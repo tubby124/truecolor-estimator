@@ -1,0 +1,14 @@
+service_id,service_name,service_type,unit,default_price,min_charge,applies_to,pricing_rule_ref,taxable_gst,taxable_pst,is_active,notes,source_ref,pricing_version
+SVC-DESIGN-BASIC,Design – Basic Artwork Setup,DESIGN,flat,35.00,35.00,ALL,PR-SVC-DESIGN-BASIC,TRUE,FALSE,TRUE,Minor edits to customer-provided artwork; resizing; colour conversion,NEW WAVE PRODUCTS.csv:row115,v1_2026-02-19
+SVC-DESIGN-FULL,Design – Full Custom Design,DESIGN,flat,50.00,50.00,ALL,PR-SVC-DESIGN-FULL,TRUE,FALSE,TRUE,Full original design from scratch or major redesign,NEW WAVE PRODUCTS.csv:row116,v1_2026-02-19
+SVC-DESIGN-LOGO,Design – Logo Recreation / Vectorization,DESIGN,flat,75.00,75.00,ALL,PR-SVC-DESIGN-LOGO,TRUE,FALSE,TRUE,Recreating or vectorizing a logo from raster source,NEW WAVE PRODUCTS.csv:row117,v1_2026-02-19
+SVC-RUSH,Rush Fee,SURCHARGE,flat,40.00,40.00,ALL,PR-ADDON-RUSH,TRUE,FALSE,TRUE,Applied when is_rush=TRUE; added on top of all other charges,estimatorRules.csv:row5,v1_2026-02-19
+SVC-INSTALL,Installation Service,INSTALLATION,flat,75.00,75.00,SIGN;RIGID;BANNER,PR-SVC-INSTALL,TRUE,FALSE,TRUE,Base rate; complex installs quoted manually,NEW WAVE PRODUCTS.csv:row112,v1_2026-02-19
+SVC-GROMMET,Grommets (per unit),ADDON,per_unit,2.00,0,BANNER,PR-ADDON-GROMMET,TRUE,FALSE,TRUE,Auto-calculated: perimeter_ft/2 grommets; min 4,NEW WAVE PRODUCTS.csv:row215 + estimatorRules.csv:row4,v1_2026-02-19
+SVC-HSTAKE,H-Stake (Yard Stake),ADDON,per_unit,2.50,2.50,SIGN,PR-ADDON-HSTAKE,TRUE,FALSE,TRUE,Sell $2.50/unit (was $2.00; bumped per owner 2026-02-19); cost $0.63/unit (DS00043); margin ~75%,materialLibrary.csv:row16,v1_2026-02-19
+SVC-STAND-ECO,Retractable Banner Stand – Economy,HARDWARE,per_unit,219.00,219.00,DISPLAY,PR-DISP-ECO,TRUE,FALSE,TRUE,Included in economy retractable banner package price,NEW WAVE PRODUCTS.csv:row51,v1_2026-02-19
+SVC-STAND-DLX,Retractable Banner Stand – Deluxe,HARDWARE,per_unit,299.00,299.00,DISPLAY,PR-DISP-DLX,TRUE,FALSE,TRUE,Included in deluxe retractable banner package price,NEW WAVE PRODUCTS.csv:row52,v1_2026-02-19
+SVC-STAND-PREM,Retractable Banner Stand – Premium,HARDWARE,per_unit,349.00,349.00,DISPLAY,PR-DISP-PREM,TRUE,FALSE,TRUE,Included in premium retractable banner package price,NEW WAVE PRODUCTS.csv:row53,v1_2026-02-19
+SVC-LAM-GLOSS,Gloss Lamination (add-on),FINISHING,per_sqft,0,0,BANNER;RIGID;SIGN,,,TRUE,FALSE,TRUE,Included in base price for most categories; only charged separately if explicitly add-on,estimatorRules.csv,v1_2026-02-19
+SVC-DESIGN-NONE,No Design Fee (Print Ready),DESIGN,flat,0,0,ALL,PR-SVC-DESIGN-BASIC,TRUE,FALSE,TRUE,Customer provides print-ready files — no design charge,estimatorRules.csv,v1_2026-02-19
+SVC-16PT-UPG,16pt Card Stock Upgrade,ADDON,flat,10.00,10.00,BUSINESS_CARD,PR-BC-16PT-UPG,TRUE,FALSE,TRUE,Upgrade from standard 14pt to premium 16pt card stock; add $10 per order,NEW WAVE PRODUCTS.csv:row131,v1_2026-02-19

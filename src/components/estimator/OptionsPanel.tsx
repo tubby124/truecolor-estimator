@@ -1,0 +1,297 @@
+"use client";
+
+import type { Category, DesignStatus } from "@/lib/data/types";
+import type { Addon } from "@/lib/data/types";
+
+interface EstimatorState {
+  width_in: string;
+  height_in: string;
+  sides: 1 | 2;
+  qty: number;
+  addons: Addon[];
+  design_status: DesignStatus;
+  is_rush: boolean;
+  material_code: string;
+}
+
+interface Props {
+  category: Category;
+  state: EstimatorState;
+  onChange: (updates: Partial<EstimatorState>) => void;
+}
+
+// Qty options by product type
+const QTY_TIERS: Record<string, number[]> = {
+  FLYER: [25, 50, 100, 250, 500, 1000, 2500, 5000],
+  BUSINESS_CARD: [250, 500, 1000, 2500, 5000],
+  BROCHURE: [50, 100, 250, 500, 1000],
+  POSTCARD: [50, 100, 250, 500, 1000],
+  STICKER: [50, 100, 250, 500, 1000],
+};
+
+export function OptionsPanel({ category, state, onChange }: Props) {
+  const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING", "PHOTO_POSTER", "DISPLAY"].includes(category);
+  const showSides = ["SIGN", "FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD"].includes(category);
+  const showGrommets = category === "BANNER";
+  const showHStake = category === "SIGN";
+  const showQtyTier = QTY_TIERS[category] !== undefined;
+
+  const toggleAddon = (addon: Addon) => {
+    const current = state.addons;
+    if (current.includes(addon)) {
+      onChange({ addons: current.filter((a) => a !== addon) });
+    } else {
+      onChange({ addons: [...current, addon] });
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* Dimensions — for sqft-based products */}
+      {isSqftBased && (
+        <FieldGroup label="Dimensions">
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <label className="block text-xs text-[var(--muted)] mb-1">Width (inches)</label>
+              <input
+                type="number"
+                min="1"
+                placeholder="e.g. 36"
+                value={state.width_in}
+                onChange={(e) => onChange({ width_in: e.target.value })}
+                className="w-full border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
+              />
+            </div>
+            <span className="text-[var(--muted)] text-lg mt-4">×</span>
+            <div className="flex-1">
+              <label className="block text-xs text-[var(--muted)] mb-1">Height (inches)</label>
+              <input
+                type="number"
+                min="1"
+                placeholder="e.g. 72"
+                value={state.height_in}
+                onChange={(e) => onChange({ height_in: e.target.value })}
+                className="w-full border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
+              />
+            </div>
+          </div>
+          {state.width_in && state.height_in && (
+            <SqftBadge widthIn={parseFloat(state.width_in)} heightIn={parseFloat(state.height_in)} />
+          )}
+        </FieldGroup>
+      )}
+
+      {/* Sides */}
+      {showSides && (
+        <FieldGroup label="Sides">
+          <div className="flex gap-2">
+            {[1, 2].map((s) => (
+              <button
+                key={s}
+                onClick={() => onChange({ sides: s as 1 | 2 })}
+                className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                  state.sides === s
+                    ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                    : "border-[var(--border)] bg-white text-[var(--foreground)] hover:border-gray-300"
+                }`}
+              >
+                {s === 1 ? "Single-sided" : "Double-sided"}
+              </button>
+            ))}
+          </div>
+        </FieldGroup>
+      )}
+
+      {/* Quantity — tier picker for print products */}
+      {showQtyTier ? (
+        <FieldGroup label="Quantity">
+          <div className="flex flex-wrap gap-2">
+            {QTY_TIERS[category].map((q) => (
+              <button
+                key={q}
+                onClick={() => onChange({ qty: q })}
+                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                  state.qty === q
+                    ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                    : "border-[var(--border)] bg-white hover:border-gray-300"
+                }`}
+              >
+                {q.toLocaleString()}
+              </button>
+            ))}
+          </div>
+          {category === "STICKER" && state.qty < 50 && (
+            <p className="text-xs text-amber-600 mt-1">Minimum order: 50 stickers</p>
+          )}
+        </FieldGroup>
+      ) : isSqftBased ? (
+        <FieldGroup label="Quantity">
+          <input
+            type="number"
+            min="1"
+            value={state.qty}
+            onChange={(e) => onChange({ qty: parseInt(e.target.value) || 1 })}
+            className="w-24 border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
+          />
+        </FieldGroup>
+      ) : null}
+
+      {/* Business Card stock upgrade */}
+      {category === "BUSINESS_CARD" && (
+        <FieldGroup label="Card Stock">
+          <div className="flex gap-2">
+            <button
+              onClick={() => onChange({ addons: state.addons.filter((a) => a !== "CARD_STOCK_16PT") })}
+              className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                !state.addons.includes("CARD_STOCK_16PT")
+                  ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                  : "border-[var(--border)] bg-white hover:border-gray-300"
+              }`}
+            >
+              14pt (Standard)
+            </button>
+            <button
+              onClick={() => {
+                if (!state.addons.includes("CARD_STOCK_16PT")) {
+                  onChange({ addons: [...state.addons, "CARD_STOCK_16PT"] });
+                }
+              }}
+              className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                state.addons.includes("CARD_STOCK_16PT")
+                  ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                  : "border-[var(--border)] bg-white hover:border-gray-300"
+              }`}
+            >
+              16pt (+$10)
+            </button>
+          </div>
+        </FieldGroup>
+      )}
+
+      {/* Add-ons */}
+      {(showGrommets || showHStake) && (
+        <FieldGroup label="Add-ons">
+          <div className="space-y-2">
+            {showGrommets && (
+              <AddonToggle
+                id="GROMMETS"
+                label="Grommets"
+                sublabel="Auto-calculated · $2.00 each"
+                checked={state.addons.includes("GROMMETS")}
+                onChange={() => toggleAddon("GROMMETS")}
+              />
+            )}
+            {showHStake && (
+              <AddonToggle
+                id="H_STAKE"
+                label="H-Stake (Yard Stake)"
+                sublabel="$2.50 each"
+                checked={state.addons.includes("H_STAKE")}
+                onChange={() => toggleAddon("H_STAKE")}
+              />
+            )}
+          </div>
+        </FieldGroup>
+      )}
+
+      {/* Rush */}
+      <FieldGroup label="Turnaround">
+        <AddonToggle
+          id="RUSH"
+          label="Rush Order"
+          sublabel="+$40.00 flat fee"
+          checked={state.is_rush}
+          onChange={() => onChange({ is_rush: !state.is_rush })}
+          accent="amber"
+        />
+      </FieldGroup>
+
+      {/* Design Status */}
+      <FieldGroup label="Design / Artwork">
+        <div className="space-y-2">
+          {[
+            { val: "PRINT_READY", label: "Files are print-ready", sub: "No charge" },
+            { val: "MINOR_EDIT", label: "Minor edits needed", sub: "+$35.00" },
+            { val: "FULL_DESIGN", label: "Full design from scratch", sub: "+$50.00" },
+            { val: "LOGO_RECREATION", label: "Logo recreation / vectorize", sub: "+$75.00" },
+          ].map((opt) => (
+            <button
+              key={opt.val}
+              onClick={() => onChange({ design_status: opt.val as DesignStatus })}
+              className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border text-sm transition-all ${
+                state.design_status === opt.val
+                  ? "border-[var(--brand)] bg-[var(--brand-50)]"
+                  : "border-[var(--border)] bg-white hover:border-gray-300"
+              }`}
+            >
+              <span className={state.design_status === opt.val ? "font-medium text-[var(--brand)]" : ""}>
+                {opt.label}
+              </span>
+              <span className="text-xs text-[var(--muted)]">{opt.sub}</span>
+            </button>
+          ))}
+        </div>
+      </FieldGroup>
+    </div>
+  );
+}
+
+function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)] mb-2">{label}</p>
+      {children}
+    </div>
+  );
+}
+
+function AddonToggle({
+  id,
+  label,
+  sublabel,
+  checked,
+  onChange,
+  accent = "red",
+}: {
+  id: string;
+  label: string;
+  sublabel: string;
+  checked: boolean;
+  onChange: () => void;
+  accent?: "red" | "amber";
+}) {
+  const activeClass = accent === "amber"
+    ? "border-amber-400 bg-amber-50"
+    : "border-[var(--brand)] bg-[var(--brand-50)]";
+
+  return (
+    <button
+      onClick={onChange}
+      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-sm transition-all ${
+        checked ? activeClass : "border-[var(--border)] bg-white hover:border-gray-300"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+          checked
+            ? accent === "amber" ? "bg-amber-400 border-amber-400" : "bg-[var(--brand)] border-[var(--brand)]"
+            : "border-gray-300 bg-white"
+        }`}>
+          {checked && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+        </div>
+        <span className={checked ? "font-medium" : ""}>{label}</span>
+      </div>
+      <span className="text-xs text-[var(--muted)]">{sublabel}</span>
+    </button>
+  );
+}
+
+function SqftBadge({ widthIn, heightIn }: { widthIn: number; heightIn: number }) {
+  const sqft = ((widthIn / 12) * (heightIn / 12)).toFixed(2);
+  return (
+    <div className="mt-2 inline-flex items-center gap-1.5 bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1.5 rounded-full">
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+      {sqft} sq ft
+    </div>
+  );
+}

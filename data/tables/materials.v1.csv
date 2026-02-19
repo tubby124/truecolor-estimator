@@ -1,0 +1,29 @@
+material_code,material_name,category,finish,thickness_or_weight,cost_model,cost_rate,is_generic,is_placeholder,supplier_unit_cost,supplier_unit_type,supplier_date,supplier_invoice_ref,width_in,aliases,keywords,source_ref
+ARLPMF7008,Arlon DPF 510 Matte Vinyl,VINYL,Matte,3.2mil,per_sqft,0.27,FALSE,FALSE,,,,,,ARLPMF7008,"vinyl,decal,sticker,vehicle decal,wrap",materialLibrary.csv:row2
+RMVN006,Vision Perf 70/30 Window Vinyl,VINYL,Gloss,6mil,per_sqft,0.42,FALSE,FALSE,,,,,,RMVN006,"perf,perforated,window perf,one way",materialLibrary.csv:row3
+RMAD005,Clear Adhesive Vinyl (Removable),VINYL,Clear,4mil,per_sqft,0.25,FALSE,FALSE,,,,,,RMAD005,"clear vinyl,removable vinyl,window decal",materialLibrary.csv:row4
+RMBF004,13oz Matte Vinyl Banner,BANNER_VINYL,Matte,13oz,per_sqft,0.17,FALSE,FALSE,,,,,,RMBF004,"vinyl banner,outdoor banner,indoor banner",materialLibrary.csv:row5
+RMBK001,PET Banner Material – Retractable,BANNER_RETRACTABLE,Matte,10oz,per_sqft,0.28,FALSE,FALSE,,,,,,RMBK001,"retractable banner,pull up banner,roll up banner",materialLibrary.csv:row6
+RMPR002,Banner Lamination Film – Gloss,LAMINATE,Gloss,3mil,per_sqft,0.18,FALSE,FALSE,,,,,,RMPR002,"gloss laminate,lamination",materialLibrary.csv:row7
+RMPR001,Banner Lamination Film – Matte,LAMINATE,Matte,3mil,per_sqft,0.18,FALSE,FALSE,,,,,,RMPR001,"matte laminate,lamination",materialLibrary.csv:row8
+MPHCC020,4mm Coroplast Sheet,RIGID,Matte,4mm,per_sqft,0.41,FALSE,FALSE,,,,,,MPHCC020,"coroplast,coro,yard sign,lawn sign",materialLibrary.csv:row9
+RMACP002,Aluminum Composite Panel (ACP),RIGID,Matte,3mm,per_sqft,1.86,FALSE,FALSE,,,,,,RMACP002,"acp,aluminum composite,dibond",materialLibrary.csv:row10
+RMPS002,220gsm Matte Poster Paper,PAPER,Matte,220gsm,per_sqft,0.24,FALSE,FALSE,,,,,,RMPS002,"poster paper,poster,photo poster",materialLibrary.csv:row11
+MAG302437550M,30mil Vehicle Magnet,MAGNET,Matte,30mil,per_sqft,1.62,FALSE,FALSE,,,,,,MAG302437550M,"magnet,vehicle magnet,car magnet",materialLibrary.csv:row12
+PERTT019,Transfer Tape (Medium Tack),SUPPLY,Matte,30in roll,per_sqft,0.1635,FALSE,FALSE,,,,,,PERTT019,"transfer tape,premask,permask,cut lettering",materialLibrary.csv:row13
+RBS33507875S,Economy Retractable Banner Stand,HARDWARE,N/A,per unit,per_unit,32.80,FALSE,FALSE,,,,,,RBS33507875S,"banner stand,economy stand,retractable stand",materialLibrary.csv:row14
+RBS33507900PSB,Deluxe Retractable Banner Stand,HARDWARE,N/A,per unit,per_unit,100.24,FALSE,FALSE,,,,,,RBS33507900PSB,"deluxe banner stand,premium stand",materialLibrary.csv:row15
+DS00043,H-Stake (Yard Sign),HARDWARE,N/A,per unit,per_unit,0.63,FALSE,FALSE,,,,,,DS00043,"h stake,yard stake,wire stake",materialLibrary.csv:row16
+RMGR002,Grommet #2 Nickel,HARDWARE,N/A,per unit,per_unit,0.118,FALSE,FALSE,,,,,,RMGR002,"grommet,hemming",materialLibrary.csv:row17
+GENERIC_VINYL,Vinyl Sticker Film (Generic),VINYL,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"vinyl sticker,decal,sticker",materialLibrary.csv:row18
+GENERIC_CORO,Coroplast (Generic),RIGID,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"coroplast,coro",materialLibrary.csv:row19
+GENERIC_ACP,ACP Panel (Generic),RIGID,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"acp,aluminum panel",materialLibrary.csv:row20
+GENERIC_FOAM,Foam Board (Generic),RIGID,Unknown,unknown,per_sqft,0,TRUE,TRUE,,,,,,,"foam board,foamcore",materialLibrary.csv:row21 | GAP-01: no supplier cost known
+GENERIC_BANNER,Vinyl Banner (Generic),BANNER_VINYL,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"banner,vinyl banner",materialLibrary.csv:row22
+GENERIC_RETRACTABLE,Retractable Banner (Generic),BANNER_RETRACTABLE,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"pull up banner,retractable",materialLibrary.csv:row23
+GENERIC_PHOTO,Photo Paper (Generic),PAPER,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"photo paper",materialLibrary.csv:row24
+GENERIC_MAGNET,Magnet Material (Generic),MAGNET,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"magnet",materialLibrary.csv:row25
+PLACEHOLDER_14PT,14pt White Card Stock,PAPER,N/A,14pt,per_unit,0,FALSE,TRUE,,,,,,,"14pt card,business card,postcard,16pt upgrade",GAP-02: no supplier cost — awaiting Spicers pricing
+PLACEHOLDER_16PT,16pt White Card Stock,PAPER,N/A,16pt,per_unit,0,FALSE,TRUE,,,,,,,"16pt card,business card upgrade",GAP-10: no SKU in materialLibrary
+PLACEHOLDER_80LB,80lb Gloss Text Paper,PAPER,Gloss,80lb,per_unit,0,FALSE,TRUE,,,,,,,"80lb gloss,flyer paper,brochure paper",GAP-03: no supplier cost — awaiting Spicers pricing
+PLACEHOLDER_100LB,100lb Gloss Text Paper,PAPER,Gloss,100lb,per_unit,0,FALSE,TRUE,,,,,,,"100lb gloss,premium flyer paper",GAP-04: no supplier cost — awaiting Spicers pricing
