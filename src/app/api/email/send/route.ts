@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import QRCode from "qrcode";
-import { buildQuoteEmailHtml, type QuoteEmailData } from "@/lib/email/quoteTemplate";
+import { buildQuoteEmailHtml, buildDiagramSvgXml, type QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { EstimateResponse } from "@/lib/engine/types";
 import { encodePaymentToken } from "@/lib/payment/token";
 
@@ -78,11 +78,25 @@ export async function POST(req: Request) {
     }
 
     const hasProofAttachment = !!(proofImage?.dataUrl);
+
+    // Generate spec diagram PNG via @resvg/resvg-js (SVG → PNG so email clients render it)
+    const DIAGRAM_CID = "diagram@truecolor";
+    let diagramBuffer: Buffer | undefined;
+    try {
+      const { Resvg } = await import("@resvg/resvg-js");
+      const svgXml = buildDiagramSvgXml(jobDetails);
+      const resvg = new Resvg(svgXml, { fitTo: { mode: "width", value: 400 } });
+      diagramBuffer = Buffer.from(resvg.render().asPng());
+    } catch (e) {
+      console.warn("[diagram] PNG generation failed, falling back to inline SVG:", e);
+    }
+
     // Pass CID string to template so it renders as cid: src (works in all email clients)
     const qrCodeCid = qrCodeBuffer ? QR_CID : undefined;
     const PROOF_CID = "proof@truecolor";
     const proofImageCid = hasProofAttachment ? PROOF_CID : undefined;
-    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeCid, proofImageCid });
+    const diagramCid = diagramBuffer ? DIAGRAM_CID : undefined;
+    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeCid, proofImageCid, diagramCid });
 
     const subject = customerName
       ? `Your Quote from True Color Display Printing — ${jobDetails.categoryLabel}`
@@ -107,6 +121,16 @@ export async function POST(req: Request) {
         content: Buffer.from(base64Data, "base64"),
         contentType: proofImage.mimeType,
         cid: PROOF_CID,
+      });
+    }
+
+    // Spec diagram PNG — inline CID (renders the product diagram in email body)
+    if (diagramBuffer) {
+      attachments.push({
+        filename: "diagram.png",
+        content: diagramBuffer,
+        contentType: "image/png",
+        cid: DIAGRAM_CID,
       });
     }
 

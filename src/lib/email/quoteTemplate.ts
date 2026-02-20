@@ -24,10 +24,12 @@ export interface QuoteEmailData {
   paymentUrl?: string;
   /** Optional QR code CID for inline attachment (e.g. "qrcode@truecolor") — use cid: in img src */
   qrCodeCid?: string;
+  /** CID for the spec diagram PNG — when provided renders as <img cid:...> instead of inline SVG */
+  diagramCid?: string;
 }
 
 export function buildQuoteEmailHtml(data: QuoteEmailData): string {
-  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, proofImageCid, paymentUrl, qrCodeCid } = data;
+  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, proofImageCid, paymentUrl, qrCodeCid, diagramCid } = data;
   const sellPrice = quoteData.sell_price ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
@@ -157,7 +159,7 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                 <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Your Proof</p>
 
                 <!-- Spec diagram (dimensions + material) -->
-                ${buildProductDiagramSvg(jobDetails)}
+                ${buildProductDiagramSvg(jobDetails, diagramCid)}
 
                 ${proofImageCid ? `<!-- Artwork proof image -->
                 <div style="border: 2px solid #e2dbd4; border-radius: 10px; overflow: hidden; margin-bottom: 10px;">
@@ -321,7 +323,46 @@ function escHtml(str: string): string {
 
 // ─── Server-side SVG spec diagram (mirrors ProductProof.tsx layout) ──────────
 
-function buildProductDiagramSvg(jobDetails: QuoteEmailData["jobDetails"]): string {
+/** Returns the raw <svg>...</svg> XML string — used by route.ts to render a PNG via @resvg/resvg-js */
+export function buildDiagramSvgXml(jobDetails: QuoteEmailData["jobDetails"]): string {
+  return _buildDiagramSvgInner(jobDetails);
+}
+
+function buildProductDiagramSvg(jobDetails: QuoteEmailData["jobDetails"], cid?: string): string {
+  const svgInner = _buildDiagramSvgInner(jobDetails);
+  const footerHtml = _buildDiagramFooterHtml(jobDetails);
+  if (cid) {
+    return `
+    <div style="background:#faf8f6;border:2px solid #e2dbd4;border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <img src="cid:${cid}" alt="Product specification diagram" width="400" height="220" style="width:100%;max-height:180px;display:block;border:0;" />
+      ${footerHtml}
+    </div>`;
+  }
+  // Fallback: inline SVG (stripped by most email clients, but no regression)
+  return `
+    <div style="background:#faf8f6;border:2px solid #e2dbd4;border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      ${svgInner}
+      ${footerHtml}
+    </div>`;
+}
+
+function _buildDiagramFooterHtml(jobDetails: QuoteEmailData["jobDetails"]): string {
+  const SQFT_CATS = ["SIGN","BANNER","RIGID","FOAMBOARD","MAGNET","DECAL","VINYL_LETTERING","PHOTO_POSTER","DISPLAY"];
+  const isSqft = SQFT_CATS.includes(jobDetails.category);
+  const wIn = jobDetails.widthIn ?? 0;
+  const hIn = jobDetails.heightIn ?? 0;
+  const wFt = wIn / 12;
+  const hFt = hIn / 12;
+  const fmt = (n: number) => (n % 1 === 0 ? `${n}` : n.toFixed(2));
+  const footerLine1 = [jobDetails.materialName, `${jobDetails.qty > 1 ? `×${jobDetails.qty}` : "1 unit"}`, (jobDetails.sides ?? 1) === 2 ? "2-sided" : "1-sided"].filter(Boolean).join(" · ");
+  const dimLine = isSqft && wIn > 0 ? `${fmt(wFt)} ft × ${fmt(hFt)} ft` : "";
+  return `<div style="padding:8px 14px;border-top:1px solid #e6ddd5;text-align:center;">
+    <p style="margin:0;font-size:12px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(footerLine1)}</p>
+    ${dimLine ? `<p style="margin:2px 0 0;font-size:13px;font-weight:600;color:#4a3728;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(dimLine)}</p>` : ""}
+  </div>`;
+}
+
+function _buildDiagramSvgInner(jobDetails: QuoteEmailData["jobDetails"]): string {
   const VB_W = 400, VB_H = 220;
   const MAX_W = 280, MAX_H = 140;
   const CX = VB_W / 2, CY = VB_H / 2;
@@ -397,25 +438,15 @@ function buildProductDiagramSvg(jobDetails: QuoteEmailData["jobDetails"]): strin
     ? `<g><rect x="${x+rW-36}" y="${y}" width="36" height="18" rx="9" fill="#e52222" opacity="0.9"/><text x="${x+rW-18}" y="${y+12.5}" text-anchor="middle" fill="white" font-size="10" font-weight="600" font-family="system-ui,sans-serif">×${jobDetails.qty.toLocaleString()}</text></g>`
     : "";
 
-  const footerLine1 = [jobDetails.materialName, `${jobDetails.qty > 1 ? `×${jobDetails.qty}` : "1 unit"}`, jobDetails.sides === 2 ? "2-sided" : "1-sided"].filter(Boolean).join(" · ");
-  const dimLine = isSqft && wIn > 0 ? `${fmt(wFt)} ft × ${fmt(hFt)} ft` : "";
-
-  return `
-    <div style="background:#faf8f6;border:2px solid #e2dbd4;border-radius:10px;overflow:hidden;margin-bottom:12px;">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VB_W} ${VB_H}" width="${VB_W}" height="${VB_H}"
-        style="width:100%;max-height:180px;display:block;">
-        <rect x="${x}" y="${y}" width="${rW}" height="${rH}" fill="#f5f2ee"
-          stroke="${isDashed ? "#e52222" : "#c8bfb6"}" stroke-width="1.5"
-          ${isDashed ? 'stroke-dasharray="6 3"' : ""} rx="${rx}" ry="${rx}"/>
-        ${markers}
-        ${materialBadge}
-        ${rushBadge}
-        ${dimLabels}
-        ${qtyBadge}
-      </svg>
-      <div style="padding:8px 14px;border-top:1px solid #e6ddd5;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(footerLine1)}</p>
-        ${dimLine ? `<p style="margin:2px 0 0;font-size:13px;font-weight:600;color:#4a3728;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(dimLine)}</p>` : ""}
-      </div>
-    </div>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VB_W} ${VB_H}" width="${VB_W}" height="${VB_H}"
+    style="width:100%;max-height:180px;display:block;">
+    <rect x="${x}" y="${y}" width="${rW}" height="${rH}" fill="#f5f2ee"
+      stroke="${isDashed ? "#e52222" : "#c8bfb6"}" stroke-width="1.5"
+      ${isDashed ? 'stroke-dasharray="6 3"' : ""} rx="${rx}" ry="${rx}"/>
+    ${markers}
+    ${materialBadge}
+    ${rushBadge}
+    ${dimLabels}
+    ${qtyBadge}
+  </svg>`;
 }
