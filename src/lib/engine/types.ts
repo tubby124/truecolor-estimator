@@ -47,4 +47,10 @@ export interface EstimateResponse {
   needs_clarification: boolean;
   clarification_notes: string[];
   pricing_version: string;
+  // PLACEHOLDER warning — true when any material cost is unknown (awaiting supplier data)
+  has_placeholder: boolean;
+  placeholder_materials: string[];
+  // Margin thresholds from config.v1.csv — passed through so UI never hardcodes them
+  margin_green_threshold: number;
+  margin_yellow_threshold: number;
 }

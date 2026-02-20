@@ -155,6 +155,29 @@ export function getMaterials(): Material[] {
   return _materials;
 }
 
+// ─── Config (key→value business rules) ───────────────────────────────────────
+
+let _config: Record<string, string> | null = null;
+
+export function getConfig(): Record<string, string> {
+  if (_config) return _config;
+  const [, ...rows] = readCsv("config.v1.csv");
+  _config = {};
+  for (const r of rows) {
+    if (r[0]) _config[r[0]] = r[1] ?? "";
+  }
+  return _config;
+}
+
+/** Returns a config value as a number. Throws if the key is missing or non-numeric. */
+export function getConfigNum(key: string): number {
+  const cfg = getConfig();
+  if (!(key in cfg)) throw new Error(`config.v1.csv: missing key "${key}"`);
+  const n = parseFloat(cfg[key]);
+  if (isNaN(n)) throw new Error(`config.v1.csv: key "${key}" = "${cfg[key]}" is not a number`);
+  return n;
+}
+
 // ─── Services ────────────────────────────────────────────────────────────────
 
 let _services: Service[] | null = null;

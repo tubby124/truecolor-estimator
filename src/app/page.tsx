@@ -266,7 +266,9 @@ function CustomerOverlay({
   onClose: () => void;
 }) {
   const sellPrice = result.sell_price ?? 0;
-  const gst = Math.round(sellPrice * 0.05 * 100) / 100;
+  // GST rate comes from engine (which reads config.v1.csv) — do not hardcode 0.05 here
+  const gstRate = 0.05; // TODO Phase 3: pass gst_rate through EstimateResponse
+  const gst = Math.round(sellPrice * gstRate * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
 
   return (

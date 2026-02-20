@@ -1,11 +1,10 @@
 // True Color Pricing Engine — 11-step evaluation per RULE_ENGINE_SPEC.md
 // Pure function: same inputs → same output always (idempotent)
 
-import { getPricingRules, getProducts, getMaterials, getServices } from "../data/loader";
+import { getPricingRules, getProducts, getMaterials, getServices, getConfigNum } from "../data/loader";
 import type { EstimateRequest, EstimateResponse, LineItem, CostBreakdown } from "./types";
 
 const PRICING_VERSION = "v1_2026-02-19";
-const GST_RATE = 0.05;
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
 
@@ -133,15 +132,15 @@ export function estimate(req: EstimateRequest): EstimateResponse {
       }
     } else {
       // Fallback: PR-FALLBACK-ALL
-      basePricePerSqft = 6.50;
-      basePrice = ceilCent(sqft * 6.50);
-      minCharge = 25;
+      basePricePerSqft = getConfigNum("default_sqft_fallback_rate");
+      basePrice = ceilCent(sqft * basePricePerSqft);
+      minCharge = getConfigNum("default_minimum_fallback");
       matchedRuleId = "PR-FALLBACK-ALL";
       tierLabel = "FALLBACK";
       rulesFired.push("PR-FALLBACK-ALL");
-      clarifications.push("Product category or material not matched — using fallback rate $6.50/sqft. Please verify.");
+      clarifications.push(`Product category or material not matched — using fallback rate $${basePricePerSqft.toFixed(2)}/sqft. Please verify.`);
       lineItems.push({
-        description: `${category} – Custom – ${sqft.toFixed(2)} sqft @ $6.50/sqft (FALLBACK)`,
+        description: `${category} – Custom – ${sqft.toFixed(2)} sqft @ $${basePricePerSqft.toFixed(2)}/sqft (FALLBACK)`,
         qty: 1,
         unit_price: basePrice,
         line_total: basePrice,
@@ -163,14 +162,17 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     const widthFt = req.width_in / 12;
     const heightFt = req.height_in / 12;
     const perimeterFt = 2 * (widthFt + heightFt);
-    const grometCount = Math.max(4, Math.ceil(perimeterFt / 2));
-    const grometCharge = grometCount * 2.0;
+    const grommetSpacing = getConfigNum("grommet_spacing_ft");
+    const grommetMin = getConfigNum("grommet_minimum_count");
+    const grommetPrice = getConfigNum("grommet_price_per_unit");
+    const grometCount = Math.max(grommetMin, Math.ceil(perimeterFt / grommetSpacing));
+    const grometCharge = grometCount * grommetPrice;
     addonTotal += grometCharge;
     rulesFired.push("PR-ADDON-GROMMET");
     lineItems.push({
-      description: `Grommets (${grometCount} × $2.00 — auto-calculated from perimeter)`,
+      description: `Grommets (${grometCount} × $${grommetPrice.toFixed(2)} — auto-calculated from perimeter)`,
       qty: grometCount,
-      unit_price: 2.0,
+      unit_price: grommetPrice,
       line_total: grometCharge,
       rule_id: "PR-ADDON-GROMMET",
     });
@@ -179,7 +181,7 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   // H-Stake
   if (addons.includes("H_STAKE")) {
     const hstakeSvc = services.find((s) => s.service_id === "SVC-HSTAKE");
-    const hstakePrice = hstakeSvc?.default_price ?? 2.50;
+    const hstakePrice = hstakeSvc?.default_price ?? getConfigNum("hstake_price_per_unit");
     addonTotal += hstakePrice;
     rulesFired.push("PR-ADDON-HSTAKE");
     lineItems.push({
@@ -193,13 +195,14 @@ export function estimate(req: EstimateRequest): EstimateResponse {
 
   // 16pt Card Upgrade
   if (addons.includes("CARD_STOCK_16PT")) {
-    addonTotal += 10.0;
+    const upgPrice = getConfigNum("card_stock_16pt_upgrade_price");
+    addonTotal += upgPrice;
     rulesFired.push("SVC-16PT-UPG");
     lineItems.push({
       description: "16pt Card Stock Upgrade",
       qty: 1,
-      unit_price: 10.0,
-      line_total: 10.0,
+      unit_price: upgPrice,
+      line_total: upgPrice,
       rule_id: "SVC-16PT-UPG",
     });
   }
@@ -222,13 +225,13 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   let designFee = 0;
   let designRuleId: string | null = null;
   if (designStatus === "MINOR_EDIT") {
-    designFee = 35.0;
+    designFee = getConfigNum("design_minor_edit_fee");
     designRuleId = "PR-DESIGN-BASIC";
   } else if (designStatus === "FULL_DESIGN") {
-    designFee = 50.0;
+    designFee = getConfigNum("design_full_design_fee");
     designRuleId = "PR-DESIGN-FULL";
   } else if (designStatus === "LOGO_RECREATION") {
-    designFee = 75.0;
+    designFee = getConfigNum("design_logo_recreation_fee");
     designRuleId = "PR-DESIGN-LOGO";
   } else if (designStatus === "UNKNOWN") {
     clarifications.push("Design status unknown — please confirm if files are print-ready.");
@@ -247,20 +250,21 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   // ── STEP 8: Rush fee ──────────────────────────────────────────────────────
   let rushFee = 0;
   if (isRush || addons.includes("RUSH")) {
-    rushFee = 40.0;
+    rushFee = getConfigNum("rush_fee_flat");
     rulesFired.push("PR-ADDON-RUSH");
     lineItems.push({
       description: "Rush Fee",
       qty: 1,
-      unit_price: 40.0,
-      line_total: 40.0,
+      unit_price: rushFee,
+      line_total: rushFee,
       rule_id: "PR-ADDON-RUSH",
     });
   }
 
   // ── STEP 9: Total sell price ──────────────────────────────────────────────
+  const gstRate = getConfigNum("gst_rate");
   const subtotal = round2(effectiveBase + addonTotal + designFee + rushFee);
-  const gst = round2(subtotal * GST_RATE);
+  const gst = round2(subtotal * gstRate);
   const total = round2(subtotal + gst);
 
   // ── STEP 10: Cost estimate ────────────────────────────────────────────────
@@ -272,6 +276,10 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   const waveName = isFixedSize && fixedMatch
     ? fixedMatch.product_name
     : buildWaveName(category, req, sqft);
+
+  // Determine PLACEHOLDER state for UI warning banner
+  const hasPlaceholder = cost?.is_partial ?? false;
+  const placeholderMaterials: string[] = hasPlaceholder ? ["supplier cost pending — check materials.v1.csv"] : [];
 
   return {
     status: clarifications.length > 0 ? "NEEDS_CLARIFICATION" : "QUOTED",
@@ -288,6 +296,10 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     needs_clarification: clarifications.length > 0,
     clarification_notes: clarifications,
     pricing_version: PRICING_VERSION,
+    has_placeholder: hasPlaceholder,
+    placeholder_materials: placeholderMaterials,
+    margin_green_threshold: getConfigNum("margin_green_threshold"),
+    margin_yellow_threshold: getConfigNum("margin_yellow_threshold"),
   };
 }
 
@@ -323,22 +335,26 @@ function computeCost(
   }
 
   if (isKonica) {
-    // Konica: $0.05/sheet color, assume 1 sheet per job (imposition TBD)
-    inkCost = round2(qty * sides * 0.05);
+    // Konica: cost per sheet (click charge), assume 1 sheet per job (imposition TBD — Q4)
+    const konicaRate = getConfigNum("konica_ink_cost_per_sheet");
+    inkCost = round2(qty * sides * konicaRate);
     rulesFired.push("CR-PAPER-INK-COLOR");
   } else if (sqft) {
-    // Roland: $0.16/sqft
-    inkCost = round2(sqft * wasteMultiplier * 0.16);
+    // Roland wide-format ink cost
+    const rolandRate = getConfigNum("roland_ink_cost_per_sqft");
+    inkCost = round2(sqft * wasteMultiplier * rolandRate);
     rulesFired.push("CR-ROLAND-INK");
   }
 
-  const laborCost = round2((6 / 60) * 35); // 6 min at $35/hr = $3.50
-  const overheadCost = 5.0;
+  const laborMin = getConfigNum("labor_minutes_per_job");
+  const laborRate = getConfigNum("labor_rate_per_hour");
+  const laborCost = round2((laborMin / 60) * laborRate);
+  const overheadCost = getConfigNum("overhead_flat_per_job");
 
   // H-Stake add-on cost
   let addonCost = 0;
   if (addons.includes("H_STAKE")) {
-    addonCost += 0.63; // material cost
+    addonCost += getConfigNum("hstake_cost_per_unit"); // material cost only
   }
 
   let totalCost: number | "PLACEHOLDER" = "PLACEHOLDER";
@@ -456,6 +472,15 @@ function designStatusLabel(status: string): string {
 }
 
 function blocked(reason: string): EstimateResponse {
+  // Safe config reads with fallback for blocked responses (config may not be loaded yet)
+  let greenThreshold = 50;
+  let yellowThreshold = 30;
+  try {
+    greenThreshold = getConfigNum("margin_green_threshold");
+    yellowThreshold = getConfigNum("margin_yellow_threshold");
+  } catch {
+    // Config not available — use defaults
+  }
   return {
     status: "BLOCKED",
     sell_price: null,
@@ -471,5 +496,9 @@ function blocked(reason: string): EstimateResponse {
     needs_clarification: true,
     clarification_notes: [reason],
     pricing_version: "v1_2026-02-19",
+    has_placeholder: false,
+    placeholder_materials: [],
+    margin_green_threshold: greenThreshold,
+    margin_yellow_threshold: yellowThreshold,
   };
 }
