@@ -18,10 +18,14 @@ export interface QuoteEmailData {
   };
   siteUrl: string;
   hasProofAttachment?: boolean;
+  /** Optional "Pay Now" link embedded in the email (generated server-side) */
+  paymentUrl?: string;
+  /** Optional QR code PNG as data URL for the payment link */
+  qrCodeDataUrl?: string;
 }
 
 export function buildQuoteEmailHtml(data: QuoteEmailData): string {
-  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment } = data;
+  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeDataUrl } = data;
   const sellPrice = quoteData.sell_price ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
@@ -202,9 +206,29 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                 </p>
               </div>
 
+              ${paymentUrl ? `<!-- PAY NOW block -->
+              <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; text-align: center;">
+                <p style="margin: 0 0 6px; font-size: 11px; font-weight: 700; color: #15803d; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Pay Online — Secure Checkout
+                </p>
+                <p style="margin: 0 0 14px; font-size: 13px; color: #166534; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Click below to pay by credit or debit card — no account needed.
+                </p>
+                <a href="${paymentUrl}"
+                  style="display: inline-block; background: #16a34a; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: 700; padding: 14px 36px; border-radius: 10px; text-decoration: none; letter-spacing: 0.01em;">
+                  Pay $${total.toFixed(2)} CAD →
+                </a>
+                ${qrCodeDataUrl ? `<div style="margin-top: 16px;">
+                  <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    Or scan with your phone:
+                  </p>
+                  <img src="${qrCodeDataUrl}" width="130" height="130" alt="Scan to pay" style="border-radius: 10px; border: 1px solid #d1fae5;" />
+                </div>` : ""}
+              </div>` : ""}
+
               <!-- How to Approve -->
               <p style="margin: 0 0 12px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                Ready to Proceed?
+                ${paymentUrl ? "Or Approve by Email" : "Ready to Proceed?"}
               </p>
 
               <!-- Step 1: Reply to approve -->

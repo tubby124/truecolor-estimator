@@ -1,6 +1,8 @@
 import nodemailer from "nodemailer";
+import QRCode from "qrcode";
 import { buildQuoteEmailHtml, type QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { EstimateResponse } from "@/lib/engine/types";
+import { encodePaymentToken } from "@/lib/payment/token";
 
 interface SendQuoteRequest {
   to: string;
@@ -9,6 +11,7 @@ interface SendQuoteRequest {
   quoteData: EstimateResponse;
   jobDetails: QuoteEmailData["jobDetails"];
   proofImage?: { dataUrl: string; filename: string; mimeType: string } | null;
+  includePaymentLink?: boolean;
 }
 
 function isValidEmail(email: string): boolean {
@@ -37,7 +40,7 @@ function getTransporter() {
 export async function POST(req: Request) {
   try {
     const body: SendQuoteRequest = await req.json();
-    const { to, customerName, note, quoteData, jobDetails, proofImage } = body;
+    const { to, customerName, note, quoteData, jobDetails, proofImage, includePaymentLink } = body;
 
     // Validate
     if (!to || !isValidEmail(to)) {
@@ -51,8 +54,29 @@ export async function POST(req: Request) {
     const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
     const bcc = process.env.SMTP_BCC ?? undefined;
 
+    // Generate payment link + QR code if requested and token secret is configured
+    let paymentUrl: string | undefined;
+    let qrCodeDataUrl: string | undefined;
+    if (includePaymentLink && process.env.PAYMENT_TOKEN_SECRET) {
+      const sellPrice = quoteData.sell_price ?? 0;
+      const totalWithGst = Math.round(sellPrice * 1.05 * 100) / 100;
+      const description = `True Color Display Printing — ${jobDetails.categoryLabel}`;
+      const token = encodePaymentToken(totalWithGst, description);
+      paymentUrl = `${siteUrl}/pay/${token}`;
+      try {
+        qrCodeDataUrl = await QRCode.toDataURL(paymentUrl, {
+          width: 260,
+          margin: 2,
+          color: { dark: "#111827", light: "#ffffff" },
+        });
+      } catch {
+        // QR failure is non-fatal — email still sends with the text link
+        qrCodeDataUrl = undefined;
+      }
+    }
+
     const hasProofAttachment = !!(proofImage?.dataUrl);
-    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment });
+    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeDataUrl });
 
     const subject = customerName
       ? `Your Quote from True Color Display Printing — ${jobDetails.categoryLabel}`
@@ -80,7 +104,7 @@ export async function POST(req: Request) {
       subject,
       html,
       // Plain-text fallback
-      text: buildPlainText({ customerName, note, quoteData, jobDetails, hasProofAttachment }),
+      text: buildPlainText({ customerName, note, quoteData, jobDetails, hasProofAttachment, paymentUrl }),
       ...(attachments.length > 0 ? { attachments } : {}),
     });
 
@@ -98,7 +122,8 @@ function buildPlainText({
   quoteData,
   jobDetails,
   hasProofAttachment,
-}: Pick<SendQuoteRequest, "customerName" | "note" | "quoteData" | "jobDetails"> & { hasProofAttachment?: boolean }): string {
+  paymentUrl,
+}: Pick<SendQuoteRequest, "customerName" | "note" | "quoteData" | "jobDetails"> & { hasProofAttachment?: boolean; paymentUrl?: string }): string {
   const sellPrice = quoteData.sell_price ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
@@ -128,6 +153,8 @@ function buildPlainText({
     "",
     "This quote is valid for 30 days.",
     "",
+    paymentUrl ? `Pay online: ${paymentUrl}` : "",
+    paymentUrl ? "" : "",
     "To approve, reply to this email or contact us at info@true-color.ca",
     hasProofAttachment ? "" : "",
     hasProofAttachment ? "A proof of your design is attached to this email." : "",

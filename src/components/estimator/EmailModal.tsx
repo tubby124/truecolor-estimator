@@ -18,6 +18,7 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
+  const [includePaymentLink, setIncludePaymentLink] = useState(true);
   const [sendState, setSendState] = useState<SendState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
@@ -55,6 +56,7 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
           quoteData: result,
           jobDetails,
           proofImage: proofImage ?? undefined,
+          includePaymentLink,
         }),
       });
 
@@ -157,6 +159,23 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
                 disabled={sendState === "sending"}
                 className="w-full border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white resize-none disabled:opacity-50 transition-colors"
               />
+            </div>
+
+            {/* Payment link toggle */}
+            <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
+              <input
+                id="payment-link-toggle"
+                type="checkbox"
+                checked={includePaymentLink}
+                onChange={(e) => setIncludePaymentLink(e.target.checked)}
+                disabled={sendState === "sending"}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer"
+              />
+              <label htmlFor="payment-link-toggle" className="text-xs text-green-800 cursor-pointer leading-relaxed">
+                <span className="font-semibold">Include &ldquo;Pay Now&rdquo; button + QR code</span>
+                <br />
+                <span className="text-green-700">Customer can pay by card online — secure Clover checkout</span>
+              </label>
             </div>
 
             {/* Error */}
