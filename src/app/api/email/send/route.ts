@@ -8,6 +8,7 @@ interface SendQuoteRequest {
   note?: string;
   quoteData: EstimateResponse;
   jobDetails: QuoteEmailData["jobDetails"];
+  proofImage?: { dataUrl: string; filename: string; mimeType: string } | null;
 }
 
 function isValidEmail(email: string): boolean {
@@ -36,7 +37,7 @@ function getTransporter() {
 export async function POST(req: Request) {
   try {
     const body: SendQuoteRequest = await req.json();
-    const { to, customerName, note, quoteData, jobDetails } = body;
+    const { to, customerName, note, quoteData, jobDetails, proofImage } = body;
 
     // Validate
     if (!to || !isValidEmail(to)) {
@@ -50,13 +51,27 @@ export async function POST(req: Request) {
     const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
     const bcc = process.env.SMTP_BCC ?? undefined;
 
-    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl });
+    const hasProofAttachment = !!(proofImage?.dataUrl);
+    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment });
 
     const subject = customerName
       ? `Your Quote from True Color Display Printing — ${jobDetails.categoryLabel}`
       : `Quote from True Color Display Printing — ${jobDetails.categoryLabel}`;
 
     const transporter = getTransporter();
+
+    // Build attachment array if a proof image was uploaded
+    type MailAttachment = { filename: string; content: Buffer; contentType: string };
+    const attachments: MailAttachment[] = [];
+    if (proofImage?.dataUrl) {
+      // Strip "data:<mime>;base64," prefix
+      const base64Data = proofImage.dataUrl.replace(/^data:[^;]+;base64,/, "");
+      attachments.push({
+        filename: proofImage.filename,
+        content: Buffer.from(base64Data, "base64"),
+        contentType: proofImage.mimeType,
+      });
+    }
 
     await transporter.sendMail({
       from,
@@ -65,7 +80,8 @@ export async function POST(req: Request) {
       subject,
       html,
       // Plain-text fallback
-      text: buildPlainText({ customerName, note, quoteData, jobDetails }),
+      text: buildPlainText({ customerName, note, quoteData, jobDetails, hasProofAttachment }),
+      ...(attachments.length > 0 ? { attachments } : {}),
     });
 
     return Response.json({ success: true });
@@ -81,7 +97,8 @@ function buildPlainText({
   note,
   quoteData,
   jobDetails,
-}: Pick<SendQuoteRequest, "customerName" | "note" | "quoteData" | "jobDetails">): string {
+  hasProofAttachment,
+}: Pick<SendQuoteRequest, "customerName" | "note" | "quoteData" | "jobDetails"> & { hasProofAttachment?: boolean }): string {
   const sellPrice = quoteData.sell_price ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
@@ -112,6 +129,8 @@ function buildPlainText({
     "This quote is valid for 30 days.",
     "",
     "To approve, reply to this email or contact us at info@true-color.ca",
+    hasProofAttachment ? "" : "",
+    hasProofAttachment ? "A proof of your design is attached to this email." : "",
     "",
     "True Color Display Printing",
     "Saskatoon, SK, Canada",

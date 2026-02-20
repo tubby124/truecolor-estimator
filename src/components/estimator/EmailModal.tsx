@@ -3,16 +3,18 @@
 import { useState, useRef, useEffect } from "react";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
+import type { ProofImageState } from "@/components/estimator/ProductProof";
 
 interface Props {
   result: EstimateResponse;
   jobDetails: QuoteEmailData["jobDetails"];
   onClose: () => void;
+  proofImage?: ProofImageState | null;
 }
 
 type SendState = "idle" | "sending" | "success" | "error";
 
-export function EmailModal({ result, jobDetails, onClose }: Props) {
+export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
@@ -52,6 +54,7 @@ export function EmailModal({ result, jobDetails, onClose }: Props) {
           note: note.trim() || undefined,
           quoteData: result,
           jobDetails,
+          proofImage: proofImage ?? undefined,
         }),
       });
 
@@ -161,6 +164,16 @@ export function EmailModal({ result, jobDetails, onClose }: Props) {
               <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3">
                 <p className="text-sm text-red-700 font-medium mb-0.5">Failed to send</p>
                 <p className="text-xs text-red-600">{errorMsg}</p>
+              </div>
+            )}
+
+            {/* Proof attachment notice */}
+            {proofImage && (
+              <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                <span className="text-sm">📎</span>
+                <p className="text-xs text-blue-700">
+                  Proof image will be attached: <span className="font-mono">{proofImage.filename}</span>
+                </p>
               </div>
             )}
 

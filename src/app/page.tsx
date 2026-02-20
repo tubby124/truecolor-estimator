@@ -10,6 +10,7 @@ import type { Addon } from "@/lib/data/types";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
 import { LOGO_PATH } from "@/lib/config";
+import type { ProofImageState } from "@/components/estimator/ProductProof";
 
 interface EstimatorState {
   width_in: string;
@@ -66,6 +67,7 @@ export default function EstimatorPage() {
   const [loading, setLoading] = useState(false);
   const [isCustomerMode, setIsCustomerMode] = useState(false);
   const [step, setStep] = useState<"pick" | "options">("pick");
+  const [proofImage, setProofImage] = useState<ProofImageState | null>(null);
 
   const handleCategorySelect = useCallback((cat: Category) => {
     setCategory(cat);
@@ -75,6 +77,7 @@ export default function EstimatorPage() {
       qty: ["FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD", "STICKER"].includes(cat) ? 250 : 1,
     });
     setResult(null);
+    setProofImage(null);
     setStep("options");
   }, []);
 
@@ -209,6 +212,8 @@ export default function EstimatorPage() {
                   }
                   isRush={state.is_rush}
                   designStatus={state.design_status}
+                  proofImage={proofImage}
+                  onProofUpload={setProofImage}
                 />
               )}
               <QuotePanel
@@ -217,6 +222,7 @@ export default function EstimatorPage() {
                 isCustomerMode={isCustomerMode}
                 onToggleCustomerMode={() => setIsCustomerMode((v) => !v)}
                 jobDetails={category ? buildJobDetails(category, state, MATERIAL_LABEL_MAP) : undefined}
+                proofImage={proofImage}
               />
             </div>
           </div>

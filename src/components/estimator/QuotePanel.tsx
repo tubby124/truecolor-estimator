@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
 import { EmailModal } from "@/components/estimator/EmailModal";
+import type { ProofImageState } from "@/components/estimator/ProductProof";
 
 interface Props {
   result: EstimateResponse | null;
@@ -11,9 +12,10 @@ interface Props {
   isCustomerMode: boolean;
   onToggleCustomerMode: () => void;
   jobDetails?: QuoteEmailData["jobDetails"];
+  proofImage?: ProofImageState | null;
 }
 
-export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode, jobDetails }: Props) {
+export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode, jobDetails, proofImage }: Props) {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
 
   if (!result && !loading) {
@@ -223,6 +225,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
           result={result}
           jobDetails={jobDetails}
           onClose={() => setEmailModalOpen(false)}
+          proofImage={proofImage}
         />
       )}
     </div>
