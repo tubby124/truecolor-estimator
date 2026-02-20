@@ -71,14 +71,14 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
   const detailPills = detailItems
     .map(
       (d) =>
-        `<span style="display: inline-block; background: #f3f4f6; color: #374151; font-size: 12px; padding: 4px 10px; border-radius: 999px; margin: 3px 3px 3px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">${escHtml(d)}</span>`
+        `<span style="display: inline-block; background: #f0eae4; color: #4a3728; font-size: 12px; padding: 4px 10px; border-radius: 999px; margin: 3px 3px 3px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">${escHtml(d)}</span>`
     )
     .join("");
 
   const rushBanner = jobDetails.isRush
     ? `<tr>
-        <td colspan="2" style="padding: 10px 16px; background: #fffbeb; border-top: 1px solid #fde68a; border-bottom: 1px solid #fde68a;">
-          <p style="margin: 0; font-size: 12px; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        <td colspan="2" style="padding: 10px 16px; background: #fff8f0; border-top: 1px solid #f0d0a8; border-bottom: 1px solid #f0d0a8;">
+          <p style="margin: 0; font-size: 12px; color: #7a4010; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
             ⚡ <strong>Rush order</strong> — priority turnaround included
           </p>
         </td>
@@ -86,8 +86,8 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
     : "";
 
   const noteBlock = note
-    ? `<div style="background: #f9fafb; border-left: 3px solid #e52222; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 28px;">
-        <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">${escHtml(note)}</p>
+    ? `<div style="background: #f8f4f0; border-left: 3px solid #e52222; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 28px;">
+        <p style="margin: 0; font-size: 14px; color: #4a3728; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">${escHtml(note)}</p>
       </div>`
     : "";
 
@@ -102,7 +102,7 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
 
   const minChargeNote = quoteData.min_charge_applied
     ? `<tr>
-        <td colspan="2" style="padding: 4px 16px 8px; font-size: 12px; color: #d97706; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        <td colspan="2" style="padding: 4px 16px 8px; font-size: 12px; color: #9a5500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
           Minimum order charge applied
         </td>
       </tr>`
@@ -116,10 +116,10 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Your Quote from True Color Display Printing</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #f4efe9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
 
   <!-- Outer wrapper -->
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 32px 16px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4efe9; padding: 32px 16px;">
     <tr>
       <td align="center">
 
@@ -160,14 +160,14 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                 ${buildProductDiagramSvg(jobDetails)}
 
                 ${proofImageCid ? `<!-- Artwork proof image -->
-                <div style="border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden; margin-bottom: 10px;">
-                  <p style="margin: 0; padding: 6px 14px; font-size: 11px; font-weight: 600; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-transform: uppercase; letter-spacing: 0.06em;">Artwork</p>
+                <div style="border: 2px solid #e2dbd4; border-radius: 10px; overflow: hidden; margin-bottom: 10px;">
+                  <p style="margin: 0; padding: 6px 14px; font-size: 11px; font-weight: 600; color: #7a6560; background: #f8f4f0; border-bottom: 1px solid #e2dbd4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-transform: uppercase; letter-spacing: 0.06em;">Artwork</p>
                   <img src="cid:${proofImageCid}" alt="Your artwork proof" style="display: block; width: 100%; max-width: 100%; height: auto; border: 0;" />
                 </div>` : ""}
 
                 <!-- Review callout — always shown -->
-                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px;">
-                  <p style="margin: 0; font-size: 12px; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <div style="background: #fff8f0; border: 1px solid #f0d0a8; border-radius: 8px; padding: 10px 14px;">
+                  <p style="margin: 0; font-size: 12px; color: #7a4010; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                     ⚠️ &nbsp;Please review the dimensions and ${hasProofAttachment ? "artwork" : "specifications"} carefully before approving. This is exactly how your final print will look.
                   </p>
                 </div>
@@ -175,13 +175,13 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
 
               <!-- Quote table -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-                style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; margin-bottom: 28px;">
+                style="border: 1px solid #e2dbd4; border-radius: 10px; overflow: hidden; margin-bottom: 28px;">
 
                 <!-- Column header -->
                 <thead>
-                  <tr style="background: #f9fafb;">
-                    <th style="padding: 10px 16px; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; border-bottom: 1px solid #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Description</th>
-                    <th style="padding: 10px 16px; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; text-align: right; border-bottom: 1px solid #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Amount</th>
+                  <tr style="background: #f9f6f3;">
+                    <th style="padding: 10px 16px; font-size: 11px; font-weight: 700; color: #7a6560; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; border-bottom: 1px solid #e2dbd4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Description</th>
+                    <th style="padding: 10px 16px; font-size: 11px; font-weight: 700; color: #7a6560; text-transform: uppercase; letter-spacing: 0.06em; text-align: right; border-bottom: 1px solid #e2dbd4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Amount</th>
                   </tr>
                 </thead>
 
@@ -192,15 +192,15 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                   ${minChargeNote}
 
                   <!-- Subtotal -->
-                  <tr style="background: #fafafa;">
-                    <td style="padding: 10px 16px; font-size: 13px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Subtotal</td>
-                    <td style="padding: 10px 16px; font-size: 13px; color: #374151; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${sellPrice.toFixed(2)}</td>
+                  <tr style="background: #f9f6f3;">
+                    <td style="padding: 10px 16px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Subtotal</td>
+                    <td style="padding: 10px 16px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${sellPrice.toFixed(2)}</td>
                   </tr>
 
                   <!-- GST -->
-                  <tr style="background: #fafafa;">
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">GST (5%)</td>
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #374151; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${gst.toFixed(2)}</td>
+                  <tr style="background: #f9f6f3;">
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">GST (5%)</td>
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${gst.toFixed(2)}</td>
                   </tr>
 
                   <!-- TOTAL -->
@@ -216,18 +216,18 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
               </table>
 
               <!-- Validity -->
-              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin-bottom: 24px;">
-                <p style="margin: 0; font-size: 13px; color: #166534; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+              <div style="background: #faf7f4; border: 1px solid #e6ddd5; border-radius: 8px; padding: 12px 16px; margin-bottom: 24px;">
+                <p style="margin: 0; font-size: 13px; color: #4a3728; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   ✓ &nbsp;This quote is valid for <strong>30 days</strong> from today. Prices are in Canadian dollars and include GST.
                 </p>
               </div>
 
               ${paymentUrl ? `<!-- PAY NOW block -->
-              <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; text-align: center;">
-                <p style="margin: 0 0 6px; font-size: 11px; font-weight: 700; color: #15803d; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+              <div style="background: #f0fbf4; border: 2px solid #a3d9b0; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; text-align: center;">
+                <p style="margin: 0 0 6px; font-size: 11px; font-weight: 700; color: #1a6b37; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   Pay Online — Secure Checkout
                 </p>
-                <p style="margin: 0 0 14px; font-size: 13px; color: #166534; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <p style="margin: 0 0 14px; font-size: 13px; color: #1a5a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   Click below to pay by credit or debit card — no account needed.
                 </p>
                 <a href="${paymentUrl}"
@@ -235,10 +235,10 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                   Pay $${total.toFixed(2)} CAD →
                 </a>
                 ${qrCodeCid ? `<div style="margin-top: 16px;">
-                  <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  <p style="margin: 0 0 8px; font-size: 12px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                     Or scan with your phone:
                   </p>
-                  <img src="cid:${qrCodeCid}" width="130" height="130" alt="Scan to pay" style="border-radius: 10px; border: 1px solid #d1fae5;" />
+                  <img src="cid:${qrCodeCid}" width="130" height="130" alt="Scan to pay" style="border-radius: 10px; border: 1px solid #a3d9b0;" />
                 </div>` : ""}
               </div>` : ""}
 
@@ -248,11 +248,11 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
               </p>
 
               <!-- Step 1: Reply to approve -->
-              <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;">
-                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #991b1b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+              <div style="background: #fdf4f4; border: 1px solid #f0bfbb; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #9c2020; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   1. Reply &ldquo;Approved&rdquo; to confirm your order
                 </p>
-                <p style="margin: 0; font-size: 12px; color: #7f1d1d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
+                <p style="margin: 0; font-size: 12px; color: #7a1818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
                   Simply reply to this email with <strong>Approved</strong> (or any confirmation) and we&apos;ll get your order started right away.
                 </p>
                 <div style="text-align: center; margin-top: 12px;">
@@ -264,14 +264,14 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
               </div>
 
               <!-- Step 2: eTransfer payment -->
-              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 16px; margin-bottom: 24px;">
-                <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #1e40af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+              <div style="background: #faf7f4; border: 1px solid #e6ddd5; border-radius: 8px; padding: 14px 16px; margin-bottom: 24px;">
+                <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #e52222; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   2. Pay by Interac eTransfer
                 </p>
-                <p style="margin: 0 0 6px; font-size: 14px; font-weight: 700; color: #1d4ed8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
+                <p style="margin: 0 0 6px; font-size: 14px; font-weight: 700; color: #c01c1c; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
                   info@true-color.ca
                 </p>
-                <p style="margin: 0; font-size: 12px; color: #3b82f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <p style="margin: 0; font-size: 12px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   Auto-deposit enabled · No password needed · Send exact total above
                 </p>
               </div>
@@ -281,19 +281,19 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
 
           <!-- FOOTER -->
           <tr>
-            <td style="background: #1f2937; border-radius: 0 0 12px 12px; padding: 24px 32px; text-align: center;">
-              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            <td style="background: #1c1712; border-radius: 0 0 12px 12px; padding: 24px 32px; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #f5f0eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                 True Color Display Printing
               </p>
-              <p style="margin: 0 0 4px; font-size: 12px; color: #9ca3af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+              <p style="margin: 0 0 4px; font-size: 12px; color: #9c928a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                 Saskatoon, Saskatchewan · Canada
               </p>
-              <p style="margin: 0 0 8px; font-size: 12px; color: #9ca3af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <a href="mailto:info@true-color.ca" style="color: #f87171; text-decoration: none;">info@true-color.ca</a>
+              <p style="margin: 0 0 8px; font-size: 12px; color: #9c928a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                <a href="mailto:info@true-color.ca" style="color: #f08080; text-decoration: none;">info@true-color.ca</a>
                 &nbsp;·&nbsp;
-                <a href="https://truecolorprinting.ca" style="color: #f87171; text-decoration: none;">truecolorprinting.ca</a>
+                <a href="https://truecolorprinting.ca" style="color: #f08080; text-decoration: none;">truecolorprinting.ca</a>
               </p>
-              <p style="margin: 0; font-size: 11px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+              <p style="margin: 0; font-size: 11px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                 All prices in CAD · Pricing v1_2026-02-19
               </p>
             </td>
@@ -401,11 +401,11 @@ function buildProductDiagramSvg(jobDetails: QuoteEmailData["jobDetails"]): strin
   const dimLine = isSqft && wIn > 0 ? `${fmt(wFt)} ft × ${fmt(hFt)} ft` : "";
 
   return `
-    <div style="background:#ffffff;border:2px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:12px;">
+    <div style="background:#faf8f6;border:2px solid #e2dbd4;border-radius:10px;overflow:hidden;margin-bottom:12px;">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VB_W} ${VB_H}" width="${VB_W}" height="${VB_H}"
         style="width:100%;max-height:180px;display:block;">
-        <rect x="${x}" y="${y}" width="${rW}" height="${rH}" fill="#f9f9f9"
-          stroke="${isDashed ? "#e52222" : "#d0d0d0"}" stroke-width="1.5"
+        <rect x="${x}" y="${y}" width="${rW}" height="${rH}" fill="#f5f2ee"
+          stroke="${isDashed ? "#e52222" : "#c8bfb6"}" stroke-width="1.5"
           ${isDashed ? 'stroke-dasharray="6 3"' : ""} rx="${rx}" ry="${rx}"/>
         ${markers}
         ${materialBadge}
@@ -413,9 +413,9 @@ function buildProductDiagramSvg(jobDetails: QuoteEmailData["jobDetails"]): strin
         ${dimLabels}
         ${qtyBadge}
       </svg>
-      <div style="padding:8px 14px;border-top:1px solid #f3f4f6;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(footerLine1)}</p>
-        ${dimLine ? `<p style="margin:2px 0 0;font-size:13px;font-weight:600;color:#111827;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(dimLine)}</p>` : ""}
+      <div style="padding:8px 14px;border-top:1px solid #e6ddd5;text-align:center;">
+        <p style="margin:0;font-size:12px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(footerLine1)}</p>
+        ${dimLine ? `<p style="margin:2px 0 0;font-size:13px;font-weight:600;color:#4a3728;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(dimLine)}</p>` : ""}
       </div>
     </div>`;
 }
