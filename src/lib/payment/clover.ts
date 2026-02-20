@@ -11,7 +11,7 @@
 const BASE_URL =
   process.env.CLOVER_ENVIRONMENT === "sandbox"
     ? "https://apisandbox.dev.clover.com/invoicingcheckoutservice"
-    : "https://api.clover.com/invoicingcheckoutservice";
+    : "https://www.clover.com/invoicingcheckoutservice";
 
 export interface CloverCheckoutResult {
   checkoutUrl: string;
