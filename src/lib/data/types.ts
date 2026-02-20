@@ -42,8 +42,7 @@ export type Addon =
   | "DESIGN_MINOR"
   | "DESIGN_FULL"
   | "DESIGN_LOGO"
-  | "INSTALLATION"
-  | "CARD_STOCK_16PT";
+  | "INSTALLATION";
 
 // pricing_rules.v1.csv row
 export interface PricingRule {

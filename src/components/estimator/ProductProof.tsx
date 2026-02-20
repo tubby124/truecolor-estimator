@@ -46,7 +46,6 @@ function addonLabels(addons: Addon[]): string {
   const labels: Record<string, string> = {
     GROMMETS: "Grommets",
     H_STAKE: "H-Stake",
-    CARD_STOCK_16PT: "16pt Card Stock",
   };
   return addons.map((a) => labels[a] ?? a).join(", ");
 }
