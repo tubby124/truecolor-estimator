@@ -2,15 +2,20 @@
 
 import { useState } from "react";
 import type { EstimateResponse } from "@/lib/engine/types";
+import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
+import { EmailModal } from "@/components/estimator/EmailModal";
 
 interface Props {
   result: EstimateResponse | null;
   loading: boolean;
   isCustomerMode: boolean;
   onToggleCustomerMode: () => void;
+  jobDetails?: QuoteEmailData["jobDetails"];
 }
 
-export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode }: Props) {
+export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode, jobDetails }: Props) {
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+
   if (!result && !loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-64 text-center px-8">
@@ -187,25 +192,38 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
         </div>
       )}
 
-      {/* Print + action buttons */}
+      {/* Action buttons */}
       {!isBlocked && (
         <div className="flex gap-2 no-print">
           <button
             onClick={() => window.print()}
-            className="flex-1 py-2.5 border border-[var(--border)] rounded-xl text-sm text-[var(--muted)] hover:border-gray-400 transition-all"
+            className="py-2.5 px-4 border border-[var(--border)] rounded-xl text-sm text-[var(--muted)] hover:border-gray-400 transition-all"
           >
-            Print quote
+            Print
           </button>
           <button
-            onClick={() => {
-              // Future: create Wave invoice
-              alert("Wave integration coming in Phase 3");
-            }}
-            className="flex-1 py-2.5 bg-[var(--brand)] text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all"
+            onClick={() => setEmailModalOpen(true)}
+            disabled={!jobDetails}
+            className="flex-1 py-2.5 bg-[var(--brand)] text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
           >
-            Create Wave invoice
+            Email quote →
+          </button>
+          <button
+            onClick={() => alert("Wave integration coming in Phase 3")}
+            className="py-2.5 px-4 border border-[var(--border)] rounded-xl text-sm text-[var(--muted)] hover:border-gray-400 transition-all"
+          >
+            Wave
           </button>
         </div>
+      )}
+
+      {/* Email modal */}
+      {emailModalOpen && result && jobDetails && (
+        <EmailModal
+          result={result}
+          jobDetails={jobDetails}
+          onClose={() => setEmailModalOpen(false)}
+        />
       )}
     </div>
   );

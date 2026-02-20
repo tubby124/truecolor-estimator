@@ -8,6 +8,8 @@ import { ProductProof } from "@/components/estimator/ProductProof";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { Addon } from "@/lib/data/types";
 import type { EstimateResponse } from "@/lib/engine/types";
+import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
+import { LOGO_PATH } from "@/lib/config";
 
 interface EstimatorState {
   width_in: string;
@@ -143,12 +145,11 @@ export default function EstimatorPage() {
                 </svg>
               </button>
             )}
-            <div>
-              <h1 className="text-base font-semibold tracking-tight">
-                True Color <span className="text-[var(--brand)]">Estimator</span>
-              </h1>
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={LOGO_PATH} alt="True Color Display Printing" className="h-8 w-auto object-contain" />
               {category && (
-                <p className="text-xs text-[var(--muted)]">{categoryDisplayName(category)}</p>
+                <span className="text-xs text-[var(--muted)] hidden sm:block">{categoryDisplayName(category)}</span>
               )}
             </div>
           </div>
@@ -215,6 +216,7 @@ export default function EstimatorPage() {
                 loading={loading}
                 isCustomerMode={isCustomerMode}
                 onToggleCustomerMode={() => setIsCustomerMode((v) => !v)}
+                jobDetails={category ? buildJobDetails(category, state, MATERIAL_LABEL_MAP) : undefined}
               />
             </div>
           </div>
@@ -294,7 +296,8 @@ function CustomerOverlay({
       <div className="flex flex-col items-center py-12 px-6 max-w-lg mx-auto">
         {/* Brand */}
         <div className="mb-8 text-center">
-          <h1 className="text-lg font-semibold text-[var(--brand)] mb-1">True Color Display Printing</h1>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={LOGO_PATH} alt="True Color Display Printing" className="h-12 w-auto object-contain mx-auto mb-2" />
           <p className="text-sm text-[var(--muted)]">Your Quote</p>
         </div>
 
@@ -356,6 +359,24 @@ function CustomerOverlay({
       </div>
     </div>
   );
+}
+
+function buildJobDetails(
+  category: Category,
+  state: EstimatorState,
+  materialLabelMap: Partial<Record<string, string>>
+): QuoteEmailData["jobDetails"] {
+  const isSqft = SQFT_CATEGORIES.includes(category);
+  return {
+    category,
+    categoryLabel: categoryDisplayName(category),
+    widthIn: isSqft ? parseFloat(state.width_in) || undefined : undefined,
+    heightIn: isSqft ? parseFloat(state.height_in) || undefined : undefined,
+    qty: state.qty,
+    sides: state.sides,
+    materialName: materialLabelMap[state.material_code] ?? undefined,
+    isRush: state.is_rush,
+  };
 }
 
 function categoryDisplayName(cat: Category): string {
