@@ -21,7 +21,7 @@ CR-ACP-MAT,v1_2026-02-19,RIGID,MATERIAL,RMACP002,1.86,,,1.05,,,,,,,FALSE,,materi
 CR-ACP-INK,v1_2026-02-19,RIGID,INK,,,,,1.05,ROLAND,0.16,,,,,FALSE,,estimatorRules.csv:row12+row16
 CR-ACP-LABOR,v1_2026-02-19,RIGID,LABOR,,,,,,,,,6,35.00,,FALSE,,estimatorRules.csv:row17+row18
 CR-ACP-OVERHEAD,v1_2026-02-19,RIGID,OVERHEAD,,,,,,,,,,,5.00,FALSE,,estimatorRules.csv:row19
-CR-FOAM-MAT,v1_2026-02-19,FOAMBOARD,MATERIAL,GENERIC_FOAM,0,,,1.05,,,,,,,TRUE,GAP-01: no foamboard supplier cost — awaiting Spicers pricing,materialLibrary.csv:row21
+CR-FOAM-MAT,v1_2026-02-19,FOAMBOARD,MATERIAL,GENERIC_FOAM,1.024,,,1.05,,,,,,,FALSE,,Spicer invoice 2026-01-19 INSR314489610 $327.60/10sh → $1.024/sqft
 CR-FOAM-INK,v1_2026-02-19,FOAMBOARD,INK,,,,,1.05,ROLAND,0.16,,,,,FALSE,,estimatorRules.csv:row12+row16
 CR-FOAM-LABOR,v1_2026-02-19,FOAMBOARD,LABOR,,,,,,,,,6,35.00,,FALSE,,estimatorRules.csv:row17+row18
 CR-FOAM-OVERHEAD,v1_2026-02-19,FOAMBOARD,OVERHEAD,,,,,,,,,,,5.00,FALSE,,estimatorRules.csv:row19

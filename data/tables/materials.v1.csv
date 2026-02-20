@@ -18,7 +18,7 @@ RMGR002,Grommet #2 Nickel,HARDWARE,N/A,per unit,per_unit,0.118,FALSE,FALSE,,,,,,
 GENERIC_VINYL,Vinyl Sticker Film (Generic),VINYL,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"vinyl sticker,decal,sticker",materialLibrary.csv:row18
 GENERIC_CORO,Coroplast (Generic),RIGID,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"coroplast,coro",materialLibrary.csv:row19
 GENERIC_ACP,ACP Panel (Generic),RIGID,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"acp,aluminum panel",materialLibrary.csv:row20
-GENERIC_FOAM,Foam Board (Generic),RIGID,Unknown,unknown,per_sqft,0,TRUE,TRUE,,,,,,,"foam board,foamcore",materialLibrary.csv:row21 | GAP-01: no supplier cost known
+GENERIC_FOAM,Insite Reveal Foam Board 48x96 3/16in White,RIGID,White Matte,3/16in (4.76mm),per_sqft,1.024,FALSE,FALSE,327.60,per case (10 sheets),2026-01-19,INSR314489610,,INSR314489610,"foam board,foamcore,insite reveal,foam core",Spicer invoice 2026-01-19 INSR314489610 $327.60/10sh — 48x96in = 32sqft ea → $1.024/sqft
 GENERIC_BANNER,Vinyl Banner (Generic),BANNER_VINYL,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"banner,vinyl banner",materialLibrary.csv:row22
 GENERIC_RETRACTABLE,Retractable Banner (Generic),BANNER_RETRACTABLE,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"pull up banner,retractable",materialLibrary.csv:row23
 GENERIC_PHOTO,Photo Paper (Generic),PAPER,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"photo paper",materialLibrary.csv:row24
