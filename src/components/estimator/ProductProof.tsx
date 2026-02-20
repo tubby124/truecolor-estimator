@@ -367,6 +367,27 @@ export function ProductProof({
       {sellPrice !== undefined && (
         <div className="px-4 pb-4">
           <hr className="border-[var(--border)] mb-4" />
+
+          {/* Proof image — read-only display in customer/print mode (no upload controls) */}
+          {proofImage && !onProofUpload && (
+            <div className="mb-4">
+              {proofImage.mimeType === "application/pdf" ? (
+                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-[var(--border)]">
+                  <span className="text-xl">📄</span>
+                  <span className="text-xs text-gray-700 truncate">{proofImage.filename}</span>
+                </div>
+              ) : (
+                <img
+                  src={proofImage.dataUrl}
+                  alt="Design Proof"
+                  className="w-full h-auto rounded-lg border border-[var(--border)]"
+                  style={{ maxHeight: 220, objectFit: "contain" }}
+                />
+              )}
+              <p className="text-xs text-center text-[var(--muted)] mt-1">Design proof</p>
+            </div>
+          )}
+
           {/* Two-column grid */}
           <div className="grid grid-cols-2 gap-4 text-sm mb-6">
             {/* LEFT: Job summary */}
@@ -460,6 +481,9 @@ export function ProductProof({
           {/* Footer */}
           <p className="text-xs text-[var(--muted)] text-center mt-4">
             True Color Display Printing Ltd. · truecolorprinting.com · Saskatoon, SK
+          </p>
+          <p className="text-xs text-center mt-1" style={{ color: "#1d4ed8" }}>
+            Pay by Interac eTransfer: <strong>info@true-color.ca</strong>
           </p>
         </div>
       )}

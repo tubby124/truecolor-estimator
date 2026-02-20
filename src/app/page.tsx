@@ -242,6 +242,7 @@ export default function EstimatorPage() {
           materialName={MATERIAL_LABEL_MAP[state.material_code] ?? categoryDisplayName(category!)}
           isRush={state.is_rush}
           designStatus={state.design_status}
+          proofImage={proofImage}
           onClose={() => setIsCustomerMode(false)}
         />
       )}
@@ -267,6 +268,7 @@ function CustomerOverlay({
   materialName,
   isRush,
   designStatus,
+  proofImage,
   onClose,
 }: {
   result: EstimateResponse;
@@ -279,6 +281,7 @@ function CustomerOverlay({
   materialName: string;
   isRush: boolean;
   designStatus: string;
+  proofImage?: ProofImageState | null;
   onClose: () => void;
 }) {
   const sellPrice = result.sell_price ?? 0;
@@ -322,6 +325,7 @@ function CustomerOverlay({
             sellPrice={sellPrice}
             gstAmount={gst}
             totalAmount={total}
+            proofImage={proofImage}
           />
         </div>
 
@@ -361,7 +365,29 @@ function CustomerOverlay({
           </p>
         )}
 
-        <p className="text-xs text-gray-300 mt-4">Prices in CAD + GST · True Color Display Printing</p>
+        {/* Approval + payment options */}
+        <div className="w-full space-y-3 mt-6">
+          {/* Approve CTA */}
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+            <p className="text-sm font-semibold text-red-800 mb-1">Ready to proceed?</p>
+            <p className="text-xs text-red-600 mb-3">Reply &ldquo;Approved&rdquo; and we&apos;ll get your order started</p>
+            <a
+              href={`mailto:info@true-color.ca?subject=Approved%20-%20Quote&body=Hi%2C%20I%20approve%20this%20quote%20and%20would%20like%20to%20proceed.`}
+              className="inline-block bg-[var(--brand)] text-white text-sm font-semibold px-6 py-2.5 rounded-lg"
+            >
+              Reply to Approve →
+            </a>
+          </div>
+
+          {/* eTransfer */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-1">Pay by Interac eTransfer</p>
+            <p className="text-base font-bold text-blue-800">info@true-color.ca</p>
+            <p className="text-xs text-blue-500 mt-0.5">Auto-deposit enabled · Send exact total above</p>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-300 mt-6">Prices in CAD + GST · True Color Display Printing</p>
       </div>
     </div>
   );

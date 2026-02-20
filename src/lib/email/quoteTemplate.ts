@@ -202,15 +202,38 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                 </p>
               </div>
 
-              <!-- CTA -->
-              <div style="text-align: center; margin-bottom: 8px;">
-                <p style="margin: 0 0 16px; font-size: 14px; color: #374151; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Ready to proceed? Reply to this email or give us a call — we&apos;ll get your order started right away.
+              <!-- How to Approve -->
+              <p style="margin: 0 0 12px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                Ready to Proceed?
+              </p>
+
+              <!-- Step 1: Reply to approve -->
+              <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #991b1b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  1. Reply &ldquo;Approved&rdquo; to confirm your order
                 </p>
-                <a href="mailto:info@true-color.ca"
-                  style="display: inline-block; background: #e52222; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Reply to Approve →
-                </a>
+                <p style="margin: 0; font-size: 12px; color: #7f1d1d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
+                  Simply reply to this email with <strong>Approved</strong> (or any confirmation) and we&apos;ll get your order started right away.
+                </p>
+                <div style="text-align: center; margin-top: 12px;">
+                  <a href="mailto:info@true-color.ca?subject=Approved%20-%20Quote&body=Hi%2C%20I%20approve%20this%20quote%20and%20would%20like%20to%20proceed."
+                    style="display: inline-block; background: #e52222; color: #ffffff; font-size: 13px; font-weight: 600; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    Reply to Approve →
+                  </a>
+                </div>
+              </div>
+
+              <!-- Step 2: eTransfer payment -->
+              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 16px; margin-bottom: 24px;">
+                <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #1e40af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  2. Pay by Interac eTransfer
+                </p>
+                <p style="margin: 0 0 6px; font-size: 14px; font-weight: 700; color: #1d4ed8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
+                  info@true-color.ca
+                </p>
+                <p style="margin: 0; font-size: 12px; color: #3b82f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Auto-deposit enabled · No password needed · Send exact total above
+                </p>
               </div>
 
             </td>
