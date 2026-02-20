@@ -45,9 +45,8 @@ export async function createCloverCheckout(
     },
   };
 
-  if (customerEmail) {
-    body.customer = { email: customerEmail };
-  }
+  // Clover requires a non-null customer object
+  body.customer = customerEmail ? { email: customerEmail } : { firstName: "Customer" };
 
   const res = await fetch(`${BASE_URL}/v1/checkouts`, {
     method: "POST",

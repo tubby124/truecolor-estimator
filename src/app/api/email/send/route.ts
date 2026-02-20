@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       const sellPrice = quoteData.sell_price ?? 0;
       const totalWithGst = Math.round(sellPrice * 1.05 * 100) / 100;
       const description = `True Color Display Printing — ${jobDetails.categoryLabel}`;
-      const token = encodePaymentToken(totalWithGst, description);
+      const token = encodePaymentToken(totalWithGst, description, to);
       paymentUrl = `${siteUrl}/pay/${token}`;
       try {
         // Use toBuffer (not toDataURL) — data: URIs are stripped by Gmail and all major email clients

@@ -19,16 +19,19 @@ export default async function PaymentGatewayPage({ params }: Props) {
   let amountCents: number;
   let description: string;
 
+  let customerEmail: string | undefined;
+
   try {
     const payload = decodePaymentToken(token);
     amountCents = payload.amountCents;
     description = payload.description;
+    customerEmail = payload.customerEmail;
   } catch {
     return <ExpiredPage />;
   }
 
   try {
-    const result = await createCloverCheckout(amountCents, description);
+    const result = await createCloverCheckout(amountCents, description, customerEmail);
     redirect(result.checkoutUrl);
   } catch (err) {
     console.error("[pay/token] Clover checkout failed:", err);
