@@ -10,8 +10,8 @@
 
 const BASE_URL =
   process.env.CLOVER_ENVIRONMENT === "sandbox"
-    ? "https://scl-sandbox.dev.clover.com"
-    : "https://scl.clover.com";
+    ? "https://apisandbox.dev.clover.com/invoicingcheckoutservice"
+    : "https://api.clover.com/invoicingcheckoutservice";
 
 export interface CloverCheckoutResult {
   checkoutUrl: string;
@@ -34,7 +34,6 @@ export async function createCloverCheckout(
   }
 
   const body: Record<string, unknown> = {
-    merchant: { id: merchantId },
     shoppingCart: {
       lineItems: [
         {
@@ -54,6 +53,7 @@ export async function createCloverCheckout(
     method: "POST",
     headers: {
       Authorization: `Bearer ${privateKey}`,
+      "X-Clover-Merchant-Id": merchantId,
       "Content-Type": "application/json",
       Accept: "application/json",
     },
