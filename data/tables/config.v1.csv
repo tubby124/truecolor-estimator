@@ -13,6 +13,7 @@ design_logo_recreation_fee,75.00,Design fee for logo recreation or vectorization
 rush_fee_flat,40.00,Flat rush order surcharge added to all rush jobs,services.v1.csv:SVC-RUSH,2026-02-19
 roland_ink_cost_per_sqft,0.16,Roland wide-format ink cost per sqft (color) for cost estimation,estimatorRules.csv:row12,2026-02-19
 konica_ink_cost_per_sheet,0.05,Konica digital press click charge per sheet color for cost estimation,estimatorRules.csv:row13,2026-02-19
+bc_imposition_factor,21,Business cards per 18x12 parent sheet — used to convert qty-of-cards to sheets for ink cost,owner confirmed 2026-02-20,2026-02-20
 labor_minutes_per_job,6,Standard labor minutes per job line for cost estimation,estimatorRules.csv:row17,2026-02-19
 labor_rate_per_hour,35.00,Staff labor rate per hour for cost estimation,estimatorRules.csv:row18,2026-02-19
 overhead_flat_per_job,5.00,Flat overhead cost allocated per job for cost estimation,estimatorRules.csv:row19,2026-02-19
