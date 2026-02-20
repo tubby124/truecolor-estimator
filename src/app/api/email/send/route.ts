@@ -80,7 +80,9 @@ export async function POST(req: Request) {
     const hasProofAttachment = !!(proofImage?.dataUrl);
     // Pass CID string to template so it renders as cid: src (works in all email clients)
     const qrCodeCid = qrCodeBuffer ? QR_CID : undefined;
-    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeCid });
+    const PROOF_CID = "proof@truecolor";
+    const proofImageCid = hasProofAttachment ? PROOF_CID : undefined;
+    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeCid, proofImageCid });
 
     const subject = customerName
       ? `Your Quote from True Color Display Printing — ${jobDetails.categoryLabel}`
@@ -97,13 +99,14 @@ export async function POST(req: Request) {
     };
     const attachments: MailAttachment[] = [];
 
-    // Proof image (visible attachment)
+    // Proof image — inline CID (renders in email body) + still downloadable as attachment
     if (proofImage?.dataUrl) {
       const base64Data = proofImage.dataUrl.replace(/^data:[^;]+;base64,/, "");
       attachments.push({
         filename: proofImage.filename,
         content: Buffer.from(base64Data, "base64"),
         contentType: proofImage.mimeType,
+        cid: PROOF_CID,
       });
     }
 

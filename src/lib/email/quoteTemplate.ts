@@ -18,6 +18,8 @@ export interface QuoteEmailData {
   };
   siteUrl: string;
   hasProofAttachment?: boolean;
+  /** CID for the inline proof image — renders the proof visually inside the email body */
+  proofImageCid?: string;
   /** Optional "Pay Now" link embedded in the email (generated server-side) */
   paymentUrl?: string;
   /** Optional QR code CID for inline attachment (e.g. "qrcode@truecolor") — use cid: in img src */
@@ -25,7 +27,7 @@ export interface QuoteEmailData {
 }
 
 export function buildQuoteEmailHtml(data: QuoteEmailData): string {
-  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeCid } = data;
+  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, proofImageCid, paymentUrl, qrCodeCid } = data;
   const sellPrice = quoteData.sell_price ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
@@ -150,11 +152,17 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                 <div>${detailPills}</div>
               </div>
 
-              ${hasProofAttachment ? `<!-- Proof attachment notice -->
-              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-                <p style="margin: 0; font-size: 13px; color: #1d4ed8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  📎 &nbsp;A proof of your design is attached to this email.
-                </p>
+              ${hasProofAttachment ? `<!-- Proof section — inline image + review callout -->
+              <div style="margin-bottom: 24px;">
+                <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Your Proof</p>
+                <div style="border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden; text-align: center; background: #f9fafb;">
+                  ${proofImageCid ? `<img src="cid:${proofImageCid}" alt="Your print proof" style="display: block; width: 100%; max-width: 100%; height: auto; border: 0;" />` : ""}
+                  <div style="padding: 10px 14px; background: #fffbeb; border-top: 1px solid #fde68a;">
+                    <p style="margin: 0; font-size: 12px; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      ⚠️ &nbsp;Please review your proof carefully before approving. This is exactly how your final print will look.
+                    </p>
+                  </div>
+                </div>
               </div>` : ""}
 
               <!-- Quote table -->
