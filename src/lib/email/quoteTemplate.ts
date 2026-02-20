@@ -17,10 +17,11 @@ export interface QuoteEmailData {
     isRush: boolean;
   };
   siteUrl: string;
+  hasProofAttachment?: boolean;
 }
 
 export function buildQuoteEmailHtml(data: QuoteEmailData): string {
-  const { customerName, note, quoteData, jobDetails, siteUrl } = data;
+  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment } = data;
   const sellPrice = quoteData.sell_price ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
@@ -144,6 +145,13 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                 <p style="margin: 0 0 8px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em;">Job Details</p>
                 <div>${detailPills}</div>
               </div>
+
+              ${hasProofAttachment ? `<!-- Proof attachment notice -->
+              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                <p style="margin: 0; font-size: 13px; color: #1d4ed8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  📎 &nbsp;A proof of your design is attached to this email.
+                </p>
+              </div>` : ""}
 
               <!-- Quote table -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0"

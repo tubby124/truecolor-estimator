@@ -2,6 +2,12 @@
 
 import type { Category, Addon } from "@/lib/data/types";
 
+export interface ProofImageState {
+  dataUrl: string;
+  filename: string;
+  mimeType: string;
+}
+
 interface Props {
   category: Category;
   widthIn: number;   // 0 for fixed-size/print products
@@ -15,6 +21,8 @@ interface Props {
   sellPrice?: number;
   gstAmount?: number;
   totalAmount?: number;
+  proofImage?: ProofImageState | null;
+  onProofUpload?: (img: ProofImageState | null) => void;
 }
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
@@ -142,6 +150,7 @@ function grommets(
 export function ProductProof({
   category, widthIn, heightIn, qty, sides, addons, materialName,
   isRush, designStatus, sellPrice, gstAmount, totalAmount,
+  proofImage, onProofUpload,
 }: Props) {
   const isSqft = SQFT_CATEGORIES.includes(category);
   const hasGrommets = addons.includes("GROMMETS");
@@ -297,6 +306,62 @@ export function ProductProof({
           </p>
         )}
       </div>
+
+      {/* Proof image upload — staff view only (when onProofUpload is provided) */}
+      {onProofUpload && (
+        <div className="px-4 pb-4 border-t border-[var(--border)] pt-3">
+          {proofImage ? (
+            <div className="space-y-2">
+              {proofImage.mimeType === "application/pdf" ? (
+                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-[var(--border)]">
+                  <span className="text-xl">📄</span>
+                  <span className="text-xs text-gray-700 truncate flex-1">{proofImage.filename}</span>
+                </div>
+              ) : (
+                <img
+                  src={proofImage.dataUrl}
+                  alt="Proof"
+                  className="w-full h-auto rounded-lg border border-[var(--border)]"
+                  style={{ maxHeight: 200, objectFit: "contain" }}
+                />
+              )}
+              <button
+                onClick={() => onProofUpload(null)}
+                className="text-xs text-red-500 hover:text-red-700 transition-colors"
+              >
+                × Remove proof image
+              </button>
+            </div>
+          ) : (
+            <label className="flex items-center gap-2 cursor-pointer text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition-colors group">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,application/pdf"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 3 * 1024 * 1024) {
+                    alert("File too large. Maximum size is 3MB (JPG, PNG, PDF).");
+                    e.target.value = "";
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    const dataUrl = ev.target?.result as string;
+                    onProofUpload({ dataUrl, filename: file.name, mimeType: file.type });
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>Upload proof image to attach to email</span>
+            </label>
+          )}
+        </div>
+      )}
 
       {/* Client confirmation section — only when sellPrice is provided */}
       {sellPrice !== undefined && (
