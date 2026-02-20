@@ -56,7 +56,8 @@ export async function POST(req: Request) {
 
     // Generate payment link + QR code if requested and token secret is configured
     let paymentUrl: string | undefined;
-    let qrCodeDataUrl: string | undefined;
+    let qrCodeBuffer: Buffer | undefined;
+    const QR_CID = "qrcode@truecolor";
     if (includePaymentLink && process.env.PAYMENT_TOKEN_SECRET) {
       const sellPrice = quoteData.sell_price ?? 0;
       const totalWithGst = Math.round(sellPrice * 1.05 * 100) / 100;
@@ -64,19 +65,22 @@ export async function POST(req: Request) {
       const token = encodePaymentToken(totalWithGst, description);
       paymentUrl = `${siteUrl}/pay/${token}`;
       try {
-        qrCodeDataUrl = await QRCode.toDataURL(paymentUrl, {
+        // Use toBuffer (not toDataURL) — data: URIs are stripped by Gmail and all major email clients
+        qrCodeBuffer = await QRCode.toBuffer(paymentUrl, {
           width: 260,
           margin: 2,
           color: { dark: "#111827", light: "#ffffff" },
         });
       } catch {
         // QR failure is non-fatal — email still sends with the text link
-        qrCodeDataUrl = undefined;
+        qrCodeBuffer = undefined;
       }
     }
 
     const hasProofAttachment = !!(proofImage?.dataUrl);
-    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeDataUrl });
+    // Pass CID string to template so it renders as cid: src (works in all email clients)
+    const qrCodeCid = qrCodeBuffer ? QR_CID : undefined;
+    const html = buildQuoteEmailHtml({ customerEmail: to, customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeCid });
 
     const subject = customerName
       ? `Your Quote from True Color Display Printing — ${jobDetails.categoryLabel}`
@@ -84,16 +88,32 @@ export async function POST(req: Request) {
 
     const transporter = getTransporter();
 
-    // Build attachment array if a proof image was uploaded
-    type MailAttachment = { filename: string; content: Buffer; contentType: string };
+    // Build attachment array
+    type MailAttachment = {
+      filename: string;
+      content: Buffer;
+      contentType: string;
+      cid?: string;
+    };
     const attachments: MailAttachment[] = [];
+
+    // Proof image (visible attachment)
     if (proofImage?.dataUrl) {
-      // Strip "data:<mime>;base64," prefix
       const base64Data = proofImage.dataUrl.replace(/^data:[^;]+;base64,/, "");
       attachments.push({
         filename: proofImage.filename,
         content: Buffer.from(base64Data, "base64"),
         contentType: proofImage.mimeType,
+      });
+    }
+
+    // QR code as inline CID attachment (not a visible attachment — embedded in HTML)
+    if (qrCodeBuffer) {
+      attachments.push({
+        filename: "qrcode.png",
+        content: qrCodeBuffer,
+        contentType: "image/png",
+        cid: QR_CID,
       });
     }
 
@@ -103,7 +123,6 @@ export async function POST(req: Request) {
       bcc,
       subject,
       html,
-      // Plain-text fallback
       text: buildPlainText({ customerName, note, quoteData, jobDetails, hasProofAttachment, paymentUrl }),
       ...(attachments.length > 0 ? { attachments } : {}),
     });

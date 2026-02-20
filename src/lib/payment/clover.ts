@@ -28,7 +28,13 @@ export async function createCloverCheckout(
     throw new Error("CLOVER_ECOMM_PRIVATE_KEY not configured");
   }
 
+  const merchantId = process.env.CLOVER_MERCHANT_ID;
+  if (!merchantId) {
+    throw new Error("CLOVER_MERCHANT_ID not configured");
+  }
+
   const body: Record<string, unknown> = {
+    merchant: { id: merchantId },
     shoppingCart: {
       lineItems: [
         {

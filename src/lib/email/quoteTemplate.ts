@@ -20,12 +20,12 @@ export interface QuoteEmailData {
   hasProofAttachment?: boolean;
   /** Optional "Pay Now" link embedded in the email (generated server-side) */
   paymentUrl?: string;
-  /** Optional QR code PNG as data URL for the payment link */
-  qrCodeDataUrl?: string;
+  /** Optional QR code CID for inline attachment (e.g. "qrcode@truecolor") — use cid: in img src */
+  qrCodeCid?: string;
 }
 
 export function buildQuoteEmailHtml(data: QuoteEmailData): string {
-  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeDataUrl } = data;
+  const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, paymentUrl, qrCodeCid } = data;
   const sellPrice = quoteData.sell_price ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
@@ -218,11 +218,11 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                   style="display: inline-block; background: #16a34a; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: 700; padding: 14px 36px; border-radius: 10px; text-decoration: none; letter-spacing: 0.01em;">
                   Pay $${total.toFixed(2)} CAD →
                 </a>
-                ${qrCodeDataUrl ? `<div style="margin-top: 16px;">
+                ${qrCodeCid ? `<div style="margin-top: 16px;">
                   <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                     Or scan with your phone:
                   </p>
-                  <img src="${qrCodeDataUrl}" width="130" height="130" alt="Scan to pay" style="border-radius: 10px; border: 1px solid #d1fae5;" />
+                  <img src="cid:${qrCodeCid}" width="130" height="130" alt="Scan to pay" style="border-radius: 10px; border: 1px solid #d1fae5;" />
                 </div>` : ""}
               </div>` : ""}
 
