@@ -321,9 +321,13 @@ function computeCost(
   }
 
   if (isKonica) {
-    // Konica: cost per sheet (click charge), assume 1 sheet per job (imposition TBD — Q4)
+    // Konica: cost per sheet (click charge).
+    // For business cards, divide qty by imposition factor to get number of sheets printed.
     const konicaRate = getConfigNum("konica_ink_cost_per_sheet");
-    inkCost = round2(qty * sides * konicaRate);
+    const imposition = category === "BUSINESS_CARD"
+      ? getConfigNum("bc_imposition_factor")
+      : 1;
+    inkCost = round2(Math.ceil(qty / imposition) * sides * konicaRate);
     rulesFired.push("CR-PAPER-INK-COLOR");
   } else if (sqft) {
     // Roland wide-format ink cost
