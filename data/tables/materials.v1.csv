@@ -23,7 +23,7 @@ GENERIC_BANNER,Vinyl Banner (Generic),BANNER_VINYL,Unknown,unknown,per_sqft,0,TR
 GENERIC_RETRACTABLE,Retractable Banner (Generic),BANNER_RETRACTABLE,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"pull up banner,retractable",materialLibrary.csv:row23
 GENERIC_PHOTO,Photo Paper (Generic),PAPER,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"photo paper",materialLibrary.csv:row24
 GENERIC_MAGNET,Magnet Material (Generic),MAGNET,Unknown,unknown,per_sqft,0,TRUE,FALSE,,,,,,,"magnet",materialLibrary.csv:row25
-PLACEHOLDER_14PT,14pt White Card Stock,PAPER,N/A,14pt,per_unit,0,FALSE,TRUE,,,,,,,"14pt card,business card,postcard,16pt upgrade",GAP-02: no supplier cost — awaiting Spicers pricing
+PLACEHOLDER_14PT,Pacesetter Dig Gloss Cov 130# 18x12 13.4PT White FSC,PAPER,Gloss,13.4pt (130# cover),per_unit,0.016,FALSE,FALSE,336.42,per M (1000 sheets),2026-02-20,PACDIGC10812FSC,,PACDIGC10812FSC,"14pt card,business card,postcard,bc card stock",Spicer current price 2026-02-20 PACDIGC10812FSC $336.42/M — 18x12 at 21-up = $0.016/card
 PLACEHOLDER_16PT,16pt White Card Stock,PAPER,N/A,16pt,per_unit,0,FALSE,TRUE,,,,,,,"16pt card,business card upgrade",GAP-10: no SKU in materialLibrary
 PLACEHOLDER_80LB,Pacesetter Dig Gloss Tex 80lb 12x18 White FSC,PAPER,Gloss,80lb text,per_unit,0.055,FALSE,FALSE,110.03,per M (1000 sheets),2026-01-19,PACDIGI36FSC,,PACDIGI36FSC,"80lb gloss,flyer paper,80lb text,80lb",Spicer invoice 2026-01-19 PACDIGI36FSC $110.03/M — 12x18 at 2-up = $0.055/flyer
 PLACEHOLDER_100LB,100lb Gloss Text Paper,PAPER,Gloss,100lb,per_unit,0,FALSE,TRUE,,,,,,,"100lb gloss,premium flyer paper",GAP-04: no supplier cost — awaiting Spicers pricing
