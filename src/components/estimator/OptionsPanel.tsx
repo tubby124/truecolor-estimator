@@ -171,38 +171,6 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
         </FieldGroup>
       ) : null}
 
-      {/* Business Card stock upgrade */}
-      {category === "BUSINESS_CARD" && (
-        <FieldGroup label="Card Stock">
-          <div className="flex gap-2">
-            <button
-              onClick={() => onChange({ addons: state.addons.filter((a) => a !== "CARD_STOCK_16PT") })}
-              className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all ${
-                !state.addons.includes("CARD_STOCK_16PT")
-                  ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
-                  : "border-[var(--border)] bg-white hover:border-gray-300"
-              }`}
-            >
-              14pt (Standard)
-            </button>
-            <button
-              onClick={() => {
-                if (!state.addons.includes("CARD_STOCK_16PT")) {
-                  onChange({ addons: [...state.addons, "CARD_STOCK_16PT"] });
-                }
-              }}
-              className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all ${
-                state.addons.includes("CARD_STOCK_16PT")
-                  ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
-                  : "border-[var(--border)] bg-white hover:border-gray-300"
-              }`}
-            >
-              16pt (+$10)
-            </button>
-          </div>
-        </FieldGroup>
-      )}
-
       {/* Add-ons */}
       {(showGrommets || showHStake) && (
         <FieldGroup label="Add-ons">

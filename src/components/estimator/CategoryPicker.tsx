@@ -21,7 +21,7 @@ const CATEGORIES: CategoryOption[] = [
   { id: "PHOTO_POSTER", label: "Photo Poster", sublabel: "220gsm Matte", icon: "🖼", group: "wide_format" },
   { id: "VINYL_LETTERING", label: "Vinyl Lettering", sublabel: "Cut vinyl · Custom", icon: "🔤", group: "wide_format" },
   { id: "FLYER", label: "Flyers", sublabel: "80lb Gloss · Konica", icon: "📄", group: "print" },
-  { id: "BUSINESS_CARD", label: "Business Cards", sublabel: "14pt / 16pt · Konica", icon: "💼", group: "print" },
+  { id: "BUSINESS_CARD", label: "Business Cards", sublabel: "14pt · Konica", icon: "💼", group: "print" },
   { id: "BROCHURE", label: "Brochures", sublabel: "100lb Gloss · Folded", icon: "📋", group: "print" },
   { id: "POSTCARD", label: "Postcards", sublabel: "Standard sizes", icon: "📮", group: "print" },
   { id: "DESIGN", label: "Design Service", sublabel: "Artwork · Logo", icon: "✏️", group: "services" },

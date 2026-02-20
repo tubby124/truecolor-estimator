@@ -193,20 +193,6 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     });
   }
 
-  // 16pt Card Upgrade
-  if (addons.includes("CARD_STOCK_16PT")) {
-    const upgPrice = getConfigNum("card_stock_16pt_upgrade_price");
-    addonTotal += upgPrice;
-    rulesFired.push("SVC-16PT-UPG");
-    lineItems.push({
-      description: "16pt Card Stock Upgrade",
-      qty: 1,
-      unit_price: upgPrice,
-      line_total: upgPrice,
-      rule_id: "SVC-16PT-UPG",
-    });
-  }
-
   // ── STEP 6: Apply minimum charge ──────────────────────────────────────────
   let effectiveBase = basePrice;
   let minChargeApplied = false;
