@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# True Color Display Printing — Estimator
 
-## Getting Started
+Internal staff estimator and client quoting tool for True Color Display Printing Ltd., Saskatoon SK.
 
-First, run the development server:
+## Local Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Updating Prices (No Code Needed)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All pricing lives in `data/tables/`. To update a price:
 
-## Learn More
+1. Open the relevant CSV in any spreadsheet app
+2. Find the row by `rule_id` or `product_code`
+3. Update the value
+4. Save and restart the dev server (`npm run dev`)
+5. The change takes effect immediately — no code deploy needed
 
-To learn more about Next.js, take a look at the following resources:
+Key files:
+- `data/tables/config.v1.csv` — fees, rates, GST, margin thresholds
+- `data/tables/pricing_rules.v1.csv` — sqft-based sell price tiers
+- `data/tables/products.v1.csv` — fixed-size product prices
+- `data/tables/services.v1.csv` — add-on prices (H-Stake, rush, design)
+- `data/tables/materials.v1.csv` — supplier material costs
+- `data/tables/cost_rules.v1.csv` — cost calculation rules
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploying to Railway
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Push to GitHub
+2. Connect repo to Railway
+3. Set environment variables from `.env.example`
+4. Railway auto-deploys on push to `main`
 
-## Deploy on Vercel
+## Phase Roadmap
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Phase | Status | Description |
+|-------|--------|-------------|
+| 1 | Complete | Staff estimator — live quote tool |
+| 2 | Planned | PDF export, shareable quote links |
+| 3 | Planned | Wave API integration, Supabase |
+| 4 | Planned | Customer dashboard, Clover POS |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pricing Version
+
+Current: `v1_2026-02-19`
+
+All prices in CAD. GST 5% applied at subtotal.

@@ -10,6 +10,11 @@ interface Props {
   sides: 1 | 2;
   addons: Addon[];
   materialName: string;
+  isRush?: boolean;
+  designStatus?: string;  // "PRINT_READY"|"MINOR_EDIT"|"FULL_DESIGN"|"LOGO_RECREATION"
+  sellPrice?: number;
+  gstAmount?: number;
+  totalAmount?: number;
 }
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
@@ -34,6 +39,46 @@ const SQFT_CATEGORIES: Category[] = [
   "SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET",
   "DECAL", "VINYL_LETTERING", "PHOTO_POSTER", "DISPLAY",
 ];
+
+// ─── Helper functions ─────────────────────────────────────────────────────────
+
+function addonLabels(addons: Addon[]): string {
+  const labels: Record<string, string> = {
+    GROMMETS: "Grommets",
+    H_STAKE: "H-Stake",
+    CARD_STOCK_16PT: "16pt Card Stock",
+  };
+  return addons.map((a) => labels[a] ?? a).join(", ");
+}
+
+function designLabel(status: string): string {
+  const labels: Record<string, string> = {
+    MINOR_EDIT: "Minor Edits",
+    FULL_DESIGN: "Full Design Included",
+    LOGO_RECREATION: "Logo Recreation",
+  };
+  return labels[status] ?? status;
+}
+
+function getCategoryLabel(category: string): string {
+  const map: Record<string, string> = {
+    SIGN: "Coroplast Sign",
+    BANNER: "Vinyl Banner",
+    RIGID: "ACP Sign",
+    FOAMBOARD: "Foam Board",
+    DISPLAY: "Retractable Banner",
+    STICKER: "Sticker",
+    DECAL: "Decal",
+    VINYL_LETTERING: "Vinyl Lettering",
+    PHOTO_POSTER: "Photo Poster",
+    MAGNET: "Vehicle Magnet",
+    POSTCARD: "Postcard",
+    BUSINESS_CARD: "Business Cards",
+    FLYER: "Flyers",
+    BROCHURE: "Brochure",
+  };
+  return map[category] ?? category;
+}
 
 // ─── Helper: scale rect to fit max bounds ────────────────────────────────────
 
@@ -97,6 +142,7 @@ function grommets(
 
 export function ProductProof({
   category, widthIn, heightIn, qty, sides, addons, materialName,
+  isRush, designStatus, sellPrice, gstAmount, totalAmount,
 }: Props) {
   const isSqft = SQFT_CATEGORIES.includes(category);
   const hasGrommets = addons.includes("GROMMETS");
@@ -130,6 +176,15 @@ export function ProductProof({
     sides === 2 ? "2-sided" : "1-sided",
   ];
 
+  // Grommet count for label
+  const grommetPts = hasGrommets && isSqft && widthIn > 0
+    ? grommets(x, y, rW, rH, widthFt, heightFt)
+    : [];
+  const grommetCount = grommetPts.length;
+
+  // Derived SVG dimensions for grommet label positioning
+  const svgW = VB_W;
+
   return (
     <div className="bg-white border border-[var(--border)] rounded-2xl overflow-hidden">
       {/* Header */}
@@ -155,12 +210,54 @@ export function ProductProof({
             hasGrommets={hasGrommets}
           />
 
+          {/* Material badge — top-left SVG text label (sqft products only) */}
+          {SQFT_CATEGORIES.includes(category) && (
+            <text
+              x={x + 6} y={y + 14}
+              fontSize="8"
+              fill="var(--muted)"
+              fontFamily="-apple-system, sans-serif"
+            >
+              {materialName}
+            </text>
+          )}
+
+          {/* RUSH badge — top-right pill, red, only when isRush === true */}
+          {isRush && (
+            <g>
+              <rect x={x + rW - 52} y={y + 4} width={48} height={14} rx={3} fill="#ef4444" />
+              <text
+                x={x + rW - 28} y={y + 14}
+                fontSize="7"
+                fill="white"
+                textAnchor="middle"
+                fontFamily="-apple-system, sans-serif"
+                fontWeight="600"
+              >
+                RUSH
+              </text>
+            </g>
+          )}
+
           {/* Grommet overlay */}
           {hasGrommets && isSqft && widthIn > 0 && (
             <GrommetOverlay
               x={x} y={y} rW={rW} rH={rH}
               widthFt={widthFt} heightFt={heightFt}
             />
+          )}
+
+          {/* Grommet count label */}
+          {hasGrommets && isSqft && widthIn > 0 && grommetCount > 0 && (
+            <text
+              x={svgW / 2} y={y + rH + 22}
+              fontSize="8"
+              fill="var(--muted)"
+              textAnchor="middle"
+              fontFamily="-apple-system, sans-serif"
+            >
+              {grommetCount} Grommets
+            </text>
           )}
 
           {/* H-Stake overlay */}
@@ -193,7 +290,115 @@ export function ProductProof({
             {dimLabel}
           </p>
         )}
+
+        {/* Design tier label — below SVG footer, only when designStatus is set and not PRINT_READY */}
+        {designStatus && designStatus !== "PRINT_READY" && (
+          <p className="text-xs text-center text-[var(--muted)] mt-2">
+            ✏ {designLabel(designStatus)}
+          </p>
+        )}
       </div>
+
+      {/* Client confirmation section — only when sellPrice is provided */}
+      {sellPrice !== undefined && (
+        <div className="px-4 pb-4">
+          <hr className="border-[var(--border)] mb-4" />
+          {/* Two-column grid */}
+          <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+            {/* LEFT: Job summary */}
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)] mb-2">Job Summary</p>
+              {/* Product name */}
+              <div className="flex gap-2">
+                <span className="text-[var(--muted)] w-20 shrink-0">Product</span>
+                <span className="font-medium">{getCategoryLabel(category)}</span>
+              </div>
+              {/* Dimensions — only if sqft-based */}
+              {widthIn > 0 && heightIn > 0 && (
+                <div className="flex gap-2">
+                  <span className="text-[var(--muted)] w-20 shrink-0">Size</span>
+                  <span className="font-medium">{(widthIn / 12).toFixed(1)} × {(heightIn / 12).toFixed(1)} ft</span>
+                </div>
+              )}
+              {/* Material */}
+              <div className="flex gap-2">
+                <span className="text-[var(--muted)] w-20 shrink-0">Material</span>
+                <span className="font-medium">{materialName}</span>
+              </div>
+              {/* Qty */}
+              <div className="flex gap-2">
+                <span className="text-[var(--muted)] w-20 shrink-0">Qty</span>
+                <span className="font-medium">{qty.toLocaleString()}</span>
+              </div>
+              {/* Sides */}
+              <div className="flex gap-2">
+                <span className="text-[var(--muted)] w-20 shrink-0">Sides</span>
+                <span className="font-medium">{sides === 2 ? "Double-sided" : "Single-sided"}</span>
+              </div>
+              {/* Add-ons */}
+              {addons.length > 0 && (
+                <div className="flex gap-2">
+                  <span className="text-[var(--muted)] w-20 shrink-0">Add-ons</span>
+                  <span className="font-medium">{addonLabels(addons)}</span>
+                </div>
+              )}
+              {/* Design */}
+              {designStatus && designStatus !== "PRINT_READY" && (
+                <div className="flex gap-2">
+                  <span className="text-[var(--muted)] w-20 shrink-0">Design</span>
+                  <span className="font-medium">{designLabel(designStatus)}</span>
+                </div>
+              )}
+              {/* Rush */}
+              {isRush && (
+                <div className="flex gap-2">
+                  <span className="text-[var(--muted)] w-20 shrink-0">Turnaround</span>
+                  <span className="font-medium text-red-600">Rush Order</span>
+                </div>
+              )}
+            </div>
+            {/* RIGHT: Price box */}
+            <div className="border border-[var(--border)] rounded-xl p-4 space-y-2 self-start">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)] mb-3">Quote</p>
+              <div className="flex justify-between text-sm">
+                <span className="text-[var(--muted)]">Subtotal</span>
+                <span className="font-medium tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
+                  ${sellPrice.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-[var(--muted)]">GST (5%)</span>
+                <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
+                  ${(gstAmount ?? sellPrice * 0.05).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between text-base font-semibold border-t border-[var(--border)] pt-2 mt-2">
+                <span>Total</span>
+                <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
+                  ${(totalAmount ?? (sellPrice + (gstAmount ?? sellPrice * 0.05))).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+          {/* Signature line */}
+          <div className="border-t border-[var(--border)] pt-4">
+            <div className="flex items-end gap-8">
+              <div className="flex-1">
+                <div className="border-b border-gray-400 pb-1 mb-1"></div>
+                <p className="text-xs text-[var(--muted)]">Client Signature</p>
+              </div>
+              <div className="w-40">
+                <div className="border-b border-gray-400 pb-1 mb-1"></div>
+                <p className="text-xs text-[var(--muted)]">Date</p>
+              </div>
+            </div>
+          </div>
+          {/* Footer */}
+          <p className="text-xs text-[var(--muted)] text-center mt-4">
+            True Color Display Printing Ltd. · truecolorprinting.com · Saskatoon, SK
+          </p>
+        </div>
+      )}
     </div>
   );
 }

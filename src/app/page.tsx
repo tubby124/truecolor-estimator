@@ -206,6 +206,8 @@ export default function EstimatorPage() {
                   materialName={
                     MATERIAL_LABEL_MAP[state.material_code] ?? categoryDisplayName(category)
                   }
+                  isRush={state.is_rush}
+                  designStatus={state.design_status}
                 />
               )}
               <QuotePanel
@@ -230,6 +232,8 @@ export default function EstimatorPage() {
           sides={state.sides}
           addons={state.addons}
           materialName={MATERIAL_LABEL_MAP[state.material_code] ?? categoryDisplayName(category!)}
+          isRush={state.is_rush}
+          designStatus={state.design_status}
           onClose={() => setIsCustomerMode(false)}
         />
       )}
@@ -253,6 +257,8 @@ function CustomerOverlay({
   sides,
   addons,
   materialName,
+  isRush,
+  designStatus,
   onClose,
 }: {
   result: EstimateResponse;
@@ -263,6 +269,8 @@ function CustomerOverlay({
   sides: 1 | 2;
   addons: Addon[];
   materialName: string;
+  isRush: boolean;
+  designStatus: string;
   onClose: () => void;
 }) {
   const sellPrice = result.sell_price ?? 0;
@@ -300,6 +308,11 @@ function CustomerOverlay({
             sides={sides}
             addons={addons}
             materialName={materialName}
+            isRush={isRush}
+            designStatus={designStatus}
+            sellPrice={sellPrice}
+            gstAmount={gst}
+            totalAmount={total}
           />
         </div>
 

@@ -1,0 +1,12 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/api/estimate"
+healthcheckTimeout = 30
+
+[environments.production.variables]
+NODE_ENV = "production"
+PORT = "$PORT"

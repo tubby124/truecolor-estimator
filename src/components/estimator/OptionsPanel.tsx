@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { Addon } from "@/lib/data/types";
 
@@ -18,6 +19,7 @@ interface Props {
   category: Category;
   state: EstimatorState;
   onChange: (updates: Partial<EstimatorState>) => void;
+  categoryLabel?: string; // human-readable name shown as a badge at top
 }
 
 // Qty options by product type
@@ -29,12 +31,21 @@ const QTY_TIERS: Record<string, number[]> = {
   STICKER: [50, 100, 250, 500, 1000],
 };
 
-export function OptionsPanel({ category, state, onChange }: Props) {
+export function OptionsPanel({ category, state, onChange, categoryLabel }: Props) {
   const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING", "PHOTO_POSTER", "DISPLAY"].includes(category);
   const showSides = ["SIGN", "FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD"].includes(category);
   const showGrommets = category === "BANNER";
   const showHStake = category === "SIGN";
   const showQtyTier = QTY_TIERS[category] !== undefined;
+
+  // Track whether user has interacted with dimension inputs (for validation UX)
+  const [widthTouched, setWidthTouched] = useState(false);
+  const [heightTouched, setHeightTouched] = useState(false);
+
+  const widthVal = parseFloat(state.width_in);
+  const heightVal = parseFloat(state.height_in);
+  const widthInvalid = widthTouched && (!state.width_in || widthVal <= 0);
+  const heightInvalid = heightTouched && (!state.height_in || heightVal <= 0);
 
   const toggleAddon = (addon: Addon) => {
     const current = state.addons;
@@ -47,11 +58,18 @@ export function OptionsPanel({ category, state, onChange }: Props) {
 
   return (
     <div className="space-y-5">
+      {/* Product category badge */}
+      {categoryLabel && (
+        <div className="inline-flex items-center gap-1.5 bg-[var(--brand-50)] text-[var(--brand)] text-xs font-semibold px-3 py-1.5 rounded-full">
+          {categoryLabel}
+        </div>
+      )}
+
       {/* Dimensions — for sqft-based products */}
       {isSqftBased && (
         <FieldGroup label="Dimensions">
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="w-full sm:flex-1">
               <label className="block text-xs text-[var(--muted)] mb-1">Width (inches)</label>
               <input
                 type="number"
@@ -59,11 +77,19 @@ export function OptionsPanel({ category, state, onChange }: Props) {
                 placeholder="e.g. 36"
                 value={state.width_in}
                 onChange={(e) => onChange({ width_in: e.target.value })}
-                className="w-full border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
+                onBlur={() => setWidthTouched(true)}
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 bg-white min-h-[44px] ${
+                  widthInvalid
+                    ? "border-red-400 focus:border-red-400 focus:ring-red-400"
+                    : "border-[var(--border)] focus:border-[var(--brand)] focus:ring-[var(--brand)]"
+                }`}
               />
+              {widthInvalid && (
+                <p className="text-xs text-red-500 mt-1">Enter a valid width</p>
+              )}
             </div>
-            <span className="text-[var(--muted)] text-lg mt-4">×</span>
-            <div className="flex-1">
+            <span className="text-[var(--muted)] text-lg hidden sm:block mt-4">×</span>
+            <div className="w-full sm:flex-1">
               <label className="block text-xs text-[var(--muted)] mb-1">Height (inches)</label>
               <input
                 type="number"
@@ -71,12 +97,20 @@ export function OptionsPanel({ category, state, onChange }: Props) {
                 placeholder="e.g. 72"
                 value={state.height_in}
                 onChange={(e) => onChange({ height_in: e.target.value })}
-                className="w-full border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
+                onBlur={() => setHeightTouched(true)}
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 bg-white min-h-[44px] ${
+                  heightInvalid
+                    ? "border-red-400 focus:border-red-400 focus:ring-red-400"
+                    : "border-[var(--border)] focus:border-[var(--brand)] focus:ring-[var(--brand)]"
+                }`}
               />
+              {heightInvalid && (
+                <p className="text-xs text-red-500 mt-1">Enter a valid height</p>
+              )}
             </div>
           </div>
-          {state.width_in && state.height_in && (
-            <SqftBadge widthIn={parseFloat(state.width_in)} heightIn={parseFloat(state.height_in)} />
+          {state.width_in && state.height_in && widthVal > 0 && heightVal > 0 && (
+            <SqftBadge widthIn={widthVal} heightIn={heightVal} />
           )}
         </FieldGroup>
       )}
@@ -85,16 +119,17 @@ export function OptionsPanel({ category, state, onChange }: Props) {
       {showSides && (
         <FieldGroup label="Sides">
           <div className="flex gap-2">
-            {[1, 2].map((s) => (
+            {([1, 2] as const).map((s) => (
               <button
                 key={s}
-                onClick={() => onChange({ sides: s as 1 | 2 })}
-                className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                onClick={() => onChange({ sides: s })}
+                className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all flex items-center justify-center gap-2 ${
                   state.sides === s
                     ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
                     : "border-[var(--border)] bg-white text-[var(--foreground)] hover:border-gray-300"
                 }`}
               >
+                {s === 1 ? <OneSidedIcon active={state.sides === 1} /> : <TwoSidedIcon active={state.sides === 2} />}
                 {s === 1 ? "Single-sided" : "Double-sided"}
               </button>
             ))}
@@ -236,6 +271,8 @@ export function OptionsPanel({ category, state, onChange }: Props) {
   );
 }
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -293,5 +330,39 @@ function SqftBadge({ widthIn, heightIn }: { widthIn: number; heightIn: number })
       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
       {sqft} sq ft
     </div>
+  );
+}
+
+// Inline SVG icons for sides toggle
+function OneSidedIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none" className="shrink-0">
+      <rect x="1" y="1" width="16" height="12" rx="1.5"
+        fill={active ? "var(--brand-50)" : "#f3f4f6"}
+        stroke={active ? "var(--brand)" : "#9ca3af"}
+        strokeWidth="1.5"
+      />
+      <line x1="4" y1="4.5" x2="14" y2="4.5" stroke={active ? "var(--brand)" : "#9ca3af"} strokeWidth="1" strokeLinecap="round" />
+      <line x1="4" y1="7" x2="11" y2="7" stroke={active ? "var(--brand)" : "#9ca3af"} strokeWidth="1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function TwoSidedIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="22" height="14" viewBox="0 0 22 14" fill="none" className="shrink-0">
+      <rect x="1" y="1" width="9" height="12" rx="1.5"
+        fill={active ? "var(--brand-50)" : "#f3f4f6"}
+        stroke={active ? "var(--brand)" : "#9ca3af"}
+        strokeWidth="1.5"
+      />
+      <rect x="12" y="1" width="9" height="12" rx="1.5"
+        fill={active ? "var(--brand-50)" : "#f3f4f6"}
+        stroke={active ? "var(--brand)" : "#9ca3af"}
+        strokeWidth="1.5"
+        opacity="0.6"
+      />
+      <path d="M10.5 7H11.5" stroke={active ? "var(--brand)" : "#9ca3af"} strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
   );
 }

@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
+/* ─── Design System Tokens ──────────────────────────────────────────────────
+   True Color Display Printing — Premium print shop, Saskatoon SK
+   Brand: #e63020 (red). All prices CAD. GST applied at subtotal.
+   Never add decorative gradients, shadows, or ornaments.
+   ─────────────────────────────────────────────────────────────────────────── */
+
 :root {
+  /* Core palette */
   --background: #f8f8f8;
   --foreground: #111111;
   --brand: #e63020;
@@ -8,6 +15,29 @@
   --muted: #6b6b6b;
   --border: #e5e5e5;
   --white: #ffffff;
+
+  /* Margin health indicators (thresholds come from config.v1.csv via engine) */
+  --margin-green: #16a34a;
+  --margin-green-bg: #f0fdf4;
+  --margin-green-border: #bbf7d0;
+  --margin-yellow: #d97706;
+  --margin-yellow-bg: #fffbeb;
+  --margin-yellow-border: #fde68a;
+  --margin-red: #dc2626;
+  --margin-red-bg: #fef2f2;
+  --margin-red-border: #fecaca;
+
+  /* Proof document */
+  --proof-bg: #ffffff;
+  --proof-border: #e5e5e5;
+
+  /* Placeholder / supplier cost warning */
+  --warning-bg: #fefce8;
+  --warning-text: #854d0e;
+  --warning-border: #fde047;
+
+  /* Price column — monospace for tabular alignment */
+  --font-price: "SF Mono", "Fira Code", "Consolas", monospace;
 }
 
 @theme inline {
@@ -25,10 +55,33 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Smooth price animation */
+/* ─── Margin badge variants ──────────────────────────────────────────────── */
+
+.margin-badge--green {
+  color: var(--margin-green);
+  background: var(--margin-green-bg);
+  border-color: var(--margin-green-border);
+}
+
+.margin-badge--yellow {
+  color: var(--margin-yellow);
+  background: var(--margin-yellow-bg);
+  border-color: var(--margin-yellow-border);
+}
+
+.margin-badge--red {
+  color: var(--margin-red);
+  background: var(--margin-red-bg);
+  border-color: var(--margin-red-border);
+}
+
+/* ─── Price animation ────────────────────────────────────────────────────── */
+
 .price-animate {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ─── Print styles ───────────────────────────────────────────────────────── */
 
 @media print {
   .no-print { display: none !important; }

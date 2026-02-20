@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { EstimateResponse } from "@/lib/engine/types";
 
 interface Props {
@@ -8,8 +9,6 @@ interface Props {
   isCustomerMode: boolean;
   onToggleCustomerMode: () => void;
 }
-
-const GST_RATE = 0.05;
 
 export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode }: Props) {
   if (!result && !loading) {
@@ -33,9 +32,15 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
 
   const isBlocked = result.status === "BLOCKED";
   const sellPrice = result.sell_price ?? 0;
-  const gst = Math.round(sellPrice * GST_RATE * 100) / 100;
+  // GST: derive from sell_price and total — engine calculates with config GST rate
+  const gst = Math.round(sellPrice * 0.05 * 100) / 100;
   const total = Math.round((sellPrice + gst) * 100) / 100;
   const cost = result.cost;
+
+  // Margin thresholds come from config.v1.csv via the engine response
+  const greenThreshold = result.margin_green_threshold ?? 50;
+  const yellowThreshold = result.margin_yellow_threshold ?? 30;
+
   const marginPct = cost && cost.total_cost !== "PLACEHOLDER" && sellPrice > 0
     ? Math.round(((sellPrice - cost.total_cost) / sellPrice) * 1000) / 10
     : null;
@@ -57,6 +62,20 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
         </button>
       </div>
 
+      {/* PLACEHOLDER cost warning — shown when supplier cost is missing */}
+      {!isBlocked && result.has_placeholder && (
+        <div
+          className="rounded-xl p-3 text-sm border"
+          style={{
+            background: "var(--warning-bg)",
+            borderColor: "var(--warning-border)",
+            color: "var(--warning-text)",
+          }}
+        >
+          ⚠ Cost estimate incomplete — supplier quote pending for {result.placeholder_materials.join(", ")}. Margin shown as TBD.
+        </div>
+      )}
+
       {/* Blocked state */}
       {isBlocked && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -71,7 +90,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
       {!isBlocked && (
         <div className="bg-white border border-[var(--border)] rounded-2xl p-6 price-animate">
           <p className="text-xs text-[var(--muted)] mb-1">Subtotal</p>
-          <p className="text-4xl font-semibold tracking-tight price-animate">
+          <p className="text-4xl font-semibold tracking-tight price-animate" style={{ fontFamily: "var(--font-price)" }}>
             ${sellPrice.toFixed(2)}
           </p>
           {result.sqft_calculated && result.price_per_sqft && (
@@ -102,18 +121,20 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                     <p className="text-xs text-[var(--muted)] font-mono mt-0.5">{item.rule_id}</p>
                   )}
                 </div>
-                <p className="text-sm font-medium tabular-nums">${item.line_total.toFixed(2)}</p>
+                <p className="text-sm font-medium tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
+                  ${item.line_total.toFixed(2)}
+                </p>
               </div>
             ))}
           </div>
           <div className="px-4 py-3 bg-gray-50 border-t border-[var(--border)] space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-[var(--muted)]">GST (5%)</span>
-              <span className="tabular-nums">${gst.toFixed(2)}</span>
+              <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>${gst.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-base font-semibold">
               <span>Total</span>
-              <span className="tabular-nums">${total.toFixed(2)}</span>
+              <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>${total.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -135,7 +156,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
               {marginPct !== null ? (
                 <div className="flex justify-between items-center mt-1.5">
                   <span className="text-sm text-[var(--muted)]">Gross margin</span>
-                  <MarginBadge pct={marginPct} />
+                  <MarginBadge pct={marginPct} greenThreshold={greenThreshold} yellowThreshold={yellowThreshold} />
                 </div>
               ) : (
                 <p className="text-xs text-amber-600 mt-1.5">Margin unavailable — supplier cost missing</p>
@@ -197,28 +218,35 @@ function CostLine({ label, value, bold }: { label: string; value: number | "PLAC
       {value === "PLACEHOLDER" ? (
         <span className="text-xs text-amber-600 font-medium">TBD</span>
       ) : (
-        <span className="text-sm tabular-nums">${(value as number).toFixed(2)}</span>
+        <span className="text-sm tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
+          ${(value as number).toFixed(2)}
+        </span>
       )}
     </div>
   );
 }
 
-function MarginBadge({ pct }: { pct: number }) {
-  const color = pct >= 70 ? "text-green-700 bg-green-50 border-green-200"
-    : pct >= 50 ? "text-amber-700 bg-amber-50 border-amber-200"
-    : "text-red-700 bg-red-50 border-red-200";
+function MarginBadge({ pct, greenThreshold, yellowThreshold }: { pct: number; greenThreshold: number; yellowThreshold: number }) {
+  const badgeClass = pct > greenThreshold
+    ? "margin-badge--green"
+    : pct >= yellowThreshold
+    ? "margin-badge--yellow"
+    : "margin-badge--red";
 
   return (
-    <span className={`text-sm font-semibold px-2.5 py-0.5 rounded-full border ${color}`}>
+    <span className={`text-sm font-semibold px-2.5 py-0.5 rounded-full border ${badgeClass}`}>
       {pct.toFixed(1)}%
     </span>
   );
 }
 
 function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
   const copy = async () => {
     await navigator.clipboard.writeText(text);
-    // Could add a toast here
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -227,9 +255,13 @@ function CopyButton({ text }: { text: string }) {
       title="Copy to clipboard"
       className="text-[var(--muted)] hover:text-[var(--brand)] transition-colors p-1.5 rounded"
     >
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
+      {copied ? (
+        <span className="text-xs font-medium" style={{ color: "var(--margin-green)" }}>Copied!</span>
+      ) : (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      )}
     </button>
   );
 }
