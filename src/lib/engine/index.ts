@@ -320,6 +320,13 @@ function computeCost(
     isPartial = true;
   }
 
+  // Per-item paper stock cost for Konica press products (flyers, brochures, postcards, BCs).
+  // cost_per_sqft stores the per-item rate when cost_model=per_unit (e.g. $0.055/flyer at 2-up).
+  if (isKonica && mat && !mat.is_placeholder && mat.cost_per_sqft !== null && materialCost === "PLACEHOLDER") {
+    materialCost = round2(qty * mat.cost_per_sqft);
+    isPartial = false;
+  }
+
   if (isKonica) {
     // Konica: cost per sheet (click charge), assume 1 sheet per job (imposition TBD — Q4)
     const konicaRate = getConfigNum("konica_ink_cost_per_sheet");
