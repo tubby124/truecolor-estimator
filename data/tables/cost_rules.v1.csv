@@ -29,8 +29,8 @@ CR-PAPER-MAT,v1_2026-02-19,PAPER,MATERIAL,RMPS002,0.24,,,1.0,,,,,,,FALSE,No wast
 CR-PAPER-INK,v1_2026-02-19,PAPER,INK,,,,0.05,,KONICA,,0.05,,,FALSE,Color: $0.05/side. BW: $0.005/side per estimatorRules.csv,estimatorRules.csv:row13
 CR-PAPER-LABOR,v1_2026-02-19,PAPER,LABOR,,,,,,,,,6,35.00,,FALSE,,estimatorRules.csv:row17+row18
 CR-PAPER-OVERHEAD,v1_2026-02-19,PAPER,OVERHEAD,,,,,,,,,,,5.00,FALSE,,estimatorRules.csv:row19
-CR-BC-MAT,v1_2026-02-19,BUSINESS_CARD,MATERIAL,PLACEHOLDER_14PT,0,,,,KONICA,,,,,FALSE,TRUE,GAP-02: no 14pt card stock supplier cost — awaiting Spicers pricing,materialLibrary.csv + GAP-02
-CR-BC-INK,v1_2026-02-19,BUSINESS_CARD,INK,,,,0.05,,KONICA,,0.05,,,FALSE,Note: $0.05 is per sheet click charge not per card. Imposition factor unknown — Q4 partial.,estimatorRules.csv:row13
+CR-BC-MAT,v1_2026-02-19,BUSINESS_CARD,MATERIAL,PLACEHOLDER_14PT,0.016,,,,KONICA,,,,,FALSE,FALSE,,Spicer PACDIGC10812FSC $336.42/M — 21-up on 18x12 = $0.016/card (confirmed 2026-02-20)
+CR-BC-INK,v1_2026-02-19,BUSINESS_CARD,INK,,,,0.05,,KONICA,,0.05,,,FALSE,Note: $0.05 is per sheet click charge not per card. Imposition = 21 cards/sheet (confirmed 2026-02-20). Real ink cost = ceil(qty/21)*sides*$0.05. Engine fix in fix/bc-ink-imposition branch.,estimatorRules.csv:row13
 CR-BC-LABOR,v1_2026-02-19,BUSINESS_CARD,LABOR,,,,,,,,,6,35.00,,FALSE,,estimatorRules.csv:row17+row18
 CR-BC-OVERHEAD,v1_2026-02-19,BUSINESS_CARD,OVERHEAD,,,,,,,,,,,5.00,FALSE,,estimatorRules.csv:row19
 CR-MAGNET-MAT,v1_2026-02-19,MAGNET,MATERIAL,MAG302437550M,1.62,,,1.10,,,,,,,FALSE,,materialLibrary.csv:row12 + estimatorRules.csv:row15
