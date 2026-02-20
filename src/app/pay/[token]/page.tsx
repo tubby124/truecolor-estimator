@@ -30,13 +30,16 @@ export default async function PaymentGatewayPage({ params }: Props) {
     return <ExpiredPage />;
   }
 
+  let checkoutUrl: string;
   try {
     const result = await createCloverCheckout(amountCents, description, customerEmail);
-    redirect(result.checkoutUrl);
+    checkoutUrl = result.checkoutUrl;
   } catch (err) {
     console.error("[pay/token] Clover checkout failed:", err);
     return <ErrorPage />;
   }
+
+  redirect(checkoutUrl);
 }
 
 function ExpiredPage() {
