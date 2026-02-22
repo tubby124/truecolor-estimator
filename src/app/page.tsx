@@ -1,435 +1,308 @@
-"use client";
+import Image from "next/image";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { SiteNav } from "@/components/site/SiteNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
-import { useState, useEffect, useCallback } from "react";
-import { CategoryPicker } from "@/components/estimator/CategoryPicker";
-import { OptionsPanel } from "@/components/estimator/OptionsPanel";
-import { QuotePanel } from "@/components/estimator/QuotePanel";
-import { ProductProof } from "@/components/estimator/ProductProof";
-import type { Category, DesignStatus } from "@/lib/data/types";
-import type { Addon } from "@/lib/data/types";
-import type { EstimateResponse } from "@/lib/engine/types";
-import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
-import { LOGO_PATH } from "@/lib/config";
-import type { ProofImageState } from "@/components/estimator/ProductProof";
-
-interface EstimatorState {
-  width_in: string;
-  height_in: string;
-  sides: 1 | 2;
-  qty: number;
-  addons: Addon[];
-  design_status: DesignStatus;
-  is_rush: boolean;
-  material_code: string;
-}
-
-const DEFAULT_STATE: EstimatorState = {
-  width_in: "",
-  height_in: "",
-  sides: 1,
-  qty: 1,
-  addons: [],
-  design_status: "PRINT_READY",
-  is_rush: false,
-  material_code: "",
+export const metadata: Metadata = {
+  title: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
+  description:
+    "Coroplast signs from $30. Vinyl banners from $45. Business cards from $40. In-house designer, local pickup at 216 33rd St W Saskatoon. See your exact price now — no quote forms.",
+  alternates: { canonical: "/" },
 };
 
-// Map categories to their default material codes
-const MATERIAL_MAP: Partial<Record<Category, string>> = {
-  SIGN: "MPHCC020",
-  BANNER: "RMBF004",
-  RIGID: "RMACP002",
-  MAGNET: "MAG302437550M",
-  PHOTO_POSTER: "RMPS002",
-  DECAL: "ARLPMF7008",
-  VINYL_LETTERING: "ARLPMF7008",
-};
+// ─── Product grid data ─────────────────────────────────────────────────────────
 
-// Human-readable material names for the proof card
-const MATERIAL_LABEL_MAP: Partial<Record<string, string>> = {
-  MPHCC020: "Coroplast 4mm",
-  RMBF004: "Vinyl Banner 13oz",
-  RMACP002: "ACP 3mm Aluminum",
-  MAG302437550M: "Magnetic Sheet 30mil",
-  RMPS002: "Photo Paper 220gsm",
-  ARLPMF7008: "Adhesive Vinyl",
-};
-
-const SQFT_CATEGORIES: Category[] = [
-  "SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET",
-  "DECAL", "VINYL_LETTERING", "PHOTO_POSTER", "DISPLAY",
+const PRODUCTS = [
+  {
+    name: "Coroplast Signs",
+    from: "from $30",
+    desc: "Job site, yard, and directional signs. Survives Saskatchewan winters.",
+    img: "/images/products/product/coroplast-yard-sign-800x600.webp",
+    href: "/staff",
+  },
+  {
+    name: "Vinyl Banners",
+    from: "from $45",
+    desc: "13oz vinyl for events, storefronts, and trade shows. Any size.",
+    img: "/images/products/product/banner-vinyl-colorful-800x600.webp",
+    href: "/staff",
+  },
+  {
+    name: "Business Cards",
+    from: "from $40",
+    desc: "250 cards, 14pt gloss stock. Single or double-sided.",
+    img: "/images/products/product/business-cards-800x600.webp",
+    href: "/staff",
+  },
+  {
+    name: "Flyers",
+    from: "from $45",
+    desc: "100 flyers on 80lb gloss. Sharp colour, clean finish.",
+    img: "/images/products/product/flyers-stack-800x600.webp",
+    href: "/staff",
+  },
+  {
+    name: "Vehicle Magnets",
+    from: "from $45",
+    desc: "30mil magnets for any vehicle. Custom size, full colour.",
+    img: "/images/products/product/vehicle-magnets-800x600.webp",
+    href: "/staff",
+  },
+  {
+    name: "ACP Aluminum Signs",
+    from: "from $60",
+    desc: "3mm aluminum composite. Indoor or outdoor, built to last.",
+    img: "/images/products/product/acp-aluminum-sign-800x600.webp",
+    href: "/staff",
+  },
 ];
 
-export default function EstimatorPage() {
-  const [category, setCategory] = useState<Category | null>(null);
-  const [state, setState] = useState<EstimatorState>(DEFAULT_STATE);
-  const [result, setResult] = useState<EstimateResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [isCustomerMode, setIsCustomerMode] = useState(false);
-  const [step, setStep] = useState<"pick" | "options">("pick");
-  const [proofImage, setProofImage] = useState<ProofImageState | null>(null);
+// ─── Industry tiles ────────────────────────────────────────────────────────────
 
-  const handleCategorySelect = useCallback((cat: Category) => {
-    setCategory(cat);
-    setState({
-      ...DEFAULT_STATE,
-      material_code: MATERIAL_MAP[cat] ?? "",
-      qty: ["FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD", "STICKER"].includes(cat) ? 250 : 1,
-    });
-    setResult(null);
-    setProofImage(null);
-    setStep("options");
-  }, []);
+const INDUSTRIES = [
+  {
+    name: "Construction",
+    img: "/images/products/heroes/construction-hero-1200x500.webp",
+    href: "#",
+  },
+  {
+    name: "Real Estate",
+    img: "/images/products/heroes/realestate-hero-1200x500.webp",
+    href: "#",
+  },
+  {
+    name: "Agriculture",
+    img: "/images/products/heroes/agriculture-hero-1200x500.webp",
+    href: "#",
+  },
+  {
+    name: "Healthcare",
+    img: "/images/products/heroes/healthcare-hero-1200x500.webp",
+    href: "#",
+  },
+  {
+    name: "Retail & Franchise",
+    img: "/images/products/heroes/retail-hero-1200x500.webp",
+    href: "#",
+  },
+  {
+    name: "Sports & Events",
+    img: "/images/products/heroes/sports-hero-1200x500.webp",
+    href: "#",
+  },
+];
 
-  const handleStateChange = useCallback((updates: Partial<EstimatorState>) => {
-    setState((prev) => ({ ...prev, ...updates }));
-  }, []);
+// ─── Page ──────────────────────────────────────────────────────────────────────
 
-  // Debounced estimate fetch
-  useEffect(() => {
-    if (!category) return;
-
-    const w = parseFloat(state.width_in);
-    const h = parseFloat(state.height_in);
-    const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING", "PHOTO_POSTER"].includes(category);
-    const isPrintBased = ["FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD", "STICKER"].includes(category);
-
-    // Don't fetch if sqft-based product has no dimensions yet
-    if (isSqftBased && (!w || !h || w <= 0 || h <= 0)) {
-      setResult(null);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const body = {
-          category,
-          material_code: state.material_code || undefined,
-          width_in: isSqftBased ? w : undefined,
-          height_in: isSqftBased ? h : undefined,
-          sides: state.sides,
-          qty: state.qty,
-          addons: state.addons,
-          is_rush: state.is_rush,
-          design_status: state.design_status,
-          pricing_version: "v1_2026-02-19",
-        };
-        const res = await fetch("/api/estimate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const data: EstimateResponse = await res.json();
-        setResult(data);
-      } catch {
-        setResult(null);
-      } finally {
-        setLoading(false);
-      }
-    }, 300); // 300ms debounce — price updates feel instant
-
-    return () => clearTimeout(timer);
-  }, [category, state]);
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      {/* Header */}
-      <header className="bg-white border-b border-[var(--border)] sticky top-0 z-10 no-print">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {step === "options" && (
-              <button
-                onClick={() => { setStep("pick"); setCategory(null); setResult(null); }}
-                className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-            )}
-            <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={LOGO_PATH} alt="True Color Display Printing" className="h-8 w-auto object-contain" />
-              {category && (
-                <span className="text-xs text-[var(--muted)] hidden sm:block">{categoryDisplayName(category)}</span>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-[var(--muted)] font-mono hidden sm:block">v1_2026-02-19</span>
-            <button
-              onClick={() => { setCategory(null); setState(DEFAULT_STATE); setResult(null); setStep("pick"); }}
-              className="text-xs px-3 py-1.5 border border-[var(--border)] rounded-full text-[var(--muted)] hover:border-gray-400 transition-all"
+    <div className="min-h-screen bg-white">
+      <SiteNav />
+
+      {/* ── HERO ─────────────────────────────────────────────────────────────── */}
+      <section className="bg-[#1c1712] text-white px-6 py-20 md:py-28">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
+            See your exact price<br />
+            <span className="text-[#16C2F3]">in 30 seconds.</span>
+          </h1>
+          <p className="text-xl text-gray-300 mb-3 max-w-2xl">
+            No quote forms. No callbacks. No waiting 7 days for Toronto to ship it.
+          </p>
+          <p className="text-base text-gray-400 mb-10 max-w-xl">
+            Signs, banners, business cards, magnets, flyers — all in one shop.
+            In-house designer. Local Saskatoon pickup at 216 33rd St W.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              href="/staff"
+              className="bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors"
             >
-              New quote
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Step 1: Category picker */}
-        {step === "pick" && (
-          <div className="max-w-2xl mx-auto">
-            <div className="mb-8 text-center">
-              <h2 className="text-2xl font-semibold tracking-tight mb-1">What are we printing?</h2>
-              <p className="text-sm text-[var(--muted)]">Select a product category to start your quote</p>
-            </div>
-            <CategoryPicker selected={category} onSelect={handleCategorySelect} />
-          </div>
-        )}
-
-        {/* Step 2: Options + Live Quote */}
-        {step === "options" && category && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            {/* Left: Options */}
-            <div className="bg-white border border-[var(--border)] rounded-2xl p-6">
-              <h2 className="text-sm font-semibold text-[var(--muted)] uppercase tracking-widest mb-5">
-                Job Details
-              </h2>
-              <OptionsPanel
-                category={category}
-                state={state}
-                onChange={handleStateChange}
-              />
-            </div>
-
-            {/* Right: Proof + Live Quote */}
-            <div className="lg:sticky lg:top-24 space-y-4">
-              {/* Product proof — shown when dimensions are set (sqft) or always (print) */}
-              {(!SQFT_CATEGORIES.includes(category) ||
-                (parseFloat(state.width_in) > 0 && parseFloat(state.height_in) > 0)) && (
-                <ProductProof
-                  category={category}
-                  widthIn={parseFloat(state.width_in) || 0}
-                  heightIn={parseFloat(state.height_in) || 0}
-                  qty={state.qty}
-                  sides={state.sides}
-                  addons={state.addons}
-                  materialName={
-                    MATERIAL_LABEL_MAP[state.material_code] ?? categoryDisplayName(category)
-                  }
-                  isRush={state.is_rush}
-                  designStatus={state.design_status}
-                  proofImage={proofImage}
-                  onProofUpload={setProofImage}
-                />
-              )}
-              <QuotePanel
-                result={result}
-                loading={loading}
-                isCustomerMode={isCustomerMode}
-                onToggleCustomerMode={() => setIsCustomerMode((v) => !v)}
-                jobDetails={category ? buildJobDetails(category, state, MATERIAL_LABEL_MAP) : undefined}
-                proofImage={proofImage}
-              />
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Customer-facing fullscreen overlay */}
-      {isCustomerMode && result && result.sell_price !== null && (
-        <CustomerOverlay
-          result={result}
-          category={category!}
-          widthIn={parseFloat(state.width_in) || 0}
-          heightIn={parseFloat(state.height_in) || 0}
-          qty={state.qty}
-          sides={state.sides}
-          addons={state.addons}
-          materialName={MATERIAL_LABEL_MAP[state.material_code] ?? categoryDisplayName(category!)}
-          isRush={state.is_rush}
-          designStatus={state.design_status}
-          proofImage={proofImage}
-          onClose={() => setIsCustomerMode(false)}
-        />
-      )}
-
-      {/* Pricing version footer */}
-      <footer className="text-center py-6 text-xs text-[var(--muted)] no-print">
-        True Color Display Printing · Pricing v1_2026-02-19 · All prices in CAD + GST
-      </footer>
-    </div>
-  );
-}
-
-// ─── Customer-Facing Overlay ──────────────────────────────────────────────────
-
-function CustomerOverlay({
-  result,
-  category,
-  widthIn,
-  heightIn,
-  qty,
-  sides,
-  addons,
-  materialName,
-  isRush,
-  designStatus,
-  proofImage,
-  onClose,
-}: {
-  result: EstimateResponse;
-  category: Category;
-  widthIn: number;
-  heightIn: number;
-  qty: number;
-  sides: 1 | 2;
-  addons: Addon[];
-  materialName: string;
-  isRush: boolean;
-  designStatus: string;
-  proofImage?: ProofImageState | null;
-  onClose: () => void;
-}) {
-  const sellPrice = result.sell_price ?? 0;
-  // GST rate comes from engine (which reads config.v1.csv) — do not hardcode 0.05 here
-  const gstRate = 0.05; // TODO Phase 3: pass gst_rate through EstimateResponse
-  const gst = Math.round(sellPrice * gstRate * 100) / 100;
-  const total = Math.round((sellPrice + gst) * 100) / 100;
-
-  return (
-    <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="fixed top-6 right-6 text-gray-400 hover:text-gray-600 z-10"
-      >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      <div className="flex flex-col items-center py-12 px-6 max-w-lg mx-auto">
-        {/* Brand */}
-        <div className="mb-8 text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LOGO_PATH} alt="True Color Display Printing" className="h-12 w-auto object-contain mx-auto mb-2" />
-          <p className="text-sm text-[var(--muted)]">Your Quote</p>
-        </div>
-
-        {/* Product proof diagram */}
-        <div className="w-full mb-8">
-          <ProductProof
-            category={category}
-            widthIn={widthIn}
-            heightIn={heightIn}
-            qty={qty}
-            sides={sides}
-            addons={addons}
-            materialName={materialName}
-            isRush={isRush}
-            designStatus={designStatus}
-            sellPrice={sellPrice}
-            gstAmount={gst}
-            totalAmount={total}
-            proofImage={proofImage}
-          />
-        </div>
-
-        {/* Sqft detail */}
-        {result.sqft_calculated && (
-          <p className="text-sm text-gray-400 mb-6 text-center">
-            {result.sqft_calculated.toFixed(2)} sq ft
-            {result.price_per_sqft && ` · $${result.price_per_sqft.toFixed(2)}/sq ft`}
-          </p>
-        )}
-
-        {/* Big price */}
-        <div className="mb-8 text-center">
-          <p className="text-7xl font-semibold tracking-tighter">${total.toFixed(2)}</p>
-          <p className="text-sm text-[var(--muted)] mt-2">Total including GST</p>
-        </div>
-
-        {/* Line items (simplified) */}
-        {result.line_items.length > 1 && (
-          <div className="w-full space-y-2 mb-8">
-            {result.line_items.map((item, i) => (
-              <div key={i} className="flex justify-between text-sm text-gray-600">
-                <span>{item.description.split("(")[0].trim()}</span>
-                <span>${item.line_total.toFixed(2)}</span>
-              </div>
-            ))}
-            <div className="flex justify-between text-sm text-gray-400 border-t border-gray-100 pt-2">
-              <span>GST (5%)</span>
-              <span>${gst.toFixed(2)}</span>
-            </div>
-          </div>
-        )}
-
-        {result.min_charge_applied && (
-          <p className="text-xs text-[var(--muted)] mb-4">
-            Minimum order charge applied
-          </p>
-        )}
-
-        {/* Approval + payment options */}
-        <div className="w-full space-y-3 mt-6">
-          {/* Approve CTA */}
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-            <p className="text-sm font-semibold text-red-800 mb-1">Ready to proceed?</p>
-            <p className="text-xs text-red-600 mb-3">Reply &ldquo;Approved&rdquo; and we&apos;ll get your order started</p>
+              See Exact Prices →
+            </Link>
             <a
-              href={`mailto:info@true-color.ca?subject=Approved%20-%20Quote&body=Hi%2C%20I%20approve%20this%20quote%20and%20would%20like%20to%20proceed.`}
-              className="inline-block bg-[var(--brand)] text-white text-sm font-semibold px-6 py-2.5 rounded-lg"
+              href="tel:+13069548688"
+              className="border border-gray-600 text-gray-300 font-semibold text-base px-6 py-4 rounded-md hover:border-gray-400 hover:text-white transition-colors"
             >
-              Reply to Approve →
+              Call (306) 954-8688
             </a>
           </div>
+        </div>
+      </section>
 
-          {/* eTransfer */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-1">Pay by Interac eTransfer</p>
-            <p className="text-base font-bold text-blue-800">info@true-color.ca</p>
-            <p className="text-xs text-blue-500 mt-0.5">Auto-deposit enabled · Send exact total above</p>
-          </div>
+      {/* ── TRUST STRIP ──────────────────────────────────────────────────────── */}
+      <section className="bg-white border-b border-gray-100 px-6 py-5">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-5 md:gap-10 text-sm text-gray-500">
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            <span className="text-yellow-400">⭐⭐⭐⭐⭐</span>
+            <span>Saskatoon local</span>
+          </span>
+          <span className="whitespace-nowrap">📍 Pickup at 216 33rd St W</span>
+          <span className="whitespace-nowrap">✏️ In-house designer</span>
+          <span className="whitespace-nowrap">💰 Live prices — no back-and-forth</span>
+        </div>
+      </section>
+
+      {/* ── PRODUCT GRID ─────────────────────────────────────────────────────── */}
+      <section className="px-6 py-16 max-w-6xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">What we print</h2>
+        <p className="text-gray-500 mb-10 text-lg">
+          Exact prices — no &ldquo;call for a quote.&rdquo; Pick a product and see your number now.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {PRODUCTS.map((p) => (
+            <Link
+              key={p.name}
+              href={p.href}
+              className="group border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-all hover:border-[#16C2F3]/40"
+            >
+              <div className="relative h-48 bg-gray-50 overflow-hidden">
+                <Image
+                  src={p.img}
+                  alt={`${p.name} — True Color Display Printing Saskatoon`}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-baseline justify-between mb-2">
+                  <h3 className="font-bold text-[#1c1712] text-lg">{p.name}</h3>
+                  <span className="text-[#16C2F3] font-bold text-sm whitespace-nowrap ml-2">
+                    {p.from}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 leading-relaxed">{p.desc}</p>
+                <p className="text-[#16C2F3] text-sm font-semibold mt-4 group-hover:underline">
+                  See exact price →
+                </p>
+              </div>
+            </Link>
+          ))}
         </div>
 
-        <p className="text-xs text-gray-300 mt-6">Prices in CAD + GST · True Color Display Printing</p>
-      </div>
+        {/* Also offer retractable banner stand */}
+        <div className="mt-8 p-5 bg-[#f4efe9] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="font-bold text-[#1c1712]">Retractable Banner Stands</p>
+            <p className="text-sm text-gray-500">Economy stand from $219. Banner included.</p>
+          </div>
+          <Link
+            href="/staff"
+            className="text-[#16C2F3] text-sm font-bold whitespace-nowrap hover:underline"
+          >
+            See price →
+          </Link>
+        </div>
+      </section>
+
+      {/* ── INDUSTRIES ───────────────────────────────────────────────────────── */}
+      <section className="bg-[#f4efe9] px-6 py-16">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">We print for</h2>
+          <p className="text-gray-500 mb-10 text-lg">
+            Every industry has its own deadlines and print needs. We handle all of them.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {INDUSTRIES.map((ind) => (
+              <div
+                key={ind.name}
+                className="relative h-36 md:h-44 rounded-xl overflow-hidden bg-gray-300"
+              >
+                <Image
+                  src={ind.img}
+                  alt={`${ind.name} printing Saskatoon — True Color`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-4">
+                  <p className="text-white font-bold text-sm md:text-base">{ind.name}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PITCH BLOCK — Hormozi style ───────────────────────────────────────── */}
+      <section className="px-6 py-16 md:py-20">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-8 leading-tight">
+            Cheaper than Staples.<br />
+            Faster than waiting 7 days.<br />
+            Bring us anything.
+          </h2>
+
+          <div className="space-y-5 text-gray-600 text-lg mb-10">
+            <p>
+              Coroplast signs from{" "}
+              <strong className="text-[#1c1712]">$30</strong>. Vinyl banners from{" "}
+              <strong className="text-[#1c1712]">$45</strong>. 250 business cards for{" "}
+              <strong className="text-[#1c1712]">$40</strong>. Prices you can see right now,
+              without emailing anyone.
+            </p>
+            <p>
+              Got a rough sketch? A low-res logo? No file at all? Our in-house designer
+              handles artwork prep, upscaling, and layout — from your napkin sketch to
+              print-ready in the same visit.
+            </p>
+            <p>
+              One shop. One order. Local pickup at{" "}
+              <a
+                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0N6"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#16C2F3] hover:underline"
+              >
+                216 33rd St W, Saskatoon
+              </a>
+              . No shipping wait. No Toronto turnaround time.
+            </p>
+          </div>
+
+          {/* Pull quote */}
+          <blockquote className="border-l-4 border-[#16C2F3] pl-6 py-2 mb-10">
+            <p className="text-xl font-semibold text-[#1c1712]">
+              &ldquo;Send the file Friday. Pick it up Saturday. Done.&rdquo;
+            </p>
+          </blockquote>
+
+          <Link
+            href="/staff"
+            className="inline-block bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors"
+          >
+            Get My Exact Price →
+          </Link>
+        </div>
+      </section>
+
+      {/* ── FOAMBOARD + MORE PRODUCTS callout ────────────────────────────────── */}
+      <section className="bg-[#1c1712] px-6 py-14">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-8">
+          <div className="flex-1">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              Also: Foamboard, decals, photo prints & more.
+            </h2>
+            <p className="text-gray-400">
+              Foamboard counter displays from $45. Retractable banner stands from $219.
+              Stickers, photo posters, and more. All priced live on our estimator.
+            </p>
+          </div>
+          <Link
+            href="/staff"
+            className="shrink-0 bg-white text-[#1c1712] font-bold px-7 py-4 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap"
+          >
+            See All Products →
+          </Link>
+        </div>
+      </section>
+
+      <SiteFooter />
     </div>
   );
-}
-
-function buildJobDetails(
-  category: Category,
-  state: EstimatorState,
-  materialLabelMap: Partial<Record<string, string>>
-): QuoteEmailData["jobDetails"] {
-  const isSqft = SQFT_CATEGORIES.includes(category);
-  return {
-    category,
-    categoryLabel: categoryDisplayName(category),
-    widthIn: isSqft ? parseFloat(state.width_in) || undefined : undefined,
-    heightIn: isSqft ? parseFloat(state.height_in) || undefined : undefined,
-    qty: state.qty,
-    sides: state.sides,
-    materialName: materialLabelMap[state.material_code] ?? undefined,
-    isRush: state.is_rush,
-  };
-}
-
-function categoryDisplayName(cat: Category): string {
-  const map: Record<Category, string> = {
-    SIGN: "Coroplast Sign",
-    BANNER: "Vinyl Banner",
-    RIGID: "ACP Sign",
-    FOAMBOARD: "Foam Board",
-    DISPLAY: "Retractable Banner",
-    STICKER: "Sticker",
-    DECAL: "Decal",
-    VINYL_LETTERING: "Vinyl Lettering",
-    PHOTO_POSTER: "Photo Poster",
-    MAGNET: "Vehicle Magnet",
-    POSTCARD: "Postcard",
-    BUSINESS_CARD: "Business Cards",
-    FLYER: "Flyers",
-    BROCHURE: "Brochure",
-    DESIGN: "Design Service",
-    INSTALLATION: "Installation",
-    SERVICE: "Service",
-  };
-  return map[cat] ?? cat;
 }
