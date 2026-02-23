@@ -27,6 +27,7 @@ export interface CreateOrderRequest {
     email: string;
     company?: string;
     phone?: string;
+    address?: string;
   };
   is_rush: boolean;
   payment_method: "clover_card" | "etransfer";
@@ -69,6 +70,14 @@ export async function POST(req: NextRequest) {
     if (custErr || !customer) {
       console.error("[orders] customer upsert:", custErr);
       return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
+    }
+
+    // Update address if provided (non-fatal — column added via migration, may not exist yet)
+    if (contact.address?.trim()) {
+      void supabase
+        .from("customers")
+        .update({ address: contact.address.trim() } as Record<string, unknown>)
+        .eq("id", customer.id);
     }
 
     // 2. Calculate totals

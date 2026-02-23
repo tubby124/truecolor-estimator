@@ -6,6 +6,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { getCart, clearCart, type CartItem } from "@/lib/cart/cart";
 import type { CreateOrderRequest } from "@/app/api/orders/route";
+import { createClient } from "@/lib/supabase/client";
 
 const GST_RATE = 0.05;
 const RUSH_FEE = 40;
@@ -19,14 +20,21 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [phone, setPhone] = useState("");
-  const [isRush, setIsRush] = useState(false);
+  const [address, setAddress] = useState("");
+
+  // Account creation
+  const [createAccount, setCreateAccount] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Notes + artwork (multi-file)
   const [notes, setNotes] = useState("");
   const [artworkFiles, setArtworkFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState("");
 
-  // Payment state
+  // Rush + payment state
+  const [isRush, setIsRush] = useState(false);
   const [payMethod, setPayMethod] = useState<"clover_card" | "etransfer">("clover_card");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,6 +56,16 @@ export default function CheckoutPage() {
     if (!name.trim() || !email.trim()) {
       setError("Name and email are required.");
       return;
+    }
+    if (createAccount) {
+      if (!password || password.length < 8) {
+        setError("Password must be at least 8 characters.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("Passwords don't match.");
+        return;
+      }
     }
     setLoading(true);
     try {
@@ -77,7 +95,13 @@ export default function CheckoutPage() {
 
       const body: CreateOrderRequest = {
         items,
-        contact: { name, email, company: company || undefined, phone: phone || undefined },
+        contact: {
+          name,
+          email,
+          company: company || undefined,
+          phone: phone || undefined,
+          address: address || undefined,
+        },
         is_rush: isRush,
         payment_method: payMethod,
         notes: notes.trim() || undefined,
@@ -95,6 +119,30 @@ export default function CheckoutPage() {
         error?: string;
       };
       if (!res.ok) throw new Error(data.error ?? "Could not create order");
+
+      // Create Supabase account if requested (client-side, non-fatal)
+      if (createAccount) {
+        try {
+          const supabase = createClient();
+          const { error: signUpErr } = await supabase.auth.signUp({
+            email: email.trim().toLowerCase(),
+            password,
+            options: {
+              data: {
+                name: name.trim(),
+                company: company.trim() || undefined,
+              },
+            },
+          });
+          if (signUpErr) {
+            // "User already registered" is not a fatal error — order already placed
+            console.warn("[checkout] account signup (non-fatal):", signUpErr.message);
+          }
+        } catch (signUpEx) {
+          console.warn("[checkout] account signup exception (non-fatal):", signUpEx);
+        }
+      }
+
       clearCart();
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
@@ -199,7 +247,92 @@ export default function CheckoutPage() {
                     />
                   </div>
                 </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1" htmlFor="address">
+                    Address (optional — used for invoicing)
+                  </label>
+                  <input
+                    id="address"
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                    placeholder="123 Main St, Saskatoon, SK S7K 0A1"
+                  />
+                </div>
               </div>
+            </section>
+
+            {/* Create account option */}
+            <section className="border border-gray-200 rounded-xl p-4">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={createAccount}
+                  onChange={(e) => setCreateAccount(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-[#16C2F3] shrink-0"
+                />
+                <div>
+                  <p className="font-semibold text-sm text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
+                    Save my info &amp; create a free account
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Sign in anytime to track orders, reorder, and pay later.
+                  </p>
+                </div>
+              </label>
+
+              {createAccount && (
+                <div className="mt-4 space-y-3 border-t border-gray-100 pt-4">
+                  <div className="relative">
+                    <label className="block text-xs text-gray-500 mb-1" htmlFor="password">
+                      Password *
+                    </label>
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      minLength={8}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm pr-16 focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                      placeholder="Min. 8 characters"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-[26px] text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1" htmlFor="confirmPassword">
+                      Confirm password *
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${
+                        confirmPassword && password !== confirmPassword
+                          ? "border-red-300"
+                          : "border-gray-200"
+                      }`}
+                      placeholder="Repeat password"
+                    />
+                    {confirmPassword && password !== confirmPassword && (
+                      <p className="text-xs text-red-500 mt-1">Passwords don&apos;t match.</p>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Already have an account?{" "}
+                    <Link href="/account" className="text-[#16C2F3] hover:underline">
+                      Sign in at /account
+                    </Link>
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* Order notes */}
