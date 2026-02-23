@@ -69,6 +69,9 @@ export function AccountClientPage() {
   const [mlLoading, setMlLoading] = useState(false);
   const [mlError, setMlError] = useState("");
 
+  // Rate-limit banner
+  const [rateLimitHit, setRateLimitHit] = useState(false);
+
   // Tab + password state
   const [activeTab, setActiveTab] = useState<"magic" | "password">("magic");
   const [password, setPassword] = useState("");
@@ -135,7 +138,13 @@ export function AccountClientPage() {
       if (!res.ok) throw new Error(data.error ?? "Could not send link");
       setSent(true);
     } catch (err) {
-      setMlError(err instanceof Error ? err.message : "Something went wrong.");
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      if (msg.toLowerCase().includes("rate")) {
+        setRateLimitHit(true);
+        setActiveTab("password");
+      } else {
+        setMlError(msg);
+      }
     } finally {
       setMlLoading(false);
     }
@@ -292,6 +301,30 @@ export function AccountClientPage() {
           {/* Sign-in form */}
           <div className="bg-[#f4efe9] rounded-2xl p-8 max-w-md mb-12">
             <h2 className="font-bold text-[#1c1712] mb-4">Sign in to your account</h2>
+
+            {/* Rate-limit banner */}
+            {rateLimitHit && (
+              <div className="mb-4 flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 text-sm text-yellow-800">
+                <span className="shrink-0 mt-0.5">⚠️</span>
+                <span>
+                  Too many login emails sent — please wait 60 minutes, or{" "}
+                  <button
+                    onClick={() => setActiveTab("password")}
+                    className="font-semibold underline hover:no-underline"
+                  >
+                    sign in with your password
+                  </button>{" "}
+                  below.
+                </span>
+                <button
+                  onClick={() => setRateLimitHit(false)}
+                  className="ml-auto shrink-0 text-yellow-600 hover:text-yellow-900"
+                  aria-label="Dismiss"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             {/* Tab switcher */}
             <div className="flex rounded-lg overflow-hidden border border-gray-200 mb-5">

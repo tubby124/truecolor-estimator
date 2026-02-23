@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { CartIcon } from "@/components/site/CartIcon";
+import { AccountIcon } from "@/components/site/AccountIcon";
 
 const PRODUCT_LINKS = [
   { label: "Coroplast Signs", href: "/products/coroplast-signs" },
@@ -157,12 +158,9 @@ export function SiteNav() {
             >
               (306) 954-8688
             </a>
-            <Link
-              href="/account"
-              className="text-sm text-gray-300 hover:text-white transition-colors hidden sm:block"
-            >
-              My Orders
-            </Link>
+            <span className="hidden sm:block">
+              <AccountIcon />
+            </span>
             <CartIcon />
             <Link
               href="/quote"
@@ -266,6 +264,15 @@ export function SiteNav() {
             >
               (306) 954-8688
             </a>
+
+            {/* My Account */}
+            <Link
+              href="/account"
+              onClick={() => setDrawerOpen(false)}
+              className="block text-base text-gray-300 hover:text-white transition-colors"
+            >
+              My Account / Orders
+            </Link>
 
             {/* CTA */}
             <Link

@@ -43,6 +43,12 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error("[magic-link]", error.message);
+      if (error.message.toLowerCase().includes("rate")) {
+        return NextResponse.json(
+          { error: "Too many login emails. Please wait 60 minutes or use password login." },
+          { status: 429 }
+        );
+      }
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
