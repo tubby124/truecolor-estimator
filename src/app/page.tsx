@@ -163,6 +163,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
+      <ReviewsSection />
+
       {/* ── PRODUCT GRID ─────────────────────────────────────────────────────── */}
       <section className="px-6 py-16 max-w-6xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">What we print</h2>
@@ -259,9 +262,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
-      <ReviewsSection />
 
       {/* ── GALLERY STRIP ────────────────────────────────────────────────────── */}
       <GalleryStrip />
