@@ -31,6 +31,7 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
   const [product, setProduct] = useState(defaultProduct ?? PRODUCT_OPTIONS[0]);
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [fileTooBig, setFileTooBig] = useState(""); // filename that was rejected for size
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -60,19 +61,27 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
       setProduct(defaultProduct ?? PRODUCT_OPTIONS[0]);
       setDescription("");
       setFile(null);
+      setFileTooBig("");
       setLoading(false);
       setSent(false);
       setError("");
     }
   }, [open, defaultProduct]);
 
+  function handleFileChange(picked: File | null) {
+    if (picked && picked.size > 4 * 1024 * 1024) {
+      setFileTooBig(picked.name);
+      setFile(null);
+      if (fileRef.current) fileRef.current.value = "";
+    } else {
+      setFileTooBig("");
+      setFile(picked);
+    }
+  }
+
   async function handleSubmit() {
     if (!name.trim() || !email.trim() || !description.trim()) {
       setError("Name, email, and project details are required.");
-      return;
-    }
-    if (file && file.size > 4 * 1024 * 1024) {
-      setError("File too large — max 4 MB. Try a compressed JPG or PDF, or email it to info@true-color.ca.");
       return;
     }
     setError("");
@@ -146,9 +155,14 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-[#1c1712] mb-2">Quote request sent!</h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-gray-500 mb-4">
               We&apos;ll reply to <strong>{email}</strong> within 1 business day.
             </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800 mb-6 text-left">
+              <strong>Have a large artwork file?</strong> Just email it to{" "}
+              <a href="mailto:info@true-color.ca" className="underline font-medium">info@true-color.ca</a>{" "}
+              with your name and we&apos;ll match it to your quote.
+            </div>
             <button
               onClick={onClose}
               className="bg-[#16C2F3] text-white font-bold px-8 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors"
@@ -223,7 +237,10 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
 
             {/* File attachment */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Attach a file (optional)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-medium text-gray-500">Attach a file (optional)</label>
+                <span className="text-xs text-gray-400">Max 4 MB · PDF, AI, JPG, PNG</span>
+              </div>
               <div
                 className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-[#16C2F3] transition-colors cursor-pointer"
                 onClick={() => fileRef.current?.click()}
@@ -232,7 +249,7 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
                   ref={fileRef}
                   type="file"
                   accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
                   className="hidden"
                 />
                 {file ? (
@@ -244,10 +261,18 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
                 ) : (
                   <div className="flex items-center justify-center gap-2 text-gray-400">
                     <Paperclip className="w-4 h-4" />
-                    <span className="text-sm">Logo, sketch, or reference image — PDF, AI, JPG, PNG</span>
+                    <span className="text-sm">Logo, sketch, or reference image</span>
                   </div>
                 )}
               </div>
+              {fileTooBig && (
+                <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 text-xs text-amber-800">
+                  <strong>{fileTooBig}</strong> is too large to attach here.{" "}
+                  Submit your quote now — then email the file to{" "}
+                  <a href="mailto:info@true-color.ca" className="underline font-medium">info@true-color.ca</a>{" "}
+                  with your name and we&apos;ll match it up.
+                </div>
+              )}
             </div>
 
             {error && (
