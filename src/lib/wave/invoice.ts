@@ -26,6 +26,7 @@ export interface WaveInvoiceResult {
   invoiceId: string;
   invoiceNumber: string;
   pdfUrl: string | null;
+  viewUrl: string | null;
 }
 
 // --------------------------------------------------------------------------
@@ -133,14 +134,14 @@ export async function createWaveInvoice(
     invoiceCreate: {
       didSucceed: boolean;
       inputErrors: { message: string }[];
-      invoice: { id: string; invoiceNumber: string; pdfUrl: string | null } | null;
+      invoice: { id: string; invoiceNumber: string; pdfUrl: string | null; viewUrl: string | null } | null;
     };
   }>(
     `mutation($input: InvoiceCreateInput!) {
       invoiceCreate(input: $input) {
         didSucceed
         inputErrors { path message }
-        invoice { id invoiceNumber pdfUrl }
+        invoice { id invoiceNumber pdfUrl viewUrl }
       }
     }`,
     {
@@ -165,5 +166,52 @@ export async function createWaveInvoice(
     invoiceId: inv.id,
     invoiceNumber: inv.invoiceNumber,
     pdfUrl: inv.pdfUrl ?? null,
+    viewUrl: inv.viewUrl ?? null,
   };
+}
+
+// --------------------------------------------------------------------------
+// Approve a DRAFT invoice (required before sending)
+// --------------------------------------------------------------------------
+
+export async function approveWaveInvoice(invoiceId: string): Promise<void> {
+  const data = await waveQuery<{
+    invoiceApprove: { didSucceed: boolean; inputErrors: { message: string }[] };
+  }>(
+    `mutation($input: InvoiceApproveInput!) {
+      invoiceApprove(input: $input) {
+        didSucceed
+        inputErrors { path message }
+      }
+    }`,
+    { input: { invoiceId } }
+  );
+
+  if (!data.invoiceApprove.didSucceed) {
+    const errs = data.invoiceApprove.inputErrors?.map((e) => e.message).join(", ");
+    throw new Error(`Wave invoiceApprove failed: ${errs}`);
+  }
+}
+
+// --------------------------------------------------------------------------
+// Send an approved invoice to the customer via Wave email
+// --------------------------------------------------------------------------
+
+export async function sendWaveInvoice(invoiceId: string): Promise<void> {
+  const data = await waveQuery<{
+    invoiceSend: { didSucceed: boolean; inputErrors: { message: string }[] };
+  }>(
+    `mutation($input: InvoiceSendInput!) {
+      invoiceSend(input: $input) {
+        didSucceed
+        inputErrors { path message }
+      }
+    }`,
+    { input: { invoiceId } }
+  );
+
+  if (!data.invoiceSend.didSucceed) {
+    const errs = data.invoiceSend.inputErrors?.map((e) => e.message).join(", ");
+    throw new Error(`Wave invoiceSend failed: ${errs}`);
+  }
 }
