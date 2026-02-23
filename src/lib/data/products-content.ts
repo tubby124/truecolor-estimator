@@ -122,7 +122,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "3×6 ft", width_in: 36, height_in: 72 },
       { label: "4×8 ft", width_in: 48, height_in: 96 },
     ],
-    qtyPresets: [1, 2, 5],
+    qtyPresets: [1, 2, 5, 10],
     specs: [
       { label: "Material", value: "13oz scrim vinyl (woven polyester + PVC laminate)" },
       { label: "Print", value: "Full-colour digital, vibrant outdoor inks" },
@@ -332,7 +332,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "24×36\"", width_in: 24, height_in: 36 },
       { label: "4×8 ft", width_in: 48, height_in: 96 },
     ],
-    qtyPresets: [1, 2, 5],
+    qtyPresets: [1, 5, 10, 25],
     specs: [
       { label: "Material", value: "3mm aluminum composite panel (ACP) — 2 aluminum skins + PE core" },
       { label: "Print", value: "Full-colour UV-cured digital print" },
@@ -392,7 +392,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "18×24\"", width_in: 18, height_in: 24 },
       { label: "24×36\"", width_in: 24, height_in: 36 },
     ],
-    qtyPresets: [1, 2, 5],
+    qtyPresets: [1, 5, 10, 25],
     specs: [
       { label: "Material", value: "5mm PVC foamboard (Gilman InSite)" },
       { label: "Print", value: "Full-colour UV-resistant digital print" },

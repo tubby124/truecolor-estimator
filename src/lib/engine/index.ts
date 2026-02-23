@@ -1,7 +1,7 @@
 // True Color Pricing Engine — 11-step evaluation per RULE_ENGINE_SPEC.md
 // Pure function: same inputs → same output always (idempotent)
 
-import { getPricingRules, getProducts, getMaterials, getServices, getConfigNum } from "../data/loader";
+import { getPricingRules, getProducts, getMaterials, getServices, getConfigNum, getQtyDiscounts } from "../data/loader";
 import type { EstimateRequest, EstimateResponse, LineItem, CostBreakdown } from "./types";
 
 const PRICING_VERSION = "v1_2026-02-19";
@@ -149,6 +149,41 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     }
   }
 
+  // ── STEP 4.5: Qty bulk discount ──────────────────────────────────────────
+  // Applies a per-unit discount multiplier for sqft-priced products (SIGN,
+  // BANNER, RIGID, FOAMBOARD). Unit-priced products (BCs, flyers, stickers)
+  // already encode qty tiers via separate SKUs — those are excluded here
+  // because basePricePerSqft is null for unit-priced products.
+  // Discount is applied to per-unit basePrice before STEP 6 multiplies by qty.
+  let qtyDiscountPct = 0;
+  let qtyDiscountApplied = false;
+  let pricePerUnit: number | null = null;
+
+  if (basePricePerSqft !== null && !isFixedSize && basePrice !== null) {
+    const qtyRule = getQtyDiscounts().find(
+      (r) => r.category === category &&
+        qty >= r.qty_min &&
+        (r.qty_max === null || qty <= r.qty_max)
+    );
+    if (qtyRule && qtyRule.discount_pct > 0) {
+      qtyDiscountPct = qtyRule.discount_pct;
+      qtyDiscountApplied = true;
+      const discountMultiplier = 1 - qtyDiscountPct / 100;
+      const originalPerUnit = basePrice;
+      basePrice = ceilCent(originalPerUnit * discountMultiplier);
+      pricePerUnit = basePrice;
+      if (lineItems.length > 0) {
+        lineItems[0].unit_price = basePrice;
+        lineItems[0].line_total = basePrice;
+        lineItems[0].description += ` (${qtyDiscountPct}% bulk discount)`;
+      }
+    } else {
+      pricePerUnit = basePrice;
+    }
+  } else if (!isFixedSize && basePrice !== null) {
+    pricePerUnit = basePrice;
+  }
+
   if (basePrice === null) {
     return blocked("Cannot compute price — no dimensions or fixed-size match");
   }
@@ -293,6 +328,9 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     placeholder_materials: placeholderMaterials,
     margin_green_threshold: getConfigNum("margin_green_threshold"),
     margin_yellow_threshold: getConfigNum("margin_yellow_threshold"),
+    qty_discount_pct: qtyDiscountPct > 0 ? qtyDiscountPct : null,
+    qty_discount_applied: qtyDiscountApplied,
+    price_per_unit: pricePerUnit,
   };
 }
 
@@ -504,5 +542,8 @@ function blocked(reason: string): EstimateResponse {
     placeholder_materials: [],
     margin_green_threshold: greenThreshold,
     margin_yellow_threshold: yellowThreshold,
+    qty_discount_pct: null,
+    qty_discount_applied: false,
+    price_per_unit: null,
   };
 }

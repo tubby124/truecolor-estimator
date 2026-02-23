@@ -53,4 +53,8 @@ export interface EstimateResponse {
   // Margin thresholds from config.v1.csv — passed through so UI never hardcodes them
   margin_green_threshold: number;
   margin_yellow_threshold: number;
+  // Bulk quantity discount fields
+  qty_discount_pct: number | null;
+  qty_discount_applied: boolean;
+  price_per_unit: number | null;
 }

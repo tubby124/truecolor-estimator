@@ -31,6 +31,15 @@ const QTY_TIERS: Record<string, number[]> = {
   STICKER: [50, 100, 250, 500, 1000],
 };
 
+// Quick-pick bulk qty presets for sqft-based products
+const SQFT_QTY_PRESETS: Record<string, number[]> = {
+  SIGN:      [1, 5, 10, 25],
+  BANNER:    [1, 2, 5, 10],
+  RIGID:     [1, 5, 10, 25],
+  FOAMBOARD: [1, 5, 10, 25],
+  MAGNET:    [1, 2, 4],
+};
+
 export function OptionsPanel({ category, state, onChange, categoryLabel }: Props) {
   const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING", "PHOTO_POSTER", "DISPLAY"].includes(category);
   const showSides = ["SIGN", "FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD"].includes(category);
@@ -161,13 +170,41 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
         </FieldGroup>
       ) : isSqftBased ? (
         <FieldGroup label="Quantity">
-          <input
-            type="number"
-            min="1"
-            value={state.qty}
-            onChange={(e) => onChange({ qty: parseInt(e.target.value) || 1 })}
-            className="w-24 border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
-          />
+          {SQFT_QTY_PRESETS[category] ? (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {SQFT_QTY_PRESETS[category].map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => onChange({ qty: q })}
+                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                      state.qty === q
+                        ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                        : "border-[var(--border)] bg-white hover:border-gray-300"
+                    }`}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="number"
+                min="1"
+                placeholder="Custom qty"
+                value={state.qty}
+                onChange={(e) => onChange({ qty: parseInt(e.target.value) || 1 })}
+                className="w-28 border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
+              />
+            </div>
+          ) : (
+            <input
+              type="number"
+              min="1"
+              value={state.qty}
+              onChange={(e) => onChange({ qty: parseInt(e.target.value) || 1 })}
+              className="w-24 border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
+            />
+          )}
         </FieldGroup>
       ) : null}
 

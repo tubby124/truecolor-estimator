@@ -205,3 +205,32 @@ export function getServices(): Service[] {
     }));
   return _services;
 }
+
+// ─── Qty Discounts ────────────────────────────────────────────────────────────
+
+export interface QtyDiscount {
+  rule_id: string;
+  category: string;
+  qty_min: number;
+  qty_max: number | null;
+  discount_pct: number;
+  version: string;
+}
+
+let _qtyDiscounts: QtyDiscount[] | null = null;
+
+export function getQtyDiscounts(): QtyDiscount[] {
+  if (_qtyDiscounts) return _qtyDiscounts;
+  const [, ...rows] = readCsv("qty_discounts.v1.csv");
+  _qtyDiscounts = rows
+    .filter((r) => r[0])
+    .map((r) => ({
+      rule_id: r[0],
+      category: r[1],
+      qty_min: parseInt(r[2]) || 1,
+      qty_max: r[3] ? parseInt(r[3]) : null,
+      discount_pct: parseFloat(r[4]) || 0,
+      version: r[5] || "",
+    }));
+  return _qtyDiscounts;
+}

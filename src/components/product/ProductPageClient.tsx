@@ -26,6 +26,7 @@ interface Props {
 
 const EMPTY_PRICE: PriceData = {
   price: null, loading: false, addonTotal: 0, designFee: 0, gst: null, total: null,
+  pricePerUnit: null, qtyDiscountPct: null, qtyDiscountApplied: false,
 };
 
 const EMPTY_CONFIG: ConfigData = {
@@ -127,6 +128,9 @@ export function ProductPageClient({ product }: Props) {
             materialLabel={materialLabel}
             addonQtys={configData.addonQtys}
             category={product.category as Category}
+            pricePerUnit={priceData.pricePerUnit}
+            qtyDiscountPct={priceData.qtyDiscountPct}
+            qtyDiscountApplied={priceData.qtyDiscountApplied}
           />
         </div>
       </div>

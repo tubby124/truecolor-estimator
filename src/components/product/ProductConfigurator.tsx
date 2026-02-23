@@ -3,6 +3,20 @@
 import { useState, useEffect, useCallback } from "react";
 import type { ProductContent } from "@/lib/data/products-content";
 
+const BULK_HINTS: Record<string, Record<number, string>> = {
+  SIGN:      { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
+  BANNER:    { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
+  RIGID:     { 5: "save 3%", 10: "save 5%",  25: "save 8%"  },
+  FOAMBOARD: { 5: "save 8%", 10: "save 12%", 25: "save 15%" },
+};
+
+const MOST_POPULAR_QTY: Record<string, number> = {
+  SIGN: 10,
+  BANNER: 5,
+  RIGID: 10,
+  FOAMBOARD: 10,
+};
+
 const DESIGN_FEES: Record<string, number> = {
   PRINT_READY: 0,
   MINOR_EDIT: 35,
@@ -17,6 +31,9 @@ export interface PriceData {
   designFee: number;
   gst: number | null;
   total: number | null;
+  pricePerUnit: number | null;
+  qtyDiscountPct: number | null;
+  qtyDiscountApplied: boolean;
 }
 
 export interface ConfigData {
@@ -51,6 +68,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [designStatus, setDesignStatus] = useState<string>("PRINT_READY");
   const [addonQtys, setAddonQtys] = useState<Record<string, number>>({});
   const [selectedTier, setSelectedTier] = useState(0);
+  const [qtyDiscountPct, setQtyDiscountPct] = useState<number | null>(null);
+  const [qtyDiscountApplied, setQtyDiscountApplied] = useState(false);
+  const [pricePerUnit, setPricePerUnit] = useState<number | null>(null);
 
   const effectiveWidth = isCustom ? parseFloat(customW) || 0 : selectedSize.width_in;
   const effectiveHeight = isCustom ? parseFloat(customH) || 0 : selectedSize.height_in;
@@ -84,6 +104,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       const data = await res.json();
       if (data.sell_price != null) {
         setPrice(data.sell_price);
+        setQtyDiscountApplied(data.qty_discount_applied ?? false);
+        setQtyDiscountPct(data.qty_discount_pct ?? null);
+        setPricePerUnit(data.price_per_unit ?? null);
       }
     } catch {
       // silent
@@ -119,8 +142,11 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       designFee: DESIGN_FEES[designStatus] ?? 0,
       gst: gstCalc,
       total: totalCalc,
+      pricePerUnit,
+      qtyDiscountPct,
+      qtyDiscountApplied,
     });
-  }, [price, loading, addonTotal, designStatus, onPriceChange]);
+  }, [price, loading, addonTotal, designStatus, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied]);
 
   // Bubble config to parent (for proof + cart)
   useEffect(() => {
@@ -249,30 +275,51 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       {/* Quantity */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Quantity</p>
-        <div className="flex flex-wrap gap-2">
-          {product.qtyPresets.map((q) => (
+        <div className="flex flex-wrap gap-3 pt-4">
+          {product.qtyPresets.map((q) => {
+            const hint = BULK_HINTS[product.category]?.[q];
+            const isMostPopular = MOST_POPULAR_QTY[product.category] === q;
+            const isSelected = !isCustomQty && qty === q;
+            const hasDiscount = !!hint;
+            return (
+              <div key={q} className="relative flex flex-col items-center">
+                {isMostPopular && (
+                  <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-100 border border-amber-400 text-amber-900 text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap z-10">
+                    Popular
+                  </span>
+                )}
+                <button
+                  onClick={() => { setQty(q); setIsCustomQty(false); }}
+                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    isSelected && hasDiscount
+                      ? "border-2 border-green-500 bg-green-50 text-green-800"
+                      : isSelected
+                      ? "bg-[#1c1712] text-white border-[#1c1712]"
+                      : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+                  }`}
+                >
+                  {q}
+                </button>
+                {hint && (
+                  <span className="mt-1 text-[11px] text-green-600 font-medium leading-tight">
+                    {hint}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+          <div className="flex flex-col items-center">
             <button
-              key={q}
-              onClick={() => { setQty(q); setIsCustomQty(false); }}
+              onClick={() => setIsCustomQty(true)}
               className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                !isCustomQty && qty === q
+                isCustomQty
                   ? "bg-[#1c1712] text-white border-[#1c1712]"
                   : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
               }`}
             >
-              {q}
+              Custom
             </button>
-          ))}
-          <button
-            onClick={() => setIsCustomQty(true)}
-            className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-              isCustomQty
-                ? "bg-[#1c1712] text-white border-[#1c1712]"
-                : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
-            }`}
-          >
-            Custom
-          </button>
+          </div>
         </div>
         {isCustomQty && (
           <input
@@ -283,6 +330,14 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             min={1}
             className="mt-2 border border-gray-200 rounded-lg px-3 py-2 text-sm w-36 focus:outline-none focus:border-[#16C2F3]"
           />
+        )}
+        {qtyDiscountApplied && pricePerUnit != null && effectiveQty > 1 && (
+          <div className="mt-2 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 border border-green-300 text-xs font-semibold px-2 py-0.5 rounded-full">
+              {qtyDiscountPct}% bulk discount
+            </span>
+            <span className="text-xs text-green-700 font-medium">${pricePerUnit.toFixed(2)}/unit</span>
+          </div>
         )}
       </div>
 

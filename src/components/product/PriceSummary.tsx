@@ -11,6 +11,9 @@ interface PriceSummaryProps {
   designFee: number;
   gst: number | null;
   total: number | null;
+  pricePerUnit?: number | null;
+  qtyDiscountPct?: number | null;
+  qtyDiscountApplied?: boolean;
   // Cart
   addedToCart: boolean;
   onAddToCart: () => void;
@@ -36,6 +39,7 @@ export function PriceSummary({
   price, loading, addonTotal, designFee, gst, total,
   addedToCart, onAddToCart, productSlug,
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
+  pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
 }: PriceSummaryProps) {
   const hasPrice = price != null;
 
@@ -76,6 +80,15 @@ export function PriceSummary({
               <p className="text-4xl font-bold text-[#1c1712] tabular-nums leading-none">
                 ${price!.toFixed(2)}
               </p>
+              {/* Bulk discount badge */}
+              {qtyDiscountApplied && qtyDiscountPct && pricePerUnit != null && qty > 1 && (
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 border border-green-300 text-xs font-semibold px-2 py-0.5 rounded-full">
+                    {qtyDiscountPct}% bulk discount
+                  </span>
+                  <span className="text-xs text-green-700 font-medium">${pricePerUnit.toFixed(2)}/unit × {qty}</span>
+                </div>
+              )}
 
               {/* Design service note */}
               {designFee > 0 && (

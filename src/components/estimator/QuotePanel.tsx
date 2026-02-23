@@ -97,6 +97,12 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
       {!isBlocked && (
         <div className="bg-white border border-[var(--border)] rounded-2xl p-6 price-animate">
           <p className="text-xs text-[var(--muted)] mb-1">Subtotal</p>
+          {/* Strikethrough original price when bulk discount applied */}
+          {result.qty_discount_applied && result.qty_discount_pct && result.price_per_unit != null && (
+            <p className="text-sm text-gray-400 line-through leading-none mb-0.5">
+              ${(result.price_per_unit / (1 - result.qty_discount_pct / 100)).toFixed(2)} (standard rate)
+            </p>
+          )}
           <p className="text-4xl font-semibold tracking-tight price-animate" style={{ fontFamily: "var(--font-price)" }}>
             ${sellPrice.toFixed(2)}
           </p>
@@ -104,6 +110,15 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
             <p className="text-sm text-[var(--muted)] mt-1">
               {result.sqft_calculated.toFixed(2)} sq ft × ${result.price_per_sqft.toFixed(2)}/sqft
             </p>
+          )}
+          {/* Bulk discount badge */}
+          {result.qty_discount_applied && result.qty_discount_pct && result.price_per_unit != null && (
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 border border-green-300 text-xs font-semibold px-2.5 py-1 rounded-full">
+                {result.qty_discount_pct}% bulk discount
+              </span>
+              <span className="text-sm text-green-700 font-medium">${result.price_per_unit.toFixed(2)}/unit</span>
+            </div>
           )}
           {result.min_charge_applied && (
             <span className="inline-block mt-2 text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-medium">
@@ -158,6 +173,12 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
             <CostLine label="Ink" value={cost.ink_cost} />
             <CostLine label="Labor" value={cost.labor_cost} />
             <CostLine label="Overhead" value={cost.overhead_cost} />
+            {result.qty_discount_applied && result.qty_discount_pct && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-[var(--muted)]">Bulk discount</span>
+                <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">−{result.qty_discount_pct}%</span>
+              </div>
+            )}
             <div className="border-t border-[var(--border)] pt-2 mt-2">
               <CostLine label="Total cost" value={cost.total_cost} bold />
               {marginPct !== null ? (
