@@ -70,10 +70,25 @@ async function fetchOrders() {
       order_number,
       status,
       is_rush,
+      subtotal,
+      gst,
       total,
       payment_method,
       created_at,
-      customers ( name, email, company )
+      notes,
+      customers ( name, email, company ),
+      order_items (
+        id,
+        product_name,
+        qty,
+        width_in,
+        height_in,
+        sides,
+        design_status,
+        line_total,
+        category,
+        file_storage_path
+      )
     `
     )
     .order("created_at", { ascending: false })
