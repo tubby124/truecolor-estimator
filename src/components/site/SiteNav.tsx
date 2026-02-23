@@ -6,6 +6,7 @@ import Image from "next/image";
 import { CartIcon } from "@/components/site/CartIcon";
 import { AccountIcon } from "@/components/site/AccountIcon";
 import { StaffQuoteButton } from "@/components/site/StaffQuoteButton";
+import { QuoteModal } from "@/components/QuoteModal";
 
 const PRODUCT_LINKS = [
   { label: "Coroplast Signs", href: "/products/coroplast-signs" },
@@ -30,6 +31,7 @@ const INDUSTRY_LINKS = [
 export function SiteNav() {
   const [openMenu, setOpenMenu] = useState<"products" | "industries" | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click
@@ -65,7 +67,7 @@ export function SiteNav() {
           {/* Logo */}
           <Link href="/" className="flex items-center shrink-0">
             <Image
-              src="/truecolorlogo.webp"
+              src="/truecolorlogo.png"
               alt="True Color Display Printing"
               width={140}
               height={40}
@@ -159,7 +161,7 @@ export function SiteNav() {
             </Link>
           </nav>
 
-          {/* Right side: phone + My Orders + Cart + CTA + hamburger */}
+          {/* Right side: phone + icons + CTAs + hamburger */}
           <div className="flex items-center gap-3 sm:gap-4">
             <a
               href="tel:+13069548688"
@@ -174,6 +176,13 @@ export function SiteNav() {
             <span className="hidden sm:block">
               <StaffQuoteButton />
             </span>
+            {/* Request a Quote — all visitors, desktop */}
+            <button
+              onClick={() => setQuoteOpen(true)}
+              className="bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 py-2.5 rounded-md transition-colors whitespace-nowrap hidden sm:block"
+            >
+              Request a Quote →
+            </button>
             <Link
               href="/quote"
               className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden sm:block"
@@ -202,7 +211,7 @@ export function SiteNav() {
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <Link href="/" onClick={() => setDrawerOpen(false)}>
               <Image
-                src="/truecolorlogo.webp"
+                src="/truecolorlogo.png"
                 alt="True Color Display Printing"
                 width={120}
                 height={34}
@@ -298,6 +307,14 @@ export function SiteNav() {
               <StaffQuoteButton />
             </div>
 
+            {/* Request a Quote — all visitors, mobile */}
+            <button
+              onClick={() => { setDrawerOpen(false); setQuoteOpen(true); }}
+              className="block w-full text-center bg-amber-500 text-white text-base font-bold px-5 py-3.5 rounded-md hover:bg-amber-400 transition-colors"
+            >
+              Request a Quote →
+            </button>
+
             {/* Customer CTA */}
             <Link
               href="/quote"
@@ -309,6 +326,9 @@ export function SiteNav() {
           </div>
         </div>
       )}
+
+      {/* Quote Request Modal */}
+      <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} />
     </>
   );
 }

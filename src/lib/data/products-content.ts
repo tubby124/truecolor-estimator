@@ -45,7 +45,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     galleryImages: [
       "/images/products/product/coroplast-yard-sign-800x600.webp",
       "/images/products/product/coroplast-job-site-800x600.webp",
-      "/images/products/product/coroplast-fence-construction-800x600.webp",
+      "/images/gallery/gallery-coroplast-realtor-keyshape.jpg",
     ],
     defaultSides: 1,
     sideOptions: true,
@@ -112,7 +112,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     heroImage: "/images/products/product/banner-vinyl-colorful-800x600.webp",
     galleryImages: [
       "/images/products/product/banner-vinyl-colorful-800x600.webp",
-      "/images/products/product/banner-13oz-1200x400.webp",
+      "/images/gallery/gallery-outdoor-banner-best-donairs.webp",
+      "/images/gallery/gallery-vinyl-banner-windshield-masters.webp",
     ],
     defaultSides: 1,
     sideOptions: false,
@@ -174,7 +175,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     heroImage: "/images/products/product/vehicle-magnets-800x600.webp",
     galleryImages: [
       "/images/products/product/vehicle-magnets-800x600.webp",
-      "/images/products/product/magnet-truck-construction-800x600.webp",
+      "/images/gallery/gallery-vehicle-decal-windshield-masters.webp",
     ],
     defaultSides: 1,
     sideOptions: false,
@@ -322,7 +323,6 @@ export const PRODUCTS: Record<string, ProductContent> = {
     heroImage: "/images/products/product/acp-aluminum-sign-800x600.webp",
     galleryImages: [
       "/images/products/product/acp-aluminum-sign-800x600.webp",
-      "/images/products/product/acp-sign-brick-wall-800x600.webp",
     ],
     defaultSides: 1,
     sideOptions: true,
@@ -427,9 +427,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     fromPrice: "$45",
     category: "DECAL",
     material_code: "ARLPMF7008",
-    heroImage: "/images/products/product/window-decals-800x600.webp",
+    heroImage: "/images/gallery/gallery-window-decal-swiss-barber.webp",
     galleryImages: [
-      "/images/products/product/window-decals-800x600.webp",
+      "/images/gallery/gallery-window-decal-swiss-barber.webp",
     ],
     defaultSides: 1,
     sideOptions: false,
@@ -481,6 +481,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     heroImage: "/images/products/product/retractable-stand-600x900.webp",
     galleryImages: [
       "/images/products/product/retractable-stand-600x900.webp",
+      "/images/gallery/gallery-retractable-banner-financial-office.jpg",
+      "/images/gallery/gallery-retractable-banner-client-office.jpg",
     ],
     defaultSides: 1,
     sideOptions: false,

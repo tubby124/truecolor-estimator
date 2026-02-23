@@ -9,7 +9,7 @@ export function SiteFooter() {
           {/* Col 1: Brand */}
           <div>
             <Image
-              src="/truecolorlogo.webp"
+              src="/truecolorlogo.png"
               alt="True Color Display Printing"
               width={140}
               height={40}

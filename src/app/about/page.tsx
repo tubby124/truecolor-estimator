@@ -49,31 +49,47 @@ export default function AboutPage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      {/* ── HERO ── */}
-      <section className="relative min-h-[400px] md:min-h-[480px] flex items-center overflow-hidden">
-        <Image
-          src="/images/about/shop-exterior.webp"
-          alt="True Color Display Printing storefront at 216 33rd St W, Saskatoon"
-          fill
-          className="object-cover object-center"
-          priority
-        />
-        <div className="absolute inset-0 bg-[#1c1712]/65" />
-        <div className="relative z-10 max-w-4xl mx-auto px-6 py-16 text-white">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-5">
-            We Print It Here.<br />
-            <span className="text-[#16C2F3]">In Saskatoon.</span>
-          </h1>
-          <p className="text-lg text-gray-200 max-w-xl mb-8">
-            In-house production means faster turnaround, real accountability,
-            and results you can hold in your hands — no middlemen, no shipping delays.
-          </p>
-          <Link
-            href="/quote"
-            className="inline-block bg-[#16C2F3] text-white font-bold text-base px-7 py-3.5 rounded-md hover:bg-[#0fb0dd] transition-colors"
-          >
-            Get a Price →
-          </Link>
+      {/* ── HERO — two-column split ── */}
+      <section className="grid md:grid-cols-[55%_45%] min-h-[400px] md:min-h-[520px]">
+        {/* Left — shop photo */}
+        <div className="relative min-h-[280px] md:min-h-0 overflow-hidden">
+          <Image
+            src="/images/about/shop-exterior.webp"
+            alt="True Color Display Printing storefront at 216 33rd St W, Saskatoon"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+          {/* Subtle shadow on right edge only on desktop */}
+          <div className="absolute inset-0 bg-[#1c1712]/20 md:bg-transparent" />
+        </div>
+
+        {/* Right — headline + CTAs */}
+        <div className="bg-[#1c1712] flex items-center px-8 md:px-12 py-12 md:py-16">
+          <div className="text-white max-w-sm">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-5">
+              We Print It Here.<br />
+              <span className="text-[#16C2F3]">In Saskatoon.</span>
+            </h1>
+            <p className="text-gray-300 text-lg leading-relaxed mb-8">
+              In-house production means faster turnaround, real accountability,
+              and results you can hold in your hands — no middlemen, no shipping delays.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/quote"
+                className="bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-md hover:bg-[#0fb0dd] transition-colors"
+              >
+                Get a Price →
+              </Link>
+              <a
+                href="tel:+13069548688"
+                className="border border-white/40 text-gray-300 font-semibold px-6 py-3 rounded-md hover:border-white hover:text-white transition-colors"
+              >
+                (306) 954-8688
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -5,6 +5,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ReviewsSection } from "@/components/home/ReviewsSection";
 import { GalleryStrip } from "@/components/home/GalleryStrip";
+import { HeroSlider } from "@/components/home/HeroSlider";
 
 export const metadata: Metadata = {
   title: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
@@ -102,58 +103,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[560px] md:min-h-[660px] flex items-center overflow-hidden">
-        {/* Mobile hero image */}
-        <Image
-          src="/images/products/heroes/realestate-hero-1200x500.webp"
-          alt=""
-          fill
-          className="object-cover object-top md:hidden"
-          priority
-        />
-        {/* Desktop hero image */}
-        <Image
-          src="/images/products/heroes/construction-hero-1200x500.webp"
-          alt=""
-          fill
-          className="object-cover object-center hidden md:block"
-          priority
-        />
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-[#1c1712]/70" />
-
-        {/* Hero content */}
-        <div className="relative z-10 text-white px-6 py-20 md:py-28 w-full">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
-              See your exact price<br />
-              <span className="text-[#16C2F3]">in 30 seconds.</span>
-            </h1>
-            <p className="text-xl text-gray-300 mb-3 max-w-2xl">
-              No quote forms. No callbacks. No waiting 7 days for Toronto to ship it.
-            </p>
-            <p className="text-base text-gray-400 mb-10 max-w-xl">
-              Signs, banners, business cards, magnets, flyers — all in one shop.
-              In-house designer. Local Saskatoon pickup at 216 33rd St W.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/quote"
-                className="bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors"
-              >
-                See Exact Prices →
-              </Link>
-              <a
-                href="tel:+13069548688"
-                className="border border-gray-600 text-gray-300 font-semibold text-base px-6 py-4 rounded-md hover:border-gray-400 hover:text-white transition-colors"
-              >
-                Call (306) 954-8688
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── HERO SLIDER ──────────────────────────────────────────────────────── */}
+      <HeroSlider />
 
       {/* ── TURNAROUND BAR ───────────────────────────────────────────────────── */}
       <section className="bg-[#16C2F3] py-4">
