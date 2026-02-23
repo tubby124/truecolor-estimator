@@ -17,6 +17,7 @@ import { createOrFindWaveCustomer, createWaveInvoice } from "@/lib/wave/invoice"
 import { createCloverCheckout } from "@/lib/payment/clover";
 import type { CartItem } from "@/lib/cart/cart";
 import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
+import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -29,7 +30,7 @@ export interface CreateOrderRequest {
   is_rush: boolean;
   payment_method: "clover_card" | "etransfer";
   notes?: string;
-  file_storage_path?: string;
+  file_storage_paths?: string[];
 }
 
 const GST_RATE = 0.05;
@@ -38,7 +39,7 @@ const RUSH_FEE = 40;
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items, contact, is_rush, payment_method, notes, file_storage_path } = body;
+    const { items, contact, is_rush, payment_method, notes, file_storage_paths } = body;
 
     if (!items?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -76,9 +77,16 @@ export async function POST(req: NextRequest) {
     const total = subtotal + rush + gst;
 
     // 3. Create order row
+    // Generate order_number server-side — bypasses DB trigger (which may not be deployed)
+    // Format: TC-2026-X4F2A — year + 5-char base-36 timestamp suffix (collision prob ~0.01%)
+    const orderYear = new Date().getFullYear();
+    const orderSuffix = Date.now().toString(36).slice(-5).toUpperCase();
+    const generatedOrderNumber = `TC-${orderYear}-${orderSuffix}`;
+
     const { data: order, error: orderErr } = await supabase
       .from("orders")
       .insert({
+        order_number: generatedOrderNumber,
         customer_id: customer.id,
         status: "pending_payment",
         is_rush,
@@ -92,7 +100,12 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (orderErr || !order) {
-      console.error("[orders] order insert:", orderErr);
+      console.error("[orders] INSERT failed:", {
+        code: orderErr?.code,
+        message: orderErr?.message,
+        details: orderErr?.details,
+        hint: orderErr?.hint,
+      });
       return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
     }
 
@@ -113,8 +126,9 @@ export async function POST(req: NextRequest) {
       line_total: item.sell_price,
     }));
 
-    if (file_storage_path && orderItems.length > 0) {
-      (orderItems[0] as Record<string, unknown>).file_storage_path = file_storage_path;
+    // Attach first file path to first order item (DB column only stores one path per item)
+    if (file_storage_paths?.length && orderItems.length > 0) {
+      (orderItems[0] as Record<string, unknown>).file_storage_path = file_storage_paths[0];
     }
 
     const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
@@ -166,7 +180,7 @@ export async function POST(req: NextRequest) {
 
       const siteUrl =
         process.env.NEXT_PUBLIC_SITE_URL ??
-        "https://truecolor-estimator-o2q38cgso-tubby124s-projects.vercel.app";
+        "https://truecolor-estimator-3rlzylwqm-tubby124s-projects.vercel.app";
       const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
 
       const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl);
@@ -180,7 +194,7 @@ export async function POST(req: NextRequest) {
     }
 
 
-    // 7. Send order confirmation email (non-fatal)
+    // 7. Send order confirmation email to customer (non-fatal)
     try {
       await sendOrderConfirmationEmail({
         orderNumber: order.order_number,
@@ -202,6 +216,36 @@ export async function POST(req: NextRequest) {
       });
     } catch (emailErr) {
       console.error("[orders] confirmation email failed (non-fatal):", emailErr);
+    }
+
+    // 8. Send staff notification email (non-fatal)
+    try {
+      const siteUrlForEmail =
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        "https://truecolor-estimator-3rlzylwqm-tubby124s-projects.vercel.app";
+      await sendStaffOrderNotification({
+        orderNumber: order.order_number,
+        contact,
+        items: orderItems.map(item => ({
+          product_name: item.product_name,
+          qty: item.qty,
+          width_in: item.width_in,
+          height_in: item.height_in,
+          sides: item.sides,
+          design_status: item.design_status,
+          line_total: item.line_total,
+        })),
+        subtotal,
+        gst,
+        total,
+        is_rush,
+        payment_method,
+        notes: notes ?? null,
+        filePaths: file_storage_paths ?? [],
+        siteUrl: siteUrlForEmail,
+      });
+    } catch (staffEmailErr) {
+      console.error("[orders] staff notification failed (non-fatal):", staffEmailErr);
     }
 
     return NextResponse.json({

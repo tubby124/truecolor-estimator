@@ -13,22 +13,44 @@ interface Props {
   searchParams: Promise<{ oid?: string }>;
 }
 
+interface OrderSummary {
+  order_number: string;
+  total: number;
+  payment_method: string;
+}
+
 export default async function OrderConfirmedPage({ searchParams }: Props) {
   const { oid } = await searchParams;
 
-  // Auto-confirm payment when Clover redirects back with orderId
+  let orderSummary: OrderSummary | null = null;
+
   if (oid) {
     try {
       const supabase = createServiceClient();
+
+      // Auto-confirm payment when Clover redirects back with orderId
       await supabase
         .from("orders")
         .update({ status: "payment_received", paid_at: new Date().toISOString() })
         .eq("id", oid)
         .eq("status", "pending_payment"); // idempotent — only updates if still pending
+
+      // Fetch order details to show on confirmation page
+      const { data } = await supabase
+        .from("orders")
+        .select("order_number, total, payment_method")
+        .eq("id", oid)
+        .single();
+
+      if (data) {
+        orderSummary = data as OrderSummary;
+      }
     } catch {
-      // Non-fatal — order stays pending, staff can confirm manually
+      // Non-fatal — show generic confirmation
     }
   }
+
+  const isEtransfer = orderSummary?.payment_method === "etransfer";
 
   return (
     <div className="min-h-screen bg-white">
@@ -52,10 +74,36 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         </div>
 
         <h1 className="text-3xl font-bold text-[#1c1712] mb-3">Order received!</h1>
+
+        {/* Order number badge */}
+        {orderSummary?.order_number && (
+          <div className="inline-flex items-center gap-2 bg-[#f4efe9] border border-[#ddd5c8] rounded-lg px-5 py-2.5 mb-5">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Order</span>
+            <span className="text-lg font-bold text-[#1c1712] tracking-wide">{orderSummary.order_number}</span>
+          </div>
+        )}
+
         <p className="text-gray-500 text-lg mb-10 leading-relaxed">
           We&apos;ve got your order and will have it ready for pickup at{" "}
           <span className="font-semibold text-[#1c1712]">216 33rd St W, Saskatoon</span>.
         </p>
+
+        {/* eTransfer payment reminder — shown only for e-Transfer orders */}
+        {isEtransfer && orderSummary && (
+          <div className="bg-[#fdf8ee] border border-[#f0d890] rounded-2xl p-6 text-left mb-8">
+            <p className="font-bold text-[#7a5a00] mb-2">Complete your payment</p>
+            <p className="text-sm text-[#7a5a00] mb-3 leading-relaxed">
+              Send{" "}
+              <span className="font-bold">${orderSummary.total.toFixed(2)} CAD</span>
+              {" "}by Interac e-Transfer to:
+            </p>
+            <p className="font-mono text-base font-bold text-[#1c1712] mb-3">info@true-color.ca</p>
+            <p className="text-xs text-gray-500">
+              Auto-deposit enabled — no security question needed. Include your name in the memo.
+              We&apos;ll confirm and start production within 1 business day.
+            </p>
+          </div>
+        )}
 
         {/* What happens next */}
         <div className="bg-[#f4efe9] rounded-2xl p-8 text-left mb-10">
@@ -101,7 +149,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         <div className="border border-[#16C2F3]/30 rounded-2xl p-6 mb-8 bg-[#f0fbff]">
           <h2 className="font-bold text-[#1c1712] text-base mb-1">Track this order anytime</h2>
           <p className="text-sm text-gray-600 mb-4">
-            See your order status and reorder in one click &mdash; we&apos;ll email you a login link, no password needed.
+            Create an account to see your order status and reorder in one click.
           </p>
           <Link
             href="/account"
@@ -109,16 +157,6 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
           >
             View my orders &rarr;
           </Link>
-        </div>
-
-        {/* eTransfer note for those paying by eTransfer */}
-        <div className="border border-gray-100 rounded-xl p-5 text-left mb-10">
-          <p className="text-sm font-semibold text-[#1c1712] mb-1">Paying by e-Transfer?</p>
-          <p className="text-sm text-gray-500">
-            Send to{" "}
-            <span className="font-mono font-semibold">info@true-color.ca</span> — auto-deposit
-            enabled, no security question. Include your name in the memo.
-          </p>
         </div>
 
         {/* CTAs */}

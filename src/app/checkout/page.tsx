@@ -6,7 +6,6 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { getCart, clearCart, type CartItem } from "@/lib/cart/cart";
 import type { CreateOrderRequest } from "@/app/api/orders/route";
-import { uploadArtworkFile } from "@/lib/supabase/storage";
 
 const GST_RATE = 0.05;
 const RUSH_FEE = 40;
@@ -22,9 +21,10 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [isRush, setIsRush] = useState(false);
 
-  // Notes + artwork
+  // Notes + artwork (multi-file)
   const [notes, setNotes] = useState("");
-  const [artworkFile, setArtworkFile] = useState<File | null>(null);
+  const [artworkFiles, setArtworkFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState("");
 
   // Payment state
   const [payMethod, setPayMethod] = useState<"clover_card" | "etransfer">("clover_card");
@@ -51,15 +51,28 @@ export default function CheckoutPage() {
     }
     setLoading(true);
     try {
-      // Upload artwork file first if provided
-      let filePath: string | undefined;
-      if (artworkFile) {
-        try {
-          filePath = await uploadArtworkFile(artworkFile);
-        } catch (uploadErr) {
-          console.warn("[checkout] file upload failed (non-fatal):", uploadErr);
-          // Non-fatal — continue without file
+      // Upload artwork files one-by-one via server-side API (bypasses storage RLS)
+      const filePaths: string[] = [];
+      if (artworkFiles.length > 0) {
+        for (let i = 0; i < artworkFiles.length; i++) {
+          setUploadProgress(`Uploading file ${i + 1} of ${artworkFiles.length}…`);
+          try {
+            const form = new FormData();
+            form.append("file", artworkFiles[i]);
+            const uploadRes = await fetch("/api/upload", { method: "POST", body: form });
+            if (uploadRes.ok) {
+              const { path } = (await uploadRes.json()) as { path: string };
+              filePaths.push(path);
+            } else {
+              const { error: uploadErr } = (await uploadRes.json()) as { error?: string };
+              console.warn("[checkout] upload failed:", uploadErr);
+              // Non-fatal — continue without this file
+            }
+          } catch (uploadErr) {
+            console.warn("[checkout] file upload exception:", uploadErr);
+          }
         }
+        setUploadProgress("");
       }
 
       const body: CreateOrderRequest = {
@@ -68,7 +81,7 @@ export default function CheckoutPage() {
         is_rush: isRush,
         payment_method: payMethod,
         notes: notes.trim() || undefined,
-        file_storage_path: filePath,
+        file_storage_paths: filePaths.length > 0 ? filePaths : undefined,
       };
       const res = await fetch("/api/orders", {
         method: "POST",
@@ -89,6 +102,7 @@ export default function CheckoutPage() {
         window.location.href = "/order-confirmed";
       }
     } catch (err) {
+      setUploadProgress("");
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
@@ -200,27 +214,32 @@ export default function CheckoutPage() {
               />
             </section>
 
-            {/* Artwork file */}
+            {/* Artwork files — multi-file */}
             <section>
               <h2 className="text-lg font-bold text-[#1c1712] mb-3">Attach your artwork</h2>
               <label className="block">
                 <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#16C2F3] transition-colors cursor-pointer">
                   <input
                     type="file"
+                    multiple
                     accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
-                    onChange={(e) => setArtworkFile(e.target.files?.[0] ?? null)}
+                    onChange={(e) => setArtworkFiles(Array.from(e.target.files ?? []))}
                     className="hidden"
                   />
-                  {artworkFile ? (
-                    <div>
-                      <p className="font-semibold text-[#1c1712] text-sm">📎 {artworkFile.name}</p>
-                      <p className="text-xs text-gray-400 mt-1">{(artworkFile.size / 1024 / 1024).toFixed(1)} MB</p>
-                      <p className="text-xs text-[#16C2F3] mt-2">Click to change file</p>
+                  {artworkFiles.length > 0 ? (
+                    <div className="space-y-1.5">
+                      {artworkFiles.map((f, i) => (
+                        <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-1.5">
+                          <p className="font-medium text-[#1c1712] text-sm truncate max-w-[220px]">📎 {f.name}</p>
+                          <p className="text-xs text-gray-400 shrink-0 ml-2">{(f.size / 1024 / 1024).toFixed(1)} MB</p>
+                        </div>
+                      ))}
+                      <p className="text-xs text-[#16C2F3] mt-2">Click to change files</p>
                     </div>
                   ) : (
                     <div>
-                      <p className="text-sm text-gray-500">Drop your file here or click to browse</p>
-                      <p className="text-xs text-gray-400 mt-1">PDF, AI, EPS, JPG, PNG — up to 50MB</p>
+                      <p className="text-sm text-gray-500">Drop your files here or click to browse</p>
+                      <p className="text-xs text-gray-400 mt-1">PDF, AI, EPS, JPG, PNG — up to 50 MB each · Select multiple files at once</p>
                     </div>
                   )}
                 </div>
@@ -305,11 +324,23 @@ export default function CheckoutPage() {
               )}
             </section>
 
+            {/* Upload progress */}
+            {uploadProgress && (
+              <p className="text-sm text-[#16C2F3] font-medium animate-pulse">{uploadProgress}</p>
+            )}
+
             {/* Error */}
             {error && (
-              <p className="text-red-500 text-sm bg-red-50 border border-red-100 rounded-lg px-4 py-3">
-                {error}
-              </p>
+              <div className="bg-red-50 border border-red-100 rounded-lg px-4 py-3">
+                <p className="text-red-600 font-semibold text-sm mb-0.5">Something went wrong</p>
+                <p className="text-red-500 text-sm">{error}</p>
+                <p className="text-red-400 text-xs mt-2">
+                  Need help? Call{" "}
+                  <a href="tel:+13069548688" className="underline font-medium">(306) 954-8688</a>
+                  {" "}or email{" "}
+                  <a href="mailto:info@true-color.ca" className="underline font-medium">info@true-color.ca</a>
+                </p>
+              </div>
             )}
 
             {/* Submit */}
@@ -319,7 +350,9 @@ export default function CheckoutPage() {
                 disabled={loading}
                 className="w-full bg-[#16C2F3] hover:bg-[#0fb0dd] disabled:opacity-60 text-white font-bold text-lg py-4 rounded-xl transition-colors"
               >
-                {loading ? "Creating order…" : `Pay $${total.toFixed(2)} →`}
+                {loading
+                  ? uploadProgress || "Creating order…"
+                  : `Pay $${total.toFixed(2)} →`}
               </button>
             ) : (
               <button
@@ -327,7 +360,9 @@ export default function CheckoutPage() {
                 disabled={loading}
                 className="w-full bg-[#1c1712] hover:bg-black disabled:opacity-60 text-white font-bold text-lg py-4 rounded-xl transition-colors"
               >
-                {loading ? "Submitting order…" : `Submit order — pay $${total.toFixed(2)} by e-Transfer`}
+                {loading
+                  ? uploadProgress || "Submitting order…"
+                  : `Submit order — pay $${total.toFixed(2)} by e-Transfer`}
               </button>
             )}
             {payMethod === "etransfer" && !loading && (
