@@ -12,20 +12,15 @@ export function StaffQuoteButton() {
   useEffect(() => {
     const supabase = createClient();
 
-    // getUser() makes a verified API call — more reliable than getSession()
-    // which only reads from storage and may return a stale/incomplete user object
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsStaff(user?.email?.toLowerCase() === STAFF_EMAIL);
+    // getSession() reads directly from the cookie — no network call, no timeout risk.
+    // The email is in the JWT payload so session.user.email is always populated.
+    // (getUser() makes a live API call that can return null on token refresh/expiry.)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsStaff(session?.user?.email?.toLowerCase() === STAFF_EMAIL);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-          setIsStaff(user?.email?.toLowerCase() === STAFF_EMAIL);
-        });
-      } else {
-        setIsStaff(false);
-      }
+      setIsStaff(session?.user?.email?.toLowerCase() === STAFF_EMAIL);
     });
 
     return () => listener.subscription.unsubscribe();

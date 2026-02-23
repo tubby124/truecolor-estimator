@@ -92,15 +92,13 @@ export function AccountClientPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email?.toLowerCase() === STAFF_EMAIL) {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.email?.toLowerCase() === STAFF_EMAIL) {
         router.replace("/staff/orders");
         return;
       }
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session) setSession(data.session as SessionData);
-        setLoading(false);
-      });
+      if (session) setSession(session as SessionData);
+      setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
