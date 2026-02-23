@@ -3,19 +3,23 @@
 /**
  * /account/callback
  *
- * Supabase magic-link uses the IMPLICIT flow — the token arrives in the URL
- * hash fragment (#access_token=...) which is browser-only and never reaches
- * the server.
+ * Handles TWO flows:
  *
- * The Supabase JS client has detectSessionInUrl:true by default, so it
- * automatically processes the hash fragment and fires SIGNED_IN via
- * onAuthStateChange.  We just listen for that event and redirect.
+ * 1. PKCE flow (preferred, set via Supabase Dashboard → Auth → Flow type = PKCE):
+ *    URL arrives as: /account/callback?token_hash=xxx&type=email
+ *    → call verifyOtp({ token_hash, type }) → session stored in localStorage → redirect
  *
- * We do NOT call setSession manually — let the client handle it.
+ * 2. Implicit flow (legacy hash fragment, only if PKCE not yet enabled):
+ *    URL arrives as: /account/callback#access_token=xxx
+ *    → onAuthStateChange SIGNED_IN event → redirect
+ *
+ * To permanently fix login, go to:
+ *   Supabase Dashboard → Authentication → Sign in / Sign up → Auth flow → set to PKCE
  */
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import type { EmailOtpType } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
 
@@ -23,42 +27,57 @@ export default function CallbackPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const hash = window.location.hash;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+    const supabase = createClient(SUPABASE_URL, anonKey);
 
-    // If no access_token in hash, just send to account page
+    // ── PKCE flow: token arrives as a query param ───────────────────────────
+    const searchParams = new URLSearchParams(window.location.search);
+    const tokenHash = searchParams.get("token_hash");
+    const type = (searchParams.get("type") ?? "email") as EmailOtpType;
+
+    if (tokenHash) {
+      supabase.auth
+        .verifyOtp({ token_hash: tokenHash, type })
+        .then(({ error: err }) => {
+          if (err) {
+            setError(
+              `Sign-in failed: ${err.message}. The link may have expired — please request a new one.`
+            );
+          } else {
+            window.location.replace(
+              type === "recovery" ? "/account?reset=1" : "/account"
+            );
+          }
+        });
+      return; // done — no hash handling needed
+    }
+
+    // ── Implicit flow fallback: token arrives in the URL hash ──────────────
+    const hash = window.location.hash;
     if (!hash.includes("access_token=")) {
+      // No token at all → send to account page
       window.location.replace("/account");
       return;
     }
 
-    const type = new URLSearchParams(hash.slice(1)).get("type");
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+    const hashParams = new URLSearchParams(hash.slice(1));
+    const hashType = hashParams.get("type");
+    const accessToken = hashParams.get("access_token") ?? "";
+    const refreshToken = hashParams.get("refresh_token") ?? "";
 
-    // createClient with detectSessionInUrl:true (the default) automatically
-    // reads #access_token=... from the URL and fires SIGNED_IN
-    const supabase = createClient(SUPABASE_URL, anonKey);
-
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        if (type === "recovery") {
-          window.location.replace("/account?reset=1");
-        } else {
-          window.location.replace("/account");
+    // Manually call setSession and also listen for SIGNED_IN
+    supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      .then(({ error: err }) => {
+        if (err) {
+          setError(
+            `Sign-in failed: ${err.message}. Please request a new login link.`
+          );
+          return;
         }
-      }
-    });
-
-    // Safety timeout — if no SIGNED_IN within 8 s, show a useful error
-    const timeout = setTimeout(() => {
-      setError(
-        "The sign-in link has expired or was already used. Please request a new one."
-      );
-    }, 8000);
-
-    return () => {
-      data.subscription.unsubscribe();
-      clearTimeout(timeout);
-    };
+        window.location.replace(
+          hashType === "recovery" ? "/account?reset=1" : "/account"
+        );
+      });
   }, []);
 
   if (error) {
@@ -68,7 +87,7 @@ export default function CallbackPage() {
           <p className="text-red-600 font-semibold">{error}</p>
           <a
             href="/account"
-            className="inline-block text-[#16C2F3] text-sm font-semibold hover:underline"
+            className="inline-block bg-[#16C2F3] text-white text-sm font-bold px-6 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors"
           >
             Back to sign in &rarr;
           </a>
