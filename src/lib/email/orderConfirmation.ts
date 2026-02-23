@@ -28,6 +28,7 @@ export interface OrderConfirmationParams {
   total: number;
   is_rush: boolean;
   payment_method: "clover_card" | "etransfer";
+  checkout_url?: string; // Clover hosted checkout URL (card orders only)
 }
 
 // ─── Transporter (same pattern as /api/email/send/route.ts) ───────────────────
@@ -72,7 +73,10 @@ export async function sendOrderConfirmationEmail(
   const from =
     process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
   const bcc = process.env.SMTP_BCC ?? undefined;
-  const subject = `Order ${orderNumber} confirmed — True Color Display Printing`;
+  const subject =
+    payment_method === "clover_card"
+      ? `Complete your payment — Order ${orderNumber} · True Color Display Printing`
+      : `Order ${orderNumber} received — True Color Display Printing`;
 
   const html = buildOrderConfirmationHtml(params);
   const text = buildOrderConfirmationText(params);
@@ -102,7 +106,7 @@ export async function sendOrderConfirmationEmail(
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
-  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method } = p;
+  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, checkout_url } = p;
   const RUSH_FEE = 40;
 
   // ── Line items rows ──
@@ -156,13 +160,21 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
   // ── Payment note block ──
   const paymentBlock =
     payment_method === "clover_card"
-      ? `<div style="background: #f0fbf4; border: 1px solid #a3d9b0; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
-          <p style="margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #1a6b37; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            Payment received — card charged
+      ? `<div style="background: #fff7ed; border: 1px solid #fb923c; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+          <p style="margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            Complete your payment
           </p>
-          <p style="margin: 0; font-size: 13px; color: #1a5a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
-            Your credit/debit card has been charged $${total.toFixed(2)} CAD.
-            A receipt will appear on your statement as <strong>True Color Display Printing</strong>.
+          <p style="margin: 0 0 14px; font-size: 13px; color: #7c2d12; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
+            Your order is confirmed — click below to pay <strong>$${total.toFixed(2)} CAD</strong> securely via Clover.
+          </p>
+          ${checkout_url
+            ? `<a href="${escHtml(checkout_url)}"
+                style="display: inline-block; background: #ea580c; color: #ffffff; font-size: 14px; font-weight: 700; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin-bottom: 12px;">
+                Pay now →
+              </a>`
+            : ""}
+          <p style="margin: 0; font-size: 11px; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            Link valid for 24 hours · Questions? Email <a href="mailto:info@true-color.ca" style="color: #9a3412;">info@true-color.ca</a>
           </p>
         </div>`
       : `<div style="background: #fdf8ee; border: 1px solid #f0d890; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
@@ -231,7 +243,9 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                 Order confirmed!
               </h1>
               <p style="margin: 0 0 18px; font-size: 14px; color: #6b7280; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                Hi ${escHtml(contact.name)}, thanks for your order. We have received it and will get started shortly.
+                ${payment_method === "clover_card"
+                  ? `Hi ${escHtml(contact.name)}, your order is saved and held for you. Complete payment below to start production.`
+                  : `Hi ${escHtml(contact.name)}, thanks for your order. We have received it and will get started once payment clears.`}
               </p>
 
               <!-- Order number badge -->
