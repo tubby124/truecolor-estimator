@@ -8,6 +8,7 @@ const BULK_HINTS: Record<string, Record<number, string>> = {
   BANNER:    { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
   RIGID:     { 5: "save 3%", 10: "save 5%",  25: "save 8%"  },
   FOAMBOARD: { 5: "save 8%", 10: "save 12%", 25: "save 15%" },
+  MAGNET:    { 5: "save 5%", 10: "save 10%" },
 };
 
 const MOST_POPULAR_QTY: Record<string, number> = {
@@ -15,6 +16,7 @@ const MOST_POPULAR_QTY: Record<string, number> = {
   BANNER: 5,
   RIGID: 10,
   FOAMBOARD: 10,
+  MAGNET: 4,
 };
 
 const DESIGN_FEES: Record<string, number> = {
@@ -34,6 +36,8 @@ export interface PriceData {
   pricePerUnit: number | null;
   qtyDiscountPct: number | null;
   qtyDiscountApplied: boolean;
+  minChargeApplied: boolean;
+  minChargeValue: number | null;
 }
 
 export interface ConfigData {
@@ -71,6 +75,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [qtyDiscountPct, setQtyDiscountPct] = useState<number | null>(null);
   const [qtyDiscountApplied, setQtyDiscountApplied] = useState(false);
   const [pricePerUnit, setPricePerUnit] = useState<number | null>(null);
+  const [minChargeApplied, setMinChargeApplied] = useState(false);
+  const [minChargeValue, setMinChargeValue] = useState<number | null>(null);
 
   const effectiveWidth = isCustom ? parseFloat(customW) || 0 : selectedSize.width_in;
   const effectiveHeight = isCustom ? parseFloat(customH) || 0 : selectedSize.height_in;
@@ -107,6 +113,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setQtyDiscountApplied(data.qty_discount_applied ?? false);
         setQtyDiscountPct(data.qty_discount_pct ?? null);
         setPricePerUnit(data.price_per_unit ?? null);
+        setMinChargeApplied(data.min_charge_applied ?? false);
+        setMinChargeValue(data.min_charge_value ?? null);
       }
     } catch {
       // silent
@@ -145,8 +153,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       pricePerUnit,
       qtyDiscountPct,
       qtyDiscountApplied,
+      minChargeApplied,
+      minChargeValue,
     });
-  }, [price, loading, addonTotal, designStatus, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied]);
+  }, [price, loading, addonTotal, designStatus, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue]);
 
   // Bubble config to parent (for proof + cart)
   useEffect(() => {

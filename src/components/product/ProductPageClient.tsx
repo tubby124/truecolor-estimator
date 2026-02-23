@@ -27,6 +27,7 @@ interface Props {
 const EMPTY_PRICE: PriceData = {
   price: null, loading: false, addonTotal: 0, designFee: 0, gst: null, total: null,
   pricePerUnit: null, qtyDiscountPct: null, qtyDiscountApplied: false,
+  minChargeApplied: false, minChargeValue: null,
 };
 
 const EMPTY_CONFIG: ConfigData = {
@@ -131,6 +132,8 @@ export function ProductPageClient({ product }: Props) {
             pricePerUnit={priceData.pricePerUnit}
             qtyDiscountPct={priceData.qtyDiscountPct}
             qtyDiscountApplied={priceData.qtyDiscountApplied}
+            minChargeApplied={priceData.minChargeApplied}
+            minChargeValue={priceData.minChargeValue}
           />
         </div>
       </div>

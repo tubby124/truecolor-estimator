@@ -230,7 +230,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 2,
     sideOptions: true,
     sizePresets: [
-      { label: "250 cards", width_in: 3.5, height_in: 2 },
+      { label: "3.5×2\"", width_in: 3.5, height_in: 2 },
     ],
     qtyPresets: [250, 500, 1000],
     specs: [
@@ -275,7 +275,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     galleryImages: [
       "/images/products/product/flyers-stack-800x600.webp",
     ],
-    defaultSides: 1,
+    defaultSides: 2,
     sideOptions: true,
     sizePresets: [
       { label: "Letter (100)", width_in: 8.5, height_in: 11 },
@@ -416,6 +416,57 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
     ],
     relatedSlugs: ["acp-signs", "retractable-banners", "vinyl-banners"],
+  },
+
+  "window-decals": {
+    slug: "window-decals",
+    name: "Window Decals",
+    tagline: "Custom adhesive vinyl decals for windows and vehicles.",
+    description:
+      "Printed on premium adhesive vinyl — crisp colour, clean cut edges, easy to apply. Perfect for storefronts, vehicle windows, glass doors, and promotional surfaces. Removable without residue on most surfaces. Custom sizes and shapes available.",
+    fromPrice: "$45",
+    category: "DECAL",
+    material_code: "ARLPMF7008",
+    heroImage: "/images/products/product/window-decals-800x600.webp",
+    galleryImages: [
+      "/images/products/product/window-decals-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "12×12\"", width_in: 12, height_in: 12 },
+      { label: "12×24\"", width_in: 12, height_in: 24 },
+      { label: "24×24\"", width_in: 24, height_in: 24 },
+      { label: "24×36\"", width_in: 24, height_in: 36 },
+    ],
+    qtyPresets: [1, 2, 5, 10],
+    specs: [
+      { label: "Material", value: "Premium adhesive vinyl (matte or gloss)" },
+      { label: "Print", value: "Full-colour digital, vibrant UV-resistant inks" },
+      { label: "Adhesive", value: "Removable adhesive — no residue on glass" },
+      { label: "Standard sizes", value: "12×12\", 12×24\", 24×24\", 24×36\" — custom available" },
+      { label: "Application", value: "Windows, glass doors, vehicles, smooth surfaces" },
+    ],
+    whoUsesThis: ["Retail", "Construction", "Real Estate", "Events", "Healthcare"],
+    faqs: [
+      {
+        q: "Will window decals damage my glass?",
+        a: "No — adhesive vinyl uses a removable adhesive that peels off cleanly from glass without residue. Avoid applying to painted, textured, or porous surfaces.",
+      },
+      {
+        q: "Can I put these on my vehicle windows?",
+        a: "Yes — adhesive vinyl works on auto glass. For the outside of a vehicle, use standard adhesive. For the inside, specify reverse-print when ordering.",
+      },
+      {
+        q: "How long do window decals last outdoors?",
+        a: "UV-resistant inks give a 2–3 year outdoor lifespan on glass. Avoid pressure washing directly at the edges.",
+      },
+      {
+        q: "What file format do I need?",
+        a: "PDF (preferred), PNG at 150+ DPI, or AI. Need a design? Our in-house team handles it from a rough sketch — starting at $35.",
+      },
+    ],
+    relatedSlugs: ["vehicle-magnets", "coroplast-signs", "vinyl-banners"],
   },
 
   "retractable-banners": {

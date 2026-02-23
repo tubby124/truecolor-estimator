@@ -14,6 +14,8 @@ interface PriceSummaryProps {
   pricePerUnit?: number | null;
   qtyDiscountPct?: number | null;
   qtyDiscountApplied?: boolean;
+  minChargeApplied?: boolean;
+  minChargeValue?: number | null;
   // Cart
   addedToCart: boolean;
   onAddToCart: () => void;
@@ -40,6 +42,7 @@ export function PriceSummary({
   addedToCart, onAddToCart, productSlug,
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
   pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
+  minChargeApplied, minChargeValue,
 }: PriceSummaryProps) {
   const hasPrice = price != null;
 
@@ -88,6 +91,13 @@ export function PriceSummary({
                   </span>
                   <span className="text-xs text-green-700 font-medium">${pricePerUnit.toFixed(2)}/unit × {qty}</span>
                 </div>
+              )}
+
+              {/* Minimum charge note */}
+              {minChargeApplied && minChargeValue != null && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1 mt-2">
+                  Minimum order ${minChargeValue.toFixed(2)} applied
+                </p>
               )}
 
               {/* Design service note */}
