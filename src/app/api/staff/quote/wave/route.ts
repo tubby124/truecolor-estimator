@@ -85,7 +85,7 @@ export async function POST(req: Request) {
       try {
         await approveWaveInvoice(invoice.invoiceId);
         finalAction = "approved";
-        await sendWaveInvoice(invoice.invoiceId);
+        await sendWaveInvoice(invoice.invoiceId, customerEmail);
         finalAction = "sent";
       } catch (sendErr) {
         // Non-fatal — invoice was created, just not sent

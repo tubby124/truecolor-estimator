@@ -9,7 +9,7 @@
  * tied to order status = "ready_for_pickup".
  */
 
-import { waveQuery, WAVE_BUSINESS_ID, WAVE_GST_TAX_ID } from "./client";
+import { waveQuery, WAVE_BUSINESS_ID, WAVE_GST_TAX_ID, WAVE_PRINT_PRODUCT_ID } from "./client";
 
 // --------------------------------------------------------------------------
 // Types
@@ -110,18 +110,24 @@ export async function createWaveInvoice(
     memo?: string;
   }
 ): Promise<WaveInvoiceResult> {
+  // Wave invoiceCreate requires productId (ID!) on every line item.
+  // We use a single generic "Print Services" product (WAVE_PRINT_PRODUCT_ID) for all lines;
+  // unitPrice per-line overrides the product's default price.
+  // Field names confirmed via Wave schema introspection: unitPrice (not unitValue), quantity as Decimal.
   const lineItems = items.map((item) => ({
+    productId: WAVE_PRINT_PRODUCT_ID,
     description: item.description,
     quantity: String(item.qty),
-    unitValue: item.unitPrice.toFixed(2),
+    unitPrice: item.unitPrice.toFixed(2),
     taxes: item.applyGst ? [{ salesTaxId: WAVE_GST_TAX_ID }] : [],
   }));
 
   if (opts?.isRush) {
     lineItems.push({
+      productId: WAVE_PRINT_PRODUCT_ID,
       description: "Rush production fee — same-day turnaround",
       quantity: "1",
-      unitValue: "40.00",
+      unitPrice: "40.00",
       taxes: [],
     });
   }
@@ -197,7 +203,13 @@ export async function approveWaveInvoice(invoiceId: string): Promise<void> {
 // Send an approved invoice to the customer via Wave email
 // --------------------------------------------------------------------------
 
-export async function sendWaveInvoice(invoiceId: string): Promise<void> {
+// InvoiceSendInput requires: invoiceId, to (email list), attachPDF (bool)
+// Optional: subject, message, fromAddress, ccMyself
+export async function sendWaveInvoice(
+  invoiceId: string,
+  toEmail: string,
+  opts?: { subject?: string; message?: string }
+): Promise<void> {
   const data = await waveQuery<{
     invoiceSend: { didSucceed: boolean; inputErrors: { message: string }[] };
   }>(
@@ -207,7 +219,16 @@ export async function sendWaveInvoice(invoiceId: string): Promise<void> {
         inputErrors { path message }
       }
     }`,
-    { input: { invoiceId } }
+    {
+      input: {
+        invoiceId,
+        to: [toEmail],
+        attachPDF: true,
+        subject: opts?.subject ?? "Your invoice from True Color Display Printing",
+        message: opts?.message ?? "Please find your invoice attached. You can also view and pay it online using the link below.",
+        ccMyself: true,
+      },
+    }
   );
 
   if (!data.invoiceSend.didSucceed) {
