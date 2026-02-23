@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -57,21 +58,49 @@ export async function POST(req: NextRequest) {
       if (cloverOrderId) {
         try {
           const supabase = createServiceClient();
-          const { error, count } = await supabase
+          const { data: updatedOrders, error } = await supabase
             .from("orders")
             .update({
               status: "payment_received",
               paid_at: new Date().toISOString(),
             })
             .eq("payment_reference", cloverOrderId)
-            .eq("status", "pending_payment");
+            .eq("status", "pending_payment")
+            .select("order_number, customer_id, total, is_rush");
 
           if (error) {
             console.error("[clover-webhook] order update failed:", error.message);
           } else {
+            const count = updatedOrders?.length ?? 0;
             console.log(
-              `[clover-webhook] order confirmed via webhook | Clover order: ${cloverOrderId} | rows updated: ${count ?? 0}`
+              `[clover-webhook] order confirmed via webhook | Clover order: ${cloverOrderId} | rows updated: ${count}`
             );
+
+            // Send "payment confirmed" email to customer (non-fatal)
+            if (updatedOrders && updatedOrders.length > 0) {
+              try {
+                const order = updatedOrders[0];
+                const { data: customer } = await supabase
+                  .from("customers")
+                  .select("email, name")
+                  .eq("id", order.customer_id)
+                  .single();
+                if (customer) {
+                  await sendOrderStatusEmail({
+                    status: "payment_received",
+                    orderNumber: order.order_number,
+                    customerName: customer.name,
+                    customerEmail: customer.email,
+                    total: order.total,
+                    isRush: order.is_rush,
+                    paymentMethod: "clover_card",
+                  });
+                  console.log(`[clover-webhook] payment confirmed email sent → ${customer.email}`);
+                }
+              } catch (emailErr) {
+                console.error("[clover-webhook] payment confirmed email failed (non-fatal):", emailErr);
+              }
+            }
           }
         } catch (err) {
           console.error("[clover-webhook] unexpected error:", err);

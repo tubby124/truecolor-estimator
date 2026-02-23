@@ -13,7 +13,7 @@ export default function RealEstatePage() {
     <IndustryPage
       title="Real Estate Signs Saskatoon"
       subtitle="Your listing goes live Tuesday. Your sign should too."
-      heroImage="/images/products/heroes/realestate-hero-1200x500.webp"
+      heroImage="/images/products/heroes/realestate-exp-hero-1200x500.webp"
       heroAlt="Real estate yard signs Saskatoon"
       description="Saskatoon REALTORS and brokerages use True Color for yard signs, feature sheets, and business cards. Your listing is time-sensitive — we get it. Standard turnaround is 1–3 business days. Rush available. In-house designer handles low-res headshots and brokerage templates."
       products={[

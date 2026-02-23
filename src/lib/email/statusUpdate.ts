@@ -23,6 +23,7 @@ export interface StatusUpdateParams {
   customerEmail: string;
   total: number;
   isRush: boolean;
+  paymentMethod?: string; // "clover_card" | "etransfer" — affects payment_received wording
 }
 
 // ─── Transporter ──────────────────────────────────────────────────────────────
@@ -69,7 +70,8 @@ function buildSubject(p: StatusUpdateParams): string {
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildHtml(p: StatusUpdateParams): string {
-  const { status, orderNumber, customerName, total, isRush } = p;
+  const { status, orderNumber, customerName, total, isRush, paymentMethod } = p;
+  const paymentLabel = paymentMethod === "clover_card" ? "card payment" : "e-Transfer";
 
   const configs = {
     payment_received: {
@@ -79,7 +81,7 @@ function buildHtml(p: StatusUpdateParams): string {
       icon: "✓",
       iconBg: "#16a34a",
       headline: "Payment confirmed!",
-      subline: `Your e-Transfer of <strong>$${total.toFixed(2)} CAD</strong> has been received. Your order is now in our production queue.`,
+      subline: `Your ${paymentLabel} of <strong>$${total.toFixed(2)} CAD</strong> has been received. Your order is now in our production queue.`,
       bodyContent: `
         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
           <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#15803d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -235,13 +237,14 @@ function buildHtml(p: StatusUpdateParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildText(p: StatusUpdateParams): string {
-  const { status, orderNumber, customerName, total, isRush } = p;
+  const { status, orderNumber, customerName, total, isRush, paymentMethod } = p;
+  const paymentLabel = paymentMethod === "clover_card" ? "card payment" : "e-Transfer payment";
 
   const messages = {
     payment_received: [
       `Hi ${customerName},`,
       "",
-      `We've received your e-Transfer payment of $${total.toFixed(2)} CAD.`,
+      `We've received your ${paymentLabel} of $${total.toFixed(2)} CAD.`,
       `Your order ${orderNumber} is now in our production queue.`,
       "",
       isRush

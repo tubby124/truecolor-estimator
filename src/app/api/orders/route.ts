@@ -213,6 +213,7 @@ export async function POST(req: NextRequest) {
         total,
         is_rush,
         payment_method,
+        checkout_url: checkoutUrl ?? undefined,
       });
     } catch (emailErr) {
       console.error("[orders] confirmation email failed (non-fatal):", emailErr);

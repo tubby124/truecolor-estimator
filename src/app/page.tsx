@@ -66,31 +66,37 @@ const PRODUCTS = [
 const INDUSTRIES = [
   {
     name: "Construction",
+    tagline: "Site signs, banners & hoarding boards",
     img: "/images/products/heroes/construction-hero-1200x500.webp",
     href: "/construction-signs-saskatoon",
   },
   {
     name: "Real Estate",
-    img: "/images/products/heroes/realestate-hero-1200x500.webp",
+    tagline: "Yard signs, cards & feature sheets",
+    img: "/images/products/heroes/realestate-exp-hero-1200x500.webp",
     href: "/real-estate-signs-saskatoon",
   },
   {
     name: "Agriculture",
+    tagline: "Farm & field signage",
     img: "/images/products/heroes/agriculture-hero-1200x500.webp",
     href: "/agriculture-signs-saskatoon",
   },
   {
     name: "Healthcare",
+    tagline: "Clinic wayfinding & banners",
     img: "/images/products/heroes/healthcare-hero-1200x500.webp",
     href: "/healthcare-printing-saskatoon",
   },
   {
     name: "Retail & Franchise",
+    tagline: "Window decals, banners & promo print",
     img: "/images/products/heroes/retail-hero-1200x500.webp",
     href: "/retail-signs-saskatoon",
   },
   {
     name: "Sports & Events",
+    tagline: "Banners, backdrops & event signage",
     img: "/images/products/heroes/sports-hero-1200x500.webp",
     href: "/sports-banners-saskatoon",
   },
@@ -261,30 +267,31 @@ export default function HomePage() {
       <GalleryStrip />
 
       {/* ── INDUSTRIES ───────────────────────────────────────────────────────── */}
-      <section className="bg-[#f4efe9] px-6 py-16">
+      <section className="bg-[#1c1712] px-6 py-16">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">We print for</h2>
-          <p className="text-gray-500 mb-10 text-lg">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">We print for</h2>
+          <p className="text-gray-400 mb-10 text-lg">
             Every industry has its own deadlines and print needs. We handle all of them.
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {INDUSTRIES.map((ind) => (
               <Link
                 key={ind.name}
                 href={ind.href}
-                className="group relative h-36 md:h-44 rounded-xl overflow-hidden bg-gray-300 block"
+                className="group relative h-56 md:h-64 rounded-xl overflow-hidden block ring-1 ring-white/10 hover:ring-[#16C2F3] transition-all duration-300"
               >
                 <Image
                   src={ind.img}
                   alt={`${ind.name} printing Saskatoon — True Color`}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-4">
-                  <p className="text-white font-bold text-sm md:text-base">{ind.name}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-5">
+                  <p className="text-white font-bold text-lg leading-tight">{ind.name}</p>
+                  <p className="text-[#16C2F3] text-sm mt-1">{ind.tagline} →</p>
                 </div>
               </Link>
             ))}

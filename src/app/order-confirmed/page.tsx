@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 
 export const metadata: Metadata = {
   title: "Order Confirmed — True Color",
@@ -29,11 +30,39 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       const supabase = createServiceClient();
 
       // Auto-confirm payment when Clover redirects back with orderId
-      await supabase
+      // .select() lets us detect if the row was actually updated (vs. already confirmed by webhook)
+      const { data: updatedOrders } = await supabase
         .from("orders")
         .update({ status: "payment_received", paid_at: new Date().toISOString() })
         .eq("id", oid)
-        .eq("status", "pending_payment"); // idempotent — only updates if still pending
+        .eq("status", "pending_payment") // idempotent — only updates if still pending
+        .select("order_number, customer_id, total, is_rush, payment_method");
+
+      // Send "payment confirmed" email only if this redirect beat the webhook
+      // (if webhook already fired and updated the status, updatedOrders will be empty)
+      if (updatedOrders && updatedOrders.length > 0) {
+        try {
+          const o = updatedOrders[0];
+          const { data: customer } = await supabase
+            .from("customers")
+            .select("email, name")
+            .eq("id", o.customer_id)
+            .single();
+          if (customer) {
+            await sendOrderStatusEmail({
+              status: "payment_received",
+              orderNumber: o.order_number,
+              customerName: customer.name,
+              customerEmail: customer.email,
+              total: o.total,
+              isRush: o.is_rush,
+              paymentMethod: o.payment_method,
+            });
+          }
+        } catch {
+          // non-fatal — page still shows confirmation
+        }
+      }
 
       // Fetch order details to show on confirmation page
       const { data } = await supabase

@@ -392,7 +392,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildOrderConfirmationText(p: OrderConfirmationParams): string {
-  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method } = p;
+  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, checkout_url } = p;
   const RUSH_FEE = 40;
 
   const itemLines = items.map((item) => {
@@ -405,7 +405,7 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
 
   const payNote =
     payment_method === "clover_card"
-      ? `Your card has been charged $${total.toFixed(2)} CAD.`
+      ? `Please complete your payment of $${total.toFixed(2)} CAD at:\n${checkout_url ?? "https://truecolor-estimator.vercel.app"}`
       : `Please send $${total.toFixed(2)} CAD via Interac e-Transfer to: info@true-color.ca (auto-deposit, no password).`;
 
   const lines = [
