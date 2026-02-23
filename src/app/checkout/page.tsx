@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { getCart, clearCart, type CartItem } from "@/lib/cart/cart";
-import type { CheckoutRequestBody } from "@/app/api/checkout/route";
+import type { CreateOrderRequest } from "@/app/api/orders/route";
 
 const GST_RATE = 0.05;
 const RUSH_FEE = 40;
@@ -22,7 +22,7 @@ export default function CheckoutPage() {
   const [isRush, setIsRush] = useState(false);
 
   // Payment state
-  const [payMethod, setPayMethod] = useState<"card" | "etransfer">("card");
+  const [payMethod, setPayMethod] = useState<"clover_card" | "etransfer">("clover_card");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,7 +38,7 @@ export default function CheckoutPage() {
   const gst = (subtotal + rush) * GST_RATE;
   const total = subtotal + rush + gst;
 
-  async function handleCardPayment() {
+  async function handleSubmit() {
     setError("");
     if (!name.trim() || !email.trim()) {
       setError("Name and email are required.");
@@ -46,26 +46,30 @@ export default function CheckoutPage() {
     }
     setLoading(true);
     try {
-      const body: CheckoutRequestBody = {
-        items: items.map((i) => ({
-          product_name: i.product_name,
-          label: i.label,
-          sell_price: i.sell_price,
-        })),
+      const body: CreateOrderRequest = {
+        items,
         contact: { name, email, company: company || undefined, phone: phone || undefined },
         is_rush: isRush,
+        payment_method: payMethod,
       };
-      const res = await fetch("/api/checkout", {
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = (await res.json()) as { checkoutUrl?: string; error?: string };
-      if (!res.ok || !data.checkoutUrl) {
-        throw new Error(data.error ?? "Could not create checkout session");
-      }
+      const data = (await res.json()) as {
+        orderId?: string;
+        orderNumber?: string;
+        checkoutUrl?: string | null;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(data.error ?? "Could not create order");
       clearCart();
-      window.location.href = data.checkoutUrl;
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        window.location.href = "/order-confirmed";
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -194,9 +198,9 @@ export default function CheckoutPage() {
                   <input
                     type="radio"
                     name="pay"
-                    value="card"
-                    checked={payMethod === "card"}
-                    onChange={() => setPayMethod("card")}
+                    value="clover_card"
+                    checked={payMethod === "clover_card"}
+                    onChange={() => setPayMethod("clover_card")}
                     className="accent-[#16C2F3]"
                   />
                   <div>
@@ -249,18 +253,27 @@ export default function CheckoutPage() {
             )}
 
             {/* Submit */}
-            {payMethod === "card" ? (
+            {payMethod === "clover_card" ? (
               <button
-                onClick={handleCardPayment}
+                onClick={handleSubmit}
                 disabled={loading}
                 className="w-full bg-[#16C2F3] hover:bg-[#0fb0dd] disabled:opacity-60 text-white font-bold text-lg py-4 rounded-xl transition-colors"
               >
-                {loading ? "Redirecting to payment…" : `Pay $${total.toFixed(2)} →`}
+                {loading ? "Creating order…" : `Pay $${total.toFixed(2)} →`}
               </button>
             ) : (
-              <div className="text-center py-4 border border-gray-100 rounded-xl">
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="w-full bg-[#1c1712] hover:bg-black disabled:opacity-60 text-white font-bold text-lg py-4 rounded-xl transition-colors"
+              >
+                {loading ? "Submitting order…" : `Submit order — pay $${total.toFixed(2)} by e-Transfer`}
+              </button>
+            )}
+            {payMethod === "etransfer" && !loading && (
+              <div className="text-center py-0 border border-gray-100 rounded-xl p-4">
                 <p className="text-sm text-gray-500">
-                  Send your e-Transfer, then{" "}
+                  After submitting, send your e-Transfer, then{" "}
                   <a href="mailto:info@true-color.ca" className="text-[#16C2F3] underline">
                     email us
                   </a>{" "}

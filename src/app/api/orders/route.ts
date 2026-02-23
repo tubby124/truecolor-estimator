@@ -1,0 +1,181 @@
+/**
+ * POST /api/orders
+ *
+ * Creates:
+ *   1. Supabase customer (upsert by email)
+ *   2. Supabase order + order_items rows
+ *   3. Wave invoice (DRAFT — silent, not sent to customer yet)
+ *   4. Clover Hosted Checkout session
+ *
+ * Returns: { orderId, orderNumber, checkoutUrl }
+ * On eTransfer: returns { orderId, orderNumber, checkoutUrl: null }
+ */
+
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { createOrFindWaveCustomer, createWaveInvoice } from "@/lib/wave/invoice";
+import { createCloverCheckout } from "@/lib/payment/clover";
+import type { CartItem } from "@/lib/cart/cart";
+
+export interface CreateOrderRequest {
+  items: CartItem[];
+  contact: {
+    name: string;
+    email: string;
+    company?: string;
+    phone?: string;
+  };
+  is_rush: boolean;
+  payment_method: "clover_card" | "etransfer";
+}
+
+const GST_RATE = 0.05;
+const RUSH_FEE = 40;
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = (await req.json()) as CreateOrderRequest;
+    const { items, contact, is_rush, payment_method } = body;
+
+    if (!items?.length) {
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    }
+    if (!contact?.email || !contact?.name) {
+      return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+    }
+
+    const supabase = createServiceClient();
+
+    // 1. Upsert customer
+    const { data: customer, error: custErr } = await supabase
+      .from("customers")
+      .upsert(
+        {
+          email: contact.email.toLowerCase().trim(),
+          name: contact.name.trim(),
+          company: contact.company?.trim() || null,
+          phone: contact.phone?.trim() || null,
+        },
+        { onConflict: "email", ignoreDuplicates: false }
+      )
+      .select("id")
+      .single();
+
+    if (custErr || !customer) {
+      console.error("[orders] customer upsert:", custErr);
+      return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
+    }
+
+    // 2. Calculate totals
+    const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
+    const rush = is_rush ? RUSH_FEE : 0;
+    const gst = Math.round((subtotal + rush) * GST_RATE * 100) / 100;
+    const total = subtotal + rush + gst;
+
+    // 3. Create order row
+    const { data: order, error: orderErr } = await supabase
+      .from("orders")
+      .insert({
+        customer_id: customer.id,
+        status: "pending_payment",
+        is_rush,
+        subtotal,
+        gst,
+        total,
+        payment_method,
+        notes: contact.company ? `Company: ${contact.company}` : null,
+      })
+      .select("id, order_number")
+      .single();
+
+    if (orderErr || !order) {
+      console.error("[orders] order insert:", orderErr);
+      return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+    }
+
+    // 4. Create order_items rows
+    const orderItems = items.map((item) => ({
+      order_id: order.id,
+      category: item.category,
+      product_name: item.product_name,
+      material_code: item.config.material_code ?? null,
+      width_in: item.config.width_in ?? null,
+      height_in: item.config.height_in ?? null,
+      sides: item.config.sides ?? 1,
+      qty: item.qty,
+      addons: item.config.addons ?? [],
+      is_rush: item.config.design_status === "RUSH" || false,
+      design_status: item.config.design_status ?? "PRINT_READY",
+      unit_price: item.sell_price / item.qty,
+      line_total: item.sell_price,
+    }));
+
+    const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
+    if (itemsErr) {
+      console.error("[orders] order_items insert:", itemsErr);
+      // Non-fatal — order exists, continue
+    }
+
+    // 5. Create Wave invoice (DRAFT, silent)
+    let waveInvoiceId: string | null = null;
+    try {
+      const waveCustomerId = await createOrFindWaveCustomer(
+        contact.email.toLowerCase().trim(),
+        contact.name.trim()
+      );
+
+      const waveItems = items.map((item) => ({
+        description: item.label,
+        unitPrice: item.sell_price / item.qty,
+        qty: item.qty,
+        applyGst: true,
+      }));
+
+      const inv = await createWaveInvoice(waveCustomerId, waveItems, {
+        isRush: is_rush,
+        orderNumber: order.order_number,
+      });
+
+      waveInvoiceId = inv.invoiceId;
+
+      // Save wave_invoice_id back to order (best-effort — schema may not have column yet)
+      void supabase
+        .from("orders")
+        .update({ wave_invoice_id: waveInvoiceId } as Record<string, unknown>)
+        .eq("id", order.id);
+    } catch (waveErr) {
+      // Wave failure is non-fatal — order still exists, staff can create manually
+      console.error("[orders] Wave invoice creation failed (non-fatal):", waveErr);
+    }
+
+    // 6. Clover Hosted Checkout (card only)
+    let checkoutUrl: string | null = null;
+    if (payment_method === "clover_card") {
+      const totalCents = Math.round(total * 100);
+      const description =
+        items.length === 1
+          ? items[0].product_name
+          : `True Color Order ${order.order_number} (${items.length} items)`;
+
+      const clover = await createCloverCheckout(totalCents, description, contact.email);
+      checkoutUrl = clover.checkoutUrl;
+
+      // Save Clover session ref (best-effort)
+      void supabase
+        .from("orders")
+        .update({ payment_reference: clover.sessionId } as Record<string, unknown>)
+        .eq("id", order.id);
+    }
+
+    return NextResponse.json({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      checkoutUrl,
+      waveInvoiceId,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Order creation failed";
+    console.error("[orders]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
