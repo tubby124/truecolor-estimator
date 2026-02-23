@@ -380,7 +380,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       "5mm PVC foamboard — rigid, smooth-faced, and ultra-lightweight. Ideal for counter displays, event signage, trade show backdrops, and retail point-of-purchase displays. Clean edges, sharp print, easy to transport and set up.",
     fromPrice: "$45",
     category: "FOAMBOARD",
-    material_code: "INSR314489610",
+    material_code: "GENERIC_FOAM",
     heroImage: "/images/products/product/foamboard-display-800x600.webp",
     galleryImages: [
       "/images/products/product/foamboard-display-800x600.webp",
@@ -464,7 +464,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tierPresets: [
       { label: "Economy — $219", material_code: "RBS33507875S", price: 219 },
       { label: "Deluxe — $299", material_code: "RBS33507900PSB", price: 299 },
-      { label: "Premium — $349", material_code: "RBS33507900PSB", price: 349 },
+      { label: "Premium — $349", material_code: "RBS33507900PREM", price: 349 },
     ],
   },
 };
