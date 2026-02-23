@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { decodePaymentToken } from "@/lib/payment/token";
 import { createCloverCheckout } from "@/lib/payment/clover";
+import { createServiceClient } from "@/lib/supabase/server";
 
 interface Props {
   params: Promise<{ token: string }>;
@@ -35,6 +36,20 @@ export default async function PaymentGatewayPage({ params }: Props) {
   try {
     const result = await createCloverCheckout(amountCents, description, customerEmail, redirectUrl);
     checkoutUrl = result.checkoutUrl;
+
+    // Update payment_reference in DB so the Clover webhook can find this order.
+    // The redirectUrl contains the order ID: .../order-confirmed?oid={uuid}
+    if (result.sessionId && redirectUrl) {
+      const oidMatch = redirectUrl.match(/[?&]oid=([a-f0-9-]{36})/i);
+      if (oidMatch?.[1]) {
+        const supabase = createServiceClient();
+        void supabase
+          .from("orders")
+          .update({ payment_reference: result.sessionId } as Record<string, unknown>)
+          .eq("id", oidMatch[1])
+          .eq("status", "pending_payment"); // only update if still pending
+      }
+    }
   } catch (err) {
     console.error("[pay/token] Clover checkout failed:", err);
     return <ErrorPage />;

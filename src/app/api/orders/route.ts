@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { createOrFindWaveCustomer, createWaveInvoice } from "@/lib/wave/invoice";
 import { createCloverCheckout } from "@/lib/payment/clover";
+import { encodePaymentToken } from "@/lib/payment/token";
 import type { CartItem } from "@/lib/cart/cart";
 import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
@@ -191,6 +192,15 @@ export async function POST(req: NextRequest) {
         .from("orders")
         .update({ payment_reference: clover.sessionId } as Record<string, unknown>)
         .eq("id", order.id);
+
+      // Build a durable /pay/{token} URL for the email (30-day validity, creates fresh Clover session on each click)
+      // The raw checkoutUrl expires after 15 minutes and should not go in emails
+      try {
+        const payToken = encodePaymentToken(total, description, contact.email, redirectUrl);
+        checkoutUrl = `${siteUrl}/pay/${payToken}`;
+      } catch {
+        // If token signing fails, keep the raw Clover URL as fallback
+      }
     }
 
 

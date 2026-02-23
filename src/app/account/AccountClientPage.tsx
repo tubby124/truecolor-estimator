@@ -263,7 +263,8 @@ export function AccountClientPage() {
       });
     });
     setReorderedId(order.id);
-    setTimeout(() => setReorderedId(null), 3000);
+    // Redirect to cart after brief confirmation flash
+    setTimeout(() => router.push("/cart"), 800);
   }
 
   if (loading) {
@@ -595,19 +596,21 @@ export function AccountClientPage() {
                         Complete Payment &rarr;
                       </a>
                     )}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleReorder(order);
-                      }}
-                      className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
-                        reorderedId === order.id
-                          ? "bg-[#8CC63E] text-white"
-                          : "bg-[#f4efe9] text-[#1c1712] hover:bg-[#16C2F3] hover:text-white"
-                      }`}
-                    >
-                      {reorderedId === order.id ? "\u2713 Added to cart" : "Reorder"}
-                    </button>
+                    {order.status !== "pending_payment" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReorder(order);
+                        }}
+                        className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
+                          reorderedId === order.id
+                            ? "bg-[#8CC63E] text-white"
+                            : "bg-[#f4efe9] text-[#1c1712] hover:bg-[#16C2F3] hover:text-white"
+                        }`}
+                      >
+                        {reorderedId === order.id ? "\u2713 Going to cart\u2026" : "Reorder"}
+                      </button>
+                    )}
                     <span className="text-gray-400 text-sm">
                       {expandedOrder === order.id ? "\u25b2" : "\u25bc"}
                     </span>

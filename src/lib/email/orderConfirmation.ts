@@ -174,7 +174,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
               </a>`
             : ""}
           <p style="margin: 0; font-size: 11px; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            Link valid for 24 hours · Questions? Email <a href="mailto:info@true-color.ca" style="color: #9a3412;">info@true-color.ca</a>
+            You can also pay anytime from your <a href="https://truecolor-estimator.vercel.app/account" style="color: #9a3412;">order dashboard</a> · Questions? Email <a href="mailto:info@true-color.ca" style="color: #9a3412;">info@true-color.ca</a>
           </p>
         </div>`
       : `<div style="background: #fdf8ee; border: 1px solid #f0d890; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
