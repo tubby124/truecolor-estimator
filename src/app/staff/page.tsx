@@ -157,6 +157,7 @@ export default function StaffPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">← Website</Link>
             <Link href="/staff/orders" className="text-sm text-[#16C2F3] hover:underline">Orders →</Link>
             <span className="text-xs text-[var(--muted)] font-mono hidden sm:block">v1_2026-02-19 · STAFF</span>
             <button

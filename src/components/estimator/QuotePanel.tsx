@@ -59,13 +59,13 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
         <h2 className="text-sm font-semibold text-[var(--muted)] uppercase tracking-widest">Quote</h2>
         <button
           onClick={onToggleCustomerMode}
-          className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+          className={`text-sm font-semibold px-4 py-2 rounded-md transition-colors ${
             isCustomerMode
-              ? "bg-[var(--brand)] text-white border-[var(--brand)]"
-              : "border-[var(--border)] text-[var(--muted)] hover:border-gray-400"
+              ? "bg-[var(--brand)] text-white hover:opacity-90"
+              : "bg-green-600 text-white hover:bg-green-500"
           }`}
         >
-          {isCustomerMode ? "← Staff view" : "Show customer →"}
+          {isCustomerMode ? "← Back to Staff View" : "Show Customer Price →"}
         </button>
       </div>
 

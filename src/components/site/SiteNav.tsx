@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CartIcon } from "@/components/site/CartIcon";
 import { AccountIcon } from "@/components/site/AccountIcon";
+import { StaffQuoteButton } from "@/components/site/StaffQuoteButton";
 
 const PRODUCT_LINKS = [
   { label: "Coroplast Signs", href: "/products/coroplast-signs" },
@@ -162,6 +163,9 @@ export function SiteNav() {
               <AccountIcon />
             </span>
             <CartIcon />
+            <span className="hidden sm:block">
+              <StaffQuoteButton />
+            </span>
             <Link
               href="/quote"
               className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden sm:block"
@@ -274,7 +278,12 @@ export function SiteNav() {
               My Account / Orders
             </Link>
 
-            {/* CTA */}
+            {/* Staff CTA — only visible for info@true-color.ca */}
+            <div onClick={() => setDrawerOpen(false)}>
+              <StaffQuoteButton />
+            </div>
+
+            {/* Customer CTA */}
             <Link
               href="/quote"
               onClick={() => setDrawerOpen(false)}
