@@ -103,32 +103,74 @@ export default function HomePage() {
       <SiteNav />
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <section className="bg-[#1c1712] text-white px-6 py-20 md:py-28">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
-            See your exact price<br />
-            <span className="text-[#16C2F3]">in 30 seconds.</span>
-          </h1>
-          <p className="text-xl text-gray-300 mb-3 max-w-2xl">
-            No quote forms. No callbacks. No waiting 7 days for Toronto to ship it.
-          </p>
-          <p className="text-base text-gray-400 mb-10 max-w-xl">
-            Signs, banners, business cards, magnets, flyers — all in one shop.
-            In-house designer. Local Saskatoon pickup at 216 33rd St W.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Link
-              href="/quote"
-              className="bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors"
-            >
-              See Exact Prices →
+      <section className="relative min-h-[560px] md:min-h-[660px] flex items-center overflow-hidden">
+        {/* Mobile hero image */}
+        <Image
+          src="/images/products/heroes/realestate-hero-1200x500.webp"
+          alt=""
+          fill
+          className="object-cover object-top md:hidden"
+          priority
+        />
+        {/* Desktop hero image */}
+        <Image
+          src="/images/products/heroes/construction-hero-1200x500.webp"
+          alt=""
+          fill
+          className="object-cover object-center hidden md:block"
+          priority
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-[#1c1712]/70" />
+
+        {/* Hero content */}
+        <div className="relative z-10 text-white px-6 py-20 md:py-28 w-full">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
+              See your exact price<br />
+              <span className="text-[#16C2F3]">in 30 seconds.</span>
+            </h1>
+            <p className="text-xl text-gray-300 mb-3 max-w-2xl">
+              No quote forms. No callbacks. No waiting 7 days for Toronto to ship it.
+            </p>
+            <p className="text-base text-gray-400 mb-10 max-w-xl">
+              Signs, banners, business cards, magnets, flyers — all in one shop.
+              In-house designer. Local Saskatoon pickup at 216 33rd St W.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/quote"
+                className="bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors"
+              >
+                See Exact Prices →
+              </Link>
+              <a
+                href="tel:+13069548688"
+                className="border border-gray-600 text-gray-300 font-semibold text-base px-6 py-4 rounded-md hover:border-gray-400 hover:text-white transition-colors"
+              >
+                Call (306) 954-8688
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TURNAROUND BAR ───────────────────────────────────────────────────── */}
+      <section className="bg-[#16C2F3] py-4">
+        <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-white">
+          <div>
+            <p className="font-bold text-base">Same-Day Available</p>
+            <p className="text-sm opacity-90">In by noon, ready by 5 PM</p>
+          </div>
+          <div>
+            <p className="font-bold text-base">Next-Day Standard</p>
+            <p className="text-sm opacity-90">On all products, every time</p>
+          </div>
+          <div>
+            <Link href="/quote" className="block hover:opacity-90 transition-opacity">
+              <p className="font-bold text-base">Rush: +$40 Flat</p>
+              <p className="text-sm opacity-90">Need it in hours? We do that.</p>
             </Link>
-            <a
-              href="tel:+13069548688"
-              className="border border-gray-600 text-gray-300 font-semibold text-base px-6 py-4 rounded-md hover:border-gray-400 hover:text-white transition-colors"
-            >
-              Call (306) 954-8688
-            </a>
           </div>
         </div>
       </section>
@@ -137,12 +179,30 @@ export default function HomePage() {
       <section className="bg-white border-b border-gray-100 px-6 py-5">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-5 md:gap-10 text-sm text-gray-500">
           <span className="flex items-center gap-2 whitespace-nowrap">
-            <span className="text-yellow-400">⭐⭐⭐⭐⭐</span>
-            <span>Saskatoon local</span>
+            <svg className="w-4 h-4 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span>4.9 stars — Saskatoon local</span>
           </span>
-          <span className="whitespace-nowrap">📍 Pickup at 216 33rd St W</span>
-          <span className="whitespace-nowrap">✏️ In-house designer</span>
-          <span className="whitespace-nowrap">💰 Live prices — no back-and-forth</span>
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+            </svg>
+            <span>Pickup at 216 33rd St W</span>
+          </span>
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+            </svg>
+            <span>In-house designer</span>
+          </span>
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            <span>Live prices — no back-and-forth</span>
+          </span>
         </div>
       </section>
 
@@ -200,6 +260,49 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────────────── */}
+      <section className="px-6 py-16 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-[#1c1712] text-center mb-12">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              {
+                n: "1",
+                title: "Get your exact price",
+                desc: "Pick a product. See your number in 30 seconds. No forms, no phone tag.",
+                href: "/quote",
+                link: "Get a price →",
+              },
+              {
+                n: "2",
+                title: "Send your file",
+                desc: "Upload a PDF, AI, or JPG. Or bring a rough sketch — our designer handles the rest.",
+                href: "/services",
+                link: "Design services →",
+              },
+              {
+                n: "3",
+                title: "Pick it up",
+                desc: "Most orders same day or next morning. 216 33rd St W, Saskatoon.",
+                href: "https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK",
+                link: "Get directions →",
+              },
+            ].map((step) => (
+              <div key={step.n} className="flex flex-col items-center text-center gap-3">
+                <div className="w-11 h-11 rounded-full bg-[#16C2F3] flex items-center justify-center text-white font-bold text-lg shrink-0">
+                  {step.n}
+                </div>
+                <h3 className="font-bold text-[#1c1712] text-lg">{step.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+                <a href={step.href} className="text-[#16C2F3] text-sm font-semibold hover:underline">
+                  {step.link}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
       <ReviewsSection />
 
@@ -235,6 +338,23 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── STATS BAR ────────────────────────────────────────────────────────── */}
+      <section className="py-10 bg-white border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          {[
+            { number: "500+", label: "Businesses Served" },
+            { number: "4.9★", label: "Google Rating" },
+            { number: "Same-Day", label: "Turnaround Available" },
+            { number: "Local", label: "Saskatoon SK" },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">{stat.number}</p>
+              <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 

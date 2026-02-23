@@ -105,6 +105,166 @@ const GALLERY_ITEMS = [
     slug: "retractable-banners",
     category: "Displays",
   },
+
+  // ── REAL CLIENT WORK ─────────────────────────────────────────────────────────
+
+  // Window Decals
+  {
+    src: "/images/gallery/gallery-window-decal-swiss-barber.webp",
+    label: "Window Decals — Swiss Barber",
+    from: "from $65",
+    slug: "vinyl-banners",
+    category: "Window Decals",
+  },
+  {
+    src: "/images/gallery/gallery-window-decal-pact-agriculture.jpg",
+    label: "Office Window Decals — PACT",
+    from: "from $65",
+    slug: "vinyl-banners",
+    category: "Window Decals",
+  },
+
+  // Vehicle Vinyl & Magnets
+  {
+    src: "/images/gallery/gallery-vehicle-vinyl-ayotte-plumbing.jpg",
+    label: "Van Vinyl Branding — Ayotte Plumbing",
+    from: "from $45",
+    slug: "vehicle-magnets",
+    category: "Vehicle Signage",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-vinyl-ayotte-full-side.jpg",
+    label: "Full Side Vinyl — Ayotte Service Van",
+    from: "from $45",
+    slug: "vehicle-magnets",
+    category: "Vehicle Signage",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-decal-windshield-masters.webp",
+    label: "Door Magnet — Windshield Masters",
+    from: "from $45",
+    slug: "vehicle-magnets",
+    category: "Vehicle Signage",
+  },
+
+  // Banners
+  {
+    src: "/images/gallery/gallery-outdoor-banner-best-donairs.webp",
+    label: "Outdoor Storefront Banner — Best Donairs",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+  {
+    src: "/images/gallery/gallery-vinyl-banner-windshield-masters.webp",
+    label: "Vinyl Banner — Windshield Masters",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+
+  // Retractable Banners
+  {
+    src: "/images/gallery/gallery-retractable-banner-financial-office.jpg",
+    label: "Retractable Banner — Financial Services",
+    from: "from $219",
+    slug: "retractable-banners",
+    category: "Displays",
+  },
+  {
+    src: "/images/gallery/gallery-retractable-banner-client-office.jpg",
+    label: "Retractable Banner — Client Delivery",
+    from: "from $219",
+    slug: "retractable-banners",
+    category: "Displays",
+  },
+
+  // Coroplast Signs
+  {
+    src: "/images/gallery/gallery-coroplast-realtor-keyshape.jpg",
+    label: "Custom-Shape Sign — Boyes Group Realtor",
+    from: "from $30",
+    slug: "coroplast-signs",
+    category: "Signs",
+  },
+  {
+    src: "/images/gallery/gallery-coroplast-circle-made-in-canada.jpg",
+    label: "Custom Circle Sign — Made in Canada",
+    from: "from $30",
+    slug: "coroplast-signs",
+    category: "Signs",
+  },
+  {
+    src: "/images/gallery/gallery-coroplast-retail-zaks-pricing.jpg",
+    label: "Retail Pricing Signs — Zak's",
+    from: "from $30",
+    slug: "coroplast-signs",
+    category: "Signs",
+  },
+  {
+    src: "/images/gallery/gallery-design-retail-weve-moving.jpg",
+    label: "We're Moving Announcement Sign",
+    from: "from $30",
+    slug: "coroplast-signs",
+    category: "Signs",
+  },
+
+  // Business Cards & Print
+  {
+    src: "/images/gallery/gallery-business-cards-bd-deep-cleaning.jpg",
+    label: "Business Cards — BD Deep Cleaning",
+    from: "from $40",
+    slug: "business-cards",
+    category: "Cards & Print",
+  },
+  {
+    src: "/images/gallery/gallery-loyalty-card-prairie-cannabis.jpg",
+    label: "Loyalty Card — Prairie Cannabis",
+    from: "from $40",
+    slug: "business-cards",
+    category: "Cards & Print",
+  },
+
+  // Flyers & Large Format
+  {
+    src: "/images/gallery/gallery-flyers-boxed-marketing.jpg",
+    label: "Marketing Flyers — Boxed Order",
+    from: "from $45",
+    slug: "flyers",
+    category: "Cards & Print",
+  },
+  {
+    src: "/images/gallery/gallery-flyer-pulse-strategies.jpg",
+    label: "Professional Flyer — Pulse Strategies CPA",
+    from: "from $45",
+    slug: "flyers",
+    category: "Cards & Print",
+  },
+  {
+    src: "/images/gallery/gallery-large-format-realtor-poster.jpg",
+    label: "Large Format Print — Kevin Appl REALTOR",
+    from: "from $30",
+    slug: "flyers",
+    category: "Cards & Print",
+  },
+
+  // Magnets
+  {
+    src: "/images/gallery/gallery-magnet-calendar-shuttle.jpg",
+    label: "Calendar Magnet — Prairie Path Shuttle",
+    from: "from $45",
+    slug: "vehicle-magnets",
+    category: "Magnets",
+  },
+
+  // Behind the Scenes
+  {
+    src: "/images/gallery/gallery-shop-roland-large-format.jpg",
+    label: "Roland TrueVIS — In-House Printing",
+    from: "Our Shop",
+    slug: "coroplast-signs",
+    category: "Behind the Scenes",
+  },
 ];
 
 export default function GalleryPage() {
