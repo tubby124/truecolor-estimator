@@ -107,8 +107,6 @@ const GALLERY_ITEMS = [
   },
 ];
 
-const CATEGORIES = ["All", "Signs", "Banners", "Magnets", "Cards & Print", "Displays"];
-
 export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-white">
@@ -119,25 +117,9 @@ export default function GalleryPage() {
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-[#1c1712] mb-3">Our Work</h1>
           <p className="text-gray-500 text-lg max-w-xl">
-            Real jobs. Real Saskatoon businesses. Every product shown here was
-            designed, printed, and picked up at 216 33rd St W.
+            Signs, banners, magnets, cards, and more — all designed, printed, and
+            picked up at 216 33rd St W, Saskatoon.
           </p>
-        </div>
-
-        {/* Category note — static for now, JS filter available if needed */}
-        <div className="flex flex-wrap gap-2 mb-10">
-          {CATEGORIES.map((cat) => (
-            <span
-              key={cat}
-              className={`px-4 py-2 rounded-full text-sm font-medium ${
-                cat === "All"
-                  ? "bg-[#1c1712] text-white"
-                  : "bg-[#f4efe9] text-gray-600"
-              }`}
-            >
-              {cat}
-            </span>
-          ))}
         </div>
 
         {/* Gallery grid */}
@@ -165,18 +147,6 @@ export default function GalleryPage() {
               </div>
             </Link>
           ))}
-        </div>
-
-        {/* Add photos note */}
-        <div className="mt-12 p-6 border border-dashed border-gray-200 rounded-xl text-center text-gray-400 text-sm">
-          <p className="font-medium text-gray-600 mb-1">More photos coming soon</p>
-          <p>
-            Drop real job photos in{" "}
-            <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">
-              public/images/gallery/
-            </code>{" "}
-            — they&apos;ll appear here automatically.
-          </p>
         </div>
 
         {/* CTA */}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteNav } from "@/components/site/SiteNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -9,14 +10,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Simple dark header */}
-      <header className="bg-[#1c1712] px-6 py-5">
-        <div className="max-w-4xl mx-auto">
-          <Link href="/" className="text-gray-300 hover:text-white text-sm transition-colors">
-            ← Back to True Color
-          </Link>
-        </div>
-      </header>
+      <SiteNav />
 
       <main className="max-w-4xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold text-[#1c1712] mb-4">Privacy Policy</h1>
@@ -93,7 +87,7 @@ export default function PrivacyPage() {
                 <strong>Vercel</strong> — website hosting (servers in North America)
               </li>
               <li>
-                <strong>Stripe</strong> — payment processing (PCI DSS compliant)
+                <strong>Clover</strong> — payment processing (PCI DSS compliant)
               </li>
               <li>
                 <strong>Supabase</strong> — secure order database
@@ -121,12 +115,7 @@ export default function PrivacyPage() {
         </div>
       </main>
 
-      <footer className="bg-[#1c1712] text-gray-500 text-xs text-center py-6 px-6">
-        © 2026 True Color Display Printing Ltd. · 216 33rd St W, Saskatoon SK ·{" "}
-        <Link href="/terms" className="hover:text-gray-300 transition-colors">
-          Terms
-        </Link>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

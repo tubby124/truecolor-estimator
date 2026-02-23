@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteNav } from "@/components/site/SiteNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -9,13 +10,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-[#1c1712] px-6 py-5">
-        <div className="max-w-4xl mx-auto">
-          <Link href="/" className="text-gray-300 hover:text-white text-sm transition-colors">
-            ← Back to True Color
-          </Link>
-        </div>
-      </header>
+      <SiteNav />
 
       <main className="max-w-4xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold text-[#1c1712] mb-4">Terms of Service</h1>
@@ -125,12 +120,7 @@ export default function TermsPage() {
         </div>
       </main>
 
-      <footer className="bg-[#1c1712] text-gray-500 text-xs text-center py-6 px-6">
-        © 2026 True Color Display Printing Ltd. · 216 33rd St W, Saskatoon SK ·{" "}
-        <Link href="/privacy" className="hover:text-gray-300 transition-colors">
-          Privacy Policy
-        </Link>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

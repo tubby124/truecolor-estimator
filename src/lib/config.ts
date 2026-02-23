@@ -6,7 +6,7 @@ export const LOGO_FILENAME = "truecolorlogo.webp";
 export const LOGO_PATH = `/${LOGO_FILENAME}`;
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolor-estimator-o2q38cgso-tubby124s-projects.vercel.app";
 
 // Full absolute URL used in emails (clients can't access relative paths)
 export function logoAbsoluteUrl(siteUrl?: string): string {
