@@ -28,17 +28,9 @@ export default async function StaffOrdersPage() {
 
       <main className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-[#1c1712]">Orders</h1>
-            <p className="text-gray-500 text-sm mt-1">Staff view — manage all orders</p>
-          </div>
-          <Link
-            href="/staff"
-            className="bg-amber-500 text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-amber-400 transition-colors whitespace-nowrap"
-          >
-            Make a Quote →
-          </Link>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#1c1712]">Orders</h1>
+          <p className="text-gray-500 text-sm mt-1">Staff view — manage all orders</p>
         </div>
 
         {fetchError ? (

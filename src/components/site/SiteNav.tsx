@@ -67,7 +67,7 @@ export function SiteNav() {
           {/* Logo */}
           <Link href="/" className="flex items-center shrink-0">
             <Image
-              src="/truecolorlogo.png"
+              src="/truecolorlogo.webp"
               alt="True Color Display Printing"
               width={140}
               height={40}
@@ -159,6 +159,14 @@ export function SiteNav() {
             >
               About
             </Link>
+
+            {/* Our Work — plain link */}
+            <Link
+              href="/gallery"
+              className="text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+            >
+              Our Work
+            </Link>
           </nav>
 
           {/* Right side: phone + icons + CTAs + hamburger */}
@@ -211,7 +219,7 @@ export function SiteNav() {
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <Link href="/" onClick={() => setDrawerOpen(false)}>
               <Image
-                src="/truecolorlogo.png"
+                src="/truecolorlogo.webp"
                 alt="True Color Display Printing"
                 width={120}
                 height={34}
@@ -282,6 +290,13 @@ export function SiteNav() {
                 className="block py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
               >
                 About Our Shop
+              </Link>
+              <Link
+                href="/gallery"
+                onClick={() => setDrawerOpen(false)}
+                className="block py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
+              >
+                Our Work
               </Link>
             </div>
 

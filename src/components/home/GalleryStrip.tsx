@@ -2,37 +2,39 @@ import Image from "next/image";
 import Link from "next/link";
 
 const GALLERY_IMAGES = [
+  // Real client work (4)
+  {
+    src: "/images/gallery/gallery-outdoor-banner-best-donairs.webp",
+    alt: "Outdoor storefront banner — Best Donairs, True Color Display Printing Saskatoon",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-vinyl-ayotte-plumbing.jpg",
+    alt: "Van vinyl branding — Ayotte Plumbing, True Color Display Printing Saskatoon",
+  },
+  {
+    src: "/images/gallery/gallery-window-decal-swiss-barber.webp",
+    alt: "Window decals — Swiss Barber, True Color Display Printing Saskatoon",
+  },
+  {
+    src: "/images/gallery/gallery-coroplast-realtor-keyshape.jpg",
+    alt: "Custom-shape coroplast sign — Boyes Group Realtor, True Color Display Printing Saskatoon",
+  },
+  // Product showcase (4)
   {
     src: "/images/products/product/coroplast-yard-sign-800x600.webp",
     alt: "Coroplast yard sign — True Color Display Printing Saskatoon",
-  },
-  {
-    src: "/images/products/product/coroplast-fence-construction-800x600.webp",
-    alt: "Coroplast fence construction sign — True Color Display Printing Saskatoon",
-  },
-  {
-    src: "/images/products/product/banner-vinyl-colorful-800x600.webp",
-    alt: "Colourful vinyl banner — True Color Display Printing Saskatoon",
   },
   {
     src: "/images/products/product/vehicle-magnets-800x600.webp",
     alt: "Vehicle magnets — True Color Display Printing Saskatoon",
   },
   {
-    src: "/images/products/product/magnet-truck-construction-800x600.webp",
-    alt: "Construction truck magnet — True Color Display Printing Saskatoon",
-  },
-  {
-    src: "/images/products/product/business-cards-800x600.webp",
-    alt: "Business cards — True Color Display Printing Saskatoon",
+    src: "/images/products/product/banner-vinyl-colorful-800x600.webp",
+    alt: "Colourful vinyl banner — True Color Display Printing Saskatoon",
   },
   {
     src: "/images/products/product/acp-aluminum-sign-800x600.webp",
     alt: "ACP aluminum sign — True Color Display Printing Saskatoon",
-  },
-  {
-    src: "/images/products/product/acp-sign-brick-wall-800x600.webp",
-    alt: "ACP sign on brick wall — True Color Display Printing Saskatoon",
   },
 ];
 
