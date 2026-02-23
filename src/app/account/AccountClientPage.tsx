@@ -147,7 +147,13 @@ export function AccountClientPage() {
         password,
       });
       if (error) throw error;
-      if (data.session) setSession(data.session as SessionData);
+      if (data.session) {
+        if (data.session.user?.email?.toLowerCase() === STAFF_EMAIL) {
+          router.replace("/staff/orders");
+          return;
+        }
+        setSession(data.session as SessionData);
+      }
     } catch (err) {
       setPwError(err instanceof Error ? err.message : "Invalid email or password.");
     } finally {
