@@ -139,6 +139,14 @@ export function SiteNav() {
                 </div>
               )}
             </div>
+
+            {/* Services — plain link */}
+            <Link
+              href="/services"
+              className="text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+            >
+              Services
+            </Link>
           </nav>
 
           {/* Right side: phone + My Orders + Cart + CTA + hamburger */}
@@ -237,6 +245,18 @@ export function SiteNav() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {/* Services */}
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Services</p>
+              <Link
+                href="/services"
+                onClick={() => setDrawerOpen(false)}
+                className="block py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
+              >
+                Design, Installation & More
+              </Link>
             </div>
 
             {/* Phone */}
