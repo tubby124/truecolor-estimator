@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { addToCart } from "@/lib/cart/cart";
 
 const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolor-estimator-o2q38cgso-tubby124s-projects.vercel.app";
 
 const STATUS_LABELS: Record<string, string> = {
   pending_payment: "Pending payment",
@@ -68,6 +69,24 @@ export function AccountClientPage() {
   const [mlLoading, setMlLoading] = useState(false);
   const [mlError, setMlError] = useState("");
 
+  // Tab + password state
+  const [activeTab, setActiveTab] = useState<"magic" | "password">("magic");
+  const [password, setPassword] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState("");
+  const [pwResetSent, setPwResetSent] = useState(false);
+
+  // Password reset state (for ?reset=1)
+  const [newPassword, setNewPassword] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetDone, setResetDone] = useState(false);
+
+  // Read ?reset=1 from URL on client side (avoids Suspense requirement)
+  const isReset =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("reset") === "1";
+
   useEffect(() => {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
     const supabase = createClient(SUPABASE_URL, anonKey);
@@ -122,6 +141,73 @@ export function AccountClientPage() {
     }
   }
 
+  async function handlePasswordSignIn() {
+    if (!email.trim() || !password) return;
+    setPwError("");
+    setPwLoading(true);
+    try {
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+      const supabase = createClient(SUPABASE_URL, anonKey);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) throw error;
+      if (data.session) setSession(data.session as SessionData);
+    } catch (err) {
+      setPwError(err instanceof Error ? err.message : "Invalid email or password.");
+    } finally {
+      setPwLoading(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      setPwError("Enter your email above first.");
+      return;
+    }
+    setPwError("");
+    setPwLoading(true);
+    try {
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+      const supabase = createClient(SUPABASE_URL, anonKey);
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase(),
+        { redirectTo: `${SITE_URL}/account/callback` }
+      );
+      if (error) throw error;
+      setPwResetSent(true);
+    } catch (err) {
+      setPwError(err instanceof Error ? err.message : "Could not send reset email.");
+    } finally {
+      setPwLoading(false);
+    }
+  }
+
+  async function handleSetNewPassword() {
+    if (!newPassword || newPassword.length < 8) {
+      setResetError("Password must be at least 8 characters.");
+      return;
+    }
+    setResetError("");
+    setResetLoading(true);
+    try {
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+      const supabase = createClient(SUPABASE_URL, anonKey);
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setResetDone(true);
+      // Clear ?reset=1 from URL and refresh session
+      window.history.replaceState({}, "", "/account");
+      const { data } = await supabase.auth.getSession();
+      if (data.session) setSession(data.session as SessionData);
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : "Could not update password.");
+    } finally {
+      setResetLoading(false);
+    }
+  }
+
   function handleReorder(order: Order) {
     order.order_items.forEach((item) => {
       addToCart({
@@ -164,53 +250,182 @@ export function AccountClientPage() {
         <main className="max-w-3xl mx-auto px-6 py-16">
           <h1 className="text-3xl font-bold text-[#1c1712] mb-2">Your orders</h1>
           <p className="text-gray-500 mb-10">
-            Enter your email to receive a login link &mdash; no password needed.
+            Sign in to view your order history and reorder with one click.
           </p>
 
-          {/* Magic link form */}
-          <div className="bg-[#f4efe9] rounded-2xl p-8 max-w-md mb-12">
-            <h2 className="font-bold text-[#1c1712] mb-4">Access your account</h2>
-            {sent ? (
-              <div className="text-center py-4">
-                <p className="font-semibold text-[#1c1712]">Check your inbox</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  We sent a login link to{" "}
-                  <span className="font-mono">{email}</span>
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1" htmlFor="email">
-                    Email address
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleMagicLink()}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                    placeholder="you@example.com"
-                  />
+          {/* Password reset block — shown when ?reset=1 is in URL */}
+          {isReset && (
+            <div className="bg-[#f4efe9] rounded-2xl p-8 max-w-md mb-12">
+              <h2 className="font-bold text-[#1c1712] mb-4">Set your new password</h2>
+              {resetDone ? (
+                <p className="text-[#1c1712] font-semibold">Password updated! Redirecting&hellip;</p>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1" htmlFor="newpw">
+                      New password (min 8 characters)
+                    </label>
+                    <input
+                      id="newpw"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                      placeholder="Enter new password"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSetNewPassword}
+                    disabled={resetLoading}
+                    className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
+                  >
+                    {resetLoading ? "Saving\u2026" : "Save password \u2192"}
+                  </button>
+                  {resetError && (
+                    <p className="text-red-500 text-xs">{resetError}</p>
+                  )}
                 </div>
-                <button
-                  onClick={handleMagicLink}
-                  disabled={mlLoading}
-                  className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
-                >
-                  {mlLoading ? "Sending\u2026" : "Send login link \u2192"}
-                </button>
-                {mlError && (
-                  <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
-                    {mlError}
-                  </p>
+              )}
+            </div>
+          )}
+
+          {/* Sign-in form */}
+          <div className="bg-[#f4efe9] rounded-2xl p-8 max-w-md mb-12">
+            <h2 className="font-bold text-[#1c1712] mb-4">Sign in to your account</h2>
+
+            {/* Tab switcher */}
+            <div className="flex rounded-lg overflow-hidden border border-gray-200 mb-5">
+              <button
+                onClick={() => setActiveTab("magic")}
+                className={`flex-1 py-2 text-sm font-semibold transition-colors ${
+                  activeTab === "magic"
+                    ? "bg-[#1c1712] text-white"
+                    : "bg-white text-gray-500 hover:text-[#1c1712]"
+                }`}
+              >
+                Email link
+              </button>
+              <button
+                onClick={() => setActiveTab("password")}
+                className={`flex-1 py-2 text-sm font-semibold transition-colors ${
+                  activeTab === "password"
+                    ? "bg-[#1c1712] text-white"
+                    : "bg-white text-gray-500 hover:text-[#1c1712]"
+                }`}
+              >
+                Password
+              </button>
+            </div>
+
+            {/* Magic link tab */}
+            {activeTab === "magic" && (
+              <>
+                {sent ? (
+                  <div className="text-center py-4">
+                    <p className="font-semibold text-[#1c1712]">Check your inbox</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      We sent a login link to{" "}
+                      <span className="font-mono">{email}</span>
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1" htmlFor="email">
+                        Email address
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleMagicLink()}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                        placeholder="you@example.com"
+                      />
+                    </div>
+                    <button
+                      onClick={handleMagicLink}
+                      disabled={mlLoading}
+                      className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
+                    >
+                      {mlLoading ? "Sending\u2026" : "Send login link \u2192"}
+                    </button>
+                    {mlError && (
+                      <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
+                        {mlError}
+                      </p>
+                    )}
+                  </div>
+                )}
+                <p className="text-xs text-gray-400 mt-3">
+                  We&apos;ll email you a one-click login link. No password required.
+                </p>
+              </>
+            )}
+
+            {/* Password tab */}
+            {activeTab === "password" && (
+              <div className="space-y-3">
+                {pwResetSent ? (
+                  <div className="text-center py-4">
+                    <p className="font-semibold text-[#1c1712]">Reset link sent!</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Check your inbox for a password reset link.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-email">
+                        Email address
+                      </label>
+                      <input
+                        id="pw-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                        placeholder="you@example.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-password">
+                        Password
+                      </label>
+                      <input
+                        id="pw-password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handlePasswordSignIn()}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                        placeholder="Your password"
+                      />
+                    </div>
+                    <button
+                      onClick={handlePasswordSignIn}
+                      disabled={pwLoading}
+                      className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
+                    >
+                      {pwLoading ? "Signing in\u2026" : "Sign in \u2192"}
+                    </button>
+                    {pwError && (
+                      <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
+                        {pwError}
+                      </p>
+                    )}
+                    <button
+                      onClick={handleForgotPassword}
+                      type="button"
+                      className="text-xs text-gray-400 hover:text-[#16C2F3] transition-colors w-full text-center"
+                    >
+                      Forgot password?
+                    </button>
+                  </>
                 )}
               </div>
             )}
-            <p className="text-xs text-gray-400 mt-3">
-              We&apos;ll email you a one-click login link. No password required.
-            </p>
           </div>
 
           {/* Help block */}

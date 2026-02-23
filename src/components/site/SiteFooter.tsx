@@ -37,6 +37,14 @@ export function SiteFooter() {
               <a href="tel:+13069548688" className="block hover:text-white transition-colors">
                 (306) 954-8688
               </a>
+              <a
+                href="https://www.instagram.com/truecolorprint"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block hover:text-white transition-colors"
+              >
+                Instagram @truecolorprint
+              </a>
               <a href="mailto:info@true-color.ca" className="block hover:text-white transition-colors">
                 info@true-color.ca
               </a>

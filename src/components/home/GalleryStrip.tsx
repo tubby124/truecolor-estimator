@@ -70,12 +70,12 @@ export function GalleryStrip() {
             See full gallery →
           </Link>
           <a
-            href="https://instagram.com/truecolorprinting"
+            href="https://www.instagram.com/truecolorprint"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 text-sm hover:text-gray-200 transition-colors"
           >
-            Follow @truecolorprinting on Instagram
+            Follow @truecolorprint on Instagram
           </a>
         </div>
       </div>

@@ -101,9 +101,9 @@ export function ProductConfigurator({ product }: Props) {
     const designLabel =
       designStatus !== "PRINT_READY"
         ? ` | ${
-            designStatus === "NEED_DESIGN"
+            designStatus === "FULL_DESIGN"
               ? "Full Design"
-              : designStatus === "NEED_REVISION"
+              : designStatus === "MINOR_EDIT"
               ? "Minor Edits"
               : "Logo Vectorization"
           }`
@@ -342,9 +342,9 @@ export function ProductConfigurator({ product }: Props) {
         <div className="flex flex-col gap-2">
           {[
             { label: "I have a print-ready file", value: "PRINT_READY", note: "" },
-            { label: "Minor edits to my file", value: "NEED_REVISION", note: "+$35" },
-            { label: "Design from scratch", value: "NEED_DESIGN", note: "+$50" },
-            { label: "Logo vectorization", value: "LOGO_ONLY", note: "+$75" },
+            { label: "Minor edits to my file", value: "MINOR_EDIT", note: "+$35" },
+            { label: "Design from scratch", value: "FULL_DESIGN", note: "+$50" },
+            { label: "Logo vectorization", value: "LOGO_RECREATION", note: "+$75" },
           ].map((opt) => (
             <button
               key={opt.value}

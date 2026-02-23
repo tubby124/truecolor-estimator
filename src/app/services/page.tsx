@@ -67,22 +67,28 @@ export default function ServicesPage() {
           <ServiceCard
             icon="&#x1F527;"
             heading="Installation &amp; Application"
-            description="Need us to put it up? We install vinyl decals, window graphics, and vehicle wraps in Saskatoon."
+            description="Need us to put it up? We install vinyl decals, window graphics, and vehicle wraps in Saskatoon. Flat rate $75 for most installations in the city."
             details={[
               "Storefront window decals",
               "Vinyl lettering",
               "Vehicle graphic application",
             ]}
+            detailsNote="$75 flat rate for most Saskatoon installations. Complex or large-format jobs quoted individually."
             cta="Get a quote →"
             ctaHref="/quote-request?product=installation"
           />
 
           <ServiceCard
             icon="&#x1FAA9;"
-            heading="Window Decals &amp; Vinyl Stickers"
-            description="Perforated window film (see-through from inside), cut vinyl lettering for storefronts, sticker packs for events and branding."
-            details={[]}
-            detailsNote="Coming soon to the online estimator. Pricing varies by size and quantity."
+            heading="Window Decals &amp; Vinyl"
+            description="From see-through window film to storefront lettering — we carry the materials to get it done right."
+            details={[
+              "Perforated see-through window film",
+              "Clear removable vinyl decals",
+              "Matte vinyl",
+              "Cut vinyl lettering for storefronts",
+            ]}
+            detailsNote="Pricing varies by size, material, and complexity — request an exact quote below."
             cta="Ask for a quote →"
             ctaHref="/quote-request?product=window-decals"
           />
@@ -90,11 +96,11 @@ export default function ServicesPage() {
           <ServiceCard
             icon="&#x1F3A8;"
             heading="Graphic Design Services"
-            description="Don&apos;t have a logo or layout? Our in-house designer handles full logo creation, brand packages, and print layout from scratch."
+            description="Don&apos;t have a logo or layout? Our in-house designer handles everything from quick edits to full original logo creation."
             details={[
-              "Logo design — $75\u2013$200",
-              "Full brand package — $200\u2013$400",
-              "Print layout (flyer / banner / card) — $35\u2013$75",
+              "Logo tweak / minor edits — $20\u2013$35",
+              "Print layout (flyer, banner, card) — $35\u2013$50",
+              "Original logo design from scratch — $50\u2013$75",
             ]}
             cta="Book a design consultation →"
             ctaHref="/quote-request?product=graphic-design"
