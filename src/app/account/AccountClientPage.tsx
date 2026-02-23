@@ -93,12 +93,25 @@ export function AccountClientPage() {
   useEffect(() => {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
     const supabase = createClient(SUPABASE_URL, anonKey);
+
+    // getSession covers the normal case (already logged in, or coming back from callback)
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         setSession(data.session as SessionData);
       }
       setLoading(false);
     });
+
+    // onAuthStateChange covers the edge case where the user lands directly on
+    // /account with #access_token= in the hash (e.g. if emailRedirectTo changes)
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setSession(session as SessionData);
+        setLoading(false);
+      }
+    });
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
