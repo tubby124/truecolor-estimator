@@ -73,11 +73,16 @@ export function AccountClientPage() {
   const [rateLimitHit, setRateLimitHit] = useState(false);
 
   // Tab + password state
-  const [activeTab, setActiveTab] = useState<"magic" | "password">("magic");
+  const [activeTab, setActiveTab] = useState<"magic" | "password">("password");
   const [password, setPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState("");
   const [pwResetSent, setPwResetSent] = useState(false);
+
+  // Sign-up mode (inside the password tab)
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [signUpDone, setSignUpDone] = useState(false);
 
   // Password reset state (for ?reset=1)
   const [newPassword, setNewPassword] = useState("");
@@ -178,6 +183,39 @@ export function AccountClientPage() {
       if (data.session) setSession(data.session as SessionData);
     } catch (err) {
       setPwError(err instanceof Error ? err.message : "Invalid email or password.");
+    } finally {
+      setPwLoading(false);
+    }
+  }
+
+  async function handleSignUp() {
+    if (!email.trim() || !password) return;
+    if (password !== confirmPassword) {
+      setPwError("Passwords don't match.");
+      return;
+    }
+    if (password.length < 8) {
+      setPwError("Password must be at least 8 characters.");
+      return;
+    }
+    setPwError("");
+    setPwLoading(true);
+    try {
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+      const supabase = createClient(SUPABASE_URL, anonKey);
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) throw error;
+      // If session returned immediately (email confirmation disabled), log them in
+      if (data.session) {
+        setSession(data.session as SessionData);
+      } else {
+        setSignUpDone(true);
+      }
+    } catch (err) {
+      setPwError(err instanceof Error ? err.message : "Could not create account.");
     } finally {
       setPwLoading(false);
     }
@@ -420,6 +458,19 @@ export function AccountClientPage() {
                       Check your inbox for a password reset link.
                     </p>
                   </div>
+                ) : signUpDone ? (
+                  <div className="text-center py-4">
+                    <p className="font-semibold text-[#1c1712]">Account created!</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Check your inbox to confirm your email, then sign in above.
+                    </p>
+                    <button
+                      onClick={() => { setSignUpDone(false); setIsSignUp(false); }}
+                      className="mt-3 text-sm text-[#16C2F3] font-semibold hover:underline"
+                    >
+                      Back to sign in
+                    </button>
+                  </div>
                 ) : (
                   <>
                     <div>
@@ -437,37 +488,66 @@ export function AccountClientPage() {
                     </div>
                     <div>
                       <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-password">
-                        Password
+                        Password {isSignUp && <span className="text-gray-400">(min 8 characters)</span>}
                       </label>
                       <input
                         id="pw-password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handlePasswordSignIn()}
+                        onKeyDown={(e) => e.key === "Enter" && !isSignUp && handlePasswordSignIn()}
                         className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                        placeholder="Your password"
+                        placeholder={isSignUp ? "Choose a password" : "Your password"}
                       />
                     </div>
+                    {isSignUp && (
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-confirm">
+                          Confirm password
+                        </label>
+                        <input
+                          id="pw-confirm"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleSignUp()}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                          placeholder="Repeat password"
+                        />
+                      </div>
+                    )}
                     <button
-                      onClick={handlePasswordSignIn}
+                      onClick={isSignUp ? handleSignUp : handlePasswordSignIn}
                       disabled={pwLoading}
                       className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
                     >
-                      {pwLoading ? "Signing in\u2026" : "Sign in \u2192"}
+                      {pwLoading
+                        ? isSignUp ? "Creating account\u2026" : "Signing in\u2026"
+                        : isSignUp ? "Create account \u2192" : "Sign in \u2192"}
                     </button>
                     {pwError && (
                       <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
                         {pwError}
                       </p>
                     )}
-                    <button
-                      onClick={handleForgotPassword}
-                      type="button"
-                      className="text-xs text-gray-400 hover:text-[#16C2F3] transition-colors w-full text-center"
-                    >
-                      Forgot password?
-                    </button>
+                    <div className="flex items-center justify-between pt-1">
+                      {!isSignUp && (
+                        <button
+                          onClick={handleForgotPassword}
+                          type="button"
+                          className="text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
+                        >
+                          Forgot password?
+                        </button>
+                      )}
+                      <button
+                        onClick={() => { setIsSignUp(!isSignUp); setPwError(""); setConfirmPassword(""); }}
+                        type="button"
+                        className="text-xs text-[#16C2F3] font-semibold hover:underline ml-auto"
+                      >
+                        {isSignUp ? "Already have an account? Sign in" : "New here? Create account"}
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
