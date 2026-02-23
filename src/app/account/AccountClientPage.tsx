@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -54,7 +55,10 @@ interface SessionData {
   user: { email?: string };
 }
 
+const STAFF_EMAIL = "info@true-color.ca";
+
 export function AccountClientPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<SessionData | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -88,15 +92,23 @@ export function AccountClientPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        setSession(data.session as SessionData);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email?.toLowerCase() === STAFF_EMAIL) {
+        router.replace("/staff/orders");
+        return;
       }
-      setLoading(false);
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) setSession(data.session as SessionData);
+        setLoading(false);
+      });
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
+        if (session.user?.email?.toLowerCase() === STAFF_EMAIL) {
+          router.replace("/staff/orders");
+          return;
+        }
         setSession(session as SessionData);
         setLoading(false);
       }

@@ -12,12 +12,20 @@ export function StaffQuoteButton() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getSession().then(({ data }) => {
-      setIsStaff(data.session?.user?.email?.toLowerCase() === STAFF_EMAIL);
+    // getUser() makes a verified API call — more reliable than getSession()
+    // which only reads from storage and may return a stale/incomplete user object
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsStaff(user?.email?.toLowerCase() === STAFF_EMAIL);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsStaff(session?.user?.email?.toLowerCase() === STAFF_EMAIL);
+      if (session) {
+        supabase.auth.getUser().then(({ data: { user } }) => {
+          setIsStaff(user?.email?.toLowerCase() === STAFF_EMAIL);
+        });
+      } else {
+        setIsStaff(false);
+      }
     });
 
     return () => listener.subscription.unsubscribe();
