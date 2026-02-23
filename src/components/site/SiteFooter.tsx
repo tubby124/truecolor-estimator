@@ -47,7 +47,7 @@ export function SiteFooter() {
           <div>
             <h3 className="text-white text-sm font-semibold mb-4">Quick Links</h3>
             <div className="space-y-2 text-sm">
-              <Link href="/staff" className="block hover:text-white transition-colors">
+              <Link href="/quote" className="block hover:text-white transition-colors">
                 Get a Price
               </Link>
               <Link href="/privacy" className="block hover:text-white transition-colors">
@@ -56,9 +56,10 @@ export function SiteFooter() {
               <Link href="/terms" className="block hover:text-white transition-colors">
                 Terms of Service
               </Link>
-              {/* TODO: Replace # with real Google Business review shortlink from Google Business Profile dashboard → "Get more reviews" button */}
               <a
-                href="#"
+                href="https://g.page/r/CZH6HlbNejQAEAE/review"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block hover:text-white transition-colors"
               >
                 ⭐ Leave a Google Review

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { CartIcon } from "@/components/site/CartIcon";
 
 export function SiteNav() {
   return (
@@ -17,7 +18,7 @@ export function SiteNav() {
           />
         </Link>
 
-        {/* Right side: phone + CTA */}
+        {/* Right side: cart + phone + CTA */}
         <div className="flex items-center gap-3 sm:gap-5">
           <a
             href="tel:+13069548688"
@@ -25,8 +26,9 @@ export function SiteNav() {
           >
             (306) 954-8688
           </a>
+          <CartIcon />
           <Link
-            href="/staff"
+            href="/quote"
             className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap"
           >
             Get a Price →

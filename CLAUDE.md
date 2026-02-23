@@ -142,7 +142,7 @@ When `includePaymentLink=true`:
 - Token encodes: `{ amountCents, description, exp (30d), v: 1 }`
 - Token signed with `PAYMENT_TOKEN_SECRET` (HMAC-SHA256)
 
-`src/lib/payment/clover.ts` — `POST https://scl.clover.com/v1/checkouts` with `Authorization: Bearer CLOVER_ECOMM_PRIVATE_KEY`
+`src/lib/payment/clover.ts` — `POST https://www.clover.com/invoicingcheckoutservice/v1/checkouts` with `Authorization: Bearer CLOVER_ECOMM_PRIVATE_KEY` + `X-Clover-Merchant-Id` header
 
 `src/lib/payment/token.ts` — `encodePaymentToken(totalWithGst, description)` / `decodePaymentToken(token)`
 
@@ -267,6 +267,7 @@ When Spicers data arrives: update `materials.v1.csv`, set `is_placeholder=FALSE`
 10. **Commits = git push = Vercel redeploy.** One concern per commit. Conventional Commits format.
 11. **Payment tokens are HMAC-signed.** Never trust raw amount from URL. Always decode via `decodePaymentToken()`.
 12. **Clover filter syntax = multiple `filter=` params.** Do NOT join with `AND` — it breaks the API.
+13. **Next.js `redirect()` MUST be outside try/catch.** It works by throwing `NEXT_REDIRECT` internally. If you wrap it in a try/catch, the catch block intercepts the throw and the redirect never fires — you get ErrorPage instead. Always store the URL in a variable inside try, then call `redirect(url)` after the block.
 
 ---
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { ReviewsSection } from "@/components/home/ReviewsSection";
 
 export const metadata: Metadata = {
   title: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
@@ -19,42 +20,42 @@ const PRODUCTS = [
     from: "from $30",
     desc: "Job site, yard, and directional signs. Survives Saskatchewan winters.",
     img: "/images/products/product/coroplast-yard-sign-800x600.webp",
-    href: "/staff",
+    href: "/products/coroplast-signs",
   },
   {
     name: "Vinyl Banners",
     from: "from $45",
     desc: "13oz vinyl for events, storefronts, and trade shows. Any size.",
     img: "/images/products/product/banner-vinyl-colorful-800x600.webp",
-    href: "/staff",
+    href: "/products/vinyl-banners",
   },
   {
     name: "Business Cards",
     from: "from $40",
     desc: "250 cards, 14pt gloss stock. Single or double-sided.",
     img: "/images/products/product/business-cards-800x600.webp",
-    href: "/staff",
+    href: "/products/business-cards",
   },
   {
     name: "Flyers",
     from: "from $45",
     desc: "100 flyers on 80lb gloss. Sharp colour, clean finish.",
     img: "/images/products/product/flyers-stack-800x600.webp",
-    href: "/staff",
+    href: "/products/flyers",
   },
   {
     name: "Vehicle Magnets",
     from: "from $45",
     desc: "30mil magnets for any vehicle. Custom size, full colour.",
     img: "/images/products/product/vehicle-magnets-800x600.webp",
-    href: "/staff",
+    href: "/products/vehicle-magnets",
   },
   {
     name: "ACP Aluminum Signs",
     from: "from $60",
     desc: "3mm aluminum composite. Indoor or outdoor, built to last.",
     img: "/images/products/product/acp-aluminum-sign-800x600.webp",
-    href: "/staff",
+    href: "/products/acp-signs",
   },
 ];
 
@@ -116,7 +117,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
-              href="/staff"
+              href="/quote"
               className="bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors"
             >
               See Exact Prices →
@@ -190,7 +191,7 @@ export default function HomePage() {
             <p className="text-sm text-gray-500">Economy stand from $219. Banner included.</p>
           </div>
           <Link
-            href="/staff"
+            href="/products/retractable-banners"
             className="text-[#16C2F3] text-sm font-bold whitespace-nowrap hover:underline"
           >
             See price →
@@ -228,6 +229,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
+      <ReviewsSection />
 
       {/* ── PITCH BLOCK — Hormozi style ───────────────────────────────────────── */}
       <section className="px-6 py-16 md:py-20">
@@ -273,7 +277,7 @@ export default function HomePage() {
           </blockquote>
 
           <Link
-            href="/staff"
+            href="/quote"
             className="inline-block bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors"
           >
             Get My Exact Price →

@@ -194,17 +194,24 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   }
 
   // ── STEP 6: Apply minimum charge ──────────────────────────────────────────
-  let effectiveBase = basePrice;
+  // For sqft-priced products: compare total order price (unit price × qty) against minimum.
+  // This ensures bulk orders (e.g. 30 small signs) aren't penalized — the minimum
+  // applies to the whole job, not to each unit individually.
+  const totalOrderBase = isFixedSize ? basePrice : round2(basePrice * qty);
+  let effectiveBase = totalOrderBase;
   let minChargeApplied = false;
-  if (minCharge > 0 && basePrice < minCharge) {
+  if (minCharge > 0 && totalOrderBase < minCharge) {
     effectiveBase = minCharge;
     minChargeApplied = true;
-    // Adjust the first line item to reflect the minimum
     if (lineItems.length > 0) {
       lineItems[0].unit_price = minCharge;
       lineItems[0].line_total = minCharge;
       lineItems[0].description += ` (min charge $${minCharge.toFixed(2)} applied)`;
     }
+  } else if (!isFixedSize && qty > 1 && lineItems.length > 0) {
+    // Update line item to show all units correctly (total clears minimum)
+    lineItems[0].qty = qty;
+    lineItems[0].line_total = totalOrderBase;
   }
 
   // ── STEP 7: Design fee ────────────────────────────────────────────────────
