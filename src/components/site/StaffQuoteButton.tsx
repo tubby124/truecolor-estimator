@@ -2,23 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 
-const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
+const STAFF_EMAIL = "info@true-color.ca";
 
 export function StaffQuoteButton() {
   const [isStaff, setIsStaff] = useState(false);
 
   useEffect(() => {
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-    const supabase = createClient(SUPABASE_URL, anonKey);
+    const supabase = createClient();
 
     supabase.auth.getSession().then(({ data }) => {
-      setIsStaff(data.session?.user?.email === "info@true-color.ca");
+      setIsStaff(data.session?.user?.email?.toLowerCase() === STAFF_EMAIL);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsStaff(session?.user?.email === "info@true-color.ca");
+      setIsStaff(session?.user?.email?.toLowerCase() === STAFF_EMAIL);
     });
 
     return () => listener.subscription.unsubscribe();

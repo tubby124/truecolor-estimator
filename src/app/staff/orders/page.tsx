@@ -35,9 +35,9 @@ export default async function StaffOrdersPage() {
           </div>
           <Link
             href="/staff"
-            className="text-sm text-gray-500 hover:text-[#16C2F3] transition-colors"
+            className="bg-amber-500 text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-amber-400 transition-colors whitespace-nowrap"
           >
-            ← Back to estimator
+            Make a Quote →
           </Link>
         </div>
 

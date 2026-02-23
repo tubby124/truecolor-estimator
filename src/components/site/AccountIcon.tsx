@@ -3,16 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
-
-const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
+import { createClient } from "@/lib/supabase/client";
 
 export function AccountIcon() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-    const supabase = createClient(SUPABASE_URL, anonKey);
+    const supabase = createClient();
     supabase.auth.getSession().then(({ data }) => {
       setLoggedIn(!!data.session);
     });

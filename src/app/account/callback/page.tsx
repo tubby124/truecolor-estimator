@@ -20,17 +20,14 @@
  */
 
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 import type { EmailOtpType } from "@supabase/supabase-js";
-
-const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
 
 export default function CallbackPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-    const supabase = createClient(SUPABASE_URL, anonKey);
+    const supabase = createClient();
 
     // ── PKCE flow (Pro plan): token arrives as ?token_hash= ────────────────
     const searchParams = new URLSearchParams(window.location.search);

@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { addToCart } from "@/lib/cart/cart";
 
-const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolor-estimator-o2q38cgso-tubby124s-projects.vercel.app";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -87,8 +86,7 @@ export function AccountClientPage() {
     new URLSearchParams(window.location.search).get("reset") === "1";
 
   useEffect(() => {
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-    const supabase = createClient(SUPABASE_URL, anonKey);
+    const supabase = createClient();
 
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
@@ -122,8 +120,7 @@ export function AccountClientPage() {
   }, [session]);
 
   async function handleSignOut() {
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-    const supabase = createClient(SUPABASE_URL, anonKey);
+    const supabase = createClient();
     await supabase.auth.signOut();
     setSession(null);
     setOrders([]);
@@ -134,8 +131,7 @@ export function AccountClientPage() {
     setPwError("");
     setPwLoading(true);
     try {
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-      const supabase = createClient(SUPABASE_URL, anonKey);
+      const supabase = createClient();
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
@@ -162,8 +158,7 @@ export function AccountClientPage() {
     setPwError("");
     setPwLoading(true);
     try {
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-      const supabase = createClient(SUPABASE_URL, anonKey);
+      const supabase = createClient();
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
@@ -194,8 +189,7 @@ export function AccountClientPage() {
     setPwError("");
     setPwLoading(true);
     try {
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-      const supabase = createClient(SUPABASE_URL, anonKey);
+      const supabase = createClient();
       const { error } = await supabase.auth.resetPasswordForEmail(
         email.trim().toLowerCase(),
         { redirectTo: `${SITE_URL}/account/callback` }
@@ -217,8 +211,7 @@ export function AccountClientPage() {
     setResetError("");
     setResetLoading(true);
     try {
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
-      const supabase = createClient(SUPABASE_URL, anonKey);
+      const supabase = createClient();
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       setResetDone(true);
