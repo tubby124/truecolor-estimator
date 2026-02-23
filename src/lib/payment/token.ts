@@ -24,6 +24,7 @@ interface TokenPayload {
   d: string;   // description
   e: number;   // expiry timestamp (ms since epoch)
   em?: string; // customer email (optional)
+  r?: string;  // redirect URL after payment (optional)
 }
 
 function sign(encoded: string): string {
@@ -34,7 +35,12 @@ function sign(encoded: string): string {
  * Encodes a payment token. amountDollars is the pre-GST sell price;
  * totalWithGst is what gets stored so the customer pays the right amount.
  */
-export function encodePaymentToken(totalWithGst: number, description: string, customerEmail?: string): string {
+export function encodePaymentToken(
+  totalWithGst: number,
+  description: string,
+  customerEmail?: string,
+  redirectUrl?: string,
+): string {
   const expiry = Date.now() + TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
   const payload: TokenPayload = {
     v: TOKEN_VERSION,
@@ -42,6 +48,7 @@ export function encodePaymentToken(totalWithGst: number, description: string, cu
     d: description,
     e: expiry,
     ...(customerEmail ? { em: customerEmail } : {}),
+    ...(redirectUrl ? { r: redirectUrl } : {}),
   };
   const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = sign(encoded);
@@ -56,6 +63,7 @@ export function decodePaymentToken(token: string): {
   amountCents: number;
   description: string;
   customerEmail?: string;
+  redirectUrl?: string;
 } {
   const dot = token.lastIndexOf(".");
   if (dot === -1) throw new Error("Invalid token format");
@@ -79,5 +87,6 @@ export function decodePaymentToken(token: string): {
     amountCents: payload.a,
     description: payload.d,
     customerEmail: payload.em,
+    redirectUrl: payload.r,
   };
 }

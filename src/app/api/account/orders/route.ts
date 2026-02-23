@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { encodePaymentToken } from "@/lib/payment/token";
 
 const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
 
@@ -77,5 +78,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: ordersErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ orders: orders ?? [] });
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolor-estimator.vercel.app";
+
+  const ordersWithPayUrl = (orders ?? []).map((order) => {
+    let pay_url: string | null = null;
+    if (order.status === "pending_payment" && order.payment_method === "clover_card") {
+      try {
+        const token = encodePaymentToken(
+          order.total,
+          `Order ${order.order_number}`,
+          user.email ?? undefined,
+          `${siteUrl}/order-confirmed?oid=${order.id}`,
+        );
+        pay_url = `/pay/${token}`;
+      } catch {
+        // Non-fatal — payment token secret may not be configured
+      }
+    }
+    return { ...order, pay_url };
+  });
+
+  return NextResponse.json({ orders: ordersWithPayUrl });
 }

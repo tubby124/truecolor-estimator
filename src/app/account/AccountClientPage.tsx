@@ -47,6 +47,7 @@ interface Order {
   created_at: string;
   is_rush: boolean;
   payment_method: string;
+  pay_url: string | null;
   order_items: OrderItem[];
 }
 
@@ -585,6 +586,15 @@ export function AccountClientPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
+                    {order.pay_url && order.status === "pending_payment" && (
+                      <a
+                        href={order.pay_url}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-sm font-bold px-4 py-2 rounded-lg bg-[#16C2F3] text-white hover:bg-[#0fb0dd] transition-colors whitespace-nowrap"
+                      >
+                        Complete Payment &rarr;
+                      </a>
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
