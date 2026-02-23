@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
             <p style="font-weight: bold; color: #1c1712; margin: 0 0 8px;">Message:</p>
             <p style="margin: 0; white-space: pre-wrap; color: #333;">${description}</p>
           </div>
-          ${fileName ? `<p style="margin-top: 12px; font-size: 14px; color: #666;">File attached: <strong>${fileName}</strong></p>` : ""}
+          ${fileName ? `<p style="margin-top: 12px; font-size: 14px; color: #666;">FILE_PLACEHOLDER</p>` : ""}
         </div>
         <div style="background: #f4efe9; padding: 16px 30px; font-size: 12px; color: #888;">
           Reply directly to this email to respond to ${name}.
@@ -62,16 +63,37 @@ export async function POST(req: NextRequest) {
       </div>
     `;
 
-    // Build attachments
-    type MailAttachment = { filename: string; content: string; encoding: string };
-    const attachments: MailAttachment[] = [];
+    // Upload artwork file to Supabase Storage (non-fatal)
+    let fileSection = fileName ? `File: <strong>${fileName}</strong>` : "";
     if (fileBase64 && fileName) {
-      attachments.push({
-        filename: fileName,
-        content: fileBase64.split(",")[1] ?? fileBase64, // strip data URI prefix if present
-        encoding: "base64",
-      });
+      try {
+        const supabase = createServiceClient();
+        const rawBase64 = fileBase64.split(",")[1] ?? fileBase64;
+        const mimeType = fileBase64.split(";")[0].split(":")[1] ?? "application/octet-stream";
+        const uuid = crypto.randomUUID();
+        const path = `quote-requests/${uuid}/${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const buffer = Buffer.from(rawBase64, "base64");
+
+        const { error: uploadError } = await supabase.storage
+          .from("print-files")
+          .upload(path, buffer, { contentType: mimeType, upsert: false });
+
+        if (uploadError) {
+          console.error("[quote-request] storage upload failed:", uploadError.message);
+        } else {
+          const { data: signed } = await supabase.storage
+            .from("print-files")
+            .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
+          if (signed?.signedUrl) {
+            fileSection = `<a href="${signed.signedUrl}" style="color: #16C2F3; font-weight: bold;">Download: ${fileName}</a>`;
+          }
+        }
+      } catch (storageErr) {
+        console.error("[quote-request] storage error:", storageErr);
+      }
     }
+
+    const htmlWithFile = html.replace("FILE_PLACEHOLDER", fileSection);
 
     // Send to staff
     await transporter.sendMail({
@@ -79,8 +101,7 @@ export async function POST(req: NextRequest) {
       to: "info@true-color.ca",
       replyTo: email,
       subject,
-      html,
-      attachments,
+      html: htmlWithFile,
     });
 
     // Send confirmation to customer
