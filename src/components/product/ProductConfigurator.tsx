@@ -20,6 +20,9 @@ export function ProductConfigurator({ product }: Props) {
   const [price, setPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [designStatus, setDesignStatus] = useState<string>("PRINT_READY");
+  const [addonQtys, setAddonQtys] = useState<Record<string, number>>({});
+  const [selectedTier, setSelectedTier] = useState(0);
 
   const effectiveWidth = isCustom
     ? parseFloat(customW) || 0
@@ -35,17 +38,21 @@ export function ProductConfigurator({ product }: Props) {
     if (!effectiveWidth || !effectiveHeight) return;
     setLoading(true);
     try {
+      const effectiveMaterialCode = product.tierPresets
+        ? product.tierPresets[selectedTier]?.material_code ?? product.material_code
+        : product.material_code;
+
       const res = await fetch("/api/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           category: product.category,
-          material_code: product.material_code,
+          material_code: effectiveMaterialCode,
           width_in: effectiveWidth,
           height_in: effectiveHeight,
           sides,
           qty: effectiveQty,
-          design_status: "PRINT_READY",
+          design_status: designStatus,
         }),
       });
       const data = await res.json();
@@ -60,18 +67,27 @@ export function ProductConfigurator({ product }: Props) {
   }, [
     product.category,
     product.material_code,
+    product.tierPresets,
     effectiveWidth,
     effectiveHeight,
     sides,
     effectiveQty,
+    designStatus,
+    selectedTier,
   ]);
 
   useEffect(() => {
     fetchPrice();
   }, [fetchPrice]);
 
-  const gst = price != null ? price * 0.05 : null;
-  const total = price != null && gst != null ? price + gst : null;
+  const addonTotal = product.addons
+    ? product.addons.reduce(
+        (sum, addon) => sum + (addonQtys[addon.label] || 0) * addon.unitPrice,
+        0
+      )
+    : 0;
+  const gst = price != null ? (price + addonTotal) * 0.05 : null;
+  const total = price != null && gst != null ? price + addonTotal + gst : null;
 
   // Build a human-readable label
   const sizeLabel = isCustom
@@ -82,11 +98,22 @@ export function ProductConfigurator({ product }: Props) {
 
   function handleAddToCart() {
     if (price == null) return;
+    const designLabel =
+      designStatus !== "PRINT_READY"
+        ? ` | ${
+            designStatus === "NEED_DESIGN"
+              ? "Full Design"
+              : designStatus === "NEED_REVISION"
+              ? "Minor Edits"
+              : "Logo Vectorization"
+          }`
+        : "";
+    const label = `${sizeLabel} — ${sidesLabel} ${qtyLabel}${designLabel}`;
     addToCart({
       product_name: product.name,
       product_slug: product.slug,
       category: product.category,
-      label: `${sizeLabel} — ${sidesLabel} ${qtyLabel}`,
+      label,
       config: {
         category: product.category,
         material_code: product.material_code,
@@ -94,7 +121,10 @@ export function ProductConfigurator({ product }: Props) {
         height_in: effectiveHeight,
         sides,
         qty: effectiveQty,
-        design_status: "PRINT_READY",
+        design_status: designStatus,
+        addons: Object.entries(addonQtys)
+          .filter(([, qty]) => qty > 0)
+          .map(([addonLabel, addonQty]) => `${addonLabel} ×${addonQty}`),
       },
       sell_price: price,
       qty: effectiveQty,
@@ -111,8 +141,30 @@ export function ProductConfigurator({ product }: Props) {
         <p className="text-gray-500 text-sm mt-1">Starting from {product.fromPrice}</p>
       </div>
 
-      {/* Size presets — only shown for sqft products */}
-      {product.sizePresets.length > 1 && (
+      {/* Tier selector (retractable banners / tiered products) */}
+      {product.tierPresets && (
+        <div>
+          <p className="text-sm font-semibold text-[#1c1712] mb-2">Select your stand</p>
+          <div className="flex flex-col gap-2">
+            {product.tierPresets.map((tier, i) => (
+              <button
+                key={tier.label}
+                onClick={() => setSelectedTier(i)}
+                className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-colors ${
+                  selectedTier === i
+                    ? "bg-[#1c1712] text-white border-[#1c1712]"
+                    : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+                }`}
+              >
+                {tier.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Size presets — only shown for sqft products without tierPresets */}
+      {!product.tierPresets && product.sizePresets.length > 1 && (
         <div>
           <p className="text-sm font-semibold text-[#1c1712] mb-2">Size</p>
           <div className="flex flex-wrap gap-2">
@@ -237,6 +289,87 @@ export function ProductConfigurator({ product }: Props) {
         )}
       </div>
 
+      {/* Add-ons (shown only when product has addons) */}
+      {product.addons && product.addons.length > 0 && (
+        <div>
+          <p className="text-sm font-semibold text-[#1c1712] mb-2">Add-ons</p>
+          <div className="space-y-2">
+            {product.addons.map((addon) => (
+              <div
+                key={addon.label}
+                className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-3"
+              >
+                <div>
+                  <span className="text-sm font-medium text-[#1c1712]">{addon.label}</span>
+                  <span className="text-xs text-gray-400 ml-2">${addon.unitPrice.toFixed(2)} each</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      setAddonQtys((prev) => ({
+                        ...prev,
+                        [addon.label]: Math.max(0, (prev[addon.label] || 0) - (addon.step || 1)),
+                      }))
+                    }
+                    className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center text-sm font-semibold">
+                    {addonQtys[addon.label] || 0}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setAddonQtys((prev) => ({
+                        ...prev,
+                        [addon.label]: (prev[addon.label] || 0) + (addon.step || 1),
+                      }))
+                    }
+                    className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Design help */}
+      <div>
+        <p className="text-sm font-semibold text-[#1c1712] mb-2">Do you have a design file?</p>
+        <div className="flex flex-col gap-2">
+          {[
+            { label: "I have a print-ready file", value: "PRINT_READY", note: "" },
+            { label: "Minor edits to my file", value: "NEED_REVISION", note: "+$35" },
+            { label: "Design from scratch", value: "NEED_DESIGN", note: "+$50" },
+            { label: "Logo vectorization", value: "LOGO_ONLY", note: "+$75" },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setDesignStatus(opt.value)}
+              className={`flex items-center justify-between px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+                designStatus === opt.value
+                  ? "bg-[#1c1712] text-white border-[#1c1712]"
+                  : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+              }`}
+            >
+              <span>{opt.label}</span>
+              {opt.note && (
+                <span
+                  className={`text-xs ${
+                    designStatus === opt.value ? "text-blue-200" : "text-gray-400"
+                  }`}
+                >
+                  {opt.note}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Live price display */}
       <div className="bg-[#f4efe9] rounded-xl p-4">
         {loading ? (
@@ -246,6 +379,11 @@ export function ProductConfigurator({ product }: Props) {
             <p className="text-3xl font-bold text-[#1c1712]">
               ${price.toFixed(2)}
             </p>
+            {addonTotal > 0 && (
+              <p className="text-sm text-gray-500 mt-0.5">
+                + ${addonTotal.toFixed(2)} add-ons
+              </p>
+            )}
             <p className="text-sm text-gray-500 mt-1">
               + ${gst!.toFixed(2)} GST = <strong>${total!.toFixed(2)}</strong> total
             </p>
@@ -272,7 +410,7 @@ export function ProductConfigurator({ product }: Props) {
         </button>
 
         <a
-          href="/quote"
+          href={`/quote-request?product=${product.slug}`}
           className="block w-full py-3 rounded-lg border border-gray-200 text-center text-sm font-medium text-gray-600 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors"
         >
           Or get a quote by email

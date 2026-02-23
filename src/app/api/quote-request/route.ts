@@ -1,0 +1,112 @@
+/**
+ * POST /api/quote-request
+ * Sends a quote request email to info@true-color.ca
+ * and a confirmation to the customer.
+ */
+import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+
+export async function POST(req: NextRequest) {
+  try {
+    const { name, email, phone, product, description, isCustom, fileBase64, fileName } =
+      (await req.json()) as {
+        name: string;
+        email: string;
+        phone?: string;
+        product?: string;
+        description: string;
+        isCustom?: boolean;
+        fileBase64?: string;
+        fileName?: string;
+      };
+
+    if (!name?.trim() || !email?.trim() || !description?.trim()) {
+      return NextResponse.json({ error: "Name, email, and description are required" }, { status: 400 });
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST ?? "smtp.hostinger.com",
+      port: Number(process.env.SMTP_PORT ?? 465),
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    const subject = isCustom
+      ? `Custom Quote Request — ${name}`
+      : `Quote Request — ${product ?? "General"} — ${name}`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background-color: #1c1712; padding: 20px 30px;">
+          <h1 style="color: #16C2F3; font-size: 20px; margin: 0;">New ${isCustom ? "Custom " : ""}Quote Request</h1>
+        </div>
+        <div style="padding: 24px 30px; background: #fff;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712; width: 120px;">From</td><td style="padding: 8px 0;">${name}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Email</td><td style="padding: 8px 0;"><a href="mailto:${email}" style="color: #16C2F3;">${email}</a></td></tr>
+            ${phone ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Phone</td><td style="padding: 8px 0;">${phone}</td></tr>` : ""}
+            ${product ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Product</td><td style="padding: 8px 0;">${product}</td></tr>` : ""}
+          </table>
+          <div style="margin-top: 16px; padding: 16px; background: #f4efe9; border-radius: 8px;">
+            <p style="font-weight: bold; color: #1c1712; margin: 0 0 8px;">Message:</p>
+            <p style="margin: 0; white-space: pre-wrap; color: #333;">${description}</p>
+          </div>
+          ${fileName ? `<p style="margin-top: 12px; font-size: 14px; color: #666;">File attached: <strong>${fileName}</strong></p>` : ""}
+        </div>
+        <div style="background: #f4efe9; padding: 16px 30px; font-size: 12px; color: #888;">
+          Reply directly to this email to respond to ${name}.
+        </div>
+      </div>
+    `;
+
+    // Build attachments
+    type MailAttachment = { filename: string; content: string; encoding: string };
+    const attachments: MailAttachment[] = [];
+    if (fileBase64 && fileName) {
+      attachments.push({
+        filename: fileName,
+        content: fileBase64.split(",")[1] ?? fileBase64, // strip data URI prefix if present
+        encoding: "base64",
+      });
+    }
+
+    // Send to staff
+    await transporter.sendMail({
+      from: `"True Color Website" <${process.env.SMTP_USER}>`,
+      to: "info@true-color.ca",
+      replyTo: email,
+      subject,
+      html,
+      attachments,
+    });
+
+    // Send confirmation to customer
+    await transporter.sendMail({
+      from: `"True Color Display Printing" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Got your quote request — True Color Display Printing",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #1c1712; padding: 20px 30px;">
+            <p style="color: #16C2F3; font-size: 18px; font-weight: bold; margin: 0;">True Color Display Printing</p>
+          </div>
+          <div style="padding: 24px 30px; background: #fff;">
+            <p style="font-size: 16px; color: #1c1712;">Hi ${name},</p>
+            <p style="color: #444;">Got it! We received your quote request and will reply within 1 business day.</p>
+            <p style="color: #444;">In the meantime, you can call us at <a href="tel:+13069548688" style="color: #16C2F3;">(306) 954-8688</a> or visit us at 216 33rd St W, Saskatoon.</p>
+            <p style="color: #444;">— The True Color Team</p>
+          </div>
+        </div>
+      `,
+    });
+
+    return NextResponse.json({ sent: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to send";
+    console.error("[quote-request]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

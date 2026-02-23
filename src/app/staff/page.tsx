@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { CategoryPicker } from "@/components/estimator/CategoryPicker";
 import { OptionsPanel } from "@/components/estimator/OptionsPanel";
 import { QuotePanel } from "@/components/estimator/QuotePanel";
@@ -156,6 +157,7 @@ export default function StaffPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/staff/orders" className="text-sm text-[#16C2F3] hover:underline">Orders →</Link>
             <span className="text-xs text-[var(--muted)] font-mono hidden sm:block">v1_2026-02-19 · STAFF</span>
             <button
               onClick={() => { setCategory(null); setState(DEFAULT_STATE); setResult(null); setStep("pick"); }}

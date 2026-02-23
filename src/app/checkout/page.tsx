@@ -6,6 +6,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { getCart, clearCart, type CartItem } from "@/lib/cart/cart";
 import type { CreateOrderRequest } from "@/app/api/orders/route";
+import { uploadArtworkFile } from "@/lib/supabase/storage";
 
 const GST_RATE = 0.05;
 const RUSH_FEE = 40;
@@ -20,6 +21,10 @@ export default function CheckoutPage() {
   const [company, setCompany] = useState("");
   const [phone, setPhone] = useState("");
   const [isRush, setIsRush] = useState(false);
+
+  // Notes + artwork
+  const [notes, setNotes] = useState("");
+  const [artworkFile, setArtworkFile] = useState<File | null>(null);
 
   // Payment state
   const [payMethod, setPayMethod] = useState<"clover_card" | "etransfer">("clover_card");
@@ -46,11 +51,24 @@ export default function CheckoutPage() {
     }
     setLoading(true);
     try {
+      // Upload artwork file first if provided
+      let filePath: string | undefined;
+      if (artworkFile) {
+        try {
+          filePath = await uploadArtworkFile(artworkFile);
+        } catch (uploadErr) {
+          console.warn("[checkout] file upload failed (non-fatal):", uploadErr);
+          // Non-fatal — continue without file
+        }
+      }
+
       const body: CreateOrderRequest = {
         items,
         contact: { name, email, company: company || undefined, phone: phone || undefined },
         is_rush: isRush,
         payment_method: payMethod,
+        notes: notes.trim() || undefined,
+        file_storage_path: filePath,
       };
       const res = await fetch("/api/orders", {
         method: "POST",
@@ -103,7 +121,7 @@ export default function CheckoutPage() {
         <h1 className="text-3xl font-bold text-[#1c1712] mb-10">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Left — Contact + Payment */}
+          {/* Left — Contact + Notes + Artwork + Payment */}
           <div className="space-y-8">
             {/* Contact */}
             <section>
@@ -168,6 +186,48 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
+            </section>
+
+            {/* Order notes */}
+            <section>
+              <h2 className="text-lg font-bold text-[#1c1712] mb-3">Notes for your order</h2>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="E.g. 2 signs with logo on left, 1 with logo right. Or: picking up Tuesday AM."
+                rows={3}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] resize-none"
+              />
+            </section>
+
+            {/* Artwork file */}
+            <section>
+              <h2 className="text-lg font-bold text-[#1c1712] mb-3">Attach your artwork</h2>
+              <label className="block">
+                <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#16C2F3] transition-colors cursor-pointer">
+                  <input
+                    type="file"
+                    accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
+                    onChange={(e) => setArtworkFile(e.target.files?.[0] ?? null)}
+                    className="hidden"
+                  />
+                  {artworkFile ? (
+                    <div>
+                      <p className="font-semibold text-[#1c1712] text-sm">📎 {artworkFile.name}</p>
+                      <p className="text-xs text-gray-400 mt-1">{(artworkFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                      <p className="text-xs text-[#16C2F3] mt-2">Click to change file</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm text-gray-500">Drop your file here or click to browse</p>
+                      <p className="text-xs text-gray-400 mt-1">PDF, AI, EPS, JPG, PNG — up to 50MB</p>
+                    </div>
+                  )}
+                </div>
+              </label>
+              <p className="text-xs text-gray-400 mt-2">
+                No file yet? Bring it on USB or email us after — our designer starts at $35.
+              </p>
             </section>
 
             {/* Rush toggle */}

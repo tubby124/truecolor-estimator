@@ -26,6 +26,9 @@ export interface ProductContent {
   whoUsesThis: string[];
   faqs: { q: string; a: string }[];
   relatedSlugs: string[];
+  addons?: { label: string; unitPrice: number; step?: number }[];
+  materialInfo?: { headline: string; bullets: string[] };
+  tierPresets?: { label: string; material_code: string; price: number }[];
 }
 
 export const PRODUCTS: Record<string, ProductContent> = {
@@ -82,6 +85,19 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
     ],
     relatedSlugs: ["vehicle-magnets", "vinyl-banners", "acp-signs"],
+    addons: [
+      { label: "H-Stakes", unitPrice: 2.50, step: 1 },
+      { label: "Grommets", unitPrice: 2.00, step: 2 },
+    ],
+    materialInfo: {
+      headline: "4mm corrugated polypropylene — weatherproof, lightweight",
+      bullets: [
+        "Holds up to -40°C Saskatchewan winters",
+        "UV-resistant ink — no fading for 2+ years outdoors",
+        "Recyclable — drop-off at most SK recycling centres",
+        "Flutes run vertically — H-stakes slide right in",
+      ],
+    },
   },
 
   "vinyl-banners": {
@@ -135,6 +151,15 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
     ],
     relatedSlugs: ["retractable-banners", "coroplast-signs", "acp-signs"],
+    materialInfo: {
+      headline: "13oz scrim vinyl — tear-resistant, outdoor-rated",
+      bullets: [
+        "Woven polyester mesh + PVC laminate — won't tear in wind",
+        "Vibrant outdoor inks, 1–3 year outdoor lifespan",
+        "Standard hem + grommets every 2 ft included",
+        "Any custom size — min charge $45",
+      ],
+    },
   },
 
   "vehicle-magnets": {
@@ -197,6 +222,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       "Printed on 14pt gloss card stock — the industry standard for professional business cards. Crisp colour, smooth matte or gloss finish, sharp edges. 250 cards is the standard run; we also offer 500 and 1000.",
     fromPrice: "$40",
     category: "BUSINESS_CARD",
+    material_code: "PLACEHOLDER_14PT",
     heroImage: "/images/products/product/business-cards-800x600.webp",
     galleryImages: [
       "/images/products/product/business-cards-800x600.webp",
@@ -204,7 +230,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 2,
     sideOptions: true,
     sizePresets: [
-      { label: "250 cards", width_in: 3.5 * 12, height_in: 2 * 12 }, // using qty preset instead
+      { label: "250 cards", width_in: 3.5, height_in: 2 },
     ],
     qtyPresets: [250, 500, 1000],
     specs: [
@@ -244,6 +270,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       "Printed on Pacesetter 80lb gloss text stock — bright white, FSC-certified, sharp colour reproduction. Perfect for mass distribution, door-to-door campaigns, event handouts, and in-store promotions. Any quantity, both sides available.",
     fromPrice: "$45",
     category: "FLYER",
+    material_code: "PLACEHOLDER_80LB",
     heroImage: "/images/products/product/flyers-stack-800x600.webp",
     galleryImages: [
       "/images/products/product/flyers-stack-800x600.webp",
@@ -251,7 +278,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 1,
     sideOptions: true,
     sizePresets: [
-      { label: "Letter (100)", width_in: 8.5 * 12, height_in: 11 * 12 }, // qty-based
+      { label: "Letter (100)", width_in: 8.5, height_in: 11 },
     ],
     qtyPresets: [100, 250, 500, 1000],
     specs: [
@@ -334,6 +361,15 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
     ],
     relatedSlugs: ["coroplast-signs", "vinyl-banners", "foamboard-displays"],
+    materialInfo: {
+      headline: "3mm aluminum composite panel — rigid, weatherproof, permanent",
+      bullets: [
+        "Two aluminum skins bonded to a polyethylene core",
+        "Won't rust, warp, or degrade outdoors — indefinite lifespan",
+        "UV-cured digital print — no fading",
+        "Drill holes or adhesive mounting on request",
+      ],
+    },
   },
 
   "foamboard-displays": {
@@ -385,10 +421,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
   "retractable-banners": {
     slug: "retractable-banners",
     name: "Retractable Banner Stands",
-    tagline: "Economy stand + banner from $219.",
+    tagline: "Economy, Deluxe, or Premium stand. Banner included.",
     description:
-      "The Origin retractable banner stand — 33.5\" wide, 80\" tall banner included. Rolls up into a compact base in seconds. Ideal for trade shows, conferences, retail, and events. Set up in under 30 seconds, take it anywhere.",
-    fromPrice: "$219",
+      "Choose from three tiers of retractable banner stands — Economy ($219), Deluxe ($299), or Premium ($349). All include a 33.5\" wide × 80\" tall full-colour printed banner. Rolls up into a compact base in seconds. Ideal for trade shows, conferences, retail, and events.",
+    fromPrice: "from $219",
     category: "DISPLAY",
     material_code: "RBS33507875S",
     heroImage: "/images/products/product/retractable-stand-600x900.webp",
@@ -402,11 +438,12 @@ export const PRODUCTS: Record<string, ProductContent> = {
     ],
     qtyPresets: [1, 2],
     specs: [
-      { label: "Stand", value: "Origin retractable banner stand (aluminum)" },
+      { label: "Economy", value: "Aluminum stand, basic roll-up mechanism, carry bag — $219" },
+      { label: "Deluxe", value: "Premium aluminum stand, tension mechanism, padded carry case — $299" },
+      { label: "Premium", value: "Deluxe stand + expedited turnaround, professional print finish — $349" },
       { label: "Banner size", value: "33.5\" × 80\" (standard retractable size)" },
       { label: "Setup time", value: "Under 30 seconds" },
-      { label: "Includes", value: "Stand + full-colour printed banner + carry bag" },
-      { label: "Material", value: "Dye-sublimated fabric or vinyl banner (your choice)" },
+      { label: "Includes", value: "Stand + full-colour printed banner + carry bag/case" },
     ],
     whoUsesThis: ["Trade Shows", "Events", "Retail", "Healthcare", "Non-Profits"],
     faqs: [
@@ -424,6 +461,11 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
     ],
     relatedSlugs: ["vinyl-banners", "foamboard-displays", "coroplast-signs"],
+    tierPresets: [
+      { label: "Economy — $219", material_code: "RBS33507875S", price: 219 },
+      { label: "Deluxe — $299", material_code: "RBS33507900PSB", price: 299 },
+      { label: "Premium — $349", material_code: "RBS33507900PSB", price: 349 },
+    ],
   },
 };
 

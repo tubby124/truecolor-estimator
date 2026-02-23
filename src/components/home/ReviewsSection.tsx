@@ -49,6 +49,8 @@ const REVIEWS = [
   },
 ];
 
+const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
+
 function StarIcon() {
   return (
     <svg viewBox="0 0 20 20" fill="#FBB939" className="w-4 h-4">
@@ -69,31 +71,29 @@ function GoogleIcon() {
 }
 
 export function ReviewsSection() {
+  const visibleReviews = REVIEWS.slice(0, 3);
+
   return (
-    <section className="bg-white px-6 py-16 border-t border-gray-100">
+    <section className="bg-white px-6 py-10 border-t border-gray-100">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-10">
-          <div>
-            <p className="text-2xl font-black text-[#1c1712] tracking-tight">EXCELLENT</p>
-            <div className="flex gap-0.5 my-1">
+        {/* Compact header: big rating + stars + count + Google badge — all in one row */}
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <span className="text-5xl font-black text-[#1c1712] leading-none">4.9</span>
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => <StarIcon key={i} />)}
             </div>
-            <p className="text-sm text-gray-500">Based on <strong className="text-[#1c1712]">23 reviews</strong></p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <GoogleIcon />
-              <span className="text-sm font-semibold text-gray-700">Google</span>
-            </div>
+            <span className="text-sm text-gray-500">23 Google reviews</span>
           </div>
-          <div className="hidden sm:block w-px h-16 bg-gray-200" />
-          <p className="text-gray-500 text-sm max-w-xs leading-relaxed">
-            Real reviews from real Saskatoon businesses. See why local companies choose True Color for their print needs.
-          </p>
+          <div className="flex items-center gap-1.5 ml-2 border border-gray-200 rounded-full px-3 py-1">
+            <GoogleIcon />
+            <span className="text-sm font-semibold text-gray-700">Google</span>
+          </div>
         </div>
 
-        {/* Review cards */}
+        {/* Review cards — desktop: first 3 only */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {REVIEWS.map((r) => (
+          {visibleReviews.map((r) => (
             <div
               key={r.name}
               className="border border-gray-100 rounded-xl p-5 flex flex-col gap-3 hover:shadow-md transition-shadow"
@@ -120,16 +120,30 @@ export function ReviewsSection() {
                 {[...Array(5)].map((_, i) => <StarIcon key={i} />)}
               </div>
 
-              {/* Review text */}
-              <p className="text-sm text-gray-600 leading-relaxed">{r.text}</p>
+              {/* Review text — truncated at 120 chars */}
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {r.text.length > 120 ? r.text.slice(0, 120) + "…" : r.text}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* CTA to leave review */}
-        <div className="mt-8 text-center">
+        {/* See all reviews link */}
+        <div className="mt-5 mb-6">
           <a
-            href="https://g.page/r/CZH6HlbNejQAEAE/review"
+            href={GOOGLE_REVIEW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-[#16C2F3] hover:underline"
+          >
+            See all 23 reviews →
+          </a>
+        </div>
+
+        {/* CTA to leave review */}
+        <div className="text-center">
+          <a
+            href={GOOGLE_REVIEW_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#1c1712] transition-colors"

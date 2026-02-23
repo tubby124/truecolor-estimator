@@ -16,6 +16,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { createOrFindWaveCustomer, createWaveInvoice } from "@/lib/wave/invoice";
 import { createCloverCheckout } from "@/lib/payment/clover";
 import type { CartItem } from "@/lib/cart/cart";
+import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -27,6 +28,8 @@ export interface CreateOrderRequest {
   };
   is_rush: boolean;
   payment_method: "clover_card" | "etransfer";
+  notes?: string;
+  file_storage_path?: string;
 }
 
 const GST_RATE = 0.05;
@@ -35,7 +38,7 @@ const RUSH_FEE = 40;
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items, contact, is_rush, payment_method } = body;
+    const { items, contact, is_rush, payment_method, notes, file_storage_path } = body;
 
     if (!items?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest) {
         gst,
         total,
         payment_method,
-        notes: contact.company ? `Company: ${contact.company}` : null,
+        notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
       })
       .select("id, order_number")
       .single();
@@ -109,6 +112,10 @@ export async function POST(req: NextRequest) {
       unit_price: item.sell_price / item.qty,
       line_total: item.sell_price,
     }));
+
+    if (file_storage_path && orderItems.length > 0) {
+      (orderItems[0] as Record<string, unknown>).file_storage_path = file_storage_path;
+    }
 
     const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
     if (itemsErr) {
@@ -170,6 +177,31 @@ export async function POST(req: NextRequest) {
         .from("orders")
         .update({ payment_reference: clover.sessionId } as Record<string, unknown>)
         .eq("id", order.id);
+    }
+
+
+    // 7. Send order confirmation email (non-fatal)
+    try {
+      await sendOrderConfirmationEmail({
+        orderNumber: order.order_number,
+        contact,
+        items: orderItems.map(item => ({
+          product_name: item.product_name,
+          qty: item.qty,
+          width_in: item.width_in,
+          height_in: item.height_in,
+          sides: item.sides,
+          design_status: item.design_status,
+          line_total: item.line_total,
+        })),
+        subtotal,
+        gst,
+        total,
+        is_rush,
+        payment_method,
+      });
+    } catch (emailErr) {
+      console.error("[orders] confirmation email failed (non-fatal):", emailErr);
     }
 
     return NextResponse.json({

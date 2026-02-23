@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ReviewsSection } from "@/components/home/ReviewsSection";
+import { GalleryStrip } from "@/components/home/GalleryStrip";
 
 export const metadata: Metadata = {
   title: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
@@ -65,32 +66,32 @@ const INDUSTRIES = [
   {
     name: "Construction",
     img: "/images/products/heroes/construction-hero-1200x500.webp",
-    href: "#",
+    href: "/construction-signs-saskatoon",
   },
   {
     name: "Real Estate",
     img: "/images/products/heroes/realestate-hero-1200x500.webp",
-    href: "#",
+    href: "/real-estate-signs-saskatoon",
   },
   {
     name: "Agriculture",
     img: "/images/products/heroes/agriculture-hero-1200x500.webp",
-    href: "#",
+    href: "/agriculture-signs-saskatoon",
   },
   {
     name: "Healthcare",
     img: "/images/products/heroes/healthcare-hero-1200x500.webp",
-    href: "#",
+    href: "/healthcare-printing-saskatoon",
   },
   {
     name: "Retail & Franchise",
     img: "/images/products/heroes/retail-hero-1200x500.webp",
-    href: "#",
+    href: "/retail-signs-saskatoon",
   },
   {
     name: "Sports & Events",
     img: "/images/products/heroes/sports-hero-1200x500.webp",
-    href: "#",
+    href: "/sports-banners-saskatoon",
   },
 ];
 
@@ -199,6 +200,12 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
+      <ReviewsSection />
+
+      {/* ── GALLERY STRIP ────────────────────────────────────────────────────── */}
+      <GalleryStrip />
+
       {/* ── INDUSTRIES ───────────────────────────────────────────────────────── */}
       <section className="bg-[#f4efe9] px-6 py-16">
         <div className="max-w-6xl mx-auto">
@@ -209,29 +216,27 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {INDUSTRIES.map((ind) => (
-              <div
+              <Link
                 key={ind.name}
-                className="relative h-36 md:h-44 rounded-xl overflow-hidden bg-gray-300"
+                href={ind.href}
+                className="group relative h-36 md:h-44 rounded-xl overflow-hidden bg-gray-300 block"
               >
                 <Image
                   src={ind.img}
                   alt={`${ind.name} printing Saskatoon — True Color`}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-4">
                   <p className="text-white font-bold text-sm md:text-base">{ind.name}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
-
-      {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
-      <ReviewsSection />
 
       {/* ── PITCH BLOCK — Hormozi style ───────────────────────────────────────── */}
       <section className="px-6 py-16 md:py-20">
@@ -298,7 +303,7 @@ export default function HomePage() {
             </p>
           </div>
           <Link
-            href="/staff"
+            href="/quote"
             className="shrink-0 bg-white text-[#1c1712] font-bold px-7 py-4 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap"
           >
             See All Products →

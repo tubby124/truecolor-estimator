@@ -5,7 +5,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductConfigurator } from "@/components/product/ProductConfigurator";
-import { ProductTabs } from "@/components/product/ProductTabs";
+import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
 
 interface Props {
@@ -70,7 +70,7 @@ export default async function ProductPage({ params }: Props) {
 
         {/* Tabs: description, specs, FAQ */}
         <div className="border-t border-gray-100 pt-10 mb-16">
-          <ProductTabs product={product} />
+          <ProductAccordion product={product} />
         </div>
 
         {/* Related products */}
