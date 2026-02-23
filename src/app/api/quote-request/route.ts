@@ -2,27 +2,37 @@
  * POST /api/quote-request
  * Sends a quote request email to info@true-color.ca
  * and a confirmation to the customer.
+ *
+ * Accepts: multipart/form-data (switched from JSON to avoid 4.5 MB Vercel body limit
+ * that was triggered when files were base64-encoded in JSON).
  */
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { createServiceClient } from "@/lib/supabase/server";
 
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
+
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, phone, product, description, isCustom, fileBase64, fileName } =
-      (await req.json()) as {
-        name: string;
-        email: string;
-        phone?: string;
-        product?: string;
-        description: string;
-        isCustom?: boolean;
-        fileBase64?: string;
-        fileName?: string;
-      };
+    const form = await req.formData();
 
-    if (!name?.trim() || !email?.trim() || !description?.trim()) {
+    const name = ((form.get("name") as string) ?? "").trim();
+    const email = ((form.get("email") as string) ?? "").trim();
+    const phone = ((form.get("phone") as string) ?? "").trim() || undefined;
+    const product = ((form.get("product") as string) ?? "").trim() || undefined;
+    const description = ((form.get("description") as string) ?? "").trim();
+    const isCustom = form.get("isCustom") === "true";
+    const file = form.get("file") as File | null;
+
+    if (!name || !email || !description) {
       return NextResponse.json({ error: "Name, email, and description are required" }, { status: 400 });
+    }
+
+    if (file && file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: `File too large — max 4 MB (received ${(file.size / 1024 / 1024).toFixed(1)} MB)` },
+        { status: 400 }
+      );
     }
 
     const transporter = nodemailer.createTransport({
@@ -55,7 +65,7 @@ export async function POST(req: NextRequest) {
             <p style="font-weight: bold; color: #1c1712; margin: 0 0 8px;">Message:</p>
             <p style="margin: 0; white-space: pre-wrap; color: #333;">${description}</p>
           </div>
-          ${fileName ? `<p style="margin-top: 12px; font-size: 14px; color: #666;">FILE_PLACEHOLDER</p>` : ""}
+          ${file ? `<p style="margin-top: 12px; font-size: 14px; color: #666;">FILE_PLACEHOLDER</p>` : ""}
         </div>
         <div style="background: #f4efe9; padding: 16px 30px; font-size: 12px; color: #888;">
           Reply directly to this email to respond to ${name}.
@@ -64,19 +74,18 @@ export async function POST(req: NextRequest) {
     `;
 
     // Upload artwork file to Supabase Storage (non-fatal)
-    let fileSection = fileName ? `File: <strong>${fileName}</strong>` : "";
-    if (fileBase64 && fileName) {
+    let fileSection = file ? `File: <strong>${file.name}</strong>` : "";
+    if (file && file.size > 0) {
       try {
         const supabase = createServiceClient();
-        const rawBase64 = fileBase64.split(",")[1] ?? fileBase64;
-        const mimeType = fileBase64.split(";")[0].split(":")[1] ?? "application/octet-stream";
         const uuid = crypto.randomUUID();
-        const path = `quote-requests/${uuid}/${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-        const buffer = Buffer.from(rawBase64, "base64");
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `quote-requests/${uuid}/${safeName}`;
+        const bytes = await file.arrayBuffer();
 
         const { error: uploadError } = await supabase.storage
           .from("print-files")
-          .upload(path, buffer, { contentType: mimeType, upsert: false });
+          .upload(path, bytes, { contentType: file.type || "application/octet-stream", upsert: false });
 
         if (uploadError) {
           console.error("[quote-request] storage upload failed:", uploadError.message);
@@ -85,7 +94,7 @@ export async function POST(req: NextRequest) {
             .from("print-files")
             .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
           if (signed?.signedUrl) {
-            fileSection = `<a href="${signed.signedUrl}" style="color: #16C2F3; font-weight: bold;">Download: ${fileName}</a>`;
+            fileSection = `<a href="${signed.signedUrl}" style="color: #16C2F3; font-weight: bold;">Download: ${file.name}</a>`;
           }
         }
       } catch (storageErr) {

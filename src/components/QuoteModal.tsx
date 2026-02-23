@@ -71,37 +71,34 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
       setError("Name, email, and project details are required.");
       return;
     }
+    if (file && file.size > 4 * 1024 * 1024) {
+      setError("File too large — max 4 MB. Try a compressed JPG or PDF, or email it to info@true-color.ca.");
+      return;
+    }
     setError("");
     setLoading(true);
 
     try {
-      let fileBase64: string | undefined;
-      let fileName: string | undefined;
-      if (file) {
-        fileName = file.name;
-        fileBase64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      if (phone) formData.append("phone", phone);
+      formData.append("product", product);
+      formData.append("description", description);
+      formData.append("isCustom", "false");
+      if (file) formData.append("file", file);
 
       const res = await fetch("/api/quote-request", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone: phone || undefined,
-          product,
-          description,
-          isCustom: false,
-          fileBase64,
-          fileName,
-        }),
+        body: formData,
       });
-      const data = (await res.json()) as { sent?: boolean; error?: string };
+
+      let data: { sent?: boolean; error?: string } = {};
+      try {
+        data = (await res.json()) as typeof data;
+      } catch {
+        throw new Error("Server error — please try again or call (306) 954-8688.");
+      }
       if (!res.ok) throw new Error(data.error ?? "Failed to send");
       setSent(true);
     } catch (err) {
