@@ -63,23 +63,14 @@ export function AccountClientPage() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [reorderedId, setReorderedId] = useState<string | null>(null);
 
-  // Magic link form state
+  // Sign-in form state
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const [mlLoading, setMlLoading] = useState(false);
-  const [mlError, setMlError] = useState("");
-
-  // Rate-limit banner
-  const [rateLimitHit, setRateLimitHit] = useState(false);
-
-  // Tab + password state
-  const [activeTab, setActiveTab] = useState<"magic" | "password">("password");
   const [password, setPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState("");
   const [pwResetSent, setPwResetSent] = useState(false);
 
-  // Sign-up mode (inside the password tab)
+  // Sign-up mode (inside the sign-in form)
   const [isSignUp, setIsSignUp] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signUpDone, setSignUpDone] = useState(false);
@@ -99,7 +90,6 @@ export function AccountClientPage() {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
     const supabase = createClient(SUPABASE_URL, anonKey);
 
-    // getSession covers the normal case (already logged in, or coming back from callback)
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         setSession(data.session as SessionData);
@@ -107,8 +97,6 @@ export function AccountClientPage() {
       setLoading(false);
     });
 
-    // onAuthStateChange covers the edge case where the user lands directly on
-    // /account with #access_token= in the hash (e.g. if emailRedirectTo changes)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         setSession(session as SessionData);
@@ -139,33 +127,6 @@ export function AccountClientPage() {
     await supabase.auth.signOut();
     setSession(null);
     setOrders([]);
-  }
-
-  async function handleMagicLink() {
-    const trimmed = email.trim();
-    if (!trimmed) return;
-    setMlError("");
-    setMlLoading(true);
-    try {
-      const res = await fetch("/api/auth/magic-link", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed }),
-      });
-      const data = (await res.json()) as { sent?: boolean; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Could not send link");
-      setSent(true);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Something went wrong.";
-      if (msg.toLowerCase().includes("rate")) {
-        setRateLimitHit(true);
-        setActiveTab("password");
-      } else {
-        setMlError(msg);
-      }
-    } finally {
-      setMlLoading(false);
-    }
   }
 
   async function handlePasswordSignIn() {
@@ -211,10 +172,11 @@ export function AccountClientPage() {
         },
       });
       if (error) throw error;
-      // If session returned immediately (email confirmation disabled), log them in
+      // If email confirmation is disabled, session is returned immediately
       if (data.session) {
         setSession(data.session as SessionData);
       } else {
+        // Fallback if email confirmation is somehow still on
         setSignUpDone(true);
       }
     } catch (err) {
@@ -226,7 +188,7 @@ export function AccountClientPage() {
 
   async function handleForgotPassword() {
     if (!email.trim()) {
-      setPwError("Enter your email above first.");
+      setPwError("Enter your email address above first.");
       return;
     }
     setPwError("");
@@ -260,7 +222,6 @@ export function AccountClientPage() {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       setResetDone(true);
-      // Clear ?reset=1 from URL and refresh session
       window.history.replaceState({}, "", "/account");
       const { data } = await supabase.auth.getSession();
       if (data.session) setSession(data.session as SessionData);
@@ -306,6 +267,67 @@ export function AccountClientPage() {
     );
   }
 
+  // ── Password reset form — takes priority over everything else ─────────────
+  // Shown when ?reset=1 is in the URL (user clicked a password reset link).
+  // The user arrives with a valid recovery session so session may or may not be set.
+  if (isReset) {
+    return (
+      <div className="min-h-screen bg-white">
+        <SiteNav />
+        <main className="max-w-3xl mx-auto px-6 py-16">
+          <h1 className="text-3xl font-bold text-[#1c1712] mb-2">Set your new password</h1>
+          <p className="text-gray-500 mb-10">Choose a new password for your account.</p>
+          <div className="bg-[#f4efe9] rounded-2xl p-8 max-w-md">
+            {resetDone ? (
+              <div className="text-center py-4">
+                <p className="font-semibold text-[#1c1712] text-lg">Password updated!</p>
+                <p className="text-sm text-gray-500 mt-2">You&apos;re now signed in.</p>
+                <a
+                  href="/account"
+                  className="mt-6 inline-block bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors text-sm"
+                >
+                  Go to my orders &rarr;
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1" htmlFor="newpw">
+                    New password <span className="text-gray-400">(min 8 characters)</span>
+                  </label>
+                  <input
+                    id="newpw"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSetNewPassword()}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                    placeholder="Enter new password"
+                    autoFocus
+                  />
+                </div>
+                <button
+                  onClick={handleSetNewPassword}
+                  disabled={resetLoading}
+                  className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
+                >
+                  {resetLoading ? "Saving\u2026" : "Save password \u2192"}
+                </button>
+                {resetError && (
+                  <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
+                    {resetError}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  // ── Not logged in — show sign-in / sign-up form ───────────────────────────
   if (!session) {
     return (
       <div className="min-h-screen bg-white">
@@ -316,246 +338,126 @@ export function AccountClientPage() {
             Sign in to view your order history and reorder with one click.
           </p>
 
-          {/* Password reset block — shown when ?reset=1 is in URL */}
-          {isReset && (
-            <div className="bg-[#f4efe9] rounded-2xl p-8 max-w-md mb-12">
-              <h2 className="font-bold text-[#1c1712] mb-4">Set your new password</h2>
-              {resetDone ? (
-                <p className="text-[#1c1712] font-semibold">Password updated! Redirecting&hellip;</p>
-              ) : (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1" htmlFor="newpw">
-                      New password (min 8 characters)
-                    </label>
-                    <input
-                      id="newpw"
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                      placeholder="Enter new password"
-                    />
-                  </div>
-                  <button
-                    onClick={handleSetNewPassword}
-                    disabled={resetLoading}
-                    className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
-                  >
-                    {resetLoading ? "Saving\u2026" : "Save password \u2192"}
-                  </button>
-                  {resetError && (
-                    <p className="text-red-500 text-xs">{resetError}</p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Sign-in form */}
           <div className="bg-[#f4efe9] rounded-2xl p-8 max-w-md mb-12">
-            <h2 className="font-bold text-[#1c1712] mb-4">Sign in to your account</h2>
+            <h2 className="font-bold text-[#1c1712] mb-5">
+              {isSignUp ? "Create your account" : "Sign in to your account"}
+            </h2>
 
-            {/* Rate-limit banner */}
-            {rateLimitHit && (
-              <div className="mb-4 flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 text-sm text-yellow-800">
-                <span className="shrink-0 mt-0.5">⚠️</span>
-                <span>
-                  Too many login emails sent — please wait 60 minutes, or{" "}
-                  <button
-                    onClick={() => setActiveTab("password")}
-                    className="font-semibold underline hover:no-underline"
-                  >
-                    sign in with your password
-                  </button>{" "}
-                  below.
-                </span>
+            {pwResetSent ? (
+              <div className="text-center py-4">
+                <p className="font-semibold text-[#1c1712]">Reset link sent!</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Check your inbox for a password reset email.
+                </p>
                 <button
-                  onClick={() => setRateLimitHit(false)}
-                  className="ml-auto shrink-0 text-yellow-600 hover:text-yellow-900"
-                  aria-label="Dismiss"
+                  onClick={() => setPwResetSent(false)}
+                  className="mt-4 text-sm text-[#16C2F3] font-semibold hover:underline"
                 >
-                  ✕
+                  Back to sign in
                 </button>
               </div>
-            )}
-
-            {/* Tab switcher */}
-            <div className="flex rounded-lg overflow-hidden border border-gray-200 mb-5">
-              <button
-                onClick={() => setActiveTab("magic")}
-                className={`flex-1 py-2 text-sm font-semibold transition-colors ${
-                  activeTab === "magic"
-                    ? "bg-[#1c1712] text-white"
-                    : "bg-white text-gray-500 hover:text-[#1c1712]"
-                }`}
-              >
-                Email link
-              </button>
-              <button
-                onClick={() => setActiveTab("password")}
-                className={`flex-1 py-2 text-sm font-semibold transition-colors ${
-                  activeTab === "password"
-                    ? "bg-[#1c1712] text-white"
-                    : "bg-white text-gray-500 hover:text-[#1c1712]"
-                }`}
-              >
-                Password
-              </button>
-            </div>
-
-            {/* Magic link tab */}
-            {activeTab === "magic" && (
-              <>
-                {sent ? (
-                  <div className="text-center py-4">
-                    <p className="font-semibold text-[#1c1712]">Check your inbox</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      We sent a login link to{" "}
-                      <span className="font-mono">{email}</span>
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1" htmlFor="email">
-                        Email address
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleMagicLink()}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                        placeholder="you@example.com"
-                      />
-                    </div>
-                    <button
-                      onClick={handleMagicLink}
-                      disabled={mlLoading}
-                      className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
-                    >
-                      {mlLoading ? "Sending\u2026" : "Send login link \u2192"}
-                    </button>
-                    {mlError && (
-                      <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
-                        {mlError}
-                      </p>
-                    )}
-                  </div>
-                )}
-                <p className="text-xs text-gray-400 mt-3">
-                  We&apos;ll email you a one-click login link. No password required.
+            ) : signUpDone ? (
+              <div className="text-center py-4">
+                <p className="font-semibold text-[#1c1712]">Check your inbox!</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  We sent a confirmation link to{" "}
+                  <span className="font-mono">{email}</span>.
                 </p>
-              </>
-            )}
-
-            {/* Password tab */}
-            {activeTab === "password" && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Click the link, then come back here and sign in with your password.
+                </p>
+                <button
+                  onClick={() => { setSignUpDone(false); setIsSignUp(false); }}
+                  className="mt-4 text-sm text-[#16C2F3] font-semibold hover:underline"
+                >
+                  Back to sign in
+                </button>
+              </div>
+            ) : (
               <div className="space-y-3">
-                {pwResetSent ? (
-                  <div className="text-center py-4">
-                    <p className="font-semibold text-[#1c1712]">Reset link sent!</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Check your inbox for a password reset link.
-                    </p>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-email">
+                    Email address
+                  </label>
+                  <input
+                    id="pw-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-password">
+                    Password{" "}
+                    {isSignUp && <span className="text-gray-400">(min 8 characters)</span>}
+                  </label>
+                  <input
+                    id="pw-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !isSignUp && handlePasswordSignIn()}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                    placeholder={isSignUp ? "Choose a password" : "Your password"}
+                    autoComplete={isSignUp ? "new-password" : "current-password"}
+                  />
+                </div>
+                {isSignUp && (
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-confirm">
+                      Confirm password
+                    </label>
+                    <input
+                      id="pw-confirm"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSignUp()}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                      placeholder="Repeat password"
+                      autoComplete="new-password"
+                    />
                   </div>
-                ) : signUpDone ? (
-                  <div className="text-center py-4">
-                    <p className="font-semibold text-[#1c1712]">Check your inbox!</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      We sent a confirmation link to <span className="font-mono">{email}</span>.
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Click the link to verify your email — then come back here and sign in with your password.
-                    </p>
-                    <button
-                      onClick={() => { setSignUpDone(false); setIsSignUp(false); }}
-                      className="mt-4 text-sm text-[#16C2F3] font-semibold hover:underline"
-                    >
-                      Back to sign in
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-email">
-                        Email address
-                      </label>
-                      <input
-                        id="pw-email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                        placeholder="you@example.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-password">
-                        Password {isSignUp && <span className="text-gray-400">(min 8 characters)</span>}
-                      </label>
-                      <input
-                        id="pw-password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && !isSignUp && handlePasswordSignIn()}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                        placeholder={isSignUp ? "Choose a password" : "Your password"}
-                      />
-                    </div>
-                    {isSignUp && (
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-confirm">
-                          Confirm password
-                        </label>
-                        <input
-                          id="pw-confirm"
-                          type="password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleSignUp()}
-                          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                          placeholder="Repeat password"
-                        />
-                      </div>
-                    )}
-                    <button
-                      onClick={isSignUp ? handleSignUp : handlePasswordSignIn}
-                      disabled={pwLoading}
-                      className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
-                    >
-                      {pwLoading
-                        ? isSignUp ? "Creating account\u2026" : "Signing in\u2026"
-                        : isSignUp ? "Create account \u2192" : "Sign in \u2192"}
-                    </button>
-                    {pwError && (
-                      <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
-                        {pwError}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between pt-1">
-                      {!isSignUp && (
-                        <button
-                          onClick={handleForgotPassword}
-                          type="button"
-                          className="text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
-                        >
-                          Forgot password?
-                        </button>
-                      )}
-                      <button
-                        onClick={() => { setIsSignUp(!isSignUp); setPwError(""); setConfirmPassword(""); }}
-                        type="button"
-                        className="text-xs text-[#16C2F3] font-semibold hover:underline ml-auto"
-                      >
-                        {isSignUp ? "Already have an account? Sign in" : "New here? Create account"}
-                      </button>
-                    </div>
-                  </>
                 )}
+                <button
+                  onClick={isSignUp ? handleSignUp : handlePasswordSignIn}
+                  disabled={pwLoading}
+                  className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
+                >
+                  {pwLoading
+                    ? isSignUp ? "Creating account\u2026" : "Signing in\u2026"
+                    : isSignUp ? "Create account \u2192" : "Sign in \u2192"}
+                </button>
+                {pwError && (
+                  <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
+                    {pwError}
+                  </p>
+                )}
+                <div className="flex items-center justify-between pt-1">
+                  {!isSignUp && (
+                    <button
+                      onClick={handleForgotPassword}
+                      type="button"
+                      className="text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setPwError("");
+                      setConfirmPassword("");
+                    }}
+                    type="button"
+                    className="text-xs text-[#16C2F3] font-semibold hover:underline ml-auto"
+                  >
+                    {isSignUp ? "Already have an account? Sign in" : "New here? Create account"}
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -594,7 +496,7 @@ export function AccountClientPage() {
     );
   }
 
-  // Logged in — show dashboard
+  // ── Logged in — show order dashboard ─────────────────────────────────────
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />

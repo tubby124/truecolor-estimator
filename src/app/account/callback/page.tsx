@@ -5,16 +5,18 @@
  *
  * Handles TWO flows:
  *
- * 1. PKCE flow (preferred, set via Supabase Dashboard → Auth → Flow type = PKCE):
- *    URL arrives as: /account/callback?token_hash=xxx&type=email
- *    → call verifyOtp({ token_hash, type }) → session stored in localStorage → redirect
+ * 1. PKCE flow (future — upgrade Supabase to Pro and set Auth flow = PKCE):
+ *    URL arrives as: /account/callback?token_hash=xxx&type=recovery
+ *    → call verifyOtp({ token_hash, type }) → redirect
  *
- * 2. Implicit flow (legacy hash fragment, only if PKCE not yet enabled):
- *    URL arrives as: /account/callback#access_token=xxx
- *    → onAuthStateChange SIGNED_IN event → redirect
+ * 2. Implicit flow (free plan default):
+ *    URL arrives as: /account/callback#access_token=xxx&type=recovery
+ *    → Supabase SDK auto-processes the hash on createClient()
+ *    → fires onAuthStateChange with PASSWORD_RECOVERY or SIGNED_IN
+ *    → we redirect accordingly
  *
- * To permanently fix login, go to:
- *   Supabase Dashboard → Authentication → Sign in / Sign up → Auth flow → set to PKCE
+ * DO NOT manually call setSession() — the SDK processes the hash itself and
+ * calling setSession() again causes a race condition / token-already-used error.
  */
 
 import { useEffect, useState } from "react";
@@ -30,7 +32,7 @@ export default function CallbackPage() {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
     const supabase = createClient(SUPABASE_URL, anonKey);
 
-    // ── PKCE flow: token arrives as a query param ───────────────────────────
+    // ── PKCE flow (Pro plan): token arrives as ?token_hash= ────────────────
     const searchParams = new URLSearchParams(window.location.search);
     const tokenHash = searchParams.get("token_hash");
     const type = (searchParams.get("type") ?? "email") as EmailOtpType;
@@ -40,44 +42,43 @@ export default function CallbackPage() {
         .verifyOtp({ token_hash: tokenHash, type })
         .then(({ error: err }) => {
           if (err) {
-            setError(
-              `Sign-in failed: ${err.message}. The link may have expired — please request a new one.`
-            );
+            setError("Link expired or already used — please request a new one.");
           } else {
             window.location.replace(
               type === "recovery" ? "/account?reset=1" : "/account"
             );
           }
         });
-      return; // done — no hash handling needed
+      return;
     }
 
-    // ── Implicit flow fallback: token arrives in the URL hash ──────────────
-    const hash = window.location.hash;
-    if (!hash.includes("access_token=")) {
-      // No token at all → send to account page
+    // ── Implicit flow (free plan): SDK auto-processes #access_token= ───────
+    // If there's no hash token, nothing to do — bounce to account page.
+    if (!window.location.hash.includes("access_token=")) {
       window.location.replace("/account");
       return;
     }
 
-    const hashParams = new URLSearchParams(hash.slice(1));
-    const hashType = hashParams.get("type");
-    const accessToken = hashParams.get("access_token") ?? "";
-    const refreshToken = hashParams.get("refresh_token") ?? "";
+    // Let the SDK handle the hash. Listen for the event it fires.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        // User clicked a password reset link → send to the set-password form
+        window.location.replace("/account?reset=1");
+      } else if (event === "SIGNED_IN") {
+        // Email confirmation link (if confirmation ever re-enabled) → account
+        window.location.replace("/account");
+      }
+    });
 
-    // Manually call setSession and also listen for SIGNED_IN
-    supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
-      .then(({ error: err }) => {
-        if (err) {
-          setError(
-            `Sign-in failed: ${err.message}. Please request a new login link.`
-          );
-          return;
-        }
-        window.location.replace(
-          hashType === "recovery" ? "/account?reset=1" : "/account"
-        );
-      });
+    // Safety timeout: if the SDK never fires an event (invalid/expired token)
+    const timeout = setTimeout(() => {
+      setError("Link expired or invalid — please request a new one.");
+    }, 6000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   if (error) {
