@@ -1,14 +1,43 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { addToCart } from "@/lib/cart/cart";
 import type { ProductContent } from "@/lib/data/products-content";
+
+const DESIGN_FEES: Record<string, number> = {
+  PRINT_READY: 0,
+  MINOR_EDIT: 35,
+  FULL_DESIGN: 50,
+  LOGO_RECREATION: 75,
+};
+
+export interface PriceData {
+  price: number | null;
+  loading: boolean;
+  addonTotal: number;
+  designFee: number;
+  gst: number | null;
+  total: number | null;
+}
+
+export interface ConfigData {
+  widthIn: number;
+  heightIn: number;
+  qty: number;
+  sides: 1 | 2;
+  addonQtys: Record<string, number>;
+  designStatus: string;
+  materialCode: string;
+  sizeLabel: string;
+  sidesLabel: string;
+}
 
 interface Props {
   product: ProductContent;
+  onPriceChange?: (data: PriceData) => void;
+  onConfigChange?: (config: ConfigData) => void;
 }
 
-export function ProductConfigurator({ product }: Props) {
+export function ProductConfigurator({ product, onPriceChange, onConfigChange }: Props) {
   const [selectedSize, setSelectedSize] = useState(product.sizePresets[0]);
   const [customW, setCustomW] = useState("");
   const [customH, setCustomH] = useState("");
@@ -19,29 +48,26 @@ export function ProductConfigurator({ product }: Props) {
   const [isCustomQty, setIsCustomQty] = useState(false);
   const [price, setPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [addedToCart, setAddedToCart] = useState(false);
   const [designStatus, setDesignStatus] = useState<string>("PRINT_READY");
   const [addonQtys, setAddonQtys] = useState<Record<string, number>>({});
   const [selectedTier, setSelectedTier] = useState(0);
 
-  const effectiveWidth = isCustom
-    ? parseFloat(customW) || 0
-    : selectedSize.width_in;
-  const effectiveHeight = isCustom
-    ? parseFloat(customH) || 0
-    : selectedSize.height_in;
-  const effectiveQty = isCustomQty
-    ? parseInt(customQty, 10) || product.qtyPresets[0]
-    : qty;
+  const effectiveWidth = isCustom ? parseFloat(customW) || 0 : selectedSize.width_in;
+  const effectiveHeight = isCustom ? parseFloat(customH) || 0 : selectedSize.height_in;
+  const effectiveQty = isCustomQty ? parseInt(customQty, 10) || product.qtyPresets[0] : qty;
+
+  const addonTotal = product.addons
+    ? product.addons.reduce((sum, addon) => sum + (addonQtys[addon.label] || 0) * addon.unitPrice, 0)
+    : 0;
+
+  const effectiveMaterialCode = product.tierPresets
+    ? product.tierPresets[selectedTier]?.material_code ?? product.material_code
+    : product.material_code;
 
   const fetchPrice = useCallback(async () => {
     if (!effectiveWidth || !effectiveHeight) return;
     setLoading(true);
     try {
-      const effectiveMaterialCode = product.tierPresets
-        ? product.tierPresets[selectedTier]?.material_code ?? product.material_code
-        : product.material_code;
-
       const res = await fetch("/api/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -60,91 +86,70 @@ export function ProductConfigurator({ product }: Props) {
         setPrice(data.sell_price);
       }
     } catch {
-      // silent — price just won't update
+      // silent
     } finally {
       setLoading(false);
     }
   }, [
     product.category,
-    product.material_code,
-    product.tierPresets,
+    effectiveMaterialCode,
     effectiveWidth,
     effectiveHeight,
     sides,
     effectiveQty,
     designStatus,
-    selectedTier,
   ]);
 
+  // Fire price fetch — debounced 300ms for custom inputs, immediate for presets
   useEffect(() => {
-    fetchPrice();
-  }, [fetchPrice]);
+    if (!effectiveWidth || !effectiveHeight) return;
+    const delay = isCustom || isCustomQty ? 300 : 0;
+    const timer = setTimeout(fetchPrice, delay);
+    return () => clearTimeout(timer);
+  }, [fetchPrice, isCustom, isCustomQty]);
 
-  const addonTotal = product.addons
-    ? product.addons.reduce(
-        (sum, addon) => sum + (addonQtys[addon.label] || 0) * addon.unitPrice,
-        0
-      )
-    : 0;
-  const gst = price != null ? (price + addonTotal) * 0.05 : null;
-  const total = price != null && gst != null ? price + addonTotal + gst : null;
-
-  // Build a human-readable label
-  const sizeLabel = isCustom
-    ? `${customW}×${customH}"`
-    : selectedSize.label;
-  const sidesLabel = sides === 1 ? "Single-sided" : "Double-sided";
-  const qtyLabel = `× ${effectiveQty}`;
-
-  function handleAddToCart() {
-    if (price == null) return;
-    const designLabel =
-      designStatus !== "PRINT_READY"
-        ? ` | ${
-            designStatus === "FULL_DESIGN"
-              ? "Full Design"
-              : designStatus === "MINOR_EDIT"
-              ? "Minor Edits"
-              : "Logo Vectorization"
-          }`
-        : "";
-    const label = `${sizeLabel} — ${sidesLabel} ${qtyLabel}${designLabel}`;
-    addToCart({
-      product_name: product.name,
-      product_slug: product.slug,
-      category: product.category,
-      label,
-      config: {
-        category: product.category,
-        material_code: product.material_code,
-        width_in: effectiveWidth,
-        height_in: effectiveHeight,
-        sides,
-        qty: effectiveQty,
-        design_status: designStatus,
-        addons: Object.entries(addonQtys)
-          .filter(([, qty]) => qty > 0)
-          .map(([addonLabel, addonQty]) => `${addonLabel} ×${addonQty}`),
-      },
-      sell_price: price,
-      qty: effectiveQty,
+  // Bubble price data to parent
+  useEffect(() => {
+    const gstCalc = price != null ? (price + addonTotal) * 0.05 : null;
+    const totalCalc = price != null && gstCalc != null ? price + addonTotal + gstCalc : null;
+    onPriceChange?.({
+      price,
+      loading,
+      addonTotal,
+      designFee: DESIGN_FEES[designStatus] ?? 0,
+      gst: gstCalc,
+      total: totalCalc,
     });
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 3000);
-  }
+  }, [price, loading, addonTotal, designStatus, onPriceChange]);
+
+  // Bubble config to parent (for proof + cart)
+  useEffect(() => {
+    onConfigChange?.({
+      widthIn: effectiveWidth,
+      heightIn: effectiveHeight,
+      qty: effectiveQty,
+      sides,
+      addonQtys,
+      designStatus,
+      materialCode: effectiveMaterialCode ?? "",
+      sizeLabel: isCustom ? `${customW}″×${customH}″` : selectedSize.label,
+      sidesLabel: sides === 1 ? "Single-sided" : "Double-sided",
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveWidth, effectiveHeight, effectiveQty, sides, addonQtys, designStatus, selectedTier, isCustom, customW, customH, selectedSize.label]);
 
   return (
     <div className="space-y-6">
-      {/* Product name + price anchor */}
+      {/* Product name */}
       <div>
         <h1 className="text-2xl font-bold text-[#1c1712]">{product.name}</h1>
-        <p className="text-gray-500 text-sm mt-1">Starting from {product.fromPrice}</p>
+        <p className="text-gray-400 text-sm mt-1">Starting from {product.fromPrice}</p>
       </div>
 
-      {/* Tier selector (retractable banners / tiered products) */}
+      {/* Tier selector */}
       {product.tierPresets && (
         <div>
-          <p className="text-sm font-semibold text-[#1c1712] mb-2">Select your stand</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Select Your Stand</p>
           <div className="flex flex-col gap-2">
             {product.tierPresets.map((tier, i) => (
               <button
@@ -163,18 +168,15 @@ export function ProductConfigurator({ product }: Props) {
         </div>
       )}
 
-      {/* Size presets — only shown for sqft products without tierPresets */}
+      {/* Size presets */}
       {!product.tierPresets && product.sizePresets.length > 1 && (
         <div>
-          <p className="text-sm font-semibold text-[#1c1712] mb-2">Size</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Size</p>
           <div className="flex flex-wrap gap-2">
             {product.sizePresets.map((preset) => (
               <button
                 key={preset.label}
-                onClick={() => {
-                  setSelectedSize(preset);
-                  setIsCustom(false);
-                }}
+                onClick={() => { setSelectedSize(preset); setIsCustom(false); }}
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   !isCustom && selectedSize.label === preset.label
                     ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -195,12 +197,10 @@ export function ProductConfigurator({ product }: Props) {
               Custom
             </button>
           </div>
-
-          {/* Custom size inputs */}
           {isCustom && (
             <div className="flex gap-2 mt-3">
               <div>
-                <label className="text-xs text-gray-500 block mb-1">Width (inches)</label>
+                <label className="text-xs text-gray-400 block mb-1">Width (inches)</label>
                 <input
                   type="number"
                   value={customW}
@@ -210,7 +210,7 @@ export function ProductConfigurator({ product }: Props) {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 block mb-1">Height (inches)</label>
+                <label className="text-xs text-gray-400 block mb-1">Height (inches)</label>
                 <input
                   type="number"
                   value={customH}
@@ -227,7 +227,7 @@ export function ProductConfigurator({ product }: Props) {
       {/* Sides toggle */}
       {product.sideOptions && (
         <div>
-          <p className="text-sm font-semibold text-[#1c1712] mb-2">Sides</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Sides</p>
           <div className="flex gap-2">
             {([1, 2] as const).map((s) => (
               <button
@@ -248,15 +248,12 @@ export function ProductConfigurator({ product }: Props) {
 
       {/* Quantity */}
       <div>
-        <p className="text-sm font-semibold text-[#1c1712] mb-2">Quantity</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Quantity</p>
         <div className="flex flex-wrap gap-2">
           {product.qtyPresets.map((q) => (
             <button
               key={q}
-              onClick={() => {
-                setQty(q);
-                setIsCustomQty(false);
-              }}
+              onClick={() => { setQty(q); setIsCustomQty(false); }}
               className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                 !isCustomQty && qty === q
                   ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -289,10 +286,10 @@ export function ProductConfigurator({ product }: Props) {
         )}
       </div>
 
-      {/* Add-ons (shown only when product has addons) */}
+      {/* Add-ons */}
       {product.addons && product.addons.length > 0 && (
         <div>
-          <p className="text-sm font-semibold text-[#1c1712] mb-2">Add-ons</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Add-ons</p>
           <div className="space-y-2">
             {product.addons.map((addon) => (
               <div
@@ -338,7 +335,7 @@ export function ProductConfigurator({ product }: Props) {
 
       {/* Design help */}
       <div>
-        <p className="text-sm font-semibold text-[#1c1712] mb-2">Do you have a design file?</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Do You Have a Design File?</p>
         <div className="flex flex-col gap-2">
           {[
             { label: "I have a print-ready file", value: "PRINT_READY", note: "" },
@@ -357,11 +354,7 @@ export function ProductConfigurator({ product }: Props) {
             >
               <span>{opt.label}</span>
               {opt.note && (
-                <span
-                  className={`text-xs ${
-                    designStatus === opt.value ? "text-blue-200" : "text-gray-400"
-                  }`}
-                >
+                <span className={`text-xs ${designStatus === opt.value ? "text-blue-200" : "text-gray-400"}`}>
                   {opt.note}
                 </span>
               )}
@@ -369,59 +362,6 @@ export function ProductConfigurator({ product }: Props) {
           ))}
         </div>
       </div>
-
-      {/* Live price display */}
-      <div className="bg-[#f4efe9] rounded-xl p-4">
-        {loading ? (
-          <div className="h-10 bg-gray-200 rounded animate-pulse w-32" />
-        ) : price != null ? (
-          <div>
-            <p className="text-3xl font-bold text-[#1c1712]">
-              ${price.toFixed(2)}
-            </p>
-            {addonTotal > 0 && (
-              <p className="text-sm text-gray-500 mt-0.5">
-                + ${addonTotal.toFixed(2)} add-ons
-              </p>
-            )}
-            <p className="text-sm text-gray-500 mt-1">
-              + ${gst!.toFixed(2)} GST = <strong>${total!.toFixed(2)}</strong> total
-            </p>
-          </div>
-        ) : (
-          <p className="text-sm text-gray-400">Enter dimensions to see price</p>
-        )}
-      </div>
-
-      {/* CTAs */}
-      <div className="space-y-3">
-        <button
-          onClick={handleAddToCart}
-          disabled={price == null || addedToCart}
-          className={`w-full py-4 rounded-lg font-bold text-white text-lg transition-colors ${
-            addedToCart
-              ? "bg-[#8CC63E] cursor-default"
-              : price == null
-              ? "bg-gray-300 cursor-not-allowed"
-              : "bg-[#16C2F3] hover:bg-[#0fb0dd]"
-          }`}
-        >
-          {addedToCart ? "✓ Added to Cart" : "Add to Cart →"}
-        </button>
-
-        <a
-          href={`/quote-request?product=${product.slug}`}
-          className="block w-full py-3 rounded-lg border border-gray-200 text-center text-sm font-medium text-gray-600 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors"
-        >
-          Or get a quote by email
-        </a>
-      </div>
-
-      {/* Design note */}
-      <p className="text-xs text-gray-400 leading-relaxed">
-        No file? Our in-house designer handles artwork from a rough sketch —
-        starting at $35. Just mention it in your order notes.
-      </p>
     </div>
   );
 }

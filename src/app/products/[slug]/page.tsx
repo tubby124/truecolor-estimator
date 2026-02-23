@@ -3,8 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { ProductGallery } from "@/components/product/ProductGallery";
-import { ProductConfigurator } from "@/components/product/ProductConfigurator";
+import { ProductPageClient } from "@/components/product/ProductPageClient";
 import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
 
@@ -34,9 +33,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   // Related products
-  const related = product.relatedSlugs
-    .map((s) => getProduct(s))
-    .filter(Boolean);
+  const related = product.relatedSlugs.map((s) => getProduct(s)).filter(Boolean);
 
   return (
     <div className="min-h-screen bg-white">
@@ -45,27 +42,16 @@ export default async function ProductPage({ params }: Props) {
       <main className="max-w-6xl mx-auto px-6 py-10">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-400 mb-8 flex items-center gap-2">
-          <Link href="/" className="hover:text-[#1c1712] transition-colors">
-            Home
-          </Link>
+          <Link href="/" className="hover:text-[#1c1712] transition-colors">Home</Link>
           <span>›</span>
-          <Link href="/quote" className="hover:text-[#1c1712] transition-colors">
-            Products
-          </Link>
+          <Link href="/quote" className="hover:text-[#1c1712] transition-colors">Products</Link>
           <span>›</span>
           <span className="text-[#1c1712] font-medium">{product.name}</span>
         </nav>
 
-        {/* Main product layout — gallery + configurator */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16">
-          {/* Left: Gallery */}
-          <ProductGallery
-            images={product.galleryImages}
-            productName={product.name}
-          />
-
-          {/* Right: Configurator */}
-          <ProductConfigurator product={product} />
+        {/* Interactive product layout — gallery + options + sticky price panel */}
+        <div className="mb-16">
+          <ProductPageClient product={product} />
         </div>
 
         {/* Tabs: description, specs, FAQ */}
@@ -76,9 +62,7 @@ export default async function ProductPage({ params }: Props) {
         {/* Related products */}
         {related.length > 0 && (
           <div className="border-t border-gray-100 pt-10">
-            <h2 className="text-xl font-bold text-[#1c1712] mb-6">
-              Customers also print
-            </h2>
+            <h2 className="text-xl font-bold text-[#1c1712] mb-6">Customers also print</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {related.map((r) => r && (
                 <Link
@@ -90,9 +74,7 @@ export default async function ProductPage({ params }: Props) {
                     {r.name}
                   </p>
                   <p className="text-sm text-gray-500">{r.fromPrice}</p>
-                  <p className="text-[#16C2F3] text-sm mt-3 group-hover:underline">
-                    See price →
-                  </p>
+                  <p className="text-[#16C2F3] text-sm mt-3 group-hover:underline">See price →</p>
                 </Link>
               ))}
             </div>
