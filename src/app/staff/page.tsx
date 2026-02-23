@@ -356,6 +356,9 @@ function CustomerOverlay({
         {result.min_charge_applied && (
           <p className="text-xs text-[var(--muted)] mb-4">
             Minimum order charge applied
+            {result.price_per_unit != null && result.sell_price != null &&
+             result.price_per_unit < result.sell_price &&
+             ` · $${result.price_per_unit.toFixed(2)}/unit`}
           </p>
         )}
 

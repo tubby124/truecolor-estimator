@@ -243,6 +243,11 @@ export function estimate(req: EstimateRequest): EstimateResponse {
       lineItems[0].line_total = minCharge;
       lineItems[0].description += ` (min charge $${minCharge.toFixed(2)} applied)`;
     }
+    // When min charge applies across multiple units, show the effective per-unit
+    // cost so the UI can display "2 × $22.50/unit" rather than a frozen $45.00
+    if (qty > 1 && !isFixedSize) {
+      pricePerUnit = round2(effectiveBase / qty);
+    }
   } else if (!isFixedSize && qty > 1 && lineItems.length > 0) {
     // Update line item to show all units correctly (total clears minimum)
     lineItems[0].qty = qty;

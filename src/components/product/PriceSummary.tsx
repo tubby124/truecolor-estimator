@@ -97,6 +97,7 @@ export function PriceSummary({
               {minChargeApplied && minChargeValue != null && (
                 <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1 mt-2">
                   Minimum order ${minChargeValue.toFixed(2)} applied
+                  {qty > 1 && pricePerUnit != null && ` · ${qty} × $${pricePerUnit.toFixed(2)}/unit`}
                 </p>
               )}
 

@@ -349,6 +349,11 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             <span className="text-xs text-green-700 font-medium">${pricePerUnit.toFixed(2)}/unit</span>
           </div>
         )}
+        {!qtyDiscountApplied && minChargeApplied && pricePerUnit != null && effectiveQty > 1 && (
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-xs text-amber-700 font-medium">${pricePerUnit.toFixed(2)}/unit (min order applies)</span>
+          </div>
+        )}
       </div>
 
       {/* Add-ons */}

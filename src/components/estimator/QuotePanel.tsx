@@ -123,6 +123,9 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
           {result.min_charge_applied && (
             <span className="inline-block mt-2 text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-medium">
               Minimum charge applied (${result.min_charge_value?.toFixed(2)})
+              {result.price_per_unit != null && result.sell_price != null &&
+               result.price_per_unit < result.sell_price &&
+               ` · $${result.price_per_unit.toFixed(2)}/unit`}
             </span>
           )}
         </div>
