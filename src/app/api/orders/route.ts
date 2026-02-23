@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       sides: item.config.sides ?? 1,
       qty: item.qty,
       addons: item.config.addons ?? [],
-      is_rush: item.config.design_status === "RUSH" || false,
+      is_rush,
       design_status: item.config.design_status ?? "PRINT_READY",
       unit_price: item.sell_price / item.qty,
       line_total: item.sell_price,
@@ -157,7 +157,12 @@ export async function POST(req: NextRequest) {
           ? items[0].product_name
           : `True Color Order ${order.order_number} (${items.length} items)`;
 
-      const clover = await createCloverCheckout(totalCents, description, contact.email);
+      const siteUrl =
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        "https://truecolor-estimator-o2q38cgso-tubby124s-projects.vercel.app";
+      const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
+
+      const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl);
       checkoutUrl = clover.checkoutUrl;
 
       // Save Clover session ref (best-effort)

@@ -38,12 +38,14 @@ export function addToCart(item: Omit<CartItem, "id">): CartItem[] {
   const newItem: CartItem = { ...item, id: crypto.randomUUID() };
   const updated = [...cart, newItem];
   sessionStorage.setItem(CART_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new Event("tc_cart_updated"));
   return updated;
 }
 
 export function removeFromCart(id: string): CartItem[] {
   const updated = getCart().filter((i) => i.id !== id);
   sessionStorage.setItem(CART_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new Event("tc_cart_updated"));
   return updated;
 }
 

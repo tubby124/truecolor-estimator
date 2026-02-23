@@ -2,13 +2,34 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Order Confirmed — True Color",
   robots: { index: false },
 };
 
-export default function OrderConfirmedPage() {
+interface Props {
+  searchParams: Promise<{ oid?: string }>;
+}
+
+export default async function OrderConfirmedPage({ searchParams }: Props) {
+  const { oid } = await searchParams;
+
+  // Auto-confirm payment when Clover redirects back with orderId
+  if (oid) {
+    try {
+      const supabase = createServiceClient();
+      await supabase
+        .from("orders")
+        .update({ status: "payment_received", paid_at: new Date().toISOString() })
+        .eq("id", oid)
+        .eq("status", "pending_payment"); // idempotent — only updates if still pending
+    } catch {
+      // Non-fatal — order stays pending, staff can confirm manually
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />

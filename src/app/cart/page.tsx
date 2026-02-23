@@ -90,25 +90,13 @@ export default function CartPage() {
 
             {/* Checkout CTA */}
             <div className="pt-4 space-y-3">
-              {/* Checkout stub — Stripe coming soon */}
-              <div className="w-full bg-[#16C2F3] text-white font-bold text-lg py-4 rounded-lg text-center">
-                <p>Ready to order?</p>
-                <p className="text-sm font-normal mt-1 opacity-90">
-                  Call us at{" "}
-                  <a href="tel:+13069548688" className="underline">
-                    (306) 954-8688
-                  </a>{" "}
-                  or email{" "}
-                  <a href="mailto:info@true-color.ca" className="underline">
-                    info@true-color.ca
-                  </a>
-                </p>
-                <p className="text-xs font-normal mt-1 opacity-75">
-                  Online checkout coming soon — quote sent to your email instantly
-                </p>
-              </div>
+              <Link
+                href="/checkout"
+                className="block w-full bg-[#16C2F3] hover:bg-[#0fb0dd] text-white font-bold text-lg py-4 rounded-lg text-center transition-colors"
+              >
+                Proceed to Checkout →
+              </Link>
 
-              {/* Quote by email */}
               <Link
                 href="/quote"
                 className="block w-full border border-gray-200 text-gray-600 font-medium text-center py-3 rounded-lg hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-sm"

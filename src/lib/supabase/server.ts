@@ -7,8 +7,8 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
 
 export function createServiceClient() {
-  const key = process.env.SUPABASE_SERVICE_KEY;
-  if (!key) throw new Error("SUPABASE_SERVICE_KEY not configured");
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!key) throw new Error("SUPABASE_SECRET_KEY not configured");
   return createClient(SUPABASE_URL, key, {
     auth: { persistSession: false },
   });

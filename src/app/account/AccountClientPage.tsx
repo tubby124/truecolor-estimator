@@ -8,11 +8,28 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 export function AccountClientPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleMagicLink() {
-    if (!email.trim()) return;
-    // TODO: POST to /api/auth/magic-link when Supabase auth is wired
-    setSent(true);
+  async function handleMagicLink() {
+    const trimmed = email.trim();
+    if (!trimmed) return;
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      const data = (await res.json()) as { sent?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Could not send link");
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -52,10 +69,16 @@ export function AccountClientPage() {
               </div>
               <button
                 onClick={handleMagicLink}
-                className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors text-sm"
+                disabled={loading}
+                className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
               >
-                Send login link →
+                {loading ? "Sending…" : "Send login link →"}
               </button>
+              {error && (
+                <p className="text-red-500 text-xs bg-red-50 border border-red-100 rounded px-3 py-2">
+                  {error}
+                </p>
+              )}
             </div>
           )}
           <p className="text-xs text-gray-400 mt-3">

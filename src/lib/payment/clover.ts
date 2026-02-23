@@ -21,7 +21,8 @@ export interface CloverCheckoutResult {
 export async function createCloverCheckout(
   amountCents: number,
   description: string,
-  customerEmail?: string
+  customerEmail?: string,
+  redirectUrl?: string
 ): Promise<CloverCheckoutResult> {
   const privateKey = process.env.CLOVER_ECOMM_PRIVATE_KEY;
   if (!privateKey) {
@@ -47,6 +48,9 @@ export async function createCloverCheckout(
 
   // Clover requires a non-null customer object
   body.customer = customerEmail ? { email: customerEmail } : { firstName: "Customer" };
+
+  // After payment, redirect back to our site
+  if (redirectUrl) body.redirectUrl = redirectUrl;
 
   const res = await fetch(`${BASE_URL}/v1/checkouts`, {
     method: "POST",

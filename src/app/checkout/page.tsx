@@ -35,7 +35,7 @@ export default function CheckoutPage() {
 
   const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
   const rush = isRush ? RUSH_FEE : 0;
-  const gst = (subtotal + rush) * GST_RATE;
+  const gst = Math.round((subtotal + rush) * GST_RATE * 100) / 100;
   const total = subtotal + rush + gst;
 
   async function handleSubmit() {
