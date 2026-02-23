@@ -68,6 +68,9 @@ async function fetchOrders() {
       payment_method,
       created_at,
       notes,
+      proof_storage_path,
+      proof_sent_at,
+      file_storage_paths,
       customers ( name, email, company ),
       order_items (
         id,

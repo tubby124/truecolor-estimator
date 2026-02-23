@@ -380,6 +380,12 @@ export default function CheckoutPage() {
               <p className="text-xs text-gray-400 mt-2">
                 No file yet? Bring it on USB or email us after — our designer starts at $35.
               </p>
+              <p className="text-xs text-gray-400 mt-1">
+                For the best results, you can also email high-quality artwork directly to{" "}
+                <a href="mailto:info@true-color.ca" className="text-[#16C2F3] hover:underline">
+                  info@true-color.ca
+                </a>
+              </p>
             </section>
 
             {/* Rush toggle */}

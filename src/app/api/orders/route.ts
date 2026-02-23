@@ -119,6 +119,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
     }
 
+    // Save all file paths to order (requires DB migration: file_storage_paths TEXT[] — best-effort)
+    if (file_storage_paths?.length) {
+      void supabase
+        .from("orders")
+        .update({ file_storage_paths } as Record<string, unknown>)
+        .eq("id", order.id);
+    }
+
     // 4. Create order_items rows
     const orderItems = items.map((item) => ({
       order_id: order.id,

@@ -80,6 +80,9 @@ export interface Order {
   payment_method: string;
   created_at: string;
   notes: string | null;
+  proof_storage_path: string | null;
+  proof_sent_at: string | null;
+  file_storage_paths: string[] | null;
   customers: Customer[] | Customer | null;
   order_items: OrderItem[] | null;
 }
@@ -133,6 +136,14 @@ export function OrdersTable({ initialOrders }: Props) {
   const [replySending, setReplySending] = useState(false);
   const [replySent, setReplySent] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
+
+  // Proof state — one proof panel at a time
+  const [proofOrderId, setProofOrderId] = useState<string | null>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofMessage, setProofMessage] = useState("");
+  const [proofUploading, setProofUploading] = useState(false);
+  const [proofSentId, setProofSentId] = useState<string | null>(null);
+  const [proofError, setProofError] = useState<string | null>(null);
 
   // ── Stats (computed from all orders, not filtered view) ──────────────────────
 
@@ -239,6 +250,38 @@ export function OrdersTable({ initialOrders }: Props) {
     }
   }
 
+  // ── Proof upload ──────────────────────────────────────────────────────────────
+
+  async function handleSendProof(orderId: string) {
+    if (!proofFile) return;
+    setProofUploading(true);
+    setProofError(null);
+    try {
+      const form = new FormData();
+      form.append("file", proofFile);
+      if (proofMessage.trim()) form.append("message", proofMessage.trim());
+      const res = await fetch(`/api/staff/orders/${orderId}/proof`, {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json() as { ok?: boolean; proofPath?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      setProofSentId(orderId);
+      // Update local order state so the proof badge / "sent on" text appears immediately
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId
+            ? { ...o, proof_storage_path: data.proofPath ?? null, proof_sent_at: new Date().toISOString() }
+            : o
+        )
+      );
+    } catch (err) {
+      setProofError(err instanceof Error ? err.message : "Failed to send proof");
+    } finally {
+      setProofUploading(false);
+    }
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
@@ -304,11 +347,16 @@ export function OrdersTable({ initialOrders }: Props) {
             const isExpanded = expandedId === order.id;
             const isLoadingStatus = loadingStatus === order.id;
             const isReplyOpen = replyOrderId === order.id;
+            const isProofOpen = proofOrderId === order.id;
 
             // Find artwork file on any item
             const fileItem = order.order_items?.find((i) => i.file_storage_path);
             const fileUrl = fileItem?.file_storage_path
               ? `${SUPABASE_STORAGE_URL}/${fileItem.file_storage_path}`
+              : null;
+
+            const proofUrl = order.proof_storage_path
+              ? `${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`
               : null;
 
             const rushFee = order.is_rush
@@ -344,6 +392,11 @@ export function OrdersTable({ initialOrders }: Props) {
                         {fileUrl && (
                           <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
                             📎 Artwork
+                          </span>
+                        )}
+                        {proofUrl && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
+                            🖼 Proof sent
                           </span>
                         )}
                       </div>
@@ -587,6 +640,101 @@ export function OrdersTable({ initialOrders }: Props) {
                         </div>
                       )}
                     </div>
+
+                    {/* Upload proof */}
+                    <div>
+                      <button
+                        onClick={() => {
+                          if (isProofOpen) {
+                            setProofOrderId(null);
+                          } else {
+                            setProofOrderId(order.id);
+                            setProofFile(null);
+                            setProofMessage("");
+                            setProofSentId(null);
+                            setProofError(null);
+                          }
+                        }}
+                        className={`text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
+                          isProofOpen
+                            ? "border-gray-300 bg-white text-gray-500"
+                            : "border-violet-400 text-violet-600 hover:bg-violet-50"
+                        }`}
+                      >
+                        {isProofOpen ? "✕ Close proof panel" : "🖼 Upload proof"}
+                      </button>
+
+                      {/* Show existing proof indicator */}
+                      {proofUrl && !isProofOpen && (
+                        <p className="text-xs text-violet-600 mt-1.5">
+                          ✓ Proof sent
+                          {order.proof_sent_at
+                            ? ` on ${new Date(order.proof_sent_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}`
+                            : ""}
+                          {" · "}
+                          <a
+                            href={proofUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            View proof →
+                          </a>
+                        </p>
+                      )}
+
+                      {isProofOpen && (
+                        <div className="mt-4 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+                          <div>
+                            <label className="text-xs font-semibold text-gray-500 block mb-1.5">
+                              Proof file (JPG, PNG, WebP, or PDF)
+                            </label>
+                            <input
+                              type="file"
+                              accept=".jpg,.jpeg,.png,.webp,.pdf"
+                              onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
+                              disabled={proofSentId === order.id}
+                              className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-semibold text-gray-500 block mb-1.5">
+                              Note to customer (optional)
+                            </label>
+                            <textarea
+                              value={proofMessage}
+                              onChange={(e) => setProofMessage(e.target.value)}
+                              disabled={proofSentId === order.id}
+                              rows={3}
+                              placeholder="E.g. Please check the bleed area on the left side."
+                              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-400 transition-colors resize-none disabled:opacity-60 font-sans"
+                            />
+                          </div>
+
+                          {proofError && (
+                            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                              {proofError}
+                            </p>
+                          )}
+
+                          {proofSentId === order.id ? (
+                            <p className="text-sm text-violet-700 bg-violet-50 border border-violet-200 rounded-lg px-4 py-3 font-semibold">
+                              ✓ Proof sent to {customer?.email}
+                            </p>
+                          ) : (
+                            <button
+                              onClick={() => handleSendProof(order.id)}
+                              disabled={proofUploading || !proofFile}
+                              className="bg-violet-600 text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              {proofUploading ? "Uploading…" : "Send proof to customer →"}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                   </div>
                 )}
               </div>

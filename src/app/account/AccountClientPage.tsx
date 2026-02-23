@@ -39,6 +39,9 @@ interface OrderItem {
   material_code: string | null;
 }
 
+const SUPABASE_STORAGE_URL =
+  "https://dczbgraekmzirxknjvwe.supabase.co/storage/v1/object/public/print-files";
+
 interface Order {
   id: string;
   order_number: string;
@@ -48,6 +51,7 @@ interface Order {
   is_rush: boolean;
   payment_method: string;
   pay_url: string | null;
+  proof_storage_path: string | null;
   order_items: OrderItem[];
 }
 
@@ -645,6 +649,49 @@ export function AccountClientPage() {
                         </div>
                       ))}
                     </div>
+
+                    {/* Proof from True Color */}
+                    {order.proof_storage_path && (
+                      <div className="mt-4 border-t border-gray-200 pt-4">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                          Proof from True Color
+                        </p>
+                        {/\.(jpg|jpeg|png|webp)$/i.test(order.proof_storage_path) ? (
+                          <div>
+                            <img
+                              src={`${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`}
+                              alt="Print proof"
+                              className="max-w-full rounded-lg border border-gray-200 mb-2"
+                              style={{ maxHeight: "400px", objectFit: "contain" }}
+                            />
+                            <a
+                              href={`${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-[#16C2F3] font-semibold hover:underline"
+                            >
+                              View full size →
+                            </a>
+                          </div>
+                        ) : (
+                          <a
+                            href={`${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm font-semibold text-[#16C2F3] hover:underline"
+                          >
+                            📄 Download proof PDF →
+                          </a>
+                        )}
+                        <p className="text-xs text-gray-400 mt-2">
+                          Looks good? We&apos;ll proceed to print. Have changes? Reply to your confirmation email or contact us at{" "}
+                          <a href="mailto:info@true-color.ca" className="text-[#16C2F3] hover:underline">
+                            info@true-color.ca
+                          </a>
+                        </p>
+                      </div>
+                    )}
+
                   </div>
                 )}
               </div>
