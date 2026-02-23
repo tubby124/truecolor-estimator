@@ -206,6 +206,9 @@ export function AccountClientPage() {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
+        options: {
+          emailRedirectTo: `${SITE_URL}/account/callback`,
+        },
       });
       if (error) throw error;
       // If session returned immediately (email confirmation disabled), log them in
@@ -460,13 +463,16 @@ export function AccountClientPage() {
                   </div>
                 ) : signUpDone ? (
                   <div className="text-center py-4">
-                    <p className="font-semibold text-[#1c1712]">Account created!</p>
+                    <p className="font-semibold text-[#1c1712]">Check your inbox!</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      We sent a confirmation link to <span className="font-mono">{email}</span>.
+                    </p>
                     <p className="text-sm text-gray-500 mt-1">
-                      Check your inbox to confirm your email, then sign in above.
+                      Click the link to verify your email — then come back here and sign in with your password.
                     </p>
                     <button
                       onClick={() => { setSignUpDone(false); setIsSignUp(false); }}
-                      className="mt-3 text-sm text-[#16C2F3] font-semibold hover:underline"
+                      className="mt-4 text-sm text-[#16C2F3] font-semibold hover:underline"
                     >
                       Back to sign in
                     </button>
