@@ -34,8 +34,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        // TODO: replace with a proper 1200×630 OG image once designed
-        url: "/truecolorlogo.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "True Color Display Printing — Saskatoon Print Shop",

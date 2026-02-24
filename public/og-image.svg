@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+
+  <!-- ── Background ── -->
+  <rect width="1200" height="630" fill="#111111"/>
+
+  <!-- ── Top + bottom red accent bars ── -->
+  <rect x="0" y="0"   width="1200" height="6" fill="#e63020"/>
+  <rect x="0" y="624" width="1200" height="6" fill="#e63020"/>
+
+  <!-- ── Right panel subtle background ── -->
+  <rect x="760" y="6" width="440" height="618" fill="#161616"/>
+
+  <!-- ── Left red vertical accent bar ── -->
+  <rect x="60" y="88" width="5" height="190" fill="#e63020"/>
+
+  <!-- ── Company name ── -->
+  <text x="84" y="168"
+        font-family="Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="92"
+        fill="#ffffff"
+        letter-spacing="-2">TRUE COLOR</text>
+
+  <!-- ── Subtitle ── -->
+  <text x="86" y="220"
+        font-family="Arial, Helvetica, sans-serif"
+        font-weight="700"
+        font-size="36"
+        fill="#e63020"
+        letter-spacing="6">DISPLAY PRINTING</text>
+
+  <!-- ── Divider ── -->
+  <rect x="84" y="246" width="580" height="1.5" fill="#2a2a2a"/>
+
+  <!-- ── Tagline ── -->
+  <text x="84" y="288"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="23"
+        fill="#777777">Saskatoon's trusted print shop — see your exact price online.</text>
+
+  <!-- ── Product pills ── -->
+
+  <!-- Signs (filled, brand) -->
+  <rect x="84"  y="314" width="90"  height="38" rx="19" fill="#e63020"/>
+  <text x="129" y="339" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">Signs</text>
+
+  <!-- Banners -->
+  <rect x="186" y="314" width="106" height="38" rx="19" fill="none" stroke="#383838" stroke-width="1.5"/>
+  <text x="239" y="339" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#999999" text-anchor="middle">Banners</text>
+
+  <!-- Magnets -->
+  <rect x="304" y="314" width="106" height="38" rx="19" fill="none" stroke="#383838" stroke-width="1.5"/>
+  <text x="357" y="339" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#999999" text-anchor="middle">Magnets</text>
+
+  <!-- Cards -->
+  <rect x="422" y="314" width="86"  height="38" rx="19" fill="none" stroke="#383838" stroke-width="1.5"/>
+  <text x="465" y="339" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#999999" text-anchor="middle">Cards</text>
+
+  <!-- Flyers -->
+  <rect x="520" y="314" width="86"  height="38" rx="19" fill="none" stroke="#383838" stroke-width="1.5"/>
+  <text x="563" y="339" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#999999" text-anchor="middle">Flyers</text>
+
+  <!-- ── USP row ── -->
+  <circle cx="84"  cy="408" r="3" fill="#e63020"/>
+  <text x="96"  y="413" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#5a5a5a">In-house designer</text>
+
+  <circle cx="264" cy="408" r="3" fill="#e63020"/>
+  <text x="276" y="413" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#5a5a5a">Instant online pricing</text>
+
+  <circle cx="482" cy="408" r="3" fill="#e63020"/>
+  <text x="494" y="413" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#5a5a5a">Same-day rush available</text>
+
+  <!-- ── Bottom contact line ── -->
+  <text x="84" y="568"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="17"
+        fill="#404040">216 33rd St W, Saskatoon SK  ·  true-color.ca  ·  (306) 954-8688</text>
+
+
+  <!-- ════════════════════════════════════════════
+       RIGHT DECORATIVE PANEL — stacked print samples
+       Centre of panel ≈ (980, 310)
+       ════════════════════════════════════════════ -->
+
+  <!-- Sheet 1 — back (large sign, rotated -10°) -->
+  <g transform="rotate(-10 980 310)">
+    <rect x="840" y="110" width="280" height="400" rx="6"
+          fill="#1c1c1c" stroke="#2e2e2e" stroke-width="1.5"/>
+    <!-- faint lines of "copy" -->
+    <rect x="868" y="160" width="140" height="11" rx="3" fill="#252525"/>
+    <rect x="868" y="182" width="100" height="8"  rx="3" fill="#222222"/>
+    <rect x="868" y="200" width="120" height="8"  rx="3" fill="#222222"/>
+  </g>
+
+  <!-- Sheet 2 — middle (banner, rotated -3°, red stripe) -->
+  <g transform="rotate(-3 980 310)">
+    <rect x="850" y="125" width="260" height="380" rx="6"
+          fill="#202020" stroke="#353535" stroke-width="1.5"/>
+    <!-- Bold red stripe across middle -->
+    <rect x="850" y="280" width="260" height="50" fill="#e63020" opacity="0.85"/>
+    <!-- Small white text hint in stripe -->
+    <rect x="876" y="297" width="100" height="14" rx="3" fill="rgba(255,255,255,0.25)"/>
+    <!-- Above stripe — content lines -->
+    <rect x="876" y="165" width="130" height="12" rx="3" fill="#2d2d2d"/>
+    <rect x="876" y="188" width="90"  height="8"  rx="3" fill="#282828"/>
+    <rect x="876" y="206" width="110" height="8"  rx="3" fill="#282828"/>
+  </g>
+
+  <!-- Sheet 3 — front (business card / ACP, rotated +6°) -->
+  <g transform="rotate(6 980 310)">
+    <!-- Card body -->
+    <rect x="858" y="138" width="244" height="346" rx="6"
+          fill="#1a1a1a" stroke="#484848" stroke-width="1.5"/>
+    <!-- Red header bar (top half with rounded top, bottom square) -->
+    <rect x="858" y="138" width="244" height="58" rx="6" fill="#e63020"/>
+    <rect x="858" y="172" width="244" height="24"       fill="#e63020"/>
+    <!-- White header text stand-in -->
+    <rect x="880" y="154" width="120" height="12" rx="3" fill="rgba(255,255,255,0.75)"/>
+    <!-- Body content lines -->
+    <rect x="880" y="222" width="110" height="11" rx="3" fill="#2d2d2d"/>
+    <rect x="880" y="244" width="150" height="8"  rx="3" fill="#282828"/>
+    <rect x="880" y="262" width="90"  height="8"  rx="3" fill="#282828"/>
+    <rect x="880" y="280" width="130" height="8"  rx="3" fill="#282828"/>
+    <!-- Image placeholder box bottom-left -->
+    <rect x="880" y="370" width="72" height="72" rx="4"
+          fill="#252525" stroke="#303030" stroke-width="1"/>
+    <!-- Contact info lines bottom-right -->
+    <rect x="966" y="374" width="116" height="9" rx="3" fill="#2d2d2d"/>
+    <rect x="966" y="394" width="86"  height="9" rx="3" fill="#282828"/>
+    <rect x="966" y="414" width="100" height="9" rx="3" fill="#282828"/>
+    <rect x="966" y="434" width="76"  height="9" rx="3" fill="#282828"/>
+  </g>
+
+  <!-- ── TC monogram circle ── -->
+  <circle cx="1148" cy="578" r="28"
+          fill="none" stroke="#2a2a2a" stroke-width="1.5"/>
+  <text x="1148" y="585"
+        font-family="Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="18"
+        fill="#3a3a3a"
+        text-anchor="middle">TC</text>
+
+  <!-- ── CMYK colour swatches ── -->
+  <circle cx="796" cy="578" r="9" fill="#00b4d8" opacity="0.70"/>
+  <circle cx="820" cy="578" r="9" fill="#e63020" opacity="0.85"/>
+  <circle cx="844" cy="578" r="9" fill="#f0c040" opacity="0.70"/>
+  <circle cx="868" cy="578" r="9" fill="#111111" stroke="#363636" stroke-width="1.2"/>
+
+</svg>

@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:smoke": "vitest run e2e/",
+    "gen-og": "node scripts/gen-og.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

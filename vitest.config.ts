@@ -5,6 +5,8 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    // e2e/ smoke tests hit the live Vercel URL — run separately with npm run test:smoke
+    exclude: ["**/node_modules/**", "**/e2e/**"],
   },
   resolve: {
     alias: {
