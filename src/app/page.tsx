@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { ReviewsSection } from "@/components/home/ReviewsSection";
 import { GalleryStrip } from "@/components/home/GalleryStrip";
 import { HeroSlider } from "@/components/home/HeroSlider";
 
@@ -161,6 +162,9 @@ export default function HomePage() {
           </span>
         </div>
       </section>
+
+      {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
+      <ReviewsSection />
 
       {/* ── PRODUCT GRID ─────────────────────────────────────────────────────── */}
       <section className="px-6 py-16 max-w-6xl mx-auto">

@@ -81,6 +81,14 @@ body {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ─── Hide Trustindex floating badge (we use the inline widget only) ─────── */
+#trustindex-floating-widget-container,
+.ti-float-btn,
+.ti-float-btn-wrapper,
+[class*="ti-float"] {
+  display: none !important;
+}
+
 /* ─── Print styles ───────────────────────────────────────────────────────── */
 
 @media print {
