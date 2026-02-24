@@ -7,7 +7,7 @@
 
 ### Automated (run now)
 ```bash
-npm test             # 27 pricing engine unit tests (always passing)
+npm test             # 36 pricing engine unit tests (always passing)
 npm run test:smoke   # HTTP smoke tests against live Vercel site
 ```
 The smoke tests in `e2e/smoke.test.ts` cover:
@@ -139,6 +139,18 @@ Example: `coroplast-yard-sign-800x600.webp`
 | Grommet count suggestion (UX) | ✅ Done — live hint "~X for your size" on sign page |
 | Banner grommets included note | ✅ Done — blue info box shows count + "included standard" |
 | Addon tip text (H-stakes, Grommets) | ✅ Done — `tip` field in products-content.ts |
+| H-Stake & Grommet addon qty bug | ✅ Done — commit 1293157: now × qty (5 signs → 5 stakes) |
+| FLYER 100× pricing bug (CRITICAL) | ✅ Done — commit 3d95a77: lot price not multiplied by qty |
+
+### Known Gaps (engine) — Awaiting Owner Input
+
+| Issue | Category | Impact | Fix needed |
+|-------|----------|--------|------------|
+| FLYER qty 25/50 not in products.v1.csv or rules | FLYER | Low — UI only offers 100/250/500/1000 presets | Confirm if 25/50 qty should be offered; add products + rules |
+| STICKER — no pricing rules at all | STICKER | Medium — estimator shows but all return NEEDS_CLARIFICATION | Confirm sticker prices with owner; add to CSV |
+| MAGNET bulk discount caps at 10% for qty≥25 | MAGNET | Low — may be intentional | Confirm with owner if 25+ magnets should get a higher tier |
+| PHOTO_POSTER qty>1 uses sqft fallback rate | PHOTO_POSTER | None — no customer product page exists | No action needed unless poster page is added |
+| DECAL / VINYL_LETTERING — no pricing rules | DECAL / VINYL | None — no customer product pages | Add pages/pricing when ready to launch these products |
 
 ---
 
