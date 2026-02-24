@@ -48,6 +48,9 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   let minCharge = 0;
   let matchedRuleId: string | null = null;
   let isFixedSize = false;
+  // isLotPrice: true when price_per_unit in a pricing rule is a flat lot price for the print run
+  // (e.g. $45 for 100 flyers) — must NOT be multiplied by qty again in STEP 6
+  let isLotPrice = false;
 
   const products = getProducts();
   const fixedMatch = products.find((p) => {
@@ -120,13 +123,16 @@ export function estimate(req: EstimateRequest): EstimateResponse {
           rule_id: matchedRuleId,
         });
       } else if (tierRule.price_per_unit !== null) {
+        // price_per_unit for print products (flyers, stickers, postcards) is a FLAT LOT PRICE
+        // for the matched quantity — do NOT multiply by qty (that already happened at the shop).
         basePrice = tierRule.price_per_unit;
+        isLotPrice = true;
         tierLabel = tierRule.rule_id;
         lineItems.push({
           description: buildUnitDescription(category, req, qty),
-          qty: qty,
+          qty: 1,
           unit_price: basePrice,
-          line_total: basePrice * qty,
+          line_total: basePrice,
           rule_id: matchedRuleId,
         });
       }
@@ -235,7 +241,10 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   // For sqft-priced products: compare total order price (unit price × qty) against minimum.
   // This ensures bulk orders (e.g. 30 small signs) aren't penalized — the minimum
   // applies to the whole job, not to each unit individually.
-  const totalOrderBase = isFixedSize ? basePrice : round2(basePrice * qty);
+  // isFixedSize: exact product match (one price for the whole order)
+  // isLotPrice: pricing rule with price_per_unit as a flat print-run price (not per-piece)
+  // Both cases: basePrice IS the total — do not multiply by qty
+  const totalOrderBase = (isFixedSize || isLotPrice) ? basePrice : round2(basePrice * qty);
   let effectiveBase = totalOrderBase;
   let minChargeApplied = false;
   if (minCharge > 0 && totalOrderBase < minCharge) {

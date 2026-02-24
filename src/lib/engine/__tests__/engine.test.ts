@@ -377,6 +377,58 @@ describe("STEP 5 — add-ons", () => {
   });
 });
 
+// ─── Print lot-price (FLYER / STICKER etc.) ─────────────────────────────────
+
+describe("Print lot-price — price_per_unit is flat lot price, not per-piece", () => {
+  it("FLYER 80lb sides=1 qty=100 — should be $45 (not $4,500)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 100,
+    });
+    expect(result.sell_price).toBe(45);
+  });
+
+  it("FLYER 80lb sides=1 qty=250 — should be $110", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 250,
+    });
+    expect(result.sell_price).toBe(110);
+  });
+
+  it("FLYER 80lb sides=2 qty=100 — should be $45 (STEP 3 exact match)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.sell_price).toBe(45);
+  });
+
+  it("BUSINESS_CARD lot price unaffected — 14pt 2S qty=250 still $45", () => {
+    const result = estimate({
+      category: "BUSINESS_CARD",
+      material_code: "PLACEHOLDER_14PT",
+      width_in: 3.5,
+      height_in: 2,
+      sides: 2,
+      qty: 250,
+    });
+    expect(result.sell_price).toBe(45);
+  });
+});
+
 // ─── line_items integrity ────────────────────────────────────────────────────
 
 describe("line_items integrity", () => {
