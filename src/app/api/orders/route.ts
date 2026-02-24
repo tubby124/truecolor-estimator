@@ -80,6 +80,31 @@ export async function POST(req: NextRequest) {
         .eq("id", customer.id);
     }
 
+    // Append company to saved companies[] list (non-fatal — requires migration)
+    if (contact.company?.trim()) {
+      void (async () => {
+        try {
+          const { data: c } = await supabase
+            .from("customers")
+            .select("companies")
+            .eq("id", customer.id)
+            .maybeSingle();
+          const current: string[] = Array.isArray((c as { companies?: unknown })?.companies)
+            ? (c as { companies: string[] }).companies
+            : [];
+          const newCo = contact.company!.trim();
+          if (!current.includes(newCo)) {
+            await supabase
+              .from("customers")
+              .update({ companies: [...current, newCo] } as Record<string, unknown>)
+              .eq("id", customer.id);
+          }
+        } catch {
+          // companies column may not exist yet — skip
+        }
+      })();
+    }
+
     // 2. Calculate totals
     const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
     const rush = is_rush ? RUSH_FEE : 0;

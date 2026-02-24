@@ -11,6 +11,84 @@ import { createClient } from "@/lib/supabase/client";
 const GST_RATE = 0.05;
 const RUSH_FEE = 40;
 
+// ── Sign dimension preview ──────────────────────────────────────────────────
+// Renders a proportional rectangle with dimension labels — shown in order summary
+// for items that have width_in / height_in configured.
+function SignPreview({ widthIn, heightIn }: { widthIn: number; heightIn: number }) {
+  const MAXPX = 64;
+  const wFt = parseFloat((widthIn / 12).toFixed(2));
+  const hFt = parseFloat((heightIn / 12).toFixed(2));
+  const aspect = wFt / hFt;
+
+  let rW: number, rH: number;
+  if (aspect >= 1) {
+    rW = MAXPX;
+    rH = Math.max(10, Math.round(MAXPX / aspect));
+  } else {
+    rH = MAXPX;
+    rW = Math.max(10, Math.round(MAXPX * aspect));
+  }
+
+  const PAD_LEFT = 26;
+  const PAD_BOT = 16;
+  const svgW = rW + PAD_LEFT + 4;
+  const svgH = rH + PAD_BOT + 6;
+
+  return (
+    <svg
+      width={svgW}
+      height={svgH}
+      viewBox={`0 0 ${svgW} ${svgH}`}
+      aria-hidden="true"
+      className="overflow-visible"
+    >
+      {/* Sign rectangle */}
+      <rect
+        x={PAD_LEFT}
+        y={3}
+        width={rW}
+        height={rH}
+        fill="white"
+        stroke="#d1d5db"
+        strokeWidth="1"
+        rx="2"
+      />
+      {/* Subtle content lines */}
+      {rH >= 22 &&
+        [0.32, 0.52, 0.70].map((frac, i) => (
+          <line
+            key={i}
+            x1={PAD_LEFT + 5}
+            y1={3 + rH * frac}
+            x2={PAD_LEFT + rW - 5}
+            y2={3 + rH * frac}
+            stroke="#e5e7eb"
+            strokeWidth="0.75"
+          />
+        ))}
+      {/* Width label (bottom) */}
+      <text
+        x={PAD_LEFT + rW / 2}
+        y={3 + rH + PAD_BOT - 1}
+        textAnchor="middle"
+        fontSize="8"
+        fill="#9ca3af"
+      >
+        {wFt} ft
+      </text>
+      {/* Height label (left, rotated) */}
+      <text
+        textAnchor="middle"
+        fontSize="8"
+        fill="#9ca3af"
+        transform={`translate(11, ${3 + rH / 2}) rotate(-90)`}
+      >
+        {hFt} ft
+      </text>
+    </svg>
+  );
+}
+
 export default function CheckoutPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -22,7 +100,13 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
-  // Account creation
+  // Logged-in state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [savedCompanies, setSavedCompanies] = useState<string[]>([]);
+  const [showCompanyInput, setShowCompanyInput] = useState(false);
+
+  // Account creation (only shown when NOT logged in)
   const [createAccount, setCreateAccount] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,6 +126,42 @@ export default function CheckoutPage() {
   useEffect(() => {
     setItems(getCart());
     setMounted(true);
+
+    // Check if user is already logged in — pre-fill their saved profile
+    const supabase = createClient();
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.access_token) return;
+      setIsLoggedIn(true);
+      setAccessToken(session.access_token);
+      try {
+        const res = await fetch("/api/account/profile", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!res.ok) return;
+        const p = (await res.json()) as {
+          name?: string;
+          email?: string;
+          company?: string;
+          companies?: string[];
+          phone?: string;
+          address?: string;
+        };
+        if (p.name) setName(p.name);
+        if (p.email) setEmail(p.email);
+        if (p.phone) setPhone(p.phone);
+        if (p.address) setAddress(p.address);
+        if (p.company) setCompany(p.company);
+        const companies = p.companies ?? [];
+        // Ensure the last-used company is always in the selector list
+        const allCompanies =
+          p.company && !companies.includes(p.company)
+            ? [p.company, ...companies]
+            : companies;
+        setSavedCompanies(allCompanies);
+      } catch {
+        // Non-fatal — continue without pre-fill
+      }
+    });
   }, []);
 
   if (!mounted) return null;
@@ -84,7 +204,6 @@ export default function CheckoutPage() {
             } else {
               const { error: uploadErr } = (await uploadRes.json()) as { error?: string };
               console.warn("[checkout] upload failed:", uploadErr);
-              // Non-fatal — continue without this file
             }
           } catch (uploadErr) {
             console.warn("[checkout] file upload exception:", uploadErr);
@@ -120,6 +239,18 @@ export default function CheckoutPage() {
       };
       if (!res.ok) throw new Error(data.error ?? "Could not create order");
 
+      // If logged in, save the used company to their profile (non-fatal)
+      if (isLoggedIn && accessToken && company.trim()) {
+        void fetch("/api/account/profile", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ company: company.trim() }),
+        }).catch(() => {});
+      }
+
       // Create Supabase account if requested (client-side, non-fatal)
       if (createAccount) {
         try {
@@ -135,7 +266,6 @@ export default function CheckoutPage() {
             },
           });
           if (signUpErr) {
-            // "User already registered" is not a fatal error — order already placed
             console.warn("[checkout] account signup (non-fatal):", signUpErr.message);
           }
         } catch (signUpEx) {
@@ -175,6 +305,54 @@ export default function CheckoutPage() {
     );
   }
 
+  // Company field: dropdown picker for 2+ saved companies, plain input otherwise
+  const companyField =
+    isLoggedIn && savedCompanies.length >= 2 ? (
+      <div className="space-y-2">
+        <select
+          value={showCompanyInput ? "__other__" : company || ""}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === "__other__") {
+              setShowCompanyInput(true);
+              setCompany("");
+            } else {
+              setShowCompanyInput(false);
+              setCompany(val);
+            }
+          }}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+        >
+          <option value="">No company</option>
+          {savedCompanies.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+          <option value="__other__">+ Other company…</option>
+        </select>
+        {showCompanyInput && (
+          <input
+            type="text"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+            placeholder="Enter company name"
+            autoFocus
+          />
+        )}
+      </div>
+    ) : (
+      <input
+        id="company"
+        type="text"
+        value={company}
+        onChange={(e) => setCompany(e.target.value)}
+        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+        placeholder="ABC Realty"
+      />
+    );
+
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
@@ -183,8 +361,9 @@ export default function CheckoutPage() {
         <h1 className="text-3xl font-bold text-[#1c1712] mb-10">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Left — Contact + Notes + Artwork + Payment */}
+          {/* ── Left — Contact + Notes + Artwork + Payment ── */}
           <div className="space-y-8">
+
             {/* Contact */}
             <section>
               <h2 className="text-lg font-bold text-[#1c1712] mb-4">Your info</h2>
@@ -222,16 +401,9 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1" htmlFor="company">
-                      Company (optional)
+                      Company{isLoggedIn && savedCompanies.length >= 2 ? " (saved)" : " (optional)"}
                     </label>
-                    <input
-                      id="company"
-                      type="text"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                      placeholder="ABC Realty"
-                    />
+                    {companyField}
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1" htmlFor="phone">
@@ -263,77 +435,94 @@ export default function CheckoutPage() {
               </div>
             </section>
 
-            {/* Create account option */}
-            <section className="border border-gray-200 rounded-xl p-4">
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={createAccount}
-                  onChange={(e) => setCreateAccount(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-[#16C2F3] shrink-0"
-                />
+            {/* Account section: logged-in banner OR create-account checkbox */}
+            {isLoggedIn ? (
+              <section className="border border-gray-100 rounded-xl p-4 bg-gray-50 flex items-center justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-sm text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
-                    Save my info &amp; create a free account
-                  </p>
+                  <p className="text-sm font-semibold text-[#1c1712]">{email}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Sign in anytime to track orders, reorder, and pay later.
+                    Your info is pre-filled. Edit any field to update.
                   </p>
                 </div>
-              </label>
-
-              {createAccount && (
-                <div className="mt-4 space-y-3 border-t border-gray-100 pt-4">
-                  <div className="relative">
-                    <label className="block text-xs text-gray-500 mb-1" htmlFor="password">
-                      Password *
-                    </label>
-                    <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      minLength={8}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm pr-16 focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
-                      placeholder="Min. 8 characters"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-[26px] text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
-                  </div>
+                <Link
+                  href="/account"
+                  className="text-xs text-[#16C2F3] font-semibold hover:underline shrink-0"
+                >
+                  My orders →
+                </Link>
+              </section>
+            ) : (
+              <section className="border border-gray-200 rounded-xl p-4">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={createAccount}
+                    onChange={(e) => setCreateAccount(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-[#16C2F3] shrink-0"
+                  />
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1" htmlFor="confirmPassword">
-                      Confirm password *
-                    </label>
-                    <input
-                      id="confirmPassword"
-                      type={showPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${
-                        confirmPassword && password !== confirmPassword
-                          ? "border-red-300"
-                          : "border-gray-200"
-                      }`}
-                      placeholder="Repeat password"
-                    />
-                    {confirmPassword && password !== confirmPassword && (
-                      <p className="text-xs text-red-500 mt-1">Passwords don&apos;t match.</p>
-                    )}
+                    <p className="font-semibold text-sm text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
+                      Save my info &amp; create a free account
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Sign in anytime to track orders, reorder, and pay later.
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-400">
-                    Already have an account?{" "}
-                    <Link href="/account" className="text-[#16C2F3] hover:underline">
-                      Sign in at /account
-                    </Link>
-                  </p>
-                </div>
-              )}
-            </section>
+                </label>
+
+                {createAccount && (
+                  <div className="mt-4 space-y-3 border-t border-gray-100 pt-4">
+                    <div className="relative">
+                      <label className="block text-xs text-gray-500 mb-1" htmlFor="password">
+                        Password *
+                      </label>
+                      <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        minLength={8}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm pr-16 focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                        placeholder="Min. 8 characters"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-[26px] text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1" htmlFor="confirmPassword">
+                        Confirm password *
+                      </label>
+                      <input
+                        id="confirmPassword"
+                        type={showPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${
+                          confirmPassword && password !== confirmPassword
+                            ? "border-red-300"
+                            : "border-gray-200"
+                        }`}
+                        placeholder="Repeat password"
+                      />
+                      {confirmPassword && password !== confirmPassword && (
+                        <p className="text-xs text-red-500 mt-1">Passwords don&apos;t match.</p>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Already have an account?{" "}
+                      <Link href="/account" className="text-[#16C2F3] hover:underline">
+                        Sign in at /account
+                      </Link>
+                    </p>
+                  </div>
+                )}
+              </section>
+            )}
 
             {/* Order notes */}
             <section>
@@ -443,7 +632,6 @@ export default function CheckoutPage() {
                 </label>
               </div>
 
-              {/* eTransfer details */}
               {payMethod === "etransfer" && (
                 <div className="mt-4 bg-[#f4efe9] rounded-xl p-5 text-sm space-y-2">
                   <p className="font-bold text-[#1c1712]">Send e-Transfer to:</p>
@@ -453,9 +641,7 @@ export default function CheckoutPage() {
                   <p className="text-gray-700">
                     Amount: <span className="font-bold">${total.toFixed(2)}</span>
                   </p>
-                  <p className="text-gray-700">
-                    Reference: your name + order details
-                  </p>
+                  <p className="text-gray-700">Reference: your name + order details</p>
                   <p className="text-gray-500 text-xs mt-2">
                     Auto-deposit is enabled — no security question needed. We&apos;ll confirm by email within 1 business day.
                   </p>
@@ -525,33 +711,46 @@ export default function CheckoutPage() {
             </p>
           </div>
 
-          {/* Right — Order Summary */}
+          {/* ── Right — Order Summary ── */}
           <div>
             <div className="bg-gray-50 rounded-2xl p-6 sticky top-24">
               <h2 className="text-lg font-bold text-[#1c1712] mb-5">Order summary</h2>
 
-              <div className="space-y-3 mb-5">
-                {items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-[#1c1712]">{item.product_name}</p>
-                      <p className="text-xs text-gray-500 leading-relaxed">{item.label}</p>
-                      {/* Addon sub-rows from engine line_items */}
-                      {item.line_items && item.line_items.length > 1 && (
-                        <div className="mt-1 space-y-0.5">
-                          {item.line_items.slice(1).map((li, i) => (
-                            <p key={i} className="text-xs text-gray-400 pl-2 border-l-2 border-gray-200">
-                              {li.description}: ${li.line_total.toFixed(2)}
-                            </p>
-                          ))}
-                        </div>
-                      )}
+              <div className="space-y-5 mb-5">
+                {items.map((item) => {
+                  const wIn = item.config.width_in;
+                  const hIn = item.config.height_in;
+                  const hasDims = wIn != null && hIn != null && wIn > 0 && hIn > 0;
+                  return (
+                    <div key={item.id} className="flex justify-between items-start gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-[#1c1712]">{item.product_name}</p>
+                        <p className="text-xs text-gray-500 leading-relaxed">{item.label}</p>
+
+                        {/* Proportional sign preview — shown for items with dimensions */}
+                        {hasDims && (
+                          <div className="mt-2 bg-white rounded-lg border border-gray-100 p-2 inline-block">
+                            <SignPreview widthIn={wIn!} heightIn={hIn!} />
+                          </div>
+                        )}
+
+                        {/* Addon sub-rows from engine line_items */}
+                        {item.line_items && item.line_items.length > 1 && (
+                          <div className="mt-1.5 space-y-0.5">
+                            {item.line_items.slice(1).map((li, i) => (
+                              <p key={i} className="text-xs text-gray-400 pl-2 border-l-2 border-gray-200">
+                                {li.description}: ${li.line_total.toFixed(2)}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm font-bold text-[#1c1712] shrink-0">
+                        ${item.sell_price.toFixed(2)}
+                      </p>
                     </div>
-                    <p className="text-sm font-bold text-[#1c1712] shrink-0">
-                      ${item.sell_price.toFixed(2)}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="border-t border-gray-200 pt-4 space-y-2">
