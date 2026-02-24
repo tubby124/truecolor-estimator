@@ -27,6 +27,15 @@ const DESIGN_FEES: Record<string, number> = {
   LOGO_RECREATION: 75,
 };
 
+// Grommet estimator — mirrors engine formula (spacing + min from config.v1.csv)
+const GROMMET_SPACING_FT = 2;
+const GROMMET_MIN_COUNT = 4;
+function estimateGrommetCount(widthIn: number, heightIn: number): number {
+  if (!widthIn || !heightIn) return GROMMET_MIN_COUNT;
+  const perimeterFt = 2 * (widthIn / 12 + heightIn / 12);
+  return Math.max(GROMMET_MIN_COUNT, Math.ceil(perimeterFt / GROMMET_SPACING_FT));
+}
+
 export interface PriceData {
   price: number | null;
   loading: boolean;
@@ -376,45 +385,82 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Add-ons</p>
           <div className="space-y-2">
-            {product.addons.map((addon) => (
-              <div
-                key={addon.label}
-                className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-3"
-              >
-                <div>
-                  <span className="text-sm font-medium text-[#1c1712]">{addon.label}</span>
-                  <span className="text-xs text-gray-400 ml-2">${addon.unitPrice.toFixed(2)} each</span>
+            {product.addons.map((addon) => {
+              const isGrommet = addon.engineCode === "GROMMETS";
+              const hasDims = effectiveWidth > 0 && effectiveHeight > 0;
+              const grommetCount = isGrommet && hasDims ? estimateGrommetCount(effectiveWidth, effectiveHeight) : null;
+              const grommetTotal = grommetCount != null ? grommetCount * addon.unitPrice : null;
+              const isAddonActive = (addonQtys[addon.label] || 0) > 0;
+              return (
+                <div
+                  key={addon.label}
+                  className="border border-gray-200 rounded-lg px-4 py-3 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-sm font-medium text-[#1c1712]">{addon.label}</span>
+                      <span className="text-xs text-gray-400 ml-2">
+                        {isGrommet ? "Auto-calculated · $2.00 each" : `$${addon.unitPrice.toFixed(2)} each`}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          setAddonQtys((prev) => ({
+                            ...prev,
+                            [addon.label]: Math.max(0, (prev[addon.label] || 0) - (addon.step || 1)),
+                          }))
+                        }
+                        className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
+                      >
+                        −
+                      </button>
+                      <span className="w-8 text-center text-sm font-semibold">
+                        {addonQtys[addon.label] || 0}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setAddonQtys((prev) => ({
+                            ...prev,
+                            [addon.label]: (prev[addon.label] || 0) + (addon.step || 1),
+                          }))
+                        }
+                        className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  {/* Grommet count estimate (live — updates as dimensions change) */}
+                  {isGrommet && hasDims && !isAddonActive && (
+                    <p className="text-xs text-[#16C2F3]">
+                      For your {effectiveWidth}×{effectiveHeight}″ sign: ~{grommetCount} grommets (${grommetTotal!.toFixed(2)} total)
+                    </p>
+                  )}
+                  {/* Grommet note when active (engine has the exact count in line_items) */}
+                  {isGrommet && isAddonActive && (
+                    <p className="text-xs text-green-600">
+                      Count auto-calculated from your sign size — see price breakdown below
+                    </p>
+                  )}
+                  {/* Static tip for non-grommet addons, or grommet tip when no dims */}
+                  {addon.tip && !(isGrommet && hasDims) && (
+                    <p className="text-xs text-gray-400">{addon.tip}</p>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      setAddonQtys((prev) => ({
-                        ...prev,
-                        [addon.label]: Math.max(0, (prev[addon.label] || 0) - (addon.step || 1)),
-                      }))
-                    }
-                    className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center text-sm font-semibold">
-                    {addonQtys[addon.label] || 0}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setAddonQtys((prev) => ({
-                        ...prev,
-                        [addon.label]: (prev[addon.label] || 0) + (addon.step || 1),
-                      }))
-                    }
-                    className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
+        </div>
+      )}
+
+      {/* Banner grommets included note */}
+      {product.category === "BANNER" && effectiveWidth > 0 && effectiveHeight > 0 && (
+        <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
+          <p className="text-xs font-semibold text-blue-800 mb-0.5">Grommets included standard</p>
+          <p className="text-xs text-blue-600">
+            Your {effectiveWidth}×{effectiveHeight}″ banner includes ~{estimateGrommetCount(effectiveWidth, effectiveHeight)} grommets (every 2 ft along the perimeter) plus hemmed edges — at no extra charge.
+          </p>
         </div>
       )}
 

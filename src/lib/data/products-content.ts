@@ -26,7 +26,7 @@ export interface ProductContent {
   whoUsesThis: string[];
   faqs: { q: string; a: string }[];
   relatedSlugs: string[];
-  addons?: { label: string; unitPrice: number; step?: number; engineCode?: string }[];
+  addons?: { label: string; unitPrice: number; step?: number; engineCode?: string; tip?: string }[];
   materialInfo?: { headline: string; bullets: string[] };
   tierPresets?: { label: string; material_code: string; price: number }[];
 }
@@ -86,8 +86,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     ],
     relatedSlugs: ["vehicle-magnets", "vinyl-banners", "acp-signs"],
     addons: [
-      { label: "H-Stakes", unitPrice: 2.50, step: 1, engineCode: "H_STAKE" },
-      { label: "Grommets", unitPrice: 2.00, step: 2, engineCode: "GROMMETS" },
+      { label: "H-Stakes", unitPrice: 2.50, step: 1, engineCode: "H_STAKE", tip: "Wire H-stakes slide into the bottom flutes for yard or ground installation." },
+      { label: "Grommets", unitPrice: 2.00, step: 2, engineCode: "GROMMETS", tip: "For hanging or wall-mounting. Count auto-calculated from your sign size every 2 ft." },
     ],
     materialInfo: {
       headline: "4mm corrugated polypropylene — weatherproof, lightweight",

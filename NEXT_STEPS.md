@@ -113,18 +113,6 @@ Example: `coroplast-yard-sign-800x600.webp`
 
 ---
 
-## DB Migration Required (run in Supabase SQL editor)
-
-```sql
-ALTER TABLE order_items ADD COLUMN IF NOT EXISTS line_items_json JSONB;
-```
-
-This stores the full engine breakdown (base + addons + fees) per order item so staff can see
-the exact line_items for any historical order. The column is added best-effort — new orders
-will attempt to store it, old orders won't have it (NULL). Safe to run any time.
-
----
-
 ## What's Done
 
 | Fix | Status |
@@ -147,3 +135,28 @@ will attempt to store it, old orders won't have it (NULL). Safe to run any time.
 | MAGNET MOST_POPULAR_QTY 4→5 (hint now shows) | ✅ Done |
 | OptionsPanel MAGNET presets [1,2,4]→[1,2,4,5,10] | ✅ Done |
 | PriceSummary shows engine addon sub-lines (not local calc) | ✅ Done |
+| DB migration `line_items_json JSONB` | ✅ Done — run by owner 2026-02-24 |
+| Grommet count suggestion (UX) | ✅ Done — live hint "~X for your size" on sign page |
+| Banner grommets included note | ✅ Done — blue info box shows count + "included standard" |
+| Addon tip text (H-stakes, Grommets) | ✅ Done — `tip` field in products-content.ts |
+
+---
+
+## Grommet Count Logic (for reference)
+
+Engine formula (matches `config.v1.csv` — do NOT hardcode these elsewhere):
+- `grommet_spacing_ft` = 2 ft between grommets
+- `grommet_minimum_count` = 4 minimum regardless of size
+- `count = max(4, ceil(perimeter_ft / 2))`
+- `perimeter_ft = 2 × (width_in/12 + height_in/12)`
+
+Example estimates:
+| Sign size | Perimeter | Grommets | Cost |
+|-----------|-----------|---------|------|
+| 18×24 in | 7 ft | 4 | $8.00 |
+| 24×36 in | 10 ft | 5 | $10.00 |
+| 24×48 in | 12 ft | 6 | $12.00 |
+| 48×96 in | 24 ft | 12 | $24.00 |
+| 24×72 in (banner) | 16 ft | 8 | included |
+
+Client-side estimate in `ProductConfigurator.tsx` mirrors this formula exactly (confirmed by unit test).
