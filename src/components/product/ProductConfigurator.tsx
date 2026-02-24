@@ -8,7 +8,7 @@ const BULK_HINTS: Record<string, Record<number, string>> = {
   BANNER:    { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
   RIGID:     { 5: "save 3%", 10: "save 5%",  25: "save 8%"  },
   FOAMBOARD: { 5: "save 8%", 10: "save 12%", 25: "save 15%" },
-  MAGNET:    { 5: "save 5%", 10: "save 10%" },
+  MAGNET:    { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
 };
 
 const MOST_POPULAR_QTY: Record<string, number> = {
@@ -93,6 +93,12 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const fetchPrice = useCallback(async () => {
     if (!effectiveWidth || !effectiveHeight) return;
     setLoading(true);
+    // Build engine addon codes from active addonQtys (uses engineCode field from products-content.ts)
+    const engineAddons = product.addons
+      ? product.addons
+          .filter((addon) => addon.engineCode && (addonQtys[addon.label] || 0) > 0)
+          .map((addon) => addon.engineCode as string)
+      : [];
     try {
       const res = await fetch("/api/estimate", {
         method: "POST",
@@ -105,6 +111,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           sides,
           qty: effectiveQty,
           design_status: designStatus,
+          addons: engineAddons.length > 0 ? engineAddons : undefined,
         }),
       });
       const data = await res.json();
@@ -123,12 +130,14 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
     }
   }, [
     product.category,
+    product.addons,
     effectiveMaterialCode,
     effectiveWidth,
     effectiveHeight,
     sides,
     effectiveQty,
     designStatus,
+    addonQtys,
   ]);
 
   // Fire price fetch — debounced 300ms for custom inputs, immediate for presets
@@ -320,7 +329,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           })}
           <div className="flex flex-col items-center">
             <button
-              onClick={() => setIsCustomQty(true)}
+              onClick={() => { setCustomQty(String(qty)); setIsCustomQty(true); }}
               className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                 isCustomQty
                   ? "bg-[#1c1712] text-white border-[#1c1712]"

@@ -26,7 +26,7 @@ export interface ProductContent {
   whoUsesThis: string[];
   faqs: { q: string; a: string }[];
   relatedSlugs: string[];
-  addons?: { label: string; unitPrice: number; step?: number }[];
+  addons?: { label: string; unitPrice: number; step?: number; engineCode?: string }[];
   materialInfo?: { headline: string; bullets: string[] };
   tierPresets?: { label: string; material_code: string; price: number }[];
 }
@@ -86,8 +86,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     ],
     relatedSlugs: ["vehicle-magnets", "vinyl-banners", "acp-signs"],
     addons: [
-      { label: "H-Stakes", unitPrice: 2.50, step: 1 },
-      { label: "Grommets", unitPrice: 2.00, step: 2 },
+      { label: "H-Stakes", unitPrice: 2.50, step: 1, engineCode: "H_STAKE" },
+      { label: "Grommets", unitPrice: 2.00, step: 2, engineCode: "GROMMETS" },
     ],
     materialInfo: {
       headline: "4mm corrugated polypropylene — weatherproof, lightweight",
@@ -185,7 +185,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "18×24\"", width_in: 18, height_in: 24 },
       { label: "24×36\"", width_in: 24, height_in: 36 },
     ],
-    qtyPresets: [1, 2, 4],
+    qtyPresets: [1, 2, 4, 5, 10],
     specs: [
       { label: "Material", value: "30mil flexible magnetic sheeting" },
       { label: "Print surface", value: "White gloss vinyl laminate — full colour" },

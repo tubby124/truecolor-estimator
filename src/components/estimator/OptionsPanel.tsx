@@ -193,6 +193,7 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
                 placeholder="Custom qty"
                 value={state.qty}
                 onChange={(e) => onChange({ qty: parseInt(e.target.value) || 1 })}
+                onFocus={(e) => e.target.select()}
                 className="w-28 border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
               />
             </div>

@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
       .update(bodyText)
       .digest("base64");
 
-    if (signature && signature !== expected) {
-      console.warn("[clover-webhook] Invalid signature — possible spoofing attempt");
+    if (!signature || signature !== expected) {
+      console.warn("[clover-webhook] Invalid or missing signature — possible spoofing attempt");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
   }
