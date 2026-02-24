@@ -344,6 +344,37 @@ describe("STEP 5 — add-ons", () => {
     // Perimeter: 2*(2ft+6ft) = 16ft, grommet every 2ft = 8 grommets × $2 = $16
     expect(grommetLine!.qty).toBeGreaterThan(0);
   });
+
+  it("H_STAKE qty 2 — charges 2 stakes, not 1", () => {
+    const single = estimate({
+      category: "SIGN", material_code: "MPHCC020",
+      width_in: 18, height_in: 24, sides: 1, qty: 1, addons: ["H_STAKE"],
+    });
+    const double = estimate({
+      category: "SIGN", material_code: "MPHCC020",
+      width_in: 18, height_in: 24, sides: 1, qty: 2, addons: ["H_STAKE"],
+    });
+    const singleStake = single.line_items.find((li) => li.rule_id === "PR-ADDON-HSTAKE")!;
+    const doubleStake = double.line_items.find((li) => li.rule_id === "PR-ADDON-HSTAKE")!;
+    expect(doubleStake.qty).toBe(2);
+    expect(doubleStake.line_total).toBe(singleStake.line_total * 2);
+  });
+
+  it("GROMMETS qty 2 — charges 2× grommet count", () => {
+    const single = estimate({
+      category: "BANNER", material_code: "RMBF004",
+      width_in: 24, height_in: 72, sides: 1, qty: 1, addons: ["GROMMETS"],
+    });
+    const double = estimate({
+      category: "BANNER", material_code: "RMBF004",
+      width_in: 24, height_in: 72, sides: 1, qty: 2, addons: ["GROMMETS"],
+    });
+    const singleGrom = single.line_items.find((li) => li.rule_id === "PR-ADDON-GROMMET")!;
+    const doubleGrom = double.line_items.find((li) => li.rule_id === "PR-ADDON-GROMMET")!;
+    // 2 banners should have 2× the grommet count and 2× the charge
+    expect(doubleGrom.qty).toBe(singleGrom.qty * 2);
+    expect(doubleGrom.line_total).toBe(singleGrom.line_total * 2);
+  });
 });
 
 // ─── line_items integrity ────────────────────────────────────────────────────

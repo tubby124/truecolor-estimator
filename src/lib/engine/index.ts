@@ -192,7 +192,7 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   let addonTotal = 0;
   const services = getServices();
 
-  // Grommets — auto-calculate from perimeter if banner
+  // Grommets — auto-calculate from perimeter, multiply by qty (each sign/banner needs its own)
   if (addons.includes("GROMMETS") && req.width_in && req.height_in) {
     const widthFt = req.width_in / 12;
     const heightFt = req.height_in / 12;
@@ -200,30 +200,33 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     const grommetSpacing = getConfigNum("grommet_spacing_ft");
     const grommetMin = getConfigNum("grommet_minimum_count");
     const grommetPrice = getConfigNum("grommet_price_per_unit");
-    const grometCount = Math.max(grommetMin, Math.ceil(perimeterFt / grommetSpacing));
-    const grometCharge = grometCount * grommetPrice;
+    const grommetCountPerUnit = Math.max(grommetMin, Math.ceil(perimeterFt / grommetSpacing));
+    const totalGrommetCount = grommetCountPerUnit * qty;
+    const grometCharge = totalGrommetCount * grommetPrice;
     addonTotal += grometCharge;
     rulesFired.push("PR-ADDON-GROMMET");
+    const qtyNote = qty > 1 ? ` × ${qty} units` : "";
     lineItems.push({
-      description: `Grommets (${grometCount} × $${grommetPrice.toFixed(2)} — auto-calculated from perimeter)`,
-      qty: grometCount,
+      description: `Grommets (${grommetCountPerUnit}/unit${qtyNote} = ${totalGrommetCount} × $${grommetPrice.toFixed(2)} — auto-calculated from perimeter)`,
+      qty: totalGrommetCount,
       unit_price: grommetPrice,
       line_total: grometCharge,
       rule_id: "PR-ADDON-GROMMET",
     });
   }
 
-  // H-Stake
+  // H-Stake — 1 stake per sign, multiply by qty
   if (addons.includes("H_STAKE")) {
     const hstakeSvc = services.find((s) => s.service_id === "SVC-HSTAKE");
     const hstakePrice = hstakeSvc?.default_price ?? getConfigNum("hstake_price_per_unit");
-    addonTotal += hstakePrice;
+    const hstakeTotal = hstakePrice * qty;
+    addonTotal += hstakeTotal;
     rulesFired.push("PR-ADDON-HSTAKE");
     lineItems.push({
       description: `H-Stake (yard stake)`,
-      qty: 1,
+      qty: qty,
       unit_price: hstakePrice,
-      line_total: hstakePrice,
+      line_total: hstakeTotal,
       rule_id: "PR-ADDON-HSTAKE",
     });
   }
