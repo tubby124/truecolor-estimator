@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { encodePaymentToken } from "@/lib/payment/token";
 
-const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");

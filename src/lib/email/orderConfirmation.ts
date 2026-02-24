@@ -368,7 +368,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                 216 33rd St W · Saskatoon, SK · Canada
               </p>
               <p style="margin: 0 0 8px; font-size: 12px; color: #9c928a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <a href="tel:+13066528888" style="color: #f08080; text-decoration: none;">(306) 652-8888</a>
+                <a href="tel:+13069548688" style="color: #f08080; text-decoration: none;">(306) 954-8688</a>
                 &nbsp;·&nbsp;
                 <a href="mailto:info@true-color.ca" style="color: #f08080; text-decoration: none;">info@true-color.ca</a>
               </p>
@@ -431,7 +431,7 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
       ? "Your rush order is prioritized — we will contact you today."
       : "Typical turnaround: 1–3 business days. We will email you when your order is ready.",
     "",
-    "Questions? Reply to this email or call (306) 652-8888.",
+    "Questions? Reply to this email or call (306) 954-8688.",
     "",
     "True Color Display Printing",
     "Saskatoon, SK, Canada",

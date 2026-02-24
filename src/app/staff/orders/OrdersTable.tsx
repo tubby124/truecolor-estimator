@@ -45,7 +45,7 @@ const DESIGN_LABELS: Record<string, string> = {
 };
 
 const SUPABASE_STORAGE_URL =
-  "https://dczbgraekmzirxknjvwe.supabase.co/storage/v1/object/public/print-files";
+  `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 

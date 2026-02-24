@@ -40,7 +40,7 @@ interface OrderItem {
 }
 
 const SUPABASE_STORAGE_URL =
-  "https://dczbgraekmzirxknjvwe.supabase.co/storage/v1/object/public/print-files";
+  `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
 
 interface Order {
   id: string;

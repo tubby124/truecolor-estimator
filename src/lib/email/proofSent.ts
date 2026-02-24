@@ -229,7 +229,7 @@ function buildHtml(p: ProofSentParams): string {
               216 33rd St W · Saskatoon, SK · Canada
             </p>
             <p style="margin:0;font-size:12px;color:#9c928a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              <a href="tel:+13066528888" style="color:#f08080;text-decoration:none;">(306) 652-8888</a>
+              <a href="tel:+13069548688" style="color:#f08080;text-decoration:none;">(306) 954-8688</a>
               &nbsp;·&nbsp;
               <a href="mailto:info@true-color.ca" style="color:#f08080;text-decoration:none;">info@true-color.ca</a>
             </p>
@@ -271,7 +271,7 @@ function buildText(p: ProofSentParams): string {
     "",
     "— True Color Display Printing",
     "216 33rd St W, Saskatoon, SK",
-    "(306) 652-8888",
+    "(306) 954-8688",
     "info@true-color.ca",
   ].join("\n");
 }

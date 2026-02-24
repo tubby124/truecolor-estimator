@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
+import { approveWaveInvoice, sendWaveInvoice } from "@/lib/wave/invoice";
 
 const VALID_STATUSES = [
   "pending_payment",
@@ -71,7 +72,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       try {
         const { data: order } = await supabase
           .from("orders")
-          .select("order_number, total, is_rush, customers ( name, email )")
+          .select("order_number, total, is_rush, wave_invoice_id, customers ( name, email )")
           .eq("id", id)
           .single();
 
@@ -90,6 +91,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
               total: Number(order.total),
               isRush: Boolean(order.is_rush),
             });
+          }
+
+          // On ready_for_pickup: approve + send Wave invoice (non-fatal)
+          if (status === "ready_for_pickup" && order.wave_invoice_id && customer?.email) {
+            try {
+              await approveWaveInvoice(order.wave_invoice_id);
+              await sendWaveInvoice(order.wave_invoice_id, customer.email, {
+                subject: `Invoice for True Color Order ${order.order_number} — Ready for Pickup`,
+                message: `Your order is ready for pickup at 216 33rd St W, Saskatoon. Please find your invoice attached. Balance is due on pickup.`,
+              });
+              console.log(`[staff/orders/status] Wave invoice sent → ${customer.email} (${order.wave_invoice_id})`);
+            } catch (waveErr) {
+              console.error("[staff/orders/status] Wave invoice send failed (non-fatal):", waveErr);
+            }
           }
         }
       } catch (emailErr) {

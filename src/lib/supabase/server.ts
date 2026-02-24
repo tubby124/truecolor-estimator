@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-const SUPABASE_URL = "https://dczbgraekmzirxknjvwe.supabase.co";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
 
 export function createServiceClient() {
   const key = process.env.SUPABASE_SECRET_KEY;
