@@ -76,7 +76,8 @@ export async function GET(req: NextRequest) {
     .limit(50);
 
   if (ordersErr) {
-    return NextResponse.json({ error: ordersErr.message }, { status: 500 });
+    console.error("[account/orders]", ordersErr.message);
+    return NextResponse.json({ error: "Failed to load orders" }, { status: 500 });
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolor-estimator.vercel.app";

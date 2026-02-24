@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+
+export const metadata: Metadata = {
+  title: "Services | True Color Display Printing Saskatoon",
+  description:
+    "Print, design, and installation services from True Color Display Printing. In-house graphic design, window decal application, vehicle graphic installation. Saskatoon, SK.",
+  alternates: { canonical: "/services" },
+};
 
 interface ServiceCardProps {
   icon: string;

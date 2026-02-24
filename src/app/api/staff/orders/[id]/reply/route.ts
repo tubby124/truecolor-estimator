@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
 import nodemailer from "nodemailer";
 
 interface Params {
@@ -15,6 +15,9 @@ interface Params {
 }
 
 export async function POST(req: NextRequest, { params }: Params) {
+  const user = await getSessionUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const { id } = await params;
     const { subject, message } = (await req.json()) as {

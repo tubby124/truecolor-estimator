@@ -9,6 +9,8 @@
  *   "send"  → create + approve + send to customer via Wave email
  */
 
+import { NextResponse } from "next/server";
+import { getSessionUser } from "@/lib/supabase/server";
 import type { EstimateResponse } from "@/lib/engine/types";
 import {
   createOrFindWaveCustomer,
@@ -35,6 +37,9 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(req: Request) {
+  const user = await getSessionUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     // Check Wave is configured before doing any work
     if (!process.env.WAVE_API_TOKEN) {

@@ -1,7 +1,7 @@
 /**
  * PATCH /api/staff/orders/[id]/status
  *
- * Updates order status. Staff-only route — no auth guard yet (noindex, URL-obscured).
+ * Updates order status. Staff-only route — requires authenticated Supabase session.
  * Body: { status: order_status }
  *
  * Allowed transitions (enforced client-side; server accepts any valid status):
@@ -14,7 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 
 const VALID_STATUSES = [
@@ -39,6 +39,9 @@ interface Params {
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
+  const user = await getSessionUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const { id } = await params;
     const { status } = (await req.json()) as { status: OrderStatus };

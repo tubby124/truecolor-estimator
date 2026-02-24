@@ -14,7 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
 import { sendProofEmail } from "@/lib/email/proofSent";
 
 const MAX_FILE_SIZE = 52_428_800; // 50 MB
@@ -28,14 +28,18 @@ const ALLOWED_MIME_TYPES = [
 
 const ALLOWED_EXTENSIONS = /\.(jpg|jpeg|png|webp|pdf)$/i;
 
-const SUPABASE_STORAGE_PUBLIC =
-  "https://dczbgraekmzirxknjvwe.supabase.co/storage/v1/object/public/print-files";
+const SUPABASE_STORAGE_PUBLIC = `${
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"
+}/storage/v1/object/public/print-files`;
 
 interface Params {
   params: Promise<{ id: string }>;
 }
 
 export async function POST(req: NextRequest, { params }: Params) {
+  const user = await getSessionUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const { id: orderId } = await params;
 

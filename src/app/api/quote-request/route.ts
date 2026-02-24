@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     // Send to staff
     await transporter.sendMail({
       from: `"True Color Website" <${process.env.SMTP_USER}>`,
-      to: "info@true-color.ca",
+      to: process.env.STAFF_EMAIL ?? "info@true-color.ca",
       replyTo: email,
       subject,
       html: htmlWithFile,

@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Owner visiting /account → redirect to staff dashboard
-  if (path === "/account" && user?.email === "info@true-color.ca") {
+  if (path === "/account" && user?.email === (process.env.STAFF_EMAIL ?? "info@true-color.ca")) {
     const staffUrl = request.nextUrl.clone();
     staffUrl.pathname = "/staff/orders";
     return NextResponse.redirect(staffUrl);
