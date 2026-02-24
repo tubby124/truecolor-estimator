@@ -49,11 +49,21 @@ export default function CartPage() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="border border-gray-100 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="border border-gray-100 rounded-xl p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4"
               >
                 <div className="flex-1">
                   <p className="font-bold text-[#1c1712]">{item.product_name}</p>
                   <p className="text-sm text-gray-500 mt-0.5">{item.label}</p>
+                  {/* Addon sub-rows from engine line_items */}
+                  {item.line_items && item.line_items.length > 1 && (
+                    <div className="mt-2 space-y-0.5">
+                      {item.line_items.slice(1).map((li, i) => (
+                        <p key={i} className="text-xs text-gray-400 pl-3 border-l-2 border-gray-100">
+                          {li.description}: ${li.line_total.toFixed(2)}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-6 shrink-0">
                   <div className="text-right">

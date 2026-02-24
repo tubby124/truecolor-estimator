@@ -346,6 +346,57 @@ describe("STEP 5 — add-ons", () => {
   });
 });
 
+// ─── line_items integrity ────────────────────────────────────────────────────
+
+describe("line_items integrity", () => {
+  it("line_items[0] is always the base product", () => {
+    const result = estimate({
+      category: "SIGN",
+      material_code: "MPHCC020",
+      width_in: 18,
+      height_in: 24,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.line_items.length).toBeGreaterThan(0);
+    expect(result.line_items[0].line_total).toBeGreaterThan(0);
+  });
+
+  it("BANNER 24×72 with GROMMETS — grommet count matches perimeter formula", () => {
+    // Perimeter: 2 × (2ft + 6ft) = 16 ft → every 2ft = 8 grommets
+    const result = estimate({
+      category: "BANNER",
+      material_code: "RMBF004",
+      width_in: 24,
+      height_in: 72,
+      sides: 1,
+      qty: 1,
+      addons: ["GROMMETS"],
+    });
+    expect(result.status).toBe("QUOTED");
+    const grommetLine = result.line_items.find((li) => li.rule_id === "PR-ADDON-GROMMET");
+    expect(grommetLine).toBeDefined();
+    expect(grommetLine!.qty).toBe(8); // 16ft perimeter / 2ft spacing = 8
+    expect(grommetLine!.line_total).toBe(16); // 8 × $2.00
+  });
+
+  it("line_items sum always equals sell_price (no rounding drift, including addons)", () => {
+    const cases = [
+      { category: "SIGN" as const, material_code: "MPHCC020", width_in: 18, height_in: 24, sides: 1 as const, qty: 1, addons: ["H_STAKE"] as const },
+      { category: "BANNER" as const, material_code: "RMBF004", width_in: 24, height_in: 72, sides: 1 as const, qty: 1, addons: ["GROMMETS"] as const },
+      { category: "MAGNET" as const, material_code: "MAG302437550M", width_in: 12, height_in: 18, sides: 1 as const, qty: 5 },
+    ];
+    for (const req of cases) {
+      const result = estimate(req);
+      if (result.status === "QUOTED" && result.sell_price != null) {
+        const lineSum = result.line_items.reduce((s, li) => s + li.line_total, 0);
+        expect(Math.abs(lineSum - result.sell_price)).toBeLessThan(0.02); // within 2¢ rounding
+      }
+    }
+  });
+});
+
 // ─── Response shape ───────────────────────────────────────────────────────────
 
 describe("Response shape", () => {

@@ -22,6 +22,7 @@ export interface OrderConfirmationParams {
     sides: number;
     design_status: string;
     line_total: number;
+    line_items?: Array<{ description: string; qty: number; unit_price: number; line_total: number; rule_id: string }>;
   }>;
   subtotal: number;
   gst: number;
@@ -132,6 +133,20 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
         .filter(Boolean)
         .join(" · ");
 
+      // Addon sub-rows (grommets, H-stakes, etc.) — shown only when engine line_items available
+      const addonSubRows = item.line_items && item.line_items.length > 1
+        ? item.line_items.slice(1).map((li) =>
+            `<tr style="background: ${bg};">
+              <td style="padding: 4px 16px 4px 28px; font-size: 12px; color: #6b7280; border-bottom: 1px solid #f0ebe4;">
+                ↳ ${escHtml(li.description)}
+              </td>
+              <td style="padding: 4px 16px; font-size: 12px; color: #6b7280; text-align: right; border-bottom: 1px solid #f0ebe4; font-variant-numeric: tabular-nums;">
+                $${li.line_total.toFixed(2)}
+              </td>
+            </tr>`
+          ).join("")
+        : "";
+
       return `
         <tr style="background: ${bg};">
           <td style="padding: 12px 16px; font-size: 14px; color: #1f2937; border-bottom: 1px solid #f0ebe4; line-height: 1.5;">
@@ -141,7 +156,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
           <td style="padding: 12px 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top;">
             $${item.line_total.toFixed(2)}
           </td>
-        </tr>`;
+        </tr>${addonSubRows}`;
     })
     .join("");
 

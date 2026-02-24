@@ -2,6 +2,7 @@
 
 import { CustomerProof } from "@/components/product/CustomerProof";
 import type { Category } from "@/lib/data/types";
+import type { LineItem } from "@/lib/cart/cart";
 
 interface PriceSummaryProps {
   // Price data
@@ -16,6 +17,7 @@ interface PriceSummaryProps {
   qtyDiscountApplied?: boolean;
   minChargeApplied?: boolean;
   minChargeValue?: number | null;
+  lineItems?: LineItem[]; // engine breakdown — used for addon sub-line display
   // Cart
   addedToCart: boolean;
   onAddToCart: () => void;
@@ -42,8 +44,10 @@ export function PriceSummary({
   addedToCart, onAddToCart, productSlug,
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
   pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
-  minChargeApplied, minChargeValue,
+  minChargeApplied, minChargeValue, lineItems = [],
 }: PriceSummaryProps) {
+  // Addon sub-lines = engine line_items beyond the first (base product) item
+  const addonLines = lineItems.length > 1 ? lineItems.slice(1) : [];
   const hasPrice = price != null;
 
   return (
@@ -109,8 +113,14 @@ export function PriceSummary({
                 </p>
               )}
 
-              {/* Add-ons */}
-              {addonTotal > 0 && (
+              {/* Add-on sub-lines from engine (correct perimeter-based qty) */}
+              {addonLines.map((li, i) => (
+                <p key={i} className="text-sm text-gray-500">
+                  + ${li.line_total.toFixed(2)} {li.description}
+                </p>
+              ))}
+              {/* Fallback: local addonTotal when engine line_items not yet loaded */}
+              {addonLines.length === 0 && addonTotal > 0 && (
                 <p className="text-sm text-gray-500">
                   + ${addonTotal.toFixed(2)} add-ons
                 </p>

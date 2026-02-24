@@ -1,6 +1,14 @@
 // Cart state manager — sessionStorage based, no login required
 // Items persist across page navigation within the same browser tab
 
+export interface LineItem {
+  description: string;
+  qty: number;
+  unit_price: number;
+  line_total: number;
+  rule_id: string;
+}
+
 export interface CartItem {
   id: string;
   product_name: string;
@@ -17,8 +25,9 @@ export interface CartItem {
     design_status?: string;
     addons?: string[];
   };
-  sell_price: number; // pre-tax total (all units)
+  sell_price: number; // pre-tax total (all units) — engine sell_price, includes addons
   qty: number;
+  line_items?: LineItem[]; // engine breakdown: base product + addon sub-lines
 }
 
 const CART_KEY = "tc_cart";

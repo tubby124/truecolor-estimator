@@ -536,6 +536,16 @@ export default function CheckoutPage() {
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-[#1c1712]">{item.product_name}</p>
                       <p className="text-xs text-gray-500 leading-relaxed">{item.label}</p>
+                      {/* Addon sub-rows from engine line_items */}
+                      {item.line_items && item.line_items.length > 1 && (
+                        <div className="mt-1 space-y-0.5">
+                          {item.line_items.slice(1).map((li, i) => (
+                            <p key={i} className="text-xs text-gray-400 pl-2 border-l-2 border-gray-200">
+                              {li.description}: ${li.line_total.toFixed(2)}
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <p className="text-sm font-bold text-[#1c1712] shrink-0">
                       ${item.sell_price.toFixed(2)}

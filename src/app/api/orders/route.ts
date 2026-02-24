@@ -128,6 +128,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Create order_items rows
+    // line_items_json requires DB migration: ALTER TABLE order_items ADD COLUMN IF NOT EXISTS line_items_json JSONB;
     const orderItems = items.map((item) => ({
       order_id: order.id,
       category: item.category,
@@ -142,6 +143,7 @@ export async function POST(req: NextRequest) {
       design_status: item.config.design_status ?? "PRINT_READY",
       unit_price: item.sell_price / item.qty,
       line_total: item.sell_price,
+      ...(item.line_items ? { line_items_json: item.line_items } : {}),
     }));
 
     // Attach first file path to first order item (DB column only stores one path per item)
@@ -226,7 +228,7 @@ export async function POST(req: NextRequest) {
       await sendOrderConfirmationEmail({
         orderNumber: order.order_number,
         contact,
-        items: orderItems.map(item => ({
+        items: orderItems.map((item, idx) => ({
           product_name: item.product_name,
           qty: item.qty,
           width_in: item.width_in,
@@ -234,6 +236,7 @@ export async function POST(req: NextRequest) {
           sides: item.sides,
           design_status: item.design_status,
           line_total: item.line_total,
+          line_items: items[idx]?.line_items,
         })),
         subtotal,
         gst,

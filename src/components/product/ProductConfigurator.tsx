@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { ProductContent } from "@/lib/data/products-content";
+import type { LineItem } from "@/lib/cart/cart";
 
 const BULK_HINTS: Record<string, Record<number, string>> = {
   SIGN:      { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
@@ -16,7 +17,7 @@ const MOST_POPULAR_QTY: Record<string, number> = {
   BANNER: 5,
   RIGID: 10,
   FOAMBOARD: 10,
-  MAGNET: 4,
+  MAGNET: 5,
 };
 
 const DESIGN_FEES: Record<string, number> = {
@@ -38,6 +39,7 @@ export interface PriceData {
   qtyDiscountApplied: boolean;
   minChargeApplied: boolean;
   minChargeValue: number | null;
+  lineItems: LineItem[]; // engine breakdown: base + addons
 }
 
 export interface ConfigData {
@@ -68,6 +70,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [customQty, setCustomQty] = useState("");
   const [isCustomQty, setIsCustomQty] = useState(false);
   const [price, setPrice] = useState<number | null>(null);
+  const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [designStatus, setDesignStatus] = useState<string>("PRINT_READY");
   const [addonQtys, setAddonQtys] = useState<Record<string, number>>({});
@@ -117,6 +120,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       const data = await res.json();
       if (data.sell_price != null) {
         setPrice(data.sell_price);
+        setLineItems(data.line_items ?? []);
         setQtyDiscountApplied(data.qty_discount_applied ?? false);
         setQtyDiscountPct(data.qty_discount_pct ?? null);
         setPricePerUnit(data.price_per_unit ?? null);
@@ -149,9 +153,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   }, [fetchPrice, isCustom, isCustomQty]);
 
   // Bubble price data to parent
+  // NOTE: price is already the engine's sell_price including all addons — do NOT add addonTotal again
   useEffect(() => {
-    const gstCalc = price != null ? (price + addonTotal) * 0.05 : null;
-    const totalCalc = price != null && gstCalc != null ? price + addonTotal + gstCalc : null;
+    const gstCalc = price != null ? price * 0.05 : null;
+    const totalCalc = price != null && gstCalc != null ? price + gstCalc : null;
     onPriceChange?.({
       price,
       loading,
@@ -164,8 +169,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       qtyDiscountApplied,
       minChargeApplied,
       minChargeValue,
+      lineItems,
     });
-  }, [price, loading, addonTotal, designStatus, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue]);
+  }, [price, loading, addonTotal, designStatus, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, lineItems]);
 
   // Bubble config to parent (for proof + cart)
   useEffect(() => {

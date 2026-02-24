@@ -113,6 +113,18 @@ Example: `coroplast-yard-sign-800x600.webp`
 
 ---
 
+## DB Migration Required (run in Supabase SQL editor)
+
+```sql
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS line_items_json JSONB;
+```
+
+This stores the full engine breakdown (base + addons + fees) per order item so staff can see
+the exact line_items for any historical order. The column is added best-effort — new orders
+will attempt to store it, old orders won't have it (NULL). Safe to run any time.
+
+---
+
 ## What's Done
 
 | Fix | Status |
@@ -127,6 +139,11 @@ Example: `coroplast-yard-sign-800x600.webp`
 | Dead files deleted (2 files) | ✅ Done |
 | Supabase URL — env var with fallback | ✅ Done |
 | Wave invoice send on pickup | ✅ Done |
-| 27 pricing engine unit tests | ✅ Done (`npm test`) |
+| 27 → 30 pricing engine unit tests | ✅ Done (`npm test`) |
 | HTTP smoke tests (14 routes + API + security) | ✅ Done (`npm run test:smoke`) |
 | OG image — branded 1200×630 SVG → PNG | ✅ Done (`public/og-image.png`) |
+| GST double-counting bug fixed | ✅ Done — price already includes addons; was adding addonTotal twice |
+| line_items piped: engine → cart → checkout → email | ✅ Done — full breakdown visible everywhere |
+| MAGNET MOST_POPULAR_QTY 4→5 (hint now shows) | ✅ Done |
+| OptionsPanel MAGNET presets [1,2,4]→[1,2,4,5,10] | ✅ Done |
+| PriceSummary shows engine addon sub-lines (not local calc) | ✅ Done |

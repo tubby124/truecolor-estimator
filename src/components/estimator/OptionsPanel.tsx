@@ -37,7 +37,7 @@ const SQFT_QTY_PRESETS: Record<string, number[]> = {
   BANNER:    [1, 2, 5, 10],
   RIGID:     [1, 5, 10, 25],
   FOAMBOARD: [1, 5, 10, 25],
-  MAGNET:    [1, 2, 4],
+  MAGNET:    [1, 2, 4, 5, 10],
 };
 
 export function OptionsPanel({ category, state, onChange, categoryLabel }: Props) {
