@@ -63,7 +63,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Sides", value: "Single or double-sided" },
       { label: "Weather resistance", value: "Waterproof, UV-resistant, rated for outdoor use" },
       { label: "Lifespan", value: "2–3 years in direct sun / Saskatchewan winters" },
-      { label: "Add-ons", value: "H-stakes (+$2.50 ea), grommets (+$2.00 ea)" },
+      { label: "Add-ons", value: "H-stakes (+$2.50 ea), grommets (+$2.50 ea)" },
     ],
     whoUsesThis: ["Construction", "Real Estate", "Events", "Retail", "Agriculture"],
     faqs: [
@@ -87,7 +87,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     relatedSlugs: ["vehicle-magnets", "vinyl-banners", "acp-signs"],
     addons: [
       { label: "H-Stakes", unitPrice: 2.50, step: 1, engineCode: "H_STAKE", tip: "Wire H-stakes slide into the bottom flutes for yard or ground installation." },
-      { label: "Grommets", unitPrice: 2.00, step: 2, engineCode: "GROMMETS", tip: "For hanging or wall-mounting. Count auto-calculated from your sign size every 2 ft." },
+      { label: "Grommets", unitPrice: 2.50, step: 2, engineCode: "GROMMETS", tip: "For hanging or wall-mounting. Count auto-calculated from your sign size every 2 ft." },
     ],
     materialInfo: {
       headline: "4mm corrugated polypropylene — weatherproof, lightweight",
@@ -105,7 +105,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Vinyl Banners",
     tagline: "13oz vinyl for events, storefronts, and trade shows.",
     description:
-      "Printed on 13oz scrim vinyl — a woven polyester mesh laminated with PVC for superior tear resistance and vibrant colour. Standard hem and grommets every 2 feet. Suitable for indoor and outdoor use. Any size, any quantity.",
+      "Printed on 13oz scrim vinyl — a woven polyester mesh laminated with PVC for superior tear resistance and vibrant colour. Hemmed edges standard. Grommets optional (+$2.50 each). Suitable for indoor and outdoor use. Any size, any quantity.",
     fromPrice: "$45",
     category: "BANNER",
     material_code: "RMBF004",
@@ -127,16 +127,16 @@ export const PRODUCTS: Record<string, ProductContent> = {
     specs: [
       { label: "Material", value: "13oz scrim vinyl (woven polyester + PVC laminate)" },
       { label: "Print", value: "Full-colour digital, vibrant outdoor inks" },
-      { label: "Finish", value: "Hemmed edges + grommets every 2 ft (standard)" },
+      { label: "Finish", value: "Hemmed edges standard — grommets optional (+$2.50 each)" },
       { label: "Standard sizes", value: "2×4, 2×6, 3×6, 4×8 ft — any custom size available" },
-      { label: "Weather resistance", value: "Outdoor rated, wind-resistant with hem and grommets" },
+      { label: "Weather resistance", value: "Outdoor rated, wind-resistant with hemmed edges" },
       { label: "Sides", value: "Single-sided (double-sided available on request)" },
     ],
     whoUsesThis: ["Events", "Retail", "Construction", "Sports", "Real Estate"],
     faqs: [
       {
         q: "Are grommets included?",
-        a: "Yes — standard banners include hemmed edges and grommets every 2 feet at no extra charge.",
+        a: "Hemmed edges are included standard. Grommets are optional — add them to your order for $2.50 each. Count is auto-calculated from your banner size (every 2 ft along the perimeter).",
       },
       {
         q: "Can I get a banner wider than 4 feet?",
@@ -151,13 +151,16 @@ export const PRODUCTS: Record<string, ProductContent> = {
         a: "With proper hanging (not too taut, allows some wind movement), 13oz vinyl banners last 1–3 years outdoors.",
       },
     ],
+    addons: [
+      { label: "Grommets", unitPrice: 2.50, step: 2, engineCode: "GROMMETS", tip: "Count auto-calculated from your banner size — every 2 ft along the perimeter." },
+    ],
     relatedSlugs: ["retractable-banners", "coroplast-signs", "acp-signs"],
     materialInfo: {
       headline: "13oz scrim vinyl — tear-resistant, outdoor-rated",
       bullets: [
         "Woven polyester mesh + PVC laminate — won't tear in wind",
         "Vibrant outdoor inks, 1–3 year outdoor lifespan",
-        "Standard hem + grommets every 2 ft included",
+        "Hemmed edges included — grommets optional at $2.50 each",
         "Any custom size — min charge $45",
       ],
     },

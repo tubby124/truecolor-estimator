@@ -217,7 +217,7 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
               <AddonToggle
                 id="GROMMETS"
                 label="Grommets"
-                sublabel="Auto-calculated · $2.00 each"
+                sublabel="Auto-calculated · $2.50 each"
                 checked={state.addons.includes("GROMMETS")}
                 onChange={() => toggleAddon("GROMMETS")}
               />

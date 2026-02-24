@@ -341,7 +341,7 @@ describe("STEP 5 — add-ons", () => {
     expect(withGrommets.sell_price!).toBeGreaterThan(base.sell_price!);
     const grommetLine = withGrommets.line_items.find((li) => li.rule_id === "PR-ADDON-GROMMET");
     expect(grommetLine).toBeDefined();
-    // Perimeter: 2*(2ft+6ft) = 16ft, grommet every 2ft = 8 grommets × $2 = $16
+    // Perimeter: 2*(2ft+6ft) = 16ft, grommet every 2ft = 8 grommets × $2.50 = $20
     expect(grommetLine!.qty).toBeGreaterThan(0);
   });
 
@@ -461,7 +461,7 @@ describe("line_items integrity", () => {
     const grommetLine = result.line_items.find((li) => li.rule_id === "PR-ADDON-GROMMET");
     expect(grommetLine).toBeDefined();
     expect(grommetLine!.qty).toBe(8); // 16ft perimeter / 2ft spacing = 8
-    expect(grommetLine!.line_total).toBe(16); // 8 × $2.00
+    expect(grommetLine!.line_total).toBe(20); // 8 × $2.50
   });
 
   it("line_items sum always equals sell_price (no rounding drift, including addons)", () => {

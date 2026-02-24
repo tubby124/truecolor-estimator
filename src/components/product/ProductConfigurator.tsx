@@ -400,7 +400,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                     <div>
                       <span className="text-sm font-medium text-[#1c1712]">{addon.label}</span>
                       <span className="text-xs text-gray-400 ml-2">
-                        {isGrommet ? "Auto-calculated · $2.00 each" : `$${addon.unitPrice.toFixed(2)} each`}
+                        {isGrommet ? "Auto-calculated · $2.50 each" : `$${addon.unitPrice.toFixed(2)} each`}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -451,16 +451,6 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
               );
             })}
           </div>
-        </div>
-      )}
-
-      {/* Banner grommets included note */}
-      {product.category === "BANNER" && effectiveWidth > 0 && effectiveHeight > 0 && (
-        <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
-          <p className="text-xs font-semibold text-blue-800 mb-0.5">Grommets included standard</p>
-          <p className="text-xs text-blue-600">
-            Your {effectiveWidth}×{effectiveHeight}″ banner includes ~{estimateGrommetCount(effectiveWidth, effectiveHeight)} grommets (every 2 ft along the perimeter) plus hemmed edges — at no extra charge.
-          </p>
         </div>
       )}
 
