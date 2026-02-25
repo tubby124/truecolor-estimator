@@ -44,6 +44,15 @@ const DESIGN_LABELS: Record<string, string> = {
   NEED_REVISION: "Revision",
 };
 
+// Ordered list of valid statuses for the override dropdown + status-sort
+const VALID_STATUSES = [
+  "pending_payment",
+  "payment_received",
+  "in_production",
+  "ready_for_pickup",
+  "complete",
+];
+
 const SUPABASE_STORAGE_URL =
   `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
 
@@ -53,6 +62,7 @@ interface Customer {
   name: string;
   email: string;
   company: string | null;
+  phone: string | null;
 }
 
 interface OrderItem {
@@ -68,7 +78,6 @@ interface OrderItem {
   file_storage_path: string | null;
 }
 
-// Supabase returns joined rows as arrays even for many-to-one relations
 export interface Order {
   id: string;
   order_number: string;
@@ -80,6 +89,7 @@ export interface Order {
   payment_method: string;
   created_at: string;
   notes: string | null;
+  staff_notes: string | null;
   proof_storage_path: string | null;
   proof_sent_at: string | null;
   file_storage_paths: string[] | null;
@@ -100,13 +110,14 @@ function StatCard({
 }: {
   label: string;
   value: string | number;
-  accent?: "yellow" | "purple" | "blue" | "green";
+  accent?: "yellow" | "purple" | "blue" | "green" | "indigo";
 }) {
   const colorMap = {
     yellow: "text-yellow-700",
     purple: "text-purple-700",
     blue: "text-blue-700",
     green: "text-green-700",
+    indigo: "text-indigo-600",
   };
   return (
     <div className="bg-white border border-gray-100 rounded-xl p-4">
@@ -125,9 +136,22 @@ function StatCard({
 export function OrdersTable({ initialOrders }: Props) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("active");
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "total_desc" | "status_asc">("newest");
+
+  // Per-order status override select value (in expanded panel)
+  const [overrideStatus, setOverrideStatus] = useState<Record<string, string>>({});
+
+  // Staff notes — keyed by order id
+  const [staffNoteValues, setStaffNoteValues] = useState<Record<string, string>>(
+    () => Object.fromEntries(initialOrders.map((o) => [o.id, o.staff_notes ?? ""]))
+  );
+  const [savingNoteId, setSavingNoteId] = useState<string | null>(null);
+  const [savedNoteId, setSavedNoteId] = useState<string | null>(null);
+  const [noteErrors, setNoteErrors] = useState<Record<string, string>>({});
 
   // Reply state — one reply panel at a time
   const [replyOrderId, setReplyOrderId] = useState<string | null>(null);
@@ -145,17 +169,19 @@ export function OrdersTable({ initialOrders }: Props) {
   const [proofSentId, setProofSentId] = useState<string | null>(null);
   const [proofError, setProofError] = useState<string | null>(null);
 
-  // ── Stats (computed from all orders, not filtered view) ──────────────────────
+  // ── Stats ──────────────────────────────────────────────────────────────────────
 
   const stats = useMemo(() => {
     const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    const todayStr = now.toISOString().slice(0, 10);
 
-    const dayOfWeek = now.getDay(); // 0=Sun
+    const dayOfWeek = now.getDay();
     const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - daysFromMonday);
     weekStart.setHours(0, 0, 0, 0);
+
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
     return {
       active: orders.filter((o) => o.status !== "complete").length,
@@ -167,10 +193,24 @@ export function OrdersTable({ initialOrders }: Props) {
       revenueWeek: orders
         .filter((o) => new Date(o.created_at) >= weekStart)
         .reduce((sum, o) => sum + Number(o.total), 0),
+      revenueMonth: orders
+        .filter((o) => new Date(o.created_at) >= monthStart)
+        .reduce((sum, o) => sum + Number(o.total), 0),
     };
   }, [orders]);
 
-  // ── Filtered + searched list ──────────────────────────────────────────────────
+  // ── Filter tab counts ──────────────────────────────────────────────────────────
+
+  const counts = useMemo(
+    () => ({
+      active: orders.filter((o) => o.status !== "complete").length,
+      complete: orders.filter((o) => o.status === "complete").length,
+      all: orders.length,
+    }),
+    [orders]
+  );
+
+  // ── Filtered + sorted list ──────────────────────────────────────────────────
 
   const displayed = useMemo(() => {
     let result = orders;
@@ -186,36 +226,86 @@ export function OrdersTable({ initialOrders }: Props) {
           o.order_number.toLowerCase().includes(q) ||
           c?.name?.toLowerCase().includes(q) ||
           c?.email?.toLowerCase().includes(q) ||
-          (c?.company ?? "").toLowerCase().includes(q)
+          (c?.company ?? "").toLowerCase().includes(q) ||
+          (c?.phone ?? "").includes(q)
         );
       });
     }
 
-    return result;
-  }, [orders, filter, search]);
+    const sorted = [...result];
+    if (sortBy === "oldest") {
+      sorted.sort((a, b) => a.created_at.localeCompare(b.created_at));
+    } else if (sortBy === "total_desc") {
+      sorted.sort((a, b) => Number(b.total) - Number(a.total));
+    } else if (sortBy === "status_asc") {
+      sorted.sort(
+        (a, b) => VALID_STATUSES.indexOf(a.status) - VALID_STATUSES.indexOf(b.status)
+      );
+    } else {
+      sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    }
 
-  // ── Status advance ────────────────────────────────────────────────────────────
+    return sorted;
+  }, [orders, filter, search, sortBy]);
+
+  // ── Status advance / override ──────────────────────────────────────────────
 
   async function handleStatusUpdate(orderId: string, newStatus: string) {
     setLoadingStatus(orderId);
+    setStatusError(null);
     try {
       const res = await fetch(`/api/staff/orders/${orderId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (!res.ok) throw new Error("Update failed");
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Update failed");
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
+      setOverrideStatus((prev) => ({ ...prev, [orderId]: newStatus }));
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update status");
+      setStatusError(err instanceof Error ? err.message : "Failed to update status");
     } finally {
       setLoadingStatus(null);
     }
   }
 
-  // ── Reply actions ─────────────────────────────────────────────────────────────
+  // ── Staff notes save ───────────────────────────────────────────────────────
+
+  async function handleSaveNote(orderId: string) {
+    setSavingNoteId(orderId);
+    setNoteErrors((prev) => ({ ...prev, [orderId]: "" }));
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/notes`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ staff_notes: staffNoteValues[orderId] ?? "" }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Save failed");
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId ? { ...o, staff_notes: staffNoteValues[orderId] || null } : o
+        )
+      );
+      setSavedNoteId(orderId);
+      setTimeout(
+        () => setSavedNoteId((prev) => (prev === orderId ? null : prev)),
+        2500
+      );
+    } catch (err) {
+      setNoteErrors((prev) => ({
+        ...prev,
+        [orderId]: err instanceof Error ? err.message : "Save failed",
+      }));
+    } finally {
+      setSavingNoteId(null);
+    }
+  }
+
+  // ── Reply actions ──────────────────────────────────────────────────────────
 
   function openReply(orderId: string, orderNumber: string) {
     if (replyOrderId === orderId) {
@@ -250,7 +340,7 @@ export function OrdersTable({ initialOrders }: Props) {
     }
   }
 
-  // ── Proof upload ──────────────────────────────────────────────────────────────
+  // ── Proof upload ───────────────────────────────────────────────────────────
 
   async function handleSendProof(orderId: string) {
     if (!proofFile) return;
@@ -264,10 +354,9 @@ export function OrdersTable({ initialOrders }: Props) {
         method: "POST",
         body: form,
       });
-      const data = await res.json() as { ok?: boolean; proofPath?: string; error?: string };
+      const data = (await res.json()) as { ok?: boolean; proofPath?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
       setProofSentId(orderId);
-      // Update local order state so the proof badge / "sent on" text appears immediately
       setOrders((prev) =>
         prev.map((o) =>
           o.id === orderId
@@ -282,55 +371,82 @@ export function OrdersTable({ initialOrders }: Props) {
     }
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div>
-      {/* ── Stats bar ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+      {/* ── Stats bar — 6 cards ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mb-8">
         <StatCard label="Active orders" value={stats.active} />
         <StatCard label="Pending payment" value={stats.pendingPayment} accent="yellow" />
         <StatCard label="In production" value={stats.inProduction} accent="purple" />
-        <StatCard
-          label="Today"
-          value={`$${stats.revenueToday.toFixed(2)}`}
-          accent="blue"
-        />
-        <StatCard
-          label="This week"
-          value={`$${stats.revenueWeek.toFixed(2)}`}
-          accent="green"
-        />
+        <StatCard label="Today" value={`$${stats.revenueToday.toFixed(2)}`} accent="blue" />
+        <StatCard label="This week" value={`$${stats.revenueWeek.toFixed(2)}`} accent="green" />
+        <StatCard label="This month" value={`$${stats.revenueMonth.toFixed(2)}`} accent="indigo" />
       </div>
 
-      {/* ── Search + filter row ── */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      {/* ── Search + filter + sort row ── */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <input
           type="search"
-          placeholder="Search by order #, name, email, company…"
+          placeholder="Search by order #, name, email, phone, company…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#16C2F3] transition-colors"
         />
-        <div className="flex items-center gap-2">
-          {["active", "complete", "all"].map((f) => (
+        <div className="flex items-center gap-2 flex-wrap">
+          {(["active", "complete", "all"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
                 filter === f
                   ? "bg-[#16C2F3] text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {f === "active" ? "Active" : f === "complete" ? "Complete" : "All"}
+              <span
+                className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+                  filter === f ? "bg-white/25 text-white" : "bg-gray-200 text-gray-500"
+                }`}
+              >
+                {counts[f]}
+              </span>
             </button>
           ))}
-          <span className="text-sm text-gray-400 whitespace-nowrap ml-1">
+
+          {/* Sort dropdown */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-[#16C2F3] bg-white transition-colors cursor-pointer"
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="total_desc">Largest total</option>
+            <option value="status_asc">By status</option>
+          </select>
+
+          <span className="text-sm text-gray-400 whitespace-nowrap">
             {displayed.length} order{displayed.length !== 1 ? "s" : ""}
           </span>
         </div>
       </div>
+
+      {/* ── Status error banner ── */}
+      {statusError && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3 flex items-center justify-between">
+          <p className="text-sm text-red-700">{statusError}</p>
+          <button
+            onClick={() => setStatusError(null)}
+            className="text-red-400 hover:text-red-600 text-lg leading-none ml-4"
+            aria-label="Dismiss error"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* ── Orders list ── */}
       {displayed.length === 0 ? (
@@ -349,11 +465,25 @@ export function OrdersTable({ initialOrders }: Props) {
             const isReplyOpen = replyOrderId === order.id;
             const isProofOpen = proofOrderId === order.id;
 
-            // Find artwork file on any item
-            const fileItem = order.order_items?.find((i) => i.file_storage_path);
-            const fileUrl = fileItem?.file_storage_path
-              ? `${SUPABASE_STORAGE_URL}/${fileItem.file_storage_path}`
-              : null;
+            // Artwork files — prefer file_storage_paths[] array, fall back to first order_items path
+            const artworkFiles: Array<{ url: string; label: string }> = [];
+            if (order.file_storage_paths && order.file_storage_paths.length > 0) {
+              order.file_storage_paths.forEach((path, idx) => {
+                const filename = path.includes("/") ? path.split("/").pop() : path;
+                artworkFiles.push({
+                  url: `${SUPABASE_STORAGE_URL}/${path}`,
+                  label: `File ${idx + 1}${filename ? ` — ${filename}` : ""}`,
+                });
+              });
+            } else {
+              const fileItem = order.order_items?.find((i) => i.file_storage_path);
+              if (fileItem?.file_storage_path) {
+                artworkFiles.push({
+                  url: `${SUPABASE_STORAGE_URL}/${fileItem.file_storage_path}`,
+                  label: "Artwork file",
+                });
+              }
+            }
 
             const proofUrl = order.proof_storage_path
               ? `${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`
@@ -362,6 +492,9 @@ export function OrdersTable({ initialOrders }: Props) {
             const rushFee = order.is_rush
               ? Number(order.total) - Number(order.subtotal) - Number(order.gst)
               : 0;
+
+            // Current value for the status override dropdown
+            const currentOverride = overrideStatus[order.id] ?? order.status;
 
             return (
               <div
@@ -389,9 +522,9 @@ export function OrdersTable({ initialOrders }: Props) {
                         >
                           {STATUS_LABELS[order.status] ?? order.status}
                         </span>
-                        {fileUrl && (
+                        {artworkFiles.length > 0 && (
                           <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
-                            📎 Artwork
+                            📎 {artworkFiles.length > 1 ? `${artworkFiles.length} files` : "Artwork"}
                           </span>
                         )}
                         {proofUrl && (
@@ -399,17 +532,28 @@ export function OrdersTable({ initialOrders }: Props) {
                             🖼 Proof sent
                           </span>
                         )}
+                        {order.staff_notes && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                            📝 Note
+                          </span>
+                        )}
                       </div>
 
-                      {/* Customer */}
+                      {/* Customer — name + company */}
                       <p className="text-sm font-semibold text-gray-800">
                         {customer?.name ?? "Unknown"}
                         {customer?.company ? ` — ${customer.company}` : ""}
                       </p>
+
+                      {/* Meta row — email · phone · payment · total · date */}
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {customer?.email} ·{" "}
-                        {order.payment_method === "clover_card" ? "Card" : "e-Transfer"} · $
-                        {Number(order.total).toFixed(2)} CAD ·{" "}
+                        {customer?.email}
+                        {customer?.phone ? ` · ${customer.phone}` : ""}
+                        {" · "}
+                        {order.payment_method === "clover_card" ? "Card" : "e-Transfer"}
+                        {" · $"}
+                        {Number(order.total).toFixed(2)} CAD
+                        {" · "}
                         {new Date(order.created_at).toLocaleDateString("en-CA", {
                           month: "short",
                           day: "numeric",
@@ -431,9 +575,7 @@ export function OrdersTable({ initialOrders }: Props) {
                         </button>
                       )}
                       <button
-                        onClick={() =>
-                          setExpandedId(isExpanded ? null : order.id)
-                        }
+                        onClick={() => setExpandedId(isExpanded ? null : order.id)}
                         className="text-sm px-3 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
                         aria-label={isExpanded ? "Collapse order" : "Expand order"}
                       >
@@ -446,6 +588,43 @@ export function OrdersTable({ initialOrders }: Props) {
                 {/* ── Expanded section ── */}
                 {isExpanded && (
                   <div className="border-t border-gray-100 bg-gray-50 p-5 space-y-6">
+
+                    {/* Customer info block */}
+                    <div className="flex flex-wrap gap-x-8 gap-y-3">
+                      <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Customer</p>
+                        <p className="text-sm font-semibold text-gray-800">{customer?.name ?? "—"}</p>
+                        {customer?.company && (
+                          <p className="text-xs text-gray-500">{customer.company}</p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Email</p>
+                        <a
+                          href={`mailto:${customer?.email}`}
+                          className="text-sm text-[#16C2F3] hover:underline"
+                        >
+                          {customer?.email ?? "—"}
+                        </a>
+                      </div>
+                      {customer?.phone && (
+                        <div>
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Phone</p>
+                          <a
+                            href={`tel:${customer.phone}`}
+                            className="text-sm text-[#16C2F3] hover:underline"
+                          >
+                            {customer.phone}
+                          </a>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Payment</p>
+                        <p className="text-sm text-gray-700">
+                          {order.payment_method === "clover_card" ? "Credit card" : "Interac e-Transfer"}
+                        </p>
+                      </div>
+                    </div>
 
                     {/* Order items table */}
                     {order.order_items && order.order_items.length > 0 && (
@@ -534,7 +713,7 @@ export function OrdersTable({ initialOrders }: Props) {
                       </div>
                     </div>
 
-                    {/* Customer notes */}
+                    {/* Customer notes — amber */}
                     {order.notes && (
                       <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
@@ -546,22 +725,100 @@ export function OrdersTable({ initialOrders }: Props) {
                       </div>
                     )}
 
-                    {/* Artwork file */}
-                    {fileUrl && (
+                    {/* Production notes (staff only — slate) */}
+                    <div>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                          Production notes
+                        </p>
+                        <span className="text-xs text-slate-400">— staff only, never sent to customer</span>
+                      </div>
+                      <textarea
+                        value={staffNoteValues[order.id] ?? ""}
+                        onChange={(e) =>
+                          setStaffNoteValues((prev) => ({ ...prev, [order.id]: e.target.value }))
+                        }
+                        rows={3}
+                        placeholder="Internal notes: file needs bleed, waiting on design approval, call before pickup, special instructions…"
+                        className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-slate-400 transition-colors resize-none font-sans text-gray-700 placeholder-slate-400"
+                      />
+                      <div className="flex items-center gap-3 mt-2">
+                        <button
+                          onClick={() => handleSaveNote(order.id)}
+                          disabled={savingNoteId === order.id}
+                          className="text-sm font-semibold px-4 py-1.5 rounded-lg bg-slate-700 text-white hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {savingNoteId === order.id ? "Saving…" : "Save note"}
+                        </button>
+                        {savedNoteId === order.id && (
+                          <span className="text-xs text-green-600 font-semibold">✓ Saved</span>
+                        )}
+                        {noteErrors[order.id] && (
+                          <span className="text-xs text-red-600">{noteErrors[order.id]}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Artwork files — all files */}
+                    {artworkFiles.length > 0 && (
                       <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                          Artwork file
+                          Artwork ({artworkFiles.length} file{artworkFiles.length !== 1 ? "s" : ""})
                         </p>
-                        <a
-                          href={fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-[#16C2F3] font-semibold hover:underline"
-                        >
-                          📎 View artwork file →
-                        </a>
+                        <div className="space-y-1.5">
+                          {artworkFiles.map((f, idx) => (
+                            <a
+                              key={idx}
+                              href={f.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 text-sm text-[#16C2F3] font-semibold hover:underline"
+                            >
+                              📎 {f.label} →
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     )}
+
+                    {/* Change status (override — any direction) */}
+                    <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                        Change status
+                      </p>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <select
+                          value={currentOverride}
+                          onChange={(e) =>
+                            setOverrideStatus((prev) => ({ ...prev, [order.id]: e.target.value }))
+                          }
+                          className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#16C2F3] bg-white transition-colors"
+                        >
+                          {VALID_STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {STATUS_LABELS[s]}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => handleStatusUpdate(order.id, currentOverride)}
+                          disabled={isLoadingStatus || currentOverride === order.status}
+                          className="text-sm font-semibold px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {isLoadingStatus ? "Updating…" : "Update →"}
+                        </button>
+                        <span className="text-xs text-gray-400">
+                          Currently:{" "}
+                          <span
+                            className={`font-semibold px-1.5 py-0.5 rounded ${
+                              STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {STATUS_LABELS[order.status] ?? order.status}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
 
                     {/* Message customer */}
                     <div>
@@ -669,7 +926,10 @@ export function OrdersTable({ initialOrders }: Props) {
                         <p className="text-xs text-violet-600 mt-1.5">
                           ✓ Proof sent
                           {order.proof_sent_at
-                            ? ` on ${new Date(order.proof_sent_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}`
+                            ? ` on ${new Date(order.proof_sent_at).toLocaleDateString("en-CA", {
+                                month: "short",
+                                day: "numeric",
+                              })}`
                             : ""}
                           {" · "}
                           <a
