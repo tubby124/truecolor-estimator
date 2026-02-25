@@ -106,7 +106,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "13oz vinyl for events, storefronts, and trade shows.",
     description:
       "Printed on 13oz scrim vinyl — a woven polyester mesh laminated with PVC for superior tear resistance and vibrant colour. Hemmed edges standard. Grommets optional (+$2.50 each). Suitable for indoor and outdoor use. Any size, any quantity.",
-    fromPrice: "$45",
+    fromPrice: "$66",
     category: "BANNER",
     material_code: "RMBF004",
     heroImage: "/images/products/product/banner-vinyl-colorful-800x600.webp",
@@ -161,7 +161,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
         "Woven polyester mesh + PVC laminate — won't tear in wind",
         "Vibrant outdoor inks, 1–3 year outdoor lifespan",
         "Hemmed edges included — grommets optional at $2.50 each",
-        "Any custom size — min charge $45",
+        "Any custom size available — smallest preset 2×4 ft from $66",
       ],
     },
   },
@@ -487,7 +487,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "One-way vision graphics. Full colour outside, see-through inside.",
     description:
       "Vision Perf 70/30 window vinyl — 70% print surface, 30% open perforations. Vivid full-colour graphics visible from the street; clear sightlines from inside. Perfect for storefront windows, vehicle rear windows, and glass partitions. Priced per panel at $8/sqft and up.",
-    fromPrice: "$40",
+    fromPrice: "$48",
     category: "DECAL",
     material_code: "RMVN006",
     heroImage: "/images/products/product/window-perf-800x600.webp",

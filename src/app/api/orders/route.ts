@@ -269,6 +269,7 @@ export async function POST(req: NextRequest) {
         is_rush,
         payment_method,
         checkout_url: checkoutUrl ?? undefined,
+        uploadedFileCount: file_storage_paths?.length ?? 0,
       });
     } catch (emailErr) {
       console.error("[orders] confirmation email failed (non-fatal):", emailErr);

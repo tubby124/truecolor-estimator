@@ -8,6 +8,7 @@
  */
 
 import nodemailer from "nodemailer";
+import QRCode from "qrcode";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,6 +31,9 @@ export interface OrderConfirmationParams {
   is_rush: boolean;
   payment_method: "clover_card" | "etransfer";
   checkout_url?: string; // Clover hosted checkout URL (card orders only)
+  uploadedFileCount?: number; // number of artwork files the customer uploaded
+  /** Internal — CID for inline QR code attachment. Set by sendOrderConfirmationEmail, not callers. */
+  qrCodeCid?: string;
 }
 
 // ─── Transporter (same pattern as /api/email/send/route.ts) ───────────────────
@@ -69,6 +73,7 @@ export async function sendOrderConfirmationEmail(
     total,
     is_rush,
     payment_method,
+    checkout_url,
   } = params;
 
   const from =
@@ -79,7 +84,29 @@ export async function sendOrderConfirmationEmail(
       ? `Complete your payment — Order ${orderNumber} · True Color Display Printing`
       : `Order ${orderNumber} received — True Color Display Printing`;
 
-  const html = buildOrderConfirmationHtml(params);
+  // Generate QR code as CID buffer for card orders with a payment link
+  let qrAttachment: { filename: string; content: Buffer; cid: string; contentDisposition: "inline" } | null = null;
+  let qrCodeCid: string | undefined;
+  if (payment_method === "clover_card" && checkout_url) {
+    try {
+      const buf = await QRCode.toBuffer(checkout_url, {
+        width: 160,
+        margin: 2,
+        color: { dark: "#1c1712", light: "#ffffff" },
+      });
+      qrCodeCid = "order-payment-qr@truecolor";
+      qrAttachment = {
+        filename: "payment-qr.png",
+        content: buf,
+        cid: qrCodeCid,
+        contentDisposition: "inline",
+      };
+    } catch {
+      // Non-fatal — email still sends without QR
+    }
+  }
+
+  const html = buildOrderConfirmationHtml({ ...params, qrCodeCid });
   const text = buildOrderConfirmationText(params);
 
   const transporter = getTransporter();
@@ -91,6 +118,7 @@ export async function sendOrderConfirmationEmail(
     subject,
     html,
     text,
+    attachments: qrAttachment ? [qrAttachment] : [],
   });
 
   console.log(
@@ -107,7 +135,7 @@ export async function sendOrderConfirmationEmail(
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
-  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, checkout_url } = p;
+  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, checkout_url, qrCodeCid, uploadedFileCount } = p;
   const RUSH_FEE = 40;
 
   // ── Line items rows ──
@@ -172,6 +200,17 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
       </tr>`
     : "";
 
+  // ── QR code image tag (CID inline attachment — Gmail-safe) ──
+  const qrImg = qrCodeCid && checkout_url
+    ? `<div style="text-align: center; margin: 14px 0 4px;">
+        <img src="cid:${qrCodeCid}" width="120" height="120" alt="Scan to pay"
+          style="border-radius: 8px; border: 3px solid #9a3412; display: inline-block;" />
+        <p style="margin: 6px 0 0; font-size: 11px; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+          Scan with your phone to pay
+        </p>
+      </div>`
+    : "";
+
   // ── Payment note block ──
   const paymentBlock =
     payment_method === "clover_card"
@@ -184,11 +223,12 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
           </p>
           ${checkout_url
             ? `<a href="${escHtml(checkout_url)}"
-                style="display: inline-block; background: #ea580c; color: #ffffff; font-size: 14px; font-weight: 700; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin-bottom: 12px;">
-                Pay now →
+                style="display: inline-block; background: #ea580c; color: #ffffff; font-size: 14px; font-weight: 700; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin-bottom: 4px;">
+                Pay $${total.toFixed(2)} now →
               </a>`
             : ""}
-          <p style="margin: 0; font-size: 11px; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+          ${qrImg}
+          <p style="margin: 10px 0 0; font-size: 11px; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
             You can also pay anytime from your <a href="https://truecolor-estimator.vercel.app/account" style="color: #9a3412;">order dashboard</a> · Questions? Email <a href="mailto:info@true-color.ca" style="color: #9a3412;">info@true-color.ca</a>
           </p>
         </div>`
@@ -199,9 +239,12 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
           <p style="margin: 0 0 6px; font-size: 14px; font-weight: 700; color: #6b4c00; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
             info@true-color.ca
           </p>
-          <p style="margin: 0; font-size: 13px; color: #7a5a00; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
+          <p style="margin: 0 0 8px; font-size: 13px; color: #7a5a00; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
             Send exactly <strong>$${total.toFixed(2)} CAD</strong> · Auto-deposit enabled — no password needed.
             Your order will be queued once payment is received.
+          </p>
+          <p style="margin: 0; font-size: 11px; color: #7a5a00; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            Track your order anytime at your <a href="https://truecolor-estimator.vercel.app/account" style="color: #7a5a00;">order dashboard</a>
           </p>
         </div>`;
 
@@ -343,6 +386,28 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                 Payment
               </p>
               ${paymentBlock}
+
+              <!-- ── ARTWORK FILES (if uploaded) ── -->
+              ${uploadedFileCount && uploadedFileCount > 0
+                ? `<p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    Your Artwork
+                  </p>
+                  <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;">
+                    <p style="margin: 0; font-size: 14px; color: #166534; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
+                      ✓ <strong>${uploadedFileCount} artwork file${uploadedFileCount === 1 ? "" : "s"} received</strong> — we have your file${uploadedFileCount === 1 ? "" : "s"} and will review ${uploadedFileCount === 1 ? "it" : "them"} before printing.
+                      We will send you a proof to approve if any adjustments are needed.
+                    </p>
+                  </div>`
+                : `<p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    Your Artwork
+                  </p>
+                  <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;">
+                    <p style="margin: 0; font-size: 14px; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
+                      No artwork file was uploaded yet. Please reply to this email or send your files to
+                      <a href="mailto:info@true-color.ca" style="color: #92400e; font-weight: 600;">info@true-color.ca</a>
+                      with your order number <strong>${escHtml(orderNumber)}</strong> in the subject line.
+                    </p>
+                  </div>`}
 
               <!-- ── PICKUP INFO ── -->
               <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">

@@ -62,6 +62,23 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (status === "ready_for_pickup") update.ready_at = new Date().toISOString();
     if (status === "complete") update.completed_at = new Date().toISOString();
 
+    // Guard: "complete" requires current status to be "ready_for_pickup"
+    // Prevents review email going to customers who haven't actually picked up their order
+    if (status === "complete") {
+      const { data: currentOrder } = await supabase
+        .from("orders")
+        .select("status")
+        .eq("id", id)
+        .single();
+
+      if (currentOrder?.status !== "ready_for_pickup") {
+        return NextResponse.json(
+          { error: "Order must be marked 'Ready for Pickup' before completing" },
+          { status: 400 }
+        );
+      }
+    }
+
     const { error } = await supabase.from("orders").update(update).eq("id", id);
 
     if (error) {
