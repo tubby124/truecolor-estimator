@@ -276,10 +276,12 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      if (data.checkoutUrl) {
+      if (payMethod === "clover_card" && data.checkoutUrl) {
+        // Card: redirect to Clover hosted checkout (it bounces back to /order-confirmed?oid=...)
         window.location.href = data.checkoutUrl;
       } else {
-        window.location.href = "/order-confirmed";
+        // eTransfer: skip Clover — go straight to confirmation with eTransfer instructions
+        window.location.href = `/order-confirmed?oid=${data.orderId ?? ""}`;
       }
     } catch (err) {
       setUploadProgress("");
