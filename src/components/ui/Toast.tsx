@@ -9,6 +9,7 @@ interface ToastProps {
   type?: ToastType;
   duration?: number;
   onDismiss?: () => void;
+  action?: { label: string; onClick: () => void };
 }
 
 const TYPE_STYLES: Record<ToastType, string> = {
@@ -29,6 +30,7 @@ export function Toast({
   type = "success",
   duration = 3500,
   onDismiss,
+  action,
 }: ToastProps) {
   const [visible, setVisible] = useState(true);
 
@@ -50,6 +52,18 @@ export function Toast({
     >
       <span aria-hidden="true">{TYPE_ICONS[type]}</span>
       <span>{message}</span>
+      {action && (
+        <button
+          onClick={() => {
+            action.onClick();
+            setVisible(false);
+            setTimeout(() => onDismiss?.(), 300);
+          }}
+          className="ml-2 font-bold underline opacity-90 hover:opacity-100 transition-opacity"
+        >
+          {action.label}
+        </button>
+      )}
       <button
         onClick={() => { setVisible(false); setTimeout(() => onDismiss?.(), 300); }}
         className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
@@ -66,6 +80,7 @@ export interface ToastItem {
   id: string;
   message: string;
   type: ToastType;
+  action?: { label: string; onClick: () => void };
 }
 
 interface ToastContainerProps {
@@ -85,6 +100,7 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
           key={toast.id}
           message={toast.message}
           type={toast.type}
+          action={toast.action}
           onDismiss={() => onDismiss(toast.id)}
         />
       ))}
@@ -103,9 +119,9 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
 export function useToast() {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  const showToast = (message: string, type: ToastType = "success") => {
+  const showToast = (message: string, type: ToastType = "success", action?: { label: string; onClick: () => void }) => {
     const id = Math.random().toString(36).slice(2);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type, action }]);
   };
 
   const dismissToast = (id: string) => {

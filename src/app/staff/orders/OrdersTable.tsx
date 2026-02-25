@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useToast, ToastContainer } from "@/components/ui/Toast";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -98,6 +99,8 @@ export interface Order {
   proof_storage_path: string | null;
   proof_sent_at: string | null;
   file_storage_paths: string[] | null;
+  is_archived: boolean;
+  archived_at: string | null;
   customers: Customer[] | Customer | null;
   order_items: OrderItem[] | null;
 }
@@ -142,7 +145,7 @@ export function OrdersTable({ initialOrders }: Props) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("active");
+  const [filter, setFilter] = useState<"active" | "complete" | "archived" | "all">("active");
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "total_desc" | "status_asc">("newest");
@@ -173,6 +176,10 @@ export function OrdersTable({ initialOrders }: Props) {
   const [proofUploading, setProofUploading] = useState(false);
   const [proofSentId, setProofSentId] = useState<string | null>(null);
   const [proofError, setProofError] = useState<string | null>(null);
+
+  // ── Archive ────────────────────────────────────────────────────────────────────
+  const [archiveLoading, setArchiveLoading] = useState<Set<string>>(new Set());
+  const { toasts, showToast, dismissToast } = useToast();
 
   // ── Live sync ──────────────────────────────────────────────────────────────────
 
@@ -229,6 +236,8 @@ export function OrdersTable({ initialOrders }: Props) {
                       file_storage_paths: u.file_storage_paths !== undefined ? (u.file_storage_paths as string[] | null) : o.file_storage_paths,
                       wave_invoice_approved_at: u.wave_invoice_approved_at !== undefined ? (u.wave_invoice_approved_at as string | null) : o.wave_invoice_approved_at,
                       wave_payment_recorded_at: u.wave_payment_recorded_at !== undefined ? (u.wave_payment_recorded_at as string | null) : o.wave_payment_recorded_at,
+                      is_archived: u.is_archived !== undefined ? (u.is_archived as boolean) : o.is_archived,
+                      archived_at: u.archived_at !== undefined ? (u.archived_at as string | null) : o.archived_at,
                     }
                   : o
               )
@@ -255,6 +264,7 @@ export function OrdersTable({ initialOrders }: Props) {
   // ── Stats ──────────────────────────────────────────────────────────────────────
 
   const stats = useMemo(() => {
+    const live = orders.filter((o) => !o.is_archived);
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
 
@@ -267,16 +277,16 @@ export function OrdersTable({ initialOrders }: Props) {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
     return {
-      active: orders.filter((o) => o.status !== "complete").length,
-      pendingPayment: orders.filter((o) => o.status === "pending_payment").length,
-      inProduction: orders.filter((o) => o.status === "in_production").length,
-      revenueToday: orders
+      active: live.filter((o) => o.status !== "complete").length,
+      pendingPayment: live.filter((o) => o.status === "pending_payment").length,
+      inProduction: live.filter((o) => o.status === "in_production").length,
+      revenueToday: live
         .filter((o) => o.created_at.slice(0, 10) === todayStr)
         .reduce((sum, o) => sum + Number(o.total), 0),
-      revenueWeek: orders
+      revenueWeek: live
         .filter((o) => new Date(o.created_at) >= weekStart)
         .reduce((sum, o) => sum + Number(o.total), 0),
-      revenueMonth: orders
+      revenueMonth: live
         .filter((o) => new Date(o.created_at) >= monthStart)
         .reduce((sum, o) => sum + Number(o.total), 0),
     };
@@ -286,9 +296,10 @@ export function OrdersTable({ initialOrders }: Props) {
 
   const counts = useMemo(
     () => ({
-      active: orders.filter((o) => o.status !== "complete").length,
-      complete: orders.filter((o) => o.status === "complete").length,
-      all: orders.length,
+      active: orders.filter((o) => !o.is_archived && o.status !== "complete").length,
+      complete: orders.filter((o) => !o.is_archived && o.status === "complete").length,
+      archived: orders.filter((o) => o.is_archived).length,
+      all: orders.filter((o) => !o.is_archived).length,
     }),
     [orders]
   );
@@ -298,8 +309,10 @@ export function OrdersTable({ initialOrders }: Props) {
   const displayed = useMemo(() => {
     let result = orders;
 
-    if (filter === "active") result = result.filter((o) => o.status !== "complete");
-    else if (filter === "complete") result = result.filter((o) => o.status === "complete");
+    if (filter === "active") result = result.filter((o) => !o.is_archived && o.status !== "complete");
+    else if (filter === "complete") result = result.filter((o) => !o.is_archived && o.status === "complete");
+    else if (filter === "archived") result = result.filter((o) => o.is_archived);
+    else result = result.filter((o) => !o.is_archived); // "all" = all non-archived
 
     if (search.trim()) {
       const q = search.trim().toLowerCase();
@@ -385,6 +398,49 @@ export function OrdersTable({ initialOrders }: Props) {
       }));
     } finally {
       setSavingNoteId(null);
+    }
+  }
+
+  // ── Archive / Unarchive ────────────────────────────────────────────────────
+
+  async function handleArchive(orderId: string, orderNumber: string, archive: boolean) {
+    setArchiveLoading((prev) => new Set([...prev, orderId]));
+    // Optimistic update
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId
+          ? { ...o, is_archived: archive, archived_at: archive ? new Date().toISOString() : null }
+          : o
+      )
+    );
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/archive`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archived: archive }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Archive failed");
+      if (archive) {
+        showToast(`${orderNumber} archived`, "info", {
+          label: "Undo",
+          onClick: () => void handleArchive(orderId, orderNumber, false),
+        });
+      } else {
+        showToast(`${orderNumber} restored`, "success");
+      }
+    } catch (err) {
+      // Revert optimistic update on error
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, is_archived: !archive, archived_at: null } : o))
+      );
+      showToast(err instanceof Error ? err.message : "Archive failed", "error");
+    } finally {
+      setArchiveLoading((prev) => {
+        const next = new Set(prev);
+        next.delete(orderId);
+        return next;
+      });
     }
   }
 
@@ -492,17 +548,17 @@ export function OrdersTable({ initialOrders }: Props) {
           className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#16C2F3] transition-colors"
         />
         <div className="flex items-center gap-2 flex-wrap">
-          {(["active", "complete", "all"] as const).map((f) => (
+          {(["active", "complete", "archived", "all"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
                 filter === f
-                  ? "bg-[#16C2F3] text-white"
+                  ? f === "archived" ? "bg-gray-500 text-white" : "bg-[#16C2F3] text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {f === "active" ? "Active" : f === "complete" ? "Complete" : "All"}
+              {f === "active" ? "Active" : f === "complete" ? "Complete" : f === "archived" ? "Archived" : "All"}
               <span
                 className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
                   filter === f ? "bg-white/25 text-white" : "bg-gray-200 text-gray-500"
@@ -552,7 +608,7 @@ export function OrdersTable({ initialOrders }: Props) {
       {/* ── Orders list ── */}
       {displayed.length === 0 ? (
         <p className="text-gray-400 text-center py-16">
-          {search.trim() ? "No orders match your search." : "No orders here yet."}
+          {search.trim() ? "No orders match your search." : filter === "archived" ? "No archived orders." : "No orders here yet."}
         </p>
       ) : (
         <div className="space-y-3">
@@ -601,11 +657,11 @@ export function OrdersTable({ initialOrders }: Props) {
               <div
                 key={order.id}
                 className={`border rounded-xl overflow-hidden transition-shadow hover:shadow-sm ${
-                  order.is_rush ? "border-orange-300" : "border-gray-200"
+                  order.is_archived ? "border-gray-100 opacity-70" : order.is_rush ? "border-orange-300" : "border-gray-200"
                 }`}
               >
                 {/* ── Summary row ── */}
-                <div className={`p-5 ${order.is_rush ? "bg-orange-50" : "bg-white"}`}>
+                <div className={`p-5 ${order.is_archived ? "bg-gray-50" : order.is_rush ? "bg-orange-50" : "bg-white"}`}>
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       {/* Badges */}
@@ -649,6 +705,11 @@ export function OrdersTable({ initialOrders }: Props) {
                             W Unpaid
                           </span>
                         )}
+                        {order.is_archived && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-500">
+                            Archived
+                          </span>
+                        )}
                       </div>
 
                       {/* Customer — name + company */}
@@ -677,7 +738,7 @@ export function OrdersTable({ initialOrders }: Props) {
 
                     {/* Action buttons */}
                     <div className="flex items-center gap-2 shrink-0">
-                      {nextStatus && (
+                      {nextStatus && !order.is_archived && (
                         <button
                           onClick={() => handleStatusUpdate(order.id, nextStatus)}
                           disabled={isLoadingStatus}
@@ -1049,6 +1110,28 @@ export function OrdersTable({ initialOrders }: Props) {
                       )}
                     </div>
 
+                    {/* Archive / Unarchive */}
+                    <div className="pt-2 border-t border-gray-100 flex items-center gap-3">
+                      {!order.is_archived ? (
+                        <button
+                          onClick={() => void handleArchive(order.id, order.order_number, true)}
+                          disabled={archiveLoading.has(order.id)}
+                          className="text-sm font-semibold px-4 py-2 rounded-lg border border-gray-200 text-gray-400 hover:border-red-200 hover:text-red-400 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                        >
+                          {archiveLoading.has(order.id) ? "Archiving…" : "Archive order"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => void handleArchive(order.id, order.order_number, false)}
+                          disabled={archiveLoading.has(order.id)}
+                          className="text-sm font-semibold px-4 py-2 rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50 disabled:opacity-50 transition-colors"
+                        >
+                          {archiveLoading.has(order.id) ? "Restoring…" : "↩ Unarchive order"}
+                        </button>
+                      )}
+                      <span className="text-xs text-gray-300">Orders are never deleted</span>
+                    </div>
+
                     {/* Upload proof */}
                     <div>
                       <button
@@ -1153,6 +1236,8 @@ export function OrdersTable({ initialOrders }: Props) {
           })}
         </div>
       )}
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

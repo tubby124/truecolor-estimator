@@ -62,6 +62,8 @@ async function fetchOrders() {
       order_number,
       status,
       is_rush,
+      is_archived,
+      archived_at,
       subtotal,
       gst,
       total,
