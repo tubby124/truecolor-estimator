@@ -421,6 +421,23 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                     </p>
                   </div>`}
 
+              <!-- ── CREATE ACCOUNT NUDGE ── -->
+              <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                Your Account
+              </p>
+              <div style="background: #f0fbff; border: 1px solid #7de0f7; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+                <p style="margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #0369a1; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Save time on your next order
+                </p>
+                <p style="margin: 0 0 14px; font-size: 13px; color: #0c4a6e; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Create a free account to track this order in real time, reorder in one click, and keep your contact and company details saved — perfect for quick invoicing.
+                </p>
+                <a href="https://truecolor-estimator.vercel.app/account?signup=1&amp;email=${encodeURIComponent(contact.email)}"
+                  style="display: inline-block; background: #16C2F3; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 10px 22px; border-radius: 7px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Create your free account &rarr;
+                </a>
+              </div>
+
               <!-- ── PICKUP INFO ── -->
               <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                 Pickup
@@ -515,6 +532,10 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
     "",
     "--- PAYMENT ---",
     payNote,
+    "",
+    "--- YOUR ACCOUNT ---",
+    `Create a free account to track this order, reorder in one click, and keep your details saved for invoicing:`,
+    `https://truecolor-estimator.vercel.app/account?signup=1&email=${encodeURIComponent(p.contact.email)}`,
     "",
     "--- PICKUP ---",
     "216 33rd St W, Saskatoon, SK",

@@ -248,6 +248,16 @@ export function AccountClientPage() {
   // ── Auth + initial load ─────────────────────────────────────────────────────
 
   useEffect(() => {
+    // Pre-fill from email nudge link — /account?signup=1&email=jane@example.com
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("signup") === "1") {
+        setIsSignUp(true);
+        const preEmail = params.get("email");
+        if (preEmail) setEmail(decodeURIComponent(preEmail));
+      }
+    }
+
     const supabase = createClient();
 
     supabase.auth.getSession().then(({ data: { session } }) => {
