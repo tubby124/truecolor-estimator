@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -168,6 +170,82 @@ export function OrdersTable({ initialOrders }: Props) {
   const [proofUploading, setProofUploading] = useState(false);
   const [proofSentId, setProofSentId] = useState<string | null>(null);
   const [proofError, setProofError] = useState<string | null>(null);
+
+  // ── Live sync ──────────────────────────────────────────────────────────────────
+
+  const router = useRouter();
+  const [newOrderAlert, setNewOrderAlert] = useState(false);
+  const [lastSync, setLastSync] = useState<Date>(new Date());
+  const isFirstRender = useRef(true);
+
+  // When router.refresh() runs and new initialOrders flow in, merge them into local state
+  // (avoids resetting local editing state — only adds new orders, removes deleted ones)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setOrders((prev) => {
+      const existingById = new Map(prev.map((o) => [o.id, o]));
+      const merged = initialOrders.map((fresh) => existingById.get(fresh.id) ?? fresh);
+      return merged;
+    });
+    setStaffNoteValues((prev) => {
+      const updated = { ...prev };
+      initialOrders.forEach((o) => {
+        if (!(o.id in updated)) updated[o.id] = o.staff_notes ?? "";
+      });
+      return updated;
+    });
+    setLastSync(new Date());
+  }, [initialOrders]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Supabase Realtime subscription — live order status updates
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel("staff-orders-live")
+      .on(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        "postgres_changes" as any,
+        { event: "*", schema: "public", table: "orders" },
+        (payload: { eventType: string; new: Record<string, unknown>; old: { id?: string } }) => {
+          if (payload.eventType === "UPDATE") {
+            const u = payload.new;
+            setOrders((prev) =>
+              prev.map((o) =>
+                o.id === u.id
+                  ? {
+                      ...o,
+                      status: (u.status as string) ?? o.status,
+                      notes: u.notes !== undefined ? (u.notes as string | null) : o.notes,
+                      staff_notes: u.staff_notes !== undefined ? (u.staff_notes as string | null) : o.staff_notes,
+                      proof_storage_path: u.proof_storage_path !== undefined ? (u.proof_storage_path as string | null) : o.proof_storage_path,
+                      proof_sent_at: u.proof_sent_at !== undefined ? (u.proof_sent_at as string | null) : o.proof_sent_at,
+                      file_storage_paths: u.file_storage_paths !== undefined ? (u.file_storage_paths as string[] | null) : o.file_storage_paths,
+                    }
+                  : o
+              )
+            );
+            setLastSync(new Date());
+          } else if (payload.eventType === "INSERT") {
+            // New order — refresh server data to get full joins (customers + items)
+            setNewOrderAlert(true);
+            router.refresh();
+          }
+        }
+      )
+      .subscribe();
+
+    // Fallback: poll every 45s in case Realtime isn't enabled on the orders table
+    const poll = setInterval(() => router.refresh(), 45_000);
+
+    return () => {
+      void supabase.removeChannel(channel);
+      clearInterval(poll);
+    };
+  }, [router]);
 
   // ── Stats ──────────────────────────────────────────────────────────────────────
 
@@ -375,6 +453,20 @@ export function OrdersTable({ initialOrders }: Props) {
 
   return (
     <div>
+      {/* ── New order alert ── */}
+      {newOrderAlert && (
+        <div className="mb-4 bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-center justify-between">
+          <p className="text-sm text-green-800 font-semibold">🔔 New order received — list updated</p>
+          <button
+            onClick={() => setNewOrderAlert(false)}
+            className="text-green-500 hover:text-green-700 text-lg leading-none ml-4"
+            aria-label="Dismiss"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* ── Stats bar — 6 cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mb-8">
         <StatCard label="Active orders" value={stats.active} />
@@ -430,6 +522,10 @@ export function OrdersTable({ initialOrders }: Props) {
 
           <span className="text-sm text-gray-400 whitespace-nowrap">
             {displayed.length} order{displayed.length !== 1 ? "s" : ""}
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 whitespace-nowrap">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            Live · {lastSync.toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit" })}
           </span>
         </div>
       </div>

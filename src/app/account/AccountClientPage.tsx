@@ -134,6 +134,38 @@ export function AccountClientPage() {
       .finally(() => setOrdersLoading(false));
   }, [session]);
 
+  // Live order status sync — re-fetches orders when any order changes (staff updates status, etc.)
+  useEffect(() => {
+    if (!session) return;
+
+    const supabase = createClient();
+
+    const refetchOrders = () => {
+      fetch("/api/account/orders", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+        .then((r) => r.json())
+        .then((data: { orders?: Order[] }) => {
+          if (data.orders) setOrders(data.orders);
+        })
+        .catch(console.error);
+    };
+
+    const channel = supabase
+      .channel("customer-orders-live")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .on("postgres_changes" as any, { event: "*", schema: "public", table: "orders" }, refetchOrders)
+      .subscribe();
+
+    // Fallback poll every 20 seconds (covers cases where Realtime isn't enabled on orders table)
+    const poll = setInterval(refetchOrders, 20_000);
+
+    return () => {
+      void supabase.removeChannel(channel);
+      clearInterval(poll);
+    };
+  }, [session]);
+
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
