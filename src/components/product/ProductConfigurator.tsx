@@ -18,7 +18,7 @@ const BULK_HINTS: Record<string, Record<number, string>> = {
   STICKER:        { 100: "save 16%", 250: "save 32%", 500: "save 50%", 1000: "save 66%" }, // single size — exact
   POSTCARD:       { 250: "save 20%+", 500: "save 35%+", 1000: "save 50%+" },               // conservative across 4×6/5×7/3×4
   BROCHURE:       { 250: "save 40%+", 500: "save 44%+" },                                  // verified tri-fold + half-fold
-  BUSINESS_CARD:  { 500: "save 25%+", 1000: "save 35%+" },                                 // conservative for 2-sided (default)
+  BUSINESS_CARD:  { 500: "save 25%+", 1000: "save 35%+", 1500: "save 40%+", 2000: "save 40%+", 2500: "save 40%+", 5000: "save 50%+" }, // Spicer-verified 2026-02-24
   FLYER:          { 500: "save 30%+", 1000: "save 40%+" },                                 // covers 80lb AND 100lb paper
 };
 
@@ -361,20 +361,22 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
               </div>
             );
           })}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={() => { setCustomQty(String(qty)); setIsCustomQty(true); }}
-              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                isCustomQty
-                  ? "bg-[#1c1712] text-white border-[#1c1712]"
-                  : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
-              }`}
-            >
-              Custom
-            </button>
-          </div>
+          {!product.lotPriced && (
+            <div className="flex flex-col items-center">
+              <button
+                onClick={() => { setCustomQty(String(qty)); setIsCustomQty(true); }}
+                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  isCustomQty
+                    ? "bg-[#1c1712] text-white border-[#1c1712]"
+                    : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+                }`}
+              >
+                Custom
+              </button>
+            </div>
+          )}
         </div>
-        {isCustomQty && (
+        {!product.lotPriced && isCustomQty && (
           <input
             type="number"
             value={customQty}
@@ -383,6 +385,15 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             min={1}
             className="mt-2 border border-gray-200 rounded-lg px-3 py-2 text-sm w-36 focus:outline-none focus:border-[#16C2F3]"
           />
+        )}
+        {product.lotPriced && (
+          <p className="mt-3 text-xs text-gray-400">
+            Need more than {Math.max(...product.qtyPresets).toLocaleString()}?{" "}
+            <a href="tel:+13069548688" className="text-[#16C2F3] font-medium hover:underline">
+              Call (306) 954-8688
+            </a>{" "}
+            for a custom quote.
+          </p>
         )}
         {qtyDiscountApplied && pricePerUnit != null && effectiveQty > 1 && (
           <div className="mt-2 flex items-center gap-2">
