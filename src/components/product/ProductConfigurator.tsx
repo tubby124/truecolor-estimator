@@ -12,12 +12,12 @@ const BULK_HINTS: Record<string, Record<number, string>> = {
   MAGNET:         { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
   DECAL:          { 5: "save 5%", 10: "save 10%"                  },
   VINYL_LETTERING:{ 5: "save 8%"                                   },
-  // Lot-priced: savings are per-unit vs minimum lot (baked into tiered lot prices)
-  STICKER:        { 100: "save 16%", 250: "save 32%", 500: "save 50%", 1000: "save 66%" },
-  POSTCARD:       { 250: "save 50%+", 500: "save 60%+", 1000: "save 70%+" },
-  BROCHURE:       { 250: "save 40%+", 500: "save 44%+" },
-  BUSINESS_CARD:  { 500: "save 28%+", 1000: "save 40%+" },
-  FLYER:          { 500: "save 40%+", 1000: "save 59%+" },
+  // Lot-priced: savings vs qty 100 (minimum lot common to all sizes/papers)
+  STICKER:        { 100: "save 16%", 250: "save 32%", 500: "save 50%", 1000: "save 66%" }, // single size — exact
+  POSTCARD:       { 250: "save 20%+", 500: "save 35%+", 1000: "save 50%+" },               // conservative across 4×6/5×7/3×4
+  BROCHURE:       { 250: "save 40%+", 500: "save 44%+" },                                  // verified tri-fold + half-fold
+  BUSINESS_CARD:  { 500: "save 25%+", 1000: "save 35%+" },                                 // conservative for 2-sided (default)
+  FLYER:          { 500: "save 30%+", 1000: "save 40%+" },                                 // covers 80lb AND 100lb paper
 };
 
 const MOST_POPULAR_QTY: Record<string, number> = {
