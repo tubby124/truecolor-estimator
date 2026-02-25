@@ -44,6 +44,7 @@ const MATERIAL_MAP: Partial<Record<Category, string>> = {
   PHOTO_POSTER: "RMPS002",
   DECAL: "ARLPMF7008",
   VINYL_LETTERING: "ARLPMF7008",
+  DISPLAY: "RBS33507875S", // Economy tier by default
 };
 
 // Human-readable material names for the proof card
@@ -54,6 +55,9 @@ const MATERIAL_LABEL_MAP: Partial<Record<string, string>> = {
   MAG302437550M: "Magnetic Sheet 30mil",
   RMPS002: "Photo Paper 220gsm",
   ARLPMF7008: "Adhesive Vinyl",
+  RBS33507875S: "Retractable Banner — Economy",
+  RBS33507900PSB: "Retractable Banner — Deluxe",
+  RBS33507900PREM: "Retractable Banner — Premium",
 };
 
 const SQFT_CATEGORIES: Category[] = [
@@ -76,6 +80,8 @@ export default function StaffPage() {
       ...DEFAULT_STATE,
       material_code: MATERIAL_MAP[cat] ?? "",
       qty: ["FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD", "STICKER"].includes(cat) ? 250 : 1,
+      // Retractable banners are always 33.5" × 80" — pre-fill so proof renders immediately
+      ...(cat === "DISPLAY" ? { width_in: "33.5", height_in: "80" } : {}),
     });
     setResult(null);
     setProofImage(null);

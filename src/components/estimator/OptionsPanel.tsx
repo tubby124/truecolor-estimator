@@ -41,10 +41,11 @@ const SQFT_QTY_PRESETS: Record<string, number[]> = {
   DECAL:          [1, 2, 5, 10],
   VINYL_LETTERING:[1, 2, 5, 10],
   PHOTO_POSTER:   [1],
+  DISPLAY:        [1, 2],
 };
 
 export function OptionsPanel({ category, state, onChange, categoryLabel }: Props) {
-  const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING", "PHOTO_POSTER", "DISPLAY"].includes(category);
+  const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING", "PHOTO_POSTER"].includes(category);
   const showSides = ["SIGN", "FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD"].includes(category);
   const showGrommets = category === "BANNER";
   const showHStake = category === "SIGN";
@@ -75,6 +76,31 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
         <div className="inline-flex items-center gap-1.5 bg-[var(--brand-50)] text-[var(--brand)] text-xs font-semibold px-3 py-1.5 rounded-full">
           {categoryLabel}
         </div>
+      )}
+
+      {/* Retractable Banner tier selector */}
+      {category === "DISPLAY" && (
+        <FieldGroup label="Stand Tier">
+          <div className="flex flex-col gap-2">
+            {[
+              { label: "Economy — $219", material_code: "RBS33507875S" },
+              { label: "Deluxe — $299", material_code: "RBS33507900PSB" },
+              { label: "Premium — $349", material_code: "RBS33507900PREM" },
+            ].map((tier) => (
+              <button
+                key={tier.material_code}
+                onClick={() => onChange({ material_code: tier.material_code })}
+                className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-all ${
+                  state.material_code === tier.material_code
+                    ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                    : "border-[var(--border)] bg-white hover:border-gray-300"
+                }`}
+              >
+                {tier.label}
+              </button>
+            ))}
+          </div>
+        </FieldGroup>
       )}
 
       {/* Dimensions — for sqft-based products */}
