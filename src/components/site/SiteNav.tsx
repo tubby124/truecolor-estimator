@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { CartIcon } from "@/components/site/CartIcon";
@@ -56,6 +56,9 @@ export function SiteNav() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+  const productsTriggerRef = useRef<HTMLButtonElement>(null);
+  const industriesTriggerRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -77,6 +80,71 @@ export function SiteNav() {
     }
     return () => { document.body.style.overflow = ""; };
   }, [drawerOpen]);
+
+  // Focus trap + Escape close for mobile drawer
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const drawer = drawerRef.current;
+    if (!drawer) return;
+
+    // Focus the close button on open
+    const closeBtn = drawer.querySelector<HTMLElement>('[aria-label="Close menu"]');
+    closeBtn?.focus();
+
+    function trapFocus(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setDrawerOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const focusable = drawer!.querySelectorAll<HTMLElement>(
+        'a, button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    document.addEventListener("keydown", trapFocus);
+    return () => document.removeEventListener("keydown", trapFocus);
+  }, [drawerOpen]);
+
+  // Keyboard handler for dropdown triggers (ArrowDown opens + focuses first item, Escape closes)
+  const handleTriggerKeyDown = useCallback((e: React.KeyboardEvent, menu: "products" | "industries") => {
+    if (e.key === "Escape") {
+      setOpenMenu(null);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setOpenMenu(menu);
+      // Focus first menu item after render
+      setTimeout(() => {
+        const first = document.querySelector<HTMLElement>(`[data-menu="${menu}"] a, [data-menu="${menu}"] [role="menuitem"]`);
+        first?.focus();
+      }, 0);
+    }
+  }, []);
+
+  // Keyboard handler for open dropdown (ArrowUp/Down to navigate, Escape to close + refocus trigger)
+  const handleDropdownKeyDown = useCallback((e: React.KeyboardEvent, menu: "products" | "industries") => {
+    const container = e.currentTarget as HTMLElement;
+    const items = Array.from(container.querySelectorAll<HTMLElement>("a"));
+    const idx = items.indexOf(document.activeElement as HTMLElement);
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setOpenMenu(null);
+      (menu === "products" ? productsTriggerRef : industriesTriggerRef).current?.focus();
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      items[Math.min(idx + 1, items.length - 1)]?.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      items[Math.max(idx - 1, 0)]?.focus();
+    }
+  }, []);
 
   function toggleMenu(menu: "products" | "industries") {
     setOpenMenu((prev) => (prev === menu ? null : menu));
@@ -104,7 +172,11 @@ export function SiteNav() {
             {/* Products dropdown */}
             <div className="relative">
               <button
+                ref={productsTriggerRef}
                 onClick={() => toggleMenu("products")}
+                onKeyDown={(e) => handleTriggerKeyDown(e, "products")}
+                aria-haspopup="true"
+                aria-expanded={openMenu === "products"}
                 className="flex items-center gap-1 text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
               >
                 Products
@@ -119,7 +191,12 @@ export function SiteNav() {
                 </svg>
               </button>
               {openMenu === "products" && (
-                <div role="menu" className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-[540px]">
+                <div
+                  role="menu"
+                  data-menu="products"
+                  onKeyDown={(e) => handleDropdownKeyDown(e, "products")}
+                  className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-[540px]"
+                >
                   <div className="grid grid-cols-3 gap-0 p-3">
                     {PRODUCT_CATEGORIES.map((cat) => (
                       <div key={cat.label}>
@@ -146,7 +223,11 @@ export function SiteNav() {
             {/* Industries dropdown */}
             <div className="relative">
               <button
+                ref={industriesTriggerRef}
                 onClick={() => toggleMenu("industries")}
+                onKeyDown={(e) => handleTriggerKeyDown(e, "industries")}
+                aria-haspopup="true"
+                aria-expanded={openMenu === "industries"}
                 className="flex items-center gap-1 text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
               >
                 Industries
@@ -161,7 +242,12 @@ export function SiteNav() {
                 </svg>
               </button>
               {openMenu === "industries" && (
-                <div role="menu" className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl w-56 z-50">
+                <div
+                  role="menu"
+                  data-menu="industries"
+                  onKeyDown={(e) => handleDropdownKeyDown(e, "industries")}
+                  className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl w-56 z-50"
+                >
                   {INDUSTRY_LINKS.map((link) => (
                     <Link
                       key={link.href}
@@ -247,7 +333,7 @@ export function SiteNav() {
 
       {/* Mobile Drawer */}
       {drawerOpen && (
-        <div className="fixed inset-0 z-50 bg-[#1c1712] overflow-y-auto">
+        <div ref={drawerRef} className="fixed inset-0 z-50 bg-[#1c1712] overflow-y-auto">
           {/* Close button */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <Link href="/" onClick={() => setDrawerOpen(false)}>

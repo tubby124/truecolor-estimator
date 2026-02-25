@@ -39,6 +39,17 @@ const DESIGN_LABELS: Record<number, string> = {
   75: "Logo vectorization",
 };
 
+// Bulk discount tiers by category — mirrors qty_discounts.v1.csv
+const QTY_DISCOUNT_TIERS: Partial<Record<Category, { label: string; pct: number }[]>> = {
+  SIGN:            [{ label: "5–9",  pct: 8  }, { label: "10–24", pct: 17 }, { label: "25+", pct: 23 }],
+  BANNER:          [{ label: "5–9",  pct: 5  }, { label: "10–24", pct: 10 }, { label: "25+", pct: 15 }],
+  RIGID:           [{ label: "5–9",  pct: 3  }, { label: "10–24", pct: 5  }, { label: "25+", pct: 8  }],
+  FOAMBOARD:       [{ label: "5–9",  pct: 8  }, { label: "10–24", pct: 12 }, { label: "25+", pct: 15 }],
+  MAGNET:          [{ label: "5–9",  pct: 5  }, { label: "10–24", pct: 10 }, { label: "25+", pct: 15 }],
+  DECAL:           [{ label: "5–9",  pct: 5  }, { label: "10+",   pct: 10 }],
+  VINYL_LETTERING: [{ label: "5+",   pct: 8  }],
+};
+
 export function PriceSummary({
   price, loading, addonTotal, designFee, gst, total,
   addedToCart, onAddToCart, productSlug,
@@ -94,6 +105,29 @@ export function PriceSummary({
                     {qtyDiscountPct}% bulk discount
                   </span>
                   <span className="text-xs text-green-700 font-medium">${pricePerUnit.toFixed(2)}/unit × {qty}</span>
+                </div>
+              )}
+
+              {/* Bulk savings tier table — always shown for categories with qty discounts */}
+              {QTY_DISCOUNT_TIERS[category] && (
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
+                    Order more, pay less
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {QTY_DISCOUNT_TIERS[category]!.map((tier) => (
+                      <span
+                        key={tier.label}
+                        className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                          qtyDiscountApplied && qtyDiscountPct === tier.pct
+                            ? "bg-green-100 text-green-800 border-green-300"
+                            : "bg-gray-50 text-gray-500 border-gray-200"
+                        }`}
+                      >
+                        {tier.label} units: {tier.pct}% off
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 

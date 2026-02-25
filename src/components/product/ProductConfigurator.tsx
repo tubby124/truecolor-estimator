@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { LineItem } from "@/lib/cart/cart";
+import { useToast, ToastContainer } from "@/components/ui";
+import { sanitizeError } from "@/lib/errors/sanitize";
 
 const BULK_HINTS: Record<string, Record<number, string>> = {
   SIGN:           { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
@@ -85,6 +87,7 @@ interface Props {
 }
 
 export function ProductConfigurator({ product, onPriceChange, onConfigChange }: Props) {
+  const { toasts, showToast, dismissToast } = useToast();
   const [selectedSize, setSelectedSize] = useState(product.sizePresets[0]);
   const [customW, setCustomW] = useState("");
   const [customH, setCustomH] = useState("");
@@ -151,8 +154,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setMinChargeApplied(data.min_charge_applied ?? false);
         setMinChargeValue(data.min_charge_value ?? null);
       }
-    } catch {
-      // silent
+    } catch (err) {
+      showToast(sanitizeError(err), "error");
     } finally {
       setLoading(false);
     }
@@ -215,6 +218,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
 
   return (
     <div className="space-y-6">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       {/* Product name */}
       <div>
         <h1 className="text-2xl font-bold text-[#1c1712]">{product.name}</h1>

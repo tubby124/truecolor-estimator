@@ -323,7 +323,7 @@ export default function CheckoutPage() {
               setCompany(val);
             }
           }}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+          className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
         >
           <option value="">No company</option>
           {savedCompanies.map((c) => (
@@ -338,7 +338,7 @@ export default function CheckoutPage() {
             type="text"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+            className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
             placeholder="Enter company name"
             autoFocus
           />
@@ -350,7 +350,7 @@ export default function CheckoutPage() {
         type="text"
         value={company}
         onChange={(e) => setCompany(e.target.value)}
-        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+        className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
         placeholder="ABC Realty"
       />
     );
@@ -380,7 +380,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
                       placeholder="Jane Smith"
                       required
                     />
@@ -401,7 +401,7 @@ export default function CheckoutPage() {
                           setEmailError("");
                         }
                       }}
-                      className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${emailError ? "border-red-300" : "border-gray-200"}`}
+                      className={`w-full border rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${emailError ? "border-red-300" : "border-gray-200"}`}
                       placeholder="jane@example.com"
                       required
                     />
@@ -426,7 +426,7 @@ export default function CheckoutPage() {
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
                       placeholder="(306) 555-0100"
                     />
                   </div>
@@ -440,7 +440,7 @@ export default function CheckoutPage() {
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
                     placeholder="123 Main St, Saskatoon, SK S7K 0A1"
                   />
                 </div>
@@ -494,7 +494,7 @@ export default function CheckoutPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         minLength={8}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm pr-16 focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                        className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm pr-16 focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
                         placeholder="Min. 8 characters"
                       />
                       <button
@@ -514,7 +514,7 @@ export default function CheckoutPage() {
                         type={showPassword ? "text" : "password"}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${
+                        className={`w-full border rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${
                           confirmPassword && password !== confirmPassword
                             ? "border-red-300"
                             : "border-gray-200"
@@ -544,7 +544,7 @@ export default function CheckoutPage() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="E.g. 2 signs with logo on left, 1 with logo right. Or: picking up Tuesday AM."
                 rows={3}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] resize-none"
+                className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] resize-none"
               />
             </section>
 
@@ -700,6 +700,14 @@ export default function CheckoutPage() {
                   <a href="mailto:info@true-color.ca" className="underline font-medium">info@true-color.ca</a>
                 </p>
               </div>
+            )}
+
+            {/* Clover redirect note */}
+            {payMethod === "clover_card" && (
+              <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                <span aria-hidden="true">🔒</span>
+                You&apos;ll be redirected to Clover&apos;s secure checkout to complete payment.
+              </p>
             )}
 
             {/* Submit */}

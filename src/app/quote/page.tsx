@@ -58,7 +58,7 @@ export default function QuotePage() {
               href={`/products/${product.slug}`}
               className="group flex flex-col items-center gap-3 p-6 border border-gray-100 rounded-2xl hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
             >
-              <span className="text-4xl">
+              <span className="text-4xl" role="img" aria-label={product.name}>
                 {PRODUCT_ICONS[product.slug] || "🖨️"}
               </span>
               <div>

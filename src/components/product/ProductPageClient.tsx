@@ -5,6 +5,7 @@ import { addToCart } from "@/lib/cart/cart";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductConfigurator, type PriceData, type ConfigData } from "@/components/product/ProductConfigurator";
 import { PriceSummary } from "@/components/product/PriceSummary";
+import { useToast, ToastContainer } from "@/components/ui";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { Category } from "@/lib/data/types";
 
@@ -37,6 +38,7 @@ const EMPTY_CONFIG: ConfigData = {
 };
 
 export function ProductPageClient({ product }: Props) {
+  const { toasts, showToast, dismissToast } = useToast();
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
   const [configData, setConfigData] = useState<ConfigData>(EMPTY_CONFIG);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -89,6 +91,7 @@ export function ProductPageClient({ product }: Props) {
 
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 3000);
+    showToast(`${product.name} added to cart!`, "success");
   }
 
   const materialLabel = MATERIAL_LABELS[product.slug] ?? product.name;
@@ -96,6 +99,7 @@ export function ProductPageClient({ product }: Props) {
   return (
     // pb-24 on mobile/tablet for sticky bar clearance; removed on lg+
     <div className="pb-24 lg:pb-0">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       {/* ── 3-column grid ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_2fr_1.4fr] gap-8 items-start">
 
