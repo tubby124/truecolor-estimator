@@ -750,6 +750,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     heroImage: "/images/products/product/postcards-800x600.webp",
     galleryImages: [
       "/images/products/product/postcard-realtor-justlisted-800x600.webp",
+      "/images/products/product/postcard-restaurant-promo-800x600.webp",
+      "/images/products/product/postcard-mailing-stack-800x600.webp",
       "/images/products/product/postcards-800x600.webp",
     ],
     defaultSides: 2,
@@ -801,6 +803,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "PLACEHOLDER_100LB",
     heroImage: "/images/products/product/brochures-800x600.webp",
     galleryImages: [
+      "/images/products/product/brochure-halffold-spread-800x600.webp",
+      "/images/products/product/brochure-acrylic-rack-lobby-800x600.webp",
       "/images/products/product/brochures-800x600.webp",
     ],
     defaultSides: 2,
@@ -906,6 +910,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MAG302437550M",
     heroImage: "/images/products/product/magnet-calendars-800x600.webp",
     galleryImages: [
+      "/images/products/product/magnet-calendar-cards-800x600.webp",
       "/images/products/product/magnet-calendars-800x600.webp",
     ],
     defaultSides: 1,
