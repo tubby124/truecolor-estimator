@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { ReviewsSection } from "@/components/home/ReviewsSection";
 import { GalleryStrip } from "@/components/home/GalleryStrip";
 import { HeroSlider } from "@/components/home/HeroSlider";
+import { LocalShopSection } from "@/components/home/LocalShopSection";
 
 export const metadata: Metadata = {
   title: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
@@ -132,6 +133,9 @@ export default function HomePage() {
 
       {/* ── HERO SLIDER ──────────────────────────────────────────────────────── */}
       <HeroSlider />
+
+      {/* ── LOCAL SHOP ───────────────────────────────────────────────────────── */}
+      <LocalShopSection />
 
       {/* ── TURNAROUND BAR ───────────────────────────────────────────────────── */}
       <section className="bg-[#16C2F3] py-4">
