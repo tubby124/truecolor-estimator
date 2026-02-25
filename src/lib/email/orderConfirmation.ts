@@ -87,7 +87,7 @@ export async function sendOrderConfirmationEmail(
   // Generate QR code as CID buffer for card orders with a payment link
   let qrAttachment: { filename: string; content: Buffer; cid: string; contentDisposition: "inline" } | null = null;
   let qrCodeCid: string | undefined;
-  if (payment_method === "clover_card" && checkout_url) {
+  if (checkout_url) {
     try {
       const buf = await QRCode.toBuffer(checkout_url, {
         width: 160,
@@ -246,6 +246,18 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
           <p style="margin: 0; font-size: 11px; color: #7a5a00; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
             Track your order anytime at your <a href="https://truecolor-estimator.vercel.app/account" style="color: #7a5a00;">order dashboard</a>
           </p>
+          ${checkout_url
+            ? `<div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid #e8d87a;">
+                <p style="margin: 0 0 8px; font-size: 12px; color: #7a5a00; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Prefer to pay by credit card instead?
+                </p>
+                <a href="${escHtml(checkout_url)}"
+                  style="display: inline-block; color: #7a5a00; border: 1px solid #c4a500; font-size: 13px; font-weight: 600; text-decoration: none; padding: 8px 18px; border-radius: 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin-bottom: 10px;">
+                  Pay $${total.toFixed(2)} by card →
+                </a>
+                ${qrImg}
+              </div>`
+            : ""}
         </div>`;
 
   // ── Rush banner ──

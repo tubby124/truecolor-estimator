@@ -18,6 +18,7 @@ interface OrderSummary {
   order_number: string;
   total: number;
   payment_method: string;
+  payment_reference: string | null;
 }
 
 export default async function OrderConfirmedPage({ searchParams }: Props) {
@@ -67,7 +68,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       // Fetch order details to show on confirmation page
       const { data } = await supabase
         .from("orders")
-        .select("order_number, total, payment_method")
+        .select("order_number, total, payment_method, payment_reference")
         .eq("id", oid)
         .single();
 
@@ -80,6 +81,9 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
   }
 
   const isEtransfer = orderSummary?.payment_method === "etransfer";
+  // For eTransfer orders, payment_reference holds the /pay/{token} card URL.
+  // For clover_card orders, payment_reference is the Clover session ID — not a pay URL.
+  const cardPayUrl = isEtransfer ? (orderSummary?.payment_reference ?? null) : null;
 
   return (
     <div className="min-h-screen bg-white">
@@ -131,6 +135,35 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
               Auto-deposit enabled — no security question needed. Include your name in the memo.
               We&apos;ll confirm and start production within 1 business day.
             </p>
+          </div>
+        )}
+
+        {/* Secondary card payment option — silently hidden when no pay URL available */}
+        {isEtransfer && cardPayUrl && (
+          <div className="text-center mb-8">
+            <p className="text-xs text-gray-400 mb-3">Prefer to pay by credit card?</p>
+            <a
+              href={cardPayUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 border border-gray-300 text-gray-600 font-medium text-sm px-6 py-2.5 rounded-lg hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"
+                />
+              </svg>
+              Pay by credit card instead
+            </a>
           </div>
         )}
 

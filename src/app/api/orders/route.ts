@@ -216,7 +216,7 @@ export async function POST(req: NextRequest) {
       console.error("[orders] Wave invoice creation failed (non-fatal):", waveErr);
     }
 
-    // 6. Clover Hosted Checkout (card only)
+    // 6. Clover Hosted Checkout (card) or /pay/{token} fallback URL (eTransfer)
     let checkoutUrl: string | null = null;
     if (payment_method === "clover_card") {
       const totalCents = Math.round(total * 100);
@@ -246,6 +246,29 @@ export async function POST(req: NextRequest) {
         checkoutUrl = `${siteUrl}/pay/${payToken}`;
       } catch {
         // If token signing fails, keep the raw Clover URL as fallback
+      }
+    } else if (payment_method === "etransfer") {
+      // Generate a /pay/{token} URL as an optional card payment fallback.
+      // No Clover API call needed — /pay/ creates a fresh Clover session on each click.
+      // Stored in payment_reference (unused/null for eTransfer orders) so the
+      // /order-confirmed page and email can surface a "Pay by card instead" option.
+      try {
+        const siteUrl =
+          process.env.NEXT_PUBLIC_SITE_URL ??
+          "https://truecolor-estimator.vercel.app";
+        const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
+        const desc =
+          items.length === 1
+            ? items[0].product_name
+            : `True Color Order ${order.order_number} (${items.length} items)`;
+        const payToken = encodePaymentToken(total, desc, contact.email, redirectUrl);
+        checkoutUrl = `${siteUrl}/pay/${payToken}`;
+        void supabase
+          .from("orders")
+          .update({ payment_reference: checkoutUrl } as Record<string, unknown>)
+          .eq("id", order.id);
+      } catch {
+        // Non-fatal — eTransfer still works without card fallback
       }
     }
 
