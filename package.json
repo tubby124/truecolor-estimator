@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:smoke": "vitest run e2e/",
-    "gen-og": "node scripts/gen-og.mjs"
+    "gen-og": "node scripts/gen-og.mjs",
+    "validate:pricing": "node scripts/validate-pricing.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

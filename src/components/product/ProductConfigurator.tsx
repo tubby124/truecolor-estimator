@@ -12,6 +12,12 @@ const BULK_HINTS: Record<string, Record<number, string>> = {
   MAGNET:         { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
   DECAL:          { 5: "save 5%", 10: "save 10%"                  },
   VINYL_LETTERING:{ 5: "save 8%"                                   },
+  // Lot-priced: savings are per-unit vs minimum lot (baked into tiered lot prices)
+  STICKER:        { 100: "save 16%", 250: "save 32%", 500: "save 50%", 1000: "save 66%" },
+  POSTCARD:       { 250: "save 50%+", 500: "save 60%+", 1000: "save 70%+" },
+  BROCHURE:       { 250: "save 40%+", 500: "save 44%+" },
+  BUSINESS_CARD:  { 500: "save 28%+", 1000: "save 40%+" },
+  FLYER:          { 500: "save 40%+", 1000: "save 59%+" },
 };
 
 const MOST_POPULAR_QTY: Record<string, number> = {
@@ -22,6 +28,11 @@ const MOST_POPULAR_QTY: Record<string, number> = {
   MAGNET:          5,
   DECAL:           2,
   VINYL_LETTERING: 1,
+  STICKER:         100,
+  POSTCARD:        250,
+  BROCHURE:        250,
+  BUSINESS_CARD:   500,
+  FLYER:           500,
 };
 
 const DESIGN_FEES: Record<string, number> = {
@@ -381,6 +392,12 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           <div className="mt-2 flex items-center gap-2">
             <span className="text-xs text-amber-700 font-medium">${pricePerUnit.toFixed(2)}/unit (min order applies)</span>
           </div>
+        )}
+        {/* Per-unit display for lot-priced products (no engine discount, no min charge) */}
+        {!qtyDiscountApplied && !minChargeApplied && effectiveQty > 1 && price !== null && (
+          <p className="text-xs text-gray-400 mt-1 font-medium">
+            ${(price / effectiveQty).toFixed(2)} / unit
+          </p>
         )}
       </div>
 
