@@ -59,6 +59,27 @@ const PRODUCTS = [
     img: "/images/products/product/acp-aluminum-sign-800x600.webp",
     href: "/products/acp-signs",
   },
+  {
+    name: "Foamboard Displays",
+    from: "from $45",
+    desc: "Lightweight indoor displays for events, counters, and trade shows.",
+    img: "/images/products/product/foamboard-display-800x600.webp",
+    href: "/products/foamboard-displays",
+  },
+  {
+    name: "Window Decals",
+    from: "from $45",
+    desc: "Full-colour adhesive vinyl for storefronts, vehicles, and glass doors.",
+    img: "/images/gallery/gallery-window-decal-swiss-barber.webp",
+    href: "/products/window-decals",
+  },
+  {
+    name: "Perforated Window Vinyl",
+    from: "from $40",
+    desc: "One-way vision graphics. Full colour outside, see-through inside.",
+    img: "/images/products/product/window-perf-800x600.webp",
+    href: "/products/window-perf",
+  },
 ];
 
 // ─── Industry tiles ────────────────────────────────────────────────────────────
@@ -205,18 +226,28 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Also offer retractable banner stand */}
-        <div className="mt-8 p-5 bg-[#f4efe9] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p className="font-bold text-[#1c1712]">Retractable Banner Stands</p>
-            <p className="text-sm text-gray-500">Economy stand from $219. Banner included.</p>
+        {/* Also offer additional products */}
+        <div className="mt-8 p-5 bg-[#f4efe9] rounded-xl">
+          <p className="font-bold text-[#1c1712] mb-3">Also available — all priced live:</p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: "Brochures from $70", href: "/products/brochures" },
+              { label: "Postcards from $35", href: "/products/postcards" },
+              { label: "Stickers from $95", href: "/products/stickers" },
+              { label: "Photo Posters from $15", href: "/products/photo-posters" },
+              { label: "Magnet Calendars from $45", href: "/products/magnet-calendars" },
+              { label: "Retractable Banners from $219", href: "/products/retractable-banners" },
+              { label: "Vinyl Lettering from $40", href: "/products/vinyl-lettering" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="inline-block bg-white border border-gray-200 text-[#1c1712] text-sm font-medium px-3 py-1.5 rounded-full hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
-          <Link
-            href="/products/retractable-banners"
-            className="text-[#16C2F3] text-sm font-bold whitespace-nowrap hover:underline"
-          >
-            See price →
-          </Link>
         </div>
       </section>
 
@@ -368,16 +399,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FOAMBOARD + MORE PRODUCTS callout ────────────────────────────────── */}
+      {/* ── ALL PRODUCTS callout ─────────────────────────────────────────────── */}
       <section className="bg-[#1c1712] px-6 py-14">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-8">
           <div className="flex-1">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Also: Foamboard, decals, photo prints & more.
+              16 products. All priced live. No quote forms.
             </h2>
             <p className="text-gray-400">
-              Foamboard counter displays from $45. Retractable banner stands from $219.
-              Stickers, photo posters, and more. All priced live on our estimator.
+              Retractable banners from $219 · Brochures from $70 · Postcards from $35 · Stickers from $95 · Photo posters from $15 · Vinyl lettering from $40 · Magnet calendars from $45 — see your exact price in 30 seconds.
             </p>
           </div>
           <Link

@@ -159,7 +159,7 @@ export default function StaffPage() {
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">← Website</Link>
             <Link href="/staff/orders" className="text-sm text-[#16C2F3] hover:underline">Orders →</Link>
-            <span className="text-xs text-[var(--muted)] font-mono hidden sm:block">v1_2026-02-19 · STAFF</span>
+            <span className="text-xs text-[var(--muted)] font-mono hidden sm:block">v1_2026-02-24 · STAFF</span>
             <button
               onClick={() => { setCategory(null); setState(DEFAULT_STATE); setResult(null); setStep("pick"); }}
               className="text-xs px-3 py-1.5 border border-[var(--border)] rounded-full text-[var(--muted)] hover:border-gray-400 transition-all"
@@ -250,7 +250,7 @@ export default function StaffPage() {
 
       {/* Pricing version footer */}
       <footer className="text-center py-6 text-xs text-[var(--muted)] no-print">
-        True Color Display Printing · Pricing v1_2026-02-19 · All prices in CAD + GST
+        True Color Display Printing · Pricing v1_2026-02-24 · All prices in CAD + GST
       </footer>
     </div>
   );

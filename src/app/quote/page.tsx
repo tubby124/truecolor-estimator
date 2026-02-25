@@ -24,6 +24,14 @@ const PRODUCT_ICONS: Record<string, string> = {
   "acp-signs": "🔲",
   "foamboard-displays": "🖼️",
   "retractable-banners": "📋",
+  "window-decals": "🪟",
+  "window-perf": "👁️",
+  "vinyl-lettering": "✂️",
+  "stickers": "🔖",
+  "postcards": "📮",
+  "brochures": "📑",
+  "photo-posters": "🎨",
+  "magnet-calendars": "📅",
 };
 
 export default function QuotePage() {

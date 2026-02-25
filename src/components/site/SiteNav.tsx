@@ -8,15 +8,38 @@ import { AccountIcon } from "@/components/site/AccountIcon";
 import { StaffQuoteButton } from "@/components/site/StaffQuoteButton";
 import { QuoteModal } from "@/components/QuoteModal";
 
-const PRODUCT_LINKS = [
-  { label: "Coroplast Signs", href: "/products/coroplast-signs" },
-  { label: "Vinyl Banners", href: "/products/vinyl-banners" },
-  { label: "Vehicle Magnets", href: "/products/vehicle-magnets" },
-  { label: "Business Cards", href: "/products/business-cards" },
-  { label: "Flyers & Brochures", href: "/products/flyers" },
-  { label: "Aluminum Composite Signs", href: "/products/acp-signs" },
-  { label: "Foamboard Displays", href: "/products/foamboard-displays" },
-  { label: "Retractable Banners", href: "/products/retractable-banners" },
+const PRODUCT_CATEGORIES = [
+  {
+    label: "Signs & Displays",
+    links: [
+      { label: "Coroplast Signs", href: "/products/coroplast-signs" },
+      { label: "ACP Aluminum Signs", href: "/products/acp-signs" },
+      { label: "Vinyl Banners", href: "/products/vinyl-banners" },
+      { label: "Foamboard Displays", href: "/products/foamboard-displays" },
+      { label: "Retractable Banners", href: "/products/retractable-banners" },
+    ],
+  },
+  {
+    label: "Window & Vehicle",
+    links: [
+      { label: "Window Decals", href: "/products/window-decals" },
+      { label: "Perforated Window Vinyl", href: "/products/window-perf" },
+      { label: "Vehicle Magnets", href: "/products/vehicle-magnets" },
+      { label: "Vinyl Lettering", href: "/products/vinyl-lettering" },
+      { label: "Magnet Calendars", href: "/products/magnet-calendars" },
+    ],
+  },
+  {
+    label: "Print & Promo",
+    links: [
+      { label: "Business Cards", href: "/products/business-cards" },
+      { label: "Flyers", href: "/products/flyers" },
+      { label: "Brochures", href: "/products/brochures" },
+      { label: "Postcards", href: "/products/postcards" },
+      { label: "Stickers", href: "/products/stickers" },
+      { label: "Photo Posters", href: "/products/photo-posters" },
+    ],
+  },
 ];
 
 const INDUSTRY_LINKS = [
@@ -96,17 +119,26 @@ export function SiteNav() {
                 </svg>
               </button>
               {openMenu === "products" && (
-                <div className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl w-56 z-50">
-                  {PRODUCT_LINKS.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setOpenMenu(null)}
-                      className="block px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors first:rounded-t-lg last:rounded-b-lg"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+                <div className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-[540px]">
+                  <div className="grid grid-cols-3 gap-0 p-3">
+                    {PRODUCT_CATEGORIES.map((cat) => (
+                      <div key={cat.label}>
+                        <p className="px-2 pt-1 pb-2 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">
+                          {cat.label}
+                        </p>
+                        {cat.links.map((link) => (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setOpenMenu(null)}
+                            className="block px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -241,19 +273,26 @@ export function SiteNav() {
             {/* Products section */}
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Products</p>
-              <ul className="space-y-1">
-                {PRODUCT_LINKS.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      onClick={() => setDrawerOpen(false)}
-                      className="block py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              {PRODUCT_CATEGORIES.map((cat) => (
+                <div key={cat.label} className="mb-4">
+                  <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider mb-1 pl-0.5">
+                    {cat.label}
+                  </p>
+                  <ul>
+                    {cat.links.map((link) => (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          onClick={() => setDrawerOpen(false)}
+                          className="block py-2 pl-2 text-sm text-gray-300 hover:text-white transition-colors border-b border-white/5"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
 
             {/* Industries section */}
