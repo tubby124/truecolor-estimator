@@ -18,13 +18,13 @@ export default function RestaurantsPage() {
       description="Saskatoon restaurants, cafes, and food trucks use True Color for menu boards, promo banners, window graphics, and business cards. Menu changes shouldn't cost $200 each time. We print fast, match your brand, and you pick up locally — no shipping wait."
       products={[
         { name: "Foam Board Menus", from: "from $45", slug: "foam-board-signs" },
-        { name: "Vinyl Banners", from: "from $45", slug: "vinyl-banners" },
+        { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Flyers & Menus", from: "from $45", slug: "flyers" },
         { name: "Business Cards", from: "from $40", slug: "business-cards" },
       ]}
       whyPoints={[
         "Foam board menu boards from $45 (18×24\") — no lamination needed indoors",
-        "Vinyl banners for patio, windows, and promos — from $45",
+        "Vinyl banners for patio, windows, and promos — from $66",
         "Same-day available when ordered before 10 AM — confirmed by phone",
         "In-house designer handles low-res logos and photo-heavy layouts",
         "Reprints match your previous order exactly — bring your order number",

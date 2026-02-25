@@ -17,7 +17,7 @@ export default function EventBannersPage() {
       heroAlt="Event banners and signage Saskatoon"
       description="Event timelines compress fast. True Color supplies 13oz hemmed vinyl banners, foam board signs, retractable banner stands, and coroplast directionals — all from one shop. Last-minute spec changes happen — we adjust without drama. Local pickup at 216 33rd St W."
       products={[
-        { name: "Vinyl Banners", from: "from $45", slug: "vinyl-banners" },
+        { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Foam Board Signs", from: "from $45", slug: "foam-board-signs" },
         { name: "Retractable Banner Stands", from: "from $219", slug: "retractable-banners" },
         { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },

@@ -18,7 +18,7 @@ export default function AgriculturePage() {
       description="Saskatchewan agriculture businesses use True Color for everything from acreage markers and gate signs to trade show banners and business cards. We understand prairie conditions — our products are built to handle Saskatchewan weather year-round."
       products={[
         { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
-        { name: "Vinyl Banners", from: "from $45", slug: "vinyl-banners" },
+        { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
       ]}
       whyPoints={[

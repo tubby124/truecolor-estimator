@@ -11,7 +11,7 @@ import { LocalShopSection } from "@/components/home/LocalShopSection";
 export const metadata: Metadata = {
   title: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
   description:
-    "Coroplast signs from $30. Vinyl banners from $45. Business cards from $40. In-house designer, local pickup at 216 33rd St W Saskatoon. See your exact price now — no quote forms.",
+    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $40. In-house designer, local pickup at 216 33rd St W Saskatoon. See your exact price now — no quote forms.",
   alternates: { canonical: "/" },
 };
 
