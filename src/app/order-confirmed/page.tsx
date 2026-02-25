@@ -30,13 +30,15 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
     try {
       const supabase = createServiceClient();
 
-      // Auto-confirm payment when Clover redirects back with orderId
+      // Auto-confirm payment only for card orders redirected back from Clover.
+      // eTransfer orders stay in pending_payment until staff manually marks them paid.
       // .select() lets us detect if the row was actually updated (vs. already confirmed by webhook)
       const { data: updatedOrders } = await supabase
         .from("orders")
         .update({ status: "payment_received", paid_at: new Date().toISOString() })
         .eq("id", oid)
-        .eq("status", "pending_payment") // idempotent — only updates if still pending
+        .eq("status", "pending_payment")     // idempotent — only updates if still pending
+        .eq("payment_method", "clover_card") // never auto-confirm eTransfer orders
         .select("order_number, customer_id, total, is_rush, payment_method");
 
       // Send "payment confirmed" email only if this redirect beat the webhook
