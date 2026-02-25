@@ -11,11 +11,13 @@
  *   payment_received  → "Payment confirmed — your order is in the queue"
  *   in_production     → "We're printing your order now"
  *   ready_for_pickup  → "Your order is ready for pickup!"
+ *   complete          → review request email ("How did your order turn out?")
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
+import { sendReviewRequestEmail } from "@/lib/email/reviewRequest";
 import { approveWaveInvoice, sendWaveInvoice } from "@/lib/wave/invoice";
 
 const VALID_STATUSES = [
@@ -67,7 +69,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Send customer notification email for key status transitions (non-fatal)
+    // ── Status-change emails (all non-fatal) ──────────────────────────────────
+
+    // Standard status notification emails (payment_received / in_production / ready_for_pickup)
     if (NOTIFY_STATUSES.has(status)) {
       try {
         const { data: order } = await supabase
@@ -110,6 +114,35 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       } catch (emailErr) {
         // Non-fatal — status already updated, just log the email failure
         console.error("[staff/orders/status] customer notification failed (non-fatal):", emailErr);
+      }
+    }
+
+    // Review request email — fires when staff marks order "complete"
+    if (status === "complete") {
+      try {
+        const { data: order } = await supabase
+          .from("orders")
+          .select("order_number, customers ( name, email )")
+          .eq("id", id)
+          .single();
+
+        if (order) {
+          const customerRaw = Array.isArray(order.customers)
+            ? order.customers[0]
+            : order.customers;
+          const customer = customerRaw as { name: string; email: string } | null;
+
+          if (customer?.email) {
+            await sendReviewRequestEmail({
+              customerName: customer.name,
+              customerEmail: customer.email,
+              orderNumber: order.order_number,
+            });
+          }
+        }
+      } catch (reviewEmailErr) {
+        // Non-fatal — status already saved, review email failure should never block the response
+        console.error("[staff/orders/status] review request email failed (non-fatal):", reviewEmailErr);
       }
     }
 
