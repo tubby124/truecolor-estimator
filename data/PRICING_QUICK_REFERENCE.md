@@ -103,7 +103,7 @@ Common sizes:
 
 > **Minimum $45 — no exceptions.** Validator enforces this.
 
-Magnet Calendar (8.5×11"): $45 (hits minimum)
+Magnet Calendars (any size, sqft-based — $24/sqft): 4×7"=$45min · 5×7"=$45min · 5×8"=$60/10 · 8.5×11"=$140/10 · Custom size supported
 
 ---
 

@@ -197,7 +197,7 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
             <p className="text-xs text-amber-600 mt-1">Minimum order: 50 stickers</p>
           )}
         </FieldGroup>
-      ) : isSqftBased ? (
+      ) : (isSqftBased || SQFT_QTY_PRESETS[category] !== undefined) ? (
         <FieldGroup label="Quantity">
           {SQFT_QTY_PRESETS[category] ? (
             <div className="space-y-2">

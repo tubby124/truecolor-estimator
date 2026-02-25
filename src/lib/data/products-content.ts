@@ -879,9 +879,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
   "magnet-calendars": {
     slug: "magnet-calendars",
     name: "Magnet Calendars",
-    tagline: "8.5×11\" fridge magnets. Team schedules, business calendars, promotions.",
+    tagline: "Any size. Team schedules, business calendars, promotions.",
     description:
-      "Custom 8.5×11\" promotional magnets printed on 30mil flexible magnetic sheeting — the same material as our vehicle magnets. Full-colour gloss surface, standard fridge magnet size. Perfect for sports team schedules, realtor calendars, contractor leave-behinds, and branded giveaways. Team orders of 50+ units? Call for custom bulk pricing — as low as $8 each for large runs.",
+      "Custom promotional magnets printed on 30mil flexible magnetic sheeting — the same material as our vehicle magnets. Full-colour gloss surface. Choose a standard size or enter any custom dimensions. Perfect for sports team schedules, realtor calendars, contractor leave-behinds, and branded giveaways. Team orders of 50+ units? Call for custom bulk pricing.",
     fromPrice: "$45",
     category: "MAGNET",
     material_code: "MAG302437550M",
@@ -892,14 +892,18 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 1,
     sideOptions: false,
     sizePresets: [
-      { label: "8.5×11\"", width_in: 8.5, height_in: 11 },
+      { label: '4×7"',    width_in: 4,   height_in: 7  },
+      { label: '5×7"',    width_in: 5,   height_in: 7  },
+      { label: '5×8"',    width_in: 5,   height_in: 8  },
+      { label: '4×9"',    width_in: 4,   height_in: 9  },
+      { label: '8.5×11"', width_in: 8.5, height_in: 11 },
     ],
     qtyPresets: [1, 10, 25, 50, 100],
     specs: [
       { label: "Material", value: "30mil flexible magnetic sheeting — same as vehicle magnets" },
       { label: "Print surface", value: "White gloss vinyl laminate — full colour" },
-      { label: "Standard size", value: "8.5×11\" — standard letter / fridge magnet size" },
-      { label: "Min qty", value: "1 (team bulk pricing available at 50+)" },
+      { label: "Common sizes", value: "4×7\", 5×7\", 5×8\", 4×9\", 8.5×11\" — or any custom size" },
+      { label: "Min order", value: "$45 (team bulk pricing available at 50+)" },
       { label: "Use", value: "Fridge magnets, team schedules, realtor calendars, promo giveaways" },
     ],
     whoUsesThis: ["Sports Teams", "Real Estate", "Construction", "Agriculture", "Events"],
@@ -909,12 +913,16 @@ export const PRODUCTS: Record<string, ProductContent> = {
         a: "Sports teams print their season schedules — fans stick them on the fridge all season. Realtors hand them out with the year calendar and their contact info. Contractors use them as branded leave-behinds. Any business that wants something customers keep for months rather than recycle.",
       },
       {
+        q: "What sizes can I order?",
+        a: "Any size you want. Common sizes are 4×7\", 5×7\", 5×8\", 4×9\", and 8.5×11\". Use the Custom button on the estimator to enter any dimensions — pricing is based on square footage.",
+      },
+      {
         q: "Do bulk discounts apply for team orders?",
-        a: "The estimator prices at the standard rate ($45 minimum). For orders of 50 or more, call or email us — team bulk pricing can go as low as $8 each on large runs. We'll quote you directly.",
+        a: "Yes — 5% off at 5–9 units, 10% off at 10+. For orders of 50 or more, call or email us — team bulk pricing can go as low as $8 each on large runs. We'll quote you directly.",
       },
       {
         q: "What's the difference between this and a vehicle magnet?",
-        a: "Same 30mil material — the difference is size and intent. Vehicle magnets are 12×18\" and larger for car doors. Magnet calendars are 8.5×11\" for fridges, filing cabinets, and office whiteboards.",
+        a: "Same 30mil material — the difference is size and intent. Vehicle magnets are 12×18\" and larger for car doors. Magnet calendars are sized for fridges, filing cabinets, and office whiteboards.",
       },
       {
         q: "Do they stick to all fridges?",
@@ -922,7 +930,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What file do I need?",
-        a: "PDF or high-res PNG at 150+ DPI at 8.5×11\". Include 1/8\" bleed on all sides. For calendar templates (month grids, schedule tables), our designer can set these up from $35.",
+        a: "PDF or high-res PNG at 150+ DPI at your chosen size. Include 1/8\" bleed on all sides. For calendar templates (month grids, schedule tables), our designer can set these up from $35.",
       },
     ],
     relatedSlugs: ["vehicle-magnets", "coroplast-signs", "flyers"],
