@@ -803,6 +803,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "PLACEHOLDER_100LB",
     heroImage: "/images/products/product/brochures-800x600.webp",
     galleryImages: [
+      "/images/products/product/brochure-trifold-open-800x600.webp",
       "/images/products/product/brochure-halffold-spread-800x600.webp",
       "/images/products/product/brochure-acrylic-rack-lobby-800x600.webp",
       "/images/products/product/brochures-800x600.webp",
@@ -856,6 +857,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RMPS002",
     heroImage: "/images/products/product/photo-posters-800x600.webp",
     galleryImages: [
+      "/images/products/product/poster-framed-gallery-wall-800x600.webp",
+      "/images/products/product/poster-sports-team-800x600.webp",
+      "/images/products/product/poster-event-easel-800x600.webp",
       "/images/products/product/photo-posters-800x600.webp",
     ],
     defaultSides: 1,
@@ -910,6 +914,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MAG302437550M",
     heroImage: "/images/products/product/magnet-calendars-800x600.webp",
     galleryImages: [
+      "/images/products/product/magnet-calendar-fridge-800x600.webp",
+      "/images/products/product/magnet-calendar-filing-cabinet-800x600.webp",
       "/images/products/product/magnet-calendar-cards-800x600.webp",
       "/images/products/product/magnet-calendars-800x600.webp",
     ],
