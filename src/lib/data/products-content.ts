@@ -436,6 +436,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "ARLPMF7008",
     heroImage: "/images/gallery/gallery-window-decal-swiss-barber.webp",
     galleryImages: [
+      "/images/products/product/vinyl-window-decal-storefront-800x600.webp",
+      "/images/products/product/vinyl-decal-car-rear-800x600.webp",
       "/images/gallery/gallery-window-decal-swiss-barber.webp",
     ],
     defaultSides: 1,
@@ -496,6 +498,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RMVN006",
     heroImage: "/images/products/product/window-perf-800x600.webp",
     galleryImages: [
+      "/images/products/product/perf-vinyl-storefront-exterior-800x600.webp",
+      "/images/products/product/perf-vinyl-interior-seethrough-800x600.webp",
+      "/images/products/product/perf-vinyl-closeup-texture-800x600.webp",
       "/images/products/product/window-perf-800x600.webp",
       "/images/gallery/gallery-window-decal-swiss-barber.webp",
     ],
@@ -562,6 +567,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/vinyl-lettering-800x600.webp",
     galleryImages: [
+      "/images/products/product/vinyl-lettering-shop-window-800x600.webp",
+      "/images/products/product/vinyl-lettering-office-wall-800x600.webp",
+      "/images/products/product/vinyl-lettering-vehicle-door-800x600.webp",
       "/images/products/product/vinyl-lettering-800x600.webp",
     ],
     defaultSides: 1,
@@ -679,6 +687,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/stickers-800x600.webp",
     galleryImages: [
+      "/images/products/product/sticker-diecut-truecolor-logo-800x600.webp",
+      "/images/products/product/sticker-custom-sheet-800x600.webp",
+      "/images/products/product/sticker-laptop-waterbottle-800x600.webp",
       "/images/products/product/stickers-800x600.webp",
     ],
     defaultSides: 1,
@@ -738,6 +749,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "PLACEHOLDER_14PT",
     heroImage: "/images/products/product/postcards-800x600.webp",
     galleryImages: [
+      "/images/products/product/postcard-realtor-justlisted-800x600.webp",
       "/images/products/product/postcards-800x600.webp",
     ],
     defaultSides: 2,
