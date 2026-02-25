@@ -29,6 +29,7 @@ export interface ProductContent {
   addons?: { label: string; unitPrice: number; step?: number; engineCode?: string; tip?: string }[];
   materialInfo?: { headline: string; bullets: string[] };
   tierPresets?: { label: string; material_code: string; price: number }[];
+  lotPriced?: boolean; // true = fixed lot tiers only; hides Custom qty button, shows "call for more"
 }
 
 export const PRODUCTS: Record<string, ProductContent> = {
@@ -236,7 +237,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     sizePresets: [
       { label: "3.5×2\"", width_in: 3.5, height_in: 2 },
     ],
-    qtyPresets: [250, 500, 1000],
+    qtyPresets: [250, 500, 1000, 1500, 2000, 2500, 5000],
+    lotPriced: true,
     specs: [
       { label: "Paper", value: "14pt gloss card stock" },
       { label: "Print", value: "Full-colour digital (Konica Minolta press)" },
@@ -285,6 +287,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Letter (100)", width_in: 8.5, height_in: 11 },
     ],
     qtyPresets: [100, 250, 500, 1000],
+    lotPriced: true,
     specs: [
       { label: "Paper", value: "Pacesetter 80lb gloss text (FSC-certified)" },
       { label: "Print", value: "Full-colour digital (Konica Minolta press)" },
@@ -683,6 +686,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "4×4\"", width_in: 4, height_in: 4 },
     ],
     qtyPresets: [50, 100, 250, 500, 1000],
+    lotPriced: true,
     specs: [
       { label: "Material", value: "Arlon DPF 510 matte adhesive vinyl — 3.2 mil" },
       { label: "Print", value: "Full-colour UV-resistant digital print" },
@@ -743,6 +747,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "3×4\"", width_in: 4, height_in: 3 },
     ],
     qtyPresets: [50, 100, 250, 500, 1000],
+    lotPriced: true,
     specs: [
       { label: "Stock", value: "14pt gloss coated card — same as business cards" },
       { label: "Print", value: "Full-colour double-sided digital" },
@@ -792,6 +797,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Half-fold (4 panels)", width_in: 8.5, height_in: 11 },
     ],
     qtyPresets: [100, 250, 500],
+    lotPriced: true,
     specs: [
       { label: "Stock", value: "100lb gloss text — heavier and premium vs. standard flyer paper" },
       { label: "Print", value: "Full-colour double-sided digital" },
