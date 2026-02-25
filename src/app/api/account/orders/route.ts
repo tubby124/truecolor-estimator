@@ -53,11 +53,16 @@ export async function GET(req: NextRequest) {
       id,
       order_number,
       status,
+      subtotal,
+      gst,
       total,
+      notes,
       created_at,
       is_rush,
       payment_method,
       proof_storage_path,
+      proof_sent_at,
+      file_storage_paths,
       order_items (
         id,
         product_name,
@@ -68,7 +73,10 @@ export async function GET(req: NextRequest) {
         design_status,
         line_total,
         category,
-        material_code
+        material_code,
+        addons,
+        line_items_json,
+        file_storage_path
       )
     `)
     .eq("customer_id", customerId)

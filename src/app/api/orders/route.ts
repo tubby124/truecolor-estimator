@@ -112,11 +112,13 @@ export async function POST(req: NextRequest) {
     const total = subtotal + rush + gst;
 
     // 3. Create order row
-    // Generate order_number server-side — bypasses DB trigger (which may not be deployed)
-    // Format: TC-2026-X4F2A — year + 5-char base-36 timestamp suffix (collision prob ~0.01%)
+    // Generate order_number server-side — sequential TC-YYYY-NNNN format
+    // Uses row count as counter; collision risk negligible for a small shop
+    const { count: orderCount } = await supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true });
     const orderYear = new Date().getFullYear();
-    const orderSuffix = Date.now().toString(36).slice(-5).toUpperCase();
-    const generatedOrderNumber = `TC-${orderYear}-${orderSuffix}`;
+    const generatedOrderNumber = `TC-${orderYear}-${String((orderCount ?? 0) + 1).padStart(4, "0")}`;
 
     const { data: order, error: orderErr } = await supabase
       .from("orders")

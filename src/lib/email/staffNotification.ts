@@ -449,6 +449,108 @@ function buildStaffNotificationText(
   return lines.join("\n");
 }
 
+// ─── Customer file revision notification ──────────────────────────────────────
+
+export interface CustomerFileRevisionParams {
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  fileName: string;
+  fileUrl: string;
+  orderId: string;
+  siteUrl: string;
+}
+
+export async function sendCustomerFileRevisionNotification(
+  params: CustomerFileRevisionParams
+): Promise<void> {
+  const { orderNumber, customerName, customerEmail, fileName, fileUrl, siteUrl } = params;
+
+  const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
+  const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
+  const subject = `[File updated] Order ${orderNumber} — ${customerName}`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+<body style="margin:0;padding:0;background:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4efe9;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
+
+        <tr><td style="background:#1c1712;border-radius:12px 12px 0 0;padding:18px 32px;">
+          <p style="margin:0;font-size:12px;font-weight:600;color:#d6cfc7;letter-spacing:.08em;text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+            True Color — Customer File Update
+          </p>
+        </td></tr>
+
+        <tr><td style="background:#fffbeb;border-top:3px solid #f59e0b;padding:14px 32px;text-align:center;">
+          <p style="margin:0;font-size:14px;font-weight:700;color:#92400e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+            Customer uploaded a revised artwork file
+          </p>
+        </td></tr>
+
+        <tr><td style="background:#fff;padding:24px 32px 32px;">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+            <div>
+              <p style="margin:0;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Order</p>
+              <p style="margin:2px 0 0;font-size:22px;font-weight:700;color:#1c1712;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(orderNumber)}</p>
+            </div>
+            <a href="${escHtml(siteUrl)}/staff/orders"
+              style="display:inline-block;background:#16C2F3;color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:10px 20px;border-radius:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+              Open Staff Dashboard →
+            </a>
+          </div>
+
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Customer</p>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-bottom:20px;">
+            <p style="margin:0 0 4px;font-size:13px;color:#1c1712;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"><strong>${escHtml(customerName)}</strong></p>
+            <p style="margin:0;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+              <a href="mailto:${escHtml(customerEmail)}" style="color:#16C2F3;text-decoration:none;">${escHtml(customerEmail)}</a>
+            </p>
+          </div>
+
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Uploaded file</p>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;">
+            <p style="margin:0;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+              📎 <a href="${escHtml(fileUrl)}" target="_blank" style="color:#16C2F3;text-decoration:none;font-weight:600;">${escHtml(fileName)}</a>
+              <span style="font-size:11px;color:#9ca3af;margin-left:6px;">(link valid 7 days)</span>
+            </p>
+          </div>
+
+        </td></tr>
+
+        <tr><td style="background:#1c1712;border-radius:0 0 12px 12px;padding:16px 32px;text-align:center;">
+          <p style="margin:0;font-size:12px;color:#7a6a60;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+            True Color Display Printing — Internal staff notification only
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const text = [
+    `[File updated] Order ${orderNumber}`,
+    "",
+    `Customer: ${customerName} <${customerEmail}>`,
+    "",
+    `File: ${fileName}`,
+    `View: ${fileUrl}`,
+    "",
+    `Staff dashboard: ${siteUrl}/staff/orders`,
+    "",
+    "True Color Display Printing — Internal staff notification",
+  ].join("\n");
+
+  const transporter = getTransporter();
+  await transporter.sendMail({ from, to: staffEmail, subject, html, text });
+  console.log(`[staffNotification] file revision sent → ${staffEmail} | order ${orderNumber}`);
+}
+
 // ─── HTML escape helper ───────────────────────────────────────────────────────
 
 function escHtml(str: string | undefined | null): string {
