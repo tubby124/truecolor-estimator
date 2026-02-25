@@ -5,19 +5,23 @@ import type { ProductContent } from "@/lib/data/products-content";
 import type { LineItem } from "@/lib/cart/cart";
 
 const BULK_HINTS: Record<string, Record<number, string>> = {
-  SIGN:      { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
-  BANNER:    { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
-  RIGID:     { 5: "save 3%", 10: "save 5%",  25: "save 8%"  },
-  FOAMBOARD: { 5: "save 8%", 10: "save 12%", 25: "save 15%" },
-  MAGNET:    { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
+  SIGN:           { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
+  BANNER:         { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
+  RIGID:          { 5: "save 3%", 10: "save 5%",  25: "save 8%"  },
+  FOAMBOARD:      { 5: "save 8%", 10: "save 12%", 25: "save 15%" },
+  MAGNET:         { 5: "save 5%", 10: "save 10%", 25: "save 15%" },
+  DECAL:          { 5: "save 5%", 10: "save 10%"                  },
+  VINYL_LETTERING:{ 5: "save 8%"                                   },
 };
 
 const MOST_POPULAR_QTY: Record<string, number> = {
-  SIGN: 10,
-  BANNER: 5,
-  RIGID: 10,
-  FOAMBOARD: 10,
-  MAGNET: 5,
+  SIGN:           10,
+  BANNER:          5,
+  RIGID:          10,
+  FOAMBOARD:      10,
+  MAGNET:          5,
+  DECAL:           2,
+  VINYL_LETTERING: 1,
 };
 
 const DESIGN_FEES: Record<string, number> = {

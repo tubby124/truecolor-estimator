@@ -59,6 +59,42 @@ The smoke tests in `e2e/smoke.test.ts` cover:
 **I'll do:** Add rows to `data/tables/products.v1.csv` + update `src/lib/data/products-content.ts` → page becomes fully functional with real prices.
 **Current state:** `src/app/products/retractable-banners/` page exists but stand pricing is placeholder.
 
+### Images — 5 New Product Pages (NEW — 2026-02-24 Sprint 2)
+
+Five new product pages need hero images. Generate with ChatGPT DALL-E v3. Save as WebP 800×600 and drop into `public/images/products/product/`.
+
+#### `stickers-800x600.webp`
+> Sheet of 9 die-cut 4×4" vinyl stickers arranged in a 3×3 grid on a clean white background. Bold, colourful brand graphics on each sticker — different designs visible. Matte finish, square die-cut edges crisp and clean. Professional flat-lay product photography style. Teal/cyan and dark charcoal brand colours visible on some stickers.
+
+#### `postcards-800x600.webp`
+> Small stack of 4×6" glossy full-colour postcards fanned out on a clean white surface. Top card shows a real estate or retail promo design with vivid colours. Gloss finish visible on the card edges. Professional commercial photography, natural light. Teal/cyan accent colours in the design.
+
+#### `brochures-800x600.webp`
+> Two tri-fold brochures on a clean white surface — one open flat showing all 6 panels, one folded closed. Professional healthcare or real estate brochure design, teal and dark brand colours. Matte 100lb gloss stock visible from the folded edges. Commercial photography style, natural daylight.
+
+#### `photo-posters-800x600.webp`
+> Large 24×36" matte photo poster mounted on a clean white wall in a bright professional gallery or office setting. Vivid full-colour print — could be an event poster or landscape print. Frame-ready appearance, matte finish with no glare. Natural side light. Photorealistic commercial photography style.
+
+#### `magnet-calendars-800x600.webp`
+> Three 8.5×11" custom magnet calendars displayed on a stainless steel refrigerator door in a clean modern kitchen. Full-colour sports team schedule design visible on the magnets — one shows a hockey team schedule, one shows a real estate agent's branded calendar. One magnet held slightly off the fridge showing its flexibility. Professional photography, natural kitchen light.
+
+---
+
+### Images — Window & Vinyl Product Pages (NEW — 2026-02-24)
+
+Three new product pages need hero images. Generate with ChatGPT DALL-E v3. Save as WebP 800×600 and drop into `public/images/products/product/`.
+
+#### `window-perf-800x600.webp`
+> Professional storefront window with one-way vision perforated vinyl graphic applied. Full-colour brand graphics visible on exterior glass of a modern retail store. Clean, professional commercial photography style. Brand colours teal/cyan and dark charcoal. Interior of store visible through the perforations from inside. Natural daylight. Photorealistic.
+
+#### `vinyl-lettering-800x600.webp`
+> Close-up of a glass door with clean white cut-vinyl lettering showing business hours — Monday through Friday 9am–5pm, Saturday 10am–4pm. Professional retail storefront. The letters are precision-cut vinyl, smooth white, applied directly to clear glass. Natural daylight, clean and sharp. Commercial photography style.
+
+#### `window-decals-product-800x600.webp` *(optional upgrade — currently using gallery image)*
+> Vivid full-colour printed adhesive vinyl decal applied to a shop window. The decal features a bold retail promotion graphic with bright colours. Clean glass, professional installation, photorealistic commercial photography. Teal and dark brand colours visible in the decal design.
+
+---
+
 ### Images — You Generate, I'll Integrate
 **Where the prompts are:**
 - `research/content/truecolor-image-gen-instructions.md` — main generation guide
@@ -99,9 +135,6 @@ Example: `coroplast-yard-sign-800x600.webp`
 ### Wave Invoice Send — Multi-send guard (FEAT-01 follow-up)
 - Gap: if staff clicks `ready_for_pickup` twice, Wave may error on second approve
 - Fix: check invoice status before approve (`invoice { status }` query) — low priority
-
-### Window Decals page
-- No product page yet — waiting on pricing confirmation from owner
 
 ### Realtor Kit bundle page
 - Concept: coroplast sign + magnet + feature sheet bundle — waiting on owner confirmation
@@ -147,10 +180,10 @@ Example: `coroplast-yard-sign-800x600.webp`
 | Issue | Category | Impact | Fix needed |
 |-------|----------|--------|------------|
 | FLYER qty 25/50 not in products.v1.csv or rules | FLYER | Low — UI only offers 100/250/500/1000 presets | Confirm if 25/50 qty should be offered; add products + rules |
-| STICKER — no pricing rules at all | STICKER | Medium — estimator shows but all return NEEDS_CLARIFICATION | Confirm sticker prices with owner; add to CSV |
 | MAGNET bulk discount caps at 10% for qty≥25 | MAGNET | Low — may be intentional | Confirm with owner if 25+ magnets should get a higher tier |
-| PHOTO_POSTER qty>1 uses sqft fallback rate | PHOTO_POSTER | None — no customer product page exists | No action needed unless poster page is added |
-| DECAL / VINYL_LETTERING — no pricing rules | DECAL / VINYL | None — no customer product pages | Add pages/pricing when ready to launch these products |
+| PHOTO_POSTER qty>1 uses sqft fallback rate | PHOTO_POSTER | Low — page launched but shows qty=1 only | If bulk poster orders needed, add multi-qty products to products.v1.csv |
+| DECAL / VINYL_LETTERING — pricing rules exist; pages launched 2026-02-24 | DECAL / VINYL | ✅ Resolved — window-decals, window-perf, vinyl-lettering all live | — |
+| STICKER / POSTCARD / BROCHURE / PHOTO_POSTER / MAGNET_CALENDAR — pages launched 2026-02-24 | ALL | ✅ Resolved — all 5 product pages live | — |
 
 ---
 

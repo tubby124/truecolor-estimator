@@ -171,7 +171,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Vehicle Magnets",
     tagline: "30mil magnets for any vehicle. Remove in seconds.",
     description:
-      "Made from 30mil flexible magnetic sheeting — thick enough to stay put on the highway, flexible enough to remove and store flat. Full-colour print on white gloss surface. Suitable for all steel vehicles. Your business is on wheels.",
+      "Made from 30mil flexible magnetic sheeting — thick enough to stay put on the highway, flexible enough to remove and store flat. Full-colour print on white gloss surface. Suitable for all steel vehicles. Your business is on wheels. Also need car decals or window graphics? See our window decals page — same full-colour print on adhesive vinyl for vehicle windows and body.",
     fromPrice: "$45",
     category: "MAGNET",
     material_code: "MAG302437550M",
@@ -215,7 +215,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
         a: "No — magnets only adhere to steel. Many newer trucks and vans have aluminum doors. Check your vehicle specs or test with a fridge magnet first.",
       },
     ],
-    relatedSlugs: ["coroplast-signs", "vinyl-banners", "acp-signs"],
+    relatedSlugs: ["coroplast-signs", "vinyl-banners", "acp-signs", "magnet-calendars", "window-decals"],
   },
 
   "business-cards": {
@@ -444,7 +444,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     ],
     qtyPresets: [1, 2, 5, 10],
     specs: [
-      { label: "Material", value: "Premium adhesive vinyl (matte or gloss)" },
+      { label: "Material", value: "Arlon DPF 510 matte adhesive vinyl — 3.2 mil" },
       { label: "Print", value: "Full-colour digital, vibrant UV-resistant inks" },
       { label: "Adhesive", value: "Removable adhesive — no residue on glass" },
       { label: "Standard sizes", value: "12×12\", 12×24\", 24×24\", 24×36\" — custom available" },
@@ -469,7 +469,147 @@ export const PRODUCTS: Record<string, ProductContent> = {
         a: "PDF (preferred), PNG at 150+ DPI, or AI. Need a design? Our in-house team handles it from a rough sketch — starting at $35.",
       },
     ],
-    relatedSlugs: ["vehicle-magnets", "coroplast-signs", "vinyl-banners"],
+    relatedSlugs: ["window-perf", "vinyl-lettering", "vehicle-magnets"],
+    materialInfo: {
+      headline: "Arlon DPF 510 matte adhesive vinyl — 3.2 mil full-colour print",
+      bullets: [
+        "Removable adhesive — peels cleanly from glass without residue",
+        "Full-colour UV-resistant print — vibrant colours, 2–3 year outdoor lifespan",
+        "Custom shapes and die-cut edges available on request",
+        "Works on glass, vehicle windows, smooth walls, and metal",
+      ],
+    },
+  },
+
+  "window-perf": {
+    slug: "window-perf",
+    name: "Perforated Window Vinyl",
+    tagline: "One-way vision graphics. Full colour outside, see-through inside.",
+    description:
+      "Vision Perf 70/30 window vinyl — 70% print surface, 30% open perforations. Vivid full-colour graphics visible from the street; clear sightlines from inside. Perfect for storefront windows, vehicle rear windows, and glass partitions. Priced per panel at $8/sqft and up.",
+    fromPrice: "$40",
+    category: "DECAL",
+    material_code: "RMVN006",
+    heroImage: "/images/products/product/window-perf-800x600.webp",
+    galleryImages: [
+      "/images/products/product/window-perf-800x600.webp",
+      "/images/gallery/gallery-window-decal-swiss-barber.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "24×36\"", width_in: 24, height_in: 36 },
+      { label: "36×48\"", width_in: 36, height_in: 48 },
+      { label: "36×80\"", width_in: 36, height_in: 80 },
+      { label: "48×80\"", width_in: 48, height_in: 80 },
+    ],
+    qtyPresets: [1, 2, 5, 10],
+    specs: [
+      { label: "Material", value: "Vision Perf 70/30 window vinyl — 6 mil" },
+      { label: "Perforation", value: "30% open area — see-through from inside, opaque from outside" },
+      { label: "Print", value: "Full-colour UV-resistant digital print" },
+      { label: "Standard sizes", value: "24×36\", 36×48\", 36×80\", 48×80\" — custom panel sizes available" },
+      { label: "Application", value: "Exterior glass — storefronts, vehicle rear windows, office partitions" },
+      { label: "Removal", value: "Clean peel — no adhesive residue on glass" },
+    ],
+    whoUsesThis: ["Retail", "Franchise", "Healthcare", "Auto", "Restaurant"],
+    faqs: [
+      {
+        q: "Can people see through window perf from outside?",
+        a: "No — from the outside, the graphic is fully visible and opaque. The 30% open perforation is only apparent up close. From inside, you see through the open areas like a screen.",
+      },
+      {
+        q: "How do I measure a window for perf vinyl?",
+        a: "Measure the glass area you want covered (width × height in inches). You don't need to cover the frame. We'll cut to your exact dimensions.",
+      },
+      {
+        q: "Does window perf work on all glass?",
+        a: "Yes — it applies to any smooth glass surface. Avoid applying over tinted film or existing window graphics.",
+      },
+      {
+        q: "How long does window perf last outdoors?",
+        a: "UV-resistant inks give 2–3 years in direct sun. The vinyl itself is rated for extended outdoor use.",
+      },
+      {
+        q: "Do you install window perf?",
+        a: "Installation is available at $75 base rate. Large multi-panel jobs are quoted separately. Or pick up and apply it yourself — it's straightforward on flat glass.",
+      },
+    ],
+    relatedSlugs: ["window-decals", "vinyl-lettering", "vinyl-banners"],
+    materialInfo: {
+      headline: "Vision Perf 70/30 — 6 mil one-way vision vinyl",
+      bullets: [
+        "70% print coverage — full-colour, vibrant outdoor graphics",
+        "30% open perforations — natural light and sightlines preserved",
+        "UV-resistant inks — 2–3 year outdoor lifespan",
+        "Clean-peel adhesive — no residue on glass",
+      ],
+    },
+  },
+
+  "vinyl-lettering": {
+    slug: "vinyl-lettering",
+    name: "Vinyl Lettering",
+    tagline: "Cut vinyl letters for store hours, addresses, and names.",
+    description:
+      "Single-colour die-cut vinyl lettering — no print, just precision-cut letters from coloured vinyl sheet. Clean, professional look for store hours, business names, suite numbers, door addresses, and directional text. Priced by bounding box area at $8.50/sqft. Minimum order $40. Available in white, black, red, blue, gold, and more.",
+    fromPrice: "$40",
+    category: "VINYL_LETTERING",
+    material_code: "ARLPMF7008",
+    heroImage: "/images/products/product/vinyl-lettering-800x600.webp",
+    galleryImages: [
+      "/images/products/product/vinyl-lettering-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "12×6\"",  width_in: 12, height_in: 6  },
+      { label: "24×6\"",  width_in: 24, height_in: 6  },
+      { label: "36×6\"",  width_in: 36, height_in: 6  },
+      { label: "48×12\"", width_in: 48, height_in: 12 },
+    ],
+    qtyPresets: [1, 2, 5, 10],
+    specs: [
+      { label: "Material", value: "Arlon DPF 510 matte vinyl — 3.2 mil, single colour" },
+      { label: "Method", value: "Die-cut (no print) — precision plotter cut from coloured vinyl" },
+      { label: "Colours", value: "White, black, red, blue, gold — other colours available on request" },
+      { label: "Pricing", value: "By bounding box area — enter the width × height of your text block" },
+      { label: "Minimum", value: "$40 minimum order" },
+      { label: "Application", value: "Glass, painted walls, smooth metal, vehicle doors" },
+    ],
+    whoUsesThis: ["Retail", "Restaurant", "Healthcare", "Office", "Trades"],
+    faqs: [
+      {
+        q: "How do I measure my lettering for a quote?",
+        a: "Measure the width and height of the imaginary box that contains all your text. For example, a 3-line store hours block at 36\" wide × 12\" tall = enter 36×12\". That's the bounding box we price from.",
+      },
+      {
+        q: "What's the difference between vinyl lettering and a printed decal?",
+        a: "Vinyl lettering is a single opaque colour, precision-cut — clean, minimalist look, great for hours or addresses. Printed decals support full colour, logos, and photos. If you need more than one colour or any images, choose a window decal instead.",
+      },
+      {
+        q: "What colours are available?",
+        a: "White and black cover 90% of jobs. We also carry red, blue, gold, and other colours — just let us know when ordering. No upcharge for colour selection.",
+      },
+      {
+        q: "What's the minimum order?",
+        a: "The minimum charge is $40. A typical set of store hours on a door runs $40–$65 depending on size.",
+      },
+      {
+        q: "Do you install vinyl lettering?",
+        a: "Installation is $75 flat and includes alignment, squeegee application, and tape removal. Or we prep the lettering on transfer tape for easy DIY install — peel, position, and press.",
+      },
+    ],
+    relatedSlugs: ["window-decals", "window-perf", "coroplast-signs"],
+    materialInfo: {
+      headline: "Arlon DPF 510 matte vinyl — 3.2 mil die-cut lettering",
+      bullets: [
+        "Single-colour precision cut — no printing, just clean letter shapes",
+        "Applies to glass, painted surfaces, metal, and more",
+        "UV-resistant — 3–5 year indoor lifespan; 2–3 years outdoors",
+        "Transfer tape included — positioned and ready to apply",
+      ],
+    },
   },
 
   "retractable-banners": {
@@ -522,6 +662,279 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Deluxe — $299", material_code: "RBS33507900PSB", price: 299 },
       { label: "Premium — $349", material_code: "RBS33507900PREM", price: 349 },
     ],
+  },
+
+  "stickers": {
+    slug: "stickers",
+    name: "Vinyl Stickers",
+    tagline: "Die-cut vinyl stickers. Minimum 50. Durable indoors and out.",
+    description:
+      "Custom 4×4\" die-cut vinyl stickers printed on Arlon DPF 510 matte adhesive vinyl — the same material we use for window decals. UV-resistant inks, clean die-cut edges, removable adhesive. Perfect for product packaging, event giveaways, branding, and promotional campaigns. Minimum order 50 stickers. Custom sizes and shapes available by quote.",
+    fromPrice: "$95",
+    category: "STICKER",
+    material_code: "ARLPMF7008",
+    heroImage: "/images/products/product/stickers-800x600.webp",
+    galleryImages: [
+      "/images/products/product/stickers-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "4×4\"", width_in: 4, height_in: 4 },
+    ],
+    qtyPresets: [50, 100, 250, 500, 1000],
+    specs: [
+      { label: "Material", value: "Arlon DPF 510 matte adhesive vinyl — 3.2 mil" },
+      { label: "Print", value: "Full-colour UV-resistant digital print" },
+      { label: "Cut", value: "Die-cut square — clean edges, no carrier sheet" },
+      { label: "Standard size", value: "4×4\" — custom shapes and sizes by quote" },
+      { label: "Minimum qty", value: "50 stickers" },
+      { label: "Adhesive", value: "Removable — peels cleanly from most surfaces" },
+    ],
+    whoUsesThis: ["Retail", "Events", "Food & Bev", "Sports", "Trades"],
+    faqs: [
+      {
+        q: "Why is the minimum 50 stickers?",
+        a: "Setup and cutting time makes small runs uneconomical. At 50 units the price per sticker drops to $1.90 each. At 1000 units it's $0.65 each.",
+      },
+      {
+        q: "Can I get custom shapes — circles, die-cut logos?",
+        a: "Custom shapes (circles, ovals, die-cut outlines) are available by quote. The estimator prices standard 4×4\" squares. Contact us for custom shape pricing.",
+      },
+      {
+        q: "How long do they last outdoors?",
+        a: "UV-resistant inks give 2–3 years outdoors on smooth surfaces. For bumper or vehicle use, the removable adhesive will hold but is designed to peel cleanly — not permanent outdoor vinyl.",
+      },
+      {
+        q: "What file do I need to supply?",
+        a: "PDF or high-res PNG at 150+ DPI. For die-cut shapes, include a separate cut path in the file. Need a design? Our in-house team starts at $35.",
+      },
+    ],
+    relatedSlugs: ["window-decals", "business-cards", "flyers"],
+    materialInfo: {
+      headline: "Arlon DPF 510 matte vinyl — 3.2 mil, same as window decals",
+      bullets: [
+        "UV-resistant inks — 2–3 year outdoor lifespan on smooth surfaces",
+        "Removable adhesive — peels cleanly without residue",
+        "Die-cut square edges — no white border or carrier sheet",
+        "Works on glass, packaging, smooth walls, vehicles, and laptops",
+      ],
+    },
+  },
+
+  "postcards": {
+    slug: "postcards",
+    name: "Postcards",
+    tagline: "14pt gloss postcards. Three sizes. From $35.",
+    description:
+      "Full-colour double-sided postcards on 14pt gloss card stock — the same premium stock as our business cards. Available in 4×6\", 5×7\", and 3×4\" sizes. Perfect for direct mail campaigns, real estate listing mailers, event announcements, and menus. Priced per lot by quantity.",
+    fromPrice: "$35",
+    category: "POSTCARD",
+    material_code: "PLACEHOLDER_14PT",
+    heroImage: "/images/products/product/postcards-800x600.webp",
+    galleryImages: [
+      "/images/products/product/postcards-800x600.webp",
+    ],
+    defaultSides: 2,
+    sideOptions: true,
+    sizePresets: [
+      { label: "4×6\"", width_in: 6, height_in: 4 },
+      { label: "5×7\"", width_in: 7, height_in: 5 },
+      { label: "3×4\"", width_in: 4, height_in: 3 },
+    ],
+    qtyPresets: [50, 100, 250, 500, 1000],
+    specs: [
+      { label: "Stock", value: "14pt gloss coated card — same as business cards" },
+      { label: "Print", value: "Full-colour double-sided digital" },
+      { label: "Sizes", value: "4×6\", 5×7\", 3×4\" — standard mailable sizes" },
+      { label: "Finish", value: "Gloss coated — vivid colour, fingerprint resistant" },
+      { label: "Min qty", value: "50 postcards" },
+    ],
+    whoUsesThis: ["Real Estate", "Retail", "Events", "Healthcare", "Restaurant"],
+    faqs: [
+      {
+        q: "What's the difference between a postcard and a flyer?",
+        a: "Postcards are printed on thick 14pt card stock — rigid enough to mail without an envelope, and durable enough to hand out at events. Flyers use lighter 80lb or 100lb paper — better for high-quantity distribution or door hangers.",
+      },
+      {
+        q: "Which size is most popular?",
+        a: "4×6\" is the standard Canada Post mailable postcard size and most cost-effective to mail. 5×7\" stands out in a mailbox and has more design real estate. 3×4\" is compact — good for menus, business leave-behinds, and gift inserts.",
+      },
+      {
+        q: "Can I mail these directly?",
+        a: "Yes — 4×6\" and 5×7\" meet Canada Post unaddressed admail and addressed admail specs. Leave the right half of the back panel blank for address and postage. We can add a postal indicia if you're doing a bulk mail run — ask us.",
+      },
+      {
+        q: "What file format do I need?",
+        a: "PDF with 1/8\" bleed on all sides, or high-res PNG at 300 DPI. Our in-house designer can set up the layout for $35 if you have a rough concept.",
+      },
+    ],
+    relatedSlugs: ["flyers", "brochures", "business-cards"],
+  },
+
+  "brochures": {
+    slug: "brochures",
+    name: "Brochures",
+    tagline: "Tri-fold or half-fold. 100lb gloss. From $70.",
+    description:
+      "Professional brochures on 100lb gloss text paper — full-colour double-sided, folded and finished in-house. Choose tri-fold (6 panels) or half-fold (4 panels). Tri-fold pricing shown in the estimator; half-fold adds $15/100, $10/250, $15/500. Minimum order 100 brochures. Perfect for service menus, event programs, and company overviews.",
+    fromPrice: "$70",
+    category: "BROCHURE",
+    material_code: "PLACEHOLDER_100LB",
+    heroImage: "/images/products/product/brochures-800x600.webp",
+    galleryImages: [
+      "/images/products/product/brochures-800x600.webp",
+    ],
+    defaultSides: 2,
+    sideOptions: false,
+    sizePresets: [
+      { label: "Tri-fold (6 panels)", width_in: 8.5, height_in: 11 },
+      { label: "Half-fold (4 panels)", width_in: 8.5, height_in: 11 },
+    ],
+    qtyPresets: [100, 250, 500],
+    specs: [
+      { label: "Stock", value: "100lb gloss text — heavier and premium vs. standard flyer paper" },
+      { label: "Print", value: "Full-colour double-sided digital" },
+      { label: "Fold options", value: "Tri-fold (6 panels) or half-fold (4 panels)" },
+      { label: "Size", value: "8.5×11\" flat — folds to letter/pocket size" },
+      { label: "Min qty", value: "100 brochures" },
+      { label: "Half-fold upcharge", value: "$15 extra at 100, $10 at 250, $15 at 500" },
+    ],
+    whoUsesThis: ["Healthcare", "Real Estate", "Retail", "Events", "Trades"],
+    faqs: [
+      {
+        q: "What's the difference between tri-fold and half-fold?",
+        a: "Tri-fold divides the 8.5×11\" sheet into 3 equal panels — you get 6 sides (front, back, and 4 interior). Half-fold folds the sheet in half — you get 4 sides, each a larger 5.5×8.5\" panel. Tri-fold is more compact (fits in a pocket); half-fold has more space per panel.",
+      },
+      {
+        q: "How do I set up my file?",
+        a: "For tri-fold: set up 3 equal panels of 3.67\" wide × 11\" tall on each side, with 1/8\" bleed. For half-fold: 2 panels of 4.25\" × 11\" each side. We'll send you a template — just ask.",
+      },
+      {
+        q: "Why is the minimum 100?",
+        a: "Folding and scoring each brochure requires setup time. Below 100 the per-unit cost rises significantly. For small runs (under 50), consider a flyer on heavier paper instead.",
+      },
+      {
+        q: "How much does half-fold cost vs. tri-fold?",
+        a: "The estimator shows tri-fold pricing. Half-fold adds: $15 extra at 100 qty, $10 extra at 250, $15 extra at 500. So 250 half-fold brochures = $115 instead of $105.",
+      },
+    ],
+    relatedSlugs: ["flyers", "postcards", "business-cards"],
+  },
+
+  "photo-posters": {
+    slug: "photo-posters",
+    name: "Photo Posters",
+    tagline: "220gsm matte poster paper. Seven sizes. From $15.",
+    description:
+      "Large-format photo posters printed on 220gsm matte poster paper — no glare, frame-ready finish. Available in seven sizes from 12×18\" up to 36×48\". Ideal for event signage, gallery prints, trade show backdrops, and office décor. Priced individually per poster.",
+    fromPrice: "$15",
+    category: "PHOTO_POSTER",
+    material_code: "RMPS002",
+    heroImage: "/images/products/product/photo-posters-800x600.webp",
+    galleryImages: [
+      "/images/products/product/photo-posters-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "12×18\"", width_in: 12, height_in: 18 },
+      { label: "16×20\"", width_in: 16, height_in: 20 },
+      { label: "18×24\"", width_in: 18, height_in: 24 },
+      { label: "20×30\"", width_in: 20, height_in: 30 },
+      { label: "24×36\"", width_in: 24, height_in: 36 },
+      { label: "30×40\"", width_in: 30, height_in: 40 },
+      { label: "36×48\"", width_in: 36, height_in: 48 },
+    ],
+    qtyPresets: [1],
+    specs: [
+      { label: "Material", value: "220gsm matte coated poster paper" },
+      { label: "Finish", value: "Matte — no glare, frame-ready" },
+      { label: "Sizes", value: "12×18\", 16×20\", 18×24\", 20×30\", 24×36\", 30×40\", 36×48\"" },
+      { label: "Print", value: "Full-colour digital, single-sided" },
+      { label: "Pricing", value: "Per unit — order individual posters, no minimum" },
+    ],
+    whoUsesThis: ["Events", "Photography", "Retail", "Healthcare", "Sports"],
+    faqs: [
+      {
+        q: "Matte vs. glossy — which should I choose?",
+        a: "We print posters on matte paper. Matte is preferred for framed prints, office displays, and anywhere with overhead lighting — it eliminates glare and reads clearly at all angles. Glossy finish is available for some products but not standard for posters.",
+      },
+      {
+        q: "Are these sizes frame-ready?",
+        a: "Yes — 12×18\", 16×20\", 18×24\", 20×30\", and 24×36\" all correspond to standard frame sizes you'll find at IKEA, Walmart, and art supply stores. The 30×40\" and 36×48\" may require custom frames.",
+      },
+      {
+        q: "Can you print larger than 36×48\"?",
+        a: "Yes — we can print wide-format sizes beyond 36×48\" on banner or vinyl material. For oversized poster prints, request a custom quote.",
+      },
+      {
+        q: "What resolution do I need for a large poster?",
+        a: "Minimum 100 DPI at the print size. For a 24×36\" poster, that's 2400×3600 pixels. For the best results, supply 150–300 DPI. We'll let you know if the file resolution is too low before printing.",
+      },
+    ],
+    relatedSlugs: ["foamboard-displays", "vinyl-banners", "flyers"],
+  },
+
+  "magnet-calendars": {
+    slug: "magnet-calendars",
+    name: "Magnet Calendars",
+    tagline: "8.5×11\" fridge magnets. Team schedules, business calendars, promotions.",
+    description:
+      "Custom 8.5×11\" promotional magnets printed on 30mil flexible magnetic sheeting — the same material as our vehicle magnets. Full-colour gloss surface, standard fridge magnet size. Perfect for sports team schedules, realtor calendars, contractor leave-behinds, and branded giveaways. Team orders of 50+ units? Call for custom bulk pricing — as low as $8 each for large runs.",
+    fromPrice: "$45",
+    category: "MAGNET",
+    material_code: "MAG302437550M",
+    heroImage: "/images/products/product/magnet-calendars-800x600.webp",
+    galleryImages: [
+      "/images/products/product/magnet-calendars-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "8.5×11\"", width_in: 8.5, height_in: 11 },
+    ],
+    qtyPresets: [1, 10, 25, 50, 100],
+    specs: [
+      { label: "Material", value: "30mil flexible magnetic sheeting — same as vehicle magnets" },
+      { label: "Print surface", value: "White gloss vinyl laminate — full colour" },
+      { label: "Standard size", value: "8.5×11\" — standard letter / fridge magnet size" },
+      { label: "Min qty", value: "1 (team bulk pricing available at 50+)" },
+      { label: "Use", value: "Fridge magnets, team schedules, realtor calendars, promo giveaways" },
+    ],
+    whoUsesThis: ["Sports Teams", "Real Estate", "Construction", "Agriculture", "Events"],
+    faqs: [
+      {
+        q: "What's the typical use for magnet calendars?",
+        a: "Sports teams print their season schedules — fans stick them on the fridge all season. Realtors hand them out with the year calendar and their contact info. Contractors use them as branded leave-behinds. Any business that wants something customers keep for months rather than recycle.",
+      },
+      {
+        q: "Do bulk discounts apply for team orders?",
+        a: "The estimator prices at the standard rate ($45 minimum). For orders of 50 or more, call or email us — team bulk pricing can go as low as $8 each on large runs. We'll quote you directly.",
+      },
+      {
+        q: "What's the difference between this and a vehicle magnet?",
+        a: "Same 30mil material — the difference is size and intent. Vehicle magnets are 12×18\" and larger for car doors. Magnet calendars are 8.5×11\" for fridges, filing cabinets, and office whiteboards.",
+      },
+      {
+        q: "Do they stick to all fridges?",
+        a: "They stick to any steel or ferromagnetic surface. Most fridges, filing cabinets, and metal doors work fine. Stainless steel fridges vary — some are non-magnetic. Test with a regular fridge magnet first.",
+      },
+      {
+        q: "What file do I need?",
+        a: "PDF or high-res PNG at 150+ DPI at 8.5×11\". Include 1/8\" bleed on all sides. For calendar templates (month grids, schedule tables), our designer can set these up from $35.",
+      },
+    ],
+    relatedSlugs: ["vehicle-magnets", "coroplast-signs", "flyers"],
+    materialInfo: {
+      headline: "30mil flexible magnetic sheeting — same as vehicle magnets",
+      bullets: [
+        "Thick 30mil magnetic base — stays put on fridges and metal surfaces",
+        "Full-colour gloss laminate print surface — vivid, durable",
+        "Flexible — rolls or folds without cracking",
+        "No backing paper — ready to stick right away",
+      ],
+    },
   },
 };
 

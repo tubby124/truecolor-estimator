@@ -20,12 +20,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const productSlugs = [
     "coroplast-signs",
     "vinyl-banners",
-    "acp-aluminum-signs",
+    "acp-signs",
     "vehicle-magnets",
     "flyers",
     "business-cards",
-    "foam-board-signs",
+    "foamboard-displays",
     "retractable-banners",
+    "window-decals",
+    "window-perf",
+    "vinyl-lettering",
+    "stickers",
+    "postcards",
+    "brochures",
+    "photo-posters",
+    "magnet-calendars",
   ];
 
   return [

@@ -26,18 +26,21 @@ interface Props {
 const QTY_TIERS: Record<string, number[]> = {
   FLYER: [25, 50, 100, 250, 500, 1000, 2500, 5000],
   BUSINESS_CARD: [250, 500, 1000, 2500, 5000],
-  BROCHURE: [50, 100, 250, 500, 1000],
+  BROCHURE: [100, 250, 500],
   POSTCARD: [50, 100, 250, 500, 1000],
   STICKER: [50, 100, 250, 500, 1000],
 };
 
 // Quick-pick bulk qty presets for sqft-based products
 const SQFT_QTY_PRESETS: Record<string, number[]> = {
-  SIGN:      [1, 5, 10, 25],
-  BANNER:    [1, 2, 5, 10],
-  RIGID:     [1, 5, 10, 25],
-  FOAMBOARD: [1, 5, 10, 25],
-  MAGNET:    [1, 2, 4, 5, 10],
+  SIGN:           [1, 5, 10, 25],
+  BANNER:         [1, 2, 5, 10],
+  RIGID:          [1, 5, 10, 25],
+  FOAMBOARD:      [1, 5, 10, 25],
+  MAGNET:         [1, 2, 4, 5, 10],
+  DECAL:          [1, 2, 5, 10],
+  VINYL_LETTERING:[1, 2, 5, 10],
+  PHOTO_POSTER:   [1],
 };
 
 export function OptionsPanel({ category, state, onChange, categoryLabel }: Props) {
