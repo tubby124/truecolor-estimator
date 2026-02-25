@@ -9,44 +9,30 @@ import { useState } from "react";
 //   1. Drop file into: public/images/gallery/
 //   2. Add an entry here in REAL_WORK
 const REAL_WORK = [
-  // Banners
+  // ── Behind the Scenes ──
   {
-    src: "/images/gallery/gallery-outdoor-banner-best-donairs.webp",
-    label: "Outdoor Storefront Banner — Best Donairs",
-    from: "from $45",
+    src: "/images/gallery/gallery-shop-roland-large-format.jpg",
+    label: "Roland TrueVIS — In-House Printing",
+    from: "Our Shop",
+    slug: "coroplast-signs",
+    category: "Shop",
+  },
+  {
+    src: "/images/gallery/gallery-shop-roland-ag-banner.jpg",
+    label: "Roland Printing — Agricultural Banner Run",
+    from: "Our Shop",
     slug: "vinyl-banners",
-    category: "Banners",
+    category: "Shop",
   },
   {
-    src: "/images/gallery/gallery-vinyl-banner-windshield-masters.webp",
-    label: "Vinyl Banner — Windshield Masters",
-    from: "from $45",
-    slug: "vinyl-banners",
-    category: "Banners",
+    src: "/images/gallery/gallery-shop-roland-saskatoon-cabs.jpg",
+    label: "Roland Printing — Saskatoon Cabs Decals",
+    from: "Our Shop",
+    slug: "stickers",
+    category: "Shop",
   },
-  // Vehicle Signage
-  {
-    src: "/images/gallery/gallery-vehicle-vinyl-ayotte-plumbing.jpg",
-    label: "Van Vinyl Branding — Ayotte Plumbing",
-    from: "from $45",
-    slug: "vehicle-magnets",
-    category: "Vehicle Signage",
-  },
-  {
-    src: "/images/gallery/gallery-vehicle-vinyl-ayotte-full-side.jpg",
-    label: "Full Side Vinyl — Ayotte Service Van",
-    from: "from $45",
-    slug: "vehicle-magnets",
-    category: "Vehicle Signage",
-  },
-  {
-    src: "/images/gallery/gallery-vehicle-decal-windshield-masters.webp",
-    label: "Door Magnet — Windshield Masters",
-    from: "from $45",
-    slug: "vehicle-magnets",
-    category: "Vehicle Signage",
-  },
-  // Coroplast Signs
+
+  // ── Signs ──
   {
     src: "/images/gallery/gallery-coroplast-realtor-keyshape.jpg",
     label: "Custom-Shape Sign — Boyes Group Realtor",
@@ -75,7 +61,101 @@ const REAL_WORK = [
     slug: "coroplast-signs",
     category: "Signs",
   },
-  // Retractable Banners
+  {
+    src: "/images/gallery/gallery-coroplast-remax-openhouse.jpg",
+    label: "Open House Sign — RE/MAX Aman Singh",
+    from: "from $30",
+    slug: "coroplast-signs",
+    category: "Signs",
+  },
+  {
+    src: "/images/gallery/gallery-coroplast-71st-storage.jpg",
+    label: "Roadside Directional Sign — 71st Street Storage",
+    from: "from $30",
+    slug: "coroplast-signs",
+    category: "Signs",
+  },
+  {
+    src: "/images/gallery/gallery-coroplast-parking-signs.jpg",
+    label: "Private Parking Signs — Batch Order",
+    from: "from $30",
+    slug: "coroplast-signs",
+    category: "Signs",
+  },
+  {
+    src: "/images/gallery/gallery-coroplast-bjm-graduation.jpg",
+    label: "Grad Yard Sign — Bishop James Mahoney",
+    from: "from $30",
+    slug: "coroplast-signs",
+    category: "Signs",
+  },
+  {
+    src: "/images/gallery/gallery-acp-cargem-auto-sales.jpg",
+    label: "ACP Sign — CARGEM Auto Sales",
+    from: "from $60",
+    slug: "acp-signs",
+    category: "Signs",
+  },
+  {
+    src: "/images/gallery/gallery-acp-mia-casa-construction.jpg",
+    label: "ACP Sign — Mia Casa Construction",
+    from: "from $60",
+    slug: "acp-signs",
+    category: "Signs",
+  },
+
+  // ── Banners ──
+  {
+    src: "/images/gallery/gallery-outdoor-banner-best-donairs.webp",
+    label: "Outdoor Storefront Banner — Best Donairs",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+  {
+    src: "/images/gallery/gallery-vinyl-banner-windshield-masters.webp",
+    label: "Vinyl Banner — Windshield Masters",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+  {
+    src: "/images/gallery/gallery-banner-habesha-convenience.jpg",
+    label: "Storefront Banner — Habesha Convenience Store",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+  {
+    src: "/images/gallery/gallery-banner-colorful-nails-spa.jpg",
+    label: "Salon Banner — Colorful Nails & Spa",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+  {
+    src: "/images/gallery/gallery-banner-hello-warman-petshop.jpg",
+    label: "Large Format Banner — Hello Warman Pet Shop",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+  {
+    src: "/images/gallery/gallery-banner-ericsson-5g.jpg",
+    label: "Large Format Event Banner — Ericsson 5G",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+  {
+    src: "/images/gallery/gallery-banner-karuna-vitamin.jpg",
+    label: "Trade Show Backdrop — Karuna Skincare",
+    from: "from $45",
+    slug: "vinyl-banners",
+    category: "Banners",
+  },
+
+  // ── Retractable Banners ──
   {
     src: "/images/gallery/gallery-retractable-banner-financial-office.jpg",
     label: "Retractable Banner — Financial Services",
@@ -90,22 +170,117 @@ const REAL_WORK = [
     slug: "retractable-banners",
     category: "Displays",
   },
-  // Window Decals
+  {
+    src: "/images/gallery/gallery-retractable-borna-realtor.jpg",
+    label: "Retractable Banner — Borna Development Realtor",
+    from: "from $219",
+    slug: "retractable-banners",
+    category: "Displays",
+  },
+  {
+    src: "/images/gallery/gallery-retractable-shammi-realtor.jpg",
+    label: "Retractable Banner — Divine Kreation Realty",
+    from: "from $219",
+    slug: "retractable-banners",
+    category: "Displays",
+  },
+  {
+    src: "/images/gallery/gallery-retractable-wfg-insurance.jpg",
+    label: "Retractable Banner — WFG Insurance Agent",
+    from: "from $219",
+    slug: "retractable-banners",
+    category: "Displays",
+  },
+  {
+    src: "/images/gallery/gallery-retractable-two-men-truck.jpg",
+    label: "Retractable Banner — Two Men and a Truck",
+    from: "from $219",
+    slug: "retractable-banners",
+    category: "Displays",
+  },
+  {
+    src: "/images/gallery/gallery-retractable-lilians-hair.jpg",
+    label: "Retractable Banner — Lilian's Hair Studio",
+    from: "from $219",
+    slug: "retractable-banners",
+    category: "Displays",
+  },
+
+  // ── Vehicle Signage ──
+  {
+    src: "/images/gallery/gallery-vehicle-vinyl-ayotte-plumbing.jpg",
+    label: "Van Vinyl Branding — Ayotte Plumbing",
+    from: "from $45",
+    slug: "vehicle-magnets",
+    category: "Vehicle",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-vinyl-ayotte-full-side.jpg",
+    label: "Full Side Vinyl — Ayotte Service Van",
+    from: "from $45",
+    slug: "vehicle-magnets",
+    category: "Vehicle",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-decal-windshield-masters.webp",
+    label: "Door Magnet — Windshield Masters",
+    from: "from $45",
+    slug: "vehicle-magnets",
+    category: "Vehicle",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-vinyl-south-stream.jpg",
+    label: "Truck Wrap — South Stream Seafood",
+    from: "from $45",
+    slug: "vehicle-magnets",
+    category: "Vehicle",
+  },
+  {
+    src: "/images/gallery/gallery-vinyl-lettering-skbk-trailer.jpg",
+    label: "Trailer Lettering — SKBK Construction",
+    from: "from $40",
+    slug: "vinyl-lettering",
+    category: "Vehicle",
+  },
+
+  // ── Window & Vinyl ──
   {
     src: "/images/gallery/gallery-window-decal-swiss-barber.webp",
     label: "Window Decals — Swiss Barber",
     from: "from $65",
-    slug: "vinyl-banners",
-    category: "Window Decals",
+    slug: "window-decals",
+    category: "Window & Vinyl",
   },
   {
     src: "/images/gallery/gallery-window-decal-pact-agriculture.jpg",
     label: "Office Window Decals — PACT",
     from: "from $65",
-    slug: "vinyl-banners",
-    category: "Window Decals",
+    slug: "window-decals",
+    category: "Window & Vinyl",
   },
-  // Business Cards & Print
+  {
+    src: "/images/gallery/gallery-window-decal-skull-car.jpg",
+    label: "Custom Window Decal — Die-Cut Skull",
+    from: "from $65",
+    slug: "window-decals",
+    category: "Window & Vinyl",
+  },
+  {
+    src: "/images/gallery/gallery-vinyl-lettering-cowry-kitchen.jpg",
+    label: "Storefront Vinyl Lettering — Cowry Cabinets",
+    from: "from $40",
+    slug: "vinyl-lettering",
+    category: "Window & Vinyl",
+  },
+  {
+    src: "/images/gallery/gallery-vinyl-lettering-mags.jpg",
+    label: "Large Cut Vinyl Letters — MAGS",
+    from: "from $40",
+    slug: "vinyl-lettering",
+    category: "Window & Vinyl",
+  },
+
+  // ── Cards & Print ──
   {
     src: "/images/gallery/gallery-business-cards-bd-deep-cleaning.jpg",
     label: "Business Cards — BD Deep Cleaning",
@@ -120,7 +295,20 @@ const REAL_WORK = [
     slug: "business-cards",
     category: "Cards & Print",
   },
-  // Flyers & Large Format
+  {
+    src: "/images/gallery/gallery-business-cards-nofal-barber.jpg",
+    label: "Business Cards — Nofal Barber Shop",
+    from: "from $40",
+    slug: "business-cards",
+    category: "Cards & Print",
+  },
+  {
+    src: "/images/gallery/gallery-business-cards-lilians-hair.jpg",
+    label: "Business Cards — Lilian's Hair Studio",
+    from: "from $40",
+    slug: "business-cards",
+    category: "Cards & Print",
+  },
   {
     src: "/images/gallery/gallery-flyers-boxed-marketing.jpg",
     label: "Marketing Flyers — Boxed Order",
@@ -142,21 +330,56 @@ const REAL_WORK = [
     slug: "flyers",
     category: "Cards & Print",
   },
-  // Magnets
+  {
+    src: "/images/gallery/gallery-flyer-nissen-ramen.jpg",
+    label: "Restaurant Flyer — Nissen Dim Sum Ramen",
+    from: "from $45",
+    slug: "flyers",
+    category: "Cards & Print",
+  },
+  {
+    src: "/images/gallery/gallery-flyer-sprayright-agri.jpg",
+    label: "Agricultural Flyer — SprayRight",
+    from: "from $45",
+    slug: "flyers",
+    category: "Cards & Print",
+  },
+  {
+    src: "/images/gallery/gallery-flyer-axis-health.jpg",
+    label: "Rack Cards — Axis Health Center",
+    from: "from $45",
+    slug: "flyers",
+    category: "Cards & Print",
+  },
+  {
+    src: "/images/gallery/gallery-postcards-oxenfree-crafts.jpg",
+    label: "Postcards — Oxenfree Crafts",
+    from: "from $35",
+    slug: "postcards",
+    category: "Cards & Print",
+  },
+  {
+    src: "/images/gallery/gallery-stickers-dyck-farms.jpg",
+    label: "Sticker Sheets — Dyck Farms",
+    from: "from $95",
+    slug: "stickers",
+    category: "Cards & Print",
+  },
+
+  // ── Magnets ──
   {
     src: "/images/gallery/gallery-magnet-calendar-shuttle.jpg",
     label: "Calendar Magnet — Prairie Path Shuttle",
     from: "from $45",
-    slug: "vehicle-magnets",
+    slug: "magnet-calendars",
     category: "Magnets",
   },
-  // Behind the Scenes
   {
-    src: "/images/gallery/gallery-shop-roland-large-format.jpg",
-    label: "Roland TrueVIS — In-House Printing",
-    from: "Our Shop",
-    slug: "coroplast-signs",
-    category: "Behind the Scenes",
+    src: "/images/gallery/gallery-magnet-calendar-lyndell-concrete.jpg",
+    label: "Calendar Magnet — Lyndell Concrete Supply",
+    from: "from $45",
+    slug: "magnet-calendars",
+    category: "Magnets",
   },
 ];
 
@@ -227,6 +450,18 @@ const PRODUCT_SHOWCASE = [
   },
 ];
 
+const CATEGORIES = [
+  "All",
+  "Shop",
+  "Signs",
+  "Banners",
+  "Displays",
+  "Vehicle",
+  "Window & Vinyl",
+  "Cards & Print",
+  "Magnets",
+];
+
 type GalleryItem = {
   src: string;
   label: string;
@@ -260,16 +495,56 @@ function GalleryCard({ item }: { item: GalleryItem }) {
 }
 
 export function GalleryGrid() {
+  const [activeCategory, setActiveCategory] = useState("All");
   const [showMore, setShowMore] = useState(false);
+
+  const filtered =
+    activeCategory === "All"
+      ? REAL_WORK
+      : REAL_WORK.filter((item) => item.category === activeCategory);
 
   return (
     <>
-      {/* Real client work — always shown */}
+      {/* Category filter tabs */}
+      <div className="flex flex-wrap gap-2 mb-8">
+        {CATEGORIES.map((cat) => {
+          const count =
+            cat === "All"
+              ? REAL_WORK.length
+              : REAL_WORK.filter((i) => i.category === cat).length;
+          return (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+                activeCategory === cat
+                  ? "bg-[#16C2F3] text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {cat}
+              <span
+                className={`ml-1.5 text-xs ${
+                  activeCategory === cat ? "text-white/80" : "text-gray-400"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Real client work */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {REAL_WORK.map((item, i) => (
+        {filtered.map((item, i) => (
           <GalleryCard key={i} item={item} />
         ))}
       </div>
+
+      {filtered.length === 0 && (
+        <p className="text-center text-gray-400 py-16">No items in this category yet.</p>
+      )}
 
       {/* Product showcase — behind "View More" */}
       {!showMore ? (
