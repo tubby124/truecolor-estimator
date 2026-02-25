@@ -27,3 +27,5 @@ PLACEHOLDER_14PT,Pacesetter Dig Gloss Cov 130# 18x12 13.4PT White FSC,PAPER,Glos
 PLACEHOLDER_16PT,16pt White Card Stock,PAPER,N/A,16pt,per_unit,0,FALSE,TRUE,,,,,,,"16pt card,business card upgrade",GAP-10: no SKU in materialLibrary
 PLACEHOLDER_80LB,Pacesetter Dig Gloss Tex 80lb 12x18 White FSC,PAPER,Gloss,80lb text,per_unit,0.055,FALSE,FALSE,110.03,per M (1000 sheets),2026-01-19,PACDIGI36FSC,,PACDIGI36FSC,"80lb gloss,flyer paper,80lb text,80lb",Spicer invoice 2026-01-19 PACDIGI36FSC $110.03/M — 12x18 at 2-up = $0.055/flyer
 PLACEHOLDER_100LB,100lb Gloss Text Paper,PAPER,Gloss,100lb,per_unit,0,FALSE,TRUE,,,,,,,"100lb gloss,premium flyer paper",GAP-04: no supplier cost — awaiting Spicers pricing
+PLACEHOLDER_TF_100LB,Tri-Fold Brochure 100lb Gloss,PAPER,Gloss,100lb,per_unit,0,FALSE,TRUE,,,,,,,"tri-fold brochure,trifold,6 panel brochure",GAP-04b: same as PLACEHOLDER_100LB — awaiting Spicers pricing
+PLACEHOLDER_HF_100LB,Half-Fold Brochure 100lb Gloss,PAPER,Gloss,100lb,per_unit,0,FALSE,TRUE,,,,,,,"half-fold brochure,bifold,4 panel brochure",GAP-04c: same as PLACEHOLDER_100LB — awaiting Spicers pricing

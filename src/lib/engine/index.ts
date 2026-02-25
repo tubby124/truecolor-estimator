@@ -83,8 +83,8 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     });
   }
 
-  // ── STEP 4: Sqft-tier pricing (if no fixed match) ─────────────────────────
-  if (!isFixedSize && sqft !== null) {
+  // ── STEP 4: Pricing rules lookup (if no fixed match) ──────────────────────
+  if (!isFixedSize) {
     const rules = getPricingRules().filter(
       (r) =>
         r.category === category &&
@@ -92,66 +92,94 @@ export function estimate(req: EstimateRequest): EstimateResponse {
         (!req.material_code || r.material_code === req.material_code || r.material_code === "GENERIC_FOAM" || r.material_code === "GENERIC")
     );
 
-    // Find matching tier
-    const tierRule = rules.find((r) => {
-      if (r.price_per_sqft === null && r.price_per_unit === null) return false;
-      if (r.sqft_min === null && r.sqft_max === null) {
-        // Flat rate rule (no sqft range — e.g. decals, stickers by qty)
-        if (r.qty_min !== null && qty < r.qty_min) return false;
-        if (r.qty_max !== null && qty > r.qty_max) return false;
-        return true;
-      }
-      const lo = r.sqft_min ?? 0;
-      const hi = r.sqft_max ?? Infinity;
-      return sqft! >= lo && sqft! <= hi;
+    // ── STEP 4a: price_per_unit rules — no sqft required ──────────────────
+    // Handles products priced per-unit regardless of dimensions (retractable stands).
+    // is_lot_price=false → multiply by qty (e.g. $219/stand × 5 = $1,095)
+    // is_lot_price=true  → flat lot price (e.g. 100 flyers = $110 total, don't × qty)
+    const unitRule = rules.find((r) => {
+      if (r.price_per_unit === null || r.price_per_sqft !== null) return false;
+      if (r.sqft_min !== null || r.sqft_max !== null) return false; // has sqft range → Step 4b
+      if (r.qty_min !== null && qty < r.qty_min) return false;
+      if (r.qty_max !== null && qty > r.qty_max) return false;
+      return true;
     });
 
-    if (tierRule) {
-      minCharge = tierRule.min_charge;
-      matchedRuleId = tierRule.rule_id;
+    if (unitRule) {
+      minCharge = unitRule.min_charge;
+      matchedRuleId = unitRule.rule_id;
       rulesFired.push(matchedRuleId);
-
-      if (tierRule.price_per_sqft !== null) {
-        basePricePerSqft = tierRule.price_per_sqft;
-        basePrice = ceilCent(sqft * basePricePerSqft);
-        tierLabel = tierRule.rule_id;
-        lineItems.push({
-          description: buildSqftDescription(category, req, sqft, basePricePerSqft),
-          qty: 1,
-          unit_price: basePrice,
-          line_total: basePrice,
-          rule_id: matchedRuleId,
-        });
-      } else if (tierRule.price_per_unit !== null) {
-        // price_per_unit for print products (flyers, stickers, postcards) is a FLAT LOT PRICE
-        // for the matched quantity — do NOT multiply by qty (that already happened at the shop).
-        basePrice = tierRule.price_per_unit;
-        isLotPrice = true;
-        tierLabel = tierRule.rule_id;
-        lineItems.push({
-          description: buildUnitDescription(category, req, qty),
-          qty: 1,
-          unit_price: basePrice,
-          line_total: basePrice,
-          rule_id: matchedRuleId,
-        });
-      }
-    } else {
-      // Fallback: PR-FALLBACK-ALL
-      basePricePerSqft = getConfigNum("default_sqft_fallback_rate");
-      basePrice = ceilCent(sqft * basePricePerSqft);
-      minCharge = getConfigNum("default_minimum_fallback");
-      matchedRuleId = "PR-FALLBACK-ALL";
-      tierLabel = "FALLBACK";
-      rulesFired.push("PR-FALLBACK-ALL");
-      clarifications.push(`Product category or material not matched — using fallback rate $${basePricePerSqft.toFixed(2)}/sqft. Please verify.`);
+      basePrice = unitRule.price_per_unit!;
+      isLotPrice = unitRule.is_lot_price !== false;
+      tierLabel = unitRule.rule_id;
       lineItems.push({
-        description: `${category} – Custom – ${sqft.toFixed(2)} sqft @ $${basePricePerSqft.toFixed(2)}/sqft (FALLBACK)`,
+        description: buildUnitDescription(category, req, qty),
         qty: 1,
         unit_price: basePrice,
         line_total: basePrice,
-        rule_id: "PR-FALLBACK-ALL",
+        rule_id: matchedRuleId,
       });
+    }
+
+    // ── STEP 4b: Sqft-tier pricing — requires dimensions ──────────────────
+    if (basePrice === null && sqft !== null) {
+      const tierRule = rules.find((r) => {
+        if (r.price_per_sqft === null && r.price_per_unit === null) return false;
+        if (r.sqft_min === null && r.sqft_max === null) {
+          // Flat rate rule (no sqft range — e.g. decals, stickers by qty)
+          if (r.qty_min !== null && qty < r.qty_min) return false;
+          if (r.qty_max !== null && qty > r.qty_max) return false;
+          return true;
+        }
+        const lo = r.sqft_min ?? 0;
+        const hi = r.sqft_max ?? Infinity;
+        return sqft! >= lo && sqft! <= hi;
+      });
+
+      if (tierRule) {
+        minCharge = tierRule.min_charge;
+        matchedRuleId = tierRule.rule_id;
+        rulesFired.push(matchedRuleId);
+
+        if (tierRule.price_per_sqft !== null) {
+          basePricePerSqft = tierRule.price_per_sqft;
+          basePrice = ceilCent(sqft * basePricePerSqft);
+          tierLabel = tierRule.rule_id;
+          lineItems.push({
+            description: buildSqftDescription(category, req, sqft, basePricePerSqft),
+            qty: 1,
+            unit_price: basePrice,
+            line_total: basePrice,
+            rule_id: matchedRuleId,
+          });
+        } else if (tierRule.price_per_unit !== null) {
+          basePrice = tierRule.price_per_unit;
+          isLotPrice = tierRule.is_lot_price !== false;
+          tierLabel = tierRule.rule_id;
+          lineItems.push({
+            description: buildUnitDescription(category, req, qty),
+            qty: 1,
+            unit_price: basePrice,
+            line_total: basePrice,
+            rule_id: matchedRuleId,
+          });
+        }
+      } else {
+        // Fallback: PR-FALLBACK-ALL
+        basePricePerSqft = getConfigNum("default_sqft_fallback_rate");
+        basePrice = ceilCent(sqft * basePricePerSqft);
+        minCharge = getConfigNum("default_minimum_fallback");
+        matchedRuleId = "PR-FALLBACK-ALL";
+        tierLabel = "FALLBACK";
+        rulesFired.push("PR-FALLBACK-ALL");
+        clarifications.push(`Product category or material not matched — using fallback rate $${basePricePerSqft.toFixed(2)}/sqft. Please verify.`);
+        lineItems.push({
+          description: `${category} – Custom – ${sqft.toFixed(2)} sqft @ $${basePricePerSqft.toFixed(2)}/sqft (FALLBACK)`,
+          qty: 1,
+          unit_price: basePrice,
+          line_total: basePrice,
+          rule_id: "PR-FALLBACK-ALL",
+        });
+      }
     }
   }
 

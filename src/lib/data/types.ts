@@ -62,6 +62,7 @@ export interface PricingRule {
   rounding: string;
   conflict_note: string;
   source_ref: string;
+  is_lot_price: boolean;
 }
 
 // products.v1.csv row (fixed-size catalog products)

@@ -41,7 +41,7 @@ const SQFT_QTY_PRESETS: Record<string, number[]> = {
   DECAL:          [1, 2, 5, 10],
   VINYL_LETTERING:[1, 2, 5, 10],
   PHOTO_POSTER:   [1],
-  DISPLAY:        [1, 2],
+  DISPLAY:        [1, 2, 3, 4, 5],
 };
 
 export function OptionsPanel({ category, state, onChange, categoryLabel }: Props) {

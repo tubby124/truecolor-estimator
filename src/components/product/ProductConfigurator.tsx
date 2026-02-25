@@ -18,7 +18,7 @@ const BULK_HINTS: Record<string, Record<number, string>> = {
   STICKER:        { 100: "save 16%", 250: "save 32%", 500: "save 50%", 1000: "save 66%" }, // single size — exact
   POSTCARD:       { 250: "save 20%+", 500: "save 35%+", 1000: "save 50%+" },               // conservative across 4×6/5×7/3×4
   BROCHURE:       { 250: "save 40%+", 500: "save 44%+" },                                  // verified tri-fold + half-fold
-  BUSINESS_CARD:  { 500: "save 25%+", 1000: "save 35%+", 1500: "save 40%+", 2000: "save 40%+", 2500: "save 40%+", 5000: "save 50%+" }, // Spicer-verified 2026-02-24
+  BUSINESS_CARD:  { 500: "save 25%+", 1000: "save 35%+" }, // Spicer-verified 2026-02-24
   FLYER:          { 500: "save 30%+", 1000: "save 40%+" },                                 // covers 80lb AND 100lb paper
 };
 
@@ -118,7 +118,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
 
   const effectiveMaterialCode = product.tierPresets
     ? product.tierPresets[selectedTier]?.material_code ?? product.material_code
-    : product.material_code;
+    : (!isCustom && selectedSize?.material_code)
+      ? selectedSize.material_code
+      : product.material_code;
 
   const fetchPrice = useCallback(async () => {
     if (!effectiveWidth || !effectiveHeight) return;

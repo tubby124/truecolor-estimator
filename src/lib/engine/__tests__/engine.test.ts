@@ -536,3 +536,149 @@ describe("Response shape", () => {
     expect(Math.abs(lineSum - result.sell_price!)).toBeLessThan(0.02); // within 2 cents rounding
   });
 });
+
+// ── DISPLAY: Retractable banner qty × price ──────────────────────────────────
+describe("DISPLAY — retractable banner qty × price", () => {
+  it("Economy qty=1 → $219 (Step 3 exact match)", () => {
+    const result = estimate({
+      category: "DISPLAY",
+      material_code: "RBS33507875S",
+      width_in: 33.5,
+      height_in: 78.75,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(219);
+  });
+
+  it("Economy qty=2 → $438 (Step 4a × qty)", () => {
+    const result = estimate({
+      category: "DISPLAY",
+      material_code: "RBS33507875S",
+      width_in: 33.5,
+      height_in: 78.75,
+      sides: 1,
+      qty: 2,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(438);
+  });
+
+  it("Economy qty=5 → $1095 (Step 4a × qty)", () => {
+    const result = estimate({
+      category: "DISPLAY",
+      material_code: "RBS33507875S",
+      width_in: 33.5,
+      height_in: 78.75,
+      sides: 1,
+      qty: 5,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(1095);
+  });
+
+  it("Economy qty=5 with NO dimensions → QUOTED (not BLOCKED)", () => {
+    const result = estimate({
+      category: "DISPLAY",
+      material_code: "RBS33507875S",
+      qty: 5,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(1095);
+  });
+
+  it("Deluxe qty=1 → $299 (Step 3 exact match)", () => {
+    const result = estimate({
+      category: "DISPLAY",
+      material_code: "RBS33507900PSB",
+      width_in: 33.5,
+      height_in: 78.75,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(299);
+  });
+
+  it("Deluxe qty=2 → $598 (Step 4a × qty)", () => {
+    const result = estimate({
+      category: "DISPLAY",
+      material_code: "RBS33507900PSB",
+      width_in: 33.5,
+      height_in: 78.75,
+      sides: 1,
+      qty: 2,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(598);
+  });
+});
+
+// ── PHOTO_POSTER: per-unit pricing × qty ─────────────────────────────────────
+describe("PHOTO_POSTER — per-unit pricing × qty", () => {
+  it("12×18\" qty=1 → $15 (Step 3 exact match)", () => {
+    const result = estimate({
+      category: "PHOTO_POSTER",
+      material_code: "RMPS002",
+      width_in: 12,
+      height_in: 18,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(15);
+  });
+
+  it("12×18\" qty=2 → $30 (Step 4b per-unit × qty)", () => {
+    const result = estimate({
+      category: "PHOTO_POSTER",
+      material_code: "RMPS002",
+      width_in: 12,
+      height_in: 18,
+      sides: 1,
+      qty: 2,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(30);
+  });
+
+  it("18×24\" qty=3 → $66 (Step 4b per-unit × qty)", () => {
+    const result = estimate({
+      category: "PHOTO_POSTER",
+      material_code: "RMPS002",
+      width_in: 18,
+      height_in: 24,
+      sides: 1,
+      qty: 3,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(66);
+  });
+
+  it("24×36\" qty=2 → $70 (Step 4b per-unit × qty)", () => {
+    const result = estimate({
+      category: "PHOTO_POSTER",
+      material_code: "RMPS002",
+      width_in: 24,
+      height_in: 36,
+      sides: 1,
+      qty: 2,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(70);
+  });
+
+  it("30×40\" qty=2 → $96 (Step 4b per-unit × qty)", () => {
+    const result = estimate({
+      category: "PHOTO_POSTER",
+      material_code: "RMPS002",
+      width_in: 30,
+      height_in: 40,
+      sides: 1,
+      qty: 2,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(96);
+  });
+});

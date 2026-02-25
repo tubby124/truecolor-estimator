@@ -70,6 +70,7 @@ export function getPricingRules(): PricingRule[] {
       rounding: r[13] || "",
       conflict_note: r[14] || "",
       source_ref: r[15] || "",
+      is_lot_price: r[16]?.toUpperCase() === "FALSE" ? false : true,
     }));
   return _pricingRules;
 }

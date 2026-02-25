@@ -6,6 +6,7 @@ export interface SizePreset {
   label: string;
   width_in: number;
   height_in: number;
+  material_code?: string;
 }
 
 export interface ProductContent {
@@ -237,7 +238,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     sizePresets: [
       { label: "3.5×2\"", width_in: 3.5, height_in: 2 },
     ],
-    qtyPresets: [250, 500, 1000, 1500, 2000, 2500, 5000],
+    qtyPresets: [250, 500, 1000],
     lotPriced: true,
     specs: [
       { label: "Paper", value: "14pt gloss card stock" },
@@ -331,7 +332,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       "/images/products/product/acp-aluminum-sign-800x600.webp",
     ],
     defaultSides: 1,
-    sideOptions: true,
+    sideOptions: false,
     sizePresets: [
       { label: "12×18\"", width_in: 12, height_in: 18 },
       { label: "18×24\"", width_in: 18, height_in: 24 },
@@ -621,7 +622,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "Economy, Deluxe, or Premium stand. Banner included.",
     description:
       "Choose from three tiers of retractable banner stands — Economy ($219), Deluxe ($299), or Premium ($349). All include a 33.5\" wide × 80\" tall full-colour printed banner. Rolls up into a compact base in seconds. Ideal for trade shows, conferences, retail, and events.",
-    fromPrice: "from $219",
+    fromPrice: "$219",
     category: "DISPLAY",
     material_code: "RBS33507875S",
     heroImage: "/images/products/product/retractable-stand-600x900.webp",
@@ -740,7 +741,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       "/images/products/product/postcards-800x600.webp",
     ],
     defaultSides: 2,
-    sideOptions: true,
+    sideOptions: false,
     sizePresets: [
       { label: "4×6\"", width_in: 6, height_in: 4 },
       { label: "5×7\"", width_in: 7, height_in: 5 },
@@ -793,8 +794,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 2,
     sideOptions: false,
     sizePresets: [
-      { label: "Tri-fold (6 panels)", width_in: 8.5, height_in: 11 },
-      { label: "Half-fold (4 panels)", width_in: 8.5, height_in: 11 },
+      { label: "Tri-fold (6 panels)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_TF_100LB" },
+      { label: "Half-fold (4 panels)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_HF_100LB" },
     ],
     qtyPresets: [100, 250, 500],
     lotPriced: true,
