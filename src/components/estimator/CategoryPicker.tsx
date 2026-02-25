@@ -85,10 +85,10 @@ function CategoryGroup({
                 const Icon = CATEGORY_ICON_MAP[item.id] ?? Printer;
                 return (
                   <Icon
-                    size={24}
+                    size={26}
                     strokeWidth={1.5}
                     aria-hidden={true}
-                    className={isSelected ? "text-[var(--brand)]" : "text-slate-500"}
+                    className={isSelected ? "text-[var(--brand)]" : "text-[var(--brand)]/30"}
                   />
                 );
               })()}
