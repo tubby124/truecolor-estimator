@@ -253,6 +253,27 @@ When Spicers data arrives: update `materials.v1.csv`, set `is_placeholder=FALSE`
 
 ---
 
+## UX Standards — Always Enforce
+
+Run these skills before shipping any UI or order feature:
+
+| Skill | When to use | Checks |
+|-------|-------------|--------|
+| `/web-design-ux` | Before any component PR | Accessibility (WCAG 2.1 AA), loading states, error sanitization, mobile 44px targets, toast feedback, form labels |
+| `/ecommerce-ux` | Before any checkout/order/email change | Checkout UX, 7-email sequence completeness, B2B patterns, trust signals, security |
+
+**Always import these utilities — never recreate:**
+```tsx
+import { sanitizeError } from "@/lib/errors/sanitize";       // safe error messages
+import { Skeleton, SkeletonCard, SkeletonPrice } from "@/components/ui"; // loading states
+import { useToast, ToastContainer } from "@/components/ui";  // async feedback
+```
+
+**Email sequence (7 required — verify all exist before shipping order features):**
+order_confirmation → payment_received → in_production → ready_for_pickup → proof_review → payment_failure_recovery (cron 24h) → review_request (cron day 5)
+
+---
+
 ## Architecture Rules
 
 1. **No new npm packages** without explicit approval. Current approved deps: `qrcode` (added for payment QR).

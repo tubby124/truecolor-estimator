@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { getCart, clearCart, type CartItem } from "@/lib/cart/cart";
 import type { CreateOrderRequest } from "@/app/api/orders/route";
 import { createClient } from "@/lib/supabase/client";
+import { sanitizeError } from "@/lib/errors/sanitize";
 
 const GST_RATE = 0.05;
 const RUSH_FEE = 40;
@@ -96,6 +97,7 @@ export default function CheckoutPage() {
   // Contact form
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [company, setCompany] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -281,7 +283,7 @@ export default function CheckoutPage() {
       }
     } catch (err) {
       setUploadProgress("");
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setError(sanitizeError(err));
     } finally {
       setLoading(false);
     }
@@ -391,11 +393,21 @@ export default function CheckoutPage() {
                       id="email"
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                      onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(""); }}
+                      onBlur={() => {
+                        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                          setEmailError("Please enter a valid email address.");
+                        } else {
+                          setEmailError("");
+                        }
+                      }}
+                      className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${emailError ? "border-red-300" : "border-gray-200"}`}
                       placeholder="jane@example.com"
                       required
                     />
+                    {emailError && (
+                      <p className="text-sm text-red-600 mt-1">{emailError}</p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -510,7 +522,7 @@ export default function CheckoutPage() {
                         placeholder="Repeat password"
                       />
                       {confirmPassword && password !== confirmPassword && (
-                        <p className="text-xs text-red-500 mt-1">Passwords don&apos;t match.</p>
+                        <p className="text-sm text-red-600 mt-1">Passwords don&apos;t match.</p>
                       )}
                     </div>
                     <p className="text-xs text-gray-400">
@@ -539,33 +551,55 @@ export default function CheckoutPage() {
             {/* Artwork files — multi-file */}
             <section>
               <h2 className="text-lg font-bold text-[#1c1712] mb-3">Attach your artwork</h2>
-              <label className="block">
-                <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#16C2F3] transition-colors cursor-pointer">
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
-                    onChange={(e) => setArtworkFiles(Array.from(e.target.files ?? []))}
-                    className="hidden"
-                  />
-                  {artworkFiles.length > 0 ? (
-                    <div className="space-y-1.5">
-                      {artworkFiles.map((f, i) => (
-                        <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-1.5">
-                          <p className="font-medium text-[#1c1712] text-sm truncate max-w-[220px]">📎 {f.name}</p>
-                          <p className="text-xs text-gray-400 shrink-0 ml-2">{(f.size / 1024 / 1024).toFixed(1)} MB</p>
-                        </div>
-                      ))}
-                      <p className="text-xs text-[#16C2F3] mt-2">Click to change files</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-sm text-gray-500">Drop your files here or click to browse</p>
-                      <p className="text-xs text-gray-400 mt-1">PDF, AI, EPS, JPG, PNG — up to 50 MB each · Select multiple files at once</p>
-                    </div>
-                  )}
-                </div>
+              {/* Hidden file input — triggered by clicking the drop zone or the label below */}
+              <label id="artwork-file-label" className="hidden">
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
+                  onChange={(e) => setArtworkFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])])}
+                  className="hidden"
+                />
               </label>
+              <div
+                className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#16C2F3] transition-colors cursor-pointer"
+                onClick={() => (document.querySelector("#artwork-file-label input") as HTMLInputElement | null)?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-blue-400", "bg-blue-50"); }}
+                onDragLeave={(e) => { e.currentTarget.classList.remove("border-blue-400", "bg-blue-50"); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove("border-blue-400", "bg-blue-50");
+                  const dropped = Array.from(e.dataTransfer.files);
+                  if (dropped.length > 0) setArtworkFiles((prev) => [...prev, ...dropped]);
+                }}
+              >
+                {artworkFiles.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {artworkFiles.map((f, i) => (
+                      <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-1.5">
+                        <p className="font-medium text-[#1c1712] text-sm truncate max-w-[200px]">📎 {f.name}</p>
+                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                          <p className="text-xs text-gray-400">{(f.size / 1024 / 1024).toFixed(1)} MB</p>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setArtworkFiles((prev) => prev.filter((_, idx) => idx !== i)); }}
+                            className="text-gray-400 hover:text-red-500 transition-colors text-sm font-bold leading-none"
+                            aria-label={`Remove ${f.name}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <p className="text-xs text-[#16C2F3] mt-2">Click or drop to add more files</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-gray-500">Drop your files here or click to browse</p>
+                    <p className="text-xs text-gray-400 mt-1">PDF, AI, EPS, JPG, PNG — up to 50 MB each · Select multiple files at once</p>
+                  </div>
+                )}
+              </div>
               <p className="text-xs text-gray-400 mt-2">
                 No file yet? Bring it on USB or email us after — our designer starts at $35.
               </p>

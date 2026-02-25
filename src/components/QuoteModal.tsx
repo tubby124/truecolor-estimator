@@ -36,6 +36,7 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape
   useEffect(() => {
@@ -67,6 +68,41 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
       setError("");
     }
   }, [open, defaultProduct]);
+
+  // Focus trap
+  useEffect(() => {
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    // Focus first focusable element on open
+    const focusable = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    focusable[0]?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []); // runs once on mount
 
   function handleFileChange(picked: File | null) {
     if (picked && picked.size > 4 * 1024 * 1024) {
@@ -130,7 +166,12 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
       {/* Card */}
-      <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div>

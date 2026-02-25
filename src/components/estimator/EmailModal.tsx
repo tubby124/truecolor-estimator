@@ -23,6 +23,7 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
   const [errorMsg, setErrorMsg] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Focus email field when modal opens
   useEffect(() => {
@@ -35,6 +36,41 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
+
+  // Focus trap
+  useEffect(() => {
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    // Focus first focusable element on open
+    const focusable = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    focusable[0]?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []); // runs once on mount
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const emailInvalid = emailTouched && !emailValid;
@@ -84,7 +120,12 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Modal card */}
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+      >
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">

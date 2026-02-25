@@ -119,7 +119,7 @@ export function SiteNav() {
                 </svg>
               </button>
               {openMenu === "products" && (
-                <div className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-[540px]">
+                <div role="menu" className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-[540px]">
                   <div className="grid grid-cols-3 gap-0 p-3">
                     {PRODUCT_CATEGORIES.map((cat) => (
                       <div key={cat.label}>
@@ -161,7 +161,7 @@ export function SiteNav() {
                 </svg>
               </button>
               {openMenu === "industries" && (
-                <div className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl w-56 z-50">
+                <div role="menu" className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl w-56 z-50">
                   {INDUSTRY_LINKS.map((link) => (
                     <Link
                       key={link.href}
@@ -235,6 +235,7 @@ export function SiteNav() {
               onClick={() => setDrawerOpen(true)}
               className="sm:hidden p-1 text-white"
               aria-label="Open menu"
+              aria-expanded={drawerOpen}
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -269,15 +270,15 @@ export function SiteNav() {
             </button>
           </div>
 
-          <div className="px-6 py-6 space-y-8">
+          <nav aria-label="Mobile navigation" className="px-6 py-6 space-y-8">
             {/* Products section */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Products</p>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Products</h3>
               {PRODUCT_CATEGORIES.map((cat) => (
                 <div key={cat.label} className="mb-4">
-                  <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider mb-1 pl-0.5">
+                  <h3 className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider mb-1 pl-0.5">
                     {cat.label}
-                  </p>
+                  </h3>
                   <ul>
                     {cat.links.map((link) => (
                       <li key={link.href}>
@@ -297,7 +298,7 @@ export function SiteNav() {
 
             {/* Industries section */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Industries</p>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Industries</h3>
               <ul className="space-y-1">
                 {INDUSTRY_LINKS.map((link) => (
                   <li key={link.href}>
@@ -315,7 +316,7 @@ export function SiteNav() {
 
             {/* Services */}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Services</p>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Services</h3>
               <Link
                 href="/services"
                 onClick={() => setDrawerOpen(false)}
@@ -377,7 +378,7 @@ export function SiteNav() {
             >
               Get a Price →
             </Link>
-          </div>
+          </nav>
         </div>
       )}
 

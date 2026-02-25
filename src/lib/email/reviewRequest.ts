@@ -6,10 +6,6 @@
  *
  * Sent from: PATCH /api/staff/orders/[id]/status when status === "complete"
  *
- * NOTE: The Google review link below contains a placeholder.
- * Owner must replace REPLACE_WITH_GOOGLE_PLACE_ID with the actual
- * Google Place ID from: https://developers.google.com/maps/documentation/javascript/place-id
- * Or use the short link from Google Business Profile → "Get more reviews" → copy link.
  */
 
 import nodemailer from "nodemailer";
@@ -23,10 +19,8 @@ export interface ReviewRequestParams {
 }
 
 // ─── Google review link ───────────────────────────────────────────────────────
-// TODO (owner): Replace this with the real link from Google Business Profile.
-// Go to: Google Business Profile → Home → "Get more reviews" → copy the short link.
 const GOOGLE_REVIEW_URL =
-  "https://g.page/r/REPLACE_WITH_GOOGLE_PLACE_ID/review";
+  "https://g.page/r/CZH6HlbNejQAEAE/review";
 
 // ─── Transporter ──────────────────────────────────────────────────────────────
 
