@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { ProductPageClient } from "@/components/product/ProductPageClient";
 import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
+import { PrintIcon } from "@/components/icons/PrintIcons";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -68,13 +69,21 @@ export default async function ProductPage({ params }: Props) {
                 <Link
                   key={r.slug}
                   href={`/products/${r.slug}`}
-                  className="group border border-gray-100 rounded-xl p-5 hover:border-[#16C2F3]/40 hover:shadow-md transition-all"
+                  className="group border border-gray-100 rounded-xl p-5 hover:border-[#16C2F3]/40 hover:shadow-md transition-all flex items-center gap-4"
                 >
-                  <p className="font-bold text-[#1c1712] mb-1 group-hover:text-[#16C2F3] transition-colors">
-                    {r.name}
-                  </p>
-                  <p className="text-sm text-gray-500">{r.fromPrice}</p>
-                  <p className="text-[#16C2F3] text-sm mt-3 group-hover:underline">See price →</p>
+                  <PrintIcon
+                    slug={r.slug}
+                    size={28}
+                    className="text-[var(--brand)] shrink-0"
+                    aria-hidden={true}
+                  />
+                  <div>
+                    <p className="font-bold text-[#1c1712] mb-1 group-hover:text-[#16C2F3] transition-colors">
+                      {r.name}
+                    </p>
+                    <p className="text-sm text-gray-500">{r.fromPrice}</p>
+                    <p className="text-[#16C2F3] text-sm mt-1 group-hover:underline">See price →</p>
+                  </div>
                 </Link>
               ))}
             </div>
