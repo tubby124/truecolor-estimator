@@ -30,10 +30,10 @@ export interface WaveInvoiceResult {
 }
 
 // --------------------------------------------------------------------------
-// Find existing customer by email
+// Find existing customer by email (exported for use in status route + webhooks)
 // --------------------------------------------------------------------------
 
-async function findCustomerByEmail(email: string): Promise<string | null> {
+export async function findCustomerByEmail(email: string): Promise<string | null> {
   const data = await waveQuery<{
     business: { customers: { edges: { node: { id: string; email: string } }[] } };
   }>(
@@ -174,6 +174,86 @@ export async function createWaveInvoice(
     pdfUrl: inv.pdfUrl ?? null,
     viewUrl: inv.viewUrl ?? null,
   };
+}
+
+// --------------------------------------------------------------------------
+// Record a payment in Wave via moneyTransactionCreate.
+//
+// Wave has no public `invoicePaymentCreate` mutation — payments are recorded
+// as general income transactions. Wave auto-reconciles matching transactions
+// (same customer + amount) against outstanding invoices.
+//
+// Requires env vars: WAVE_INCOME_ACCOUNT_ID + WAVE_BANK_ACCOUNT_ID
+// If either is missing, skips gracefully (non-fatal — status update still succeeds).
+//
+// externalId = Supabase order UUID → idempotency key prevents duplicate transactions
+// if the same order is processed twice (e.g. double-click, webhook + status route).
+// --------------------------------------------------------------------------
+
+export type WavePaymentMethod = "CREDIT_CARD" | "BANK_TRANSFER" | "CASH" | "CHECK" | "OTHER";
+
+export async function recordWavePayment(
+  _invoiceId: string,        // kept for caller API compat — not used by moneyTransactionCreate
+  amount: number,            // dollars, e.g. 125.55
+  method: WavePaymentMethod,
+  note?: string,
+  customerId?: string,       // Wave customer ID — enables auto-reconciliation against invoice
+  externalId?: string,       // Supabase order UUID — idempotency key
+): Promise<void> {
+  const incomeAccountId = process.env.WAVE_INCOME_ACCOUNT_ID;
+  const bankAccountId = process.env.WAVE_BANK_ACCOUNT_ID;
+
+  if (!incomeAccountId || !bankAccountId) {
+    console.warn(
+      "[recordWavePayment] WAVE_INCOME_ACCOUNT_ID or WAVE_BANK_ACCOUNT_ID not configured — skipping Wave payment recording"
+    );
+    return;
+  }
+
+  const paymentDate = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  const description = note ?? `Payment received — ${method}`;
+
+  const lineItem: Record<string, unknown> = {
+    accountId: incomeAccountId,
+    amount: amount.toFixed(2),
+    balance: "INCREASE",
+  };
+  if (customerId) lineItem.customerId = customerId;
+
+  const input: Record<string, unknown> = {
+    businessId: WAVE_BUSINESS_ID,
+    date: paymentDate,
+    description,
+    anchor: {
+      accountId: bankAccountId,
+      amount: amount.toFixed(2),
+      direction: "DEPOSIT",
+    },
+    lineItems: [lineItem],
+  };
+  if (externalId) input.externalId = externalId;
+
+  const data = await waveQuery<{
+    moneyTransactionCreate: {
+      didSucceed: boolean;
+      inputErrors: { message: string }[];
+      transaction: { id: string } | null;
+    };
+  }>(
+    `mutation($input: MoneyTransactionCreateInput!) {
+      moneyTransactionCreate(input: $input) {
+        didSucceed
+        inputErrors { path message }
+        transaction { id }
+      }
+    }`,
+    { input }
+  );
+
+  if (!data.moneyTransactionCreate.didSucceed) {
+    const errs = data.moneyTransactionCreate.inputErrors?.map((e) => e.message).join(", ");
+    throw new Error(`Wave moneyTransactionCreate failed: ${errs}`);
+  }
 }
 
 // --------------------------------------------------------------------------

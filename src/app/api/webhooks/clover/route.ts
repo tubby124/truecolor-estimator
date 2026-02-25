@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
+import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
             })
             .eq("payment_reference", cloverOrderId)
             .eq("status", "pending_payment")
-            .select("order_number, customer_id, total, is_rush");
+            .select("id, order_number, customer_id, total, is_rush, wave_invoice_id");
 
           if (error) {
             console.error("[clover-webhook] order update failed:", error.message);
@@ -76,10 +77,11 @@ export async function POST(req: NextRequest) {
               `[clover-webhook] order confirmed via webhook | Clover order: ${cloverOrderId} | rows updated: ${count}`
             );
 
-            // Send "payment confirmed" email to customer (non-fatal)
+            // Send "payment confirmed" email + mark Wave invoice paid (both non-fatal)
             if (updatedOrders && updatedOrders.length > 0) {
+              const order = updatedOrders[0];
+
               try {
-                const order = updatedOrders[0];
                 const { data: customer } = await supabase
                   .from("customers")
                   .select("email, name")
@@ -99,6 +101,44 @@ export async function POST(req: NextRequest) {
                 }
               } catch (emailErr) {
                 console.error("[clover-webhook] payment confirmed email failed (non-fatal):", emailErr);
+              }
+
+              // Mark Wave invoice as PAID (non-fatal)
+              const waveInvoiceId = order.wave_invoice_id ?? null;
+              const orderTotal = Number(order.total ?? 0);
+              if (waveInvoiceId && orderTotal > 0) {
+                try {
+                  await approveWaveInvoice(waveInvoiceId);
+
+                  // Look up customer email for Wave customer ID (auto-reconciliation)
+                  const { data: orderCustomer } = await supabase
+                    .from("customers")
+                    .select("email")
+                    .eq("id", order.customer_id)
+                    .single();
+                  const waveCustomerId = orderCustomer?.email
+                    ? await findCustomerByEmail(orderCustomer.email).catch(() => null)
+                    : null;
+
+                  await recordWavePayment(
+                    waveInvoiceId,
+                    orderTotal,
+                    "CREDIT_CARD",
+                    `Clover card — Order ${order.order_number}`,
+                    waveCustomerId ?? undefined,
+                    order.id,  // Supabase order UUID as externalId — idempotency key
+                  );
+
+                  // Write Wave sync timestamps back to the order row
+                  const now = new Date().toISOString();
+                  void supabase.from("orders")
+                    .update({ wave_invoice_approved_at: now, wave_payment_recorded_at: now })
+                    .eq("id", order.id);
+
+                  console.log(`[clover-webhook] Wave invoice marked paid → ${waveInvoiceId}`);
+                } catch (waveErr) {
+                  console.error("[clover-webhook] Wave payment recording failed (non-fatal):", waveErr);
+                }
               }
             }
           }

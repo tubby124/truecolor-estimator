@@ -89,6 +89,9 @@ export interface Order {
   gst: number;
   total: number;
   payment_method: string;
+  wave_invoice_id: string | null;
+  wave_invoice_approved_at: string | null;
+  wave_payment_recorded_at: string | null;
   created_at: string;
   notes: string | null;
   staff_notes: string | null;
@@ -224,6 +227,8 @@ export function OrdersTable({ initialOrders }: Props) {
                       proof_storage_path: u.proof_storage_path !== undefined ? (u.proof_storage_path as string | null) : o.proof_storage_path,
                       proof_sent_at: u.proof_sent_at !== undefined ? (u.proof_sent_at as string | null) : o.proof_sent_at,
                       file_storage_paths: u.file_storage_paths !== undefined ? (u.file_storage_paths as string[] | null) : o.file_storage_paths,
+                      wave_invoice_approved_at: u.wave_invoice_approved_at !== undefined ? (u.wave_invoice_approved_at as string | null) : o.wave_invoice_approved_at,
+                      wave_payment_recorded_at: u.wave_payment_recorded_at !== undefined ? (u.wave_payment_recorded_at as string | null) : o.wave_payment_recorded_at,
                     }
                   : o
               )
@@ -633,6 +638,17 @@ export function OrdersTable({ initialOrders }: Props) {
                             📝 Note
                           </span>
                         )}
+                        {order.wave_payment_recorded_at && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                            W Paid
+                          </span>
+                        )}
+                        {order.wave_invoice_id && !order.wave_payment_recorded_at &&
+                          (order.status === "payment_received" || order.status === "ready_for_pickup") && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                            W Unpaid
+                          </span>
+                        )}
                       </div>
 
                       {/* Customer — name + company */}
@@ -808,6 +824,45 @@ export function OrdersTable({ initialOrders }: Props) {
                         </span>
                       </div>
                     </div>
+
+                    {/* Wave Accounting status */}
+                    {order.wave_invoice_id && (
+                      <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                          Wave Accounting
+                        </p>
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <a
+                            href="https://next.waveapps.com/businesses/0fea8474-b467-4a12-b558-efa4c74c7e3c/invoicing/invoices"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-[#16C2F3] hover:underline font-semibold"
+                          >
+                            Open Wave →
+                          </a>
+                          {order.wave_invoice_approved_at ? (
+                            <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                              Invoice approved
+                            </span>
+                          ) : (
+                            <span className="text-xs bg-gray-50 text-gray-400 border border-gray-200 px-2 py-0.5 rounded-full">
+                              Draft
+                            </span>
+                          )}
+                          {order.wave_payment_recorded_at ? (
+                            <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-semibold">
+                              ✓ Payment recorded
+                            </span>
+                          ) : (
+                            <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+                              {order.payment_method === "clover_card"
+                                ? "Card — pending webhook"
+                                : "Awaiting payment confirmation"}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Customer notes — amber */}
                     {order.notes && (
