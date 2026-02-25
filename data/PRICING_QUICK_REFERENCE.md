@@ -156,9 +156,8 @@ Most popular: 100 stickers
 | 250   | $40     | $45     | $0.18         |
 | 500   | $50     | $65     | $0.13         |
 | 1000  | $80     | $110    | $0.11         |
-| 2500  | —       | $260    | $0.10         |
-| 5000  | —       | $420    | $0.08         |
 
+**Max qty: 1000** — owner confirmed unprofitable above this. Call for larger runs.
 Most popular: 500 (2-sided)
 
 ---
@@ -184,7 +183,7 @@ Most popular: 500 (80lb)
 
 ---
 
-### Brochures (BROCHURE · PLACEHOLDER_100LB · Tri-Fold or Half-Fold)
+### Brochures (BROCHURE · PLACEHOLDER_TF_100LB / PLACEHOLDER_HF_100LB · 100lb Gloss)
 **Tri-Fold (letter 8.5×11 folded to 3 panels):**
 | Qty  | Total | Per Unit | Savings vs 100 |
 |------|-------|----------|----------------|
@@ -203,7 +202,7 @@ Most popular: 250 (tri-fold)
 
 ---
 
-### Postcards (POSTCARD · PLACEHOLDER_14PT · 14pt Gloss · Double-Sided)
+### Postcards (POSTCARD · PLACEHOLDER_14PT · 14pt Gloss · **Always Double-Sided**)
 **4×6":**
 | Qty  | Total | Per Unit | Savings vs 50 |
 |------|-------|----------|---------------|
