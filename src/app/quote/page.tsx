@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PRODUCTS, PRODUCT_SLUGS } from "@/lib/data/products-content";
+import { PrintIcon } from "@/components/icons/PrintIcons";
 
 export const metadata: Metadata = {
   title: "Get a Price | True Color Display Printing Saskatoon",
@@ -13,26 +14,6 @@ export const metadata: Metadata = {
 
 // Product categories for the picker
 const PICKER_PRODUCTS = PRODUCT_SLUGS.map((slug) => PRODUCTS[slug]).filter(Boolean);
-
-// Icons per product (simple emoji — clean enough for this purpose)
-const PRODUCT_ICONS: Record<string, string> = {
-  "coroplast-signs": "🪧",
-  "vinyl-banners": "🎌",
-  "business-cards": "🃏",
-  "flyers": "📄",
-  "vehicle-magnets": "🧲",
-  "acp-signs": "🔲",
-  "foamboard-displays": "🖼️",
-  "retractable-banners": "📋",
-  "window-decals": "🪟",
-  "window-perf": "👁️",
-  "vinyl-lettering": "✂️",
-  "stickers": "🔖",
-  "postcards": "📮",
-  "brochures": "📑",
-  "photo-posters": "🎨",
-  "magnet-calendars": "📅",
-};
 
 export default function QuotePage() {
   return (
@@ -58,9 +39,12 @@ export default function QuotePage() {
               href={`/products/${product.slug}`}
               className="group flex flex-col items-center gap-3 p-6 border border-gray-100 rounded-2xl hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
             >
-              <span className="text-4xl" role="img" aria-label={product.name}>
-                {PRODUCT_ICONS[product.slug] || "🖨️"}
-              </span>
+              <PrintIcon
+                slug={product.slug}
+                size={36}
+                className="text-[var(--brand)]"
+                aria-hidden={true}
+              />
               <div>
                 <p className="font-bold text-[#1c1712] text-sm leading-tight">
                   {product.name}

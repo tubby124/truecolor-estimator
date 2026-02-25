@@ -10,7 +10,7 @@
  *  1. Every products-content.ts slug exists in sitemap.ts
  *  2. Every products-content.ts category exists in CategoryPicker.tsx
  *  3. Every products-content.ts slug exists in SiteNav.tsx PRODUCT_CATEGORIES
- *  4. Every products-content.ts slug has an emoji in quote/page.tsx PRODUCT_ICONS
+ *  4. Every products-content.ts slug has a Lucide icon in PrintIcons.tsx SLUG_ICON_MAP
  *  5. No MAGNET product in products.v1.csv has price < $45
  */
 
@@ -98,15 +98,15 @@ for (const slug of slugs) {
   }
 }
 
-// ─── Check 4: Slugs have emoji in quote/page.tsx PRODUCT_ICONS ────────────
-console.log("\n[5] Checking slugs have emoji in quote/page.tsx PRODUCT_ICONS ...");
-const quotePage = readFile("src/app/quote/page.tsx");
+// ─── Check 4: Slugs have an icon in PrintIcons.tsx SLUG_ICON_MAP ──────────
+console.log("\n[5] Checking slugs have a Lucide icon in PrintIcons.tsx SLUG_ICON_MAP ...");
+const printIconsContent = readFile("src/components/icons/PrintIcons.tsx");
 
 for (const slug of slugs) {
-  if (quotePage.includes(`"${slug}"`) || quotePage.includes(`'${slug}'`)) {
-    pass(`${slug} → quote/page.tsx PRODUCT_ICONS`);
+  if (printIconsContent.includes(`"${slug}"`) || printIconsContent.includes(`'${slug}'`)) {
+    pass(`${slug} → PrintIcons.tsx SLUG_ICON_MAP`);
   } else {
-    warn(`${slug} has no emoji in PRODUCT_ICONS (will show 🖨️ fallback)`);
+    warn(`${slug} has no icon in SLUG_ICON_MAP (will show Printer fallback)`);
   }
 }
 

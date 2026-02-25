@@ -1,32 +1,33 @@
 "use client";
 
+import { Printer } from "lucide-react";
+import { CATEGORY_ICON_MAP } from "@/components/icons/PrintIcons";
 import type { Category } from "@/lib/data/types";
 
 interface CategoryOption {
   id: Category;
   label: string;
   sublabel: string;
-  icon: string;
   group: "wide_format" | "print" | "services";
 }
 
 const CATEGORIES: CategoryOption[] = [
-  { id: "SIGN", label: "Coroplast Sign", sublabel: "4mm · Outdoor", icon: "🪧", group: "wide_format" },
-  { id: "BANNER", label: "Vinyl Banner", sublabel: "13oz · Hemmed", icon: "🏳️", group: "wide_format" },
-  { id: "RIGID", label: "ACP Sign", sublabel: "3mm Aluminum", icon: "🔲", group: "wide_format" },
-  { id: "FOAMBOARD", label: "Foam Board", sublabel: "5mm · Indoor", icon: "⬜", group: "wide_format" },
-  { id: "MAGNET", label: "Magnet", sublabel: "30mil · Vehicle / Calendar", icon: "🧲", group: "wide_format" },
-  { id: "DECAL", label: "Window Decal", sublabel: "Arlon vinyl · Adhesive", icon: "🪟", group: "wide_format" },
-  { id: "VINYL_LETTERING", label: "Vinyl Lettering", sublabel: "Cut vinyl · Custom", icon: "✂️", group: "wide_format" },
-  { id: "DISPLAY", label: "Retractable Banner", sublabel: "Economy / Deluxe", icon: "🖼️", group: "wide_format" },
-  { id: "PHOTO_POSTER", label: "Photo Poster", sublabel: "220gsm Matte", icon: "🎨", group: "wide_format" },
-  { id: "FLYER", label: "Flyers", sublabel: "80lb Gloss · Konica", icon: "📄", group: "print" },
-  { id: "BUSINESS_CARD", label: "Business Cards", sublabel: "14pt · Konica", icon: "💼", group: "print" },
-  { id: "BROCHURE", label: "Brochures", sublabel: "100lb Gloss · Folded", icon: "📋", group: "print" },
-  { id: "POSTCARD", label: "Postcards", sublabel: "Standard sizes", icon: "📮", group: "print" },
-  { id: "STICKER", label: "Vinyl Stickers", sublabel: "Die-cut · 4×4\" lots", icon: "🔖", group: "print" },
-  { id: "DESIGN", label: "Design Service", sublabel: "Artwork · Logo", icon: "✏️", group: "services" },
-  { id: "INSTALLATION", label: "Installation", sublabel: "On-site · Mounting", icon: "🔧", group: "services" },
+  { id: "SIGN", label: "Coroplast Sign", sublabel: "4mm · Outdoor", group: "wide_format" },
+  { id: "BANNER", label: "Vinyl Banner", sublabel: "13oz · Hemmed", group: "wide_format" },
+  { id: "RIGID", label: "ACP Sign", sublabel: "3mm Aluminum", group: "wide_format" },
+  { id: "FOAMBOARD", label: "Foam Board", sublabel: "5mm · Indoor", group: "wide_format" },
+  { id: "MAGNET", label: "Magnet", sublabel: "30mil · Vehicle / Calendar", group: "wide_format" },
+  { id: "DECAL", label: "Window Decal", sublabel: "Arlon vinyl · Adhesive", group: "wide_format" },
+  { id: "VINYL_LETTERING", label: "Vinyl Lettering", sublabel: "Cut vinyl · Custom", group: "wide_format" },
+  { id: "DISPLAY", label: "Retractable Banner", sublabel: "Economy / Deluxe", group: "wide_format" },
+  { id: "PHOTO_POSTER", label: "Photo Poster", sublabel: "220gsm Matte", group: "wide_format" },
+  { id: "FLYER", label: "Flyers", sublabel: "80lb Gloss · Konica", group: "print" },
+  { id: "BUSINESS_CARD", label: "Business Cards", sublabel: "14pt · Konica", group: "print" },
+  { id: "BROCHURE", label: "Brochures", sublabel: "100lb Gloss · Folded", group: "print" },
+  { id: "POSTCARD", label: "Postcards", sublabel: "Standard sizes", group: "print" },
+  { id: "STICKER", label: "Vinyl Stickers", sublabel: "Die-cut · 4×4\" lots", group: "print" },
+  { id: "DESIGN", label: "Design Service", sublabel: "Artwork · Logo", group: "services" },
+  { id: "INSTALLATION", label: "Installation", sublabel: "On-site · Mounting", group: "services" },
 ];
 
 interface Props {
@@ -80,7 +81,17 @@ function CategoryGroup({
                 }
               `}
             >
-              <span className="text-2xl">{item.icon}</span>
+              {(() => {
+                const Icon = CATEGORY_ICON_MAP[item.id] ?? Printer;
+                return (
+                  <Icon
+                    size={24}
+                    strokeWidth={1.5}
+                    aria-hidden={true}
+                    className={isSelected ? "text-[var(--brand)]" : "text-slate-500"}
+                  />
+                );
+              })()}
               <div>
                 <p className={`text-sm font-semibold leading-tight ${isSelected ? "text-[var(--brand)]" : "text-[var(--foreground)]"}`}>
                   {item.label}
