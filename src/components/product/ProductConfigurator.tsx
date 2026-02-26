@@ -449,7 +449,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                             [addon.label]: Math.max(0, (prev[addon.label] || 0) - (addon.step || 1)),
                           }))
                         }
-                        className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
+                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
                       >
                         −
                       </button>
@@ -463,7 +463,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                             [addon.label]: (prev[addon.label] || 0) + (addon.step || 1),
                           }))
                         }
-                        className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
+                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-lg leading-none"
                       >
                         +
                       </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -8,8 +8,9 @@ import { getCart, clearCart, type CartItem } from "@/lib/cart/cart";
 import type { CreateOrderRequest } from "@/app/api/orders/route";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { Skeleton } from "@/components/ui/Skeleton";
 
-const GST_RATE = 0.05;
+const DEFAULT_GST_RATE = 0.05;
 const RUSH_FEE = 40;
 
 // ── Sign dimension preview ──────────────────────────────────────────────────
@@ -94,7 +95,7 @@ export default function CheckoutPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  // Contact form
+  // Contact form — restored from sessionStorage on mount
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -117,6 +118,7 @@ export default function CheckoutPage() {
   // Notes + artwork (multi-file)
   const [notes, setNotes] = useState("");
   const [artworkFiles, setArtworkFiles] = useState<File[]>([]);
+  const artworkInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState("");
 
   // Rush + payment state
@@ -124,6 +126,33 @@ export default function CheckoutPage() {
   const [payMethod, setPayMethod] = useState<"clover_card" | "etransfer">("clover_card");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Restore form fields from sessionStorage (survives navigation)
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("tc_checkout_form");
+      if (saved) {
+        const f = JSON.parse(saved) as Record<string, string>;
+        if (f.name) setName(f.name);
+        if (f.email) setEmail(f.email);
+        if (f.company) setCompany(f.company);
+        if (f.phone) setPhone(f.phone);
+        if (f.address) setAddress(f.address);
+        if (f.notes) setNotes(f.notes);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  // Save form fields to sessionStorage on change
+  useEffect(() => {
+    if (!mounted) return;
+    try {
+      sessionStorage.setItem(
+        "tc_checkout_form",
+        JSON.stringify({ name, email, company, phone, address, notes })
+      );
+    } catch { /* quota exceeded — ignore */ }
+  }, [name, email, company, phone, address, notes, mounted]);
 
   useEffect(() => {
     setItems(getCart());
@@ -166,11 +195,35 @@ export default function CheckoutPage() {
     });
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted)
+    return (
+      <div className="min-h-screen bg-white">
+        <SiteNav />
+        <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
+          <Skeleton className="h-9 w-48 mb-10" />
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+            <div className="lg:col-span-3 space-y-6">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="lg:col-span-2 space-y-4">
+              <Skeleton className="h-6 w-36" />
+              <Skeleton className="h-20 w-full rounded-xl" />
+              <Skeleton className="h-20 w-full rounded-xl" />
+              <Skeleton className="h-14 w-full rounded-lg" />
+            </div>
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
 
   const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
   const rush = isRush ? RUSH_FEE : 0;
-  const gst = Math.round((subtotal + rush) * GST_RATE * 100) / 100;
+  const gstRate = items[0]?.gst_rate ?? DEFAULT_GST_RATE;
+  const gst = Math.round((subtotal + rush) * gstRate * 100) / 100;
   const total = subtotal + rush + gst;
 
   async function handleSubmit() {
@@ -276,6 +329,7 @@ export default function CheckoutPage() {
       }
 
       clearCart();
+      try { sessionStorage.removeItem("tc_checkout_form"); } catch { /* ignore */ }
       if (payMethod === "clover_card" && data.checkoutUrl) {
         // Card: redirect to Clover hosted checkout (it bounces back to /order-confirmed?oid=...)
         window.location.href = data.checkoutUrl;
@@ -295,7 +349,7 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-white">
         <SiteNav />
-        <main className="max-w-2xl mx-auto px-6 py-20 text-center">
+        <main id="main-content" className="max-w-2xl mx-auto px-6 py-20 text-center">
           <p className="text-gray-400 text-lg mb-6">Your cart is empty.</p>
           <Link
             href="/quote"
@@ -361,7 +415,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="max-w-5xl mx-auto px-6 py-14">
+      <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
         <h1 className="text-3xl font-bold text-[#1c1712] mb-10">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -553,19 +607,18 @@ export default function CheckoutPage() {
             {/* Artwork files — multi-file */}
             <section>
               <h2 className="text-lg font-bold text-[#1c1712] mb-3">Attach your artwork</h2>
-              {/* Hidden file input — triggered by clicking the drop zone or the label below */}
-              <label id="artwork-file-label" className="hidden">
-                <input
-                  type="file"
-                  multiple
-                  accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
-                  onChange={(e) => setArtworkFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])])}
-                  className="hidden"
-                />
-              </label>
+              {/* Hidden file input — triggered by clicking the drop zone */}
+              <input
+                ref={artworkInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
+                onChange={(e) => setArtworkFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])])}
+                className="hidden"
+              />
               <div
                 className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#16C2F3] transition-colors cursor-pointer"
-                onClick={() => (document.querySelector("#artwork-file-label input") as HTMLInputElement | null)?.click()}
+                onClick={() => artworkInputRef.current?.click()}
                 onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-blue-400", "bg-blue-50"); }}
                 onDragLeave={(e) => { e.currentTarget.classList.remove("border-blue-400", "bg-blue-50"); }}
                 onDrop={(e) => {

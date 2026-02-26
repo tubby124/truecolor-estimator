@@ -26,7 +26,7 @@ export default async function StaffOrdersPage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="max-w-5xl mx-auto px-6 py-12">
+      <main id="main-content" className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#1c1712]">Orders</h1>

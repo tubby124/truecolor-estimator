@@ -12,7 +12,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="max-w-4xl mx-auto px-6 py-16">
+      <main id="main-content" className="max-w-4xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold text-[#1c1712] mb-4">Terms of Service</h1>
         <p className="text-gray-500 mb-12">
           Last updated: February 2026 · True Color Display Printing Ltd.

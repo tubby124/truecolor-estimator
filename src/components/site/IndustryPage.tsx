@@ -53,7 +53,7 @@ export function IndustryPage({
         </div>
       </section>
 
-      <main className="max-w-5xl mx-auto px-6 py-14">
+      <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
         {/* Description */}
         <p className="text-gray-600 text-lg leading-relaxed mb-12 max-w-2xl">
           {description}

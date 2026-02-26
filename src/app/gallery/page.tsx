@@ -16,7 +16,7 @@ export default function GalleryPage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="max-w-6xl mx-auto px-6 py-14">
+      <main id="main-content" className="max-w-6xl mx-auto px-6 py-14">
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-[#1c1712] mb-3">Our Work</h1>

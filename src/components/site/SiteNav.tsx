@@ -302,13 +302,6 @@ export function SiteNav() {
             <span className="hidden sm:block">
               <StaffQuoteButton />
             </span>
-            {/* Request a Quote — all visitors, desktop */}
-            <button
-              onClick={() => setQuoteOpen(true)}
-              className="bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 py-2.5 rounded-md transition-colors whitespace-nowrap hidden sm:block"
-            >
-              Request a Quote →
-            </button>
             <Link
               href="/quote"
               className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden sm:block"
@@ -448,14 +441,6 @@ export function SiteNav() {
               <StaffQuoteButton />
             </div>
 
-            {/* Request a Quote — all visitors, mobile */}
-            <button
-              onClick={() => { setDrawerOpen(false); setQuoteOpen(true); }}
-              className="block w-full text-center bg-amber-500 text-white text-base font-bold px-5 py-3.5 rounded-md hover:bg-amber-400 transition-colors"
-            >
-              Request a Quote →
-            </button>
-
             {/* Customer CTA */}
             <Link
               href="/quote"
@@ -464,6 +449,14 @@ export function SiteNav() {
             >
               Get a Price →
             </Link>
+
+            {/* Request a Quote — secondary */}
+            <button
+              onClick={() => { setDrawerOpen(false); setQuoteOpen(true); }}
+              className="block w-full text-center border border-gray-600 text-gray-300 text-base font-medium px-5 py-3.5 rounded-md hover:border-white hover:text-white transition-colors"
+            >
+              Request a Custom Quote
+            </button>
           </nav>
         </div>
       )}

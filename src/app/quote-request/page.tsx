@@ -91,7 +91,7 @@ function QuoteForm() {
     return (
       <div className="min-h-screen bg-white">
         <SiteNav />
-        <main className="max-w-2xl mx-auto px-6 py-20 text-center">
+        <main id="main-content" className="max-w-2xl mx-auto px-6 py-20 text-center">
           <div className="w-16 h-16 bg-[#8CC63E] rounded-full flex items-center justify-center mx-auto mb-6">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -130,7 +130,7 @@ function QuoteForm() {
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
-      <main className="max-w-2xl mx-auto px-6 py-14">
+      <main id="main-content" className="max-w-2xl mx-auto px-6 py-14">
         <h1 className="text-3xl font-bold text-[#1c1712] mb-2">Get a quote</h1>
         <p className="text-gray-500 mb-10">
           Tell us what you need and we&apos;ll reply within 1 business day.

@@ -20,7 +20,7 @@ export default function QuotePage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="max-w-5xl mx-auto px-6 py-14">
+      <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
         {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-[#1c1712] mb-4 leading-tight">

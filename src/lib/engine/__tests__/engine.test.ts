@@ -10,6 +10,7 @@
 
 import { describe, it, expect } from "vitest";
 import { estimate } from "../index";
+import type { Addon } from "@/lib/data/types";
 
 // ─── BLOCKED / Invalid inputs ─────────────────────────────────────────────────
 
@@ -466,8 +467,8 @@ describe("line_items integrity", () => {
 
   it("line_items sum always equals sell_price (no rounding drift, including addons)", () => {
     const cases = [
-      { category: "SIGN" as const, material_code: "MPHCC020", width_in: 18, height_in: 24, sides: 1 as const, qty: 1, addons: ["H_STAKE"] as const },
-      { category: "BANNER" as const, material_code: "RMBF004", width_in: 24, height_in: 72, sides: 1 as const, qty: 1, addons: ["GROMMETS"] as const },
+      { category: "SIGN" as const, material_code: "MPHCC020", width_in: 18, height_in: 24, sides: 1 as const, qty: 1, addons: ["H_STAKE"] as Addon[] },
+      { category: "BANNER" as const, material_code: "RMBF004", width_in: 24, height_in: 72, sides: 1 as const, qty: 1, addons: ["GROMMETS"] as Addon[] },
       { category: "MAGNET" as const, material_code: "MAG302437550M", width_in: 12, height_in: 18, sides: 1 as const, qty: 5 },
     ];
     for (const req of cases) {

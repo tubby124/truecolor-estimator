@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { getCart, removeFromCart, getCartSubtotal, type CartItem } from "@/lib/cart/cart";
+import { getCart, removeFromCart, addToCart, type CartItem } from "@/lib/cart/cart";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useToast, ToastContainer } from "@/components/ui/Toast";
 
 export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
+  const { toasts, showToast, dismissToast } = useToast();
 
   useEffect(() => {
     setItems(getCart());
@@ -16,21 +19,56 @@ export default function CartPage() {
   }, []);
 
   function handleRemove(id: string) {
+    const removed = items.find((i) => i.id === id);
     const updated = removeFromCart(id);
     setItems(updated);
+    if (removed) {
+      const { id: _id, ...rest } = removed;
+      showToast("Item removed", "info", {
+        label: "Undo",
+        onClick: () => {
+          addToCart(rest);
+          setItems(getCart());
+        },
+      });
+    }
   }
 
   const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
-  const gst = subtotal * 0.05;
+  const gstRate = items[0]?.gst_rate ?? 0.05;
+  const gst = Math.round(subtotal * gstRate * 100) / 100;
   const total = subtotal + gst;
 
-  if (!mounted) return null;
+  if (!mounted)
+    return (
+      <div className="min-h-screen bg-white">
+        <SiteNav />
+        <main id="main-content" className="max-w-3xl mx-auto px-6 py-14">
+          <Skeleton className="h-8 w-40 mb-8" />
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="border border-gray-100 rounded-xl p-5 space-y-3">
+                <Skeleton className="h-5 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+            <div className="border-t border-gray-200 pt-6 mt-6 space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-6 w-full" />
+            </div>
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="max-w-3xl mx-auto px-6 py-14">
+      <main id="main-content" className="max-w-3xl mx-auto px-6 py-14">
         <h1 className="text-3xl font-bold text-[#1c1712] mb-8">Your Cart</h1>
 
         {items.length === 0 ? (
@@ -89,7 +127,7 @@ export default function CartPage() {
                 <span>${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-500">
-                <span>GST (5%)</span>
+                <span>GST ({Math.round(gstRate * 100)}%)</span>
                 <span>${gst.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-[#1c1712] text-lg pt-2">
@@ -124,6 +162,7 @@ export default function CartPage() {
       </main>
 
       <SiteFooter />
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

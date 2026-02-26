@@ -176,7 +176,7 @@ export default function StaffPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main id="main-content" className="max-w-6xl mx-auto px-6 py-8">
         {/* Step 1: Category picker */}
         {step === "pick" && (
           <div className="max-w-2xl mx-auto">

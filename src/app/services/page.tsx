@@ -61,7 +61,7 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-[#fafafa]">
       <SiteNav />
 
-      <main className="max-w-5xl mx-auto px-6 py-16">
+      <main id="main-content" className="max-w-5xl mx-auto px-6 py-16">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-[#1c1712] mb-3">Services</h1>

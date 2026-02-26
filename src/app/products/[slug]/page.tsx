@@ -36,11 +36,58 @@ export default async function ProductPage({ params }: Props) {
   // Related products
   const related = product.relatedSlugs.map((s) => getProduct(s)).filter(Boolean);
 
+  // Extract numeric price from fromPrice string (e.g. "$30" → "30")
+  const priceNum = product.fromPrice.replace(/[^0-9.]/g, "") || "0";
+
+  // JSON-LD structured data
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.tagline,
+    image: product.heroImage,
+    brand: { "@type": "Brand", name: "True Color Display Printing" },
+    offers: {
+      "@type": "Offer",
+      price: priceNum,
+      priceCurrency: "CAD",
+      availability: "https://schema.org/InStock",
+      seller: { "@type": "LocalBusiness", name: "True Color Display Printing" },
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://truecolorprinting.ca/" },
+      { "@type": "ListItem", position: 2, name: "Products", item: "https://truecolorprinting.ca/quote" },
+      { "@type": "ListItem", position: 3, name: product.name, item: `https://truecolorprinting.ca/products/${slug}` },
+    ],
+  };
+
+  const faqJsonLd = product.faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: product.faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: { "@type": "Answer", text: faq.a },
+    })),
+  } : null;
+
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      {/* Structured data */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      {faqJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      )}
+
+      <main id="main-content" className="max-w-6xl mx-auto px-6 py-10">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-400 mb-8 flex items-center gap-2">
           <Link href="/" className="hover:text-[#1c1712] transition-colors">Home</Link>

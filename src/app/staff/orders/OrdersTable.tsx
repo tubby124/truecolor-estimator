@@ -4,57 +4,14 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
-
-// ─── Constants ─────────────────────────────────────────────────────────────────
-
-const STATUS_LABELS: Record<string, string> = {
-  pending_payment: "Pending payment",
-  payment_received: "Payment received",
-  in_production: "In production",
-  ready_for_pickup: "Ready for pickup",
-  complete: "Complete",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  pending_payment: "bg-yellow-100 text-yellow-800",
-  payment_received: "bg-blue-100 text-blue-800",
-  in_production: "bg-purple-100 text-purple-800",
-  ready_for_pickup: "bg-green-100 text-green-800",
-  complete: "bg-gray-100 text-gray-600",
-};
-
-const NEXT_STATUS: Record<string, string> = {
-  pending_payment: "payment_received",
-  payment_received: "in_production",
-  in_production: "ready_for_pickup",
-  ready_for_pickup: "complete",
-};
-
-const NEXT_LABEL: Record<string, string> = {
-  pending_payment: "Mark paid",
-  payment_received: "Start production",
-  in_production: "Mark ready",
-  ready_for_pickup: "Mark complete",
-};
-
-const DESIGN_LABELS: Record<string, string> = {
-  PRINT_READY: "Print-ready",
-  MINOR_EDIT: "Minor edit",
-  FULL_DESIGN: "Full design",
-  LOGO_RECREATION: "Logo recreation",
-  NEED_DESIGN: "Design needed",
-  NEED_TOUCHUP: "Touch-up",
-  NEED_REVISION: "Revision",
-};
-
-// Ordered list of valid statuses for the override dropdown + status-sort
-const VALID_STATUSES = [
-  "pending_payment",
-  "payment_received",
-  "in_production",
-  "ready_for_pickup",
-  "complete",
-];
+import {
+  STATUS_LABELS,
+  STATUS_COLORS,
+  NEXT_STATUS,
+  NEXT_LABEL,
+  DESIGN_LABELS,
+  VALID_STATUSES,
+} from "@/lib/data/order-constants";
 
 const SUPABASE_STORAGE_URL =
   `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
@@ -84,7 +41,7 @@ interface OrderItem {
 export interface Order {
   id: string;
   order_number: string;
-  status: string;
+  status: (typeof VALID_STATUSES)[number];
   is_rush: boolean;
   subtotal: number;
   gst: number;
@@ -228,7 +185,7 @@ export function OrdersTable({ initialOrders }: Props) {
                 o.id === u.id
                   ? {
                       ...o,
-                      status: (u.status as string) ?? o.status,
+                      status: (u.status as (typeof VALID_STATUSES)[number]) ?? o.status,
                       notes: u.notes !== undefined ? (u.notes as string | null) : o.notes,
                       staff_notes: u.staff_notes !== undefined ? (u.staff_notes as string | null) : o.staff_notes,
                       proof_storage_path: u.proof_storage_path !== undefined ? (u.proof_storage_path as string | null) : o.proof_storage_path,
@@ -346,7 +303,7 @@ export function OrdersTable({ initialOrders }: Props) {
 
   // ── Status advance / override ──────────────────────────────────────────────
 
-  async function handleStatusUpdate(orderId: string, newStatus: string) {
+  async function handleStatusUpdate(orderId: string, newStatus: (typeof VALID_STATUSES)[number]) {
     setLoadingStatus(orderId);
     setStatusError(null);
     try {
@@ -673,6 +630,7 @@ export function OrdersTable({ initialOrders }: Props) {
                           </span>
                         )}
                         <span
+                          aria-label={`Status: ${STATUS_LABELS[order.status] ?? order.status}`}
                           className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                             STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
                           }`}
@@ -740,7 +698,7 @@ export function OrdersTable({ initialOrders }: Props) {
                     <div className="flex items-center gap-2 shrink-0">
                       {nextStatus && !order.is_archived && (
                         <button
-                          onClick={() => handleStatusUpdate(order.id, nextStatus)}
+                          onClick={() => handleStatusUpdate(order.id, nextStatus as (typeof VALID_STATUSES)[number])}
                           disabled={isLoadingStatus}
                           className="bg-[#1c1712] hover:bg-black disabled:opacity-60 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                         >
@@ -1013,7 +971,7 @@ export function OrdersTable({ initialOrders }: Props) {
                           ))}
                         </select>
                         <button
-                          onClick={() => handleStatusUpdate(order.id, currentOverride)}
+                          onClick={() => handleStatusUpdate(order.id, currentOverride as (typeof VALID_STATUSES)[number])}
                           disabled={isLoadingStatus || currentOverride === order.status}
                           className="text-sm font-semibold px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                         >
@@ -1022,6 +980,7 @@ export function OrdersTable({ initialOrders }: Props) {
                         <span className="text-xs text-gray-400">
                           Currently:{" "}
                           <span
+                            aria-label={`Status: ${STATUS_LABELS[order.status] ?? order.status}`}
                             className={`font-semibold px-1.5 py-0.5 rounded ${
                               STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
                             }`}

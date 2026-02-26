@@ -154,11 +154,12 @@ export function HeroSlider() {
             key={i}
             onClick={() => setCurrent(i)}
             aria-label={`Go to slide ${i + 1}`}
-            className={`w-2 h-2 rounded-full transition-all ${
+            className={`w-3 h-3 rounded-full transition-all p-0 min-w-[12px] min-h-[12px] touch-manipulation ${
               i === current
                 ? "bg-[#16C2F3] scale-125"
                 : "bg-white/40 hover:bg-white/70"
             }`}
+            style={{ WebkitTapHighlightColor: "transparent" }}
           />
         ))}
       </div>

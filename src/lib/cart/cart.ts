@@ -26,6 +26,7 @@ export interface CartItem {
     addons?: string[];
   };
   sell_price: number; // pre-tax total (all units) — engine sell_price, includes addons
+  gst_rate: number; // e.g. 0.05 — stored at add-to-cart time so display never hardcodes
   qty: number;
   line_items?: LineItem[]; // engine breakdown: base product + addon sub-lines
 }

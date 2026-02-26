@@ -91,7 +91,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="max-w-2xl mx-auto px-6 py-20 text-center">
+      <main id="main-content" className="max-w-2xl mx-auto px-6 py-20 text-center">
         {/* Checkmark */}
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-[#16C2F3] rounded-full flex items-center justify-center">

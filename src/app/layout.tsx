@@ -18,6 +18,12 @@ export const metadata: Metadata = {
     default: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
     template: "%s | True Color Display Printing",
   },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "True Color",
+  },
   description:
     "Coroplast signs from $30. Vinyl banners from $66. Business cards from $40. In-house designer, local Saskatoon pickup at 216 33rd St W. See your exact price online — no quote forms.",
   metadataBase: new URL("https://truecolorprinting.ca"),

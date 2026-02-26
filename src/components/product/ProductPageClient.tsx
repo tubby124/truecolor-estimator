@@ -85,6 +85,7 @@ export function ProductPageClient({ product }: Props) {
           .map(([addonLabel, addonQty]) => `${addonLabel} ×${addonQty}`),
       },
       sell_price: priceData.price,
+      gst_rate: 0.05,
       qty: configData.qty,
       line_items: priceData.lineItems.length > 0 ? priceData.lineItems : undefined,
     });

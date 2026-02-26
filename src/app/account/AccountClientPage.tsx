@@ -8,6 +8,11 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { addToCart } from "@/lib/cart/cart";
 import type { LineItem } from "@/lib/cart/cart";
+import {
+  STATUS_LABELS,
+  STATUS_COLORS,
+  STATUS_STEPS,
+} from "@/lib/data/order-constants";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??
@@ -18,32 +23,6 @@ const SUPABASE_STORAGE_URL = `${
 }/storage/v1/object/public/print-files`;
 
 const STAFF_EMAIL = "info@true-color.ca";
-
-// ─── Status config ────────────────────────────────────────────────────────────
-
-const STATUS_STEPS = [
-  { key: "pending_payment", label: "Ordered" },
-  { key: "payment_received", label: "Paid" },
-  { key: "in_production", label: "Printing" },
-  { key: "ready_for_pickup", label: "Ready" },
-  { key: "complete", label: "Done" },
-];
-
-const STATUS_LABELS: Record<string, string> = {
-  pending_payment: "Pending payment",
-  payment_received: "Payment received",
-  in_production: "In production",
-  ready_for_pickup: "Ready for pickup",
-  complete: "Complete",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  pending_payment: "bg-yellow-100 text-yellow-800",
-  payment_received: "bg-blue-100 text-blue-800",
-  in_production: "bg-purple-100 text-purple-800",
-  ready_for_pickup: "bg-green-100 text-green-800",
-  complete: "bg-gray-100 text-gray-600",
-};
 
 // ─── Addon config ─────────────────────────────────────────────────────────────
 
@@ -445,6 +424,7 @@ export function AccountClientPage() {
           design_status: item.design_status,
         },
         sell_price: item.line_total,
+        gst_rate: 0.05,
         qty: item.qty,
       });
     });
@@ -483,7 +463,7 @@ export function AccountClientPage() {
     return (
       <div className="min-h-screen bg-white">
         <SiteNav />
-        <main className="max-w-3xl mx-auto px-6 py-20 text-center">
+        <main id="main-content" className="max-w-3xl mx-auto px-6 py-20 text-center">
           <div className="h-8 w-32 bg-gray-100 rounded animate-pulse mx-auto" />
         </main>
       </div>
@@ -496,7 +476,7 @@ export function AccountClientPage() {
     return (
       <div className="min-h-screen bg-white">
         <SiteNav />
-        <main className="max-w-3xl mx-auto px-6 py-16">
+        <main id="main-content" className="max-w-3xl mx-auto px-6 py-16">
           <h1 className="text-3xl font-bold text-[#1c1712] mb-2">
             Set your new password
           </h1>
@@ -565,7 +545,7 @@ export function AccountClientPage() {
     return (
       <div className="min-h-screen bg-white">
         <SiteNav />
-        <main className="max-w-3xl mx-auto px-6 py-16">
+        <main id="main-content" className="max-w-3xl mx-auto px-6 py-16">
           <h1 className="text-3xl font-bold text-[#1c1712] mb-2">Your orders</h1>
           <p className="text-gray-500 mb-10">
             Sign in to track your orders, download proofs, and reorder with one click.
@@ -761,7 +741,7 @@ export function AccountClientPage() {
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <main id="main-content" className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-8">

@@ -10,6 +10,7 @@
  */
 
 import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 import { getSessionUser } from "@/lib/supabase/server";
 import type { EstimateResponse } from "@/lib/engine/types";
 import {
@@ -95,6 +96,47 @@ export async function POST(req: Request) {
       } catch (sendErr) {
         // Non-fatal — invoice was created, just not sent
         console.error("[quote/wave] Approve/send failed (invoice still created):", sendErr);
+      }
+    }
+
+    // Staff summary notification — fires only when invoice was actually sent
+    if (finalAction === "sent") {
+      try {
+        const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
+        const rushLabel = jobDetails.isRush ? " 🚨 RUSH" : "";
+        const totalDisplay = quoteData.sell_price?.toFixed(2) ?? "?";
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT ?? "465"),
+          secure: process.env.SMTP_SECURE !== "false",
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        });
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>",
+          to: staffEmail,
+          subject: `[Quote Sent] ${name} — ${jobDetails.categoryLabel} ×${jobDetails.qty}${rushLabel} — $${totalDisplay}`,
+          html: `
+            <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1f2937;">
+              <div style="background:#16C2F3;padding:16px 24px;">
+                <p style="margin:0;color:#fff;font-size:16px;font-weight:700;">Quote Sent to Customer</p>
+              </div>
+              <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                  <tr><td style="padding:6px 0;color:#6b7280;width:120px;">Customer</td><td style="padding:6px 0;font-weight:600;">${name}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6b7280;">Email</td><td style="padding:6px 0;">${customerEmail}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6b7280;">Job</td><td style="padding:6px 0;">${jobDetails.categoryLabel} × ${jobDetails.qty}${rushLabel}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6b7280;">Total</td><td style="padding:6px 0;font-weight:600;">$${totalDisplay} + GST</td></tr>
+                  <tr><td style="padding:6px 0;color:#6b7280;">Invoice #</td><td style="padding:6px 0;">${invoice.invoiceNumber}</td></tr>
+                  <tr><td style="padding:6px 0;color:#6b7280;">Sent at</td><td style="padding:6px 0;">${new Date().toLocaleString("en-CA", { timeZone: "America/Regina" })} CST</td></tr>
+                </table>
+                ${invoice.viewUrl ? `<div style="margin-top:16px;"><a href="${invoice.viewUrl}" style="background:#16C2F3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;font-size:14px;">View Wave Invoice</a></div>` : ""}
+              </div>
+            </div>`,
+          text: `Quote sent to ${name} (${customerEmail})\nJob: ${jobDetails.categoryLabel} × ${jobDetails.qty}${rushLabel}\nTotal: $${totalDisplay} + GST\nInvoice #: ${invoice.invoiceNumber}\n${invoice.viewUrl ? `View: ${invoice.viewUrl}` : ""}`,
+        });
+        console.log(`[quote/wave] staff notification sent → ${staffEmail}`);
+      } catch (notifyErr) {
+        console.error("[quote/wave] staff notification failed (non-fatal):", notifyErr);
       }
     }
 
