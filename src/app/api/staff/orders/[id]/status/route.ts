@@ -55,13 +55,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const supabase = createServiceClient();
 
-    const update: Record<string, unknown> = { status };
-
-    // Set timestamp columns on key transitions
-    if (status === "payment_received") update.paid_at = new Date().toISOString();
-    if (status === "ready_for_pickup") update.ready_at = new Date().toISOString();
-    if (status === "complete") update.completed_at = new Date().toISOString();
-
     // Guard: "complete" requires current status to be "ready_for_pickup"
     // Prevents review email going to customers who haven't actually picked up their order
     if (status === "complete") {
@@ -79,11 +72,26 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
-    const { error } = await supabase.from("orders").update(update).eq("id", id);
+    // Step 1: Update status (always succeeds — no optional columns)
+    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
 
     if (error) {
       console.error("[staff/orders/status]", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Step 2: Update timestamp columns — non-fatal if columns don't exist yet in schema
+    const timestamps: Record<string, string> = {};
+    if (status === "payment_received") timestamps.paid_at = new Date().toISOString();
+    if (status === "ready_for_pickup") timestamps.ready_at = new Date().toISOString();
+    if (status === "complete") timestamps.completed_at = new Date().toISOString();
+
+    if (Object.keys(timestamps).length > 0) {
+      const { error: tsError } = await supabase.from("orders").update(timestamps).eq("id", id);
+      if (tsError) {
+        // Non-fatal — status already saved. Columns may not exist yet (run migration).
+        console.warn("[staff/orders/status] timestamp update failed (run DB migration):", tsError.message);
+      }
     }
 
     // ── Status-change side effects (all non-fatal) ────────────────────────────
