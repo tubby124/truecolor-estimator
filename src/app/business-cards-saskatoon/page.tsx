@@ -22,7 +22,7 @@ export default function BusinessCardsSaskatoonPage() {
       subtitle="250 cards from $40. Double-sided, 14pt gloss. Ready in 1–3 business days."
       heroImage="/images/products/product/business-cards-800x600.webp"
       heroAlt="Business card printing in Saskatoon — 250 cards from $40 at True Color"
-      description="True Color Display Printing produces professional business cards for Saskatoon businesses. 250 double-sided cards on 14pt gloss stock start at $40 — less than you'd pay at Staples without the corporate markup. We print in-house, which means we control quality and turnaround. Cards are standard 3.5×2\" size, full-colour both sides, with a high-gloss finish. Same-day rush available for +$40 flat. In-house designer handles layout from your logo and contact info."
+      description="True Color Display Printing produces professional business cards for Saskatoon businesses. 250 double-sided cards on 14pt gloss stock start at $40 — less than you'd pay at Staples without the corporate markup. We print in-house, which means we control quality and turnaround. Cards are standard 3.5×2 inch size, full-colour both sides, with a high-gloss finish. Same-day rush available for +$40 flat. In-house designer handles layout from your logo and contact info."
       products={[
         { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
