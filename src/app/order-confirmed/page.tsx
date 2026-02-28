@@ -4,6 +4,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
+import { AccountSignupCard } from "@/components/site/AccountSignupCard";
 
 export const metadata: Metadata = {
   title: "Order Confirmed — True Color",
@@ -19,6 +20,7 @@ interface OrderSummary {
   total: number;
   payment_method: string;
   payment_reference: string | null;
+  customers?: { email: string } | Array<{ email: string }> | null;
 }
 
 export default async function OrderConfirmedPage({ searchParams }: Props) {
@@ -70,7 +72,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       // Fetch order details to show on confirmation page
       const { data } = await supabase
         .from("orders")
-        .select("order_number, total, payment_method, payment_reference")
+        .select("order_number, total, payment_method, payment_reference, customers(email)")
         .eq("id", oid)
         .single();
 
@@ -81,6 +83,9 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       // Non-fatal — show generic confirmation
     }
   }
+
+  const customerRaw = orderSummary?.customers;
+  const customerEmail = Array.isArray(customerRaw) ? customerRaw[0]?.email : customerRaw?.email;
 
   const isEtransfer = orderSummary?.payment_method === "etransfer";
   // For eTransfer orders, payment_reference holds the /pay/{token} card URL.
@@ -210,18 +215,22 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         </div>
 
         {/* Account prompt */}
-        <div className="border border-[#16C2F3]/30 rounded-2xl p-6 mb-8 bg-[#f0fbff]">
-          <h2 className="font-bold text-[#1c1712] text-base mb-1">Track this order anytime</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Create an account to see your order status and reorder in one click.
-          </p>
-          <Link
-            href="/account"
-            className="inline-block bg-[#16C2F3] text-white font-bold text-sm px-6 py-2.5 rounded-lg hover:bg-[#0fb0dd] transition-colors"
-          >
-            View my orders &rarr;
-          </Link>
-        </div>
+        {orderSummary?.order_number && customerEmail ? (
+          <AccountSignupCard email={customerEmail} orderNumber={orderSummary.order_number} />
+        ) : (
+          <div className="border border-[#16C2F3]/30 rounded-2xl p-6 mb-8 bg-[#f0fbff]">
+            <h2 className="font-bold text-[#1c1712] text-base mb-1">Track this order anytime</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Create an account to see your order status and reorder in one click.
+            </p>
+            <Link
+              href="/account"
+              className="inline-block bg-[#16C2F3] text-white font-bold text-sm px-6 py-2.5 rounded-lg hover:bg-[#0fb0dd] transition-colors"
+            >
+              View my orders &rarr;
+            </Link>
+          </div>
+        )}
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
