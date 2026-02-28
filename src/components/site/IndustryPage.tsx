@@ -30,8 +30,46 @@ export function IndustryPage({
   whyPoints,
   faqs,
 }: IndustryPageProps) {
+  // ── Structured data ──────────────────────────────────────────────────────────
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: title,
+    serviceType: "Print Service",
+    provider: {
+      "@type": "LocalBusiness",
+      name: "True Color Display Printing",
+      url: "https://truecolorprinting.ca",
+      telephone: "+13069548688",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "216 33rd St W",
+        addressLocality: "Saskatoon",
+        addressRegion: "SK",
+        postalCode: "S7L 0V2",
+        addressCountry: "CA",
+      },
+    },
+    areaServed: { "@type": "City", name: "Saskatoon" },
+    description,
+  };
+
+  const faqSchema = faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: { "@type": "Answer", text: faq.a },
+    })),
+  } : null;
+
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      )}
       <SiteNav />
 
       {/* Hero */}

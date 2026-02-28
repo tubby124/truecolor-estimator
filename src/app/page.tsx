@@ -124,11 +124,64 @@ const INDUSTRIES = [
   },
 ];
 
+// ─── Schema ────────────────────────────────────────────────────────────────────
+
+const homeFaqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "How much does printing cost in Saskatoon?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Coroplast signs start at $30. Vinyl banners start at $66. Business cards are $40 for 250 double-sided. See exact prices for any size and quantity at truecolorprinting.ca/quote — no quote forms needed.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Do you offer same-day printing in Saskatoon?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes — same-day rush printing is available for an additional $40 flat fee on any order. Order before 10 AM and call (306) 954-8688 to confirm capacity. Standard turnaround is 1–3 business days.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Where is True Color Display Printing located?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "216 33rd St W, Saskatoon, SK S7L 0V2. Open Monday–Friday 9 AM–5 PM. Free local pickup on all orders — no shipping wait.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Do I need to call for a quote?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "No — use the online estimator at truecolorprinting.ca/quote to see your exact price in 30 seconds. Pick your product, size, and quantity. No forms, no phone tag, no waiting.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What file format do I need for printing?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "PDF or JPG at 150 dpi minimum. No file? Our in-house designer handles artwork prep from a rough sketch or low-res logo, starting at $35. Vector files (AI, EPS) are also accepted.",
+      },
+    },
+  ],
+};
+
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqSchema) }}
+      />
       <SiteNav />
 
       {/* ── HERO SLIDER ──────────────────────────────────────────────────────── */}

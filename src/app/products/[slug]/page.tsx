@@ -22,9 +22,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) return { title: "Product Not Found" };
 
   return {
-    title: `${product.name} Saskatoon | ${product.fromPrice} | True Color Display Printing`,
-    description: `${product.tagline} ${product.description.slice(0, 100)}... Local pickup at 216 33rd St W, Saskatoon.`,
+    title: `${product.name} Saskatoon | ${product.fromPrice} | True Color`,
+    description: `${product.name} in Saskatoon — ${product.tagline} From ${product.fromPrice}. Order online, local pickup at 216 33rd St W.`,
     alternates: { canonical: `/products/${slug}` },
+    openGraph: {
+      title: `${product.name} Saskatoon | ${product.fromPrice} | True Color`,
+      description: `${product.name} in Saskatoon. ${product.tagline} From ${product.fromPrice}. Local pickup at 216 33rd St W.`,
+      url: `https://truecolorprinting.ca/products/${slug}`,
+      images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+      locale: "en_CA",
+      type: "website",
+    },
   };
 }
 
