@@ -1,16 +1,36 @@
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
-const WIDGET_URL =
+
+// ── Desktop widget — 3-column grid (layout 16) ───────────────────────────────
+const DESKTOP_WIDGET_URL =
   "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/content.html";
-// CSS URL reverse-engineered from loader.js:
-// getCDNUrl() + "assets/widget-presetted-css/" + layoutId + "-" + setId + ".css"
-// then replaced "widget-presetted-css/" → "widget-presetted-css/v{cssVersion}/"
+// CSS URL: getCDNUrl() + "assets/widget-presetted-css/v{cssVersion}/{layoutId}-{setId}.css"
 // data-layout-id="16", data-set-id="light-background", data-css-version="2"
-const CSS_URL =
+const DESKTOP_CSS_URL =
   "https://cdn.trustindex.io/assets/widget-presetted-css/v2/16-light-background.css";
 // Sprite sheet: all reviewer profile photos stacked vertically, 40px per row
-// loader.js: loadSpriteImage sets background: url(sprite.jpg) 0 -(index*40)px
-const SPRITE_URL =
+const DESKTOP_SPRITE_URL =
   "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/sprite.jpg";
+
+// ── Mobile widget — slider (layout 5) ────────────────────────────────────────
+// loader.js?3924add66dce01062296d322f53 — path prefix is first 2 chars ("39")
+const MOBILE_WIDGET_URL =
+  "https://cdn.trustindex.io/widgets/39/3924add66dce01062296d322f53/content.html";
+// data-layout-id="5", data-set-id="light-background", data-css-version="2"
+const MOBILE_CSS_URL =
+  "https://cdn.trustindex.io/assets/widget-presetted-css/v2/5-light-background.css";
+const MOBILE_SPRITE_URL =
+  "https://cdn.trustindex.io/widgets/39/3924add66dce01062296d322f53/sprite.jpg";
+
+// Override Trustindex slider to be swipeable with zero JS (native scroll-snap).
+// loader.js normally drives slide transitions via JS transforms; without it the
+// flex wrapper stays static and overflows. We flip overflow→auto + add
+// scroll-snap so touch users can swipe naturally between cards.
+const MOBILE_SCROLL_SNAP_CSS = `
+.ti-widget[data-layout-id='5'] .ti-reviews-container-wrapper{overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ti-widget[data-layout-id='5'] .ti-reviews-container-wrapper::-webkit-scrollbar{display:none}
+.ti-widget[data-layout-id='5'] .ti-review-item{flex:0 0 100%!important;max-width:100%!important;scroll-snap-align:start}
+.ti-widget[data-layout-id='5'] .ti-controls{display:none!important}
+`;
 
 function GoogleIcon() {
   return (
@@ -23,11 +43,16 @@ function GoogleIcon() {
   );
 }
 
-async function fetchWidgetHtml(): Promise<string | null> {
+async function fetchWidgetHtml(
+  widgetUrl: string,
+  cssUrl: string,
+  spriteUrl: string,
+  extraCss = "",
+): Promise<string | null> {
   try {
     const [widgetRes, cssRes] = await Promise.all([
-      fetch(WIDGET_URL, { next: { revalidate: 3600 } }),
-      fetch(CSS_URL,    { next: { revalidate: 86400 } }), // CSS rarely changes
+      fetch(widgetUrl, { next: { revalidate: 3600 } }),
+      fetch(cssUrl,    { next: { revalidate: 86400 } }), // CSS rarely changes
     ]);
     if (!widgetRes.ok) return null;
 
@@ -44,29 +69,37 @@ async function fetchWidgetHtml(): Promise<string | null> {
     const widgetWithSprites = widgetHtml.replace(
       /(<div[^>]+class="[^"]*ti-profile-img-sprite[^"]*"[^>]*)(>)/g,
       (_match, tag, close) => {
-        const bg = `background:url('${SPRITE_URL}') 0 -${spriteIdx * 40}px no-repeat`;
+        const bg = `background:url('${spriteUrl}') 0 -${spriteIdx * 40}px no-repeat`;
         spriteIdx++;
         return `${tag} style="${bg}"${close}`;
       }
     );
 
-    // Inline CSS + sprite-injected widget HTML — zero client-side requests
-    return `<style>${css}</style>\n${widgetWithSprites}`;
+    // Inline CSS (+ any overrides) + sprite-injected widget HTML
+    return `<style>${css}${extraCss}</style>\n${widgetWithSprites}`;
   } catch {
     return null;
   }
 }
 
 export async function ReviewsSection() {
-  const widgetHtml = await fetchWidgetHtml();
+  const [desktopHtml, mobileHtml] = await Promise.all([
+    fetchWidgetHtml(DESKTOP_WIDGET_URL, DESKTOP_CSS_URL, DESKTOP_SPRITE_URL),
+    fetchWidgetHtml(MOBILE_WIDGET_URL, MOBILE_CSS_URL, MOBILE_SPRITE_URL, MOBILE_SCROLL_SNAP_CSS),
+  ]);
 
   return (
     <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {widgetHtml ? (
-          /* Server-rendered widget — no JS loader, no CSP issues, no React conflict */
-          <div dangerouslySetInnerHTML={{ __html: widgetHtml }} />
-        ) : null}
+        {/* Desktop — 3-column grid, hidden on mobile */}
+        {desktopHtml && (
+          <div className="hidden md:block" dangerouslySetInnerHTML={{ __html: desktopHtml }} />
+        )}
+
+        {/* Mobile — CSS scroll-snap slider, hidden on desktop */}
+        {mobileHtml && (
+          <div className="md:hidden" dangerouslySetInnerHTML={{ __html: mobileHtml }} />
+        )}
 
         {/* Leave a review CTA */}
         <div className="mt-5 text-center">
