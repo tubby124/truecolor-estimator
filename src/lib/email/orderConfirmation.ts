@@ -32,8 +32,8 @@ export interface OrderConfirmationParams {
   payment_method: "clover_card" | "etransfer";
   checkout_url?: string; // Clover hosted checkout URL (card orders only)
   uploadedFileCount?: number; // number of artwork files the customer uploaded
-  /** Internal — base64 data URL for inline QR code. Set by sendOrderConfirmationEmail, not callers. */
-  qrDataUrl?: string;
+  /** Internal — CID for inline QR code (Brevo attachment). Set by sendOrderConfirmationEmail, not callers. */
+  qrCodeCid?: string;
 }
 
 
@@ -62,11 +62,12 @@ export async function sendOrderConfirmationEmail(
       ? `Complete your payment — Order ${orderNumber} · True Color Display Printing`
       : `Order ${orderNumber} received — True Color Display Printing`;
 
-  // Generate QR code as data URL for card orders with a payment link
-  let qrDataUrl: string | undefined;
+  // Generate QR code as buffer for card orders — use CID attachment (data URIs are stripped by Gmail)
+  const QR_CID = "order-payment-qr@truecolor";
+  let qrBuffer: Buffer | undefined;
   if (checkout_url) {
     try {
-      qrDataUrl = await QRCode.toDataURL(checkout_url, {
+      qrBuffer = await QRCode.toBuffer(checkout_url, {
         width: 160,
         margin: 2,
         color: { dark: "#1c1712", light: "#ffffff" },
@@ -76,7 +77,7 @@ export async function sendOrderConfirmationEmail(
     }
   }
 
-  const html = buildOrderConfirmationHtml({ ...params, qrDataUrl });
+  const html = buildOrderConfirmationHtml({ ...params, qrCodeCid: qrBuffer ? QR_CID : undefined });
   const text = buildOrderConfirmationText(params);
 
   await sendEmail({
@@ -86,6 +87,9 @@ export async function sendOrderConfirmationEmail(
     subject,
     html,
     text,
+    attachments: qrBuffer
+      ? [{ name: "payment-qr.png", content: qrBuffer.toString("base64"), contentId: QR_CID }]
+      : undefined,
   });
 
   console.log(
@@ -102,7 +106,7 @@ export async function sendOrderConfirmationEmail(
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
-  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, checkout_url, qrDataUrl, uploadedFileCount } = p;
+  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, checkout_url, qrCodeCid, uploadedFileCount } = p;
   const RUSH_FEE = 40;
 
   // ── Line items rows ──
@@ -167,10 +171,10 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
       </tr>`
     : "";
 
-  // ── QR code image tag (data URL — shows in Apple Mail, Outlook; Gmail may hide it) ──
-  const qrImg = qrDataUrl
+  // ── QR code image tag — CID inline attachment (works in all clients; data URIs stripped by Gmail) ──
+  const qrImg = qrCodeCid
     ? `<div style="text-align: center; margin: 14px 0 4px;">
-        <img src="${qrDataUrl}" width="120" height="120" alt="Scan to pay"
+        <img src="cid:${qrCodeCid}" width="120" height="120" alt="Scan to pay"
           style="border-radius: 8px; border: 3px solid #9a3412; display: inline-block;" />
         <p style="margin: 6px 0 0; font-size: 11px; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
           Scan with your phone to pay
