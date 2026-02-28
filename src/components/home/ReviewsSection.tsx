@@ -15,12 +15,16 @@ function GoogleIcon() {
 
 export function ReviewsSection() {
   return (
-    <section className="bg-white border-b border-gray-100 py-8 overflow-hidden">
+    <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Trustindex live Google reviews widget */}
+        {/* Trustindex live Google reviews widget — container div required for inline inject */}
+        <div
+          className="trustindex-widget"
+          data-url="https://www.trustindex.io/widget/c1b158266dfc004a71264ccddfe/"
+        />
         <Script
           src="https://cdn.trustindex.io/loader.js?c1b158266dfc004a71264ccddfe"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
 
         {/* Leave a review CTA */}
