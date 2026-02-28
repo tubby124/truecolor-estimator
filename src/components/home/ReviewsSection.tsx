@@ -1,47 +1,25 @@
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
 
-// ── Desktop widget — 3-column grid (layout 16) ───────────────────────────────
-const DESKTOP_WIDGET_URL =
+// ── Widget — 3-column grid (layout 16), used for both desktop and mobile ─────
+const WIDGET_URL =
   "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/content.html";
-// CSS URL: getCDNUrl() + "assets/widget-presetted-css/v{cssVersion}/{layoutId}-{setId}.css"
 // data-layout-id="16", data-set-id="light-background", data-css-version="2"
-const DESKTOP_CSS_URL =
+const WIDGET_CSS_URL =
   "https://cdn.trustindex.io/assets/widget-presetted-css/v2/16-light-background.css";
 // Sprite sheet: all reviewer profile photos stacked vertically, 40px per row
-const DESKTOP_SPRITE_URL =
+const WIDGET_SPRITE_URL =
   "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/sprite.jpg";
 
-// ── Mobile widget — slider (layout 5) ────────────────────────────────────────
-// loader.js?3924add66dce01062296d322f53 — path prefix is first 2 chars ("39")
-const MOBILE_WIDGET_URL =
-  "https://cdn.trustindex.io/widgets/39/3924add66dce01062296d322f53/content.html";
-// data-layout-id="5", data-set-id="light-background", data-css-version="2"
-const MOBILE_CSS_URL =
-  "https://cdn.trustindex.io/assets/widget-presetted-css/v2/5-light-background.css";
-const MOBILE_SPRITE_URL =
-  "https://cdn.trustindex.io/widgets/39/3924add66dce01062296d322f53/sprite.jpg";
-
-// Override Trustindex slider to be swipeable with zero JS (native scroll-snap).
-// Injected AFTER the widget HTML so it wins the cascade over the inline
-// <style class="scss-content"> block that Trustindex embeds at the end of
-// content.html (which uses !important with 3-attribute specificity).
-//
-// Three problems solved here:
-// 1. .ti-widget-container.ti-col-4 uses a sidebar layout (footer left, reviews
-//    right) → force display:block to stack vertically on mobile.
-// 2. .ti-reviews-container-wrapper has overflow:hidden → flip to overflow-x:auto
-//    + scroll-snap so users can swipe between cards with no JS.
-// 3. .ti-controls (prev/next arrows) are absolutely positioned and bleed outside
-//    the container. The inline SCSS re-enables them at max-width:479px with
-//    higher specificity. We match all 3 attribute selectors to win.
-const MOBILE_SCROLL_SNAP_CSS = `
-.ti-widget[data-layout-id='5'] .ti-widget-container{display:block!important;max-width:100%!important;overflow:hidden!important}
-.ti-widget[data-layout-id='5'] .ti-reviews-container{overflow:hidden!important;max-width:100%!important}
-.ti-widget[data-layout-id='5'] .ti-reviews-container-wrapper{overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0!important}
-.ti-widget[data-layout-id='5'] .ti-reviews-container-wrapper::-webkit-scrollbar{display:none}
-.ti-widget[data-layout-id='5'] .ti-review-item{flex:0 0 100%!important;max-width:100%!important;scroll-snap-align:start;box-sizing:border-box!important}
-.ti-widget[data-layout-id='5'][data-set-id='light-background'][data-pid='3924add66dce01062296d322f53'] .ti-controls{display:none!important}
-`;
+// On mobile (<768px): collapse the 3-column flex grid to 1-column and show
+// only the first 3 reviews. Layout 5 (slider) was dropped because it requires
+// JS to populate the review card heights — without the loader.js the cards
+// render as a zero-height collapsed container.
+const MOBILE_RESPONSIVE_CSS = `
+@media (max-width:767px){
+  .ti-widget[data-layout-id='16'] .ti-col-3 .ti-review-item{flex:0 0 100%!important;max-width:100%!important}
+  .ti-widget[data-layout-id='16'] .ti-review-item:nth-child(n+4){display:none!important}
+  .ti-widget[data-layout-id='16'] .ti-load-more,.ti-widget[data-layout-id='16'] .ti-more-btn{display:none!important}
+}`;
 
 function GoogleIcon() {
   return (
@@ -97,22 +75,19 @@ async function fetchWidgetHtml(
 }
 
 export async function ReviewsSection() {
-  const [desktopHtml, mobileHtml] = await Promise.all([
-    fetchWidgetHtml(DESKTOP_WIDGET_URL, DESKTOP_CSS_URL, DESKTOP_SPRITE_URL),
-    fetchWidgetHtml(MOBILE_WIDGET_URL, MOBILE_CSS_URL, MOBILE_SPRITE_URL, MOBILE_SCROLL_SNAP_CSS),
-  ]);
+  const widgetHtml = await fetchWidgetHtml(
+    WIDGET_URL,
+    WIDGET_CSS_URL,
+    WIDGET_SPRITE_URL,
+    MOBILE_RESPONSIVE_CSS,
+  );
 
   return (
     <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Desktop — 3-column grid, hidden on mobile */}
-        {desktopHtml && (
-          <div className="hidden md:block" dangerouslySetInnerHTML={{ __html: desktopHtml }} />
-        )}
-
-        {/* Mobile — CSS scroll-snap slider, hidden on desktop */}
-        {mobileHtml && (
-          <div className="md:hidden" dangerouslySetInnerHTML={{ __html: mobileHtml }} />
+        {/* Reviews widget — 3-col grid on desktop, 1-col (3 reviews) on mobile */}
+        {widgetHtml && (
+          <div dangerouslySetInnerHTML={{ __html: widgetHtml }} />
         )}
 
         {/* Leave a review CTA */}
