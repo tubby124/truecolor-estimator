@@ -22,14 +22,25 @@ const MOBILE_SPRITE_URL =
   "https://cdn.trustindex.io/widgets/39/3924add66dce01062296d322f53/sprite.jpg";
 
 // Override Trustindex slider to be swipeable with zero JS (native scroll-snap).
-// loader.js normally drives slide transitions via JS transforms; without it the
-// flex wrapper stays static and overflows. We flip overflow→auto + add
-// scroll-snap so touch users can swipe naturally between cards.
+// Injected AFTER the widget HTML so it wins the cascade over the inline
+// <style class="scss-content"> block that Trustindex embeds at the end of
+// content.html (which uses !important with 3-attribute specificity).
+//
+// Three problems solved here:
+// 1. .ti-widget-container.ti-col-4 uses a sidebar layout (footer left, reviews
+//    right) → force display:block to stack vertically on mobile.
+// 2. .ti-reviews-container-wrapper has overflow:hidden → flip to overflow-x:auto
+//    + scroll-snap so users can swipe between cards with no JS.
+// 3. .ti-controls (prev/next arrows) are absolutely positioned and bleed outside
+//    the container. The inline SCSS re-enables them at max-width:479px with
+//    higher specificity. We match all 3 attribute selectors to win.
 const MOBILE_SCROLL_SNAP_CSS = `
-.ti-widget[data-layout-id='5'] .ti-reviews-container-wrapper{overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ti-widget[data-layout-id='5'] .ti-widget-container{display:block!important;max-width:100%!important;overflow:hidden!important}
+.ti-widget[data-layout-id='5'] .ti-reviews-container{overflow:hidden!important;max-width:100%!important}
+.ti-widget[data-layout-id='5'] .ti-reviews-container-wrapper{overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0!important}
 .ti-widget[data-layout-id='5'] .ti-reviews-container-wrapper::-webkit-scrollbar{display:none}
-.ti-widget[data-layout-id='5'] .ti-review-item{flex:0 0 100%!important;max-width:100%!important;scroll-snap-align:start}
-.ti-widget[data-layout-id='5'] .ti-controls{display:none!important}
+.ti-widget[data-layout-id='5'] .ti-review-item{flex:0 0 100%!important;max-width:100%!important;scroll-snap-align:start;box-sizing:border-box!important}
+.ti-widget[data-layout-id='5'][data-set-id='light-background'][data-pid='3924add66dce01062296d322f53'] .ti-controls{display:none!important}
 `;
 
 function GoogleIcon() {
@@ -75,8 +86,11 @@ async function fetchWidgetHtml(
       }
     );
 
-    // Inline CSS (+ any overrides) + sprite-injected widget HTML
-    return `<style>${css}${extraCss}</style>\n${widgetWithSprites}`;
+    // Inline base CSS first, then widget HTML, then our overrides last.
+    // Overrides must come AFTER the widget HTML because content.html embeds an
+    // inline <style class="scss-content"> at its end with !important rules —
+    // putting our CSS after ensures we win the cascade regardless of specificity.
+    return `<style>${css}</style>\n${widgetWithSprites}${extraCss ? `\n<style>${extraCss}</style>` : ""}`;
   } catch {
     return null;
   }
