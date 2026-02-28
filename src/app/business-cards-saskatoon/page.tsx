@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export default function BusinessCardsSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="business-cards-saskatoon"
+      primaryProductSlug="business-cards"
       title="Business Cards Saskatoon"
       subtitle="250 cards from $40. Double-sided, 14pt gloss. Ready in 1–3 business days."
       heroImage="/images/products/product/business-cards-800x600.webp"

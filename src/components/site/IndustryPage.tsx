@@ -18,6 +18,10 @@ export interface IndustryPageProps {
   products: IndustryProduct[];
   whyPoints: string[];
   faqs: { q: string; a: string }[];
+  /** URL slug for this page (e.g. "coroplast-signs-saskatoon") — used for BreadcrumbList schema */
+  canonicalSlug?: string;
+  /** Product page slug for the primary CTA (e.g. "coroplast-signs") — links to /products/[slug] estimator */
+  primaryProductSlug?: string;
 }
 
 export function IndustryPage({
@@ -29,7 +33,11 @@ export function IndustryPage({
   products,
   whyPoints,
   faqs,
+  canonicalSlug,
+  primaryProductSlug,
 }: IndustryPageProps) {
+  const BASE_URL = "https://truecolorprinting.ca";
+
   // ── Structured data ──────────────────────────────────────────────────────────
   const serviceSchema = {
     "@context": "https://schema.org",
@@ -39,7 +47,7 @@ export function IndustryPage({
     provider: {
       "@type": "LocalBusiness",
       name: "True Color Display Printing",
-      url: "https://truecolorprinting.ca",
+      url: BASE_URL,
       telephone: "+13069548688",
       address: {
         "@type": "PostalAddress",
@@ -64,11 +72,25 @@ export function IndustryPage({
     })),
   } : null;
 
+  const breadcrumbSchema = canonicalSlug ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: title, item: `${BASE_URL}/${canonicalSlug}` },
+    ],
+  } : null;
+
+  const ctaHref = primaryProductSlug ? `/products/${primaryProductSlug}` : "/quote";
+
   return (
     <div className="min-h-screen bg-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       {faqSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      )}
+      {breadcrumbSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       )}
       <SiteNav />
 
@@ -136,10 +158,10 @@ export function IndustryPage({
           </ul>
         </div>
 
-        {/* CTA */}
+        {/* CTA — links to product estimator if primaryProductSlug provided, otherwise /quote */}
         <div className="text-center mb-14">
           <Link
-            href="/quote"
+            href={ctaHref}
             className="bg-[#16C2F3] text-white font-bold text-lg px-10 py-4 rounded-lg hover:bg-[#0fb0dd] transition-colors"
           >
             Get My Price →

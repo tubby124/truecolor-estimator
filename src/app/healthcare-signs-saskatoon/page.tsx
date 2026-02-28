@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export default function HealthcareSignsSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="healthcare-signs-saskatoon"
+      primaryProductSlug="acp-signs"
       title="Healthcare Signs Saskatoon"
       subtitle="Clinic signage, wayfinding, and patient-facing displays. Professional and compliant."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"

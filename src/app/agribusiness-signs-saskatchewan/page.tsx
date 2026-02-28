@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export default function AgribusinessSignsSaskatchewanPage() {
   return (
     <IndustryPage
+      canonicalSlug="agribusiness-signs-saskatchewan"
+      primaryProductSlug="coroplast-signs"
       title="Agribusiness Signs Saskatchewan"
       subtitle="Farm signs, equipment branding, and field signage built for Saskatchewan conditions."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"

@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export default function BannerPrintingSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="banner-printing-saskatoon"
+      primaryProductSlug="vinyl-banners"
       title="Banner Printing Saskatoon"
       subtitle="13oz vinyl banners from $8.25/sqft. Any size. Grommets included. Same-day rush available."
       heroImage="/images/products/product/banner-vinyl-colorful-800x600.webp"

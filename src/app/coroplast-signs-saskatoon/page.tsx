@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export default function CoroplastSignsSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="coroplast-signs-saskatoon"
+      primaryProductSlug="coroplast-signs"
       title="Coroplast Signs Saskatoon"
       subtitle="From $8/sqft. Same-day available. Pick up at 216 33rd St W."
       heroImage="/images/products/product/coroplast-yard-sign-800x600.webp"

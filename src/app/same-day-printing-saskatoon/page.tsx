@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 export default function SameDayPrintingSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="same-day-printing-saskatoon"
       title="Same Day Printing Saskatoon"
       subtitle="Order before 10 AM — pick up by 5 PM. Rush is +$40 flat, no per-item upcharge."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
