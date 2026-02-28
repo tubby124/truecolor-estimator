@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
 
 function GoogleIcon() {
@@ -12,11 +16,30 @@ function GoogleIcon() {
 }
 
 export function ReviewsSection() {
+  const placeholderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const placeholder = placeholderRef.current;
+    if (!placeholder) return;
+
+    // Create div.ti-widget imperatively — outside React's fiber tree so
+    // Trustindex's replaceWith() doesn't conflict with React reconciliation
+    const widgetDiv = document.createElement('div');
+    widgetDiv.className = 'ti-widget';
+    placeholder.appendChild(widgetDiv);
+
+    // Append script to placeholder — loader finds div.ti-widget and injects there
+    const script = document.createElement('script');
+    script.src = 'https://cdn.trustindex.io/loader.js?c1b158266dfc004a71264ccddfe';
+    script.async = true;
+    placeholder.appendChild(script);
+  }, []);
+
   return (
     <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {/* loader.js (in layout.tsx) scans DOM for div.ti-widget and injects reviews here */}
-        <div className="ti-widget" />
+        {/* Empty placeholder — widget div + script injected imperatively in useEffect */}
+        <div ref={placeholderRef} />
 
         {/* Leave a review CTA */}
         <div className="mt-5 text-center">

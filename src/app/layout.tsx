@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { BackToTop } from "@/components/site/BackToTop";
 
@@ -114,11 +113,6 @@ export default function RootLayout({
         </a>
         {children}
         <BackToTop />
-        {/* Trustindex: load globally so it finds div.ti-widget anywhere in the DOM */}
-        <Script
-          src="https://cdn.trustindex.io/loader.js?c1b158266dfc004a71264ccddfe"
-          strategy="afterInteractive"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
