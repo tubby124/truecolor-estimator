@@ -7,6 +7,10 @@ const WIDGET_URL =
 // data-layout-id="16", data-set-id="light-background", data-css-version="2"
 const CSS_URL =
   "https://cdn.trustindex.io/assets/widget-presetted-css/v2/16-light-background.css";
+// Sprite sheet: all reviewer profile photos stacked vertically, 40px per row
+// loader.js: loadSpriteImage sets background: url(sprite.jpg) 0 -(index*40)px
+const SPRITE_URL =
+  "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/sprite.jpg";
 
 function GoogleIcon() {
   return (
@@ -32,8 +36,22 @@ async function fetchWidgetHtml(): Promise<string | null> {
       cssRes.ok ? cssRes.text() : Promise.resolve(""),
     ]);
 
-    // Inline the CSS so the widget is fully styled with zero client-side requests
-    return `<style>${css}</style>\n${widgetHtml}`;
+    // Inject sprite background-positions server-side.
+    // loader.js normally does this in JS: querySelectorAll(".ti-profile-img-sprite")
+    // then sets style.background = url(sprite.jpg) at 0 -(index*40)px per reviewer.
+    // CSS confirms height:40px for this layout. We replicate that here.
+    let spriteIdx = 0;
+    const widgetWithSprites = widgetHtml.replace(
+      /(<div[^>]+class="[^"]*ti-profile-img-sprite[^"]*"[^>]*)(>)/g,
+      (_match, tag, close) => {
+        const bg = `background:url('${SPRITE_URL}') 0 -${spriteIdx * 40}px no-repeat`;
+        spriteIdx++;
+        return `${tag} style="${bg}"${close}`;
+      }
+    );
+
+    // Inline CSS + sprite-injected widget HTML — zero client-side requests
+    return `<style>${css}</style>\n${widgetWithSprites}`;
   } catch {
     return null;
   }
