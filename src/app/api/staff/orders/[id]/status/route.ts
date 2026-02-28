@@ -55,23 +55,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const supabase = createServiceClient();
 
-    // Guard: "complete" requires current status to be "ready_for_pickup"
-    // Prevents review email going to customers who haven't actually picked up their order
-    if (status === "complete") {
-      const { data: currentOrder } = await supabase
-        .from("orders")
-        .select("status")
-        .eq("id", id)
-        .single();
-
-      if (currentOrder?.status !== "ready_for_pickup") {
-        return NextResponse.json(
-          { error: "Order must be marked 'Ready for Pickup' before completing" },
-          { status: 400 }
-        );
-      }
-    }
-
     // Step 1: Update status (always succeeds — no optional columns)
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
 
