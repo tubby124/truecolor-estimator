@@ -31,7 +31,7 @@ function getTransporter() {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   if (!host || !user || !pass) throw new Error("SMTP not configured");
-  return nodemailer.createTransport({ host, port, secure, auth: { user, pass } });
+  return nodemailer.createTransport({ host, port, secure, auth: { user, pass }, connectionTimeout: 10_000, greetingTimeout: 5_000, socketTimeout: 15_000 });
 }
 
 // ─── Entry point ──────────────────────────────────────────────────────────────

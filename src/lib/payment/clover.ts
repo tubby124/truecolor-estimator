@@ -61,6 +61,7 @@ export async function createCloverCheckout(
       Accept: "application/json",
     },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!res.ok) {
