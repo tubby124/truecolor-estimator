@@ -401,13 +401,30 @@ export function SiteNav() {
                   <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Staff View</span>
                   <span className="text-xs text-gray-500 truncate">· {mobileAuth.email}</span>
                 </div>
+                {/* Primary CTA: Make a Quote (estimator) */}
+                <Link
+                  href="/staff"
+                  onClick={() => setDrawerOpen(false)}
+                  className="flex items-center justify-between w-full bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 py-3.5 rounded-md transition-colors min-h-[44px] mb-2"
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Make a Quote
+                  </span>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                {/* Secondary: Staff Portal (orders) + Sign Out */}
                 <div className="flex gap-2">
                   <Link
                     href="/staff/orders"
                     onClick={() => setDrawerOpen(false)}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 py-3 rounded-md transition-colors min-h-[44px]"
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-3 rounded-md transition-colors min-h-[44px]"
                   >
-                    Staff Portal →
+                    Orders
                   </Link>
                   <button
                     onClick={handleMobileSignOut}

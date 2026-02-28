@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { createServiceClient } from "@/lib/supabase/server";
 import { OrdersTable } from "./OrdersTable";
+import { LOGO_PATH } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Orders — True Color Staff",
@@ -24,9 +24,40 @@ export default async function StaffOrdersPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <SiteNav />
+      {/* Staff header — mirrors the estimator header for consistency */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-3">
+          {/* Left: logo + page title */}
+          <div className="flex items-center gap-3 min-w-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={LOGO_PATH} alt="True Color Display Printing" className="h-8 w-auto object-contain flex-shrink-0" />
+            <span className="text-sm font-semibold text-[#1c1712] truncate">Orders</span>
+          </div>
 
-      <main id="main-content" className="max-w-5xl mx-auto px-6 py-12">
+          {/* Right: nav actions */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link
+              href="/"
+              className="inline-flex items-center min-h-[44px] px-2 text-xs text-gray-400 hover:text-gray-600 transition-colors whitespace-nowrap"
+              aria-label="Back to website"
+            >
+              ← Website
+            </Link>
+            <Link
+              href="/staff"
+              className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
+              aria-label="Open staff estimator to create a new quote"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>Make a Quote</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <main id="main-content" className="max-w-5xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#1c1712]">Orders</h1>
