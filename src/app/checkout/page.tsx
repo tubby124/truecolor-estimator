@@ -613,7 +613,15 @@ export default function CheckoutPage() {
                 type="file"
                 multiple
                 accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
-                onChange={(e) => setArtworkFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])])}
+                onChange={(e) => {
+                  const MAX = 50 * 1024 * 1024;
+                  const files = Array.from(e.target.files ?? []);
+                  const valid = files.filter((f) => f.size <= MAX);
+                  const oversized = files.filter((f) => f.size > MAX);
+                  if (oversized.length > 0) setError(`File too large: ${oversized.map((f) => f.name).join(", ")} — max 50 MB each.`);
+                  if (valid.length > 0) setArtworkFiles((prev) => [...prev, ...valid]);
+                  e.target.value = "";
+                }}
                 className="hidden"
               />
               <div
@@ -624,8 +632,12 @@ export default function CheckoutPage() {
                 onDrop={(e) => {
                   e.preventDefault();
                   e.currentTarget.classList.remove("border-blue-400", "bg-blue-50");
+                  const MAX = 50 * 1024 * 1024;
                   const dropped = Array.from(e.dataTransfer.files);
-                  if (dropped.length > 0) setArtworkFiles((prev) => [...prev, ...dropped]);
+                  const valid = dropped.filter((f) => f.size <= MAX);
+                  const oversized = dropped.filter((f) => f.size > MAX);
+                  if (oversized.length > 0) setError(`File too large: ${oversized.map((f) => f.name).join(", ")} — max 50 MB each.`);
+                  if (valid.length > 0) setArtworkFiles((prev) => [...prev, ...valid]);
                 }}
               >
                 {artworkFiles.length > 0 ? (

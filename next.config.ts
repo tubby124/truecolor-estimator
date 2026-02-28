@@ -7,8 +7,37 @@ const nextConfig: NextConfig = {
   // so Turbopack/webpack don't try to bundle the .node binary
   serverExternalPackages: ["@resvg/resvg-js"],
 
+  async redirects() {
+    return [
+      // /restaurants → canonical geo URL
+      {
+        source: "/restaurants",
+        destination: "/restaurant-signs-saskatoon",
+        permanent: true,
+      },
+      // /agriculture-signs-saskatoon → keep (don't redirect — different keyword target)
+      // /election-signs → keep canonical (has "Saskatoon" in title/content)
+    ];
+  },
+
   async headers() {
     return [
+      // ── Noindex: transactional + private pages ────────────────────────────
+      ...[
+        "/cart",
+        "/checkout",
+        "/order-confirmed",
+        "/pay/:path*",
+        "/staff/:path*",
+        "/account",
+        "/account/:path*",
+        "/quote/:path+",
+        "/api/:path*",
+      ].map((source) => ({
+        source,
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      })),
+      // ── Security headers on all routes ───────────────────────────────────
       {
         source: "/(.*)",
         headers: [

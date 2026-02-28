@@ -103,12 +103,18 @@ export function HeroSlider() {
 
             {/* Text side */}
             <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-10 bg-[#1c1712]">
+              {/* Page H1 — only in first slide DOM so there's exactly one H1 on the page */}
+              {i === 0 && (
+                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight mb-4">
+                  Price it. Proof it. Pick it up today.
+                </h1>
+              )}
               <p className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">
                 {slide.accentWord}
               </p>
-              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
+              <p className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
                 {slide.headline}
-              </h1>
+              </p>
               <p className="text-gray-300 text-base md:text-lg max-w-sm mb-8 leading-relaxed">
                 {slide.sub}
               </p>

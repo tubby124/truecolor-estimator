@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Election Campaign Signs Saskatoon | Volume Coroplast Pricing | True Color",
+  title: "Election Signs Saskatoon & Saskatchewan | Volume Coroplast | True Color",
   description:
-    "Coroplast yard signs for Saskatoon-area campaigns. Volume pricing at $7.25/sqft. Fast turnaround. H-stakes at $2.50 each. No corporate account needed.",
+    "Coroplast election yard signs in Saskatoon and Saskatchewan. Volume pricing from $7.25/sqft (32+ sqft). H-stakes $2.50 each. Double-sided available. Call (306) 954-8688.",
   alternates: { canonical: "/election-signs" },
 };
 
