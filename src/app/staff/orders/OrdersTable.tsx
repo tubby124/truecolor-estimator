@@ -136,6 +136,8 @@ export function OrdersTable({ initialOrders }: Props) {
 
   // ── Archive ────────────────────────────────────────────────────────────────────
   const [archiveLoading, setArchiveLoading] = useState<Set<string>>(new Set());
+  // Tracks which order has a pending "Mark complete" confirmation (terminal state guard)
+  const [confirmingComplete, setConfirmingComplete] = useState<string | null>(null);
   const { toasts, showToast, dismissToast } = useToast();
 
   // ── Live sync ──────────────────────────────────────────────────────────────────
@@ -303,9 +305,15 @@ export function OrdersTable({ initialOrders }: Props) {
 
   // ── Status advance / override ──────────────────────────────────────────────
 
-  async function handleStatusUpdate(orderId: string, newStatus: (typeof VALID_STATUSES)[number]) {
+  async function handleStatusUpdate(
+    orderId: string,
+    newStatus: (typeof VALID_STATUSES)[number],
+    orderNumber: string,
+  ) {
+    const prevStatus = orders.find((o) => o.id === orderId)?.status;
     setLoadingStatus(orderId);
     setStatusError(null);
+    setConfirmingComplete(null);
     try {
       const res = await fetch(`/api/staff/orders/${orderId}/status`, {
         method: "PATCH",
@@ -318,8 +326,18 @@ export function OrdersTable({ initialOrders }: Props) {
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
       setOverrideStatus((prev) => ({ ...prev, [orderId]: newStatus }));
+      showToast(`${orderNumber} → ${STATUS_LABELS[newStatus]}`, "success");
     } catch (err) {
-      setStatusError(err instanceof Error ? err.message : "Failed to update status");
+      // Roll back optimistic UI to previous status
+      if (prevStatus) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: prevStatus } : o))
+        );
+        setOverrideStatus((prev) => ({ ...prev, [orderId]: prevStatus }));
+      }
+      setStatusError(
+        `${orderNumber}: ${err instanceof Error ? err.message : "Failed to update status"}`,
+      );
     } finally {
       setLoadingStatus(null);
     }
@@ -697,13 +715,37 @@ export function OrdersTable({ initialOrders }: Props) {
                     {/* Action buttons */}
                     <div className="flex items-center gap-2 shrink-0">
                       {nextStatus && !order.is_archived && (
-                        <button
-                          onClick={() => handleStatusUpdate(order.id, nextStatus as (typeof VALID_STATUSES)[number])}
-                          disabled={isLoadingStatus}
-                          className="bg-[#1c1712] hover:bg-black disabled:opacity-60 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-                        >
-                          {isLoadingStatus ? "Updating…" : NEXT_LABEL[order.status]}
-                        </button>
+                        confirmingComplete === order.id ? (
+                          <>
+                            <button
+                              onClick={() => setConfirmingComplete(null)}
+                              className="text-sm px-3 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => void handleStatusUpdate(order.id, nextStatus as (typeof VALID_STATUSES)[number], order.order_number)}
+                              disabled={isLoadingStatus}
+                              className="bg-[#1c1712] hover:bg-black disabled:opacity-60 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                            >
+                              {isLoadingStatus ? "Sending…" : "Yes — sends review email"}
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              if (nextStatus === "complete") {
+                                setConfirmingComplete(order.id);
+                              } else {
+                                void handleStatusUpdate(order.id, nextStatus as (typeof VALID_STATUSES)[number], order.order_number);
+                              }
+                            }}
+                            disabled={isLoadingStatus}
+                            className="bg-[#1c1712] hover:bg-black disabled:opacity-60 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                          >
+                            {isLoadingStatus ? "Updating…" : NEXT_LABEL[order.status]}
+                          </button>
+                        )
                       )}
                       <button
                         onClick={() => setExpandedId(isExpanded ? null : order.id)}
@@ -971,7 +1013,7 @@ export function OrdersTable({ initialOrders }: Props) {
                           ))}
                         </select>
                         <button
-                          onClick={() => handleStatusUpdate(order.id, currentOverride as (typeof VALID_STATUSES)[number])}
+                          onClick={() => void handleStatusUpdate(order.id, currentOverride as (typeof VALID_STATUSES)[number], order.order_number)}
                           disabled={isLoadingStatus || currentOverride === order.status}
                           className="text-sm font-semibold px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                         >
