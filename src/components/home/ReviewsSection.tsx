@@ -1,6 +1,12 @@
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
 const WIDGET_URL =
   "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/content.html";
+// CSS URL reverse-engineered from loader.js:
+// getCDNUrl() + "assets/widget-presetted-css/" + layoutId + "-" + setId + ".css"
+// then replaced "widget-presetted-css/" → "widget-presetted-css/v{cssVersion}/"
+// data-layout-id="16", data-set-id="light-background", data-css-version="2"
+const CSS_URL =
+  "https://cdn.trustindex.io/assets/widget-presetted-css/v2/16-light-background.css";
 
 function GoogleIcon() {
   return (
@@ -15,20 +21,19 @@ function GoogleIcon() {
 
 async function fetchWidgetHtml(): Promise<string | null> {
   try {
-    const res = await fetch(WIDGET_URL, {
-      next: { revalidate: 3600 }, // refresh reviews every hour
-    });
-    if (!res.ok) return null;
-    const raw = await res.text();
+    const [widgetRes, cssRes] = await Promise.all([
+      fetch(WIDGET_URL, { next: { revalidate: 3600 } }),
+      fetch(CSS_URL,    { next: { revalidate: 86400 } }), // CSS rarely changes
+    ]);
+    if (!widgetRes.ok) return null;
 
-    // Extract <style> blocks from anywhere in the document
-    const styles = (raw.match(/<style[\s\S]*?<\/style>/gi) ?? []).join("\n");
+    const [widgetHtml, css] = await Promise.all([
+      widgetRes.text(),
+      cssRes.ok ? cssRes.text() : Promise.resolve(""),
+    ]);
 
-    // Extract body content (the actual widget HTML)
-    const bodyMatch = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    const body = bodyMatch ? bodyMatch[1].trim() : raw;
-
-    return styles + "\n" + body;
+    // Inline the CSS so the widget is fully styled with zero client-side requests
+    return `<style>${css}</style>\n${widgetHtml}`;
   } catch {
     return null;
   }
