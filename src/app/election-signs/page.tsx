@@ -17,9 +17,9 @@ export default function ElectionSignsPage() {
       heroAlt="Election campaign coroplast yard signs Saskatoon"
       description="Campaign timing is everything. True Color prints coroplast yard signs with volume pricing — no corporate account, no broker markup. Tier 3 pricing kicks in at 32+ sqft, which is just 10 signs at 24×36 in. H-stakes at $2.50 each. Consistent color across every single sign."
       products={[
-        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
-        { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-aluminum-signs" },
-        { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
+        { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
+        { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
+        { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
       ]}
       whyPoints={[
         "Volume discount at 32+ sqft — 10 signs of 24×36\" qualifies for $7.25/sqft",
