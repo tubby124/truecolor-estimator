@@ -41,8 +41,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protect all /staff/* routes except /staff/login itself
+  const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
   if (path.startsWith("/staff") && !path.startsWith("/staff/login")) {
-    if (!user) {
+    if (!user || user.email !== staffEmail) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/staff/login";
       return NextResponse.redirect(loginUrl);

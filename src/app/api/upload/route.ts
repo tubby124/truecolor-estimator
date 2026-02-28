@@ -10,7 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
 
 const MAX_FILE_SIZE = 52_428_800; // 50 MB
 
@@ -26,6 +26,9 @@ const ALLOWED_MIME_TYPES = [
 const ALLOWED_EXTENSIONS = /\.(pdf|ai|eps|jpg|jpeg|png|webp)$/i;
 
 export async function POST(req: NextRequest) {
+  const user = await getSessionUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const form = await req.formData();
     const file = form.get("file") as File | null;
