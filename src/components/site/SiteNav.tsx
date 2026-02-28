@@ -7,6 +7,8 @@ import { CartIcon } from "@/components/site/CartIcon";
 import { AccountIcon } from "@/components/site/AccountIcon";
 import { StaffQuoteButton } from "@/components/site/StaffQuoteButton";
 import { QuoteModal } from "@/components/QuoteModal";
+import { User } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const PRODUCT_CATEGORIES = [
   {
@@ -55,6 +57,8 @@ export function SiteNav() {
   const [openMenu, setOpenMenu] = useState<"products" | "industries" | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [mobileAuth, setMobileAuth] = useState<{ email: string; isStaff: boolean } | null>(null);
+  const [mobileAuthLoaded, setMobileAuthLoaded] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   const productsTriggerRef = useRef<HTMLButtonElement>(null);
   const industriesTriggerRef = useRef<HTMLButtonElement>(null);
@@ -145,6 +149,28 @@ export function SiteNav() {
       items[Math.max(idx - 1, 0)]?.focus();
     }
   }, []);
+
+  // Auth state for mobile drawer
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => {
+      const email = data.session?.user?.email ?? null;
+      setMobileAuth(email ? { email, isStaff: email.toLowerCase() === "info@true-color.ca" } : null);
+      setMobileAuthLoaded(true);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const email = session?.user?.email ?? null;
+      setMobileAuth(email ? { email, isStaff: email.toLowerCase() === "info@true-color.ca" } : null);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  async function handleMobileSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setMobileAuth(null);
+    setDrawerOpen(false);
+  }
 
   function toggleMenu(menu: "products" | "industries") {
     setOpenMenu((prev) => (prev === menu ? null : menu));
@@ -295,9 +321,7 @@ export function SiteNav() {
             >
               (306) 954-8688
             </a>
-            <span className="hidden sm:block">
-              <AccountIcon />
-            </span>
+            <AccountIcon />
             <CartIcon />
             <span className="hidden sm:block">
               <StaffQuoteButton />
@@ -347,6 +371,76 @@ export function SiteNav() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
+          </div>
+
+          {/* ── Mobile Auth Block ── */}
+          <div className="px-6 py-4 border-b border-white/10">
+            {!mobileAuthLoaded ? null : !mobileAuth ? (
+              /* Logged out — prominent Sign In CTA */
+              <div>
+                <Link
+                  href="/account"
+                  onClick={() => setDrawerOpen(false)}
+                  className="flex items-center justify-between w-full bg-[#16C2F3] text-white text-sm font-bold px-4 py-3.5 rounded-md hover:bg-[#0fb0dd] transition-colors min-h-[44px]"
+                >
+                  <span className="flex items-center gap-2">
+                    <User className="w-4 h-4" strokeWidth={2} />
+                    Sign In / Create Account
+                  </span>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                <p className="text-xs text-gray-500 mt-2 px-1">Track your orders &amp; save your info for next time</p>
+              </div>
+            ) : mobileAuth.isStaff ? (
+              /* Staff logged in */
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2 h-2 bg-amber-400 rounded-full" />
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Staff View</span>
+                  <span className="text-xs text-gray-500 truncate">· {mobileAuth.email}</span>
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    href="/staff/orders"
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 py-3 rounded-md transition-colors min-h-[44px]"
+                  >
+                    Staff Portal →
+                  </Link>
+                  <button
+                    onClick={handleMobileSignOut}
+                    className="flex items-center justify-center px-4 py-3 border border-gray-600 text-gray-400 hover:text-white hover:border-white text-sm rounded-md transition-colors min-h-[44px]"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Customer logged in */
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2 h-2 bg-green-400 rounded-full" />
+                  <span className="text-xs text-gray-400">Signed in</span>
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    href="/account"
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/15 text-white text-sm font-medium px-4 py-3 rounded-md transition-colors min-h-[44px]"
+                  >
+                    My Orders →
+                  </Link>
+                  <button
+                    onClick={handleMobileSignOut}
+                    className="flex items-center justify-center px-4 py-3 border border-gray-600 text-gray-400 hover:text-white hover:border-white text-sm rounded-md transition-colors min-h-[44px]"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <nav aria-label="Mobile navigation" className="px-6 py-6 space-y-8">
@@ -426,20 +520,6 @@ export function SiteNav() {
             >
               (306) 954-8688
             </a>
-
-            {/* My Account */}
-            <Link
-              href="/account"
-              onClick={() => setDrawerOpen(false)}
-              className="block text-base text-gray-300 hover:text-white transition-colors"
-            >
-              My Account / Orders
-            </Link>
-
-            {/* Staff CTA — only visible for info@true-color.ca */}
-            <div onClick={() => setDrawerOpen(false)}>
-              <StaffQuoteButton />
-            </div>
 
             {/* Customer CTA */}
             <Link
