@@ -1,5 +1,71 @@
 # True Color Estimator — Next Steps
-**Updated:** 2026-02-24 | Waiting on owner input or external assets.
+**Updated:** 2026-02-28 | truecolorprinting.ca LIVE on Railway. DNS cutover COMPLETE.
+
+---
+
+## ⚡ SEO + WEBSITE REVAMP — Master Task List
+*Full audit: `research/website/SEO_CUTOVER_AUDIT_20260228.md`*
+*All copy pre-written: `research/content/website_copy.md` + `seo_keywords.md`*
+*Skills: `/truecolor-seo` (bible) · `/new-seo-page` (scaffold) · `/seo-audit` · `/schema-markup` · `/copy-editing`*
+
+### PHASE 1 — Technical Fixes
+| # | Priority | Task | Status |
+|---|---|---|---|
+| 1 | 🔴 | Check Hostinger for old URLs → 301 redirects in `next.config.ts` | 🕐 OWNER: check Hostinger file manager |
+| 2 | 🔴 | noindex on all transactional pages | ✅ DONE — commit 7845377 |
+| 3 | 🔴 | Google Search Console → verify domain → submit sitemap | 🕐 OWNER ACTION |
+
+### PHASE 2 — SEO Landing Pages
+| # | Page | Status |
+|---|---|---|
+| 4–9 | All 6 geo landing pages | ✅ DONE — all exist with Service+FAQPage+BreadcrumbList schema |
+| — | 10 additional landing pages | ✅ DONE — see SEO Sprint in MEMORY.md |
+
+### PHASE 3 — Homepage
+| # | Task | Status |
+|---|---|---|
+| 10 | Hero H1 → "Price it. Proof it. Pick it up today." | ✅ DONE — already live |
+| 11 | Pricing callouts | ✅ DONE — $30/$45/$40 in pitch block |
+| 12 | FAQPage schema (5 questions) | ✅ DONE — `homeFaqSchema` in page.tsx |
+| 13 | Fix review dates | ✅ DONE — Trustindex live widget renders real dates |
+| 14 | Icon 404s (apple-icon, icon) | ✅ CODE DONE — stop-gap uses truecolorlogo.png. **OWNER: drop proper PNGs into `public/`** |
+| 15 | HeroSlider single H1 | ✅ DONE — only slide 0 renders H1 |
+| 16 | Trust signals above checkout | ✅ DONE — trust strip in checkout |
+| — | Fix 3 broken industry tile links | ✅ DONE — commit 6f09518 |
+
+### PHASE 4 — Product Pages SEO
+| # | Task | Status |
+|---|---|---|
+| 17 | FAQPage schema on product pages | ✅ DONE — `product.faqs` → FAQPage JSON-LD in products/[slug]/page.tsx |
+| 18 | Metadata audit (title/description/OG) | ✅ DONE — dynamic `${name} Saskatoon \| ${price} \| True Color` on all 16 |
+| 19 | Service schema on product pages | ✅ DONE — commit 6f09518 |
+| 20 | 200+ word educational intros | 🟡 PENDING — low urgency, high effort |
+| 21 | `/quote-request` metadata | ✅ DONE — `src/app/quote-request/layout.tsx` commit 6f09518 |
+
+### PHASE 5 — Industry Pages
+| # | Task | Status |
+|---|---|---|
+| 22 | Service + FAQPage schema on all industry pages | ✅ DONE — IndustryPage.tsx has both |
+| 23 | BreadcrumbList on all industry pages | ✅ DONE — `canonicalSlug` prop on all 11 pages commit 6f09518 |
+| 24 | `/restaurants` 301 redirect | ✅ DONE — `next.config.ts` |
+| 25 | `/election-signs` Saskatoon in metadata + H1 | ✅ DONE — title + H1 both include "Saskatoon" |
+| 26 | Real estate page spring improvements | 🟡 PENDING — spring listing season NOW |
+
+### PHASE 6 — GBP + Off-Page (Owner Actions Required)
+| # | Priority | Task | Notes |
+|---|---|---|---|
+| 27 | 🔴 | GBP: upload 20+ photos | Ranking factor #1 for local |
+| 28 | 🔴 | Replace `REPLACE_WITH_GOOGLE_PLACE_ID` in `reviewRequest.ts:32` | Unlocks auto review requests |
+| 29 | 🟠 | Submit to 8 Canadian directories | NAP citation = local signal |
+| 30 | 🟡 | GBP: add Q&A section | Appears in Google Maps panel |
+| 31 | 🕐 | **Drop `public/apple-icon.png` (512×512) + `public/icon.png` (32×32)`** | ChatGPT prompts in session notes |
+
+---
+
+### SEO Quick Answer
+> **The old Hostinger site was NOT captured** — DNS flipped before we could scrape it. The good news: the old site was only *appearing* (not dominating) for a few terms. The new Railway site already has stronger SEO than the old site. The `research/content/` folder has everything needed to rank: keyword map, full page copy, competitor analysis. Nothing was lost that can't be rebuilt.
+
+---
 
 ---
 

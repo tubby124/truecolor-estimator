@@ -253,6 +253,57 @@ When Spicers data arrives: update `materials.v1.csv`, set `is_placeholder=FALSE`
 
 ---
 
+## SEO Standards — Always Enforce
+
+> **Every page you build or edit is an SEO asset.** This site competes in Saskatoon's local print market. No competitor has a content grade above C. We answer every question they refuse to answer. Always check SEO before shipping.
+
+Run `/truecolor-seo` before building or editing any page. The command contains: keyword targets, competitor intel, schema templates, a page checklist, and links to all pre-written copy.
+
+### Auto-Checklist for Any Page Edit
+
+Before committing any change to a page:
+
+| Check | Requirement |
+|---|---|
+| `title` | 50–60 chars · starts with primary keyword · ends with `\| True Color Printing Saskatoon` |
+| `description` | 150–160 chars · keyword + price mention + location |
+| H1 | Contains primary keyword · ONE per page only |
+| URL | `/keyword-saskatoon` or `/keyword-saskatchewan` format |
+| Pricing | Real prices from CSV — NEVER "contact for pricing" |
+| CTA above fold | "Get an instant price" → `/products/[slug]` |
+| Schema | Service + FAQPage + BreadcrumbList on every landing page |
+| noindex | MUST be on: `/pay/[token]`, `/cart`, `/checkout`, `/order-confirmed`, `/staff/*` |
+| Sitemap | New page added to `src/app/sitemap.ts` |
+| Internal links | ≥2 links to product pages |
+
+### Priority Landing Pages (NOT YET BUILT — build these in order)
+
+| # | Page | Keyword | Vol/mo | Copy source |
+|---|---|---|---|---|
+| 1 | `/coroplast-signs-saskatoon` | coroplast signs saskatoon | 100–300 | `seo_keywords.md` L304 |
+| 2 | `/same-day-printing-saskatoon` | same day printing saskatoon | 200–400 | `seo_keywords.md` L224 |
+| 3 | `/agribusiness-signs-saskatchewan` | agribusiness signs sask | 50–150 | `website_copy.md` L249 ← FULL COPY READY |
+| 4 | `/healthcare-signs-saskatoon` | healthcare signs saskatoon | 20–80 | `website_copy.md` L403 ← FULL COPY READY |
+| 5 | `/banner-printing-saskatoon` | banner printing saskatoon | 200–500 | `seo_keywords.md` L278 |
+| 6 | `/business-cards-saskatoon` | business cards saskatoon | 150–350 | `seo_keywords.md` L252 |
+
+### Schema Required on Every Landing Page
+
+Three schema types — all JSON-LD in `<script type="application/ld+json">`:
+1. **Service** — `serviceType`, `areaServed: Saskatoon`, `offers.price` (real price from CSV)
+2. **FAQPage** — minimum 3 questions from the 50-question list in `competitor_content_audit.md`
+3. **BreadcrumbList** — home → this page
+
+### SEO Research Files
+
+All copy is pre-written. Never write copy from scratch — use these:
+- `research/content/website_copy.md` — complete copy for 6 industry pages
+- `research/content/seo_keywords.md` — keyword map + copy briefs for all Tier 1 pages
+- `research/content/competitor_content_audit.md` — 50 questions to answer + competitor gaps
+- `research/website/SEO_DOMINATION_PLAN_20260228.md` — master competitive strategy + page briefs
+
+---
+
 ## UX Standards — Always Enforce
 
 Run these skills before shipping any UI or order feature:
