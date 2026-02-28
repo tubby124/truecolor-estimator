@@ -8,7 +8,7 @@
  * If the proof is a PDF: shows a download button instead.
  */
 
-import { getSmtpTransporter } from "./smtp";
+import { sendEmail } from "./smtp";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,8 +38,7 @@ export async function sendProofEmail(params: ProofSentParams): Promise<void> {
   const html = buildHtml(params);
   const text = buildText(params);
 
-  const transporter = await getSmtpTransporter();
-  await transporter.sendMail({ from, to: params.customerEmail, subject, html, text });
+  await sendEmail({ from, to: params.customerEmail, subject, html, text });
 
   console.log(
     `[proofSent] email sent → ${params.customerEmail} | ${params.orderNumber}`

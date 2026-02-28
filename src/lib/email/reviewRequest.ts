@@ -8,7 +8,7 @@
  *
  */
 
-import { getSmtpTransporter } from "./smtp";
+import { sendEmail } from "./smtp";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,8 +33,7 @@ export async function sendReviewRequestEmail(
   const html = buildReviewRequestEmailHtml(params);
   const text = buildReviewRequestEmailText(params);
 
-  const transporter = await getSmtpTransporter();
-  await transporter.sendMail({
+  await sendEmail({
     from,
     to: params.customerEmail,
     subject,

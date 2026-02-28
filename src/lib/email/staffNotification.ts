@@ -12,7 +12,7 @@
  */
 
 import { createServiceClient } from "@/lib/supabase/server";
-import { getSmtpTransporter } from "./smtp";
+import { sendEmail } from "./smtp";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -85,9 +85,7 @@ export async function sendStaffOrderNotification(
   const html = buildStaffNotificationHtml(params, fileLinks, siteUrl);
   const text = buildStaffNotificationText(params, fileLinks, siteUrl);
 
-  const transporter = await getSmtpTransporter();
-
-  await transporter.sendMail({
+  await sendEmail({
     from,
     to: staffEmail,
     subject,
@@ -531,8 +529,7 @@ export async function sendCustomerFileRevisionNotification(
     "True Color Display Printing — Internal staff notification",
   ].join("\n");
 
-  const transporter = await getSmtpTransporter();
-  await transporter.sendMail({ from, to: staffEmail, subject, html, text });
+  await sendEmail({ from, to: staffEmail, subject, html, text });
   console.log(`[staffNotification] file revision sent → ${staffEmail} | order ${orderNumber}`);
 }
 

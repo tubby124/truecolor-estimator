@@ -12,7 +12,7 @@
  * No email for: pending_payment (customer already has confirmation), complete (staff-side only)
  */
 
-import { getSmtpTransporter } from "./smtp";
+import { sendEmail } from "./smtp";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,8 +35,7 @@ export async function sendOrderStatusEmail(params: StatusUpdateParams): Promise<
   const html = buildHtml(params);
   const text = buildText(params);
 
-  const transporter = await getSmtpTransporter();
-  await transporter.sendMail({ from, to: params.customerEmail, subject, html, text });
+  await sendEmail({ from, to: params.customerEmail, subject, html, text });
 
   console.log(
     `[statusUpdate] email sent → ${params.customerEmail} | ${params.orderNumber} | status: ${params.status}`

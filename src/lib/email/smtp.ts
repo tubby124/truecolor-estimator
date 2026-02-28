@@ -1,45 +1,85 @@
-import nodemailer from "nodemailer";
-import dns from "dns/promises";
-
 /**
- * Creates a nodemailer SMTP transporter, forcing IPv4 DNS resolution.
+ * src/lib/email/smtp.ts
  *
- * Railway (and many cloud hosts) have no outbound IPv6 routing.
- * smtp.hostinger.com resolves via Cloudflare to both A and AAAA records;
- * without this, Node.js picks the IPv6 address and throws ENETUNREACH.
+ * Sends transactional email via Brevo REST API (HTTPS, port 443).
  *
- * We call dns.resolve4() to get the IPv4 address explicitly, then pass it
- * as `host` while setting `tls.servername` to the original hostname so TLS
- * certificate verification still passes.
+ * WHY: Railway Hobby plan ($5/mo) blocks ALL outbound SMTP ports (25, 465,
+ * 587, 2525) at the platform firewall level — no DNS trick, no nodemailer
+ * config, no Brevo SMTP relay (also port 587), no alternate port fixes this.
+ *
+ * SOLUTION: Brevo transactional email REST API over HTTPS (port 443).
+ * Railway does not block outbound HTTPS. No nodemailer needed.
+ *
+ * Required env var: BREVO_API_KEY  (Brevo → Settings → API Keys → v3 key)
+ * Sender display name still reads from: SMTP_FROM env var (unchanged)
  */
-export async function getSmtpTransporter() {
-  const smtpHost = process.env.SMTP_HOST ?? "";
-  const port = parseInt(process.env.SMTP_PORT ?? "465");
-  const secure = process.env.SMTP_SECURE !== "false";
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
 
-  if (!smtpHost || !user || !pass) {
-    throw new Error("SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASS");
+interface EmailRecipient {
+  email: string;
+  name?: string;
+}
+
+export interface SendEmailOptions {
+  from?: string;
+  to: string | string[];
+  bcc?: string | string[];
+  subject: string;
+  html: string;
+  text?: string;
+  priority?: "high" | "normal" | "low";
+}
+
+/** Parse "Display Name <addr@example.com>" or bare "addr@example.com" */
+function parseAddress(addr: string): EmailRecipient {
+  const match = addr.match(/^(.+?)\s*<(.+?)>$/);
+  if (match) return { name: match[1].trim(), email: match[2].trim() };
+  return { email: addr.trim() };
+}
+
+function toRecipientList(addr: string | string[]): EmailRecipient[] {
+  return (Array.isArray(addr) ? addr : [addr]).map(parseAddress);
+}
+
+export async function sendEmail(options: SendEmailOptions): Promise<void> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "BREVO_API_KEY not configured — add it to Railway Variables " +
+        "(Brevo Dashboard → Settings → API Keys → Generate new key)"
+    );
   }
 
-  // Resolve to IPv4 explicitly — bypasses Node.js DNS preference settings entirely.
-  let host = smtpHost;
-  try {
-    const [ipv4] = await dns.resolve4(smtpHost);
-    if (ipv4) host = ipv4;
-  } catch {
-    console.warn("[smtp] dns.resolve4 failed for", smtpHost, "— falling back to hostname");
+  const fromRaw =
+    options.from ??
+    process.env.SMTP_FROM ??
+    "True Color Display Printing <info@true-color.ca>";
+
+  const body: Record<string, unknown> = {
+    sender: parseAddress(fromRaw),
+    to: toRecipientList(options.to),
+    subject: options.subject,
+    htmlContent: options.html,
+  };
+
+  if (options.text) body.textContent = options.text;
+  if (options.bcc) body.bcc = toRecipientList(options.bcc);
+  if (options.priority === "high") {
+    body.headers = { "X-Priority": "1", Importance: "High" };
   }
 
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-    tls: { servername: smtpHost }, // TLS SNI must match original hostname, not resolved IP
-    connectionTimeout: 10_000,
-    greetingTimeout: 5_000,
-    socketTimeout: 15_000,
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": apiKey,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15_000),
   });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    throw new Error(`Brevo API error ${res.status}: ${errText}`);
+  }
 }
