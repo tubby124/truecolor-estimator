@@ -1,4 +1,7 @@
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
+// Google Maps place page — opens to the reviews tab
+const GOOGLE_ALL_REVIEWS_URL =
+  "https://www.google.com/maps/place/?q=place_id:ChIJ96tVovr3BFMRkfoeVs16NAA";
 
 // ── Widget — 3-column grid (layout 16), used for both desktop and mobile ─────
 const WIDGET_URL =
@@ -10,15 +13,15 @@ const WIDGET_CSS_URL =
 const WIDGET_SPRITE_URL =
   "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/sprite.jpg";
 
-// On mobile (<768px): collapse the 3-column flex grid to 1-column and show
-// only the first 3 reviews. Layout 5 (slider) was dropped because it requires
-// JS to populate the review card heights — without the loader.js the cards
-// render as a zero-height collapsed container.
+// On mobile (<768px): collapse to 1-column, show 6 reviews, fix centering.
+// Layout 5 (slider) was dropped — it requires JS to set card heights at runtime;
+// without loader.js the ti-reviews-container-wrapper collapses to zero height.
 const MOBILE_RESPONSIVE_CSS = `
 @media (max-width:767px){
   .ti-widget[data-layout-id='16'] .ti-col-3 .ti-review-item{flex:0 0 100%!important;max-width:100%!important}
-  .ti-widget[data-layout-id='16'] .ti-review-item:nth-child(n+4){display:none!important}
-  .ti-widget[data-layout-id='16'] .ti-load-more,.ti-widget[data-layout-id='16'] .ti-more-btn{display:none!important}
+  .ti-widget[data-layout-id='16'] .ti-review-item:nth-child(n+7){display:none!important}
+  .ti-widget[data-layout-id='16'] .ti-load-more-reviews-container{display:none!important}
+  .ti-widget[data-layout-id='16'] .ti-reviews-container .ti-reviews-container-wrapper{margin-bottom:0!important}
 }`;
 
 function GoogleIcon() {
@@ -85,10 +88,23 @@ export async function ReviewsSection() {
   return (
     <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Reviews widget — 3-col grid on desktop, 1-col (3 reviews) on mobile */}
+        {/* Reviews widget — 3-col grid on desktop, 1-col (6 reviews) on mobile */}
         {widgetHtml && (
           <div dangerouslySetInnerHTML={{ __html: widgetHtml }} />
         )}
+
+        {/* Mobile only — see all reviews link (widget shows 6 of 27) */}
+        <div className="md:hidden mt-4 text-center">
+          <a
+            href={GOOGLE_ALL_REVIEWS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
+          >
+            <GoogleIcon />
+            <span>See all 27 reviews on Google</span>
+          </a>
+        </div>
 
         {/* Leave a review CTA */}
         <div className="mt-5 text-center">
