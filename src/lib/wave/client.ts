@@ -36,6 +36,7 @@ export async function waveQuery<T = unknown>(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ query, variables: variables ?? {} }),
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!res.ok) {
