@@ -1,8 +1,6 @@
-'use client';
-
-import { useEffect, useRef } from 'react';
-
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
+const WIDGET_URL =
+  "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/content.html";
 
 function GoogleIcon() {
   return (
@@ -15,31 +13,37 @@ function GoogleIcon() {
   );
 }
 
-export function ReviewsSection() {
-  const placeholderRef = useRef<HTMLDivElement>(null);
+async function fetchWidgetHtml(): Promise<string | null> {
+  try {
+    const res = await fetch(WIDGET_URL, {
+      next: { revalidate: 3600 }, // refresh reviews every hour
+    });
+    if (!res.ok) return null;
+    const raw = await res.text();
 
-  useEffect(() => {
-    const placeholder = placeholderRef.current;
-    if (!placeholder) return;
+    // Extract <style> blocks from anywhere in the document
+    const styles = (raw.match(/<style[\s\S]*?<\/style>/gi) ?? []).join("\n");
 
-    // Create div.ti-widget imperatively — outside React's fiber tree so
-    // Trustindex's replaceWith() doesn't conflict with React reconciliation
-    const widgetDiv = document.createElement('div');
-    widgetDiv.className = 'ti-widget';
-    placeholder.appendChild(widgetDiv);
+    // Extract body content (the actual widget HTML)
+    const bodyMatch = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    const body = bodyMatch ? bodyMatch[1].trim() : raw;
 
-    // Append script to placeholder — loader finds div.ti-widget and injects there
-    const script = document.createElement('script');
-    script.src = 'https://cdn.trustindex.io/loader.js?c1b158266dfc004a71264ccddfe';
-    script.async = true;
-    placeholder.appendChild(script);
-  }, []);
+    return styles + "\n" + body;
+  } catch {
+    return null;
+  }
+}
+
+export async function ReviewsSection() {
+  const widgetHtml = await fetchWidgetHtml();
 
   return (
     <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Empty placeholder — widget div + script injected imperatively in useEffect */}
-        <div ref={placeholderRef} />
+        {widgetHtml ? (
+          /* Server-rendered widget — no JS loader, no CSP issues, no React conflict */
+          <div dangerouslySetInnerHTML={{ __html: widgetHtml }} />
+        ) : null}
 
         {/* Leave a review CTA */}
         <div className="mt-5 text-center">
