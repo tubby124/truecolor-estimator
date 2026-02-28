@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
-import nodemailer from "nodemailer";
+import { sendEmail } from "@/lib/email/smtp";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -55,22 +55,6 @@ export async function POST(req: NextRequest, { params }: Params) {
         { status: 400 }
       );
     }
-
-    // Build transporter (same as orderConfirmation.ts)
-    const host = process.env.SMTP_HOST;
-    const port = parseInt(process.env.SMTP_PORT ?? "465");
-    const secure = process.env.SMTP_SECURE !== "false";
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-
-    if (!host || !user || !pass) {
-      return NextResponse.json(
-        { error: "SMTP not configured" },
-        { status: 500 }
-      );
-    }
-
-    const transporter = nodemailer.createTransport({ host, port, secure, auth: { user, pass } });
 
     const from =
       process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
@@ -132,7 +116,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const text = `Hi ${customer.name},\n\n${message}\n\nRef: ${order.order_number}\n\n—\nTrue Color Display Printing\n216 33rd St W, Saskatoon, SK\n(306) 954-8688\ninfo@true-color.ca`;
 
-    await transporter.sendMail({
+    await sendEmail({
       from,
       to: customer.email,
       subject: subject.trim(),

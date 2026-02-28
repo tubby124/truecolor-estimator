@@ -1,8 +1,8 @@
-import nodemailer from "nodemailer";
 import QRCode from "qrcode";
 import { buildQuoteEmailHtml, buildDiagramSvgXml, type QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { EstimateResponse } from "@/lib/engine/types";
 import { encodePaymentToken } from "@/lib/payment/token";
+import { sendEmail, type SendEmailAttachment } from "@/lib/email/smtp";
 
 interface SendQuoteRequest {
   to: string;
@@ -16,25 +16,6 @@ interface SendQuoteRequest {
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function getTransporter() {
-  const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT ?? "465");
-  const secure = process.env.SMTP_SECURE !== "false"; // default true
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (!host || !user || !pass) {
-    throw new Error("SMTP environment variables not configured (SMTP_HOST, SMTP_USER, SMTP_PASS)");
-  }
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-  });
 }
 
 export async function POST(req: Request) {
@@ -102,56 +83,33 @@ export async function POST(req: Request) {
       ? `Your Quote from True Color Display Printing — ${jobDetails.categoryLabel}`
       : `Quote from True Color Display Printing — ${jobDetails.categoryLabel}`;
 
-    const transporter = getTransporter();
+    // Build attachment array for Brevo API (base64 content + optional contentId for CID inline)
+    const attachments: SendEmailAttachment[] = [];
 
-    // Build attachment array
-    type MailAttachment = {
-      filename: string;
-      content: Buffer;
-      contentType: string;
-      cid?: string;
-    };
-    const attachments: MailAttachment[] = [];
-
-    // Proof image — inline CID (renders in email body) + still downloadable as attachment
+    // Proof image — inline CID (renders in email body)
     if (proofImage?.dataUrl) {
       const base64Data = proofImage.dataUrl.replace(/^data:[^;]+;base64,/, "");
-      attachments.push({
-        filename: proofImage.filename,
-        content: Buffer.from(base64Data, "base64"),
-        contentType: proofImage.mimeType,
-        cid: PROOF_CID,
-      });
+      attachments.push({ name: proofImage.filename, content: base64Data, contentId: PROOF_CID });
     }
 
     // Spec diagram PNG — inline CID (renders the product diagram in email body)
     if (diagramBuffer) {
-      attachments.push({
-        filename: "diagram.png",
-        content: diagramBuffer,
-        contentType: "image/png",
-        cid: DIAGRAM_CID,
-      });
+      attachments.push({ name: "diagram.png", content: diagramBuffer.toString("base64"), contentId: DIAGRAM_CID });
     }
 
-    // QR code as inline CID attachment (not a visible attachment — embedded in HTML)
+    // QR code — inline CID (embedded in HTML payment block)
     if (qrCodeBuffer) {
-      attachments.push({
-        filename: "qrcode.png",
-        content: qrCodeBuffer,
-        contentType: "image/png",
-        cid: QR_CID,
-      });
+      attachments.push({ name: "qrcode.png", content: qrCodeBuffer.toString("base64"), contentId: QR_CID });
     }
 
-    await transporter.sendMail({
+    await sendEmail({
       from,
       to,
       bcc,
       subject,
       html,
       text: buildPlainText({ customerName, note, quoteData, jobDetails, hasProofAttachment, paymentUrl }),
-      ...(attachments.length > 0 ? { attachments } : {}),
+      attachments: attachments.length > 0 ? attachments : undefined,
     });
 
     return Response.json({ success: true });

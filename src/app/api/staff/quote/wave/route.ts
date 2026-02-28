@@ -10,8 +10,8 @@
  */
 
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 import { getSessionUser } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email/smtp";
 import type { EstimateResponse } from "@/lib/engine/types";
 import {
   createOrFindWaveCustomer,
@@ -105,13 +105,7 @@ export async function POST(req: Request) {
         const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
         const rushLabel = jobDetails.isRush ? " 🚨 RUSH" : "";
         const totalDisplay = quoteData.sell_price?.toFixed(2) ?? "?";
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: parseInt(process.env.SMTP_PORT ?? "465"),
-          secure: process.env.SMTP_SECURE !== "false",
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-        await transporter.sendMail({
+        await sendEmail({
           from: process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>",
           to: staffEmail,
           subject: `[Quote Sent] ${name} — ${jobDetails.categoryLabel} ×${jobDetails.qty}${rushLabel} — $${totalDisplay}`,

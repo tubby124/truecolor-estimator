@@ -19,14 +19,22 @@ interface EmailRecipient {
   name?: string;
 }
 
+export interface SendEmailAttachment {
+  content: string; // base64 encoded
+  name: string;
+  contentId?: string; // set to enable CID inline image: <img src="cid:contentId">
+}
+
 export interface SendEmailOptions {
   from?: string;
   to: string | string[];
   bcc?: string | string[];
+  replyTo?: string;
   subject: string;
   html: string;
   text?: string;
   priority?: "high" | "normal" | "low";
+  attachments?: SendEmailAttachment[];
 }
 
 /** Parse "Display Name <addr@example.com>" or bare "addr@example.com" */
@@ -63,8 +71,16 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
 
   if (options.text) body.textContent = options.text;
   if (options.bcc) body.bcc = toRecipientList(options.bcc);
+  if (options.replyTo) body.replyTo = parseAddress(options.replyTo);
   if (options.priority === "high") {
     body.headers = { "X-Priority": "1", Importance: "High" };
+  }
+  if (options.attachments?.length) {
+    body.attachment = options.attachments.map((a) => {
+      const att: Record<string, string> = { content: a.content, name: a.name };
+      if (a.contentId) att.contentId = a.contentId;
+      return att;
+    });
   }
 
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {

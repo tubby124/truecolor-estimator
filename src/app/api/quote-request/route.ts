@@ -7,8 +7,8 @@
  * that was triggered when files were base64-encoded in JSON).
  */
 import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email/smtp";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -35,15 +35,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST ?? "smtp.hostinger.com",
-      port: Number(process.env.SMTP_PORT ?? 465),
-      secure: true,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
 
     const subject = isCustom
       ? `Custom Quote Request — ${name}`
@@ -105,8 +97,8 @@ export async function POST(req: NextRequest) {
     const htmlWithFile = html.replace("FILE_PLACEHOLDER", fileSection);
 
     // Send to staff
-    await transporter.sendMail({
-      from: `"True Color Website" <${process.env.SMTP_USER}>`,
+    await sendEmail({
+      from,
       to: process.env.STAFF_EMAIL ?? "info@true-color.ca",
       replyTo: email,
       subject,
@@ -114,8 +106,8 @@ export async function POST(req: NextRequest) {
     });
 
     // Send confirmation to customer
-    await transporter.sendMail({
-      from: `"True Color Display Printing" <${process.env.SMTP_USER}>`,
+    await sendEmail({
+      from,
       to: email,
       subject: "Got your quote request — True Color Display Printing",
       html: `
