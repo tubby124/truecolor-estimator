@@ -56,7 +56,7 @@ function getTransporter() {
     throw new Error("SMTP environment variables not configured — need SMTP_HOST, SMTP_USER, SMTP_PASS");
   }
 
-  return nodemailer.createTransport({ host, port, secure, auth: { user, pass }, family: 4, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 30000 });
+  return nodemailer.createTransport({ host, port, secure, auth: { user, pass }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 30000 });
 }
 
 // ─── Signed file URLs via service role ───────────────────────────────────────
