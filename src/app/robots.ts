@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/staff", "/api/", "/pay/"],
+        disallow: ["/staff", "/api/", "/pay/", "/cart", "/checkout", "/order-confirmed", "/account"],
       },
     ],
     sitemap: "https://truecolorprinting.ca/sitemap.xml",
