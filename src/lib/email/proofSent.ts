@@ -8,7 +8,7 @@
  * If the proof is a PDF: shows a download button instead.
  */
 
-import nodemailer from "nodemailer";
+import { getSmtpTransporter } from "./smtp";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,18 +30,6 @@ export interface ProofSentParams {
   }>;
 }
 
-// ─── Transporter ──────────────────────────────────────────────────────────────
-
-function getTransporter() {
-  const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT ?? "465");
-  const secure = process.env.SMTP_SECURE !== "false";
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  if (!host || !user || !pass) throw new Error("SMTP not configured");
-  return nodemailer.createTransport({ host, port, secure, auth: { user, pass }, connectionTimeout: 10_000, greetingTimeout: 5_000, socketTimeout: 15_000 });
-}
-
 // ─── Entry point ──────────────────────────────────────────────────────────────
 
 export async function sendProofEmail(params: ProofSentParams): Promise<void> {
@@ -50,7 +38,7 @@ export async function sendProofEmail(params: ProofSentParams): Promise<void> {
   const html = buildHtml(params);
   const text = buildText(params);
 
-  const transporter = getTransporter();
+  const transporter = await getSmtpTransporter();
   await transporter.sendMail({ from, to: params.customerEmail, subject, html, text });
 
   console.log(

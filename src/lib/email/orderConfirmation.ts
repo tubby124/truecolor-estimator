@@ -7,8 +7,8 @@
  * Nodemailer transporter pattern mirrors /api/email/send/route.ts.
  */
 
-import nodemailer from "nodemailer";
 import QRCode from "qrcode";
+import { getSmtpTransporter } from "./smtp";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,31 +36,6 @@ export interface OrderConfirmationParams {
   qrCodeCid?: string;
 }
 
-// ─── Transporter (same pattern as /api/email/send/route.ts) ───────────────────
-
-function getTransporter() {
-  const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT ?? "465");
-  const secure = process.env.SMTP_SECURE !== "false"; // default true
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (!host || !user || !pass) {
-    throw new Error(
-      "SMTP environment variables not configured — need SMTP_HOST, SMTP_USER, SMTP_PASS"
-    );
-  }
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-    connectionTimeout: 10_000,
-    greetingTimeout: 5_000,
-    socketTimeout: 15_000,
-  });
-}
 
 // ─── Public entry point ───────────────────────────────────────────────────────
 
@@ -112,7 +87,7 @@ export async function sendOrderConfirmationEmail(
   const html = buildOrderConfirmationHtml({ ...params, qrCodeCid });
   const text = buildOrderConfirmationText(params);
 
-  const transporter = getTransporter();
+  const transporter = await getSmtpTransporter();
 
   await transporter.sendMail({
     from,

@@ -11,8 +11,8 @@
  *   - eTransfer warning to NOT start printing until payment confirmed
  */
 
-import nodemailer from "nodemailer";
 import { createServiceClient } from "@/lib/supabase/server";
+import { getSmtpTransporter } from "./smtp";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,21 +43,6 @@ export interface StaffOrderNotificationParams {
   siteUrl: string;
 }
 
-// ─── Transporter ─────────────────────────────────────────────────────────────
-
-function getTransporter() {
-  const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT ?? "465");
-  const secure = process.env.SMTP_SECURE !== "false";
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (!host || !user || !pass) {
-    throw new Error("SMTP environment variables not configured — need SMTP_HOST, SMTP_USER, SMTP_PASS");
-  }
-
-  return nodemailer.createTransport({ host, port, secure, auth: { user, pass }, connectionTimeout: 10_000, greetingTimeout: 5_000, socketTimeout: 15_000 });
-}
 
 // ─── Signed file URLs via service role ───────────────────────────────────────
 
@@ -100,7 +85,7 @@ export async function sendStaffOrderNotification(
   const html = buildStaffNotificationHtml(params, fileLinks, siteUrl);
   const text = buildStaffNotificationText(params, fileLinks, siteUrl);
 
-  const transporter = getTransporter();
+  const transporter = await getSmtpTransporter();
 
   await transporter.sendMail({
     from,
@@ -546,7 +531,7 @@ export async function sendCustomerFileRevisionNotification(
     "True Color Display Printing — Internal staff notification",
   ].join("\n");
 
-  const transporter = getTransporter();
+  const transporter = await getSmtpTransporter();
   await transporter.sendMail({ from, to: staffEmail, subject, html, text });
   console.log(`[staffNotification] file revision sent → ${staffEmail} | order ${orderNumber}`);
 }
