@@ -1,7 +1,3 @@
-'use client';
-
-import { useEffect, useRef } from 'react';
-
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
 
 function GoogleIcon() {
@@ -16,27 +12,11 @@ function GoogleIcon() {
 }
 
 export function ReviewsSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    // Inject script directly into container so Trustindex renders the widget here
-    const script = document.createElement('script');
-    script.src = 'https://cdn.trustindex.io/loader.js?c1b158266dfc004a71264ccddfe';
-    script.async = true;
-    script.defer = true;
-    container.appendChild(script);
-    return () => {
-      if (container.contains(script)) container.removeChild(script);
-    };
-  }, []);
-
   return (
     <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Trustindex live Google reviews widget */}
-        <div ref={containerRef} />
+        {/* loader.js (in layout.tsx) scans DOM for div.ti-widget and injects reviews here */}
+        <div className="ti-widget" />
 
         {/* Leave a review CTA */}
         <div className="mt-5 text-center">
