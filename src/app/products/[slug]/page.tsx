@@ -84,12 +84,42 @@ export default async function ProductPage({ params }: Props) {
     })),
   } : null;
 
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: `${product.name} Saskatoon`,
+    serviceType: "Print Service",
+    description: product.tagline,
+    provider: {
+      "@type": "LocalBusiness",
+      name: "True Color Display Printing",
+      url: "https://truecolorprinting.ca",
+      telephone: "+13069548688",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "216 33rd St W",
+        addressLocality: "Saskatoon",
+        addressRegion: "SK",
+        postalCode: "S7L 0V2",
+        addressCountry: "CA",
+      },
+    },
+    areaServed: { "@type": "City", name: "Saskatoon" },
+    offers: {
+      "@type": "Offer",
+      price: priceNum,
+      priceCurrency: "CAD",
+      availability: "https://schema.org/InStock",
+    },
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
 
       {/* Structured data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {faqJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />

@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function RealEstatePage() {
   return (
     <IndustryPage
+      canonicalSlug="real-estate-signs-saskatoon"
       title="Real Estate Signs Saskatoon"
       subtitle="Your listing goes live Tuesday. Your sign should too."
       heroImage="/images/products/heroes/realestate-exp-hero-1200x500.webp"

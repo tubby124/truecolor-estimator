@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function ConstructionPage() {
   return (
     <IndustryPage
+      canonicalSlug="construction-signs-saskatoon"
       title="Construction Signs Saskatoon"
       subtitle="Job site signs, truck magnets, and business cards. Ready when your crew is."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"

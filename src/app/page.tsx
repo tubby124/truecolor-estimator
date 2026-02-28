@@ -108,19 +108,19 @@ const INDUSTRIES = [
     name: "Healthcare",
     tagline: "Clinic wayfinding & banners",
     img: "/images/products/heroes/healthcare-hero-1200x500.webp",
-    href: "/healthcare-printing-saskatoon",
+    href: "/healthcare-signs-saskatoon",
   },
   {
-    name: "Retail & Franchise",
-    tagline: "Window decals, banners & promo print",
+    name: "Retail & Restaurants",
+    tagline: "Window decals, banners & menus",
     img: "/images/products/heroes/retail-hero-1200x500.webp",
-    href: "/retail-signs-saskatoon",
+    href: "/restaurant-signs-saskatoon",
   },
   {
     name: "Sports & Events",
     tagline: "Banners, backdrops & event signage",
     img: "/images/products/heroes/sports-hero-1200x500.webp",
-    href: "/sports-banners-saskatoon",
+    href: "/event-banners",
   },
 ];
 

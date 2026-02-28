@@ -11,6 +11,8 @@ export const metadata: Metadata = {
 export default function ElectionSignsPage() {
   return (
     <IndustryPage
+      canonicalSlug="election-signs"
+      primaryProductSlug="coroplast-signs"
       title="Election Campaign Signs Saskatoon"
       subtitle="Volume pricing. Fast turnaround. No runaround."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"

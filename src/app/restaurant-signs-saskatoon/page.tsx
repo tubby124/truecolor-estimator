@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 export default function RestaurantSignsSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="restaurant-signs-saskatoon"
       title="Restaurant Signs Saskatoon"
       subtitle="Menu boards, banners, and window graphics. Ready when your restaurant needs them."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"

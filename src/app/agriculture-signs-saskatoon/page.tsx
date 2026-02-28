@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function AgriculturePage() {
   return (
     <IndustryPage
+      canonicalSlug="agriculture-signs-saskatoon"
       title="Agriculture Signs Saskatchewan"
       subtitle="From farm gates to trade shows — printed in Saskatoon."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
