@@ -39,7 +39,7 @@
 | 17 | FAQPage schema on product pages | ✅ DONE — `product.faqs` → FAQPage JSON-LD in products/[slug]/page.tsx |
 | 18 | Metadata audit (title/description/OG) | ✅ DONE — dynamic `${name} Saskatoon \| ${price} \| True Color` on all 16 |
 | 19 | Service schema on product pages | ✅ DONE — commit 6f09518 |
-| 20 | 200+ word educational intros | 🟡 PENDING — low urgency, high effort |
+| 20 | 200+ word educational intros | ✅ DONE — commit ad67092, all 16 products expanded |
 | 21 | `/quote-request` metadata | ✅ DONE — `src/app/quote-request/layout.tsx` commit 6f09518 |
 
 ### PHASE 5 — Industry Pages
@@ -49,7 +49,7 @@
 | 23 | BreadcrumbList on all industry pages | ✅ DONE — `canonicalSlug` prop on all 11 pages commit 6f09518 |
 | 24 | `/restaurants` 301 redirect | ✅ DONE — `next.config.ts` |
 | 25 | `/election-signs` Saskatoon in metadata + H1 | ✅ DONE — title + H1 both include "Saskatoon" |
-| 26 | Real estate page spring improvements | 🟡 PENDING — spring listing season NOW |
+| 26 | Real estate page spring improvements | ✅ DONE — expanded description, 5 products, 6 FAQs, spring copy |
 
 ### PHASE 6 — GBP + Off-Page (Owner Actions Required)
 | # | Priority | Task | Notes |
