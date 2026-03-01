@@ -120,7 +120,7 @@ const INDUSTRIES = [
     name: "Sports & Events",
     tagline: "Banners, backdrops & event signage",
     img: "/images/products/heroes/sports-hero-1200x500.webp",
-    href: "/event-banners",
+    href: "/sports-banners-saskatoon",
   },
 ];
 
