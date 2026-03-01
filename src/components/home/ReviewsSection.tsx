@@ -13,16 +13,44 @@ const WIDGET_CSS_URL =
 const WIDGET_SPRITE_URL =
   "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/sprite.jpg";
 
-// On mobile (<768px): collapse to 1-column, show 6 reviews, fix centering.
+// On mobile (<768px): 1-column, show 3 reviews (always text — see sort below).
 // Layout 5 (slider) was dropped — it requires JS to set card heights at runtime;
 // without loader.js the ti-reviews-container-wrapper collapses to zero height.
 const MOBILE_RESPONSIVE_CSS = `
 @media (max-width:767px){
   .ti-widget[data-layout-id='16'] .ti-col-3 .ti-review-item{flex:0 0 100%!important;max-width:100%!important}
-  .ti-widget[data-layout-id='16'] .ti-review-item:nth-child(n+7){display:none!important}
+  .ti-widget[data-layout-id='16'] .ti-review-item:nth-child(n+4){display:none!important}
   .ti-widget[data-layout-id='16'] .ti-load-more-reviews-container{display:none!important}
   .ti-widget[data-layout-id='16'] .ti-reviews-container .ti-reviews-container-wrapper{margin-bottom:0!important}
 }`;
+
+// Reorder review items so text reviews always come first.
+// Trustindex sorts by date — rating-only reviews (no written text) can appear
+// anywhere and would waste mobile nth-child slots with blank cards.
+// Strategy: split on the ti-review-item boundary, check each chunk for real
+// text content in the ti-review-text-container, float those to the top.
+// nth-child(n+4) on mobile then always picks 3 reviews that have actual text.
+function sortTextReviewsFirst(html: string): string {
+  const MARKER = '<div class="ti-review-item ';
+  const parts = html.split(MARKER);
+  if (parts.length <= 1) return html;
+
+  const prefix = parts[0]; // everything before the first review item
+  const items  = parts.slice(1); // each chunk begins right after MARKER
+
+  const hasText = (chunk: string): boolean => {
+    const idx = chunk.indexOf('class="ti-review-text-container');
+    if (idx === -1) return false;
+    // Strip HTML tags from the content area and look for substantive text.
+    // Threshold of 10 chars filters out whitespace-only or empty containers.
+    const plain = chunk.slice(idx).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return plain.length > 10;
+  };
+
+  const withText    = items.filter(hasText);
+  const withoutText = items.filter((i) => !hasText(i));
+  return prefix + [...withText, ...withoutText].map((i) => MARKER + i).join('');
+}
 
 function GoogleIcon() {
   return (
@@ -67,11 +95,15 @@ async function fetchWidgetHtml(
       }
     );
 
+    // Float text reviews to the top so the mobile nth-child slice always
+    // shows reviews with actual written content, not rating-only blanks.
+    const widgetSorted = sortTextReviewsFirst(widgetWithSprites);
+
     // Inline base CSS first, then widget HTML, then our overrides last.
     // Overrides must come AFTER the widget HTML because content.html embeds an
     // inline <style class="scss-content"> at its end with !important rules —
     // putting our CSS after ensures we win the cascade regardless of specificity.
-    return `<style>${css}</style>\n${widgetWithSprites}${extraCss ? `\n<style>${extraCss}</style>` : ""}`;
+    return `<style>${css}</style>\n${widgetSorted}${extraCss ? `\n<style>${extraCss}</style>` : ""}`;
   } catch {
     return null;
   }
@@ -88,12 +120,12 @@ export async function ReviewsSection() {
   return (
     <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Reviews widget — 3-col grid on desktop, 1-col (6 reviews) on mobile */}
+        {/* Reviews widget — 3-col grid on desktop, 1-col top-3-text reviews on mobile */}
         {widgetHtml && (
           <div dangerouslySetInnerHTML={{ __html: widgetHtml }} />
         )}
 
-        {/* Mobile only — see all reviews link (widget shows 6 of 27) */}
+        {/* Mobile only — see all reviews link (widget shows top 3 text reviews) */}
         <div className="md:hidden mt-4 text-center">
           <a
             href={GOOGLE_ALL_REVIEWS_URL}
