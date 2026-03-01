@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
     description:
       "Vinyl graduation banners, foam board displays & retractable stands for Saskatoon schools and venues. Banners from $90. Same-day rush available.",
     url: "https://truecolorprinting.ca/graduation-banners-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/images/seasonal/graduation/hero.png", width: 1200, height: 500 }],
     type: "website",
   },
 };
@@ -32,12 +33,12 @@ export default function GraduationBannersPage() {
       primaryProductSlug="vinyl-banners"
       title="Graduation Banners Saskatoon"
       subtitle="Vinyl banners, foam board photo displays, and retractable stands for Saskatoon schools, universities, and event venues — don't risk a shipping delay before grad day."
-      heroImage="/images/products/heroes/sports-hero-1200x500.webp"
+      heroImage="/images/seasonal/graduation/hero.png"
       heroAlt="Graduation banners and foam board photo displays printed in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces vinyl graduation banners, foam board photo displays, and retractable banner stands for Saskatoon schools, universities, and event venues. We serve all levels — elementary and high school graduation ceremonies, university and college convocation events, and private graduation parties. A 2×6 ft grad banner is $90 + GST. A 4×8 ft convocation banner is $240 + GST. Foam board display panels from $10/sqft. Retractable banner stand complete from $219 + GST. Standard turnaround: 1–3 business days from artwork approval. Same-day rush: +$40 flat, order before 10 AM. In-house Roland UV printer. Local pickup at 216 33rd St W, Saskatoon, Saskatchewan."
       descriptionNode={
         <>
-          <p className="text-gray-600 text-lg leading-relaxed mb-8">
+          <p className="text-gray-600 text-lg leading-relaxed mb-10">
             True Color Display Printing produces vinyl graduation banners, foam board photo backdrops,
             and retractable banner stands for Saskatoon schools, universities, and event venues.
             We serve all levels — elementary and high school ceremonies, university convocation at the
@@ -45,6 +46,28 @@ export default function GraduationBannersPage() {
             colours and grad year — our in-house designer handles the layout. Local pickup at
             216 33rd St W. Same-day rush available: +$40 flat, order before 10 AM.
           </p>
+
+          {/* Banner design directions */}
+          <div className="mb-10">
+            <h3 className="text-xl font-bold text-[#1c1712] mb-1">Banner design directions</h3>
+            <p className="text-sm text-gray-500 mb-5">Tell us your school colours and grad year — or send your own artwork and we&apos;ll match it exactly.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/graduation/banner-school-colors.png" alt="Graduation banner in blue and gold school colours — Class of 2026 Congratulations Graduates" fill className="object-cover" sizes="(max-width:640px) 100vw, 50vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">School Colours</p>
+                <p className="text-xs text-gray-500 mt-0.5">School crest, custom colours — gyms, convocation entrances, outdoor ceremony</p>
+              </div>
+              <div>
+                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/graduation/banner-gold-classic.png" alt="Classic navy and gold graduation banner with grad cap — Congratulations Class of 2026" fill className="object-cover" sizes="(max-width:640px) 100vw, 50vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Classic Gold</p>
+                <p className="text-xs text-gray-500 mt-0.5">Navy & gold, grad cap — university convocation, private grad parties</p>
+              </div>
+            </div>
+          </div>
 
           <h3 className="text-xl font-bold text-[#1c1712] mb-3">
             Graduation banner sizes and pricing
