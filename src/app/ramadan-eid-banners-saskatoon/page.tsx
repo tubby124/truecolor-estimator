@@ -32,7 +32,7 @@ export default function RamadanEidBannersPage() {
       primaryProductSlug="vinyl-banners"
       title="Ramadan & Eid Banners Saskatoon"
       subtitle="Iftar night banners, Eid al-Fitr signage, and community event flyers — printed in 48 hours. Serving Saskatoon mosques, halal restaurants, and Islamic schools."
-      heroImage="/images/seasonal/ramadan/hero.png"
+      heroImage="/images/seasonal/ramadan/banner-eid-mubarak.png"
       heroAlt="Ramadan and Eid event banners printed in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces vinyl banners, flyers, and retractable banner stands for Ramadan and Eid events in Saskatoon. We've printed for local university student associations' Iftar Night dinners, halal restaurants running Ramadan specials, mosques welcoming Eid prayer congregations, and settlement organizations serving newcomer families. Standard turnaround: 48 hours from artwork approval. Same-day rush: +$40 flat, order before 10 AM. In-house Roland UV printer — no outsourcing, no surprises. Local pickup at 216 33rd St W, Saskatoon, Saskatchewan."
       descriptionNode={

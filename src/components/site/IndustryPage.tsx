@@ -107,7 +107,7 @@ export function IndustryPage({
           priority
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20" />
         <div className="absolute bottom-0 left-0 px-6 py-8 max-w-3xl">
           <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-2">
             {title}
