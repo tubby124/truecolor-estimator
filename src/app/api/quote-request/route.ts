@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -23,6 +24,15 @@ function esc(str: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 3 quote requests per IP per minute
+  const ip = getClientIp(req);
+  if (!rateLimit(`quote:${ip}`, 3, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a moment and try again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const form = await req.formData();
 
@@ -36,6 +46,23 @@ export async function POST(req: NextRequest) {
 
     if (!name || !email || !description) {
       return NextResponse.json({ error: "Name, email, and description are required" }, { status: 400 });
+    }
+
+    // Input length limits
+    if (name.length > 100) {
+      return NextResponse.json({ error: "Name is too long (max 100 characters)" }, { status: 400 });
+    }
+    if (email.length > 254) {
+      return NextResponse.json({ error: "Email address is too long" }, { status: 400 });
+    }
+    if ((phone ?? "").length > 20) {
+      return NextResponse.json({ error: "Phone number is too long" }, { status: 400 });
+    }
+    if ((product ?? "").length > 100) {
+      return NextResponse.json({ error: "Product field is too long (max 100 characters)" }, { status: 400 });
+    }
+    if (description.length > 2000) {
+      return NextResponse.json({ error: "Description is too long (max 2000 characters)" }, { status: 400 });
     }
 
     if (file && file.size > MAX_FILE_SIZE) {

@@ -21,6 +21,7 @@ import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { estimate } from "@/lib/engine";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -93,6 +94,15 @@ function revalidateItemPrices(items: CartItem[], is_rush: boolean): CartItem[] {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 orders per IP per minute (generous for a print shop)
+  const ip = getClientIp(req);
+  if (!rateLimit(`orders:${ip}`, 5, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a moment and try again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = (await req.json()) as CreateOrderRequest;
     const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths } = body;
@@ -100,8 +110,27 @@ export async function POST(req: NextRequest) {
     if (!rawItems?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
+    if (rawItems.length > 20) {
+      return NextResponse.json({ error: "Too many items in cart (max 20)" }, { status: 400 });
+    }
     if (!contact?.email || !contact?.name) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+    }
+    // Input length limits
+    if (contact.name.length > 100) {
+      return NextResponse.json({ error: "Name is too long (max 100 characters)" }, { status: 400 });
+    }
+    if (contact.email.length > 254) {
+      return NextResponse.json({ error: "Email address is too long" }, { status: 400 });
+    }
+    if ((contact.company ?? "").length > 100) {
+      return NextResponse.json({ error: "Company name is too long (max 100 characters)" }, { status: 400 });
+    }
+    if ((contact.phone ?? "").length > 20) {
+      return NextResponse.json({ error: "Phone number is too long" }, { status: 400 });
+    }
+    if ((notes ?? "").length > 1000) {
+      return NextResponse.json({ error: "Order notes are too long (max 1000 characters)" }, { status: 400 });
     }
 
     // ── Server-side price revalidation (prevents price manipulation attacks) ──
