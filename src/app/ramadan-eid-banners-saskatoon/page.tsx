@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -31,10 +32,102 @@ export default function RamadanEidBannersPage() {
       primaryProductSlug="vinyl-banners"
       title="Ramadan & Eid Banners Saskatoon"
       subtitle="Iftar night banners, Eid al-Fitr signage, and community event flyers — printed in 48 hours. Serving Saskatoon mosques, halal restaurants, and Islamic schools."
-      // TODO: Replace hero with a Ramadan/community event photo once available
-      heroImage="/images/products/heroes/sports-hero-1200x500.webp"
+      heroImage="/images/seasonal/ramadan/hero.png"
       heroAlt="Ramadan and Eid event banners printed in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces vinyl banners, flyers, and retractable banner stands for Ramadan and Eid events in Saskatoon. We've printed for local university student associations' Iftar Night dinners, halal restaurants running Ramadan specials, mosques welcoming Eid prayer congregations, and settlement organizations serving newcomer families. Standard turnaround: 48 hours from artwork approval. Same-day rush: +$40 flat, order before 10 AM. In-house Roland UV printer — no outsourcing, no surprises. Local pickup at 216 33rd St W, Saskatoon, Saskatchewan."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-10">
+            True Color Display Printing produces vinyl banners, flyers, and retractable banner stands
+            for Ramadan and Eid events in Saskatoon. We&apos;ve printed for local university student
+            associations&apos; Iftar Night dinners, halal restaurants running Ramadan specials, mosques
+            welcoming Eid prayer congregations, and settlement organizations serving newcomer families.
+            Standard turnaround: 48 hours from artwork approval. Same-day rush: +$40 flat, order before
+            10 AM. In-house Roland UV printer — no outsourcing, no surprises. Local pickup at 216 33rd
+            St W, Saskatoon, Saskatchewan.
+          </p>
+
+          {/* Design directions — Vinyl Banners */}
+          <div className="mb-10">
+            <h3 className="text-xl font-bold text-[#1c1712] mb-1">Banner design directions</h3>
+            <p className="text-sm text-gray-500 mb-5">Tell us which style fits — or send your own artwork and we&apos;ll match it exactly.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/ramadan/banner-traditional.png" alt="Traditional Elegance — navy gold Eid banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Traditional Elegance</p>
+                <p className="text-xs text-gray-500 mt-0.5">Navy, gold calligraphy, lanterns — mosque entrances, formal Eid prayers</p>
+              </div>
+              <div>
+                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/ramadan/banner-modern-minimal.png" alt="Modern Minimal — white gold crescent Eid Mubarak banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Modern Minimal</p>
+                <p className="text-xs text-gray-500 mt-0.5">White, oversized gold crescent — university events, restaurants, professional iftars</p>
+              </div>
+              <div>
+                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/ramadan/banner-community-warm.png" alt="Community Warm — sunset Iftar Night 2026 banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Community / Warm</p>
+                <p className="text-xs text-gray-500 mt-0.5">Sunset gradient, iftar table — community dinners, halal restaurants</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Design directions — Flyers */}
+          <div className="mb-10">
+            <h3 className="text-xl font-bold text-[#1c1712] mb-1">Flyer design directions</h3>
+            <p className="text-sm text-gray-500 mb-5">250 glossy flyers from $110 + GST — printed same week.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/ramadan/flyer-formal-invitation.png" alt="Formal invitation flyer for Iftar Night — cream gold arabesque border" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Formal Invitation</p>
+                <p className="text-xs text-gray-500 mt-0.5">Cream, gold arabesque border — university MSA iftars, galas</p>
+              </div>
+              <div>
+                <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/ramadan/flyer-bold-announcement.png" alt="Bold announcement flyer for Iftar Night — dark green with food photography" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Bold Announcement</p>
+                <p className="text-xs text-gray-500 mt-0.5">Dark green, food photography — community halls, mosque bulletin boards</p>
+              </div>
+              <div>
+                <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/ramadan/flyer-sponsorship.png" alt="Sponsorship layout flyer for Ramadan charity iftar — gold tiers" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Sponsorship Layout</p>
+                <p className="text-xs text-gray-500 mt-0.5">Gold/cream, tiered sponsor grid — charity iftars, mosque fundraisers</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Design directions — Retractable Banners */}
+          <div>
+            <h3 className="text-xl font-bold text-[#1c1712] mb-1">Retractable banner directions</h3>
+            <p className="text-sm text-gray-500 mb-5">24×80&quot; stand + print complete from $219 + GST — no separate graphic fee.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 max-w-md">
+              <div>
+                <div className="relative aspect-[3/8] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/ramadan/retractable-welcome.png" alt="Welcome display retractable banner stand for Ramadan Iftar Night" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Welcome Display</p>
+                <p className="text-xs text-gray-500 mt-0.5">Mosque entrances, event registration desks</p>
+              </div>
+              <div>
+                <div className="relative aspect-[3/8] w-full rounded-lg overflow-hidden mb-3">
+                  <Image src="/images/seasonal/ramadan/retractable-sponsor-wall.png" alt="Sponsor recognition wall retractable banner for Ramadan charity gala" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
+                </div>
+                <p className="font-semibold text-sm text-[#1c1712]">Sponsor Wall</p>
+                <p className="text-xs text-gray-500 mt-0.5">Charity galas, mosque fundraisers</p>
+              </div>
+            </div>
+          </div>
+        </>
+      }
       products={[
         { name: "Vinyl Banners", from: "2×6ft from $90", slug: "vinyl-banners" },
         {
