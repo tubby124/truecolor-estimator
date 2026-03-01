@@ -6,12 +6,21 @@ export const metadata: Metadata = {
   description:
     "Farm gate signs, acreage markers, and trade show banners for Saskatchewan ag businesses. Coroplast from $30. Vehicle magnets from $45. Saskatoon local pickup.",
   alternates: { canonical: "/agriculture-signs-saskatoon" },
+  openGraph: {
+    title: "Agriculture Signs Saskatchewan | True Color Display Printing",
+    description:
+      "Farm gate signs, plot markers, trade show banners, and truck magnets for Saskatchewan ag businesses. Coroplast from $30. Local Saskatoon pickup.",
+    url: "https://truecolorprinting.ca/agriculture-signs-saskatoon",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
 };
 
 export default function AgriculturePage() {
   return (
     <IndustryPage
       canonicalSlug="agriculture-signs-saskatoon"
+      primaryProductSlug="coroplast-signs"
       title="Agriculture Signs Saskatchewan"
       subtitle="From farm gates to trade shows — printed in Saskatoon."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
@@ -41,6 +50,18 @@ export default function AgriculturePage() {
         {
           q: "Can you print vehicle magnets for farm trucks?",
           a: "Yes — 30mil magnets for any steel vehicle. 8×12\" up to 24×36\" and custom sizes.",
+        },
+        {
+          q: "Do you do plot markers or field boundary signs?",
+          a: "Yes — coroplast signs are the standard for field and plot markers. UV-printed with your field number, crop type, or variety name. Typically 12×18\" or 18×24\". Waterproof and stake-ready. Call with your quantities for bulk pricing.",
+        },
+        {
+          q: "Can I get banners for Agribition or Canadian Western Agribition?",
+          a: "Yes — trade show vinyl banners and retractable banner stands are ready in 1–3 business days. Popular sizes: 3×6 ft backdrop banners, 24×80\" retractable stands. Bring your logo and we design the layout in-house.",
+        },
+        {
+          q: "What's your turnaround before the seeding season rush?",
+          a: "Standard is 1–3 business days after artwork approval. If you need signs before the season starts, order early — March and April get busy. Same-day rush is available for +$40 flat on most orders placed before 10 AM.",
         },
       ]}
     />

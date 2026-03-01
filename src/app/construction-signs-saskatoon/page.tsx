@@ -20,6 +20,7 @@ export default function ConstructionPage() {
   return (
     <IndustryPage
       canonicalSlug="construction-signs-saskatoon"
+      primaryProductSlug="coroplast-signs"
       title="Construction Signs Saskatoon"
       subtitle="Job site signs, truck magnets, and business cards. Ready when your crew is."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"

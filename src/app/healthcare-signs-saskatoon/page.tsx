@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -15,6 +16,23 @@ export const metadata: Metadata = {
   },
 };
 
+const descriptionNode = (
+  <>
+    Saskatoon clinics, medical offices, dental practices, and wellness centres rely on True
+    Color for signage that&apos;s clean, professional, and easy to update. ACP aluminum panels
+    for building directories and room signs. Foam board displays for waiting room education.
+    Vinyl banners for seasonal health programs and grand openings. Retractable stands for
+    health fairs and community events. We print in-house, control quality start to finish,
+    and deliver locally — no shipping delays when your waiting room signage needs to be ready
+    for Monday.{" "}
+    Running a dental practice?{" "}
+    <Link href="/dental-office-signs-saskatoon" className="text-[#16C2F3] underline">
+      See our dedicated dental office signs page
+    </Link>{" "}
+    for business cards, ACP suite signs, and same-day turnaround for new associates.
+  </>
+);
+
 export default function HealthcareSignsSaskatoonPage() {
   return (
     <IndustryPage
@@ -25,6 +43,7 @@ export default function HealthcareSignsSaskatoonPage() {
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Healthcare clinic signs and wayfinding printed in Saskatoon by True Color Display Printing"
       description="Saskatoon clinics, medical offices, dental practices, and wellness centres rely on True Color for signage that's clean, professional, and easy to update. ACP aluminum panels for building directories and room signs. Foam board displays for waiting room education. Vinyl banners for seasonal health programs and grand openings. Retractable stands for health fairs and community events. We print in-house, control quality start to finish, and deliver locally — no shipping delays when your waiting room signage needs to be ready for Monday."
+      descriptionNode={descriptionNode}
       products={[
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },

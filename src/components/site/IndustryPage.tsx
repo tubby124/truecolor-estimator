@@ -15,6 +15,8 @@ export interface IndustryPageProps {
   heroImage: string;
   heroAlt: string;
   description: string;
+  /** Optional JSX override for description — use when links are needed. `description` is still used for schema. */
+  descriptionNode?: React.ReactNode;
   products: IndustryProduct[];
   whyPoints: string[];
   faqs: { q: string; a: string }[];
@@ -30,6 +32,7 @@ export function IndustryPage({
   heroImage,
   heroAlt,
   description,
+  descriptionNode,
   products,
   whyPoints,
   faqs,
@@ -116,7 +119,7 @@ export function IndustryPage({
       <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
         {/* Description */}
         <p className="text-gray-600 text-lg leading-relaxed mb-12 max-w-2xl">
-          {description}
+          {descriptionNode ?? description}
         </p>
 
         {/* Products */}

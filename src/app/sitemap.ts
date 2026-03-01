@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/business-cards-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/agribusiness-signs-saskatchewan", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/healthcare-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    { url: "/dental-office-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/vehicle-magnets-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/aluminum-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/retractable-banners-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },

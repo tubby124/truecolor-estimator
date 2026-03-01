@@ -54,7 +54,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.trustindex.io https://*.trustindex.io; style-src 'self' 'unsafe-inline' https://cdn.trustindex.io https://*.trustindex.io; img-src 'self' data: https:; connect-src 'self' https://dczbgraekmzirxknjvwe.supabase.co wss://dczbgraekmzirxknjvwe.supabase.co https://api.brevo.com https://api.clover.com https://*.trustindex.io; frame-src https://*.trustindex.io https://www.trustindex.io; frame-ancestors 'none'; font-src 'self' data: https://cdn.trustindex.io https://*.trustindex.io;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.trustindex.io https://*.trustindex.io https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://cdn.trustindex.io https://*.trustindex.io; img-src 'self' data: https:; connect-src 'self' https://dczbgraekmzirxknjvwe.supabase.co wss://dczbgraekmzirxknjvwe.supabase.co https://api.brevo.com https://api.clover.com https://*.trustindex.io https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net; frame-src https://*.trustindex.io https://www.trustindex.io; frame-ancestors 'none'; font-src 'self' data: https://cdn.trustindex.io https://*.trustindex.io;",
           },
         ],
       },

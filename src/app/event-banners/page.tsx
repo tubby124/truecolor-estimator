@@ -20,6 +20,7 @@ export default function EventBannersPage() {
   return (
     <IndustryPage
       canonicalSlug="event-banners"
+      primaryProductSlug="vinyl-banners"
       title="Event Banners & Signage Saskatoon"
       subtitle="The event is Saturday. The banner needs to be there."
       heroImage="/images/products/heroes/sports-hero-1200x500.webp"
