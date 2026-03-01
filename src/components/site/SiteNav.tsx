@@ -48,7 +48,7 @@ const INDUSTRY_LINKS = [
   { label: "Construction", href: "/construction-signs-saskatoon" },
   { label: "Real Estate", href: "/real-estate-signs-saskatoon" },
   { label: "Agriculture", href: "/agriculture-signs-saskatoon" },
-  { label: "Healthcare", href: "/healthcare-printing-saskatoon" },
+  { label: "Healthcare", href: "/healthcare-signs-saskatoon" },
   { label: "Retail", href: "/retail-signs-saskatoon" },
   { label: "Sports & Events", href: "/sports-banners-saskatoon" },
   { label: "Ramadan & Eid", href: "/ramadan-eid-banners-saskatoon" },
