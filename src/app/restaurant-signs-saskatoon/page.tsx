@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,6 +26,28 @@ export default function RestaurantSignsSaskatoonPage() {
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Restaurant menu boards and signs printed in Saskatoon"
       description="Saskatoon restaurants, cafes, bars, and food trucks use True Color for menu boards, promotional banners, window vinyl, and business cards. Menu prices change — your signage shouldn't cost $200 every time it does. We print fast, match your brand colours, and you pick up locally at 216 33rd St W. No shipping wait. In-house designer handles everything from your logo file to a rough sketch of your layout."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            Saskatoon restaurants, cafes, bars, and food trucks use True Color for menu boards,
+            promotional banners, window vinyl, and business cards. Menu prices change — your signage
+            shouldn&apos;t cost $200 every time it does. We print fast, match your brand colours, and
+            you pick up locally at 216 33rd St W. In-house designer handles everything from your logo
+            file to a rough sketch of your layout.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Planning a seasonal promotion? See our{" "}
+            <Link href="/st-patricks-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              St. Patrick&apos;s Day printing page
+            </Link>{" "}
+            for bar and pub-specific banners, window decals, and flyers — or check{" "}
+            <Link href="/same-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              same-day printing
+            </Link>{" "}
+            if you need it fast.
+          </p>
+        </>
+      }
       products={[
         { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },

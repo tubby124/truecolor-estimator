@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,6 +26,32 @@ export default function BannerPrintingSaskatoonPage() {
       heroImage="/images/products/product/banner-vinyl-colorful-800x600.webp"
       heroAlt="Vinyl banner printing in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces 13oz vinyl banners for Saskatoon businesses, events, and organizations. Any custom size, full colour, grommets included as standard. Volume pricing applies automatically — 5% off at 5+ sqft, 10% off at 10+ sqft, 15% off at 15+ sqft. We print in-house on our Roland UV printer, which means faster turnaround and colour consistency you can rely on. Same-day rush available for +$40 flat."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            True Color Display Printing produces 13oz vinyl banners for Saskatoon businesses, events,
+            and organizations. Any custom size, full colour, grommets included as standard. Volume
+            pricing applies automatically — 5% off at 5+ sqft, 10% off at 10+ sqft, 15% off at 15+
+            sqft. In-house Roland UV printer — faster turnaround, consistent colour. Same-day rush
+            available for +$40 flat.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Need banners for a specific occasion? See:{" "}
+            <Link href="/graduation-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Graduation banners
+            </Link>
+            {" · "}
+            <Link href="/st-patricks-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              St. Patrick&apos;s Day printing
+            </Link>
+            {" · "}
+            <Link href="/ramadan-eid-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Ramadan &amp; Eid banners
+            </Link>
+            {" — each page includes occasion-specific sizing guides and pricing."}
+          </p>
+        </>
+      }
       products={[
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },

@@ -32,6 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/election-signs", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/event-banners", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/ramadan-eid-banners-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    // Seasonal pages
+    { url: "/st-patricks-day-printing-saskatoon", priority: 0.85, changeFrequency: "weekly" as const },
+    { url: "/graduation-banners-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    { url: "/mothers-day-printing-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/canada-day-printing-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/back-to-school-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
     // Legal
     { url: "/privacy", priority: 0.3, changeFrequency: "yearly" as const },
     { url: "/terms", priority: 0.3, changeFrequency: "yearly" as const },
