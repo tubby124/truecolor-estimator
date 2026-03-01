@@ -52,6 +52,8 @@ const INDUSTRY_LINKS = [
   { label: "Retail", href: "/retail-signs-saskatoon" },
   { label: "Sports & Events", href: "/sports-banners-saskatoon" },
   { label: "Ramadan & Eid", href: "/ramadan-eid-banners-saskatoon" },
+  { label: "St. Patrick's Day", href: "/st-patricks-day-printing-saskatoon" },
+  { label: "Graduation Banners", href: "/graduation-banners-saskatoon" },
 ];
 
 export function SiteNav() {
