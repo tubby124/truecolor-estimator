@@ -3,6 +3,8 @@ import { buildQuoteEmailHtml, buildDiagramSvgXml, type QuoteEmailData } from "@/
 import type { EstimateResponse } from "@/lib/engine/types";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { sendEmail, type SendEmailAttachment } from "@/lib/email/smtp";
+import { requireStaffUser } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 interface SendQuoteRequest {
   to: string;
@@ -19,6 +21,10 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(req: Request) {
+  // Staff-only endpoint — only the owner can send quote emails
+  const staffCheck = await requireStaffUser();
+  if (staffCheck instanceof NextResponse) return staffCheck;
+
   try {
     const body: SendQuoteRequest = await req.json();
     const { to, customerName, note, quoteData, jobDetails, proofImage, includePaymentLink } = body;

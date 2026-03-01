@@ -10,7 +10,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/supabase/server";
+import { requireStaffUser } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import type { EstimateResponse } from "@/lib/engine/types";
 import {
@@ -38,8 +38,8 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function POST(req: Request) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const staffCheck = await requireStaffUser();
+  if (staffCheck instanceof NextResponse) return staffCheck;
 
   try {
     // Check Wave is configured before doing any work

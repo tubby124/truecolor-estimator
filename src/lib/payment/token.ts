@@ -7,7 +7,7 @@
  * Token format: base64url(payload).HMAC-SHA256(payload)
  */
 
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 
 const TOKEN_VERSION = 1;
 const TOKEN_TTL_DAYS = 30; // aligns with 30-day quote validity
@@ -71,9 +71,16 @@ export function decodePaymentToken(token: string): {
   const encoded = token.slice(0, dot);
   const sig = token.slice(dot + 1);
 
-  // Verify HMAC signature
+  // Verify HMAC signature using constant-time comparison to prevent timing attacks
   const expectedSig = sign(encoded);
-  if (sig !== expectedSig) throw new Error("Invalid token signature");
+  const sigBuf = Buffer.from(sig);
+  const expectedBuf = Buffer.from(expectedSig);
+  if (
+    sigBuf.length !== expectedBuf.length ||
+    !timingSafeEqual(sigBuf, expectedBuf)
+  ) {
+    throw new Error("Invalid token signature");
+  }
 
   // Decode payload
   const payload = JSON.parse(

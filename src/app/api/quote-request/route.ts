@@ -12,6 +12,16 @@ import { sendEmail } from "@/lib/email/smtp";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
+/** Escape HTML special characters to prevent injection in email templates */
+function esc(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
@@ -48,19 +58,19 @@ export async function POST(req: NextRequest) {
         </div>
         <div style="padding: 24px 30px; background: #fff;">
           <table style="width: 100%; border-collapse: collapse;">
-            <tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712; width: 120px;">From</td><td style="padding: 8px 0;">${name}</td></tr>
-            <tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Email</td><td style="padding: 8px 0;"><a href="mailto:${email}" style="color: #16C2F3;">${email}</a></td></tr>
-            ${phone ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Phone</td><td style="padding: 8px 0;">${phone}</td></tr>` : ""}
-            ${product ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Product</td><td style="padding: 8px 0;">${product}</td></tr>` : ""}
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712; width: 120px;">From</td><td style="padding: 8px 0;">${esc(name)}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Email</td><td style="padding: 8px 0;"><a href="mailto:${esc(email)}" style="color: #16C2F3;">${esc(email)}</a></td></tr>
+            ${phone ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Phone</td><td style="padding: 8px 0;">${esc(phone)}</td></tr>` : ""}
+            ${product ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Product</td><td style="padding: 8px 0;">${esc(product)}</td></tr>` : ""}
           </table>
           <div style="margin-top: 16px; padding: 16px; background: #f4efe9; border-radius: 8px;">
             <p style="font-weight: bold; color: #1c1712; margin: 0 0 8px;">Message:</p>
-            <p style="margin: 0; white-space: pre-wrap; color: #333;">${description}</p>
+            <p style="margin: 0; white-space: pre-wrap; color: #333;">${esc(description)}</p>
           </div>
           ${file ? `<p style="margin-top: 12px; font-size: 14px; color: #666;">FILE_PLACEHOLDER</p>` : ""}
         </div>
         <div style="background: #f4efe9; padding: 16px 30px; font-size: 12px; color: #888;">
-          Reply directly to this email to respond to ${name}.
+          Reply directly to this email to respond to ${esc(name)}.
         </div>
       </div>
     `;
@@ -116,7 +126,7 @@ export async function POST(req: NextRequest) {
             <p style="color: #16C2F3; font-size: 18px; font-weight: bold; margin: 0;">True Color Display Printing</p>
           </div>
           <div style="padding: 24px 30px; background: #fff;">
-            <p style="font-size: 16px; color: #1c1712;">Hi ${name},</p>
+            <p style="font-size: 16px; color: #1c1712;">Hi ${esc(name)},</p>
             <p style="color: #444;">Got it! We received your quote request and will reply within 1 business day.</p>
             <p style="color: #444;">In the meantime, you can call us at <a href="tel:+13069548688" style="color: #16C2F3;">(306) 954-8688</a> or visit us at 216 33rd St W, Saskatoon.</p>
             <p style="color: #444;">— The True Color Team</p>

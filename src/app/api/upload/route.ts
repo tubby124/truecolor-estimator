@@ -5,12 +5,18 @@
  * This bypasses Supabase storage RLS policies that would block unauthenticated
  * (anonymous checkout) uploads when using the anon key directly from the browser.
  *
+ * Open to anonymous users — protection comes from:
+ * 1. Strict MIME type + extension allowlist (only print-ready formats)
+ * 2. 50 MB file size limit
+ * 3. UUID-based storage paths (no enumeration possible)
+ * 4. Files stored under pending/ — not linked to any order until checkout completes
+ *
  * Accepts: FormData with field "file"
  * Returns: { path: string }  — the storage path for use in the order
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 const MAX_FILE_SIZE = 52_428_800; // 50 MB
 
@@ -26,8 +32,8 @@ const ALLOWED_MIME_TYPES = [
 const ALLOWED_EXTENSIONS = /\.(pdf|ai|eps|jpg|jpeg|png|webp)$/i;
 
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // No auth required — artwork upload is part of anonymous checkout flow.
+  // Protection: strict allowlist + UUID paths (see header comment above).
 
   try {
     const form = await req.formData();

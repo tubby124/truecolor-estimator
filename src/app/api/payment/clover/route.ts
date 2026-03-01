@@ -1,4 +1,6 @@
 import { createCloverCheckout } from "@/lib/payment/clover";
+import { requireStaffUser } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 interface CloverPaymentRequest {
   amount_cents: number;
@@ -7,6 +9,10 @@ interface CloverPaymentRequest {
 }
 
 export async function POST(req: Request) {
+  // Staff-only endpoint — only the owner can create payment links from the quote tool
+  const staffCheck = await requireStaffUser();
+  if (staffCheck instanceof NextResponse) return staffCheck;
+
   try {
     const body: CloverPaymentRequest = await req.json();
     const { amount_cents, description, customer_email } = body;

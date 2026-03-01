@@ -9,15 +9,15 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient, getSessionUser } from "@/lib/supabase/server";
+import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 
 interface Params {
   params: Promise<{ id: string }>;
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const staffCheck = await requireStaffUser();
+  if (staffCheck instanceof NextResponse) return staffCheck;
 
   try {
     const { id } = await params;

@@ -19,6 +19,8 @@ import { encodePaymentToken } from "@/lib/payment/token";
 import type { CartItem } from "@/lib/cart/cart";
 import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
+import { estimate } from "@/lib/engine";
+import { sanitizeError } from "@/lib/errors/sanitize";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -38,17 +40,72 @@ export interface CreateOrderRequest {
 const GST_RATE = 0.05;
 const RUSH_FEE = 40;
 
+/**
+ * Server-side price revalidation.
+ * Re-runs the pricing engine for each cart item and overrides the client-submitted
+ * sell_price with the authoritative server price. Prevents price manipulation attacks
+ * where a malicious user submits fake prices (e.g. sell_price: 0.01).
+ *
+ * If the engine can't price an item (BLOCKED/NEEDS_CLARIFICATION), the client price
+ * is accepted with a warning logged — handles custom/unusual items gracefully.
+ */
+function revalidateItemPrices(items: CartItem[], is_rush: boolean): CartItem[] {
+  return items.map((item) => {
+    try {
+      const result = estimate({
+        category: item.category as Parameters<typeof estimate>[0]["category"],
+        material_code: item.config.material_code,
+        width_in: item.config.width_in,
+        height_in: item.config.height_in,
+        sides: item.config.sides as 1 | 2 | undefined,
+        qty: item.qty,
+        addons: item.config.addons as Parameters<typeof estimate>[0]["addons"],
+        design_status: item.config.design_status as Parameters<typeof estimate>[0]["design_status"],
+        is_rush,
+      });
+
+      if (result.status === "QUOTED" && result.sell_price != null) {
+        const serverPrice = result.sell_price;
+        const clientPrice = item.sell_price;
+        const diff = Math.abs(serverPrice - clientPrice);
+        const diffPct = clientPrice > 0 ? diff / clientPrice : 1;
+
+        if (diffPct > 0.01 || diff > 0.5) {
+          // Log manipulation attempt or stale client-side price
+          console.warn(
+            `[orders] price revalidation: client=$${clientPrice.toFixed(2)} server=$${serverPrice.toFixed(2)} diff=$${diff.toFixed(2)} (${(diffPct * 100).toFixed(1)}%) — using server price | item: ${item.product_name}`
+          );
+        }
+        return { ...item, sell_price: serverPrice, line_items: result.line_items };
+      } else {
+        // Engine couldn't price this item — log and accept client price (manual order)
+        console.warn(
+          `[orders] price revalidation: engine returned ${result.status} for ${item.product_name} — accepting client price $${item.sell_price.toFixed(2)} (manual review recommended)`
+        );
+        return item;
+      }
+    } catch (err) {
+      // Engine threw — accept client price but log
+      console.error(`[orders] price revalidation error for ${item.product_name}:`, err);
+      return item;
+    }
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items, contact, is_rush, payment_method, notes, file_storage_paths } = body;
+    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths } = body;
 
-    if (!items?.length) {
+    if (!rawItems?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
     if (!contact?.email || !contact?.name) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
     }
+
+    // ── Server-side price revalidation (prevents price manipulation attacks) ──
+    const items = revalidateItemPrices(rawItems, is_rush);
 
     const supabase = createServiceClient();
 
@@ -111,30 +168,41 @@ export async function POST(req: NextRequest) {
     const gst = Math.round((subtotal + rush) * GST_RATE * 100) / 100;
     const total = subtotal + rush + gst;
 
-    // 3. Create order row
-    // Generate order_number server-side — sequential TC-YYYY-NNNN format
-    // Uses row count as counter; collision risk negligible for a small shop
-    const { count: orderCount } = await supabase
-      .from("orders")
-      .select("*", { count: "exact", head: true });
+    // 3. Create order row — retry up to 3 times on order_number collision (Postgres code 23505)
+    // count+1 approach: safe for a small shop; retry handles the rare concurrent-request edge case
     const orderYear = new Date().getFullYear();
-    const generatedOrderNumber = `TC-${orderYear}-${String((orderCount ?? 0) + 1).padStart(4, "0")}`;
+    type OrderRow = { id: string; order_number: string };
+    type OrderInsertError = { code?: string; message?: string; details?: string; hint?: string } | null;
+    let order: OrderRow | null = null;
+    let orderErr: OrderInsertError = null;
 
-    const { data: order, error: orderErr } = await supabase
-      .from("orders")
-      .insert({
-        order_number: generatedOrderNumber,
-        customer_id: customer.id,
-        status: "pending_payment",
-        is_rush,
-        subtotal,
-        gst,
-        total,
-        payment_method,
-        notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
-      })
-      .select("id, order_number")
-      .single();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { count: orderCount } = await supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true });
+      const orderNumber = `TC-${orderYear}-${String((orderCount ?? 0) + 1).padStart(4, "0")}`;
+
+      const { data, error } = await supabase
+        .from("orders")
+        .insert({
+          order_number: orderNumber,
+          customer_id: customer.id,
+          status: "pending_payment",
+          is_rush,
+          subtotal,
+          gst,
+          total,
+          payment_method,
+          notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
+        })
+        .select("id, order_number")
+        .single();
+
+      order = data as OrderRow | null;
+      orderErr = error as OrderInsertError;
+      if (!error || (error as { code?: string }).code !== "23505") break;
+      // 23505 = unique_violation — order_number collision; re-fetch count and retry
+    }
 
     if (orderErr || !order) {
       console.error("[orders] INSERT failed:", {
@@ -337,8 +405,7 @@ export async function POST(req: NextRequest) {
       waveInvoiceId,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Order creation failed";
-    console.error("[orders]", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[orders]", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

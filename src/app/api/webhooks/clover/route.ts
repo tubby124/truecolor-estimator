@@ -14,7 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
@@ -27,18 +27,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not read body" }, { status: 400 });
   }
 
-  // Verify HMAC signature from Clover
+  // Verify HMAC signature from Clover — always required (fail-closed)
   const tokenSecret = process.env.PAYMENT_TOKEN_SECRET;
-  if (tokenSecret) {
-    const signature = req.headers.get("x-clover-signature") ?? "";
-    const expected = createHmac("sha256", tokenSecret)
-      .update(bodyText)
-      .digest("base64");
+  if (!tokenSecret) {
+    console.error("[clover-webhook] PAYMENT_TOKEN_SECRET not configured — rejecting all webhook calls");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 401 });
+  }
 
-    if (!signature || signature !== expected) {
-      console.warn("[clover-webhook] Invalid or missing signature — possible spoofing attempt");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  const signature = req.headers.get("x-clover-signature") ?? "";
+  const expected = createHmac("sha256", tokenSecret)
+    .update(bodyText)
+    .digest("base64");
+
+  // Use constant-time comparison to prevent timing attacks
+  const sigBuf = Buffer.from(signature);
+  const expectedBuf = Buffer.from(expected);
+  if (
+    !signature ||
+    sigBuf.length !== expectedBuf.length ||
+    !timingSafeEqual(sigBuf, expectedBuf)
+  ) {
+    console.warn("[clover-webhook] Invalid or missing signature — possible spoofing attempt");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   let event: Record<string, unknown>;
