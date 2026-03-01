@@ -73,6 +73,12 @@ export function SiteFooter() {
               <Link href="/ramadan-eid-banners-saskatoon" className="block hover:text-white transition-colors">
                 Ramadan &amp; Eid Banners
               </Link>
+              <Link href="/st-patricks-day-printing-saskatoon" className="block hover:text-white transition-colors">
+                St. Patrick&apos;s Day Printing
+              </Link>
+              <Link href="/graduation-banners-saskatoon" className="block hover:text-white transition-colors">
+                Graduation Banners
+              </Link>
               <Link href="/gallery" className="block hover:text-white transition-colors">
                 Our Work
               </Link>
