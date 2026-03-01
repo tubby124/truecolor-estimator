@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export default function RetractableBannersSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="retractable-banners-saskatoon"
+      primaryProductSlug="retractable-banners"
       title="Retractable Banners Saskatoon"
       subtitle="Stand + full-colour print from $219. Ready for your next trade show or event."
       heroImage="/images/products/product/retractable-stand-600x900.webp"

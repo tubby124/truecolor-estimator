@@ -9,7 +9,7 @@ import { HeroSlider } from "@/components/home/HeroSlider";
 import { LocalShopSection } from "@/components/home/LocalShopSection";
 
 export const metadata: Metadata = {
-  title: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
+  title: { absolute: "True Color Display Printing | Saskatoon Signs, Banners & Cards" },
   description:
     "Coroplast signs from $30. Vinyl banners from $66. Business cards from $40. In-house designer, local pickup at 216 33rd St W Saskatoon. See your exact price now — no quote forms.",
   alternates: { canonical: "/" },
@@ -151,7 +151,7 @@ const homeFaqSchema = {
       name: "Where is True Color Display Printing located?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "216 33rd St W, Saskatoon, SK S7L 0V2. Open Monday–Friday 9 AM–5 PM. Free local pickup on all orders — no shipping wait.",
+        text: "216 33rd St W, Saskatoon, SK S7L 0V5. Open Monday–Friday 9 AM–5 PM. Free local pickup on all orders — no shipping wait.",
       },
     },
     {
@@ -194,8 +194,10 @@ export default function HomePage() {
       <section className="bg-[#16C2F3] py-4">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-white">
           <div>
-            <p className="font-bold text-base">Same-Day Available</p>
-            <p className="text-sm opacity-90">In by noon, ready by 5 PM</p>
+            <Link href="/same-day-printing-saskatoon" className="block hover:opacity-90 transition-opacity">
+              <p className="font-bold text-base">Same-Day Available</p>
+              <p className="text-sm opacity-90">In by noon, ready by 5 PM</p>
+            </Link>
           </div>
           <div>
             <p className="font-bold text-base">Next-Day Standard</p>
@@ -429,7 +431,7 @@ export default function HomePage() {
             <p>
               One shop. One order. Local pickup at{" "}
               <a
-                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0N6"
+                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V5"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#16C2F3] hover:underline"

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Coroplast Signs Saskatoon | From $8/sqft | True Color Display Printing",
+  title: "Coroplast Signs Saskatoon | From $8/sqft",
   description:
     "Custom coroplast yard signs in Saskatoon from $8/sqft. Yard signs, job site signs, real estate signs. Same-day available. Local pickup at 216 33rd St W. In-house designer.",
   alternates: { canonical: "/coroplast-signs-saskatoon" },

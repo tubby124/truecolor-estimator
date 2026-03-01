@@ -6,6 +6,14 @@ export const metadata: Metadata = {
   description:
     "Site signs, truck magnets, and business cards for Saskatoon contractors. Coroplast from $30, magnets from $45. In-house designer. Local pickup same day.",
   alternates: { canonical: "/construction-signs-saskatoon" },
+  openGraph: {
+    title: "Construction Signs Saskatoon | True Color",
+    description:
+      "Job site coroplast signs and safety banners from $30. Same-day rush. Local Saskatoon pickup at 216 33rd St W.",
+    url: "https://truecolorprinting.ca/construction-signs-saskatoon",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
 };
 
 export default function ConstructionPage() {

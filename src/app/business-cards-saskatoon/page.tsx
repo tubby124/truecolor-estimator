@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Business Cards Saskatoon | 250 Cards from $40 | True Color Display Printing",
+  title: "Business Cards Saskatoon | 250 Cards from $40",
   description:
     "Custom business card printing in Saskatoon. 250 cards from $40, double-sided 14pt gloss. Same-day rush available. Local pickup at 216 33rd St W. In-house designer.",
   alternates: { canonical: "/business-cards-saskatoon" },

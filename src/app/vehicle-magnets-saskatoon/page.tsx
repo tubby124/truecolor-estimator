@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Vehicle Magnets Saskatoon | From $24/sqft | True Color Display Printing",
+  title: "Vehicle Magnets Saskatoon | From $24/sqft",
   description:
     "Custom vehicle magnets in Saskatoon from $24/sqft. 30mil thick, full colour, removable and reusable. Same-day rush available. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/vehicle-magnets-saskatoon" },
@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export default function VehicleMagnetsSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="vehicle-magnets-saskatoon"
+      primaryProductSlug="vehicle-magnets"
       title="Vehicle Magnets Saskatoon"
       subtitle="From $24/sqft. 30mil thick. Remove them when you want. Keep your resale value."
       heroImage="/images/products/product/vehicle-magnets-800x600.webp"

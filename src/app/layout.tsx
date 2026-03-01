@@ -94,7 +94,18 @@ const localBusinessSchema = {
   ],
   priceRange: "$$",
   image: "https://truecolorprinting.ca/truecolorlogo.png",
-  sameAs: ["https://www.instagram.com/truecolorprint"],
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "5.0",
+    reviewCount: "27",
+    bestRating: "5",
+    worstRating: "1",
+  },
+  sameAs: [
+    "https://www.instagram.com/truecolorprint",
+    "https://maps.google.com/?cid=3278649905558780051",
+    "https://www.facebook.com/truecolordisplay",
+  ],
 };
 
 export default function RootLayout({

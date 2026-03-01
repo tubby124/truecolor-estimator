@@ -6,6 +6,14 @@ export const metadata: Metadata = {
   description:
     "Coroplast election yard signs in Saskatoon and Saskatchewan. Volume pricing from $7.25/sqft (32+ sqft). H-stakes $2.50 each. Double-sided available. Call (306) 954-8688.",
   alternates: { canonical: "/election-signs" },
+  openGraph: {
+    title: "Election Signs Saskatoon | True Color",
+    description:
+      "Custom coroplast election signs from $8/sqft. Double-sided available. Same-day rush. Local Saskatoon pickup.",
+    url: "https://truecolorprinting.ca/election-signs",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
 };
 
 export default function ElectionSignsPage() {

@@ -6,6 +6,14 @@ export const metadata: Metadata = {
   description:
     "Coroplast yard signs for Saskatoon REALTORS. Listing goes live Tuesday — signs ready same week. From $30. In-house designer. Local pickup.",
   alternates: { canonical: "/real-estate-signs-saskatoon" },
+  openGraph: {
+    title: "Real Estate Signs Saskatoon | True Color",
+    description:
+      "Coroplast yard signs for REALTORS from $30. Business cards, feature sheets. Same-day available. Local Saskatoon pickup.",
+    url: "https://truecolorprinting.ca/real-estate-signs-saskatoon",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
 };
 
 export default function RealEstatePage() {

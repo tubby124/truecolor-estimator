@@ -7,6 +7,14 @@ export const metadata: Metadata = {
   description:
     "Print, design, and installation services from True Color Display Printing. In-house graphic design, window decal application, vehicle graphic installation. Saskatoon, SK.",
   alternates: { canonical: "/services" },
+  openGraph: {
+    title: "Services | True Color Display Printing Saskatoon",
+    description:
+      "Print, design, and installation services in Saskatoon. In-house graphic design, window decal application, and vehicle graphic installation.",
+    url: "https://truecolorprinting.ca/services",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
 };
 
 interface ServiceCardProps {

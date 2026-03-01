@@ -5,10 +5,18 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { GalleryGrid } from "./GalleryGrid";
 
 export const metadata: Metadata = {
-  title: "Our Work | True Color Display Printing Saskatoon",
+  title: "Our Work | Print Shop Gallery Saskatoon",
   description:
     "See real jobs from True Color Display Printing — coroplast signs, vinyl banners, vehicle magnets, business cards and more. Local Saskatoon print shop.",
   alternates: { canonical: "/gallery" },
+  openGraph: {
+    title: "Our Work | Saskatoon Print Shop Gallery",
+    description:
+      "Real jobs from True Color — coroplast signs, vinyl banners, vehicle magnets, business cards and more. Saskatoon print shop at 216 33rd St W.",
+    url: "https://truecolorprinting.ca/gallery",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
 };
 
 export default function GalleryPage() {

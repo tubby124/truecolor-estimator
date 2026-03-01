@@ -6,7 +6,7 @@ import { PRODUCTS, PRODUCT_SLUGS } from "@/lib/data/products-content";
 import { PrintIcon } from "@/components/icons/PrintIcons";
 
 export const metadata: Metadata = {
-  title: "Get a Price | True Color Display Printing Saskatoon",
+  title: "Get a Price | Instant Print Pricing Saskatoon",
   description:
     "Instant live pricing on signs, banners, business cards, flyers, magnets and more. No quote forms. No callbacks. See your exact price now.",
   alternates: { canonical: "/quote" },

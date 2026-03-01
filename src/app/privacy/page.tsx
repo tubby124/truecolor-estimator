@@ -23,7 +23,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-bold text-[#1c1712] mb-3">1. Who We Are</h2>
             <p>
               True Color Display Printing Ltd. operates at 216 33rd Street West (upstairs), Saskatoon,
-              SK S7L 0N6. We can be reached at{" "}
+              SK S7L 0V5. We can be reached at{" "}
               <a href="mailto:info@true-color.ca" className="text-[#16C2F3] hover:underline">
                 info@true-color.ca
               </a>{" "}

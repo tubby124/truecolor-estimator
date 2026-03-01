@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 export default function AluminumSignsSaskatoonPage() {
   return (
     <IndustryPage
+      canonicalSlug="aluminum-signs-saskatoon"
+      primaryProductSlug="acp-signs"
       title="Aluminum Signs Saskatoon"
       subtitle="ACP from $13/sqft. 10+ year outdoor lifespan. Professional and permanent."
       heroImage="/images/products/product/acp-aluminum-sign-800x600.webp"

@@ -5,10 +5,18 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "About Us | True Color Display Printing Saskatoon",
+  title: "About | Saskatoon Print Shop — Real Equipment, Local Pickup",
   description:
     "Meet the team behind True Color Display Printing. In-house Roland TrueVIS and Konica Minolta equipment. Local Saskatoon print shop at 216 33rd St W.",
   alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About True Color | Saskatoon Print Shop",
+    description:
+      "Meet the team behind True Color Display Printing. Roland TrueVIS UV printer, Konica Minolta press, in-house designer. Local Saskatoon shop at 216 33rd St W.",
+    url: "https://truecolorprinting.ca/about",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
 };
 
 const EQUIPMENT = [

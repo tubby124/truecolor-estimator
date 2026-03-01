@@ -6,11 +6,20 @@ export const metadata: Metadata = {
   description:
     "Banners, foam boards, and retractable stands for Saskatoon events. Same-day options. One shop for signage, banners, and print. Local pickup.",
   alternates: { canonical: "/event-banners" },
+  openGraph: {
+    title: "Event Banners Saskatoon | True Color",
+    description:
+      "Vinyl banners, foam boards, retractable stands for Saskatoon events. Same-day available. Local pickup at 216 33rd St W.",
+    url: "https://truecolorprinting.ca/event-banners",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
 };
 
 export default function EventBannersPage() {
   return (
     <IndustryPage
+      canonicalSlug="event-banners"
       title="Event Banners & Signage Saskatoon"
       subtitle="The event is Saturday. The banner needs to be there."
       heroImage="/images/products/heroes/sports-hero-1200x500.webp"
@@ -18,7 +27,7 @@ export default function EventBannersPage() {
       description="Event timelines compress fast. True Color supplies 13oz hemmed vinyl banners, foam board signs, retractable banner stands, and coroplast directionals — all from one shop. Last-minute spec changes happen — we adjust without drama. Local pickup at 216 33rd St W."
       products={[
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
-        { name: "Foam Board Signs", from: "from $45", slug: "foam-board-signs" },
+        { name: "Foam Board Signs", from: "from $45", slug: "foamboard-displays" },
         { name: "Retractable Banner Stands", from: "from $219", slug: "retractable-banners" },
         { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
       ]}

@@ -26,13 +26,13 @@ export function SiteFooter() {
             <h3 className="text-white text-sm font-semibold mb-4">Find Us</h3>
             <div className="space-y-2 text-sm">
               <a
-                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0N6"
+                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V5"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block hover:text-white transition-colors"
               >
                 216 33rd St W (upstairs)<br />
-                Saskatoon, SK S7L 0N6
+                Saskatoon, SK S7L 0V5
               </a>
               <a href="tel:+13069548688" className="block hover:text-white transition-colors">
                 (306) 954-8688
@@ -58,11 +58,23 @@ export function SiteFooter() {
               <Link href="/quote" className="block hover:text-white transition-colors">
                 Get a Price
               </Link>
-              <Link href="/privacy" className="block hover:text-white transition-colors">
-                Privacy Policy
+              <Link href="/coroplast-signs-saskatoon" className="block hover:text-white transition-colors">
+                Coroplast Signs
               </Link>
-              <Link href="/terms" className="block hover:text-white transition-colors">
-                Terms of Service
+              <Link href="/same-day-printing-saskatoon" className="block hover:text-white transition-colors">
+                Same-Day Printing
+              </Link>
+              <Link href="/banner-printing-saskatoon" className="block hover:text-white transition-colors">
+                Vinyl Banners
+              </Link>
+              <Link href="/business-cards-saskatoon" className="block hover:text-white transition-colors">
+                Business Cards
+              </Link>
+              <Link href="/gallery" className="block hover:text-white transition-colors">
+                Our Work
+              </Link>
+              <Link href="/about" className="block hover:text-white transition-colors">
+                About Us
               </Link>
               <a
                 href="https://g.page/r/CZH6HlbNejQAEAE/review"

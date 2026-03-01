@@ -71,7 +71,7 @@ export default function TermsPage() {
                 availability when ordering.
               </li>
               <li>
-                Orders are available for pickup at 216 33rd St W (upstairs), Saskatoon, SK S7L 0N6.
+                Orders are available for pickup at 216 33rd St W (upstairs), Saskatoon, SK S7L 0V5.
                 We will notify you when your order is ready.
               </li>
             </ul>

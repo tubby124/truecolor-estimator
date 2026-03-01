@@ -54,7 +54,7 @@ export function IndustryPage({
         streetAddress: "216 33rd St W",
         addressLocality: "Saskatoon",
         addressRegion: "SK",
-        postalCode: "S7L 0V2",
+        postalCode: "S7L 0V5",
         addressCountry: "CA",
       },
     },

@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description:
       "Coroplast, ACP, and banner printing for Saskatchewan farms, ag dealers, and co-ops. Volume pricing. Local pickup Saskatoon.",
     url: "https://truecolorprinting.ca/agribusiness-signs-saskatchewan",
+    type: "website",,
+    url: "https://truecolorprinting.ca/agribusiness-signs-saskatchewan",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
   },
 };
