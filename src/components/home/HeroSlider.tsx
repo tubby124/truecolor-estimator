@@ -85,7 +85,7 @@ export function HeroSlider() {
         <div
           key={i}
           className={`transition-opacity duration-700 ${
-            i === current ? "opacity-100" : "opacity-0 absolute inset-0"
+            i === current ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none"
           }`}
         >
           <div className="flex flex-col md:flex-row min-h-[420px] md:min-h-[500px]">
