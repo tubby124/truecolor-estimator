@@ -51,6 +51,7 @@ const INDUSTRY_LINKS = [
   { label: "Healthcare", href: "/healthcare-printing-saskatoon" },
   { label: "Retail", href: "/retail-signs-saskatoon" },
   { label: "Sports & Events", href: "/sports-banners-saskatoon" },
+  { label: "Ramadan & Eid", href: "/ramadan-eid-banners-saskatoon" },
 ];
 
 export function SiteNav() {
