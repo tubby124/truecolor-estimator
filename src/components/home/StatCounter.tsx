@@ -13,10 +13,9 @@ interface Props {
  * Uses ease-out cubic easing. Fires once.
  */
 export function StatCounter({ target, suffix = "", className = "" }: Props) {
-  const { ref, value } = useCountUp(target);
+  const { ref, value } = useCountUp<HTMLSpanElement>(target);
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <span ref={ref as any} className={className}>
+    <span ref={ref} className={className}>
       {value}{suffix}
     </span>
   );

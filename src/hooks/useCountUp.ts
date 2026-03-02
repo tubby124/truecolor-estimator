@@ -8,8 +8,8 @@ import { useEffect, useRef, useState } from "react";
  *   const { ref, value } = useCountUp(500, 1500);
  *   <span ref={ref}>{value}+</span>
  */
-export function useCountUp(target: number, duration = 1500) {
-  const ref = useRef<HTMLElement>(null);
+export function useCountUp<T extends HTMLElement = HTMLElement>(target: number, duration = 1500) {
+  const ref = useRef<T>(null);
   const [value, setValue] = useState(0);
   const started = useRef(false);
 

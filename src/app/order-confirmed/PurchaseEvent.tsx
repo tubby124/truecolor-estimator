@@ -4,13 +4,12 @@ import { useEffect } from "react";
 import { trackPurchase } from "@/lib/analytics";
 
 interface Props {
-  orderId: string;
   orderNumber: string;
   total: number;
   paymentMethod: string;
 }
 
-export function PurchaseEvent({ orderId, orderNumber, total, paymentMethod }: Props) {
+export function PurchaseEvent({ orderNumber, total, paymentMethod }: Props) {
   useEffect(() => {
     trackPurchase({
       transaction_id: orderNumber,

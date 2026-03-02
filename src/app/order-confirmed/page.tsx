@@ -100,7 +100,6 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       {/* GA4 purchase event (client component — fires once on mount) */}
       {oid && orderSummary && (
         <PurchaseEvent
-          orderId={oid}
           orderNumber={orderSummary.order_number}
           total={orderSummary.total}
           paymentMethod={orderSummary.payment_method}
@@ -110,10 +109,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       <main id="main-content" className="max-w-2xl mx-auto px-6 py-20 text-center">
         {/* Animated checkmark */}
         <div className="flex justify-center mb-6">
-          <div
-            className="w-16 h-16 bg-[#16C2F3] rounded-full flex items-center justify-center"
-            style={{ animation: "checkIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both" }}
-          >
+          <div className="w-16 h-16 bg-[#16C2F3] rounded-full flex items-center justify-center check-in-anim">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -126,7 +122,6 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
             </svg>
           </div>
         </div>
-        <style>{`@keyframes checkIn{0%{transform:scale(0);opacity:0}80%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}`}</style>
 
         <h1 className="text-3xl font-bold text-[#1c1712] mb-3">Order received!</h1>
 

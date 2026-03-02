@@ -108,6 +108,18 @@ body {
 .reveal-section.delay-3 { transition-delay: 0.3s; }
 .reveal-section.delay-4 { transition-delay: 0.4s; }
 
+/* ─── Order confirmed checkmark spring entrance ─────────────────────────── */
+
+@keyframes checkIn {
+  0%   { transform: scale(0); opacity: 0; }
+  80%  { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.check-in-anim {
+  animation: checkIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
 /* ─── Price pulse — fires when price value changes (key={price} remounts) ─── */
 
 @keyframes pricePulse {
