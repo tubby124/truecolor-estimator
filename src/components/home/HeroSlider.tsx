@@ -62,6 +62,8 @@ const SLIDES = [
   },
 ];
 
+const SLIDE_WIDTH_PCT = 100 / SLIDES.length;
+
 export function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -86,63 +88,72 @@ export function HeroSlider() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Slides */}
-      {SLIDES.map((slide, i) => (
-        <div
-          key={i}
-          className={`transition-opacity duration-700 ${
-            i === current ? "opacity-100" : "opacity-0 absolute inset-0 pointer-events-none"
-          }`}
-        >
-          <div className="flex flex-col md:flex-row min-h-[420px] md:min-h-[500px]">
-            {/* Image side — product shown fully, no cropping */}
-            <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-[#13100c] flex items-center justify-center overflow-hidden">
-              <Image
-                src={slide.img}
-                alt={slide.imgAlt}
-                fill
-                className="object-contain p-6 md:p-10"
-                priority={i === 0}
-                loading={i === 0 ? undefined : "lazy"}
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
+      {/* Track — all slides side-by-side, translateX to reveal current */}
+      <div
+        className="flex transition-transform duration-700 will-change-transform"
+        style={{
+          width: `${SLIDES.length * 100}%`,
+          transform: `translateX(-${current * SLIDE_WIDTH_PCT}%)`,
+          transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)",
+        }}
+      >
+        {SLIDES.map((slide, i) => (
+          <div
+            key={i}
+            aria-hidden={i !== current}
+            style={{ width: `${SLIDE_WIDTH_PCT}%` }}
+            className="flex-shrink-0"
+          >
+            <div className="flex flex-col md:flex-row min-h-[420px] md:min-h-[500px]">
+              {/* Image side */}
+              <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-[#13100c] flex items-center justify-center overflow-hidden">
+                <Image
+                  src={slide.img}
+                  alt={slide.imgAlt}
+                  fill
+                  className="object-contain p-6 md:p-10"
+                  priority={i === 0}
+                  loading={i === 0 ? undefined : "lazy"}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
 
-            {/* Text side */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-10 bg-[#1c1712]">
-              {/* Page H1 — only in first slide DOM so there's exactly one H1 on the page */}
-              {i === 0 && (
-                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight mb-4">
-                  Price it. Proof it. Pick it up today.
-                </h1>
-              )}
-              <p className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">
-                {slide.accentWord}
-              </p>
-              <p className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
-                {slide.headline}
-              </p>
-              <p className="text-gray-300 text-base md:text-lg max-w-sm mb-8 leading-relaxed">
-                {slide.sub}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href={slide.ctaHref}
-                  className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base btn-shimmer"
-                >
-                  {slide.cta}
-                </Link>
-                <a
-                  href="tel:+13069548688"
-                  className="border border-white/40 text-white font-semibold px-7 py-3.5 rounded-lg hover:border-white transition-colors text-base"
-                >
-                  Call (306) 954-8688
-                </a>
+              {/* Text side */}
+              <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-10 bg-[#1c1712]">
+                {/* Page H1 — only in first slide so there's exactly one H1 on the page */}
+                {i === 0 && (
+                  <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight mb-4">
+                    Price it. Proof it. Pick it up today.
+                  </h1>
+                )}
+                <p className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">
+                  {slide.accentWord}
+                </p>
+                <p className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
+                  {slide.headline}
+                </p>
+                <p className="text-gray-300 text-base md:text-lg max-w-sm mb-8 leading-relaxed">
+                  {slide.sub}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href={slide.ctaHref}
+                    className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base btn-shimmer"
+                  >
+                    {slide.cta}
+                  </Link>
+                  <a
+                    href="tel:+13069548688"
+                    className="border border-white/40 text-white font-semibold px-7 py-3.5 rounded-lg hover:border-white transition-colors text-base"
+                  >
+                    Call (306) 954-8688
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {/* Prev / Next arrows */}
       <button

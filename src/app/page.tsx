@@ -9,6 +9,8 @@ import { HeroSlider } from "@/components/home/HeroSlider";
 import { LocalShopSection } from "@/components/home/LocalShopSection";
 import { ScrollRevealInit } from "@/components/home/ScrollRevealInit";
 import { StatCounter } from "@/components/home/StatCounter";
+import { MarqueeStrip } from "@/components/home/MarqueeStrip";
+import { SameDayClock } from "@/components/home/SameDayClock";
 
 export const metadata: Metadata = {
   title: { absolute: "True Color Display Printing | Saskatoon Signs, Banners & Cards" },
@@ -22,6 +24,7 @@ export const metadata: Metadata = {
 const PRODUCTS = [
   {
     name: "Coroplast Signs",
+    category: "Signs",
     from: "from $30",
     desc: "Job site, yard, and directional signs. Survives Saskatchewan winters.",
     img: "/images/products/product/coroplast-yard-sign-800x600.webp",
@@ -29,6 +32,7 @@ const PRODUCTS = [
   },
   {
     name: "Vinyl Banners",
+    category: "Banners",
     from: "from $45",
     desc: "13oz vinyl for events, storefronts, and trade shows. Any size.",
     img: "/images/products/product/banner-vinyl-colorful-800x600.webp",
@@ -36,6 +40,7 @@ const PRODUCTS = [
   },
   {
     name: "Business Cards",
+    category: "Print",
     from: "from $40",
     desc: "250 cards, 14pt gloss stock. Single or double-sided.",
     img: "/images/products/product/business-cards-800x600.webp",
@@ -43,6 +48,7 @@ const PRODUCTS = [
   },
   {
     name: "Flyers",
+    category: "Print",
     from: "from $45",
     desc: "100 flyers on 80lb gloss. Sharp colour, clean finish.",
     img: "/images/products/product/flyers-stack-800x600.webp",
@@ -50,6 +56,7 @@ const PRODUCTS = [
   },
   {
     name: "Vehicle Magnets",
+    category: "Signs",
     from: "from $45",
     desc: "30mil magnets for any vehicle. Custom size, full colour.",
     img: "/images/products/product/vehicle-magnets-800x600.webp",
@@ -57,6 +64,7 @@ const PRODUCTS = [
   },
   {
     name: "ACP Aluminum Signs",
+    category: "Signs",
     from: "from $60",
     desc: "3mm aluminum composite. Indoor or outdoor, built to last.",
     img: "/images/products/product/acp-aluminum-sign-800x600.webp",
@@ -64,6 +72,7 @@ const PRODUCTS = [
   },
   {
     name: "Foamboard Displays",
+    category: "Displays",
     from: "from $45",
     desc: "Lightweight indoor displays for events, counters, and trade shows.",
     img: "/images/products/product/foamboard-display-800x600.webp",
@@ -71,6 +80,7 @@ const PRODUCTS = [
   },
   {
     name: "Window Decals",
+    category: "Windows",
     from: "from $45",
     desc: "Full-colour adhesive vinyl for storefronts, vehicles, and glass doors.",
     img: "/images/gallery/gallery-window-decal-swiss-barber.webp",
@@ -78,6 +88,7 @@ const PRODUCTS = [
   },
   {
     name: "Perforated Window Vinyl",
+    category: "Windows",
     from: "from $40",
     desc: "One-way vision graphics. Full colour outside, see-through inside.",
     img: "/images/products/product/window-perf-800x600.webp",
@@ -200,6 +211,7 @@ export default function HomePage() {
               <p className="font-bold text-base">Same-Day Available</p>
               <p className="text-sm opacity-90">In by noon, ready by 5 PM</p>
             </Link>
+            <SameDayClock />
           </div>
           <div>
             <p className="font-bold text-base">Next-Day Standard</p>
@@ -245,6 +257,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── MARQUEE STRIP ────────────────────────────────────────────────────── */}
+      <MarqueeStrip />
+
       {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
       <div className="reveal-section">
         <ReviewsSection />
@@ -272,6 +287,9 @@ export default function HomePage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
+                <span className="absolute top-3 left-3 z-10 bg-[#1c1712]/80 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                  {p.category}
+                </span>
               </div>
               <div className="p-5">
                 <div className="flex items-baseline justify-between mb-2">
@@ -281,9 +299,11 @@ export default function HomePage() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 leading-relaxed">{p.desc}</p>
-                <p className="text-[#16C2F3] text-sm font-semibold mt-4 group-hover:underline">
-                  See exact price →
-                </p>
+                <div className="mt-4">
+                  <span className="inline-flex items-center gap-1 bg-[#16C2F3] text-white text-xs font-bold px-3.5 py-1.5 rounded-full group-hover:bg-[#0fb0dd] transition-colors">
+                    See exact price →
+                  </span>
+                </div>
               </div>
             </Link>
           ))}
