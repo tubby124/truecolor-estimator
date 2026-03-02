@@ -20,8 +20,9 @@ function getSaskTime() {
  * Live countdown to the same-day order cutoff (12:00 PM CST).
  * Renders a small line showing "Closes in Xh Ym".
  * Returns null on weekends or after noon — disappears automatically.
+ * Pass className to override text styling for different backgrounds.
  */
-export function SameDayClock() {
+export function SameDayClock({ className }: { className?: string }) {
   const [countdown, setCountdown] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export function SameDayClock() {
   if (!countdown) return null;
 
   return (
-    <p className="text-xs text-white/80 mt-1 flex items-center justify-center gap-1">
+    <p className={className ?? "text-xs text-white/80 mt-1 flex items-center justify-center gap-1"}>
       <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <circle cx="12" cy="12" r="10" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l3 3" />

@@ -9,6 +9,7 @@ import { useToast, ToastContainer } from "@/components/ui";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { Category } from "@/lib/data/types";
 import { trackViewItem, trackAddToCart } from "@/lib/analytics";
+import { SameDayClock } from "@/components/home/SameDayClock";
 
 // Friendly material labels shown in the customer proof
 const MATERIAL_LABELS: Record<string, string> = {
@@ -170,6 +171,7 @@ export function ProductPageClient({ product }: Props) {
         {/* Price summary */}
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 leading-none mb-0.5">Total incl. GST</p>
+          <SameDayClock className="text-[10px] text-[#16C2F3] flex items-center gap-1 mb-0.5" />
           {priceData.loading && priceData.total == null ? (
             <div className="h-6 w-24 bg-gray-100 rounded animate-pulse" />
           ) : priceData.total != null ? (

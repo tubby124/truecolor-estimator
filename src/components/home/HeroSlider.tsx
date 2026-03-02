@@ -125,9 +125,9 @@ export function HeroSlider() {
                     Price it. Proof it. Pick it up today.
                   </h1>
                 )}
-                <p className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">
+                <h2 className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">
                   {slide.accentWord}
-                </p>
+                </h2>
                 <p className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
                   {slide.headline}
                 </p>

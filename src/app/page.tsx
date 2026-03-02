@@ -227,28 +227,28 @@ export default function HomePage() {
       </section>
 
       {/* ── TRUST STRIP ──────────────────────────────────────────────────────── */}
-      <section className="reveal-section bg-white border-b border-gray-100 px-6 py-5">
+      <section className="bg-white border-b border-gray-100 px-6 py-5">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-5 md:gap-10 text-sm text-gray-500">
-          <span className="flex items-center gap-2 whitespace-nowrap">
+          <span className="reveal-section flex items-center gap-2 whitespace-nowrap">
             <svg className="w-4 h-4 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 24 24">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
             <span>5.0 stars · 27 reviews</span>
           </span>
-          <span className="flex items-center gap-2 whitespace-nowrap">
+          <span className="reveal-section delay-1 flex items-center gap-2 whitespace-nowrap">
             <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
             </svg>
             <span>Pickup at 216 33rd St W</span>
           </span>
-          <span className="flex items-center gap-2 whitespace-nowrap">
+          <span className="reveal-section delay-2 flex items-center gap-2 whitespace-nowrap">
             <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
             </svg>
             <span>In-house designer</span>
           </span>
-          <span className="flex items-center gap-2 whitespace-nowrap">
+          <span className="reveal-section delay-3 flex items-center gap-2 whitespace-nowrap">
             <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
             </svg>
