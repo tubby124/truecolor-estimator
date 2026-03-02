@@ -9,13 +9,12 @@ import { HeroSlider } from "@/components/home/HeroSlider";
 import { LocalShopSection } from "@/components/home/LocalShopSection";
 import { ScrollRevealInit } from "@/components/home/ScrollRevealInit";
 import { StatCounter } from "@/components/home/StatCounter";
-import { MarqueeStrip } from "@/components/home/MarqueeStrip";
 import { SameDayClock } from "@/components/home/SameDayClock";
 
 export const metadata: Metadata = {
   title: { absolute: "True Color Display Printing | Saskatoon Signs, Banners & Cards" },
   description:
-    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $40. In-house designer, local pickup at 216 33rd St W Saskatoon. See your exact price now — no quote forms.",
+    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer, local pickup at 216 33rd St W Saskatoon. See your exact price now — no quote forms.",
   alternates: { canonical: "/" },
 };
 
@@ -41,7 +40,7 @@ const PRODUCTS = [
   {
     name: "Business Cards",
     category: "Print",
-    from: "from $40",
+    from: "from $45",
     desc: "250 cards, 14pt gloss stock. Single or double-sided.",
     img: "/images/products/product/business-cards-800x600.webp",
     href: "/products/business-cards",
@@ -148,7 +147,7 @@ const homeFaqSchema = {
       name: "How much does printing cost in Saskatoon?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Coroplast signs start at $30. Vinyl banners start at $66. Business cards are $40 for 250 double-sided. See exact prices for any size and quantity at truecolorprinting.ca/quote — no quote forms needed.",
+        text: "Coroplast signs start at $30. Vinyl banners start at $66. Business cards are $45 for 250 double-sided. See exact prices for any size and quantity at truecolorprinting.ca/quote — no quote forms needed.",
       },
     },
     {
@@ -256,9 +255,6 @@ export default function HomePage() {
           </span>
         </div>
       </section>
-
-      {/* ── MARQUEE STRIP ────────────────────────────────────────────────────── */}
-      <MarqueeStrip />
 
       {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
       <div className="reveal-section">

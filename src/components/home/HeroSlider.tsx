@@ -45,9 +45,9 @@ const SLIDES = [
   },
   {
     img: "/images/products/product/business-cards-800x600.webp",
-    imgAlt: "Business cards printed in Saskatoon — 250 double-sided cards from $40, True Color",
+    imgAlt: "Business cards printed in Saskatoon — 250 double-sided cards from $45, True Color",
     accentWord: "Business Cards",
-    headline: "250 for $40",
+    headline: "250 for $45",
     sub: "14pt gloss stock, double-sided. Picked up locally in Saskatoon.",
     cta: "See Exact Prices →",
     ctaHref: "/products/business-cards",
