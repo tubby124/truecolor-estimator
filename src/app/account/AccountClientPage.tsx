@@ -347,6 +347,12 @@ export function AccountClientPage() {
         options: { emailRedirectTo: `${SITE_URL}/account/callback` },
       });
       if (error) throw error;
+      // Notify admin of new account (fire-and-forget — non-blocking, non-fatal)
+      fetch("/api/auth/signup-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      }).catch(() => {});
       if (data.session) {
         setSession(data.session as SessionData);
       } else {

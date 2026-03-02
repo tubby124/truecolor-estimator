@@ -75,6 +75,7 @@ export async function sendStaffOrderNotification(
   const { orderNumber, contact, is_rush, payment_method, total, filePaths, siteUrl } = params;
 
   const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
   const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
 
   const paymentLabel = payment_method === "clover_card" ? "Card (Clover)" : "e-Transfer";
@@ -85,9 +86,13 @@ export async function sendStaffOrderNotification(
   const html = buildStaffNotificationHtml(params, fileLinks, siteUrl);
   const text = buildStaffNotificationText(params, fileLinks, siteUrl);
 
+  // Build recipient list: staff + optional admin personal email (deduped)
+  const toAddresses: string[] = [staffEmail];
+  if (adminEmail && adminEmail !== staffEmail) toAddresses.push(adminEmail);
+
   await sendEmail({
     from,
-    to: staffEmail,
+    to: toAddresses,
     subject,
     priority: "high",
     html,
@@ -95,7 +100,7 @@ export async function sendStaffOrderNotification(
   });
 
   console.log(
-    `[staffNotification] sent → ${staffEmail} | order ${orderNumber} | ${paymentLabel} | $${total.toFixed(2)}`
+    `[staffNotification] sent → ${toAddresses.join(", ")} | order ${orderNumber} | ${paymentLabel} | $${total.toFixed(2)}`
   );
 }
 
