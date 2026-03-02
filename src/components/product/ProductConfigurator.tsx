@@ -6,6 +6,7 @@ import type { LineItem } from "@/lib/cart/cart";
 import { useToast, ToastContainer } from "@/components/ui";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { trackPriceCalculated } from "@/lib/analytics";
+import { motion } from "motion/react";
 
 const BULK_HINTS: Record<string, Record<number, string>> = {
   SIGN:           { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
@@ -241,9 +242,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Select Your Stand</p>
           <div className="flex flex-col gap-2">
             {product.tierPresets.map((tier, i) => (
-              <button
+              <motion.button
                 key={tier.label}
                 onClick={() => setSelectedTier(i)}
+                whileTap={{ scale: 0.96 }}
                 className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-colors ${
                   selectedTier === i
                     ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -251,7 +253,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 }`}
               >
                 {tier.label}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -263,9 +265,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Size</p>
           <div className="flex flex-wrap gap-2">
             {product.sizePresets.map((preset) => (
-              <button
+              <motion.button
                 key={preset.label}
                 onClick={() => { setSelectedSize(preset); setIsCustom(false); }}
+                whileTap={{ scale: 0.94 }}
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   !isCustom && selectedSize.label === preset.label
                     ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -273,10 +276,11 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 }`}
               >
                 {preset.label}
-              </button>
+              </motion.button>
             ))}
-            <button
+            <motion.button
               onClick={() => setIsCustom(true)}
+              whileTap={{ scale: 0.94 }}
               className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                 isCustom
                   ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -284,7 +288,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
               }`}
             >
               Custom
-            </button>
+            </motion.button>
           </div>
           {isCustom && (
             <div className="flex gap-2 mt-3">
@@ -319,9 +323,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Sides</p>
           <div className="flex gap-2">
             {([1, 2] as const).map((s) => (
-              <button
+              <motion.button
                 key={s}
                 onClick={() => setSides(s)}
+                whileTap={{ scale: 0.95 }}
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   sides === s
                     ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -329,7 +334,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 }`}
               >
                 {s === 1 ? "Single-sided" : "Double-sided"}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -351,8 +356,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                     Popular
                   </span>
                 )}
-                <button
+                <motion.button
                   onClick={() => { setQty(q); setIsCustomQty(false); }}
+                  whileTap={{ scale: 0.94 }}
                   className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                     isSelected && hasDiscount
                       ? "border-2 border-green-500 bg-green-50 text-green-800"
@@ -362,7 +368,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                   }`}
                 >
                   {q}
-                </button>
+                </motion.button>
                 {hint && (
                   <span className="mt-1 text-[11px] text-green-600 font-medium leading-tight">
                     {hint}
@@ -373,8 +379,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           })}
           {!product.lotPriced && (
             <div className="flex flex-col items-center">
-              <button
+              <motion.button
                 onClick={() => { setCustomQty(String(qty)); setIsCustomQty(true); }}
+                whileTap={{ scale: 0.94 }}
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   isCustomQty
                     ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -382,7 +389,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 }`}
               >
                 Custom
-              </button>
+              </motion.button>
             </div>
           )}
         </div>
@@ -510,9 +517,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             { label: "Design from scratch", value: "FULL_DESIGN", note: "+$50" },
             { label: "Logo vectorization", value: "LOGO_RECREATION", note: "+$75" },
           ].map((opt) => (
-            <button
+            <motion.button
               key={opt.value}
               onClick={() => setDesignStatus(opt.value)}
+              whileTap={{ scale: 0.97 }}
               className={`flex items-center justify-between px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
                 designStatus === opt.value
                   ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -525,7 +533,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                   {opt.note}
                 </span>
               )}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

@@ -178,6 +178,28 @@ body {
   animation-play-state: paused;
 }
 
+/* ─── View Transitions API (page route changes) ─────────────────────────── */
+/* Enabled by experimental.viewTransition in next.config.ts                  */
+/* Progressive enhancement — ignored by browsers that don't support it       */
+
+@keyframes vtSlideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes vtSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+::view-transition-old(root) {
+  animation: vtSlideOut 180ms ease-out;
+}
+
+::view-transition-new(root) {
+  animation: vtSlideIn 220ms ease-out;
+}
+
 /* ─── Print styles ───────────────────────────────────────────────────────── */
 
 @media print {

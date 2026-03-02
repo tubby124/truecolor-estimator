@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "motion/react";
 
 const SLIDES = [
   {
@@ -88,14 +89,12 @@ export function HeroSlider() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Track — all slides side-by-side, translateX to reveal current */}
-      <div
-        className="flex transition-transform duration-700 will-change-transform"
-        style={{
-          width: `${SLIDES.length * 100}%`,
-          transform: `translateX(-${current * SLIDE_WIDTH_PCT}%)`,
-          transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)",
-        }}
+      {/* Track — all slides side-by-side, spring-animated to reveal current */}
+      <motion.div
+        className="flex will-change-transform"
+        style={{ width: `${SLIDES.length * 100}%` }}
+        animate={{ x: `-${current * SLIDE_WIDTH_PCT}%` }}
+        transition={{ type: "spring", stiffness: 300, damping: 32, mass: 0.8 }}
       >
         {SLIDES.map((slide, i) => (
           <div
@@ -153,7 +152,7 @@ export function HeroSlider() {
             </div>
           </div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Prev / Next arrows */}
       <button

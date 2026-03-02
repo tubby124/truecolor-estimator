@@ -3,6 +3,7 @@
 import { CustomerProof } from "@/components/product/CustomerProof";
 import type { Category } from "@/lib/data/types";
 import type { LineItem } from "@/lib/cart/cart";
+import { motion, AnimatePresence } from "motion/react";
 
 interface PriceSummaryProps {
   // Price data
@@ -93,9 +94,16 @@ export function PriceSummary({
               <div className="h-4 bg-gray-100 rounded animate-pulse w-24" />
             </div>
           ) : (
-            <div className="space-y-1">
+            <AnimatePresence mode="wait">
+            <motion.div
+              key={price}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 28 }}
+              className="space-y-1"
+            >
               {/* Main price — key={price} remounts on change, triggering CSS animation */}
-              <p key={price} className="price-pulse text-4xl font-bold text-[#1c1712] tabular-nums leading-none">
+              <p className="price-pulse text-4xl font-bold text-[#1c1712] tabular-nums leading-none">
                 ${price!.toFixed(2)}
               </p>
               {/* Bulk discount badge */}
@@ -171,7 +179,8 @@ export function PriceSummary({
                   <span className="tabular-nums">${total?.toFixed(2)}</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
+            </AnimatePresence>
           )}
         </div>
 
@@ -189,19 +198,20 @@ export function PriceSummary({
         )}
 
         {/* Add to Cart */}
-        <button
+        <motion.button
           onClick={onAddToCart}
           disabled={!hasPrice || addedToCart || loading}
+          whileTap={hasPrice && !addedToCart && !loading ? { scale: 0.97 } : {}}
           className={`w-full py-4 rounded-xl font-bold text-white text-base transition-all ${
             addedToCart
               ? "bg-[#8CC63E] cursor-default"
               : !hasPrice || loading
               ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-[#16C2F3] hover:bg-[#0fb0dd] active:scale-[0.98]"
+              : "bg-[#16C2F3] hover:bg-[#0fb0dd]"
           }`}
         >
           {addedToCart ? "✓ Added to Cart" : loading && hasPrice ? "Updating…" : "Add to Cart →"}
-        </button>
+        </motion.button>
 
         {/* Secondary CTA */}
         <a
