@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { AccountSignupCard } from "@/components/site/AccountSignupCard";
+import { PurchaseEvent } from "@/app/order-confirmed/PurchaseEvent";
 
 export const metadata: Metadata = {
   title: "Order Confirmed — True Color",
@@ -96,10 +97,23 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
+      {/* GA4 purchase event (client component — fires once on mount) */}
+      {oid && orderSummary && (
+        <PurchaseEvent
+          orderId={oid}
+          orderNumber={orderSummary.order_number}
+          total={orderSummary.total}
+          paymentMethod={orderSummary.payment_method}
+        />
+      )}
+
       <main id="main-content" className="max-w-2xl mx-auto px-6 py-20 text-center">
-        {/* Checkmark */}
+        {/* Animated checkmark */}
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-[#16C2F3] rounded-full flex items-center justify-center">
+          <div
+            className="w-16 h-16 bg-[#16C2F3] rounded-full flex items-center justify-center"
+            style={{ animation: "checkIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both" }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -112,6 +126,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
             </svg>
           </div>
         </div>
+        <style>{`@keyframes checkIn{0%{transform:scale(0);opacity:0}80%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}`}</style>
 
         <h1 className="text-3xl font-bold text-[#1c1712] mb-3">Order received!</h1>
 
@@ -212,6 +227,23 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Google Review CTA — highest-intent moment */}
+        <div className="mb-8 p-5 bg-yellow-50 border border-yellow-200 rounded-2xl text-center">
+          <p className="text-sm font-semibold text-yellow-900 mb-1">Happy with your experience?</p>
+          <p className="text-xs text-yellow-700 mb-3">27 Saskatoon businesses already left us a review. Takes 30 seconds.</p>
+          <a
+            href="https://g.page/r/CZH6HlbNejQAEAE/review"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-white border border-yellow-300 text-yellow-900 font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-yellow-50 transition-colors"
+          >
+            <svg className="w-4 h-4 fill-yellow-400" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            Leave a Google Review →
+          </a>
         </div>
 
         {/* Account prompt */}

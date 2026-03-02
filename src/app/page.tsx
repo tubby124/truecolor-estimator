@@ -7,6 +7,8 @@ import { ReviewsSection } from "@/components/home/ReviewsSection";
 import { GalleryStrip } from "@/components/home/GalleryStrip";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { LocalShopSection } from "@/components/home/LocalShopSection";
+import { ScrollRevealInit } from "@/components/home/ScrollRevealInit";
+import { StatCounter } from "@/components/home/StatCounter";
 
 export const metadata: Metadata = {
   title: { absolute: "True Color Display Printing | Saskatoon Signs, Banners & Cards" },
@@ -213,7 +215,7 @@ export default function HomePage() {
       </section>
 
       {/* ── TRUST STRIP ──────────────────────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-100 px-6 py-5">
+      <section className="reveal-section bg-white border-b border-gray-100 px-6 py-5">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-5 md:gap-10 text-sm text-gray-500">
           <span className="flex items-center gap-2 whitespace-nowrap">
             <svg className="w-4 h-4 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 24 24">
@@ -244,10 +246,12 @@ export default function HomePage() {
       </section>
 
       {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
-      <ReviewsSection />
+      <div className="reveal-section">
+        <ReviewsSection />
+      </div>
 
       {/* ── PRODUCT GRID ─────────────────────────────────────────────────────── */}
-      <section className="px-6 py-16 max-w-6xl mx-auto">
+      <section className="reveal-section px-6 py-16 max-w-6xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">What we print</h2>
         <p className="text-gray-500 mb-10 text-lg">
           Exact prices — no &ldquo;call for a quote.&rdquo; Pick a product and see your number now.
@@ -311,10 +315,15 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────────── */}
-      <section className="px-6 py-16 bg-gray-50 border-y border-gray-100">
+      <section className="reveal-section px-6 py-16 bg-gray-50 border-y border-gray-100">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-[#1c1712] text-center mb-12">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-10">
+            {/* Connecting line — desktop only */}
+            <div
+              className="hidden md:block absolute h-0.5 bg-gray-200"
+              style={{ top: "22px", left: "22%", right: "22%" }}
+            />
             {[
               {
                 n: "1",
@@ -322,6 +331,7 @@ export default function HomePage() {
                 desc: "Pick a product. See your number in 30 seconds. No forms, no phone tag.",
                 href: "/quote",
                 link: "Get a price →",
+                delay: "",
               },
               {
                 n: "2",
@@ -329,6 +339,7 @@ export default function HomePage() {
                 desc: "Upload a PDF, AI, or JPG. Or bring a rough sketch — our designer handles the rest.",
                 href: "/services",
                 link: "Design services →",
+                delay: "delay-2",
               },
               {
                 n: "3",
@@ -336,9 +347,10 @@ export default function HomePage() {
                 desc: "Most orders same day or next morning. 216 33rd St W, Saskatoon.",
                 href: "https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK",
                 link: "Get directions →",
+                delay: "delay-4",
               },
             ].map((step) => (
-              <div key={step.n} className="flex flex-col items-center text-center gap-3">
+              <div key={step.n} className={`reveal-section ${step.delay} flex flex-col items-center text-center gap-3`}>
                 <div className="w-11 h-11 rounded-full bg-[#16C2F3] flex items-center justify-center text-white font-bold text-lg shrink-0">
                   {step.n}
                 </div>
@@ -354,10 +366,12 @@ export default function HomePage() {
       </section>
 
       {/* ── GALLERY STRIP ────────────────────────────────────────────────────── */}
-      <GalleryStrip />
+      <div className="reveal-section">
+        <GalleryStrip />
+      </div>
 
       {/* ── INDUSTRIES ───────────────────────────────────────────────────────── */}
-      <section className="bg-[#1c1712] px-6 py-16">
+      <section className="reveal-section bg-[#1c1712] px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">We print for</h2>
           <p className="text-gray-400 mb-10 text-lg">
@@ -381,7 +395,9 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-5">
                   <p className="text-white font-bold text-lg leading-tight">{ind.name}</p>
-                  <p className="text-[#16C2F3] text-sm mt-1">{ind.tagline} →</p>
+                  <p className="text-[#16C2F3] text-sm mt-1 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                    {ind.tagline} →
+                  </p>
                 </div>
               </Link>
             ))}
@@ -390,24 +406,31 @@ export default function HomePage() {
       </section>
 
       {/* ── STATS BAR ────────────────────────────────────────────────────────── */}
-      <section className="py-10 bg-white border-b border-gray-100">
+      <section className="reveal-section py-10 bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { number: "500+", label: "Businesses Served" },
-            { number: "4.9★", label: "Google Rating" },
-            { number: "Same-Day", label: "Turnaround Available" },
-            { number: "Local", label: "Saskatoon SK" },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">{stat.number}</p>
-              <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
-            </div>
-          ))}
+          <div>
+            <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">
+              <StatCounter target={500} suffix="+" />
+            </p>
+            <p className="text-sm text-gray-500 mt-1">Businesses Served</p>
+          </div>
+          <div>
+            <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">5.0★</p>
+            <p className="text-sm text-gray-500 mt-1">Google Rating</p>
+          </div>
+          <div>
+            <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">Same-Day</p>
+            <p className="text-sm text-gray-500 mt-1">Turnaround Available</p>
+          </div>
+          <div>
+            <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">Local</p>
+            <p className="text-sm text-gray-500 mt-1">Saskatoon SK</p>
+          </div>
         </div>
       </section>
 
       {/* ── PITCH BLOCK — Hormozi style ───────────────────────────────────────── */}
-      <section className="px-6 py-16 md:py-20">
+      <section className="reveal-section px-6 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-8 leading-tight">
             Cheaper than Staples.<br />
@@ -451,7 +474,7 @@ export default function HomePage() {
 
           <Link
             href="/quote"
-            className="inline-block bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors"
+            className="inline-block bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors btn-shimmer"
           >
             Get My Exact Price →
           </Link>
@@ -459,7 +482,7 @@ export default function HomePage() {
       </section>
 
       {/* ── ALL PRODUCTS callout ─────────────────────────────────────────────── */}
-      <section className="bg-[#1c1712] px-6 py-14">
+      <section className="reveal-section bg-[#1c1712] px-6 py-14">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-8">
           <div className="flex-1">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
@@ -471,7 +494,7 @@ export default function HomePage() {
           </div>
           <Link
             href="/quote"
-            className="shrink-0 bg-white text-[#1c1712] font-bold px-7 py-4 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap"
+            className="shrink-0 bg-white text-[#1c1712] font-bold px-7 py-4 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap btn-shimmer"
           >
             See All Products →
           </Link>
@@ -479,6 +502,9 @@ export default function HomePage() {
       </section>
 
       <SiteFooter />
+
+      {/* Scroll reveal — attaches IntersectionObserver to all .reveal-section elements */}
+      <ScrollRevealInit />
     </div>
   );
 }

@@ -94,8 +94,8 @@ export function PriceSummary({
             </div>
           ) : (
             <div className="space-y-1">
-              {/* Main price */}
-              <p className="text-4xl font-bold text-[#1c1712] tabular-nums leading-none">
+              {/* Main price — key={price} remounts on change, triggering CSS animation */}
+              <p key={price} className="price-pulse text-4xl font-bold text-[#1c1712] tabular-nums leading-none">
                 ${price!.toFixed(2)}
               </p>
               {/* Bulk discount badge */}
@@ -174,6 +174,19 @@ export function PriceSummary({
             </div>
           )}
         </div>
+
+        {/* Social proof — shown once price is visible */}
+        {hasPrice && (
+          <a
+            href="https://g.page/r/CZH6HlbNejQAEAE/review"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
+          >
+            <span className="text-yellow-400 tracking-tight">★★★★★</span>
+            <span>5.0 · 27 local Google reviews</span>
+          </a>
+        )}
 
         {/* Add to Cart */}
         <button

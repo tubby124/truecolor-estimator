@@ -103,6 +103,7 @@ export function HeroSlider() {
                 fill
                 className="object-contain p-6 md:p-10"
                 priority={i === 0}
+                loading={i === 0 ? undefined : "lazy"}
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
@@ -127,7 +128,7 @@ export function HeroSlider() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={slide.ctaHref}
-                  className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base"
+                  className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base btn-shimmer"
                 >
                   {slide.cta}
                 </Link>
@@ -159,21 +160,12 @@ export function HeroSlider() {
         <ChevronRight className="w-4 h-4" />
       </button>
 
-      {/* Dot indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            className={`w-3 h-3 rounded-full transition-all p-0 min-w-[12px] min-h-[12px] touch-manipulation ${
-              i === current
-                ? "bg-[#16C2F3] scale-125"
-                : "bg-white/40 hover:bg-white/70"
-            }`}
-            style={{ WebkitTapHighlightColor: "transparent" }}
-          />
-        ))}
+      {/* Slide progress bar — fills over 5s, resets on slide change */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 h-1 bg-white/10">
+        <div
+          key={current}
+          className="h-full bg-[#16C2F3] slide-progress-bar"
+        />
       </div>
     </section>
   );

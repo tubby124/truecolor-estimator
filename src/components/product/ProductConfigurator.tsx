@@ -5,6 +5,7 @@ import type { ProductContent } from "@/lib/data/products-content";
 import type { LineItem } from "@/lib/cart/cart";
 import { useToast, ToastContainer } from "@/components/ui";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { trackPriceCalculated } from "@/lib/analytics";
 
 const BULK_HINTS: Record<string, Record<number, string>> = {
   SIGN:           { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
@@ -155,6 +156,13 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setPricePerUnit(data.price_per_unit ?? null);
         setMinChargeApplied(data.min_charge_applied ?? false);
         setMinChargeValue(data.min_charge_value ?? null);
+        // GA4: price_calculated — fires every time a valid price is returned
+        trackPriceCalculated({
+          item_id: product.material_code ?? product.category,
+          item_name: product.name,
+          price: data.sell_price,
+          quantity: effectiveQty,
+        });
       }
     } catch (err) {
       showToast(sanitizeError(err), "error");

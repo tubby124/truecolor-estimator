@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { addToCart } from "@/lib/cart/cart";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductConfigurator, type PriceData, type ConfigData } from "@/components/product/ProductConfigurator";
@@ -8,6 +8,7 @@ import { PriceSummary } from "@/components/product/PriceSummary";
 import { useToast, ToastContainer } from "@/components/ui";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { Category } from "@/lib/data/types";
+import { trackViewItem, trackAddToCart } from "@/lib/analytics";
 
 // Friendly material labels shown in the customer proof
 const MATERIAL_LABELS: Record<string, string> = {
@@ -42,6 +43,16 @@ export function ProductPageClient({ product }: Props) {
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
   const [configData, setConfigData] = useState<ConfigData>(EMPTY_CONFIG);
   const [addedToCart, setAddedToCart] = useState(false);
+
+  // Fire view_item once on mount
+  useEffect(() => {
+    trackViewItem({
+      item_id: product.slug,
+      item_name: product.name,
+      item_category: product.category,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePriceChange = useCallback((data: PriceData) => {
     setPriceData(data);
@@ -88,6 +99,15 @@ export function ProductPageClient({ product }: Props) {
       gst_rate: 0.05,
       qty: configData.qty,
       line_items: priceData.lineItems.length > 0 ? priceData.lineItems : undefined,
+    });
+
+    // GA4: add_to_cart
+    trackAddToCart({
+      item_id: product.slug,
+      item_name: product.name,
+      item_category: product.category,
+      price: priceData.price,
+      quantity: configData.qty,
     });
 
     setAddedToCart(true);

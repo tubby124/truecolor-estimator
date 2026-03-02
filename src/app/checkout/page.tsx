@@ -9,6 +9,7 @@ import type { CreateOrderRequest } from "@/app/api/orders/route";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { trackBeginCheckout } from "@/lib/analytics";
 
 const DEFAULT_GST_RATE = 0.05;
 const RUSH_FEE = 40;
@@ -155,8 +156,12 @@ export default function CheckoutPage() {
   }, [name, email, company, phone, address, notes, mounted]);
 
   useEffect(() => {
-    setItems(getCart());
+    const cart = getCart();
+    setItems(cart);
     setMounted(true);
+    // GA4: begin_checkout
+    const cartTotal = cart.reduce((sum, item) => sum + item.sell_price, 0);
+    trackBeginCheckout({ value: cartTotal, item_count: cart.length });
 
     // Check if user is already logged in — pre-fill their saved profile
     const supabase = createClient();
