@@ -28,23 +28,38 @@ export default function RestaurantSignsSaskatoonPage() {
       description="Saskatoon restaurants, cafes, bars, and food trucks use True Color for menu boards, promotional banners, window vinyl, and business cards. Menu prices change — your signage shouldn't cost $200 every time it does. We print fast, match your brand colours, and you pick up locally at 216 33rd St W. No shipping wait. In-house designer handles everything from your logo file to a rough sketch of your layout."
       descriptionNode={
         <>
-          <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            Saskatoon restaurants, cafes, bars, and food trucks use True Color for menu boards,
-            promotional banners, window vinyl, and business cards. Menu prices change — your signage
-            shouldn&apos;t cost $200 every time it does. We print fast, match your brand colours, and
-            you pick up locally at 216 33rd St W. In-house designer handles everything from your logo
-            file to a rough sketch of your layout.
+          <p className="text-gray-600 text-lg leading-relaxed">
+            Saskatoon restaurants, cafes, bars, and food trucks rely on True Color Display Printing
+            for menu boards, promotional banners, window vinyl, and business cards. Menu prices
+            change, specials rotate, and seasonal promotions come and go — your signage
+            shouldn&apos;t cost $200 every time it does. We print fast, match your brand colours
+            exactly, and you pick up locally at 216 33rd St W. No shipping wait. No vendor
+            juggling. No dropped files.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Planning a seasonal promotion? See our{" "}
+            For menu boards, 3/16&quot; foam board at 18×24&quot; is the go-to for indoor wall
+            menus — lightweight, clean edges, easy to swap when prices change. Window decals and
+            perforated vinyl for storefront branding start at $45. Planning a grand opening,
+            a patio season launch, or a holiday promotion?{" "}
+            <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
+              Event banners
+            </Link>{" "}
+            and{" "}
+            <Link href="/retractable-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
+              retractable banner stands
+            </Link>{" "}
+            (from $219, complete) are the professional way to make foot traffic stop and look.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Our in-house designer handles everything from a full brand guide to a rough napkin
+            sketch of your layout. Reorders match your previous job exactly — bring your order
+            number and we reproduce it identically. Same-day is available if ordered before 10 AM
+            (+$40 flat rush fee). For seasonal promotions like St. Patrick&apos;s Day or
+            Thanksgiving, see our{" "}
             <Link href="/st-patricks-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
-              St. Patrick&apos;s Day printing page
+              seasonal printing pages
             </Link>{" "}
-            for bar and pub-specific banners, window decals, and flyers — or check{" "}
-            <Link href="/same-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
-              same-day printing
-            </Link>{" "}
-            if you need it fast.
+            — we have event-specific templates ready to go.
           </p>
         </>
       }

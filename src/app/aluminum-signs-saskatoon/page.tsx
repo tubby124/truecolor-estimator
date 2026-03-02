@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,6 +26,36 @@ export default function AluminumSignsSaskatoonPage() {
       heroImage="/images/products/product/acp-aluminum-sign-800x600.webp"
       heroAlt="3mm aluminum composite ACP signs printed in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces 3mm aluminum composite (ACP) signs for Saskatoon businesses that need something that lasts. ACP is the go-to material for building directories, commercial real estate signs, permanent site signs, and branded exterior signage. Unlike coroplast, ACP does not bend, warp, fade, or flex. Roland UV ink is printed directly to the panel surface — sharp edges, vivid colour, no lamination needed. Prices start at $13/sqft with volume discounts at 8+ sqft (15% off) and 17+ sqft (23% off). Order online and get an exact price in 30 seconds."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            True Color Display Printing produces 3mm aluminum composite (ACP) signs for Saskatoon
+            businesses that need something that lasts. ACP is the professional standard for building
+            directories, commercial exterior signs, and permanent site identification —
+            the kind of sign that&apos;s still looking sharp in 10 years. Unlike coroplast,
+            ACP does not bend, warp, or flex. Roland UV ink is printed directly to the panel surface
+            — sharp edges, vivid colour, no lamination needed. Prices start at $13/sqft with volume
+            discounts at 8+ sqft (15% off) and 17+ sqft (23% off).
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            ACP is the go-to material for{" "}
+            <Link href="/real-estate-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              real estate and commercial property signs
+            </Link>
+            ,{" "}
+            <Link href="/construction-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              permanent job site identification
+            </Link>
+            , building suite directories, and any outdoor sign that needs to survive Saskatchewan
+            seasons indefinitely. For temporary or budget-conscious applications, our{" "}
+            <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              coroplast signs
+            </Link>{" "}
+            start at $8/sqft and offer a 2–3 year outdoor lifespan. Pickup at 216 33rd St W,
+            Saskatoon — same-day rush available (+$40 flat).
+          </p>
+        </>
+      }
       products={[
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },

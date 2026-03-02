@@ -19,9 +19,35 @@ export const metadata: Metadata = {
   },
 };
 
+const gallerySchema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Print Work Gallery — True Color Display Printing",
+  description:
+    "Photo gallery of real print jobs from True Color Display Printing in Saskatoon — coroplast signs, vinyl banners, vehicle magnets, business cards, and large format prints.",
+  url: "https://truecolorprinting.ca/gallery",
+  provider: {
+    "@type": "LocalBusiness",
+    name: "True Color Display Printing",
+    url: "https://truecolorprinting.ca",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "216 33rd St W",
+      addressLocality: "Saskatoon",
+      addressRegion: "SK",
+      postalCode: "S7L 0V5",
+      addressCountry: "CA",
+    },
+  },
+};
+
 export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(gallerySchema) }}
+      />
       <SiteNav />
 
       <main id="main-content" className="max-w-6xl mx-auto px-6 py-14">

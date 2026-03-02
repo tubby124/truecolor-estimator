@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,6 +26,43 @@ export default function SameDayPrintingSaskatoonPage() {
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Same day printing Saskatoon — signs, banners, and cards ready today"
       description="True Color Display Printing offers genuine same-day printing in Saskatoon. Order before 10 AM and we confirm availability by phone — your order is ready by 5 PM the same day. The rush fee is a flat $40 added to your order total, not a per-item surcharge. We print coroplast signs, vinyl banners, business cards, flyers, and vehicle magnets in-house on our Roland UV printer. No outsourcing, no shipping wait, no excuses."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            True Color Display Printing offers genuine same-day printing in Saskatoon — not
+            &ldquo;we&apos;ll try&rdquo; same-day, but confirmed same-day. Order before 10 AM,
+            call (306) 954-8688 to confirm capacity, and your order is ready for pickup by 5 PM
+            the same business day. The rush fee is a flat $40 added to your order total —
+            not per sign, not per sqft. Whether you&apos;re ordering 1 banner or 50 coroplast
+            signs, the rush surcharge is the same $40.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            We print entirely in-house on our Roland UV equipment. That means we control the
+            timeline — no waiting on a supplier, no courier delays, no excuses. Same-day
+            options include{" "}
+            <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              coroplast signs
+            </Link>
+            ,{" "}
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              vinyl banners
+            </Link>
+            ,{" "}
+            <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
+              business cards
+            </Link>
+            , flyers, vehicle magnets, and foam board displays.
+            Aluminum composite (ACP) signs may need an extra day — call to confirm.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            No print-ready file? Not a problem. Our in-house designer can prep your artwork
+            on the spot from a low-res logo, a Word doc, or a rough sketch — design starts
+            at $35 and usually takes under 2 hours for simple layouts. Pickup is at
+            216 33rd St W, Saskatoon. No delivery fees, no shipping guesswork —
+            your order is in your hands the same day you ordered it.
+          </p>
+        </>
+      }
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },

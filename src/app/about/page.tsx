@@ -19,6 +19,44 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "True Color Display Printing",
+  url: "https://truecolorprinting.ca",
+  logo: "https://truecolorprinting.ca/truecolorlogo.png",
+  telephone: "+13069548688",
+  email: "info@true-color.ca",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "216 33rd St W",
+    addressLocality: "Saskatoon",
+    addressRegion: "SK",
+    postalCode: "S7L 0V5",
+    addressCountry: "CA",
+  },
+  sameAs: [
+    "https://www.instagram.com/truecolorprint",
+    "https://maps.google.com/?cid=3278649905558780051",
+    "https://www.facebook.com/truecolordisplay",
+  ],
+  description:
+    "Saskatoon-based print shop operating Roland TrueVIS and Konica Minolta production equipment in-house. Coroplast signs, vinyl banners, vehicle magnets, business cards, and large format printing. Local pickup at 216 33rd St W.",
+  foundingLocation: {
+    "@type": "Place",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Saskatoon",
+      addressRegion: "SK",
+      addressCountry: "CA",
+    },
+  },
+  areaServed: [
+    { "@type": "City", name: "Saskatoon" },
+    { "@type": "AdministrativeArea", name: "Saskatchewan" },
+  ],
+};
+
 const EQUIPMENT = [
   {
     img: "/images/about/printer-roland-truvis.webp",
@@ -55,6 +93,10 @@ const WHY_LOCAL = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
       <SiteNav />
 
       {/* ── PAGE HEADER ── */}
@@ -68,9 +110,11 @@ export default function AboutPage() {
             <span className="text-[#16C2F3]">Printed here.</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl leading-relaxed">
-            We own our presses, employ our own designer, and do every order in our
-            Saskatoon shop. No outsourcing, no shipping middlemen — just faster
-            turnaround and real accountability.
+            True Color Display Printing is a Saskatoon print shop at 216 33rd St W
+            specializing in large-format printing, signs, banners, vehicle magnets, and business
+            cards for local businesses and organizations across Saskatchewan. We own our presses,
+            employ our own designer, and do every order in-house — no outsourcing, no shipping
+            middlemen, just faster turnaround and real accountability.
           </p>
         </div>
       </section>
@@ -130,6 +174,33 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── SERVING SASKATCHEWAN ── */}
+      <section className="px-6 py-16 max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-[#1c1712] mb-3">Serving Saskatchewan Province-Wide</h2>
+        <p className="text-gray-500 mb-8 text-lg max-w-2xl">
+          Based in Saskatoon, we print and ship to businesses across Saskatchewan.
+          Customer pays shipping — we handle everything else.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { city: "Regina — Banners", href: "/banner-printing-regina" },
+            { city: "Regina — Signs", href: "/coroplast-signs-regina" },
+            { city: "Prince Albert", href: "/signs-prince-albert-sk" },
+            { city: "Lloydminster", href: "/printing-lloydminster-sk" },
+            { city: "Moose Jaw", href: "/signs-moose-jaw-sk" },
+            { city: "Swift Current", href: "/printing-swift-current-sk" },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="border border-gray-200 rounded-lg px-4 py-3 text-sm font-medium text-[#1c1712] hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-center"
+            >
+              {item.city}
+            </Link>
+          ))}
         </div>
       </section>
 

@@ -15,6 +15,18 @@ const nextConfig: NextConfig = {
         destination: "/restaurant-signs-saskatoon",
         permanent: true,
       },
+      // /sports-banners-saskatoon → /event-banners (temporary until sports page is built)
+      {
+        source: "/sports-banners-saskatoon",
+        destination: "/event-banners",
+        permanent: false,
+      },
+      // /retail-signs-saskatoon → /restaurant-signs-saskatoon (no retail page built yet)
+      {
+        source: "/retail-signs-saskatoon",
+        destination: "/restaurant-signs-saskatoon",
+        permanent: false,
+      },
       // /agriculture-signs-saskatoon → keep (don't redirect — different keyword target)
       // /election-signs → keep canonical (has "Saskatoon" in title/content)
     ];

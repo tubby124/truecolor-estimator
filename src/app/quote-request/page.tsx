@@ -289,12 +289,22 @@ function QuoteForm() {
             </p>
           )}
 
+          <div className="flex items-center justify-between text-xs text-gray-400 bg-gray-50 rounded-lg px-4 py-3">
+            <span>No commitment — we send your price, you decide.</span>
+            <span className="flex items-center gap-1 shrink-0">
+              <svg className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              5.0 · 27 reviews
+            </span>
+          </div>
+
           <button
             onClick={handleSubmit}
             disabled={loading}
             className="w-full bg-[#16C2F3] hover:bg-[#0fb0dd] disabled:opacity-60 text-white font-bold text-lg py-4 rounded-xl transition-colors"
           >
-            {loading ? "Sending\u2026" : "Send quote request \u2192"}
+            {loading ? "Sending\u2026" : "Send My Request \u2192"}
           </button>
 
           <p className="text-xs text-gray-400 text-center">

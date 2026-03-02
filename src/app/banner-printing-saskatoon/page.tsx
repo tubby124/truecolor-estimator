@@ -37,6 +37,10 @@ export default function BannerPrintingSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Need banners for a specific occasion? See:{" "}
+            <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
+              Event banners &amp; signage
+            </Link>
+            {" · "}
             <Link href="/graduation-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
               Graduation banners
             </Link>

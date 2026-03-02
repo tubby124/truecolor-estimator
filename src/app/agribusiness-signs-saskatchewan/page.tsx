@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -26,6 +27,39 @@ export default function AgribusinessSignsSaskatchewanPage() {
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Agribusiness signs for Saskatchewan farms and equipment dealers"
       description="Saskatchewan's ag sector needs signage that performs in the field — UV-resistant coroplast that survives prairie winters, truck magnets that stay on at highway speeds, and aluminum signs that last 10+ years on equipment. True Color Display Printing serves ag retailers, grain elevator operators, equipment dealers, co-ops, and independent farm operations across Saskatchewan. Volume pricing applies automatically — no account needed. Pickup in Saskatoon or we can arrange delivery for large runs."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            Saskatchewan&apos;s ag sector needs signage that performs in the field — UV-resistant{" "}
+            <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              coroplast signs
+            </Link>{" "}
+            that survive prairie freeze-thaw cycles, truck magnets that stay on at highway speeds,
+            and aluminum composite signs that last 10+ years on equipment and yard installations.
+            True Color Display Printing in Saskatoon prints for ag retailers, grain elevator
+            operators, equipment dealers, co-ops, and independent farm operations across the province.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Volume pricing applies automatically — no corporate account required. Coroplast signs
+            drop to $7.25/sqft at 32+ sqft (about 10 signs at 24×36&quot;).
+            ACP aluminum composite at $13/sqft delivers a professional finish that holds up on
+            permanent farm and equipment yard installations for a decade or more. For fleet branding
+            on grain trucks and equipment, our{" "}
+            <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
+              vehicle magnets
+            </Link>{" "}
+            from $24/sqft stick securely to steel doors, remove cleanly between seasons, and
+            leave no adhesive residue on your paint.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            We&apos;re in Saskatoon at 216 33rd St W — local pickup means you inspect your order
+            before you leave. Bring a PDF, a brand guide, or a rough sketch and our in-house
+            designer handles the rest. For large runs that need delivery to rural Saskatchewan,
+            call us at (306) 954-8688 and we&apos;ll work out logistics. No outsourcing,
+            no shipping middlemen — everything printed on our Roland UV equipment in-house.
+          </p>
+        </>
+      }
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },

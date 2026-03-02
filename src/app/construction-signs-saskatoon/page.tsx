@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -51,9 +52,15 @@ export default function ConstructionPage() {
             What Saskatoon contractors order most
           </h3>
           <p className="text-gray-600 leading-relaxed mb-8">
-            The standard job site package for a Saskatoon contractor: one or two coroplast site ID signs
-            (18×24&quot;, $24–30) with the company name and permit number, a pair of 30mil truck door
-            magnets ($45–90/pair depending on size), and 250 business cards ($40) to hand on-site.
+            The standard job site package for a Saskatoon contractor: one or two{" "}
+            <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              coroplast site ID signs
+            </Link>{" "}
+            (18×24&quot;, $24–30) with the company name and permit number, a pair of 30mil{" "}
+            <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
+              truck door magnets
+            </Link>{" "}
+            ($45–90/pair depending on size), and 250 business cards ($40) to hand on-site.
             Home builders and developers add development signage (4×8 ft coroplast, $232) for the lot
             and directional coroplast signs (18×24&quot;, $24) for subdivision roads. For fencing and
             hoarding, a full-colour vinyl banner ($8.25/sqft) runs the length of your site perimeter

@@ -61,7 +61,10 @@ export function IndustryPage({
         addressCountry: "CA",
       },
     },
-    areaServed: { "@type": "City", name: "Saskatoon" },
+    areaServed: [
+      { "@type": "City", name: "Saskatoon" },
+      { "@type": "AdministrativeArea", name: "Saskatchewan" },
+    ],
     description,
   };
 
@@ -118,9 +121,15 @@ export function IndustryPage({
 
       <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
         {/* Description */}
-        <p className="text-gray-600 text-lg leading-relaxed mb-12 max-w-2xl">
-          {descriptionNode ?? description}
-        </p>
+        {descriptionNode ? (
+          <div className="text-gray-600 text-lg leading-relaxed mb-12 max-w-2xl space-y-4">
+            {descriptionNode}
+          </div>
+        ) : (
+          <p className="text-gray-600 text-lg leading-relaxed mb-12 max-w-2xl">
+            {description}
+          </p>
+        )}
 
         {/* Products */}
         <div className="mb-14">

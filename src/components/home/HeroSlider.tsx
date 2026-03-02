@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 const SLIDES = [
   {
     img: "/images/products/product/coroplast-yard-sign-800x600.webp",
+    imgAlt: "Coroplast yard signs printed in Saskatoon, SK — True Color Display Printing",
     accentWord: "Coroplast Signs",
     headline: "from $8/sqft",
     sub: "Job site, yard, and directional signs. Survives Saskatchewan winters.",
@@ -16,6 +17,7 @@ const SLIDES = [
   },
   {
     img: "/images/products/product/vehicle-magnets-800x600.webp",
+    imgAlt: "Vehicle magnets from $24/sqft — printed in Saskatoon by True Color Display Printing",
     accentWord: "Vehicle Magnets",
     headline: "from $24/sqft",
     sub: "30mil magnets for any vehicle. Removable, reusable, full colour.",
@@ -24,6 +26,7 @@ const SLIDES = [
   },
   {
     img: "/images/products/product/banner-vinyl-colorful-800x600.webp",
+    imgAlt: "Custom vinyl banner printing Saskatoon — 13oz banners from $8.25/sqft, True Color",
     accentWord: "Vinyl Banners",
     headline: "from $8.25/sqft",
     sub: "13oz vinyl for events, storefronts, and trade shows. Any size.",
@@ -32,6 +35,7 @@ const SLIDES = [
   },
   {
     img: "/images/products/product/acp-aluminum-sign-800x600.webp",
+    imgAlt: "ACP aluminum composite signs Saskatoon — from $13/sqft, 10+ year outdoor lifespan",
     accentWord: "Aluminum Signs",
     headline: "from $13/sqft",
     sub: "3mm aluminum composite — professional, durable, outdoor-ready.",
@@ -40,6 +44,7 @@ const SLIDES = [
   },
   {
     img: "/images/products/product/business-cards-800x600.webp",
+    imgAlt: "Business cards printed in Saskatoon — 250 double-sided cards from $40, True Color",
     accentWord: "Business Cards",
     headline: "250 for $40",
     sub: "14pt gloss stock, double-sided. Picked up locally in Saskatoon.",
@@ -48,6 +53,7 @@ const SLIDES = [
   },
   {
     img: "/images/products/product/retractable-stand-600x900.webp",
+    imgAlt: "Retractable banner stand with full-colour print — from $219 at True Color, Saskatoon",
     accentWord: "Retractable Banners",
     headline: "from $219",
     sub: "Premium stand + full-colour print. Ready for your next trade show.",
@@ -93,7 +99,7 @@ export function HeroSlider() {
             <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-[#13100c] flex items-center justify-center overflow-hidden">
               <Image
                 src={slide.img}
-                alt={slide.accentWord}
+                alt={slide.imgAlt}
                 fill
                 className="object-contain p-6 md:p-10"
                 priority={i === 0}

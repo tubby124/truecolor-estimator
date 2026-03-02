@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,6 +26,35 @@ export default function CoroplastSignsSaskatoonPage() {
       heroImage="/images/products/product/coroplast-yard-sign-800x600.webp"
       heroAlt="Coroplast yard signs printed in Saskatoon by True Color Display Printing"
       description="True Color Display Printing is Saskatoon's go-to shop for coroplast signs. Whether you need 1 yard sign or 500 job site signs, we print in-house on our Roland UV printer and have them ready in 1–3 business days — same day for rush orders placed before 10 AM. Prices start at $8/sqft with volume discounts at 8+ sqft (8% off) and 17+ sqft (17% off). H-stakes at $2.50 each."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            True Color Display Printing is Saskatoon&apos;s go-to shop for coroplast signs.
+            Whether you need 1 yard sign or 500 job site signs, we print in-house on our Roland UV
+            printer and have them ready in 1–3 business days — same day for rush orders placed before
+            10 AM. Prices start at $8/sqft with volume discounts at 8+ sqft (8% off) and 17+ sqft
+            (17% off). H-stakes at $2.50 each. All printing done at 216 33rd St W, Saskatoon —
+            no national chain shipping wait.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Coroplast is the backbone of dozens of use cases across Saskatoon and Saskatchewan. Popular applications:{" "}
+            <Link href="/construction-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              job site and contractor signs
+            </Link>
+            ,{" "}
+            <Link href="/real-estate-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              real estate yard signs
+            </Link>
+            ,{" "}
+            <Link href="/election-signs" className="text-[#16C2F3] underline font-medium">
+              election campaign signs
+            </Link>
+            , and seasonal yard signs for promotions and events. Double-sided coroplast is available
+            for corner lots. Any custom size up to 4×8 ft — use the pricing calculator on the
+            product page to get your exact price in 30 seconds.
+          </p>
+        </>
+      }
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
