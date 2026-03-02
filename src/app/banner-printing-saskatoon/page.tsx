@@ -35,6 +35,21 @@ export default function BannerPrintingSaskatoonPage() {
             sqft. In-house Roland UV printer — faster turnaround, consistent colour. Same-day rush
             available for +$40 flat.
           </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            13oz scrim vinyl is the industry standard for outdoor banners in Saskatchewan. It handles
+            wind, rain, and the UV exposure of a prairie summer without curling, peeling, or fading.
+            Grommets are set every 24 inches along all four edges as standard — no extra charge, no
+            forgetting to ask. For banners that need to hang from a horizontal rod or pipe, pole
+            pockets are available on request. Banner stands and retractable pull-ups are also available
+            if you need a freestanding display instead.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            Saskatoon businesses and organizations use True Color for grand opening banners, seasonal
+            storefront promotions, trade show backdrops, Riders game day setups, community event
+            signage, school fundraiser banners, and construction site hoardings. Most orders are ready
+            in 1–3 business days. If you need it faster, same-day rush is available for a flat +$40
+            fee on orders placed before 10 AM — call (306) 954-8688 to confirm capacity.
+          </p>
           <p className="text-gray-600 leading-relaxed">
             Need banners for a specific occasion? See:{" "}
             <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
@@ -94,6 +109,14 @@ export default function BannerPrintingSaskatoonPage() {
         {
           q: "What file format do you need for banners?",
           a: "PDF at 150 dpi minimum (at print size). JPG files are accepted for simpler designs. If you have a low-res logo or rough layout, our in-house designer can prep it for $35–$50.",
+        },
+        {
+          q: "Do you print banners for Saskatoon events and trade shows?",
+          a: "Yes — event and trade show banners are one of our most common orders. Step-and-repeat backdrops, sponsor banners, entrance banners, booth banners, and directional signage are all standard jobs. For trade show setups, retractable banner stands ($219 complete) are popular because they pack down into a carry bag. See the event banners page for occasion-specific guides.",
+        },
+        {
+          q: "Can I get a banner designed and printed at the same shop?",
+          a: "Yes — True Color has an in-house Photoshop designer who handles banner layouts from a rough brief, logo file, or description. Standard layout fee is $35. Most proofs come back same day. Design and print happen in the same building — no files moving between vendors, no delays.",
         },
       ]}
     />

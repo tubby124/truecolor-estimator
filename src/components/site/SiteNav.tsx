@@ -25,10 +25,10 @@ const PRODUCT_CATEGORIES = [
     label: "Window & Vehicle",
     links: [
       { label: "Window Decals", href: "/products/window-decals" },
+      { label: "Wall Graphics", href: "/wall-graphics-saskatoon" },
       { label: "Perforated Window Vinyl", href: "/products/window-perf" },
       { label: "Vehicle Magnets", href: "/products/vehicle-magnets" },
       { label: "Vinyl Lettering", href: "/products/vinyl-lettering" },
-      { label: "Magnet Calendars", href: "/products/magnet-calendars" },
     ],
   },
   {
@@ -45,6 +45,7 @@ const PRODUCT_CATEGORIES = [
 ];
 
 const INDUSTRY_LINKS = [
+  { label: "Sign Company Saskatoon", href: "/sign-company-saskatoon" },
   { label: "Construction", href: "/construction-signs-saskatoon" },
   { label: "Real Estate", href: "/real-estate-signs-saskatoon" },
   { label: "Agriculture", href: "/agriculture-signs-saskatoon" },
@@ -510,6 +511,13 @@ export function SiteNav() {
             {/* Services */}
             <div>
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Services</h3>
+              <Link
+                href="/graphic-design-saskatoon"
+                onClick={() => setDrawerOpen(false)}
+                className="block py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
+              >
+                Graphic Design
+              </Link>
               <Link
                 href="/services"
                 onClick={() => setDrawerOpen(false)}

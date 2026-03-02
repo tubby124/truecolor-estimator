@@ -24,6 +24,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/vehicle-magnets-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/aluminum-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/retractable-banners-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    // New SEO pages (2026-03-02)
+    { url: "/graphic-design-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
+    { url: "/sign-company-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
+    { url: "/wall-graphics-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
     // Industry pages
     { url: "/real-estate-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/construction-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },

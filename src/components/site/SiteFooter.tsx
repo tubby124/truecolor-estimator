@@ -58,6 +58,12 @@ export function SiteFooter() {
               <Link href="/quote" className="block hover:text-white transition-colors">
                 Get a Price
               </Link>
+              <Link href="/graphic-design-saskatoon" className="block hover:text-white transition-colors">
+                Graphic Design
+              </Link>
+              <Link href="/sign-company-saskatoon" className="block hover:text-white transition-colors">
+                Sign Company Saskatoon
+              </Link>
               <Link href="/coroplast-signs-saskatoon" className="block hover:text-white transition-colors">
                 Coroplast Signs
               </Link>
