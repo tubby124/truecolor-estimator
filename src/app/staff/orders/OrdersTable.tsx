@@ -642,6 +642,11 @@ export function OrdersTable({ initialOrders }: Props) {
                       {/* Badges */}
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="font-bold text-[#1c1712]">{order.order_number}</span>
+                        {order.staff_notes?.startsWith("Manual order") && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 tracking-wide uppercase">
+                            Manual
+                          </span>
+                        )}
                         {order.is_rush && (
                           <span className="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
                             RUSH
