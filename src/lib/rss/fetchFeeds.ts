@@ -31,6 +31,18 @@ export async function fetchFeed(url: string, limit = 3): Promise<FeedItem[]> {
   }
 }
 
+/** Fetch multiple feeds, merge, sort by recency, return top N items */
+export async function fetchMergedFeeds(
+  sources: string[],
+  totalLimit = 3
+): Promise<FeedItem[]> {
+  const results = await Promise.all(sources.map((url) => fetchFeed(url, totalLimit)));
+  return results
+    .flat()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, totalLimit);
+}
+
 export function formatRelativeDate(dateStr: string): string {
   if (!dateStr) return "";
   try {

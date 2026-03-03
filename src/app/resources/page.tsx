@@ -2,19 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { fetchFeed, formatRelativeDate, type FeedItem } from "@/lib/rss/fetchFeeds";
+import { fetchFeed, fetchMergedFeeds, formatRelativeDate, type FeedItem } from "@/lib/rss/fetchFeeds";
 
 export const revalidate = 21600; // ISR: rebuild every 6 hours
 
 export const metadata: Metadata = {
   title: "Print & Design Resources | True Color Display Printing Saskatoon",
   description:
-    "Curated printing industry news, graphic design tips, marketing ideas, and Saskatchewan business resources — updated daily for Saskatoon businesses.",
+    "Printing news, graphic design tips, Saskatchewan agriculture, Saskatoon food & restaurant news, construction updates, and local business resources — curated for Saskatoon businesses and updated daily.",
   alternates: { canonical: "/resources" },
   openGraph: {
     title: "Print & Design Resources | True Color Display Printing",
     description:
-      "Stay current with printing industry news, design trends, and Saskatoon business insights. Curated by True Color Display Printing.",
+      "Curated industry news for Saskatoon businesses — printing, design, agriculture, food & restaurant, construction, and local Saskatchewan news.",
     url: "https://truecolorprinting.ca/resources",
     type: "website",
   },
@@ -29,7 +29,7 @@ const pageSchema = {
       url: "https://truecolorprinting.ca/resources",
       name: "Print & Design Resources | True Color Display Printing Saskatoon",
       description:
-        "Curated printing industry news, graphic design tips, and Saskatchewan business resources for Saskatoon businesses.",
+        "Printing news, graphic design, Saskatchewan agriculture, Saskatoon food & restaurant, construction, and local business resources — curated by True Color Display Printing.",
       publisher: {
         "@type": "LocalBusiness",
         name: "True Color Display Printing Ltd.",
@@ -59,7 +59,7 @@ const pageSchema = {
           name: "How often is this resource page updated?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "The resource feeds on this page are refreshed automatically every 6 hours, pulling the latest articles from industry publications and Saskatchewan business news sources.",
+            text: "The resource feeds on this page are refreshed automatically every 6 hours, pulling the latest articles from industry publications, Saskatchewan agriculture, Saskatoon food & restaurant news, construction updates, and local business sources.",
           },
         },
         {
@@ -68,6 +68,22 @@ const pageSchema = {
           acceptedAnswer: {
             "@type": "Answer",
             text: "Yes — True Color has a full-time in-house Photoshop designer who can build layouts from scratch, modify existing files, and turn around same-day proofs. Standard design is a flat $35 fee. This is a major differentiator from print-only shops.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Does True Color print signs for Saskatoon restaurants and food businesses?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Absolutely. True Color prints menu boards, window decals, A-frame signs, vinyl banners, promotional flyers, and grand opening signage for Saskatoon restaurants, cafés, bars, and food businesses. Same-day rush available for urgent orders.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Does True Color print signs for Saskatchewan farms and agribusinesses?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes — True Color provides coroplast yard signs, ACP aluminum signs, vehicle magnets, and large vinyl banners for Saskatchewan farms, agribusinesses, co-ops, and equipment dealers. Durable materials built for outdoor prairie conditions.",
           },
         },
       ],
@@ -145,11 +161,39 @@ function FeedBlock({ section }: { section: FeedSection }) {
 }
 
 export default async function ResourcesPage() {
-  const [industryItems, designItems, marketingItems, localItems] = await Promise.all([
+  const [
+    industryItems,
+    designItems,
+    marketingItems,
+    localItems,
+    agItems,
+    foodItems,
+    constructionItems,
+  ] = await Promise.all([
+    // Original 4
     fetchFeed("https://www.printingimpressions.com/feed/", 3),
     fetchFeed("https://www.creativebloq.com/feeds/all", 3),
     fetchFeed("https://smallbiztrends.com/feed", 3),
-    fetchFeed("https://www.cbc.ca/cmlink/rss-canada-saskatchewan", 3),
+    fetchMergedFeeds([
+      "https://www.cbc.ca/cmlink/rss-canada-saskatchewan",
+      "https://globalnews.ca/saskatoon/feed/",
+    ], 3),
+    // New: Saskatchewan Agriculture
+    fetchMergedFeeds([
+      "https://www.producer.com/feed/",
+      "https://www.grainews.ca/feed/",
+    ], 3),
+    // New: Saskatoon Food & Restaurant
+    fetchMergedFeeds([
+      "https://www.nrn.com/rss",
+      "https://eatnorth.com/feed",
+      "https://globalnews.ca/saskatoon/feed/",
+    ], 3),
+    // New: Construction & Development
+    fetchMergedFeeds([
+      "https://www.dailycommercialnews.com/rss",
+      "https://www.constructioncanada.net/feed/",
+    ], 3),
   ]);
 
   const sections: FeedSection[] = [
@@ -181,12 +225,39 @@ export default async function ResourcesPage() {
       emptyMessage: "Checking for new articles — check back soon.",
     },
     {
-      title: "Saskatchewan Business News",
+      title: "Saskatoon & Saskatchewan News",
       intro:
-        "Keeping a pulse on the local economy helps True Color and our clients anticipate busy seasons, new business openings, and community events that drive demand for printed signage. From Saskatoon construction to agriculture to retail — it's all interconnected.",
+        "Local news from CBC Saskatchewan and Global News Saskatoon. From new business openings to city development projects and community events — what's happening in Saskatoon directly shapes demand for printed signage, promotional materials, and branded displays.",
       ctaText: "About our Saskatoon shop →",
       ctaHref: "/about",
       items: localItems,
+      emptyMessage: "Checking for new articles — check back soon.",
+    },
+    {
+      title: "Saskatchewan Agriculture & Farming",
+      intro:
+        "Saskatchewan is Canada's agricultural heartland. From grain prices and harvest reports to farm equipment and agribusiness news — we follow The Western Producer and Grainews closely because our farmers are some of our best customers. Need yard signs, ACP signs, or vehicle magnets for your operation?",
+      ctaText: "Farm & ag signage →",
+      ctaHref: "/agribusiness-signs-saskatchewan",
+      items: agItems,
+      emptyMessage: "Checking for new articles — check back soon.",
+    },
+    {
+      title: "Saskatoon Food & Restaurant Scene",
+      intro:
+        "Saskatoon's food scene is growing fast — new restaurants, ghost kitchens, food trucks, and cafés opening every season. Whether you need window decals, menu boards, A-frame signs, or grand-opening banners, True Color has served Saskatoon's hospitality industry for years. Pick up signage same day.",
+      ctaText: "Restaurant signs & menus →",
+      ctaHref: "/restaurant-signs-saskatoon",
+      items: foodItems,
+      emptyMessage: "Checking for new articles — check back soon.",
+    },
+    {
+      title: "Construction & Development News",
+      intro:
+        "New builds, commercial developments, and residential projects across Saskatchewan and the prairies. Construction companies rely on yard signs, site signage, vehicle magnets, and safety banners — and True Color delivers fast turnaround for job sites across the city and province.",
+      ctaText: "Construction site signage →",
+      ctaHref: "/construction-signs-saskatoon",
+      items: constructionItems,
       emptyMessage: "Checking for new articles — check back soon.",
     },
   ];
@@ -210,9 +281,9 @@ export default async function ResourcesPage() {
             Print &amp; Design Resources for Saskatoon Businesses
           </h1>
           <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-            We believe informed clients make better decisions. That&apos;s why we curate the latest
-            news from the printing industry, the graphic design world, small business marketing, and
-            the Saskatchewan business community — all in one place. Updated every 6 hours.
+            Printing news, design tips, Saskatchewan agriculture, local restaurant updates,
+            construction industry news, and Saskatoon business coverage — all in one place.
+            Updated every 6 hours, automatically.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
@@ -231,18 +302,20 @@ export default async function ResourcesPage() {
         </div>
       </section>
 
-      {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="max-w-6xl mx-auto px-6 py-3">
-        <ol className="flex items-center gap-2 text-xs text-gray-400">
-          <li>
-            <Link href="/" className="hover:text-[#16C2F3] transition-colors">
-              Home
-            </Link>
-          </li>
-          <li aria-hidden="true">›</li>
-          <li className="text-gray-600 font-medium">Resources</li>
-        </ol>
-      </nav>
+      {/* Quick-jump nav */}
+      <div className="bg-gray-50 border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 py-3 overflow-x-auto">
+          <ol className="flex items-center gap-2 text-xs text-gray-400 mb-0 whitespace-nowrap">
+            <li>
+              <Link href="/" className="hover:text-[#16C2F3] transition-colors">
+                Home
+              </Link>
+            </li>
+            <li aria-hidden="true">›</li>
+            <li className="text-gray-600 font-medium">Resources</li>
+          </ol>
+        </div>
+      </div>
 
       {/* Feed sections */}
       <main id="main-content" className="max-w-6xl mx-auto px-6 py-10">
@@ -260,8 +333,8 @@ export default async function ResourcesPage() {
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
                 True Color offers a full range of printing including coroplast signs, vinyl banners,
-                ACP aluminum signs, vehicle magnets, business cards, flyers, retractable banners,
-                window decals, and more. We also have a{" "}
+                ACP aluminum signs, vehicle magnets, business cards, flyers, retractable banners, and
+                window decals. We also have a{" "}
                 <Link href="/graphic-design-saskatoon" className="text-[#16C2F3] hover:underline">
                   full-time in-house graphic designer
                 </Link>{" "}
@@ -270,11 +343,38 @@ export default async function ResourcesPage() {
             </div>
             <div>
               <h3 className="font-semibold text-[#1c1712] mb-1">
+                Does True Color print signs for Saskatoon restaurants and food businesses?
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Yes — we print menu boards, window decals, A-frame signs, vinyl banners, and
+                grand-opening signage for Saskatoon restaurants, cafés, bars, and food trucks.
+                Same-day rush available.{" "}
+                <Link href="/restaurant-signs-saskatoon" className="text-[#16C2F3] hover:underline">
+                  See restaurant sign options →
+                </Link>
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[#1c1712] mb-1">
+                Does True Color print signs for Saskatchewan farms and agribusinesses?
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Absolutely — coroplast yard signs, ACP aluminum signs, vehicle magnets, and large
+                vinyl banners for SK farms, agribusinesses, co-ops, and equipment dealers. Durable
+                materials built for outdoor prairie conditions.{" "}
+                <Link href="/agribusiness-signs-saskatchewan" className="text-[#16C2F3] hover:underline">
+                  See ag & farm signage →
+                </Link>
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[#1c1712] mb-1">
                 How often is this resource page updated?
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                The feeds on this page are refreshed automatically every 6 hours, pulling the latest
-                articles from industry publications and Saskatchewan business news sources.
+                Every 6 hours automatically — pulling the latest from printing industry publications,
+                CBC Saskatchewan, Global News Saskatoon, The Western Producer, Nation&apos;s
+                Restaurant News, Eat North, and construction trade media.
               </p>
             </div>
             <div>
@@ -282,9 +382,8 @@ export default async function ResourcesPage() {
                 Can True Color help design my print materials?
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Yes — we have a full-time in-house Photoshop designer who builds layouts from scratch,
-                modifies existing files, and delivers same-day proofs. Standard design is a flat $35
-                fee. This is a major differentiator from print-only shops.{" "}
+                Yes — full-time in-house Photoshop designer, same-day proofs, flat $35 standard
+                design fee.{" "}
                 <Link href="/graphic-design-saskatoon" className="text-[#16C2F3] hover:underline">
                   Learn more about our design service →
                 </Link>
@@ -297,10 +396,10 @@ export default async function ResourcesPage() {
         <section className="mt-16 bg-[#1c1712] rounded-2xl px-8 py-10 text-center text-white">
           <h2 className="text-xl font-bold mb-2">Ready to print for your Saskatoon business?</h2>
           <p className="text-gray-300 text-sm mb-6 max-w-xl mx-auto">
-            Get an instant price on banners, signs, business cards, and more. Local pickup at 216 33rd
-            St W, Saskatoon. Same-day rush available.
+            Signs, banners, business cards, and more. Local pickup at 216 33rd St W, Saskatoon.
+            Same-day rush available.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/quote"
               className="bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-md hover:bg-[#0fb0dd] transition-colors text-sm"
@@ -308,16 +407,28 @@ export default async function ResourcesPage() {
               Get an Instant Price →
             </Link>
             <Link
-              href="/banner-printing-saskatoon"
-              className="border border-white/30 text-white font-medium px-6 py-3 rounded-md hover:border-white transition-colors text-sm"
+              href="/restaurant-signs-saskatoon"
+              className="border border-white/30 text-white font-medium px-5 py-3 rounded-md hover:border-white transition-colors text-sm"
             >
-              Banner Printing
+              Restaurant Signs
             </Link>
             <Link
-              href="/coroplast-signs-saskatoon"
-              className="border border-white/30 text-white font-medium px-6 py-3 rounded-md hover:border-white transition-colors text-sm"
+              href="/agribusiness-signs-saskatchewan"
+              className="border border-white/30 text-white font-medium px-5 py-3 rounded-md hover:border-white transition-colors text-sm"
             >
-              Coroplast Signs
+              Farm & Ag Signs
+            </Link>
+            <Link
+              href="/construction-signs-saskatoon"
+              className="border border-white/30 text-white font-medium px-5 py-3 rounded-md hover:border-white transition-colors text-sm"
+            >
+              Construction Signs
+            </Link>
+            <Link
+              href="/banner-printing-saskatoon"
+              className="border border-white/30 text-white font-medium px-5 py-3 rounded-md hover:border-white transition-colors text-sm"
+            >
+              Banners
             </Link>
           </div>
         </section>
