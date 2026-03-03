@@ -70,6 +70,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const total = Number(order.total);
     const subtotal = Number(order.subtotal);
     const gst = Number(order.gst);
+    const pst = Number((order as Record<string, unknown>).pst ?? 0);
 
     // Build a description from order_items (or fall back to notes)
     const items = (Array.isArray(order.order_items) ? order.order_items : [order.order_items])
@@ -113,6 +114,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         description,
         subtotal,
         gst,
+        pst,
         total,
         paymentUrl,
         paymentMethod: "clover",

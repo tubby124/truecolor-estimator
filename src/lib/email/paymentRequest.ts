@@ -13,8 +13,9 @@ export interface PaymentRequestEmailParams {
   orderNumber: string;
   contact: { name: string; email: string; company?: string | null };
   description: string;   // e.g. "500 Postcards 5×7 two-sided"
-  subtotal: number;      // pre-GST
+  subtotal: number;      // pre-tax
   gst: number;
+  pst: number;
   total: number;
   paymentUrl: string;    // /pay/{token} for Clover, or Wave viewUrl
   paymentMethod: "clover" | "wave";
@@ -45,7 +46,7 @@ export async function sendPaymentRequestEmail(
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, description, subtotal, gst, total, paymentUrl, paymentMethod, notes } = p;
+  const { orderNumber, contact, description, subtotal, gst, pst, total, paymentUrl, paymentMethod, notes } = p;
 
   const methodNote =
     paymentMethod === "wave"
@@ -152,11 +153,21 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 
                   <!-- GST row -->
                   <tr style="background: #f9f6f3;">
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    <td style="padding: 4px 16px 4px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                       GST (5%)
                     </td>
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    <td style="padding: 4px 16px 4px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                       $${gst.toFixed(2)}
+                    </td>
+                  </tr>
+
+                  <!-- PST row -->
+                  <tr style="background: #f9f6f3;">
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      PST (6%)
+                    </td>
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      $${pst.toFixed(2)}
                     </td>
                   </tr>
 
@@ -234,7 +245,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, description, subtotal, gst, total, paymentUrl } = p;
+  const { orderNumber, contact, description, subtotal, gst, pst, total, paymentUrl } = p;
 
   return [
     `Hi ${contact.name},`,
@@ -247,6 +258,7 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     "",
     `  Subtotal: $${subtotal.toFixed(2)}`,
     `  GST (5%): $${gst.toFixed(2)}`,
+    `  PST (6%): $${pst.toFixed(2)}`,
     `  TOTAL:    $${total.toFixed(2)} CAD`,
     "",
     `--- PAY NOW ---`,

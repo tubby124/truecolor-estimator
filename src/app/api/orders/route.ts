@@ -36,9 +36,12 @@ export interface CreateOrderRequest {
   payment_method: "clover_card" | "etransfer";
   notes?: string;
   file_storage_paths?: string[];
+  discount_code?: string;   // optional — re-validated server-side before use
+  discount_amount?: number; // client hint only — authoritative amount comes from DB
 }
 
 const GST_RATE = 0.05;
+const PST_RATE = 0.06;
 const RUSH_FEE = 40;
 
 /**
@@ -77,7 +80,7 @@ function revalidateItemPrices(items: CartItem[], is_rush: boolean): CartItem[] {
             `[orders] price revalidation: client=$${clientPrice.toFixed(2)} server=$${serverPrice.toFixed(2)} diff=$${diff.toFixed(2)} (${(diffPct * 100).toFixed(1)}%) — using server price | item: ${item.product_name}`
           );
         }
-        return { ...item, sell_price: serverPrice, line_items: result.line_items };
+        return { ...item, sell_price: serverPrice, design_fee: result.design_fee ?? 0, line_items: result.line_items };
       } else {
         // Engine couldn't price this item — log and accept client price (manual order)
         console.warn(
@@ -105,7 +108,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths } = body;
+    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode } = body;
 
     if (!rawItems?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -191,11 +194,65 @@ export async function POST(req: NextRequest) {
       })();
     }
 
-    // 2. Calculate totals
+    // 2. Validate discount code (server-side — never trust client amount)
+    let validatedDiscountCode: string | null = null;
+    let validatedDiscount = 0;
+    let discountCodeId: string | null = null;
+    if (rawDiscountCode?.trim()) {
+      try {
+        const codeUpper = rawDiscountCode.trim().toUpperCase();
+        const { data: dc } = await supabase
+          .from("discount_codes")
+          .select("id, code, discount_amount, is_active, per_account_limit, max_uses, expires_at")
+          .ilike("code", codeUpper)
+          .maybeSingle();
+
+        if (dc && dc.is_active && (!dc.expires_at || new Date(dc.expires_at) > new Date())) {
+          // Check per-account usage
+          const { count: used } = await supabase
+            .from("discount_redemptions")
+            .select("*", { count: "exact", head: true })
+            .eq("code_id", dc.id)
+            .eq("customer_id", customer.id);
+
+          // Check global max_uses
+          let globalOk = true;
+          if (dc.max_uses !== null) {
+            const { count: totalUsed } = await supabase
+              .from("discount_redemptions")
+              .select("*", { count: "exact", head: true })
+              .eq("code_id", dc.id);
+            globalOk = (totalUsed ?? 0) < dc.max_uses;
+          }
+
+          if ((used ?? 0) < dc.per_account_limit && globalOk) {
+            validatedDiscountCode = dc.code;
+            validatedDiscount = Number(dc.discount_amount);
+            discountCodeId = dc.id;
+          } else {
+            console.warn(`[orders] discount code ${codeUpper} rejected — already used or limit reached for customer ${customer.id}`);
+          }
+        } else if (dc) {
+          console.warn(`[orders] discount code ${codeUpper} rejected — inactive or expired`);
+        }
+      } catch (discountErr) {
+        // Non-fatal — order proceeds without discount
+        console.error("[orders] discount validation error (non-fatal):", discountErr);
+      }
+    }
+
+    // 3. Calculate totals
     const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
     const rush = is_rush ? RUSH_FEE : 0;
-    const gst = Math.round((subtotal + rush) * GST_RATE * 100) / 100;
-    const total = subtotal + rush + gst;
+    // Discount reduces pre-tax base (legally correct — reduces taxable amount)
+    const discount = Math.min(validatedDiscount, subtotal + rush); // cap: total can't go negative
+    const discountedSubtotal = subtotal - discount;
+    // PST applies to printed goods only — design fees (PST-exempt) are subtracted from the PST base
+    const rawPstBase = items.reduce((s, i) => s + (i.sell_price - (i.design_fee ?? 0)), 0);
+    const pstBase = Math.max(0, rawPstBase - discount); // discount reduces PST-taxable base
+    const gst = Math.round((discountedSubtotal + rush) * GST_RATE * 100) / 100;
+    const pst = Math.round(pstBase * PST_RATE * 100) / 100;
+    const total = discountedSubtotal + rush + gst + pst;
 
     // 3. Create order row — retry up to 3 times on order_number collision (Postgres code 23505)
     // count+1 approach: safe for a small shop; retry handles the rare concurrent-request edge case
@@ -218,9 +275,12 @@ export async function POST(req: NextRequest) {
           customer_id: customer.id,
           status: "pending_payment",
           is_rush,
-          subtotal,
+          subtotal: discountedSubtotal,
           gst,
+          pst,
           total,
+          discount_code: validatedDiscountCode ?? undefined,
+          discount_amount: discount,
           payment_method,
           notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
         })
@@ -241,6 +301,23 @@ export async function POST(req: NextRequest) {
         hint: orderErr?.hint,
       });
       return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+    }
+
+    // Record discount redemption (non-fatal — order is already saved)
+    if (discountCodeId && discount > 0) {
+      void supabase
+        .from("discount_redemptions")
+        .insert({
+          code_id: discountCodeId,
+          customer_id: customer.id,
+          order_id: order.id,
+          amount_saved: discount,
+        } as Record<string, unknown>)
+        .then(({ error: redemptionErr }) => {
+          if (redemptionErr) {
+            console.error("[orders] discount redemption insert failed (non-fatal):", redemptionErr);
+          }
+        });
     }
 
     // Save all file paths to order (requires DB migration: file_storage_paths TEXT[] — best-effort)
@@ -289,12 +366,25 @@ export async function POST(req: NextRequest) {
         contact.name.trim()
       );
 
-      const waveItems = items.map((item) => ({
-        description: item.label,
-        unitPrice: item.sell_price / item.qty,
-        qty: item.qty,
-        applyGst: true,
-      }));
+      // Split items with a design fee into two Wave lines:
+      //   1. Product/hardware portion (GST + PST)
+      //   2. Design fee portion (GST only — PST-exempt service)
+      const waveItems = items.flatMap((item) => {
+        const fee = item.design_fee ?? 0;
+        const productAmt = item.sell_price - fee;
+        const lines = [];
+        if (productAmt > 0) {
+          lines.push({ description: item.label, unitPrice: productAmt / item.qty, qty: item.qty, applyGst: true, applyPst: true });
+        }
+        if (fee > 0) {
+          lines.push({ description: "Design / Artwork Fee", unitPrice: fee, qty: 1, applyGst: true, applyPst: false });
+        }
+        if (productAmt <= 0 && fee <= 0) {
+          // Fallback: keep original item if amounts are zero
+          lines.push({ description: item.label, unitPrice: item.sell_price / item.qty, qty: item.qty, applyGst: true, applyPst: true });
+        }
+        return lines;
+      });
 
       const inv = await createWaveInvoice(waveCustomerId, waveItems, {
         isRush: is_rush,
@@ -382,7 +472,27 @@ export async function POST(req: NextRequest) {
     }
 
 
-    // 7. Send order confirmation email to customer (non-fatal)
+    // 7. Check if customer has used REVIEW10 (for smart email promo — non-fatal)
+    let hasUsedReviewCode = false;
+    try {
+      const { data: reviewCodeRow } = await supabase
+        .from("discount_codes")
+        .select("id")
+        .eq("code", "REVIEW10")
+        .maybeSingle();
+      if (reviewCodeRow) {
+        const { count: reviewCount } = await supabase
+          .from("discount_redemptions")
+          .select("*", { count: "exact", head: true })
+          .eq("code_id", reviewCodeRow.id)
+          .eq("customer_id", customer.id);
+        hasUsedReviewCode = (reviewCount ?? 0) > 0;
+      }
+    } catch {
+      // Non-fatal — email still sends without smart promo
+    }
+
+    // 8. Send order confirmation email to customer (non-fatal)
     try {
       await sendOrderConfirmationEmail({
         orderNumber: order.order_number,
@@ -397,9 +507,13 @@ export async function POST(req: NextRequest) {
           line_total: item.line_total,
           line_items: items[idx]?.line_items,
         })),
-        subtotal,
+        subtotal: discountedSubtotal,
         gst,
+        pst,
         total,
+        discount_code: validatedDiscountCode ?? undefined,
+        discount_amount: discount > 0 ? discount : undefined,
+        hasUsedReviewCode,
         is_rush,
         payment_method,
         checkout_url: checkoutUrl ?? undefined,
@@ -409,7 +523,7 @@ export async function POST(req: NextRequest) {
       console.error("[orders] confirmation email failed (non-fatal):", emailErr);
     }
 
-    // 8. Send staff notification email (non-fatal)
+    // 9. Send staff notification email (non-fatal)
     try {
       const siteUrlForEmail =
         process.env.NEXT_PUBLIC_SITE_URL ??
@@ -426,9 +540,12 @@ export async function POST(req: NextRequest) {
           design_status: item.design_status,
           line_total: item.line_total,
         })),
-        subtotal,
+        subtotal: discountedSubtotal,
         gst,
+        pst,
         total,
+        discount_code: validatedDiscountCode ?? undefined,
+        discount_amount: discount > 0 ? discount : undefined,
         is_rush,
         payment_method,
         notes: notes ?? null,

@@ -27,7 +27,11 @@ export interface OrderConfirmationParams {
   }>;
   subtotal: number;
   gst: number;
+  pst: number;
   total: number;
+  discount_code?: string;      // e.g. "REVIEW10" — shown as a discount row in the summary
+  discount_amount?: number;    // pre-tax discount amount (already subtracted from subtotal)
+  hasUsedReviewCode?: boolean; // true = customer has used REVIEW10 → show plain review ask; false = show $10 off offer
   is_rush: boolean;
   payment_method: "clover_card" | "etransfer";
   checkout_url?: string; // Clover hosted checkout URL (card orders only)
@@ -106,7 +110,7 @@ export async function sendOrderConfirmationEmail(
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
-  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, checkout_url, qrCodeCid, uploadedFileCount } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, discount_code, discount_amount, hasUsedReviewCode, is_rush, payment_method, checkout_url, qrCodeCid, uploadedFileCount } = p;
   const RUSH_FEE = 40;
 
   // ── Line items rows ──
@@ -332,6 +336,17 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                   ${itemRows}
                   ${rushRow}
 
+                  <!-- Discount row (shown only when a code was applied) -->
+                  ${discount_amount && discount_amount > 0 ? `
+                  <tr style="background: #f0fdf4;">
+                    <td style="padding: 10px 16px; font-size: 13px; color: #15803d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-top: 1px solid #e2dbd4;">
+                      Discount${discount_code ? ` (${escHtml(discount_code)})` : ""}
+                    </td>
+                    <td style="padding: 10px 16px; font-size: 13px; color: #15803d; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-top: 1px solid #e2dbd4;">
+                      −$${discount_amount.toFixed(2)}
+                    </td>
+                  </tr>` : ""}
+
                   <!-- Subtotal row -->
                   <tr style="background: #f9f6f3;">
                     <td style="padding: 10px 16px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-top: 1px solid #e2dbd4;">
@@ -344,11 +359,21 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
 
                   <!-- GST row -->
                   <tr style="background: #f9f6f3;">
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    <td style="padding: 4px 16px 4px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                       GST (5%)
                     </td>
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    <td style="padding: 4px 16px 4px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                       $${gst.toFixed(2)}
+                    </td>
+                  </tr>
+
+                  <!-- PST row -->
+                  <tr style="background: #f9f6f3;">
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      PST (6%)
+                    </td>
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      $${pst.toFixed(2)}
                     </td>
                   </tr>
 
@@ -426,6 +451,34 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                 </p>
               </div>
 
+              <!-- ── REVIEW PROMO ── -->
+              ${hasUsedReviewCode
+                ? `<div style="background: #f9f6f3; border: 1px solid #e2dbd4; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; text-align: center;">
+                    <p style="margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #1c1712; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      ⭐ Enjoying our work?
+                    </p>
+                    <p style="margin: 0 0 12px; font-size: 13px; color: #4a3728; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      A quick Google review means the world to us — it helps other Saskatoon businesses find us!
+                    </p>
+                    <a href="https://g.page/r/CZH6HlbNejQAEAE/review"
+                      style="display: inline-block; background: #16C2F3; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 10px 22px; border-radius: 7px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      Leave a Google Review →
+                    </a>
+                  </div>`
+                : `<div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; text-align: center;">
+                    <p style="margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      ⭐ Love your order? Get $10 off your next one!
+                    </p>
+                    <p style="margin: 0 0 12px; font-size: 13px; color: #78350f; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      Leave us a Google review and we'll give you <strong>$10 off</strong> your next order.
+                      Just screenshot your review and show us at pickup, or reply to this email.
+                    </p>
+                    <a href="https://g.page/r/CZH6HlbNejQAEAE/review"
+                      style="display: inline-block; background: #f59e0b; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 10px 22px; border-radius: 7px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      Leave a Review & Earn $10 Off →
+                    </a>
+                  </div>`}
+
               <!-- ── QUESTIONS ── -->
               <div style="background: #fdf4f4; border: 1px solid #f0bfbb; border-radius: 8px; padding: 14px 16px; margin-bottom: 8px;">
                 <p style="margin: 0; font-size: 13px; color: #7a1818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
@@ -453,7 +506,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                 <a href="mailto:info@true-color.ca" style="color: #f08080; text-decoration: none;">info@true-color.ca</a>
               </p>
               <p style="margin: 0; font-size: 11px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                All prices in CAD · GST included
+                All prices in CAD · GST + PST included
               </p>
             </td>
           </tr>
@@ -472,7 +525,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildOrderConfirmationText(p: OrderConfirmationParams): string {
-  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, checkout_url } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, discount_code, discount_amount, hasUsedReviewCode, is_rush, payment_method, checkout_url } = p;
   const RUSH_FEE = 40;
 
   const itemLines = items.map((item) => {
@@ -497,8 +550,10 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
     ...itemLines,
     "",
     is_rush ? `  Rush fee: $${RUSH_FEE.toFixed(2)}` : "",
+    discount_amount && discount_amount > 0 ? `  Discount${discount_code ? ` (${discount_code})` : ""}: -$${discount_amount.toFixed(2)}` : "",
     `  Subtotal: $${subtotal.toFixed(2)}`,
     `  GST (5%): $${gst.toFixed(2)}`,
+    `  PST (6%): $${pst.toFixed(2)}`,
     `  TOTAL:    $${total.toFixed(2)} CAD`,
     "",
     "--- PAYMENT ---",
@@ -514,6 +569,10 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
     is_rush
       ? "Your rush order is prioritized — we will contact you today."
       : "Typical turnaround: 1–3 business days. We will email you when your order is ready.",
+    "",
+    hasUsedReviewCode
+      ? "--- THANK YOU ---\nEnjoying our work? A quick Google review means the world to us:\nhttps://g.page/r/CZH6HlbNejQAEAE/review"
+      : "--- GET $10 OFF YOUR NEXT ORDER ---\nLeave us a Google review and we'll give you $10 off your next order!\nJust screenshot your review and show us at pickup, or reply to this email.\nhttps://g.page/r/CZH6HlbNejQAEAE/review",
     "",
     "Questions? Reply to this email or call (306) 954-8688.",
     "",

@@ -35,6 +35,7 @@ export interface CostBreakdown {
 export interface EstimateResponse {
   status: "QUOTED" | "NEEDS_CLARIFICATION" | "BLOCKED";
   sell_price: number | null;
+  design_fee?: number; // PST-exempt design service portion bundled in sell_price
   line_items: LineItem[];
   sqft_calculated: number | null;
   price_per_sqft: number | null;

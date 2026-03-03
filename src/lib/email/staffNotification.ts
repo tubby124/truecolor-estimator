@@ -35,7 +35,10 @@ export interface StaffOrderNotificationParams {
   }>;
   subtotal: number;
   gst: number;
+  pst: number;
   total: number;
+  discount_code?: string;
+  discount_amount?: number;
   is_rush: boolean;
   payment_method: "clover_card" | "etransfer";
   notes: string | null;
@@ -111,7 +114,7 @@ function buildStaffNotificationHtml(
   fileLinks: Array<{ filename: string; url: string | null }>,
   siteUrl: string
 ): string {
-  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, notes } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, discount_code, discount_amount, is_rush, payment_method, notes } = p;
   const RUSH_FEE = 40;
 
   const now = new Date().toLocaleString("en-CA", {
@@ -334,13 +337,22 @@ function buildStaffNotificationHtml(
                 <tbody>
                   ${itemRows}
                   ${rushRow}
+                  ${discount_amount && discount_amount > 0 ? `
+                  <tr style="background: #f0fdf4;">
+                    <td style="padding: 8px 16px; font-size: 12px; color: #15803d; border-top: 1px solid #e2dbd4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Discount${discount_code ? ` (${discount_code})` : ""}</td>
+                    <td style="padding: 8px 16px; font-size: 12px; color: #15803d; font-weight: 700; text-align: right; border-top: 1px solid #e2dbd4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">−$${discount_amount.toFixed(2)}</td>
+                  </tr>` : ""}
                   <tr style="background: #f9f6f3;">
                     <td style="padding: 8px 16px; font-size: 12px; color: #7a6560; border-top: 1px solid #e2dbd4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">Subtotal</td>
                     <td style="padding: 8px 16px; font-size: 12px; color: #4a3728; text-align: right; border-top: 1px solid #e2dbd4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${subtotal.toFixed(2)}</td>
                   </tr>
                   <tr style="background: #f9f6f3;">
-                    <td style="padding: 4px 16px 8px; font-size: 12px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">GST (5%)</td>
-                    <td style="padding: 4px 16px 8px; font-size: 12px; color: #4a3728; text-align: right; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${gst.toFixed(2)}</td>
+                    <td style="padding: 4px 16px 4px; font-size: 12px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">GST (5%)</td>
+                    <td style="padding: 4px 16px 4px; font-size: 12px; color: #4a3728; text-align: right; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${gst.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 4px 16px 8px; font-size: 12px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">PST (6%)</td>
+                    <td style="padding: 4px 16px 8px; font-size: 12px; color: #4a3728; text-align: right; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${pst.toFixed(2)}</td>
                   </tr>
                   <tr style="background: #1c1712;">
                     <td style="padding: 14px 16px; font-size: 14px; font-weight: 700; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">TOTAL</td>
@@ -387,7 +399,7 @@ function buildStaffNotificationText(
   fileLinks: Array<{ filename: string; url: string | null }>,
   siteUrl: string
 ): string {
-  const { orderNumber, contact, items, subtotal, gst, total, is_rush, payment_method, notes } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, discount_code, discount_amount, is_rush, payment_method, notes } = p;
   const RUSH_FEE = 40;
 
   const lines: string[] = [
@@ -412,8 +424,10 @@ function buildStaffNotificationText(
     }),
     "",
     is_rush ? `  Rush fee: $${RUSH_FEE.toFixed(2)}` : "",
+    discount_amount && discount_amount > 0 ? `  Discount${discount_code ? ` (${discount_code})` : ""}: -$${discount_amount.toFixed(2)}` : "",
     `  Subtotal: $${subtotal.toFixed(2)}`,
     `  GST (5%): $${gst.toFixed(2)}`,
+    `  PST (6%): $${pst.toFixed(2)}`,
     `  TOTAL:    $${total.toFixed(2)} CAD`,
     "",
     "PAYMENT",

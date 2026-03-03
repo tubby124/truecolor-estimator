@@ -27,6 +27,7 @@ export interface CartItem {
   };
   sell_price: number; // pre-tax total (all units) — engine sell_price, includes addons
   gst_rate: number; // e.g. 0.05 — stored at add-to-cart time so display never hardcodes
+  design_fee?: number; // PST-exempt portion (design services) bundled in sell_price — subtracted before PST calc
   qty: number;
   line_items?: LineItem[]; // engine breakdown: base product + addon sub-lines
 }
