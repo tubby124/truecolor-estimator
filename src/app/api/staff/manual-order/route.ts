@@ -162,8 +162,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Failed to generate payment link" }, { status: 500 });
       }
     } else {
-      // Wave: create invoice → approve → get viewUrl → send our branded email
-      // If viewUrl not available, fall back to Wave's own invoice email
+      // Wave: create invoice → approve → Wave sends their own branded invoice email
+      // (Wave's email is reliable, includes PDF, CCes the shop — no viewUrl dependency)
       try {
         const waveCustomerId = await createOrFindWaveCustomer(
           contact.email.toLowerCase().trim(),
@@ -182,22 +182,51 @@ export async function POST(req: NextRequest) {
           .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
           .eq("id", order.id);
 
-        // Approve the invoice so it becomes payable
+        // Approve invoice → makes it payable and gives it a public URL
         await approveWaveInvoice(inv.invoiceId);
 
-        if (inv.viewUrl) {
-          // Wave returned a hosted checkout URL — use it in our branded email
-          paymentUrl = inv.viewUrl;
-        } else {
-          // viewUrl not available — let Wave send their own invoice email (CC's the shop)
-          await sendWaveInvoice(inv.invoiceId, contact.email.toLowerCase().trim(), {
-            subject: `Invoice from True Color Display Printing — ${order.order_number}`,
-            message: `Hi ${contact.name.trim()},\n\nPlease find your invoice attached. Click "Pay Invoice" to pay online.\n\nRef: ${order.order_number}\n\nThank you,\nTrue Color Display Printing\n(306) 954-8688`,
+        // Always use Wave's own send: reliable, includes PDF attachment, CCes the shop
+        await sendWaveInvoice(inv.invoiceId, contact.email.toLowerCase().trim(), {
+          subject: `Invoice from True Color Display Printing — ${order.order_number}`,
+          message: `Hi ${contact.name.trim()},\n\nPlease find your invoice attached. Click "Pay Invoice" to pay online.\n\nRef: ${order.order_number}\n\nThank you,\nTrue Color Display Printing\n(306) 954-8688`,
+        });
+
+        console.log(`[manual-order] Wave invoice sent → ${contact.email} | order ${order.order_number}`);
+
+        // Send staff notification (skip customer email — Wave already sent it)
+        try {
+          const siteUrlForStaff = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+          await sendStaffOrderNotification({
+            orderNumber: order.order_number,
+            contact: {
+              name: contact.name.trim(),
+              email: contact.email.toLowerCase().trim(),
+              company: contact.company?.trim(),
+              phone: contact.phone?.trim(),
+            },
+            items: [{
+              product_name: description.trim(),
+              qty: 1,
+              width_in: null,
+              height_in: null,
+              sides: 1,
+              design_status: "PRINT_READY",
+              line_total: subtotal,
+            }],
+            subtotal,
+            gst,
+            total,
+            is_rush: false,
+            payment_method: "etransfer",
+            notes: `[Manual Order — Wave] ${notes?.trim() ?? "Created via staff payment request"}`,
+            filePaths: [],
+            siteUrl: siteUrlForStaff,
           });
-          // Wave handled the email — return success without our custom email
-          console.log(`[manual-order] Wave invoice sent directly | order ${order.order_number}`);
-          return NextResponse.json({ orderId: order.id, orderNumber: order.order_number, paymentUrl: null });
+        } catch (staffEmailErr) {
+          console.error("[manual-order] staff notification failed (non-fatal):", staffEmailErr);
         }
+
+        return NextResponse.json({ orderId: order.id, orderNumber: order.order_number, paymentUrl: null });
       } catch (waveErr) {
         console.error("[manual-order] Wave invoice error:", waveErr);
         return NextResponse.json({ error: "Failed to create Wave invoice. Please try Clover instead." }, { status: 500 });
@@ -248,7 +277,7 @@ export async function POST(req: NextRequest) {
         gst,
         total,
         is_rush: false,
-        payment_method: payment_method === "wave" ? "etransfer" : "clover_card",
+        payment_method: "clover_card",
         notes: `[Manual Order] ${notes?.trim() ?? "Created via staff payment request"}`,
         filePaths: [],
         siteUrl,

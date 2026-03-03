@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { createOrFindWaveCustomer, createWaveInvoice } from "@/lib/wave/invoice";
+import { createOrFindWaveCustomer, createWaveInvoice, approveWaveInvoice } from "@/lib/wave/invoice";
 import { createCloverCheckout } from "@/lib/payment/clover";
 import { encodePaymentToken } from "@/lib/payment/token";
 import type { CartItem } from "@/lib/cart/cart";
@@ -308,6 +308,18 @@ export async function POST(req: NextRequest) {
         .from("orders")
         .update({ wave_invoice_id: waveInvoiceId } as Record<string, unknown>)
         .eq("id", order.id);
+
+      // Auto-approve the invoice so it appears in Wave reports and can be sent as a receipt.
+      // Non-fatal — order and invoice still exist if this fails.
+      try {
+        await approveWaveInvoice(waveInvoiceId);
+        void supabase
+          .from("orders")
+          .update({ wave_invoice_approved_at: new Date().toISOString() } as Record<string, unknown>)
+          .eq("id", order.id);
+      } catch (approveErr) {
+        console.warn("[orders] Wave invoice auto-approve failed (non-fatal):", approveErr);
+      }
     } catch (waveErr) {
       // Wave failure is non-fatal — order still exists, staff can create manually
       console.error("[orders] Wave invoice creation failed (non-fatal):", waveErr);

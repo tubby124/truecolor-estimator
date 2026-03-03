@@ -134,6 +134,10 @@ export function OrdersTable({ initialOrders }: Props) {
   const [proofSentId, setProofSentId] = useState<string | null>(null);
   const [proofError, setProofError] = useState<string | null>(null);
 
+  // Resend payment link — keyed by order id
+  const [resendingPaymentId, setResendingPaymentId] = useState<string | null>(null);
+  const [resendSuccessIds, setResendSuccessIds] = useState<Set<string>>(new Set());
+
   // ── Archive ────────────────────────────────────────────────────────────────────
   const [archiveLoading, setArchiveLoading] = useState<Set<string>>(new Set());
   // Tracks which order has a pending "Mark complete" confirmation (terminal state guard)
@@ -340,6 +344,25 @@ export function OrdersTable({ initialOrders }: Props) {
       );
     } finally {
       setLoadingStatus(null);
+    }
+  }
+
+  // ── Resend payment link ─────────────────────────────────────────────────────
+
+  async function handleResendPayment(orderId: string, orderNumber: string) {
+    setResendingPaymentId(orderId);
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/resend-payment`, { method: "POST" });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Resend failed");
+      setResendSuccessIds((prev) => new Set(prev).add(orderId));
+      showToast(`Payment link resent for ${orderNumber}`, "success");
+      // Clear success indicator after 8 seconds
+      setTimeout(() => setResendSuccessIds((prev) => { const s = new Set(prev); s.delete(orderId); return s; }), 8000);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to resend — try again", "error");
+    } finally {
+      setResendingPaymentId(null);
     }
   }
 
@@ -699,6 +722,15 @@ export function OrdersTable({ initialOrders }: Props) {
                         {customer?.company ? ` — ${customer.company}` : ""}
                       </p>
 
+                      {/* Product summary — what was ordered */}
+                      {order.order_items && order.order_items.length > 0 && (
+                        <p className="text-xs font-medium text-gray-600 mt-0.5">
+                          {order.order_items[0].product_name}
+                          {(order.order_items[0].qty ?? 1) > 1 ? ` × ${order.order_items[0].qty}` : ""}
+                          {order.order_items.length > 1 ? ` · +${order.order_items.length - 1} more` : ""}
+                        </p>
+                      )}
+
                       {/* Meta row — email · phone · payment · total · date */}
                       <p className="text-xs text-gray-400 mt-0.5">
                         {customer?.email}
@@ -1037,6 +1069,26 @@ export function OrdersTable({ initialOrders }: Props) {
                         </span>
                       </div>
                     </div>
+
+                    {/* Resend payment link — only for pending_payment orders */}
+                    {order.status === "pending_payment" && (
+                      <div>
+                        <button
+                          onClick={() => void handleResendPayment(order.id, order.order_number)}
+                          disabled={resendingPaymentId === order.id}
+                          className="text-sm font-semibold px-4 py-2 rounded-lg border border-emerald-400 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+                        >
+                          {resendingPaymentId === order.id
+                            ? "Sending…"
+                            : resendSuccessIds.has(order.id)
+                            ? "✓ Resent!"
+                            : "↩ Resend payment link"}
+                        </button>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Re-emails the customer a fresh payment link
+                        </p>
+                      </div>
+                    )}
 
                     {/* Message customer */}
                     <div>
