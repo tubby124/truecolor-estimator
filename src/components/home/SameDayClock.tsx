@@ -17,9 +17,9 @@ function getSaskTime() {
 }
 
 /**
- * Live countdown to the same-day order cutoff (12:00 PM CST).
+ * Live countdown to the same-day order cutoff (5:00 PM CST).
  * Renders a small line showing "Closes in Xh Ym".
- * Returns null on weekends or after noon — disappears automatically.
+ * Returns null on weekends or after 5 PM — disappears automatically.
  * Pass className to override text styling for different backgrounds.
  */
 export function SameDayClock({ className }: { className?: string }) {
@@ -29,7 +29,7 @@ export function SameDayClock({ className }: { className?: string }) {
     function tick() {
       const { day, hour, minute } = getSaskTime();
       if (day === "Sat" || day === "Sun") { setCountdown(null); return; }
-      const minsLeft = 12 * 60 - (hour * 60 + minute);
+      const minsLeft = 17 * 60 - (hour * 60 + minute);
       if (minsLeft <= 0) { setCountdown(null); return; }
       const h = Math.floor(minsLeft / 60);
       const m = minsLeft % 60;
