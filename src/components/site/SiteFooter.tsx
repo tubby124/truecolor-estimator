@@ -77,6 +77,15 @@ export function SiteFooter() {
               <Link href="/business-cards-saskatoon" className="block hover:text-white transition-colors">
                 Business Cards
               </Link>
+              <Link href="/large-format-printing-saskatoon" className="block hover:text-white transition-colors">
+                Large Format Printing
+              </Link>
+              <Link href="/trade-show-displays-saskatoon" className="block hover:text-white transition-colors">
+                Trade Show Displays
+              </Link>
+              <Link href="/event-signs-saskatoon" className="block hover:text-white transition-colors">
+                Event Signs
+              </Link>
               <Link href="/ramadan-eid-banners-saskatoon" className="block hover:text-white transition-colors">
                 Ramadan &amp; Eid Banners
               </Link>

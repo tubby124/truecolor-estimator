@@ -23,12 +23,12 @@ export default function SameDayPrintingSaskatoonPage() {
       primaryProductSlug="coroplast-signs"
       title="Same Day Printing Saskatoon"
       subtitle="Order before 10 AM — pick up by 5 PM. Rush is +$40 flat, no per-item upcharge."
-      heroImage="/images/products/heroes/construction-hero-1200x500.webp"
+      heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Same day printing Saskatoon — signs, banners, and cards ready today"
-      description="True Color Display Printing offers genuine same-day printing in Saskatoon. Order before 10 AM and we confirm availability by phone — your order is ready by 5 PM the same day. The rush fee is a flat $40 added to your order total, not a per-item surcharge. We print coroplast signs, vinyl banners, business cards, flyers, and vehicle magnets in-house on our Roland UV printer. No outsourcing, no shipping wait, no excuses."
+      description="True Color Display Printing offers genuine same-day printing in Saskatoon. Order before 10 AM and we confirm availability by phone — your order is ready by 5 PM the same day. The rush fee is a flat $40 added to your order total, not a per-item surcharge. We print coroplast signs, vinyl banners, business cards, flyers, foamboard displays, and vehicle magnets entirely in-house on our Roland UV printer. No outsourcing, no supplier delays, no excuses. Same-day available Monday through Friday — call (306) 954-8688 before ordering to confirm capacity."
       descriptionNode={
         <>
-          <p className="text-gray-600 text-lg leading-relaxed">
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
             True Color Display Printing offers genuine same-day printing in Saskatoon — not
             &ldquo;we&apos;ll try&rdquo; same-day, but confirmed same-day. Order before 10 AM,
             call (306) 954-8688 to confirm capacity, and your order is ready for pickup by 5 PM
@@ -36,7 +36,7 @@ export default function SameDayPrintingSaskatoonPage() {
             not per sign, not per sqft. Whether you&apos;re ordering 1 banner or 50 coroplast
             signs, the rush surcharge is the same $40.
           </p>
-          <p className="text-gray-600 leading-relaxed">
+          <p className="text-gray-600 leading-relaxed mb-6">
             We print entirely in-house on our Roland UV equipment. That means we control the
             timeline — no waiting on a supplier, no courier delays, no excuses. Same-day
             options include{" "}
@@ -54,12 +54,34 @@ export default function SameDayPrintingSaskatoonPage() {
             , flyers, vehicle magnets, and foam board displays.
             Aluminum composite (ACP) signs may need an extra day — call to confirm.
           </p>
-          <p className="text-gray-600 leading-relaxed">
+          <p className="text-gray-600 leading-relaxed mb-6">
             No print-ready file? Not a problem. Our in-house designer can prep your artwork
             on the spot from a low-res logo, a Word doc, or a rough sketch — design starts
             at $35 and usually takes under 2 hours for simple layouts. Pickup is at
             216 33rd St W, Saskatoon. No delivery fees, no shipping guesswork —
             your order is in your hands the same day you ordered it.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Same-day printing is the right call when you&apos;ve lost a sign to wind damage,
+            had a last-minute event pop up, or simply forgot to order ahead of a trade show
+            or grand opening. Our Saskatoon shop serves contractors, realtors, event organizers,
+            and local businesses who need reliable same-day turnaround without the inflated
+            pricing of big-box stores. A standard 4×8 coroplast sign is $232 — $272 with the
+            $40 rush fee. A 2×6 vinyl banner runs $90 standard, $130 same-day. No hidden
+            costs, no minimum orders, no waiting in a queue behind out-of-town jobs.
+            We&apos;re a local Saskatoon print shop and your order always comes first. See our{" "}
+            <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              coroplast sign pricing
+            </Link>
+            ,{" "}
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              banner printing options
+            </Link>
+            , or use the{" "}
+            <Link href="/quote" className="text-[#16C2F3] underline font-medium">
+              instant quote tool
+            </Link>
+            {" "}to get an exact price before you call.
           </p>
         </>
       }
@@ -103,6 +125,14 @@ export default function SameDayPrintingSaskatoonPage() {
         {
           q: "I need signs for an event tomorrow morning. Can you help?",
           a: "Yes — order by end of business today (5 PM) for next-morning standard turnaround with no rush fee. Or order first thing tomorrow before 10 AM for same-day rush. Call us and we'll figure it out.",
+        },
+        {
+          q: "How much does same-day printing cost in Saskatoon?",
+          a: "Standard pricing plus a flat $40 rush fee. A 4×8 coroplast sign is $232 standard — $272 same-day. A 2×6 vinyl banner is $90 standard — $130 same-day. Business cards (250, 2-sided) are $45 standard — $85 same-day. The $40 rush fee applies to your whole order, not per item, so ordering more doesn't make the rush proportionally more expensive.",
+        },
+        {
+          q: "What's the deadline to order same-day printing in Saskatoon?",
+          a: "Order before 10 AM and call (306) 954-8688 to confirm same-day availability. We're at 216 33rd St W, Saskatoon — open Monday to Friday. Calling ahead is important because same-day capacity is limited on busy days. If you miss the 10 AM cutoff, we can often turn orders around for next-morning pickup with no rush fee.",
         },
       ]}
     />

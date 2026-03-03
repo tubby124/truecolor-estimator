@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,7 +26,57 @@ export default function RealEstatePage() {
       subtitle="Your listing goes live Tuesday. Your sign should too."
       heroImage="/images/products/heroes/realestate-exp-hero-1200x500.webp"
       heroAlt="Real estate yard signs Saskatoon"
-      description={"Spring listing season means signs go up fast and open house weekends stack up. Saskatoon REALTORS and brokerages count on True Color for coroplast yard signs, feature sheets, business cards, postcards, and vehicle magnets — everything you need to market a listing and brand yourself on the drive. Standard turnaround is 1–3 business days. Same-day rush is available for $40 flat on orders placed before 10 AM — listing photos came back late, no problem. Our in-house designer handles low-res headshots, brokerage templates, and last-minute copy changes so your files are print-ready without hiring an outside designer. H-stakes are $2.50 each and ship with your signs — just press them into the ground and you're done. Need to brand your truck? 12×18\" vehicle magnets from $36 — your face and number visible at every showing, every open house. We're at 216 33rd St W, Saskatoon — most agents pick up on their way to a showing."}
+      description="Spring listing season means signs go up fast and open house weekends stack up. Saskatoon REALTORS and brokerages count on True Color for coroplast yard signs, feature sheets, business cards, postcards, and vehicle magnets — everything to market a listing and brand yourself on the drive. Standard turnaround is 1–3 business days. Same-day rush available for $40 flat on orders before 10 AM. In-house designer handles brokerage templates, low-res headshots, and last-minute edits. H-stakes $2.50 each. Vehicle magnets from $36. Pickup at 216 33rd St W, Saskatoon."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            Spring listing season means signs go up fast and open house weekends stack up.
+            Saskatoon REALTORS and brokerages count on True Color for{" "}
+            <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              coroplast yard signs
+            </Link>
+            , feature sheets, business cards, postcards, and{" "}
+            <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
+              vehicle magnets
+            </Link>
+            {" "}— everything you need to market a listing and brand yourself on the drive.
+            Standard turnaround is 1–3 business days. Same-day rush is available for $40 flat
+            on orders placed before 10 AM — listing photos came back late? Not a problem.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            The most popular yard sign for Saskatoon REALTORS is the 18×24&quot; coroplast on
+            H-stakes — $30 per sign with stakes at $2.50 each. Corner lots and acreage listings
+            often upgrade to 24×36&quot; double-sided for visibility from both directions.
+            Our{" "}
+            <Link href="/aluminum-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              ACP aluminum signs
+            </Link>
+            {" "}are a premium option for agents who want a permanent brand presence outside
+            their brokerage or on a team rider. We print in-house on our Roland UV printer —
+            colour is vibrant, outdoor-rated, and won&apos;t fade through a Saskatchewan summer.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            Our in-house designer handles brokerage templates, low-res headshots, and
+            last-minute copy changes so your files are print-ready without hiring an outside
+            designer — design starts at $35 and proofs come back the same day. We work with
+            RE/MAX, Century 21, eXp, Coldwell Banker, Royal LePage, and independent brokerages.
+            Need to brand your vehicle? 12×18&quot; vehicle magnets from $36 each —
+            your face and phone number visible at every showing and open house.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            We&apos;re at 216 33rd St W, Saskatoon — most agents pick up on their way to a showing.
+            Need postcards for a just-listed drop or{" "}
+            <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
+              business cards
+            </Link>
+            {" "}for a broker open? We have everything in one stop. Use the{" "}
+            <Link href="/quote" className="text-[#16C2F3] underline font-medium">
+              instant quote tool
+            </Link>
+            {" "}to price out your listing kit, or call (306) 954-8688 and we&apos;ll quote your full order in minutes.
+          </p>
+        </>
+      }
       products={[
         { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
         { name: "Business Cards", from: "from $40", slug: "business-cards" },
@@ -67,6 +118,14 @@ export default function RealEstatePage() {
         {
           q: "Do you print open house feature sheets?",
           a: "Yes — letter-size (8.5×11\") flyers on 80lb or 100lb gloss stock, double-sided, from $45 for 100 sheets. Bring your MLS listing photos and we'll lay out a professional feature sheet in-house.",
+        },
+        {
+          q: "How much do real estate signs cost in Saskatoon?",
+          a: "Coroplast yard signs start at $30 for 18×24\" single-sided — the most common REALTOR sign size. 24×36\" double-sided (great for corner lots) from $66. H-stakes are $2.50 each. Vehicle magnets (12×18\") from $36. Business cards (250, 2-sided) from $45. Feature sheets (100, double-sided, 80lb) from $45. Most REALTORS spend $100–$200 to fully kit out a listing.",
+        },
+        {
+          q: "Where can I get real estate signs printed in Saskatoon?",
+          a: "True Color Display Printing at 216 33rd St W, Saskatoon (306) 954-8688. We're a local print shop specializing in REALTOR signage — yard signs, vehicle magnets, feature sheets, business cards, and postcards all in one place. Open Monday to Friday, standard 1–3 day turnaround, same-day rush available.",
         },
       ]}
     />

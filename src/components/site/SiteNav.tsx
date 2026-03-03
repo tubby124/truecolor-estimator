@@ -46,12 +46,15 @@ const PRODUCT_CATEGORIES = [
 
 const INDUSTRY_LINKS = [
   { label: "Sign Company Saskatoon", href: "/sign-company-saskatoon" },
+  { label: "Large Format Printing", href: "/large-format-printing-saskatoon" },
+  { label: "Same-Day Printing", href: "/same-day-printing-saskatoon" },
+  { label: "Trade Show Displays", href: "/trade-show-displays-saskatoon" },
   { label: "Construction", href: "/construction-signs-saskatoon" },
   { label: "Real Estate", href: "/real-estate-signs-saskatoon" },
   { label: "Agriculture", href: "/agriculture-signs-saskatoon" },
   { label: "Healthcare", href: "/healthcare-signs-saskatoon" },
   { label: "Retail & Restaurant", href: "/restaurant-signs-saskatoon" },
-  { label: "Sports & Events", href: "/event-banners" },
+  { label: "Events & Weddings", href: "/event-signs-saskatoon" },
   { label: "Ramadan & Eid", href: "/ramadan-eid-banners-saskatoon" },
   { label: "St. Patrick's Day", href: "/st-patricks-day-printing-saskatoon" },
   { label: "Graduation Banners", href: "/graduation-banners-saskatoon" },

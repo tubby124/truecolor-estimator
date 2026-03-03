@@ -32,6 +32,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Print product SEO pages (2026-03-03)
     { url: "/flyer-printing-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/brochure-printing-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
+    // Service & hub SEO pages (2026-03-03)
+    { url: "/large-format-printing-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
+    { url: "/trade-show-displays-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
+    { url: "/event-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     // Industry pages
     { url: "/real-estate-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/construction-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
