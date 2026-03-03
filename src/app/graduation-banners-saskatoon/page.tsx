@@ -51,21 +51,34 @@ export default function GraduationBannersPage() {
           <div className="mb-10">
             <h3 className="text-xl font-bold text-[#1c1712] mb-1">Banner design directions</h3>
             <p className="text-sm text-gray-500 mb-5">Tell us your school colours and grad year — or send your own artwork and we&apos;ll match it exactly.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 max-w-lg">
               <div>
-                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/graduation/banner-school-colors.png" alt="Graduation banner in blue and gold school colours — Class of 2026 Congratulations Graduates" fill className="object-cover" sizes="(max-width:640px) 100vw, 50vw" />
+                <div className="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-[#f8f4ef] mb-3">
+                  <Image src="/images/seasonal/graduation/banner-school-colors.png" alt="Graduation banner in blue and gold school colours — Class of 2026 Congratulations Graduates" fill className="object-contain" sizes="(max-width:640px) 50vw, 260px" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">School Colours</p>
                 <p className="text-xs text-gray-500 mt-0.5">School crest, custom colours — gyms, convocation entrances, outdoor ceremony</p>
               </div>
               <div>
-                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/graduation/banner-gold-classic.png" alt="Classic navy and gold graduation banner with grad cap — Congratulations Class of 2026" fill className="object-cover" sizes="(max-width:640px) 100vw, 50vw" />
+                <div className="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-[#f8f4ef] mb-3">
+                  <Image src="/images/seasonal/graduation/banner-gold-classic.png" alt="Classic navy and gold graduation banner with grad cap — Congratulations Class of 2026" fill className="object-contain" sizes="(max-width:640px) 50vw, 260px" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Classic Gold</p>
-                <p className="text-xs text-gray-500 mt-0.5">Navy & gold, grad cap — university convocation, private grad parties</p>
+                <p className="text-xs text-gray-500 mt-0.5">Navy &amp; gold, grad cap — university convocation, private grad parties</p>
               </div>
+            </div>
+          </div>
+
+          {/* Retractable banner stands */}
+          <div className="mb-10">
+            <h3 className="text-xl font-bold text-[#1c1712] mb-1">Retractable banner stands</h3>
+            <p className="text-sm text-gray-500 mb-5">24×80&quot; stand + full-colour grad print — from $219 + GST complete. No separate graphic fee.</p>
+            <div className="max-w-[220px]">
+              <div className="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-[#f8f4ef] mb-3">
+                <Image src="/images/seasonal/graduation/hero.png" alt="Retractable graduation banner stand — Class of 2026 step-and-repeat backdrop in navy and gold" fill className="object-contain" sizes="220px" />
+              </div>
+              <p className="font-semibold text-sm text-[#1c1712]">Step-and-repeat backdrop</p>
+              <p className="text-xs text-gray-500 mt-0.5">Class of 2026, school colours — photo booth setups, event entrances</p>
             </div>
           </div>
 
