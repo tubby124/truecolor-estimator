@@ -1,5 +1,6 @@
 key,value,description,source_ref,last_updated
 gst_rate,0.05,Canadian GST rate applied to all taxable sales,estimatorRules.csv,2026-02-19
+pst_rate,0.06,Saskatchewan PST rate applied to printed goods (tangible personal property),SK PST Act,2026-03-03
 default_sqft_fallback_rate,6.50,Fallback rate per sqft when no category rule matches — triggers NEEDS_CLARIFICATION,estimatorRules.csv:row2,2026-02-19
 default_minimum_fallback,25.00,Minimum charge used with fallback rate only,estimatorRules.csv:row2,2026-02-19
 grommet_price_per_unit,2.50,Sell price per grommet unit (updated per owner 2026-02-24),NEW WAVE PRODUCTS.csv:row215 + estimatorRules.csv:row4,2026-02-24

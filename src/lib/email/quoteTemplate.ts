@@ -32,8 +32,10 @@ export interface QuoteEmailData {
 export function buildQuoteEmailHtml(data: QuoteEmailData): string {
   const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, proofImageCid, paymentUrl, qrCodeCid, diagramCid } = data;
   const sellPrice = quoteData.sell_price ?? 0;
+  const designFee = quoteData.design_fee ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
-  const total = Math.round((sellPrice + gst) * 100) / 100;
+  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
+  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
 
   const greeting = customerName ? `Hi ${customerName},` : "Hello,";
   const logoUrl = logoAbsoluteUrl(siteUrl);
@@ -202,8 +204,14 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
 
                   <!-- GST -->
                   <tr style="background: #f9f6f3;">
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">GST (5%)</td>
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${gst.toFixed(2)}</td>
+                    <td style="padding: 4px 16px 4px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">GST (5%)</td>
+                    <td style="padding: 4px 16px 4px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${gst.toFixed(2)}</td>
+                  </tr>
+
+                  <!-- PST -->
+                  <tr style="background: #f9f6f3;">
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">PST (6%)</td>
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${pst.toFixed(2)}</td>
                   </tr>
 
                   <!-- TOTAL -->
@@ -221,7 +229,7 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
               <!-- Validity -->
               <div style="background: #faf7f4; border: 1px solid #e6ddd5; border-radius: 8px; padding: 12px 16px; margin-bottom: 24px;">
                 <p style="margin: 0; font-size: 13px; color: #4a3728; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  ✓ &nbsp;This quote is valid for <strong>30 days</strong> from today. Prices are in Canadian dollars and include GST.
+                  ✓ &nbsp;This quote is valid for <strong>30 days</strong> from today. Prices are in Canadian dollars and include GST and PST.
                 </p>
               </div>
 

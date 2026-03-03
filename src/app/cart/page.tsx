@@ -155,7 +155,7 @@ export default function CartPage() {
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
-              <p className="text-xs text-gray-400">GST (5%) calculated at checkout</p>
+              <p className="text-xs text-gray-400">GST (5%) + PST (6%) added at checkout</p>
             </div>
 
             {/* Checkout CTA */}
@@ -177,7 +177,7 @@ export default function CartPage() {
 
             {/* Trust note */}
             <p className="text-xs text-gray-400 text-center pt-2">
-              All prices in CAD · GST added at checkout · Pickup at 216 33rd St W, Saskatoon
+              All prices in CAD · GST + PST added at checkout · Pickup at 216 33rd St W, Saskatoon
             </p>
           </div>
         )}

@@ -357,6 +357,7 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   return {
     status: clarifications.length > 0 ? "NEEDS_CLARIFICATION" : "QUOTED",
     sell_price: sellPrice,
+    design_fee: designFee,
     line_items: lineItems,
     sqft_calculated: sqft,
     price_per_sqft: basePricePerSqft,

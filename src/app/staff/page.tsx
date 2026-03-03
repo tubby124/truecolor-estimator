@@ -258,7 +258,7 @@ export default function StaffPage() {
 
       {/* Pricing version footer */}
       <footer className="text-center py-6 text-xs text-[var(--muted)] no-print">
-        True Color Display Printing · Pricing v1_2026-02-24 · All prices in CAD + GST
+        True Color Display Printing · Pricing v1_2026-02-24 · All prices in CAD + GST + PST
       </footer>
     </div>
   );
@@ -294,9 +294,11 @@ function CustomerOverlay({
   onClose: () => void;
 }) {
   const sellPrice = result.sell_price ?? 0;
+  const designFee = result.design_fee ?? 0;
   const gstRate = 0.05;
   const gst = Math.round(sellPrice * gstRate * 100) / 100;
-  const total = Math.round((sellPrice + gst) * 100) / 100;
+  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
+  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
@@ -343,7 +345,7 @@ function CustomerOverlay({
 
         <div className="mb-8 text-center">
           <p className="text-7xl font-semibold tracking-tighter">${total.toFixed(2)}</p>
-          <p className="text-sm text-[var(--muted)] mt-2">Total including GST</p>
+          <p className="text-sm text-[var(--muted)] mt-2">Total including GST + PST</p>
         </div>
 
         {result.line_items.length > 1 && (
@@ -357,6 +359,10 @@ function CustomerOverlay({
             <div className="flex justify-between text-sm text-gray-400 border-t border-gray-100 pt-2">
               <span>GST (5%)</span>
               <span>${gst.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm text-gray-400">
+              <span>PST (6%)</span>
+              <span>${pst.toFixed(2)}</span>
             </div>
           </div>
         )}

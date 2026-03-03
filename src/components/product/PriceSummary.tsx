@@ -170,7 +170,7 @@ export function PriceSummary({
 
               {/* Tax note */}
               <p className="text-xs text-gray-400 border-t border-gray-100 pt-3 mt-3">
-                + 5% GST added at checkout
+                + GST (5%) &amp; PST (6%) added at checkout
               </p>
             </motion.div>
             </AnimatePresence>

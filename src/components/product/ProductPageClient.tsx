@@ -98,6 +98,7 @@ export function ProductPageClient({ product }: Props) {
       },
       sell_price: priceData.price,
       gst_rate: 0.05,
+      design_fee: priceData.designFee ?? 0,
       qty: configData.qty,
       line_items: priceData.lineItems.length > 0 ? priceData.lineItems : undefined,
     });

@@ -15,6 +15,10 @@ export const WAVE_BUSINESS_ID =
 export const WAVE_GST_TAX_ID =
   "QnVzaW5lc3M6MGZlYTg0NzQtYjQ2Ny00YTEyLWI1NTgtZWZhNGM3NGM3ZTNjO1NhbGVzVGF4OjE5MzI0MzkyNDI=";
 
+// Saskatchewan PST 6% — confirmed via Wave GraphQL 2026-03-03
+export const WAVE_PST_TAX_ID =
+  "QnVzaW5lc3M6MGZlYTg0NzQtYjQ2Ny00YTEyLWI1NTgtZWZhNGM3NGM3ZTNjO1NhbGVzVGF4OjE5MzI0MzkyNTg=";
+
 // Generic "Print Services" product — created once, used as productId on all invoice line items.
 // Wave's invoiceCreate requires productId (ID!) on every line item. This product has unitPrice $0
 // and the actual per-line price is set via unitValue on each item, overriding the product default.

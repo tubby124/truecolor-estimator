@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { QuoteModal } from "@/components/QuoteModal";
 
 const SLIDES = [
   {
@@ -73,6 +74,7 @@ export function HeroSlider() {
   // known bug where overflow:hidden doesn't clip absolutely-positioned children
   // that use CSS transform-based animations.
   const [isMobile, setIsMobile] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
@@ -196,6 +198,12 @@ export function HeroSlider() {
               >
                 {slide.cta}
               </Link>
+              <button
+                onClick={() => setQuoteOpen(true)}
+                className="border border-white/40 text-white font-semibold px-7 py-3.5 rounded-lg hover:border-white transition-colors text-base"
+              >
+                Custom Quote
+              </button>
               <a
                 href="tel:+13069548688"
                 className="border border-white/40 text-white font-semibold px-7 py-3.5 rounded-lg hover:border-white transition-colors text-base"
@@ -230,6 +238,8 @@ export function HeroSlider() {
           className="h-full bg-[#16C2F3] slide-progress-bar"
         />
       </div>
+
+      <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} />
     </section>
   );
 }

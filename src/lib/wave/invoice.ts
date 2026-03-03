@@ -9,7 +9,7 @@
  * tied to order status = "ready_for_pickup".
  */
 
-import { waveQuery, WAVE_BUSINESS_ID, WAVE_GST_TAX_ID, WAVE_PRINT_PRODUCT_ID } from "./client";
+import { waveQuery, WAVE_BUSINESS_ID, WAVE_GST_TAX_ID, WAVE_PST_TAX_ID, WAVE_PRINT_PRODUCT_ID } from "./client";
 
 // --------------------------------------------------------------------------
 // Types
@@ -20,6 +20,7 @@ export interface WaveLineItem {
   unitPrice: number;   // pre-tax, dollars
   qty: number;
   applyGst: boolean;
+  applyPst?: boolean;  // SK PST 6% — omit for design fees, rush, installation
 }
 
 export interface WaveInvoiceResult {
@@ -119,7 +120,10 @@ export async function createWaveInvoice(
     description: item.description,
     quantity: String(item.qty),
     unitPrice: item.unitPrice.toFixed(2),
-    taxes: item.applyGst ? [{ salesTaxId: WAVE_GST_TAX_ID }] : [],
+    taxes: [
+        ...(item.applyGst ? [{ salesTaxId: WAVE_GST_TAX_ID }] : []),
+        ...(item.applyPst ? [{ salesTaxId: WAVE_PST_TAX_ID }] : []),
+      ],
   }));
 
   if (opts?.isRush) {

@@ -43,8 +43,10 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
 
   const isBlocked = result.status === "BLOCKED";
   const sellPrice = result.sell_price ?? 0;
+  const designFee = result.design_fee ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
-  const total = Math.round((sellPrice + gst) * 100) / 100;
+  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
+  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
   const cost = result.cost;
 
   const greenThreshold = result.margin_green_threshold ?? 50;
@@ -183,6 +185,10 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
         <td>GST (5%)</td>
         <td style="text-align:right;font-variant-numeric:tabular-nums;">$${gst.toFixed(2)}</td>
       </tr>
+      <tr class="gst-row">
+        <td>PST (6%)</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums;">$${pst.toFixed(2)}</td>
+      </tr>
       <tr class="total-row">
         <td>Total (CAD)</td>
         <td style="text-align:right;font-variant-numeric:tabular-nums;">$${total.toFixed(2)}</td>
@@ -191,7 +197,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
   </table>
 
   <!-- Validity -->
-  <div class="validity">✓ This quote is valid for <strong>30 days</strong> from the date above. Prices are in Canadian dollars and include GST.</div>
+  <div class="validity">✓ This quote is valid for <strong>30 days</strong> from the date above. Prices are in Canadian dollars and include GST and PST.</div>
 
   <!-- Payment instructions -->
   <div class="section-label">Payment</div>
@@ -226,7 +232,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
 
   <!-- Terms -->
   <div class="terms">
-    50% deposit required to begin production · Balance due on pickup · All prices in CAD · GST included at 5%<br />
+    50% deposit required to begin production · Balance due on pickup · All prices in CAD · GST (5%) + PST (6%) included<br />
     Prices valid for 30 days from quote date · Questions? Call (306) 954-8688 or email info@true-color.ca<br />
     True Color Display Printing · 216 33rd St W (Upstairs), Saskatoon SK S7M 0R1
   </div>
@@ -351,6 +357,10 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
             <div className="flex justify-between text-sm">
               <span className="text-[var(--muted)]">GST (5%)</span>
               <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>${gst.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-[var(--muted)]">PST (6%)</span>
+              <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>${pst.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-base font-semibold">
               <span>Total</span>

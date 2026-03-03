@@ -20,6 +20,7 @@ import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { sanitizeError } from "@/lib/errors/sanitize";
 
 const GST_RATE = 0.05;
+const PST_RATE = 0.06;
 
 export async function POST(req: NextRequest) {
   // Staff auth check
@@ -82,7 +83,8 @@ export async function POST(req: NextRequest) {
     // ── 2. Calculate totals ──
     const subtotal = Math.round(amount * 100) / 100;
     const gst = Math.round(subtotal * GST_RATE * 100) / 100;
-    const total = Math.round((subtotal + gst) * 100) / 100;
+    const pst = Math.round(subtotal * PST_RATE * 100) / 100;
+    const total = Math.round((subtotal + gst + pst) * 100) / 100;
 
     // ── 3. Create order row (retry on order_number collision) ──
     const orderYear = new Date().getFullYear();
@@ -104,6 +106,7 @@ export async function POST(req: NextRequest) {
           is_rush: false,
           subtotal,
           gst,
+          pst,
           total,
           payment_method: payment_method === "wave" ? "wave" : "clover_card",
           notes: notes?.trim() || null,
@@ -172,7 +175,7 @@ export async function POST(req: NextRequest) {
 
         const inv = await createWaveInvoice(
           waveCustomerId,
-          [{ description: description.trim(), unitPrice: subtotal, qty: 1, applyGst: true }],
+          [{ description: description.trim(), unitPrice: subtotal, qty: 1, applyGst: true, applyPst: true }],
           { orderNumber: order.order_number }
         );
 
@@ -215,6 +218,7 @@ export async function POST(req: NextRequest) {
             }],
             subtotal,
             gst,
+            pst,
             total,
             is_rush: false,
             payment_method: "etransfer",
@@ -245,6 +249,7 @@ export async function POST(req: NextRequest) {
         description: description.trim(),
         subtotal,
         gst,
+        pst,
         total,
         paymentUrl: paymentUrl!,
         paymentMethod: payment_method,
@@ -275,6 +280,7 @@ export async function POST(req: NextRequest) {
         }],
         subtotal,
         gst,
+        pst,
         total,
         is_rush: false,
         payment_method: "clover_card",

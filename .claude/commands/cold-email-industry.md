@@ -65,30 +65,42 @@ curl -s -o /dev/null -w "%{http_code}" https://truecolorprinting.ca/[industry-sl
 Use `mcp__apify__call-actor` with `actor: "enckay/google-maps-places-extractor"` and `async: true`.
 
 ### Input schema (REQUIRED — pass as object, NOT string):
+
+⚠️ `keyword` and `location` are SEPARATE fields — NEVER embed location inside keyword. Doing so causes actor validation failure.
+
 ```json
 {
-  "keyword": "[search term]",
-  "location": "Saskatoon, Saskatchewan, Canada",
+  "keyword": "[search term only — no city/province]",
+  "location": "Saskatoon, SK, Canada",
   "maxResults": 40,
   "filterPermanentlyClosed": true,
   "extractContactDetails": true,
-  "extractWebsiteEmails": true
+  "extractWebsiteEmails": true,
+  "extractSocialMedia": true,
+  "calculateLeadScore": true
 }
 ```
 
-### Standard search queries per industry:
+For province-wide searches (agriculture, farm supply): use `"location": "Saskatchewan, Canada"`
 
-| Industry | Queries to run (all in parallel) |
-|----------|----------------------------------|
-| healthcare | "dental clinic saskatoon", "optometry saskatoon", "physiotherapy saskatoon", "chiropractic saskatoon" |
-| real-estate | "real estate agent saskatoon", "realtor saskatoon", "real estate brokerage saskatoon" |
-| construction | "general contractor saskatoon", "construction company saskatoon", "renovation contractor saskatoon" |
-| retail | "retail store saskatoon", "boutique saskatoon", "clothing store saskatoon" |
-| events | "event planner saskatoon", "wedding planner saskatoon", "event venue saskatoon" |
-| nonprofits | "nonprofit saskatoon", "charity saskatoon", "community organization saskatoon" |
-| sports | "sports club saskatoon", "recreation centre saskatoon", "gym saskatoon" |
-| agriculture | "farm supply saskatoon", "agricultural dealer saskatoon", "seed company saskatoon" |
-| restaurants | "restaurant saskatoon", "cafe saskatoon", "food truck saskatoon" |
+### Standard search queries per industry (keyword only — location set separately):
+
+| Industry | Keywords (run in parallel, location="Saskatoon, SK, Canada") |
+|----------|--------------------------------------------------------------|
+| healthcare | "dental clinic", "optometry", "physiotherapy", "chiropractic" |
+| real-estate | "real estate agent", "realtor", "real estate brokerage" |
+| construction | "general contractor", "construction company", "renovation contractor home builder", "roofing contractor", "landscaping company" |
+| retail | "retail boutique gift shop", "clothing store boutique" |
+| events | "event planner", "wedding venue", "event venue banquet hall", "party rental equipment" |
+| nonprofits | "non-profit organization charity" |
+| sports | "minor hockey sports association", "fitness gym yoga studio" |
+| agriculture | "farm supply store" + "seed dealer agricultural supply" (location="Saskatchewan, Canada") + "agricultural equipment dealer" |
+| restaurants | "restaurant", "cafe", "bar and grill", "food truck" |
+| st-patricks | "Irish pub", "sports bar", "bar and grill", "nightclub lounge", "pub brewery taproom" |
+| mothers-day | "day spa massage", "beauty salon", "nail salon", "florist flower shop", "hair salon barber" |
+| graduation | "private school", "event venue banquet hall", "party rental equipment", "wedding venue" |
+| canada-day | "retail boutique gift shop", "auto dealership car dealer", "non-profit organization charity", "fitness gym yoga studio" |
+| back-to-school | "daycare child care center", "tutoring center learning academy" |
 
 ### Post-scrape filtering rules (apply after results arrive):
 - **EXCLUDE**: chains with 10+ locations (Tim Hortons, Subway, national franchises)
@@ -199,6 +211,19 @@ Check: `emailBlacklisted` must be `false` AND `statistics.unsubscriptions.adminU
 
 ---
 
+### ⚠️ CRITICAL: Campaigns and Templates are INDEPENDENT objects
+
+**Brevo bakes HTML into campaigns at creation time.** Updating a transactional template (Layer 1) does NOT update its corresponding scheduled campaign (Layer 2). They are completely separate.
+
+**Rule — any time you change email content after campaigns are created:**
+1. Update the template (`mcp__brevo__transac_templates_update_smtp_template_with_sender_email`)
+2. ALSO update the campaign (`mcp__brevo__email_campaign_management_update_email_campaign`) — fetch HTML from template → push to campaign
+3. Run all campaign updates in parallel. All should return 204.
+
+**Verification after campaign creation:** Always spot-check at least 1 campaign with `mcp__brevo__email_campaign_management_get_campaign_details` to confirm the HTML contains the image header and correct CTA URL — not the base template's placeholder dental/generic link.
+
+---
+
 ### Layer 1 — Transactional templates (for QA and reference)
 
 Use `mcp__brevo__transac_templates_create_smtp_template_with_sender_email`
@@ -221,6 +246,25 @@ Use `mcp__brevo__transac_templates_create_smtp_template_with_sender_email`
 | Email 9 | 270 | **43** | fall is prime time for new associates |
 | Email 10 | 365 | **44** | still haven't printed with us yet? |
 
+### Industry header images — REQUIRED for every new industry
+
+Every industry sequence needs two custom email header images before templates go live:
+- **Main header** (emails 2–5): 600×250px, dark charcoal `#1c1712`, product flatlay + "Signs & displays for [industry]"
+- **Follow-up header** (emails 6–10): 600×250px, dark navy `#1B4F8A`, single hero product + urgency copy
+- **Format:** PNG | **Hosted at:** `https://truecolorprinting.ca/images/industries/[industry]/`
+- **File names:** `email-header-[industry]-main.png` + `email-header-[industry]-followup.png`
+- **ChatGPT prompts template:** `HEALTHCARE_IMAGE_PROMPTS.md` — copy + swap industry, products, and palette
+- **Verify live before sending:** `curl -s -o /dev/null -w "%{http_code}" https://truecolorprinting.ca/images/industries/[industry]/email-header-[industry]-main.png` → must return 200
+- **HTML tag:** `<tr><td style="background:#1c1712;padding:0;line-height:0;"><img src="..." width="600" style="display:block;width:100%;max-width:600px;height:auto;" /></td></tr>` — NEVER add padding to a TD containing an image
+
+### ⚠️ CTA URL audit (run before every industry's campaign creation)
+
+After writing all 10 email HTML files, grep for any wrong industry slug BEFORE creating templates or campaigns:
+```bash
+grep -r "dental-office-signs-saskatoon" research/emails/drafts/[industry]/
+```
+If any results: replace with the correct industry slug. The dental template was used as the base for HC — this bug will repeat if not caught early.
+
 ### Send test emails to verify rendering
 
 Send all 9 in parallel via `mcp__brevo__transac_templates_send_test_template`:
@@ -228,11 +272,14 @@ Send all 9 in parallel via `mcp__brevo__transac_templates_send_test_template`:
 emailTo: ["info@true-color.ca"]
 tags: {"FIRSTNAME": "Test", "COMPANY": "True Color Clinic"}
 ```
+**Always use `info@true-color.ca` as test recipient.** `hasan.sharif@exprealty.com` is admin-unsubscribed — Brevo silently drops it (returns 204 with no send). Always verify test recipient first with `mcp__brevo__contacts_get_contact_info` — check `emailBlacklisted` and `adminUnsubscription` array.
+
 Confirm on all:
 - [ ] Subject line renders correctly (no broken tokens)
-- [ ] Header dark background shows (#1c1712)
+- [ ] Industry header image loads at top (not plain dark text header)
+- [ ] Emails 2–5 use `email-header-[industry]-main.png`, emails 6–10 use `email-header-[industry]-followup.png`
 - [ ] CTA button renders cyan (#16C2F3), tappable on mobile
-- [ ] Images load (for email 7 with Instagram photos)
+- [ ] CTA URL goes to `/[industry]-signs-saskatoon` (NOT `/dental-office-signs-saskatoon`)
 - [ ] Footer shows address + Instagram + unsubscribe link
 - [ ] No broken `{{contact.FIRSTNAME}}` tokens (replace with "Test" in preview)
 - [ ] Mobile view at 375px — no horizontal scroll, CTA ≥ 44px tall
@@ -264,6 +311,23 @@ Confirm on all:
 
 **Run all 9 campaign creates in parallel.**
 
+### ⚠️ Post-creation campaign sync (MANDATORY — do not skip)
+
+After all 9 campaigns are created, immediately run a spot-check:
+```
+mcp__brevo__email_campaign_management_get_campaign_details → campaignId: [first campaign]
+```
+Confirm in the returned HTML:
+- Image header tag present (`email-header-[industry]-main.png`)
+- CTA URL points to `/[industry]-signs-saskatoon` (not dental or old URL)
+
+If either check fails → update ALL campaigns with correct HTML from the templates:
+```
+mcp__brevo__transac_templates_get_smtp_template → templateId: [each template]
+mcp__brevo__email_campaign_management_update_email_campaign → campaignId: [each campaign], htmlContent: [from template]
+```
+Run all 9 fetches + 9 updates in parallel. All should return 204.
+
 ### ⚠️ Send-day optimization (cadence days are targets, not absolutes)
 
 Saskatchewan = **CST year-round** (no DST). 10am CST = **16:00 UTC** always.
@@ -293,7 +357,49 @@ Scheduled campaigns send to everyone in the list at the scheduled time. To stop 
 
 ---
 
-## STEP 5 — UPDATE TRACKER
+## STEP 5 — INSTAGRAM + SOCIAL CONTENT (ALWAYS — same session)
+
+For every industry campaign, produce **3 Instagram posts** using the SAME images already in `public/images/industries/[industry]/`. No new image generation needed.
+
+### Post schedule
+- Post 1 (Launch): Same date as Email 1 (Day 0)
+- Post 2 (Mid): Day 30–60 — case study or social proof angle
+- Post 3 (Long-game): Day 90+ — product spotlight for the industry
+
+### Output format for each
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSTAGRAM POST [N] — [INDUSTRY] — [DATE]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMAGE: public/images/industries/[industry]/[filename].png
+PRODUCTION URL: https://truecolorprinting.ca/images/industries/[industry]/[filename].png
+
+CAPTION (150–220 chars):
+[Hook — punchy 3–5 words]
+[2 lines value/story]
+From $[X] before GST.
+🌐 truecolorprinting.ca/[slug]?utm_source=social&utm_medium=instagram&utm_campaign=[industry]
+
+HASHTAGS (first comment — 12–15 total):
+#Saskatoon #SaskatoonBusiness #SaskatoonPrinting #YXE
+#[3 product hashtags] #[3 industry hashtags] #[2 audience hashtags]
+
+BLOTATO ROW:
+caption_raw  | [raw caption, single line, no hashtags]
+platforms    | instagram,facebook
+image_url    | https://truecolorprinting.ca/images/industries/[industry]/[filename].png
+schedule_date | [YYYY-MM-DD]
+status       | Ready to Post
+campaign     | [industry]-2026
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Save rows to: `research/emails/drafts/[industry]/blotato_queue.csv`
+Full hashtag library: `memory/instagram-content-system.md`
+
+---
+
+## STEP 6 — UPDATE TRACKER
 
 After completing the above steps, update `research/outreach/OUTREACH_TRACKER.md`:
 1. Add/update the industry section with current enrolled contact list
