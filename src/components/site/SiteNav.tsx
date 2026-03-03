@@ -320,6 +320,14 @@ export function SiteNav() {
             >
               Our Work
             </Link>
+
+            {/* Resources — plain link */}
+            <Link
+              href="/resources"
+              className="text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+            >
+              Resources
+            </Link>
           </nav>
 
           {/* Right side: phone + icons + CTAs + hamburger */}
@@ -543,6 +551,13 @@ export function SiteNav() {
                 className="block py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
               >
                 Our Work
+              </Link>
+              <Link
+                href="/resources"
+                onClick={() => setDrawerOpen(false)}
+                className="block py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
+              >
+                Resources
               </Link>
             </div>
 
