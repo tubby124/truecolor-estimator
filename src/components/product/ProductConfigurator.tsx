@@ -260,7 +260,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       {/* Size presets */}
       {!product.tierPresets && product.sizePresets.length > 1 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Size</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">{product.sizeSectionLabel ?? "Size"}</p>
           <div className="flex flex-wrap gap-2">
             {product.sizePresets.map((preset) => (
               <button
@@ -309,6 +309,18 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 />
               </div>
             </div>
+          )}
+          {isCustom && price === null && !loading && customW && customH && (
+            <p className="mt-2 text-xs text-gray-500">
+              Custom sizes are available —{" "}
+              <a href="tel:+13069548688" className="text-[#16C2F3] font-medium hover:underline">
+                call (306) 954-8688
+              </a>{" "}
+              or{" "}
+              <a href="/quote" className="text-[#16C2F3] font-medium hover:underline">
+                request a quote
+              </a>.
+            </p>
           )}
         </div>
       )}
@@ -395,6 +407,18 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             min={1}
             className="mt-2 border border-gray-200 rounded-lg px-3 py-2 text-sm w-36 focus:outline-none focus:border-[#16C2F3]"
           />
+        )}
+        {isCustomQty && price === null && !loading && customQty && (
+          <p className="mt-2 text-xs text-gray-500">
+            Need a quote for {customQty}?{" "}
+            <a href="tel:+13069548688" className="text-[#16C2F3] font-medium hover:underline">
+              Call (306) 954-8688
+            </a>{" "}
+            or{" "}
+            <a href="/quote" className="text-[#16C2F3] font-medium hover:underline">
+              get a quote online
+            </a>.
+          </p>
         )}
         {product.lotPriced && (
           <p className="mt-3 text-xs text-gray-400">

@@ -22,6 +22,7 @@ export interface ProductContent {
   defaultSides: 1 | 2;
   sideOptions: boolean; // show single/double toggle
   sizePresets: SizePreset[];
+  sizeSectionLabel?: string; // overrides "Size" heading in configurator (e.g. "Paper Weight")
   qtyPresets: number[];
   specs: { label: string; value: string }[];
   whoUsesThis: string[];
@@ -282,10 +283,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
 
   "flyers": {
     slug: "flyers",
-    name: "Flyers & Brochures",
-    tagline: "100 flyers on 80lb gloss from $45.",
+    name: "Flyers",
+    tagline: "Letter flyers from $45. 80lb or 100lb gloss.",
     description:
-      "Printed on Pacesetter 80lb gloss text — a bright white, FSC-certified press sheet that produces sharp colour reproduction at an efficient price. The 80lb weight is standard for professional flyers and restaurant menus: stiff enough to hold its shape when handed out, light enough to keep postage manageable for direct mail. True Color runs flyers on our Konica Minolta digital production press — the same machine we use for brochures and business cards — with consistent colour from the first sheet to the last. 100 flyers is the minimum (letter size, 8.5×11\"). Price per flyer drops significantly at 250 and 500+. Want a heavier feel? Upgrade to 100lb gloss for $20 extra on a 250-flyer run — noticeably thicker in hand. Both sides available; double-sided is included in the base price. Common uses in Saskatoon: restaurant menus, event programs, open house handouts, election campaign materials, contractor service lists, and non-profit fundraiser sheets. Half-letter (5.5×8.5\"), legal, and other formats available on request. Supply PDF or high-res PNG at 150+ DPI. No file? Our in-house designer handles layout from a rough concept — starts at $35. Pickup at 216 33rd St W, Saskatoon in 1–2 business days, or same-day rush for $40 flat.",
+      "Printed on Pacesetter 80lb gloss text — a bright white, FSC-certified press sheet that produces sharp colour reproduction at an efficient price. The 80lb weight is standard for professional flyers and restaurant menus: stiff enough to hold its shape when handed out, light enough to keep postage manageable for direct mail. True Color runs flyers on our Konica Minolta digital production press with consistent colour from the first sheet to the last. 100 flyers is the minimum (letter size, 8.5×11\"). Price per flyer drops significantly at 250 and 500+. Want a heavier feel? Select 100lb gloss — noticeably thicker in hand and a step up in perceived quality. Both options print full-colour double-sided as standard. Common uses in Saskatoon: restaurant menus, event programs, open house handouts, election campaign materials, contractor service lists, and non-profit fundraiser sheets. Half-letter (5.5×8.5\"), legal (8.5×14\"), and other custom sizes available on request — use the Custom button or call us. Supply PDF or high-res PNG at 150+ DPI. No file? Our in-house designer handles layout from a rough concept — starts at $35. Pickup at 216 33rd St W, Saskatoon in 1–2 business days, or same-day rush for $40 flat.",
     fromPrice: "$45",
     category: "FLYER",
     material_code: "PLACEHOLDER_80LB",
@@ -301,16 +302,16 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 2,
     sideOptions: false, // All flyer products are 2S-only in CSV — no 1S variants exist
     sizePresets: [
-      { label: "Letter (100)", width_in: 8.5, height_in: 11 },
+      { label: "80lb Gloss (standard)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_80LB" },
+      { label: "100lb Gloss (premium)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_100LB" },
     ],
+    sizeSectionLabel: "Paper Weight",
     qtyPresets: [100, 250, 500, 1000],
-    lotPriced: true,
     specs: [
-      { label: "Paper", value: "Pacesetter 80lb gloss text (FSC-certified)" },
-      { label: "Print", value: "Full-colour digital (Konica Minolta press)" },
-      { label: "Size", value: "Letter (8.5×11\") — other sizes available" },
-      { label: "Sides", value: "Double-sided (front + back)" },
-      { label: "Also available", value: "100lb gloss text for heavier feel" },
+      { label: "Paper options", value: "80lb gloss text (standard) or 100lb gloss text (premium)" },
+      { label: "Print", value: "Full-colour double-sided digital (Konica Minolta press)" },
+      { label: "Standard size", value: "Letter 8.5×11\" — half-letter, legal, and custom sizes available" },
+      { label: "Minimum", value: "100 flyers" },
     ],
     whoUsesThis: ["Retail", "Events", "Non-Profits", "Healthcare", "Sports", "Agriculture"],
     faqs: [
@@ -320,18 +321,22 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What's the difference between 80lb and 100lb paper?",
-        a: "80lb gloss is standard — crisp print, good colour. 100lb is noticeably heavier and feels more premium. Add $20 for 100lb on a 250-flyer run.",
+        a: "80lb gloss is standard — crisp print, good colour, cost-effective. 100lb is noticeably heavier and feels more premium in hand. Select 100lb in the Paper Weight picker above for exact pricing at your quantity.",
       },
       {
         q: "Can I get a different size than letter?",
-        a: "Yes — half-letter (5.5×8.5\"), legal (8.5×14\"), and other sizes available. Ask us when ordering.",
+        a: "Yes — half-letter (5.5×8.5\"), legal (8.5×14\"), and fully custom dimensions are available. Use the Custom quantity/size options above, or call (306) 954-8688 for a quote on non-standard sizes.",
+      },
+      {
+        q: "Are flyers double-sided?",
+        a: "Yes — all flyer pricing includes full-colour printing on both sides (front + back). Single-sided flyers are available on request at a reduced rate — just ask.",
       },
       {
         q: "Do you do door-to-door distribution?",
-        a: "We print; we don't distribute. But we can print and have them ready for you to pick up same-day or next morning.",
+        a: "We print; we don't distribute. But we can print and have them ready for pickup same-day or next morning.",
       },
     ],
-    relatedSlugs: ["business-cards", "coroplast-signs", "vinyl-banners"],
+    relatedSlugs: ["brochures", "business-cards", "postcards"],
   },
 
   "acp-signs": {
@@ -792,7 +797,6 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "3×4\"", width_in: 4, height_in: 3 },
     ],
     qtyPresets: [50, 100, 250, 500, 1000],
-    lotPriced: true,
     specs: [
       { label: "Stock", value: "14pt gloss coated card — same as business cards" },
       { label: "Print", value: "Full-colour double-sided digital" },
@@ -846,7 +850,6 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Half-fold (4 panels)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_HF_100LB" },
     ],
     qtyPresets: [100, 250, 500],
-    lotPriced: true,
     specs: [
       { label: "Stock", value: "100lb gloss text — heavier and premium vs. standard flyer paper" },
       { label: "Print", value: "Full-colour double-sided digital" },

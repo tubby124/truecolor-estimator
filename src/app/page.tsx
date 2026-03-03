@@ -49,9 +49,17 @@ const PRODUCTS = [
     name: "Flyers",
     category: "Print",
     from: "from $45",
-    desc: "100 flyers on 80lb gloss. Sharp colour, clean finish.",
+    desc: "100 flyers on 80lb or 100lb gloss. Sharp colour, clean finish.",
     img: "/images/products/product/flyers-stack-800x600.webp",
     href: "/products/flyers",
+  },
+  {
+    name: "Brochures",
+    category: "Print",
+    from: "from $70",
+    desc: "Tri-fold or half-fold. 100lb gloss. Scored and folded in-house.",
+    img: "/images/products/product/brochures-800x600.webp",
+    href: "/products/brochures",
   },
   {
     name: "Vehicle Magnets",

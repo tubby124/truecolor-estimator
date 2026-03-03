@@ -29,6 +29,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/graphic-design-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/sign-company-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/wall-graphics-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    // Print product SEO pages (2026-03-03)
+    { url: "/flyer-printing-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
+    { url: "/brochure-printing-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
     // Industry pages
     { url: "/real-estate-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/construction-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
