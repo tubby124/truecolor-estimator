@@ -7,13 +7,6 @@ const nextConfig: NextConfig = {
   // so Turbopack/webpack don't try to bundle the .node binary
   serverExternalPackages: ["@resvg/resvg-js"],
 
-  // Enables native browser View Transitions API for smooth page route changes.
-  // CSS lives in globals.css (vtSlideOut / vtSlideIn keyframes).
-  // Progressive enhancement — zero JS cost, ignored in unsupported browsers.
-  experimental: {
-    viewTransition: true,
-  },
-
   async redirects() {
     return [
       // /restaurants → canonical geo URL

@@ -67,8 +67,22 @@ export function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
   const [paused, setPaused] = useState(false);
+  // Detect mobile after mount to choose animation type.
+  // SSR defaults to false (mobile-first) — client hydration sets the real value.
+  // On mobile we use opacity crossfade (no x-transform) to avoid iOS Safari's
+  // known bug where overflow:hidden doesn't clip absolutely-positioned children
+  // that use CSS transform-based animations.
+  const [isMobile, setIsMobile] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
 
   const next = useCallback(() => {
     setDirection(1);
@@ -105,9 +119,22 @@ export function HeroSlider() {
 
   const slide = SLIDES[current];
 
+  // Mobile: opacity crossfade — no x-transform, no Safari overflow:hidden bug
+  // Desktop: spring x-slide animation
+  const mobileVariants = {
+    enter: { opacity: 0 },
+    center: { opacity: 1 },
+    exit: { opacity: 0 },
+  };
+  const desktopVariants = {
+    enter: (d: number) => ({ x: `${d * 100}%` }),
+    center: { x: 0 },
+    exit: (d: number) => ({ x: `${d * -100}%` }),
+  };
+
   return (
     <section
-      className="relative overflow-hidden bg-[#1c1712] min-h-[420px] md:min-h-[500px]"
+      className="relative overflow-hidden bg-[#1c1712] min-h-[420px] md:min-h-[500px] isolate"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
@@ -115,22 +142,23 @@ export function HeroSlider() {
     >
       {/*
         AnimatePresence: only 1–2 slides in the DOM at once.
-        Each slide is position:absolute + 100% wide — zero 600vw overflow.
-        The section's overflow:hidden clips entering/exiting slides.
+        Mobile: opacity crossfade (safe on iOS Safari — no transform overflow bug).
+        Desktop: x-axis spring slide (full animation).
+        The section's overflow:hidden + isolate clips entering/exiting slides.
       */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={current}
           custom={direction}
-          variants={{
-            enter: (d: number) => ({ x: `${d * 100}%` }),
-            center: { x: 0 },
-            exit: (d: number) => ({ x: `${d * -100}%` }),
-          }}
+          variants={isMobile ? mobileVariants : desktopVariants}
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ type: "spring", stiffness: 300, damping: 32, mass: 0.8 }}
+          transition={
+            isMobile
+              ? { duration: 0.35, ease: "easeInOut" }
+              : { type: "spring", stiffness: 300, damping: 32, mass: 0.8 }
+          }
           className="absolute inset-0 flex flex-col md:flex-row"
         >
           {/* Image side */}
