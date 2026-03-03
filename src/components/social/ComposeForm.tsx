@@ -265,6 +265,12 @@ export function ComposeForm({ campaigns }: Props) {
                     setCaptionInstagram(r.instagram);
                     setCaptionFacebook(r.facebook);
                     setCaptionTwitter(r.twitter);
+                    // Auto-fill hashtags from AI when provided
+                    if (r.hashtags?.trim()) setHashtags(r.hashtags);
+                  }}
+                  onImageUploaded={(url) => {
+                    setImageUrl(url);
+                    setImageError(false);
                   }}
                 />
                 {/* Manual override panels if AI not used */}

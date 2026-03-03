@@ -7,12 +7,15 @@ interface RewriteResult {
   instagram: string;
   facebook: string;
   twitter: string;
+  hashtags?: string;
+  angle?: string;
 }
 
 interface Props {
   captionRaw: string;
   campaignSlug?: string;
   onResult: (result: RewriteResult) => void;
+  onImageUploaded?: (url: string) => void;
 }
 
 // Compress image to max 1024px JPEG before sending to AI
@@ -43,8 +46,22 @@ async function compressImage(file: File): Promise<{ base64: string; type: string
   });
 }
 
-export function CaptionRewriter({ captionRaw, campaignSlug, onResult }: Props) {
+// Upload image to Supabase Storage via our API, returns public URL
+async function uploadImage(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch("/api/staff/social/upload", {
+    method: "POST",
+    body: form,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "Upload failed");
+  return data.url as string;
+}
+
+export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUploaded }: Props) {
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState<"uploading" | "generating" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RewriteResult | null>(null);
 
@@ -101,12 +118,20 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult }: Props) {
       const payload: Record<string, any> = { campaign_slug: campaignSlug };
 
       if (hasImage && imageFile) {
+        // Step 1: Upload image to Supabase Storage → get public URL
+        setLoadingStep("uploading");
+        const publicUrl = await uploadImage(imageFile);
+        onImageUploaded?.(publicUrl);
+
+        // Step 2: Compress for AI vision analysis
+        setLoadingStep("generating");
         const { base64, type } = await compressImage(imageFile);
         payload.image_base64 = base64;
         payload.image_type = type;
-        // Include any notes the staff wrote as additional context
+        payload.image_url = publicUrl; // helps AI know where it'll be hosted
         if (hasCaption) payload.caption_raw = captionRaw;
       } else {
+        setLoadingStep("generating");
         payload.caption_raw = captionRaw;
       }
 
@@ -123,11 +148,12 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult }: Props) {
       setError(e instanceof Error ? e.message : "Generation failed");
     } finally {
       setLoading(false);
+      setLoadingStep(null);
     }
   }
 
   const buttonLabel = loading
-    ? hasImage ? "Analyzing image…" : "Generating…"
+    ? loadingStep === "uploading" ? "Uploading image…" : "Analyzing & generating…"
     : hasImage
     ? "✨ Generate from image"
     : "✨ Rewrite with AI";
@@ -137,7 +163,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult }: Props) {
       {/* Image drop zone */}
       <div>
         <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
-          Drop a photo of your work — AI generates the caption
+          Drop a photo of your work — AI generates everything
         </p>
         <AnimatePresence mode="wait">
           {imagePreview ? (
@@ -161,7 +187,8 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult }: Props) {
                 </p>
                 <button
                   onClick={removeImage}
-                  className="flex-shrink-0 bg-white/20 hover:bg-white/40 text-white text-xs px-2.5 py-1 rounded-lg transition-colors"
+                  disabled={loading}
+                  className="flex-shrink-0 bg-white/20 hover:bg-white/40 text-white text-xs px-2.5 py-1 rounded-lg transition-colors disabled:opacity-50"
                 >
                   ✕ Remove
                 </button>
@@ -188,7 +215,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult }: Props) {
                 {isDragging ? "Drop it!" : "Drop a photo or click to browse"}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                JPG, PNG — AI will analyze it and write captions
+                AI identifies the product and writes platform-specific captions + hashtags
               </p>
             </motion.div>
           )}
@@ -223,13 +250,27 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult }: Props) {
 
       {!hasImage && !hasCaption && (
         <p className="text-xs text-gray-400">
-          Write a caption above, or drop a photo — AI generates posts for all 3 platforms.
+          Write a caption above, or drop a photo — AI generates posts + hashtags for all 3 platforms.
         </p>
       )}
 
       {error && (
         <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
       )}
+
+      {/* AI angle note */}
+      <AnimatePresence>
+        {result?.angle && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-xs text-gray-400 italic bg-gray-50 px-3 py-2 rounded-lg"
+          >
+            AI angle: {result.angle}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {result && (

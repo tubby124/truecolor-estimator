@@ -114,6 +114,8 @@ export interface CaptionRewriteResponse {
   instagram: string;
   facebook: string;
   twitter: string;
+  hashtags?: string;  // post-specific hashtag string from AI
+  angle?: string;     // AI's one-sentence marketing strategy note
 }
 
 // N8N webhook payload
