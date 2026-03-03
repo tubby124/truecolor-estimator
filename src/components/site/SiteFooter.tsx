@@ -105,7 +105,7 @@ export function SiteFooter() {
         </div>
 
         <div className="border-t border-gray-800 mt-10 pt-6 text-xs text-gray-600 flex flex-col sm:flex-row justify-between gap-2">
-          <p>© 2026 True Color Display Printing Ltd. All prices in CAD + GST.</p>
+          <p>© 2026 True Color Display Printing Ltd. All prices in CAD · GST added at checkout.</p>
           <p>
             <Link href="/privacy" className="hover:text-gray-400 transition-colors">Privacy</Link>
             {" · "}

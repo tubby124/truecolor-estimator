@@ -55,9 +55,6 @@ export default function CartPage() {
   }
 
   const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
-  const gstRate = items[0]?.gst_rate ?? 0.05;
-  const gst = Math.round(subtotal * gstRate * 100) / 100;
-  const total = subtotal + gst;
 
   if (!mounted)
     return (
@@ -140,7 +137,6 @@ export default function CartPage() {
                     <p className="font-bold text-[#1c1712]">
                       ${item.sell_price.toFixed(2)}
                     </p>
-                    <p className="text-xs text-gray-400">+ GST</p>
                   </div>
                   <button
                     onClick={() => handleRemove(item.id)}
@@ -155,18 +151,11 @@ export default function CartPage() {
 
             {/* Order total */}
             <div className="border-t border-gray-200 pt-6 mt-6 space-y-2">
-              <div className="flex justify-between text-sm text-gray-500">
+              <div className="flex justify-between font-bold text-[#1c1712] text-lg">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>GST ({Math.round(gstRate * 100)}%)</span>
-                <span>${gst.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-bold text-[#1c1712] text-lg pt-2">
-                <span>Total</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
+              <p className="text-xs text-gray-400">GST (5%) calculated at checkout</p>
             </div>
 
             {/* Checkout CTA */}
@@ -188,7 +177,7 @@ export default function CartPage() {
 
             {/* Trust note */}
             <p className="text-xs text-gray-400 text-center pt-2">
-              All prices in CAD + 5% GST · Pickup at 216 33rd St W, Saskatoon
+              All prices in CAD · GST added at checkout · Pickup at 216 33rd St W, Saskatoon
             </p>
           </div>
         )}

@@ -170,13 +170,13 @@ export function ProductPageClient({ product }: Props) {
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
         {/* Price summary */}
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-400 leading-none mb-0.5">Total incl. GST</p>
+          <p className="text-xs text-gray-400 leading-none mb-0.5">Price (before tax)</p>
           <SameDayClock className="text-[10px] text-[#16C2F3] flex items-center gap-1 mb-0.5" />
-          {priceData.loading && priceData.total == null ? (
+          {priceData.loading && priceData.price == null ? (
             <div className="h-6 w-24 bg-gray-100 rounded animate-pulse" />
-          ) : priceData.total != null ? (
+          ) : priceData.price != null ? (
             <p className={`text-xl font-bold text-[#1c1712] leading-none tabular-nums transition-opacity duration-200 ${priceData.loading ? "opacity-60" : "opacity-100"}`}>
-              ${priceData.total.toFixed(2)}
+              ${priceData.price.toFixed(2)}
             </p>
           ) : (
             <p className="text-sm text-gray-400 leading-none">Configure above</p>

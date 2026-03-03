@@ -168,17 +168,10 @@ export function PriceSummary({
                 </p>
               )}
 
-              {/* Divider */}
-              <div className="border-t border-gray-100 my-3 pt-1">
-                <div className="flex justify-between text-sm text-gray-400">
-                  <span>GST (5%)</span>
-                  <span className="tabular-nums">${gst?.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-base font-bold text-[#1c1712] mt-1">
-                  <span>Total</span>
-                  <span className="tabular-nums">${total?.toFixed(2)}</span>
-                </div>
-              </div>
+              {/* Tax note */}
+              <p className="text-xs text-gray-400 border-t border-gray-100 pt-3 mt-3">
+                + 5% GST added at checkout
+              </p>
             </motion.div>
             </AnimatePresence>
           )}
