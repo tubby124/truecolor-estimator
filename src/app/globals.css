@@ -38,6 +38,29 @@
 
   /* Price column — monospace for tabular alignment */
   --font-price: "SF Mono", "Fira Code", "Consolas", monospace;
+
+  /* ── Social Studio ───────────────────────────────────────────────────────── */
+  --social-bg: #0f1117;
+  --social-bg-card: #1a1d27;
+  --social-border: rgba(255,255,255,0.08);
+
+  /* Campaign colors */
+  --campaign-ramadan: #7c3aed;
+  --campaign-st-patricks: #16a34a;
+  --campaign-graduation: #4f46e5;
+  --campaign-easter: #ca8a04;
+  --campaign-mothers-day: #db2777;
+  --campaign-agriculture: #92400e;
+  --campaign-canada-day: #e63020;
+  --campaign-cfl: #16a34a;
+  --campaign-back-to-school: #2563eb;
+
+  /* Post status colors */
+  --status-draft: #9ca3af;
+  --status-ready: #3b82f6;
+  --status-posting: #f59e0b;
+  --status-posted: #10b981;
+  --status-failed: #ef4444;
 }
 
 @theme inline {
