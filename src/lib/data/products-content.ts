@@ -45,7 +45,6 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MPHCC020",
     heroImage: "/images/products/product/coroplast-yard-sign-800x600.webp",
     galleryImages: [
-      "/images/products/product/coroplast-yard-sign-800x600.webp",
       "/images/products/product/coroplast-job-site-800x600.webp",
       "/images/products/product/coroplast-fence-construction-800x600.webp",
       "/images/gallery/gallery-coroplast-realtor-keyshape.jpg",
@@ -116,12 +115,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RMBF004",
     heroImage: "/images/products/product/banner-vinyl-colorful-800x600.webp",
     galleryImages: [
-      "/images/products/product/banner-vinyl-colorful-800x600.webp",
       "/images/products/product/banner-13oz-1200x400.webp",
-      "/images/gallery/gallery-outdoor-banner-best-donairs.webp",
-      "/images/gallery/gallery-vinyl-banner-windshield-masters.webp",
-      "/images/gallery/gallery-banner-habesha-convenience.jpg",
-      "/images/gallery/gallery-banner-ericsson-5g.jpg",
+      "/images/gallery/gallery-banner-colorful-nails-spa.jpg",
+      "/images/gallery/gallery-banner-hello-warman-petshop.jpg",
+      "/images/gallery/gallery-banner-karuna-vitamin.jpg",
     ],
     defaultSides: 1,
     sideOptions: false,
@@ -185,7 +182,6 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MAG302437550M",
     heroImage: "/images/products/product/vehicle-magnets-800x600.webp",
     galleryImages: [
-      "/images/products/product/vehicle-magnets-800x600.webp",
       "/images/products/product/magnet-truck-construction-800x600.webp",
       "/images/gallery/gallery-vehicle-decal-windshield-masters.webp",
     ],
@@ -342,8 +338,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RMACP002",
     heroImage: "/images/products/product/acp-aluminum-sign-800x600.webp",
     galleryImages: [
-      "/images/products/product/acp-aluminum-sign-800x600.webp",
       "/images/products/product/acp-sign-brick-wall-800x600.webp",
+      "/images/gallery/gallery-acp-cargem-auto-sales.jpg",
+      "/images/gallery/gallery-acp-mia-casa-construction.jpg",
     ],
     defaultSides: 1,
     sideOptions: false,
@@ -878,7 +875,6 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RMPS002",
     heroImage: "/images/products/product/photo-posters-800x600.webp",
     galleryImages: [
-      "/images/products/product/photo-posters-800x600.webp",
       "/images/products/product/poster-framed-gallery-wall-800x600.webp",
       "/images/products/product/poster-landscape-framed-800x600.webp",
       "/images/products/product/poster-sports-team-800x600.webp",
