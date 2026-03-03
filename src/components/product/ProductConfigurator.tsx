@@ -97,6 +97,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [qty, setQty] = useState(product.qtyPresets[0]);
   const [customQty, setCustomQty] = useState("");
   const [isCustomQty, setIsCustomQty] = useState(false);
+  const [isCustomFlexSize, setIsCustomFlexSize] = useState(false);
+  const [customFlexW, setCustomFlexW] = useState("");
+  const [customFlexH, setCustomFlexH] = useState("");
   const [price, setPrice] = useState<number | null>(null);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -109,8 +112,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [minChargeApplied, setMinChargeApplied] = useState(false);
   const [minChargeValue, setMinChargeValue] = useState<number | null>(null);
 
-  const effectiveWidth = isCustom ? parseFloat(customW) || 0 : selectedSize.width_in;
-  const effectiveHeight = isCustom ? parseFloat(customH) || 0 : selectedSize.height_in;
+  const effectiveWidth = isCustomFlexSize ? parseFloat(customFlexW) || 0 : isCustom ? parseFloat(customW) || 0 : selectedSize.width_in;
+  const effectiveHeight = isCustomFlexSize ? parseFloat(customFlexH) || 0 : isCustom ? parseFloat(customH) || 0 : selectedSize.height_in;
   const effectiveQty = isCustomQty ? parseInt(customQty, 10) || product.qtyPresets[0] : qty;
 
   const addonTotal = product.addons
@@ -119,7 +122,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
 
   const effectiveMaterialCode = product.tierPresets
     ? product.tierPresets[selectedTier]?.material_code ?? product.material_code
-    : (!isCustom && selectedSize?.material_code)
+    : selectedSize?.material_code
       ? selectedSize.material_code
       : product.material_code;
 
@@ -184,10 +187,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   // Fire price fetch — debounced 300ms for custom inputs, immediate for presets
   useEffect(() => {
     if (!effectiveWidth || !effectiveHeight) return;
-    const delay = isCustom || isCustomQty ? 300 : 0;
+    const delay = isCustom || isCustomQty || isCustomFlexSize ? 300 : 0;
     const timer = setTimeout(fetchPrice, delay);
     return () => clearTimeout(timer);
-  }, [fetchPrice, isCustom, isCustomQty]);
+  }, [fetchPrice, isCustom, isCustomQty, isCustomFlexSize]);
 
   // Bubble price data to parent
   // NOTE: price is already the engine's sell_price including all addons — do NOT add addonTotal again
@@ -220,7 +223,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       addonQtys,
       designStatus,
       materialCode: effectiveMaterialCode ?? "",
-      sizeLabel: isCustom ? `${customW}″×${customH}″` : selectedSize.label,
+      sizeLabel: isCustomFlexSize ? `${customFlexW}″×${customFlexH}″` : isCustom ? `${customW}″×${customH}″` : selectedSize.label,
       sidesLabel: sides === 1 ? "Single-sided" : "Double-sided",
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -311,6 +314,71 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             </div>
           )}
           {isCustom && price === null && !loading && customW && customH && (
+            <p className="mt-2 text-xs text-gray-500">
+              Custom sizes are available —{" "}
+              <a href="tel:+13069548688" className="text-[#16C2F3] font-medium hover:underline">
+                call (306) 954-8688
+              </a>{" "}
+              or{" "}
+              <a href="/quote" className="text-[#16C2F3] font-medium hover:underline">
+                request a quote
+              </a>.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Flex size section — for products where sizePresets are repurposed (e.g. paper weight on flyers) */}
+      {product.showCustomSize && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Size</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setIsCustomFlexSize(false)}
+              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
+                !isCustomFlexSize
+                  ? "bg-[#1c1712] text-white border-[#1c1712]"
+                  : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+              }`}
+            >
+              Letter 8.5×11″
+            </button>
+            <button
+              onClick={() => setIsCustomFlexSize(true)}
+              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
+                isCustomFlexSize
+                  ? "bg-[#1c1712] text-white border-[#1c1712]"
+                  : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+              }`}
+            >
+              Custom
+            </button>
+          </div>
+          {isCustomFlexSize && (
+            <div className="flex gap-2 mt-3">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Width (inches)</label>
+                <input
+                  type="number"
+                  value={customFlexW}
+                  onChange={(e) => setCustomFlexW(e.target.value)}
+                  placeholder="e.g. 5.5"
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-28 focus:outline-none focus:border-[#16C2F3]"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Height (inches)</label>
+                <input
+                  type="number"
+                  value={customFlexH}
+                  onChange={(e) => setCustomFlexH(e.target.value)}
+                  placeholder="e.g. 8.5"
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-28 focus:outline-none focus:border-[#16C2F3]"
+                />
+              </div>
+            </div>
+          )}
+          {isCustomFlexSize && price === null && !loading && customFlexW && customFlexH && (
             <p className="mt-2 text-xs text-gray-500">
               Custom sizes are available —{" "}
               <a href="tel:+13069548688" className="text-[#16C2F3] font-medium hover:underline">

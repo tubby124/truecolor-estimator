@@ -23,6 +23,7 @@ export interface ProductContent {
   sideOptions: boolean; // show single/double toggle
   sizePresets: SizePreset[];
   sizeSectionLabel?: string; // overrides "Size" heading in configurator (e.g. "Paper Weight")
+  showCustomSize?: boolean; // show a separate Size section (for products where sizePresets are used for something else, e.g. paper weight)
   qtyPresets: number[];
   specs: { label: string; value: string }[];
   whoUsesThis: string[];
@@ -306,6 +307,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "100lb Gloss (premium)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_100LB" },
     ],
     sizeSectionLabel: "Paper Weight",
+    showCustomSize: true,
     qtyPresets: [100, 250, 500, 1000],
     specs: [
       { label: "Paper options", value: "80lb gloss text (standard) or 100lb gloss text (premium)" },
