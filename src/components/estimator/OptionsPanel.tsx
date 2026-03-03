@@ -46,7 +46,7 @@ const SQFT_QTY_PRESETS: Record<string, number[]> = {
 
 export function OptionsPanel({ category, state, onChange, categoryLabel }: Props) {
   const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING", "PHOTO_POSTER"].includes(category);
-  const showSides = ["SIGN", "FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD"].includes(category);
+  const showSides = ["SIGN", "BUSINESS_CARD"].includes(category);
   const showGrommets = category === "BANNER";
   const showHStake = category === "SIGN";
   const showQtyTier = QTY_TIERS[category] !== undefined;

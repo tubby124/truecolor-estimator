@@ -80,6 +80,8 @@ export default function StaffPage() {
       ...DEFAULT_STATE,
       material_code: MATERIAL_MAP[cat] ?? "",
       qty: ["FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD", "STICKER"].includes(cat) ? 250 : 1,
+      // Flyers, brochures, postcards are always double-sided — no 1S products exist in catalog
+      sides: ["FLYER", "BROCHURE", "POSTCARD"].includes(cat) ? 2 : DEFAULT_STATE.sides,
       // Retractable banners are always 33.5" × 80" — pre-fill so proof renders immediately
       ...(cat === "DISPLAY" ? { width_in: "33.5", height_in: "80" } : {}),
     });
