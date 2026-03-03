@@ -93,7 +93,10 @@ export function ComposeForm({ campaigns }: Props) {
   }
 
   async function handleSave(status: "draft" | "ready") {
-    if (!captionRaw.trim()) { showToast("Raw caption is required", "error"); return; }
+    if (!captionRaw.trim() && !captionInstagram.trim()) {
+      showToast("Write a caption or generate one with AI first", "error");
+      return;
+    }
     setSaving(true);
     try {
       const scheduleTimestamp = scheduleDate && !useNextFreeSlot
@@ -243,13 +246,15 @@ export function ComposeForm({ campaigns }: Props) {
             <StepCard key="2" title="Caption & AI Rewrite">
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-semibold text-[#1c1712] mb-1">Raw caption</label>
-                  <p className="text-xs text-gray-400 mb-2">Punchy. Price first. Saskatoon local. (e.g. "2×4ft banner from $66, ready in 48hrs. Order today.")</p>
+                  <label className="block text-sm font-semibold text-[#1c1712] mb-1">
+                    Notes / raw caption <span className="font-normal text-gray-400">(optional)</span>
+                  </label>
+                  <p className="text-xs text-gray-400 mb-2">Add notes or a rough caption — OR skip this and drop a photo below. AI will figure it out.</p>
                   <textarea
                     value={captionRaw}
                     onChange={e => setCaptionRaw(e.target.value)}
-                    rows={4}
-                    placeholder="2×4ft vinyl banner from $66. Ready in 48 hours. Saskatoon pickup or delivery. Order at truecolorprinting.ca"
+                    rows={3}
+                    placeholder="e.g. 2×4ft vinyl banner, green, for the St. Patrick's Day promo — $66"
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#e63020]/30 focus:border-[#e63020] resize-none"
                   />
                 </div>

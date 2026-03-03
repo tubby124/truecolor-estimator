@@ -103,8 +103,11 @@ export interface CreatePostBody {
 }
 
 export interface CaptionRewriteBody {
-  caption_raw: string;
+  caption_raw?: string;       // existing caption to rewrite (optional when image/topic provided)
   campaign_slug?: string;
+  image_base64?: string;      // base64-encoded image (no data:... prefix) for vision generation
+  image_type?: string;        // MIME type e.g. 'image/jpeg'
+  topic?: string;             // free-form topic when no caption and no image
 }
 
 export interface CaptionRewriteResponse {
