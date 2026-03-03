@@ -68,15 +68,20 @@ export function SiteNav() {
   const industriesTriggerRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns on outside click
+  // Close dropdowns on outside click/tap (mousedown for desktop, touchstart for mobile)
   useEffect(() => {
-    function handleMouseDown(e: MouseEvent) {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+    function handleOutside(e: MouseEvent | TouchEvent) {
+      const target = e instanceof TouchEvent ? e.touches[0]?.target : e.target;
+      if (navRef.current && !navRef.current.contains(target as Node)) {
         setOpenMenu(null);
       }
     }
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => document.removeEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
   }, []);
 
   // Lock body scroll when drawer is open

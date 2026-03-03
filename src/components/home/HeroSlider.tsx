@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -68,6 +68,8 @@ const SLIDE_WIDTH_PCT = 100 / SLIDES.length;
 export function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const next = useCallback(() => {
     setCurrent((i) => (i + 1) % SLIDES.length);
@@ -83,16 +85,38 @@ export function HeroSlider() {
     return () => clearInterval(timer);
   }, [paused, next]);
 
+  // Touch swipe handlers — horizontal swipe changes slide, vertical scroll is unaffected
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    // Only swipe if horizontal movement dominates (>40px) and not a scroll
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) next(); else prev();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }
+
   return (
     <section
       className="relative overflow-hidden bg-[#1c1712]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* Track — all slides side-by-side, spring-animated to reveal current */}
+      {/* Track — all slides side-by-side, spring-animated to reveal current.
+          touchAction:pan-y ensures vertical scrolling always works on mobile
+          and motion never intercepts scroll gestures on the hero area. */}
       <motion.div
         className="flex will-change-transform"
-        style={{ width: `${SLIDES.length * 100}%` }}
+        style={{ width: `${SLIDES.length * 100}%`, touchAction: "pan-y" }}
         animate={{ x: `-${current * SLIDE_WIDTH_PCT}%` }}
         transition={{ type: "spring", stiffness: 300, damping: 32, mass: 0.8 }}
       >

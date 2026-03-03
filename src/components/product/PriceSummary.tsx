@@ -191,11 +191,10 @@ export function PriceSummary({
         )}
 
         {/* Add to Cart */}
-        <motion.button
+        <button
           onClick={onAddToCart}
           disabled={!hasPrice || addedToCart || loading}
-          whileTap={hasPrice && !addedToCart && !loading ? { scale: 0.97 } : {}}
-          className={`w-full py-4 rounded-xl font-bold text-white text-base transition-all ${
+          className={`w-full py-4 rounded-xl font-bold text-white text-base transition-all active:scale-[0.97] ${
             addedToCart
               ? "bg-[#8CC63E] cursor-default"
               : !hasPrice || loading
@@ -204,7 +203,7 @@ export function PriceSummary({
           }`}
         >
           {addedToCart ? "✓ Added to Cart" : loading && hasPrice ? "Updating…" : "Add to Cart →"}
-        </motion.button>
+        </button>
 
         {/* Secondary CTA */}
         <a
