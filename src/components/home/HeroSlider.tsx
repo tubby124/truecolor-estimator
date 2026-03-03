@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 
 const SLIDES = [
   {
@@ -63,19 +63,20 @@ const SLIDES = [
   },
 ];
 
-const SLIDE_WIDTH_PCT = 100 / SLIDES.length;
-
 export function HeroSlider() {
   const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
   const [paused, setPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
   const next = useCallback(() => {
+    setDirection(1);
     setCurrent((i) => (i + 1) % SLIDES.length);
   }, []);
 
   const prev = useCallback(() => {
+    setDirection(-1);
     setCurrent((i) => (i - 1 + SLIDES.length) % SLIDES.length);
   }, []);
 
@@ -85,7 +86,7 @@ export function HeroSlider() {
     return () => clearInterval(timer);
   }, [paused, next]);
 
-  // Touch swipe handlers — horizontal swipe changes slide, vertical scroll is unaffected
+  // Touch swipe — horizontal swipe changes slide, vertical scroll unaffected
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -95,7 +96,6 @@ export function HeroSlider() {
     if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = e.changedTouches[0].clientY - touchStartY.current;
-    // Only swipe if horizontal movement dominates (>40px) and not a scroll
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
       if (dx < 0) next(); else prev();
     }
@@ -103,80 +103,81 @@ export function HeroSlider() {
     touchStartY.current = null;
   }
 
+  const slide = SLIDES[current];
+
   return (
     <section
-      className="relative overflow-hidden bg-[#1c1712]"
+      className="relative overflow-hidden bg-[#1c1712] min-h-[420px] md:min-h-[500px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Track — all slides side-by-side, spring-animated to reveal current.
-          touchAction:pan-y ensures vertical scrolling always works on mobile
-          and motion never intercepts scroll gestures on the hero area. */}
-      <motion.div
-        className="flex will-change-transform"
-        style={{ width: `${SLIDES.length * 100}%`, touchAction: "pan-y" }}
-        animate={{ x: `-${current * SLIDE_WIDTH_PCT}%` }}
-        transition={{ type: "spring", stiffness: 300, damping: 32, mass: 0.8 }}
-      >
-        {SLIDES.map((slide, i) => (
-          <div
-            key={i}
-            aria-hidden={i !== current}
-            style={{ width: `${SLIDE_WIDTH_PCT}%` }}
-            className="flex-shrink-0"
-          >
-            <div className="flex flex-col md:flex-row min-h-[420px] md:min-h-[500px]">
-              {/* Image side */}
-              <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-[#13100c] flex items-center justify-center overflow-hidden">
-                <Image
-                  src={slide.img}
-                  alt={slide.imgAlt}
-                  fill
-                  className="object-contain p-6 md:p-10"
-                  priority={i === 0}
-                  loading={i === 0 ? undefined : "lazy"}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
+      {/*
+        AnimatePresence: only 1–2 slides in the DOM at once.
+        Each slide is position:absolute + 100% wide — zero 600vw overflow.
+        The section's overflow:hidden clips entering/exiting slides.
+      */}
+      <AnimatePresence initial={false} custom={direction}>
+        <motion.div
+          key={current}
+          custom={direction}
+          variants={{
+            enter: (d: number) => ({ x: `${d * 100}%` }),
+            center: { x: 0 },
+            exit: (d: number) => ({ x: `${d * -100}%` }),
+          }}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ type: "spring", stiffness: 300, damping: 32, mass: 0.8 }}
+          className="absolute inset-0 flex flex-col md:flex-row"
+        >
+          {/* Image side */}
+          <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-[#13100c] flex items-center justify-center overflow-hidden">
+            <Image
+              src={slide.img}
+              alt={slide.imgAlt}
+              fill
+              className="object-contain p-6 md:p-10"
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
 
-              {/* Text side */}
-              <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-10 bg-[#1c1712]">
-                {/* Page H1 — only in first slide so there's exactly one H1 on the page */}
-                {i === 0 && (
-                  <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight mb-4">
-                    Price it. Proof it. Pick it up today.
-                  </h1>
-                )}
-                <h2 className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">
-                  {slide.accentWord}
-                </h2>
-                <p className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
-                  {slide.headline}
-                </p>
-                <p className="text-gray-300 text-base md:text-lg max-w-sm mb-8 leading-relaxed">
-                  {slide.sub}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    href={slide.ctaHref}
-                    className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base btn-shimmer"
-                  >
-                    {slide.cta}
-                  </Link>
-                  <a
-                    href="tel:+13069548688"
-                    className="border border-white/40 text-white font-semibold px-7 py-3.5 rounded-lg hover:border-white transition-colors text-base"
-                  >
-                    Call (306) 954-8688
-                  </a>
-                </div>
-              </div>
+          {/* Text side */}
+          <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-10 bg-[#1c1712]">
+            {current === 0 && (
+              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight mb-4">
+                Price it. Proof it. Pick it up today.
+              </h1>
+            )}
+            <h2 className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">
+              {slide.accentWord}
+            </h2>
+            <p className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
+              {slide.headline}
+            </p>
+            <p className="text-gray-300 text-base md:text-lg max-w-sm mb-8 leading-relaxed">
+              {slide.sub}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={slide.ctaHref}
+                className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base btn-shimmer"
+              >
+                {slide.cta}
+              </Link>
+              <a
+                href="tel:+13069548688"
+                className="border border-white/40 text-white font-semibold px-7 py-3.5 rounded-lg hover:border-white transition-colors text-base"
+              >
+                Call (306) 954-8688
+              </a>
             </div>
           </div>
-        ))}
-      </motion.div>
+        </motion.div>
+      </AnimatePresence>
 
       {/* Prev / Next arrows */}
       <button
@@ -194,7 +195,7 @@ export function HeroSlider() {
         <ChevronRight className="w-4 h-4" />
       </button>
 
-      {/* Slide progress bar — fills over 5s, resets on slide change */}
+      {/* Slide progress bar */}
       <div className="absolute bottom-0 left-0 right-0 z-20 h-1 bg-white/10">
         <div
           key={current}
