@@ -37,18 +37,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not read body" }, { status: 400 });
   }
 
-  // Verify HMAC-SHA256 signature from Wave
+  // Verify HMAC-SHA256 signature from Wave — fail-closed (require secret to be configured)
   const webhookSecret = process.env.WAVE_WEBHOOK_SECRET;
-  if (webhookSecret) {
-    const signature = req.headers.get("x-wave-signature") ?? "";
-    const expected =
-      "sha256=" +
-      createHmac("sha256", webhookSecret).update(bodyText).digest("hex");
+  if (!webhookSecret) {
+    console.error("[wave-webhook] WAVE_WEBHOOK_SECRET not configured — rejecting all webhook calls");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 401 });
+  }
 
-    if (!signature || signature !== expected) {
-      console.warn("[wave-webhook] Invalid or missing signature — possible spoofing attempt");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  const signature = req.headers.get("x-wave-signature") ?? "";
+  const expected =
+    "sha256=" +
+    createHmac("sha256", webhookSecret).update(bodyText).digest("hex");
+
+  if (!signature || signature !== expected) {
+    console.warn("[wave-webhook] Invalid or missing signature — possible spoofing attempt");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   let event: Record<string, unknown>;

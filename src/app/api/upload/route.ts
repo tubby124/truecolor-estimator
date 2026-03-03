@@ -17,6 +17,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 const MAX_FILE_SIZE = 52_428_800; // 50 MB
 
@@ -33,7 +34,16 @@ const ALLOWED_EXTENSIONS = /\.(pdf|ai|eps|jpg|jpeg|png|webp)$/i;
 
 export async function POST(req: NextRequest) {
   // No auth required — artwork upload is part of anonymous checkout flow.
-  // Protection: strict allowlist + UUID paths (see header comment above).
+  // Protection: strict allowlist + UUID paths + rate limit (see header comment above).
+
+  // Rate limit: 10 uploads per IP per minute (generous for normal use, blocks spam)
+  const ip = getClientIp(req);
+  if (!rateLimit(`upload:${ip}`, 10, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many upload requests. Please wait a moment and try again." },
+      { status: 429 }
+    );
+  }
 
   try {
     const form = await req.formData();

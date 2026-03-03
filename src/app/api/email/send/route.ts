@@ -47,9 +47,12 @@ export async function POST(req: Request) {
     const QR_CID = "qrcode@truecolor";
     if (includePaymentLink && process.env.PAYMENT_TOKEN_SECRET) {
       const sellPrice = quoteData.sell_price ?? 0;
-      const totalWithGst = Math.round(sellPrice * 1.05 * 100) / 100;
+      const designFee = quoteData.design_fee ?? 0;
+      const gst = Math.round(sellPrice * 0.05 * 100) / 100;
+      const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
+      const totalWithTax = Math.round((sellPrice + gst + pst) * 100) / 100;
       const description = `True Color Display Printing — ${jobDetails.categoryLabel}`;
-      const token = encodePaymentToken(totalWithGst, description, to);
+      const token = encodePaymentToken(totalWithTax, description, to);
       paymentUrl = `${siteUrl}/pay/${token}`;
       try {
         // Use toBuffer (not toDataURL) — data: URIs are stripped by Gmail and all major email clients
@@ -135,8 +138,10 @@ function buildPlainText({
   paymentUrl,
 }: Pick<SendQuoteRequest, "customerName" | "note" | "quoteData" | "jobDetails"> & { hasProofAttachment?: boolean; paymentUrl?: string }): string {
   const sellPrice = quoteData.sell_price ?? 0;
+  const designFee = quoteData.design_fee ?? 0;
   const gst = Math.round(sellPrice * 0.05 * 100) / 100;
-  const total = Math.round((sellPrice + gst) * 100) / 100;
+  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
+  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
   const greeting = customerName ? `Hi ${customerName},` : "Hello,";
 
   const lines = [
@@ -159,6 +164,7 @@ function buildPlainText({
     "",
     `Subtotal: $${sellPrice.toFixed(2)}`,
     `GST (5%): $${gst.toFixed(2)}`,
+    `PST (6%): $${pst.toFixed(2)}`,
     `TOTAL: $${total.toFixed(2)} CAD`,
     "",
     "This quote is valid for 30 days.",

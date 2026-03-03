@@ -13,6 +13,15 @@ import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
+const ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/postscript", // AI / EPS
+];
+const ALLOWED_EXTENSIONS = /\.(pdf|ai|eps|jpg|jpeg|png|webp)$/i;
+
 /** Escape HTML special characters to prevent injection in email templates */
 function esc(str: string): string {
   return str
@@ -70,6 +79,17 @@ export async function POST(req: NextRequest) {
         { error: `File too large — max 4 MB (received ${(file.size / 1024 / 1024).toFixed(1)} MB)` },
         { status: 400 }
       );
+    }
+
+    if (file && file.size > 0) {
+      const isAllowedMime = ALLOWED_MIME_TYPES.includes(file.type);
+      const isAllowedExt = ALLOWED_EXTENSIONS.test(file.name);
+      if (!isAllowedMime && !isAllowedExt) {
+        return NextResponse.json(
+          { error: "File type not allowed — use PDF, AI, EPS, JPG, PNG, or WebP" },
+          { status: 400 }
+        );
+      }
     }
 
     const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
