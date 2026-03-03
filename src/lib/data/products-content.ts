@@ -296,7 +296,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       "/images/gallery/gallery-flyers-boxed-marketing.jpg",
     ],
     defaultSides: 2,
-    sideOptions: true,
+    sideOptions: false, // All flyer products are 2S-only in CSV — no 1S variants exist
     sizePresets: [
       { label: "Letter (100)", width_in: 8.5, height_in: 11 },
     ],
@@ -306,7 +306,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Paper", value: "Pacesetter 80lb gloss text (FSC-certified)" },
       { label: "Print", value: "Full-colour digital (Konica Minolta press)" },
       { label: "Size", value: "Letter (8.5×11\") — other sizes available" },
-      { label: "Sides", value: "Single or double-sided" },
+      { label: "Sides", value: "Double-sided (front + back)" },
       { label: "Also available", value: "100lb gloss text for heavier feel" },
     ],
     whoUsesThis: ["Retail", "Events", "Non-Profits", "Healthcare", "Sports", "Agriculture"],
