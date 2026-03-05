@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>True Color — Local Citation Directory Listing Kit</title>
+  <style>
+    :root {
+      --brand-dark: #1c1712;
+      --brand-cyan: #16C2F3;
+      --brand-green: #8CC63E;
+      --brand-orange: #F97316;
+      --bg: #f5f5f0;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #1c1712;
+      --muted: #6b7280;
+      --done-bg: #f0fdf4;
+      --done-border: #bbf7d0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--brand-dark);
+      color: #fff;
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .header h1 { font-size: 1.5rem; font-weight: 800; }
+    .header h1 span { color: var(--brand-cyan); }
+    .header p { font-size: 0.85rem; color: #9ca3af; margin-top: 4px; }
+    .progress-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .progress-bar { width: 200px; height: 8px; background: #374151; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--brand-green); border-radius: 99px; transition: width 0.4s; }
+    .progress-text { font-size: 0.75rem; color: #9ca3af; }
+
+    /* ── NAP BANNER ── */
+    .nap-banner {
+      background: #fff;
+      border-bottom: 3px solid var(--brand-cyan);
+      padding: 20px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: center;
+    }
+    .nap-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brand-cyan); margin-bottom: 2px; }
+    .nap-value { font-size: 0.95rem; font-weight: 600; }
+    .nap-note { background: #fef9c3; border: 1px solid #fde047; border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; color: #713f12; max-width: 320px; }
+
+    /* ── MAIN LAYOUT ── */
+    .layout { display: flex; gap: 0; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: var(--brand-dark);
+      min-height: 100vh;
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; padding: 0 20px 12px; }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: #9ca3af;
+      font-size: 0.85rem;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-item:hover { background: rgba(255,255,255,0.06); color: #fff; border-left-color: var(--brand-cyan); }
+    .sidebar-item.done { color: var(--brand-green); }
+    .sidebar-item.done .sidebar-dot { background: var(--brand-green); }
+    .sidebar-dot { width: 8px; height: 8px; border-radius: 50%; background: #4b5563; flex-shrink: 0; }
+    .sidebar-priority { font-size: 0.65rem; background: var(--brand-orange); color: #fff; border-radius: 4px; padding: 1px 5px; font-weight: 700; margin-left: auto; }
+
+    /* ── CONTENT AREA ── */
+    .content { flex: 1; padding: 32px 40px; max-width: 900px; }
+
+    /* ── INTRO CARD ── */
+    .intro-card {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+    .intro-card h2 { font-size: 1rem; font-weight: 700; color: #1e40af; margin-bottom: 8px; }
+    .intro-card ul { padding-left: 18px; }
+    .intro-card li { font-size: 0.85rem; color: #1e3a8a; margin-bottom: 4px; }
+
+    /* ── DIRECTORY SECTION ── */
+    .dir-section { margin-bottom: 48px; scroll-margin-top: 20px; }
+    .dir-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+    .dir-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .dir-title-block h2 { font-size: 1.25rem; font-weight: 800; }
+    .dir-title-block .dir-url { font-size: 0.8rem; color: var(--brand-cyan); text-decoration: none; }
+    .dir-title-block .dir-url:hover { text-decoration: underline; }
+    .dir-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .tag-free { background: #dcfce7; color: #166534; }
+    .tag-paid { background: #fee2e2; color: #991b1b; }
+    .tag-important { background: #fef3c7; color: #92400e; }
+    .tag-high { background: #fce7f3; color: #9d174d; }
+    .done-badge {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .done-toggle {
+      appearance: none;
+      width: 40px;
+      height: 22px;
+      background: #d1d5db;
+      border-radius: 99px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+    }
+    .done-toggle:checked { background: var(--brand-green); }
+    .done-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: left 0.2s;
+    }
+    .done-toggle:checked::after { left: 21px; }
+
+    /* ── FIELDS ── */
+    .fields-grid { display: grid; gap: 16px; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-group.half { }
+    .fields-2col { grid-template-columns: 1fr 1fr; display: grid; gap: 16px; }
+    label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    label .required { color: #ef4444; }
+    label .optional { color: #9ca3af; font-weight: 400; font-style: italic; text-transform: none; letter-spacing: 0; }
+    .copy-field {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      background: #fafaf9;
+      color: var(--text);
+      resize: vertical;
+      transition: border-color 0.15s, background 0.15s;
+      line-height: 1.5;
+    }
+    .copy-field:focus { outline: none; border-color: var(--brand-cyan); background: #fff; }
+    .copy-row { display: flex; gap: 6px; }
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #f3f4f6;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--brand-cyan); color: #fff; border-color: var(--brand-cyan); }
+    .copy-btn.copied { background: var(--brand-green); color: #fff; border-color: var(--brand-green); }
+
+    /* ── INSTRUCTION BOX ── */
+    .instruction-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    .instruction-box h3 { font-size: 0.8rem; font-weight: 700; color: #92400e; margin-bottom: 8px; }
+    .instruction-box ol, .instruction-box ul { padding-left: 18px; }
+    .instruction-box li { font-size: 0.82rem; color: #78350f; margin-bottom: 4px; }
+    .instruction-box a { color: #b45309; }
+
+    /* ── CATEGORY BOX ── */
+    .category-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-top: 16px;
+    }
+    .category-box h3 { font-size: 0.8rem; font-weight: 700; color: #166534; margin-bottom: 8px; }
+    .category-path { font-size: 0.85rem; color: #15803d; font-weight: 500; font-family: monospace; }
+    .category-note { font-size: 0.78rem; color: #4b7c5a; margin-top: 4px; }
+
+    /* ── PHOTO CHECKLIST ── */
+    .photo-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .photo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.83rem;
+    }
+    .photo-item input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--brand-green); cursor: pointer; flex-shrink: 0; }
+    .photo-item .photo-path { font-family: monospace; font-size: 0.75rem; color: var(--brand-cyan); margin-left: auto; }
+
+    /* ── DIVIDER ── */
+    .section-divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+    /* ── HOURS TABLE ── */
+    .hours-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .hours-table td { padding: 6px 12px; border: 1px solid var(--border); }
+    .hours-table td:first-child { font-weight: 600; width: 120px; background: #f9fafb; }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--brand-dark); color: #6b7280; text-align: center; padding: 20px; font-size: 0.75rem; margin-top: 60px; }
+
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; min-height: auto; position: static; }
+      .content { padding: 20px; }
+      .fields-2col { grid-template-columns: 1fr; }
+      .nap-banner { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div>
+    <h1>True Color <span>Citation Kit</span></h1>
+    <p>Local directory listings — copy &amp; paste ready. Each section is pre-filled with your exact business info.</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-text" id="progressText">0 / 9 directories done</div>
+  </div>
+</div>
+
+<!-- ── NAP MASTER REFERENCE ── -->
+<div class="nap-banner">
+  <div>
+    <div class="nap-label">Business Name</div>
+    <div class="nap-value">True Color Display Printing Ltd.</div>
+  </div>
+  <div>
+    <div class="nap-label">Address</div>
+    <div class="nap-value">216 33rd St W, Saskatoon, SK S7L 0V5</div>
+  </div>
+  <div>
+    <div class="nap-label">Phone</div>
+    <div class="nap-value">(306) 954-8688</div>
+  </div>
+  <div>
+    <div class="nap-label">Website</div>
+    <div class="nap-value">https://truecolorprinting.ca</div>
+  </div>
+  <div class="nap-note">
+    ⚠️ <strong>Use the exact name/address/phone above on every listing.</strong> Even small variations (like "True Color Printing" without "Display") hurt local SEO rankings.
+  </div>
+</div>
+
+<!-- ── LAYOUT ── -->
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sidebar-title">9 Directories</div>
+    <a href="#bing" class="sidebar-item"><span class="sidebar-dot"></span>Bing Places<span class="sidebar-priority">HIGH</span></a>
+    <a href="#apple" class="sidebar-item"><span class="sidebar-dot"></span>Apple Maps<span class="sidebar-priority">HIGH</span></a>
+    <a href="#foursquare" class="sidebar-item"><span class="sidebar-dot"></span>Foursquare</a>
+    <a href="#yelp" class="sidebar-item"><span class="sidebar-dot"></span>Yelp Canada</a>
+    <a href="#yellowpages" class="sidebar-item"><span class="sidebar-dot"></span>Yellow Pages</a>
+    <a href="#canada411" class="sidebar-item"><span class="sidebar-dot"></span>Canada411</a>
+    <a href="#facebook" class="sidebar-item"><span class="sidebar-dot"></span>Facebook</a>
+    <a href="#linkedin" class="sidebar-item"><span class="sidebar-dot"></span>LinkedIn</a>
+    <a href="#chamber" class="sidebar-item"><span class="sidebar-dot"></span>SK Chamber</a>
+  </nav>
+
+  <!-- ── CONTENT ── -->
+  <div class="content">
+
+    <div class="intro-card">
+      <h2>📋 How to use this kit</h2>
+      <ul>
+        <li>Open each directory link → create or claim your business listing → paste the fields below.</li>
+        <li>Click any text box to select it, then <strong>Ctrl+A → Ctrl+C</strong> (or use the copy button) to copy.</li>
+        <li>Toggle the ✓ switch when a listing is done — progress bar updates automatically.</li>
+        <li><strong>Priority order:</strong> Bing → Apple → Foursquare → Yelp → Yellow Pages → Canada411 → Facebook → LinkedIn → Chamber.</li>
+        <li>Upload the <strong>same logo</strong> and <strong>same cover photo</strong> to every platform for brand consistency.</li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         1. BING PLACES
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="bing">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#0078D4;color:#fff;">🅱</div>
+        <div class="dir-title-block">
+          <h2>1. Bing Places for Business</h2>
+          <a href="https://www.bingplaces.com" target="_blank" class="dir-url">🔗 bingplaces.com → "Add or claim your business"</a>
+          <div class="dir-tags">
+            <span class="tag tag-free">Free</span>
+            <span class="tag tag-important">Feeds Cortana + Windows Maps + Bing Search</span>
+            <span class="tag tag-high">~15 min to claim</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="bing" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 How to claim on Bing Places</h3>
+        <ol>
+          <li>Go to <strong>bingplaces.com</strong> → click "Add new business" or search for "True Color Display Printing"</li>
+          <li>If a listing already exists, click "Claim" and verify via phone or postcard</li>
+          <li>Sign in with a Microsoft account (create free if needed)</li>
+          <li>Fill in all fields below — Bing rewards completeness with higher placement</li>
+          <li>Add at least <strong>5 photos</strong> for best results</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Business Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Phone Number <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Street Address <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">216 33rd St W</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>City <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">Saskatoon</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Province / Postal Code <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">SK  |  S7L 0V5</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Website URL <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Business Description <span class="required">*</span> <span class="optional">(max 500 chars)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="5">True Color Display Printing Ltd. is Saskatoon's full-service print shop offering vinyl banners, coroplast signs, ACP aluminum signs, vehicle magnets, business cards, flyers, retractable banners, and window decals. We have an in-house Photoshop designer on staff, instant online pricing, and same-day rush service. Order online at truecolorprinting.ca or visit us at 216 33rd St W.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-box">
+        <h3>🗂 Category to Select</h3>
+        <div class="category-path">Printing Service</div>
+        <div class="category-note">Bing also lets you add secondary categories — add: Sign Shop, Graphic Designer</div>
+      </div>
+
+      <div class="fields-grid" style="margin-top:16px;">
+        <div class="field-group">
+          <label>Business Hours</label>
+          <table class="hours-table">
+            <tr><td>Monday–Friday</td><td>9:00 AM – 5:30 PM</td></tr>
+            <tr><td>Saturday</td><td>Closed</td></tr>
+            <tr><td>Sunday</td><td>Closed</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         2. APPLE MAPS CONNECT
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="apple">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#000;color:#fff;">🍎</div>
+        <div class="dir-title-block">
+          <h2>2. Apple Maps Connect</h2>
+          <a href="https://mapsconnect.apple.com" target="_blank" class="dir-url">🔗 mapsconnect.apple.com</a>
+          <div class="dir-tags">
+            <span class="tag tag-free">Free</span>
+            <span class="tag tag-important">Powers Apple Maps + Siri</span>
+            <span class="tag tag-high">Requires Apple ID</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="apple" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 How to add on Apple Maps Connect</h3>
+        <ol>
+          <li>Go to <strong>mapsconnect.apple.com</strong> — sign in with any Apple ID</li>
+          <li>Click "Add a new place" or search for the business first</li>
+          <li>If it already exists (populated from other sources), click "Claim this place"</li>
+          <li>Verify ownership via phone call or SMS to <strong>(306) 954-8688</strong></li>
+          <li>Apple Maps is used by every iPhone by default — very high value listing</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Place Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Phone <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Address <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">216 33rd St W, Saskatoon, SK S7L 0V5</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Website <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Short Description <span class="optional">(shown in Maps)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="3">Full-service Saskatoon print shop — banners, signs, business cards, vehicle magnets, and more. In-house designer. Instant online pricing. Same-day rush available.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-box">
+        <h3>🗂 Category to Select</h3>
+        <div class="category-path">Printing &amp; Publishing → Printing Service</div>
+        <div class="category-note">Apple Maps uses a fixed category tree — scroll to "Printing Service" under Printing &amp; Publishing</div>
+      </div>
+
+      <div class="fields-grid" style="margin-top:16px;">
+        <div class="field-group">
+          <label>Business Hours</label>
+          <table class="hours-table">
+            <tr><td>Monday–Friday</td><td>9:00 AM – 5:30 PM</td></tr>
+            <tr><td>Saturday</td><td>Closed</td></tr>
+            <tr><td>Sunday</td><td>Closed</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         3. FOURSQUARE
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="foursquare">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#f94877;color:#fff;">4SQ</div>
+        <div class="dir-title-block">
+          <h2>3. Foursquare</h2>
+          <a href="https://foursquare.com/add-place" target="_blank" class="dir-url">🔗 foursquare.com/add-place</a>
+          <div class="dir-tags">
+            <span class="tag tag-free">Free</span>
+            <span class="tag tag-important">Feeds 50+ apps (Uber, Snapchat, TripAdvisor, etc.)</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="foursquare" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 Why Foursquare matters so much</h3>
+        <ol>
+          <li>Foursquare's Places database powers location data for <strong>Uber, Snapchat, Twitter/X, TripAdvisor, Samsung devices</strong> and 50+ other apps</li>
+          <li>One Foursquare listing = citations across all of them automatically</li>
+          <li>Go to <strong>foursquare.com/add-place</strong> → search first, then add if not found</li>
+          <li>Create a free Foursquare account if you don't have one</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Venue Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Phone <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Address <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">216 33rd St W, Saskatoon, SK S7L 0V5, Canada</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Website <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-box">
+        <h3>🗂 Category to Select</h3>
+        <div class="category-path">Professional &amp; Other Places → Professional Services → Print Shop</div>
+        <div class="category-note">Type "Print Shop" in the category search box — it appears in the Professional Services subcategory</div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         4. YELP CANADA
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="yelp">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#d32323;color:#fff;">★</div>
+        <div class="dir-title-block">
+          <h2>4. Yelp Canada</h2>
+          <a href="https://biz.yelp.ca" target="_blank" class="dir-url">🔗 biz.yelp.ca → "Add your business to Yelp"</a>
+          <div class="dir-tags">
+            <span class="tag tag-free">Free (paid upgrade available)</span>
+            <span class="tag tag-important">High DR + feeds Bing</span>
+            <span class="tag tag-high">Most fields visible to public</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="yelp" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 Yelp setup tips</h3>
+        <ol>
+          <li>Go to <strong>biz.yelp.ca</strong> → "Manage my free listing" or "Add your business"</li>
+          <li>Yelp often already has a stub — search first and claim it if so</li>
+          <li>Fill in ALL 4 description sections (Specialties, History, Meet the Business Owner) — each one indexes separately</li>
+          <li>Skip paid ads — the free listing is all you need for citations</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Business Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Phone <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Street Address <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">216 33rd St W</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>City <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">Saskatoon</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Province / Postal Code <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">SK  /  S7L 0V5</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Website <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Specialties <span class="required">*</span> <span class="optional">(what you do best — most visible section)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="7">We specialize in large-format printing for Saskatoon businesses: vinyl banners, coroplast yard signs, ACP aluminum signs, vehicle magnets, retractable banners, window decals, and perforated window film. We also print business cards, flyers, postcards, brochures, and photo posters.
+
+What makes us different: we have a full-time in-house Photoshop designer who builds graphics from scratch, modifies your existing files, or does minor edits — all for a flat design fee. Same-day rush printing available. Instant pricing online at truecolorprinting.ca.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>History of the Business <span class="optional">(optional but helps SEO)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="4">True Color Display Printing Ltd. was established in Saskatoon, SK and has been proudly serving local businesses, organizations, and individuals with high-quality large-format and commercial printing. Located at 216 33rd St W, we've built our reputation on fast turnarounds, fair pricing, and keeping everything in-house.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Meet the Business Owner <span class="optional">(personal touch — boosts trust)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="3">Hi! We're the team at True Color Display Printing. We take pride in every job — whether it's 1 sign or 500 flyers. Our in-house designer means you get professional results without the agency price tag. Stop in, call, or order online anytime.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-box">
+        <h3>🗂 Categories to Select (Yelp allows up to 3)</h3>
+        <div class="category-path">Primary: Printing Services</div>
+        <div class="category-path">Secondary: Signmaking</div>
+        <div class="category-path">Tertiary: Graphic Design</div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         5. YELLOW PAGES CANADA
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="yellowpages">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#FFD700;color:#000;">YP</div>
+        <div class="dir-title-block">
+          <h2>5. Yellow Pages Canada</h2>
+          <a href="https://www.yellowpages.ca/bus/addlisting.html" target="_blank" class="dir-url">🔗 yellowpages.ca → "Add a listing"</a>
+          <div class="dir-tags">
+            <span class="tag tag-free">Free basic / Paid enhanced</span>
+            <span class="tag tag-important">Major Canadian citation source</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="yellowpages" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 Yellow Pages Canada tips</h3>
+        <ol>
+          <li>Go to <strong>yellowpages.ca</strong> → search "True Color Display Printing Saskatoon" first</li>
+          <li>If a listing exists, look for "Is this your business? Claim it" link</li>
+          <li>If not found, click "Add a listing" in the footer</li>
+          <li>Free listing includes name, address, phone, website — enough for citation value</li>
+          <li>Skip the paid "Featured" upgrade — not worth it at this stage</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Business Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Phone <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Address <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">216 33rd St W, Saskatoon, SK S7L 0V5</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Website <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Business Description <span class="optional">(max 300 chars on free plan)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="4">Full-service print shop in Saskatoon. Vinyl banners, coroplast signs, ACP signs, vehicle magnets, business cards, flyers, and more. In-house Photoshop designer. Instant online pricing. Same-day rush available.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Services List <span class="optional">(enter one per line if prompted)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="8">Vinyl Banner Printing
+Coroplast Sign Printing
+ACP Aluminum Sign Printing
+Vehicle Magnet Printing
+Business Card Printing
+Flyer Printing
+Retractable Banner Printing
+Window Decal Printing
+Graphic Design
+Large Format Printing</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-box">
+        <h3>🗂 Category to Select</h3>
+        <div class="category-path">Primary: Printers</div>
+        <div class="category-path">Secondary: Signs (if allowed)</div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         6. CANADA411
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="canada411">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#003087;color:#fff;">411</div>
+        <div class="dir-title-block">
+          <h2>6. Canada411</h2>
+          <a href="https://www.canada411.ca" target="_blank" class="dir-url">🔗 canada411.ca → Search your business → "Suggest an edit"</a>
+          <div class="dir-tags">
+            <span class="tag tag-free">Free</span>
+            <span class="tag tag-important">Major Canadian phone directory</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="canada411" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 Canada411 tips</h3>
+        <ol>
+          <li>Canada411 is owned by Yellow Pages Group — listings are often auto-generated from phone records</li>
+          <li>Search <strong>canada411.ca</strong> for "True Color Display Printing Saskatoon" first</li>
+          <li>If found, click "Suggest an edit" to correct/verify the info</li>
+          <li>If not found, you can submit a new listing via the help/contact form</li>
+          <li>Minimal fields — just NAP + website is enough here</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Business Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Phone <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Full Address <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">216 33rd St W, Saskatoon, SK S7L 0V5</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Website <span class="optional">(if field is available)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Category / Business Type</label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">Printers</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         7. FACEBOOK BUSINESS PAGE
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="facebook">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#1877F2;color:#fff;">f</div>
+        <div class="dir-title-block">
+          <h2>7. Facebook Business Page</h2>
+          <a href="https://www.facebook.com/pages/create" target="_blank" class="dir-url">🔗 facebook.com/pages/create</a>
+          <div class="dir-tags">
+            <span class="tag tag-free">Free</span>
+            <span class="tag tag-important">Indexed by Google + Bing</span>
+            <span class="tag tag-high">Social proof + customer messaging</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="facebook" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 Facebook Page setup steps</h3>
+        <ol>
+          <li>Go to <strong>facebook.com/pages/create</strong> → choose "Business or Brand"</li>
+          <li>Page name = exact business name (no keywords stuffed in)</li>
+          <li>Choose category: <strong>Printing Service</strong> — start typing and it will appear</li>
+          <li>After creating: go to Page Settings → Page Info → fill in ALL fields below</li>
+          <li>Set a custom username (URL): <strong>@TrueColorPrinting</strong></li>
+          <li>Upload logo as profile photo (square crop) + a shop/work photo as cover</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Page Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Username (Page URL) <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">TrueColorPrinting</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Address <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">216 33rd St W, Saskatoon, SK S7L 0V5, Canada</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Phone <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Website <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Short Description <span class="required">*</span> <span class="optional">(max 255 chars — shown under page name)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="3">Saskatoon's full-service print shop — vinyl banners, signs, vehicle magnets, business cards, flyers & more. In-house designer. Instant online pricing. Same-day rush.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Long Description / About <span class="optional">(in "About" tab — up to 50,000 chars)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="10">True Color Display Printing Ltd. is Saskatoon's go-to full-service print shop for businesses and organizations of every size.
+
+We print everything your business needs:
+• Vinyl Banners (13oz indoor/outdoor)
+• Coroplast Yard Signs (4mm)
+• ACP Aluminum Signs (3mm)
+• Vehicle Magnets (30mil)
+• Retractable Banners
+• Window Decals &amp; Perforated Window Film
+• Business Cards (14pt gloss)
+• Flyers &amp; Postcards
+• Brochures
+• Photo Posters &amp; Large Format Prints
+• Stickers &amp; Labels
+• Magnet Calendars
+
+What sets us apart:
+✓ Full-time in-house Photoshop designer — we build from scratch or modify your files
+✓ Instant online pricing at truecolorprinting.ca — no waiting for quotes
+✓ Same-day rush printing available (rush fee applies)
+✓ Beats Staples and FedEx on price
+✓ Local Saskatoon business — order online, pick up at 216 33rd St W
+
+Order online or give us a call at (306) 954-8688. We'd love to print for you.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Email <span class="optional">(shown on page info)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">info@true-color.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-box">
+        <h3>🗂 Categories to Select (Facebook allows 3)</h3>
+        <div class="category-path">Primary: Printing Service</div>
+        <div class="category-path">Secondary: Sign Shop</div>
+        <div class="category-path">Tertiary: Graphic Designer</div>
+      </div>
+
+      <div class="fields-grid" style="margin-top:16px;">
+        <div class="field-group">
+          <label>Business Hours</label>
+          <table class="hours-table">
+            <tr><td>Monday–Friday</td><td>9:00 AM – 5:30 PM</td></tr>
+            <tr><td>Saturday</td><td>Closed</td></tr>
+            <tr><td>Sunday</td><td>Closed</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="fields-grid">
+          <div class="field-group">
+            <label>Photos to Upload</label>
+            <div class="photo-list">
+              <div class="photo-item"><input type="checkbox" /><span>Profile photo — True Color logo (square, white background)</span><span class="photo-path">GBP_UPLOAD/images/</span></div>
+              <div class="photo-item"><input type="checkbox" /><span>Cover photo — shop interior or banner examples (820×312px)</span></div>
+              <div class="photo-item"><input type="checkbox" /><span>3–5 product photos from the website gallery</span><span class="photo-path">public/images/gallery/</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         8. LINKEDIN COMPANY PAGE
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="linkedin">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#0A66C2;color:#fff;">in</div>
+        <div class="dir-title-block">
+          <h2>8. LinkedIn Company Page</h2>
+          <a href="https://www.linkedin.com/company/setup/new/" target="_blank" class="dir-url">🔗 linkedin.com/company/setup/new</a>
+          <div class="dir-tags">
+            <span class="tag tag-free">Free</span>
+            <span class="tag tag-important">Strong domain authority — ranks fast in Google</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="linkedin" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 LinkedIn Company Page tips</h3>
+        <ol>
+          <li>Sign in to LinkedIn with a personal account → click "Work" icon → "Create a Company Page"</li>
+          <li>LinkedIn ranks well in Google for "[Business Name] Saskatoon" searches — high value citation</li>
+          <li>Set the custom URL to <strong>linkedin.com/company/truecolordisplayprinting</strong></li>
+          <li>Upload the square logo — LinkedIn shows it prominently in search results</li>
+          <li>No need to post regularly — just a complete profile is enough for citation value</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Company Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>LinkedIn Public URL <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">truecolordisplayprinting</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Website <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Tagline <span class="optional">(max 120 chars — shown under company name)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="2">Saskatoon's full-service print shop. Banners, signs, business cards & more. Instant online pricing. In-house designer.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>About / Description <span class="required">*</span> <span class="optional">(max 2,000 chars)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="10">True Color Display Printing Ltd. is a full-service print shop based in Saskatoon, Saskatchewan, serving local businesses, organizations, and individuals since our founding.
+
+We specialize in large-format and commercial printing including:
+• Vinyl banners (indoor/outdoor, 13oz material)
+• Coroplast yard signs and hoarding panels
+• ACP (aluminum composite panel) signs
+• Vehicle magnets and door signs
+• Retractable banners and trade show displays
+• Window decals and perforated window vinyl
+• Business cards, flyers, postcards, and brochures
+• Photo posters and large-format prints
+• Stickers and magnet calendars
+
+Our differentiator: a full-time in-house Photoshop graphic designer who can build your design from scratch, vectorize logos, or make quick edits — all at a flat rate.
+
+We offer instant online pricing at truecolorprinting.ca with same-day rush service available. Local pickup at 216 33rd St W, Saskatoon.
+
+Industry served: Retail, construction, real estate, healthcare, restaurants, non-profits, agriculture, events, and more.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Industry <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">Printing</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Company Size <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">1–10 employees</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Company Type <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">Privately Held</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Location <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">Saskatoon, Saskatchewan, Canada</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Phone <span class="optional">(in contact info section)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         9. SASKATOON / SK CHAMBER OF COMMERCE
+    ══════════════════════════════════════════════════════════ -->
+    <section class="dir-section" id="chamber">
+      <div class="dir-header">
+        <div class="dir-logo" style="background:#2d4a8a;color:#fff;">🏛</div>
+        <div class="dir-title-block">
+          <h2>9. Saskatoon Chamber of Commerce</h2>
+          <a href="https://www.saskatoonchamber.com/membership" target="_blank" class="dir-url">🔗 saskatoonchamber.com/membership</a>
+          <div class="dir-tags">
+            <span class="tag tag-paid">Paid (~$350–$650/yr)</span>
+            <span class="tag tag-important">High-authority local backlink</span>
+            <span class="tag tag-high">Best for local credibility</span>
+          </div>
+        </div>
+        <label class="done-badge"><input type="checkbox" class="done-toggle" data-dir="chamber" /> Done</label>
+      </div>
+
+      <div class="instruction-box">
+        <h3>📌 Chamber of Commerce — is it worth it?</h3>
+        <ol>
+          <li><strong>Yes</strong> — the Saskatoon Chamber member directory is a high-authority local citation (.com domain with strong local trust)</li>
+          <li>Membership also gives networking access + a Saskatchewan business directory listing</li>
+          <li>Cost: approximately $350–$650/year depending on membership tier</li>
+          <li>Call <strong>(306) 244-2151</strong> or email <strong>chamber@saskatoonchamber.com</strong> to ask about the "Small Business" tier</li>
+          <li>The directory backlink alone is worth ~3–4 months of organic citation building</li>
+        </ol>
+      </div>
+
+      <div class="fields-grid">
+        <div class="fields-2col">
+          <div class="field-group">
+            <label>Business Name <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">True Color Display Printing Ltd.</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Phone <span class="required">*</span></label>
+            <div class="copy-row">
+              <textarea class="copy-field" rows="1">(306) 954-8688</textarea>
+              <button class="copy-btn" onclick="copyField(this)">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Address <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">216 33rd St W, Saskatoon, SK S7L 0V5</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Website <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">https://truecolorprinting.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Email <span class="required">*</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">info@true-color.ca</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Business Description <span class="optional">(for directory listing)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="5">True Color Display Printing Ltd. is a full-service Saskatoon print shop specializing in vinyl banners, coroplast signs, ACP aluminum signs, vehicle magnets, business cards, flyers, retractable banners, window decals, and large-format printing. We feature an in-house Photoshop designer, instant online pricing at truecolorprinting.ca, and same-day rush service.</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Industry / Category</label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">Printing &amp; Publishing</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Contact Person Name <span class="optional">(for membership application)</span></label>
+          <div class="copy-row">
+            <textarea class="copy-field" rows="1">True Color Display Printing — Owner</textarea>
+            <button class="copy-btn" onclick="copyField(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         BONUS: QUICK ACTIONS
+    ══════════════════════════════════════════════════════════ -->
+    <div class="section-divider"></div>
+
+    <div class="intro-card" style="background:#f5f3ff;border-color:#ddd6fe;">
+      <h2 style="color:#5b21b6;">⚡ Bonus: 3 more quick wins after the 9 above</h2>
+      <ul>
+        <li><strong>Better Business Bureau (bbb.org):</strong> Free Canadian listing. Adds trust signal. Search for the business first — may already have a stub.</li>
+        <li><strong>Hotfrog Canada (hotfrog.ca):</strong> Free, ~5 min. Aggregated by BrightLocal and Moz Local. Good for citation coverage.</li>
+        <li><strong>Cylex Canada (ca.cylex.ca):</strong> Free. Another aggregator that feeds smaller local data networks. Takes 2 min.</li>
+      </ul>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<div class="footer">
+  True Color Display Printing Ltd. — Local Citation Kit — Generated 2026-03-03 | truecolorprinting.ca
+</div>
+
+<script>
+  // ── Copy button logic ──
+  function copyField(btn) {
+    const textarea = btn.previousElementSibling;
+    textarea.select();
+    try {
+      navigator.clipboard.writeText(textarea.value).then(() => {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    } catch {
+      document.execCommand('copy');
+      btn.textContent = '✓ Copied';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+  }
+
+  // ── Progress bar ──
+  const toggles = document.querySelectorAll('.done-toggle');
+  const STORAGE_KEY = 'tc_citations_done';
+
+  function updateProgress() {
+    const checked = document.querySelectorAll('.done-toggle:checked').length;
+    const total = toggles.length;
+    const pct = Math.round((checked / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = checked + ' / ' + total + ' directories done';
+  }
+
+  // Load saved state
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    toggles.forEach(toggle => {
+      const dir = toggle.dataset.dir;
+      if (saved[dir]) {
+        toggle.checked = true;
+        toggle.closest('.dir-section').style.opacity = '0.6';
+        const sidebarItem = document.querySelector('.sidebar-item[href="#' + dir + '"]');
+        if (sidebarItem) {
+          sidebarItem.classList.add('done');
+          sidebarItem.querySelector('.sidebar-dot').style.background = '#8CC63E';
+        }
+      }
+    });
+  } catch(e) {}
+  updateProgress();
+
+  // Save on change
+  toggles.forEach(toggle => {
+    toggle.addEventListener('change', () => {
+      const dir = toggle.dataset.dir;
+      const section = toggle.closest('.dir-section');
+      const sidebarItem = document.querySelector('.sidebar-item[href="#' + dir + '"]');
+
+      if (toggle.checked) {
+        section.style.opacity = '0.6';
+        if (sidebarItem) {
+          sidebarItem.classList.add('done');
+          sidebarItem.querySelector('.sidebar-dot').style.background = '#8CC63E';
+        }
+      } else {
+        section.style.opacity = '1';
+        if (sidebarItem) {
+          sidebarItem.classList.remove('done');
+          sidebarItem.querySelector('.sidebar-dot').style.background = '#4b5563';
+        }
+      }
+
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        saved[dir] = toggle.checked;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      } catch(e) {}
+
+      updateProgress();
+    });
+  });
+</script>
+</body>
+</html>
