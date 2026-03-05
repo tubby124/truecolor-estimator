@@ -31,12 +31,14 @@ async function getData() {
   }
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+function StatCard({ label, value, sub, accent }: { label: string; value: string | number; sub?: string; accent?: string }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 shadow-sm">
-      <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{label}</p>
-      <p className="text-2xl font-black text-[#1c1712] mt-1 leading-tight">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    <div className="bg-[#1c1712] rounded-2xl px-5 py-4 flex flex-col justify-between min-h-[88px]">
+      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{label}</p>
+      <div>
+        <p className="text-2xl font-black leading-tight" style={{ color: accent ?? "#ffffff" }}>{value}</p>
+        {sub && <p className="text-[11px] text-white/30 mt-0.5">{sub}</p>}
+      </div>
     </div>
   );
 }
@@ -89,12 +91,12 @@ export default async function SocialDashboardPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-black text-[#1c1712]">Command Center</h1>
-            <p className="text-sm text-gray-400 mt-0.5">All campaigns · every channel · one view</p>
+            <h1 className="text-xl font-black text-[#1c1712] tracking-tight">Command Center</h1>
+            <p className="text-xs text-gray-400 mt-0.5 uppercase tracking-widest font-medium">All campaigns · every channel · one view</p>
           </div>
           <Link
             href="/staff/social/compose"
-            className="flex items-center gap-2 bg-[#e63020] text-white text-sm font-bold px-4 py-2.5 rounded-lg hover:bg-[#c8281a] transition-colors"
+            className="flex items-center gap-2 bg-[#e63020] text-white text-sm font-black px-5 py-2.5 rounded-xl hover:bg-[#c8281a] transition-colors shadow-sm"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -106,14 +108,15 @@ export default async function SocialDashboardPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Stats bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard label="Posts in queue" value={totalInQueue} />
-          <StatCard label="Posting this week" value={postingThisWeek} />
-          <StatCard label="Active campaigns" value={activeCampaigns} />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatCard label="Posts in queue" value={totalInQueue} accent="#e63020" />
+          <StatCard label="Posting this week" value={postingThisWeek} accent="#fbbf24" />
+          <StatCard label="Active campaigns" value={activeCampaigns} accent="#34d399" />
           <StatCard
             label="Last posted"
             value={lastPosted?.posted_at ? timeAgo(lastPosted.posted_at) : "—"}
             sub={!lastPosted ? "No posts yet" : undefined}
+            accent="#94a3b8"
           />
         </div>
 
@@ -135,7 +138,9 @@ export default async function SocialDashboardPage() {
             {/* In-progress first */}
             {enriched.filter((c: SocialCampaign) => c.status === "in-progress").length > 0 && (
               <section>
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Active</h2>
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />Active
+              </h2>
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {enriched
                     .filter((c: SocialCampaign) => c.status === "in-progress")
@@ -149,7 +154,9 @@ export default async function SocialDashboardPage() {
             {/* Planned */}
             {enriched.filter((c: SocialCampaign) => c.status === "planned").length > 0 && (
               <section>
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Upcoming</h2>
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-gray-300" />Upcoming
+              </h2>
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {enriched
                     .filter((c: SocialCampaign) => c.status === "planned")
@@ -163,7 +170,9 @@ export default async function SocialDashboardPage() {
             {/* Complete / Archived */}
             {enriched.filter((c: SocialCampaign) => c.status === "complete" || c.status === "archived").length > 0 && (
               <section>
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Completed</h2>
+                <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-400" />Completed
+              </h2>
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {enriched
                     .filter((c: SocialCampaign) => c.status === "complete" || c.status === "archived")

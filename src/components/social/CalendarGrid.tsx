@@ -81,34 +81,36 @@ export function CalendarGrid({ initialPosts, campaigns }: Props) {
       <div className="bg-white border-b border-gray-200 px-6 py-5">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-black text-[#1c1712]">Content Calendar</h1>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <h1 className="text-xl font-black text-[#1c1712] tracking-tight">Content Calendar</h1>
+            <p className="text-[10px] text-gray-400 mt-0.5 uppercase tracking-widest font-medium">
               {MONTHS[month]} {year} · {posts.length} post{posts.length !== 1 ? "s" : ""}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={goToday}
-              className="text-sm font-semibold text-gray-500 hover:text-[#1c1712] px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="text-xs font-bold text-gray-500 hover:text-[#1c1712] px-3 py-2 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200"
             >
               Today
             </button>
-            <button onClick={prevMonth} className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-[#1c1712]">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-            <span className="text-sm font-bold text-[#1c1712] min-w-28 text-center">
-              {MONTHS[month]} {year}
-            </span>
-            <button onClick={nextMonth} className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-[#1c1712]">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
+            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+              <button onClick={prevMonth} className="p-2 hover:bg-gray-100 transition-colors text-gray-500 hover:text-[#1c1712] border-r border-gray-200">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <span className="text-xs font-black text-[#1c1712] min-w-28 text-center px-2">
+                {MONTHS[month]} {year}
+              </span>
+              <button onClick={nextMonth} className="p-2 hover:bg-gray-100 transition-colors text-gray-500 hover:text-[#1c1712] border-l border-gray-200">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
             <Link
               href="/staff/social/compose"
-              className="flex items-center gap-1.5 bg-[#e63020] text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-[#c8281a] transition-colors ml-2"
+              className="flex items-center gap-1.5 bg-[#e63020] text-white text-xs font-black px-4 py-2.5 rounded-xl hover:bg-[#c8281a] transition-colors shadow-sm ml-1"
             >
               + Post
             </Link>
@@ -140,9 +142,9 @@ export function CalendarGrid({ initialPosts, campaigns }: Props) {
           className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
         >
           {/* Day headers */}
-          <div className="grid grid-cols-7 border-b border-gray-200">
+          <div className="grid grid-cols-7 border-b border-gray-100 bg-[#1c1712]">
             {DAYS.map(d => (
-              <div key={d} className="py-3 text-center text-xs font-bold text-gray-400 uppercase tracking-wide">
+              <div key={d} className="py-3 text-center text-[10px] font-black text-white/40 uppercase tracking-widest">
                 {d}
               </div>
             ))}

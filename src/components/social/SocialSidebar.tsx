@@ -102,8 +102,8 @@ export function SocialSidebar() {
               transition={{ duration: 0.18 }}
               className="min-w-0 overflow-hidden"
             >
-              <p className="text-white text-sm font-bold leading-tight whitespace-nowrap">Social Studio</p>
-              <p className="text-white/40 text-xs leading-tight whitespace-nowrap">True Color</p>
+              <p className="text-white text-sm font-black leading-tight whitespace-nowrap tracking-tight">Social Studio</p>
+              <p className="text-[#e63020] text-[10px] font-bold leading-tight whitespace-nowrap uppercase tracking-widest">True Color</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -120,8 +120,8 @@ export function SocialSidebar() {
               onClick={() => setMobileOpen(false)}
               title={!showLabels ? item.label : undefined}
               className={`
-                group relative flex items-center gap-3 rounded-lg text-sm font-medium
-                min-h-[44px] transition-colors duration-150
+                group relative flex items-center gap-3 rounded-xl text-xs font-bold
+                min-h-[44px] transition-all duration-150
                 ${showLabels ? "px-3" : "px-0 justify-center"}
                 ${active
                   ? "bg-[#e63020]/15 text-[#e63020]"

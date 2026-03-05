@@ -9,8 +9,7 @@ function formatDate(d: string | null | undefined) {
   return new Date(d + "T00:00:00").toLocaleDateString("en-CA", { month: "short", day: "numeric" });
 }
 
-function buildProgress(campaign: SocialCampaign & { post_count?: number; posts_ready?: number; posts_posted?: number }) {
-  // 5 channels: email, landing, ig posts (3), gbp posts (2)
+function buildProgress(campaign: SocialCampaign & { post_count?: number }) {
   let done = 0;
   const total = 5;
   if (campaign.brevo_campaign_ids?.length > 0) done++;
@@ -23,10 +22,12 @@ function buildProgress(campaign: SocialCampaign & { post_count?: number; posts_r
   return Math.round((done / total) * 100);
 }
 
-function CampaignStatusDot({ status }: { status: string }) {
-  const color = status === "in-progress" ? "bg-amber-400" : status === "complete" ? "bg-green-500" : status === "archived" ? "bg-gray-400" : "bg-gray-300";
-  return <span className={`w-2 h-2 rounded-full flex-shrink-0 ${color}`} />;
-}
+const STATUS_LABEL: Record<string, { label: string; dot: string }> = {
+  "in-progress": { label: "In Progress", dot: "bg-amber-400" },
+  "planned":     { label: "Planned",     dot: "bg-gray-300" },
+  "complete":    { label: "Complete",    dot: "bg-green-500" },
+  "archived":    { label: "Archived",    dot: "bg-gray-400" },
+};
 
 interface Props {
   campaign: SocialCampaign & { post_count?: number; posts_ready?: number; posts_posted?: number };
@@ -40,138 +41,128 @@ export function CampaignCard({ campaign, index }: Props) {
   const gbpDone = campaign.gbp_posts_done ?? 0;
   const gbpTotal = campaign.gbp_posts_total ?? 2;
   const breCount = campaign.brevo_campaign_ids?.length ?? 0;
-
-  const breevoUrl = `https://app.brevo.com/email-campaign/`;
   const landingUrl = campaign.landing_page_slug ? `https://truecolorprinting.ca/${campaign.landing_page_slug}` : null;
+  const statusCfg = STATUS_LABEL[campaign.status] ?? { label: campaign.status, dot: "bg-gray-300" };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.3 }}
-      className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+      transition={{ delay: index * 0.04, duration: 0.28 }}
+      className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all group"
+      style={{ borderLeftColor: campaign.campaign_color, borderLeftWidth: 4 }}
     >
-      {/* Header strip with campaign color */}
-      <div className="h-1" style={{ backgroundColor: campaign.campaign_color }} />
-
       <div className="p-5">
         {/* Title row */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-3 h-3 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: campaign.campaign_color }} />
-            <div className="min-w-0">
-              <h3 className="text-sm font-bold text-[#1c1712] leading-tight truncate">{campaign.name}</h3>
-              <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
-                <CampaignStatusDot status={campaign.status} />
-                {campaign.status.replace("-", " ")}
-                {campaign.event_date && (
-                  <>
-                    <span className="text-gray-300">·</span>
-                    <span>Event: {formatDate(campaign.event_date)}</span>
-                  </>
-                )}
-              </p>
+        <div className="flex items-start justify-between gap-3 mb-1">
+          <div className="min-w-0">
+            <h3 className="text-sm font-black text-[#1c1712] leading-tight">{campaign.name}</h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
+              <span className="text-xs text-gray-400">{statusCfg.label}</span>
+              {campaign.event_date && (
+                <>
+                  <span className="text-gray-300 text-xs">·</span>
+                  <span className="text-xs text-gray-400">{formatDate(campaign.event_date)}</span>
+                </>
+              )}
             </div>
           </div>
           <Link
             href={`/staff/social/compose?campaign=${campaign.slug}`}
-            className="flex-shrink-0 text-xs font-semibold text-[#e63020] bg-[#e63020]/8 hover:bg-[#e63020]/15 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+            className="flex-shrink-0 text-xs font-bold text-[#e63020] border border-[#e63020]/30 hover:bg-[#e63020] hover:text-white px-3 py-1.5 rounded-lg transition-all whitespace-nowrap"
           >
             + Post
           </Link>
         </div>
 
-        {/* Progress bar */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] text-gray-400 font-medium">Campaign build</span>
-            <span className="text-[11px] font-bold" style={{ color: campaign.campaign_color }}>{progress}%</span>
+        {/* Progress */}
+        <div className="mt-4 mb-4">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Build progress</span>
+            <span className="text-xs font-black" style={{ color: campaign.campaign_color }}>{progress}%</span>
           </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${progress}%`, backgroundColor: campaign.campaign_color }}
+          <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.8, delay: index * 0.04 + 0.2 }}
+              className="h-full rounded-full"
+              style={{ backgroundColor: campaign.campaign_color }}
             />
           </div>
         </div>
 
-        {/* Channel rows */}
-        <div className="space-y-2">
+        {/* Channel grid */}
+        <div className="grid grid-cols-2 gap-2">
           {/* Email */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-base leading-none">📧</span>
-            <span className="text-gray-500 w-16 flex-shrink-0">Email</span>
-            {breCount > 0 ? (
-              <a
-                href={breevoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                {breCount} campaign{breCount !== 1 ? "s" : ""}
-                {campaign.lead_count > 0 && <span className="text-gray-400 font-normal"> · {campaign.lead_count} leads</span>}
-              </a>
-            ) : (
-              <span className="text-gray-300">No campaigns yet</span>
-            )}
-          </div>
+          <ChannelChip
+            label="Email"
+            done={breCount > 0}
+            href="https://app.brevo.com/email-campaign/"
+            doneText={`${breCount} campaign${breCount !== 1 ? "s" : ""}${campaign.lead_count > 0 ? ` · ${campaign.lead_count} leads` : ""}`}
+            emptyText="No campaigns"
+          />
 
-          {/* Landing page */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-base leading-none">🌐</span>
-            <span className="text-gray-500 w-16 flex-shrink-0">Landing</span>
-            {landingUrl ? (
-              <a
-                href={landingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-green-600 hover:text-green-700 font-medium"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                /{campaign.landing_page_slug}
-              </a>
-            ) : (
-              <span className="text-gray-300">No landing page</span>
-            )}
-          </div>
+          {/* Landing */}
+          <ChannelChip
+            label="Landing"
+            done={!!landingUrl}
+            href={landingUrl ?? undefined}
+            doneText={`/${campaign.landing_page_slug}`}
+            emptyText="No page"
+          />
 
-          {/* Instagram posts */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-base leading-none">📸</span>
-            <span className="text-gray-500 w-16 flex-shrink-0">Instagram</span>
-            <Link
-              href={`/staff/social/queue?campaign=${campaign.id}`}
-              className="flex items-center gap-1.5 hover:underline"
-            >
-              <span className="flex gap-0.5">
-                {Array.from({ length: igTarget }).map((_, i) => (
-                  <span key={i} className={`w-2 h-2 rounded-full ${i < igCount ? "bg-[#E1306C]" : "bg-gray-200"}`} />
-                ))}
-              </span>
-              <span className={igCount === 0 ? "text-gray-300" : "text-gray-600 font-medium"}>
-                {igCount}/{igTarget} in queue
-              </span>
+          {/* Instagram */}
+          <div className="flex flex-col gap-1 bg-gray-50 rounded-xl px-3 py-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Instagram</span>
+              <span className={`text-[10px] font-bold ${igCount > 0 ? "text-[#E1306C]" : "text-gray-300"}`}>{igCount}/{igTarget}</span>
+            </div>
+            <Link href={`/staff/social/queue?campaign=${campaign.id}`} className="flex gap-1 hover:opacity-75 transition-opacity">
+              {Array.from({ length: igTarget }).map((_, i) => (
+                <span key={i} className={`flex-1 h-1.5 rounded-full transition-colors ${i < igCount ? "bg-[#E1306C]" : "bg-gray-200"}`} />
+              ))}
             </Link>
           </div>
 
           {/* GBP */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-base leading-none">🗺️</span>
-            <span className="text-gray-500 w-16 flex-shrink-0">GBP</span>
-            <span className="flex items-center gap-1.5">
-              <span className="flex gap-0.5">
-                {Array.from({ length: gbpTotal }).map((_, i) => (
-                  <span key={i} className={`w-2 h-2 rounded-full ${i < gbpDone ? "bg-amber-500" : "bg-gray-200"}`} />
-                ))}
-              </span>
-              <span className={gbpDone === 0 ? "text-gray-300" : "text-gray-600 font-medium"}>
-                {gbpDone}/{gbpTotal} posted
-              </span>
-            </span>
+          <div className="flex flex-col gap-1 bg-gray-50 rounded-xl px-3 py-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">GBP</span>
+              <span className={`text-[10px] font-bold ${gbpDone > 0 ? "text-amber-500" : "text-gray-300"}`}>{gbpDone}/{gbpTotal}</span>
+            </div>
+            <div className="flex gap-1">
+              {Array.from({ length: gbpTotal }).map((_, i) => (
+                <span key={i} className={`flex-1 h-1.5 rounded-full transition-colors ${i < gbpDone ? "bg-amber-400" : "bg-gray-200"}`} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
     </motion.div>
   );
+}
+
+function ChannelChip({
+  label, done, href, doneText, emptyText,
+}: {
+  label: string;
+  done: boolean;
+  href?: string;
+  doneText: string;
+  emptyText: string;
+}) {
+  const inner = (
+    <div className={`flex flex-col gap-0.5 rounded-xl px-3 py-2.5 transition-colors ${done ? "bg-green-50 hover:bg-green-100" : "bg-gray-50"}`}>
+      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</span>
+      <span className={`text-xs font-semibold truncate ${done ? "text-green-700" : "text-gray-300"}`}>
+        {done ? doneText : emptyText}
+      </span>
+    </div>
+  );
+  if (done && href) {
+    return <a href={href} target="_blank" rel="noopener noreferrer" className="block">{inner}</a>;
+  }
+  return inner;
 }
