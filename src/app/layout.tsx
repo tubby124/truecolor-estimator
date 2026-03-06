@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     title: "True Color",
   },
   description:
-    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $40. In-house designer, local Saskatoon pickup at 216 33rd St W. See your exact price online — no quote forms.",
+    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer, local Saskatoon pickup at 216 33rd St W. See your exact price online — no quote forms.",
   metadataBase: new URL("https://truecolorprinting.ca"),
   openGraph: {
     title: "True Color Display Printing | Saskatoon",

@@ -179,7 +179,7 @@ export function HeroSlider() {
           <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-10 bg-[#1c1712]">
             {current === 0 && (
               <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight mb-4">
-                Price it. Proof it. Pick it up today.
+                Saskatoon Print Shop — Price it. Proof it. Pick it up today.
               </h1>
             )}
             <h2 className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">

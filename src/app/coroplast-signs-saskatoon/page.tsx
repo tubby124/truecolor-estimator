@@ -92,7 +92,7 @@ export default function CoroplastSignsSaskatoonPage() {
         },
         {
           q: "What file format do you need?",
-          a: "PDF or JPG at 150 dpi minimum. If you only have a Word doc or phone photo, our in-house designer can prep it for print — typically $35–$50 depending on complexity.",
+          a: "PDF or JPG at 150 dpi minimum. If you only have a Word doc or phone photo, our in-house designer can prep it for print — $35 flat, same-day proof.",
         },
         {
           q: "Do realtors use True Color for listing signs?",
