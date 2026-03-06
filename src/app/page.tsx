@@ -207,60 +207,62 @@ export default function HomePage() {
       {/* ── HERO SLIDER ──────────────────────────────────────────────────────── */}
       <HeroSlider />
 
-      {/* ── LOCAL SHOP ───────────────────────────────────────────────────────── */}
-      <LocalShopSection />
-
       {/* ── TURNAROUND BAR ───────────────────────────────────────────────────── */}
-      <section className="bg-[#16C2F3] py-4">
-        <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-white">
-          <div>
-            <Link href="/same-day-printing-saskatoon" className="block hover:opacity-90 transition-opacity">
-              <p className="font-bold text-base">Same-Day Available</p>
-              <p className="text-sm opacity-90">In by noon, ready by 5 PM</p>
-            </Link>
+      <section className="bg-[#0f1d2a] py-3.5">
+        <div className="max-w-4xl mx-auto px-6 flex flex-wrap items-center justify-center divide-x divide-white/20">
+          <Link href="/same-day-printing-saskatoon" className="flex items-center gap-2 px-5 py-1 text-white hover:opacity-80 transition-opacity">
+            <svg className="w-4 h-4 text-[#16C2F3] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+              <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-sm font-semibold">Same-Day Available</span>
             <SameDayClock />
+          </Link>
+          <div className="flex items-center gap-2 px-5 py-1 text-white">
+            <svg className="w-4 h-4 text-[#16C2F3] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm font-semibold">1–3 Day Standard</span>
           </div>
-          <div>
-            <p className="font-bold text-base">Next-Day Standard</p>
-            <p className="text-sm opacity-90">On all products, every time</p>
-          </div>
-          <div>
-            <Link href="/quote" className="block hover:opacity-90 transition-opacity">
-              <p className="font-bold text-base">Rush: +$40 Flat</p>
-              <p className="text-sm opacity-90">Need it in hours? We do that.</p>
-            </Link>
-          </div>
+          <Link href="/quote" className="flex items-center gap-2 px-5 py-1 text-white hover:opacity-80 transition-opacity">
+            <svg className="w-4 h-4 text-[#16C2F3] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            <span className="text-sm font-semibold">Rush +$40 Flat</span>
+          </Link>
         </div>
       </section>
 
       {/* ── TRUST STRIP ──────────────────────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-100 px-6 py-5">
-        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-5 md:gap-10 text-sm text-gray-500">
-          <span className="reveal-section flex items-center gap-2 whitespace-nowrap">
-            <svg className="w-4 h-4 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 24 24">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            <span>5.0 stars · 27 reviews</span>
-          </span>
-          <span className="reveal-section delay-1 flex items-center gap-2 whitespace-nowrap">
-            <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-            </svg>
-            <span>Pickup at 216 33rd St W</span>
-          </span>
-          <span className="reveal-section delay-2 flex items-center gap-2 whitespace-nowrap">
-            <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-            </svg>
-            <span>In-house designer</span>
-          </span>
-          <span className="reveal-section delay-3 flex items-center gap-2 whitespace-nowrap">
-            <svg className="w-4 h-4 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
-            <span>Live prices — no back-and-forth</span>
-          </span>
+      <section className="bg-white border-b border-gray-100 px-6 py-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="border border-gray-100 rounded-2xl shadow-sm px-8 py-5 flex flex-wrap items-center justify-center gap-6 md:gap-10 text-sm text-gray-500">
+            <span className="reveal-section flex items-center gap-2.5 whitespace-nowrap">
+              <svg className="w-5 h-5 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span className="font-medium text-gray-700">5.0 stars · 27 reviews</span>
+            </span>
+            <span className="reveal-section delay-1 flex items-center gap-2.5 whitespace-nowrap">
+              <svg className="w-5 h-5 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+              <span className="font-medium text-gray-700">Pickup at 216 33rd St W</span>
+            </span>
+            <span className="reveal-section delay-2 flex items-center gap-2.5 whitespace-nowrap">
+              <svg className="w-5 h-5 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+              <span className="font-medium text-gray-700">In-house designer · $35 flat</span>
+            </span>
+            <span className="reveal-section delay-3 flex items-center gap-2.5 whitespace-nowrap">
+              <svg className="w-5 h-5 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+              <span className="font-medium text-gray-700">Live prices — no back-and-forth</span>
+            </span>
+          </div>
         </div>
       </section>
 
@@ -268,6 +270,9 @@ export default function HomePage() {
       <div className="reveal-section">
         <ReviewsSection />
       </div>
+
+      {/* ── LOCAL SHOP ───────────────────────────────────────────────────────── */}
+      <LocalShopSection />
 
       {/* ── PRODUCT GRID ─────────────────────────────────────────────────────── */}
       <section className="reveal-section px-6 py-16 max-w-6xl mx-auto">
@@ -281,7 +286,7 @@ export default function HomePage() {
             <Link
               key={p.name}
               href={p.href}
-              className="group border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-all hover:border-[#16C2F3]/40"
+              className="group border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl hover:border-transparent hover:ring-1 hover:ring-[#16C2F3]/30 transition-all duration-200"
             >
               <div className="relative h-48 bg-gray-50 overflow-hidden">
                 <Image
@@ -291,7 +296,7 @@ export default function HomePage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
-                <span className="absolute top-3 left-3 z-10 bg-[#1c1712]/80 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                <span className="absolute top-3 left-3 z-10 bg-white/90 text-[#1c1712] text-xs font-semibold px-2.5 py-1 rounded-full">
                   {p.category}
                 </span>
               </div>
@@ -304,7 +309,7 @@ export default function HomePage() {
                 </div>
                 <p className="text-sm text-gray-500 leading-relaxed">{p.desc}</p>
                 <div className="mt-4">
-                  <span className="inline-flex items-center gap-1 bg-[#16C2F3] text-white text-xs font-bold px-3.5 py-1.5 rounded-full group-hover:bg-[#0fb0dd] transition-colors">
+                  <span className="text-sm font-semibold text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
                     See exact price →
                   </span>
                 </div>
@@ -433,22 +438,22 @@ export default function HomePage() {
       <section className="reveal-section py-10 bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
-            <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">
+            <p className="text-3xl font-black text-[#1c1712]">
               <StatCounter target={500} suffix="+" />
             </p>
-            <p className="text-sm text-gray-500 mt-1">Businesses Served</p>
+            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Businesses Served</p>
           </div>
           <div>
-            <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">5.0★</p>
-            <p className="text-sm text-gray-500 mt-1">Google Rating</p>
+            <p className="text-3xl font-black text-[#1c1712]">5.0★</p>
+            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Google Rating</p>
           </div>
           <div>
-            <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">Same-Day</p>
-            <p className="text-sm text-gray-500 mt-1">Turnaround Available</p>
+            <p className="text-3xl font-black text-[#1c1712]">1–3 days</p>
+            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Standard Turnaround</p>
           </div>
           <div>
-            <p className="text-2xl md:text-3xl font-bold text-[#16C2F3]">Local</p>
-            <p className="text-sm text-gray-500 mt-1">Saskatoon SK</p>
+            <p className="text-3xl font-black text-[#1c1712]">$35</p>
+            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">In-House Design</p>
           </div>
         </div>
       </section>
@@ -456,7 +461,7 @@ export default function HomePage() {
       {/* ── PITCH BLOCK — Hormozi style ───────────────────────────────────────── */}
       <section className="reveal-section px-6 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-8 leading-tight">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-8 leading-[1.15] tracking-tight">
             Cheaper than Staples.<br />
             Faster than waiting 7 days.<br />
             Bring us anything.
@@ -490,7 +495,7 @@ export default function HomePage() {
           </div>
 
           {/* Pull quote */}
-          <blockquote className="border-l-4 border-[#16C2F3] pl-6 py-2 mb-10">
+          <blockquote className="border-l-4 border-[#e63020] pl-6 py-2 mb-10">
             <p className="text-xl font-semibold text-[#1c1712]">
               &ldquo;Send the file Friday. Pick it up Saturday. Done.&rdquo;
             </p>
@@ -498,7 +503,7 @@ export default function HomePage() {
 
           <Link
             href="/quote"
-            className="inline-block bg-[#16C2F3] text-white font-bold text-lg px-8 py-4 rounded-md hover:bg-[#0fb0dd] transition-colors btn-shimmer"
+            className="inline-block bg-[#16C2F3] text-white font-bold text-lg px-10 py-4 rounded-full hover:bg-[#0fb0dd] transition-colors btn-shimmer"
           >
             Get My Exact Price →
           </Link>

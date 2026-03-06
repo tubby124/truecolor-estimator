@@ -215,7 +215,7 @@ export function SiteNav() {
                 onKeyDown={(e) => handleTriggerKeyDown(e, "products")}
                 aria-haspopup="true"
                 aria-expanded={openMenu === "products"}
-                className="flex items-center gap-1 text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+                className="flex items-center gap-1 text-sm text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md transition-colors"
               >
                 Products
                 <svg
@@ -266,7 +266,7 @@ export function SiteNav() {
                 onKeyDown={(e) => handleTriggerKeyDown(e, "industries")}
                 aria-haspopup="true"
                 aria-expanded={openMenu === "industries"}
-                className="flex items-center gap-1 text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+                className="flex items-center gap-1 text-sm text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md transition-colors"
               >
                 Industries
                 <svg
@@ -303,7 +303,7 @@ export function SiteNav() {
             {/* Services — plain link */}
             <Link
               href="/services"
-              className="text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+              className="text-sm text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md transition-colors"
             >
               Services
             </Link>
@@ -311,7 +311,7 @@ export function SiteNav() {
             {/* About — plain link */}
             <Link
               href="/about"
-              className="text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+              className="text-sm text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md transition-colors"
             >
               About
             </Link>
@@ -319,7 +319,7 @@ export function SiteNav() {
             {/* Our Work — plain link */}
             <Link
               href="/gallery"
-              className="text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+              className="text-sm text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md transition-colors"
             >
               Our Work
             </Link>
@@ -327,31 +327,19 @@ export function SiteNav() {
             {/* Resources — plain link */}
             <Link
               href="/resources"
-              className="text-sm text-gray-300 hover:text-white px-3 py-2 rounded-md transition-colors"
+              className="text-sm text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md transition-colors"
             >
               Resources
             </Link>
           </nav>
 
-          {/* Right side: phone + icons + CTAs + hamburger */}
+          {/* Right side: icons + CTA + hamburger */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <a
-              href="tel:+13069548688"
-              className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
-            >
-              (306) 954-8688
-            </a>
             <AccountIcon />
             <CartIcon />
             <span className="hidden sm:block">
               <StaffQuoteButton />
             </span>
-            <button
-              onClick={() => setQuoteOpen(true)}
-              className="border border-white/30 text-white text-sm font-medium px-4 py-2 rounded-md hover:border-white transition-colors whitespace-nowrap hidden sm:block"
-            >
-              Custom Quote
-            </button>
             <Link
               href="/quote"
               className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden sm:block"

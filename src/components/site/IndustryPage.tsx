@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
@@ -110,7 +111,7 @@ export function IndustryPage({
           priority
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 px-6 py-8 max-w-3xl">
           <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-2">
             {title}
@@ -141,7 +142,7 @@ export function IndustryPage({
               <Link
                 key={p.slug}
                 href={`/products/${p.slug}`}
-                className="group border border-gray-100 rounded-xl p-5 hover:border-[#16C2F3] hover:shadow-md transition-all"
+                className="group border border-gray-100 rounded-xl p-5 hover:shadow-xl hover:border-transparent hover:ring-1 hover:ring-[#16C2F3]/30 transition-all duration-200"
               >
                 <p className="font-bold text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
                   {p.name}
@@ -163,7 +164,7 @@ export function IndustryPage({
           <ul className="space-y-3">
             {whyPoints.map((point) => (
               <li key={point} className="flex items-start gap-3 text-gray-700">
-                <span className="text-[#16C2F3] font-bold shrink-0 mt-0.5">✓</span>
+                <Check className="w-4 h-4 text-[#e63020] shrink-0 mt-1" strokeWidth={2.5} />
                 <span>{point}</span>
               </li>
             ))}
@@ -188,12 +189,23 @@ export function IndustryPage({
           <h2 className="text-2xl font-bold text-[#1c1712] mb-6">
             Frequently asked
           </h2>
-          <div className="space-y-6 max-w-2xl">
+          <div className="max-w-2xl">
             {faqs.map((faq) => (
-              <div key={faq.q} className="border-b border-gray-100 pb-6">
-                <p className="font-semibold text-[#1c1712] mb-2">{faq.q}</p>
-                <p className="text-gray-600 text-sm leading-relaxed">{faq.a}</p>
-              </div>
+              <details key={faq.q} className="border-b border-gray-100 group">
+                <summary className="flex items-center justify-between py-5 cursor-pointer font-semibold text-[#1c1712] list-none">
+                  <span className="pr-4">{faq.q}</span>
+                  <svg
+                    className="w-4 h-4 text-gray-400 shrink-0 group-open:rotate-180 transition-transform duration-200"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <p className="pb-5 text-gray-600 text-sm leading-relaxed">{faq.a}</p>
+              </details>
             ))}
           </div>
         </div>
