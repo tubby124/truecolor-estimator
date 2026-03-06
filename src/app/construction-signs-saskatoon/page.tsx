@@ -107,7 +107,7 @@ export default function ConstructionPage() {
         },
         {
           q: "Can I order just 1 pair of truck magnets?",
-          a: "Yes — no minimum beyond 1 magnet. Most Saskatoon contractors order pairs (driver + passenger door). 30mil magnets are rated for highway speeds. Size affects price — a 12×18\" pair is $45–60, a 12×24\" pair is $60–80. Bring your logo file or we can design from scratch.",
+          a: "Yes — order in pairs (driver + passenger door). 30mil magnets are rated for highway speeds. Size affects price — a 12×18\" pair is $45–60, a 12×24\" pair is $60–80. Bring your logo file or we can design from scratch.",
         },
         {
           q: "Do you print safety signs for Saskatoon construction sites?",

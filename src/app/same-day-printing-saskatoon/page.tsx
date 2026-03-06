@@ -68,7 +68,7 @@ export default function SameDayPrintingSaskatoonPage() {
             and local businesses who need reliable same-day turnaround without the inflated
             pricing of big-box stores. A standard 4×8 coroplast sign is $232 — $272 with the
             $40 rush fee. A 2×6 vinyl banner runs $90 standard, $130 same-day. No hidden
-            costs, no minimum orders, no waiting in a queue behind out-of-town jobs.
+            costs, no waiting in a queue behind out-of-town jobs.
             We&apos;re a local Saskatoon print shop and your order always comes first. See our{" "}
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               coroplast sign pricing

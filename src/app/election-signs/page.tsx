@@ -37,7 +37,7 @@ export default function ElectionSignsPage() {
             </Link>{" "}
             printed, staked, and distributed before your opponent does. True Color Display Printing
             handles election sign runs from 10 signs to 500+, with volume pricing that kicks in
-            automatically — no corporate account, no broker markup, no minimum spend.
+            automatically — no corporate account, no broker markup. Minimum order is $30.
           </p>
           <p className="text-gray-600 leading-relaxed">
             Our Roland UV printer produces consistent, vibrant colour across every sign in your run.

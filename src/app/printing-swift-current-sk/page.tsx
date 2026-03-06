@@ -49,7 +49,7 @@ export default function PrintingSwiftCurrentPage() {
             from $24/sqft for service trucks, delivery vehicles, and ag equipment.
             ACP aluminum signs from $13/sqft for permanent facility and yard signage
             that lasts 10+ years in southwest SK conditions. Business cards 250 for $40.
-            Volume pricing on all orders — no account, no minimum spend.
+            Volume pricing on all orders — no account required. Minimum order $30.
           </p>
           <p className="text-gray-600 leading-relaxed">
             To order for Swift Current delivery: call (306) 954-8688 or submit your quote at
@@ -95,7 +95,7 @@ export default function PrintingSwiftCurrentPage() {
         },
         {
           q: "What's the minimum order for Swift Current?",
-          a: "No minimum order. You can order 1 sign. Volume discounts apply automatically at higher sqft: coroplast drops from $8 to $7.25/sqft as your order grows. There's no penalty for small orders.",
+          a: "Minimum order is $30. A single 24×36\" coroplast sign at $48 clears the minimum on its own. Volume discounts apply automatically at higher sqft — coroplast drops from $8 to $7.25/sqft as your order grows.",
         },
         {
           q: "Is there a local print shop in Swift Current that competes with your prices?",
