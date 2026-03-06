@@ -97,7 +97,7 @@ export default function RamadanEidBannersPage() {
               </div>
               <div>
                 <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/flyer-sponsorship.png" alt="Sponsorship layout flyer for Ramadan charity iftar — gold tiers" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/ramadan/flyer-sponsorship.webp" alt="Sponsorship layout flyer for Ramadan charity iftar — gold tiers" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Sponsorship Layout</p>
                 <p className="text-xs text-gray-500 mt-0.5">Gold/cream, tiered sponsor grid — charity iftars, mosque fundraisers</p>
@@ -112,14 +112,14 @@ export default function RamadanEidBannersPage() {
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 max-w-md">
               <div>
                 <div className="relative aspect-[3/8] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/retractable-welcome.png" alt="Welcome display retractable banner stand for Ramadan Iftar Night" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
+                  <Image src="/images/seasonal/ramadan/retractable-welcome.webp" alt="Welcome display retractable banner stand for Ramadan Iftar Night" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Welcome Display</p>
                 <p className="text-xs text-gray-500 mt-0.5">Mosque entrances, event registration desks</p>
               </div>
               <div>
                 <div className="relative aspect-[3/8] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/retractable-sponsor-wall.png" alt="Sponsor recognition wall retractable banner for Ramadan charity gala" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
+                  <Image src="/images/seasonal/ramadan/retractable-sponsor-wall.webp" alt="Sponsor recognition wall retractable banner for Ramadan charity gala" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Sponsor Wall</p>
                 <p className="text-xs text-gray-500 mt-0.5">Charity galas, mosque fundraisers</p>

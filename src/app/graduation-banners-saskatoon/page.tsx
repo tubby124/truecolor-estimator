@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description:
       "Vinyl graduation banners, foam board displays & retractable stands for Saskatoon schools and venues. Banners from $90. Same-day rush available.",
     url: "https://truecolorprinting.ca/graduation-banners-saskatoon",
-    images: [{ url: "/images/seasonal/graduation/hero.png", width: 1200, height: 500 }],
+    images: [{ url: "/images/seasonal/graduation/hero.webp", width: 1200, height: 500 }],
     type: "website",
   },
 };
@@ -33,7 +33,7 @@ export default function GraduationBannersPage() {
       primaryProductSlug="vinyl-banners"
       title="Graduation Banners Saskatoon"
       subtitle="Vinyl banners, foam board photo displays, and retractable stands for Saskatoon schools, universities, and event venues — don't risk a shipping delay before grad day."
-      heroImage="/images/seasonal/graduation/hero.png"
+      heroImage="/images/seasonal/graduation/hero.webp"
       heroAlt="Graduation banners and foam board photo displays printed in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces vinyl graduation banners, foam board photo displays, and retractable banner stands for Saskatoon schools, universities, and event venues. We serve all levels — elementary and high school graduation ceremonies, university and college convocation events, and private graduation parties. A 2×6 ft grad banner is $90 + GST. A 4×8 ft convocation banner is $240 + GST. Foam board display panels from $10/sqft. Retractable banner stand complete from $219 + GST. Standard turnaround: 1–3 business days from artwork approval. Same-day rush: +$40 flat, order before 10 AM. In-house Roland UV printer. Local pickup at 216 33rd St W, Saskatoon, Saskatchewan."
       descriptionNode={
@@ -54,14 +54,14 @@ export default function GraduationBannersPage() {
             <div className="grid grid-cols-2 gap-4 max-w-lg">
               <div>
                 <div className="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-[#f8f4ef] mb-3">
-                  <Image src="/images/seasonal/graduation/banner-school-colors.png" alt="Graduation banner in blue and gold school colours — Class of 2026 Congratulations Graduates" fill className="object-contain" sizes="(max-width:640px) 50vw, 260px" />
+                  <Image src="/images/seasonal/graduation/banner-school-colors.webp" alt="Graduation banner in blue and gold school colours — Class of 2026 Congratulations Graduates" fill className="object-contain" sizes="(max-width:640px) 50vw, 260px" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">School Colours</p>
                 <p className="text-xs text-gray-500 mt-0.5">School crest, custom colours — gyms, convocation entrances, outdoor ceremony</p>
               </div>
               <div>
                 <div className="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-[#f8f4ef] mb-3">
-                  <Image src="/images/seasonal/graduation/banner-gold-classic.png" alt="Classic navy and gold graduation banner with grad cap — Congratulations Class of 2026" fill className="object-contain" sizes="(max-width:640px) 50vw, 260px" />
+                  <Image src="/images/seasonal/graduation/banner-gold-classic.webp" alt="Classic navy and gold graduation banner with grad cap — Congratulations Class of 2026" fill className="object-contain" sizes="(max-width:640px) 50vw, 260px" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Classic Gold</p>
                 <p className="text-xs text-gray-500 mt-0.5">Navy &amp; gold, grad cap — university convocation, private grad parties</p>
@@ -75,7 +75,7 @@ export default function GraduationBannersPage() {
             <p className="text-sm text-gray-500 mb-5">24×80&quot; stand + full-colour grad print — from $219 + GST complete. No separate graphic fee.</p>
             <div className="max-w-[220px]">
               <div className="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-[#f8f4ef] mb-3">
-                <Image src="/images/seasonal/graduation/hero.png" alt="Retractable graduation banner stand — Class of 2026 step-and-repeat backdrop in navy and gold" fill className="object-contain" sizes="220px" />
+                <Image src="/images/seasonal/graduation/hero.webp" alt="Retractable graduation banner stand — Class of 2026 step-and-repeat backdrop in navy and gold" fill className="object-contain" sizes="220px" />
               </div>
               <p className="font-semibold text-sm text-[#1c1712]">Step-and-repeat backdrop</p>
               <p className="text-xs text-gray-500 mt-0.5">Class of 2026, school colours — photo booth setups, event entrances</p>

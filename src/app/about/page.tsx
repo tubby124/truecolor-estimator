@@ -61,16 +61,19 @@ const EQUIPMENT = [
   {
     img: "/images/about/printer-roland-truvis.webp",
     name: "Roland TrueVIS VG2",
+    alt: "Roland TrueVIS VG2 wide-format UV printer — True Color Display Printing Saskatoon",
     desc: "Wide-format inkjet: coroplast signs, vinyl banners, vehicle magnets, window decals — up to 54\" wide.",
   },
   {
     img: "/images/about/printer-konica-minolta.webp",
     name: "Konica Minolta Press",
+    alt: "Konica Minolta digital production press for flyers and business cards — True Color Saskatoon",
     desc: "Digital production press: flyers, business cards, booklets, posters — sharp colour at high volume.",
   },
   {
     img: "/images/about/lamination-machine.webp",
     name: "Roll Laminator",
+    alt: "In-house roll laminator for gloss and matte finish — True Color Display Printing Saskatoon",
     desc: "Gloss or matte finish, UV protection — applied in-house so your prints stay sharp and durable.",
   },
 ];
@@ -132,7 +135,7 @@ export default function AboutPage() {
               <div className="relative h-48 bg-gray-50">
                 <Image
                   src={item.img}
-                  alt={item.name}
+                  alt={item.alt ?? item.name}
                   fill
                   className="object-cover"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"

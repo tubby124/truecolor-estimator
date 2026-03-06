@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description:
       "Green banners, shamrock flyers, and window decals for Saskatoon bars, pubs & restaurants. Vinyl banners from $90. Same-day rush available.",
     url: "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon",
-    images: [{ url: "/images/seasonal/st-patricks/hero.png", width: 1200, height: 500 }],
+    images: [{ url: "/images/seasonal/st-patricks/hero.webp", width: 1200, height: 500 }],
     type: "website",
   },
 };
@@ -33,7 +33,7 @@ export default function StPatricksDayPage() {
       primaryProductSlug="vinyl-banners"
       title="St. Patrick's Day Printing Saskatoon"
       subtitle="Banners, window decals, and flyers for Saskatoon bars, pubs, and restaurants — ready in 48 hours. Same-day rush for +$40 flat."
-      heroImage="/images/seasonal/st-patricks/hero.png"
+      heroImage="/images/seasonal/st-patricks/hero.webp"
       heroAlt="St. Patrick's Day banners and window decals printed in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces vinyl banners, promotional flyers, and window decals for St. Patrick's Day events at Saskatoon bars, pubs, restaurants, and nightclubs. A 2×6 ft banner for your pub exterior is $90 + GST. Window decals from $11/sqft — removable after the event, no residue on glass. 250 glossy promotional flyers from $110 + GST. Standard turnaround: 48 hours from artwork approval. Same-day rush: +$40 flat, order before 10 AM. In-house Roland UV printer — no outsourcing delays. Local pickup at 216 33rd St W, Saskatoon, Saskatchewan."
       descriptionNode={
@@ -53,21 +53,21 @@ export default function StPatricksDayPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/st-patricks/banner-shamrock-green.png" alt="Classic shamrock St. Patrick's Day vinyl banner — green with white shamrocks" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/st-patricks/banner-shamrock-green.webp" alt="Classic shamrock St. Patrick's Day vinyl banner — green with white shamrocks" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Classic Shamrock</p>
                 <p className="text-xs text-gray-500 mt-0.5">Emerald green, white shamrocks — pub exteriors, restaurant windows</p>
               </div>
               <div>
                 <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/st-patricks/banner-pub-modern.png" alt="Modern dark green St. Patrick's Day bar banner — March 17 event" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/st-patricks/banner-pub-modern.webp" alt="Modern dark green St. Patrick's Day bar banner — March 17 event" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Modern Bar</p>
                 <p className="text-xs text-gray-500 mt-0.5">Dark forest green, minimal — nightclubs, upscale pubs, event venues</p>
               </div>
               <div>
                 <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/st-patricks/banner-celtic-traditional.png" alt="Celtic traditional St. Patrick's Day banner with harp and gold knotwork" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/st-patricks/banner-celtic-traditional.webp" alt="Celtic traditional St. Patrick's Day banner with harp and gold knotwork" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Celtic Traditional</p>
                 <p className="text-xs text-gray-500 mt-0.5">Gold knotwork, harp — Irish-themed pubs, cultural events</p>
@@ -82,21 +82,21 @@ export default function StPatricksDayPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <div className="relative aspect-square w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/st-patricks/decal-shamrock-cluster.png" alt="Shamrock cluster window decal for St. Patrick's Day storefront" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/st-patricks/decal-shamrock-cluster.webp" alt="Shamrock cluster window decal for St. Patrick's Day storefront" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Shamrock Cluster</p>
                 <p className="text-xs text-gray-500 mt-0.5">Corner accents on storefront windows — bars, cafés, retail</p>
               </div>
               <div>
                 <div className="relative aspect-square w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/st-patricks/decal-open-sign.png" alt="St. Patrick's Day open until midnight window sign decal" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/st-patricks/decal-open-sign.webp" alt="St. Patrick's Day open until midnight window sign decal" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Event Hours Sign</p>
                 <p className="text-xs text-gray-500 mt-0.5">Hours & specials on the door — bars, restaurants, nightclubs</p>
               </div>
               <div>
                 <div className="relative aspect-square w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/st-patricks/decal-full-window.png" alt="Full window St. Patrick's Day graphic — shamrock covering entire storefront window" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/st-patricks/decal-full-window.webp" alt="Full window St. Patrick's Day graphic — shamrock covering entire storefront window" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Full Window Graphic</p>
                 <p className="text-xs text-gray-500 mt-0.5">Covers the entire window — maximum street visibility</p>
