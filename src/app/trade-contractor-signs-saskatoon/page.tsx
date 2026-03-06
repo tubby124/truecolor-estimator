@@ -12,22 +12,24 @@ export const metadata: Metadata = {
 };
 
 const description =
-  "True Color Display Printing makes vehicle magnets, coroplast yard signs, ACP aluminum signs, and vinyl banners for Saskatoon plumbers, electricians, HVAC contractors, roofers, and general contractors. Vehicle magnets start at $45 (minimum) on 30mil thick magnetic material — custom rectangle, stack and remove cleanly between jobs. Coroplast yard signs are $24 each at 18×24\" on our in-house Roland UV printer. ACP aluminum job-site signs start at $39 for 18×24\" and $66 for 24×36\". Rush production is +$40 flat when ordered before 10 AM. Our in-house designer handles layout for $35 flat with a same-day proof. Standard turnaround is 1–3 business days.";
+  "Every service call is a lead — if your truck isn't branded, you're doing free advertising for whoever sees it. Saskatoon plumbers, electricians, HVAC contractors, roofers, and general contractors use True Color for vehicle magnets, coroplast yard signs, ACP aluminum panels, and job-site banners. Vehicle magnets start at $45 on 30mil thick magnetic material — full colour, stack cleanly between jobs, remove without touching your paint. Coroplast yard signs are $24 each at 18×24\" on our in-house Roland UV printer. ACP aluminum job-site signs start at $39 for 18×24\" and $66 for 24×36\". Rush production is +$40 flat when ordered before 10 AM. Our in-house designer handles layout for $35 flat with a same-day proof. Standard turnaround is 1–3 business days.";
 
 export default function TradeContractorSignsSaskatoon() {
   return (
     <IndustryPage
       title="Trade Contractor Signs Saskatoon"
-      subtitle="Vehicle magnets, yard signs, ACP aluminum & job-site banners for Saskatoon trades"
+      subtitle="Brand every truck and job site in Saskatoon — vehicle magnets from $45, yard signs from $24, ACP aluminum from $39. In-house Roland UV, 1–3 business days."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Trade contractor vehicle magnets and job-site signs printed in Saskatoon"
       description={description}
       descriptionNode={
         <>
           <p>
-            True Color Display Printing makes signage for Saskatoon plumbers, electricians, HVAC
-            contractors, roofers, and general contractors. Our in-house Roland UV printer handles
-            everything from truck magnets to job-site banners without outsourcing delays.{" "}
+            Every service call is a lead — if your truck isn't branded, you're doing free
+            advertising for whoever sees you drive by. Saskatoon plumbers, electricians, HVAC
+            contractors, roofers, and general contractors use True Color to put their name on
+            every truck and every job site. We print vehicle magnets, yard signs, ACP panels,
+            and banners in-house on our Roland UV printer — no outsourcing, no delays.{" "}
             <Link
               href="/products/vehicle-magnets"
               className="text-[#16C2F3] underline font-medium"
@@ -106,13 +108,13 @@ export default function TradeContractorSignsSaskatoon() {
         },
       ]}
       whyPoints={[
-        "Vehicle magnets on 30mil thick material — stack cleanly, remove without damage",
-        "Roland UV in-house printer — weather-resistant colour on all coroplast and ACP signs",
-        "Coroplast yard signs from $24 each — 8% bulk discount at 5+ units",
-        "ACP aluminum from $39 for 18×24\" — permanent, professional job-site quality",
-        "Same-day rush for +$40 flat — order before 10 AM, pick up same day",
-        "In-house designer for $35 flat, same-day proof — no artwork files required",
-        "1–3 business day standard turnaround | Local pickup at 216 33rd St W, Saskatoon",
+        "Brand every service call — vehicle magnets on 30mil material stack cleanly and pull off without damaging your paint",
+        "Every truck in your fleet becomes a moving billboard — from $45 per magnet set",
+        "Yard signs at $24 each (18×24\") — put your name on every job site, 8% off when you order 5+",
+        "ACP aluminum from $39 — rigid, weather-resistant panels that stay professional through Saskatchewan winters",
+        "Colours won't fade or streak on outdoor signs — we run Roland UV in-house, no outsourcing",
+        "Same-day rush for +$40 flat — order before 10 AM and pick up before the job starts",
+        "No artwork? No problem — our designer builds your layout for $35 flat, same-day proof",
       ]}
       faqs={[
         {

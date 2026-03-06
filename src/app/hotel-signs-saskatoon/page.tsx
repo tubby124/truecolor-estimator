@@ -32,17 +32,17 @@ export default function HotelSignsSaskatoonPage() {
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             Saskatoon hotels and conference centres need signage fast — a conference books
             last-minute, a meeting room changes, a sponsor banner needs updating before
-            registration opens. True Color prints foamboard displays from $45, retractable
+            registration opens. We print foamboard displays from $45, retractable
             banners from $219, and vinyl banners from $66, all in-house on our Roland UV
             printer. Same-day rush is available for +$40 flat on orders placed before 10 AM.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
-            Foamboard is the go-to for event room signage — lightweight, professional, and
-            easy to move between rooms. An 18×24&quot; foamboard sign ($45) on an easel works
-            for meeting room names, session schedules, and speaker bios. A 24×36&quot; board
-            ($65) handles event programs and wayfinding maps. For a multi-day conference,
-            a set of foamboard boards covers every room at a fraction of permanent sign costs.
-            See full event signage options on the{" "}
+            Foamboard is the go-to for event room signage — lightweight, easy to move between
+            rooms, and sharp enough to stand in front of a sponsor. An 18×24&quot; foamboard
+            sign ($45) on an easel works for meeting room names, session schedules, and speaker
+            bios. A 24×36&quot; board ($65) handles event programs and wayfinding maps. For a
+            multi-day conference, a set of foamboard boards covers every room at a fraction of
+            permanent sign costs. See full event signage options on the{" "}
             <Link href="/event-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               event signs page
             </Link>
@@ -78,14 +78,14 @@ export default function HotelSignsSaskatoonPage() {
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
       ]}
       whyPoints={[
-        "Foamboard meeting room signs from $45 — 18×24\" on easel, ready same day with rush",
-        "Retractable banners from $219 — conference branding, sponsor displays, registration desks",
-        "Vinyl banners from $66 — outdoor event promotions, seasonal hotel signage",
-        "ACP aluminum signs from $39 — permanent exterior directionals, weatherproof year-round",
-        "Window decals from $45 — lobby branding, glass partition wayfinding, seasonal promos",
-        "Same-day rush +$40 flat — conference starts at noon, order before 10 AM",
-        "In-house Roland UV printer — sharp colour, fast turnaround, no outsourcing delays",
-        "In-house designer $35 flat, same-day proof — works from your event schedule or brand guide",
+        "Meeting room named and ready — 18×24\" foamboard on easel from $45, same day with rush",
+        "Registration desk and sponsor wall done — retractable banners from $219, pull up, roll down, store flat",
+        "Outdoor event announcement visible from the street — vinyl banners from $66 with grommets",
+        "Parking and check-in arrows that survive Saskatchewan winters — ACP aluminum signs from $39",
+        "Lobby branding and glass partition wayfinding — window decals from $45",
+        "Conference starts at noon, order before 10 AM — same-day rush +$40 flat",
+        "Consistent colour across every sign in the building — Roland UV in-house, no outsourcing",
+        "Event schedule to print-ready in hours — in-house designer $35 flat, same-day proof",
       ]}
       faqs={[
         {

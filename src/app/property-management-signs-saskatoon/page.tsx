@@ -26,35 +26,36 @@ export default function PropertyManagementSignsPage() {
       subtitle="For-rent signs, parking notices, and permanent exterior signage for Saskatoon properties."
       heroImage="/images/products/heroes/realestate-hero-1200x500.webp"
       heroAlt="Property management signs Saskatoon"
-      description="Saskatoon property managers and landlords rely on True Color for for-rent coroplast signs from $24 each (18×24\"), no-trespassing notices, reserved parking signs, and permanent ACP aluminum exterior signs for building entrances and parking lots. Buy 5 or more coroplast signs and save 8% automatically. We print in-house on our Roland UV printer — colour is weather-rated and won't peel through a Saskatchewan winter. Standard turnaround is 1–3 business days. Same-day rush available for $40 flat on orders before 10 AM. In-house designer handles your layout for $35 flat with a same-day proof. Pickup or delivery at 216 33rd St W, Saskatoon."
+      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $24 each (18×24\"), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $39. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            Saskatoon property managers and landlords rely on True Color for{" "}
+            A vacant unit costs more per day than a for-rent sign — and a sign on the right corner
+            corner fills it faster than any listing site. Saskatoon property managers order{" "}
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               for-rent coroplast signs
             </Link>{" "}
-            from $24 each (18&times;24&quot;), no-trespassing notices, reserved parking signs, and
-            permanent ACP aluminum exterior signs for building entrances and parking lots. Buy 5 or
-            more coroplast signs and save 8% automatically — the more units you manage, the more
-            sense bulk printing makes. We print everything in-house on our Roland UV printer, so
-            colour is vibrant, weather-rated, and won&apos;t fade or peel through a Saskatchewan
-            winter.
+            from $24 each (18&times;24&quot;) with H-stakes included, no-trespassing notices,
+            reserved parking signs, and permanent ACP aluminum exterior signs for building
+            entrances and parking lots. Order 5 or more coroplast signs and save 8% automatically
+            — the more units you manage, the more sense bulk printing makes. We print in-house on
+            our Roland UV so colour is weather-rated and won&apos;t fade or peel through a
+            Saskatchewan winter.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             For permanent exterior property signage — building name plaques, address signs, and
-            parking lot regulation signs — we recommend 3mm or 6mm ACP aluminum composite starting
-            at $39 for 18&times;24&quot;. ACP is rigid, rust-proof, and rated for decades outdoors.
-            It&apos;s the standard for strata corporations and multi-family housing operators who
-            need professional, permanent wayfinding that won&apos;t warp or yellow over time.
-            Compare that to coroplast, which is ideal for temporary or rotating signage like
-            for-rent, show-suite open, and seasonal notices.
+            parking lot regulation signs — 3mm or 6mm ACP aluminum composite starts at $39 for
+            18&times;24&quot;. ACP is rigid, rust-proof, and rated for decades outdoors. It&apos;s
+            the standard for strata corporations and multi-family housing operators who need
+            wayfinding that won&apos;t warp or yellow over time. Coroplast, by contrast, is the
+            right choice for temporary or rotating signage — for-rent, show-suite open, and
+            seasonal notices.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
-            Planning a leasing event or show-suite weekend? A vinyl banner hung across your
-            building&apos;s entrance or fence line is one of the highest-visibility touches you can
-            add — banners start at $8.25/sqft with grommets included, and a 2&times;4&apos; banner
-            is $66. Same-day rush is available for $40 flat on orders placed before 10 AM.
+            Running a leasing event or show-suite weekend? A vinyl banner across your
+            building&apos;s entrance or fence line is one of the highest-visibility moves you can
+            make — banners start at $8.25/sqft with grommets included, and a 2&times;4&apos;
+            banner is $66. Same-day rush is available for $40 flat on orders placed before 10 AM.
             Our{" "}
             <Link href="/real-estate-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               real estate signs page
@@ -62,11 +63,11 @@ export default function PropertyManagementSignsPage() {
             has related options if you&apos;re also marketing individual sale listings.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Need branding on your fleet or maintenance trucks? Vehicle magnets start at $45 and
-            can be removed when staff are off duty. Our in-house designer handles your layouts for
-            $35 flat — bring your logo and copy and a same-day proof comes back the same day.
-            Call (306) 954-8688 or use the instant quote tool to price out your full signage
-            package. Pickup at 216 33rd St W, Saskatoon.
+            Need your company logo on fleet or maintenance trucks? Vehicle magnets start at $45
+            and remove cleanly when staff are off duty. Our in-house designer handles your layouts
+            for $35 flat — bring your logo and copy, and a proof comes back the same day.
+            Call (306) 954-8688 or use the instant quote tool to price your full signage package.
+            Pickup at 216 33rd St W, Saskatoon.
           </p>
         </>
       }
@@ -78,27 +79,27 @@ export default function PropertyManagementSignsPage() {
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
       ]}
       whyPoints={[
-        "For-rent coroplast signs from $24 each (18×24\") — the most common landlord sign size in Saskatoon",
-        "Bulk discount: order 5+ coroplast signs and save 8% automatically — no code needed",
-        "ACP aluminum from $39 (18×24\") for permanent parking, entrance, and regulation signs",
-        "Roland UV in-house printer — weather-rated colour that survives Saskatchewan winters outdoors",
-        "Same-day rush for $40 flat — need a sign up before the weekend? Order before 10 AM",
-        "In-house designer at $35 flat — no-trespassing, reserved parking, and building ID layouts done same day",
+        "For-rent coroplast signs from $24 each (18×24\") — fill vacancies faster with the right corner placement",
+        "Order 5+ coroplast signs and save 8% automatically — no code needed, no minimum spend",
+        "ACP aluminum from $39 (18×24\") for parking lot, entrance, and regulation signs that last decades",
+        "Roland UV in-house printer — colour stays vibrant and weather-rated through Saskatchewan winters",
+        "Same-day rush for $40 flat — sign up before the weekend, order before 10 AM",
+        "In-house designer at $35 flat — no-trespassing, reserved parking, and building ID layouts, same-day proof",
         "Vinyl banners from $66 (2×4\') for leasing events and show-suite weekends — grommets included",
         "Vehicle magnets from $45 for property management fleet trucks — remove on weekends",
       ]}
       faqs={[
         {
           q: "How much do for-rent signs cost in Saskatoon?",
-          a: "Our most popular for-rent sign is 18×24\" coroplast (single-sided) at $24 each. Order 5 or more and save 8% automatically — 10 signs works out to roughly $22 each. If you want to add an H-stake for a lawn installation, those are $2.50 each. ACP aluminum versions for more permanent rental signage start at $39 for 18×24\".",
+          a: "Our most popular for-rent sign is 18×24\" coroplast (single-sided) at $24 each. Order 5 or more and save 8% automatically — 10 signs works out to roughly $22 each. H-stakes are $2.50 each for lawn installation. ACP aluminum versions for more permanent rental signage start at $39 for 18×24\".",
         },
         {
           q: "Can I get no-trespassing and reserved parking signs printed here?",
-          a: "Yes — we print no-trespassing, reserved parking, no-dumping, and any other regulation sign on coroplast (temporary/seasonal) or ACP aluminum (permanent exterior). Coroplast 18×24\" is $24. ACP 18×24\" is $39. We can match standard regulation wording or use your custom text. In-house designer handles layouts for $35.",
+          a: "Yes — we print no-trespassing, reserved parking, no-dumping, and any other regulation sign on coroplast (temporary/seasonal) or ACP aluminum (permanent exterior). Coroplast 18×24\" is $24. ACP 18×24\" is $39. We match standard regulation wording or use your custom text. In-house designer handles layouts for $35.",
         },
         {
           q: "What material is best for outdoor property signs in Saskatchewan?",
-          a: "For permanent outdoor signs (parking lot, building entrance, address plaques), we recommend 3mm or 6mm ACP aluminum composite — it's rigid, rust-proof, and rated for decades outdoors. For temporary or rotating signs (for-rent, show-suite, seasonal notices), 4mm coroplast is the right call — lower cost, easy to replace, and still outdoor-rated. We carry both.",
+          a: "For permanent outdoor signs (parking lot, building entrance, address plaques), 3mm or 6mm ACP aluminum composite is the right call — rigid, rust-proof, and rated for decades outdoors. For temporary or rotating signs (for-rent, show-suite, seasonal notices), 4mm coroplast is lower cost, easy to replace, and still outdoor-rated.",
         },
         {
           q: "Do you offer bulk pricing for property managers ordering multiple signs?",

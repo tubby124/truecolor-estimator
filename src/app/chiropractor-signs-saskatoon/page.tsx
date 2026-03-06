@@ -20,28 +20,27 @@ export const metadata: Metadata = {
 const descriptionNode = (
   <>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
-      Saskatoon chiropractors, physiotherapists, massage therapists, and naturopaths rely on
-      True Color for patient-facing signage that communicates professionalism and drives referrals.
-      Foamboard displays from $8/sqft are the standard for reception areas — service menus,
-      new patient intake info, and seasonal promotion boards print on lightweight 3/16&quot; board
-      that hangs easily or stands in a frame. A full 18×24&quot; display starts at $45. Our
-      in-house Roland UV printer handles full-colour healthcare graphics with accurate colour
-      across every piece.
+      New patients decide whether to come back before they sit down — and your reception area
+      signage is part of that first impression. Foamboard displays from $8/sqft are the standard
+      for chiropractic reception areas — service menus, new patient intake info, and seasonal
+      promotion boards print on lightweight 3/16&quot; board that hangs easily or stands in a
+      frame. A full 18×24&quot; display starts at $45. Our in-house Roland UV printer produces
+      accurate colour across every piece, so your brand reads consistently from the front window
+      to the treatment room door.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
       Retractable banner stands from $219 are the most effective single investment for a new
-      clinic opening or referral program launch. Place a 24×80&quot; stand in your reception
-      area announcing new patient specials, or set one up at a health fair or community event to
-      generate walk-in traffic. Business cards are the backbone of a referral program —
-      250 two-sided cards for $40, ready in 1–3 business days. Print a batch for every
-      practitioner in the clinic. Flyers for new patient promotions run $45 for 100 copies on
-      gloss stock. Same-day rush is +$40 flat when ordered before 10 AM.
+      clinic opening or referral program launch. A 24×80&quot; stand in your reception area
+      announces new patient specials — or set one up at a health fair to bring in walk-in traffic.
+      Business cards are the backbone of a referral program: 250 two-sided cards for $40, ready
+      in 1–3 business days. Print a batch for every practitioner in the clinic. New patient
+      promo flyers run $45 for 100 copies on gloss stock. Same-day rush is +$40 flat when
+      ordered before 10 AM.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed">
       Our in-house designer handles all layout for $35 flat with a same-day proof — from referral
-      card design to window decal sizing. Window decals from $11/sqft give your storefront a
-      professional branded look that&apos;s visible from the street. For broader healthcare
-      signage context,{" "}
+      card design to window decal sizing. Window decals from $11/sqft make your storefront
+      identifiable from the street. For broader healthcare signage context,{" "}
       <Link
         href="/healthcare-signs-saskatoon"
         className="text-[#16C2F3] underline font-medium"
@@ -69,7 +68,7 @@ export default function ChiropractorSignsSaskatoonPage() {
       subtitle="Reception displays, referral cards, and retractable banners for Saskatoon chiropractic and wellness clinics."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Foamboard displays and retractable banners for Saskatoon chiropractic and physiotherapy clinics printed by True Color Display Printing"
-      description="Saskatoon chiropractors, physiotherapists, massage therapists, and naturopaths rely on True Color for patient-facing signage that communicates professionalism and drives referrals. Foamboard displays from $8/sqft for reception service menus and seasonal promos. Retractable banners from $219 for reception areas and health fairs. Business cards 250 for $40 — the backbone of a referral program. Window decals from $11/sqft for storefront branding. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="New patients decide whether to come back before they sit down — your reception signage is part of that first impression. Foamboard displays from $8/sqft for service menus and seasonal promos. Retractable banners from $219 for reception areas and health fairs. Business cards 250 for $40 — the backbone of a referral program. Window decals from $11/sqft for storefront visibility. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
@@ -80,10 +79,10 @@ export default function ChiropractorSignsSaskatoonPage() {
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
       ]}
       whyPoints={[
-        "Foamboard reception displays from $8/sqft — service menus, new patient info, seasonal promos",
-        "Retractable banner stands from $219 — new patient welcome, referral program, health fairs",
-        "250 referral business cards for $40 — print batches for every practitioner in the clinic",
-        "Window decals from $11/sqft — professional storefront branding visible from the street",
+        "Foamboard reception displays from $8/sqft — exact colour on every service menu, promotion board, and intake sign",
+        "Retractable banner stands from $219 — new patient specials and referral programs visible to every waiting patient",
+        "250 referral business cards for $40 — print a batch per practitioner so every patient leaves with one",
+        "Window decals from $11/sqft — patients spot your clinic from the street before they look it up",
         "New patient promo flyers — 100 copies for $45 on gloss stock, ready in 1–3 business days",
         "In-house designer $35 flat — referral card layout, service menu design, same-day proof",
         "Same-day rush +$40 flat — order before 10 AM for same-day completion",
@@ -91,7 +90,7 @@ export default function ChiropractorSignsSaskatoonPage() {
       faqs={[
         {
           q: "What signage do Saskatoon chiropractors typically order from True Color?",
-          a: "The most common orders are: foamboard service menu displays for reception (from $8/sqft, 18×24\" starts at $45), retractable banner stands for new patient promotions ($219 Economy), referral business cards (250 for $40), window decals for storefront branding (from $11/sqft), and new patient flyers for community distribution (100 for $45).",
+          a: "The most common orders are: foamboard service menu displays for reception (from $8/sqft, 18×24\" starts at $45), retractable banner stands for new patient promotions ($219 Economy), referral business cards (250 for $40), window decals for storefront visibility (from $11/sqft), and new patient flyers for community distribution (100 for $45).",
         },
         {
           q: "What is the best display for a chiropractic reception area?",
@@ -119,7 +118,7 @@ export default function ChiropractorSignsSaskatoonPage() {
         },
         {
           q: "Do you print vinyl banners for health fair booths or community events?",
-          a: "Yes — vinyl banners from $8.25/sqft with grommets included. A standard 2×4&apos; booth banner is $66; a 3×6&apos; backdrop banner is $135. Order before 10 AM on the business day before your event and use rush turnaround (+$40 flat) to ensure same-day pickup. Bring a table cover design and we can print that too.",
+          a: "Yes — vinyl banners from $8.25/sqft with grommets included. A standard 2×4\' booth banner is $66; a 3×6\' backdrop banner is $135. Order before 10 AM on the business day before your event and use rush turnaround (+$40 flat) to ensure same-day pickup. Bring a table cover design and we can print that too.",
         },
       ]}
     />

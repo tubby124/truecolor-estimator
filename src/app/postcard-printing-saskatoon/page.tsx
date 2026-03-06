@@ -30,11 +30,11 @@ export default function PostcardPrintingSaskatoonPage() {
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            Postcards printed in Saskatoon on 14pt gloss, double-sided — starting at $40 for
-            50 (4×6&quot;) or $85 for 250. Saskatchewan businesses use direct mail postcards
-            because they skip the inbox and land in hands. We print in-house on our Roland UV
-            printer so colour is vibrant, sharp, and ready for Canada Post admail drops.
-            Same-day rush available for +$40 flat on orders placed before 10 AM.
+            Email gets ignored. A postcard on a kitchen counter stays there. Saskatchewan businesses
+            use direct mail postcards to cut through the noise — and at $40 for 50 (4×6&quot;, 14pt
+            gloss, double-sided) or $85 for 250, the cost per impression beats most digital channels.
+            We print in-house on our Roland UV printer so colour is vibrant, sharp, and ready for
+            Canada Post admail drops. Same-day rush available for +$40 flat on orders placed before 10 AM.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             The most popular use is{" "}
@@ -72,12 +72,12 @@ export default function PostcardPrintingSaskatoonPage() {
         { name: "Brochures (tri-fold)", from: "from $70 / 100", slug: "brochures" },
       ]}
       whyPoints={[
-        "14pt gloss stock, double-sided — Canada Post admail compliant out of the box",
+        "Skip the spam folder — 14pt gloss double-sided cards, Canada Post admail compliant, land in hands",
         "4×6\" from $40/50 | 250 for $85 | 500 for $140 — no hidden setup fees",
-        "5×7\" from $35/50 | 100 for $45 | 250 for $85",
-        "In-house Roland UV printing — sharp colour, mailable finish",
-        "Same-day rush +$40 flat — mail drop tomorrow, order before 10 AM today",
-        "In-house designer $35 flat — real estate layouts, promo cards, event invites",
+        "5×7\" from $35/50 | 100 for $45 | 250 for $85 — stands out in a crowded mailbox",
+        "Colour that matches your brand exactly — Roland UV in-house, no outsourcing, no colour surprises",
+        "Order before 10 AM, pick up today — same-day rush +$40 flat",
+        "Layout done for you — in-house designer $35 flat, real estate cards, promo mailers, invites, same-day proof",
         "3×4\" mini cards available — appointment reminders, loyalty punch cards, referral cards",
         "Local pickup at 216 33rd St W, Saskatoon — no shipping wait",
       ]}

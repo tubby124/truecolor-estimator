@@ -30,11 +30,12 @@ export default function NonProfitSignsSaskatoonPage() {
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            Saskatoon non-profits, charities, and community organizations get more out of their
-            print budget at True Color. Coroplast yard signs start at $24 for 18×24&quot; — ideal
-            for fundraiser lawn sign campaigns, awareness day promotions, and community event
-            directionals. Order 5 or more and save 8%. No minimums. Same-day rush available
-            for +$40 flat on orders placed before 10 AM.
+            When your print budget is $300 and your gala is Saturday, every dollar has to work.
+            Coroplast yard signs start at $24 for 18×24&quot; — order 5 and save 8%. Vinyl banners
+            with grommets from $66. Flyers 100 for $45. No minimums on any product. Saskatoon
+            non-profits, charities, and community organizations use these to run fundraiser
+            campaigns, awareness drives, and events without stretching their budgets.
+            Same-day rush available for +$40 flat on orders placed before 10 AM.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             Galas, auctions, and awareness events need signage that looks polished on a tight
@@ -52,7 +53,8 @@ export default function NonProfitSignsSaskatoonPage() {
             Fundraiser flyers and awareness campaign handouts are printed on 80lb gloss stock —
             100 for $45, 500 for $135. Tri-fold brochures (100 for $70) work well for program
             guides, donor thank-you packages, and community information handouts. We print
-            in-house on our Roland UV printer so turnaround is fast and colour is sharp. Need{" "}
+            in-house on our Roland UV printer so turnaround is 1–3 business days and colour is
+            sharp. Need{" "}
             <Link href="/flyer-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               flyers printed in bulk
             </Link>
@@ -76,14 +78,14 @@ export default function NonProfitSignsSaskatoonPage() {
         { name: "Brochures (tri-fold)", from: "from $70 / 100", slug: "brochures" },
       ]}
       whyPoints={[
-        "Coroplast yard signs from $24 (18×24\") — fundraiser lawn sign campaigns, 8% off at 5+",
-        "Vinyl banners from $66 with grommets — outdoor events, awareness days, street visibility",
-        "Retractable banners from $219 — donor recognition walls, sponsor displays, gala entrances",
-        "Foamboard displays from $45 — auction boards, event programs, table numbers, welcome signs",
-        "Flyers 100 for $45, 500 for $135 — door-to-door campaigns, event handouts, awareness drives",
-        "Tri-fold brochures 100 for $70 — donor packages, program guides, outreach handouts",
+        "50 lawn signs for a fundraiser campaign — coroplast 18×24\" from $24, 8% off at 5+",
+        "Street visibility without the cost — vinyl banners from $66 with grommets, outdoor-rated Roland UV print",
+        "Donor recognition wall done right — retractable banners from $219, pull up at 6 PM, pack flat after",
+        "Full gala room covered — foamboard displays from $45 for auction boards, programs, table numbers",
+        "Door-to-door flyer run — 100 for $45, 500 for $135, quantities to 10,000+",
+        "Donor packages and program guides — tri-fold brochures 100 for $70",
         "No minimums — order what you need, not what a minimum forces you to order",
-        "In-house designer $35 flat, same-day proof — no agency budget required",
+        "No agency budget needed — in-house designer $35 flat, logo to print-ready in same day",
       ]}
       faqs={[
         {

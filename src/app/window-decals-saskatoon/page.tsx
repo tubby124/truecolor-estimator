@@ -29,13 +29,13 @@ export default function WindowDecalsSaskatoonPage() {
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
-            Saskatoon storefronts, offices, and vehicles get noticed with custom window
-            graphics from True Color Display Printing. Window decals start at{" "}
+            A blank storefront window is a missed opportunity — every passerby walks past
+            without knowing what's inside or what's on sale. Custom window graphics turn
+            that glass into your best-performing sign. Window decals start at{" "}
             <strong>$11/sqft</strong> (minimum $45) — full-colour, UV-safe, and fully
-            removable without adhesive residue. Whether you need a seasonal sale graphic,
-            a permanent logo installation, or privacy frosting for an office, we cut and
-            print it in-house on our Roland UV printer. No shipping. Local pickup at
-            216 33rd St W, Saskatoon.
+            removable without adhesive residue, so you can change the creative every season
+            without repainting. We cut and print everything in-house on our Roland UV printer
+            in Saskatoon. No shipping. Local pickup at 216 33rd St W.
           </p>
           <p className="text-gray-600 leading-relaxed">
             For windows where interior visibility matters — retail floors, showrooms,
@@ -85,13 +85,13 @@ export default function WindowDecalsSaskatoonPage() {
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
       ]}
       whyPoints={[
-        "Window decals from $11/sqft (min $45) — full-colour, UV-safe, bubble-free application",
-        "Perforated window vinyl from $8/sqft — see out, brand in, blocks glare",
-        "Vinyl lettering from $8.50/sqft — clean, frameless look for hours and logos",
-        "Custom sizing to your exact window dimensions — no standard size constraints",
-        "Removable without residue — ideal for tenants, seasonal campaigns, and pop-ups",
-        "Same-day rush available (+$40 flat) when ordered before 10 AM",
-        "In-house designer $35 flat — same-day proof, handles any file format",
+        "Update your storefront every season — decals remove without residue, no repainting needed",
+        "Window decals from $11/sqft (min $45) — full-colour, UV-safe, sized to your exact glass",
+        "Perforated vinyl from $8/sqft — customers outside see your graphic, staff inside see the street",
+        "Vinyl lettering from $8.50/sqft — hours, phone number, or logo text with a clean etched-glass look",
+        "We run Roland UV in-house, so colour is consistent and there are no outsourcing surprises",
+        "Same-day turnaround for +$40 flat — order before 10 AM, pick up same day",
+        "Bring rough measurements — our designer ($35 flat, same-day proof) handles the rest",
       ]}
       faqs={[
         {

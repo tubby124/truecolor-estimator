@@ -19,23 +19,23 @@ export const metadata: Metadata = {
 
 const descriptionNode = (
   <>
-    Saskatoon car dealerships, auto body shops, tire shops, and auto detailers rely on True
-    Color for vehicle magnets, monthly sales banners, lot price signs, and permanent ACP
-    exterior signage. Vehicle magnets are the most cost-effective way to brand a demo or
-    service fleet — from $24/sqft (minimum $45), they apply in seconds, remove without
-    adhesive residue, and survive Saskatchewan winters on any steel panel. A standard
-    12×24" door magnet runs approximately $48. Order a set of 10 matching magnets for your
-    service loaners and rebranding is complete before lunch. Monthly sales promotions drive
-    the bulk of dealer print work: a 3×6 ft vinyl banner for your lot starts at $135 with
-    grommets included, and our Roland UV in-house printer produces the bold, saturated reds
-    and blacks that stop traffic on a busy strip. Coroplast price signs (from $8/sqft) on
-    individual vehicles — 18×24" at $24 each — are the fastest-to-produce, most frequently
-    reordered item at any dealership. Need permanent lot signage? ACP aluminum composite
-    starts at $13/sqft and is the industry standard for exterior durability: rigid,
-    weather-resistant, and rated for 10+ years. Our in-house Photoshop designer handles all
-    artwork for $35 flat with a same-day proof — no agency markup, no back-and-forth delays.
-    Same-day rush is +$40 flat for orders placed before 10 AM. Located at 216 33rd St W,
-    Saskatoon — fleet orders welcome.{" "}
+    End-of-month and your lot signage still says last month — that costs sales. Vehicle
+    magnets are the fastest fix: from $24/sqft (minimum $45), they go on a demo or service
+    fleet in seconds, remove without adhesive residue, and survive Saskatchewan winters on
+    any steel panel. A standard 12×24" door magnet runs approximately $48. Order a set of
+    10 matching magnets for your service loaners and rebranding is done before lunch.
+    Monthly sales promotions drive the bulk of dealer print work: a 3×6 ft vinyl banner for
+    your lot starts at $135 with grommets included, and our Roland UV in-house printer
+    produces the bold, saturated reds and blacks that stop traffic on a busy strip — printed
+    without outsourcing so there are no turnaround surprises when end-of-month hits on a
+    Friday. Coroplast price signs (from $8/sqft) on individual vehicles — 18×24" at $24
+    each — are the fastest-to-produce, most frequently reordered item at any dealership.
+    Need permanent lot signage? ACP aluminum composite starts at $13/sqft and is the
+    industry standard for exterior durability: rigid, weather-resistant, and rated for 10+
+    years in Saskatchewan conditions. Our in-house Photoshop designer handles all artwork
+    for $35 flat with a same-day proof — no agency markup, no delays when your sale starts
+    tomorrow. Same-day rush is +$40 flat for orders placed before 10 AM. Located at
+    216 33rd St W, Saskatoon — fleet orders welcome.{" "}
     See{" "}
     <Link
       href="/products/vehicle-magnets"
@@ -60,10 +60,10 @@ export default function CarDealershipSignsSaskatoonPage() {
       canonicalSlug="car-dealership-signs-saskatoon"
       primaryProductSlug="vehicle-magnets"
       title="Car Dealership Signs Saskatoon"
-      subtitle="Vehicle magnets for demo fleets, monthly sales banners, and lot signage — printed in-house, Saskatchewan-tough."
+      subtitle="End-of-month sale signage, demo fleet magnets, and permanent lot signs — printed in-house so you are never waiting on a supplier."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Vehicle magnets and vinyl banners for Saskatoon car dealerships and auto businesses printed by True Color Display Printing"
-      description="Saskatoon car dealerships, auto body shops, tire shops, and auto detailers rely on True Color for vehicle magnets, monthly sales banners, coroplast price signs, and permanent ACP exterior signage. Vehicle magnets from $24/sqft brand a demo or service fleet in minutes — no adhesive residue, survives Saskatchewan winters. Monthly sales banners from $135 for a 3×6 ft. Coroplast price signs from $8/sqft. ACP lot signage from $13/sqft for 10+ year durability. Roland UV in-house. Designer $35 flat. Rush +$40."
+      description="End-of-month and your lot signage still says last month — that costs sales. Vehicle magnets from $24/sqft rebrand your demo fleet in minutes: no adhesive residue, survives Saskatchewan winters. Monthly sales banners from $135 for a 3×6 ft, printed in-house on our Roland UV so there are no outsourcing delays when a sale starts Friday. Coroplast price signs from $8/sqft. ACP lot signage from $13/sqft for 10+ year durability. Designer $35 flat. Rush +$40."
       descriptionNode={descriptionNode}
       products={[
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
@@ -74,13 +74,13 @@ export default function CarDealershipSignsSaskatoonPage() {
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
-        "Vehicle magnets from $24/sqft — brand your entire demo or service fleet, remove without residue, reapply daily",
-        "Coroplast price signs from $8/sqft — 18×24\" at $24 each, fastest reorder item at any Saskatoon dealership",
-        "Monthly sales banners from $135 for a 3×6 ft vinyl with grommets — bold reds and blacks on our Roland UV printer",
-        "ACP aluminum lot signage from $13/sqft — rigid, weather-resistant, rated 10+ years in Saskatchewan climate",
-        "Window decals from $11/sqft for showroom glass — service hours, promotional messaging, brand accent panels",
-        "In-house Photoshop designer — $35 flat, same-day proof, no agency markup on fleet reorders",
-        "Same-day rush +$40 flat — order before 10 AM for end-of-month sale signage you need today",
+        "Vehicle magnets from $24/sqft — rebrand your full demo or service fleet before noon, remove without residue, reapply daily",
+        "Coroplast price signs from $8/sqft — 18×24\" at $24 each, the most frequently reordered item at any Saskatoon dealership",
+        "Monthly sales banners from $135 for a 3×6 ft — printed in-house on Roland UV, no outsourcing delays when end-of-month hits on a Friday",
+        "ACP aluminum lot signage from $13/sqft — rigid, weather-resistant, still looking right after 10+ Saskatchewan winters",
+        "Window decals from $11/sqft — service hours, seasonal promotions, and brand panels on showroom glass",
+        "In-house Photoshop designer — $35 flat, same-day proof, no agency markup when you need updated fleet graphics",
+        "We print same-day for +$40 flat — order before 10 AM for end-of-month sale signage you need today",
       ]}
       faqs={[
         {

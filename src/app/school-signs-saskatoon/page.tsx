@@ -12,21 +12,23 @@ export const metadata: Metadata = {
 };
 
 const description =
-  "True Color Display Printing produces school signs, sports banners, and event flyers for Saskatoon K-12 schools, daycares, and school boards. Coroplast yard signs start at $8/sqft (18×24\" = $24 each), vinyl banners from $8.25/sqft with grommets included, and flyers from $45 per 100. Our in-house Roland UV printer delivers sharp, weather-resistant prints. Need signs before the weekend tournament? Rush orders ship same day for +$40 flat when you order before 10 AM. Our in-house designer handles layout for $35 flat with a same-day proof — no art degree required. Standard turnaround is 1–3 business days.";
+  "Tournament weekend is Thursday. Your coroplast signs, gym banner, and event flyers need to be ready by Friday. Saskatoon K-12 schools, daycares, and school boards get exactly that from True Color — coroplast yard signs from $8/sqft (18×24\" = $24 each), vinyl banners from $8.25/sqft with grommets included, and flyers from $45 per 100. We print in-house on our Roland UV printer — weather-resistant colour with no outsourcing delays. Same-day rush for +$40 flat when you order before 10 AM. In-house designer $35 flat with a same-day proof. Standard turnaround is 1–3 business days.";
 
 export default function SchoolSignsSaskatoon() {
   return (
     <IndustryPage
       title="School Signs Saskatoon"
-      subtitle="Coroplast signs, gym banners, event flyers & more for Saskatoon schools and daycares"
+      subtitle="Signs, gym banners, and event flyers ready before your next tournament or school event — 1–3 business days, same-day rush available for +$40."
       heroImage="/images/products/heroes/sports-hero-1200x500.webp"
       heroAlt="School sports banners and signs printed in Saskatoon"
       description={description}
       descriptionNode={
         <>
           <p>
-            True Color Display Printing produces school signs, sports banners, and event flyers for
-            Saskatoon K-12 schools, daycares, and school boards.{" "}
+            Tournament weekend is Thursday. Your coroplast signs and gym banner need to be
+            ready by Friday — and you can't afford to wait on a courier from out of province.
+            Saskatoon K-12 schools, daycares, and school boards get their print done in-house
+            at True Color, with same-day rush available for <strong>+$40 flat</strong>.{" "}
             <Link
               href="/products/coroplast-signs"
               className="text-[#16C2F3] underline font-medium"
@@ -91,13 +93,13 @@ export default function SchoolSignsSaskatoon() {
         },
       ]}
       whyPoints={[
-        "Roland UV in-house printer — weather-resistant, outdoor-rated colour on every coroplast sign",
-        "Bulk discount: 5+ signs get 8% off automatically",
-        "Same-day rush for +$40 flat — order before 10 AM and pick up same day",
-        "In-house designer for $35 flat, same-day proof — no artwork required",
-        "Grommets always included on vinyl banners — no extra charge",
-        "1–3 business day standard turnaround from artwork approval",
-        "Local Saskatoon shop — pick up at 216 33rd St W or we can arrange delivery",
+        "Signs ready before your event — same-day rush for +$40 flat, order before 10 AM",
+        "Coroplast colour holds through rain, wind, and a full Saskatchewan fall — printed Roland UV in-house",
+        "Order 5+ coroplast signs and the price drops 8% automatically",
+        "Bring a logo and your text — our designer builds the layout for $35 flat, same-day proof",
+        "Gym banners come with grommets — no extra charge, ready to hang on tournament day",
+        "1–3 business day standard turnaround — nothing outsourced, no third-party delays",
+        "Pick up at 216 33rd St W, Saskatoon — no shipping, no courier to track",
       ]}
       faqs={[
         {

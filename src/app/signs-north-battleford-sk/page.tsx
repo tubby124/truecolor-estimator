@@ -26,40 +26,40 @@ export default function SignsNorthBattlefordPage() {
       subtitle="Coroplast signs, vehicle magnets, ACP aluminum, and vinyl banners — printed in Saskatoon, shipped to North Battleford."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Signs and printing for North Battleford SK — True Color Display Printing Saskatoon"
-      description="True Color Display Printing ships signs, banners, vehicle magnets, and business cards to North Battleford and the Battlefords area. Northwest Saskatchewan's agriculture and retail hub deserves professional signage — we print it in Saskatoon on Roland UV equipment and ship directly to you. Coroplast from $8/sqft, ACP aluminum from $13/sqft, vehicle magnets from $24/sqft. Order online, approve your proof by email, delivered in 3–5 business days. North Battleford is 140km northwest of Saskatoon."
+      description="Grain operations, Indigenous-owned businesses, and contractors in the Battlefords area shouldn't have to settle for a local shop that outsources large-format work. True Color prints coroplast from $8/sqft, ACP aluminum from $13/sqft, and vehicle magnets from $24/sqft in-house on Roland UV equipment in Saskatoon — and ships directly to North Battleford, 140km northwest. Order online, approve your proof by email, delivered in 3–5 business days."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
-            True Color Display Printing, located at 216 33rd St W in Saskatoon, prints and ships
-            professional signs to North Battleford businesses — 140km northwest of Saskatoon in
-            Saskatchewan. The Battlefords area is a regional hub for agriculture, Indigenous
-            businesses, and retail serving northwest SK. Whether you run a grain farm, a
-            contracting business, or a Main Street shop,{" "}
+            Grain operations, Indigenous-owned businesses, and contractors in the Battlefords area
+            often end up waiting two weeks for a sign because the local shop outsources large-format
+            work. True Color prints everything in-house in Saskatoon on our Roland UV press and
+            ships directly to North Battleford — 140km northwest. You approve a digital proof by
+            email, we print once it&apos;s confirmed, and your order arrives in 3–5 business days.{" "}
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
-              coroplast signs
+              Coroplast signs
             </Link>{" "}
-            from $8/sqft are UV-printed on our Roland press and weather-resistant for 2–3
-            years outdoors. H-stakes at $2.50 each for yard and field use.
+            from $8/sqft are UV-printed and weather-resistant for 2–3 years outdoors. H-stakes
+            at $2.50 each for yard and field use.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Agriculture and service businesses in the Battlefords need signage that travels with
-            their work.{" "}
+            Service businesses and ag operations in the Battlefords need branding that travels
+            with their equipment.{" "}
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vehicle magnets
             </Link>{" "}
             from $24/sqft (minimum $45) stick securely to steel service truck doors and equipment
             cabs — remove cleanly with no adhesive residue. ACP aluminum signs from $13/sqft
             for permanent business and facility signage that handles northwest Saskatchewan winters.
-            An 18×24" ACP panel is $39; 24×36" is $66. Vinyl banners from $8.25/sqft for
+            An 18×24&quot; ACP panel is $39; 24×36&quot; is $66. Vinyl banners from $8.25/sqft for
             seasonal promotions, grand openings, and community events.
           </p>
           <p className="text-gray-600 leading-relaxed">
             To order for North Battleford delivery: call (306) 954-8688 or submit your quote at
             truecolorprinting.ca. We email a digital proof for your approval before printing.
-            Once approved and payment confirmed, we print in-house on our Roland UV and ship to
-            your North Battleford address. Standard timeline: 3–5 business days. No design file?
-            Our in-house designer preps artwork from any format for $35 flat, same-day proof.
-            Rush orders available for +$40 — place by 10 AM.
+            Once approved and payment confirmed, we print in-house and ship to your North Battleford
+            address. Standard timeline: 3–5 business days. No design file? Our in-house designer
+            preps artwork from any format for $35 flat, same-day proof. Rush orders available for
+            +$40 — place by 10 AM.
           </p>
         </>
       }
@@ -72,11 +72,12 @@ export default function SignsNorthBattlefordPage() {
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
-        "Coroplast from $8/sqft — UV-printed on Roland press, weatherproof, H-stakes $2.50 each",
-        "Vehicle magnets from $24/sqft — service truck and equipment branding across northwest SK",
-        "ACP aluminum from $13/sqft — permanent facility and business signage, 10+ year lifespan",
+        "In-house Roland UV press — no outsourcing markup, consistent colour on every order shipped to North Battleford",
+        "Coroplast from $8/sqft — UV-printed, weatherproof for 2–3 years, H-stakes $2.50 each",
+        "Vehicle magnets from $24/sqft — service truck and ag equipment branding across northwest SK",
+        "ACP aluminum from $13/sqft — permanent facility and business signage, 10+ year outdoor lifespan",
         "Vinyl banners from $8.25/sqft — hemmed edges, grommets every 2 ft, 13oz outdoor vinyl",
-        "Ships to North Battleford — order online, approve proof by email, 3–5 business days",
+        "Ships to North Battleford — approve proof by email, 3–5 business days to your door",
         "In-house designer — $35 flat, same-day proof, works from any logo or rough description",
       ]}
       faqs={[
@@ -102,7 +103,7 @@ export default function SignsNorthBattlefordPage() {
         },
         {
           q: "What is the minimum order for North Battleford customers?",
-          a: "No minimum order. You can order a single coroplast sign or one vehicle magnet. Volume discounts apply automatically as your sqft total grows — coroplast drops from $8/sqft at low volumes. Business cards start at 250 for $40, flyers at 100 for $45.",
+          a: "No minimum order. You can order a single coroplast sign or one vehicle magnet. Volume discounts apply automatically as your sqft total grows. Business cards start at 250 for $40, flyers at 100 for $45.",
         },
       ]}
     />

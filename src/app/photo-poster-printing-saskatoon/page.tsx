@@ -23,22 +23,23 @@ export default function PhotoPosterPrintingSaskatoonPage() {
       canonicalSlug="photo-poster-printing-saskatoon"
       primaryProductSlug="photo-posters"
       title="Photo Poster Printing Saskatoon"
-      subtitle="Gallery-quality photo posters from $15. Printed in-house on Roland Photobase Matte 220gsm — no minimum."
+      subtitle="One print or fifty — from $15, no minimum, picked up same day with rush."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Photo poster printing Saskatoon"
       description="True Color prints photo posters in Saskatoon on Roland Photobase Matte 220gsm — a premium 220gsm matte photo paper that delivers gallery-quality colour and sharp detail at every size. Pricing starts at $15 for 12×18\", up to $65 for 36×48\". No minimum order — single prints welcome. Popular use cases include event and wedding photography prints, real estate open house property photos, office and retail display art, sports team photos, and home décor enlargements. Standard turnaround is 1–3 business days. Same-day rush available for $40 flat on orders before 10 AM. In-house designer available for $35. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            True Color prints photo posters in Saskatoon on Roland Photobase Matte 220gsm — a
-            premium matte photo paper that delivers gallery-quality colour and sharp detail at every
-            size. Pricing starts at $15 for 12&times;18&quot; and goes up to $65 for
-            36&times;48&quot;. No minimum order — single prints are welcome. Whether you need one
-            poster for a home or fifty for a trade show display,{" "}
+            When you need a photo printed large enough to stop people in their tracks — for an open
+            house, a dressing room wall, or a client delivery — you need the colour to be right and
+            the print ready on time. We print photo posters in Saskatoon on Roland Photobase Matte
+            220gsm, a heavyweight matte photo paper that renders sharp detail and accurate colour at
+            every size. Pricing starts at $15 for 12&times;18&quot; and runs to $65 for
+            36&times;48&quot;. No minimum — single prints are welcome, with no setup fees.{" "}
             <Link href="/products/photo-posters" className="text-[#16C2F3] underline font-medium">
-              photo poster orders
+              Order a photo poster
             </Link>{" "}
-            are priced per print with no setup fees.
+            with the instant quote tool.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             Saskatoon event photographers use our photo poster service to deliver large prints to
@@ -51,8 +52,8 @@ export default function PhotoPosterPrintingSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             We print on our in-house Roland UV printer — the same machine that handles our
-            large-format banners and signs. That means consistent colour accuracy across all your
-            printed materials, whether you&apos;re printing a photo poster alongside a banner for
+            large-format banners and signs. That means consistent colour across all your
+            printed materials, whether you&apos;re running a photo poster alongside a banner for
             the same event. For large display prints and trade show graphics,{" "}
             <Link href="/large-format-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               large-format printing
@@ -78,13 +79,13 @@ export default function PhotoPosterPrintingSaskatoonPage() {
         { name: "Flyers", from: "from $45", slug: "flyers" },
       ]}
       whyPoints={[
-        "Roland Photobase Matte 220gsm — gallery-quality photo paper, sharp detail and accurate colour at every size",
-        "Sizes from 12×18\" ($15) to 36×48\" ($65) — full range covered in one shop",
-        "No minimum order — single prints welcome, no setup fees",
-        "In-house Roland UV printer — same machine for posters, banners, and signs ensures colour consistency",
-        "Same-day rush for $40 flat — event photo ready before the weekend? Order before 10 AM",
-        "In-house designer at $35 — crop adjustments, white balance correction, print-ready file prep",
-        "Popular with event photographers, real estate agents, retailers, and offices in Saskatoon",
+        "Colour that holds at large sizes — Roland Photobase Matte 220gsm delivers sharp detail from 12×18\" to 36×48\"",
+        "Sizes from 12×18\" ($15) to 36×48\" ($65) — full range covered in one shop, no minimum order",
+        "Order one print or fifty at the same per-unit price — no setup fees, no quantity lock-in",
+        "Every poster matches your banners and signs — same Roland UV printer for consistent colour across jobs",
+        "Event photo ready before the weekend — same-day rush $40 flat on orders before 10 AM",
+        "Crops corrected, white balance fixed, file print-ready — in-house designer $35 flat, same-day proof",
+        "18×24\" property photo for open house display — $22, ready in 1–3 business days",
         "Local pickup at 216 33rd St W — 1–3 business day standard turnaround",
       ]}
       faqs={[

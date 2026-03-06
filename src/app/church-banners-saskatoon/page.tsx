@@ -23,18 +23,19 @@ export default function ChurchBannersSaskatoonPage() {
       canonicalSlug="church-banners-saskatoon"
       primaryProductSlug="vinyl-banners"
       title="Church Banners Saskatoon"
-      subtitle="Seasonal events, community outreach, and weekly services — printed on time."
+      subtitle="Your Sunday service announcement needs to be up before Saturday — that's the turnaround Saskatoon faith communities count on."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Church and faith community banners printed in Saskatoon"
       description="True Color prints banners, signs, and displays for churches, mosques, temples, and faith communities across Saskatoon. Vinyl banners start at $66 (2×4\"), printed in-house on our Roland UV printer with grommets included. Coroplast signs from $24 for parking and wayfinding. Retractable banners from $219 for lobby entrances. Foamboard displays from $45 for indoor event boards. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof — perfect for Easter, Christmas, Ramadan, and community outreach campaigns. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            Saskatoon churches, mosques, temples, and faith communities rely on True Color for
-            seasonal signage — Easter and Christmas banners, Ramadan and Eid announcements,
-            community outreach campaigns, and weekly service signs. Vinyl banners start at $66
-            for a 2×4&quot; with grommets included, printed in-house on our Roland UV printer.
-            Same-day rush is available for +$40 flat on orders placed before 10 AM.
+            Easter banners, Christmas service announcements, Ramadan and Eid displays, community
+            outreach campaigns — faith communities in Saskatoon run on tight event timelines and
+            tighter budgets. Vinyl banners from $66 (2×4&quot;, grommets included) go up fast and
+            come down clean. We print in-house on our Roland UV printer, so colour is sharp and
+            orders are ready in 1–3 business days. Same-day rush is available for +$40 flat on
+            orders placed before 10 AM.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             Outdoor vinyl banners are the most common seasonal piece — hung across a fence,
@@ -76,14 +77,14 @@ export default function ChurchBannersSaskatoonPage() {
         { name: "Brochures (tri-fold)", from: "from $70 / 100", slug: "brochures" },
       ]}
       whyPoints={[
-        "Vinyl banners from $66 (2×4\") with grommets — outdoor-rated Roland UV printing",
-        "3×6\" service announcement banner from $135 — visible from the street",
-        "Retractable banners from $219 — lobby and entrance displays, store flat between services",
-        "Coroplast parking and wayfinding signs 18×24\" from $24",
-        "Foamboard event boards from $45 — indoor program signs, speaker bios, welcome boards",
-        "Tri-fold brochures 100 for $70 — community program guides, outreach handouts",
-        "Same-day rush +$40 flat — Christmas Eve banner ready if you order before 10 AM",
-        "In-house designer $35 flat — Arabic script, scripture text, seasonal imagery, same-day proof",
+        "Street-visible event announcement from $66 — 2×4\" vinyl banner with grommets, Roland UV outdoor-rated",
+        "3×6\" service banner from $135 — readable from the road, holds full event details",
+        "Pull up before service, roll down after — retractable banners from $219, store flat between events",
+        "Parking and wayfinding sorted — coroplast signs 18×24\" from $24 each",
+        "Event boards for every room — foamboard displays from $45, programs, speaker bios, welcome signs",
+        "Community handouts for 100 people — tri-fold brochures 100 for $70",
+        "Christmas Eve banner ready if you order before 10 AM — same-day rush +$40 flat",
+        "Arabic script, scripture text, seasonal imagery — in-house designer $35 flat, same-day proof",
       ]}
       faqs={[
         {

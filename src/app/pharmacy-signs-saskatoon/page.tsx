@@ -20,21 +20,21 @@ export const metadata: Metadata = {
 const descriptionNode = (
   <>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
-      Saskatoon independent pharmacies, compounding pharmacies, and health stores run seasonal
-      signage campaigns that directly drive foot traffic and service uptake. True Color prints
-      foamboard in-store displays from $8/sqft for flu shot season announcements, back-to-school
-      immunization reminders, and spring allergy promotion boards. A 24×36&quot; foamboard
-      display starts at $65 — lightweight enough for a countertop easel, durable enough for a
-      full season on a wall mount. Our in-house Roland UV printer produces sharp, clean graphics
-      that look professional next to name-brand pharmaceutical displays.
+      Flu shot season opens a narrow window — patients who see your signage walk in; patients who
+      don&apos;t walk past. Saskatoon independent pharmacies and health stores use foamboard
+      in-store displays from $8/sqft to catch that attention: flu season announcements,
+      back-to-school immunization reminders, and spring allergy promotion boards. A 24×36&quot;
+      foamboard display starts at $65 — lightweight enough for a countertop easel, durable enough
+      for a full season on a wall mount. Our in-house Roland UV printer produces sharp, clean
+      graphics that hold up next to name-brand pharmaceutical displays.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
       Window decals from $11/sqft give your storefront year-round branding while doubling as
       seasonal campaign space — update them for flu season, spring allergy, and back-to-school
       without damaging the glass. Vinyl banners from $8.25/sqft (2×4&apos; for $66) work for
       outdoor promos, vaccination clinic announcements, and entrance signage. Health promotion
-      flyers run $45 for 100 copies and are effective for countertop distribution and community
-      drop campaigns. Same-day rush is available for +$40 flat when ordered before 10 AM —
+      flyers run $45 for 100 copies and drive countertop distribution and community drop campaigns.
+      Same-day rush is available for +$40 flat when ordered before 10 AM —
       call (306) 954-8688.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed">
@@ -68,7 +68,7 @@ export default function PharmacySignsSaskatoonPage() {
       subtitle="Seasonal health campaign displays, window decals, and banners for Saskatoon pharmacies and health stores."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Foamboard displays and vinyl banners for Saskatoon pharmacy seasonal health campaigns printed by True Color Display Printing"
-      description="Saskatoon independent pharmacies, compounding pharmacies, and health stores use True Color for seasonal signage campaigns that drive foot traffic. Foamboard displays from $8/sqft for flu shot season, back-to-school immunizations, and spring allergy campaigns. Window decals from $11/sqft for year-round storefront branding. Vinyl banners from $66 for outdoor vaccination clinic announcements. Health promo flyers 100 for $45. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="Flu shot season opens a narrow window — patients who see your signage walk in; patients who don't walk past. Saskatoon pharmacies use foamboard displays from $8/sqft for flu season, back-to-school immunizations, and spring allergy campaigns. Window decals from $11/sqft for year-round storefront branding. Vinyl banners from $66 for outdoor vaccination clinic announcements. Health promo flyers 100 for $45. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
@@ -79,12 +79,12 @@ export default function PharmacySignsSaskatoonPage() {
         { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
       ]}
       whyPoints={[
-        "Seasonal foamboard displays from $8/sqft — flu season, allergy season, back-to-school immunizations",
-        "Window decals from $11/sqft — year-round storefront branding that updates seasonally",
-        "Vinyl banners from $66 — outdoor vaccination clinic and health promotion announcements",
-        "Health promo flyers — 100 for $45, effective for countertop and community distribution",
-        "Retractable banner stands from $219 — in-store vaccination clinic signage and health fairs",
-        "In-house designer $35 flat — seasonal campaign artwork updated fast, same-day proof",
+        "Seasonal foamboard displays from $8/sqft — catch patients during flu season, allergy season, and back-to-school",
+        "Window decals from $11/sqft — update seasonally, remove cleanly, no damage to glass",
+        "Vinyl banners from $66 — outdoor vaccination clinic and entrance announcements with grommets included",
+        "Health promo flyers — 100 for $45, countertop-ready and effective for community distribution",
+        "Retractable banner stands from $219 — in-store vaccination clinic setup and health fair use",
+        "In-house designer $35 flat — seasonal artwork updated fast between campaigns, same-day proof",
         "Same-day rush +$40 flat — when a vaccination clinic pops up on short notice",
       ]}
       faqs={[
@@ -94,7 +94,7 @@ export default function PharmacySignsSaskatoonPage() {
         },
         {
           q: "What is the best material for an in-store seasonal promo display?",
-          a: "3/16\" foam board is the standard for pharmacy in-store displays — lightweight, affordable, and easy to reprint each season. 18×24\" from $45, 24×36\" from $65. Mount on a countertop easel, hang on a wall, or use a standing frame. Our Roland UV printer produces sharp, professional health graphics in full colour.",
+          a: "3/16\" foam board is the standard for pharmacy in-store displays — lightweight, reprints affordably each season. 18×24\" from $45, 24×36\" from $65. Mount on a countertop easel, hang on a wall, or use a standing frame. Our Roland UV printer produces sharp health graphics in full colour.",
         },
         {
           q: "Can you print window decals for a seasonal health campaign?",

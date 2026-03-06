@@ -25,16 +25,17 @@ export default function StickerPrintingSaskatoonPage() {
       subtitle="Die-cut vinyl stickers for product labels, promo giveaways, packaging, and vehicle branding — printed in-house, picked up locally."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Custom die-cut vinyl stickers printed in Saskatoon"
-      description="True Color Display Printing produces custom die-cut vinyl stickers for Saskatoon businesses — product labels, packaging branding, promo giveaways, and vehicle decals. Stickers are printed full-colour on our in-house Roland UV printer on durable waterproof vinyl. Standard size is 4x4 inch die-cut. Custom sizes available. Pricing: 100 stickers = $160, 250 = $325, 500 = $475. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat with same-day proof. Standard turnaround 1–3 business days after artwork approval. Local pickup at 216 33rd St W, Saskatoon."
+      description="Custom die-cut vinyl stickers for Saskatoon businesses — product labels, packaging branding, promo giveaways, and vehicle decals. Printed full-colour on our in-house Roland UV printer on durable waterproof vinyl. Standard size is 4x4 inch die-cut. Custom sizes available. Pricing: 100 stickers = $160, 250 = $325, 500 = $475. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat with same-day proof. Standard turnaround 1–3 business days after artwork approval. Local pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
-            True Color Display Printing produces custom die-cut vinyl stickers for Saskatoon
-            businesses. Product labels, packaging inserts, promo giveaways, event stickers,
-            and vehicle decals — all printed full-colour on our in-house Roland UV printer
-            on durable, waterproof vinyl. Standard pricing: <strong>100 stickers = $160</strong>,{" "}
-            <strong>250 = $325</strong>, <strong>500 = $475</strong>. Default size is 4×4&quot;
-            die-cut. Custom shapes and sizes are available — quote on request.
+            Cheap stickers crack at the edges in Saskatchewan winters, fade on water bottles,
+            and smear at die-cut lines. Ours don't. We print die-cut vinyl stickers in Saskatoon
+            on our in-house Roland UV printer — waterproof, scratch-resistant, and colour-accurate
+            whether they end up on a jar, a truck panel, or a laptop. Standard pricing:{" "}
+            <strong>100 stickers = $160</strong>, <strong>250 = $325</strong>,{" "}
+            <strong>500 = $475</strong>. Default size is 4×4&quot; die-cut. Custom shapes and
+            sizes are available — quote on request.
           </p>
           <p className="text-gray-600 leading-relaxed">
             The Roland UV process produces vivid, scratch-resistant colour that holds up
@@ -76,13 +77,13 @@ export default function StickerPrintingSaskatoonPage() {
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
-        "Die-cut to any shape — not limited to rectangles or standard kiss-cut sheets",
-        "Roland UV print — vivid colour, scratch-resistant, waterproof in SK winters",
-        "100 stickers from $160 | 250 from $325 | 500 from $475",
-        "Custom sizes beyond the 4×4\" default — quote on request",
-        "Same-day rush available (+$40 flat) when ordered before 10 AM",
-        "In-house designer $35 flat — handles logos, custom shapes, and layout",
-        "Local pickup at 216 33rd St W, Saskatoon — no shipping wait",
+        "Colours hold up in SK winters, on water bottles, and on vehicle panels — Roland UV-cured ink won't crack or fade",
+        "Die-cut to any shape — circles, logo outlines, ovals — not locked to rectangles or kiss-cut sheets",
+        "100 stickers from $160 | 250 from $325 | 500 from $475 — pricing that actually makes sense for a product run",
+        "Custom sizes beyond the 4×4\" default — send us your dimensions and we quote it",
+        "You see a digital proof before we cut a single sticker — no surprises at pickup",
+        "Same-day turnaround for +$40 flat — order before 10 AM, pick up same day",
+        "In-house designer $35 flat — bring a logo or a rough idea, we build the die-cut path",
       ]}
       faqs={[
         {

@@ -20,19 +20,19 @@ export const metadata: Metadata = {
 const descriptionNode = (
   <>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
-      Saskatoon daycares, preschools, after-school programs, and summer camps use True Color to
-      run enrollment campaigns that fill spots fast. Coroplast yard signs are the most cost-effective
-      tool — 18×24&quot; signs print for $24 each on durable 4mm corrugated plastic with H-stakes
-      included. Order 5 or more and get 8% off. A 20-sign neighbourhood campaign costs around
-      $440 and covers every major street in your catchment area. Our in-house Roland UV printer
-      handles full-colour graphics so your logo, phone number, and enrollment message are sharp
-      and readable at the curb.
+      Empty spots cost Saskatoon daycares real money — and a yard sign on the right corner fills
+      them faster than any social media post. Coroplast yard signs are the most cost-effective
+      enrollment tool: 18×24&quot; signs print for $24 each on durable 4mm corrugated plastic with
+      H-stakes included. Order 5 or more and save 8%. A 20-sign neighbourhood campaign covers every
+      major street in your catchment area for around $440. Our in-house Roland UV printer handles
+      full-colour graphics so your logo, phone number, and enrollment message are sharp and readable
+      at the curb.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
       For grand openings, enrollment-open announcements, and summer program launches, vinyl banners
-      are the fastest way to get noticed. A 2×4&apos; banner prints for $66 with grommets included —
+      get noticed from the street. A 2×4&apos; banner prints for $66 with grommets included —
       hang it on your fence, above your entrance, or across a community centre notice board.
-      Window decals from $11/sqft give your building a polished, permanent look that communicates
+      Window decals from $11/sqft give your building a permanent look that communicates
       hours, license numbers, and brand identity to every parent driving by. Same-day rush
       is available for +$40 flat when ordered before 10 AM — call (306) 954-8688.
     </p>
@@ -67,7 +67,7 @@ export default function DaycareSignsSaskatoonPage() {
       subtitle="Enrollment yard signs, grand opening banners, and window decals for Saskatoon daycares and preschools."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Coroplast yard signs and vinyl banners for Saskatoon daycares and preschools printed by True Color Display Printing"
-      description="Saskatoon daycares, preschools, after-school programs, and summer camps use True Color to run enrollment campaigns that fill spots fast. Coroplast yard signs are the most cost-effective tool — 18×24\" signs print for $24 each on durable 4mm corrugated plastic with H-stakes included. Order 5+ and get 8% off. A 20-sign neighbourhood campaign costs around $440. Vinyl banners from $66 for grand openings and enrollment-open announcements. Window decals from $11/sqft for permanent storefront branding. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="Empty spots cost Saskatoon daycares real money — and a yard sign on the right corner fills them faster than social media. Coroplast yard signs: 18×24\" at $24 each, 4mm, H-stakes included. Order 5+ and save 8%. A 20-sign neighbourhood campaign is around $440. Vinyl banners from $66 for grand openings and enrollment-open announcements. Window decals from $11/sqft for permanent storefront branding. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "Coroplast Signs", from: "18×24\" for $24", slug: "coroplast-signs" },
@@ -78,18 +78,18 @@ export default function DaycareSignsSaskatoonPage() {
         { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
       ]}
       whyPoints={[
-        "Coroplast enrollment yard signs at $24 each — 18×24\", 4mm, H-stakes included",
-        "Bulk order 5+ coroplast signs and get 8% off — neighbourhood campaigns from ~$440 for 20 signs",
-        "Vinyl banners from $66 with grommets — grand openings, enrollment-open, summer programs",
-        "Window decals from $11/sqft — permanent storefront branding visible to every passing parent",
-        "Foamboard lobby and classroom displays — lightweight, easy to update each semester",
+        "Coroplast enrollment yard signs at $24 each — 18×24\", 4mm, H-stakes included, sharp at the curb",
+        "Order 5+ and save 8% — 20-sign neighbourhood campaigns from ~$440 cover your full catchment area",
+        "Vinyl banners from $66 with grommets — grand openings, enrollment-open, summer program launches",
+        "Window decals from $11/sqft — permanent storefront branding every passing parent sees",
+        "Foamboard lobby and classroom displays — lightweight, reprints easily each semester",
         "In-house designer $35 flat — handles your enrollment graphics, same-day proof",
-        "Same-day rush +$40 flat — signs ready same day when enrollment windows open fast",
+        "Same-day rush +$40 flat — signs ready the day an enrollment window opens",
       ]}
       faqs={[
         {
           q: "What is the best sign for a daycare enrollment campaign in Saskatoon?",
-          a: "Coroplast yard signs are the standard for enrollment campaigns. 18×24\" signs print for $24 each on 4mm corrugated plastic with H-stakes included for yard placement. Order 5 or more and get 8% off. A 20-sign campaign covering your neighbourhood costs around $440 and generates immediate visibility among local parents.",
+          a: "Coroplast yard signs are the standard for enrollment campaigns. 18×24\" signs print for $24 each on 4mm corrugated plastic with H-stakes included for yard placement. Order 5 or more and save 8%. A 20-sign campaign covering your neighbourhood costs around $440 and generates immediate visibility among local parents.",
         },
         {
           q: "How many yard signs do I need for a neighbourhood enrollment campaign?",
@@ -97,7 +97,7 @@ export default function DaycareSignsSaskatoonPage() {
         },
         {
           q: "What banner size works best for a daycare grand opening?",
-          a: "A 3×6&apos; vinyl banner at $135 is the most common size for building frontage or fence banners. A 2×4&apos; banner at $66 works for smaller entries or community board postings. All banners include grommets and are printed on heavy-duty scrim vinyl using our Roland UV printer for outdoor durability.",
+          a: "A 3×6\' vinyl banner at $135 is the most common size for building frontage or fence banners. A 2×4\' banner at $66 works for smaller entries or community board postings. All banners include grommets and are printed on heavy-duty scrim vinyl using our Roland UV printer for outdoor durability.",
         },
         {
           q: "Can you design our enrollment graphics if we don't have artwork?",

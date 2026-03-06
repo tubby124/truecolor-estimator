@@ -22,28 +22,29 @@ export default function RetailSignsSaskatoonPage() {
       canonicalSlug="retail-signs-saskatoon"
       primaryProductSlug="vinyl-banners"
       title="Retail Signs Saskatoon"
-      subtitle="Banners, window graphics, and promo print for boutiques, pharmacies, and gift shops — fast turnaround, local pickup."
+      subtitle="Banners, window graphics, and promo print for Saskatoon boutiques, pharmacies, and gift shops — 1–3 business days, local pickup at 216 33rd St W."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Retail store signage and banners printed in Saskatoon"
-      description="Saskatoon retailers use True Color Display Printing for vinyl banners, window decals, coroplast signs, flyers, and business cards. Whether you run a clothing boutique, a pharmacy, a gift shop, or a convenience store, we print what you need for sales, seasonal promos, parking lot signage, and in-store displays. Vinyl banners start at $8.25/sqft with grommets included. Standard turnaround is 1–3 business days. Same-day rush is available for +$40 flat. In-house designer from $35 flat with same-day proof. Roland UV in-house printer ensures consistent, vivid colour that matches your brand every time."
+      description="When you need retail signage before the weekend sale, you can't wait on shipping. Saskatoon boutiques, pharmacies, gift shops, and convenience stores get banners, window decals, coroplast signs, and flyers printed in-house at True Color. Vinyl banners from $8.25/sqft with grommets included. Standard turnaround 1–3 business days. Same-day rush +$40 flat. In-house designer $35 flat with same-day proof. Roland UV in-house — consistent colour, no outsourcing."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
-            Saskatoon retailers — boutiques, clothing stores, pharmacies, gift shops, and
-            convenience stores — use True Color Display Printing for everything from window
-            banners to parking lot signs. Vinyl banners start at{" "}
-            <strong>$8.25/sqft</strong> with grommets included, and a standard 2×4&apos; banner
+            When you're running a weekend sale or putting up seasonal signage, you can't wait
+            a week for a print order to ship from out of province. Saskatoon boutiques,
+            pharmacies, gift shops, and convenience stores get their banners, window graphics,
+            and yard signs printed in-house at True Color — ready in 1–3 business days, or
+            same day for <strong>+$40 flat</strong>. Vinyl banners start at{" "}
+            <strong>$8.25/sqft</strong> with grommets included — a standard 2×4&apos; banner
             runs $66. Coroplast signs for seasonal sales or parking restrictions start at{" "}
-            <strong>$8/sqft</strong> (18×24&quot; = $24). All print is produced on our
-            in-house Roland UV printer in Saskatoon — no shipping delays, no third-party
+            <strong>$8/sqft</strong> (18×24&quot; = $24). No shipping delays, no third-party
             vendor juggling.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Running a weekend sale or a last-minute clearance event? Same-day rush is
-            available for <strong>+$40 flat</strong> when ordered before 10 AM. Our in-house
-            designer sets up your artwork for <strong>$35 flat</strong> with a same-day
-            proof — just bring your logo, a rough layout idea, or your brand colours and
-            we handle the rest. For storefront window promotions, our{" "}
+            Order before 10 AM and same-day rush gets your signs ready by end of business
+            for <strong>+$40 flat</strong>. Our in-house designer sets up your artwork for{" "}
+            <strong>$35 flat</strong> with a same-day proof — bring your logo, a rough layout
+            idea, or just your brand colours and we handle the rest. For storefront window
+            promotions, our{" "}
             <Link
               href="/products/window-decals"
               className="text-[#16C2F3] underline font-medium"
@@ -78,13 +79,13 @@ export default function RetailSignsSaskatoonPage() {
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
       ]}
       whyPoints={[
-        "Vinyl banners from $8.25/sqft — grommets included, no hidden add-ons",
-        "Coroplast signs from $8/sqft — sale events, parking lots, A-frame inserts",
-        "Window decals from $11/sqft — removable, full-colour, UV-safe",
-        "Same-day rush available (+$40 flat) when ordered before 10 AM by phone",
-        "In-house designer $35 flat — handles low-res logos and rough sketches",
-        "Roland UV in-house printer — consistent colour across every reprint",
-        "Local pickup at 216 33rd St W, Saskatoon — no shipping wait",
+        "Your sale banner is ready in 1–3 business days — same day for +$40 flat if ordered before 10 AM",
+        "Vinyl banners from $8.25/sqft with grommets included — a 2×4' banner is $66, no add-ons",
+        "Coroplast signs from $8/sqft — seasonal sales, parking, A-frame inserts ($24 for 18×24\")",
+        "Window decals from $11/sqft — removable without residue, update your storefront every season",
+        "Colours stay consistent across every reprint — we run Roland UV in-house, so there's no outsourcing",
+        "Bring a logo or a rough idea — our in-house designer builds your artwork for $35 flat, same-day proof",
+        "Pick up at 216 33rd St W, Saskatoon — no shipping, no waiting on couriers",
       ]}
       faqs={[
         {
