@@ -155,7 +155,7 @@ const homeFaqSchema = {
       name: "How much does printing cost in Saskatoon?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Coroplast signs start at $30. Vinyl banners start at $66. Business cards are $45 for 250 double-sided. See exact prices for any size and quantity at truecolorprinting.ca/quote — no quote forms needed.",
+        text: "Printing prices at True Color Display Printing in Saskatoon start at: coroplast yard signs from $8/sqft ($30 minimum); vinyl banners from $8.25/sqft; business cards from $45 for 250 double-sided on 14pt gloss stock; vehicle magnets from $45; flyers from $45 for 100 sheets; ACP aluminum signs from $13/sqft; retractable banners from $219; window decals from $45; foamboard displays from $45; stickers from $95; postcards from $35. All prices are pre-tax — GST (5%) and PST (6%) apply at checkout. Volume discounts are automatic: coroplast at 8+ sqft saves 8%, 17+ sqft saves 17%. See your exact price for any product size and quantity instantly at truecolorprinting.ca/quote — no forms, no phone calls, no waiting for a callback. Local pickup only at 216 33rd St W, Saskatoon.",
       },
     },
     {
@@ -163,7 +163,7 @@ const homeFaqSchema = {
       name: "Do you offer same-day printing in Saskatoon?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes — same-day rush printing is available for an additional $40 flat fee on any order. Order before 10 AM and call (306) 954-8688 to confirm capacity. Standard turnaround is 1–3 business days.",
+        text: "Yes — True Color Display Printing offers same-day rush printing in Saskatoon for a $40 flat fee added to any order. To qualify for same-day turnaround, your order must be placed before 10 AM and you must call (306) 954-8688 to confirm production capacity for that day. The $40 rush fee applies to the entire order regardless of size or product type. Standard turnaround without the rush fee is 1–3 business days after artwork is approved. If your artwork needs design work, the in-house designer can produce a same-day proof for $35 flat — so even orders without a ready file can sometimes be completed same day. All orders are local pickup only at 216 33rd St W, Saskatoon SK. No shipping means no courier delays.",
       },
     },
     {
@@ -171,7 +171,7 @@ const homeFaqSchema = {
       name: "Where is True Color Display Printing located?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "216 33rd St W, Saskatoon, SK S7L 0V5. Open Monday–Friday 9 AM–5 PM. Free local pickup on all orders — no shipping wait.",
+        text: "True Color Display Printing is located at 216 33rd St W, Saskatoon, SK S7L 0V5. The shop is open Monday through Friday, 9 AM to 5 PM. All orders are available for local pickup — there is no shipping option, which means no courier wait times and no risk of damaged prints in transit. Customers can drop off their artwork in person or upload a file online, approve a proof by email, and pick up the finished order when it is ready. For same-day pickup, orders must be placed before 10 AM and confirmed by phone at (306) 954-8688. The shop is a full-service in-house print shop with a Roland UV printer on site — no outsourcing to a third-party facility.",
       },
     },
     {
@@ -179,7 +179,7 @@ const homeFaqSchema = {
       name: "Do I need to call for a quote?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No — use the online estimator at truecolorprinting.ca/quote to see your exact price in 30 seconds. Pick your product, size, and quantity. No forms, no phone tag, no waiting.",
+        text: "No — True Color Display Printing has a live online estimator at truecolorprinting.ca/quote that shows your exact price in about 30 seconds. Select a product (coroplast signs, vinyl banners, business cards, vehicle magnets, flyers, brochures, ACP signs, window decals, stickers, retractable banners, and more), enter your dimensions and quantity, and the price appears instantly with no forms to fill out and no account required. The estimator covers all 16 products with full volume pricing built in. You only need to call (306) 954-8688 for same-day rush orders to confirm production capacity, or if you have a large commercial job requiring a custom quote. Design services ($35 flat) can be added to any order at checkout.",
       },
     },
     {
@@ -187,7 +187,7 @@ const homeFaqSchema = {
       name: "What file format do I need for printing?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "PDF or JPG at 150 dpi minimum. No file? Our in-house designer handles artwork prep from a rough sketch or low-res logo, starting at $35. Vector files (AI, EPS) are also accepted.",
+        text: "The preferred file formats for printing at True Color Display Printing are PDF (print-ready, with bleeds and outlines), high-resolution JPG or PNG at 150 dpi or higher at final print size, and vector formats such as AI or EPS with all fonts outlined. If your file is low resolution or needs resizing, the in-house designer can upscale and reformat artwork for $35 flat — the same price whether the job takes 10 minutes or an hour. If you have no file at all, the designer can build your artwork from scratch using a rough sketch, photo reference, or verbal description. A same-day proof is standard with design service. Upload your file directly on the product page when ordering, or email it to info@true-color.ca with your order number.",
       },
     },
   ],

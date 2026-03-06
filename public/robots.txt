@@ -1,0 +1,42 @@
+User-agent: *
+Allow: /
+
+# Block private/transactional routes
+Disallow: /api/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
+Disallow: /staff
+Disallow: /pay/
+Disallow: /order-confirmed
+
+# AI search crawlers — explicitly allowed
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+# Block training-only crawlers
+User-agent: CCBot
+Disallow: /
+
+Sitemap: https://truecolorprinting.ca/sitemap.xml
