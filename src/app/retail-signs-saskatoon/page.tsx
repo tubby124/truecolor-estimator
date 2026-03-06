@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Retail Signs Saskatoon | Banners, Decals & Flyers | True Color",
+  title: { absolute: "Retail Signs Saskatoon | Banners & Decals | True Color" },
   description:
     "Vinyl banners, window decals, coroplast signs, and flyers for Saskatoon retailers. From $8/sqft. Same-day rush available. In-house designer $35 flat.",
   alternates: { canonical: "/retail-signs-saskatoon" },

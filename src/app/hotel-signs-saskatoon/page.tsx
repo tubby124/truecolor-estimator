@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Hotel Signs Saskatoon | Event & Conference Printing | True Color",
+  title: { absolute: "Hotel Signs Saskatoon | Event Printing | True Color" },
   description:
     "Hotel and conference centre signs in Saskatoon from $45. Foamboard, retractable banners, vinyl banners, ACP exterior signs, window decals. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/hotel-signs-saskatoon" },

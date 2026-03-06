@@ -3,7 +3,7 @@ import Image from "next/image";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Graduation Banners Saskatoon | Schools & Event Venues | True Color",
+  title: { absolute: "Graduation Banners Saskatoon | From $66 | True Color" },
   description:
     "Vinyl graduation banners, foam board displays & retractable stands for Saskatoon schools and venues. Banners from $90. Same-day rush. Local pickup 216 33rd St W.",
   keywords: [

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Vehicle Magnets Saskatoon | From $24/sqft",
+  title: { absolute: "Vehicle Magnets Saskatoon | From $24/sqft | True Color" },
   description:
     "Custom vehicle magnets in Saskatoon from $24/sqft. 30mil thick, full colour, removable and reusable. Same-day rush available. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/vehicle-magnets-saskatoon" },

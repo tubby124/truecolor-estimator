@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Event Banners Saskatoon | Vinyl, Foam Board & Retractable Stands | True Color",
+  title: { absolute: "Event Banners Saskatoon | From $66 | True Color" },
   description:
     "Banners, foam boards, and retractable stands for Saskatoon events. Same-day options. One shop for signage, banners, and print. Local pickup.",
   alternates: { canonical: "/event-banners" },

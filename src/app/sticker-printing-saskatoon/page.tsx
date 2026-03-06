@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Sticker Printing Saskatoon | Die-Cut Vinyl | True Color",
+  title: { absolute: "Sticker Printing Saskatoon | Die-Cut Vinyl | True Color" },
   description:
     "Die-cut vinyl sticker printing in Saskatoon. 100 for $160, 250 for $325, 500 for $475. Full-colour UV print, waterproof, custom sizes. Local pickup. Rush +$40.",
   alternates: { canonical: "/sticker-printing-saskatoon" },

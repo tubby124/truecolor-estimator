@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Brochure Printing Saskatoon | Tri-Fold & Half-Fold | True Color",
+  title: { absolute: "Brochure Printing Saskatoon | Tri-Fold | True Color" },
   description:
     "Brochure printing in Saskatoon from $70/100. Tri-fold & half-fold on 100lb gloss, scored and folded in-house. Same-day rush available. Pickup at 216 33rd St W.",
   alternates: { canonical: "/brochure-printing-saskatoon" },

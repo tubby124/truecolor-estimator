@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Postcard Printing Saskatoon | 4×6, 5×7 | True Color",
+  title: { absolute: "Postcard Printing Saskatoon | 4×6 & 5×7 | True Color" },
   description:
     "Postcard printing in Saskatoon from $40 for 50. 4×6 and 5×7 on 14pt gloss, double-sided. Same-day rush +$40. Real estate mailers, promos, event invites. 216 33rd St W.",
   alternates: { canonical: "/postcard-printing-saskatoon" },

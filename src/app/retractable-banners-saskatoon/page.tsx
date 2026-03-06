@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Retractable Banners Saskatoon | Stand + Print From $219 | True Color",
+  title: { absolute: "Retractable Banners Saskatoon | From $219 | True Color" },
   description:
     "Retractable banner stands in Saskatoon from $219 — stand + full-colour print included. Trade shows, events, storefronts. Same-day rush available. Local pickup.",
   alternates: { canonical: "/retractable-banners-saskatoon" },

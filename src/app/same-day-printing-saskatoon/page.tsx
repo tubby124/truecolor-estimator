@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Same Day Printing Saskatoon | Rush $40 Flat",
+  title: { absolute: "Same Day Printing Saskatoon | Rush +$40 | True Color" },
   description:
     "Same-day printing in Saskatoon. Order before 10 AM, pick up by 5 PM. Signs, banners, business cards, flyers. Rush fee $40 flat — no per-item upcharge. 216 33rd St W.",
   alternates: { canonical: "/same-day-printing-saskatoon" },

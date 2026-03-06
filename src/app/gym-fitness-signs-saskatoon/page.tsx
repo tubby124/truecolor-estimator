@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Gym & Fitness Signs Saskatoon | Banners, Decals & More | True Color",
+  title: { absolute: "Gym & Fitness Signs Saskatoon | Banners | True Color" },
   description:
     "Grand opening banners from $66, retractable banners from $219, and window decals from $11/sqft for Saskatoon gyms and fitness studios. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/gym-fitness-signs-saskatoon" },

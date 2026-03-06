@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Agriculture Signs Saskatchewan | Farm Signs & Banners | True Color",
+  title: { absolute: "Agriculture Signs Saskatoon | Signs & Banners | True Color" },
   description:
     "Farm gate signs, acreage markers, and trade show banners for Saskatchewan ag businesses. Coroplast from $30. Vehicle magnets from $45. Saskatoon local pickup.",
   alternates: { canonical: "/agriculture-signs-saskatoon" },

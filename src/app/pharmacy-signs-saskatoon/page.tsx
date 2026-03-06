@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Pharmacy Signs Saskatoon | Displays, Banners & Window Decals | True Color",
+  title: { absolute: "Pharmacy Signs Saskatoon | Displays & Banners | True Color" },
   description:
     "Foamboard promo displays, flu season banners, and window decals for Saskatoon pharmacies and health stores. From $8/sqft. In-house designer $35. Local pickup.",
   alternates: { canonical: "/pharmacy-signs-saskatoon" },

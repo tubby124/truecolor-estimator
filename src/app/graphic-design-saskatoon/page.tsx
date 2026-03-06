@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Graphic Design Saskatoon | Custom Artwork, Logos & Print Layouts | True Color",
+  title: { absolute: "Graphic Design Saskatoon | Logos & Layouts | True Color" },
   description:
     "In-house Photoshop designer in Saskatoon. Custom logos, artwork modifications, print-ready layouts for banners, signs, business cards & flyers. Design + print in one shop. $35 flat for standard layouts.",
   alternates: { canonical: "/graphic-design-saskatoon" },

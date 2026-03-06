@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Coroplast Signs Regina SK | Yard Signs & Job Site Signs | True Color",
+  title: { absolute: "Coroplast Signs Regina SK | From $8/sqft | True Color" },
   description:
     "Custom coroplast signs for Regina businesses. From $8/sqft — yard signs, job site signs, real estate signs. Printed in Saskatoon and shipped to Regina. Volume pricing available.",
   alternates: { canonical: "/coroplast-signs-regina" },

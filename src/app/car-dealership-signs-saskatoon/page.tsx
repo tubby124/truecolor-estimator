@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Car Dealership Signs Saskatoon | Magnets, Banners & ACP | True Color",
+  title: { absolute: "Car Dealership Signs Saskatoon | Magnets & ACP | True Color" },
   description:
     "Vehicle magnets from $24/sqft, lot banners from $66, and ACP signs from $13/sqft for Saskatoon car dealerships and auto shops. Pickup at 216 33rd St W.",
   alternates: { canonical: "/car-dealership-signs-saskatoon" },

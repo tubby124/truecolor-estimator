@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Printing Lloydminster SK | Signs, Banners & Business Cards | True Color",
+  title: { absolute: "Printing Lloydminster SK | Signs & Banners | True Color" },
   description:
     "Custom printing for Lloydminster SK businesses. Coroplast signs, vinyl banners, vehicle magnets, business cards. Printed in Saskatoon — shipped to Lloydminster. True Color Display Printing.",
   alternates: { canonical: "/printing-lloydminster-sk" },
@@ -95,6 +95,14 @@ export default function PrintingLloydminsterPage() {
         {
           q: "Do you offer volume pricing for large Lloydminster orders?",
           a: "Yes — volume pricing applies automatically. Coroplast: 8% off at 8+ sqft, 17% off at 17+ sqft, and $7.25/sqft at 32+ sqft. Vinyl banners: 5% off at 5+ sqft, up to 15% off at 15+ sqft. No account needed.",
+        },
+        {
+          q: "What are the most popular products for Lloydminster construction companies?",
+          a: "Job site coroplast signs from $8/sqft, vehicle magnets for fleet trucks from $24/sqft, and ACP aluminum signs for permanent facility and yard identification from $13/sqft. We also print safety signs, directional signage, and hoarding banners for construction hoardings.",
+        },
+        {
+          q: "Can I pick up my order in Saskatoon instead of shipping to Lloydminster?",
+          a: "Yes — Saskatoon pickup is available at 216 33rd St W, Monday to Friday 9 AM – 5 PM. If you're making a trip to Saskatoon anyway, this is the fastest option. Same-day production (+$40 rush) means you can order in the morning and pick up by 4 PM.",
         },
       ]}
     />

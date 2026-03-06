@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Banner Printing Saskatoon | Vinyl Banners | True Color",
+  title: { absolute: "Banner Printing Saskatoon | From $8.25/sqft | True Color" },
   description:
     "Custom vinyl banner printing in Saskatoon from $8.25/sqft. Any size, grommets included. Events, storefronts, trade shows. Same-day rush available. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/banner-printing-saskatoon" },

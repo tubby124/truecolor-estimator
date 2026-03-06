@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Event Signs Saskatoon | Banners, Boards & Displays from $30",
+  title: { absolute: "Event Signs Saskatoon | Boards From $30 | True Color" },
   description:
     "Event signs in Saskatoon from $30. Vinyl banners, coroplast signs, foamboard displays, and retractable stands for weddings, galas, conferences, and community events. 216 33rd St W.",
   alternates: { canonical: "/event-signs-saskatoon" },

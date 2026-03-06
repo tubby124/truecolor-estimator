@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Window Decals Saskatoon | Perf Vinyl & Lettering | True Color",
+  title: { absolute: "Window Decals Saskatoon | From $11/sqft | True Color" },
   description:
     "Custom window decals from $11/sqft, perforated vinyl from $8/sqft, and vinyl lettering from $8.50/sqft in Saskatoon. In-house Roland UV. Same-day rush +$40.",
   alternates: { canonical: "/window-decals-saskatoon" },

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Vinyl Lettering Saskatoon | Cut Vinyl Text | True Color",
+  title: { absolute: "Vinyl Lettering Saskatoon | Cut Vinyl Text | True Color" },
   description:
     "Cut vinyl lettering for Saskatoon storefronts, vehicles & office windows from $8.50/sqft, min $40. Business hours, door text, boat numbers. Roland UV. Same-day rush +$40.",
   alternates: { canonical: "/vinyl-lettering-saskatoon" },

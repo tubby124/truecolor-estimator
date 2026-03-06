@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Banner Printing Regina SK | Vinyl Banners Shipped from Saskatoon | True Color",
+  title: { absolute: "Banner Printing Regina SK | From $8.25/sqft | True Color" },
   description:
     "Custom vinyl banner printing for Regina businesses. 13oz vinyl banners from $8.25/sqft, grommets included. Order online — shipped to Regina. True Color Display Printing, Saskatoon.",
   alternates: { canonical: "/banner-printing-regina" },

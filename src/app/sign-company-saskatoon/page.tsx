@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Saskatoon Sign Company | Coroplast & ACP | True Color",
+  title: { absolute: "Sign Company Saskatoon | Coroplast & ACP | True Color" },
   description:
     "Saskatoon sign company — coroplast from $8/sqft, ACP aluminum from $13/sqft, vinyl lettering, vehicle magnets. Same-day rush +$40. In-house print at 216 33rd St W.",
   alternates: { canonical: "/sign-company-saskatoon" },

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Real Estate Signs Saskatoon | Yard Signs, Cards & Magnets | True Color",
+  title: { absolute: "Real Estate Signs Saskatoon | From $24 | True Color" },
   description:
     "Coroplast yard signs for Saskatoon REALTORS from $30. Feature sheets, business cards, vehicle magnets, postcards. Same-day rush available. Local pickup 216 33rd St W.",
   alternates: { canonical: "/real-estate-signs-saskatoon" },

@@ -97,10 +97,22 @@ export function SiteFooter() {
                 <Link href="/large-format-printing-saskatoon" className="block hover:text-white transition-colors">
                   Large Format
                 </Link>
+                <Link href="/flyer-printing-saskatoon" className="block hover:text-white transition-colors">
+                  Flyer Printing
+                </Link>
+                <Link href="/brochure-printing-saskatoon" className="block hover:text-white transition-colors">
+                  Brochure Printing
+                </Link>
               </div>
               <div className="space-y-2">
                 <Link href="/trade-show-displays-saskatoon" className="block hover:text-white transition-colors">
                   Trade Shows
+                </Link>
+                <Link href="/retractable-banners-saskatoon" className="block hover:text-white transition-colors">
+                  Retractable Banners
+                </Link>
+                <Link href="/vehicle-magnets-saskatoon" className="block hover:text-white transition-colors">
+                  Vehicle Magnets
                 </Link>
                 <Link href="/event-signs-saskatoon" className="block hover:text-white transition-colors">
                   Event Signs
@@ -140,6 +152,10 @@ export function SiteFooter() {
             <Link href="/signs-moose-jaw-sk" className="hover:text-white transition-colors">Moose Jaw</Link>
             <Link href="/printing-swift-current-sk" className="hover:text-white transition-colors">Swift Current</Link>
             <Link href="/coroplast-signs-regina" className="hover:text-white transition-colors">Regina Signs</Link>
+            <Link href="/signs-north-battleford-sk" className="hover:text-white transition-colors">North Battleford</Link>
+            <Link href="/signs-yorkton-sk" className="hover:text-white transition-colors">Yorkton</Link>
+            <Link href="/printing-estevan-sk" className="hover:text-white transition-colors">Estevan</Link>
+            <Link href="/printing-weyburn-sk" className="hover:text-white transition-colors">Weyburn</Link>
           </div>
         </div>
 

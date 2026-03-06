@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Construction Signs Saskatoon | Site Signs, Magnets & Banners | True Color",
+  title: { absolute: "Construction Signs Saskatoon | ACP & Banners | True Color" },
   description:
     "Job site coroplast signs, safety banners, truck magnets, and hoarding banners for Saskatoon contractors and home builders. Coroplast from $8/sqft. Same-day rush. 216 33rd St W.",
   keywords: [

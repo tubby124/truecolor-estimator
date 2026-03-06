@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "School Signs Saskatoon | True Color Printing",
+  title: { absolute: "School Signs Saskatoon | Banners & Coroplast | True Color" },
   description:
     "Coroplast signs from $8/sqft, vinyl banners from $8.25/sqft, and flyers for Saskatoon K-12 schools, daycares & sports teams. Rush orders +$40. Local pickup.",
   alternates: {

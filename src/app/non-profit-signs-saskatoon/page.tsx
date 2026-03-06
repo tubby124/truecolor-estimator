@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Non-Profit Signs Saskatoon | Fundraiser & Event Printing | True Color",
+  title: { absolute: "Non-Profit Signs Saskatoon | Banners & Boards | True Color" },
   description:
     "Non-profit signs and banners in Saskatoon from $24. Coroplast yard signs, vinyl banners, flyers, retractable banners. Volume discounts. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/non-profit-signs-saskatoon" },

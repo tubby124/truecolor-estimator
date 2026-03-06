@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Signs Prince Albert SK | Coroplast, Banners & Print | True Color",
+  title: { absolute: "Signs Prince Albert SK | Coroplast & Banners | True Color" },
   description:
     "Custom signs and banners for Prince Albert SK businesses. Coroplast from $8/sqft, vinyl banners from $8.25/sqft, business cards. Printed in Saskatoon — shipped to Prince Albert.",
   alternates: { canonical: "/signs-prince-albert-sk" },
@@ -96,6 +96,14 @@ export default function SignsPrinceAlbertPage() {
         {
           q: "Can I get ACP aluminum signs shipped to Prince Albert?",
           a: "Yes — 3mm aluminum composite signs from $13/sqft. These are permanent signs that last 10+ years outdoors. Popular for business frontage, healthcare facilities, and office buildings. Ships flat, protected with foam packaging.",
+        },
+        {
+          q: "Can Prince Albert businesses get business cards and flyers shipped?",
+          a: "Yes — 250 business cards (double-sided, full colour) from $40. Flyers start at $45 for 100. Both ship flat in padded packaging. Timeline: 3–5 business days including shipping to Prince Albert.",
+        },
+        {
+          q: "Do you print for healthcare organizations in Prince Albert?",
+          a: "Yes — Victoria Hospital, clinics, and healthcare offices in PA are common customers. We print wayfinding signs (ACP from $13/sqft), banner stands for waiting rooms (from $219), business cards, and appointment reminder cards. Everything ships directly to your Prince Albert address.",
         },
       ]}
     />

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Property Management Signs Saskatoon | True Color",
+  title: { absolute: "Property Management Signs Saskatoon | True Color" },
   description:
     "For-rent coroplast signs from $24 for Saskatoon property managers. Bulk 5+ save 8%. ACP exterior signs, banners, vehicle magnets. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/property-management-signs-saskatoon" },

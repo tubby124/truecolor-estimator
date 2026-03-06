@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Printing Weyburn SK | Signs, Magnets & ACP for Potash & Ag | True Color",
+  title: { absolute: "Printing Weyburn SK | Signs & Banners | True Color" },
   description:
     "Custom signs for Weyburn SK businesses. Coroplast from $8/sqft, ACP aluminum from $13/sqft, vehicle magnets. Printed in Saskatoon — shipped to Weyburn.",
   alternates: { canonical: "/printing-weyburn-sk" },

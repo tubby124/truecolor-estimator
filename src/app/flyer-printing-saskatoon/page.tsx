@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Flyer Printing Saskatoon | From $45 for 100 | True Color",
+  title: { absolute: "Flyer Printing Saskatoon | 100 Flyers from $45 | True Color" },
   description:
     "Flyer printing in Saskatoon from $45/100 on 80lb gloss. Full-colour double-sided, 100lb upgrade available, same-day rush +$40. Custom sizes on request. Pickup at 216 33rd St W.",
   alternates: { canonical: "/flyer-printing-saskatoon" },

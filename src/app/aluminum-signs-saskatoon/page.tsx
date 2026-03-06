@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Aluminum Signs Saskatoon | ACP Signs From $13/sqft | True Color",
+  title: { absolute: "Aluminum Signs Saskatoon | ACP From $13/sqft | True Color" },
   description:
     "3mm aluminum composite (ACP) signs in Saskatoon from $13/sqft. 10+ year outdoor lifespan. Professional building signs, site signs, and directories. Local pickup.",
   alternates: { canonical: "/aluminum-signs-saskatoon" },

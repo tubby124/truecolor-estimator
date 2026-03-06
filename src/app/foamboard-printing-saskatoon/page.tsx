@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Foam Board Printing Saskatoon | True Color",
+  title: { absolute: "Foam Board Printing Saskatoon | From $45 | True Color" },
   description:
     "Foam board printing in Saskatoon from $45 for 18×24\". Sharp edges, 5mm foam, lightweight indoor display. Offices, retail, events & trade shows. Rush +$40.",
   alternates: {

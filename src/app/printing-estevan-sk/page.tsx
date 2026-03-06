@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Printing Estevan SK | Signs, Magnets & Banners for Oilfield | True Color",
+  title: { absolute: "Printing Estevan SK | Signs, Banners & Magnets | True Color" },
   description:
     "Signs and printing for Estevan SK oilfield and energy businesses. Vehicle magnets from $24/sqft, ACP aluminum from $13/sqft. Printed in Saskatoon — shipped to Estevan.",
   alternates: { canonical: "/printing-estevan-sk" },

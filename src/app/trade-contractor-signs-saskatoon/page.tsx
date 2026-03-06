@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Trade Contractor Signs Saskatoon | True Color",
+  title: { absolute: "Trade Contractor Signs Saskatoon | From $24 | True Color" },
   description:
     "Vehicle magnets from $45, yard signs from $24, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40. Roland UV printed.",
   alternates: {

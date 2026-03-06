@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Printing Swift Current SK | Signs, Banners & Magnets | True Color",
+  title: { absolute: "Printing Swift Current SK | Signs & Magnets | True Color" },
   description:
     "Custom signs and printing for Swift Current SK. Coroplast from $8/sqft, vinyl banners, vehicle magnets, business cards. Printed in Saskatoon — shipped to Swift Current.",
   alternates: { canonical: "/printing-swift-current-sk" },

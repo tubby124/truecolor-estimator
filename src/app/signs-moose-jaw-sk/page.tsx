@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Signs Moose Jaw SK | Coroplast, Banners & Vehicle Magnets | True Color",
+  title: { absolute: "Signs Moose Jaw SK | Coroplast & Banners | True Color" },
   description:
     "Custom signs and banners for Moose Jaw SK businesses. Coroplast from $8/sqft, vinyl banners, vehicle magnets. Printed in Saskatoon — shipped to Moose Jaw. True Color Display Printing.",
   alternates: { canonical: "/signs-moose-jaw-sk" },
@@ -96,6 +96,14 @@ export default function SignsMooseJawPage() {
         {
           q: "Can I get business cards and flyers shipped to Moose Jaw?",
           a: "Yes — 250 business cards (double-sided, full colour) for $40, shipped to Moose Jaw. Flyers start at $45 for 100. Business cards and flyers ship flat in a padded envelope or small box.",
+        },
+        {
+          q: "Can I get ACP aluminum signs shipped to Moose Jaw?",
+          a: "Yes — aluminum composite signs from $13/sqft, 3mm thick. Common sizes: 24×36\" = $66, 4×4 ft = $136. These are permanent signs that last 10+ years outdoors. Ships flat, padded and protected. Timeline: 3–5 business days including shipping.",
+        },
+        {
+          q: "Do you do rush orders for Moose Jaw clients?",
+          a: "Rush production (+$40 flat) is available, reducing in-house production to same-day in Saskatoon. Courier to Moose Jaw still takes 1–2 business days. For truly urgent Moose Jaw orders, consider driving to Saskatoon for pickup — 75 km, about 45 minutes.",
         },
       ]}
     />

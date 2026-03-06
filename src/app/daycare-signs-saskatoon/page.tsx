@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Daycare Signs Saskatoon | Coroplast, Banners & Displays | True Color",
+  title: { absolute: "Daycare Signs Saskatoon | Coroplast & Banners | True Color" },
   description:
     "Enrollment yard signs, banners, and window decals for Saskatoon daycares. Coroplast 18×24\" at $24 each. Bulk discounts on neighbourhood campaigns. Local pickup.",
   alternates: { canonical: "/daycare-signs-saskatoon" },

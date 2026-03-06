@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Trade Show Displays Saskatoon | Banners & Booths from $219",
+  title: { absolute: "Trade Show Displays Saskatoon | From $219 | True Color" },
   description:
     "Trade show displays in Saskatoon from $219. Retractable banner stands, vinyl banners, foamboard, and coroplast signs. In-house Roland printer, 1–3 day turnaround. 216 33rd St W.",
   alternates: { canonical: "/trade-show-displays-saskatoon" },

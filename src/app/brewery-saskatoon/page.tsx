@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Brewery Signs Saskatoon | Banners, Stickers & Taproom Decor | True Color",
+  title: { absolute: "Brewery Signs Saskatoon | Banners & Stickers | True Color" },
   description:
     "Vinyl banners, stickers, and taproom signage for Saskatoon craft breweries and distilleries. Banners from $8.25/sqft, stickers 250 for $325. Same-day rush +$40.",
   alternates: { canonical: "/brewery-saskatoon" },

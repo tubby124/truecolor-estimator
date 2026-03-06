@@ -8,12 +8,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages = [
     // Core
     { url: "/", priority: 1.0, changeFrequency: "weekly" as const },
-    { url: "/quote", priority: 0.9, changeFrequency: "weekly" as const },
+    { url: "/quote", priority: 0.6, changeFrequency: "monthly" as const },
     { url: "/gallery", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/about", priority: 0.6, changeFrequency: "monthly" as const },
     { url: "/services", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/quote-request", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/resources", priority: 0.6, changeFrequency: "daily" as const },
+    { url: "/resources", priority: 0.6, changeFrequency: "weekly" as const },
     // SEO landing pages — Tier 1 (highest priority keywords)
     { url: "/coroplast-signs-saskatoon", priority: 0.95, changeFrequency: "monthly" as const },
     { url: "/same-day-printing-saskatoon", priority: 0.95, changeFrequency: "monthly" as const },

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Signs North Battleford SK | Coroplast, Banners & Magnets | True Color",
+  title: { absolute: "Signs North Battleford SK | Coroplast & Banners | True Color" },
   description:
     "Custom signs for North Battleford SK businesses. Coroplast from $8/sqft, vehicle magnets, ACP aluminum, vinyl banners. Printed in Saskatoon — shipped to North Battleford.",
   alternates: { canonical: "/signs-north-battleford-sk" },

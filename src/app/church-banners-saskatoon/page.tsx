@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Church Banners Saskatoon | Faith Community Printing | True Color",
+  title: { absolute: "Church Banners Saskatoon | From $66 | True Color" },
   description:
     "Church and faith community banners in Saskatoon from $66. Vinyl banners, coroplast signs, retractable banners, foamboard displays. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/church-banners-saskatoon" },

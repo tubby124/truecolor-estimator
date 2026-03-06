@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Chiropractor Signs Saskatoon | Displays, Cards & Banners | True Color",
+  title: { absolute: "Chiropractor Signs Saskatoon | Displays & Cards | True Color" },
   description:
     "Foamboard displays, retractable banners, and referral cards for Saskatoon chiropractors and physiotherapists. From $8/sqft. In-house designer $35. Local pickup.",
   alternates: { canonical: "/chiropractor-signs-saskatoon" },

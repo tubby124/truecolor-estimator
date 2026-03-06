@@ -4,7 +4,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Healthcare Signs Saskatoon | Clinic & Medical Office Signage | True Color",
+  title: { absolute: "Healthcare Signs Saskatoon | Clinic Signage | True Color" },
   description:
     "Clinic signs, wayfinding, patient banners, and office directories for Saskatoon healthcare providers. ACP from $13/sqft. In-house designer. Local pickup.",
   alternates: { canonical: "/healthcare-signs-saskatoon" },

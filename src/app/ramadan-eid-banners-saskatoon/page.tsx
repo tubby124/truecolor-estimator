@@ -3,7 +3,7 @@ import Image from "next/image";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Ramadan & Eid Banners Saskatoon | Iftar Night Printing | True Color",
+  title: { absolute: "Ramadan & Eid Banners Saskatoon | From $66 | True Color" },
   description:
     "Ramadan banners, Eid al-Fitr flyers & retractable stands — from $90. Ready in 48 hours. Same-day rush available. Serving Saskatoon mosques, halal restaurants & Islamic schools. Local pickup at 216 33rd St W.",
   keywords: [
@@ -32,7 +32,7 @@ export default function RamadanEidBannersPage() {
       primaryProductSlug="vinyl-banners"
       title="Ramadan & Eid Banners Saskatoon"
       subtitle="Iftar night banners, Eid al-Fitr signage, and community event flyers — printed in 48 hours. Serving Saskatoon mosques, halal restaurants, and Islamic schools."
-      heroImage="/images/seasonal/ramadan/banner-eid-mubarak.png"
+      heroImage="/images/seasonal/ramadan/banner-eid-mubarak.webp"
       heroAlt="Ramadan and Eid event banners printed in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces vinyl banners, flyers, and retractable banner stands for Ramadan and Eid events in Saskatoon. We've printed for local university student associations' Iftar Night dinners, halal restaurants running Ramadan specials, mosques welcoming Eid prayer congregations, and settlement organizations serving newcomer families. Standard turnaround: 48 hours from artwork approval. Same-day rush: +$40 flat, order before 10 AM. In-house Roland UV printer — no outsourcing, no surprises. Local pickup at 216 33rd St W, Saskatoon, Saskatchewan."
       descriptionNode={
@@ -54,21 +54,21 @@ export default function RamadanEidBannersPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/banner-traditional.png" alt="Traditional Elegance — navy gold Eid banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/ramadan/banner-traditional.webp" alt="Traditional Elegance — navy gold Eid banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Traditional Elegance</p>
                 <p className="text-xs text-gray-500 mt-0.5">Navy, gold calligraphy, lanterns — mosque entrances, formal Eid prayers</p>
               </div>
               <div>
                 <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/banner-modern-minimal.png" alt="Modern Minimal — white gold crescent Eid Mubarak banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/ramadan/banner-modern-minimal.webp" alt="Modern Minimal — white gold crescent Eid Mubarak banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Modern Minimal</p>
                 <p className="text-xs text-gray-500 mt-0.5">White, oversized gold crescent — university events, restaurants, professional iftars</p>
               </div>
               <div>
                 <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/banner-community-warm.png" alt="Community Warm — sunset Iftar Night 2026 banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/ramadan/banner-community-warm.webp" alt="Community Warm — sunset Iftar Night 2026 banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Community / Warm</p>
                 <p className="text-xs text-gray-500 mt-0.5">Sunset gradient, iftar table — community dinners, halal restaurants</p>
@@ -83,14 +83,14 @@ export default function RamadanEidBannersPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/flyer-formal-invitation.png" alt="Formal invitation flyer for Iftar Night — cream gold arabesque border" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/ramadan/flyer-formal-invitation.webp" alt="Formal invitation flyer for Iftar Night — cream gold arabesque border" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Formal Invitation</p>
                 <p className="text-xs text-gray-500 mt-0.5">Cream, gold arabesque border — university MSA iftars, galas</p>
               </div>
               <div>
                 <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/flyer-bold-announcement.png" alt="Bold announcement flyer for Iftar Night — dark green with food photography" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
+                  <Image src="/images/seasonal/ramadan/flyer-bold-announcement.webp" alt="Bold announcement flyer for Iftar Night — dark green with food photography" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
                 </div>
                 <p className="font-semibold text-sm text-[#1c1712]">Bold Announcement</p>
                 <p className="text-xs text-gray-500 mt-0.5">Dark green, food photography — community halls, mosque bulletin boards</p>

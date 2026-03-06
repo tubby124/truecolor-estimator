@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Restaurant Signs Saskatoon | Menu Boards, Banners & More | True Color",
+  title: { absolute: "Restaurant Signs Saskatoon | Banners & Menus | True Color" },
   description:
     "Menu boards, vinyl banners, flyers, and window graphics for Saskatoon restaurants, cafes, and food trucks. Local pickup. Same-day available. In-house designer.",
   alternates: { canonical: "/restaurant-signs-saskatoon" },
@@ -99,6 +99,18 @@ export default function RestaurantSignsSaskatoonPage() {
         {
           q: "Do you do retractable banner stands for trade shows and events?",
           a: "Yes — retractable banner stand with full-colour printing starts at $219. Popular for sidewalk signs, trade shows, special events, and grand openings.",
+        },
+        {
+          q: "How much does a vinyl banner for a restaurant grand opening cost?",
+          a: "A 2×6 ft vinyl banner is $99. A 3×8 ft banner is $198. Both include full-colour printing, grommets, and hemming. Same-day rush is +$40 flat on orders placed before 10 AM — order the morning of a soft open, pick up by 4 PM.",
+        },
+        {
+          q: "Can you print window decals for our restaurant storefront?",
+          a: "Yes — cut-vinyl window decals from $45. For large street-facing windows, perforated vinyl (window perf) lets customers see out while your branding shows on the outside. Pricing depends on size. Call (306) 954-8688 or use our online quote tool.",
+        },
+        {
+          q: "Is there a minimum order for restaurant print jobs?",
+          a: "Yes — $30 minimum on most products. Flyers start at $45 for 100, business cards from $40 for 250, vinyl banners from $66 (2×4 ft), foam board menus from $45 (18×24\"). No minimum quantity — you can order just 1 item.",
         },
       ]}
     />

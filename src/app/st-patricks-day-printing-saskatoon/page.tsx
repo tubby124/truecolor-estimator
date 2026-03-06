@@ -3,7 +3,7 @@ import Image from "next/image";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "St. Patrick's Day Printing Saskatoon | Banners & Flyers | True Color",
+  title: { absolute: "St. Patrick's Day Printing Saskatoon | True Color" },
   description:
     "Green banners, shamrock flyers, and window decals for Saskatoon bars, pubs & restaurants. Vinyl banners from $90. Same-day rush available. Local pickup 216 33rd St W.",
   keywords: [

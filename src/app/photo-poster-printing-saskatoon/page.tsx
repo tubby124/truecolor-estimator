@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Photo Poster Printing Saskatoon | True Color",
+  title: { absolute: "Photo Poster Printing Saskatoon | From $18 | True Color" },
   description:
     "Photo poster printing in Saskatoon from $15 (12×18\") to $65 (36×48\"). Roland Photobase Matte 220gsm. Events, offices, real estate, retail. Same-day rush +$40. No minimum.",
   alternates: { canonical: "/photo-poster-printing-saskatoon" },

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Salon Signs Saskatoon | Window Decals, Foamboard & Cards | True Color",
+  title: { absolute: "Salon Signs Saskatoon | Window Decals From $45 | True Color" },
   description:
     "Window decals from $11/sqft, service menu foamboards, and referral cards from $40 for Saskatoon hair salons, nail salons, and spas. Pickup at 216 33rd St W.",
   alternates: { canonical: "/salon-signs-saskatoon" },

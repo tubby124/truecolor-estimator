@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Large Format Printing Saskatoon | Signs & Banners In-House",
+  title: { absolute: "Large Format Printing Saskatoon | In-House | True Color" },
   description:
     "Large format printing in Saskatoon — coroplast signs, vinyl banners, ACP aluminum, retractable displays, and foamboard. In-house Roland UV printer, 1–3 day turnaround. 216 33rd St W.",
   alternates: { canonical: "/large-format-printing-saskatoon" },

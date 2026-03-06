@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Custom Magnets Saskatoon | Vehicle & Calendar Magnets",
+  title: { absolute: "Custom Magnets Saskatoon | Vehicle & Calendar | True Color" },
   description:
     "Custom magnets in Saskatoon — vehicle magnets from $45, magnet calendars $140/10 (8.5×11\"). Roland UV in-house. Same-day rush +$40. Service trucks, B2B promo. 216 33rd St W.",
   alternates: { canonical: "/custom-magnets-saskatoon" },

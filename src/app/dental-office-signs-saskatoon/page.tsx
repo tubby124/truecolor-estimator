@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Dental Office Signs Saskatoon | Business Cards, ACP Signs & More | True Color",
+  title: { absolute: "Dental Office Signs Saskatoon | ACP & Cards | True Color" },
   description:
     "Business cards, ACP suite signs, and retractable banners for Saskatoon dental offices. New associate? Cards ready in 24–48 hrs. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/dental-office-signs-saskatoon" },

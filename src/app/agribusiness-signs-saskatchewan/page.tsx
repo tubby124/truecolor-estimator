@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Agribusiness Signs Saskatchewan | Farm & Field Signage | True Color",
+  title: { absolute: "Agribusiness Signs Saskatchewan | From $8/sqft | True Color" },
   description:
     "Custom signs for Saskatchewan agribusinesses — farm signs, equipment dealers, grain elevators, co-ops, and ag retailers. Coroplast, ACP aluminum, banners. Saskatoon local. Volume pricing.",
   alternates: { canonical: "/agribusiness-signs-saskatchewan" },
@@ -95,6 +95,18 @@ export default function AgribusinessSignsSaskatchewanPage() {
         {
           q: "Can I get signs with GPS field boundaries or aerial imagery?",
           a: "Yes — bring us a PDF or image export from your farm management software. We print any custom graphic including aerial photography, field maps, and certification badges on coroplast, ACP, or banner material.",
+        },
+        {
+          q: "What's the minimum order for agribusiness signs?",
+          a: "The minimum order is $30. A single 18×24\" coroplast sign is $24, so the $30 minimum applies automatically — you pay $30. Order 2 signs or a 24×36\" ($48) to clear it. ACP minimum is $60. Vinyl banners start at $66 (2×4 ft) with no minimum quantity.",
+        },
+        {
+          q: "Can you print for Ag in Motion or farm trade shows?",
+          a: "Yes — retractable banner stands from $219 (complete with graphic), vinyl banners for booth backdrops (any width), and coroplast or ACP for table and outdoor signage. Order at least 5 business days before your event. Rush production (+$40 flat) available if needed.",
+        },
+        {
+          q: "Do you have in-house design for ag companies without a logo?",
+          a: "Yes — minor edits $35, full layout design $50, logo creation $75. You receive a digital proof before anything goes to press. All artwork files are yours to keep.",
         },
       ]}
     />

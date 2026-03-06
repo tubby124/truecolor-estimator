@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Signs Yorkton SK | Vehicle Magnets, Banners & Coroplast | True Color",
+  title: { absolute: "Signs Yorkton SK | Coroplast & Banners | True Color" },
   description:
     "Custom signs for Yorkton SK businesses. Vehicle magnets from $24/sqft, vinyl banners from $8.25/sqft, coroplast from $8/sqft. Printed in Saskatoon — shipped to Yorkton.",
   alternates: { canonical: "/signs-yorkton-sk" },
