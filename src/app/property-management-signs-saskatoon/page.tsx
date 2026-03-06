@@ -26,7 +26,7 @@ export default function PropertyManagementSignsPage() {
       subtitle="For-rent signs, parking notices, and permanent exterior signage for Saskatoon properties."
       heroImage="/images/products/heroes/realestate-hero-1200x500.webp"
       heroAlt="Property management signs Saskatoon"
-      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $24 each (18×24\"), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $39. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $24 each (18×24&quot;), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $39. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">

@@ -26,7 +26,7 @@ export default function NonProfitSignsSaskatoonPage() {
       subtitle="Fundraiser campaigns, galas, and awareness days — without blowing the budget."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Non-profit and charity signs and banners printed in Saskatoon"
-      description="True Color prints signs, banners, flyers, and event displays for non-profits, charities, community organizations, and fundraising events across Saskatoon. Coroplast yard signs from $24 (18×24\"). Vinyl banners from $66 with grommets. Flyers 100 for $45. Retractable banners from $219 for gala entrances and donor recognition. Volume discounts apply at 5+ signs (8% off). No minimums. In-house designer $35 flat, same-day proof. Same-day rush +$40 flat on orders before 10 AM. We print in-house on our Roland UV printer. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints signs, banners, flyers, and event displays for non-profits, charities, community organizations, and fundraising events across Saskatoon. Coroplast yard signs from $24 (18×24&quot;). Vinyl banners from $66 with grommets. Flyers 100 for $45. Retractable banners from $219 for gala entrances and donor recognition. Volume discounts apply at 5+ signs (8% off). No minimums. In-house designer $35 flat, same-day proof. Same-day rush +$40 flat on orders before 10 AM. We print in-house on our Roland UV printer. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">

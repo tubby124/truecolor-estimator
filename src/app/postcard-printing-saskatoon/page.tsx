@@ -26,7 +26,7 @@ export default function PostcardPrintingSaskatoonPage() {
       subtitle="Direct mail that lands in hands — not a spam folder."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Postcard printing Saskatoon — 4x6 and 5x7 gloss direct mail"
-      description="True Color prints direct mail postcards in Saskatoon on 14pt gloss stock, double-sided, starting at $40 for 50 postcards (4×6\") or $85 for 250. We print 4×6, 5×7, and 3×4 sizes in-house on our Roland UV printer — colour is sharp, mailable, and Canada Post admail compliant. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof. Popular for real estate just-listed cards, restaurant promos, event invitations, and business announcements. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints direct mail postcards in Saskatoon on 14pt gloss stock, double-sided, starting at $40 for 50 postcards (4×6&quot;) or $85 for 250. We print 4×6, 5×7, and 3×4 sizes in-house on our Roland UV printer — colour is sharp, mailable, and Canada Post admail compliant. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof. Popular for real estate just-listed cards, restaurant promos, event invitations, and business announcements. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">

@@ -26,7 +26,7 @@ export default function PhotoPosterPrintingSaskatoonPage() {
       subtitle="One print or fifty — from $15, no minimum, picked up same day with rush."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Photo poster printing Saskatoon"
-      description="True Color prints photo posters in Saskatoon on Roland Photobase Matte 220gsm — a premium 220gsm matte photo paper that delivers gallery-quality colour and sharp detail at every size. Pricing starts at $15 for 12×18\", up to $65 for 36×48\". No minimum order — single prints welcome. Popular use cases include event and wedding photography prints, real estate open house property photos, office and retail display art, sports team photos, and home décor enlargements. Standard turnaround is 1–3 business days. Same-day rush available for $40 flat on orders before 10 AM. In-house designer available for $35. Pickup at 216 33rd St W, Saskatoon."
+      description="True Color prints photo posters in Saskatoon on Roland Photobase Matte 220gsm — a premium 220gsm matte photo paper that delivers gallery-quality colour and sharp detail at every size. Pricing starts at $15 for 12×18&quot;, up to $65 for 36×48&quot;. No minimum order — single prints welcome. Popular use cases include event and wedding photography prints, real estate open house property photos, office and retail display art, sports team photos, and home décor enlargements. Standard turnaround is 1–3 business days. Same-day rush available for $40 flat on orders before 10 AM. In-house designer available for $35. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">

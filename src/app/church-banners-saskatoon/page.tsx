@@ -26,7 +26,7 @@ export default function ChurchBannersSaskatoonPage() {
       subtitle="Your Sunday service announcement needs to be up before Saturday — that's the turnaround Saskatoon faith communities count on."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Church and faith community banners printed in Saskatoon"
-      description="True Color prints banners, signs, and displays for churches, mosques, temples, and faith communities across Saskatoon. Vinyl banners start at $66 (2×4\"), printed in-house on our Roland UV printer with grommets included. Coroplast signs from $24 for parking and wayfinding. Retractable banners from $219 for lobby entrances. Foamboard displays from $45 for indoor event boards. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof — perfect for Easter, Christmas, Ramadan, and community outreach campaigns. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints banners, signs, and displays for churches, mosques, temples, and faith communities across Saskatoon. Vinyl banners start at $66 (2×4&quot;), printed in-house on our Roland UV printer with grommets included. Coroplast signs from $24 for parking and wayfinding. Retractable banners from $219 for lobby entrances. Foamboard displays from $45 for indoor event boards. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof — perfect for Easter, Christmas, Ramadan, and community outreach campaigns. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">

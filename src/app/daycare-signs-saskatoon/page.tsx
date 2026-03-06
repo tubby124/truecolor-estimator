@@ -67,7 +67,7 @@ export default function DaycareSignsSaskatoonPage() {
       subtitle="Enrollment yard signs, grand opening banners, and window decals for Saskatoon daycares and preschools."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Coroplast yard signs and vinyl banners for Saskatoon daycares and preschools printed by True Color Display Printing"
-      description="Empty spots cost Saskatoon daycares real money — and a yard sign on the right corner fills them faster than social media. Coroplast yard signs: 18×24\" at $24 each, 4mm, H-stakes included. Order 5+ and save 8%. A 20-sign neighbourhood campaign is around $440. Vinyl banners from $66 for grand openings and enrollment-open announcements. Window decals from $11/sqft for permanent storefront branding. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="Empty spots cost Saskatoon daycares real money — and a yard sign on the right corner fills them faster than social media. Coroplast yard signs: 18×24&quot; at $24 each, 4mm, H-stakes included. Order 5+ and save 8%. A 20-sign neighbourhood campaign is around $440. Vinyl banners from $66 for grand openings and enrollment-open announcements. Window decals from $11/sqft for permanent storefront branding. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "Coroplast Signs", from: "18×24\" for $24", slug: "coroplast-signs" },
