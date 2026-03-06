@@ -36,7 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/large-format-printing-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/trade-show-displays-saskatoon", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/event-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
-    // Industry pages
+    // Industry pages (existing)
     { url: "/real-estate-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/construction-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     { url: "/agriculture-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
@@ -44,19 +44,50 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/election-signs", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/event-banners", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/ramadan-eid-banners-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    // Industry pages — Sprint A (2026-03-05)
+    { url: "/retail-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    { url: "/window-decals-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    { url: "/sticker-printing-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    { url: "/school-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    { url: "/trade-contractor-signs-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    // Product pages — Sprint B (2026-03-05)
+    { url: "/foamboard-printing-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    { url: "/vinyl-lettering-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/postcard-printing-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
+    { url: "/photo-poster-printing-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/custom-magnets-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    // Industry pages — Sprint B (2026-03-05)
+    { url: "/gym-fitness-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/salon-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/car-dealership-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    // Industry pages — Sprint C (2026-03-05)
+    { url: "/church-banners-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/non-profit-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/hotel-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/law-office-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/daycare-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/chiropractor-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/pharmacy-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/brewery-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/property-management-signs-saskatoon", priority: 0.8, changeFrequency: "monthly" as const },
     // Seasonal pages
     { url: "/st-patricks-day-printing-saskatoon", priority: 0.85, changeFrequency: "weekly" as const },
     { url: "/graduation-banners-saskatoon", priority: 0.85, changeFrequency: "monthly" as const },
     // /mothers-day-printing-saskatoon — add when page is built
     // /canada-day-printing-saskatoon — add when page is built
     // /back-to-school-signs-saskatoon — add when page is built
-    // SK province-wide city pages
+    // SK province-wide city pages (existing)
     { url: "/banner-printing-regina", priority: 0.75, changeFrequency: "monthly" as const },
     { url: "/coroplast-signs-regina", priority: 0.75, changeFrequency: "monthly" as const },
     { url: "/signs-prince-albert-sk", priority: 0.75, changeFrequency: "monthly" as const },
     { url: "/printing-lloydminster-sk", priority: 0.75, changeFrequency: "monthly" as const },
     { url: "/signs-moose-jaw-sk", priority: 0.75, changeFrequency: "monthly" as const },
     { url: "/printing-swift-current-sk", priority: 0.75, changeFrequency: "monthly" as const },
+    // SK city pages — Sprint C (2026-03-05)
+    { url: "/signs-north-battleford-sk", priority: 0.75, changeFrequency: "monthly" as const },
+    { url: "/signs-yorkton-sk", priority: 0.75, changeFrequency: "monthly" as const },
+    { url: "/printing-estevan-sk", priority: 0.75, changeFrequency: "monthly" as const },
+    { url: "/printing-weyburn-sk", priority: 0.75, changeFrequency: "monthly" as const },
     // Legal
     { url: "/privacy", priority: 0.3, changeFrequency: "yearly" as const },
     { url: "/terms", priority: 0.3, changeFrequency: "yearly" as const },

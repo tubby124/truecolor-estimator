@@ -1,3 +1,21 @@
+@~/.claude/rules/truecolor-domain.md
+@~/.claude/rules/seo-standards.md
+@~/.claude/rules/brand-voice.md
+@~/.claude/rules/content-pipeline.md
+@~/.claude/rules/content-formats.md
+@~/.claude/rules/mcp-usage.md
+
+## Mandatory Skill Gates
+- /web-design-ux   → before any UI component
+- /ecommerce-ux    → before any checkout/order/email feature
+- /pricing-health  → before any pricing CSV or engine deploy
+- /e2e-test        → before every production push to Railway
+
+## Auth Rules
+- getSession() for UI — never getUser()
+- requireStaffUser() on ALL /api/staff/* routes
+- Staff = email === STAFF_EMAIL (env var)
+
 # CLAUDE.md — True Color Display Printing Estimator
 
 > **Shared brain for all Claude agents and sessions working on this codebase.**

@@ -123,6 +123,27 @@ export default function ServicesPage() {
           />
         </div>
 
+        {/* Related service pages */}
+        <div className="mb-16">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Browse by Service</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Graphic Design Saskatoon", href: "/graphic-design-saskatoon" },
+              { label: "Same-Day Printing", href: "/same-day-printing-saskatoon" },
+              { label: "Large Format Printing", href: "/large-format-printing-saskatoon" },
+              { label: "Sign Company Saskatoon", href: "/sign-company-saskatoon" },
+            ].map(({ label, href }) => (
+              <a
+                key={href}
+                href={href}
+                className="border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-[#1c1712] hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-center"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+        </div>
+
         {/* Bottom CTA strip */}
         <div className="bg-[#1c1712] rounded-2xl px-8 py-10 text-center">
           <p className="text-white text-lg font-medium mb-2">

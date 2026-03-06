@@ -130,6 +130,19 @@ export function SiteFooter() {
           </div>
         </div>
 
+        {/* Saskatchewan cities */}
+        <div className="mt-10 pt-8 border-t border-white/5">
+          <p className="text-xs text-gray-600 mb-3 uppercase tracking-wider">Also serving Saskatchewan</p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <Link href="/banner-printing-regina" className="hover:text-white transition-colors">Regina</Link>
+            <Link href="/signs-prince-albert-sk" className="hover:text-white transition-colors">Prince Albert</Link>
+            <Link href="/printing-lloydminster-sk" className="hover:text-white transition-colors">Lloydminster</Link>
+            <Link href="/signs-moose-jaw-sk" className="hover:text-white transition-colors">Moose Jaw</Link>
+            <Link href="/printing-swift-current-sk" className="hover:text-white transition-colors">Swift Current</Link>
+            <Link href="/coroplast-signs-regina" className="hover:text-white transition-colors">Regina Signs</Link>
+          </div>
+        </div>
+
         <div className="border-t border-gray-800 mt-10 pt-6 text-xs text-gray-600 flex flex-col sm:flex-row justify-between gap-2">
           <p>© 2026 True Color Display Printing Ltd. All prices in CAD · GST added at checkout.</p>
           <p>
