@@ -56,13 +56,13 @@ export default function ConstructionPage() {
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               coroplast site ID signs
             </Link>{" "}
-            (18×24&quot;, $24–30) with the company name and permit number, a pair of 30mil{" "}
+            (18×24&quot;, $30) with the company name and permit number, a pair of 30mil{" "}
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               truck door magnets
             </Link>{" "}
             ($45–90/pair depending on size), and 250 business cards ($40) to hand on-site.
             Home builders and developers add development signage (4×8 ft coroplast, $232) for the lot
-            and directional coroplast signs (18×24&quot;, $24) for subdivision roads. For fencing and
+            and directional coroplast signs (18×24&quot;, $30) for subdivision roads. For fencing and
             hoarding, a full-colour vinyl banner ($8.25/sqft) runs the length of your site perimeter
             and doubles as advertising to passing traffic.
           </p>
@@ -74,7 +74,7 @@ export default function ConstructionPage() {
             Common job site safety signs — &quot;Hard Hat Area&quot;, &quot;No Unauthorized Entry&quot;,
             &quot;Safety Glasses Required&quot;, site identification with contractor name and permit number
             — are printed on 4mm coroplast from $8/sqft, UV-resistant and waterproof through Saskatchewan
-            winters. Standard sizes: 18×24&quot; ($24) or 24×36&quot; ($48). Bring your requirements
+            winters. Standard sizes: 18×24&quot; ($30 minimum applies) or 24×36&quot; ($48). Bring your requirements
             and we&apos;ll lay out a compliant sign. Call (306) 954-8688 to confirm turnaround for
             compliance-critical orders.
           </p>
@@ -111,7 +111,7 @@ export default function ConstructionPage() {
         },
         {
           q: "Do you print safety signs for Saskatoon construction sites?",
-          a: "Yes — safety signs including 'Hard Hat Area', 'No Unauthorized Entry', 'Safety Glasses Required', and custom site ID signs with contractor name and permit number. Printed on 4mm coroplast at $8/sqft, UV-resistant and waterproof. Standard sizes: 18×24\" ($24) or 24×36\" ($48). Bring your requirements and we'll lay out a compliant sign in-house.",
+          a: "Yes — safety signs including 'Hard Hat Area', 'No Unauthorized Entry', 'Safety Glasses Required', and custom site ID signs with contractor name and permit number. Printed on 4mm coroplast at $8/sqft, UV-resistant and waterproof. Standard sizes: 18×24\" ($30) or 24×36\" ($48). Bring your requirements and we'll lay out a compliant sign in-house.",
         },
         {
           q: "Can you print hoarding banners and construction fence banners in Saskatoon?",

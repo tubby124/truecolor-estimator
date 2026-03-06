@@ -100,7 +100,7 @@ export default function CoroplastSignsSaskatoonPage() {
         },
         {
           q: "Is there a minimum order for coroplast signs?",
-          a: "Yes — minimum order is $30. A single 18×24\" sign at $24 falls below the minimum, so most customers order at least one H-stake or go up to a 24×36\" sign ($48) which clears the minimum on its own. Use the pricing calculator to see your total before ordering.",
+          a: "Yes — $30 minimum order. A single 18×24\" sign is $24, so the $30 minimum charge applies automatically for a one-sign order — you pay $30. To avoid this, order 2 signs (2 × $24 = $48) or step up to a 24×36\" sign ($48), both of which clear the minimum. Use the pricing calculator to see your exact total.",
         },
       ]}
     />

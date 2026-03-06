@@ -129,7 +129,7 @@
 | "Can I trust the quality from an online-first shop?" | 4.9/5 Google rating. In-house production. You approve a proof before we print. |
 | "What if I need design help?" | In-house designer — MINOR_EDIT $35, FULL_DESIGN $50, LOGO_RECREATION $75. All in the estimator. |
 | "Same-day sounds too good — is it real?" | Yes, with a $40 rush fee. Order by 10am, pick up by 4pm. The $40 is the guarantee — not a promise. |
-| "I only need 1 sign — is there a minimum?" | No minimum on most products. 1 coroplast sign = $28.80 (18×24"). Order 1 if that's all you need. |
+| "Is there a minimum order?" | Yes — $30 minimum. A single 18×24" coroplast sign is $24; the $30 minimum charge is applied automatically. Order 2 signs ($48) or a 24×36" ($48) to clear the minimum. ACP minimum: $60. Banners: $66 (smallest standard size). |
 
 **Anti-persona:** Large enterprise printing contracts (50,000+ flyers, national chains with centralized procurement). We're a local shop — not competing on volume offset printing contracts.
 
