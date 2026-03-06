@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: "Banner Printing Saskatoon | Vinyl Banners from $8.25/sqft | True Color",
+  title: "Banner Printing Saskatoon | Vinyl Banners | True Color",
   description:
     "Custom vinyl banner printing in Saskatoon from $8.25/sqft. Any size, grommets included. Events, storefronts, trade shows. Same-day rush available. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/banner-printing-saskatoon" },
@@ -28,6 +28,12 @@ export default function BannerPrintingSaskatoonPage() {
       description="True Color Display Printing produces 13oz vinyl banners for Saskatoon businesses, events, and organizations. Any custom size, full colour, grommets included as standard. Volume pricing applies automatically — 5% off at 5+ sqft, 10% off at 10+ sqft, 15% off at 15+ sqft. We print in-house on our Roland UV printer, which means faster turnaround and colour consistency you can rely on. Same-day rush available for +$40 flat."
       descriptionNode={
         <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            A vinyl banner is a full-colour print on 13oz scrim vinyl, finished with grommets for hanging — the standard format for outdoor advertising, events, storefronts, and trade shows in Saskatchewan. True Color Display Printing produces custom vinyl banners in Saskatoon from $8.25/sqft, printed in-house on a Roland UV printer with 1–3 business day turnaround. A 2×6 ft banner is $90. Same-day rush available for +$40 flat.
+          </p>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            Compared to rigid signage (coroplast or ACP): vinyl banners are lightweight, flexible, and easy to hang from fences, walls, or overhead structures with grommets. Compared to retractable banner stands: outdoor vinyl banners are lower cost per sqft and suited for larger spans. 13oz scrim vinyl is rated 2–3 years outdoor use in prairie UV conditions.
+          </p>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             True Color Display Printing produces 13oz vinyl banners for Saskatoon businesses, events,
             and organizations. Any custom size, full colour, grommets included as standard. Volume
