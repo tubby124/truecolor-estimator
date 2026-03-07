@@ -136,7 +136,7 @@ export function HeroSlider() {
 
   return (
     <section
-      className="relative overflow-hidden bg-[#1c1712] min-h-[420px] md:min-h-[500px] isolate"
+      className="relative overflow-hidden bg-[#1c1712] min-h-[560px] md:min-h-[500px] isolate"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
@@ -164,7 +164,7 @@ export function HeroSlider() {
           className="absolute inset-0 flex flex-col md:flex-row"
         >
           {/* Image side */}
-          <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-[#13100c] flex items-center justify-center overflow-hidden">
+          <div className="relative w-full md:w-1/2 h-56 md:h-auto bg-[#13100c] flex items-center justify-center overflow-hidden shrink-0">
             <Image
               src={slide.img}
               alt={slide.imgAlt}
@@ -176,9 +176,9 @@ export function HeroSlider() {
           </div>
 
           {/* Text side */}
-          <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-10 bg-[#1c1712]">
+          <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-6 md:py-10 bg-[#1c1712]">
             {current === 0 && (
-              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight mb-4">
+              <h1 className="text-lg md:text-3xl font-black text-white tracking-tight leading-tight mb-3">
                 Saskatoon Print Shop — Price it. Proof it. Pick it up today.
               </h1>
             )}
@@ -188,25 +188,25 @@ export function HeroSlider() {
             <p className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
               {slide.headline}
             </p>
-            <p className="text-gray-300 text-base md:text-lg max-w-sm mb-8 leading-relaxed">
+            <p className="text-gray-300 text-base md:text-lg max-w-sm mb-5 md:mb-8 leading-relaxed">
               {slide.sub}
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <Link
                 href={slide.ctaHref}
-                className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base btn-shimmer"
+                className="bg-[#16C2F3] text-white font-bold px-7 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base btn-shimmer text-center"
               >
                 {slide.cta}
               </Link>
               <button
                 onClick={() => setQuoteOpen(true)}
-                className="border border-white/40 text-white font-semibold px-7 py-3.5 rounded-lg hover:border-white transition-colors text-base"
+                className="border border-white/40 text-white font-semibold px-7 py-3 rounded-lg hover:border-white transition-colors text-base"
               >
                 Custom Quote
               </button>
               <a
                 href="tel:+13069548688"
-                className="border border-white/40 text-white font-semibold px-7 py-3.5 rounded-lg hover:border-white transition-colors text-base"
+                className="border border-white/40 text-white font-semibold px-7 py-3 rounded-lg hover:border-white transition-colors text-base text-center"
               >
                 Call (306) 954-8688
               </a>
