@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Paperclip } from "lucide-react";
 
 const PRODUCT_OPTIONS = [
@@ -155,9 +156,9 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -170,10 +171,10 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+        className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        {/* Header — never scrolls */}
+        <div className="shrink-0 flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div>
             <h2 className="text-xl font-bold text-[#1c1712]">Request a Quote</h2>
             <p className="text-sm text-gray-500 mt-0.5">We reply within 1 business day</p>
@@ -187,6 +188,7 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
           </button>
         </div>
 
+        <div className="overflow-y-auto flex-1">
         {sent ? (
           /* ── Success state ── */
           <div className="px-6 py-12 text-center">
@@ -335,7 +337,9 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
             </p>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
