@@ -27,7 +27,7 @@ const PRODUCTS = [
     from: "from $30",
     desc: "Job site, yard, and directional signs. Survives Saskatchewan winters.",
     img: "/images/products/product/coroplast-yard-sign-800x600.webp",
-    href: "/products/coroplast-signs",
+    href: "/coroplast-signs-saskatoon",
   },
   {
     name: "Vinyl Banners",
@@ -35,7 +35,7 @@ const PRODUCTS = [
     from: "from $45",
     desc: "13oz vinyl for events, storefronts, and trade shows. Any size.",
     img: "/images/products/product/banner-vinyl-colorful-800x600.webp",
-    href: "/products/vinyl-banners",
+    href: "/banner-printing-saskatoon",
   },
   {
     name: "Business Cards",
@@ -43,7 +43,7 @@ const PRODUCTS = [
     from: "from $45",
     desc: "250 cards, 14pt gloss stock. Single or double-sided.",
     img: "/images/products/product/business-cards-800x600.webp",
-    href: "/products/business-cards",
+    href: "/business-cards-saskatoon",
   },
   {
     name: "Flyers",
@@ -51,7 +51,7 @@ const PRODUCTS = [
     from: "from $45",
     desc: "100 flyers on 80lb or 100lb gloss. Sharp colour, clean finish.",
     img: "/images/products/product/flyers-stack-800x600.webp",
-    href: "/products/flyers",
+    href: "/flyer-printing-saskatoon",
   },
   {
     name: "Brochures",
@@ -59,7 +59,7 @@ const PRODUCTS = [
     from: "from $70",
     desc: "Tri-fold or half-fold. 100lb gloss. Scored and folded in-house.",
     img: "/images/products/product/brochures-800x600.webp",
-    href: "/products/brochures",
+    href: "/brochure-printing-saskatoon",
   },
   {
     name: "Vehicle Magnets",
@@ -67,7 +67,7 @@ const PRODUCTS = [
     from: "from $45",
     desc: "30mil magnets for any vehicle. Custom size, full colour.",
     img: "/images/products/product/vehicle-magnets-800x600.webp",
-    href: "/products/vehicle-magnets",
+    href: "/vehicle-magnets-saskatoon",
   },
   {
     name: "ACP Aluminum Signs",
@@ -75,7 +75,7 @@ const PRODUCTS = [
     from: "from $60",
     desc: "3mm aluminum composite. Indoor or outdoor, built to last.",
     img: "/images/products/product/acp-aluminum-sign-800x600.webp",
-    href: "/products/acp-signs",
+    href: "/aluminum-signs-saskatoon",
   },
   {
     name: "Foamboard Displays",
@@ -83,7 +83,7 @@ const PRODUCTS = [
     from: "from $45",
     desc: "Lightweight indoor displays for events, counters, and trade shows.",
     img: "/images/products/product/foamboard-display-800x600.webp",
-    href: "/products/foamboard-displays",
+    href: "/foamboard-printing-saskatoon",
   },
   {
     name: "Window Decals",
@@ -91,7 +91,7 @@ const PRODUCTS = [
     from: "from $45",
     desc: "Full-colour adhesive vinyl for storefronts, vehicles, and glass doors.",
     img: "/images/gallery/gallery-window-decal-swiss-barber.webp",
-    href: "/products/window-decals",
+    href: "/window-decals-saskatoon",
   },
   {
     name: "Perforated Window Vinyl",
@@ -140,7 +140,7 @@ const INDUSTRIES = [
     name: "Sports & Events",
     tagline: "Banners, backdrops & event signage",
     img: "/images/products/heroes/sports-hero-1200x500.webp",
-    href: "/event-banners",
+    href: "/banner-printing-saskatoon",
   },
 ];
 
