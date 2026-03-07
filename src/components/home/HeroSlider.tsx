@@ -191,24 +191,25 @@ export function HeroSlider() {
             <p className="text-gray-300 text-base md:text-lg max-w-sm mb-5 md:mb-8 leading-relaxed">
               {slide.sub}
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2.5 sm:gap-3">
               <Link
                 href={slide.ctaHref}
-                className="bg-[#16C2F3] text-white font-bold px-7 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors text-base btn-shimmer text-center"
+                className="col-span-2 bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors text-sm sm:text-base btn-shimmer text-center"
               >
                 {slide.cta}
               </Link>
               <button
                 onClick={() => setQuoteOpen(true)}
-                className="border border-white/40 text-white font-semibold px-7 py-3 rounded-lg hover:border-white transition-colors text-base"
+                className="border border-white/40 text-white font-semibold px-3 py-2.5 sm:px-7 sm:py-3 rounded-lg hover:border-white transition-colors text-sm sm:text-base"
               >
                 Custom Quote
               </button>
               <a
                 href="tel:+13069548688"
-                className="border border-white/40 text-white font-semibold px-7 py-3 rounded-lg hover:border-white transition-colors text-base text-center"
+                className="border border-white/40 text-white font-semibold px-3 py-2.5 sm:px-7 sm:py-3 rounded-lg hover:border-white transition-colors text-sm sm:text-base text-center"
               >
-                Call (306) 954-8688
+                <span className="sm:hidden">(306) 954-8688</span>
+                <span className="hidden sm:inline">Call (306) 954-8688</span>
               </a>
             </div>
           </div>
