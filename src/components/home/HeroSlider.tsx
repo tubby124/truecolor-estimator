@@ -136,7 +136,7 @@ export function HeroSlider() {
 
   return (
     <section
-      className="relative overflow-hidden bg-[#1c1712] min-h-[560px] md:min-h-[500px] isolate"
+      className="relative overflow-hidden bg-[#1c1712] min-h-[640px] md:min-h-[500px] isolate"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
