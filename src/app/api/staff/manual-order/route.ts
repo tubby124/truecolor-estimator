@@ -221,7 +221,7 @@ export async function POST(req: NextRequest) {
             pst,
             total,
             is_rush: false,
-            payment_method: "etransfer",
+            payment_method: "wave",
             notes: `[Manual Order — Wave] ${notes?.trim() ?? "Created via staff payment request"}`,
             filePaths: [],
             siteUrl: siteUrlForStaff,

@@ -40,7 +40,7 @@ export interface StaffOrderNotificationParams {
   discount_code?: string;
   discount_amount?: number;
   is_rush: boolean;
-  payment_method: "clover_card" | "etransfer";
+  payment_method: "clover_card" | "etransfer" | "wave";
   notes: string | null;
   filePaths: string[];
   siteUrl: string;
@@ -81,7 +81,9 @@ export async function sendStaffOrderNotification(
   const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
   const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
 
-  const paymentLabel = payment_method === "clover_card" ? "Card (Clover)" : "e-Transfer";
+  const paymentLabel =
+    payment_method === "clover_card" ? "Card (Clover)" :
+    payment_method === "wave" ? "Wave Invoice" : "e-Transfer";
   const rushPrefix = is_rush ? "[RUSH] " : "";
   const subject = `${rushPrefix}NEW ORDER ${orderNumber} · ${contact.name} · $${total.toFixed(2)} · ${paymentLabel}`;
 
@@ -204,6 +206,15 @@ function buildStaffNotificationHtml(
           </p>
           <p style="margin: 0; font-size: 12px; color: #166534; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
             $${total.toFixed(2)} CAD charged. Safe to begin production.
+          </p>
+        </div>`
+      : payment_method === "wave"
+      ? `<div style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
+          <p style="margin: 0 0 2px; font-size: 13px; font-weight: 700; color: #1d4ed8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            ⏳ Wave Invoice sent — awaiting online payment
+          </p>
+          <p style="margin: 0; font-size: 12px; color: #1e40af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            $${total.toFixed(2)} CAD. Customer was emailed a Wave hosted invoice. Start production once Wave confirms payment.
           </p>
         </div>`
       : `<div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
@@ -433,6 +444,8 @@ function buildStaffNotificationText(
     "PAYMENT",
     payment_method === "clover_card"
       ? `Card charged — $${total.toFixed(2)} via Clover. Safe to begin production.`
+      : payment_method === "wave"
+      ? `Wave Invoice sent — $${total.toFixed(2)} CAD. Awaiting online payment via Wave. Start production once paid.`
       : `e-Transfer PENDING — $${total.toFixed(2)} to info@true-color.ca. DO NOT start printing yet.`,
     "",
     notes ? `CUSTOMER NOTES\n${notes}` : "",

@@ -44,7 +44,8 @@ export function StaffOrdersActions() {
   const { toasts, showToast, dismissToast } = useToast();
 
   const gst = form.amount ? Math.round(parseFloat(form.amount) * 0.05 * 100) / 100 : 0;
-  const total = form.amount ? Math.round((parseFloat(form.amount) + gst) * 100) / 100 : 0;
+  const pst = form.amount ? Math.round(parseFloat(form.amount) * 0.06 * 100) / 100 : 0;
+  const total = form.amount ? Math.round((parseFloat(form.amount) + gst + pst) * 100) / 100 : 0;
   const amountValid = form.amount !== "" && !isNaN(parseFloat(form.amount)) && parseFloat(form.amount) > 0;
 
   function openModal() {
@@ -326,8 +327,8 @@ export function StaffOrdersActions() {
                           />
                         </div>
 
-                        {/* Amount + GST + Total row */}
-                        <div className="grid grid-cols-3 gap-3">
+                        {/* Amount + GST + PST + Total row */}
+                        <div className="grid grid-cols-4 gap-3">
                           <div>
                             <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                               Amount (pre-tax) <span className="text-red-500">*</span>
@@ -351,6 +352,12 @@ export function StaffOrdersActions() {
                             <label className="block text-xs font-semibold text-gray-600 mb-1.5">GST (5%)</label>
                             <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
                               {amountValid ? `$${gst.toFixed(2)}` : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1.5">PST (6%)</label>
+                            <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
+                              {amountValid ? `$${pst.toFixed(2)}` : "—"}
                             </div>
                           </div>
                           <div>
