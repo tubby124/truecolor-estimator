@@ -6,10 +6,12 @@ import { CategoryPicker } from "@/components/estimator/CategoryPicker";
 import { OptionsPanel } from "@/components/estimator/OptionsPanel";
 import { QuotePanel } from "@/components/estimator/QuotePanel";
 import { ProductProof } from "@/components/estimator/ProductProof";
+import { MultiQuoteCart } from "@/components/estimator/MultiQuoteCart";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { Addon } from "@/lib/data/types";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
+import type { CartItem } from "@/lib/types/cart";
 import { LOGO_PATH } from "@/lib/config";
 import type { ProofImageState } from "@/components/estimator/ProductProof";
 
@@ -73,6 +75,19 @@ export default function StaffPage() {
   const [isCustomerMode, setIsCustomerMode] = useState(false);
   const [step, setStep] = useState<"pick" | "options">("pick");
   const [proofImage, setProofImage] = useState<ProofImageState | null>(null);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  const handleAddToCart = useCallback((itemResult: EstimateResponse, jobDetails: QuoteEmailData["jobDetails"]) => {
+    const hasDimensions = jobDetails.widthIn && jobDetails.heightIn;
+    const wFt = hasDimensions ? (jobDetails.widthIn! / 12).toFixed(1) : null;
+    const hFt = hasDimensions ? (jobDetails.heightIn! / 12).toFixed(1) : null;
+    const sizeStr = hasDimensions ? ` (${wFt}×${hFt} ft)` : "";
+    const label = `${jobDetails.categoryLabel} × ${jobDetails.qty}${sizeStr}`;
+    setCartItems((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), result: itemResult, jobDetails, label },
+    ]);
+  }, []);
 
   const handleCategorySelect = useCallback((cat: Category) => {
     setCategory(cat);
@@ -178,7 +193,7 @@ export default function StaffPage() {
         </div>
       </header>
 
-      <main id="main-content" className="max-w-6xl mx-auto px-6 py-8">
+      <main id="main-content" className={`max-w-6xl mx-auto px-6 py-8 ${cartItems.length > 0 ? "pb-80" : ""}`}>
         {/* Step 1: Category picker */}
         {step === "pick" && (
           <div className="max-w-2xl mx-auto">
@@ -232,11 +247,19 @@ export default function StaffPage() {
                 onToggleCustomerMode={() => setIsCustomerMode((v) => !v)}
                 jobDetails={category ? buildJobDetails(category, state, MATERIAL_LABEL_MAP) : undefined}
                 proofImage={proofImage}
+                onAddToCart={handleAddToCart}
               />
             </div>
           </div>
         )}
       </main>
+
+      {/* Multi-item quote cart — sticky bottom */}
+      <MultiQuoteCart
+        items={cartItems}
+        onRemoveItem={(id) => setCartItems((prev) => prev.filter((it) => it.id !== id))}
+        onClearCart={() => setCartItems([])}
+      />
 
       {/* Customer-facing fullscreen overlay */}
       {isCustomerMode && result && result.sell_price !== null && (

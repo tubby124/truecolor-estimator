@@ -3,10 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
+import type { CartItem } from "@/lib/types/cart";
 
 interface Props {
-  result: EstimateResponse;
-  jobDetails: QuoteEmailData["jobDetails"];
+  // Single-item mode (from QuotePanel)
+  result?: EstimateResponse;
+  jobDetails?: QuoteEmailData["jobDetails"];
+  // Multi-item mode (from MultiQuoteCart)
+  cartItems?: CartItem[];
   onClose: () => void;
 }
 
@@ -19,7 +23,8 @@ interface WaveResult {
   action: "draft" | "approved" | "sent";
 }
 
-export function WaveModal({ result, jobDetails, onClose }: Props) {
+export function WaveModal({ result, jobDetails, onClose, cartItems }: Props) {
+  const isMultiMode = cartItems && cartItems.length > 0;
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [sendViaWave, setSendViaWave] = useState(false);
@@ -86,20 +91,36 @@ export function WaveModal({ result, jobDetails, onClose }: Props) {
     setErrorMsg("");
 
     try {
+      const body = isMultiMode
+        ? {
+            customerEmail: email,
+            customerName: name.trim() || undefined,
+            items: cartItems!.map((it) => ({
+              quoteData: it.result,
+              jobDetails: {
+                qty: it.jobDetails.qty,
+                isRush: it.jobDetails.isRush,
+                categoryLabel: it.jobDetails.categoryLabel,
+              },
+            })),
+            action: sendViaWave ? "send" : "draft",
+          }
+        : {
+            customerEmail: email,
+            customerName: name.trim() || undefined,
+            quoteData: result,
+            jobDetails: {
+              qty: jobDetails!.qty,
+              isRush: jobDetails!.isRush,
+              categoryLabel: jobDetails!.categoryLabel,
+            },
+            action: sendViaWave ? "send" : "draft",
+          };
+
       const res = await fetch("/api/staff/quote/wave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerEmail: email,
-          customerName: name.trim() || undefined,
-          quoteData: result,
-          jobDetails: {
-            qty: jobDetails.qty,
-            isRush: jobDetails.isRush,
-            categoryLabel: jobDetails.categoryLabel,
-          },
-          action: sendViaWave ? "send" : "draft",
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -128,7 +149,9 @@ export function WaveModal({ result, jobDetails, onClose }: Props) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const sellPrice = result.sell_price ?? 0;
+  const sellPrice = isMultiMode
+    ? cartItems!.reduce((s, it) => s + (it.result.sell_price ?? 0), 0)
+    : result?.sell_price ?? 0;
   const total = Math.round(sellPrice * 1.05 * 100) / 100;
 
   return (
@@ -154,7 +177,10 @@ export function WaveModal({ result, jobDetails, onClose }: Props) {
               Create Wave Invoice
             </h2>
             <p className="text-xs text-[var(--muted)] mt-0.5">
-              {jobDetails.categoryLabel} · <span className="font-mono">${total.toFixed(2)} total incl. GST</span>
+              {isMultiMode
+                ? <>{cartItems!.length} items · <span className="font-mono">${total.toFixed(2)} + GST</span></>
+                : <>{jobDetails?.categoryLabel} · <span className="font-mono">${total.toFixed(2)} total incl. GST</span></>
+              }
             </p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">

@@ -4,17 +4,22 @@ import { useState, useRef, useEffect } from "react";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { ProofImageState } from "@/components/estimator/ProductProof";
+import type { CartItem } from "@/lib/types/cart";
 
 interface Props {
-  result: EstimateResponse;
-  jobDetails: QuoteEmailData["jobDetails"];
-  onClose: () => void;
+  // Single-item mode (from QuotePanel)
+  result?: EstimateResponse;
+  jobDetails?: QuoteEmailData["jobDetails"];
   proofImage?: ProofImageState | null;
+  // Multi-item mode (from MultiQuoteCart)
+  cartItems?: CartItem[];
+  onClose: () => void;
 }
 
 type SendState = "idle" | "sending" | "success" | "error";
 
-export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
+export function EmailModal({ result, jobDetails, onClose, proofImage, cartItems }: Props) {
+  const isMultiMode = cartItems && cartItems.length > 0;
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
@@ -82,18 +87,28 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
     setErrorMsg("");
 
     try {
+      const body = isMultiMode
+        ? {
+            to: email,
+            customerName: name.trim() || undefined,
+            note: note.trim() || undefined,
+            items: cartItems!.map((it) => ({ quoteData: it.result, jobDetails: it.jobDetails })),
+            includePaymentLink,
+          }
+        : {
+            to: email,
+            customerName: name.trim() || undefined,
+            note: note.trim() || undefined,
+            quoteData: result,
+            jobDetails,
+            proofImage: proofImage ?? undefined,
+            includePaymentLink,
+          };
+
       const res = await fetch("/api/email/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: email,
-          customerName: name.trim() || undefined,
-          note: note.trim() || undefined,
-          quoteData: result,
-          jobDetails,
-          proofImage: proofImage ?? undefined,
-          includePaymentLink,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -109,8 +124,15 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
     }
   };
 
-  const sellPrice = result.sell_price ?? 0;
-  const total = Math.round(sellPrice * 1.05 * 100) / 100;
+  const sellPrice = isMultiMode
+    ? cartItems!.reduce((s, it) => s + (it.result.sell_price ?? 0), 0)
+    : result?.sell_price ?? 0;
+  const designFee = isMultiMode
+    ? cartItems!.reduce((s, it) => s + (it.result.design_fee ?? 0), 0)
+    : result?.design_fee ?? 0;
+  const gst = Math.round(sellPrice * 0.05 * 100) / 100;
+  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
+  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
 
   return (
     // Backdrop
@@ -132,7 +154,10 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
           <div>
             <h2 className="text-base font-semibold tracking-tight">Email Quote</h2>
             <p className="text-xs text-[var(--muted)] mt-0.5">
-              Send to customer · {jobDetails.categoryLabel} · <span className="font-mono">${total.toFixed(2)} total</span>
+              {isMultiMode
+                ? <>{cartItems!.length}-item quote · <span className="font-mono">${total.toFixed(2)} total incl. tax</span></>
+                : <>Send to customer · {jobDetails?.categoryLabel} · <span className="font-mono">${total.toFixed(2)} total</span></>
+              }
             </p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
@@ -227,10 +252,12 @@ export function EmailModal({ result, jobDetails, onClose, proofImage }: Props) {
               </div>
             )}
 
-            {/* Proof attachment notice */}
-            {proofImage && (
+            {/* Proof attachment notice — single-item mode only */}
+            {!isMultiMode && proofImage && (
               <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                <span className="text-sm">📎</span>
+                <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
                 <p className="text-xs text-blue-700">
                   Proof image will be attached: <span className="font-mono">{proofImage.filename}</span>
                 </p>

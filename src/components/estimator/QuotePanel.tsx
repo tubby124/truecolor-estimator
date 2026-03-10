@@ -16,11 +16,13 @@ interface Props {
   onToggleCustomerMode: () => void;
   jobDetails?: QuoteEmailData["jobDetails"];
   proofImage?: ProofImageState | null;
+  onAddToCart?: (result: EstimateResponse, jobDetails: QuoteEmailData["jobDetails"]) => void;
 }
 
-export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode, jobDetails, proofImage }: Props) {
+export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode, jobDetails, proofImage, onAddToCart }: Props) {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [waveModalOpen, setWaveModalOpen] = useState(false);
+  const [addedFlash, setAddedFlash] = useState(false);
 
   if (!result && !loading) {
     return (
@@ -438,6 +440,41 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
             </svg>
             Print
           </button>
+
+          {/* Add to Cart — only shown when onAddToCart is wired up */}
+          {onAddToCart && (
+            <button
+              onClick={() => {
+                if (!jobDetails) return;
+                onAddToCart(result, jobDetails);
+                setAddedFlash(true);
+                setTimeout(() => setAddedFlash(false), 2000);
+              }}
+              disabled={!jobDetails}
+              title="Add to multi-item quote cart"
+              className={`py-2.5 px-3.5 rounded-xl text-sm font-medium transition-colors duration-200 flex items-center gap-1.5 disabled:opacity-40 min-h-[44px] cursor-pointer ${
+                addedFlash
+                  ? "bg-[#8CC63E] text-white"
+                  : "bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 hover:border-green-400"
+              }`}
+            >
+              {addedFlash ? (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Added!
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Cart
+                </>
+              )}
+            </button>
+          )}
 
           {/* Email quote */}
           <button

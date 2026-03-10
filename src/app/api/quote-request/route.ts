@@ -1,10 +1,18 @@
 /**
  * POST /api/quote-request
- * Sends a quote request email to info@true-color.ca
+ *
+ * Sends a multi-item custom quote request email to info@true-color.ca
  * and a confirmation to the customer.
  *
- * Accepts: multipart/form-data (switched from JSON to avoid 4.5 MB Vercel body limit
- * that was triggered when files were base64-encoded in JSON).
+ * Accepts: multipart/form-data
+ * Fields:
+ *   name, email, phone
+ *   items: JSON array of { product, qty, material, dimensions, sides, notes }
+ *   file_0, file_1, ... : optional artwork per item (4 MB max each)
+ *
+ * Note: This route replaced the original single-item JSON route (2026-03-10).
+ * The original sent JSON with base64 file but the API expected formData — file
+ * uploads were silently broken. This version fixes that and adds multi-item support.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -21,6 +29,15 @@ const ALLOWED_MIME_TYPES = [
   "application/postscript", // AI / EPS
 ];
 const ALLOWED_EXTENSIONS = /\.(pdf|ai|eps|jpg|jpeg|png|webp)$/i;
+
+interface ItemMeta {
+  product: string;
+  qty: string;
+  material: string;
+  dimensions: string;
+  sides: string;
+  notes: string;
+}
 
 /** Escape HTML special characters to prevent injection in email templates */
 function esc(str: string): string {
@@ -48,85 +65,131 @@ export async function POST(req: NextRequest) {
     const name = ((form.get("name") as string) ?? "").trim();
     const email = ((form.get("email") as string) ?? "").trim();
     const phone = ((form.get("phone") as string) ?? "").trim() || undefined;
-    const product = ((form.get("product") as string) ?? "").trim() || undefined;
-    const description = ((form.get("description") as string) ?? "").trim();
-    const isCustom = form.get("isCustom") === "true";
-    const file = form.get("file") as File | null;
+    const itemsRaw = (form.get("items") as string) ?? "[]";
 
-    if (!name || !email || !description) {
-      return NextResponse.json({ error: "Name, email, and description are required" }, { status: 400 });
+    // Contact validation
+    if (!name || !email) {
+      return NextResponse.json(
+        { error: "Name and email are required" },
+        { status: 400 }
+      );
     }
-
-    // Input length limits
     if (name.length > 100) {
-      return NextResponse.json({ error: "Name is too long (max 100 characters)" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Name is too long (max 100 characters)" },
+        { status: 400 }
+      );
     }
     if (email.length > 254) {
-      return NextResponse.json({ error: "Email address is too long" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email address is too long" },
+        { status: 400 }
+      );
     }
     if ((phone ?? "").length > 20) {
-      return NextResponse.json({ error: "Phone number is too long" }, { status: 400 });
-    }
-    if ((product ?? "").length > 100) {
-      return NextResponse.json({ error: "Product field is too long (max 100 characters)" }, { status: 400 });
-    }
-    if (description.length > 2000) {
-      return NextResponse.json({ error: "Description is too long (max 2000 characters)" }, { status: 400 });
-    }
-
-    if (file && file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: `File too large — max 4 MB (received ${(file.size / 1024 / 1024).toFixed(1)} MB)` },
+        { error: "Phone number is too long" },
         { status: 400 }
       );
     }
 
-    if (file && file.size > 0) {
-      const isAllowedMime = ALLOWED_MIME_TYPES.includes(file.type);
-      const isAllowedExt = ALLOWED_EXTENSIONS.test(file.name);
-      if (!isAllowedMime && !isAllowedExt) {
+    // Parse items
+    let items: ItemMeta[];
+    try {
+      items = JSON.parse(itemsRaw) as ItemMeta[];
+    } catch {
+      return NextResponse.json({ error: "Invalid items data" }, { status: 400 });
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return NextResponse.json(
+        { error: "At least one item is required" },
+        { status: 400 }
+      );
+    }
+    if (items.length > 5) {
+      return NextResponse.json(
+        { error: "Maximum 5 items per request" },
+        { status: 400 }
+      );
+    }
+
+    // Validate each item
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!item.qty?.trim()) {
         return NextResponse.json(
-          { error: "File type not allowed — use PDF, AI, EPS, JPG, PNG, or WebP" },
+          { error: `Item ${i + 1}: quantity is required` },
+          { status: 400 }
+        );
+      }
+      if (item.qty.length > 20) {
+        return NextResponse.json(
+          { error: `Item ${i + 1}: quantity value is too long` },
+          { status: 400 }
+        );
+      }
+      if ((item.material ?? "").length > 200) {
+        return NextResponse.json(
+          {
+            error: `Item ${i + 1}: material description is too long (max 200 characters)`,
+          },
+          { status: 400 }
+        );
+      }
+      if ((item.dimensions ?? "").length > 100) {
+        return NextResponse.json(
+          { error: `Item ${i + 1}: dimensions field is too long` },
+          { status: 400 }
+        );
+      }
+      if ((item.notes ?? "").length > 500) {
+        return NextResponse.json(
+          { error: `Item ${i + 1}: notes are too long (max 500 characters)` },
           { status: 400 }
         );
       }
     }
 
-    const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
+    // Upload files per item (non-fatal per item — we continue even if one upload fails)
+    const fileLinks: Array<string | null> = [];
+    const supabase = createServiceClient();
 
-    const subject = isCustom
-      ? `Custom Quote Request — ${name}`
-      : `Quote Request — ${product ?? "General"} — ${name}`;
+    for (let i = 0; i < items.length; i++) {
+      const file = form.get(`file_${i}`) as File | null;
 
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background-color: #1c1712; padding: 20px 30px;">
-          <h1 style="color: #16C2F3; font-size: 20px; margin: 0;">New ${isCustom ? "Custom " : ""}Quote Request</h1>
-        </div>
-        <div style="padding: 24px 30px; background: #fff;">
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712; width: 120px;">From</td><td style="padding: 8px 0;">${esc(name)}</td></tr>
-            <tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Email</td><td style="padding: 8px 0;"><a href="mailto:${esc(email)}" style="color: #16C2F3;">${esc(email)}</a></td></tr>
-            ${phone ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Phone</td><td style="padding: 8px 0;">${esc(phone)}</td></tr>` : ""}
-            ${product ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #1c1712;">Product</td><td style="padding: 8px 0;">${esc(product)}</td></tr>` : ""}
-          </table>
-          <div style="margin-top: 16px; padding: 16px; background: #f4efe9; border-radius: 8px;">
-            <p style="font-weight: bold; color: #1c1712; margin: 0 0 8px;">Message:</p>
-            <p style="margin: 0; white-space: pre-wrap; color: #333;">${esc(description)}</p>
-          </div>
-          ${file ? `<p style="margin-top: 12px; font-size: 14px; color: #666;">FILE_PLACEHOLDER</p>` : ""}
-        </div>
-        <div style="background: #f4efe9; padding: 16px 30px; font-size: 12px; color: #888;">
-          Reply directly to this email to respond to ${esc(name)}.
-        </div>
-      </div>
-    `;
+      if (!file || file.size === 0) {
+        fileLinks.push(null);
+        continue;
+      }
 
-    // Upload artwork file to Supabase Storage (non-fatal)
-    let fileSection = file ? `File: <strong>${file.name}</strong>` : "";
-    if (file && file.size > 0) {
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          {
+            error: `Item ${i + 1}: file too large — max 4 MB (received ${(
+              file.size /
+              1024 /
+              1024
+            ).toFixed(1)} MB)`,
+          },
+          { status: 400 }
+        );
+      }
+
+      const isAllowedMime = ALLOWED_MIME_TYPES.includes(file.type);
+      const isAllowedExt = ALLOWED_EXTENSIONS.test(file.name);
+      if (!isAllowedMime && !isAllowedExt) {
+        return NextResponse.json(
+          {
+            error: `Item ${
+              i + 1
+            }: file type not allowed — use PDF, AI, EPS, JPG, PNG, or WebP`,
+          },
+          { status: 400 }
+        );
+      }
+
       try {
-        const supabase = createServiceClient();
         const uuid = crypto.randomUUID();
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = `quote-requests/${uuid}/${safeName}`;
@@ -134,35 +197,153 @@ export async function POST(req: NextRequest) {
 
         const { error: uploadError } = await supabase.storage
           .from("print-files")
-          .upload(path, bytes, { contentType: file.type || "application/octet-stream", upsert: false });
+          .upload(path, bytes, {
+            contentType: file.type || "application/octet-stream",
+            upsert: false,
+          });
 
         if (uploadError) {
-          console.error("[quote-request] storage upload failed:", uploadError.message);
+          console.error(
+            `[quote-request] item ${i} upload failed:`,
+            uploadError.message
+          );
+          fileLinks.push(null);
         } else {
           const { data: signed } = await supabase.storage
             .from("print-files")
             .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
-          if (signed?.signedUrl) {
-            fileSection = `<a href="${signed.signedUrl}" style="color: #16C2F3; font-weight: bold;">Download: ${file.name}</a>`;
-          }
+          fileLinks.push(signed?.signedUrl ?? null);
         }
       } catch (storageErr) {
-        console.error("[quote-request] storage error:", storageErr);
+        console.error(`[quote-request] item ${i} storage error:`, storageErr);
+        fileLinks.push(null);
       }
     }
 
-    const htmlWithFile = html.replace("FILE_PLACEHOLDER", fileSection);
+    const from =
+      process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
+    const isMulti = items.length > 1;
 
-    // Send to staff
+    const subject = isMulti
+      ? `Multi-Item Quote (${items.length} items) — ${name}`
+      : `Quote Request — ${items[0].product} — ${name}`;
+
+    // Build per-item HTML sections for the staff notification email
+    const itemSections = items
+      .map((item, i) => {
+        const fileLink = fileLinks[i];
+        const sidesLabel = item.sides === "2" ? "Double-sided" : "Single-sided";
+        const rowStyle = "padding: 5px 0; font-size: 13px;";
+        const labelStyle = "color: #6b7280; width: 130px;";
+        const valueStyle = "color: #111827;";
+
+        return `
+        <div style="margin-bottom: 20px; padding: 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+          <p style="font-weight: 700; font-size: 14px; color: #1c1712; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+            Item ${i + 1}: ${esc(item.product)}
+          </p>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr style="${rowStyle}">
+              <td style="${labelStyle}">Quantity</td>
+              <td style="${valueStyle} font-weight: 600;">${esc(item.qty)}</td>
+            </tr>
+            <tr style="${rowStyle}">
+              <td style="${labelStyle}">Material / Stock</td>
+              <td style="${valueStyle}">${
+          item.material
+            ? esc(item.material)
+            : "<em style='color:#9ca3af'>Not specified</em>"
+        }</td>
+            </tr>
+            ${
+              item.dimensions
+                ? `<tr style="${rowStyle}">
+              <td style="${labelStyle}">Dimensions</td>
+              <td style="${valueStyle}">${esc(item.dimensions)}</td>
+            </tr>`
+                : ""
+            }
+            <tr style="${rowStyle}">
+              <td style="${labelStyle}">Sides</td>
+              <td style="${valueStyle}">${sidesLabel}</td>
+            </tr>
+            ${
+              item.notes
+                ? `<tr style="${rowStyle}">
+              <td style="${labelStyle} vertical-align: top;">Notes</td>
+              <td style="${valueStyle} white-space: pre-wrap;">${esc(item.notes)}</td>
+            </tr>`
+                : ""
+            }
+          </table>
+          ${
+            fileLink
+              ? `<p style="margin: 10px 0 0; font-size: 13px;"><a href="${fileLink}" style="color: #16C2F3; font-weight: 600;">Download artwork →</a></p>`
+              : ""
+          }
+        </div>`;
+      })
+      .join("");
+
+    const staffHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+        <div style="background-color: #1c1712; padding: 20px 30px;">
+          <h1 style="color: #16C2F3; font-size: 20px; margin: 0;">
+            ${
+              isMulti
+                ? `New Multi-Item Quote Request (${items.length} items)`
+                : "New Quote Request"
+            }
+          </h1>
+        </div>
+        <div style="padding: 24px 30px; background: #fff;">
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr>
+              <td style="padding: 6px 0; font-weight: bold; color: #1c1712; width: 80px; font-size: 13px;">From</td>
+              <td style="padding: 6px 0; font-size: 13px;">${esc(name)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; font-weight: bold; color: #1c1712; font-size: 13px;">Email</td>
+              <td style="padding: 6px 0; font-size: 13px;">
+                <a href="mailto:${esc(email)}" style="color: #16C2F3;">${esc(email)}</a>
+              </td>
+            </tr>
+            ${
+              phone
+                ? `<tr>
+              <td style="padding: 6px 0; font-weight: bold; color: #1c1712; font-size: 13px;">Phone</td>
+              <td style="padding: 6px 0; font-size: 13px;">${esc(phone)}</td>
+            </tr>`
+                : ""
+            }
+          </table>
+
+          <p style="font-weight: 700; font-size: 12px; color: #374151; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px;">
+            ${isMulti ? `Items (${items.length})` : "Item Details"}
+          </p>
+          ${itemSections}
+        </div>
+        <div style="background: #f4efe9; padding: 16px 30px; font-size: 12px; color: #888;">
+          Reply directly to this email to respond to ${esc(name)}.
+        </div>
+      </div>
+    `;
+
+    // Send staff notification
     await sendEmail({
       from,
       to: process.env.STAFF_EMAIL ?? "info@true-color.ca",
       replyTo: email,
       subject,
-      html: htmlWithFile,
+      html: staffHtml,
     });
 
-    // Send confirmation to customer
+    // Customer confirmation
+    const itemCountText =
+      items.length > 1
+        ? `your ${items.length}-item quote request`
+        : "your quote request";
+
     await sendEmail({
       from,
       to: email,
@@ -170,12 +351,20 @@ export async function POST(req: NextRequest) {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #1c1712; padding: 20px 30px;">
-            <p style="color: #16C2F3; font-size: 18px; font-weight: bold; margin: 0;">True Color Display Printing</p>
+            <p style="color: #16C2F3; font-size: 18px; font-weight: bold; margin: 0;">
+              True Color Display Printing
+            </p>
           </div>
           <div style="padding: 24px 30px; background: #fff;">
             <p style="font-size: 16px; color: #1c1712;">Hi ${esc(name)},</p>
-            <p style="color: #444;">Got it! We received your quote request and will reply within 1 business day.</p>
-            <p style="color: #444;">In the meantime, you can call us at <a href="tel:+13069548688" style="color: #16C2F3;">(306) 954-8688</a> or visit us at 216 33rd St W, Saskatoon.</p>
+            <p style="color: #444;">
+              Got it! We received ${itemCountText} and will reply within 1 business day.
+            </p>
+            <p style="color: #444;">
+              In the meantime, you can call us at
+              <a href="tel:+13069548688" style="color: #16C2F3;">(306) 954-8688</a>
+              or visit us at 216 33rd St W, Saskatoon.
+            </p>
             <p style="color: #444;">— The True Color Team</p>
           </div>
         </div>
