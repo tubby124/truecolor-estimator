@@ -683,3 +683,59 @@ describe("PHOTO_POSTER — per-unit pricing × qty", () => {
     expect(result.sell_price).toBe(96);
   });
 });
+
+// ─── REGRESSION: lot-price gap returns BLOCKED (not fallback sqft garbage) ────
+
+describe("REGRESSION — lot-price custom qty returns BLOCKED", () => {
+  it("FLYER qty=50 → BLOCKED (not $211.50 fallback)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 50,
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.sell_price).toBeNull();
+  });
+
+  it("FLYER qty=100 → QUOTED $45 (exact tier still works)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(45);
+  });
+
+  it("POSTCARD qty=75 → BLOCKED (between tiers)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT",
+      width_in: 6,
+      height_in: 4,
+      sides: 2,
+      qty: 75,
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.sell_price).toBeNull();
+  });
+
+  it("BROCHURE qty=75 → BLOCKED (below minimum tier)", () => {
+    const result = estimate({
+      category: "BROCHURE",
+      material_code: "PLACEHOLDER_TF_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 75,
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.sell_price).toBeNull();
+  });
+});

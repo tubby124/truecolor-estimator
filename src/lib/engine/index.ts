@@ -164,6 +164,12 @@ export function estimate(req: EstimateRequest): EstimateResponse {
           });
         }
       } else {
+        // If category-specific rules exist but none matched, the requested qty is between
+        // lot-price tiers (e.g. 50 flyers — not a supported run size). Block and request
+        // a quote. Only use the sqft fallback for truly unknown categories (rules.length === 0).
+        if (rules.length > 0) {
+          return blocked(`Quantity ${qty} is not a standard lot size — please request a quote`);
+        }
         // Fallback: PR-FALLBACK-ALL
         basePricePerSqft = getConfigNum("default_sqft_fallback_rate");
         basePrice = ceilCent(sqft * basePricePerSqft);

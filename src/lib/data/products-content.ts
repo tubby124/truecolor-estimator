@@ -309,6 +309,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     sizeSectionLabel: "Paper Weight",
     showCustomSize: true,
     qtyPresets: [100, 250, 500, 1000],
+    lotPriced: true,
     specs: [
       { label: "Paper options", value: "80lb gloss text (standard) or 100lb gloss text (premium)" },
       { label: "Print", value: "Full-colour double-sided digital (Konica Minolta press)" },
@@ -799,6 +800,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "3×4\"", width_in: 4, height_in: 3 },
     ],
     qtyPresets: [50, 100, 250, 500, 1000],
+    lotPriced: true,
     specs: [
       { label: "Stock", value: "14pt gloss coated card — same as business cards" },
       { label: "Print", value: "Full-colour double-sided digital" },
@@ -852,6 +854,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Half-fold (4 panels)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_HF_100LB" },
     ],
     qtyPresets: [100, 250, 500],
+    lotPriced: true,
     specs: [
       { label: "Stock", value: "100lb gloss text — heavier and premium vs. standard flyer paper" },
       { label: "Print", value: "Full-colour double-sided digital" },
