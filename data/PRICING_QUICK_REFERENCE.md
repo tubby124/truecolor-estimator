@@ -141,16 +141,20 @@ $8.50/sqft · Min $40
 > Lot prices are flat totals — they are NOT multiplied by qty in the engine.
 > Bulk savings are baked into tiered lot pricing (lower per-unit at higher qty).
 
-### Vinyl Stickers (STICKER · ARLPMF7008 · 4×4" Die-Cut)
-| Qty  | Total  | Per Unit | Savings vs 50 |
-|------|--------|----------|---------------|
-| 50   | $95    | $1.90    | —             |
-| 100  | $160   | $1.60    | save 16%      |
-| 250  | $325   | $1.30    | save 32%      |
-| 500  | $475   | $0.95    | save 50%      |
-| 1000 | $650   | $0.65    | save 66%      |
+### Vinyl Stickers (STICKER · Arlon DPF 510 · Die-Cut · 8 Sizes)
 
-Most popular: 100 stickers
+| Qty  | 2×2″ | 2×3″ | 3×3″ | 4×4″  | 4×6″ | 5×5″ | 6×6″ | 8×8″ |
+|------|------|------|------|-------|------|------|------|------|
+| 25   | $25  | $25  | $40  | $60   | $90  | $95  | $135 | $240 |
+| 50   | $30  | $40  | $60  | $95   | $145 | $150 | $215 | $380 |
+| 100  | $45  | $70  | $105 | $160  | $240 | $250 | $360 | $640 |
+| 250  | $95  | $140 | $210 | $325  | $490 | $510 | $730 | $1300|
+| 500  | $135 | $205 | $305 | $475  | $715 | $740 | $1070| $1900|
+| 1000 | $185 | $280 | $420 | $650  | $975 | $1020| $1465| $2600|
+
+4×4″ per-unit: 50=$1.90 · 100=$1.60 · 250=$1.30 · 500=$0.95 · 1000=$0.65
+Material codes: 4×4″=ARLPMF7008 · all other sizes=PLACEHOLDER_STICKER_{SIZE}
+Most popular: 100× 4×4″
 
 ---
 

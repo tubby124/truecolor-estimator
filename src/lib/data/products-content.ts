@@ -720,7 +720,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Vinyl Stickers",
     tagline: "Die-cut vinyl stickers. Minimum 50. Durable indoors and out.",
     description:
-      "Vinyl stickers are printed on Arlon DPF 510 matte adhesive vinyl — the same 3.2 mil cast film we use for window decals — and die-cut to clean square edges with no white border or carrier sheet separating each sticker. Roland UV-resistant inks produce vivid, durable colour that holds up on product packaging, outdoor surfaces, and high-traffic applications for 2–3 years. The standard size is 4×4\" at a minimum order of 50 stickers. Price drops sharply with quantity: 50 stickers run roughly $1.90 each; 1000 stickers drop to $0.65 each. Custom shapes — circles, ovals, die-cut brand logos — are available by quote beyond the standard 4×4\" square. Common uses in Saskatoon: product labels for local food and ag businesses, branded stickers for farm equipment dealerships, event giveaway packs, coffee shop cup stickers, and packaging seals. Stickers are safe for product packaging as long as they don't contact food directly. The removable adhesive peels cleanly from most smooth surfaces — good for promotional campaigns where you want customers to stick your brand on a laptop or water bottle without permanently marking their property. Supply a PDF or high-res PNG at 150+ DPI. In-house design from $35. Pickup at 216 33rd St W, Saskatoon.",
+      "Vinyl stickers are printed on Arlon DPF 510 matte adhesive vinyl — the same 3.2 mil cast film we use for window decals — and die-cut to clean square edges with no white border or carrier sheet separating each sticker. Roland UV-resistant inks produce vivid, durable colour that holds up on product packaging, outdoor surfaces, and high-traffic applications for 2–3 years. Eight sizes available online — 2×2\", 2×3\", 3×3\", 4×4\", 4×6\", 5×5\", 6×6\", and 8×8\" — starting at 25 stickers. Small label runs start at $25 for 25× 2×2\"; large promo stickers run $380 for 50× 8×8\". Price drops sharply with quantity: 4×4\" stickers run $1.90 each at 50 units and $0.65 each at 1000 units. Custom shapes — circles, ovals, die-cut brand logos — are available by quote. Common uses in Saskatoon: product labels for local food and ag businesses, branded stickers for farm equipment dealerships, event giveaway packs, coffee shop cup stickers, and packaging seals. Stickers are safe for product packaging as long as they don't contact food directly. The removable adhesive peels cleanly from most smooth surfaces — good for promotional campaigns where you want customers to stick your brand on a laptop or water bottle without permanently marking their property. Supply a PDF or high-res PNG at 150+ DPI. In-house design from $35. Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$95",
     category: "STICKER",
     material_code: "ARLPMF7008",
@@ -735,15 +735,22 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 1,
     sideOptions: false,
     sizePresets: [
-      { label: "4×4\"", width_in: 4, height_in: 4 },
+      { label: "2×2\"", width_in: 2, height_in: 2, material_code: "PLACEHOLDER_STICKER_2X2" },
+      { label: "2×3\"", width_in: 2, height_in: 3, material_code: "PLACEHOLDER_STICKER_2X3" },
+      { label: "3×3\"", width_in: 3, height_in: 3, material_code: "PLACEHOLDER_STICKER_3X3" },
+      { label: "4×4\"", width_in: 4, height_in: 4, material_code: "ARLPMF7008" },
+      { label: "4×6\"", width_in: 4, height_in: 6, material_code: "PLACEHOLDER_STICKER_4X6" },
+      { label: "5×5\"", width_in: 5, height_in: 5, material_code: "PLACEHOLDER_STICKER_5X5" },
+      { label: "6×6\"", width_in: 6, height_in: 6, material_code: "PLACEHOLDER_STICKER_6X6" },
+      { label: "8×8\"", width_in: 8, height_in: 8, material_code: "PLACEHOLDER_STICKER_8X8" },
     ],
-    qtyPresets: [50, 100, 250, 500, 1000],
+    qtyPresets: [25, 50, 100, 250, 500, 1000],
     lotPriced: true,
     specs: [
       { label: "Material", value: "Arlon DPF 510 matte adhesive vinyl — 3.2 mil" },
       { label: "Print", value: "Full-colour UV-resistant digital print" },
       { label: "Cut", value: "Die-cut square — clean edges, no carrier sheet" },
-      { label: "Standard size", value: "4×4\" — custom shapes and sizes by quote" },
+      { label: "Sizes", value: "2×2\" · 2×3\" · 3×3\" · 4×4\" · 4×6\" · 5×5\" · 6×6\" · 8×8\" — custom shapes by quote" },
       { label: "Minimum qty", value: "50 stickers" },
       { label: "Adhesive", value: "Removable — peels cleanly from most surfaces" },
     ],
@@ -755,7 +762,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "Can I get custom shapes — circles, die-cut logos?",
-        a: "Custom shapes (circles, ovals, die-cut outlines) are available by quote. The estimator prices standard 4×4\" squares. Contact us for custom shape pricing.",
+        a: "Eight standard sizes are priced online: 2×2\", 2×3\", 3×3\", 4×4\", 4×6\", 5×5\", 6×6\", and 8×8\". Custom shapes (circles, ovals, die-cut outlines) or non-standard dimensions are available by quote — contact us.",
       },
       {
         q: "How long do they last outdoors?",
