@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:smoke": "vitest run e2e/",
+    "test:payment": "node scripts/test-payment-flow.mjs",
     "gen-og": "node scripts/gen-og.mjs",
     "validate:pricing": "node scripts/validate-pricing.mjs"
   },

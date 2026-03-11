@@ -22,7 +22,8 @@ export async function createCloverCheckout(
   amountCents: number,
   description: string,
   customerEmail?: string,
-  redirectUrl?: string
+  redirectUrl?: string,
+  externalReferenceId?: string
 ): Promise<CloverCheckoutResult> {
   const privateKey = process.env.CLOVER_ECOMM_PRIVATE_KEY;
   if (!privateKey) {
@@ -51,6 +52,9 @@ export async function createCloverCheckout(
 
   // After payment, redirect back to our site
   if (redirectUrl) body.redirectUrl = redirectUrl;
+
+  // Tag with our internal order UUID so Clover includes it in PAYMENT webhook events
+  if (externalReferenceId) body.externalReferenceId = externalReferenceId;
 
   const res = await fetch(`${BASE_URL}/v1/checkouts`, {
     method: "POST",

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { createServiceClient } from "@/lib/supabase/server";
-import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { AccountSignupCard } from "@/components/site/AccountSignupCard";
 import { PurchaseEvent } from "@/app/order-confirmed/PurchaseEvent";
 
@@ -19,6 +18,7 @@ interface Props {
 interface OrderSummary {
   order_number: string;
   total: number;
+  status: string;
   payment_method: string;
   payment_reference: string | null;
   customers?: { email: string } | Array<{ email: string }> | null;
@@ -33,47 +33,14 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
     try {
       const supabase = createServiceClient();
 
-      // Auto-confirm payment only for card orders redirected back from Clover.
-      // eTransfer orders stay in pending_payment until staff manually marks them paid.
-      // .select() lets us detect if the row was actually updated (vs. already confirmed by webhook)
-      const { data: updatedOrders } = await supabase
-        .from("orders")
-        .update({ status: "payment_received", paid_at: new Date().toISOString() })
-        .eq("id", oid)
-        .eq("status", "pending_payment")     // idempotent — only updates if still pending
-        .eq("payment_method", "clover_card") // never auto-confirm eTransfer orders
-        .select("order_number, customer_id, total, is_rush, payment_method");
-
-      // Send "payment confirmed" email only if this redirect beat the webhook
-      // (if webhook already fired and updated the status, updatedOrders will be empty)
-      if (updatedOrders && updatedOrders.length > 0) {
-        try {
-          const o = updatedOrders[0];
-          const { data: customer } = await supabase
-            .from("customers")
-            .select("email, name")
-            .eq("id", o.customer_id)
-            .single();
-          if (customer) {
-            await sendOrderStatusEmail({
-              status: "payment_received",
-              orderNumber: o.order_number,
-              customerName: customer.name,
-              customerEmail: customer.email,
-              total: o.total,
-              isRush: o.is_rush,
-              paymentMethod: o.payment_method,
-            });
-          }
-        } catch {
-          // non-fatal — page still shows confirmation
-        }
-      }
-
-      // Fetch order details to show on confirmation page
+      // Read-only: fetch order details to display.
+      // Payment confirmation is written exclusively by the Clover webhook
+      // (/api/webhooks/clover) when it receives a captured PAYMENT event.
+      // We never auto-confirm here — Clover redirects to this URL on both
+      // success AND cancellation/timeout, so we can't trust the redirect alone.
       const { data } = await supabase
         .from("orders")
-        .select("order_number, total, payment_method, payment_reference, customers(email)")
+        .select("order_number, total, payment_method, payment_reference, status, customers(email)")
         .eq("id", oid)
         .single();
 
@@ -90,15 +57,21 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
 
   const isEtransfer = orderSummary?.payment_method === "etransfer";
   // For eTransfer orders, payment_reference holds the /pay/{token} card URL.
-  // For clover_card orders, payment_reference is the Clover session ID — not a pay URL.
+  // For clover_card orders, payment_reference is our Supabase order UUID (used for webhook matching).
   const cardPayUrl = isEtransfer ? (orderSummary?.payment_reference ?? null) : null;
+
+  // Clover orders: payment is confirmed by the webhook, not this redirect.
+  // Show a "processing" notice if the webhook hasn't fired yet.
+  const isCloverPending =
+    orderSummary?.payment_method === "clover_card" &&
+    orderSummary?.status === "pending_payment";
 
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      {/* GA4 purchase event (client component — fires once on mount) */}
-      {oid && orderSummary && (
+      {/* GA4 purchase event — only fires when payment is confirmed (not while pending) */}
+      {oid && orderSummary && orderSummary.status !== "pending_payment" && (
         <PurchaseEvent
           orderNumber={orderSummary.order_number}
           total={orderSummary.total}
@@ -137,6 +110,16 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
           We&apos;ve got your order and will have it ready for pickup at{" "}
           <span className="font-semibold text-[#1c1712]">216 33rd St W, Saskatoon</span>.
         </p>
+
+        {/* Clover payment processing notice — shown while webhook hasn't confirmed yet */}
+        {isCloverPending && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-left mb-8">
+            <p className="font-bold text-yellow-800 mb-1">Payment being verified</p>
+            <p className="text-sm text-yellow-700 leading-relaxed">
+              Your card payment is being processed. You&apos;ll receive a confirmation email once it&apos;s verified — this usually takes under a minute. You do not need to do anything else.
+            </p>
+          </div>
+        )}
 
         {/* eTransfer payment reminder — shown only for e-Transfer orders */}
         {isEtransfer && orderSummary && (

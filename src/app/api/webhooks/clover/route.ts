@@ -65,8 +65,15 @@ export async function POST(req: NextRequest) {
   if (event.type === "PAYMENT") {
     const obj = event.object as Record<string, unknown> | undefined;
     if (obj?.status === "captured" || obj?.status === "paid") {
+      // Primary: externalReferenceId = our Supabase order UUID (set in createCloverCheckout)
+      // Fallback: cloverOrderId = Clover's internal order ID (for backward compat)
+      const extRef = (obj.externalReferenceId ?? obj.external_reference_id) as string | undefined;
       const cloverOrderId = (obj.orderId ?? obj.order_id) as string | undefined;
-      if (cloverOrderId) {
+      const matchRef = extRef ?? cloverOrderId;
+
+      console.log(`[clover-webhook] matching by ${extRef ? "externalReferenceId" : "cloverOrderId"}: ${matchRef}`);
+
+      if (matchRef) {
         try {
           const supabase = createServiceClient();
           const { data: updatedOrders, error } = await supabase
@@ -75,7 +82,7 @@ export async function POST(req: NextRequest) {
               status: "payment_received",
               paid_at: new Date().toISOString(),
             })
-            .eq("payment_reference", cloverOrderId)
+            .eq("payment_reference", matchRef)
             .eq("status", "pending_payment")
             .select("id, order_number, customer_id, total, is_rush, wave_invoice_id");
 

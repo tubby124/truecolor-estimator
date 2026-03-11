@@ -39,21 +39,27 @@ export default async function PaymentGatewayPage({ params }: Props) {
 
   let checkoutUrl: string;
   try {
-    const result = await createCloverCheckout(amountCents, description, customerEmail, redirectUrl);
+    // Extract our Supabase order UUID from the redirect URL so we can:
+    // 1. Pass it to Clover as externalReferenceId (included in PAYMENT webhook events)
+    // 2. Store it as payment_reference so the webhook can match the order
+    const oidMatch = redirectUrl?.match(/[?&]oid=([a-f0-9-]{36})/i);
+    const orderId = oidMatch?.[1];
+
+    const result = await createCloverCheckout(
+      amountCents, description, customerEmail, redirectUrl,
+      orderId  // externalReferenceId — Clover echoes this back in webhook PAYMENT events
+    );
     checkoutUrl = result.checkoutUrl;
 
-    // Update payment_reference in DB so the Clover webhook can find this order.
-    // The redirectUrl contains the order ID: .../order-confirmed?oid={uuid}
-    if (result.sessionId && redirectUrl) {
-      const oidMatch = redirectUrl.match(/[?&]oid=([a-f0-9-]{36})/i);
-      if (oidMatch?.[1]) {
-        const supabase = createServiceClient();
-        void supabase
-          .from("orders")
-          .update({ payment_reference: result.sessionId } as Record<string, unknown>)
-          .eq("id", oidMatch[1])
-          .eq("status", "pending_payment"); // only update if still pending
-      }
+    // Store our own UUID as payment_reference so the Clover webhook can find this order
+    // by matching event.object.externalReferenceId === payment_reference
+    if (orderId) {
+      const supabase = createServiceClient();
+      void supabase
+        .from("orders")
+        .update({ payment_reference: orderId } as Record<string, unknown>)
+        .eq("id", orderId)
+        .eq("status", "pending_payment"); // only update if still pending
     }
   } catch (err) {
     console.error("[pay/token] Clover checkout failed:", err);
