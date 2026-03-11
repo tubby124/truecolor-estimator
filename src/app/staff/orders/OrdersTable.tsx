@@ -54,6 +54,7 @@ export interface Order {
   notes: string | null;
   staff_notes: string | null;
   proof_storage_path: string | null;
+  proof_storage_paths: string[] | null;
   proof_sent_at: string | null;
   file_storage_paths: string[] | null;
   is_archived: boolean;
@@ -128,7 +129,7 @@ export function OrdersTable({ initialOrders }: Props) {
 
   // Proof state — one proof panel at a time
   const [proofOrderId, setProofOrderId] = useState<string | null>(null);
-  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofFiles, setProofFiles] = useState<File[]>([]);
   const [proofMessage, setProofMessage] = useState("");
   const [proofUploading, setProofUploading] = useState(false);
   const [proofSentId, setProofSentId] = useState<string | null>(null);
@@ -195,6 +196,7 @@ export function OrdersTable({ initialOrders }: Props) {
                       notes: u.notes !== undefined ? (u.notes as string | null) : o.notes,
                       staff_notes: u.staff_notes !== undefined ? (u.staff_notes as string | null) : o.staff_notes,
                       proof_storage_path: u.proof_storage_path !== undefined ? (u.proof_storage_path as string | null) : o.proof_storage_path,
+                      proof_storage_paths: u.proof_storage_paths !== undefined ? (u.proof_storage_paths as string[] | null) : o.proof_storage_paths,
                       proof_sent_at: u.proof_sent_at !== undefined ? (u.proof_sent_at as string | null) : o.proof_sent_at,
                       file_storage_paths: u.file_storage_paths !== undefined ? (u.file_storage_paths as string[] | null) : o.file_storage_paths,
                       wave_invoice_approved_at: u.wave_invoice_approved_at !== undefined ? (u.wave_invoice_approved_at as string | null) : o.wave_invoice_approved_at,
@@ -480,24 +482,34 @@ export function OrdersTable({ initialOrders }: Props) {
   // ── Proof upload ───────────────────────────────────────────────────────────
 
   async function handleSendProof(orderId: string) {
-    if (!proofFile) return;
+    if (proofFiles.length === 0) return;
     setProofUploading(true);
     setProofError(null);
     try {
       const form = new FormData();
-      form.append("file", proofFile);
+      proofFiles.forEach((f) => form.append("files", f));
       if (proofMessage.trim()) form.append("message", proofMessage.trim());
       const res = await fetch(`/api/staff/orders/${orderId}/proof`, {
         method: "POST",
         body: form,
       });
-      const data = (await res.json()) as { ok?: boolean; proofPath?: string; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        latestProofPath?: string;
+        allProofPaths?: string[];
+        error?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
       setProofSentId(orderId);
       setOrders((prev) =>
         prev.map((o) =>
           o.id === orderId
-            ? { ...o, proof_storage_path: data.proofPath ?? null, proof_sent_at: new Date().toISOString() }
+            ? {
+                ...o,
+                proof_storage_path: data.latestProofPath ?? null,
+                proof_storage_paths: data.allProofPaths ?? null,
+                proof_sent_at: new Date().toISOString(),
+              }
             : o
         )
       );
@@ -640,9 +652,14 @@ export function OrdersTable({ initialOrders }: Props) {
               }
             }
 
-            const proofUrl = order.proof_storage_path
-              ? `${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`
-              : null;
+            // Prefer the new array; fall back to the legacy single path for old orders
+            const proofUrls: string[] = (
+              order.proof_storage_paths && order.proof_storage_paths.length > 0
+                ? order.proof_storage_paths
+                : order.proof_storage_path
+                ? [order.proof_storage_path]
+                : []
+            ).map((p) => `${SUPABASE_STORAGE_URL}/${p}`);
 
             const rushFee = order.is_rush
               ? Number(order.total) - Number(order.subtotal) - Number(order.gst)
@@ -688,9 +705,9 @@ export function OrdersTable({ initialOrders }: Props) {
                             📎 {artworkFiles.length > 1 ? `${artworkFiles.length} files` : "Artwork"}
                           </span>
                         )}
-                        {proofUrl && (
+                        {proofUrls.length > 0 && (
                           <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
-                            🖼 Proof sent
+                            🖼 {proofUrls.length > 1 ? `${proofUrls.length} proofs sent` : "Proof sent"}
                           </span>
                         )}
                         {order.staff_notes && (
@@ -1198,7 +1215,7 @@ export function OrdersTable({ initialOrders }: Props) {
                             setProofOrderId(null);
                           } else {
                             setProofOrderId(order.id);
-                            setProofFile(null);
+                            setProofFiles([]);
                             setProofMessage("");
                             setProofSentId(null);
                             setProofError(null);
@@ -1213,41 +1230,51 @@ export function OrdersTable({ initialOrders }: Props) {
                         {isProofOpen ? "✕ Close proof panel" : "🖼 Upload proof"}
                       </button>
 
-                      {/* Show existing proof indicator */}
-                      {proofUrl && !isProofOpen && (
-                        <p className="text-xs text-violet-600 mt-1.5">
-                          ✓ Proof sent
-                          {order.proof_sent_at
-                            ? ` on ${new Date(order.proof_sent_at).toLocaleDateString("en-CA", {
-                                month: "short",
-                                day: "numeric",
-                              })}`
-                            : ""}
-                          {" · "}
-                          <a
-                            href={proofUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline"
-                          >
-                            View proof →
-                          </a>
-                        </p>
+                      {/* Show list of all sent proofs */}
+                      {proofUrls.length > 0 && !isProofOpen && (
+                        <div className="mt-1.5 space-y-1">
+                          {proofUrls.map((url, i) => (
+                            <p key={url} className="text-xs text-violet-600">
+                              ✓ Proof{proofUrls.length > 1 ? ` ${i + 1}` : ""} sent
+                              {i === 0 && order.proof_sent_at
+                                ? ` on ${new Date(order.proof_sent_at).toLocaleDateString("en-CA", {
+                                    month: "short",
+                                    day: "numeric",
+                                  })}`
+                                : ""}
+                              {" · "}
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline"
+                              >
+                                View →
+                              </a>
+                            </p>
+                          ))}
+                        </div>
                       )}
 
                       {isProofOpen && (
                         <div className="mt-4 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
                           <div>
                             <label className="text-xs font-semibold text-gray-500 block mb-1.5">
-                              Proof file (JPG, PNG, WebP, or PDF)
+                              Proof files — select one or more (JPG, PNG, WebP, PDF)
                             </label>
                             <input
                               type="file"
                               accept=".jpg,.jpeg,.png,.webp,.pdf"
-                              onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
+                              multiple
+                              onChange={(e) => setProofFiles(Array.from(e.target.files ?? []))}
                               disabled={proofSentId === order.id}
                               className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
                             />
+                            {proofFiles.length > 1 && (
+                              <p className="text-xs text-violet-600 mt-1">
+                                {proofFiles.length} files selected
+                              </p>
+                            )}
                           </div>
 
                           <div>
@@ -1272,15 +1299,19 @@ export function OrdersTable({ initialOrders }: Props) {
 
                           {proofSentId === order.id ? (
                             <p className="text-sm text-violet-700 bg-violet-50 border border-violet-200 rounded-lg px-4 py-3 font-semibold">
-                              ✓ Proof sent to {customer?.email}
+                              ✓ {proofFiles.length > 1 ? `${proofFiles.length} proofs` : "Proof"} sent to {customer?.email}
                             </p>
                           ) : (
                             <button
                               onClick={() => handleSendProof(order.id)}
-                              disabled={proofUploading || !proofFile}
+                              disabled={proofUploading || proofFiles.length === 0}
                               className="bg-violet-600 text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                              {proofUploading ? "Uploading…" : "Send proof to customer →"}
+                              {proofUploading
+                                ? "Uploading…"
+                                : proofFiles.length > 1
+                                ? `Send ${proofFiles.length} proofs to customer →`
+                                : "Send proof to customer →"}
                             </button>
                           )}
                         </div>

@@ -1,11 +1,11 @@
 /**
  * src/lib/email/proofSent.ts
  *
- * Sends the customer an email when staff uploads a proof for their order.
+ * Sends the customer an email when staff uploads proofs for their order.
  * Triggered from POST /api/staff/orders/[id]/proof
  *
- * If the proof is an image (jpg/jpeg/png/webp): renders inline in email body.
- * If the proof is a PDF: shows a download button instead.
+ * Supports 1 or more proofs — each renders as its own block in the email.
+ * Images render inline; PDFs render as a download button.
  */
 
 import { sendEmail } from "./smtp";
@@ -16,9 +16,9 @@ export interface ProofSentParams {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
-  proofUrl: string;       // 7-day signed URL (or public URL fallback)
-  proofIsImage: boolean;  // true → inline img; false → download button
-  message?: string;       // optional staff note shown in email
+  proofUrls: string[];        // one or more 7-day signed URLs
+  proofIsImages: boolean[];   // true → inline img; false → download button (per proof)
+  message?: string;           // optional staff note shown in email
   items: Array<{
     product_name: string;
     qty: number;
@@ -34,42 +34,66 @@ export interface ProofSentParams {
 
 export async function sendProofEmail(params: ProofSentParams): Promise<void> {
   const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
-  const subject = `Proof ready for your review — Order ${params.orderNumber}`;
+  const proofCount = params.proofUrls.length;
+  const subject =
+    proofCount > 1
+      ? `${proofCount} proofs ready for your review — Order ${params.orderNumber}`
+      : `Proof ready for your review — Order ${params.orderNumber}`;
   const html = buildHtml(params);
   const text = buildText(params);
 
   await sendEmail({ from, to: params.customerEmail, subject, html, text });
 
   console.log(
-    `[proofSent] email sent → ${params.customerEmail} | ${params.orderNumber}`
+    `[proofSent] email sent → ${params.customerEmail} | ${params.orderNumber} | ${proofCount} proof(s)`
   );
 }
 
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildHtml(p: ProofSentParams): string {
-  const { orderNumber, customerName, proofUrl, proofIsImage, message, items } = p;
+  const { orderNumber, customerName, proofUrls, proofIsImages, message, items } = p;
+  const proofCount = proofUrls.length;
 
-  // Proof block — image inline or PDF download button
-  const proofBlock = proofIsImage
-    ? `
-      <img
-        src="${escHtml(proofUrl)}"
-        alt="Print proof for ${escHtml(orderNumber)}"
-        style="max-width:100%;border-radius:8px;border:1px solid #e5e7eb;display:block;margin:0 auto 12px;"
-      />
-      <p style="margin:0;text-align:center;">
-        <a href="${escHtml(proofUrl)}" target="_blank" style="font-size:13px;color:#6366f1;text-decoration:none;font-weight:600;">
-          View full size →
-        </a>
-      </p>`
-    : `
-      <div style="text-align:center;">
-        <a href="${escHtml(proofUrl)}" target="_blank"
-          style="display:inline-block;background:#6366f1;color:#fff;font-size:14px;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;">
-          📄 Download proof PDF →
-        </a>
-      </div>`;
+  // Build one proof block per URL
+  const proofBlocks = proofUrls.map((url, i) => {
+    const isImage = proofIsImages[i] ?? false;
+    const label = proofCount > 1 ? `Proof ${i + 1} of ${proofCount}` : "";
+    const labelHtml = label
+      ? `<p style="margin:0 0 10px;font-size:11px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(label)}</p>`
+      : "";
+
+    const proofContent = isImage
+      ? `
+        <img
+          src="${escHtml(url)}"
+          alt="Print proof ${i + 1} for ${escHtml(orderNumber)}"
+          style="max-width:100%;border-radius:8px;border:1px solid #e5e7eb;display:block;margin:0 auto 12px;"
+        />
+        <p style="margin:0;text-align:center;">
+          <a href="${escHtml(url)}" target="_blank" style="font-size:13px;color:#6366f1;text-decoration:none;font-weight:600;">
+            View full size →
+          </a>
+        </p>`
+      : `
+        <div style="text-align:center;">
+          <a href="${escHtml(url)}" target="_blank"
+            style="display:inline-block;background:#6366f1;color:#fff;font-size:14px;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;">
+            📄 Download proof${proofCount > 1 ? ` ${i + 1}` : ""} PDF →
+          </a>
+        </div>`;
+
+    const divider = i < proofUrls.length - 1
+      ? `<hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;" />`
+      : "";
+
+    return `
+      <div style="background:#f8f7ff;border:1px solid #c7d2fe;border-radius:10px;padding:20px;margin-bottom:${i < proofUrls.length - 1 ? "16px" : "0"};">
+        ${labelHtml}
+        ${proofContent}
+      </div>
+      ${divider}`;
+  }).join("");
 
   // Order details table
   const itemRows = items.map((item) => {
@@ -110,12 +134,20 @@ function buildHtml(p: ProofSentParams): string {
       </div>`
     : "";
 
+  const heroSubtitle = proofCount > 1
+    ? `Hi ${escHtml(customerName)}, your ${proofCount} proofs for Order ${escHtml(orderNumber)} are ready.`
+    : `Hi ${escHtml(customerName)}, your proof for Order ${escHtml(orderNumber)} is ready.`;
+
+  const heroTitle = proofCount > 1
+    ? `Your ${proofCount} proofs are ready to review`
+    : `Your proof is ready to review`;
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Proof ready — Order ${escHtml(orderNumber)}</title>
+  <title>Proof${proofCount > 1 ? "s" : ""} ready — Order ${escHtml(orderNumber)}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
 
@@ -143,10 +175,10 @@ function buildHtml(p: ProofSentParams): string {
               <span style="font-size:22px;color:#fff;line-height:50px;display:inline-block;">🖼</span>
             </div>
             <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              Your proof is ready to review
+              ${escHtml(heroTitle)}
             </h1>
             <p style="margin:0 0 18px;font-size:14px;color:#6b7280;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              Hi ${escHtml(customerName)}, your proof for Order ${escHtml(orderNumber)} is ready.
+              ${heroSubtitle}
             </p>
             <div style="display:inline-block;background:#f4efe9;border-radius:8px;padding:8px 20px;border:1px solid #ddd5c8;">
               <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:block;margin-bottom:2px;">
@@ -159,13 +191,13 @@ function buildHtml(p: ProofSentParams): string {
           </td>
         </tr>
 
-        <!-- PROOF + BODY -->
+        <!-- PROOFS + BODY -->
         <tr>
           <td style="background:#fff;padding:8px 32px 32px;">
 
-            <!-- Proof image or download button -->
-            <div style="background:#f8f7ff;border:1px solid #c7d2fe;border-radius:10px;padding:20px;margin-bottom:24px;">
-              ${proofBlock}
+            <!-- Proof blocks -->
+            <div style="margin-bottom:24px;">
+              ${proofBlocks}
             </div>
 
             <!-- Staff note (if any) -->
@@ -197,7 +229,7 @@ function buildHtml(p: ProofSentParams): string {
             <!-- Reply instruction -->
             <div style="background:#fdf4f4;border:1px solid #f0bfbb;border-radius:8px;padding:14px 16px;">
               <p style="margin:0;font-size:13px;color:#7a1818;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;">
-                Looks good? We&rsquo;ll proceed to print. Have changes? Reply to this email and let us know.
+                Look${proofCount > 1 ? "s" : "s"} good? We&rsquo;ll proceed to print. Have changes? Reply to this email and let us know.
                 You can also reach us at
                 <a href="mailto:info@true-color.ca" style="color:#e52222;font-weight:600;text-decoration:none;">info@true-color.ca</a>.
               </p>
@@ -234,7 +266,12 @@ function buildHtml(p: ProofSentParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildText(p: ProofSentParams): string {
-  const { orderNumber, customerName, proofUrl, message, items } = p;
+  const { orderNumber, customerName, proofUrls, message, items } = p;
+  const proofCount = proofUrls.length;
+
+  const proofLines = proofUrls.map((url, i) =>
+    proofCount > 1 ? `Proof ${i + 1}: ${url}` : `View your proof: ${url}`
+  );
 
   const itemLines = items.map((item) => {
     const size =
@@ -248,9 +285,11 @@ function buildText(p: ProofSentParams): string {
   return [
     `Hi ${customerName},`,
     "",
-    `Your proof for Order ${orderNumber} is ready to review.`,
+    proofCount > 1
+      ? `Your ${proofCount} proofs for Order ${orderNumber} are ready to review.`
+      : `Your proof for Order ${orderNumber} is ready to review.`,
     "",
-    `View your proof: ${proofUrl}`,
+    ...proofLines,
     "",
     ...(items.length > 0 ? ["ORDER DETAILS", ...itemLines, ""] : []),
     ...(message?.trim() ? [`Note from True Color: ${message.trim()}`, ""] : []),

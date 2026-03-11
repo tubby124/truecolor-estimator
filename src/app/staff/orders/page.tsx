@@ -88,6 +88,7 @@ async function fetchOrders() {
       notes,
       staff_notes,
       proof_storage_path,
+      proof_storage_paths,
       proof_sent_at,
       file_storage_paths,
       customers ( name, email, company, phone ),

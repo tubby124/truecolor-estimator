@@ -1,23 +1,22 @@
 /**
  * POST /api/staff/orders/[id]/proof
  *
- * Staff uploads a proof image or PDF for a customer order.
- * - Stores file at proofs/{orderId}/proof.{ext} in the "print-files" bucket (upsert)
- * - Saves proof_storage_path + proof_sent_at to the orders table
- * - Emails the customer with the proof (non-fatal if email fails)
+ * Staff uploads one or more proof images/PDFs for a customer order.
+ * - Accepts: multipart/form-data with `files` (multiple) or legacy `file` (single)
+ * - Stores each file at proofs/{orderId}/proof_{timestamp}_{index}.{ext}
+ * - Appends new paths to proof_storage_paths[] on the orders table
+ * - Updates proof_storage_path (legacy, always = last uploaded path)
+ * - Updates proof_sent_at
+ * - Emails the customer with all newly uploaded proofs in a single email
  *
- * Accepts: multipart/form-data
- *   file    (required) — image (jpg/jpeg/png/webp) or PDF
- *   message (optional) — staff note to include in the email
- *
- * Returns: { ok: true, proofPath: string }
+ * Returns: { ok: true, latestProofPath: string, allProofPaths: string[] }
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendProofEmail } from "@/lib/email/proofSent";
 
-const MAX_FILE_SIZE = 52_428_800; // 50 MB
+const MAX_FILE_SIZE = 52_428_800; // 50 MB per file
 
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
@@ -45,31 +44,37 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // ── 1. Parse multipart form ────────────────────────────────────────────────
     const form = await req.formData();
-    const file = form.get("file") as File | null;
     const message = (form.get("message") as string | null)?.trim() ?? undefined;
 
-    if (!file || file.size === 0) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    // Accept either `files` (new multi-file) or legacy `file` (single)
+    const filesRaw = form.getAll("files") as File[];
+    const legacyFile = form.get("file") as File | null;
+    const files: File[] = filesRaw.length > 0 ? filesRaw : legacyFile ? [legacyFile] : [];
+
+    if (files.length === 0) {
+      return NextResponse.json({ error: "No files provided" }, { status: 400 });
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `File too large — max 50 MB (received ${(file.size / 1024 / 1024).toFixed(1)} MB)` },
-        { status: 400 }
-      );
+    // Validate each file
+    for (const file of files) {
+      if (file.size === 0) {
+        return NextResponse.json({ error: `File "${file.name}" is empty` }, { status: 400 });
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: `File "${file.name}" too large — max 50 MB (received ${(file.size / 1024 / 1024).toFixed(1)} MB)` },
+          { status: 400 }
+        );
+      }
+      const isAllowedMime = ALLOWED_MIME_TYPES.includes(file.type);
+      const isAllowedExt = ALLOWED_EXTENSIONS.test(file.name);
+      if (!isAllowedMime && !isAllowedExt) {
+        return NextResponse.json(
+          { error: `File "${file.name}" type not allowed — use JPG, PNG, WebP, or PDF` },
+          { status: 400 }
+        );
+      }
     }
-
-    const isAllowedMime = ALLOWED_MIME_TYPES.includes(file.type);
-    const isAllowedExt = ALLOWED_EXTENSIONS.test(file.name);
-    if (!isAllowedMime && !isAllowedExt) {
-      return NextResponse.json(
-        { error: "File type not allowed — use JPG, PNG, WebP, or PDF" },
-        { status: 400 }
-      );
-    }
-
-    const proofIsImage = /\.(jpg|jpeg|png|webp)$/i.test(file.name);
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
 
     const supabase = createServiceClient();
 
@@ -79,6 +84,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       .select(
         `
         order_number,
+        proof_storage_paths,
         customers ( name, email ),
         order_items (
           product_name,
@@ -107,52 +113,72 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Customer email not found" }, { status: 400 });
     }
 
-    // ── 3. Upload proof to Supabase Storage ───────────────────────────────────
-    const proofPath = `proofs/${orderId}/proof.${ext}`;
-    const bytes = await file.arrayBuffer();
+    // ── 3. Upload each proof to Supabase Storage ───────────────────────────────
+    const timestamp = Date.now();
+    const newPaths: string[] = [];
+    const newProofMeta: Array<{ path: string; isImage: boolean }> = [];
 
-    const { error: uploadErr } = await supabase.storage
-      .from("print-files")
-      .upload(proofPath, bytes, {
-        contentType: file.type || "application/octet-stream",
-        upsert: true, // allow staff to re-upload a revised proof
-      });
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      // Use timestamp + index to guarantee unique paths even in rapid succession
+      const proofPath = `proofs/${orderId}/proof_${timestamp}_${i}.${ext}`;
+      const bytes = await file.arrayBuffer();
 
-    if (uploadErr) {
-      console.error("[staff/proof] Supabase storage error:", uploadErr.message);
-      return NextResponse.json({ error: `Upload failed: ${uploadErr.message}` }, { status: 500 });
+      const { error: uploadErr } = await supabase.storage
+        .from("print-files")
+        .upload(proofPath, bytes, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
+
+      if (uploadErr) {
+        console.error("[staff/proof] Supabase storage error:", uploadErr.message);
+        return NextResponse.json({ error: `Upload failed for "${file.name}": ${uploadErr.message}` }, { status: 500 });
+      }
+
+      newPaths.push(proofPath);
+      newProofMeta.push({ path: proofPath, isImage: /\.(jpg|jpeg|png|webp)$/i.test(file.name) });
     }
 
-    // ── 4. Update order with proof path + timestamp ───────────────────────────
+    const latestProofPath = newPaths[newPaths.length - 1];
+
+    // ── 4. Append new paths to proof_storage_paths array + update legacy field ─
+    const existingPaths = (order.proof_storage_paths as string[] | null) ?? [];
+    const allProofPaths = [...existingPaths, ...newPaths];
+
     const { error: updateErr } = await supabase
       .from("orders")
       .update({
-        proof_storage_path: proofPath,
+        proof_storage_paths: allProofPaths,
+        proof_storage_path: latestProofPath, // legacy backwards-compat field
         proof_sent_at: new Date().toISOString(),
       } as Record<string, unknown>)
       .eq("id", orderId);
 
     if (updateErr) {
       console.error("[staff/proof] DB update error:", updateErr.message);
-      // Non-fatal for the response — file was uploaded, DB update failed
-      // Continue to send email anyway
     }
 
-    // ── 5. Generate proof URL for email ───────────────────────────────────────
-    // Try 7-day signed URL first; fall back to public URL
-    let proofUrl = `${SUPABASE_STORAGE_PUBLIC}/${proofPath}`;
-    try {
-      const { data: signed } = await supabase.storage
-        .from("print-files")
-        .createSignedUrl(proofPath, 60 * 60 * 24 * 7); // 7 days
-      if (signed?.signedUrl) {
-        proofUrl = signed.signedUrl;
+    // ── 5. Generate signed URLs for each new proof ────────────────────────────
+    const proofUrls: string[] = [];
+    const proofIsImages: boolean[] = [];
+
+    for (const meta of newProofMeta) {
+      let proofUrl = `${SUPABASE_STORAGE_PUBLIC}/${meta.path}`;
+      try {
+        const { data: signed } = await supabase.storage
+          .from("print-files")
+          .createSignedUrl(meta.path, 60 * 60 * 24 * 7); // 7 days
+        if (signed?.signedUrl) proofUrl = signed.signedUrl;
+      } catch (signErr) {
+        console.warn("[staff/proof] signed URL failed (using public URL):", signErr);
       }
-    } catch (signErr) {
-      console.warn("[staff/proof] signed URL failed (using public URL):", signErr);
+      proofUrls.push(proofUrl);
+      proofIsImages.push(meta.isImage);
     }
 
-    // ── 6. Send proof email to customer (non-fatal) ───────────────────────────
+    // ── 6. Send proof email to customer with all new proofs (non-fatal) ────────
     try {
       const items = (Array.isArray(order.order_items) ? order.order_items : []) as Array<{
         product_name: string;
@@ -168,19 +194,20 @@ export async function POST(req: NextRequest, { params }: Params) {
         orderNumber: order.order_number,
         customerName: customer.name,
         customerEmail: customer.email,
-        proofUrl,
-        proofIsImage,
+        proofUrls,
+        proofIsImages,
         message,
         items,
       });
     } catch (emailErr) {
-      // Non-fatal — proof is uploaded and saved, email failure shouldn't block staff
       console.error("[staff/proof] email send failed (non-fatal):", emailErr);
     }
 
-    console.log(`[staff/proof] uploaded → ${proofPath} | order ${order.order_number}`);
+    console.log(
+      `[staff/proof] uploaded ${newPaths.length} proof(s) → order ${order.order_number} | total: ${allProofPaths.length}`
+    );
 
-    return NextResponse.json({ ok: true, proofPath });
+    return NextResponse.json({ ok: true, latestProofPath, allProofPaths });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Proof upload failed";
     console.error("[staff/proof]", msg);
