@@ -166,6 +166,15 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           price: data.sell_price,
           quantity: effectiveQty,
         });
+      } else {
+        // Engine returned BLOCKED — clear stale price so old price never persists
+        setPrice(null);
+        setLineItems([]);
+        setQtyDiscountApplied(false);
+        setQtyDiscountPct(null);
+        setPricePerUnit(null);
+        setMinChargeApplied(false);
+        setMinChargeValue(null);
       }
     } catch (err) {
       showToast(sanitizeError(err), "error");
@@ -455,22 +464,20 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
               </div>
             );
           })}
-          {!product.lotPriced && (
-            <div className="flex flex-col items-center">
-              <button
-                onClick={() => { setCustomQty(String(qty)); setIsCustomQty(true); }}
-                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
-                  isCustomQty
-                    ? "bg-[#1c1712] text-white border-[#1c1712]"
-                    : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
-                }`}
-              >
-                Custom
-              </button>
-            </div>
-          )}
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => { setCustomQty(String(qty)); setIsCustomQty(true); }}
+              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
+                isCustomQty
+                  ? "bg-[#1c1712] text-white border-[#1c1712]"
+                  : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+              }`}
+            >
+              Custom
+            </button>
+          </div>
         </div>
-        {!product.lotPriced && isCustomQty && (
+        {isCustomQty && (
           <input
             type="number"
             value={customQty}

@@ -821,3 +821,85 @@ describe("POSTCARD — size-differentiated material codes", () => {
     expect(result.sell_price).toBe(35);
   });
 });
+
+// ─── FLYER half-size (8.5×5.5) pricing (research-validated at ~78% of full) ──
+
+describe("FLYER half-size 8.5×5.5 — STEP 3 exact match per qty and paper weight", () => {
+  it("80lb half qty=100 → $35", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(35);
+  });
+
+  it("80lb half qty=250 → $88", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 2,
+      qty: 250,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(88);
+  });
+
+  it("80lb half qty=1000 → $145 (not $185 full-size — confirms no cross-size bleed)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 2,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(145);
+  });
+
+  it("100lb half qty=100 → $43", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(43);
+  });
+
+  it("100lb half qty=1000 → $250", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 2,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(250);
+  });
+
+  it("80lb half qty=200 → BLOCKED (between tiers, not $35 stale)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 2,
+      qty: 200,
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.sell_price).toBeNull();
+  });
+});

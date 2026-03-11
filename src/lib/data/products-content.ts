@@ -285,7 +285,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
   "flyers": {
     slug: "flyers",
     name: "Flyers",
-    tagline: "Letter flyers from $45. 80lb or 100lb gloss.",
+    tagline: "Flyers from $30. Full or half letter. 80lb or 100lb gloss.",
     description:
       "Printed on Pacesetter 80lb gloss text — a bright white, FSC-certified press sheet that produces sharp colour reproduction at an efficient price. The 80lb weight is standard for professional flyers and restaurant menus: stiff enough to hold its shape when handed out, light enough to keep postage manageable for direct mail. True Color runs flyers on our Konica Minolta digital production press with consistent colour from the first sheet to the last. 100 flyers is the minimum (letter size, 8.5×11\"). Price per flyer drops significantly at 250 and 500+. Want a heavier feel? Select 100lb gloss — noticeably thicker in hand and a step up in perceived quality. Both options print full-colour double-sided as standard. Common uses in Saskatoon: restaurant menus, event programs, open house handouts, election campaign materials, contractor service lists, and non-profit fundraiser sheets. Half-letter (5.5×8.5\"), legal (8.5×14\"), and other custom sizes available on request — use the Custom button or call us. Supply PDF or high-res PNG at 150+ DPI. No file? Our in-house designer handles layout from a rough concept — starts at $35. Pickup at 216 33rd St W, Saskatoon in 1–2 business days, or same-day rush for $40 flat.",
     fromPrice: "$45",
@@ -303,11 +303,12 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 2,
     sideOptions: false, // All flyer products are 2S-only in CSV — no 1S variants exist
     sizePresets: [
-      { label: "80lb Gloss (standard)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_80LB" },
-      { label: "100lb Gloss (premium)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_100LB" },
+      { label: "80lb — Full 8.5×11\"", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_80LB" },
+      { label: "80lb — Half 8.5×5.5\"", width_in: 8.5, height_in: 5.5, material_code: "PLACEHOLDER_80LB_HALF" },
+      { label: "100lb — Full 8.5×11\"", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_100LB" },
+      { label: "100lb — Half 8.5×5.5\"", width_in: 8.5, height_in: 5.5, material_code: "PLACEHOLDER_100LB_HALF" },
     ],
-    sizeSectionLabel: "Paper Weight",
-    showCustomSize: true,
+    sizeSectionLabel: "Paper & Size",
     qtyPresets: [100, 250, 500, 1000],
     lotPriced: true,
     specs: [
@@ -328,7 +329,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "Can I get a different size than letter?",
-        a: "Yes — half-letter (5.5×8.5\"), legal (8.5×14\"), and fully custom dimensions are available. Use the Custom quantity/size options above, or call (306) 954-8688 for a quote on non-standard sizes.",
+        a: "Yes — select \"Half Letter 8.5×5.5\" directly from the Paper & Size picker above. Legal (8.5×14\") and other custom dimensions are available on request — call (306) 954-8688 for a quote.",
       },
       {
         q: "Are flyers double-sided?",
