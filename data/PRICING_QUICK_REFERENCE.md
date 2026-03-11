@@ -1,5 +1,5 @@
 # True Color Display Printing — Pricing Quick Reference
-**Updated:** 2026-02-24 | **Source of truth:** `data/tables/` CSVs
+**Updated:** 2026-03-11 | **Source of truth:** `data/tables/` CSVs
 **How to update prices:** Edit the CSVs only — no code changes needed. Then `git push main` → live in ~2 min.
 
 ---
@@ -108,7 +108,11 @@ Magnet Calendars (any size, sqft-based — $24/sqft): 4×7"=$45min · 5×7"=$45m
 ---
 
 ### Window Decals (DECAL · ARLPMF7008 · Arlon DPF 510 Matte Vinyl)
-$11.00/sqft · Min $45
+| Sqft Range   | Price/sqft | Min Charge |
+|--------------|-----------|------------|
+| 0–6 sqft     | $11.00    | $45        |
+| 6.01–20 sqft | $9.00     | $45        |
+| 20.01+ sqft  | $7.50     | $45        |
 
 **Qty bulk discounts:** 5+=5% · 10+=10%
 
@@ -156,40 +160,58 @@ Most popular: 100 stickers
 | 250   | $40     | $45     | $0.18         |
 | 500   | $50     | $65     | $0.13         |
 | 1000  | $80     | $110    | $0.11         |
+| 2000  | $150    | $210    | $0.105        |
+| 5000  | $305    | $420    | $0.084        |
 
-**Max qty: 1000** — owner confirmed unprofitable above this. Call for larger runs.
 Most popular: 500 (2-sided)
 
 ---
 
-### Flyers (FLYER · PLACEHOLDER_80LB or PLACEHOLDER_100LB · 8.5×11")
-**80lb Gloss:**
-| Qty  | Total | Per Unit | Savings vs 100 |
-|------|-------|----------|----------------|
-| 100  | $45   | $0.45    | —              |
-| 250  | $110  | $0.44    | —              |
-| 500  | $135  | $0.27    | save 40%       |
-| 1000 | $185  | $0.185   | save 59%       |
+### Flyers (FLYER · 8.5×11" full / 8.5×5.5" half-letter)
+**80lb Gloss — Full 8.5×11":**
+| Qty  | 2-Sided | 1-Sided |
+|------|---------|---------|
+| 100  | $45     | $32     |
+| 250  | $110    | $79     |
+| 500  | $135    | $97     |
+| 1000 | $185    | $133    |
 
-**100lb Gloss:**
-| Qty  | Total |
-|------|-------|
-| 100  | $55   |
-| 250  | $130  |
-| 500  | $185  |
-| 1000 | $325  |
+**100lb Gloss — Full 8.5×11":** *(market-corrected Mar 2026)*
+| Qty  | 2-Sided | 1-Sided |
+|------|---------|---------|
+| 100  | $55     | $40     |
+| 250  | $115    | $83     |
+| 500  | $185    | $133    |
+| 1000 | $250    | $180    |
 
-Most popular: 500 (80lb)
+**80lb Gloss — Half-letter 8.5×5.5":**
+| Qty  | 2-Sided | 1-Sided |
+|------|---------|---------|
+| 100  | $35     | $25     |
+| 250  | $88     | $63     |
+| 500  | $105    | $76     |
+| 1000 | $145    | $104    |
+
+**100lb Gloss — Half-letter 8.5×5.5":**
+| Qty  | 2-Sided | 1-Sided |
+|------|---------|---------|
+| 100  | $43     | $31     |
+| 250  | $100    | $72     |
+| 500  | $145    | $104    |
+| 1000 | $250    | $180    |
+
+Most popular: 500 (80lb 2S)
 
 ---
 
-### Brochures (BROCHURE · PLACEHOLDER_TF_100LB / PLACEHOLDER_HF_100LB · 100lb Gloss)
+### Brochures (BROCHURE · 100lb Gloss)
 **Tri-Fold (letter 8.5×11 folded to 3 panels):**
-| Qty  | Total | Per Unit | Savings vs 100 |
-|------|-------|----------|----------------|
-| 100  | $70   | $0.70    | —              |
-| 250  | $105  | $0.42    | save 40%       |
-| 500  | $195  | $0.39    | save 44%       |
+| Qty  | Total | Per Unit |
+|------|-------|----------|
+| 100  | $70   | $0.70    |
+| 250  | $105  | $0.42    |
+| 500  | $195  | $0.39    |
+| 1000 | $320  | $0.32    |
 
 **Half-Fold (letter folded in half):**
 | Qty  | Total | Per Unit |
@@ -197,6 +219,7 @@ Most popular: 500 (80lb)
 | 100  | $85   | $0.85    |
 | 250  | $115  | $0.46    |
 | 500  | $210  | $0.42    |
+| 1000 | $360  | $0.36    |
 
 Most popular: 250 (tri-fold)
 
@@ -224,12 +247,30 @@ Most popular: 250 (tri-fold)
 **3×4":**
 | Qty  | Total |
 |------|-------|
+| 50   | $35   |
 | 100  | $60   |
 | 250  | $110  |
 | 500  | $175  |
 | 1000 | $280  |
 
 Most popular: 250 (4×6")
+
+---
+
+### Rack Cards (FLYER · PLACEHOLDER_100LB_RACK · 4×9" DL · 100lb Gloss)
+| Qty  | 2-Sided | 1-Sided |
+|------|---------|---------|
+| 100  | $35     | $25     |
+| 250  | $82     | $59     |
+| 500  | $119    | $86     |
+| 1000 | $205    | $148    |
+
+Standard DL format. Single/double-sided toggle available.
+
+---
+
+### Door Hangers (4.25×11" · 100lb Gloss) — **COMING SOON**
+Pricing TBD when press setup is complete.
 
 ---
 
