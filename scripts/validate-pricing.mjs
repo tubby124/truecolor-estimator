@@ -148,6 +148,88 @@ for (const cat of categoriesUsed) {
   }
 }
 
+// ─── Check 7: Size inversion detection ────────────────────────────────────
+// Lot-priced rules where a larger size (by area) costs LESS than a smaller size at same qty
+// KNOWN INTENTIONAL EXCEPTIONS: material codes in this list are priced at specialty premium
+// and may intentionally cost more than larger sizes (e.g. mini-format specialty cards)
+const INVERSION_EXEMPT = new Set([
+  "PLACEHOLDER_14PT_3X4", // 3x4 mini postcard — intentionally priced at specialty premium vs 4x6/5x7
+]);
+console.log("\n[8] Checking for size inversions (larger size must not be cheaper) ...");
+
+function extractSizeDims(materialCode) {
+  const m = materialCode.match(/(\d+)X(\d+)$/i);
+  if (!m) return null;
+  return { w: parseInt(m[1]), h: parseInt(m[2]), area: parseInt(m[1]) * parseInt(m[2]) };
+}
+function getSizeBaseCode(materialCode) {
+  return materialCode.replace(/_\d+X\d+$/i, "");
+}
+
+const prRulesLines = pricingRulesCsv.split("\n").filter(Boolean);
+const lotRows = prRulesLines.slice(1).map((line) => {
+  const c = line.split(",");
+  return {
+    rule_id: c[0], category: c[3], material_code: c[4],
+    qty: parseInt(c[8]) || 0,
+    price: parseFloat(c[11]) || 0,
+    is_lot: c[16]?.trim().toUpperCase() === "TRUE",
+  };
+}).filter((r) => r.is_lot && r.material_code);
+
+const sizeGroups = {};
+for (const row of lotRows) {
+  if (INVERSION_EXEMPT.has(row.material_code)) continue;
+  const dims = extractSizeDims(row.material_code);
+  if (!dims) continue;
+  const key = `${row.category}__${getSizeBaseCode(row.material_code)}`;
+  if (!sizeGroups[key]) sizeGroups[key] = {};
+  if (!sizeGroups[key][row.qty]) sizeGroups[key][row.qty] = [];
+  sizeGroups[key][row.qty].push({ ...row, area: dims.area });
+}
+
+let inversionsFound = 0;
+for (const [, qtyMap] of Object.entries(sizeGroups)) {
+  for (const [qty, entries] of Object.entries(qtyMap)) {
+    if (entries.length < 2) continue;
+    entries.sort((a, b) => a.area - b.area);
+    for (let i = 1; i < entries.length; i++) {
+      const smaller = entries[i - 1];
+      const larger = entries[i];
+      if (larger.price < smaller.price) {
+        fail(`SIZE INVERSION @ qty ${qty}: ${larger.material_code} (${larger.area}sqin) $${larger.price} < ${smaller.material_code} (${smaller.area}sqin) $${smaller.price}`);
+        inversionsFound++;
+      }
+    }
+  }
+}
+if (inversionsFound === 0) pass("No size inversions — all larger sizes cost >= smaller sizes at every qty tier");
+
+// ─── Check 8: Margin floor (lot-priced products with known material costs) ─
+const MARGIN_FLOOR = 0.60;
+console.log(`\n[9] Checking lot-priced margins >= ${MARGIN_FLOOR * 100}% floor ...`);
+
+const materialsCsv = readFile("data/tables/materials.v1.csv");
+const matCostMap = {};
+for (const line of materialsCsv.split("\n").slice(1).filter(Boolean)) {
+  const c = line.split(",");
+  const code = c[0]; const model = c[5]; const rate = parseFloat(c[6]);
+  if (model === "per_unit" && !isNaN(rate) && rate > 0) matCostMap[code] = rate;
+}
+
+let lowMarginCount = 0;
+for (const row of lotRows) {
+  const matCost = matCostMap[row.material_code];
+  if (!matCost || row.price <= 0 || row.qty <= 0) continue;
+  const totalCost = matCost * row.qty;
+  const margin = (row.price - totalCost) / row.price;
+  if (margin < MARGIN_FLOOR) {
+    warn(`LOW MARGIN: ${row.rule_id} qty=${row.qty} sell=$${row.price} matCost=$${totalCost.toFixed(2)} margin=${(margin * 100).toFixed(1)}%`);
+    lowMarginCount++;
+  }
+}
+if (lowMarginCount === 0) pass(`All lot-priced products with known costs are above ${MARGIN_FLOOR * 100}% margin`);
+
 // ─── Summary ──────────────────────────────────────────────────────────────
 console.log("\n" + "─".repeat(60));
 if (errors === 0 && warnings === 0) {
