@@ -5,22 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
-
-const PRODUCT_OPTIONS = [
-  "Coroplast Signs",
-  "Vinyl Banners",
-  "Vehicle Magnets",
-  "Business Cards",
-  "Flyers & Brochures",
-  "Paper / Document Printing",
-  "Aluminum Composite Signs",
-  "Foamboard Displays",
-  "Retractable Banners",
-  "Window Decals / Vinyl",
-  "Installation Service",
-  "Graphic Design",
-  "Other",
-];
+import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 
 interface QuoteItem {
   id: string;

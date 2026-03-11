@@ -4,22 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-
-const PRODUCT_OPTIONS = [
-  "Coroplast Signs",
-  "Vinyl Banners",
-  "Vehicle Magnets",
-  "Business Cards",
-  "Flyers & Brochures",
-  "Paper / Document Printing",
-  "Aluminum Composite Signs",
-  "Foamboard Displays",
-  "Retractable Banners",
-  "Window Decals / Vinyl",
-  "Installation Service",
-  "Graphic Design",
-  "Other",
-];
+import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 
 interface QuoteItem {
   id: string;

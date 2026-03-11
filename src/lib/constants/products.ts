@@ -1,0 +1,15 @@
+export const PRODUCT_OPTIONS = [
+  "Coroplast Signs",
+  "Vinyl Banners",
+  "Vehicle Magnets",
+  "Business Cards",
+  "Flyers & Brochures",
+  "Paper / Document Printing",
+  "Aluminum Composite Signs",
+  "Foamboard Displays",
+  "Retractable Banners",
+  "Window Decals / Vinyl",
+  "Installation Service",
+  "Graphic Design",
+  "Other",
+];
