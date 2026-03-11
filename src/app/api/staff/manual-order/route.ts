@@ -283,7 +283,7 @@ export async function POST(req: NextRequest) {
         pst,
         total,
         is_rush: false,
-        payment_method: "clover_card",
+        payment_method: "clover_pending",
         notes: `[Manual Order] ${notes?.trim() ?? "Created via staff payment request"}`,
         filePaths: [],
         siteUrl,

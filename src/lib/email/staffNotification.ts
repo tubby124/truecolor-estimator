@@ -40,7 +40,7 @@ export interface StaffOrderNotificationParams {
   discount_code?: string;
   discount_amount?: number;
   is_rush: boolean;
-  payment_method: "clover_card" | "etransfer" | "wave";
+  payment_method: "clover_card" | "clover_pending" | "etransfer" | "wave";
   notes: string | null;
   filePaths: string[];
   siteUrl: string;
@@ -83,6 +83,7 @@ export async function sendStaffOrderNotification(
 
   const paymentLabel =
     payment_method === "clover_card" ? "Card (Clover)" :
+    payment_method === "clover_pending" ? "Clover (Pending)" :
     payment_method === "wave" ? "Wave Invoice" : "e-Transfer";
   const rushPrefix = is_rush ? "[RUSH] " : "";
   const subject = `${rushPrefix}NEW ORDER ${orderNumber} · ${contact.name} · $${total.toFixed(2)} · ${paymentLabel}`;
@@ -206,6 +207,15 @@ function buildStaffNotificationHtml(
           </p>
           <p style="margin: 0; font-size: 12px; color: #166534; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
             $${total.toFixed(2)} CAD charged. Safe to begin production.
+          </p>
+        </div>`
+      : payment_method === "clover_pending"
+      ? `<div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
+          <p style="margin: 0 0 2px; font-size: 13px; font-weight: 700; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            ⏳ Payment request sent — awaiting payment
+          </p>
+          <p style="margin: 0; font-size: 12px; color: #78350f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            $${total.toFixed(2)} CAD. Clover payment link sent to customer. DO NOT start printing until payment is confirmed.
           </p>
         </div>`
       : payment_method === "wave"
