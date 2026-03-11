@@ -103,6 +103,9 @@ export function SiteFooter() {
                 <Link href="/brochure-printing-saskatoon" className="block hover:text-white transition-colors">
                   Brochure Printing
                 </Link>
+                <Link href="/products/rack-cards" className="block hover:text-white transition-colors">
+                  Rack Cards
+                </Link>
               </div>
               <div className="space-y-2">
                 <Link href="/trade-show-displays-saskatoon" className="block hover:text-white transition-colors">

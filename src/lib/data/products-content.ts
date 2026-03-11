@@ -33,6 +33,7 @@ export interface ProductContent {
   materialInfo?: { headline: string; bullets: string[] };
   tierPresets?: { label: string; material_code: string; price: number }[];
   lotPriced?: boolean; // true = fixed lot tiers only; hides Custom qty button, shows "call for more"
+  comingSoon?: boolean; // true = show Coming Soon badge, no price, no configurator
 }
 
 export const PRODUCTS: Record<string, ProductContent> = {
@@ -251,7 +252,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     sizePresets: [
       { label: "3.5×2\"", width_in: 3.5, height_in: 2 },
     ],
-    qtyPresets: [250, 500, 1000],
+    qtyPresets: [250, 500, 1000, 2000, 5000],
     lotPriced: true,
     specs: [
       { label: "Paper", value: "14pt gloss card stock" },
@@ -268,7 +269,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "Can I get more than 250 cards?",
-        a: "Yes — 500 cards and 1000 cards are available. Price per card drops significantly with higher quantities.",
+        a: "Yes — 500, 1000, 2000, and 5000 cards are available. Price per card drops significantly at higher quantities. 2000 double-sided is $210; 5000 is $420.",
       },
       {
         q: "Do you design business cards?",
@@ -855,7 +856,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Tri-fold (6 panels)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_TF_100LB" },
       { label: "Half-fold (4 panels)", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_HF_100LB" },
     ],
-    qtyPresets: [100, 250, 500],
+    qtyPresets: [100, 250, 500, 1000],
     lotPriced: true,
     specs: [
       { label: "Stock", value: "100lb gloss text — heavier and premium vs. standard flyer paper" },
@@ -884,7 +885,96 @@ export const PRODUCTS: Record<string, ProductContent> = {
         a: "The estimator shows tri-fold pricing. Half-fold adds: $15 extra at 100 qty, $10 extra at 250, $15 extra at 500. So 250 half-fold brochures = $115 instead of $105.",
       },
     ],
-    relatedSlugs: ["flyers", "postcards", "business-cards"],
+    relatedSlugs: ["flyers", "rack-cards", "business-cards"],
+  },
+
+  "rack-cards": {
+    slug: "rack-cards",
+    name: "Rack Cards",
+    tagline: "4×9\" DL rack cards. 100lb gloss. Single or double-sided. From $25.",
+    description:
+      "Rack cards are the 4\"×9\" (DL format) cards you see standing upright in lobby display racks — at hotels, clinics, restaurants, real estate offices, and tourism centres. True Color prints rack cards on 100lb gloss stock, the same premium paper used for brochures, and cuts them in-house to the standard 4×9\" dimension. Choose single-sided for a front-only menu, price list, or offer card. Choose double-sided to add a QR code, map, contact details, or secondary message on the back — both sides print at no extra charge beyond the stated price. Order as few as 100 for a test run or up to 1000 for a full rack campaign. Common uses in Saskatoon and Saskatchewan: real estate listing cards and open house takeaways, restaurant daily-special cards, clinic service menus, tourism attraction cards, contractor service overviews, and event venue promotions. Supply a print-ready PDF at 4\"×9\" with 1/8\" bleed on all sides. Need a layout? Our in-house designer can set it up from scratch for $35 flat, same-day proof. Rush order available — +$40 for same-day turnaround when you drop off artwork before 10 AM. Standard turnaround is 1–3 business days. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$25",
+    category: "FLYER",
+    material_code: "PLACEHOLDER_100LB_RACK",
+    heroImage: "/images/products/product/rack-cards-800x600.webp",
+    galleryImages: [
+      "/images/products/product/rack-cards-800x600.webp",
+    ],
+    defaultSides: 2,
+    sideOptions: true,
+    sizePresets: [
+      { label: "4×9\" (DL)", width_in: 9, height_in: 4, material_code: "PLACEHOLDER_100LB_RACK" },
+    ],
+    qtyPresets: [100, 250, 500, 1000],
+    lotPriced: true,
+    specs: [
+      { label: "Size", value: "4\"×9\" (standard DL / rack card format)" },
+      { label: "Stock", value: "100lb gloss — same premium paper as brochures" },
+      { label: "Print", value: "Full-colour digital" },
+      { label: "Sides", value: "Single-sided (front only) or double-sided — select above" },
+      { label: "Min qty", value: "100 cards" },
+      { label: "Turnaround", value: "1–3 business days | Rush +$40 (before 10 AM)" },
+    ],
+    whoUsesThis: ["Real Estate", "Healthcare", "Restaurants", "Tourism", "Retail", "Trades"],
+    faqs: [
+      {
+        q: "What size is a rack card?",
+        a: "Standard rack cards are 4\"×9\" — also called DL format. This is the size that fits standard acrylic lobby display racks. True Color cuts to this exact size.",
+      },
+      {
+        q: "Single-sided or double-sided — what's the price difference?",
+        a: "Single-sided (front only) costs about 28% less than double-sided. At 250 qty: 2S = $82, 1S = $59. Double-sided is usually worth it — the back adds real value at minimal cost per card.",
+      },
+      {
+        q: "How do I set up my file?",
+        a: "Create your document at exactly 4\"×9\" (or 4.25\"×9.25\" with 1/8\" bleed all around). Supply as a print-ready PDF. For double-sided, include both pages in one PDF file.",
+      },
+      {
+        q: "Can I get rack cards rush?",
+        a: "Yes — add +$40 for same-day turnaround when you drop off print-ready artwork before 10 AM.",
+      },
+      {
+        q: "What's the minimum order?",
+        a: "100 cards is the minimum for rack cards. Most clients order 250–500 for a display campaign, and 1000 for mass distribution.",
+      },
+      {
+        q: "Do you offer design for rack cards?",
+        a: "Yes — in-house design is $35 flat, same-day proof. Bring your logo, key message, and contact details and we'll build the layout.",
+      },
+      {
+        q: "What paper stock is used?",
+        a: "100lb gloss text — the same premium stock used for brochures. It's noticeably heavier than standard 80lb flyer paper and holds colour vibrantly.",
+      },
+      {
+        q: "Can I order rack card display stands too?",
+        a: "We stock acrylic single-pocket counter display stands. Ask at the counter when you pick up your order.",
+      },
+    ],
+    relatedSlugs: ["brochures", "flyers", "postcards"],
+  },
+
+  "door-hangers": {
+    slug: "door-hangers",
+    name: "Door Hangers",
+    tagline: "4.25×11\" door hangers with hole punch. Coming soon.",
+    description:
+      "Door hangers are 4.25\"×11\" cards with a die-cut hole at the top — designed to hang directly on residential and commercial door knobs. True Color will be offering door hanger printing on 100lb gloss stock, single or double-sided, in runs of 100 to 1000. Ideal for direct-to-door campaigns: pizza and restaurant delivery promotions, contractor service area blitzes, real estate just-listed/just-sold campaigns, and neighbourhood service businesses. Check back soon — pricing and ordering will be live shortly.",
+    fromPrice: "Coming Soon",
+    category: "FLYER",
+    material_code: "PLACEHOLDER_100LB_RACK",
+    heroImage: "/images/products/product/rack-cards-800x600.webp",
+    galleryImages: [],
+    defaultSides: 2,
+    sideOptions: false,
+    sizePresets: [],
+    qtyPresets: [100, 250, 500, 1000],
+    lotPriced: true,
+    comingSoon: true,
+    specs: [],
+    whoUsesThis: ["Real Estate", "Restaurants", "Trades", "Retail"],
+    faqs: [],
+    relatedSlugs: ["rack-cards", "flyers", "postcards"],
   },
 
   "photo-posters": {

@@ -960,7 +960,7 @@ describe("FLYER single-sided 1S — STEP 3 exact match, sides=1 isolation", () =
     expect(result.sell_price).toBe(40);
   });
 
-  it("100lb full 1S qty=1000 → $234 (not $325 double-sided)", () => {
+  it("100lb full 1S qty=1000 → $180 (corrected from $234, Phase 2A price fix)", () => {
     const result = estimate({
       category: "FLYER",
       material_code: "PLACEHOLDER_100LB",
@@ -970,7 +970,7 @@ describe("FLYER single-sided 1S — STEP 3 exact match, sides=1 isolation", () =
       qty: 1000,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.sell_price).toBe(234);
+    expect(result.sell_price).toBe(180);
   });
 
   // Half 80lb 1S
@@ -1053,5 +1053,324 @@ describe("FLYER single-sided 1S — STEP 3 exact match, sides=1 isolation", () =
     });
     expect(result.status).toBe("BLOCKED");
     expect(result.sell_price).toBeNull();
+  });
+});
+
+// ─── Phase 1 regression tests ────────────────────────────────────────────────
+
+describe("POSTCARD 3×4 — qty=50 now QUOTED (Phase 1A fix)", () => {
+  it("3×4 qty=50 → $35 (new STEP 3 product added)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_3X4",
+      width_in: 4,
+      height_in: 3,
+      sides: 2,
+      qty: 50,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(35);
+  });
+
+  it("3×4 qty=75 → BLOCKED (between 50 and 100, correct gap)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_3X4",
+      width_in: 4,
+      height_in: 3,
+      sides: 2,
+      qty: 75,
+    });
+    expect(result.status).toBe("BLOCKED");
+  });
+
+  it("3×4 qty=100 still → $60 (no regression)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_3X4",
+      width_in: 4,
+      height_in: 3,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(60);
+  });
+});
+
+describe("DECAL sqft tiers — 3 proper bounds (Phase 1B fix)", () => {
+  it("DECAL 2 sqft → min $45 fires (S tier 0–6 @ $11)", () => {
+    // 24×12 = 288 sqin = 2 sqft → $22 → min $45 fires
+    const result = estimate({
+      category: "DECAL",
+      material_code: "ARLPMF7008",
+      width_in: 24,
+      height_in: 12,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(45);
+  });
+
+  it("DECAL 8 sqft → $72 (M tier 6.01–20 @ $9/sqft)", () => {
+    // 96×12 = 1152 sqin = 8 sqft → $9 × 8 = $72
+    const result = estimate({
+      category: "DECAL",
+      material_code: "ARLPMF7008",
+      width_in: 96,
+      height_in: 12,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(72);
+  });
+
+  it("DECAL 25 sqft → $187.50 (L tier 20.01+ @ $7.50/sqft)", () => {
+    // 60×60 = 3600 sqin = 25 sqft → $7.50 × 25 = $187.50
+    const result = estimate({
+      category: "DECAL",
+      material_code: "ARLPMF7008",
+      width_in: 60,
+      height_in: 60,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(187.5);
+  });
+
+  it("DECAL 6 sqft exactly → $66 (S tier boundary, above $45 min)", () => {
+    // 72×12 = 864 sqin = 6 sqft → $11 × 6 = $66
+    const result = estimate({
+      category: "DECAL",
+      material_code: "ARLPMF7008",
+      width_in: 72,
+      height_in: 12,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(66);
+  });
+});
+
+// ─── Phase 2 regression tests ────────────────────────────────────────────────
+
+describe("100lb flyer price corrections (Phase 2A)", () => {
+  it("100lb 2S 250ct → $115 (corrected from $130)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 250,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(115);
+  });
+
+  it("100lb 2S 1000ct → $250 (corrected from $325)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(250);
+  });
+
+  it("100lb 1S 250ct → $83 (corrected from $94)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 250,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(83);
+  });
+
+  it("100lb 1S 1000ct → $180 (corrected from $234)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(180);
+  });
+});
+
+describe("Brochure 1000ct tiers (Phase 2B)", () => {
+  it("Tri-fold 1000ct → $320", () => {
+    const result = estimate({
+      category: "BROCHURE",
+      material_code: "PLACEHOLDER_TF_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(320);
+  });
+
+  it("Half-fold 1000ct → $360", () => {
+    const result = estimate({
+      category: "BROCHURE",
+      material_code: "PLACEHOLDER_HF_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(360);
+  });
+});
+
+describe("Business card 2000/5000 tiers (Phase 2C)", () => {
+  it("BC 2000 2S → $210", () => {
+    const result = estimate({
+      category: "BUSINESS_CARD",
+      material_code: "PLACEHOLDER_14PT",
+      width_in: 3.5,
+      height_in: 2,
+      sides: 2,
+      qty: 2000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(210);
+  });
+
+  it("BC 5000 2S → $420", () => {
+    const result = estimate({
+      category: "BUSINESS_CARD",
+      material_code: "PLACEHOLDER_14PT",
+      width_in: 3.5,
+      height_in: 2,
+      sides: 2,
+      qty: 5000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(420);
+  });
+
+  it("BC 2000 1S → $150 (new 1S variant)", () => {
+    const result = estimate({
+      category: "BUSINESS_CARD",
+      material_code: "PLACEHOLDER_14PT",
+      width_in: 3.5,
+      height_in: 2,
+      sides: 1,
+      qty: 2000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(150);
+  });
+
+  it("BC 5000 1S → $305 (new 1S variant)", () => {
+    const result = estimate({
+      category: "BUSINESS_CARD",
+      material_code: "PLACEHOLDER_14PT",
+      width_in: 3.5,
+      height_in: 2,
+      sides: 1,
+      qty: 5000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(305);
+  });
+});
+
+// ─── Phase 3 regression tests ────────────────────────────────────────────────
+
+describe("Rack cards 4×9 (Phase 3)", () => {
+  it("Rack 2S 100ct → $35", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_RACK",
+      width_in: 9,
+      height_in: 4,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(35);
+  });
+
+  it("Rack 2S 250ct → $82", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_RACK",
+      width_in: 9,
+      height_in: 4,
+      sides: 2,
+      qty: 250,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(82);
+  });
+
+  it("Rack 2S 1000ct → $205", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_RACK",
+      width_in: 9,
+      height_in: 4,
+      sides: 2,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(205);
+  });
+
+  it("Rack 1S 100ct → $25", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_RACK",
+      width_in: 9,
+      height_in: 4,
+      sides: 1,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(25);
+  });
+
+  it("Rack 1S 1000ct → $148", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_RACK",
+      width_in: 9,
+      height_in: 4,
+      sides: 1,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(148);
+  });
+
+  it("Rack 2S 150ct → BLOCKED (between tiers)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_RACK",
+      width_in: 9,
+      height_in: 4,
+      sides: 2,
+      qty: 150,
+    });
+    expect(result.status).toBe("BLOCKED");
   });
 });

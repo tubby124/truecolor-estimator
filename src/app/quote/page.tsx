@@ -37,8 +37,13 @@ export default function QuotePage() {
             <Link
               key={product.slug}
               href={`/products/${product.slug}`}
-              className="group flex flex-col items-center gap-3 p-6 border border-gray-100 rounded-2xl hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
+              className="group relative flex flex-col items-center gap-3 p-6 border border-gray-100 rounded-2xl hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
             >
+              {product.comingSoon && (
+                <span className="absolute top-2 right-2 text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                  Coming Soon
+                </span>
+              )}
               <PrintIcon
                 slug={product.slug}
                 size={36}
@@ -49,8 +54,8 @@ export default function QuotePage() {
                 <p className="font-bold text-[#1c1712] text-sm leading-tight">
                   {product.name}
                 </p>
-                <p className="text-[#16C2F3] text-xs font-semibold mt-1">
-                  {product.fromPrice}
+                <p className={`text-xs font-semibold mt-1 ${product.comingSoon ? "text-amber-600" : "text-[#16C2F3]"}`}>
+                  {product.comingSoon ? "Coming Soon" : product.fromPrice}
                 </p>
               </div>
             </Link>

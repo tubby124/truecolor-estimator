@@ -37,6 +37,7 @@ const PRODUCT_CATEGORIES = [
       { label: "Business Cards", href: "/products/business-cards" },
       { label: "Flyers", href: "/products/flyers" },
       { label: "Brochures", href: "/products/brochures" },
+      { label: "Rack Cards", href: "/products/rack-cards" },
       { label: "Postcards", href: "/products/postcards" },
       { label: "Stickers", href: "/products/stickers" },
       { label: "Photo Posters", href: "/products/photo-posters" },

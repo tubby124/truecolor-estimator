@@ -137,7 +137,18 @@ export default async function ProductPage({ params }: Props) {
 
         {/* Interactive product layout — gallery + options + sticky price panel */}
         <div className="mb-16">
-          <ProductPageClient product={product} />
+          {product.comingSoon ? (
+            <div className="border border-amber-200 bg-amber-50 rounded-2xl p-10 text-center">
+              <span className="inline-block text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1 rounded-full uppercase tracking-wide mb-4">
+                Coming Soon
+              </span>
+              <h2 className="text-2xl font-bold text-[#1c1712] mb-3">{product.name}</h2>
+              <p className="text-gray-600 max-w-lg mx-auto mb-6">{product.description}</p>
+              <p className="text-sm text-gray-400">Pricing and online ordering coming soon. Call <a href="tel:+13069548688" className="text-[#16C2F3] hover:underline">(306) 954-8688</a> to inquire.</p>
+            </div>
+          ) : (
+            <ProductPageClient product={product} />
+          )}
         </div>
 
         {/* Tabs: description, specs, FAQ */}

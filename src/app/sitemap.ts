@@ -108,6 +108,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "stickers",
     "postcards",
     "brochures",
+    "rack-cards",
+    "door-hangers",
     "photo-posters",
     "magnet-calendars",
   ];

@@ -39,6 +39,8 @@ export const SLUG_ICON_MAP: Record<string, LucideIcon> = {
   "postcards": Mail,
   "stickers": Tag,
   "magnet-calendars": CalendarDays,
+  "rack-cards": FileText,
+  "door-hangers": FileText,
 };
 
 /** Map category ID → Lucide icon (staff CategoryPicker) */
