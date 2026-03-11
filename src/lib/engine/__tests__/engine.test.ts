@@ -716,7 +716,7 @@ describe("REGRESSION — lot-price custom qty returns BLOCKED", () => {
   it("POSTCARD qty=75 → BLOCKED (between tiers)", () => {
     const result = estimate({
       category: "POSTCARD",
-      material_code: "PLACEHOLDER_14PT",
+      material_code: "PLACEHOLDER_14PT_4X6",
       width_in: 6,
       height_in: 4,
       sides: 2,
@@ -737,5 +737,87 @@ describe("REGRESSION — lot-price custom qty returns BLOCKED", () => {
     });
     expect(result.status).toBe("BLOCKED");
     expect(result.sell_price).toBeNull();
+  });
+});
+
+// ─── POSTCARD size-differentiated material codes (Issue 2 regression) ─────────
+
+describe("POSTCARD — size-differentiated material codes", () => {
+  it("4×6 qty=100 → $45 (STEP 3 exact match)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_4X6",
+      width_in: 6,
+      height_in: 4,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(45);
+  });
+
+  it("5×7 qty=100 → $45 (STEP 3 exact match)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_5X7",
+      width_in: 7,
+      height_in: 5,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(45);
+  });
+
+  it("3×4 qty=100 → $60 (STEP 3 exact match — NOT the 4×6 $45 rule)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_3X4",
+      width_in: 4,
+      height_in: 3,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(60);
+  });
+
+  it("4×6 qty=1000 → $220", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_4X6",
+      width_in: 6,
+      height_in: 4,
+      sides: 2,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(220);
+  });
+
+  it("3×4 qty=1000 → $280 (not $220 — confirms no cross-size bleed)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_3X4",
+      width_in: 4,
+      height_in: 3,
+      sides: 2,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(280);
+  });
+
+  it("5×7 qty=50 → $35 (smallest lot, 5×7 only)", () => {
+    const result = estimate({
+      category: "POSTCARD",
+      material_code: "PLACEHOLDER_14PT_5X7",
+      width_in: 7,
+      height_in: 5,
+      sides: 2,
+      qty: 50,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(35);
   });
 });

@@ -278,18 +278,20 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 {preset.label}
               </button>
             ))}
-            <button
-              onClick={() => setIsCustom(true)}
-              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
-                isCustom
-                  ? "bg-[#1c1712] text-white border-[#1c1712]"
-                  : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
-              }`}
-            >
-              Custom
-            </button>
+            {!product.lotPriced && (
+              <button
+                onClick={() => setIsCustom(true)}
+                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
+                  isCustom
+                    ? "bg-[#1c1712] text-white border-[#1c1712]"
+                    : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+                }`}
+              >
+                Custom
+              </button>
+            )}
           </div>
-          {isCustom && (
+          {!product.lotPriced && isCustom && (
             <div className="flex gap-2 mt-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">Width (inches)</label>
@@ -313,7 +315,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
               </div>
             </div>
           )}
-          {isCustom && price === null && !loading && customW && customH && (
+          {!product.lotPriced && isCustom && price === null && !loading && customW && customH && (
             <p className="mt-2 text-xs text-gray-500">
               Custom sizes are available —{" "}
               <a href="tel:+13069548688" className="text-[#16C2F3] font-medium hover:underline">
@@ -343,18 +345,20 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             >
               Letter 8.5×11″
             </button>
-            <button
-              onClick={() => setIsCustomFlexSize(true)}
-              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
-                isCustomFlexSize
-                  ? "bg-[#1c1712] text-white border-[#1c1712]"
-                  : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
-              }`}
-            >
-              Custom
-            </button>
+            {!product.lotPriced && (
+              <button
+                onClick={() => setIsCustomFlexSize(true)}
+                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
+                  isCustomFlexSize
+                    ? "bg-[#1c1712] text-white border-[#1c1712]"
+                    : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+                }`}
+              >
+                Custom
+              </button>
+            )}
           </div>
-          {isCustomFlexSize && (
+          {!product.lotPriced && isCustomFlexSize && (
             <div className="flex gap-2 mt-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">Width (inches)</label>
@@ -378,7 +382,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
               </div>
             </div>
           )}
-          {isCustomFlexSize && price === null && !loading && customFlexW && customFlexH && (
+          {!product.lotPriced && isCustomFlexSize && price === null && !loading && customFlexW && customFlexH && (
             <p className="mt-2 text-xs text-gray-500">
               Custom sizes are available —{" "}
               <a href="tel:+13069548688" className="text-[#16C2F3] font-medium hover:underline">

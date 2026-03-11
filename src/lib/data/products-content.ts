@@ -795,9 +795,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     defaultSides: 2,
     sideOptions: false,
     sizePresets: [
-      { label: "4×6\"", width_in: 6, height_in: 4 },
-      { label: "5×7\"", width_in: 7, height_in: 5 },
-      { label: "3×4\"", width_in: 4, height_in: 3 },
+      { label: "4×6\"", width_in: 6, height_in: 4, material_code: "PLACEHOLDER_14PT_4X6" },
+      { label: "5×7\"", width_in: 7, height_in: 5, material_code: "PLACEHOLDER_14PT_5X7" },
+      { label: "3×4\"", width_in: 4, height_in: 3, material_code: "PLACEHOLDER_14PT_3X4" },
     ],
     qtyPresets: [50, 100, 250, 500, 1000],
     lotPriced: true,
