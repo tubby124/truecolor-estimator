@@ -30,6 +30,7 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [product, setProduct] = useState(defaultProduct ?? PRODUCT_OPTIONS[0]);
+  const [qty, setQty] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [fileTooBig, setFileTooBig] = useState(""); // filename that was rejected for size
@@ -61,6 +62,7 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
       setEmail("");
       setPhone("");
       setProduct(defaultProduct ?? PRODUCT_OPTIONS[0]);
+      setQty("");
       setDescription("");
       setFile(null);
       setFileTooBig("");
@@ -117,8 +119,8 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
   }
 
   async function handleSubmit() {
-    if (!name.trim() || !email.trim() || !description.trim()) {
-      setError("Name, email, and project details are required.");
+    if (!name.trim() || !email.trim() || !qty.trim()) {
+      setError("Name, email, and quantity are required.");
       return;
     }
     setError("");
@@ -129,10 +131,13 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
       formData.append("name", name);
       formData.append("email", email);
       if (phone) formData.append("phone", phone);
-      formData.append("product", product);
-      formData.append("description", description);
-      formData.append("isCustom", "false");
-      if (file) formData.append("file", file);
+      formData.append(
+        "items",
+        JSON.stringify([
+          { product, qty, material: "", dimensions: "", sides: "1", notes: description },
+        ])
+      );
+      if (file) formData.append("file_0", file);
 
       const res = await fetch("/api/quote-request", {
         method: "POST",
@@ -266,14 +271,26 @@ export function QuoteModal({ open, onClose, defaultProduct }: Props) {
               </div>
             </div>
 
-            {/* Description */}
+            {/* Quantity */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Project details *</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Quantity *</label>
+              <input
+                type="text"
+                value={qty}
+                onChange={(e) => setQty(e.target.value)}
+                placeholder="e.g. 50, 250, 10 sets"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+              />
+            </div>
+
+            {/* Description / Notes */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Project details (optional)</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                placeholder="E.g. 10 coroplast signs, 24×36″, double-sided. Need a layout. Picking up next Thursday."
+                rows={3}
+                placeholder="Size, material, double-sided, deadline, or anything else we should know"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] resize-none"
               />
             </div>
