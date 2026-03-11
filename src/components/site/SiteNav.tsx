@@ -354,6 +354,12 @@ export function SiteNav() {
             <span className="hidden sm:block">
               <StaffQuoteButton />
             </span>
+            <button
+              onClick={() => setQuoteOpen(true)}
+              className="hidden sm:block border border-gray-600 text-gray-300 text-sm font-medium px-4 py-2.5 rounded-md hover:border-white hover:text-white transition-colors whitespace-nowrap cursor-pointer"
+            >
+              Custom Quote
+            </button>
             <Link
               href="/quote"
               className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden sm:block"
