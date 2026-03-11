@@ -381,7 +381,7 @@ describe("STEP 5 — add-ons", () => {
 // ─── Print lot-price (FLYER / STICKER etc.) ─────────────────────────────────
 
 describe("Print lot-price — price_per_unit is flat lot price, not per-piece", () => {
-  it("FLYER 80lb sides=1 qty=100 — should be $45 (not $4,500)", () => {
+  it("FLYER 80lb sides=1 qty=100 — should be $32 (1S price, not 2S $45)", () => {
     const result = estimate({
       category: "FLYER",
       material_code: "PLACEHOLDER_80LB",
@@ -390,10 +390,10 @@ describe("Print lot-price — price_per_unit is flat lot price, not per-piece", 
       sides: 1,
       qty: 100,
     });
-    expect(result.sell_price).toBe(45);
+    expect(result.sell_price).toBe(32);
   });
 
-  it("FLYER 80lb sides=1 qty=250 — should be $110", () => {
+  it("FLYER 80lb sides=1 qty=250 — should be $79 (1S price, not 2S $110)", () => {
     const result = estimate({
       category: "FLYER",
       material_code: "PLACEHOLDER_80LB",
@@ -402,7 +402,7 @@ describe("Print lot-price — price_per_unit is flat lot price, not per-piece", 
       sides: 1,
       qty: 250,
     });
-    expect(result.sell_price).toBe(110);
+    expect(result.sell_price).toBe(79);
   });
 
   it("FLYER 80lb sides=2 qty=100 — should be $45 (STEP 3 exact match)", () => {
@@ -897,6 +897,158 @@ describe("FLYER half-size 8.5×5.5 — STEP 3 exact match per qty and paper weig
       width_in: 8.5,
       height_in: 5.5,
       sides: 2,
+      qty: 200,
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.sell_price).toBeNull();
+  });
+});
+
+// ─── FLYER single-sided (1S) — all 4 paper×size combos ────────────────────────
+describe("FLYER single-sided 1S — STEP 3 exact match, sides=1 isolation", () => {
+  // Full 80lb 1S
+  it("80lb full 1S qty=100 → $32", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(32);
+  });
+
+  it("80lb full 1S qty=500 → $97 (not $135 double-sided)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 500,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(97);
+  });
+
+  it("80lb full 1S qty=1000 → $133 (not $185 double-sided)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(133);
+  });
+
+  // Full 100lb 1S
+  it("100lb full 1S qty=100 → $40", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(40);
+  });
+
+  it("100lb full 1S qty=1000 → $234 (not $325 double-sided)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(234);
+  });
+
+  // Half 80lb 1S
+  it("80lb half 1S qty=100 → $25", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 1,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(25);
+  });
+
+  it("80lb half 1S qty=1000 → $104 (not $145 double-sided)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 1,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(104);
+  });
+
+  // Half 100lb 1S
+  it("100lb half 1S qty=100 → $31", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 1,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(31);
+  });
+
+  it("100lb half 1S qty=1000 → $180 (not $250 double-sided)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_100LB_HALF",
+      width_in: 8.5,
+      height_in: 5.5,
+      sides: 1,
+      qty: 1000,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(180);
+  });
+
+  // sides=2 still returns correct 2S price — no cross-contamination
+  it("80lb full 2S qty=100 → still $45 after adding 1S (no cross-contamination)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 2,
+      qty: 100,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(45);
+  });
+
+  // sides=1 between tiers → BLOCKED
+  it("80lb full 1S qty=200 → BLOCKED (between tiers)", () => {
+    const result = estimate({
+      category: "FLYER",
+      material_code: "PLACEHOLDER_80LB",
+      width_in: 8.5,
+      height_in: 11,
+      sides: 1,
       qty: 200,
     });
     expect(result.status).toBe("BLOCKED");
