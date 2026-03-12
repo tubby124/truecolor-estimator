@@ -42,10 +42,12 @@ const organizationSchema = {
   ],
   description:
     "Saskatoon-based print shop operating Roland TrueVIS and Konica Minolta production equipment in-house. Coroplast signs, vinyl banners, vehicle magnets, business cards, and large format printing. Local pickup at 216 33rd St W.",
+  foundingYear: "2019",
   foundingLocation: {
     "@type": "Place",
     address: {
       "@type": "PostalAddress",
+      streetAddress: "1629 Ontario Ave",
       addressLocality: "Saskatoon",
       addressRegion: "SK",
       addressCountry: "CA",
@@ -55,6 +57,22 @@ const organizationSchema = {
     { "@type": "City", name: "Saskatoon" },
     { "@type": "AdministrativeArea", name: "Saskatchewan" },
   ],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Print Products and Signage",
+    itemListElement: [
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Coroplast Signs" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vinyl Banners" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Business Cards" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "ACP Aluminum Signs" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vehicle Magnets" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Flyers" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Brochures" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Window Decals" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Retractable Banners" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Graphic Design" } },
+    ],
+  },
 };
 
 const EQUIPMENT = [

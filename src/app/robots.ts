@@ -18,6 +18,9 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/staff", "/api/", "/pay/", "/cart", "/checkout", "/order-confirmed", "/account"],
       },
     ],
-    sitemap: "https://truecolorprinting.ca/sitemap.xml",
+    sitemap: [
+      "https://truecolorprinting.ca/sitemap.xml",
+      "https://truecolorprinting.ca/image-sitemap.xml",
+    ],
   };
 }
