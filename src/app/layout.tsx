@@ -146,6 +146,10 @@ export default function RootLayout({
         <Script id="ga4-init" strategy="afterInteractive">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6HMQT7MNLL');`}
         </Script>
+        <Script
+          src="https://cdn.trustindex.io/loader-cert.js?89b965e662e3991e274607505a2"
+          strategy="afterInteractive"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
