@@ -281,7 +281,10 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   const totalOrderBase = (isFixedSize || isLotPrice) ? basePrice : round2(basePrice * qty);
   let effectiveBase = totalOrderBase;
   let minChargeApplied = false;
+  // Preserve pre-minimum price so the UI can show the real item cost
+  let baseUnitPrice: number | null = null;
   if (minCharge > 0 && totalOrderBase < minCharge) {
+    baseUnitPrice = totalOrderBase;
     effectiveBase = minCharge;
     minChargeApplied = true;
     if (lineItems.length > 0) {
@@ -383,6 +386,7 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     qty_discount_pct: qtyDiscountPct > 0 ? qtyDiscountPct : null,
     qty_discount_applied: qtyDiscountApplied,
     price_per_unit: pricePerUnit,
+    base_unit_price: baseUnitPrice,
   };
 }
 
@@ -597,5 +601,6 @@ function blocked(reason: string): EstimateResponse {
     qty_discount_pct: null,
     qty_discount_applied: false,
     price_per_unit: null,
+    base_unit_price: null,
   };
 }

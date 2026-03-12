@@ -66,6 +66,7 @@ export interface PriceData {
   qtyDiscountApplied: boolean;
   minChargeApplied: boolean;
   minChargeValue: number | null;
+  baseUnitPrice: number | null; // pre-minimum price (set only when min charge applies)
   lineItems: LineItem[]; // engine breakdown: base + addons
 }
 
@@ -111,6 +112,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [pricePerUnit, setPricePerUnit] = useState<number | null>(null);
   const [minChargeApplied, setMinChargeApplied] = useState(false);
   const [minChargeValue, setMinChargeValue] = useState<number | null>(null);
+  const [baseUnitPrice, setBaseUnitPrice] = useState<number | null>(null);
 
   const effectiveWidth = isCustomFlexSize ? parseFloat(customFlexW) || 0 : isCustom ? parseFloat(customW) || 0 : selectedSize.width_in;
   const effectiveHeight = isCustomFlexSize ? parseFloat(customFlexH) || 0 : isCustom ? parseFloat(customH) || 0 : selectedSize.height_in;
@@ -159,6 +161,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setPricePerUnit(data.price_per_unit ?? null);
         setMinChargeApplied(data.min_charge_applied ?? false);
         setMinChargeValue(data.min_charge_value ?? null);
+        setBaseUnitPrice(data.base_unit_price ?? null);
         // GA4: price_calculated — fires every time a valid price is returned
         trackPriceCalculated({
           item_id: product.material_code ?? product.category,
@@ -175,6 +178,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setPricePerUnit(null);
         setMinChargeApplied(false);
         setMinChargeValue(null);
+        setBaseUnitPrice(null);
       }
     } catch (err) {
       showToast(sanitizeError(err), "error");
@@ -218,9 +222,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       qtyDiscountApplied,
       minChargeApplied,
       minChargeValue,
+      baseUnitPrice,
       lineItems,
     });
-  }, [price, loading, addonTotal, designStatus, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, lineItems]);
+  }, [price, loading, addonTotal, designStatus, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, baseUnitPrice, lineItems]);
 
   // Bubble config to parent (for proof + cart)
   useEffect(() => {

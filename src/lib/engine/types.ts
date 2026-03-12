@@ -58,4 +58,6 @@ export interface EstimateResponse {
   qty_discount_pct: number | null;
   qty_discount_applied: boolean;
   price_per_unit: number | null;
+  // Pre-minimum base price (set only when min_charge_applied is true)
+  base_unit_price: number | null;
 }

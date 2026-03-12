@@ -19,6 +19,7 @@ interface PriceSummaryProps {
   qtyDiscountApplied?: boolean;
   minChargeApplied?: boolean;
   minChargeValue?: number | null;
+  baseUnitPrice?: number | null; // pre-minimum real price
   lineItems?: LineItem[]; // engine breakdown — used for addon sub-line display
   // Cart
   addedToCart: boolean;
@@ -57,7 +58,7 @@ export function PriceSummary({
   addedToCart, onAddToCart, productSlug,
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
   pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
-  minChargeApplied, minChargeValue, lineItems = [],
+  minChargeApplied, minChargeValue, baseUnitPrice, lineItems = [],
 }: PriceSummaryProps) {
   // Addon sub-lines = engine line_items beyond the first (base product) item
   const addonLines = lineItems.length > 1 ? lineItems.slice(1) : [];
@@ -140,12 +141,36 @@ export function PriceSummary({
                 </div>
               )}
 
-              {/* Minimum charge note */}
+              {/* Minimum charge breakdown — shows real item cost vs minimum */}
               {minChargeApplied && minChargeValue != null && (
-                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1 mt-2">
-                  Minimum order ${minChargeValue.toFixed(2)} applied
-                  {qty > 1 && pricePerUnit != null && ` · ${qty} × $${pricePerUnit.toFixed(2)}/unit`}
-                </p>
+                <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg space-y-1.5">
+                  {baseUnitPrice != null && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Your item{qty > 1 ? "s" : ""}</span>
+                      <span className="text-gray-600 tabular-nums">${baseUnitPrice.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Order minimum</span>
+                    <span className="font-semibold text-[#1c1712] tabular-nums">${minChargeValue.toFixed(2)}</span>
+                  </div>
+                  {baseUnitPrice != null && minChargeValue > baseUnitPrice && (
+                    <p className="text-xs text-[#16C2F3] font-medium pt-1 border-t border-gray-200">
+                      {(() => {
+                        // Calculate how many units to beat the minimum
+                        const unitPrice = baseUnitPrice / Math.max(qty, 1);
+                        if (unitPrice > 0) {
+                          const unitsToExceed = Math.ceil(minChargeValue / unitPrice);
+                          const extraNeeded = unitsToExceed - qty;
+                          if (extraNeeded > 0 && extraNeeded <= 20) {
+                            return `Add ${extraNeeded} more to beat the minimum`;
+                          }
+                        }
+                        return "Increase quantity to get the best per-unit value";
+                      })()}
+                    </p>
+                  )}
+                </div>
               )}
 
               {/* Design service note */}
