@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { GalleryGrid } from "./GalleryGrid";
+import { InstagramFeed } from "@/components/home/InstagramFeed";
 
 export const metadata: Metadata = {
   title: "Our Work | Print Shop Gallery Saskatoon",
@@ -62,6 +63,26 @@ export default function GalleryPage() {
 
         {/* Gallery grid — real client work first, product showcase behind View More */}
         <GalleryGrid />
+
+        {/* Live Instagram feed */}
+        <section className="mt-14">
+          <h2 className="text-2xl font-bold text-[#1c1712] mb-4">
+            Latest from Instagram
+          </h2>
+          <p className="text-gray-500 text-sm mb-6">
+            Follow{" "}
+            <a
+              href="https://www.instagram.com/truecolorprint"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#16C2F3] hover:underline"
+            >
+              @truecolorprint
+            </a>{" "}
+            for daily project updates.
+          </p>
+          <InstagramFeed />
+        </section>
 
         {/* CTA */}
         <div className="mt-12 text-center">
