@@ -13,7 +13,7 @@ const WIDGET_CSS_URL =
 const WIDGET_SPRITE_URL =
   "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/sprite.jpg";
 
-// On mobile (<768px): 1-column, show 3 reviews (always text — see sort below).
+// On mobile (<768px): 1-column, show 3 reviews (image reviews first per Trustindex sort).
 // Layout 5 (slider) was dropped — it requires JS to set card heights at runtime;
 // without loader.js the ti-reviews-container-wrapper collapses to zero height.
 const MOBILE_RESPONSIVE_CSS = `
@@ -24,33 +24,6 @@ const MOBILE_RESPONSIVE_CSS = `
   .ti-widget[data-layout-id='16'] .ti-reviews-container .ti-reviews-container-wrapper{margin-bottom:0!important}
 }`;
 
-// Reorder review items so text reviews always come first.
-// Trustindex sorts by date — rating-only reviews (no written text) can appear
-// anywhere and would waste mobile nth-child slots with blank cards.
-// Strategy: split on the ti-review-item boundary, check each chunk for real
-// text content in the ti-review-text-container, float those to the top.
-// nth-child(n+4) on mobile then always picks 3 reviews that have actual text.
-function sortTextReviewsFirst(html: string): string {
-  const MARKER = '<div class="ti-review-item ';
-  const parts = html.split(MARKER);
-  if (parts.length <= 1) return html;
-
-  const prefix = parts[0]; // everything before the first review item
-  const items  = parts.slice(1); // each chunk begins right after MARKER
-
-  const hasText = (chunk: string): boolean => {
-    const idx = chunk.indexOf('class="ti-review-text-container');
-    if (idx === -1) return false;
-    // Strip HTML tags from the content area and look for substantive text.
-    // Threshold of 10 chars filters out whitespace-only or empty containers.
-    const plain = chunk.slice(idx).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-    return plain.length > 10;
-  };
-
-  const withText    = items.filter(hasText);
-  const withoutText = items.filter((i) => !hasText(i));
-  return prefix + [...withText, ...withoutText].map((i) => MARKER + i).join('');
-}
 
 function GoogleIcon() {
   return (
@@ -63,12 +36,17 @@ function GoogleIcon() {
   );
 }
 
+interface WidgetResult {
+  html: string;
+  reviewCount: number | null;
+}
+
 async function fetchWidgetHtml(
   widgetUrl: string,
   cssUrl: string,
   spriteUrl: string,
   extraCss = "",
-): Promise<string | null> {
+): Promise<WidgetResult | null> {
   try {
     const [widgetRes, cssRes] = await Promise.all([
       fetch(widgetUrl, { next: { revalidate: 3600 } }),
@@ -80,6 +58,10 @@ async function fetchWidgetHtml(
       widgetRes.text(),
       cssRes.ok ? cssRes.text() : Promise.resolve(""),
     ]);
+
+    // Extract review count from the widget HTML e.g. ">29 reviews<"
+    const countMatch = widgetHtml.match(/>(\d+) reviews</i);
+    const reviewCount = countMatch ? parseInt(countMatch[1], 10) : null;
 
     // Inject sprite background-positions server-side.
     // loader.js normally does this in JS: querySelectorAll(".ti-profile-img-sprite")
@@ -95,22 +77,19 @@ async function fetchWidgetHtml(
       }
     );
 
-    // Float text reviews to the top so the mobile nth-child slice always
-    // shows reviews with actual written content, not rating-only blanks.
-    const widgetSorted = sortTextReviewsFirst(widgetWithSprites);
-
     // Inline base CSS first, then widget HTML, then our overrides last.
     // Overrides must come AFTER the widget HTML because content.html embeds an
     // inline <style class="scss-content"> at its end with !important rules —
     // putting our CSS after ensures we win the cascade regardless of specificity.
-    return `<style>${css}</style>\n${widgetSorted}${extraCss ? `\n<style>${extraCss}</style>` : ""}`;
+    const html = `<style>${css}</style>\n${widgetWithSprites}${extraCss ? `\n<style>${extraCss}</style>` : ""}`;
+    return { html, reviewCount };
   } catch {
     return null;
   }
 }
 
 export async function ReviewsSection() {
-  const widgetHtml = await fetchWidgetHtml(
+  const widget = await fetchWidgetHtml(
     WIDGET_URL,
     WIDGET_CSS_URL,
     WIDGET_SPRITE_URL,
@@ -120,12 +99,12 @@ export async function ReviewsSection() {
   return (
     <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Reviews widget — 3-col grid on desktop, 1-col top-3-text reviews on mobile */}
-        {widgetHtml && (
-          <div dangerouslySetInnerHTML={{ __html: widgetHtml }} />
+        {/* Reviews widget — 3-col grid on desktop, 1-col image reviews first on mobile */}
+        {widget && (
+          <div dangerouslySetInnerHTML={{ __html: widget.html }} />
         )}
 
-        {/* Mobile only — see all reviews link (widget shows top 3 text reviews) */}
+        {/* Mobile only — see all reviews link */}
         <div className="md:hidden mt-4 text-center">
           <a
             href={GOOGLE_ALL_REVIEWS_URL}
@@ -134,7 +113,11 @@ export async function ReviewsSection() {
             className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
           >
             <GoogleIcon />
-            <span>See all 27 reviews on Google</span>
+            <span>
+              {widget?.reviewCount
+                ? `See all ${widget.reviewCount} reviews on Google`
+                : "See all reviews on Google"}
+            </span>
           </a>
         </div>
 
