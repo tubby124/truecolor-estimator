@@ -76,7 +76,7 @@ const INDUSTRY_LINKS = [
 ];
 
 export function SiteNav() {
-  const [openMenu, setOpenMenu] = useState<"products" | "industries" | null>(null);
+  const [openMenu, setOpenMenu] = useState<"products" | "industries" | "about" | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [mobileAuth, setMobileAuth] = useState<{ email: string; isStaff: boolean } | null>(null);
@@ -199,7 +199,7 @@ export function SiteNav() {
     setDrawerOpen(false);
   }
 
-  function toggleMenu(menu: "products" | "industries") {
+  function toggleMenu(menu: "products" | "industries" | "about") {
     setOpenMenu((prev) => (prev === menu ? null : menu));
   }
 
@@ -323,13 +323,55 @@ export function SiteNav() {
               Services
             </Link>
 
-            {/* About — plain link */}
-            <Link
-              href="/about"
-              className="text-sm text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md transition-colors"
-            >
-              About
-            </Link>
+            {/* About — dropdown with Visit Us */}
+            <div className="relative">
+              <button
+                onClick={() => toggleMenu("about")}
+                aria-haspopup="true"
+                aria-expanded={openMenu === "about"}
+                className="flex items-center gap-1 text-sm text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md transition-colors cursor-pointer"
+              >
+                About
+                <svg
+                  className={`w-3.5 h-3.5 transition-transform ${openMenu === "about" ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {openMenu === "about" && (
+                <div
+                  role="menu"
+                  className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-48"
+                >
+                  <Link
+                    href="/about"
+                    onClick={() => setOpenMenu(null)}
+                    className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-t-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a48.534 48.534 0 019 0m-9 0V6.75A2.25 2.25 0 016 4.5h12A2.25 2.25 0 0120.25 6.75v2.598m-16.5 0a48.534 48.534 0 019 0" />
+                    </svg>
+                    About Our Shop
+                  </Link>
+                  <Link
+                    href="/contact"
+                    onClick={() => setOpenMenu(null)}
+                    className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-b-lg transition-colors border-t border-white/5"
+                  >
+                    <svg className="w-4 h-4 text-[#16C2F3] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    Visit Us
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Our Work — plain link */}
             <Link
@@ -570,6 +612,17 @@ export function SiteNav() {
                 className="block py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
               >
                 About Our Shop
+              </Link>
+              <Link
+                href="/contact"
+                onClick={() => setDrawerOpen(false)}
+                className="flex items-center gap-2 py-2.5 text-base text-gray-200 hover:text-white transition-colors border-b border-white/5"
+              >
+                <svg className="w-4 h-4 text-[#16C2F3] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+                Visit Us
               </Link>
               <Link
                 href="/gallery"
