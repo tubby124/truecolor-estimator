@@ -28,23 +28,6 @@ const PRODUCT_IMAGE_MAP: Record<string, string> = {
   "magnet-calendars":    "/images/products/product/magnet-calendars-800x600.webp",
 };
 
-// Maps product calculator slug → SEO landing page (for internal link equity)
-const SEO_SLUG_MAP: Record<string, string> = {
-  "vinyl-banners":       "/banner-printing-saskatoon",
-  "coroplast-signs":     "/coroplast-signs-saskatoon",
-  "vehicle-magnets":     "/vehicle-magnets-saskatoon",
-  "acp-signs":           "/aluminum-signs-saskatoon",
-  "flyers":              "/flyer-printing-saskatoon",
-  "business-cards":      "/business-cards-saskatoon",
-  "foamboard-displays":  "/foamboard-printing-saskatoon",
-  "retractable-banners": "/retractable-banners-saskatoon",
-  "window-decals":       "/window-decals-saskatoon",
-  "vinyl-lettering":     "/vinyl-lettering-saskatoon",
-  "stickers":            "/sticker-printing-saskatoon",
-  "postcards":           "/postcard-printing-saskatoon",
-  "brochures":           "/brochure-printing-saskatoon",
-  "photo-posters":       "/photo-poster-printing-saskatoon",
-};
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -202,7 +185,7 @@ export default async function ProductPage({ params }: Props) {
               {related.map((r) => r && (
                 <Link
                   key={r.slug}
-                  href={SEO_SLUG_MAP[r.slug] ?? `/products/${r.slug}`}
+                  href={`/products/${r.slug}`}
                   className="group border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl hover:border-transparent hover:ring-1 hover:ring-[#16C2F3]/30 transition-all duration-200"
                 >
                   {PRODUCT_IMAGE_MAP[r.slug] && (
