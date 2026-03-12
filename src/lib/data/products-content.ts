@@ -718,10 +718,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
   "stickers": {
     slug: "stickers",
     name: "Vinyl Stickers",
-    tagline: "Die-cut vinyl stickers. Minimum 50. Durable indoors and out.",
+    tagline: "Die-cut vinyl stickers. Minimum 25. Durable indoors and out.",
     description:
       "Vinyl stickers are printed on Arlon DPF 510 matte adhesive vinyl — the same 3.2 mil cast film we use for window decals — and die-cut to clean square edges with no white border or carrier sheet separating each sticker. Roland UV-resistant inks produce vivid, durable colour that holds up on product packaging, outdoor surfaces, and high-traffic applications for 2–3 years. Eight sizes available online — 2×2\", 2×3\", 3×3\", 4×4\", 4×6\", 5×5\", 6×6\", and 8×8\" — starting at 25 stickers. Small label runs start at $25 for 25× 2×2\"; large promo stickers run $380 for 50× 8×8\". Price drops sharply with quantity: 4×4\" stickers run $1.90 each at 50 units and $0.65 each at 1000 units. Custom shapes — circles, ovals, die-cut brand logos — are available by quote. Common uses in Saskatoon: product labels for local food and ag businesses, branded stickers for farm equipment dealerships, event giveaway packs, coffee shop cup stickers, and packaging seals. Stickers are safe for product packaging as long as they don't contact food directly. The removable adhesive peels cleanly from most smooth surfaces — good for promotional campaigns where you want customers to stick your brand on a laptop or water bottle without permanently marking their property. Supply a PDF or high-res PNG at 150+ DPI. In-house design from $35. Pickup at 216 33rd St W, Saskatoon.",
-    fromPrice: "$95",
+    fromPrice: "$25",
     category: "STICKER",
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/stickers-800x600.webp",
