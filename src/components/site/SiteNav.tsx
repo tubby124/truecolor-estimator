@@ -407,7 +407,7 @@ export function SiteNav() {
               href="/quote"
               className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden sm:block"
             >
-              Get a Price →
+              Order Now →
             </Link>
 
             {/* Mobile quick-price CTA — 1-tap access, hidden on desktop */}
@@ -415,7 +415,7 @@ export function SiteNav() {
               href="/quote"
               className="sm:hidden bg-[#16C2F3] text-white text-xs font-bold px-3 py-2 rounded-md whitespace-nowrap"
             >
-              Get Price →
+              Order Now →
             </Link>
 
             {/* Hamburger — mobile only */}
@@ -654,7 +654,7 @@ export function SiteNav() {
               onClick={() => setDrawerOpen(false)}
               className="block w-full text-center bg-[#16C2F3] text-white text-base font-bold px-5 py-3.5 rounded-md hover:bg-[#0fb0dd] transition-colors"
             >
-              Get a Price →
+              Order Now →
             </Link>
 
             {/* Request a Quote — secondary */}

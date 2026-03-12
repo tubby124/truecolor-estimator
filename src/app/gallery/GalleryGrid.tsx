@@ -494,14 +494,24 @@ function GalleryCard({ item }: { item: GalleryItem }) {
   );
 }
 
+const INITIAL_COUNT = 12;
+
 export function GalleryGrid() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [showMore, setShowMore] = useState(false);
+  const [showAllWork, setShowAllWork] = useState(false);
 
   const filtered =
     activeCategory === "All"
       ? REAL_WORK
       : REAL_WORK.filter((item) => item.category === activeCategory);
+
+  // On "All" tab, show 12 initially; on category tabs, show everything
+  const visible =
+    activeCategory === "All" && !showAllWork
+      ? filtered.slice(0, INITIAL_COUNT)
+      : filtered;
+  const hasMore = activeCategory === "All" && !showAllWork && filtered.length > INITIAL_COUNT;
 
   return (
     <>
@@ -515,7 +525,7 @@ export function GalleryGrid() {
           return (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => { setActiveCategory(cat); setShowAllWork(false); }}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
                 activeCategory === cat
                   ? "bg-[#16C2F3] text-white"
@@ -537,13 +547,24 @@ export function GalleryGrid() {
 
       {/* Real client work */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filtered.map((item, i) => (
+        {visible.map((item, i) => (
           <GalleryCard key={i} item={item} />
         ))}
       </div>
 
       {filtered.length === 0 && (
         <p className="text-center text-gray-400 py-16">No items in this category yet.</p>
+      )}
+
+      {hasMore && (
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => setShowAllWork(true)}
+            className="inline-flex items-center gap-2 border border-gray-300 text-gray-600 font-semibold px-7 py-3 rounded-lg hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors cursor-pointer"
+          >
+            Show All {filtered.length} Projects →
+          </button>
+        </div>
       )}
 
       {/* Product showcase — behind "View More" */}
