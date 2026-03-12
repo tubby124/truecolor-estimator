@@ -232,6 +232,20 @@ export function HeroSlider() {
         <ChevronRight className="w-4 h-4" />
       </button>
 
+      {/* Slide dot indicators */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+        {SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === current ? "bg-[#16C2F3] w-4" : "bg-white/30 w-2 hover:bg-white/60"
+            }`}
+          />
+        ))}
+      </div>
+
       {/* Slide progress bar */}
       <div className="absolute bottom-0 left-0 right-0 z-20 h-1 bg-white/10">
         <div

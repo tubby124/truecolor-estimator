@@ -368,6 +368,14 @@ export function SiteNav() {
               Get a Price →
             </Link>
 
+            {/* Mobile quick-price CTA — 1-tap access, hidden on desktop */}
+            <Link
+              href="/quote"
+              className="sm:hidden bg-[#16C2F3] text-white text-xs font-bold px-3 py-2 rounded-md whitespace-nowrap"
+            >
+              Price →
+            </Link>
+
             {/* Hamburger — mobile only */}
             <button
               onClick={() => setDrawerOpen(true)}

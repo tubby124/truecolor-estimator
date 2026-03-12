@@ -10,6 +10,7 @@ import { LocalShopSection } from "@/components/home/LocalShopSection";
 import { ScrollRevealInit } from "@/components/home/ScrollRevealInit";
 import { StatCounter } from "@/components/home/StatCounter";
 import { SameDayClock } from "@/components/home/SameDayClock";
+import { MobileStickyBar } from "@/components/home/MobileStickyBar";
 
 export const metadata: Metadata = {
   title: { absolute: "True Color Display Printing | Saskatoon Signs, Banners & Cards" },
@@ -197,7 +198,7 @@ const homeFaqSchema = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20 sm:pb-0">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqSchema) }}
@@ -241,7 +242,7 @@ export default function HomePage() {
               <svg className="w-5 h-5 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
-              <span className="font-medium text-gray-700">5.0 stars · 27 reviews</span>
+              <span className="font-medium text-gray-700">5.0 stars · 29 reviews</span>
             </span>
             <span className="reveal-section delay-1 flex items-center gap-2.5 whitespace-nowrap">
               <svg className="w-5 h-5 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -266,13 +267,34 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── STATS BAR ────────────────────────────────────────────────────────── */}
+      <section className="reveal-section py-10 bg-white border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div>
+            <p className="text-3xl font-black text-[#1c1712]">
+              <StatCounter target={500} suffix="+" />
+            </p>
+            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Businesses Served</p>
+          </div>
+          <div>
+            <p className="text-3xl font-black text-[#1c1712]">5.0★</p>
+            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Google Rating</p>
+          </div>
+          <div>
+            <p className="text-3xl font-black text-[#1c1712]">1–3 days</p>
+            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Standard Turnaround</p>
+          </div>
+          <div>
+            <p className="text-3xl font-black text-[#1c1712]">$35</p>
+            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">In-House Design</p>
+          </div>
+        </div>
+      </section>
+
       {/* ── GOOGLE REVIEWS ───────────────────────────────────────────────────── */}
       <div className="reveal-section">
         <ReviewsSection />
       </div>
-
-      {/* ── LOCAL SHOP ───────────────────────────────────────────────────────── */}
-      <LocalShopSection />
 
       {/* ── PRODUCT GRID ─────────────────────────────────────────────────────── */}
       <section className="reveal-section px-6 py-16 max-w-6xl mx-auto">
@@ -288,7 +310,7 @@ export default function HomePage() {
               href={p.href}
               className="group border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl hover:border-transparent hover:ring-1 hover:ring-[#16C2F3]/30 transition-all duration-200"
             >
-              <div className="relative h-48 bg-gray-50 overflow-hidden">
+              <div className="relative h-52 bg-gray-50 overflow-hidden">
                 <Image
                   src={p.img}
                   alt={`${p.name} — True Color Display Printing Saskatoon`}
@@ -323,7 +345,6 @@ export default function HomePage() {
           <p className="font-bold text-[#1c1712] mb-3">Also available — all priced live:</p>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "Brochures from $70", href: "/products/brochures" },
               { label: "Postcards from $35", href: "/products/postcards" },
               { label: "Stickers from $95", href: "/products/stickers" },
               { label: "Photo Posters from $15", href: "/products/photo-posters" },
@@ -394,6 +415,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── LOCAL SHOP ───────────────────────────────────────────────────────── */}
+      <LocalShopSection />
+
       {/* ── GALLERY STRIP ────────────────────────────────────────────────────── */}
       <div className="reveal-section">
         <GalleryStrip />
@@ -424,36 +448,12 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-5">
                   <p className="text-white font-bold text-lg leading-tight">{ind.name}</p>
-                  <p className="text-[#16C2F3] text-sm mt-1 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                  <p className="text-[#16C2F3] text-sm mt-1 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition-all duration-300">
                     {ind.tagline} →
                   </p>
                 </div>
               </Link>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── STATS BAR ────────────────────────────────────────────────────────── */}
-      <section className="reveal-section py-10 bg-white border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div>
-            <p className="text-3xl font-black text-[#1c1712]">
-              <StatCounter target={500} suffix="+" />
-            </p>
-            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Businesses Served</p>
-          </div>
-          <div>
-            <p className="text-3xl font-black text-[#1c1712]">5.0★</p>
-            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Google Rating</p>
-          </div>
-          <div>
-            <p className="text-3xl font-black text-[#1c1712]">1–3 days</p>
-            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Standard Turnaround</p>
-          </div>
-          <div>
-            <p className="text-3xl font-black text-[#1c1712]">$35</p>
-            <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">In-House Design</p>
           </div>
         </div>
       </section>
@@ -531,6 +531,9 @@ export default function HomePage() {
       </section>
 
       <SiteFooter />
+
+      {/* Mobile sticky bottom CTA bar */}
+      <MobileStickyBar />
 
       {/* Scroll reveal — attaches IntersectionObserver to all .reveal-section elements */}
       <ScrollRevealInit />
