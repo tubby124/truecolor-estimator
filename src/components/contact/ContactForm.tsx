@@ -15,10 +15,12 @@ const PRODUCT_OPTIONS = [
   "Other / Not Sure",
 ];
 
-// Shared input class — visible focus ring (WCAG 2.1 AA) + border highlight on focus
+// Shared input class — light theme, visible focus ring (WCAG 2.1 AA)
 const inputCls =
-  "w-full bg-[#251d16] border border-white/15 rounded-lg px-4 py-3 text-white text-sm placeholder-gray-600 " +
+  "w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-gray-900 text-sm placeholder-gray-400 " +
   "focus:outline-none focus:ring-2 focus:ring-[#16C2F3]/60 focus:border-[#16C2F3] transition-colors";
+
+const labelCls = "block text-gray-700 text-xs font-semibold uppercase tracking-wider mb-1.5";
 
 export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -79,8 +81,8 @@ export function ContactForm() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <p className="text-white font-semibold text-lg">Message sent!</p>
-        <p className="text-gray-300 text-sm max-w-xs">
+        <p className="text-[#1c1712] font-semibold text-lg">Message sent!</p>
+        <p className="text-gray-500 text-sm max-w-xs">
           We&rsquo;ll reply to your email within 1 business day. Check your inbox for a confirmation.
         </p>
         {/* min-h-[44px] satisfies WCAG 2.5.5 touch target size */}
@@ -98,7 +100,7 @@ export function ContactForm() {
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" noValidate>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="contact-name" className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-1.5">
+          <label htmlFor="contact-name" className={labelCls}>
             Your Name <span className="text-[#16C2F3]" aria-hidden="true">*</span>
             <span className="sr-only">(required)</span>
           </label>
@@ -114,7 +116,7 @@ export function ContactForm() {
           />
         </div>
         <div>
-          <label htmlFor="contact-email" className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-1.5">
+          <label htmlFor="contact-email" className={labelCls}>
             Email <span className="text-[#16C2F3]" aria-hidden="true">*</span>
             <span className="sr-only">(required)</span>
           </label>
@@ -132,8 +134,8 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="contact-phone" className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-1.5">
-          Phone <span className="text-gray-500 font-normal normal-case tracking-normal">(optional)</span>
+        <label htmlFor="contact-phone" className={labelCls}>
+          Phone <span className="text-gray-400 font-normal normal-case tracking-normal">(optional)</span>
         </label>
         <input
           id="contact-phone"
@@ -147,7 +149,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="contact-product" className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-1.5">
+        <label htmlFor="contact-product" className={labelCls}>
           What do you need?
         </label>
         <select
@@ -163,7 +165,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="contact-message" className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-1.5">
+        <label htmlFor="contact-message" className={labelCls}>
           Message
         </label>
         <textarea
@@ -177,22 +179,22 @@ export function ContactForm() {
       </div>
 
       {status === "error" && (
-        <p role="alert" className="text-red-400 text-sm">{errorMsg}</p>
+        <p role="alert" className="text-red-500 text-sm">{errorMsg}</p>
       )}
 
       <button
         type="submit"
         disabled={status === "sending"}
-        className="w-full min-h-[48px] bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:ring-offset-2 focus:ring-offset-[#1c1712]"
+        className="w-full min-h-[48px] bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:ring-offset-2 focus:ring-offset-white"
       >
         {status === "sending" ? "Sending…" : "Send Message"}
       </button>
 
-      <p className="text-gray-400 text-xs text-center">
+      <p className="text-gray-500 text-xs text-center">
         Or call us directly at{" "}
         <a
           href="tel:+13069548688"
-          className="text-gray-300 hover:text-[#16C2F3] transition-colors underline underline-offset-2"
+          className="text-gray-700 hover:text-[#16C2F3] transition-colors underline underline-offset-2"
         >
           (306) 954-8688
         </a>
