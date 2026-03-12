@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "True Color Display Printing | Saskatoon Signs, Banners & Cards",
+    default: "True Color Printing | Signs, Banners & Cards Saskatoon",
     template: "%s | True Color Display Printing",
   },
   manifest: "/manifest.webmanifest",
@@ -30,10 +30,10 @@ export const metadata: Metadata = {
     title: "True Color",
   },
   description:
-    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer, local Saskatoon pickup at 216 33rd St W. See your exact price online — no quote forms.",
+    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon. See your price now.",
   metadataBase: new URL("https://truecolorprinting.ca"),
   openGraph: {
-    title: "True Color Display Printing | Saskatoon",
+    title: "True Color Printing | Signs, Banners & Cards Saskatoon",
     description:
       "Instant online pricing for signs, banners, business cards, magnets & flyers. Local Saskatoon print shop with in-house designer. No quote forms — see your price now.",
     url: "https://truecolorprinting.ca",
@@ -112,7 +112,7 @@ const localBusinessSchema = {
   aggregateRating: {
     "@type": "AggregateRating",
     ratingValue: "5.0",
-    reviewCount: "27",
+    reviewCount: "29",
     bestRating: "5",
     worstRating: "1",
   },

@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
       // /retail-signs-saskatoon has its own page — redirect removed 2026-03-05
       // /agriculture-signs-saskatoon → keep (don't redirect — different keyword target)
       // /election-signs → keep canonical (has "Saskatoon" in title/content)
+      // /vinyl-banners-saskatoon → canonical SEO page is /banner-printing-saskatoon
+      {
+        source: "/vinyl-banners-saskatoon",
+        destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
     ];
   },
 
