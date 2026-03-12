@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Business Cards Saskatoon | True Color Display Printing",
     description:
-      "250 business cards from $40. Double-sided 14pt gloss. Same-day rush. Local Saskatoon pickup.",
+      "250 business cards from $45. Double-sided 14pt gloss. Same-day rush. Local Saskatoon pickup.",
     url: "https://truecolorprinting.ca/business-cards-saskatoon",
     type: "website",
   },
@@ -23,14 +23,14 @@ export default function BusinessCardsSaskatoonPage() {
       title="Business Cards Saskatoon"
       subtitle="250 cards from $45. Double-sided, 14pt gloss. In-house designer. Ready in 1–3 business days."
       heroImage="/images/products/product/business-cards-800x600.webp"
-      heroAlt="Business card printing in Saskatoon — 250 cards from $40 at True Color"
+      heroAlt="Business card printing in Saskatoon — 250 cards from $45 at True Color"
       description="True Color Display Printing produces professional business cards for Saskatoon businesses. 250 double-sided cards on 14pt gloss stock start at $45 — less than you'd pay at Staples without the corporate markup. We print in-house, which means we control quality and turnaround. Cards are standard 3.5×2 inch size, full-colour both sides, with a high-gloss finish. Same-day rush available for +$40 flat. In-house designer handles layout from your logo and contact info. Saskatoon contractors, real estate agents, tradespeople, and small business owners order here because design and print happen under one roof — no emailing files back and forth, no waiting for a national courier to deliver a box.
 
 Business cards are the most personal marketing tool you carry. Whether you're passing one to a client on a job site, leaving a stack at a local business, or handing them out at a trade show or Chamber of Commerce event, a well-printed card on good stock makes the right impression. Our 14pt gloss is the industry standard — it's thick, holds the colour, and has the right snap when someone takes it from your hand. Matte finish is available on request.
 
 Volume pricing: 250 for $45, 500 for $58, 1000 for $75. Most orders are ready in 1–3 business days. Same-day rush is available for +$40 flat on orders placed before 10 AM. Pickup at 216 33rd St W — no shipping, inspect your cards before you leave."
       products={[
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
         { name: "Brochures", from: "from $70", slug: "brochures" },
         { name: "Postcards", from: "from $35", slug: "postcards" },

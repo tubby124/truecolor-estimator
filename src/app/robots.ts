@@ -4,7 +4,16 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "PerplexityBot", "ClaudeBot", "anthropic-ai", "Google-Extended", "Bytespider", "cohere-ai"],
+        userAgent: [
+          "GPTBot", "OAI-SearchBot", "ChatGPT-User",
+          "PerplexityBot", "PerplexityBot-User",
+          "ClaudeBot", "anthropic-ai",
+          "Google-Extended", "Gemini-Web",
+          "Bytespider", "cohere-ai",
+          "meta-externalagent",
+          "Applebot", "Applebot-Extended",
+          "Amazonbot", "YouBot", "Diffbot",
+        ],
         allow: "/",
         disallow: ["/staff", "/api/", "/pay/", "/cart", "/checkout", "/order-confirmed", "/account"],
       },

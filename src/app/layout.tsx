@@ -58,15 +58,24 @@ export const metadata: Metadata = {
     "print shop Saskatoon",
     "True Color Display Printing",
   ],
+  twitter: {
+    card: "summary_large_image",
+    title: "True Color Printing | Signs, Banners & Cards Saskatoon",
+    description:
+      "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon.",
+    images: ["https://truecolorprinting.ca/og-image.png"],
+  },
 };
 
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": "https://truecolorprinting.ca/#website",
   name: "True Color Display Printing",
   url: "https://truecolorprinting.ca",
   description:
     "Instant online pricing for signs, banners, and print products in Saskatoon, SK. No quote forms — see your exact price in 30 seconds.",
+  publisher: { "@id": "https://truecolorprinting.ca/#localbusiness" },
   potentialAction: {
     "@type": "SearchAction",
     target: {
@@ -80,6 +89,7 @@ const websiteSchema = {
 const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
+  "@id": "https://truecolorprinting.ca/#localbusiness",
   name: "True Color Display Printing",
   description:
     "Saskatoon print shop specializing in coroplast signs, vinyl banners, vehicle magnets, business cards, and large format printing. In-house designer. Instant online pricing.",
@@ -96,8 +106,8 @@ const localBusinessSchema = {
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: 52.1218,
-    longitude: -106.6702,
+    latitude: 52.1325,
+    longitude: -106.67,
   },
   openingHoursSpecification: [
     {

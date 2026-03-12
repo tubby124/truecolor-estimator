@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": "https://truecolorprinting.ca/#organization",
   name: "True Color Display Printing",
   url: "https://truecolorprinting.ca",
   logo: "https://truecolorprinting.ca/truecolorlogo.png",
