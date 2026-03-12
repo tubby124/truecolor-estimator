@@ -34,7 +34,7 @@ export function SiteFooter() {
               Saskatoon&apos;s print shop for signs, banners, magnets, cards, and flyers.
               Transparent pricing. In-house designer. Local pickup.
             </p>
-            <p className="text-xs text-gray-600 mt-4">5.0 ★ on Google · 27 reviews</p>
+            <p className="text-xs text-gray-600 mt-4">5.0 ★ on Google · 29 reviews</p>
           </div>
 
           {/* Col 2: Contact + address */}

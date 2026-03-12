@@ -1,9 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
+import { MapPin } from "lucide-react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PRODUCTS, PRODUCT_SLUGS } from "@/lib/data/products-content";
 import { PrintIcon } from "@/components/icons/PrintIcons";
+
+const PRODUCT_IMAGES: Record<string, string> = {
+  "coroplast-signs":     "/images/products/product/coroplast-yard-sign-800x600.webp",
+  "vinyl-banners":       "/images/products/product/banner-vinyl-colorful-800x600.webp",
+  "vehicle-magnets":     "/images/products/product/vehicle-magnets-800x600.webp",
+  "business-cards":      "/images/products/product/business-cards-800x600.webp",
+  "flyers":              "/images/products/product/flyers-stack-800x600.webp",
+  "acp-signs":           "/images/products/product/acp-aluminum-sign-800x600.webp",
+  "foamboard-displays":  "/images/products/product/foamboard-display-800x600.webp",
+  "window-decals":       "/images/products/product/vinyl-window-decal-storefront-800x600.webp",
+  "window-perf":         "/images/products/product/window-perf-800x600.webp",
+  "vinyl-lettering":     "/images/products/product/vinyl-lettering-800x600.webp",
+  "retractable-banners": "/images/products/product/retractable-stand-600x900.webp",
+  "stickers":            "/images/products/product/stickers-800x600.webp",
+  "postcards":           "/images/products/product/postcards-800x600.webp",
+  "brochures":           "/images/products/product/brochures-800x600.webp",
+  "photo-posters":       "/images/products/product/photo-posters-800x600.webp",
+  "magnet-calendars":    "/images/products/product/magnet-calendars-800x600.webp",
+};
 
 export const metadata: Metadata = {
   title: "Get a Price | Instant Print Pricing Saskatoon",
@@ -33,33 +54,77 @@ export default function QuotePage() {
 
         {/* Product picker grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-16">
-          {PICKER_PRODUCTS.map((product) => (
-            <Link
-              key={product.slug}
-              href={`/products/${product.slug}`}
-              className="group relative flex flex-col items-center gap-3 p-6 border border-gray-100 rounded-2xl hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
-            >
-              {product.comingSoon && (
-                <span className="absolute top-2 right-2 text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase tracking-wide">
-                  Coming Soon
-                </span>
-              )}
-              <PrintIcon
-                slug={product.slug}
-                size={36}
-                className="text-[var(--brand)]"
-                aria-hidden={true}
-              />
-              <div>
-                <p className="font-bold text-[#1c1712] text-sm leading-tight">
-                  {product.name}
-                </p>
-                <p className={`text-xs font-semibold mt-1 ${product.comingSoon ? "text-amber-600" : "text-[#16C2F3]"}`}>
-                  {product.comingSoon ? "Coming Soon" : product.fromPrice}
-                </p>
-              </div>
-            </Link>
-          ))}
+          {PICKER_PRODUCTS.map((product) => {
+            const img = PRODUCT_IMAGES[product.slug];
+            return (
+              <Link
+                key={product.slug}
+                href={`/products/${product.slug}`}
+                className="group relative flex flex-col border border-gray-100 rounded-2xl overflow-hidden hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
+              >
+                {product.comingSoon ? (
+                  /* Coming soon: icon-only layout */
+                  <div className="flex flex-col items-center gap-3 p-6">
+                    <span className="absolute top-2 right-2 text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                      Coming Soon
+                    </span>
+                    <PrintIcon
+                      slug={product.slug}
+                      size={36}
+                      className="text-[var(--brand)]"
+                      aria-hidden={true}
+                    />
+                    <div>
+                      <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                        {product.name}
+                      </p>
+                      <p className="text-xs font-semibold mt-1 text-gray-300">—</p>
+                    </div>
+                  </div>
+                ) : img ? (
+                  /* Photo-first card */
+                  <>
+                    <div className="relative h-32 w-full">
+                      <Image
+                        src={img}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                        loading="lazy"
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                        {product.name}
+                      </p>
+                      <p className="text-xs font-semibold mt-1 text-[#16C2F3]">
+                        {product.fromPrice}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  /* Fallback: icon-only (slug has no image) */
+                  <div className="flex flex-col items-center gap-3 p-6">
+                    <PrintIcon
+                      slug={product.slug}
+                      size={36}
+                      className="text-[var(--brand)]"
+                      aria-hidden={true}
+                    />
+                    <div>
+                      <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                        {product.name}
+                      </p>
+                      <p className="text-xs font-semibold mt-1 text-[#16C2F3]">
+                        {product.fromPrice}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Not sure section */}
@@ -85,8 +150,9 @@ export default function QuotePage() {
               Email us
             </a>
           </div>
-          <p className="text-xs text-gray-400 mt-4">
-            📍 Walk-ins welcome · 216 33rd St W (upstairs), Saskatoon
+          <p className="text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
+            <MapPin size={14} aria-hidden="true" />
+            Walk-ins welcome · 216 33rd St W (upstairs), Saskatoon
           </p>
         </div>
       </main>

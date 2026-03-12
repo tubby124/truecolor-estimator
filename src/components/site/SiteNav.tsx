@@ -373,7 +373,7 @@ export function SiteNav() {
               href="/quote"
               className="sm:hidden bg-[#16C2F3] text-white text-xs font-bold px-3 py-2 rounded-md whitespace-nowrap"
             >
-              Price →
+              Get Price →
             </Link>
 
             {/* Hamburger — mobile only */}

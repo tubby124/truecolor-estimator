@@ -4,6 +4,25 @@ import { Check } from "lucide-react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
+const INDUSTRY_PRODUCT_IMAGES: Record<string, string> = {
+  "vinyl-banners":       "/images/products/product/banner-vinyl-colorful-800x600.webp",
+  "coroplast-signs":     "/images/products/product/coroplast-yard-sign-800x600.webp",
+  "vehicle-magnets":     "/images/products/product/vehicle-magnets-800x600.webp",
+  "acp-signs":           "/images/products/product/acp-aluminum-sign-800x600.webp",
+  "flyers":              "/images/products/product/flyers-stack-800x600.webp",
+  "business-cards":      "/images/products/product/business-cards-800x600.webp",
+  "foamboard-displays":  "/images/products/product/foamboard-display-800x600.webp",
+  "retractable-banners": "/images/products/product/retractable-stand-600x900.webp",
+  "window-decals":       "/images/products/product/vinyl-window-decal-storefront-800x600.webp",
+  "window-perf":         "/images/products/product/window-perf-800x600.webp",
+  "vinyl-lettering":     "/images/products/product/vinyl-lettering-800x600.webp",
+  "stickers":            "/images/products/product/stickers-800x600.webp",
+  "postcards":           "/images/products/product/postcards-800x600.webp",
+  "brochures":           "/images/products/product/brochures-800x600.webp",
+  "photo-posters":       "/images/products/product/photo-posters-800x600.webp",
+  "magnet-calendars":    "/images/products/product/magnet-calendars-800x600.webp",
+};
+
 export interface IndustryProduct {
   name: string;
   from: string;
@@ -116,7 +135,13 @@ export function IndustryPage({
           <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-2">
             {title}
           </h1>
-          <p className="text-gray-200 text-base md:text-lg">{subtitle}</p>
+          <p className="text-gray-200 text-base md:text-lg mb-4">{subtitle}</p>
+          <Link
+            href={ctaHref}
+            className="inline-block bg-[#16C2F3] text-white font-bold px-8 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors"
+          >
+            Get My Price →
+          </Link>
         </div>
       </section>
 
@@ -137,22 +162,39 @@ export function IndustryPage({
           <h2 className="text-2xl font-bold text-[#1c1712] mb-6">
             What you need
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {products.map((p) => (
-              <Link
-                key={p.slug}
-                href={`/products/${p.slug}`}
-                className="group border border-gray-100 rounded-xl p-5 hover:shadow-xl hover:border-transparent hover:ring-1 hover:ring-[#16C2F3]/30 transition-all duration-200"
-              >
-                <p className="font-bold text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
-                  {p.name}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">{p.from}</p>
-                <p className="text-[#16C2F3] text-sm mt-3 font-semibold group-hover:underline">
-                  See price →
-                </p>
-              </Link>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {products.map((p) => {
+              const img = INDUSTRY_PRODUCT_IMAGES[p.slug];
+              return (
+                <Link
+                  key={p.slug}
+                  href={`/products/${p.slug}`}
+                  className="group border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl hover:border-transparent hover:ring-1 hover:ring-[#16C2F3]/30 transition-all duration-200"
+                >
+                  {img && (
+                    <div className="relative h-28 w-full">
+                      <Image
+                        src={img}
+                        alt={p.name}
+                        fill
+                        className="object-cover"
+                        loading="lazy"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <p className="font-bold text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
+                      {p.name}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">{p.from}</p>
+                    <p className="text-[#16C2F3] text-sm mt-3 font-semibold group-hover:underline">
+                      See price →
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -164,7 +206,7 @@ export function IndustryPage({
           <ul className="space-y-3">
             {whyPoints.map((point) => (
               <li key={point} className="flex items-start gap-3 text-gray-700">
-                <Check className="w-4 h-4 text-[#e63020] shrink-0 mt-1" strokeWidth={2.5} />
+                <Check className="w-4 h-4 text-[#16C2F3] shrink-0 mt-1" strokeWidth={2.5} />
                 <span>{point}</span>
               </li>
             ))}
