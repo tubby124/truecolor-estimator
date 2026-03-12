@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Election Signs Saskatoon | From $8/sqft | True Color" },
   description:
-    "Coroplast election yard signs in Saskatoon and Saskatchewan. Volume pricing from $7.25/sqft (32+ sqft). H-stakes $2.50 each. Double-sided available. Call (306) 954-8688.",
+    "Coroplast election yard signs in Saskatoon and Saskatchewan. Volume pricing from $7.25/sqft (32+ sqft). H-stakes $3 each. Double-sided available. Call (306) 954-8688.",
   alternates: { canonical: "/election-signs" },
   openGraph: {
     title: "Election Signs Saskatoon | True Color",
@@ -26,7 +26,7 @@ export default function ElectionSignsPage() {
       subtitle="Volume pricing. Fast turnaround. No runaround."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Election campaign coroplast yard signs Saskatoon"
-      description="Campaign timing is everything. True Color prints coroplast yard signs with volume pricing — no corporate account, no broker markup. Tier 3 pricing kicks in at 32+ sqft, which is just 10 signs at 24×36 in. H-stakes at $2.50 each. Consistent color across every single sign."
+      description="Coroplast election yard signs start at $8/sqft at True Color Display Printing in Saskatoon, Saskatchewan — a standard 24×36 inch campaign sign is $48 single-sided. Campaign timing is everything, and we print election signs in-house on our Roland UV printer with 1–3 business day turnaround. Volume pricing kicks in automatically with no corporate account or broker markup: Tier 2 at 12–32 sqft ($7.50/sqft) and Tier 3 at 32+ sqft ($7.25/sqft) — that's only 10 signs at 24×36 inches to qualify for the best rate. Double-sided coroplast is available for corner lots and high-visibility intersections at $14/sqft single sign, $13.13/sqft at Tier 2, and $12.69/sqft at Tier 3. H-stakes are $3 each for installation on lawns and boulevards. For bulk orders, quantity discounts stack on top of tier pricing: 5+ signs save 8%, 10+ save 17%, 25+ save 23%. The standard election sign size across Saskatchewan is 24×36 inches — visible from the road, fits standard H-stakes, and is large enough for a candidate's name, party colours, and riding information. For smaller residential lawns, 18×24 inch signs at $24 each work well. For high-traffic intersections and building lot corners, 4×8 ft coroplast signs at $232 are impossible to miss. Vehicle magnets for campaign vehicles start at $45 on 30mil stock — rated for highway speeds and removable without damaging paint. Business cards for campaign volunteers and door-knocking teams start at 250 for $40. Flyers for policy platforms and riding-specific messaging are available from $45 for 100 copies on 80lb gloss. Our in-house designer handles layouts from your party logo, candidate photo, and campaign colours for $35 flat with same-day proof. Same-day rush printing is available for +$40 flat on orders placed before 10 AM — call (306) 954-8688 to confirm capacity. When the writ drops, we can have your first batch of signs ready within 24 hours. True Color ships election signs across Saskatchewan — Saskatoon, Regina, Prince Albert, Moose Jaw, North Battleford, Yorkton, Swift Current, and rural ridings. Local Saskatoon pickup at 216 33rd St W."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -43,9 +43,16 @@ export default function ElectionSignsPage() {
             Our Roland UV printer produces consistent, vibrant colour across every sign in your run.
             Tier 3 pricing ($7.25/sqft) applies at 32+ sqft total — that&apos;s only 10 signs at
             24×36&quot;. Double-sided coroplast is available for corner lots and high-visibility
-            intersections. H-stakes are $2.50 each. Vehicle magnets for campaign vehicles start
-            at $45. All materials are weather-resistant and UV-stable —
-            they hold colour through a Saskatchewan summer.
+            intersections. H-stakes are $3 each.{" "}
+            <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Vehicle magnets
+            </Link>{" "}
+            for campaign vehicles start at $45.{" "}
+            <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Business cards
+            </Link>{" "}
+            for door-knocking teams start at 250 for $40. All materials are weather-resistant
+            and UV-stable — they hold colour through a Saskatchewan summer.
           </p>
           <p className="text-gray-600 leading-relaxed">
             When the writ drops, turnaround time matters. Standard is 1–3 business days after
@@ -60,8 +67,10 @@ export default function ElectionSignsPage() {
       }
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
-        { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
-        { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
+        { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
+        { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
+        { name: "Business Cards", from: "250 from $40", slug: "business-cards" },
+        { name: "Flyers", from: "100 from $45", slug: "flyers" },
       ]}
       whyPoints={[
         "Volume discount at 32+ sqft — 10 signs of 24×36\" qualifies for $7.25/sqft",
@@ -94,6 +103,14 @@ export default function ElectionSignsPage() {
         {
           q: "Can you deliver election signs to other Saskatchewan cities?",
           a: "Yes — True Color Display Printing ships to customers across Saskatchewan. Shipping cost is the customer's responsibility. For large runs going to multiple cities, call (306) 954-8688 to discuss logistics before ordering.",
+        },
+        {
+          q: "How much do vehicle magnets cost for campaign cars in Saskatoon?",
+          a: "30mil vehicle magnets start at $45 per magnet at True Color Display Printing. A standard 12×18 inch door magnet is $45–60, a 12×24 inch pair runs $60–80. They're rated for highway speeds and remove cleanly without damaging paint — ideal for campaign vehicles that go back to personal use after election day. Bring your candidate's logo or we design from scratch for $35.",
+        },
+        {
+          q: "Can you print campaign flyers and business cards for door-knocking teams?",
+          a: "Yes — 80lb gloss flyers for policy platforms start at 100 for $45 (2-sided, 8.5×11 inch). Business cards for campaign volunteers start at 250 for $40 on 14pt gloss. For larger runs, 1000 flyers are $185 and 1000 business cards are $110. Our in-house designer handles the layout from your party branding for $35 flat with same-day proof.",
         },
       ]}
     />

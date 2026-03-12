@@ -21,14 +21,27 @@ const descriptionNode = (
   <>
     <p className="text-gray-600 text-lg leading-relaxed mb-10">
       Saskatoon clinics, medical offices, dental practices, and wellness centres rely on True
-      Color for signage that&apos;s clean, professional, and easy to update. ACP aluminum panels
-      for building directories and room signs. Foam board displays for waiting room education.
-      Vinyl banners for seasonal health programs and grand openings. Retractable stands for
-      health fairs and community events. We print in-house, control quality start to finish,
+      Color for signage that&apos;s clean, professional, and easy to update.{" "}
+      <Link href="/aluminum-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+        ACP aluminum panels
+      </Link>{" "}
+      for building directories and room signs.{" "}
+      <Link href="/foamboard-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+        Foam board displays
+      </Link>{" "}
+      for waiting room education.{" "}
+      <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+        Vinyl banners
+      </Link>{" "}
+      for seasonal health programs and grand openings.{" "}
+      <Link href="/retractable-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
+        Retractable stands
+      </Link>{" "}
+      for health fairs and community events. We print in-house, control quality start to finish,
       and deliver locally — no shipping delays when your waiting room signage needs to be ready
       for Monday.{" "}
       Running a dental practice?{" "}
-      <Link href="/dental-office-signs-saskatoon" className="text-[#16C2F3] underline">
+      <Link href="/dental-office-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
         See our dedicated dental office signs page
       </Link>{" "}
       for business cards, ACP suite signs, and same-day turnaround for new associates.
@@ -191,7 +204,7 @@ export default function HealthcareSignsSaskatoonPage() {
       subtitle="Clinic signage, wayfinding, and patient-facing displays. Professional and compliant."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Healthcare clinic signs and wayfinding printed in Saskatoon by True Color Display Printing"
-      description="Saskatoon clinics, medical offices, dental practices, and wellness centres rely on True Color for signage that's clean, professional, and easy to update. ACP aluminum panels for building directories and room signs. Foam board displays for waiting room education. Vinyl banners for seasonal health programs and grand openings. Retractable stands for health fairs and community events. We print in-house, control quality start to finish, and deliver locally — no shipping delays when your waiting room signage needs to be ready for Monday."
+      description="ACP aluminum clinic signs start at $13/sqft at True Color Display Printing in Saskatoon, Saskatchewan — a 24×18 inch exterior suite sign is $39, a 24×36 inch building directory panel is $66 + GST. Saskatoon clinics, medical offices, dental practices, physiotherapy centres, and wellness studios rely on True Color for signage that's clean, professional, and easy to update. We print everything in-house on our Roland UV printer — no outsourcing, no courier delays, and consistent colour that matches your brand guide exactly. ACP aluminum composite panels are the standard for permanent building directories and room identification signs: rigid, weather-resistant, and lasting 10+ years without fading or warping. For multi-tenant medical buildings, we size directory panels to your specific entrance layout. Foam board displays start at $10/sqft with a $45 minimum — a 24×36 inch panel is $65, perfect for waiting room patient education, seasonal health messaging like flu shot reminders, and exam room information boards. Foam board is lightweight enough to hang with adhesive strips or stand on a tabletop easel, and inexpensive enough to reprint seasonally when your messaging changes. Vinyl banners from $8.25/sqft work for grand opening announcements, seasonal flu shot clinics, new service launches, and community health fair backdrops — a 3×8 ft vinyl banner for a clinic exterior is $180. Retractable banner stands are $219 complete including the full-colour print — ideal for health fairs, community wellness events, dental association conferences, and reception area new-patient promotions. Window decals for clinic hours, branding, and seasonal messages start at $11/sqft with a $45 minimum. Business cards for medical professionals start at 250 for $40 on 14pt gloss — new associate joining the practice? Cards are ready in 24–48 hours. Flyers for patient education handouts and new service announcements are available from $45 for 100 copies on 80lb gloss. Postcards for appointment reminders and direct mail start at 50 for $40. Our in-house designer creates accessible, high-contrast signage layouts from your clinic's brand guide for $35 flat with same-day proof — no outside designer, no delays. Same-day rush printing is available for +$40 flat on orders placed before 10 AM — call (306) 954-8688 when your waiting room signage needs to be ready by Monday opening. Standard turnaround is 1–3 business days after artwork approval. We keep your artwork on file for fast seasonal updates and reorders. Local Saskatoon pickup at 216 33rd St W, Saskatchewan."
       descriptionNode={descriptionNode}
       products={[
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
@@ -233,6 +246,14 @@ export default function HealthcareSignsSaskatoonPage() {
         {
           q: "What is your turnaround time for clinic signage?",
           a: "Standard turnaround is 1–3 business days after artwork approval. Same-day rush is +$40 flat if ordered before 10 AM — call (306) 954-8688 to confirm availability.",
+        },
+        {
+          q: "How much do business cards for healthcare professionals cost in Saskatoon?",
+          a: "Business cards start at 250 for $40 (14pt gloss, single-sided) or $45 for double-sided at True Color Display Printing. 500 cards are $65 (2-sided), 1000 cards are $110. New associate joining the clinic? We print cards in 24–48 hours — Staples quotes 5 business days. We keep each provider's file on record so reorders are fast.",
+        },
+        {
+          q: "Can you print patient education flyers and appointment reminder postcards?",
+          a: "Yes — 80lb gloss flyers for patient handouts and clinic newsletters start at 100 for $45 (2-sided, 8.5×11 inch). Postcards for appointment reminders and direct mail to surrounding neighbourhoods start at 50 for $40 on 14pt gloss (4×6 inch, always double-sided). Our in-house designer creates the layout from your branding for $35 flat with same-day proof.",
         },
       ]}
     />

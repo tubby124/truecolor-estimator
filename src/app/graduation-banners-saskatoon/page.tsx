@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -35,12 +36,20 @@ export default function GraduationBannersPage() {
       subtitle="Vinyl banners, foam board photo displays, and retractable stands for Saskatoon schools, universities, and event venues — don't risk a shipping delay before grad day."
       heroImage="/images/seasonal/graduation/hero.webp"
       heroAlt="Graduation banners and foam board photo displays printed in Saskatoon by True Color Display Printing"
-      description="True Color Display Printing produces vinyl graduation banners, foam board photo displays, and retractable banner stands for Saskatoon schools, universities, and event venues. We serve all levels — elementary and high school graduation ceremonies, university and college convocation events, and private graduation parties. A 2×6 ft grad banner is $90 + GST. A 4×8 ft convocation banner is $240 + GST. Foam board display panels from $10/sqft. Retractable banner stand complete from $219 + GST. Standard turnaround: 1–3 business days from artwork approval. Same-day rush: +$40 flat, order before 10 AM. In-house Roland UV printer. Local pickup at 216 33rd St W, Saskatoon, Saskatchewan."
+      description="Vinyl graduation banners start at $90 for a 2×6 ft banner at True Color Display Printing in Saskatoon, Saskatchewan — printed in-house on our Roland UV printer with hemming and grommets included. We produce graduation signage for elementary schools, high schools, universities, colleges, and private grad parties across Saskatoon and surrounding Saskatchewan communities. A 4×8 ft convocation banner for a gymnasium entrance or outdoor ceremony is $240 + GST — the most popular size for Saskatoon high school and U of S graduation events. Foam board photo displays start at $10/sqft with a $45 minimum — a 24×36 inch panel is $65, perfect for table centrepieces with the graduate's name, photo, and year. Retractable banner stands are $219 complete including the full-colour print — no separate graphic fee — and work as step-and-repeat photo backdrops, event entrance displays, and reception area signage. For schools ordering multiple banners, volume discounts apply automatically at 5+ units (8% off) and 10+ units (17% off). Our in-house designer creates custom layouts from your school crest, colours, and grad year for $35 flat with a same-day proof — no outside designer needed, no back-and-forth delays. Same-day rush printing is available for +$40 flat on orders placed before 10 AM — call (306) 954-8688 to confirm capacity. Standard turnaround is 1–3 business days after artwork approval. For June graduation season, order by late May to avoid peak volume. True Color prints everything in-house at 216 33rd St W, Saskatoon — no shipping from Toronto or Vancouver, no courier delays, no risk of your banner arriving after the ceremony. Whether you need a single banner for a backyard grad party or 20 banners for a school district, we handle the full run with consistent colour and quality across every piece. Flyers and programs for graduation ceremonies are available from $45 for 100 copies on 80lb gloss. Business cards for graduating students entering the workforce start at 250 for $40. Local pickup means you drive across town and pick up your order — not waiting by the mailbox hoping it arrives in time."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-10">
-            True Color Display Printing produces vinyl graduation banners, foam board photo backdrops,
-            and retractable banner stands for Saskatoon schools, universities, and event venues.
+            True Color Display Printing produces{" "}
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              vinyl graduation banners
+            </Link>
+            , foam board photo backdrops,
+            and{" "}
+            <Link href="/retractable-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
+              retractable banner stands
+            </Link>{" "}
+            for Saskatoon schools, universities, and event venues.
             We serve all levels — elementary and high school ceremonies, university convocation at the
             U of S or SIAST, and private grad parties across Saskatoon, Saskatchewan. Bring your school
             colours and grad year — our in-house designer handles the layout. Local pickup at
@@ -90,7 +99,11 @@ export default function GraduationBannersPage() {
             4×8 ft ($240 + GST) — large enough to read from across a parking lot and weatherproof for
             outdoor use. For photo opportunity backdrops and step-and-repeat walls, a 4×8 ft vinyl banner
             on a retractable stand ($219 complete) is the go-to setup. For table centrepieces and
-            directional signs inside a venue, foam board panels ($10/sqft, 24×36&quot; = $65) are
+            directional signs inside a venue,{" "}
+            <Link href="/foamboard-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              foam board panels
+            </Link>{" "}
+            ($10/sqft, 24×36&quot; = $65) are
             lightweight and easy to position without hardware.
           </p>
 
@@ -101,7 +114,11 @@ export default function GraduationBannersPage() {
             National online printers ship from Toronto or Vancouver — a shipping delay means your banner
             arrives after the ceremony. True Color prints in-house in Saskatoon. Order by <strong>late
             May</strong> for June graduation season, and you pick it up locally with days to spare.
-            If you need it faster, same-day rush is available for +$40 flat — call (306) 954-8688
+            If you need it faster,{" "}
+            <Link href="/same-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              same-day rush printing
+            </Link>{" "}
+            is available for +$40 flat — call (306) 954-8688
             before 10 AM.
           </p>
         </>
@@ -150,6 +167,10 @@ export default function GraduationBannersPage() {
         {
           q: "Where can I get graduation banners printed same day in Saskatoon?",
           a: "True Color Display Printing at 216 33rd St W, Saskatoon, SK offers same-day rush printing for a flat $40 fee. Call (306) 954-8688 before 10 AM to confirm capacity. We print vinyl banners and foam board displays in-house on our Roland UV printer. Pickup is available the same business day — no shipping risk before your graduation ceremony.",
+        },
+        {
+          q: "Can you print graduation flyers, programs, and business cards for students?",
+          a: "Yes — graduation ceremony programs and event flyers are printed on 80lb gloss stock: 100 copies for $45 (2-sided), 250 for $110, 500 for $135. For graduating students entering the workforce, business cards start at 250 for $40 (14pt gloss, 2-sided). Our in-house designer can create layouts for $35 flat with same-day proof. Local pickup at 216 33rd St W, Saskatoon.",
         },
       ]}
     />

@@ -19,22 +19,43 @@ export const metadata: Metadata = {
 
 const descriptionNode = (
   <>
-    Saskatoon dental clinics rely on True Color for business cards, ACP suite signs, and
-    patient-facing displays. Multi-dentist practice? Order all your providers in one batch —
-    one proof per associate, one pickup, one invoice. New associate starting this week? We
-    print 250 cards in 24–48 hrs. Staples quotes 5 business days. For clinics in newer
-    suburban strips (Stonebridge, Evergreen, Brighton, McKercher), we size ACP signs to fit
-    your specific fascia slot — bring the measurements and we handle the rest. In-house
-    designer matches your existing brand colours exactly. Local pickup at 216 33rd St W.{" "}
-    See all{" "}
-    <Link href="/healthcare-signs-saskatoon" className="text-[#16C2F3] underline">
-      healthcare signage options
-    </Link>
-    {" "}or go straight to{" "}
-    <Link href="/products/business-cards" className="text-[#16C2F3] underline">
-      business card pricing
-    </Link>
-    .
+    <p className="text-gray-600 text-lg leading-relaxed mb-6">
+      Saskatoon dental clinics rely on True Color for{" "}
+      <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
+        business cards
+      </Link>
+      ,{" "}
+      <Link href="/aluminum-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+        ACP suite signs
+      </Link>
+      , and patient-facing displays. Multi-dentist practice? Order all your providers in one batch —
+      one proof per associate, one pickup, one invoice. New associate starting this week? We
+      print 250 cards in 24–48 hrs. Staples quotes 5 business days.
+    </p>
+    <p className="text-gray-600 text-lg leading-relaxed mb-6">
+      For clinics in newer suburban strips (Stonebridge, Evergreen, Brighton, McKercher), we size
+      ACP signs to fit your specific fascia slot — bring the measurements and we handle the rest.{" "}
+      <Link href="/retractable-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
+        Retractable banner stands
+      </Link>{" "}
+      from $219 complete work for new-patient promos at reception and community health fairs.{" "}
+      <Link href="/window-decals-saskatoon" className="text-[#16C2F3] underline font-medium">
+        Window decals
+      </Link>{" "}
+      for clinic hours and branding start at $11/sqft. In-house designer matches your existing brand
+      colours exactly. Local pickup at 216 33rd St W.
+    </p>
+    <p className="text-gray-600 text-lg leading-relaxed">
+      See all{" "}
+      <Link href="/healthcare-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+        healthcare signage options
+      </Link>
+      {" "}or go straight to{" "}
+      <Link href="/flyer-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+        flyer printing
+      </Link>{" "}
+      for patient welcome kits and dental health campaigns.
+    </p>
   </>
 );
 
@@ -47,7 +68,7 @@ export default function DentalOfficeSignsSaskatoonPage() {
       subtitle="New associate starting Monday? Cards done by Friday. Local Saskatoon pickup."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Business cards and signs for Saskatoon dental offices printed by True Color Display Printing"
-      description="Saskatoon dental clinics rely on True Color for business cards, ACP suite signs, and patient-facing displays. Multi-dentist practice? Order all your providers in one batch — one proof per associate, one pickup, one invoice. New associate starting this week? We print 250 cards in 24–48 hrs. Staples quotes 5 business days."
+      description="Business cards for Saskatoon dental offices start at 250 for $40 on 14pt gloss at True Color Display Printing — new associate starting this week? We print cards in 24–48 hours while Staples quotes 5 business days. Multi-dentist practice ordering for 4 providers? One batch, one proof per associate, one pickup at 216 33rd St W, one invoice. ACP aluminum suite signs from $13/sqft are the standard for dental clinic exteriors in Saskatoon strip malls — Stonebridge, Evergreen, Brighton, McKercher — and last 10+ years without fading or warping. A 24×18 inch exterior fascia sign is $39, a 24×36 inch building directory panel is $66. For waiting room displays and patient education signage, foam board prints start at $10/sqft with a $45 minimum — a 24×36 inch panel is $65, lightweight enough to hang or stand in a frame. Retractable banner stands from $219 complete work for new-patient promotions at reception, community health fairs, and dental association events. Window decals for clinic hours, branding, and seasonal promotions start at $11/sqft. Our in-house Roland UV printer produces consistent, accurate colour — bring your brand guide or a Pantone reference and we match it exactly. In-house designer handles layouts from your existing branding for $35 flat with same-day proof — no outside designer, no back-and-forth delays. Same-day rush printing is available for +$40 flat on orders placed before 10 AM — call (306) 954-8688 to confirm. Standard turnaround is 1–3 business days after artwork approval. We keep your artwork on file so reorders for new associates are fast — call with the quantity and we pull your file. Flyers for dental health campaigns and new patient welcome kits are available from $45 for 100 copies on 80lb gloss. Postcards for appointment reminders and direct mail start at 50 for $40 on 14pt stock. Local Saskatoon pickup at 216 33rd St W, Saskatchewan."
       descriptionNode={descriptionNode}
       products={[
         { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
@@ -89,6 +110,14 @@ export default function DentalOfficeSignsSaskatoonPage() {
         {
           q: "How do we reorder without re-uploading everything?",
           a: "We keep your artwork on file. Call or email with your order number and quantity — we pull your file and print. No re-uploading, no re-proofing unless something has changed (new associate, new phone number, new address).",
+        },
+        {
+          q: "How much do window decals for dental clinic hours cost in Saskatoon?",
+          a: "Window decals start at $11/sqft at True Color Display Printing with a $45 minimum. A typical clinic hours and logo decal (2×3 ft) runs about $66. Frosted privacy film and one-way window graphics are also available. Decals are removable without residue — easy to update when clinic hours change or a new associate joins.",
+        },
+        {
+          q: "Can you print patient flyers and appointment reminder postcards?",
+          a: "Yes — 80lb gloss flyers for dental health campaigns and new patient welcome kits start at 100 for $45 (2-sided). Postcards for appointment reminders and direct mail to surrounding neighbourhoods start at 50 for $40 on 14pt gloss (4×6 inch, always double-sided). Our in-house designer can create the layout from your branding for $35 flat.",
         },
       ]}
     />
