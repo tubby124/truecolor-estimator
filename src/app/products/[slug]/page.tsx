@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteNav } from "@/components/site/SiteNav";
@@ -6,7 +7,44 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { ProductPageClient } from "@/components/product/ProductPageClient";
 import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
-import { PrintIcon } from "@/components/icons/PrintIcons";
+
+// Product thumbnail images for "Customers also print" cards
+const PRODUCT_IMAGE_MAP: Record<string, string> = {
+  "vinyl-banners":       "/images/products/product/banner-vinyl-colorful-800x600.webp",
+  "coroplast-signs":     "/images/products/product/coroplast-yard-sign-800x600.webp",
+  "vehicle-magnets":     "/images/products/product/vehicle-magnets-800x600.webp",
+  "acp-signs":           "/images/products/product/acp-aluminum-sign-800x600.webp",
+  "flyers":              "/images/products/product/flyers-stack-800x600.webp",
+  "business-cards":      "/images/products/product/business-cards-800x600.webp",
+  "foamboard-displays":  "/images/products/product/foamboard-display-800x600.webp",
+  "retractable-banners": "/images/products/product/retractable-stand-600x900.webp",
+  "window-decals":       "/images/products/product/vinyl-window-decal-storefront-800x600.webp",
+  "window-perf":         "/images/products/product/window-perf-800x600.webp",
+  "vinyl-lettering":     "/images/products/product/vinyl-lettering-800x600.webp",
+  "stickers":            "/images/products/product/stickers-800x600.webp",
+  "postcards":           "/images/products/product/postcards-800x600.webp",
+  "brochures":           "/images/products/product/brochures-800x600.webp",
+  "photo-posters":       "/images/products/product/photo-posters-800x600.webp",
+  "magnet-calendars":    "/images/products/product/magnet-calendars-800x600.webp",
+};
+
+// Maps product calculator slug → SEO landing page (for internal link equity)
+const SEO_SLUG_MAP: Record<string, string> = {
+  "vinyl-banners":       "/banner-printing-saskatoon",
+  "coroplast-signs":     "/coroplast-signs-saskatoon",
+  "vehicle-magnets":     "/vehicle-magnets-saskatoon",
+  "acp-signs":           "/aluminum-signs-saskatoon",
+  "flyers":              "/flyer-printing-saskatoon",
+  "business-cards":      "/business-cards-saskatoon",
+  "foamboard-displays":  "/foamboard-printing-saskatoon",
+  "retractable-banners": "/retractable-banners-saskatoon",
+  "window-decals":       "/window-decals-saskatoon",
+  "vinyl-lettering":     "/vinyl-lettering-saskatoon",
+  "stickers":            "/sticker-printing-saskatoon",
+  "postcards":           "/postcard-printing-saskatoon",
+  "brochures":           "/brochure-printing-saskatoon",
+  "photo-posters":       "/photo-poster-printing-saskatoon",
+};
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -160,25 +198,33 @@ export default async function ProductPage({ params }: Props) {
         {related.length > 0 && (
           <div className="border-t border-gray-100 pt-10">
             <h2 className="text-xl font-bold text-[#1c1712] mb-6">Customers also print</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {related.map((r) => r && (
                 <Link
                   key={r.slug}
-                  href={`/products/${r.slug}`}
-                  className="group border border-gray-100 rounded-xl p-5 hover:border-[#16C2F3]/40 hover:shadow-md transition-all flex items-center gap-4"
+                  href={SEO_SLUG_MAP[r.slug] ?? `/products/${r.slug}`}
+                  className="group border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl hover:border-transparent hover:ring-1 hover:ring-[#16C2F3]/30 transition-all duration-200"
                 >
-                  <PrintIcon
-                    slug={r.slug}
-                    size={28}
-                    className="text-[var(--brand)] shrink-0"
-                    aria-hidden={true}
-                  />
-                  <div>
-                    <p className="font-bold text-[#1c1712] mb-1 group-hover:text-[#16C2F3] transition-colors">
+                  {PRODUCT_IMAGE_MAP[r.slug] && (
+                    <div className="relative h-28 w-full">
+                      <Image
+                        src={PRODUCT_IMAGE_MAP[r.slug]}
+                        alt={r.name}
+                        fill
+                        className="object-cover"
+                        loading="lazy"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <p className="font-bold text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
                       {r.name}
                     </p>
-                    <p className="text-sm text-gray-500">{r.fromPrice}</p>
-                    <p className="text-[#16C2F3] text-sm mt-1 group-hover:underline">See price →</p>
+                    <p className="text-sm text-gray-500 mt-1">{r.fromPrice}</p>
+                    <p className="text-[#16C2F3] text-sm mt-3 font-semibold group-hover:underline">
+                      See price →
+                    </p>
                   </div>
                 </Link>
               ))}
