@@ -676,7 +676,10 @@ export function OrdersTable({ initialOrders }: Props) {
                 }`}
               >
                 {/* ── Summary row ── */}
-                <div className={`p-5 ${order.is_archived ? "bg-gray-50" : order.is_rush ? "bg-orange-50" : "bg-white"}`}>
+                <div
+                  className={`p-5 cursor-pointer transition-colors ${order.is_archived ? "bg-gray-50 hover:bg-gray-100" : order.is_rush ? "bg-orange-50 hover:bg-orange-100" : "bg-white hover:bg-gray-50"}`}
+                  onClick={() => setExpandedId(isExpanded ? null : order.id)}
+                >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       {/* Badges */}
@@ -767,7 +770,7 @@ export function OrdersTable({ initialOrders }: Props) {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                       {nextStatus && !order.is_archived && (
                         confirmingComplete === order.id ? (
                           <>

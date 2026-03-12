@@ -136,7 +136,7 @@ export default async function ProductPage({ params }: Props) {
         </nav>
 
         {/* Interactive product layout — gallery + options + sticky price panel */}
-        <div className="mb-16">
+        <div className="mb-8">
           {product.comingSoon ? (
             <div className="border border-amber-200 bg-amber-50 rounded-2xl p-10 text-center">
               <span className="inline-block text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1 rounded-full uppercase tracking-wide mb-4">
@@ -152,7 +152,7 @@ export default async function ProductPage({ params }: Props) {
         </div>
 
         {/* Tabs: description, specs, FAQ */}
-        <div className="border-t border-gray-100 pt-10 mb-16">
+        <div className="border-t border-gray-100 pt-8 mb-16">
           <ProductAccordion product={product} />
         </div>
 

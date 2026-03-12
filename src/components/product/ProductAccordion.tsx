@@ -31,9 +31,9 @@ function ChevronIcon({ open }: { open: boolean }) {
 export function ProductAccordion({ product }: Props) {
   const [open, setOpen] = useState({
     about: true,
-    specs: true,
+    specs: false,
     who: false,
-    faq: true,
+    faq: false,
   });
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -148,9 +148,15 @@ export function ProductAccordion({ product }: Props) {
                   className="flex justify-between items-start cursor-pointer py-3 w-full text-left"
                 >
                   <span className="font-semibold text-[#1c1712] text-sm pr-4">{faq.q}</span>
-                  <span className="text-gray-400 text-base mt-0.5 shrink-0">
-                    {openFaq === i ? "▾" : "▸"}
-                  </span>
+                  <svg
+                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${openFaq === i ? "rotate-90" : ""}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
 
                 {openFaq === i && (

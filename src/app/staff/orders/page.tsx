@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/components/site/SiteFooter";
 import { createServiceClient } from "@/lib/supabase/server";
 import { OrdersTable } from "./OrdersTable";
 import { StaffOrdersActions } from "./StaffOrdersActions";
@@ -59,7 +58,9 @@ export default async function StaffOrdersPage() {
         )}
       </main>
 
-      <SiteFooter />
+      <footer className="border-t border-gray-100 py-5 text-center text-xs text-gray-400">
+        True Color Staff Portal · Internal use only
+      </footer>
     </div>
   );
 }
