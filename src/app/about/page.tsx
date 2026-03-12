@@ -137,6 +137,12 @@ export default function AboutPage() {
             employ our own designer, and do every order in-house — no outsourcing, no shipping
             middlemen, just faster turnaround and real accountability.
           </p>
+          <p className="text-gray-400 text-base max-w-2xl leading-relaxed mt-4">
+            Founded in Saskatoon in 2019, True Color has grown from a single-location shop on
+            Ontario Ave to its current home at 216 33rd St W. The shop runs a Roland TrueVIS VG2
+            wide-format UV printer and a Konica Minolta digital production press — both owned and
+            operated in-house by our team every day.
+          </p>
         </div>
       </section>
 
