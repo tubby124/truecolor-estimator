@@ -7,7 +7,14 @@ export const metadata: Metadata = {
   description:
     "Coroplast signs from $8/sqft, vinyl banners from $8.25/sqft, and flyers for Saskatoon K-12 schools, daycares & sports teams. Rush orders +$40. Local pickup.",
   alternates: {
-    canonical: "https://truecolorprinting.ca/school-signs-saskatoon",
+    canonical: "/school-signs-saskatoon",
+  },
+  openGraph: {
+    title: "School Signs Saskatoon | True Color Display Printing",
+    description:
+      "Coroplast signs from $8/sqft, vinyl banners from $8.25/sqft, and flyers for Saskatoon K-12 schools, daycares & sports teams. Rush orders +$40. Local pickup.",
+    url: "https://truecolorprinting.ca/school-signs-saskatoon",
+    type: "website",
   },
 };
 

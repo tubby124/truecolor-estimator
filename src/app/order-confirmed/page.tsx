@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { createServiceClient } from "@/lib/supabase/server";
 import { AccountSignupCard } from "@/components/site/AccountSignupCard";
 import { PurchaseEvent } from "@/app/order-confirmed/PurchaseEvent";
+import { REVIEW_COUNT } from "@/lib/reviews";
 
 export const metadata: Metadata = {
   title: "Order Confirmed — True Color",
@@ -210,7 +211,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         {/* Google Review CTA — highest-intent moment */}
         <div className="mb-8 p-5 bg-yellow-50 border border-yellow-200 rounded-2xl text-center">
           <p className="text-sm font-semibold text-yellow-900 mb-1">Happy with your experience?</p>
-          <p className="text-xs text-yellow-700 mb-3">27 Saskatoon businesses already left us a review. Takes 30 seconds.</p>
+          <p className="text-xs text-yellow-700 mb-3">{REVIEW_COUNT} Saskatoon businesses already left us a review. Takes 30 seconds.</p>
           <a
             href="https://g.page/r/CZH6HlbNejQAEAE/review"
             target="_blank"

@@ -8,6 +8,7 @@ import { GalleryStrip } from "@/components/home/GalleryStrip";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { LocalShopSection } from "@/components/home/LocalShopSection";
 import { ScrollRevealInit } from "@/components/home/ScrollRevealInit";
+import { REVIEW_COUNT } from "@/lib/reviews";
 import { StatCounter } from "@/components/home/StatCounter";
 import { SameDayClock } from "@/components/home/SameDayClock";
 import { MobileStickyBar } from "@/components/home/MobileStickyBar";
@@ -242,7 +243,7 @@ export default function HomePage() {
               <svg className="w-5 h-5 text-yellow-400 fill-yellow-400 shrink-0" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
-              <span className="font-medium text-gray-700">5.0 stars · 29 reviews</span>
+              <span className="font-medium text-gray-700">5.0 stars · {REVIEW_COUNT} reviews</span>
             </span>
             <span className="reveal-section delay-1 flex items-center gap-2.5 whitespace-nowrap">
               <svg className="w-5 h-5 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

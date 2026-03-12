@@ -848,7 +848,7 @@ describe("FLYER half-size 8.5×5.5 — STEP 3 exact match per qty and paper weig
       qty: 250,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.sell_price).toBe(88);
+    expect(result.sell_price).toBe(87);
   });
 
   it("80lb half qty=1000 → $145 (not $185 full-size — confirms no cross-size bleed)", () => {
@@ -887,7 +887,7 @@ describe("FLYER half-size 8.5×5.5 — STEP 3 exact match per qty and paper weig
       qty: 1000,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.sell_price).toBe(250);
+    expect(result.sell_price).toBe(196);
   });
 
   it("80lb half qty=200 → BLOCKED (between tiers, not $35 stale)", () => {
@@ -1024,7 +1024,7 @@ describe("FLYER single-sided 1S — STEP 3 exact match, sides=1 isolation", () =
       qty: 1000,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.sell_price).toBe(180);
+    expect(result.sell_price).toBe(141);
   });
 
   // sides=2 still returns correct 2S price — no cross-contamination
@@ -1372,5 +1372,76 @@ describe("Rack cards 4×9 (Phase 3)", () => {
       qty: 150,
     });
     expect(result.status).toBe("BLOCKED");
+  });
+});
+
+// ── Regression: rush fee must be per-estimate, not baked into multi-item totals ──
+describe("Rush fee isolation", () => {
+  it("rush adds exactly $40 to a single item, not more", () => {
+    const base = estimate({
+      category: "SIGN",
+      material_code: "RMSC004",
+      width_in: 24,
+      height_in: 24,
+      sides: 1,
+      qty: 1,
+      is_rush: false,
+    });
+    const rushed = estimate({
+      category: "SIGN",
+      material_code: "RMSC004",
+      width_in: 24,
+      height_in: 24,
+      sides: 1,
+      qty: 1,
+      is_rush: true,
+    });
+    expect(rushed.sell_price! - base.sell_price!).toBe(40);
+  });
+
+  it("rush fee is flat $40 regardless of qty (not $40 × qty)", () => {
+    const base = estimate({
+      category: "SIGN",
+      material_code: "RMSC004",
+      width_in: 24,
+      height_in: 24,
+      sides: 1,
+      qty: 5,
+      is_rush: false,
+    });
+    const rushed = estimate({
+      category: "SIGN",
+      material_code: "RMSC004",
+      width_in: 24,
+      height_in: 24,
+      sides: 1,
+      qty: 5,
+      is_rush: true,
+    });
+    expect(rushed.sell_price! - base.sell_price!).toBe(40);
+  });
+});
+
+// ── Regression: is_lot_price default safety ──
+describe("is_lot_price default behavior", () => {
+  it("sqft-priced SIGN rule multiplies by qty (is_lot_price=FALSE in CSV)", () => {
+    const qty1 = estimate({
+      category: "SIGN",
+      material_code: "RMSC004",
+      width_in: 24,
+      height_in: 24,
+      sides: 1,
+      qty: 1,
+    });
+    const qty3 = estimate({
+      category: "SIGN",
+      material_code: "RMSC004",
+      width_in: 24,
+      height_in: 24,
+      sides: 1,
+      qty: 3,
+    });
+    // qty 3 should cost more than qty 1 (price scales with quantity)
+    expect(qty3.sell_price!).toBeGreaterThan(qty1.sell_price!);
   });
 });

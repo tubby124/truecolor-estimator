@@ -1,6 +1,7 @@
 "use client";
 
 import { CustomerProof } from "@/components/product/CustomerProof";
+import { REVIEW_COUNT } from "@/lib/reviews";
 import type { Category } from "@/lib/data/types";
 import type { LineItem } from "@/lib/cart/cart";
 import { motion, AnimatePresence } from "motion/react";
@@ -186,7 +187,7 @@ export function PriceSummary({
             className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
           >
             <span className="text-yellow-400 tracking-tight">★★★★★</span>
-            <span>5.0 · 27 local Google reviews</span>
+            <span>5.0 · {REVIEW_COUNT} local Google reviews</span>
           </a>
         )}
 

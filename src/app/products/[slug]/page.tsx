@@ -74,7 +74,7 @@ export default async function ProductPage({ params }: Props) {
     "@type": "Product",
     name: product.name,
     description: product.tagline,
-    image: product.heroImage,
+    image: `https://truecolorprinting.ca${product.heroImage}`,
     brand: { "@type": "Brand", name: "True Color Display Printing" },
     offers: {
       "@type": "Offer",

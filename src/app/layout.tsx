@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { BackToTop } from "@/components/site/BackToTop";
+import { REVIEW_COUNT } from "@/lib/reviews";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -122,7 +123,7 @@ const localBusinessSchema = {
   aggregateRating: {
     "@type": "AggregateRating",
     ratingValue: "5.0",
-    reviewCount: "29",
+    reviewCount: String(REVIEW_COUNT),
     bestRating: "5",
     worstRating: "1",
   },

@@ -52,8 +52,13 @@ const RUSH_FEE = 40;
  *
  * If the engine can't price an item (BLOCKED/NEEDS_CLARIFICATION), the client price
  * is accepted with a warning logged — handles custom/unusual items gracefully.
+ *
+ * NOTE: is_rush is intentionally NOT passed to the engine here. Rush is a flat $40
+ * per-order fee applied at the order level (line 246), not per-item. Passing is_rush
+ * to estimate() would add $40 to EACH item's sell_price, then the order-level rush
+ * would add another $40, resulting in overcharging.
  */
-function revalidateItemPrices(items: CartItem[], is_rush: boolean): CartItem[] {
+function revalidateItemPrices(items: CartItem[]): CartItem[] {
   return items.map((item) => {
     try {
       const result = estimate({
@@ -65,7 +70,7 @@ function revalidateItemPrices(items: CartItem[], is_rush: boolean): CartItem[] {
         qty: item.qty,
         addons: item.config.addons as Parameters<typeof estimate>[0]["addons"],
         design_status: item.config.design_status as Parameters<typeof estimate>[0]["design_status"],
-        is_rush,
+        is_rush: false,
       });
 
       if (result.status === "QUOTED" && result.sell_price != null) {
@@ -137,7 +142,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Server-side price revalidation (prevents price manipulation attacks) ──
-    const items = revalidateItemPrices(rawItems, is_rush);
+    const items = revalidateItemPrices(rawItems);
 
     const supabase = createServiceClient();
 

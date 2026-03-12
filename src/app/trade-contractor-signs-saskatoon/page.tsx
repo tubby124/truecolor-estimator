@@ -7,7 +7,14 @@ export const metadata: Metadata = {
   description:
     "Vehicle magnets from $45, yard signs from $24, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40. Roland UV printed.",
   alternates: {
-    canonical: "https://truecolorprinting.ca/trade-contractor-signs-saskatoon",
+    canonical: "/trade-contractor-signs-saskatoon",
+  },
+  openGraph: {
+    title: "Trade Contractor Signs Saskatoon | True Color Display Printing",
+    description:
+      "Vehicle magnets from $45, yard signs from $24, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40.",
+    url: "https://truecolorprinting.ca/trade-contractor-signs-saskatoon",
+    type: "website",
   },
 };
 

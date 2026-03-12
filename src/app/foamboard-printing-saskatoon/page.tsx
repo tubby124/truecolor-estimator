@@ -7,7 +7,14 @@ export const metadata: Metadata = {
   description:
     "Foam board printing in Saskatoon from $45 for 18×24\". Sharp edges, 5mm foam, lightweight indoor display. Offices, retail, events & trade shows. Rush +$40.",
   alternates: {
-    canonical: "https://truecolorprinting.ca/foamboard-printing-saskatoon",
+    canonical: "/foamboard-printing-saskatoon",
+  },
+  openGraph: {
+    title: "Foam Board Printing Saskatoon | True Color Display Printing",
+    description:
+      "Foam board printing in Saskatoon from $45 for 18×24\". Sharp edges, 5mm foam, lightweight indoor display. Offices, retail, events & trade shows. Rush +$40.",
+    url: "https://truecolorprinting.ca/foamboard-printing-saskatoon",
+    type: "website",
   },
 };
 
