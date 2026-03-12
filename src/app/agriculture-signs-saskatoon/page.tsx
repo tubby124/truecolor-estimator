@@ -25,11 +25,16 @@ export default function AgriculturePage() {
       subtitle="From farm gates to trade shows — printed in Saskatoon."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Saskatchewan farm and agriculture signs"
-      description="Saskatchewan agriculture businesses use True Color for everything from acreage markers and gate signs to trade show banners and business cards. We understand prairie conditions — our products are built to handle Saskatchewan weather year-round."
+      description="Saskatchewan agriculture businesses use True Color Display Printing for everything from coroplast farm gate signs and acreage markers to trade show banners and truck door magnets. Our in-house Roland UV printer produces weatherproof signage that handles prairie winters, spring mud, and summer sun without fading or peeling. Coroplast signs start at $30 — the standard for field plot markers, for-sale signs, and gate identification across Saskatchewan farmland. Vinyl banners from $45 work for Agribition booths, dealer days, and seasonal promotions. Vehicle magnets from $45 turn farm trucks and equipment sales vehicles into mobile advertising across rural Saskatchewan. Business cards at 250 for $45 keep ag reps, seed dealers, and farm owners professional at every handshake. Flyers from $45 and postcards from $35 handle seed catalogs, seasonal direct mail, and co-op promotions. For permanent signage at farm entrances and rural businesses, ACP aluminum signs from $60 last indefinitely in any weather. Window decals from $45 and vinyl lettering from $40 brand co-op storefronts and dealership windows. Equipment branding stickers start at $95 for 25 die-cut vinyl stickers. Our in-house designer handles layout for $35 flat with same-day proof — bring your farm logo or have us create one. Same-day rush is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Local Saskatoon pickup at 216 33rd St W means no shipping delays before the season starts."
       products={[
         { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
-        { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
+        { name: "Vinyl Banners", from: "from $45", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
+        { name: "Flyers", from: "from $45", slug: "flyers" },
+        { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-signs" },
+        { name: "Window Decals", from: "from $45", slug: "window-decals" },
+        { name: "Stickers", from: "from $95", slug: "stickers" },
       ]}
       whyPoints={[
         "Outdoor-rated coroplast and ACP signs that handle prairie winters",
@@ -62,6 +67,14 @@ export default function AgriculturePage() {
         {
           q: "What's your turnaround before the seeding season rush?",
           a: "Standard is 1–3 business days after artwork approval. If you need signs before the season starts, order early — March and April get busy. Same-day rush is available for +$40 flat on most orders placed before 10 AM.",
+        },
+        {
+          q: "Do you print stickers and labels for farm equipment and packaging?",
+          a: "Yes — die-cut vinyl stickers printed on our Roland UV printer. 25 stickers from $95, 100 from $160. Waterproof and UV-resistant. Common uses: equipment branding, seed bag labels, and product packaging stickers.",
+        },
+        {
+          q: "Can you print business cards and flyers for ag businesses?",
+          a: "Yes — business cards at 250 for $45 on 14pt gloss stock. Flyers from $45 for 100 copies on 80lb gloss, double-sided. Our in-house designer creates the layout for $35 flat with same-day proof. Popular with seed dealers, ag reps, and farm supply stores.",
         },
       ]}
     />

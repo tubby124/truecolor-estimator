@@ -11,6 +11,31 @@
 - /pricing-health  → before any pricing CSV or engine deploy
 - /e2e-test        → before every production push to Railway
 
+## SEO Sprint Log — NON-NEGOTIABLE RULE
+After ANY of the following, you MUST immediately update:
+`~/.claude/projects/-Users-owner-Downloads-TRUE-COLOR-PRICING-/memory/seo-sprints.md`
+
+Triggers (update on ALL of these, no exceptions):
+- Any SEO page created, expanded, or content changed
+- Any title tag, meta description, or H1 changed
+- Any internal link updated (href destination changes)
+- Any schema added, modified, or removed
+- Any redirect added to next.config.ts
+- Any sitemap.ts entry added or date changed
+- Any opportunity identified but deferred (wave scheduling, "not yet shipped")
+- Any ranking movement recorded from GSC
+
+Entry format (append to bottom of file under a new ## heading):
+```
+## SEO Phase [N] — [Short Title] ([YYYY-MM-DD])
+- Files changed: list them
+- What shipped: bullets
+- What was deferred/flagged: separate bullets with reason
+- Next steps / trigger date
+```
+
+Do not end any True Color SEO session without this being current.
+
 ## Auth Rules
 - getSession() for UI — never getUser()
 - requireStaffUser() on ALL /api/staff/* routes
