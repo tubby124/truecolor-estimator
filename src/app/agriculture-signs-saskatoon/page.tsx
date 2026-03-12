@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Agriculture Signs Saskatoon | Signs & Banners | True Color" },
+  title: { absolute: "Agriculture Signs Saskatoon | From $30 | True Color" },
   description:
-    "Farm gate signs, acreage markers, and trade show banners for Saskatchewan ag businesses. Coroplast from $30. Vehicle magnets from $45. Saskatoon local pickup.",
+    "Farm signs, acreage markers & trade show banners for SK agriculture. Coroplast from $30. In-house Roland UV printer. Same-day rush +$40. Saskatoon pickup.",
   alternates: { canonical: "/agriculture-signs-saskatoon" },
   openGraph: {
     title: "Agriculture Signs Saskatchewan | True Color Display Printing",
@@ -26,6 +27,44 @@ export default function AgriculturePage() {
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Saskatchewan farm and agriculture signs"
       description="Saskatchewan agriculture businesses use True Color Display Printing for everything from coroplast farm gate signs and acreage markers to trade show banners and truck door magnets. Our in-house Roland UV printer produces weatherproof signage that handles prairie winters, spring mud, and summer sun without fading or peeling. Coroplast signs start at $30 — the standard for field plot markers, for-sale signs, and gate identification across Saskatchewan farmland. Vinyl banners from $45 work for Agribition booths, dealer days, and seasonal promotions. Vehicle magnets from $45 turn farm trucks and equipment sales vehicles into mobile advertising across rural Saskatchewan. Business cards at 250 for $45 keep ag reps, seed dealers, and farm owners professional at every handshake. Flyers from $45 and postcards from $35 handle seed catalogs, seasonal direct mail, and co-op promotions. For permanent signage at farm entrances and rural businesses, ACP aluminum signs from $60 last indefinitely in any weather. Window decals from $45 and vinyl lettering from $40 brand co-op storefronts and dealership windows. Equipment branding stickers start at $95 for 25 die-cut vinyl stickers. Our in-house designer handles layout for $35 flat with same-day proof — bring your farm logo or have us create one. Same-day rush is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Local Saskatoon pickup at 216 33rd St W means no shipping delays before the season starts."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            Saskatchewan agriculture businesses use True Color Display Printing for everything from{" "}
+            <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              coroplast farm gate signs
+            </Link>{" "}
+            and acreage markers to trade show banners and truck door magnets. Our in-house Roland UV printer produces weatherproof signage that handles prairie winters, spring mud, and summer sun without fading or peeling. Coroplast signs start at $30 — the standard for field plot markers, for-sale signs, and gate identification across Saskatchewan farmland.
+          </p>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Vinyl banners
+            </Link>{" "}
+            from $45 work for Agribition booths, dealer days, and seasonal promotions.{" "}
+            <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Vehicle magnets
+            </Link>{" "}
+            from $45 turn farm trucks and equipment sales vehicles into mobile advertising across rural Saskatchewan.{" "}
+            <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Business cards
+            </Link>{" "}
+            at 250 for $45 keep ag reps, seed dealers, and farm owners professional at every handshake.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            <Link href="/flyer-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Flyers
+            </Link>{" "}
+            from $45 and postcards from $35 handle seed catalogs, seasonal direct mail, and co-op promotions. For permanent signage at farm entrances and rural businesses, ACP aluminum signs from $60 last indefinitely in any weather. Window decals from $45 and vinyl lettering from $40 brand co-op storefronts and dealership windows. Equipment branding{" "}
+            <Link href="/sticker-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              stickers
+            </Link>{" "}
+            start at $95 for 25 die-cut vinyl stickers.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Our in-house designer handles layout for $35 flat with same-day proof — bring your farm logo or have us create one. Same-day rush is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Local Saskatoon pickup at 216 33rd St W means no shipping delays before the season starts.
+          </p>
+        </>
+      }
       products={[
         { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $45", slug: "vinyl-banners" },

@@ -127,6 +127,9 @@ export function SiteFooter() {
                 <Link href="/real-estate-signs-saskatoon" className="block hover:text-white transition-colors">
                   Real Estate Signs
                 </Link>
+                <Link href="/agriculture-signs-saskatoon" className="block hover:text-white transition-colors">
+                  Agriculture Signs
+                </Link>
                 <Link href="/gallery" className="block hover:text-white transition-colors">
                   Our Work
                 </Link>
