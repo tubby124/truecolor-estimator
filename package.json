@@ -16,6 +16,7 @@
     "validate:pricing": "node scripts/validate-pricing.mjs"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.4.2",
     "@resvg/resvg-js": "^2.6.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",

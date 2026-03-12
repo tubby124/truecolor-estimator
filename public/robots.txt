@@ -1,0 +1,112 @@
+# truecolorprinting.ca robots.txt
+# Last updated: 2026-03-12
+
+User-agent: *
+Disallow: /api/
+Disallow: /staff/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /order-confirmed
+Disallow: /pay/
+Disallow: /account
+Disallow: /account/
+Disallow: /quote/
+
+# ── Google (search + AI) ─────────────────────────────────────────────────────
+User-agent: Googlebot
+Allow: /
+
+User-agent: Google-InspectionTool
+Allow: /
+
+# Google-Extended = Gemini training + Google AI Overviews (keep allowed)
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# ── AI citation crawlers — ALLOW ALL for maximum LLM visibility ──────────────
+
+# OpenAI — training + ChatGPT real-time browsing
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic / Claude
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Google Gemini (additional crawler)
+User-agent: Gemini-Web
+Allow: /
+
+# Meta AI (Facebook/Instagram)
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Amazon AI
+User-agent: Amazonbot
+Allow: /
+
+# You.com AI search
+User-agent: YouBot
+Allow: /
+
+# Common Crawl (feeds many open-source LLMs)
+User-agent: CCBot
+Allow: /
+
+# Cohere AI
+User-agent: cohere-ai
+Allow: /
+
+# Bytespider (ByteDance / TikTok AI)
+User-agent: Bytespider
+Allow: /
+
+# ── Block known bad scrapers / paid SEO crawlers ─────────────────────────────
+# These have zero impact on Google rankings or AI citations — they're commercial
+# data resellers that add no SEO value and consume crawl bandwidth.
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+Sitemap: https://truecolorprinting.ca/sitemap.xml

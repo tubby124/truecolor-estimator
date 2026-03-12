@@ -3,6 +3,7 @@
 import { useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
@@ -54,6 +55,7 @@ function QuoteForm() {
   const [contactError, setContactError] = useState("");
   const [itemErrors, setItemErrors] = useState<Record<string, string>>({});
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const fileRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
   function addItem() {
@@ -142,6 +144,7 @@ function QuoteForm() {
       items.forEach((item, i) => {
         if (item.file) fd.append(`file_${i}`, item.file);
       });
+      if (turnstileToken) fd.append("cf-turnstile-response", turnstileToken);
 
       const res = await fetch("/api/quote-request", {
         method: "POST",
@@ -416,6 +419,15 @@ function QuoteForm() {
               <span>· 27 reviews</span>
             </span>
           </div>
+
+          {/* ── Cloudflare Turnstile (invisible bot check) ── */}
+          {process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY && (
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
+              onSuccess={setTurnstileToken}
+              options={{ size: "invisible" }}
+            />
+          )}
 
           {/* ── Submit ── */}
           <button

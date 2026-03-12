@@ -62,6 +62,30 @@ export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
 
+    // Cloudflare Turnstile validation (when secret key is configured)
+    const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+    if (turnstileSecret) {
+      const turnstileToken = (form.get("cf-turnstile-response") as string) ?? "";
+      if (!turnstileToken) {
+        return NextResponse.json(
+          { error: "Bot check failed. Please refresh and try again." },
+          { status: 400 }
+        );
+      }
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: turnstileSecret, response: turnstileToken }),
+      });
+      const verifyData = (await verifyRes.json()) as { success: boolean };
+      if (!verifyData.success) {
+        return NextResponse.json(
+          { error: "Bot check failed. Please refresh and try again." },
+          { status: 400 }
+        );
+      }
+    }
+
     const name = ((form.get("name") as string) ?? "").trim();
     const email = ((form.get("email") as string) ?? "").trim();
     const phone = ((form.get("phone") as string) ?? "").trim() || undefined;
