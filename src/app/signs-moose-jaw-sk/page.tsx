@@ -65,7 +65,7 @@ export default function SignsMooseJawPage() {
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
       ]}
       whyPoints={[
@@ -95,7 +95,7 @@ export default function SignsMooseJawPage() {
         },
         {
           q: "Can I get business cards and flyers shipped to Moose Jaw?",
-          a: "Yes — 250 business cards (double-sided, full colour) for $40, shipped to Moose Jaw. Flyers start at $45 for 100. Business cards and flyers ship flat in a padded envelope or small box.",
+          a: "Yes — 250 business cards (double-sided, full colour) for $45, shipped to Moose Jaw. Flyers start at $45 for 100. Business cards and flyers ship flat in a padded envelope or small box.",
         },
         {
           q: "Can I get ACP aluminum signs shipped to Moose Jaw?",

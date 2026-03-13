@@ -55,7 +55,7 @@ export default function RetailSignsSaskatoonPage() {
             so you can update your storefront every season without repainting.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Beyond signage, we print business cards starting at 250 for $40, flyers at
+            Beyond signage, we print business cards starting at 250 for $45, flyers at
             100 for $45, and postcards for direct-mail campaigns at 250 for $85. If you need
             branded print across multiple store locations, we run your full order in one
             batch for colour consistency. Pick up locally at 216 33rd St W, Saskatoon — no
@@ -75,7 +75,7 @@ export default function RetailSignsSaskatoonPage() {
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
       ]}
       whyPoints={[
@@ -106,7 +106,7 @@ export default function RetailSignsSaskatoonPage() {
         },
         {
           q: "Do you print flyers and business cards for retailers too?",
-          a: "Yes — full-colour flyers start at 100 for $45 and 500 for $135. Business cards are 250 for $40 or 500 for $65 (2-sided). These pair well with a banner or coroplast sign campaign for a consistent in-store and street presence.",
+          a: "Yes — full-colour flyers start at 100 for $45 and 500 for $135. Business cards are 250 for $45 or 500 for $65 (2-sided). These pair well with a banner or coroplast sign campaign for a consistent in-store and street presence.",
         },
         {
           q: "Do I need to bring print-ready artwork?",

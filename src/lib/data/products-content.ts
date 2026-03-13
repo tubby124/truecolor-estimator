@@ -234,10 +234,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
   "business-cards": {
     slug: "business-cards",
     name: "Business Cards",
-    tagline: "250 cards on 14pt gloss stock. $40.",
+    tagline: "250 cards on 14pt gloss stock. $45.",
     description:
-      "14pt gloss card stock is the benchmark for professional business cards in Canada — thick enough to feel substantial in hand, smooth enough for sharp full-colour printing on both sides. At True Color, business cards run on our Konica Minolta digital production press for precise colour matching and a consistent result across every card in the run. The standard 250-card run is $40 double-sided — front design plus a printed reverse, included in the same price since both faces run in one pass. The universal 3.5×2\" format fits every card holder, wallet slot, and Rolodex. Bring a design file (PDF, AI, or EPS preferred) and we'll prep it for print. No design yet? Our in-house designer creates business card layouts from scratch for $50, or updates your existing design for $35 — usually completed the same day. Quantities: 250, 500, or 1000 cards. The per-card cost drops meaningfully at 500 and 1000, so if you distribute them at networking events or on job sites, order up. Single-sided is also available for a leaner look. Business cards are ready for pickup at 216 33rd St W, Saskatoon in 1–3 business days, or next-day with same-day rush.",
-    fromPrice: "$40",
+      "14pt gloss card stock is the benchmark for professional business cards in Canada — thick enough to feel substantial in hand, smooth enough for sharp full-colour printing on both sides. At True Color, business cards run on our Konica Minolta digital production press for precise colour matching and a consistent result across every card in the run. The standard 250-card run is $45 double-sided — front design plus a printed reverse, included in the same price since both faces run in one pass. The universal 3.5×2\" format fits every card holder, wallet slot, and Rolodex. Bring a design file (PDF, AI, or EPS preferred) and we'll prep it for print. No design yet? Our in-house designer creates business card layouts from scratch for $50, or updates your existing design for $35 — usually completed the same day. Quantities: 250, 500, or 1000 cards. The per-card cost drops meaningfully at 500 and 1000, so if you distribute them at networking events or on job sites, order up. Single-sided is also available for a leaner look. Business cards are ready for pickup at 216 33rd St W, Saskatoon in 1–3 business days, or next-day with same-day rush.",
+    fromPrice: "$45",
     category: "BUSINESS_CARD",
     material_code: "PLACEHOLDER_14PT",
     heroImage: "/images/products/product/business-cards-800x600.webp",
@@ -525,7 +525,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "One-way vision graphics. Full colour outside, see-through inside.",
     description:
       "Perforated window vinyl lets you turn a glass storefront into a billboard — full-colour graphic visible from the street, while people inside can still see out through the perforations. The 70/30 ratio means 70% of the surface is printed coverage and 30% is open perforations. From outside: a vivid, continuous graphic. From inside: a screen-like view that preserves natural light and sightlines. True Color prints window perf on 6 mil Vision Perf material with Roland UV outdoor inks — rated for 2–3 years of Saskatchewan outdoor exposure. It applies like a standard adhesive decal and peels cleanly when you want to refresh the graphic. Common applications in Saskatoon: restaurant and café windows with seasonal menu graphics, vehicle rear windows for fleet branding and election campaigns, fitness studio glass partitions, and retail franchise storefronts. Window perf works best on exterior-facing smooth glass. Avoid applying over existing tinted film or frosted glass. Custom panel sizes available — enter your exact window dimensions in the estimator. For multi-panel installations across wide windows, we recommend on-site installation ($75 base rate) to ensure panel alignment and clean seams. For a single panel, self-installation on flat glass is straightforward. Pickup at 216 33rd St W, Saskatoon.",
-    fromPrice: "$48",
+    fromPrice: "$40",
     category: "DECAL",
     material_code: "RMVN006",
     heroImage: "/images/products/product/window-perf-800x600.webp",

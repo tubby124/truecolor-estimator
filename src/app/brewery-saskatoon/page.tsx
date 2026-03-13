@@ -35,7 +35,7 @@ const descriptionNode = (
       from $11/sqft give your taproom storefront the branded look that gets people curious from
       the street. Retractable banner stands from $219 are the right tool for tap takeovers,
       festival booths, and events where you need branded presence without a permanent install.
-      Foamboard menu boards from $8/sqft handle your tap list and seasonal specials in the
+      Foamboard menu boards from $10/sqft handle your tap list and seasonal specials in the
       taproom.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed">
@@ -77,7 +77,7 @@ export default function BrewerySaskatoonPage() {
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Stickers", from: "250 for $325", slug: "stickers" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
       ]}
       whyPoints={[
@@ -86,13 +86,13 @@ export default function BrewerySaskatoonPage() {
         "Beer brand stickers 250 for $325 — Roland UV for accurate craft colour reproduction",
         "Window decals from $11/sqft — taproom storefront branding that drives walk-in traffic",
         "Retractable stands from $219 — tap takeovers, festival booths, market events",
-        "Foamboard tap list and menu boards from $8/sqft — easy to update each season",
+        "Foamboard tap list and menu boards from $10/sqft — easy to update each season",
         "Same-day rush +$40 flat — seasonal release prints the same day it taps",
       ]}
       faqs={[
         {
           q: "What signage do Saskatoon craft breweries typically order from True Color?",
-          a: "The most common orders are vinyl banners for taproom walls and seasonal launches (from $8.25/sqft), beer brand stickers for taproom giveaways and market booths (250 for $325), retractable banner stands for tap takeovers and events ($219 Economy), window decals for taproom storefronts (from $11/sqft), and foamboard tap list and menu boards (from $8/sqft).",
+          a: "The most common orders are vinyl banners for taproom walls and seasonal launches (from $8.25/sqft), beer brand stickers for taproom giveaways and market booths (250 for $325), retractable banner stands for tap takeovers and events ($219 Economy), window decals for taproom storefronts (from $11/sqft), and foamboard tap list and menu boards (from $10/sqft).",
         },
         {
           q: "How fast can you print a banner for a seasonal beer launch?",

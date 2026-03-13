@@ -82,7 +82,7 @@ PR-SVC-INSTALL,v1_2026-02-19,2026-02-19,SERVICE,,,,,,,75.00,,75.00,round_up_0.01
 PR-SVC-DESIGN-BASIC,v1_2026-02-19,2026-02-19,DESIGN,,,,,,,35.00,,35.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row115,
 PR-SVC-DESIGN-FULL,v1_2026-02-19,2026-02-19,DESIGN,,,,,,,50.00,,50.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row116,
 PR-SVC-DESIGN-LOGO,v1_2026-02-19,2026-02-19,DESIGN,,,,,,,75.00,,75.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row117,
-PR-ADDON-GROMMET,v1_2026-02-19,2026-02-19,ADDON,RMGR002,,,,,,2.00,,0,round_up_0.01,,NEW WAVE PRODUCTS.csv:row215 + estimatorRules.csv:row4,
+PR-ADDON-GROMMET,v1_2026-03-12,2026-03-12,ADDON,RMGR002,,,,,,2.50,,0,round_up_0.01,,NEW WAVE PRODUCTS.csv:row215 + estimatorRules.csv:row4 + services.v1.csv sync,
 PR-ADDON-RUSH,v1_2026-02-19,2026-02-19,ADDON,,,,,,,40.00,,40.00,round_up_0.01,,estimatorRules.csv:row5,
 PR-FALLBACK-ALL,v1_2026-02-19,2026-02-19,ALL,,,0,,,,6.50,,25.00,round_up_0.01,CONFLICT-04: fallback only when no category rule matches,estimatorRules.csv:row2,
 PR-FLYER-80H-50,v1_2026-03-11,2026-03-11,FLYER,PLACEHOLDER_80LB_HALF,,,,50,50,,28.00,,round_up_0.01,,half-size-50,TRUE

@@ -48,7 +48,7 @@ export default function PrintingSwiftCurrentPage() {
             </Link>{" "}
             from $24/sqft for service trucks, delivery vehicles, and ag equipment.
             ACP aluminum signs from $13/sqft for permanent facility and yard signage
-            that lasts 10+ years in southwest SK conditions. Business cards 250 for $40.
+            that lasts 10+ years in southwest SK conditions. Business cards 250 for $45.
             Volume pricing on all orders — no account required. Minimum order $30.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -65,7 +65,7 @@ export default function PrintingSwiftCurrentPage() {
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
@@ -73,7 +73,7 @@ export default function PrintingSwiftCurrentPage() {
         "Vehicle magnets from $24/sqft — ag equipment and service truck branding",
         "ACP aluminum from $13/sqft — permanent yard and facility signage, 10+ year lifespan",
         "Vinyl banners from $8.25/sqft — grommets included, outdoor-rated 13oz vinyl",
-        "Business cards 250 for $40 — shipped flat to Swift Current",
+        "Business cards 250 for $45 — shipped flat to Swift Current",
         "Shipped to Swift Current — order online, approve proof by email, 3–5 business days",
       ]}
       faqs={[
@@ -95,7 +95,7 @@ export default function PrintingSwiftCurrentPage() {
         },
         {
           q: "What's the minimum order for Swift Current?",
-          a: "Minimum order is $30. A single 24×36\" coroplast sign at $48 clears the minimum on its own. Volume discounts apply automatically at higher sqft — coroplast drops from $8 to $7.25/sqft as your order grows.",
+          a: "Minimum order is $30. A single 24×36\" coroplast sign at $48 clears the minimum on its own. Volume discounts apply automatically — 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs.",
         },
         {
           q: "Is there a local print shop in Swift Current that competes with your prices?",

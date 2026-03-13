@@ -36,13 +36,13 @@ export default function BannerPrintingReginaPage() {
             <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               13oz vinyl banners
             </Link>{" "}
-            start at $8.25/sqft — a 2×6 ft banner is $90, a 3×8 ft banner is $178 — with full-colour
+            start at $8.25/sqft — a 2×6 ft banner is $90, a 3×8 ft banner is $180 — with full-colour
             Roland UV printing, grommets every 2 ft, and hemmed edges included as standard.
             No hidden charges.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Volume discounts apply automatically to your Regina order: 5% off at 5+ sqft, 10% off at
-            10+ sqft, 15% off at 15+ sqft. Need{" "}
+            Volume discounts apply automatically to your Regina order: 5% off at 5+ banners, 10% off at
+            10+ banners, 15% off at 25+ banners. Need{" "}
             <Link href="/retractable-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
               retractable banner stands
             </Link>{" "}
@@ -67,13 +67,13 @@ export default function BannerPrintingReginaPage() {
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
       ]}
       whyPoints={[
         "13oz scrim vinyl — outdoor-rated, UV-stable, wind-resistant in Saskatchewan conditions",
         "Grommets and hemming included on all banners — no upcharges",
-        "Volume pricing: 5% off at 5+ sqft, 10% off at 10+, 15% off at 15+ sqft",
+        "Volume pricing: 5% off at 5+ banners, 10% off at 10+ banners, 15% off at 25+ banners",
         "Retractable banner stands from $219 — complete, ready to use",
         "Ships to Regina — order online, approve proof by email, delivered by courier",
         "In-house designer: file prep from any format starting at $35",

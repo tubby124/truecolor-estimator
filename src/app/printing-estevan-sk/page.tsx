@@ -49,7 +49,7 @@ export default function PrintingEstevanPage() {
             </Link>{" "}
             from $13/sqft are the right choice — rigid composite panel, UV-printed on our Roland
             press, survives southeast Saskatchewan freeze-thaw cycles for 10+ years without
-            fading or warping. An 18×24&quot; panel is $39; 24×36&quot; is $66. Coroplast signs
+            fading or warping. An 18×24&quot; panel is $60 (minimum applies); 24×36&quot; is $66. Coroplast signs
             from $8/sqft for short-term site and yard signage. Vinyl banners from $8.25/sqft for
             company events, facility openings, and safety signage — 13oz outdoor-rated vinyl,
             hemmed and grommeted.
@@ -69,7 +69,7 @@ export default function PrintingEstevanPage() {
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
@@ -96,7 +96,7 @@ export default function PrintingEstevanPage() {
         },
         {
           q: "What type of sign is best for permanent oilfield facility signage near Estevan?",
-          a: "ACP aluminum composite is the right choice for permanent outdoor installation in southeast Saskatchewan's climate. It's rigid, UV-printed on our Roland press, and won't fade, warp, or delaminate for 10+ years outdoors. An 18×24\" panel is $39 and a 24×36\" panel is $66. For larger signage, call (306) 954-8688.",
+          a: "ACP aluminum composite is the right choice for permanent outdoor installation in southeast Saskatchewan's climate. It's rigid, UV-printed on our Roland press, and won't fade, warp, or delaminate for 10+ years outdoors. An 18×24\" panel is $60 (minimum applies) and a 24×36\" panel is $66. For larger signage, call (306) 954-8688.",
         },
         {
           q: "Is there a local print shop in Estevan that can produce what you offer?",

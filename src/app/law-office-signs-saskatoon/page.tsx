@@ -25,7 +25,7 @@ const descriptionNode = (
       signs, building directories, and reception wall plaques — rigid, UV-resistant, and built to
       last 10+ years on an exterior fascia or interior wall. Our in-house Roland UV printer locks
       colour panel to panel, so your firm name reads the same on the door sign as it does on the
-      lobby directory. An 18×24&quot; panel is $39. A 24×36&quot; panel is $66. Bring your slot
+      lobby directory. An 18×24&quot; panel is $60 (minimum applies). A 24×36&quot; panel is $66. Bring your slot
       dimensions and we cut to size.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -73,7 +73,7 @@ export default function LawOfficeSignsSaskatoonPage() {
       descriptionNode={descriptionNode}
       products={[
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Business Cards", from: "500 for $65", slug: "business-cards" },
         { name: "Brochures", from: "100 for $70", slug: "brochures" },
@@ -91,7 +91,7 @@ export default function LawOfficeSignsSaskatoonPage() {
       faqs={[
         {
           q: "What is the best sign material for a law office exterior suite sign?",
-          a: "3mm aluminum composite (ACP) is the standard for exterior suite signs. It's rigid, UV-resistant, and lasts 10+ years on a strip mall fascia or building exterior without warping or fading. ACP signs start at $13/sqft — a standard 18×24\" panel is $39, a 24×36\" panel is $66. Bring your slot dimensions and we cut to size.",
+          a: "3mm aluminum composite (ACP) is the standard for exterior suite signs. It's rigid, UV-resistant, and lasts 10+ years on a strip mall fascia or building exterior without warping or fading. ACP signs start at $13/sqft — a standard 18×24\" panel is $60 (minimum applies), a 24×36\" panel is $66. Bring your slot dimensions and we cut to size.",
         },
         {
           q: "Can you print a lobby directory panel for a multi-tenant professional building?",
@@ -99,7 +99,7 @@ export default function LawOfficeSignsSaskatoonPage() {
         },
         {
           q: "How fast can you print business cards for a new associate?",
-          a: "Standard turnaround is 1–3 business days after artwork approval. Same-day rush is +$40 flat if ordered before 10 AM — call (306) 954-8688 to confirm. We keep your existing card file on record, so adding a new associate is a quick edit, not a full redesign. 250 cards from $40, 500 two-sided from $65.",
+          a: "Standard turnaround is 1–3 business days after artwork approval. Same-day rush is +$40 flat if ordered before 10 AM — call (306) 954-8688 to confirm. We keep your existing card file on record, so adding a new associate is a quick edit, not a full redesign. 250 cards from $45, 500 two-sided from $65.",
         },
         {
           q: "Do you print practice area brochures for law firm client intake areas?",
@@ -119,7 +119,7 @@ export default function LawOfficeSignsSaskatoonPage() {
         },
         {
           q: "Is there a minimum order for business cards or brochures?",
-          a: "No artificial minimums. Business cards start at 250 copies for $40 (one-sided) or $65 (two-sided at 500). Brochures start at 100 copies for $70. We print single orders for sole practitioners and bulk runs for multi-partner firms at the same quality.",
+          a: "No artificial minimums. Business cards start at 250 copies for $45 (two-sided) or $65 (two-sided at 500). Brochures start at 100 copies for $70. We print single orders for sole practitioners and bulk runs for multi-partner firms at the same quality.",
         },
       ]}
     />

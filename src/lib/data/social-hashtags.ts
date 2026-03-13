@@ -110,7 +110,7 @@ PRODUCTS & PRICES (all pre-GST):
 - Vinyl banners (13oz heavy-duty): From $66 (2×4ft) | $8.25/sqft (small) to $6.75/sqft (large)
 - Coroplast yard signs (corrugated plastic): $8–$7.25/sqft | 4×8ft outdoor from $232
 - ACP aluminum composite signs: $13–$10/sqft | durable, premium, outdoor/indoor
-- Vehicle magnets: $24–$18/sqft | thick 30mil, weatherproof
+- Vehicle magnets: $24/sqft | thick 30mil, weatherproof
 - Flyers (250): 80lb gloss $110 / 100lb premium $130
 - Business cards (250): $45 double-sided | fast turnaround
 - Retractable banners: Starting ~$110 | portable, trade show ready

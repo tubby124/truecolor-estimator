@@ -45,10 +45,10 @@ export default function PrintingLloydminsterPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Vinyl banners from $8.25/sqft for storefronts and job sites. Business cards 250 for
-            $40. Retractable banner stands from $219. ACP aluminum composite signs from $13/sqft
+            $45. Retractable banner stands from $219. ACP aluminum composite signs from $13/sqft
             for permanent facility and office signage that lasts 10+ years outdoors.
             Volume pricing applies automatically — no account or minimum spend required.
-            Whether you need 5 signs or 500, pricing adjusts at the sqft level.
+            Whether you need 5 signs or 500, pricing adjusts by quantity.
           </p>
           <p className="text-gray-600 leading-relaxed">
             To order for Lloydminster delivery: call (306) 954-8688 or submit at truecolorprinting.ca.
@@ -64,14 +64,14 @@ export default function PrintingLloydminsterPage() {
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
         "Coroplast from $8/sqft — UV-ink, weatherproof, built for prairie job sites",
         "Vehicle magnets from $24/sqft — highway-speed hold, removable without residue",
         "ACP aluminum signs from $13/sqft — 10+ year outdoor lifespan for permanent installs",
-        "Business cards 250 for $40 — professional full-colour, double-sided",
+        "Business cards 250 for $45 — professional full-colour, double-sided",
         "Shipped to Lloydminster SK — order online, proof by email, courier delivery",
         "In-house designer: file prep from any format starting at $35",
       ]}
@@ -94,7 +94,7 @@ export default function PrintingLloydminsterPage() {
         },
         {
           q: "Do you offer volume pricing for large Lloydminster orders?",
-          a: "Yes — volume pricing applies automatically. Coroplast: 8% off at 8+ sqft, 17% off at 17+ sqft, and $7.25/sqft at 32+ sqft. Vinyl banners: 5% off at 5+ sqft, up to 15% off at 15+ sqft. No account needed.",
+          a: "Yes — volume pricing applies automatically. Coroplast: 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs. Vinyl banners: 5% off at 5+ banners, 10% off at 10+, 15% off at 25+ banners. No account needed.",
         },
         {
           q: "What are the most popular products for Lloydminster construction companies?",

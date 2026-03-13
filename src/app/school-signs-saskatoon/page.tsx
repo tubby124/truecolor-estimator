@@ -61,7 +61,7 @@ export default function SchoolSignsSaskatoon() {
           </p>
           <p>
             Event flyers start at $45 for 100 copies (500 for $135), and business cards for admin
-            and teachers start at $40 for 250. Rush orders go same day for a +$40 flat fee when
+            and teachers start at $45 for 250. Rush orders go same day for a +$40 flat fee when
             you order before 10 AM. Our in-house designer creates your layout for $35 flat with a
             same-day proof — no files required. Standard turnaround is 1–3 business days from
             artwork approval. Pick up at 216 33rd St W, Saskatoon, or call{" "}
@@ -95,7 +95,7 @@ export default function SchoolSignsSaskatoon() {
         },
         {
           name: "Business Cards",
-          from: "250 for $40 | 500 for $65",
+          from: "250 for $45 | 500 for $65",
           slug: "business-cards",
         },
       ]}
@@ -127,7 +127,7 @@ export default function SchoolSignsSaskatoon() {
         },
         {
           q: "Can we get business cards for school admin staff?",
-          a: "Yes. Business cards are 250 for $40 or 500 for $65 (2-sided). Our designer can set up a school-branded template for $35 flat so all staff cards stay consistent. Rush production is +$40 if you need them same day.",
+          a: "Yes. Business cards are 250 for $45 or 500 for $65 (2-sided). Our designer can set up a school-branded template for $35 flat so all staff cards stay consistent. Rush production is +$40 if you need them same day.",
         },
         {
           q: "Do you offer bulk pricing for school board orders?",

@@ -4,7 +4,7 @@ SVC-DESIGN-FULL,Design – Full Custom Design,DESIGN,flat,50.00,50.00,ALL,PR-SVC
 SVC-DESIGN-LOGO,Design – Logo Recreation / Vectorization,DESIGN,flat,75.00,75.00,ALL,PR-SVC-DESIGN-LOGO,TRUE,FALSE,TRUE,Recreating or vectorizing a logo from raster source,NEW WAVE PRODUCTS.csv:row117,v1_2026-02-19
 SVC-RUSH,Rush Fee,SURCHARGE,flat,40.00,40.00,ALL,PR-ADDON-RUSH,TRUE,FALSE,TRUE,Applied when is_rush=TRUE; added on top of all other charges,estimatorRules.csv:row5,v1_2026-02-19
 SVC-INSTALL,Installation Service,INSTALLATION,flat,75.00,75.00,SIGN;RIGID;BANNER,PR-SVC-INSTALL,TRUE,FALSE,TRUE,Base rate; complex installs quoted manually,NEW WAVE PRODUCTS.csv:row112,v1_2026-02-19
-SVC-GROMMET,Grommets (per unit),ADDON,per_unit,2.00,0,BANNER,PR-ADDON-GROMMET,TRUE,FALSE,TRUE,Auto-calculated: perimeter_ft/2 grommets; min 4,NEW WAVE PRODUCTS.csv:row215 + estimatorRules.csv:row4,v1_2026-02-19
+SVC-GROMMET,Grommets (per unit),ADDON,per_unit,2.50,0,BANNER,PR-ADDON-GROMMET,TRUE,FALSE,TRUE,Auto-calculated: perimeter_ft/2 grommets; min 4,NEW WAVE PRODUCTS.csv:row215 + estimatorRules.csv:row4,v1_2026-02-19
 SVC-HSTAKE,H-Stake (Yard Stake),ADDON,per_unit,2.50,2.50,SIGN,PR-ADDON-HSTAKE,TRUE,FALSE,TRUE,Sell $2.50/unit (was $2.00; bumped per owner 2026-02-19); cost $0.63/unit (DS00043); margin ~75%,materialLibrary.csv:row16,v1_2026-02-19
 SVC-STAND-ECO,Retractable Banner Stand – Economy,HARDWARE,per_unit,219.00,219.00,DISPLAY,PR-DISP-ECO,TRUE,FALSE,TRUE,Included in economy retractable banner package price,NEW WAVE PRODUCTS.csv:row51,v1_2026-02-19
 SVC-STAND-DLX,Retractable Banner Stand – Deluxe,HARDWARE,per_unit,299.00,299.00,DISPLAY,PR-DISP-DLX,TRUE,FALSE,TRUE,Included in deluxe retractable banner package price,NEW WAVE PRODUCTS.csv:row52,v1_2026-02-19

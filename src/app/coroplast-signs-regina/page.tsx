@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Coroplast Signs Regina SK | True Color Display Printing",
     description:
-      "Coroplast yard signs from $8/sqft shipped to Regina. Volume pricing at 8+ sqft. H-stakes at $2.50. True Color Display Printing, Saskatoon.",
+      "Coroplast yard signs from $8/sqft shipped to Regina. Volume pricing at 5+ signs. H-stakes at $2.50. True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/coroplast-signs-regina",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -26,7 +26,7 @@ export default function CoroplastSignsReginaPage() {
       subtitle="Yard signs, job site signs, and real estate signs from $8/sqft. Printed in Saskatoon — shipped to Regina."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Coroplast yard signs for Regina SK businesses — True Color Display Printing Saskatoon"
-      description="True Color Display Printing in Saskatoon prints coroplast yard signs for Regina contractors, real estate agents, businesses, and organizations. From $8/sqft with volume discounts at 8+ sqft. We ship directly to Regina — order online, approve by email, delivered by courier in 3–5 business days."
+      description="True Color Display Printing in Saskatoon prints coroplast yard signs for Regina contractors, real estate agents, businesses, and organizations. From $8/sqft with volume discounts at 5+ signs (8% off) and 10+ signs (17% off). We ship directly to Regina — order online, approve by email, delivered by courier in 3–5 business days."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -42,8 +42,8 @@ export default function CoroplastSignsReginaPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Volume pricing applies automatically to your Regina order — no account needed.
-            At 8+ sqft (about 3 signs at 24×36&quot;), you save 8%. At 17+ sqft, you save 17%.
-            At 32+ sqft ($7.25/sqft), you hit Tier 3 pricing — ideal for{" "}
+            At 5+ signs, you save 8%. At 10+ signs, you save 17%.
+            At 25+ signs (23% off — $6.16/sqft), you hit Tier 3 pricing — ideal for{" "}
             <Link href="/election-signs" className="text-[#16C2F3] underline font-medium">
               election campaigns
             </Link>
@@ -64,12 +64,12 @@ export default function CoroplastSignsReginaPage() {
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
       ]}
       whyPoints={[
         "Coroplast from $8/sqft — UV-printed, weatherproof, 2–3 year outdoor lifespan",
         "H-stakes $2.50 each — ships flat to Regina, ready to stake",
-        "Volume pricing auto-applies: 8% off at 8+ sqft, 17% off at 17+ sqft",
+        "Volume pricing auto-applies: 8% off at 5+ signs, 17% off at 10+ signs",
         "Double-sided coroplast available — corner lots, election signs, intersections",
         "Ships to Regina — order online, approve proof by email, delivered by courier",
         "In-house designer: file prep from logo, Word doc, or sketch — from $35",
@@ -89,7 +89,7 @@ export default function CoroplastSignsReginaPage() {
         },
         {
           q: "Can you do election campaign signs shipped to Regina?",
-          a: "Yes — coroplast election signs at $7.25/sqft for runs of 32+ sqft (about 10 signs at 24×36\"). H-stakes at $2.50 each. Double-sided available. We ship to Regina via courier — call for large run logistics.",
+          a: "Yes — coroplast election signs at 23% off ($6.16/sqft) for orders of 25+ signs. H-stakes at $2.50 each. Double-sided available. We ship to Regina via courier — call for large run logistics.",
         },
         {
           q: "What sizes do you print for Regina customers?",

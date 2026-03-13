@@ -347,7 +347,7 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-2">
             {[
               { label: "Postcards from $35", href: "/products/postcards" },
-              { label: "Stickers from $95", href: "/products/stickers" },
+              { label: "Stickers from $25", href: "/products/stickers" },
               { label: "Photo Posters from $15", href: "/products/photo-posters" },
               { label: "Magnet Calendars from $45", href: "/products/magnet-calendars" },
               { label: "Retractable Banners from $219", href: "/products/retractable-banners" },
@@ -519,7 +519,7 @@ export default function HomePage() {
               16 products. All priced live. No quote forms.
             </h2>
             <p className="text-gray-400">
-              Retractable banners from $219 · Brochures from $70 · Postcards from $35 · Stickers from $95 · Photo posters from $15 · Vinyl lettering from $40 · Magnet calendars from $45 — see your exact price in 30 seconds.
+              Retractable banners from $219 · Brochures from $70 · Postcards from $35 · Stickers from $25 · Photo posters from $15 · Vinyl lettering from $40 · Magnet calendars from $45 — see your exact price in 30 seconds.
             </p>
           </div>
           <Link

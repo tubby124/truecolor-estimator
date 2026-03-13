@@ -32,8 +32,8 @@ These products have a per-product minimum order. The minimum IS the correct "fro
 
 | Product | "From" Price | Notes |
 |---------|-------------|-------|
-| Business Cards | from $40 | 250 qty 1-sided |
-| Flyers | from $25 | 100 qty half-letter 1-sided 80lb |
+| Business Cards | from $45 | 250 qty 2-sided (1S = $40). Marketing default is $45 (2S) since 2S is the standard product. |
+| Flyers | from $45 | 100 qty full-letter 2-sided 80lb. Secondary: $25 (100 half-letter 1S) for half-letter contexts. |
 | Stickers | from $25 | 25 qty 2×2" |
 | Postcards | from $35 | 50 qty 3×4" |
 | Brochures | from $70 | 100 qty tri-fold |
@@ -46,7 +46,7 @@ These products have a per-product minimum order. The minimum IS the correct "fro
 
 1. **Landing pages / emails / campaigns:** Use the "Marketing from $X" column. This is the minimum order — the real starting price a customer will pay.
 2. **FAQs / pricing breakdowns:** Use the "FAQ / Comparison Text" column. Show both the sqft rate AND the minimum so customers understand the structure.
-3. **Never say "from $8/sqft" for coroplast in marketing headlines** — customers can't actually order for $8, the minimum is $30. Exception: FAQ context explaining how pricing works, and product reference cards on IndustryPage (see rule 9).
+3. **Never say "from $8/sqft" for coroplast in marketing headlines** — customers can't actually order for $8, the minimum is $30. Exception: FAQ context explaining how pricing works, product reference cards on IndustryPage (see rule 9), and **ranking pages that already use sqft rates in their title** (e.g. "From $8/sqft" in coroplast title ranks #5, "From $8.25/sqft" in banner title ranks #2 — do NOT change these titles).
 4. **Banners "from $66" is correct** — the smallest standard size (2×4ft) costs $66, which is above the $45 minimum. Don't use "from $45".
 5. **Foamboard "from $45" is correct** — it's not inflated, it's the real 18×24" price that happens to match the minimum.
 6. **Rush +$40 flat** — always mention separately, never baked into "from" price.
@@ -68,6 +68,7 @@ These products have a per-product minimum order. The minimum IS the correct "fro
 **Double-sided:** T1=$14.00 · T2=$13.13 · T3=$12.69 /sqft
 
 **Qty bulk discounts:** 5+=8% · 10+=17% · 25+=23%
+> **IMPORTANT:** These are QTY discounts (ordering X+ signs), NOT sqft thresholds. Never present as "8+ sqft" or "17+ sqft" — always "5+ signs", "10+ signs", etc.
 
 Common sizes:
 | Size | Single | Double |
@@ -244,7 +245,7 @@ Most popular: 500 (2-sided)
 | Qty  | 2-Sided | 1-Sided |
 |------|---------|---------|
 | 100  | $35     | $25     |
-| 250  | $88     | $63     |
+| 250  | $87     | $62     |
 | 500  | $105    | $76     |
 | 1000 | $145    | $104    |
 
@@ -252,9 +253,9 @@ Most popular: 500 (2-sided)
 | Qty  | 2-Sided | 1-Sided |
 |------|---------|---------|
 | 100  | $43     | $31     |
-| 250  | $100    | $72     |
+| 250  | $90     | $65     |
 | 500  | $145    | $104    |
-| 1000 | $250    | $180    |
+| 1000 | $196    | $141    |
 
 Most popular: 500 (80lb 2S)
 
@@ -360,7 +361,7 @@ Graphic print included in price (33" wide banner).
 | Item                  | Price       |
 |-----------------------|-------------|
 | Grommets              | $2.50/each (auto-calculated) |
-| H-Stake               | $3.00/each |
+| H-Stake               | $2.50/each |
 | Rush/Same-Day         | +$40 flat  |
 | Minor edit (design)   | +$35       |
 | Design from scratch   | +$50       |

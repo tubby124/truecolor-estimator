@@ -73,9 +73,9 @@ export default function DaycareSignsSaskatoonPage() {
         { name: "Coroplast Signs", from: "18×24\" for $24", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "2×4\' for $66", slug: "vinyl-banners" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
       ]}
       whyPoints={[
         "Coroplast enrollment yard signs at $24 each — 18×24\", 4mm, H-stakes included, sharp at the curb",
@@ -113,7 +113,7 @@ export default function DaycareSignsSaskatoonPage() {
         },
         {
           q: "Can I order foamboard displays for a classroom or lobby?",
-          a: "Yes — foam board displays from $8/sqft (minimum $45 for 18×24\") are common for daycare lobbies and classrooms. Use them for program schedules, daily routines, parent communication boards, and seasonal theme displays. Lightweight and easy to reprint each semester.",
+          a: "Yes — foam board displays from $10/sqft (minimum $45 for 18×24\") are common for daycare lobbies and classrooms. Use them for program schedules, daily routines, parent communication boards, and seasonal theme displays. Lightweight and easy to reprint each semester.",
         },
         {
           q: "Do you print flyers for summer camp or after-school program promotion?",

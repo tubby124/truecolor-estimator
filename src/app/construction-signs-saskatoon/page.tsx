@@ -36,7 +36,7 @@ export default function ConstructionPage() {
       subtitle="Job site signs, hoarding banners, truck magnets, and safety signs for Saskatoon contractors and home builders — ready in 1–3 business days. Same-day rush available."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Construction site signs, hoarding banners, and truck magnets for Saskatoon contractors"
-      description="Coroplast job site signs start at $8/sqft at True Color Display Printing in Saskatoon, Saskatchewan — an 18×24 inch site ID sign is $30 ($30 minimum applies), a 24×36 inch safety sign is $48, and a 4×8 ft development sign for a new home lot is $232 + GST. Most Saskatoon contractors don't order site signs until the job is already live — then they're stuck waiting a week for shipping from a national print chain. True Color prints coroplast signs, hoarding banners, truck door magnets, and business cards in-house on our Roland UV printer with 1–3 business day turnaround. The standard job site package for a Saskatoon contractor includes one or two coroplast site ID signs with the company name and permit number, a pair of 30mil truck door magnets ($90/pair for standard 12×18 inch doors), and 250 business cards ($40) to hand on-site. Home builders and developers add 4×8 ft development signage ($232) for the lot and directional coroplast signs for subdivision roads. For fencing and hoarding, a full-colour 13oz scrim vinyl banner at $8.25/sqft runs the length of your site perimeter and doubles as advertising to passing traffic — a 4×20 ft hoarding banner is $600 + GST. Common job site safety signs — Hard Hat Area, No Unauthorized Entry, Safety Glasses Required, site identification with contractor name and permit number — are printed on 4mm coroplast, UV-resistant and waterproof through Saskatchewan winters and freeze-thaw cycles. For permanent company yard signage, ACP aluminum composite signs from $13/sqft last 10+ years without fading or warping. Our in-house designer handles low-res logos, rough sketches, and phone photos — design service starts at $35 flat with same-day proof. Same-day rush printing is available for +$40 flat on orders placed before 10 AM — call (306) 954-8688 to confirm capacity. Double-sided coroplast is available for corner lots and high-visibility intersections at $14/sqft. Volume discounts apply automatically: 5+ signs save 8%, 10+ save 17%, 25+ save 23%. Local Saskatoon pickup at 216 33rd St W — no shipping delays, no surprises."
+      description="Coroplast job site signs start at $8/sqft at True Color Display Printing in Saskatoon, Saskatchewan — an 18×24 inch site ID sign is $30 ($30 minimum applies), a 24×36 inch safety sign is $48, and a 4×8 ft development sign for a new home lot is $232 + GST. Most Saskatoon contractors don't order site signs until the job is already live — then they're stuck waiting a week for shipping from a national print chain. True Color prints coroplast signs, hoarding banners, truck door magnets, and business cards in-house on our Roland UV printer with 1–3 business day turnaround. The standard job site package for a Saskatoon contractor includes one or two coroplast site ID signs with the company name and permit number, a pair of 30mil truck door magnets ($90/pair for standard 12×18 inch doors), and 250 business cards ($45) to hand on-site. Home builders and developers add 4×8 ft development signage ($232) for the lot and directional coroplast signs for subdivision roads. For fencing and hoarding, a full-colour 13oz scrim vinyl banner at $8.25/sqft runs the length of your site perimeter and doubles as advertising to passing traffic — a 4×20 ft hoarding banner is $600 + GST. Common job site safety signs — Hard Hat Area, No Unauthorized Entry, Safety Glasses Required, site identification with contractor name and permit number — are printed on 4mm coroplast, UV-resistant and waterproof through Saskatchewan winters and freeze-thaw cycles. For permanent company yard signage, ACP aluminum composite signs from $13/sqft last 10+ years without fading or warping. Our in-house designer handles low-res logos, rough sketches, and phone photos — design service starts at $35 flat with same-day proof. Same-day rush printing is available for +$40 flat on orders placed before 10 AM — call (306) 954-8688 to confirm capacity. Double-sided coroplast is available for corner lots and high-visibility intersections at $14/sqft. Volume discounts apply automatically: 5+ signs save 8%, 10+ save 17%, 25+ save 23%. Local Saskatoon pickup at 216 33rd St W — no shipping delays, no surprises."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-8">
@@ -60,7 +60,7 @@ export default function ConstructionPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               truck door magnets
             </Link>{" "}
-            ($45–90/pair depending on size), and 250 business cards ($40) to hand on-site.
+            ($45–90/pair depending on size), and 250 business cards ($45) to hand on-site.
             Home builders and developers add development signage (4×8 ft coroplast, $232) for the lot
             and directional coroplast signs (18×24&quot;, $30) for subdivision roads. For fencing and
             hoarding, a full-colour vinyl banner ($8.25/sqft) runs the length of your site perimeter
@@ -84,7 +84,7 @@ export default function ConstructionPage() {
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Business Cards", from: "250 from $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 from $45", slug: "business-cards" },
       ]}
       whyPoints={[
         "Coroplast that survives Saskatchewan winters — UV-resistant, waterproof, 2–3 year outdoor lifespan",
@@ -92,7 +92,7 @@ export default function ConstructionPage() {
         "4×8ft home builder development sign — $232 + GST, the standard for new subdivision lots",
         "30mil truck door magnets that stay on at highway speeds — from $45 per magnet",
         "Safety signs: Hard Hat Area, No Entry, site ID — coroplast $8/sqft, 18×24\" from $30",
-        "250 business cards from $40 — one stop for signs, magnets, and cards — call (306) 954-8688",
+        "250 business cards from $45 — one stop for signs, magnets, and cards — call (306) 954-8688",
         "In-house designer handles low-res logos, rough sketches, and phone photos — from $35",
         "Local Saskatoon pickup at 216 33rd St W — no shipping delays from a national print chain",
       ]}

@@ -67,7 +67,7 @@ export default function SignsYorktonPage() {
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
@@ -102,7 +102,7 @@ export default function SignsYorktonPage() {
         },
         {
           q: "Do you have a minimum order for Yorkton customers?",
-          a: "No minimum. Order a single vehicle magnet or one banner. Volume pricing applies automatically — coroplast drops from $8/sqft at higher quantities. Business cards start at 250 for $40 and flyers at 100 for $45, both shipped to Yorkton.",
+          a: "No minimum. Order a single vehicle magnet or one banner. Volume pricing applies automatically — coroplast drops from $8/sqft at higher quantities. Business cards start at 250 for $45 and flyers at 100 for $45, both shipped to Yorkton.",
         },
       ]}
     />

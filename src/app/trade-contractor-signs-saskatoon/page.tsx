@@ -25,7 +25,7 @@ export default function TradeContractorSignsSaskatoon() {
   return (
     <IndustryPage
       title="Trade Contractor Signs Saskatoon"
-      subtitle="Brand every truck and job site in Saskatoon — vehicle magnets from $45, yard signs from $24, ACP aluminum from $39. In-house Roland UV, 1–3 business days."
+      subtitle="Brand every truck and job site in Saskatoon — vehicle magnets from $45, yard signs from $30, ACP aluminum from $39. In-house Roland UV, 1–3 business days."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Trade contractor vehicle magnets and job-site signs printed in Saskatoon"
       description={description}

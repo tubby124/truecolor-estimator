@@ -756,7 +756,7 @@ describe("POSTCARD — size-differentiated material codes", () => {
     expect(result.sell_price).toBe(45);
   });
 
-  it("5×7 qty=100 → $45 (STEP 3 exact match)", () => {
+  it("5×7 qty=100 → $50 (STEP 3 exact match)", () => {
     const result = estimate({
       category: "POSTCARD",
       material_code: "PLACEHOLDER_14PT_5X7",
@@ -766,7 +766,7 @@ describe("POSTCARD — size-differentiated material codes", () => {
       qty: 100,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.sell_price).toBe(45);
+    expect(result.sell_price).toBe(50);
   });
 
   it("3×4 qty=100 → $60 (STEP 3 exact match — NOT the 4×6 $45 rule)", () => {
@@ -808,7 +808,7 @@ describe("POSTCARD — size-differentiated material codes", () => {
     expect(result.sell_price).toBe(280);
   });
 
-  it("5×7 qty=50 → $35 (smallest lot, 5×7 only)", () => {
+  it("5×7 qty=50 → $45 (smallest lot, 5×7 premium)", () => {
     const result = estimate({
       category: "POSTCARD",
       material_code: "PLACEHOLDER_14PT_5X7",
@@ -818,7 +818,7 @@ describe("POSTCARD — size-differentiated material codes", () => {
       qty: 50,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.sell_price).toBe(35);
+    expect(result.sell_price).toBe(45);
   });
 });
 

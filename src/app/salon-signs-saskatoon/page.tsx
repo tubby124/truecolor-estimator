@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Salon Signs Saskatoon | Window Decals From $45 | True Color" },
   description:
-    "Window decals from $11/sqft, service menu foamboards, and referral cards from $40 for Saskatoon hair salons, nail salons, and spas. Pickup at 216 33rd St W.",
+    "Window decals from $11/sqft, service menu foamboards, and referral cards from $45 for Saskatoon hair salons, nail salons, and spas. Pickup at 216 33rd St W.",
   alternates: { canonical: "/salon-signs-saskatoon" },
   openGraph: {
     title: "Salon Signs Saskatoon | True Color Display Printing",
@@ -28,10 +28,10 @@ const descriptionNode = (
     printer reproduces your exact brand palette, whether that is a specific dusty rose,
     champagne gold, or deep plum. Send your Pantone reference or brand guide and our
     in-house designer matches it for $35 flat with a same-day proof. Foamboard service
-    menu displays from $8/sqft replace the laminated handout sheet at reception or each
+    menu displays from $10/sqft replace the laminated handout sheet at reception or each
     station — an 18×24" board runs $45, a 24×36" runs $65. Grand opening vinyl banners
     start at $66 for a 2×4 ft and pull walk-by traffic during your first weeks open.
-    Referral business cards — 250 for $40, 500 for $65 — keep your existing clients
+    Referral business cards — 250 for $45, 500 for $65 — keep your existing clients
     doing your marketing for you. We print same-day for +$40 flat on orders placed before
     10 AM. Walk in or call (306) 954-8688.{" "}
     See{" "}
@@ -61,21 +61,21 @@ export default function SalonSignsSaskatoonPage() {
       subtitle="Your storefront window decides in 3 seconds — window vinyl, service menus, and referral cards printed with exact colour accuracy."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Window decals and foamboard service menus for Saskatoon hair salons and spas printed by True Color Display Printing"
-      description="A potential client decides whether to walk into your salon before they ever read your reviews. That decision happens at your storefront window. Window decals from $11/sqft are the most impactful print piece for Saskatoon hair salons, nail salons, spas, and barber shops — our Roland UV in-house printer reproduces your exact brand palette, whether dusty rose, champagne gold, or deep plum. In-house designer $35 flat, same-day proof. Foamboard service menus from $8/sqft, referral cards 250 for $40, grand opening banners from $66. Rush +$40 flat."
+      description="A potential client decides whether to walk into your salon before they ever read your reviews. That decision happens at your storefront window. Window decals from $11/sqft are the most impactful print piece for Saskatoon hair salons, nail salons, spas, and barber shops — our Roland UV in-house printer reproduces your exact brand palette, whether dusty rose, champagne gold, or deep plum. In-house designer $35 flat, same-day proof. Foamboard service menus from $10/sqft, referral cards 250 for $45, grand opening banners from $66. Rush +$40 flat."
       descriptionNode={descriptionNode}
       products={[
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
         { name: "Vinyl Banners", from: "2×4 ft from $66", slug: "vinyl-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Stickers", from: "100 for $160", slug: "stickers" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
         "Window decals from $11/sqft — clients read your prices and services from the sidewalk before they open the door",
         "Exact colour matching: Roland UV in-house reproduces your specific dusty rose, champagne gold, or deep plum — no colour drift from an outside supplier",
-        "Foamboard service menus from $8/sqft — an 18×24\" board at reception replaces the laminated handout and looks the part",
-        "Referral business cards 250 for $40 — your lowest cost-per-acquisition tool when a happy client hands one to a friend",
+        "Foamboard service menus from $10/sqft — an 18×24\" board at reception replaces the laminated handout and looks the part",
+        "Referral business cards 250 for $45 — your lowest cost-per-acquisition tool when a happy client hands one to a friend",
         "Grand opening vinyl banners from $66 — attract walk-by traffic during the weeks that set your client base",
         "In-house Photoshop designer — $35 flat, same-day proof, brand-accurate results without an outside agency",
         "We print same-day for +$40 flat — order before 10 AM, pick up at 216 33rd St W, Saskatoon",
@@ -91,7 +91,7 @@ export default function SalonSignsSaskatoonPage() {
         },
         {
           q: "What is the most popular signage order for a new salon opening?",
-          a: "The most common new-salon package includes: one grand opening vinyl banner (2×4 ft at $66 or 3×6 ft at $135), window decals for the storefront glass (from $11/sqft), a foamboard service menu for behind the desk (from $8/sqft), and 250–500 referral business cards ($40–$65). Our designer bundles all artwork for $35 flat.",
+          a: "The most common new-salon package includes: one grand opening vinyl banner (2×4 ft at $66 or 3×6 ft at $135), window decals for the storefront glass (from $11/sqft), a foamboard service menu for behind the desk (from $10/sqft), and 250–500 referral business cards ($45–$65). Our designer bundles all artwork for $35 flat.",
         },
         {
           q: "How do foamboard service menus work inside a salon?",

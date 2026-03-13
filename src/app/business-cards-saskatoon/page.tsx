@@ -4,7 +4,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Business Cards Saskatoon | 250 Cards from $45 | True Color" },
   description:
-    "Custom business card printing in Saskatoon. 250 cards from $45, double-sided 14pt gloss. Same-day rush available. In-house designer. Local pickup at 216 33rd St W.",
+    "Custom business card printing in Saskatoon. 250 cards from $45, double-sided 14pt gloss. Same-day rush +$40. In-house designer $35. Pickup 216 33rd St W.",
   alternates: { canonical: "/business-cards-saskatoon" },
   openGraph: {
     title: "Business Cards Saskatoon | True Color Display Printing",
@@ -28,7 +28,7 @@ export default function BusinessCardsSaskatoonPage() {
 
 Business cards are the most personal marketing tool you carry. Whether you're passing one to a client on a job site, leaving a stack at a local business, or handing them out at a trade show or Chamber of Commerce event, a well-printed card on good stock makes the right impression. Our 14pt gloss is the industry standard — it's thick, holds the colour, and has the right snap when someone takes it from your hand. Matte finish is available on request.
 
-Volume pricing: 250 for $45, 500 for $58, 1000 for $75. Most orders are ready in 1–3 business days. Same-day rush is available for +$40 flat on orders placed before 10 AM. Pickup at 216 33rd St W — no shipping, inspect your cards before you leave."
+Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready in 1–3 business days. Same-day rush is available for +$40 flat on orders placed before 10 AM. Pickup at 216 33rd St W — no shipping, inspect your cards before you leave."
       products={[
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
@@ -38,7 +38,7 @@ Volume pricing: 250 for $45, 500 for $58, 1000 for $75. Most orders are ready in
       whyPoints={[
         "250 double-sided business cards for $45 — cheaper than Staples or FedEx Office, faster turnaround",
         "14pt gloss stock — professional weight and finish, matte available on request",
-        "500 for $58, 1000 for $75 — bulk pricing for sales teams and trade shows",
+        "500 for $65, 1000 for $110 — bulk pricing for sales teams and trade shows",
         "In-house Photoshop designer: bring your logo and info, we build the layout from $35",
         "Same-day rush available (+$40 flat) when ordered before 10 AM",
         "Local pickup at 216 33rd St W, Saskatoon — no shipping wait, inspect before you leave",
@@ -47,7 +47,7 @@ Volume pricing: 250 for $45, 500 for $58, 1000 for $75. Most orders are ready in
       faqs={[
         {
           q: "How much do business cards cost in Saskatoon?",
-          a: "250 double-sided business cards on 14pt gloss stock are $45 at True Color. 500 cards are $58, 1000 are $75. Single-sided is slightly less. Use the calculator at /products/business-cards to see your exact price.",
+          a: "250 double-sided business cards on 14pt gloss stock are $45 at True Color. 500 cards are $65, 1000 are $110. Single-sided is slightly less. Use the calculator at /products/business-cards to see your exact price.",
         },
         {
           q: "How long does business card printing take?",
@@ -55,7 +55,7 @@ Volume pricing: 250 for $45, 500 for $58, 1000 for $75. Most orders are ready in
         },
         {
           q: "What stock do you use for business cards?",
-          a: "Our standard is 14pt gloss stock — the professional industry standard. It's thick, rigid, and has a glossy finish on both sides. We don't offer matte or soft-touch lamination at this time.",
+          a: "Our standard is 14pt gloss stock — the professional industry standard. It's thick, rigid, and has a glossy finish on both sides. Matte finish is available on request.",
         },
         {
           q: "Can you design my business cards?",

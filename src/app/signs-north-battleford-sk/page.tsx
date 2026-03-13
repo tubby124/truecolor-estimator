@@ -68,7 +68,7 @@ export default function SignsNorthBattlefordPage() {
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
@@ -103,7 +103,7 @@ export default function SignsNorthBattlefordPage() {
         },
         {
           q: "What is the minimum order for North Battleford customers?",
-          a: "No minimum order. You can order a single coroplast sign or one vehicle magnet. Volume discounts apply automatically as your sqft total grows. Business cards start at 250 for $40, flyers at 100 for $45.",
+          a: "No minimum order. You can order a single coroplast sign or one vehicle magnet. Volume discounts apply automatically as your order quantity grows. Business cards start at 250 for $45, flyers at 100 for $45.",
         },
       ]}
     />

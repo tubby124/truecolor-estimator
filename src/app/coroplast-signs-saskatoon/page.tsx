@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Coroplast Signs Saskatoon | From $8/sqft | True Color" },
   description:
-    "Custom coroplast yard signs in Saskatoon from $8/sqft. Yard signs, job site signs, real estate signs. Same-day available. Local pickup at 216 33rd St W. In-house designer.",
+    "Coroplast yard signs in Saskatoon from $8/sqft. Yard signs, job site signs, real estate signs. Same-day rush +$40. In-house designer $35. Pickup 216 33rd St W.",
   alternates: { canonical: "/coroplast-signs-saskatoon" },
   openGraph: {
     title: "Coroplast Signs Saskatoon | True Color Display Printing",
@@ -25,14 +25,14 @@ export default function CoroplastSignsSaskatoonPage() {
       subtitle="From $8/sqft. Same-day available. Pick up at 216 33rd St W."
       heroImage="/images/products/product/coroplast-yard-sign-800x600.webp"
       heroAlt="Coroplast yard signs printed in Saskatoon by True Color Display Printing"
-      description="True Color Display Printing is Saskatoon's go-to shop for coroplast signs. Whether you need 1 yard sign or 500 job site signs, we print in-house on our Roland UV printer and have them ready in 1–3 business days — same day for rush orders placed before 10 AM. Prices start at $8/sqft with volume discounts at 8+ sqft (8% off) and 17+ sqft (17% off). H-stakes at $2.50 each."
+      description="True Color Display Printing is Saskatoon's go-to shop for coroplast signs. Whether you need 1 yard sign or 500 job site signs, we print in-house on our Roland UV printer and have them ready in 1–3 business days — same day for rush orders placed before 10 AM. Prices start at $8/sqft with volume discounts at 5+ signs (8% off) and 10+ signs (17% off). H-stakes at $2.50 each."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
             True Color Display Printing is Saskatoon&apos;s go-to shop for coroplast signs.
             Whether you need 1 yard sign or 500 job site signs, we print in-house on our Roland UV
             printer and have them ready in 1–3 business days — same day for rush orders placed before
-            10 AM. Prices start at $8/sqft with volume discounts at 8+ sqft (8% off) and 17+ sqft
+            10 AM. Prices start at $8/sqft with volume discounts at 5+ signs (8% off) and 10+ signs
             (17% off). H-stakes at $2.50 each. All printing done at 216 33rd St W, Saskatoon —
             no national chain shipping wait.
           </p>
@@ -62,7 +62,7 @@ export default function CoroplastSignsSaskatoonPage() {
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
       ]}
       whyPoints={[
-        "Prices from $8/sqft — volume discount at 8+ sqft (8% off) and 17+ sqft (17% off)",
+        "Prices from $8/sqft — volume discount at 5+ signs (8% off) and 10+ signs (17% off)",
         "H-stakes at $2.50 each — bundled with any coroplast order",
         "Roland UV print — weatherproof, UV-resistant, 2–3 year outdoor lifespan",
         "Double-sided coroplast available for corner lots and high-traffic placement",
@@ -72,7 +72,7 @@ export default function CoroplastSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much does a coroplast sign cost in Saskatoon?",
-          a: "Coroplast signs at True Color start at $8/sqft for single-sided printing. An 18×24\" sign is about 3 sqft ($24). A 24×36\" sign is 6 sqft ($48). Volume discounts apply at 8+ sqft (8% off) and 17+ sqft (17% off). H-stakes are $2.50 each.",
+          a: "Coroplast signs at True Color start at $8/sqft for single-sided printing. An 18×24\" sign is about 3 sqft ($24). A 24×36\" sign is 6 sqft ($48). Volume discounts apply at 5+ signs (8% off) and 10+ signs (17% off). H-stakes are $2.50 each.",
         },
         {
           q: "How long do coroplast yard signs last outdoors?",

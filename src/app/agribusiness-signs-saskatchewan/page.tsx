@@ -41,7 +41,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Volume pricing applies automatically — no corporate account required. Coroplast signs
-            drop to $7.25/sqft at 32+ sqft (about 10 signs at 24×36&quot;).
+            get 8% off at 5+ signs, 17% off at 10+ signs, and 23% off at 25+ signs.
             ACP aluminum composite at $13/sqft delivers a professional finish that holds up on
             permanent farm and equipment yard installations for a decade or more. For fleet branding
             on grain trucks and equipment, our{" "}
@@ -65,12 +65,12 @@ export default function AgribusinessSignsSaskatchewanPage() {
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
       ]}
       whyPoints={[
         "Coroplast from $8/sqft — weather-resistant, UV-printed, survives Saskatchewan freeze/thaw cycles",
         "ACP aluminum signs from $13/sqft — 10+ year lifespan, ideal for permanent farm and equipment yard signage",
-        "Volume discounts built in — 17+ sqft gets 17% off coroplast, no account needed",
+        "Volume discounts built in — 10+ signs gets 17% off coroplast, no account needed",
         "Vehicle and equipment magnets from $24/sqft — removable branding for tractors, trucks, and grain carts",
         "In-house designer handles low-res logos and rough sketches — no need to hire a graphic designer",
         "Local Saskatoon pickup at 216 33rd St W — no shipping wait, inspect before you leave",
@@ -86,7 +86,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         },
         {
           q: "Do you do volume pricing for ag equipment dealers ordering 50+ signs?",
-          a: "Volume discounts apply automatically based on total sqft — no account needed. Coroplast: 8% off at 8+ sqft, 17% off at 17+ sqft. For larger runs (50+ signs), call for a custom quote.",
+          a: "Volume discounts apply automatically based on number of signs — no account needed. Coroplast: 8% off at 5+ signs, 17% off at 10+ signs. For larger runs (50+ signs), call for a custom quote.",
         },
         {
           q: "What about vehicle and equipment magnets for farm trucks?",

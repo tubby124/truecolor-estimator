@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Flyer Printing Saskatoon | 100 Flyers from $45 | True Color" },
   description:
-    "Flyer printing in Saskatoon from $45/100 on 80lb gloss. Full-colour double-sided, 100lb upgrade available, same-day rush +$40. Custom sizes on request. Pickup at 216 33rd St W.",
+    "Flyer printing in Saskatoon from $45/100 on 80lb gloss. Full-colour double-sided, 100lb upgrade available. Same-day rush +$40. Pickup at 216 33rd St W.",
   alternates: { canonical: "/flyer-printing-saskatoon" },
   openGraph: {
     title: "Flyer Printing Saskatoon | True Color Display Printing",
@@ -29,10 +29,11 @@ export default function FlyerPrintingSaskatoonPage() {
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            True Color Display Printing prints full-colour flyers in Saskatoon on 80lb or 100lb gloss
-            text paper. Standard letter size (8.5×11&quot;), double-sided, minimum 100 flyers.
-            Price per flyer drops sharply at 250 and 500+ — the more you order, the lower the unit
-            cost. Same-day rush available for +$40 flat on orders placed before 10 AM.
+            True Color Display Printing prints full-colour flyers in Saskatoon, Saskatchewan on 80lb
+            or 100lb gloss text paper — 100 double-sided flyers from $45. Standard letter size
+            (8.5×11&quot;), minimum 100 flyers. Price per flyer drops sharply at 250 and 500+ — the
+            more you order, the lower the unit cost. Same-day rush available for +$40 flat on orders
+            placed before 10 AM.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             Choose 80lb gloss for everyday flyers — restaurant menus, event programs, door hangers,
@@ -85,7 +86,7 @@ export default function FlyerPrintingSaskatoonPage() {
       faqs={[
         {
           q: "How much does flyer printing cost in Saskatoon?",
-          a: "Flyers at True Color start at $45 for 100 on 80lb gloss. 250 flyers is $110, 500 is $135, and 1,000 is $185. Upgrading to 100lb paper: 250 is $130, 500 is $185, 1,000 is $325. Use the estimator at /products/flyers for exact pricing.",
+          a: "Flyers at True Color start at $45 for 100 on 80lb gloss. 250 flyers is $110, 500 is $135, and 1,000 is $185. Upgrading to 100lb paper: 250 is $115, 500 is $185, 1,000 is $250. Use the estimator at /products/flyers for exact pricing.",
         },
         {
           q: "What is the minimum order for flyers?",

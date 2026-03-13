@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Pharmacy Signs Saskatoon | Displays & Banners | True Color" },
   description:
-    "Foamboard promo displays, flu season banners, and window decals for Saskatoon pharmacies and health stores. From $8/sqft. In-house designer $35. Local pickup.",
+    "Foamboard promo displays, flu season banners, and window decals for Saskatoon pharmacies and health stores. From $10/sqft. In-house designer $35. Local pickup.",
   alternates: { canonical: "/pharmacy-signs-saskatoon" },
   openGraph: {
     title: "Pharmacy Signs Saskatoon | True Color Display Printing",
@@ -22,7 +22,7 @@ const descriptionNode = (
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
       Flu shot season opens a narrow window — patients who see your signage walk in; patients who
       don&apos;t walk past. Saskatoon independent pharmacies and health stores use foamboard
-      in-store displays from $8/sqft to catch that attention: flu season announcements,
+      in-store displays from $10/sqft to catch that attention: flu season announcements,
       back-to-school immunization reminders, and spring allergy promotion boards. A 24×36&quot;
       foamboard display starts at $65 — lightweight enough for a countertop easel, durable enough
       for a full season on a wall mount. Our in-house Roland UV printer produces sharp, clean
@@ -68,18 +68,18 @@ export default function PharmacySignsSaskatoonPage() {
       subtitle="Seasonal health campaign displays, window decals, and banners for Saskatoon pharmacies and health stores."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Foamboard displays and vinyl banners for Saskatoon pharmacy seasonal health campaigns printed by True Color Display Printing"
-      description="Flu shot season opens a narrow window — patients who see your signage walk in; patients who don't walk past. Saskatoon pharmacies use foamboard displays from $8/sqft for flu season, back-to-school immunizations, and spring allergy campaigns. Window decals from $11/sqft for year-round storefront branding. Vinyl banners from $66 for outdoor vaccination clinic announcements. Health promo flyers 100 for $45. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="Flu shot season opens a narrow window — patients who see your signage walk in; patients who don't walk past. Saskatoon pharmacies use foamboard displays from $10/sqft for flu season, back-to-school immunizations, and spring allergy campaigns. Window decals from $11/sqft for year-round storefront branding. Vinyl banners from $66 for outdoor vaccination clinic announcements. Health promo flyers 100 for $45. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
       ]}
       whyPoints={[
-        "Seasonal foamboard displays from $8/sqft — catch patients during flu season, allergy season, and back-to-school",
+        "Seasonal foamboard displays from $10/sqft — catch patients during flu season, allergy season, and back-to-school",
         "Window decals from $11/sqft — update seasonally, remove cleanly, no damage to glass",
         "Vinyl banners from $66 — outdoor vaccination clinic and entrance announcements with grommets included",
         "Health promo flyers — 100 for $45, countertop-ready and effective for community distribution",

@@ -46,8 +46,8 @@ export default function SignsPrinceAlbertPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Volume pricing applies automatically to Prince Albert orders — no account required.
-            Coroplast drops to $7.25/sqft at 32+ sqft. Banners get 15% off at 15+ sqft.
-            We also print business cards (250 for $40), flyers, vehicle magnets, retractable
+            Coroplast: 8% off at 5+ signs, 17% off at 10+ signs. Banners: 15% off at 25+ banners.
+            We also print business cards (250 for $45), flyers, vehicle magnets, retractable
             banner stands, and aluminum composite (ACP) signs for permanent installations.
             One supplier for everything your Prince Albert business needs to look professional.
           </p>
@@ -64,7 +64,7 @@ export default function SignsPrinceAlbertPage() {
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
@@ -72,7 +72,7 @@ export default function SignsPrinceAlbertPage() {
         "Coroplast from $8/sqft — UV-printed, weatherproof, built for Saskatchewan winters",
         "Vinyl banners from $8.25/sqft — grommets and hemming included",
         "Vehicle magnets from $24/sqft — removable fleet branding",
-        "Business cards 250 for $40 — sharp colour, same-day in Saskatoon, shipped to PA",
+        "Business cards 250 for $45 — sharp colour, same-day in Saskatoon, shipped to PA",
         "In-house designer — file prep from any format, starting at $35",
         "Shipped to Prince Albert — order online, approve by email, courier delivery",
       ]}
@@ -99,7 +99,7 @@ export default function SignsPrinceAlbertPage() {
         },
         {
           q: "Can Prince Albert businesses get business cards and flyers shipped?",
-          a: "Yes — 250 business cards (double-sided, full colour) from $40. Flyers start at $45 for 100. Both ship flat in padded packaging. Timeline: 3–5 business days including shipping to Prince Albert.",
+          a: "Yes — 250 business cards (double-sided, full colour) from $45. Flyers start at $45 for 100. Both ship flat in padded packaging. Timeline: 3–5 business days including shipping to Prince Albert.",
         },
         {
           q: "Do you print for healthcare organizations in Prince Albert?",

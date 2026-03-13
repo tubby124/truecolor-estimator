@@ -50,7 +50,7 @@ export default function PrintingWeyburnPage() {
             </Link>{" "}
             from $13/sqft are built for permanent facility and yard signage — rigid composite
             panel, UV-printed on our Roland press, rated 10+ years outdoors in southeast
-            Saskatchewan conditions. An 18×24&quot; ACP panel is $39; 24×36&quot; is $66.
+            Saskatchewan conditions. An 18×24&quot; ACP panel is $60 (minimum applies); 24×36&quot; is $66.
             Vehicle magnets from $24/sqft (minimum $45) for service trucks and industrial fleets.
             Vinyl banners from $8.25/sqft for company events and seasonal promotions.
           </p>
@@ -68,7 +68,7 @@ export default function PrintingWeyburnPage() {
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
@@ -95,7 +95,7 @@ export default function PrintingWeyburnPage() {
         },
         {
           q: "What is the best sign product for Weyburn agricultural businesses?",
-          a: "Coroplast signs from $8/sqft are the most popular for ag businesses — yard signs, field signs, and seasonal promotions. H-stakes at $2.50 each for ground mounting. For permanent signs on buildings or gateways, ACP aluminum from $13/sqft (18×24\" = $39, 24×36\" = $66) is the better long-term investment.",
+          a: "Coroplast signs from $8/sqft are the most popular for ag businesses — yard signs, field signs, and seasonal promotions. H-stakes at $2.50 each for ground mounting. For permanent signs on buildings or gateways, ACP aluminum from $13/sqft (18×24\" = $60 min, 24×36\" = $66) is the better long-term investment.",
         },
         {
           q: "Are there local print shops in Weyburn that offer the same products?",
@@ -103,7 +103,7 @@ export default function PrintingWeyburnPage() {
         },
         {
           q: "Is there a minimum order for Weyburn customers?",
-          a: "No minimum. You can order a single coroplast sign or one set of vehicle magnets. Volume discounts apply automatically at higher sqft totals. Business cards start at 250 for $40, flyers at 100 for $45, both shipped to Weyburn.",
+          a: "No minimum. You can order a single coroplast sign or one set of vehicle magnets. Volume discounts apply automatically at higher quantities. Business cards start at 250 for $45, flyers at 100 for $45, both shipped to Weyburn.",
         },
       ]}
     />

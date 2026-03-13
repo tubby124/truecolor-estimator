@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Banner Printing Saskatoon | From $8.25/sqft | True Color" },
   description:
-    "Custom vinyl banner printing in Saskatoon from $8.25/sqft. Any size, grommets included. Events, storefronts, trade shows. Same-day rush available. Local pickup at 216 33rd St W.",
+    "Vinyl banner printing in Saskatoon from $8.25/sqft. Any size, grommets included. Events, storefronts, trade shows. Same-day rush +$40. Pickup 216 33rd St W.",
   alternates: { canonical: "/banner-printing-saskatoon" },
   openGraph: {
     title: "Banner Printing Saskatoon | True Color Display Printing",
@@ -25,7 +25,7 @@ export default function BannerPrintingSaskatoonPage() {
       subtitle="13oz vinyl banners from $8.25/sqft. Any size. Grommets included. Same-day rush available."
       heroImage="/images/products/product/banner-vinyl-colorful-800x600.webp"
       heroAlt="Vinyl banner printing in Saskatoon by True Color Display Printing"
-      description="True Color Display Printing produces 13oz vinyl banners for Saskatoon businesses, events, and organizations. Any custom size, full colour, grommets included as standard. Volume pricing applies automatically — 5% off at 5+ sqft, 10% off at 10+ sqft, 15% off at 15+ sqft. We print in-house on our Roland UV printer, which means faster turnaround and colour consistency you can rely on. Same-day rush available for +$40 flat."
+      description="True Color Display Printing produces 13oz vinyl banners for Saskatoon businesses, events, and organizations. Any custom size, full colour, grommets included as standard. Volume pricing applies automatically — 5% off at 5+ banners, 10% off at 10+ banners, 15% off at 25+ banners. We print in-house on our Roland UV printer, which means faster turnaround and colour consistency you can rely on. Same-day rush available for +$40 flat."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -37,8 +37,8 @@ export default function BannerPrintingSaskatoonPage() {
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             True Color Display Printing produces 13oz vinyl banners for Saskatoon businesses, events,
             and organizations. Any custom size, full colour, grommets included as standard. Volume
-            pricing applies automatically — 5% off at 5+ sqft, 10% off at 10+ sqft, 15% off at 15+
-            sqft. In-house Roland UV printer — faster turnaround, consistent colour. Same-day rush
+            pricing applies automatically — 5% off at 5+ banners, 10% off at 10+ banners, 15% off at 25+
+            banners. In-house Roland UV printer — faster turnaround, consistent colour. Same-day rush
             available for +$40 flat.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
@@ -81,12 +81,12 @@ export default function BannerPrintingSaskatoonPage() {
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
       ]}
       whyPoints={[
         "13oz scrim vinyl — outdoor-rated, wind-resistant, no curling or peeling",
         "Grommets included as standard every 2 ft — no extra charge",
-        "Volume discount: 5% off at 5+ sqft, 10% off at 10+ sqft, 15% off at 15+ sqft",
+        "Volume discount: 5% off at 5+ banners, 10% off at 10+ banners, 15% off at 25+ banners",
         "Any custom size up to 4 ft wide by any length (split-panel for wider prints)",
         "Same-day rush for +$40 flat when ordered before 10 AM — call to confirm",
         "In-house Roland UV printer — we control colour and timeline, no outsourcing",
@@ -94,7 +94,7 @@ export default function BannerPrintingSaskatoonPage() {
       faqs={[
         {
           q: "How much does banner printing cost in Saskatoon?",
-          a: "Vinyl banners at True Color start at $8.25/sqft. A 2×6 ft banner is $90. A 3×8 ft banner is $178. Volume discounts: 5% off at 5+ sqft, 10% at 10+, 15% at 15+. Use the calculator at /products/vinyl-banners to get your exact price.",
+          a: "Vinyl banners at True Color start at $8.25/sqft. A 2×6 ft banner is $90. A 3×8 ft banner is $180. Volume discounts: 5% off at 5+ banners, 10% at 10+, 15% at 25+. Use the calculator at /products/vinyl-banners to get your exact price.",
         },
         {
           q: "What's included in the banner price?",

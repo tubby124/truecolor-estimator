@@ -27,7 +27,7 @@ const descriptionNode = (
     no quality surprises on your brand palette. Outdoor durability runs 3–5 years without
     fading. Retractable banners from $219 pull their weight at reception desks, membership
     drives, and community fitness expos. Foamboard class schedule boards keep your lobby sharp
-    without the cost of a permanent wall installation — swap them out each quarter for $8/sqft.
+    without the cost of a permanent wall installation — swap them out each quarter for $10/sqft.
     Window decals turn your storefront glass into a second billboard: price lists, class times,
     brand accent panels — all from $11/sqft. Need artwork? Our in-house Photoshop designer
     handles it for $35 flat with a same-day proof — no outside agency, no back-and-forth
@@ -60,12 +60,12 @@ export default function GymFitnessSignsSaskatoonPage() {
       subtitle="Make opening week count — grand opening banners from $66, class boards, and membership signage printed in-house and ready to hang."
       heroImage="/images/products/heroes/sports-hero-1200x500.webp"
       heroAlt="Vinyl banners and window decals for Saskatoon gyms and fitness studios printed by True Color Display Printing"
-      description="Opening week at a Saskatoon gym is your highest-visibility moment — and the signage needs to match. Grand opening vinyl banners start at $66 for 2×4 ft with grommets included. Colours stay vivid with our in-house Roland UV printer — bold gym palettes in neon greens, deep blacks, and high-contrast reds that hold outdoors for 3–5 years. Retractable banners from $219, foamboard class schedule boards from $8/sqft, and window decals from $11/sqft complete the kit. In-house designer $35 flat, same-day proof. Rush +$40."
+      description="Opening week at a Saskatoon gym is your highest-visibility moment — and the signage needs to match. Grand opening vinyl banners start at $66 for 2×4 ft with grommets included. Colours stay vivid with our in-house Roland UV printer — bold gym palettes in neon greens, deep blacks, and high-contrast reds that hold outdoors for 3–5 years. Retractable banners from $219, foamboard class schedule boards from $10/sqft, and window decals from $11/sqft complete the kit. In-house designer $35 flat, same-day proof. Rush +$40."
       descriptionNode={descriptionNode}
       products={[
         { name: "Vinyl Banners", from: "2×4 ft from $66", slug: "vinyl-banners" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
@@ -74,7 +74,7 @@ export default function GymFitnessSignsSaskatoonPage() {
         "Grand opening banners from $66 — 2×4 ft with grommets, ready to hang in 1–3 business days",
         "Colours that hold: Roland UV in-house means neon gym palettes printed without outsourcing — no quality surprises on your brand colours",
         "Retractable banners from $219 — membership packages sell better with a visual at reception than a brochure on a shelf",
-        "Quarter-swap class schedule boards from $8/sqft — update your lobby display without touching the wall",
+        "Quarter-swap class schedule boards from $10/sqft — update your lobby display without touching the wall",
         "Window decals from $11/sqft — your storefront glass does double duty as branded street-facing advertising",
         "In-house Photoshop designer — $35 flat, same-day proof, your artwork matched without an outside agency",
         "We print your order same-day for +$40 flat — place it before 10 AM, pick it up at 216 33rd St W, Saskatoon",
@@ -86,7 +86,7 @@ export default function GymFitnessSignsSaskatoonPage() {
         },
         {
           q: "What signage does a new CrossFit box or martial arts studio typically need?",
-          a: "Most new fitness studios order a combination of: one outdoor grand opening banner (3×6 ft, $135), one or two retractable banners for reception ($219–$349), window decals for the storefront glass ($11/sqft, min $45), and a foamboard class schedule board for the lobby (from $8/sqft). Our designer bundles the artwork across all pieces for $35 flat.",
+          a: "Most new fitness studios order a combination of: one outdoor grand opening banner (3×6 ft, $135), one or two retractable banners for reception ($219–$349), window decals for the storefront glass ($11/sqft, min $45), and a foamboard class schedule board for the lobby (from $10/sqft). Our designer bundles the artwork across all pieces for $35 flat.",
         },
         {
           q: "Can you match my gym's brand colours exactly?",
