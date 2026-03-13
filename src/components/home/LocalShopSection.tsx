@@ -36,7 +36,7 @@ export function LocalShopSection() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/quote"
+                href="/products"
                 className="bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-md hover:bg-[#0fb0dd] transition-colors"
               >
                 Get a Price →

@@ -246,7 +246,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
-            href="/quote"
+            href="/products"
             className="bg-[#16C2F3] text-white font-bold px-8 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors"
           >
             Order something else →

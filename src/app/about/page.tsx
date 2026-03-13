@@ -240,7 +240,7 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
-              href="/quote"
+              href="/products"
               className="bg-white text-[#16C2F3] font-bold px-6 py-3 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap"
             >
               Get a Quote →

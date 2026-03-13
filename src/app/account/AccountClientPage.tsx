@@ -729,7 +729,7 @@ export function AccountClientPage() {
             </div>
             <div className="mt-5">
               <Link
-                href="/quote"
+                href="/products"
                 className="text-sm text-[#16C2F3] font-semibold hover:underline"
               >
                 Place a new order &rarr;
@@ -766,7 +766,7 @@ export function AccountClientPage() {
         {/* Quick actions */}
         <div className="flex items-center gap-2 flex-wrap mb-8 text-sm">
           <Link
-            href="/quote"
+            href="/products"
             className="bg-[#16C2F3] text-white font-bold px-4 py-2 rounded-lg hover:bg-[#0fb0dd] transition-colors"
           >
             Get a price &rarr;
@@ -796,7 +796,7 @@ export function AccountClientPage() {
           <div className="text-center py-20">
             <p className="text-gray-400 text-lg mb-6">No orders yet.</p>
             <Link
-              href="/quote"
+              href="/products"
               className="bg-[#16C2F3] text-white font-bold px-8 py-4 rounded-lg hover:bg-[#0fb0dd] transition-colors"
             >
               Get a price &rarr;

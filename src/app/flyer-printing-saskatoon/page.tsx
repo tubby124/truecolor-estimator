@@ -47,7 +47,7 @@ export default function FlyerPrintingSaskatoonPage() {
             Custom sizes (half-letter 5.5×8.5&quot;, legal 8.5×14&quot;, or fully custom dimensions)
             are available on request. Use the estimator to price letter-size runs; for other sizes
             call (306) 954-8688 or{" "}
-            <Link href="/quote" className="text-[#16C2F3] underline font-medium">
+            <Link href="/products" className="text-[#16C2F3] underline font-medium">
               request a quote online
             </Link>
             .

@@ -91,7 +91,7 @@ export default function ServicesPage() {
             ]}
             detailsNote="$75 flat rate for most Saskatoon installations. Complex or large-format jobs quoted individually."
             cta="Get a quote →"
-            ctaHref="/quote-request?product=installation"
+            ctaHref="/quote?product=installation"
           />
 
           <ServiceCard
@@ -106,7 +106,7 @@ export default function ServicesPage() {
             ]}
             detailsNote="Pricing varies by size, material, and complexity — request an exact quote below."
             cta="Ask for a quote →"
-            ctaHref="/quote-request?product=window-decals"
+            ctaHref="/quote?product=window-decals"
           />
 
           <ServiceCard
@@ -119,7 +119,7 @@ export default function ServicesPage() {
               "Original logo design from scratch — $50\u2013$75",
             ]}
             cta="Book a design consultation →"
-            ctaHref="/quote-request?product=graphic-design"
+            ctaHref="/quote?product=graphic-design"
           />
         </div>
 

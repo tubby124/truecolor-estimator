@@ -226,7 +226,7 @@ export default function HomePage() {
             </svg>
             <span className="text-sm font-semibold">1–3 Day Standard</span>
           </div>
-          <Link href="/quote" className="flex items-center gap-2 px-5 py-1 text-white hover:opacity-80 transition-opacity">
+          <Link href="/products" className="flex items-center gap-2 px-5 py-1 text-white hover:opacity-80 transition-opacity">
             <svg className="w-4 h-4 text-[#16C2F3] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
             </svg>
@@ -380,7 +380,7 @@ export default function HomePage() {
                 n: "1",
                 title: "Get your exact price",
                 desc: "Pick a product. See your number in 30 seconds. No forms, no phone tag.",
-                href: "/quote",
+                href: "/products",
                 link: "Get a price →",
                 delay: "",
               },
@@ -503,7 +503,7 @@ export default function HomePage() {
           </blockquote>
 
           <Link
-            href="/quote"
+            href="/products"
             className="inline-block bg-[#16C2F3] text-white font-bold text-lg px-10 py-4 rounded-full hover:bg-[#0fb0dd] transition-colors btn-shimmer"
           >
             Get My Exact Price →
@@ -523,7 +523,7 @@ export default function HomePage() {
             </p>
           </div>
           <Link
-            href="/quote"
+            href="/products"
             className="shrink-0 bg-white text-[#1c1712] font-bold px-7 py-4 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap btn-shimmer"
           >
             See All Products →

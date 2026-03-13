@@ -71,7 +71,7 @@ export default function TradeShowDisplaysSaskatoonPage() {
               retractable banner stand options
             </Link>
             {" "}or use our{" "}
-            <Link href="/quote" className="text-[#16C2F3] underline font-medium">
+            <Link href="/products" className="text-[#16C2F3] underline font-medium">
               instant quote tool
             </Link>
             {" "}to price out your full booth kit.

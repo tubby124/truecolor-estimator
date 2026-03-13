@@ -68,7 +68,7 @@ export default function EventSignsSaskatoonPage() {
             Last-minute event? Same-day rush is +$40 flat on orders placed before 10 AM.
             Call (306) 954-8688 to confirm same-day availability for your order quantity.
             Use our{" "}
-            <Link href="/quote" className="text-[#16C2F3] underline font-medium">
+            <Link href="/products" className="text-[#16C2F3] underline font-medium">
               instant quote tool
             </Link>
             {" "}to price your event kit, or check our{" "}

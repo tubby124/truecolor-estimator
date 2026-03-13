@@ -107,7 +107,7 @@ export function IndustryPage({
     ],
   } : null;
 
-  const ctaHref = primaryProductSlug ? `/products/${primaryProductSlug}` : "/quote";
+  const ctaHref = primaryProductSlug ? `/products/${primaryProductSlug}` : "/products";
 
   return (
     <div className="min-h-screen bg-white">

@@ -420,7 +420,7 @@ export default function ContactPage() {
             </div>
             <p className="text-gray-500 text-sm">
               Not in a rush?{" "}
-              <Link href="/quote" className="text-[#16C2F3] hover:underline font-medium">
+              <Link href="/products" className="text-[#16C2F3] hover:underline font-medium">
                 Get an instant price online
               </Link>{" "}
               — no forms, no phone calls, results in 30 seconds.
@@ -449,7 +449,7 @@ export default function ContactPage() {
             Know what you need? Get your exact price in 30 seconds.
           </p>
           <Link
-            href="/quote"
+            href="/products"
             className="bg-white text-[#16C2F3] font-bold px-8 py-3 rounded-md hover:bg-gray-100 transition-colors whitespace-nowrap shrink-0"
           >
             Get a Price →

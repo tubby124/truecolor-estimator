@@ -13,7 +13,7 @@ export default function NotFound() {
         But your exact print price does. It&apos;s waiting for you on the estimator.
       </p>
       <Link
-        href="/quote"
+        href="/products"
         className="bg-[#16C2F3] text-white font-bold px-8 py-4 rounded-md text-lg hover:bg-[#0fb0dd] transition-colors"
       >
         Get a Price →

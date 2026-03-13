@@ -25,7 +25,7 @@ export default function GlobalError({
           Try again
         </button>
         <a
-          href="/quote"
+          href="/products"
           className="border border-gray-600 text-gray-300 font-semibold px-8 py-4 rounded-md text-lg hover:border-[#16C2F3] hover:text-white transition-colors"
         >
           Back to products

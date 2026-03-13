@@ -66,7 +66,7 @@ export default function LargeFormatPrintingSaskatoonPage() {
           <p className="text-gray-600 leading-relaxed">
             We&apos;re at 216 33rd St W, Saskatoon — local pickup, no shipping risk.
             Use our{" "}
-            <Link href="/quote" className="text-[#16C2F3] underline font-medium">
+            <Link href="/products" className="text-[#16C2F3] underline font-medium">
               instant quote tool
             </Link>
             {" "}to get a price in 30 seconds, or call (306) 954-8688.

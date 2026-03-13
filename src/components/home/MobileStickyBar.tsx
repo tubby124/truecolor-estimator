@@ -21,7 +21,7 @@ export function MobileStickyBar() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-[#1c1712] border-t border-white/10 px-4 py-3 flex gap-3">
       <Link
-        href="/quote"
+        href="/products"
         className="flex-1 bg-[#16C2F3] text-white font-bold text-sm py-3 rounded-md text-center hover:bg-[#0fb0dd] transition-colors"
       >
         Get a Price →

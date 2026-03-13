@@ -250,7 +250,7 @@ export function PriceSummary({
 
         {/* Secondary CTA */}
         <a
-          href={`/quote-request?product=${productSlug}`}
+          href={`/quote?product=${productSlug}`}
           className="block text-center text-sm text-gray-500 hover:text-[#16C2F3] transition-colors"
         >
           Or get a quote by email

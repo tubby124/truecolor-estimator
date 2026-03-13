@@ -78,7 +78,7 @@ export default function SameDayPrintingSaskatoonPage() {
               banner printing options
             </Link>
             , or use the{" "}
-            <Link href="/quote" className="text-[#16C2F3] underline font-medium">
+            <Link href="/products" className="text-[#16C2F3] underline font-medium">
               instant quote tool
             </Link>
             {" "}to get an exact price before you call.

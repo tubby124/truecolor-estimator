@@ -416,7 +416,7 @@ export default function CheckoutPage() {
         <main id="main-content" className="max-w-2xl mx-auto px-6 py-20 text-center">
           <p className="text-gray-400 text-lg mb-6">Your cart is empty.</p>
           <Link
-            href="/quote"
+            href="/products"
             className="bg-[#16C2F3] text-white font-bold px-8 py-4 rounded-lg hover:bg-[#0fb0dd] transition-colors"
           >
             Get a Price →

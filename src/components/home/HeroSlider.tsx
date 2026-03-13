@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { QuoteModal } from "@/components/QuoteModal";
-
 const SLIDES = [
   {
     img: "/images/products/product/coroplast-yard-sign-800x600.webp",
@@ -74,7 +72,6 @@ export function HeroSlider() {
   // known bug where overflow:hidden doesn't clip absolutely-positioned children
   // that use CSS transform-based animations.
   const [isMobile, setIsMobile] = useState(false);
-  const [quoteOpen, setQuoteOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
@@ -198,12 +195,12 @@ export function HeroSlider() {
               >
                 {slide.cta}
               </Link>
-              <button
-                onClick={() => setQuoteOpen(true)}
-                className="border border-white/40 text-white font-semibold px-3 py-2.5 sm:px-7 sm:py-3 rounded-lg hover:border-white transition-colors text-sm sm:text-base"
+              <Link
+                href="/quote"
+                className="border border-white/40 text-white font-semibold px-3 py-2.5 sm:px-7 sm:py-3 rounded-lg hover:border-white transition-colors text-sm sm:text-base text-center"
               >
                 Custom Quote
-              </button>
+              </Link>
               <a
                 href="tel:+13069548688"
                 className="border border-white/40 text-white font-semibold px-3 py-2.5 sm:px-7 sm:py-3 rounded-lg hover:border-white transition-colors text-sm sm:text-base text-center"
@@ -254,7 +251,6 @@ export function HeroSlider() {
         />
       </div>
 
-      <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} />
     </section>
   );
 }

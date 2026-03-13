@@ -34,6 +34,12 @@ const nextConfig: NextConfig = {
         destination: "/banner-printing-saskatoon",
         permanent: true,
       },
+      // /quote-request consolidated to /quote (2026-03-13 URL architecture restructure)
+      {
+        source: "/quote-request",
+        destination: "/quote",
+        permanent: true,
+      },
     ];
   },
 
@@ -48,7 +54,7 @@ const nextConfig: NextConfig = {
         "/staff/:path*",
         "/account",
         "/account/:path*",
-        "/quote/:path+",
+        "/products/:path+",
         "/api/:path*",
       ].map((source) => ({
         source,

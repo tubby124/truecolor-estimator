@@ -70,7 +70,7 @@ export default function RealEstatePage() {
               business cards
             </Link>
             {" "}for a broker open? We have everything in one stop. Use the{" "}
-            <Link href="/quote" className="text-[#16C2F3] underline font-medium">
+            <Link href="/products" className="text-[#16C2F3] underline font-medium">
               instant quote tool
             </Link>
             {" "}to price out your listing kit, or call (306) 954-8688 and we&apos;ll quote your full order in minutes.

@@ -10,7 +10,7 @@ export function SiteFooter() {
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-white font-bold text-xl">Ready to print? See your exact price now.</p>
           <Link
-            href="/quote"
+            href="/products"
             className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-full hover:bg-[#0fb0dd] transition-colors whitespace-nowrap shrink-0"
           >
             Get a Price →
@@ -74,7 +74,7 @@ export function SiteFooter() {
             <h3 className="text-white text-sm font-semibold mb-4">Quick Links</h3>
             <div className="grid grid-cols-2 gap-x-4 text-sm">
               <div className="space-y-2">
-                <Link href="/quote" className="block hover:text-white transition-colors">
+                <Link href="/products" className="block hover:text-white transition-colors">
                   Get a Price
                 </Link>
                 <Link href="/graphic-design-saskatoon" className="block hover:text-white transition-colors">

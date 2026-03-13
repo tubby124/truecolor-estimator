@@ -6,7 +6,6 @@ import Image from "next/image";
 import { CartIcon } from "@/components/site/CartIcon";
 import { AccountIcon } from "@/components/site/AccountIcon";
 import { StaffQuoteButton } from "@/components/site/StaffQuoteButton";
-import { QuoteModal } from "@/components/QuoteModal";
 import { User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,33 +13,33 @@ const PRODUCT_CATEGORIES = [
   {
     label: "Signs & Displays",
     links: [
-      { label: "Coroplast Signs", href: "/coroplast-signs-saskatoon" },
-      { label: "ACP Aluminum Signs", href: "/aluminum-signs-saskatoon" },
-      { label: "Vinyl Banners", href: "/banner-printing-saskatoon" },
-      { label: "Foamboard Displays", href: "/foamboard-printing-saskatoon" },
-      { label: "Retractable Banners", href: "/retractable-banners-saskatoon" },
+      { label: "Coroplast Signs", href: "/products/coroplast-signs" },
+      { label: "ACP Aluminum Signs", href: "/products/acp-signs" },
+      { label: "Vinyl Banners", href: "/products/vinyl-banners" },
+      { label: "Foamboard Displays", href: "/products/foamboard-displays" },
+      { label: "Retractable Banners", href: "/products/retractable-banners" },
     ],
   },
   {
     label: "Window & Vehicle",
     links: [
-      { label: "Window Decals", href: "/window-decals-saskatoon" },
+      { label: "Window Decals", href: "/products/window-decals" },
       { label: "Wall Graphics", href: "/wall-graphics-saskatoon" },
       { label: "Perforated Window Vinyl", href: "/products/window-perf" },
-      { label: "Vehicle Magnets", href: "/custom-magnets-saskatoon" },
-      { label: "Vinyl Lettering", href: "/vinyl-lettering-saskatoon" },
+      { label: "Vehicle Magnets", href: "/products/vehicle-magnets" },
+      { label: "Vinyl Lettering", href: "/products/vinyl-lettering" },
     ],
   },
   {
     label: "Print & Promo",
     links: [
-      { label: "Business Cards", href: "/business-cards-saskatoon" },
-      { label: "Flyers", href: "/flyer-printing-saskatoon" },
-      { label: "Brochures", href: "/brochure-printing-saskatoon" },
+      { label: "Business Cards", href: "/products/business-cards" },
+      { label: "Flyers", href: "/products/flyers" },
+      { label: "Brochures", href: "/products/brochures" },
       { label: "Rack Cards", href: "/products/rack-cards" },
-      { label: "Postcards", href: "/postcard-printing-saskatoon" },
-      { label: "Stickers", href: "/sticker-printing-saskatoon" },
-      { label: "Photo Posters", href: "/photo-poster-printing-saskatoon" },
+      { label: "Postcards", href: "/products/postcards" },
+      { label: "Stickers", href: "/products/stickers" },
+      { label: "Photo Posters", href: "/products/photo-posters" },
     ],
   },
 ];
@@ -78,7 +77,6 @@ const INDUSTRY_LINKS = [
 export function SiteNav() {
   const [openMenu, setOpenMenu] = useState<"products" | "industries" | "about" | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [quoteOpen, setQuoteOpen] = useState(false);
   const [mobileAuth, setMobileAuth] = useState<{ email: string; isStaff: boolean } | null>(null);
   const [mobileAuthLoaded, setMobileAuthLoaded] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
@@ -397,14 +395,14 @@ export function SiteNav() {
             <span className="hidden sm:block">
               <StaffQuoteButton />
             </span>
-            <button
-              onClick={() => setQuoteOpen(true)}
-              className="hidden sm:block border border-gray-600 text-gray-300 text-sm font-medium px-4 py-2.5 rounded-md hover:border-white hover:text-white transition-colors whitespace-nowrap cursor-pointer"
-            >
-              Custom Quote
-            </button>
             <Link
               href="/quote"
+              className="hidden sm:block border border-gray-600 text-gray-300 text-sm font-medium px-4 py-2.5 rounded-md hover:border-white hover:text-white transition-colors whitespace-nowrap"
+            >
+              Custom Quote
+            </Link>
+            <Link
+              href="/products"
               className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden sm:block"
             >
               Order Now →
@@ -412,7 +410,7 @@ export function SiteNav() {
 
             {/* Mobile quick-price CTA — 1-tap access, hidden on desktop */}
             <Link
-              href="/quote"
+              href="/products"
               className="sm:hidden bg-[#16C2F3] text-white text-xs font-bold px-3 py-2 rounded-md whitespace-nowrap"
             >
               Order Now →
@@ -650,7 +648,7 @@ export function SiteNav() {
 
             {/* Customer CTA */}
             <Link
-              href="/quote"
+              href="/products"
               onClick={() => setDrawerOpen(false)}
               className="block w-full text-center bg-[#16C2F3] text-white text-base font-bold px-5 py-3.5 rounded-md hover:bg-[#0fb0dd] transition-colors"
             >
@@ -658,18 +656,16 @@ export function SiteNav() {
             </Link>
 
             {/* Request a Quote — secondary */}
-            <button
-              onClick={() => { setDrawerOpen(false); setQuoteOpen(true); }}
+            <Link
+              href="/quote"
+              onClick={() => setDrawerOpen(false)}
               className="block w-full text-center border border-gray-600 text-gray-300 text-base font-medium px-5 py-3.5 rounded-md hover:border-white hover:text-white transition-colors"
             >
               Request a Custom Quote
-            </button>
+            </Link>
           </nav>
         </div>
       )}
-
-      {/* Quote Request Modal */}
-      <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} />
     </>
   );
 }

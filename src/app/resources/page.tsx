@@ -368,7 +368,7 @@ export default async function ResourcesPage() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/quote"
+              href="/products"
               className="bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-md hover:bg-[#0fb0dd] transition-colors text-sm"
             >
               Get an Instant Price →
@@ -429,7 +429,7 @@ export default async function ResourcesPage() {
             </p>
           </div>
           <Link
-            href="/quote"
+            href="/products"
             className="flex-shrink-0 bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-md hover:bg-[#0fb0dd] transition-colors text-sm whitespace-nowrap"
           >
             Get an Instant Price →
@@ -517,7 +517,7 @@ export default async function ResourcesPage() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/quote"
+              href="/products"
               className="bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-md hover:bg-[#0fb0dd] transition-colors text-sm"
             >
               Get an Instant Price →

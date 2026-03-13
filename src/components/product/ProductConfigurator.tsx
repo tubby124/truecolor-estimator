@@ -336,7 +336,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 call (306) 954-8688
               </a>{" "}
               or{" "}
-              <a href="/quote" className="text-[#16C2F3] font-medium hover:underline">
+              <a href="/products" className="text-[#16C2F3] font-medium hover:underline">
                 request a quote
               </a>.
             </p>
@@ -403,7 +403,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 call (306) 954-8688
               </a>{" "}
               or{" "}
-              <a href="/quote" className="text-[#16C2F3] font-medium hover:underline">
+              <a href="/products" className="text-[#16C2F3] font-medium hover:underline">
                 request a quote
               </a>.
             </p>
@@ -499,7 +499,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
               Call (306) 954-8688
             </a>{" "}
             or{" "}
-            <a href="/quote" className="text-[#16C2F3] font-medium hover:underline">
+            <a href="/products" className="text-[#16C2F3] font-medium hover:underline">
               get a quote online
             </a>.
           </p>
