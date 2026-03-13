@@ -1,5 +1,7 @@
 # SEO Protected Pages — Rankings as of 2026-03-12
 
+> This file supplements ~/.claude/rules/truecolor-seo-safety.md with specific page rankings. Update monthly from Search Console.
+
 These pages have confirmed top-10 rankings. Any edit requires:
 1. Price-only fixes (no content restructuring)
 2. NEVER change: meta title, H1, URL slug, title tag

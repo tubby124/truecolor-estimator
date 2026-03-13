@@ -1,5 +1,7 @@
 # True Color Pricing Communication Rules
 
+> This file supplements ~/.claude/rules/brand-voice.md with specific pricing communication patterns. See also: data/PRICING_QUICK_REFERENCE.md for the full pricing reference.
+
 ## Source of truth
 All prices come from data/tables/ CSVs. PRICING_QUICK_REFERENCE.md is the human-readable reference.
 
