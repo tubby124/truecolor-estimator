@@ -124,6 +124,18 @@ export function SiteFooter() {
                 <Link href="/construction-signs-saskatoon" className="block hover:text-white transition-colors">
                   Construction Signs
                 </Link>
+                <Link href="/healthcare-signs-saskatoon" className="block hover:text-white transition-colors">
+                  Healthcare Signs
+                </Link>
+                <Link href="/dental-office-signs-saskatoon" className="block hover:text-white transition-colors">
+                  Dental Office Signs
+                </Link>
+                <Link href="/election-signs" className="block hover:text-white transition-colors">
+                  Election Signs
+                </Link>
+                <Link href="/graduation-banners-saskatoon" className="block hover:text-white transition-colors">
+                  Graduation Banners
+                </Link>
                 <Link href="/real-estate-signs-saskatoon" className="block hover:text-white transition-colors">
                   Real Estate Signs
                 </Link>

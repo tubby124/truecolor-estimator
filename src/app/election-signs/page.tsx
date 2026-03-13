@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Election Signs Saskatoon | From $8/sqft | True Color" },
   description:
-    "Coroplast election yard signs in Saskatoon and Saskatchewan. Volume pricing from $7.25/sqft (32+ sqft). H-stakes $3 each. Double-sided available. Call (306) 954-8688.",
+    "Coroplast election yard signs in Saskatoon and Saskatchewan. Volume pricing from $7.25/sqft (32+ sqft). H-stakes $3. Double-sided available.",
   alternates: { canonical: "/election-signs" },
   openGraph: {
     title: "Election Signs Saskatoon | True Color",
@@ -74,10 +74,13 @@ export default function ElectionSignsPage() {
       ]}
       whyPoints={[
         "Volume discount at 32+ sqft — 10 signs of 24×36\" qualifies for $7.25/sqft",
-        "Double-sided coroplast for corner placement — maximum visibility",
-        "H-stakes at $2.50 each, bundled pricing available",
-        "Consistent Roland UV color across 10, 100, or 500 signs",
-        "Vehicle magnets from $45 — campaign vehicle branding without commitment",
+        "Double-sided coroplast for corner placement — maximum visibility at intersections",
+        "H-stakes at $3 each — bundled pricing available with any coroplast order",
+        "Consistent Roland UV colour across 10, 100, or 500 signs — your brand stays sharp",
+        "Vehicle magnets from $45 — campaign vehicle branding without permanent commitment",
+        "Same-day rush +$40 flat — when the writ drops, signs ready within 24 hours",
+        "In-house designer builds layouts from your party logo and candidate photo — $35 flat",
+        "Ships across Saskatchewan — Saskatoon, Regina, Prince Albert, Moose Jaw, and rural ridings",
       ]}
       faqs={[
         {

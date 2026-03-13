@@ -51,7 +51,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/agribusiness-signs-saskatchewan`, lastModified: new Date("2025-12-15"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/agriculture-signs-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/restaurant-signs-saskatoon`, lastModified: new Date("2026-01-08"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/election-signs`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/election-signs`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/event-banners`, lastModified: new Date("2026-01-15"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/ramadan-eid-banners-saskatoon`, lastModified: new Date("2026-02-01"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/healthcare-signs-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },

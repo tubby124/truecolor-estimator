@@ -46,12 +46,13 @@ These products have a per-product minimum order. The minimum IS the correct "fro
 
 1. **Landing pages / emails / campaigns:** Use the "Marketing from $X" column. This is the minimum order — the real starting price a customer will pay.
 2. **FAQs / pricing breakdowns:** Use the "FAQ / Comparison Text" column. Show both the sqft rate AND the minimum so customers understand the structure.
-3. **Never say "from $8/sqft" for coroplast in marketing** — customers can't actually order for $8, the minimum is $30. Exception: FAQ context explaining how pricing works.
+3. **Never say "from $8/sqft" for coroplast in marketing headlines** — customers can't actually order for $8, the minimum is $30. Exception: FAQ context explaining how pricing works, and product reference cards on IndustryPage (see rule 9).
 4. **Banners "from $66" is correct** — the smallest standard size (2×4ft) costs $66, which is above the $45 minimum. Don't use "from $45".
 5. **Foamboard "from $45" is correct** — it's not inflated, it's the real 18×24" price that happens to match the minimum.
 6. **Rush +$40 flat** — always mention separately, never baked into "from" price.
 7. **Design $35 flat** — always mention separately.
 8. **All prices are pre-tax.** GST 5% + PST 6% shown only at checkout.
+9. **Product reference cards** (`products` array on IndustryPage): use T1 sqft rates for wide-format products, flat totals for lot-priced. This matches ranking pages and product page pricing. Wide-format T1 rates: Coroplast $8/sqft, Banners $8.25/sqft, ACP $13/sqft, Foamboard $10/sqft, Window Decals $11/sqft, Vehicle Magnets $24/sqft.
 
 ---
 
@@ -118,7 +119,7 @@ Grommets: $2.50/each · auto-calculated by engine (max(4, ceil(perimeter_ft/2)))
 Common sizes:
 | Size | Price |
 |------|-------|
-| 18×24" | $39 |
+| 18×24" | $39 (min $60) |
 | 24×36" | $66* |
 | 4×8 ft | $320 |
 

@@ -6,6 +6,14 @@ export const metadata: Metadata = {
   title: { absolute: "Dental Office Signs Saskatoon | ACP & Cards | True Color" },
   description:
     "Business cards, ACP suite signs, and retractable banners for Saskatoon dental offices. New associate? Cards ready in 24–48 hrs. Local pickup at 216 33rd St W.",
+  keywords: [
+    "dental office signs saskatoon",
+    "dental business cards saskatoon",
+    "dental clinic signage saskatoon",
+    "dentist office signs saskatoon",
+    "ACP suite signs dental saskatoon",
+    "dental waiting room displays saskatoon",
+  ],
   alternates: { canonical: "/dental-office-signs-saskatoon" },
   openGraph: {
     title: "Dental Office Signs Saskatoon | True Color Display Printing",
@@ -68,14 +76,14 @@ export default function DentalOfficeSignsSaskatoonPage() {
       subtitle="New associate starting Monday? Cards done by Friday. Local Saskatoon pickup."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Business cards and signs for Saskatoon dental offices printed by True Color Display Printing"
-      description="Business cards for Saskatoon dental offices start at 250 for $40 on 14pt gloss at True Color Display Printing — new associate starting this week? We print cards in 24–48 hours while Staples quotes 5 business days. Multi-dentist practice ordering for 4 providers? One batch, one proof per associate, one pickup at 216 33rd St W, one invoice. ACP aluminum suite signs from $13/sqft are the standard for dental clinic exteriors in Saskatoon strip malls — Stonebridge, Evergreen, Brighton, McKercher — and last 10+ years without fading or warping. A 24×18 inch exterior fascia sign is $39, a 24×36 inch building directory panel is $66. For waiting room displays and patient education signage, foam board prints start at $10/sqft with a $45 minimum — a 24×36 inch panel is $65, lightweight enough to hang or stand in a frame. Retractable banner stands from $219 complete work for new-patient promotions at reception, community health fairs, and dental association events. Window decals for clinic hours, branding, and seasonal promotions start at $11/sqft. Our in-house Roland UV printer produces consistent, accurate colour — bring your brand guide or a Pantone reference and we match it exactly. In-house designer handles layouts from your existing branding for $35 flat with same-day proof — no outside designer, no back-and-forth delays. Same-day rush printing is available for +$40 flat on orders placed before 10 AM — call (306) 954-8688 to confirm. Standard turnaround is 1–3 business days after artwork approval. We keep your artwork on file so reorders for new associates are fast — call with the quantity and we pull your file. Flyers for dental health campaigns and new patient welcome kits are available from $45 for 100 copies on 80lb gloss. Postcards for appointment reminders and direct mail start at 50 for $40 on 14pt stock. Local Saskatoon pickup at 216 33rd St W, Saskatchewan."
+      description="Business cards for Saskatoon dental offices start at 250 for $40 on 14pt gloss at True Color Display Printing — new associate starting this week? We print cards in 24–48 hours while Staples quotes 5 business days. Multi-dentist practice ordering for 4 providers? One batch, one proof per associate, one pickup at 216 33rd St W, one invoice. ACP aluminum suite signs from $13/sqft are the standard for dental clinic exteriors in Saskatoon strip malls — Stonebridge, Evergreen, Brighton, McKercher — and last 10+ years without fading or warping. A 24×18 inch exterior fascia sign is $60 ($60 minimum applies), a 24×36 inch building directory panel is $66. For waiting room displays and patient education signage, foam board prints start at $10/sqft with a $45 minimum — a 24×36 inch panel is $65, lightweight enough to hang or stand in a frame. Retractable banner stands from $219 complete work for new-patient promotions at reception, community health fairs, and dental association events. Window decals for clinic hours, branding, and seasonal promotions start at $11/sqft. Our in-house Roland UV printer produces consistent, accurate colour — bring your brand guide or a Pantone reference and we match it exactly. In-house designer handles layouts from your existing branding for $35 flat with same-day proof — no outside designer, no back-and-forth delays. Same-day rush printing is available for +$40 flat on orders placed before 10 AM — call (306) 954-8688 to confirm. Standard turnaround is 1–3 business days after artwork approval. We keep your artwork on file so reorders for new associates are fast — call with the quantity and we pull your file. Flyers for dental health campaigns and new patient welcome kits are available from $45 for 100 copies on 80lb gloss. Postcards for appointment reminders and direct mail start at 50 for $40 on 14pt stock. Local Saskatoon pickup at 216 33rd St W, Saskatchewan."
       descriptionNode={descriptionNode}
       products={[
         { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
-        { name: "Window Decals", from: "from $8/sqft", slug: "window-decals" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
+        { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
@@ -89,7 +97,7 @@ export default function DentalOfficeSignsSaskatoonPage() {
       faqs={[
         {
           q: "What card stock do most dental offices choose?",
-          a: "Most dental clinics choose 16pt gloss or matte — it feels premium in a patient's hand and holds up to being carried in a wallet or pocket. 14pt is the budget-friendly option. Both are available in single or double-sided. 250 cards from $40, 1000 cards from $80.",
+          a: "Most dental clinics choose 14pt gloss or matte — it feels premium in a patient's hand and holds up to being carried in a wallet or pocket. Both are available in single or double-sided. 250 cards from $40, 1000 cards from $80.",
         },
         {
           q: "We have 4 dentists — can we order all their cards at once?",
