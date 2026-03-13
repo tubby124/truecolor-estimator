@@ -34,7 +34,7 @@ const PRODUCTS = [
   {
     name: "Vinyl Banners",
     category: "Banners",
-    from: "from $45",
+    from: "from $66",
     desc: "13oz vinyl for events, storefronts, and trade shows. Any size.",
     img: "/images/products/product/banner-vinyl-colorful-800x600.webp",
     href: "/banner-printing-saskatoon",
@@ -157,7 +157,7 @@ const homeFaqSchema = {
       name: "How much does printing cost in Saskatoon?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Printing prices at True Color Display Printing in Saskatoon start at: coroplast yard signs from $8/sqft ($30 minimum); vinyl banners from $8.25/sqft; business cards from $45 for 250 double-sided on 14pt gloss stock; vehicle magnets from $45; flyers from $45 for 100 sheets; ACP aluminum signs from $13/sqft; retractable banners from $219; window decals from $45; foamboard displays from $45; stickers from $95; postcards from $35. All prices are pre-tax — GST (5%) and PST (6%) apply at checkout. Volume discounts are automatic: coroplast at 8+ sqft saves 8%, 17+ sqft saves 17%. See your exact price for any product size and quantity instantly at truecolorprinting.ca/quote — no forms, no phone calls, no waiting for a callback. Local pickup only at 216 33rd St W, Saskatoon.",
+        text: "Printing prices at True Color Display Printing in Saskatoon start at: coroplast yard signs from $8/sqft ($30 minimum); vinyl banners from $8.25/sqft; business cards from $45 for 250 double-sided on 14pt gloss stock; vehicle magnets from $45; flyers from $45 for 100 sheets; ACP aluminum signs from $13/sqft; retractable banners from $219; window decals from $45; foamboard displays from $45; stickers from $95; postcards from $35. All prices are pre-tax — GST (5%) and PST (6%) apply at checkout. Volume discounts are automatic: coroplast at 5+ signs saves 8%, 10+ signs saves 17%. See your exact price for any product size and quantity instantly at truecolorprinting.ca/quote — no forms, no phone calls, no waiting for a callback. Local pickup only at 216 33rd St W, Saskatoon.",
       },
     },
     {
@@ -472,7 +472,7 @@ export default function HomePage() {
             <p>
               Coroplast signs from{" "}
               <strong className="text-[#1c1712]">$30</strong>. Vinyl banners from{" "}
-              <strong className="text-[#1c1712]">$45</strong>. 250 business cards for{" "}
+              <strong className="text-[#1c1712]">$66</strong>. 250 business cards for{" "}
               <strong className="text-[#1c1712]">$40</strong>. Prices you can see right now,
               without emailing anyone.
             </p>

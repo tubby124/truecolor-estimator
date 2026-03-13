@@ -26,7 +26,7 @@ export default function AgriculturePage() {
       subtitle="From farm gates to trade shows — printed in Saskatoon."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Saskatchewan farm and agriculture signs"
-      description="Saskatchewan agriculture businesses use True Color Display Printing for everything from coroplast farm gate signs and acreage markers to trade show banners and truck door magnets. Our in-house Roland UV printer produces weatherproof signage that handles prairie winters, spring mud, and summer sun without fading or peeling. Coroplast signs start at $30 — the standard for field plot markers, for-sale signs, and gate identification across Saskatchewan farmland. Vinyl banners from $45 work for Agribition booths, dealer days, and seasonal promotions. Vehicle magnets from $45 turn farm trucks and equipment sales vehicles into mobile advertising across rural Saskatchewan. Business cards at 250 for $45 keep ag reps, seed dealers, and farm owners professional at every handshake. Flyers from $45 and postcards from $35 handle seed catalogs, seasonal direct mail, and co-op promotions. For permanent signage at farm entrances and rural businesses, ACP aluminum signs from $60 last indefinitely in any weather. Window decals from $45 and vinyl lettering from $40 brand co-op storefronts and dealership windows. Equipment branding stickers start at $95 for 25 die-cut vinyl stickers. Our in-house designer handles layout for $35 flat with same-day proof — bring your farm logo or have us create one. Same-day rush is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Local Saskatoon pickup at 216 33rd St W means no shipping delays before the season starts."
+      description="Saskatchewan agriculture businesses use True Color Display Printing for everything from coroplast farm gate signs and acreage markers to trade show banners and truck door magnets. Our in-house Roland UV printer produces weatherproof signage that handles prairie winters, spring mud, and summer sun without fading or peeling. Coroplast signs start at $30 — the standard for field plot markers, for-sale signs, and gate identification across Saskatchewan farmland. Vinyl banners from $66 work for Agribition booths, dealer days, and seasonal promotions. Vehicle magnets from $45 turn farm trucks and equipment sales vehicles into mobile advertising across rural Saskatchewan. Business cards at 250 for $45 keep ag reps, seed dealers, and farm owners professional at every handshake. Flyers from $45 and postcards from $35 handle seed catalogs, seasonal direct mail, and co-op promotions. For permanent signage at farm entrances and rural businesses, ACP aluminum signs from $60 last indefinitely in any weather. Window decals from $45 and vinyl lettering from $40 brand co-op storefronts and dealership windows. Equipment branding stickers start at $95 for 25 die-cut vinyl stickers. Our in-house designer handles layout for $35 flat with same-day proof — bring your farm logo or have us create one. Same-day rush is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Local Saskatoon pickup at 216 33rd St W means no shipping delays before the season starts."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -40,7 +40,7 @@ export default function AgriculturePage() {
             <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vinyl banners
             </Link>{" "}
-            from $45 work for Agribition booths, dealer days, and seasonal promotions.{" "}
+            from $66 work for Agribition booths, dealer days, and seasonal promotions.{" "}
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vehicle magnets
             </Link>{" "}
@@ -67,7 +67,7 @@ export default function AgriculturePage() {
       }
       products={[
         { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
-        { name: "Vinyl Banners", from: "from $45", slug: "vinyl-banners" },
+        { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "from $45", slug: "flyers" },
