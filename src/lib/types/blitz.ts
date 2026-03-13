@@ -3,7 +3,7 @@
  * Maps to Supabase tables: tc_leads, tc_niche_registry, tc_campaigns, tc_email_templates
  */
 
-export type DripStatus = "queued" | "active" | "paused" | "completed" | "bounced";
+export type DripStatus = "queued" | "active" | "paused" | "completed" | "bounced" | "unsubscribed";
 
 export type CampaignStage = "draft" | "canary" | "ramping" | "active" | "paused" | "completed";
 
@@ -36,6 +36,14 @@ export interface BlitzLead {
   emails_clicked: number | null;
   last_opened_at: string | null;
   last_clicked_at: string | null;
+  // Manual outreach
+  manual_outreach_ready: boolean | null;
+  manual_outreach_at: string | null;
+  // Validation
+  email_validated: boolean | null;
+  email_validation_result: string | null;
+  unsubscribed_at: string | null;
+  last_sent_at: string | null;
   // Meta
   is_customer: boolean | null;
   status: string;
@@ -64,6 +72,11 @@ export interface BlitzCampaign {
   slug: string;
   name: string;
   status: CampaignStage;
+  niche_slug: string | null;
+  total_enrolled: number | null;
+  total_sent: number | null;
+  total_bounced: number | null;
+  bounce_rate: number | null;
   apify_run_ids: string[];
   apify_dataset_ids: string[];
   created_at: string;

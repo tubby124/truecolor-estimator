@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { BlitzPipeline } from "@/components/social/BlitzPipeline";
 import { NicheTable } from "@/components/social/NicheTable";
+import { TriggerButton } from "@/components/social/TriggerButton";
 import type { BlitzNiche, BlitzCampaign } from "@/lib/types/blitz";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ async function getData() {
   try {
     const supabase = createServiceClient();
 
-    const [campaignRes, nicheRes, totalRes, activeRes, completedRes, bouncedRes, pausedRes] =
+    const [campaignRes, nicheRes, totalRes, activeRes, completedRes, bouncedRes, pausedRes, outreachRes] =
       await Promise.all([
         supabase
           .from("tc_campaigns")
@@ -45,6 +46,11 @@ async function getData() {
           .from("tc_leads")
           .select("*", { count: "exact", head: true })
           .eq("drip_status", "paused"),
+        supabase
+          .from("tc_leads")
+          .select("*", { count: "exact", head: true })
+          .eq("manual_outreach_ready", true)
+          .is("manual_outreach_at", null),
       ]);
 
     return {
@@ -56,6 +62,7 @@ async function getData() {
         completedLeads: completedRes.count ?? 0,
         bouncedLeads: bouncedRes.count ?? 0,
         pausedLeads: pausedRes.count ?? 0,
+        outreachPending: outreachRes.count ?? 0,
       },
       lastEngineRun: campaignRes.data?.[0]?.updated_at ?? null,
     };
@@ -63,7 +70,7 @@ async function getData() {
     return {
       campaigns: [],
       niches: [],
-      stats: { totalLeads: 0, activeLeads: 0, completedLeads: 0, bouncedLeads: 0, pausedLeads: 0 },
+      stats: { totalLeads: 0, activeLeads: 0, completedLeads: 0, bouncedLeads: 0, pausedLeads: 0, outreachPending: 0 },
       lastEngineRun: null,
     };
   }
@@ -115,17 +122,29 @@ export default async function BlitzDashboardPage() {
               {stats.totalLeads.toLocaleString()} leads · {niches.length} niches · n8n drip engine
             </p>
           </div>
+          <div className="flex items-center gap-3">
+            {stats.outreachPending > 0 && (
+              <Link
+                href="/staff/social/blitz/outreach"
+                className="text-xs bg-amber-100 text-amber-800 px-3 py-2 rounded-lg font-semibold hover:bg-amber-200 transition-colors"
+              >
+                {stats.outreachPending} ready for DM
+              </Link>
+            )}
+            <TriggerButton />
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Stats bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
           <StatCard label="Total leads" value={stats.totalLeads.toLocaleString()} accent="#94a3b8" />
           <StatCard label="Active drip" value={stats.activeLeads} accent="#34d399" />
           <StatCard label="Completed" value={stats.completedLeads} accent="#22c55e" />
           <StatCard label="Bounced" value={stats.bouncedLeads} accent={stats.bouncedLeads > 0 ? "#ef4444" : "#94a3b8"} />
           <StatCard label="Bounce rate" value={`${bounceRate}%`} accent={parseFloat(bounceRate) > 5 ? "#ef4444" : "#34d399"} />
+          <StatCard label="DM Queue" value={stats.outreachPending} accent="#f97316" sub="manual outreach" />
           <StatCard
             label="Last engine run"
             value={lastEngineRun ? timeAgo(lastEngineRun) : "—"}
