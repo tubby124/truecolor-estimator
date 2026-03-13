@@ -1,0 +1,3392 @@
+{
+  "ATM": [
+    "retail"
+  ],
+  "ATV dealer": [
+    "car-dealership"
+  ],
+  "ATV rental service": [
+    "retail"
+  ],
+  "ATV repair shop": [
+    "retail"
+  ],
+  "Academic department": [
+    "retail"
+  ],
+  "Accountant": [
+    "accounting"
+  ],
+  "Accounting": [
+    "accounting"
+  ],
+  "Accounting firm": [
+    "accounting"
+  ],
+  "Acupuncture clinic": [
+    "healthcare"
+  ],
+  "Addiction treatment center": [
+    "healthcare"
+  ],
+  "Adoption agency": [
+    "printing-competitor"
+  ],
+  "Adult education school": [
+    "school"
+  ],
+  "Adult entertainment store": [
+    "retail"
+  ],
+  "Advertising agency": [
+    "printing-competitor"
+  ],
+  "Advertising service": [
+    "retail"
+  ],
+  "Aerial photographer": [
+    "restaurants"
+  ],
+  "After school program": [
+    "school"
+  ],
+  "Aggregate supplier": [
+    "retail"
+  ],
+  "Agricultural association": [
+    "agriculture"
+  ],
+  "Agricultural cooperative": [
+    "agriculture"
+  ],
+  "Agricultural machinery manufacturer": [
+    "agriculture"
+  ],
+  "Agricultural organization": [
+    "agriculture"
+  ],
+  "Agricultural product wholesaler": [
+    "agriculture"
+  ],
+  "Agricultural production": [
+    "agriculture"
+  ],
+  "Agricultural service": [
+    "agriculture"
+  ],
+  "Agrochemicals supplier": [
+    "agriculture"
+  ],
+  "Aikido school": [
+    "martial-arts"
+  ],
+  "Air conditioning contractor": [
+    "hvac"
+  ],
+  "Air duct cleaning service": [
+    "cleaning"
+  ],
+  "Airport": [
+    "moving"
+  ],
+  "Alcohol retail monopoly": [
+    "retail"
+  ],
+  "Allergist": [
+    "healthcare"
+  ],
+  "Alliance church": [
+    "church"
+  ],
+  "Alternative medicine practitioner": [
+    "healthcare"
+  ],
+  "Ambulance service": [
+    "healthcare"
+  ],
+  "American restaurant": [
+    "restaurants"
+  ],
+  "Amphitheater": [
+    "event"
+  ],
+  "Amusement center": [
+    "retail"
+  ],
+  "Amusement park": [
+    "campground"
+  ],
+  "Anglican church": [
+    "church"
+  ],
+  "Animal feed store": [
+    "agriculture"
+  ],
+  "Animal hospital": [
+    "veterinary"
+  ],
+  "Animal protection organization": [
+    "non-profit"
+  ],
+  "Animal rescue service": [
+    "pet-store"
+  ],
+  "Animal shelter": [
+    "pet-store"
+  ],
+  "Antique store": [
+    "retail"
+  ],
+  "Apartment building": [
+    "property-management"
+  ],
+  "Apartment complex": [
+    "property-management"
+  ],
+  "Apostolic church": [
+    "church"
+  ],
+  "Appliance repair service": [
+    "retail"
+  ],
+  "Appliance store": [
+    "retail"
+  ],
+  "Appraiser": [
+    "retail"
+  ],
+  "Aquatic center": [
+    "retail"
+  ],
+  "Arena": [
+    "sports-league"
+  ],
+  "Art center": [
+    "event"
+  ],
+  "Art gallery": [
+    "retail"
+  ],
+  "Art school": [
+    "school"
+  ],
+  "Arts organization": [
+    "non-profit"
+  ],
+  "Asbestos testing service": [
+    "retail"
+  ],
+  "Asian fusion restaurant": [
+    "restaurants"
+  ],
+  "Asian grocery store": [
+    "grocery"
+  ],
+  "Asian restaurant": [
+    "restaurants"
+  ],
+  "Asphalt contractor": [
+    "construction"
+  ],
+  "Assisted living facility": [
+    "seniors-care"
+  ],
+  "Association / Organization": [
+    "non-profit"
+  ],
+  "Athletic field": [
+    "gym-fitness"
+  ],
+  "Attorney": [
+    "law-office"
+  ],
+  "Attorney referral service": [
+    "law-office"
+  ],
+  "Auction house": [
+    "retail"
+  ],
+  "Audiologist": [
+    "healthcare"
+  ],
+  "Auditorium": [
+    "accounting"
+  ],
+  "Auto accessories wholesaler": [
+    "trade-contractor"
+  ],
+  "Auto body parts supplier": [
+    "auto-body"
+  ],
+  "Auto body shop": [
+    "auto-body"
+  ],
+  "Auto bodywork mechanic": [
+    "auto-body"
+  ],
+  "Auto broker": [
+    "auto-body"
+  ],
+  "Auto dent removal service": [
+    "auto-body"
+  ],
+  "Auto electrical service": [
+    "electrical"
+  ],
+  "Auto glass shop": [
+    "auto-body"
+  ],
+  "Auto machine shop": [
+    "auto-body"
+  ],
+  "Auto parts store": [
+    "auto-body"
+  ],
+  "Auto radiator repair service": [
+    "auto-body"
+  ],
+  "Auto repair shop": [
+    "auto-body"
+  ],
+  "Auto restoration service": [
+    "auto-body"
+  ],
+  "Auto tag agency": [
+    "auto-body"
+  ],
+  "Auto window tinting service": [
+    "auto-body"
+  ],
+  "Auto wrecker": [
+    "auto-body"
+  ],
+  "Automation company": [
+    "retail"
+  ],
+  "Baby clothing store": [
+    "retail"
+  ],
+  "Baby store": [
+    "retail"
+  ],
+  "Badminton club": [
+    "sports-league"
+  ],
+  "Bakery": [
+    "bakery"
+  ],
+  "Band": [
+    "retail"
+  ],
+  "Bank": [
+    "credit-union"
+  ],
+  "Bankruptcy service": [
+    "credit-union"
+  ],
+  "Banquet hall": [
+    "event"
+  ],
+  "Baptist church": [
+    "church"
+  ],
+  "Bar": [
+    "bar-nightclub"
+  ],
+  "Bar & grill": [
+    "restaurants"
+  ],
+  "Barber shop": [
+    "salon"
+  ],
+  "Barrister": [
+    "retail"
+  ],
+  "Baseball club": [
+    "sports-league"
+  ],
+  "Baseball field": [
+    "sports-league"
+  ],
+  "Basketball club": [
+    "sports-league"
+  ],
+  "Bathroom supply store": [
+    "retail"
+  ],
+  "Battery wholesaler": [
+    "trade-contractor"
+  ],
+  "Beach": [
+    "campground"
+  ],
+  "Bead store": [
+    "retail"
+  ],
+  "Bearing supplier": [
+    "retail"
+  ],
+  "Beautician": [
+    "retail"
+  ],
+  "Beauty product supplier": [
+    "salon"
+  ],
+  "Beauty salon": [
+    "salon"
+  ],
+  "Beauty supply store": [
+    "salon"
+  ],
+  "Bed & breakfast": [
+    "hotel"
+  ],
+  "Beer store": [
+    "bar-nightclub"
+  ],
+  "Bicycle Shop": [
+    "retail"
+  ],
+  "Bicycle rack": [
+    "retail"
+  ],
+  "Bilingual school": [
+    "school"
+  ],
+  "Bingo hall": [
+    "retail"
+  ],
+  "Biotechnology company": [
+    "retail"
+  ],
+  "Bird control service": [
+    "retail"
+  ],
+  "Bistro": [
+    "restaurants"
+  ],
+  "Blast cleaning service": [
+    "cleaning"
+  ],
+  "Board of education": [
+    "school"
+  ],
+  "Boarding house": [
+    "non-profit"
+  ],
+  "Boat dealer": [
+    "car-dealership"
+  ],
+  "Boat ramp": [
+    "retail"
+  ],
+  "Boat rental service": [
+    "retail"
+  ],
+  "Body piercing shop": [
+    "tattoo"
+  ],
+  "Boiler supplier": [
+    "retail"
+  ],
+  "Book store": [
+    "retail"
+  ],
+  "Bookkeeping service": [
+    "accounting"
+  ],
+  "Botanical garden": [
+    "landscaping"
+  ],
+  "Bottle & can redemption center": [
+    "retail"
+  ],
+  "Bottled water supplier": [
+    "retail"
+  ],
+  "Bouncy castle hire": [
+    "retail"
+  ],
+  "Boutique": [
+    "retail"
+  ],
+  "Bowling alley": [
+    "sports-league"
+  ],
+  "Boxing club": [
+    "martial-arts"
+  ],
+  "Boxing gym": [
+    "gym-fitness"
+  ],
+  "Brake shop": [
+    "retail"
+  ],
+  "Breakfast restaurant": [
+    "restaurants"
+  ],
+  "Brewery": [
+    "brewery"
+  ],
+  "Bridal shop": [
+    "wedding"
+  ],
+  "Brunch restaurant": [
+    "restaurants"
+  ],
+  "Bubble tea store": [
+    "coffee-shop"
+  ],
+  "Buffet restaurant": [
+    "restaurants"
+  ],
+  "Building materials market": [
+    "construction"
+  ],
+  "Building materials store": [
+    "construction"
+  ],
+  "Building materials supplier": [
+    "construction"
+  ],
+  "Building restoration service": [
+    "cleaning"
+  ],
+  "Bus stop": [
+    "retail"
+  ],
+  "Business administration service": [
+    "retail"
+  ],
+  "Business center": [
+    "retail"
+  ],
+  "Business development service": [
+    "accounting"
+  ],
+  "Business management consultant": [
+    "accounting"
+  ],
+  "Business to business service": [
+    "retail"
+  ],
+  "Butcher shop": [
+    "grocery"
+  ],
+  "Butcher shop deli": [
+    "grocery"
+  ],
+  "Cabin rental agency": [
+    "printing-competitor"
+  ],
+  "Cabinet maker": [
+    "construction"
+  ],
+  "Cabinet store": [
+    "retail"
+  ],
+  "Cadillac dealer": [
+    "car-dealership"
+  ],
+  "Cafe": [
+    "coffee-shop"
+  ],
+  "Cafeteria": [
+    "coffee-shop"
+  ],
+  "Cake shop": [
+    "bakery"
+  ],
+  "Campground": [
+    "campground"
+  ],
+  "Camping cabin": [
+    "campground"
+  ],
+  "Camping farm": [
+    "agriculture"
+  ],
+  "Canadian restaurant": [
+    "restaurants"
+  ],
+  "Cancer treatment center": [
+    "retail"
+  ],
+  "Cannabis store": [
+    "cannabis"
+  ],
+  "Canoe & kayak tour agency": [
+    "printing-competitor"
+  ],
+  "Car battery store": [
+    "retail"
+  ],
+  "Car dealer": [
+    "car-dealership"
+  ],
+  "Car detailing service": [
+    "auto-body"
+  ],
+  "Car rental agency": [
+    "auto-body"
+  ],
+  "Car repair and maintenance service": [
+    "auto-body"
+  ],
+  "Car wash": [
+    "auto-body"
+  ],
+  "Cardiologist": [
+    "healthcare"
+  ],
+  "Carpenter": [
+    "construction"
+  ],
+  "Carpet cleaning service": [
+    "cleaning"
+  ],
+  "Cash and carry wholesaler": [
+    "trade-contractor"
+  ],
+  "Casino": [
+    "retail"
+  ],
+  "Caterer": [
+    "event"
+  ],
+  "Catering food and drink supplier": [
+    "event"
+  ],
+  "Cathedral": [
+    "retail"
+  ],
+  "Catholic cathedral": [
+    "retail"
+  ],
+  "Catholic church": [
+    "church"
+  ],
+  "Catholic school": [
+    "school"
+  ],
+  "Cattle farm": [
+    "agriculture"
+  ],
+  "Cell phone store": [
+    "restaurants"
+  ],
+  "Cemetery": [
+    "funeral"
+  ],
+  "Certified public accountant": [
+    "bar-nightclub"
+  ],
+  "Chamber of Commerce": [
+    "non-profit"
+  ],
+  "Charity": [
+    "non-profit"
+  ],
+  "Chartered accountant": [
+    "accounting"
+  ],
+  "Chauffeur service": [
+    "retail"
+  ],
+  "Cheese shop": [
+    "retail"
+  ],
+  "Chemical manufacturer": [
+    "trade-contractor"
+  ],
+  "Chemical plant": [
+    "retail"
+  ],
+  "Chemical wholesaler": [
+    "trade-contractor"
+  ],
+  "Chicken restaurant": [
+    "restaurants"
+  ],
+  "Child care agency": [
+    "daycare"
+  ],
+  "Child health care center": [
+    "healthcare"
+  ],
+  "Childbirth class": [
+    "retail"
+  ],
+  "Children's camp": [
+    "campground"
+  ],
+  "Children's clothing store": [
+    "retail"
+  ],
+  "Children's farm": [
+    "agriculture"
+  ],
+  "Children's library": [
+    "non-profit"
+  ],
+  "Children's museum": [
+    "non-profit"
+  ],
+  "Chimney sweep": [
+    "retail"
+  ],
+  "Chinese language school": [
+    "school"
+  ],
+  "Chinese restaurant": [
+    "restaurants"
+  ],
+  "Chiropractor": [
+    "chiropractor"
+  ],
+  "Chocolate cafe": [
+    "coffee-shop"
+  ],
+  "Christian church": [
+    "church"
+  ],
+  "Chrysler dealer": [
+    "car-dealership"
+  ],
+  "Church": [
+    "church"
+  ],
+  "Church of Christ": [
+    "church"
+  ],
+  "Church of the Nazarene": [
+    "church"
+  ],
+  "Cider mill": [
+    "trade-contractor"
+  ],
+  "City Hall": [
+    "non-profit"
+  ],
+  "City courthouse": [
+    "non-profit"
+  ],
+  "City government office": [
+    "non-profit"
+  ],
+  "City park": [
+    "campground"
+  ],
+  "Civil engineering company": [
+    "retail"
+  ],
+  "Cleaners": [
+    "cleaning"
+  ],
+  "Cleaning products supplier": [
+    "cleaning"
+  ],
+  "Cleaning service": [
+    "cleaning"
+  ],
+  "Clothes market": [
+    "retail"
+  ],
+  "Clothing alteration service": [
+    "retail"
+  ],
+  "Clothing store": [
+    "retail"
+  ],
+  "Clothing supplier": [
+    "retail"
+  ],
+  "Club": [
+    "sports-league"
+  ],
+  "Coffee shop": [
+    "coffee-shop"
+  ],
+  "Coffee store": [
+    "coffee-shop"
+  ],
+  "Collectibles store": [
+    "retail"
+  ],
+  "College": [
+    "school"
+  ],
+  "Commercial real estate agency": [
+    "real-estate"
+  ],
+  "Community center": [
+    "event"
+  ],
+  "Community college": [
+    "school"
+  ],
+  "Community health center": [
+    "healthcare"
+  ],
+  "Community school": [
+    "school"
+  ],
+  "Computer consultant": [
+    "accounting"
+  ],
+  "Computer networking service": [
+    "retail"
+  ],
+  "Computer repair service": [
+    "construction"
+  ],
+  "Computer store": [
+    "retail"
+  ],
+  "Concert hall": [
+    "retail"
+  ],
+  "Concrete contractor": [
+    "construction"
+  ],
+  "Concrete product supplier": [
+    "construction"
+  ],
+  "Condominium complex": [
+    "property-management"
+  ],
+  "Condominium rental agency": [
+    "property-management"
+  ],
+  "Conference center": [
+    "event"
+  ],
+  "Conservatory of music": [
+    "retail"
+  ],
+  "Consignment shop": [
+    "retail"
+  ],
+  "Construction company": [
+    "construction"
+  ],
+  "Construction equipment supplier": [
+    "construction"
+  ],
+  "Construction machine dealer": [
+    "construction"
+  ],
+  "Construction material wholesaler": [
+    "construction"
+  ],
+  "Consultant": [
+    "accounting"
+  ],
+  "Container supplier": [
+    "retail"
+  ],
+  "Contractor": [
+    "construction"
+  ],
+  "Convenience store": [
+    "grocery"
+  ],
+  "Convention center": [
+    "event"
+  ],
+  "Cooperative": [
+    "co-op"
+  ],
+  "Corporate office": [
+    "retail"
+  ],
+  "Cosmetics store": [
+    "salon"
+  ],
+  "Cottage rental": [
+    "retail"
+  ],
+  "Council": [
+    "non-profit"
+  ],
+  "Counselor": [
+    "healthcare"
+  ],
+  "Countertop store": [
+    "retail"
+  ],
+  "Country club": [
+    "sports-league"
+  ],
+  "County court": [
+    "retail"
+  ],
+  "County government office": [
+    "non-profit"
+  ],
+  "Courier service": [
+    "moving"
+  ],
+  "Courthouse": [
+    "non-profit"
+  ],
+  "Coworking space": [
+    "salon"
+  ],
+  "Craft store": [
+    "retail"
+  ],
+  "Credit union": [
+    "credit-union"
+  ],
+  "Cremation service": [
+    "funeral"
+  ],
+  "Cricket ground": [
+    "retail"
+  ],
+  "Criminal justice attorney": [
+    "law-office"
+  ],
+  "Cultural association": [
+    "non-profit"
+  ],
+  "Cultural center": [
+    "event"
+  ],
+  "Culture": [
+    "retail"
+  ],
+  "Cupcake shop": [
+    "bakery"
+  ],
+  "Curling club": [
+    "sports-league"
+  ],
+  "Custom home builder": [
+    "construction"
+  ],
+  "Custom t-shirt store": [
+    "retail"
+  ],
+  "DJ service": [
+    "retail"
+  ],
+  "Dairy": [
+    "agriculture"
+  ],
+  "Dairy farm": [
+    "agriculture"
+  ],
+  "Dairy farm equipment supplier": [
+    "agriculture"
+  ],
+  "Dance club": [
+    "sports-league"
+  ],
+  "Dance company": [
+    "event"
+  ],
+  "Dance hall": [
+    "retail"
+  ],
+  "Dance school": [
+    "dance-studio"
+  ],
+  "Dance store": [
+    "retail"
+  ],
+  "Day care center": [
+    "daycare"
+  ],
+  "Day spa": [
+    "salon"
+  ],
+  "Decal supplier": [
+    "retail"
+  ],
+  "Deck builder": [
+    "retail"
+  ],
+  "Delivery service": [
+    "moving"
+  ],
+  "Demolition contractor": [
+    "construction"
+  ],
+  "Dental clinic": [
+    "dental"
+  ],
+  "Dental hygienist": [
+    "dental"
+  ],
+  "Dental laboratory": [
+    "dental"
+  ],
+  "Dentist": [
+    "dental"
+  ],
+  "Denture care center": [
+    "dental"
+  ],
+  "Department store": [
+    "retail"
+  ],
+  "Dermatologist": [
+    "healthcare"
+  ],
+  "Design agency": [
+    "printing-competitor"
+  ],
+  "Dessert shop": [
+    "restaurants"
+  ],
+  "Diagnostic center": [
+    "healthcare"
+  ],
+  "Diesel engine dealer": [
+    "auto-body"
+  ],
+  "Diesel engine repair service": [
+    "auto-body"
+  ],
+  "Diner": [
+    "restaurants"
+  ],
+  "Disability services and support organization": [
+    "non-profit"
+  ],
+  "Disc golf course": [
+    "sports-league"
+  ],
+  "Discount store": [
+    "retail"
+  ],
+  "Distance learning center": [
+    "school"
+  ],
+  "Distillery": [
+    "brewery"
+  ],
+  "Distribution service": [
+    "moving"
+  ],
+  "District government office": [
+    "non-profit"
+  ],
+  "Divorce lawyer": [
+    "law-office"
+  ],
+  "Divorce service": [
+    "retail"
+  ],
+  "Dock builder": [
+    "retail"
+  ],
+  "Doctor": [
+    "healthcare"
+  ],
+  "Dodge dealer": [
+    "car-dealership"
+  ],
+  "Dog day care center": [
+    "daycare"
+  ],
+  "Dog park": [
+    "campground"
+  ],
+  "Dog trainer": [
+    "pet-store"
+  ],
+  "Dollar store": [
+    "retail"
+  ],
+  "Donations center": [
+    "retail"
+  ],
+  "Door supplier": [
+    "construction"
+  ],
+  "Doula": [
+    "retail"
+  ],
+  "Drafting service": [
+    "retail"
+  ],
+  "Drainage service": [
+    "retail"
+  ],
+  "Drilling contractor": [
+    "construction"
+  ],
+  "Driver's license office": [
+    "retail"
+  ],
+  "Drivers license training school": [
+    "school"
+  ],
+  "Driving school": [
+    "driving-school"
+  ],
+  "Drug store": [
+    "pharmacy"
+  ],
+  "Drug testing service": [
+    "retail"
+  ],
+  "Dry cleaner": [
+    "laundromat"
+  ],
+  "Dry wall contractor": [
+    "construction"
+  ],
+  "Earth works company": [
+    "retail"
+  ],
+  "Eastern Catholic church": [
+    "church"
+  ],
+  "Economic development agency": [
+    "printing-competitor"
+  ],
+  "Education": [
+    "school"
+  ],
+  "Education center": [
+    "school"
+  ],
+  "Educational institution": [
+    "school"
+  ],
+  "Electric motor repair shop": [
+    "retail"
+  ],
+  "Electric motor store": [
+    "retail"
+  ],
+  "Electric utility company": [
+    "retail"
+  ],
+  "Electrical equipment supplier": [
+    "electrical"
+  ],
+  "Electrical installation service": [
+    "electrical"
+  ],
+  "Electrical products wholesaler": [
+    "electrical"
+  ],
+  "Electrical repair shop": [
+    "electrical"
+  ],
+  "Electrical supply store": [
+    "electrical"
+  ],
+  "Electrician": [
+    "electrical"
+  ],
+  "Electrolysis hair removal service": [
+    "salon"
+  ],
+  "Electronics company": [
+    "retail"
+  ],
+  "Electronics store": [
+    "retail"
+  ],
+  "Elementary school": [
+    "school"
+  ],
+  "Elevator service": [
+    "retail"
+  ],
+  "Embroidery shop": [
+    "printing-competitor"
+  ],
+  "Emergency care service": [
+    "healthcare"
+  ],
+  "Emergency dental service": [
+    "dental"
+  ],
+  "Emergency room": [
+    "healthcare"
+  ],
+  "Emergency training": [
+    "healthcare"
+  ],
+  "Employment agency": [
+    "printing-competitor"
+  ],
+  "Employment center": [
+    "retail"
+  ],
+  "Engine rebuilding service": [
+    "retail"
+  ],
+  "Engineer": [
+    "retail"
+  ],
+  "Engineering consultant": [
+    "accounting"
+  ],
+  "English language school": [
+    "school"
+  ],
+  "Engraver": [
+    "retail"
+  ],
+  "Entertainer": [
+    "retail"
+  ],
+  "Entertainment and recreation": [
+    "campground"
+  ],
+  "Environmental consultant": [
+    "accounting"
+  ],
+  "Environmental health service": [
+    "healthcare"
+  ],
+  "Environmental organization": [
+    "non-profit"
+  ],
+  "Equestrian facility": [
+    "retail"
+  ],
+  "Equipment rental agency": [
+    "construction"
+  ],
+  "Equipment supplier": [
+    "retail"
+  ],
+  "Erotic massage": [
+    "massage"
+  ],
+  "Estate planning attorney": [
+    "law-office"
+  ],
+  "Esthetics service": [
+    "salon"
+  ],
+  "Ethiopian restaurant": [
+    "restaurants"
+  ],
+  "European grocery store": [
+    "grocery"
+  ],
+  "Evangelical church": [
+    "church"
+  ],
+  "Event management company": [
+    "event"
+  ],
+  "Event planner": [
+    "event"
+  ],
+  "Event technology service": [
+    "retail"
+  ],
+  "Event venue": [
+    "event"
+  ],
+  "Excavating contractor": [
+    "construction"
+  ],
+  "Executive search firm": [
+    "retail"
+  ],
+  "Executive suite rental agency": [
+    "printing-competitor"
+  ],
+  "Exercise equipment store": [
+    "retail"
+  ],
+  "Exporter": [
+    "retail"
+  ],
+  "Eye care center": [
+    "optometry"
+  ],
+  "Eyebrow bar": [
+    "salon"
+  ],
+  "Eyelash salon": [
+    "salon"
+  ],
+  "Fabric store": [
+    "retail"
+  ],
+  "Fabric wholesaler": [
+    "trade-contractor"
+  ],
+  "Fairground": [
+    "event"
+  ],
+  "Family counselor": [
+    "healthcare"
+  ],
+  "Family day care service": [
+    "daycare"
+  ],
+  "Family law attorney": [
+    "law-office"
+  ],
+  "Family practice physician": [
+    "healthcare"
+  ],
+  "Family restaurant": [
+    "restaurants"
+  ],
+  "Family service center": [
+    "non-profit"
+  ],
+  "Farm": [
+    "agriculture"
+  ],
+  "Farm equipment repair service": [
+    "agriculture"
+  ],
+  "Farm equipment supplier": [
+    "agriculture"
+  ],
+  "Farm school": [
+    "agriculture"
+  ],
+  "Farm shop": [
+    "agriculture"
+  ],
+  "Farmers' market": [
+    "farmers-market"
+  ],
+  "Farmstay": [
+    "agriculture"
+  ],
+  "Fashion accessories store": [
+    "retail"
+  ],
+  "Fast food restaurant": [
+    "restaurants"
+  ],
+  "Federal government office": [
+    "non-profit"
+  ],
+  "Federal police": [
+    "non-profit"
+  ],
+  "Feed manufacturer": [
+    "trade-contractor"
+  ],
+  "Fence contractor": [
+    "construction"
+  ],
+  "Fertilizer supplier": [
+    "agriculture"
+  ],
+  "Festival": [
+    "event"
+  ],
+  "Festival hall": [
+    "event"
+  ],
+  "Filipino restaurant": [
+    "restaurants"
+  ],
+  "Financial advisor": [
+    "insurance"
+  ],
+  "Financial consultant": [
+    "insurance"
+  ],
+  "Financial institution": [
+    "credit-union"
+  ],
+  "Financial planner": [
+    "insurance"
+  ],
+  "Fire damage restoration service": [
+    "cleaning"
+  ],
+  "Fire department equipment supplier": [
+    "retail"
+  ],
+  "Fire station": [
+    "non-profit"
+  ],
+  "Fish farm": [
+    "agriculture"
+  ],
+  "Fishing camp": [
+    "campground"
+  ],
+  "Fishing pond": [
+    "retail"
+  ],
+  "Fitness center": [
+    "gym-fitness"
+  ],
+  "Flight school": [
+    "school"
+  ],
+  "Flooring store": [
+    "retail"
+  ],
+  "Florist": [
+    "florist"
+  ],
+  "Flower delivery": [
+    "retail"
+  ],
+  "Food and drink": [
+    "sports-league"
+  ],
+  "Food bank": [
+    "credit-union"
+  ],
+  "Food court": [
+    "restaurants"
+  ],
+  "Food manufacturer": [
+    "trade-contractor"
+  ],
+  "Food processing company": [
+    "trade-contractor"
+  ],
+  "Food producer": [
+    "retail"
+  ],
+  "Food products supplier": [
+    "grocery"
+  ],
+  "Football Field": [
+    "sports-league"
+  ],
+  "Ford dealer": [
+    "car-dealership"
+  ],
+  "Forestry service": [
+    "agriculture"
+  ],
+  "Formal wear store": [
+    "retail"
+  ],
+  "Foundation": [
+    "non-profit"
+  ],
+  "Foursquare church": [
+    "church"
+  ],
+  "Fraternal organization": [
+    "non-profit"
+  ],
+  "French language school": [
+    "school"
+  ],
+  "Fresh food market": [
+    "retail"
+  ],
+  "Fried chicken takeaway": [
+    "restaurants"
+  ],
+  "Fruit and vegetable store": [
+    "retail"
+  ],
+  "Fuel supplier": [
+    "trade-contractor"
+  ],
+  "Funeral home": [
+    "funeral"
+  ],
+  "Furnace repair service": [
+    "hvac"
+  ],
+  "Furnace store": [
+    "hvac"
+  ],
+  "Furniture store": [
+    "retail"
+  ],
+  "Game store": [
+    "retail"
+  ],
+  "Garbage collection service": [
+    "retail"
+  ],
+  "Garden": [
+    "landscaping"
+  ],
+  "Garden center": [
+    "landscaping"
+  ],
+  "Gardener": [
+    "landscaping"
+  ],
+  "Gas station": [
+    "retail"
+  ],
+  "Gasfitter": [
+    "retail"
+  ],
+  "Gay & lesbian organization": [
+    "non-profit"
+  ],
+  "General contractor": [
+    "construction"
+  ],
+  "General education school": [
+    "school"
+  ],
+  "General hospital": [
+    "healthcare"
+  ],
+  "General practice attorney": [
+    "law-office"
+  ],
+  "General practitioner": [
+    "retail"
+  ],
+  "General store": [
+    "retail"
+  ],
+  "Gift basket store": [
+    "retail"
+  ],
+  "Gift shop": [
+    "retail"
+  ],
+  "Glass industry": [
+    "construction"
+  ],
+  "Glass repair service": [
+    "construction"
+  ],
+  "Go-karting venue": [
+    "retail"
+  ],
+  "Golf": [
+    "retail"
+  ],
+  "Golf cart dealer": [
+    "car-dealership"
+  ],
+  "Golf club": [
+    "sports-league"
+  ],
+  "Golf course": [
+    "sports-league"
+  ],
+  "Gourmet grocery store": [
+    "grocery"
+  ],
+  "Government hospital": [
+    "healthcare"
+  ],
+  "Government office": [
+    "non-profit"
+  ],
+  "Government school": [
+    "non-profit"
+  ],
+  "Grain elevator": [
+    "agriculture"
+  ],
+  "Graphic designer": [
+    "printing-competitor"
+  ],
+  "Greek restaurant": [
+    "restaurants"
+  ],
+  "Greengrocer": [
+    "retail"
+  ],
+  "Greenhouse": [
+    "agriculture"
+  ],
+  "Grill": [
+    "restaurants"
+  ],
+  "Grocery store": [
+    "grocery"
+  ],
+  "Group home": [
+    "non-profit"
+  ],
+  "Gun club": [
+    "sports-league"
+  ],
+  "Gun shop": [
+    "retail"
+  ],
+  "Gutter cleaning service": [
+    "cleaning"
+  ],
+  "Gutter service": [
+    "retail"
+  ],
+  "Gym": [
+    "gym-fitness"
+  ],
+  "Gymnastics center": [
+    "gym-fitness"
+  ],
+  "HVAC contractor": [
+    "hvac"
+  ],
+  "Hair extension technician": [
+    "salon"
+  ],
+  "Hair removal service": [
+    "salon"
+  ],
+  "Hair salon": [
+    "salon"
+  ],
+  "Hairdresser": [
+    "salon"
+  ],
+  "Hall": [
+    "retail"
+  ],
+  "Hamburger restaurant": [
+    "restaurants"
+  ],
+  "Handyman/Handywoman/Handyperson": [
+    "retail"
+  ],
+  "Hardware store": [
+    "construction"
+  ],
+  "Hay supplier": [
+    "agriculture"
+  ],
+  "Head start center": [
+    "event"
+  ],
+  "Health": [
+    "healthcare"
+  ],
+  "Health and beauty shop": [
+    "salon"
+  ],
+  "Health consultant": [
+    "healthcare"
+  ],
+  "Health food store": [
+    "grocery"
+  ],
+  "Health spa": [
+    "salon"
+  ],
+  "Heating contractor": [
+    "hvac"
+  ],
+  "Heating equipment supplier": [
+    "hvac"
+  ],
+  "Heating oil supplier": [
+    "hvac"
+  ],
+  "Heliport": [
+    "retail"
+  ],
+  "Herbalist": [
+    "retail"
+  ],
+  "Heritage museum": [
+    "non-profit"
+  ],
+  "High school": [
+    "school"
+  ],
+  "Higher secondary school": [
+    "school"
+  ],
+  "Hiking area": [
+    "retail"
+  ],
+  "Historical landmark": [
+    "non-profit"
+  ],
+  "Hobby store": [
+    "retail"
+  ],
+  "Hockey club": [
+    "sports-league"
+  ],
+  "Hockey supply store": [
+    "retail"
+  ],
+  "Holistic medicine practitioner": [
+    "retail"
+  ],
+  "Home builder": [
+    "construction"
+  ],
+  "Home goods store": [
+    "retail"
+  ],
+  "Home health care service": [
+    "healthcare"
+  ],
+  "Home improvement store": [
+    "construction"
+  ],
+  "Home inspector": [
+    "real-estate"
+  ],
+  "Home insurance agency": [
+    "insurance"
+  ],
+  "Homeless shelter": [
+    "non-profit"
+  ],
+  "Homeopath": [
+    "retail"
+  ],
+  "Honda dealer": [
+    "car-dealership"
+  ],
+  "Honey farm": [
+    "agriculture"
+  ],
+  "Hose supplier": [
+    "retail"
+  ],
+  "Hospice": [
+    "retail"
+  ],
+  "Hospital": [
+    "healthcare"
+  ],
+  "Hot tub store": [
+    "retail"
+  ],
+  "Hotel": [
+    "hotel"
+  ],
+  "House": [
+    "retail"
+  ],
+  "House cleaning service": [
+    "cleaning"
+  ],
+  "Housing association": [
+    "non-profit"
+  ],
+  "Housing authority": [
+    "property-management"
+  ],
+  "Housing complex": [
+    "property-management"
+  ],
+  "Housing development": [
+    "construction"
+  ],
+  "Housing society": [
+    "property-management"
+  ],
+  "Hunting store": [
+    "retail"
+  ],
+  "Hydraulic equipment supplier": [
+    "retail"
+  ],
+  "Hydraulic repair service": [
+    "construction"
+  ],
+  "Hypnotherapy service": [
+    "healthcare"
+  ],
+  "Hyundai dealer": [
+    "car-dealership"
+  ],
+  "Ice cream shop": [
+    "restaurants"
+  ],
+  "Ice hockey rink": [
+    "sports-league"
+  ],
+  "Ice skating rink": [
+    "sports-league"
+  ],
+  "Immigration & naturalization service": [
+    "retail"
+  ],
+  "Immigration attorney": [
+    "law-office"
+  ],
+  "Indian grocery store": [
+    "grocery"
+  ],
+  "Indian restaurant": [
+    "restaurants"
+  ],
+  "Indoor cycling": [
+    "construction"
+  ],
+  "Indoor golf course": [
+    "sports-league"
+  ],
+  "Indoor lodging": [
+    "construction"
+  ],
+  "Indoor playground": [
+    "construction"
+  ],
+  "Industrial design company": [
+    "trade-contractor"
+  ],
+  "Industrial equipment supplier": [
+    "trade-contractor"
+  ],
+  "Information services": [
+    "retail"
+  ],
+  "Inn": [
+    "hotel"
+  ],
+  "Insolvency service": [
+    "retail"
+  ],
+  "Insulation contractor": [
+    "construction"
+  ],
+  "Insurance agency": [
+    "insurance"
+  ],
+  "Insurance broker": [
+    "insurance"
+  ],
+  "Insurance company": [
+    "insurance"
+  ],
+  "Interior designer": [
+    "construction"
+  ],
+  "Internet service provider": [
+    "retail"
+  ],
+  "Internist": [
+    "healthcare"
+  ],
+  "Irrigation equipment supplier": [
+    "landscaping"
+  ],
+  "Italian restaurant": [
+    "restaurants"
+  ],
+  "Janitorial equipment supplier": [
+    "cleaning"
+  ],
+  "Janitorial service": [
+    "cleaning"
+  ],
+  "Japanese restaurant": [
+    "restaurants"
+  ],
+  "Jeep dealer": [
+    "car-dealership"
+  ],
+  "Jehovah's Witness Kingdom Hall": [
+    "church"
+  ],
+  "Jewelry designer": [
+    "retail"
+  ],
+  "Jewelry store": [
+    "retail"
+  ],
+  "Judo club": [
+    "martial-arts"
+  ],
+  "Juice shop": [
+    "restaurants"
+  ],
+  "Jujitsu school": [
+    "school"
+  ],
+  "K-12 school": [
+    "school"
+  ],
+  "Karaoke bar": [
+    "bar-nightclub"
+  ],
+  "Karate club": [
+    "martial-arts"
+  ],
+  "Karate school": [
+    "martial-arts"
+  ],
+  "Kennel": [
+    "pet-store"
+  ],
+  "Kindergarten": [
+    "retail"
+  ],
+  "Laboratory": [
+    "healthcare"
+  ],
+  "Lake": [
+    "campground"
+  ],
+  "Land surveyor": [
+    "construction"
+  ],
+  "Landscape architect": [
+    "construction"
+  ],
+  "Landscape designer": [
+    "landscaping"
+  ],
+  "Landscaper": [
+    "landscaping"
+  ],
+  "Landscaping supply store": [
+    "landscaping"
+  ],
+  "Laser cutting service": [
+    "retail"
+  ],
+  "Lasik surgeon": [
+    "healthcare"
+  ],
+  "Laundromat": [
+    "laundromat"
+  ],
+  "Laundry service": [
+    "laundromat"
+  ],
+  "Law firm": [
+    "law-office"
+  ],
+  "Lawn bowls club": [
+    "sports-league"
+  ],
+  "Lawn care service": [
+    "landscaping"
+  ],
+  "Lawn mower store": [
+    "retail"
+  ],
+  "Lawn sprinkler system contractor": [
+    "construction"
+  ],
+  "Lawyers association": [
+    "law-office"
+  ],
+  "Leagues club": [
+    "sports-league"
+  ],
+  "Learning center": [
+    "school"
+  ],
+  "Legal services": [
+    "law-office"
+  ],
+  "Leisure center": [
+    "retail"
+  ],
+  "Library": [
+    "non-profit"
+  ],
+  "Life coach": [
+    "retail"
+  ],
+  "Life insurance agency": [
+    "insurance"
+  ],
+  "Lighting store": [
+    "retail"
+  ],
+  "Lingerie store": [
+    "retail"
+  ],
+  "Liquor store": [
+    "bar-nightclub"
+  ],
+  "Literacy program": [
+    "retail"
+  ],
+  "Live music venue": [
+    "retail"
+  ],
+  "Livestock auction house": [
+    "agriculture"
+  ],
+  "Livestock breeder": [
+    "agriculture"
+  ],
+  "Loan agency": [
+    "credit-union"
+  ],
+  "Local government office": [
+    "non-profit"
+  ],
+  "Local medical services": [
+    "healthcare"
+  ],
+  "Locksmith": [
+    "retail"
+  ],
+  "Lodge": [
+    "hotel"
+  ],
+  "Lodging": [
+    "retail"
+  ],
+  "Logging contractor": [
+    "construction"
+  ],
+  "Logistics service": [
+    "retail"
+  ],
+  "Lounge bar": [
+    "bar-nightclub"
+  ],
+  "Lumber store": [
+    "construction"
+  ],
+  "Lutheran church": [
+    "church"
+  ],
+  "MRI center": [
+    "retail"
+  ],
+  "Machine shop": [
+    "trade-contractor"
+  ],
+  "Machine workshop": [
+    "retail"
+  ],
+  "Mailing service": [
+    "moving"
+  ],
+  "Make-up artist": [
+    "salon"
+  ],
+  "Manufacturer": [
+    "trade-contractor"
+  ],
+  "Marina": [
+    "retail"
+  ],
+  "Market": [
+    "retail"
+  ],
+  "Marketing agency": [
+    "printing-competitor"
+  ],
+  "Marriage celebrant": [
+    "retail"
+  ],
+  "Martial arts club": [
+    "martial-arts"
+  ],
+  "Martial arts school": [
+    "martial-arts"
+  ],
+  "Masonry contractor": [
+    "construction"
+  ],
+  "Massage service": [
+    "massage"
+  ],
+  "Massage spa": [
+    "massage"
+  ],
+  "Massage therapist": [
+    "massage"
+  ],
+  "Material handling equipment supplier": [
+    "retail"
+  ],
+  "Mathematics school": [
+    "school"
+  ],
+  "Meat packer": [
+    "retail"
+  ],
+  "Meat processor": [
+    "retail"
+  ],
+  "Meat products store": [
+    "retail"
+  ],
+  "Mechanic": [
+    "auto-body"
+  ],
+  "Mechanical contractor": [
+    "auto-body"
+  ],
+  "Media company": [
+    "retail"
+  ],
+  "Mediation service": [
+    "retail"
+  ],
+  "Medical Center": [
+    "healthcare"
+  ],
+  "Medical clinic": [
+    "healthcare"
+  ],
+  "Medical diagnostic imaging center": [
+    "healthcare"
+  ],
+  "Medical equipment supplier": [
+    "healthcare"
+  ],
+  "Medical examiner": [
+    "healthcare"
+  ],
+  "Medical group": [
+    "healthcare"
+  ],
+  "Medical laboratory": [
+    "healthcare"
+  ],
+  "Medical office": [
+    "healthcare"
+  ],
+  "Medical spa": [
+    "salon"
+  ],
+  "Medical supply store": [
+    "healthcare"
+  ],
+  "Meditation center": [
+    "yoga-studio"
+  ],
+  "Mediterranean restaurant": [
+    "restaurants"
+  ],
+  "Men's clothing store": [
+    "retail"
+  ],
+  "Mennonite church": [
+    "church"
+  ],
+  "Mental health clinic": [
+    "healthcare"
+  ],
+  "Mental health service": [
+    "healthcare"
+  ],
+  "Metal construction company": [
+    "construction"
+  ],
+  "Metal fabricator": [
+    "trade-contractor"
+  ],
+  "Metal polishing service": [
+    "retail"
+  ],
+  "Metal supplier": [
+    "retail"
+  ],
+  "Metaphysical supply store": [
+    "retail"
+  ],
+  "Mexican restaurant": [
+    "restaurants"
+  ],
+  "Middle school": [
+    "school"
+  ],
+  "Military recruiting office": [
+    "non-profit"
+  ],
+  "Mill": [
+    "trade-contractor"
+  ],
+  "Miniature golf course": [
+    "sports-league"
+  ],
+  "Mining company": [
+    "retail"
+  ],
+  "Mobile caterer": [
+    "event"
+  ],
+  "Mobile home park": [
+    "property-management"
+  ],
+  "Mobile home supply store": [
+    "property-management"
+  ],
+  "Mobile phone repair shop": [
+    "restaurants"
+  ],
+  "Mobility equipment supplier": [
+    "retail"
+  ],
+  "Modern art museum": [
+    "non-profit"
+  ],
+  "Modular home dealer": [
+    "car-dealership"
+  ],
+  "Montessori school": [
+    "daycare"
+  ],
+  "Mosque": [
+    "church"
+  ],
+  "Motel": [
+    "hotel"
+  ],
+  "Motor vehicle dealer": [
+    "car-dealership"
+  ],
+  "Motorcycle repair shop": [
+    "retail"
+  ],
+  "Motorcycle shop": [
+    "retail"
+  ],
+  "Motorsports store": [
+    "retail"
+  ],
+  "Mountain peak": [
+    "retail"
+  ],
+  "Mover": [
+    "moving"
+  ],
+  "Movie theater": [
+    "event"
+  ],
+  "Moving and storage service": [
+    "moving"
+  ],
+  "Municipal administration office": [
+    "non-profit"
+  ],
+  "Museum": [
+    "non-profit"
+  ],
+  "Musical instrument store": [
+    "music-school"
+  ],
+  "Nail salon": [
+    "salon"
+  ],
+  "National park": [
+    "campground"
+  ],
+  "National reserve": [
+    "retail"
+  ],
+  "Natural goods store": [
+    "retail"
+  ],
+  "Nature preserve": [
+    "retail"
+  ],
+  "Naturopathic practitioner": [
+    "healthcare"
+  ],
+  "Neurosurgeon": [
+    "healthcare"
+  ],
+  "Newspaper publisher": [
+    "salon"
+  ],
+  "Night club": [
+    "sports-league"
+  ],
+  "Non-denominational church": [
+    "church"
+  ],
+  "Non-governmental organization": [
+    "non-profit"
+  ],
+  "Non-profit organization": [
+    "non-profit"
+  ],
+  "Notary public": [
+    "bar-nightclub"
+  ],
+  "Novelty store": [
+    "retail"
+  ],
+  "Nursing home": [
+    "seniors-care"
+  ],
+  "Obstetrician-gynecologist": [
+    "healthcare"
+  ],
+  "Occupational health service": [
+    "healthcare"
+  ],
+  "Occupational safety and health": [
+    "healthcare"
+  ],
+  "Occupational therapist": [
+    "healthcare"
+  ],
+  "Office": [
+    "retail"
+  ],
+  "Office equipment supplier": [
+    "retail"
+  ],
+  "Office space rental agency": [
+    "salon"
+  ],
+  "Office supply store": [
+    "retail"
+  ],
+  "Oil & natural gas company": [
+    "retail"
+  ],
+  "Oil change service": [
+    "oil-change"
+  ],
+  "Oil field equipment supplier": [
+    "trade-contractor"
+  ],
+  "Oil refinery": [
+    "retail"
+  ],
+  "Oilfield": [
+    "trade-contractor"
+  ],
+  "Ophthalmologist": [
+    "optometry"
+  ],
+  "Ophthalmology clinic": [
+    "optometry"
+  ],
+  "Optician": [
+    "optometry"
+  ],
+  "Optometrist": [
+    "optometry"
+  ],
+  "Oral surgeon": [
+    "dental"
+  ],
+  "Orchestra": [
+    "retail"
+  ],
+  "Organic food store": [
+    "grocery"
+  ],
+  "Organic shop": [
+    "retail"
+  ],
+  "Orthodontist": [
+    "dental"
+  ],
+  "Orthodox church": [
+    "church"
+  ],
+  "Orthopedic clinic": [
+    "healthcare"
+  ],
+  "Orthopedic supplies store": [
+    "retail"
+  ],
+  "Orthopedic surgeon": [
+    "healthcare"
+  ],
+  "Orthotics & prosthetics service": [
+    "retail"
+  ],
+  "Osteopath": [
+    "healthcare"
+  ],
+  "Outdoor equestrian facility": [
+    "construction"
+  ],
+  "Outdoor sports store": [
+    "retail"
+  ],
+  "Outlet store": [
+    "retail"
+  ],
+  "Pain control clinic": [
+    "healthcare"
+  ],
+  "Paint store": [
+    "retail"
+  ],
+  "Paintball center": [
+    "construction"
+  ],
+  "Painter": [
+    "construction"
+  ],
+  "Painting": [
+    "construction"
+  ],
+  "Pallet supplier": [
+    "retail"
+  ],
+  "Parish": [
+    "church"
+  ],
+  "Park": [
+    "campground"
+  ],
+  "Parking lot": [
+    "campground"
+  ],
+  "Party equipment rental service": [
+    "construction"
+  ],
+  "Party planner": [
+    "retail"
+  ],
+  "Party store": [
+    "retail"
+  ],
+  "Pastry shop": [
+    "bakery"
+  ],
+  "Paving contractor": [
+    "construction"
+  ],
+  "Pawn shop": [
+    "retail"
+  ],
+  "Pediatric dentist": [
+    "dental"
+  ],
+  "Pediatrician": [
+    "healthcare"
+  ],
+  "Pentecostal church": [
+    "church"
+  ],
+  "Performing arts theater": [
+    "event"
+  ],
+  "Periodontist": [
+    "dental"
+  ],
+  "Permanent make-up clinic": [
+    "healthcare"
+  ],
+  "Persian restaurant": [
+    "restaurants"
+  ],
+  "Personal injury attorney": [
+    "law-office"
+  ],
+  "Personal trainer": [
+    "gym-fitness"
+  ],
+  "Pest control service": [
+    "pest-control"
+  ],
+  "Pet boarding service": [
+    "retail"
+  ],
+  "Pet groomer": [
+    "pet-store"
+  ],
+  "Pet store": [
+    "pet-store"
+  ],
+  "Pet supply store": [
+    "pet-store"
+  ],
+  "Pharmaceutical company": [
+    "pharmacy"
+  ],
+  "Pharmacy": [
+    "pharmacy"
+  ],
+  "Phone repair service": [
+    "restaurants"
+  ],
+  "Photo booth": [
+    "restaurants"
+  ],
+  "Photo shop": [
+    "restaurants"
+  ],
+  "Photographer": [
+    "photographer"
+  ],
+  "Photography service": [
+    "restaurants"
+  ],
+  "Photography studio": [
+    "photographer"
+  ],
+  "Physiatrist": [
+    "retail"
+  ],
+  "Physical fitness program": [
+    "gym-fitness"
+  ],
+  "Physical therapist": [
+    "physio"
+  ],
+  "Physical therapy clinic": [
+    "physio"
+  ],
+  "Piano instructor": [
+    "music-school"
+  ],
+  "Piano moving service": [
+    "music-school"
+  ],
+  "Pick your own farm produce": [
+    "agriculture"
+  ],
+  "Pickleball court": [
+    "retail"
+  ],
+  "Picture frame shop": [
+    "retail"
+  ],
+  "Pilates studio": [
+    "yoga-studio"
+  ],
+  "Pipe supplier": [
+    "retail"
+  ],
+  "Pizza Takeout": [
+    "pizza",
+    "restaurants"
+  ],
+  "Pizza delivery": [
+    "pizza",
+    "restaurants"
+  ],
+  "Pizza restaurant": [
+    "pizza",
+    "restaurants"
+  ],
+  "Place of worship": [
+    "church"
+  ],
+  "Plant nursery": [
+    "healthcare"
+  ],
+  "Plastic surgery clinic": [
+    "healthcare"
+  ],
+  "Playground": [
+    "campground"
+  ],
+  "Plumber": [
+    "plumbing"
+  ],
+  "Plumbing supply store": [
+    "plumbing"
+  ],
+  "Podiatrist": [
+    "healthcare"
+  ],
+  "Polytechnic institute": [
+    "retail"
+  ],
+  "Pond fish supplier": [
+    "retail"
+  ],
+  "Pool billard club": [
+    "sports-league"
+  ],
+  "Pool hall": [
+    "sports-league"
+  ],
+  "Portrait studio": [
+    "photographer"
+  ],
+  "Pottery store": [
+    "retail"
+  ],
+  "Poultry farm": [
+    "agriculture"
+  ],
+  "Pregnancy care center": [
+    "healthcare"
+  ],
+  "Preparatory school": [
+    "school"
+  ],
+  "Presbyterian church": [
+    "church"
+  ],
+  "Preschool": [
+    "daycare"
+  ],
+  "Pressure washing service": [
+    "cleaning"
+  ],
+  "Primary school": [
+    "school"
+  ],
+  "Print shop": [
+    "printing-competitor"
+  ],
+  "Private tutor": [
+    "tutoring"
+  ],
+  "Produce market": [
+    "retail"
+  ],
+  "Produce wholesaler": [
+    "trade-contractor"
+  ],
+  "Promotional products supplier": [
+    "retail"
+  ],
+  "Propane supplier": [
+    "trade-contractor"
+  ],
+  "Property maintenance": [
+    "property-management"
+  ],
+  "Property management company": [
+    "property-management"
+  ],
+  "Provincial park": [
+    "campground"
+  ],
+  "Psychiatric hospital": [
+    "healthcare"
+  ],
+  "Psychiatrist": [
+    "healthcare"
+  ],
+  "Psychologist": [
+    "healthcare"
+  ],
+  "Pub": [
+    "bar-nightclub"
+  ],
+  "Public educational institution": [
+    "bar-nightclub"
+  ],
+  "Public golf course": [
+    "bar-nightclub"
+  ],
+  "Public health department": [
+    "bar-nightclub"
+  ],
+  "Public library": [
+    "bar-nightclub"
+  ],
+  "Public medical center": [
+    "healthcare"
+  ],
+  "Public swimming pool": [
+    "bar-nightclub"
+  ],
+  "Public university": [
+    "bar-nightclub"
+  ],
+  "Pump supplier": [
+    "retail"
+  ],
+  "Quilt shop": [
+    "retail"
+  ],
+  "RV dealer": [
+    "campground"
+  ],
+  "RV park": [
+    "campground"
+  ],
+  "RV repair shop": [
+    "retail"
+  ],
+  "RV storage facility": [
+    "storage"
+  ],
+  "Racecourse": [
+    "sports-league"
+  ],
+  "Radio broadcaster": [
+    "retail"
+  ],
+  "Railroad company": [
+    "retail"
+  ],
+  "Ram dealer": [
+    "car-dealership"
+  ],
+  "Ranch": [
+    "agriculture"
+  ],
+  "Ready mix concrete supplier": [
+    "construction"
+  ],
+  "Real estate agency": [
+    "real-estate"
+  ],
+  "Real estate agent": [
+    "real-estate"
+  ],
+  "Real estate attorney": [
+    "law-office"
+  ],
+  "Real estate developer": [
+    "real-estate"
+  ],
+  "Real estate rental agency": [
+    "real-estate"
+  ],
+  "Recording studio": [
+    "retail"
+  ],
+  "Recreation center": [
+    "gym-fitness"
+  ],
+  "Recruiter": [
+    "retail"
+  ],
+  "Recycling center": [
+    "retail"
+  ],
+  "Reflexologist": [
+    "retail"
+  ],
+  "Regional airport": [
+    "moving"
+  ],
+  "Registry office": [
+    "non-profit"
+  ],
+  "Rehabilitation center": [
+    "physio"
+  ],
+  "Reiki therapist": [
+    "healthcare"
+  ],
+  "Religious destination": [
+    "church"
+  ],
+  "Religious institution": [
+    "church"
+  ],
+  "Religious organization": [
+    "church"
+  ],
+  "Religious school": [
+    "church"
+  ],
+  "Rental": [
+    "retail"
+  ],
+  "Repair service": [
+    "construction"
+  ],
+  "Reptile store": [
+    "retail"
+  ],
+  "Rescue squad": [
+    "retail"
+  ],
+  "Research institute": [
+    "school"
+  ],
+  "Resort hotel": [
+    "hotel"
+  ],
+  "Restaurant": [
+    "restaurants"
+  ],
+  "Retirement community": [
+    "seniors-care"
+  ],
+  "Retirement home": [
+    "seniors-care"
+  ],
+  "Retreat center": [
+    "retail"
+  ],
+  "Rheumatologist": [
+    "retail"
+  ],
+  "Rice mill": [
+    "trade-contractor"
+  ],
+  "Road construction company": [
+    "construction"
+  ],
+  "Rock climbing gym": [
+    "gym-fitness"
+  ],
+  "Roofing contractor": [
+    "roofing"
+  ],
+  "Roofing supply store": [
+    "roofing"
+  ],
+  "Rugby club": [
+    "sports-league"
+  ],
+  "STD clinic": [
+    "healthcare"
+  ],
+  "Safety equipment supplier": [
+    "retail"
+  ],
+  "Salvage yard": [
+    "retail"
+  ],
+  "Sand & gravel supplier": [
+    "construction"
+  ],
+  "Sandwich shop": [
+    "restaurants"
+  ],
+  "Saw mill": [
+    "trade-contractor"
+  ],
+  "Scale supplier": [
+    "retail"
+  ],
+  "School": [
+    "school"
+  ],
+  "School administration office": [
+    "school"
+  ],
+  "School district office": [
+    "school"
+  ],
+  "Scrapbooking store": [
+    "retail"
+  ],
+  "Sculpture": [
+    "retail"
+  ],
+  "Second hand store": [
+    "retail"
+  ],
+  "Secondary school": [
+    "school"
+  ],
+  "Security guard service": [
+    "retail"
+  ],
+  "Security service": [
+    "retail"
+  ],
+  "Security system supplier": [
+    "retail"
+  ],
+  "Seed supplier": [
+    "agriculture"
+  ],
+  "Self defense school": [
+    "school"
+  ],
+  "Self-storage facility": [
+    "storage"
+  ],
+  "Senior citizen center": [
+    "seniors-care"
+  ],
+  "Septic system service": [
+    "plumbing"
+  ],
+  "Serviced accommodation": [
+    "retail"
+  ],
+  "Seventh-day Adventist church": [
+    "church"
+  ],
+  "Sewing machine store": [
+    "retail"
+  ],
+  "Sewing shop": [
+    "retail"
+  ],
+  "Sheet metal contractor": [
+    "construction"
+  ],
+  "Shelter": [
+    "non-profit"
+  ],
+  "Shipping and mailing service": [
+    "moving"
+  ],
+  "Shipping company": [
+    "moving"
+  ],
+  "Shipping service": [
+    "moving"
+  ],
+  "Shoe store": [
+    "retail"
+  ],
+  "Shooting range": [
+    "sports-league"
+  ],
+  "Shopping mall": [
+    "retail"
+  ],
+  "Shrine": [
+    "retail"
+  ],
+  "Siding contractor": [
+    "construction"
+  ],
+  "Sightseeing tour agency": [
+    "printing-competitor"
+  ],
+  "Sign shop": [
+    "printing-competitor"
+  ],
+  "Skatepark": [
+    "campground"
+  ],
+  "Ski resort": [
+    "hotel"
+  ],
+  "Skin care clinic": [
+    "healthcare"
+  ],
+  "Slaughterhouse": [
+    "retail"
+  ],
+  "Sleep clinic": [
+    "healthcare"
+  ],
+  "Small engine repair service": [
+    "auto-body"
+  ],
+  "Snow removal service": [
+    "retail"
+  ],
+  "Snowmobile dealer": [
+    "car-dealership"
+  ],
+  "Soccer club": [
+    "sports-league"
+  ],
+  "Soccer field": [
+    "sports-league"
+  ],
+  "Social services organization": [
+    "non-profit"
+  ],
+  "Social worker": [
+    "non-profit"
+  ],
+  "Sod supplier": [
+    "landscaping"
+  ],
+  "Softball club": [
+    "sports-league"
+  ],
+  "Softball field": [
+    "sports-league"
+  ],
+  "Software company": [
+    "retail"
+  ],
+  "Solar energy company": [
+    "retail"
+  ],
+  "Solar energy system service": [
+    "retail"
+  ],
+  "Soup kitchen": [
+    "retail"
+  ],
+  "Souvenir store": [
+    "retail"
+  ],
+  "Spa": [
+    "salon"
+  ],
+  "Spa and health club": [
+    "salon"
+  ],
+  "Specialized clinic": [
+    "healthcare"
+  ],
+  "Sporting goods store": [
+    "retail"
+  ],
+  "Sports bar": [
+    "bar-nightclub"
+  ],
+  "Sports card store": [
+    "retail"
+  ],
+  "Sports club": [
+    "sports-league"
+  ],
+  "Sports complex": [
+    "sports-league"
+  ],
+  "Sports massage therapist": [
+    "massage"
+  ],
+  "Sports medicine clinic": [
+    "physio"
+  ],
+  "Sports medicine physician": [
+    "physio"
+  ],
+  "Sports school": [
+    "school"
+  ],
+  "Sportswear store": [
+    "retail"
+  ],
+  "Stable": [
+    "retail"
+  ],
+  "Stadium": [
+    "sports-league"
+  ],
+  "Stage": [
+    "retail"
+  ],
+  "Stationery store": [
+    "retail"
+  ],
+  "Steak house": [
+    "retail"
+  ],
+  "Steel construction company": [
+    "construction"
+  ],
+  "Steel fabricator": [
+    "construction"
+  ],
+  "Storage facility": [
+    "storage"
+  ],
+  "Store": [
+    "retail"
+  ],
+  "Stucco contractor": [
+    "construction"
+  ],
+  "Summer camp organizer": [
+    "campground"
+  ],
+  "Supermarket": [
+    "grocery"
+  ],
+  "Surgeon": [
+    "healthcare"
+  ],
+  "Surgical center": [
+    "retail"
+  ],
+  "Surgical oncologist": [
+    "healthcare"
+  ],
+  "Sushi restaurant": [
+    "restaurants"
+  ],
+  "Sushi takeaway": [
+    "restaurants"
+  ],
+  "Swimming lake": [
+    "campground"
+  ],
+  "Swimming pool": [
+    "sports-league"
+  ],
+  "Swimming pool contractor": [
+    "construction"
+  ],
+  "Taco restaurant": [
+    "restaurants"
+  ],
+  "Taekwondo school": [
+    "martial-arts"
+  ],
+  "Tai chi school": [
+    "school"
+  ],
+  "Takeout Restaurant": [
+    "restaurants"
+  ],
+  "Tanning salon": [
+    "salon"
+  ],
+  "Tattoo and piercing shop": [
+    "tattoo"
+  ],
+  "Tattoo artist": [
+    "tattoo"
+  ],
+  "Tattoo shop": [
+    "tattoo"
+  ],
+  "Tattoo supply store": [
+    "tattoo"
+  ],
+  "Tax attorney": [
+    "law-office"
+  ],
+  "Tax consultant": [
+    "accounting"
+  ],
+  "Tax preparation": [
+    "accounting"
+  ],
+  "Tax preparation service": [
+    "accounting"
+  ],
+  "Taxi service": [
+    "moving"
+  ],
+  "Technical school": [
+    "school"
+  ],
+  "Teeth whitening service": [
+    "retail"
+  ],
+  "Telecommunications contractor": [
+    "construction"
+  ],
+  "Telecommunications service provider": [
+    "retail"
+  ],
+  "Television repair service": [
+    "construction"
+  ],
+  "Tent rental service": [
+    "retail"
+  ],
+  "Thai massage therapist": [
+    "massage"
+  ],
+  "Theater company": [
+    "event"
+  ],
+  "Thrift store": [
+    "retail"
+  ],
+  "Tile cleaning service": [
+    "cleaning"
+  ],
+  "Tire repair shop": [
+    "retail"
+  ],
+  "Tire shop": [
+    "tire-shop"
+  ],
+  "Tobacco shop": [
+    "retail"
+  ],
+  "Toner cartridge supplier": [
+    "retail"
+  ],
+  "Tool store": [
+    "retail"
+  ],
+  "Tour agency": [
+    "printing-competitor"
+  ],
+  "Tour operator": [
+    "travel-agency"
+  ],
+  "Tourist attraction": [
+    "hotel"
+  ],
+  "Tourist information center": [
+    "hotel"
+  ],
+  "Towing service": [
+    "towing"
+  ],
+  "Toy store": [
+    "retail"
+  ],
+  "Toyota dealer": [
+    "car-dealership"
+  ],
+  "Tractor dealer": [
+    "car-dealership"
+  ],
+  "Tractor repair shop": [
+    "car-dealership"
+  ],
+  "Trade school": [
+    "school"
+  ],
+  "Trailer dealer": [
+    "car-dealership"
+  ],
+  "Trailer repair shop": [
+    "auto-body"
+  ],
+  "Training center": [
+    "school"
+  ],
+  "Transmission shop": [
+    "auto-body"
+  ],
+  "Transportation service": [
+    "moving"
+  ],
+  "Travel agency": [
+    "travel-agency"
+  ],
+  "Travel clinic": [
+    "healthcare"
+  ],
+  "Tree service": [
+    "landscaping"
+  ],
+  "Tribal headquarters": [
+    "first-nations"
+  ],
+  "Trophy shop": [
+    "printing-competitor"
+  ],
+  "Truck accessories store": [
+    "retail"
+  ],
+  "Truck dealer": [
+    "car-dealership"
+  ],
+  "Truck parts supplier": [
+    "auto-body"
+  ],
+  "Truck rental agency": [
+    "car-dealership"
+  ],
+  "Truck repair shop": [
+    "auto-body"
+  ],
+  "Truck stop": [
+    "retail"
+  ],
+  "Trucking company": [
+    "moving"
+  ],
+  "Truss manufacturer": [
+    "trade-contractor"
+  ],
+  "Tutoring service": [
+    "tutoring"
+  ],
+  "Ukrainian restaurant": [
+    "restaurants"
+  ],
+  "Unitarian Universalist Church": [
+    "church"
+  ],
+  "United Church of Canada": [
+    "church"
+  ],
+  "University": [
+    "school"
+  ],
+  "University hospital": [
+    "healthcare"
+  ],
+  "Urology clinic": [
+    "healthcare"
+  ],
+  "Used car dealer": [
+    "car-dealership"
+  ],
+  "Used clothing store": [
+    "retail"
+  ],
+  "Utility contractor": [
+    "construction"
+  ],
+  "Vacation rental": [
+    "retail"
+  ],
+  "Vacuum cleaner store": [
+    "retail"
+  ],
+  "Vacuum cleaning system supplier": [
+    "cleaning"
+  ],
+  "Vaporizer store": [
+    "cannabis"
+  ],
+  "Veterans organization": [
+    "non-profit"
+  ],
+  "Veterinarian": [
+    "veterinary"
+  ],
+  "Veterinary care": [
+    "veterinary"
+  ],
+  "Video editing service": [
+    "retail"
+  ],
+  "Video production service": [
+    "photographer"
+  ],
+  "Vietnamese restaurant": [
+    "restaurants"
+  ],
+  "Village hall": [
+    "retail"
+  ],
+  "Vintage clothing store": [
+    "retail"
+  ],
+  "Visitor center": [
+    "retail"
+  ],
+  "Vitamin & supplements store": [
+    "retail"
+  ],
+  "Volkswagen dealer": [
+    "car-dealership"
+  ],
+  "Volleyball club": [
+    "sports-league"
+  ],
+  "Volunteer organization": [
+    "non-profit"
+  ],
+  "Walk-in clinic": [
+    "healthcare"
+  ],
+  "Warehouse": [
+    "storage"
+  ],
+  "Warehouse store": [
+    "retail"
+  ],
+  "Waste management service": [
+    "cleaning"
+  ],
+  "Water damage restoration service": [
+    "cleaning"
+  ],
+  "Water park": [
+    "campground"
+  ],
+  "Water treatment supplier": [
+    "retail"
+  ],
+  "Web hosting company": [
+    "retail"
+  ],
+  "Wedding bakery": [
+    "bakery"
+  ],
+  "Wedding photographer": [
+    "restaurants"
+  ],
+  "Wedding planner": [
+    "wedding"
+  ],
+  "Wedding service": [
+    "wedding"
+  ],
+  "Wedding venue": [
+    "event"
+  ],
+  "Welder": [
+    "trade-contractor"
+  ],
+  "Welding supply store": [
+    "retail"
+  ],
+  "Well drilling contractor": [
+    "construction"
+  ],
+  "Wellness center": [
+    "healthcare"
+  ],
+  "Wellness program": [
+    "healthcare"
+  ],
+  "Western apparel store": [
+    "retail"
+  ],
+  "Wheel alignment service": [
+    "retail"
+  ],
+  "Wheel store": [
+    "retail"
+  ],
+  "Wholesale florist": [
+    "florist"
+  ],
+  "Wholesale food store": [
+    "grocery"
+  ],
+  "Wholesaler": [
+    "trade-contractor"
+  ],
+  "Wildlife park": [
+    "campground"
+  ],
+  "Wildlife rescue service": [
+    "retail"
+  ],
+  "Window cleaning service": [
+    "cleaning"
+  ],
+  "Window installation service": [
+    "construction"
+  ],
+  "Window tinting service": [
+    "construction"
+  ],
+  "Wine store": [
+    "retail"
+  ],
+  "Winemaking supply store": [
+    "retail"
+  ],
+  "Winery": [
+    "brewery"
+  ],
+  "Women's clothing store": [
+    "retail"
+  ],
+  "Women's health clinic": [
+    "healthcare"
+  ],
+  "Women's organization": [
+    "non-profit"
+  ],
+  "Women's shelter": [
+    "non-profit"
+  ],
+  "Wood supplier": [
+    "retail"
+  ],
+  "Woodworker": [
+    "retail"
+  ],
+  "Work clothes store": [
+    "retail"
+  ],
+  "X-ray lab": [
+    "healthcare"
+  ],
+  "Yoga instructor": [
+    "yoga-studio"
+  ],
+  "Yoga studio": [
+    "yoga-studio"
+  ],
+  "Youth center": [
+    "non-profit"
+  ],
+  "Youth clothing store": [
+    "retail"
+  ],
+  "Youth organization": [
+    "non-profit"
+  ],
+  "Youth social services organization": [
+    "non-profit"
+  ],
+  "Zoo": [
+    "retail"
+  ]
+}
