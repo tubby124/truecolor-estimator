@@ -202,6 +202,28 @@
       "imagePrompt": "Modern medical clinic reception area with an ACP directory sign mounted on the wall listing doctor names and suite numbers. Clean, well-lit healthcare environment. Photorealistic, 1200x900."
     },
     {
+      "slug": "agriculture-signs",
+      "name": "Agriculture Signs — Saskatchewan Farms",
+      "category": "Industry Signs",
+      "price": "From $8/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=agriculture",
+      "description": "Farm gate signs, crop plot markers, biosecurity signs, truck magnets, and trade show banners for Saskatchewan farms and seed dealers. Coroplast yard signs from $8/sqft — UV-resistant, reusable season after season. Truck door magnets from $24/sqft. Trade show banners from $8.25/sqft. In-house Roland UV printer, ready in 1–3 business days. Local pickup 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+      "imagePath": "/images/industries/agriculture/sign-farm-gate.webp",
+      "imagePrompt": "Coroplast farm gate sign mounted on a wooden fence post at a Saskatchewan farm entrance. Sharp UV printing with farm name and phone number. Gravel road leading to farmyard, flat prairies, steel grain bins in background. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "agribusiness-signs",
+      "name": "Agribusiness Signs — Saskatchewan Dealers & Suppliers",
+      "category": "Industry Signs",
+      "price": "From $13/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_product&utm_campaign=agribusiness",
+      "description": "ACP fascia signs, warehouse ID panels, retail storefront signs, retractable trade show stands, product spec sheets, and direct mail postcards for Saskatchewan ag dealers, seed retailers, and farm supply stores. ACP aluminum signs from $13/sqft — permanent, professional, rigid. Retractable stands from $219 complete. Flyers from $45. In-house designer $35 flat. Pickup 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+      "imagePath": "/images/industries/agribusiness/sign-dealer-fascia.webp",
+      "imagePrompt": "Large ACP aluminum composite fascia sign on a Saskatchewan farm equipment dealership exterior. Bold white text on dark green background. Pickup trucks in parking lot, farm equipment on display, flat prairie horizon. Photorealistic, 1200x900."
+    },
+    {
       "slug": "same-day-rush",
       "name": "Same-Day Rush Printing — Saskatoon",
       "category": "Services",
@@ -228,12 +250,16 @@
     { "name": "Real Estate Sign Printing", "description": "Coroplast yard signs, banners, and magnets for agents" },
     { "name": "Construction Site Signage", "description": "Job site coroplast, hoarding banners, truck magnets, safety signs" },
     { "name": "Healthcare & Clinic Signage", "description": "ACP directories, foam board displays, retractable stands for clinics" },
+    { "name": "Agriculture Signage", "description": "Farm gate signs, plot markers, biosecurity signs, truck magnets for Saskatchewan farms" },
+    { "name": "Agribusiness Signage", "description": "Dealer fascia signs, warehouse panels, trade show stands, spec sheets for ag suppliers" },
     { "name": "Seasonal Event Printing", "description": "St. Patrick's Day, graduation, Eid, Canada Day — event-specific banners and decals" }
   ],
   "postSchedule": [
     { "campaign": "St. Patrick's Day", "posts": ["Mar 1 — Green banners in stock", "Mar 10 — Order by today for standard turnaround", "Mar 14 — Same-day rush still available"] },
     { "campaign": "Graduation", "posts": ["Apr 15 — Grad banner season starts", "May 10 — Order now for June ceremonies", "May 28 — Same-day rush still available"] },
     { "campaign": "Ramadan/Eid", "posts": ["Mar 1 — Ramadan Mubarak — iftar banners ready", "Mar 15 — Eid al-Fitr coming — order your banner", "Apr 10 — Eid decor printing available"] },
-    { "campaign": "Construction", "posts": ["Apr 1 — Job site signs for spring builds", "May 1 — New site? Site sign ready in 48 hours", "Ongoing"] }
+    { "campaign": "Construction", "posts": ["Apr 1 — Job site signs for spring builds", "May 1 — New site? Site sign ready in 48 hours", "Ongoing"] },
+    { "campaign": "Agriculture", "posts": ["Mar 15 — Seeding season signs ready", "Jun 1 — Ag in Motion booth signage", "Oct 1 — Harvest season farm signs"] },
+    { "campaign": "Agribusiness", "posts": ["Mar 1 — Spring dealer showroom refresh", "Jun 1 — Ag in Motion trade show stands", "Sep 1 — Fall product launch materials"] }
   ]
 }
