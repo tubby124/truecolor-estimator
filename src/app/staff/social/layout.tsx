@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SocialSidebar } from "@/components/social/SocialSidebar";
 import { RealtimeStatusRail } from "@/components/social/RealtimeStatusRail";
+import { BlitzRealtimeRail } from "@/components/social/BlitzRealtimeRail";
 
 export const metadata: Metadata = {
   title: "Social Studio — True Color",
@@ -16,6 +17,7 @@ export default function SocialStudioLayout({ children }: { children: React.React
         {children}
       </div>
       <RealtimeStatusRail />
+      <BlitzRealtimeRail />
     </div>
   );
 }

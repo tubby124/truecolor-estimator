@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { CampaignCard } from "@/components/social/CampaignCard";
 import type { SocialCampaign, SocialPost } from "@/lib/types/social";
+import gbpData from "@/lib/data/gbp-products.json";
 
 export const metadata: Metadata = {
   title: "Social Studio — True Color",
@@ -15,19 +16,54 @@ async function getData() {
   try {
     const supabase = createServiceClient();
 
-    const { data: campaigns } = await supabase
-      .from("social_campaigns")
-      .select("*")
-      .order("event_date", { ascending: true, nullsFirst: false });
+    const [campaignRes, postRes, blitzTotalRes, blitzActiveRes, blitzCompletedRes, blitzBouncedRes, nichesRes] =
+      await Promise.all([
+        supabase
+          .from("social_campaigns")
+          .select("*")
+          .order("event_date", { ascending: true, nullsFirst: false }),
+        supabase
+          .from("social_posts")
+          .select("id, campaign_id, status, schedule_time, posted_at")
+          .neq("status", "skip"),
+        supabase
+          .from("tc_leads")
+          .select("*", { count: "exact", head: true }),
+        supabase
+          .from("tc_leads")
+          .select("*", { count: "exact", head: true })
+          .eq("drip_status", "active"),
+        supabase
+          .from("tc_leads")
+          .select("*", { count: "exact", head: true })
+          .eq("drip_status", "completed"),
+        supabase
+          .from("tc_leads")
+          .select("*", { count: "exact", head: true })
+          .eq("drip_status", "bounced"),
+        supabase
+          .from("tc_niche_registry")
+          .select("*", { count: "exact", head: true })
+          .eq("has_campaign", true),
+      ]);
 
-    const { data: posts } = await supabase
-      .from("social_posts")
-      .select("id, campaign_id, status, schedule_time, posted_at")
-      .neq("status", "skip");
-
-    return { campaigns: campaigns ?? [], posts: posts ?? [] };
+    return {
+      campaigns: campaignRes.data ?? [],
+      posts: postRes.data ?? [],
+      blitz: {
+        totalLeads: blitzTotalRes.count ?? 0,
+        activeLeads: blitzActiveRes.count ?? 0,
+        completedLeads: blitzCompletedRes.count ?? 0,
+        bouncedLeads: blitzBouncedRes.count ?? 0,
+        nichesLive: nichesRes.count ?? 0,
+      },
+    };
   } catch {
-    return { campaigns: [], posts: [] };
+    return {
+      campaigns: [],
+      posts: [],
+      blitz: { totalLeads: 0, activeLeads: 0, completedLeads: 0, bouncedLeads: 0, nichesLive: 0 },
+    };
   }
 }
 
@@ -44,7 +80,7 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string 
 }
 
 export default async function SocialDashboardPage() {
-  const { campaigns, posts } = await getData();
+  const { campaigns, posts, blitz } = await getData();
 
   // Compute stats
   const now = new Date();
@@ -119,6 +155,49 @@ export default async function SocialDashboardPage() {
             accent="#94a3b8"
           />
         </div>
+
+        {/* Email Blitz summary */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] flex items-center gap-2">
+              <svg className="w-4 h-4 text-[#e63020]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.841m2.699-2.842a4.5 4.5 0 10-6.364-6.364" />
+              </svg>
+              Email Blitz
+            </h2>
+            <Link href="/staff/social/blitz" className="text-xs font-bold text-[#e63020] hover:underline">
+              View Dashboard →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <StatCard label="Total leads" value={blitz.totalLeads.toLocaleString()} accent="#94a3b8" />
+            <StatCard label="Active drip" value={blitz.activeLeads} accent="#34d399" />
+            <StatCard label="Completed" value={blitz.completedLeads} accent="#22c55e" />
+            <StatCard label="Bounced" value={blitz.bouncedLeads} accent={blitz.bouncedLeads > 0 ? "#ef4444" : "#94a3b8"} />
+            <StatCard label="Niches live" value={blitz.nichesLive} accent="#fbbf24" />
+          </div>
+        </section>
+
+        {/* GBP Products summary */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] flex items-center gap-2">
+              <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+              Google Business Profile
+            </h2>
+            <Link href="/staff/social/gmb" className="text-xs font-bold text-[#e63020] hover:underline">
+              View Products →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <StatCard label="GBP products" value={gbpData.products.length} accent="#fbbf24" />
+            <StatCard label="GBP services" value={gbpData.services.length} accent="#34d399" />
+            <StatCard label="Post schedule" value={`${gbpData.postSchedule.length} campaigns`} accent="#94a3b8" />
+          </div>
+        </section>
 
         {/* Campaign grid */}
         {campaigns.length === 0 ? (

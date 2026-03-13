@@ -1,0 +1,239 @@
+{
+  "products": [
+    {
+      "slug": "vinyl-banners",
+      "name": "Vinyl Banners — Saskatoon",
+      "category": "Signs & Displays",
+      "price": "From $8.25/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/vinyl-banners?utm_source=google_business&utm_medium=gbp_product&utm_campaign=vinyl_banners",
+      "description": "Vinyl banners printed in Saskatoon in 24–48 hours. 13oz scrim vinyl, hemming and grommets included. Popular sizes: 2×6ft ($90), 2×8ft ($120), 4×8ft ($240). Weatherproof for outdoor use — holds up in Saskatchewan wind. In-house Roland UV printer. Same-day rush available for +$40 flat. Local pickup at 216 33rd St W. No minimum order. Call (306) 954-8688.",
+      "imagePath": "public/images/seasonal/st-patricks/banner-shamrock-green.png",
+      "imagePrompt": "Professional wide-format vinyl banner hanging on a fence at a Saskatchewan outdoor event. The banner has vivid full-colour printing with hemmed edges and brass grommets visible at corners. Sunny day, flat prairie background. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "coroplast-signs",
+      "name": "Coroplast Signs — Saskatoon",
+      "category": "Signs & Displays",
+      "price": "From $8/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/coroplast-signs?utm_source=google_business&utm_medium=gbp_product&utm_campaign=coroplast_signs",
+      "description": "Coroplast signs printed in Saskatoon from $8/sqft. 4mm flute corrugated plastic — lightweight, UV-resistant, reusable. Popular for real estate, job sites, and election campaigns. Standard sizes: 18×24\" ($30), 24×36\" ($48), 4×4ft ($120), 4×8ft ($232). H-wire stakes available. Bulk pricing: 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs. Local pickup 216 33rd St W, Saskatoon.",
+      "imagePath": null,
+      "imagePrompt": "Corrugated plastic yard sign with full-colour printing staked into a well-maintained lawn in front of a business. The sign is on a metal H-wire stake. Clear sunny day, Saskatchewan residential neighbourhood background. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "acp-signs",
+      "name": "ACP Aluminum Signs — Saskatoon",
+      "category": "Signs & Displays",
+      "price": "From $13/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/acp-signs?utm_source=google_business&utm_medium=gbp_product&utm_campaign=acp_signs",
+      "description": "ACP (aluminum composite panel) signs — permanent, professional, rigid. 3mm aluminum composite with full-colour UV printing. From $13/sqft single-sided. Popular for business fronts, office directories, and construction site signage. Standard sizes: 12×24\" ($29), 24×36\" ($66), 4×4ft ($136), 4×8ft ($272). Mount with standoffs for a floating look. Local pickup 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+      "imagePath": "public/images/industries/healthcare/acp-clinic-directory.png",
+      "imagePrompt": "Brushed aluminum composite panel sign mounted on a modern building exterior with standoff mounts creating a floating effect. The sign shows a professional business logo in full colour. Clean urban Saskatchewan setting. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "foamboard-displays",
+      "name": "Foam Board Displays — Saskatoon",
+      "category": "Signs & Displays",
+      "price": "From $10/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/foamboard-displays?utm_source=google_business&utm_medium=gbp_product&utm_campaign=foamboard_displays",
+      "description": "Foam board display panels printed in Saskatoon. 5mm foam core, lightweight, easy to mount or place on easels. From $10/sqft (minimum $45). Popular for trade shows, graduation displays, open houses, and clinic waiting rooms. Common sizes: 18×24\" ($45), 24×36\" ($65), 36×48\" ($130). No hardware needed — stands on a tabletop easel. Call (306) 954-8688.",
+      "imagePath": "public/images/industries/healthcare/foamboard-know-your-numbers.png",
+      "imagePrompt": "Foam board display panel on a tabletop easel at a trade show booth. The foam board shows vibrant full-colour printing with sharp edges. Convention centre background with other booths visible. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "retractable-banners",
+      "name": "Retractable Banner Stands — Saskatoon",
+      "category": "Signs & Displays",
+      "price": "From $219 complete",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/retractable-banners?utm_source=google_business&utm_medium=gbp_product&utm_campaign=retractable_banners",
+      "description": "Retractable banner stands complete from $219 — stand + full-colour 24×80\" print included. No separate graphic fee. Popular for trade shows, clinic receptions, graduation ceremonies, and event registration desks. Lightweight, packs into a carry bag. Reusable — replace the print anytime. In-house printing. Local pickup 216 33rd St W, Saskatoon. (306) 954-8688.",
+      "imagePath": "public/images/industries/healthcare/retractable-health-fair.png",
+      "imagePrompt": "Retractable roll-up banner stand displayed in a professional reception area. The banner shows a full-colour business graphic. The silver base and telescoping pole are visible. Clean modern interior setting. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "window-decals",
+      "name": "Window Decals — Saskatoon",
+      "category": "Window & Vehicle Graphics",
+      "price": "From $11/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/window-decals?utm_source=google_business&utm_medium=gbp_product&utm_campaign=window_decals",
+      "description": "Vinyl window decals printed in Saskatoon from $11/sqft (minimum $45). Removable — zero adhesive residue on glass. Full-colour UV printing. Popular for seasonal promotions, hours of operation, logos, and event advertising on storefronts. Perforated window vinyl also available ($8/sqft) — one-way vision. Local pickup 216 33rd St W. Call (306) 954-8688.",
+      "imagePath": "public/images/seasonal/st-patricks/decal-full-window.png",
+      "imagePrompt": "Storefront glass window with a large full-colour vinyl decal showing business branding. The decal is clearly applied to the inside of the glass. Saskatoon commercial street visible in reflection. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "vehicle-magnets",
+      "name": "Vehicle Magnets — Saskatoon",
+      "category": "Window & Vehicle Graphics",
+      "price": "From $24/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/vehicle-magnets?utm_source=google_business&utm_medium=gbp_product&utm_campaign=vehicle_magnets",
+      "description": "Custom vehicle magnets printed in Saskatoon from $24/sqft. Turn any truck, van, or car into a mobile billboard. Full-colour UV print on flexible magnetic stock. Standard door magnet (12×18\") from $58, large (18×24\") from $87. Removable — no paint damage. Popular for contractors, real estate agents, and delivery businesses. 48-hour turnaround. Local pickup 216 33rd St W. (306) 954-8688.",
+      "imagePath": null,
+      "imagePrompt": "Custom printed vehicle door magnet on a white work truck. The magnet shows a full-colour business logo and phone number. Parked in a commercial parking lot. Close-up showing the magnet edge slightly raised from the door surface. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "vinyl-lettering",
+      "name": "Vinyl Lettering & Cut Graphics",
+      "category": "Window & Vehicle Graphics",
+      "price": "Custom quote",
+      "cta": "Get offer",
+      "url": "https://truecolorprinting.ca/quote?utm_source=google_business&utm_medium=gbp_product&utm_campaign=vinyl_lettering",
+      "description": "Custom vinyl lettering and cut graphics for windows, walls, vehicles, and equipment. Single-colour or multi-colour vinyl. Precision-cut plotter — no print, just the shape. Popular for vehicle door lettering, storefront window text, wall quotes, and equipment decals. Send your logo or text and we'll quote same day. (306) 954-8688.",
+      "imagePath": null,
+      "imagePrompt": "Precision-cut vinyl lettering applied to a storefront glass door showing business hours and a company name. The letters are crisp with no background — just the cut shapes on clear glass. Clean commercial setting. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "business-cards",
+      "name": "Business Cards — Saskatoon",
+      "category": "Print & Promo",
+      "price": "250 for $45",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/business-cards?utm_source=google_business&utm_medium=gbp_product&utm_campaign=business_cards",
+      "description": "Business cards printed in Saskatoon. 250 cards double-sided on 14pt card stock for $45 + GST. 500 cards $58, 1000 cards $75. Full-colour, matte or gloss finish. In-house design available ($35 flat) — send your logo and info and we'll layout a print-ready proof. Ready in 48 hours. Same-day rush +$40. Pickup at 216 33rd St W. (306) 954-8688.",
+      "imagePath": null,
+      "imagePrompt": "Stack of professionally printed business cards on 14pt card stock, fanned out on a dark wooden desk. Full-colour double-sided printing visible. Shallow depth of field, studio lighting. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "flyers",
+      "name": "Flyer Printing — Saskatoon",
+      "category": "Print & Promo",
+      "price": "250 from $110",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/flyers?utm_source=google_business&utm_medium=gbp_product&utm_campaign=flyers",
+      "description": "Flyer printing in Saskatoon — 250 glossy 8.5×11\" flyers on 80lb stock for $110 + GST. 500 flyers $150, 1000 flyers $195. Double-sided printing included. In-house designer available ($35–50). Popular for bars, restaurants, real estate, events, and seasonal promotions. 48-hour turnaround. Same-day rush available. Pickup at 216 33rd St W. Call (306) 954-8688.",
+      "imagePath": "public/images/seasonal/ramadan/flyer-bold-announcement.png",
+      "imagePrompt": "Stack of glossy full-colour printed flyers on a print shop counter. The top flyer shows vivid colours on 80lb glossy stock. Print shop environment with equipment visible in background. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "stickers",
+      "name": "Custom Stickers — Saskatoon",
+      "category": "Print & Promo",
+      "price": "Custom quote",
+      "cta": "Get offer",
+      "url": "https://truecolorprinting.ca/quote?utm_source=google_business&utm_medium=gbp_product&utm_campaign=stickers",
+      "description": "Custom stickers and labels printed in Saskatoon. Full-colour, any shape — square, circle, or custom die-cut. Waterproof vinyl or paper stock. Bumper stickers, product labels, promotional giveaways. Send your artwork or we design from scratch. Get a same-day quote — call (306) 954-8688 or submit online.",
+      "imagePath": null,
+      "imagePrompt": "Assortment of custom die-cut stickers in various shapes and sizes spread on a clean white surface. Full-colour printing on waterproof vinyl with glossy finish. Some stickers partially peeled showing the backing paper. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "photo-posters",
+      "name": "Photo Posters — Saskatoon",
+      "category": "Print & Promo",
+      "price": "Custom quote",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/products/photo-posters?utm_source=google_business&utm_medium=gbp_product&utm_campaign=photo_posters",
+      "description": "Large format photo poster printing in Saskatoon. Gallery-quality prints on photo stock, canvas, or matte paper. Any size up to 60\" wide. Popular for grad photo backdrops, office décor, event signage, and real estate listing photos. Roland UV printer — vibrant colour accuracy. Pickup 216 33rd St W. Call (306) 954-8688 for sizing and pricing.",
+      "imagePath": null,
+      "imagePrompt": "Large format photo poster being printed on a wide-format Roland UV printer. The poster shows a vivid landscape photograph emerging from the printer. Print shop environment with rolls of media visible. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "st-patricks-day",
+      "name": "St. Patrick's Day Banners & Decals",
+      "category": "Seasonal Signs & Banners",
+      "price": "From $90",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=st_patricks_day",
+      "description": "St. Patrick's Day banners, window decals, and flyers for Saskatoon bars, pubs, and restaurants. Vinyl banner 2×6ft $90 + GST. Window decals from $11/sqft — removable after March 17, no residue on glass. 250 promotional flyers $110. Order by March 10 for standard turnaround. Same-day rush available for +$40. In-house Roland UV printer. Local pickup 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+      "imagePath": "public/images/seasonal/st-patricks/hero.png",
+      "imagePrompt": "St. Patrick's Day themed vinyl banner hanging inside a Saskatoon pub. Green and gold colours with shamrock designs. The banner is hemmed with grommets visible. Warm pub interior lighting. Photorealistic, 1200x900.",
+      "seasonal": { "active": "Feb 15 – Mar 17", "addBy": "Feb 15", "removeAfter": "Mar 17" }
+    },
+    {
+      "slug": "graduation-banners",
+      "name": "Graduation Banners & Photo Displays",
+      "category": "Seasonal Signs & Banners",
+      "price": "From $90",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=graduation_banners",
+      "description": "Graduation banners, foam board displays, and retractable stands for Saskatoon schools, universities, and private grad parties. Vinyl banner 2×6ft $90, 4×8ft gym banner $240. Foam board photo display 24×36\" $65. Retractable stand complete $219. Bring your school colours and grad year — in-house designer handles the layout. Order by late May. Same-day rush +$40 flat. Pickup 216 33rd St W. (306) 954-8688.",
+      "imagePath": "public/images/seasonal/graduation/hero.png",
+      "imagePrompt": "Graduation celebration vinyl banner displayed at a school gymnasium entrance. The banner shows 'Class of 2026' with school colours. Students in caps and gowns walking past. Photorealistic, 1200x900.",
+      "seasonal": { "active": "Apr 1 – Jul 1", "addBy": "Apr 1", "removeAfter": "Jul 1" }
+    },
+    {
+      "slug": "ramadan-eid",
+      "name": "Ramadan & Eid Banners — Saskatoon",
+      "category": "Seasonal Signs & Banners",
+      "price": "From $90",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=ramadan_eid",
+      "description": "Ramadan and Eid banners, flyers, and retractable stands for Saskatoon mosques, halal restaurants, and Islamic community events. 2×6ft Iftar dinner banner $90. 4×8ft mosque entrance banner $216. Retractable stand complete $219. Print any language — Arabic, Urdu, Bengali. In-house designer. 48-hour turnaround. Same-day rush +$40. Pickup 216 33rd St W. Call (306) 954-8688.",
+      "imagePath": "public/images/seasonal/ramadan/banner-eid-mubarak.png",
+      "imagePrompt": "Ramadan Mubarak banner displayed at the entrance of a mosque. The banner features Islamic geometric patterns in gold and deep blue with Arabic calligraphy. Warm evening lighting. Photorealistic, 1200x900.",
+      "seasonal": { "active": "Feb 15 – May 15", "addBy": "Feb 15", "removeAfter": "May 15" }
+    },
+    {
+      "slug": "construction-signs",
+      "name": "Construction Signs — Saskatoon Contractors",
+      "category": "Industry Signs",
+      "price": "From $8/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=construction",
+      "description": "Job site signs, hoarding banners, truck magnets, and safety banners for Saskatoon contractors and home builders. Coroplast site signs from $8/sqft. Hoarding banner from $6.75/sqft. Truck door magnets from $24/sqft. Business cards 250 for $45. All printed in-house, ready in 1–3 business days. No outsourcing delays. Local pickup 216 33rd St W. Call (306) 954-8688.",
+      "imagePath": "public/images/products/heroes/construction-hero-1200x500.webp",
+      "imagePrompt": "Construction site with a large coroplast sign staked into the ground showing the contractor's logo and phone number. Hard hats, building framing, and Saskatchewan sky in background. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "real-estate-signs",
+      "name": "Real Estate Signs — Saskatoon",
+      "category": "Industry Signs",
+      "price": "From $8/sqft",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/real-estate-signs-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=real_estate",
+      "description": "Coroplast yard signs, vinyl banners, vehicle magnets, and feature sheets for Saskatoon real estate agents. Coroplast 18×24\" from $30. Vinyl listing banner from $90. Truck magnet door pair from $130. We print for eXp, Re/Max, Century 21, and independent agents. 48-hour turnaround. H-wire stakes available. Local pickup 216 33rd St W. Call (306) 954-8688.",
+      "imagePath": "public/images/products/heroes/realestate-hero-1200x500.webp",
+      "imagePrompt": "Real estate yard sign on a front lawn of a house for sale. The coroplast sign shows a real estate agent's branding and photo. Well-maintained Saskatoon residential neighbourhood. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "healthcare-signage",
+      "name": "Healthcare & Clinic Signage — Saskatoon",
+      "category": "Industry Signs",
+      "price": "Custom quote",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/healthcare-printing-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=healthcare",
+      "description": "ACP panels, foam board displays, retractable stands, and vinyl banners for Saskatoon medical clinics, dental offices, and wellness centres. Clinic directory ACP panels, waiting room displays, patient information foam boards, event banners. No minimums. In-house designer included. 48-hour turnaround. Pickup 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+      "imagePath": "public/images/industries/healthcare/email-header-clinic-overview.png",
+      "imagePrompt": "Modern medical clinic reception area with an ACP directory sign mounted on the wall listing doctor names and suite numbers. Clean, well-lit healthcare environment. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "same-day-rush",
+      "name": "Same-Day Rush Printing — Saskatoon",
+      "category": "Services",
+      "price": "+$40 flat rush fee",
+      "cta": "Call",
+      "url": "https://truecolorprinting.ca/same-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=same_day",
+      "description": "Same-day rush printing in Saskatoon — +$40 flat fee. Order before 10 AM, pick up same business day. Vinyl banners, coroplast signs, foamboard displays, flyers, window decals. In-house Roland UV printer — no outsourcing, no surprises. Call to confirm capacity: (306) 954-8688. Pickup at 216 33rd St W, Saskatoon, SK.",
+      "imagePath": null,
+      "imagePrompt": "Inside view of a busy print shop with a Roland UV printer running. A finished vinyl banner is being rolled up by a staff member. Clock on the wall showing morning time. Warm, productive workshop atmosphere. Photorealistic, 1200x900."
+    }
+  ],
+  "services": [
+    { "name": "Banner Printing", "description": "Vinyl banners from $8.25/sqft, hemmed and grommeted, ready in 48 hours" },
+    { "name": "Coroplast Sign Printing", "description": "Yard and job-site signs from $8/sqft, H-wire stakes available" },
+    { "name": "Same-Day Rush Printing", "description": "Any product printed same day for +$40 flat fee — order before 10 AM" },
+    { "name": "Graphic Design", "description": "In-house designer for logos, layouts, and print-ready artwork — $35–50 flat" },
+    { "name": "ACP Aluminum Sign Printing", "description": "Permanent rigid signs from $13/sqft for businesses and contractors" },
+    { "name": "Vehicle Magnet Printing", "description": "Custom truck and car door magnets from $24/sqft" },
+    { "name": "Window Decal Printing", "description": "Removable vinyl decals from $11/sqft — zero residue after removal" },
+    { "name": "Foam Board Display Printing", "description": "Lightweight display panels from $10/sqft for trade shows and events" },
+    { "name": "Retractable Banner Stand Printing", "description": "Complete stands from $219 — stand + full-colour 24×80\" print" },
+    { "name": "Business Card Printing", "description": "250 cards double-sided for $45 + GST — 48-hour turnaround" },
+    { "name": "Flyer & Brochure Printing", "description": "250 glossy flyers from $110 — same-day rush available" },
+    { "name": "Real Estate Sign Printing", "description": "Coroplast yard signs, banners, and magnets for agents" },
+    { "name": "Construction Site Signage", "description": "Job site coroplast, hoarding banners, truck magnets, safety signs" },
+    { "name": "Healthcare & Clinic Signage", "description": "ACP directories, foam board displays, retractable stands for clinics" },
+    { "name": "Seasonal Event Printing", "description": "St. Patrick's Day, graduation, Eid, Canada Day — event-specific banners and decals" }
+  ],
+  "postSchedule": [
+    { "campaign": "St. Patrick's Day", "posts": ["Mar 1 — Green banners in stock", "Mar 10 — Order by today for standard turnaround", "Mar 14 — Same-day rush still available"] },
+    { "campaign": "Graduation", "posts": ["Apr 15 — Grad banner season starts", "May 10 — Order now for June ceremonies", "May 28 — Same-day rush still available"] },
+    { "campaign": "Ramadan/Eid", "posts": ["Mar 1 — Ramadan Mubarak — iftar banners ready", "Mar 15 — Eid al-Fitr coming — order your banner", "Apr 10 — Eid decor printing available"] },
+    { "campaign": "Construction", "posts": ["Apr 1 — Job site signs for spring builds", "May 1 — New site? Site sign ready in 48 hours", "Ongoing"] }
+  ]
+}
