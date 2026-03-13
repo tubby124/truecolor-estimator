@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Real Estate Signs Saskatoon | From $30 | True Color" },
   description:
-    "Coroplast yard signs for Saskatoon REALTORS from $30. Feature sheets, business cards, vehicle magnets, postcards. Same-day rush available. Local pickup 216 33rd St W.",
+    "Coroplast yard signs for Saskatoon REALTORS from $30. Feature sheets, business cards, vehicle magnets & postcards. Same-day rush. Pickup 216 33rd St W.",
   alternates: { canonical: "/real-estate-signs-saskatoon" },
   openGraph: {
     title: "Real Estate Signs Saskatoon | True Color Display Printing",

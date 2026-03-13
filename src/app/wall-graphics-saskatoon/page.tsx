@@ -4,7 +4,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Wall Graphics Saskatoon | Vinyl Murals & Decals | True Color" },
   description:
-    "Vinyl wall graphics in Saskatoon from $11/sqft. Removable decals, lobby murals, retail walls. Roland UV printer. Same-day rush +$40. In-house designer $35. Pickup at 216 33rd St W.",
+    "Vinyl wall graphics in Saskatoon from $11/sqft. Removable decals, lobby murals, retail walls. Roland UV. Same-day rush +$40. Designer $35. 216 33rd St W.",
   alternates: { canonical: "/wall-graphics-saskatoon" },
   openGraph: {
     title: "Wall Graphics Saskatoon | Vinyl Decals & Wall Lettering | True Color",

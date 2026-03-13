@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Photo Poster Printing Saskatoon | From $18 | True Color" },
   description:
-    "Photo poster printing in Saskatoon from $15 (12×18\") to $65 (36×48\"). Roland Photobase Matte 220gsm. Events, offices, real estate, retail. Same-day rush +$40. No minimum.",
+    "Photo poster printing in Saskatoon from $15 (12×18\") to $65 (36×48\"). Roland Photobase Matte 220gsm. Events, offices, real estate. Same-day rush +$40.",
   alternates: { canonical: "/photo-poster-printing-saskatoon" },
   openGraph: {
     title: "Photo Poster Printing Saskatoon | True Color Display Printing",

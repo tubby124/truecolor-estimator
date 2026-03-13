@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Trade Show Displays Saskatoon | From $219 | True Color" },
   description:
-    "Trade show displays in Saskatoon from $219. Retractable banner stands, vinyl banners, foamboard, and coroplast signs. In-house Roland printer, 1–3 day turnaround. 216 33rd St W.",
+    "Trade show displays in Saskatoon from $219. Retractable banners, vinyl banners, foamboard, coroplast signs. Roland UV, 1–3 day turnaround. 216 33rd St W.",
   alternates: { canonical: "/trade-show-displays-saskatoon" },
   openGraph: {
     title: "Trade Show Displays Saskatoon | True Color Display Printing",
@@ -83,7 +83,7 @@ export default function TradeShowDisplaysSaskatoonPage() {
         { name: "Foamboard Displays", from: "from $45", slug: "foamboard-displays" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
-        { name: "Window Decals", from: "from /sqft", slug: "window-decals" },
+        { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
       ]}
       whyPoints={[
         "Retractable banner stands from $219 — Economy, Deluxe ($299), and Premium ($349) options",

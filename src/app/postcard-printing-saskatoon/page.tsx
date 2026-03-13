@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Postcard Printing Saskatoon | 4×6 & 5×7 | True Color" },
   description:
-    "Postcard printing in Saskatoon from $40 for 50. 4×6 and 5×7 on 14pt gloss, double-sided. Same-day rush +$40. Real estate mailers, promos, event invites. 216 33rd St W.",
+    "Postcard printing in Saskatoon from $40 for 50. 4×6 and 5×7 on 14pt gloss, double-sided. Same-day rush +$40. Real estate, events, promos. 216 33rd St W.",
   alternates: { canonical: "/postcard-printing-saskatoon" },
   openGraph: {
     title: "Postcard Printing Saskatoon | True Color Display Printing",
@@ -66,15 +66,15 @@ export default function PostcardPrintingSaskatoonPage() {
       }
       products={[
         { name: "Postcards 4×6\"", from: "from $40 / 50", slug: "postcards" },
-        { name: "Postcards 5×7\"", from: "from $35 / 50", slug: "postcards" },
+        { name: "Postcards 5×7\"", from: "from $45 / 50", slug: "postcards" },
         { name: "Flyers", from: "from $45 / 100", slug: "flyers" },
-        { name: "Business Cards", from: "from $40 / 250", slug: "business-cards" },
+        { name: "Business Cards", from: "from $45 / 250", slug: "business-cards" },
         { name: "Brochures (tri-fold)", from: "from $70 / 100", slug: "brochures" },
       ]}
       whyPoints={[
         "Skip the spam folder — 14pt gloss double-sided cards, Canada Post admail compliant, land in hands",
         "4×6\" from $40/50 | 250 for $85 | 500 for $140 — no hidden setup fees",
-        "5×7\" from $35/50 | 100 for $45 | 250 for $85 — stands out in a crowded mailbox",
+        "5×7\" from $45/50 | 100 for $50 | 250 for $95 — stands out in a crowded mailbox",
         "Colour that matches your brand exactly — Roland UV in-house, no outsourcing, no colour surprises",
         "Order before 10 AM, pick up today — same-day rush +$40 flat",
         "Layout done for you — in-house designer $35 flat, real estate cards, promo mailers, invites, same-day proof",
@@ -84,7 +84,7 @@ export default function PostcardPrintingSaskatoonPage() {
       faqs={[
         {
           q: "How much does postcard printing cost in Saskatoon?",
-          a: "4×6\" postcards (14pt gloss, double-sided): 50 for $40, 100 for $45, 250 for $85, 500 for $140. 5×7\" postcards: 50 for $35, 100 for $45, 250 for $85. Design is $35 flat if you need a layout built. Same-day rush is +$40 on top of the print cost.",
+          a: "4×6\" postcards (14pt gloss, double-sided): 50 for $40, 100 for $45, 250 for $85, 500 for $140. 5×7\" postcards: 50 for $45, 100 for $50, 250 for $95. Design is $35 flat if you need a layout built. Same-day rush is +$40 on top of the print cost.",
         },
         {
           q: "Are your postcards Canada Post admail compliant?",

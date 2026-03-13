@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Large Format Printing Saskatoon | In-House | True Color" },
   description:
-    "Large format printing in Saskatoon — coroplast signs, vinyl banners, ACP aluminum, retractable displays, and foamboard. In-house Roland UV printer, 1–3 day turnaround. 216 33rd St W.",
+    "Large format printing in Saskatoon — coroplast, vinyl banners, ACP aluminum, retractable displays & foamboard. Roland UV, 1–3 day turnaround. Local pickup.",
   alternates: { canonical: "/large-format-printing-saskatoon" },
   openGraph: {
     title: "Large Format Printing Saskatoon | True Color Display Printing",

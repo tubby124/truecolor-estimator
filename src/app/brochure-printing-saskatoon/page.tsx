@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Brochure Printing Saskatoon | Tri-Fold | True Color" },
   description:
-    "Brochure printing in Saskatoon from $70/100. Tri-fold & half-fold on 100lb gloss, scored and folded in-house. Same-day rush available. Pickup at 216 33rd St W.",
+    "Brochure printing in Saskatoon from $70/100. Tri-fold & half-fold on 100lb gloss, scored & folded in-house. Same-day rush available. Pickup 216 33rd St W.",
   alternates: { canonical: "/brochure-printing-saskatoon" },
   openGraph: {
     title: "Brochure Printing Saskatoon | True Color Display Printing",

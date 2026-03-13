@@ -4,7 +4,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Sign Company Saskatoon | Coroplast & ACP | True Color" },
   description:
-    "Saskatoon sign company — coroplast from $8/sqft, ACP aluminum from $13/sqft, vinyl lettering, vehicle magnets. Same-day rush +$40. In-house print at 216 33rd St W.",
+    "Saskatoon sign company — coroplast from $8/sqft, ACP aluminum from $13/sqft, vinyl lettering, vehicle magnets. Same-day rush +$40. Print at 216 33rd St W.",
   alternates: { canonical: "/sign-company-saskatoon" },
   openGraph: {
     title: "Sign Company Saskatoon | Coroplast, ACP & Vinyl | True Color",
@@ -26,20 +26,20 @@ export default function SignCompanySaskatoonPage() {
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Coroplast and aluminum signs printed in Saskatoon by True Color Display Printing"
       description={
-        "A sign company prints, cuts, and finishes custom signs from submitted artwork or designs them in-house. True Color Display Printing is a Saskatoon sign company at 216 33rd St W specializing in coroplast signs from $8/sqft, ACP aluminum signs from $13/sqft, vinyl banners from $8.25/sqft, vehicle magnets, window decals, and vinyl lettering — all printed on an in-house Roland UV printer with 1–3 business day turnaround.\n\nSign material comparison: coroplast (4mm corrugated plastic) costs $8/sqft and suits temporary outdoor use rated 2–3 years; ACP aluminum composite (3mm rigid panel) costs $13/sqft and suits permanent storefront and exterior signage rated 7–10 years; vinyl banners cost $8.25/sqft and suit event, fence, and flexible-hang applications. Same-day rush is available on all sign products for +$40 flat.\n\nTrue Color Display Printing is Saskatoon's in-house sign company — everything from temporary coroplast yard signs to permanent ACP aluminum panels is designed, printed, and cut under one roof at 216 33rd St W. No outsourcing to a national supplier, no waiting a week for your order to ship from Vancouver. Most sign orders are ready in 1–3 business days.\n\nCoroplast (corrugated plastic) is the go-to material for temporary outdoor signs in Saskatchewan. At 4mm thickness, it's lightweight, UV-resistant, and reusable season after season. Yard signs, job site signs, election signs, real estate listings, and event directional signs are all common coroplast applications. Standard sizes start at 18×24\" ($30) and go up to 4×8 ft sheets ($232). H-wire stakes are $2.50 each for ground mounting.\n\nFor permanent business signage, ACP (aluminum composite panel) is the professional choice. 3mm aluminum composite with a polyethylene core — rigid, weather-resistant, and clean-looking mounted on standoffs. ACP panels work for storefront signs, office directories, building exterior signs, and construction hoarding panels. Starting at $13/sqft single-sided — a 24×36\" panel is $66.\n\nVinyl lettering and cut graphics handle text-only applications: window lettering, equipment labels, vehicle door text, and office door identification. Precision plotter-cut, no background material, clean edge finish. Vehicle magnets from $18/sqft — door magnets that turn any truck or van into a mobile billboard for your business, with no paint damage.\n\nEvery sign order includes an in-house design review. Our designer checks your file for print-readiness, corrects colour profiles, and flags issues before the job goes to press. If you need a layout built from scratch, that's a $35 flat fee. Same-day rush is available on all sign products for +$40 flat when ordered before 10 AM.\n\nSaskatoon businesses, contractors, event organizers, and government offices choose True Color because the turnaround is fast, the quality is consistent, and you're dealing with one shop — not a broker who ships your job somewhere else."
+        "A sign company prints, cuts, and finishes custom signs from submitted artwork or designs them in-house. True Color Display Printing is a Saskatoon sign company at 216 33rd St W specializing in coroplast signs from $8/sqft, ACP aluminum signs from $13/sqft, vinyl banners from $8.25/sqft, vehicle magnets, window decals, and vinyl lettering — all printed on an in-house Roland UV printer with 1–3 business day turnaround.\n\nSign material comparison: coroplast (4mm corrugated plastic) costs $8/sqft and suits temporary outdoor use rated 2–3 years; ACP aluminum composite (3mm rigid panel) costs $13/sqft and suits permanent storefront and exterior signage rated 7–10 years; vinyl banners cost $8.25/sqft and suit event, fence, and flexible-hang applications. Same-day rush is available on all sign products for +$40 flat.\n\nTrue Color Display Printing is Saskatoon's in-house sign company — everything from temporary coroplast yard signs to permanent ACP aluminum panels is designed, printed, and cut under one roof at 216 33rd St W. No outsourcing to a national supplier, no waiting a week for your order to ship from Vancouver. Most sign orders are ready in 1–3 business days.\n\nCoroplast (corrugated plastic) is the go-to material for temporary outdoor signs in Saskatchewan. At 4mm thickness, it's lightweight, UV-resistant, and reusable season after season. Yard signs, job site signs, election signs, real estate listings, and event directional signs are all common coroplast applications. Standard sizes start at 18×24\" ($30) and go up to 4×8 ft sheets ($232). H-wire stakes are $2.50 each for ground mounting.\n\nFor permanent business signage, ACP (aluminum composite panel) is the professional choice. 3mm aluminum composite with a polyethylene core — rigid, weather-resistant, and clean-looking mounted on standoffs. ACP panels work for storefront signs, office directories, building exterior signs, and construction hoarding panels. Starting at $13/sqft single-sided — a 24×36\" panel is $66.\n\nVinyl lettering and cut graphics handle text-only applications: window lettering, equipment labels, vehicle door text, and office door identification. Precision plotter-cut, no background material, clean edge finish. Vehicle magnets from $24/sqft — door magnets that turn any truck or van into a mobile billboard for your business, with no paint damage.\n\nEvery sign order includes an in-house design review. Our designer checks your file for print-readiness, corrects colour profiles, and flags issues before the job goes to press. If you need a layout built from scratch, that's a $35 flat fee. Same-day rush is available on all sign products for +$40 flat when ordered before 10 AM.\n\nSaskatoon businesses, contractors, event organizers, and government offices choose True Color because the turnaround is fast, the quality is consistent, and you're dealing with one shop — not a broker who ships your job somewhere else."
       }
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
-        { name: "Vinyl Lettering", from: "custom quote", slug: "vinyl-lettering" },
-        { name: "Vehicle Magnets", from: "from $18/sqft", slug: "vehicle-magnets" },
+        { name: "Vinyl Lettering", from: "from $40", slug: "vinyl-lettering" },
+        { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
-        { name: "Vinyl Banners", from: "from $90", slug: "vinyl-banners" },
+        { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
       ]}
       whyPoints={[
         "Coroplast yard signs from $8/sqft — 18×24\" for $30, 4×8 ft for $232, H-stakes $2.50 ea",
         "ACP aluminum signs from $13/sqft — 24×36\" for $66, permanent outdoor-rated substrate",
-        "Vehicle magnets from $18/sqft — removable, no paint damage, full-colour UV print",
+        "Vehicle magnets from $24/sqft — removable, no paint damage, full-colour UV print",
         "Vinyl lettering for windows, vehicles, and equipment — precision plotter, clean edge finish",
         "In-house Roland UV printer — same building as your designer, no outsourcing",
         "Same-day rush for +$40 flat on all sign products when ordered before 10 AM",
@@ -49,7 +49,7 @@ export default function SignCompanySaskatoonPage() {
       faqs={[
         {
           q: "How much do coroplast signs cost in Saskatoon?",
-          a: "Coroplast signs at True Color start at $8/sqft single-sided. Common sizes: 18×24\" = $30, 24×36\" = $58, 4×4 ft = $116, 4×8 ft = $232. Volume pricing: $7.50/sqft at 10+ sqft, $7.25/sqft at 25+ sqft. H-wire ground stakes are $2.50 each.",
+          a: "Coroplast signs at True Color start at $8/sqft single-sided. Common sizes: 18×24\" = $30, 24×36\" = $48, 4×4 ft = $120, 4×8 ft = $232. Volume pricing: 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs. H-wire ground stakes are $2.50 each.",
         },
         {
           q: "What's the difference between coroplast and ACP aluminum signs?",
@@ -73,7 +73,7 @@ export default function SignCompanySaskatoonPage() {
         },
         {
           q: "How much do ACP aluminum signs cost in Saskatoon?",
-          a: "ACP signs at True Color start at $13/sqft single-sided. Common sizes: 12×18\" = $29, 24×36\" = $66, 4×4 ft = $136, 4×8 ft = $272. ACP is the material of choice for permanent storefront signs, office building directories, and any application where rigid, weather-resistant signage is required.",
+          a: "ACP signs at True Color start at $13/sqft single-sided. Common sizes: 12×18\" = $60, 24×36\" = $66, 4×4 ft = $176, 4×8 ft = $320. ACP is the material of choice for permanent storefront signs, office building directories, and any application where rigid, weather-resistant signage is required.",
         },
         {
           q: "Where can I get a sign made in Saskatoon?",

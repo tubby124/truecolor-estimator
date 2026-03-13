@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Same Day Printing Saskatoon | Rush +$40 | True Color" },
   description:
-    "Same-day printing in Saskatoon. Order before 10 AM, pick up by 5 PM. Signs, banners, business cards, flyers. Rush fee $40 flat — no per-item upcharge. 216 33rd St W.",
+    "Same-day printing in Saskatoon. Order before 10 AM, pick up by 5 PM. Signs, banners, cards & flyers. Rush +$40 flat — no per-item upcharge. 216 33rd St W.",
   alternates: { canonical: "/same-day-printing-saskatoon" },
   openGraph: {
     title: "Same Day Printing Saskatoon | True Color Display Printing",
@@ -88,10 +88,10 @@ export default function SameDayPrintingSaskatoonPage() {
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
       ]}
       whyPoints={[
         "Rush fee is $40 flat on the full order — no per-sign or per-item upcharge",

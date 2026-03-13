@@ -4,7 +4,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Graphic Design Saskatoon | Logos & Layouts | True Color" },
   description:
-    "In-house Photoshop designer in Saskatoon. Custom logos, artwork modifications, print-ready layouts for banners, signs, business cards & flyers. Design + print in one shop. $35 flat for standard layouts.",
+    "In-house Photoshop designer in Saskatoon. Custom logos, artwork mods, print-ready layouts for banners, signs, cards & flyers. Design + print. $35 flat.",
   alternates: { canonical: "/graphic-design-saskatoon" },
   openGraph: {
     title: "Graphic Design Saskatoon | Custom Artwork & Print Layouts | True Color",
