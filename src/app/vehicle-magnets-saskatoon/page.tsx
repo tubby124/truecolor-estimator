@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Vehicle Magnets Saskatoon | From $24/sqft | True Color" },
+  title: { absolute: "Vehicle Magnets Saskatoon | From $45 | True Color" },
   description:
-    "Custom vehicle magnets in Saskatoon from $24/sqft. 30mil thick, full colour, removable and reusable. Same-day rush available. Local pickup at 216 33rd St W.",
+    "Custom vehicle magnets in Saskatoon from $45. 30mil thick, full colour, removable and reusable. Same-day rush available. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/vehicle-magnets-saskatoon" },
   openGraph: {
     title: "Vehicle Magnets Saskatoon | True Color Display Printing",
     description:
-      "30mil vehicle magnets from $24/sqft. Full colour, removable, reusable. Same-day available. Local Saskatoon pickup.",
+      "30mil vehicle magnets from $45. Full colour, removable, reusable. Same-day available. Local Saskatoon pickup.",
     url: "https://truecolorprinting.ca/vehicle-magnets-saskatoon",
     type: "website",
   },
@@ -33,7 +33,7 @@ export default function VehicleMagnetsSaskatoonPage() {
       ]}
       whyPoints={[
         "30mil magnetic sheeting — holds at highway speeds on flat metal surfaces",
-        "Volume discount: 2+ magnets save 8%, 5+ save 23% — popular for fleet branding",
+        "Volume discount: 5+ magnets save 5%, 10+ save 10% — popular for fleet branding",
         "Removable and reusable — no damage to paint, no permanent commitment",
         "Roland UV full-colour print — sharp logos, vivid brand colours, UV-resistant",
         "Election campaigns use magnets to brand campaign vehicles without leasing restrictions",
@@ -42,7 +42,7 @@ export default function VehicleMagnetsSaskatoonPage() {
       faqs={[
         {
           q: "How much do vehicle magnets cost in Saskatoon?",
-          a: "Vehicle magnets at True Color start at $24/sqft. A standard 12×18\" magnet is 1.5 sqft — about $36. A 18×24\" magnet is 3 sqft — about $72. Volume discounts apply: 2+ magnets save 8%, 5+ save 23%. Use the calculator at /products/vehicle-magnets to get your exact price.",
+          a: "Vehicle magnets at True Color start at $24/sqft. A standard 12×18\" magnet is 1.5 sqft — about $36. A 18×24\" magnet is 3 sqft — about $72. Volume discounts apply: 5+ magnets save 5%, 10+ save 10%. Use the calculator at /products/vehicle-magnets to get your exact price.",
         },
         {
           q: "Will vehicle magnets damage my car paint?",

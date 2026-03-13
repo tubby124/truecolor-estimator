@@ -75,7 +75,7 @@ export default function VinylLetteringSaskatoonPage() {
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
         { name: "Perforated Window Vinyl", from: "from $40", slug: "window-perf" },
         { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
-        { name: "Coroplast Signs", from: "from $24", slug: "coroplast-signs" },
+        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
       ]}
       whyPoints={[
         "From $8.50/sqft, $40 minimum — lowest-cost option when you only need text or single-colour shapes",

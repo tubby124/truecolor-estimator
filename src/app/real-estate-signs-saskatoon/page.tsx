@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Real Estate Signs Saskatoon | From $24 | True Color" },
+  title: { absolute: "Real Estate Signs Saskatoon | From $30 | True Color" },
   description:
     "Coroplast yard signs for Saskatoon REALTORS from $30. Feature sheets, business cards, vehicle magnets, postcards. Same-day rush available. Local pickup 216 33rd St W.",
   alternates: { canonical: "/real-estate-signs-saskatoon" },
@@ -79,7 +79,7 @@ export default function RealEstatePage() {
       }
       products={[
         { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
-        { name: "Business Cards", from: "from $40", slug: "business-cards" },
+        { name: "Business Cards", from: "from $45", slug: "business-cards" },
         { name: "Flyers & Feature Sheets", from: "from $45", slug: "flyers" },
         { name: "Postcards", from: "from $35", slug: "postcards" },
         { name: "Vehicle Magnets", from: "from $36", slug: "vehicle-magnets" },
@@ -113,7 +113,7 @@ export default function RealEstatePage() {
         },
         {
           q: "Can I get just-listed postcards to mail to the neighbourhood?",
-          a: "Yes — 4×6\" and 5×7\" postcards on 14pt gloss stock are mailable without an envelope. Perfect for just-listed and just-sold drops to surrounding households. From $35 for 50 postcards. Meet Canada Post admail specs.",
+          a: "Yes — 4×6\" and 5×7\" postcards on 14pt gloss stock are mailable without an envelope. Perfect for just-listed and just-sold drops to surrounding households. From $40 for 50 postcards (4×6\"). Meet Canada Post admail specs.",
         },
         {
           q: "Do you print open house feature sheets?",

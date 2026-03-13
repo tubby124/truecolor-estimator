@@ -26,7 +26,7 @@ export default function ChurchBannersSaskatoonPage() {
       subtitle="Your Sunday service announcement needs to be up before Saturday — that's the turnaround Saskatoon faith communities count on."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Church and faith community banners printed in Saskatoon"
-      description="True Color prints banners, signs, and displays for churches, mosques, temples, and faith communities across Saskatoon. Vinyl banners start at $66 (2×4&quot;), printed in-house on our Roland UV printer with grommets included. Coroplast signs from $24 for parking and wayfinding. Retractable banners from $219 for lobby entrances. Foamboard displays from $45 for indoor event boards. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof — perfect for Easter, Christmas, Ramadan, and community outreach campaigns. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints banners, signs, and displays for churches, mosques, temples, and faith communities across Saskatoon. Vinyl banners start at $66 (2×4&quot;), printed in-house on our Roland UV printer with grommets included. Coroplast signs from $30 for parking and wayfinding. Retractable banners from $219 for lobby entrances. Foamboard displays from $45 for indoor event boards. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof — perfect for Easter, Christmas, Ramadan, and community outreach campaigns. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -53,7 +53,7 @@ export default function ChurchBannersSaskatoonPage() {
             in lobbies and entrances — pull up, pull down, store flat between events. Foamboard
             displays from $45 work as event program boards, welcome signs, speaker bios, and
             silent auction item boards. For coroplast parking and wayfinding signs, we print
-            18×24&quot; from $24. Need brochures for a community program or outreach campaign?
+            18×24&quot; from $30. Need brochures for a community program or outreach campaign?
             Tri-fold brochures run 100 for $70. Visit the{" "}
             <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
               event banners page
@@ -72,7 +72,7 @@ export default function ChurchBannersSaskatoonPage() {
       products={[
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
-        { name: "Coroplast Signs", from: "from $24", slug: "coroplast-signs" },
+        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
         { name: "Foamboard Displays", from: "from $45", slug: "foamboard-displays" },
         { name: "Brochures (tri-fold)", from: "from $70 / 100", slug: "brochures" },
       ]}
@@ -80,7 +80,7 @@ export default function ChurchBannersSaskatoonPage() {
         "Street-visible event announcement from $66 — 2×4\" vinyl banner with grommets, Roland UV outdoor-rated",
         "3×6\" service banner from $135 — readable from the road, holds full event details",
         "Pull up before service, roll down after — retractable banners from $219, store flat between events",
-        "Parking and wayfinding sorted — coroplast signs 18×24\" from $24 each",
+        "Parking and wayfinding sorted — coroplast signs 18×24\" from $30 each",
         "Event boards for every room — foamboard displays from $45, programs, speaker bios, welcome signs",
         "Community handouts for 100 people — tri-fold brochures 100 for $70",
         "Christmas Eve banner ready if you order before 10 AM — same-day rush +$40 flat",

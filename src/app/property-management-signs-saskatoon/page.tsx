@@ -71,14 +71,14 @@ export default function PropertyManagementSignsPage() {
         </>
       }
       products={[
-        { name: "Coroplast Signs", from: "from $24", slug: "coroplast-signs" },
+        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
         { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-signs" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
       ]}
       whyPoints={[
-        "For-rent coroplast signs from $24 each (18×24\") — fill vacancies faster with the right corner placement",
+        "For-rent coroplast signs from $30 each (18×24\") — fill vacancies faster with the right corner placement",
         "Order 5+ coroplast signs and save 8% automatically — no code needed, no minimum spend",
         "ACP aluminum from $60 for parking lot, entrance, and regulation signs that last decades",
         "Roland UV in-house printer — colour stays vibrant and weather-rated through Saskatchewan winters",

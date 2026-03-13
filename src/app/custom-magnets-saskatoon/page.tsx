@@ -70,8 +70,8 @@ export default function CustomMagnetsSaskatoonPage() {
       products={[
         { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
         { name: "Magnet Calendars", from: "$60 / 10", slug: "magnet-calendars" },
-        { name: "Business Cards", from: "from $40", slug: "business-cards" },
-        { name: "Coroplast Signs", from: "from $24", slug: "coroplast-signs" },
+        { name: "Business Cards", from: "from $45", slug: "business-cards" },
+        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
       ]}
       whyPoints={[

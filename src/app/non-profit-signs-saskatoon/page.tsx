@@ -70,7 +70,7 @@ export default function NonProfitSignsSaskatoonPage() {
         </>
       }
       products={[
-        { name: "Coroplast Yard Signs", from: "from $24", slug: "coroplast-signs" },
+        { name: "Coroplast Yard Signs", from: "from $30", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Foamboard Displays", from: "from $45", slug: "foamboard-displays" },
@@ -78,7 +78,7 @@ export default function NonProfitSignsSaskatoonPage() {
         { name: "Brochures (tri-fold)", from: "from $70 / 100", slug: "brochures" },
       ]}
       whyPoints={[
-        "50 lawn signs for a fundraiser campaign — coroplast 18×24\" from $24, 8% off at 5+",
+        "50 lawn signs for a fundraiser campaign — coroplast 18×24\" from $30, 8% off at 5+",
         "Street visibility without the cost — vinyl banners from $66 with grommets, outdoor-rated Roland UV print",
         "Donor recognition wall done right — retractable banners from $219, pull up at 6 PM, pack flat after",
         "Full gala room covered — foamboard displays from $45 for auction boards, programs, table numbers",

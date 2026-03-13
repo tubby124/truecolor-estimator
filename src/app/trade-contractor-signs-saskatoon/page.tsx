@@ -3,23 +3,23 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Trade Contractor Signs Saskatoon | From $24 | True Color" },
+  title: { absolute: "Trade Contractor Signs Saskatoon | From $30 | True Color" },
   description:
-    "Vehicle magnets from $45, yard signs from $24, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40. Roland UV printed.",
+    "Vehicle magnets from $45, yard signs from $30, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40. Roland UV printed.",
   alternates: {
     canonical: "/trade-contractor-signs-saskatoon",
   },
   openGraph: {
     title: "Trade Contractor Signs Saskatoon | True Color Display Printing",
     description:
-      "Vehicle magnets from $45, yard signs from $24, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40.",
+      "Vehicle magnets from $45, yard signs from $30, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40.",
     url: "https://truecolorprinting.ca/trade-contractor-signs-saskatoon",
     type: "website",
   },
 };
 
 const description =
-  "Every service call is a lead — if your truck isn't branded, you're doing free advertising for whoever sees it. Saskatoon plumbers, electricians, HVAC contractors, roofers, and general contractors use True Color for vehicle magnets, coroplast yard signs, ACP aluminum panels, and job-site banners. Vehicle magnets start at $45 on 30mil thick magnetic material — full colour, stack cleanly between jobs, remove without touching your paint. Coroplast yard signs are $24 each at 18×24\" on our in-house Roland UV printer. ACP aluminum job-site signs start at $39 for 18×24\" and $66 for 24×36\". Rush production is +$40 flat when ordered before 10 AM. Our in-house designer handles layout for $35 flat with a same-day proof. Standard turnaround is 1–3 business days.";
+  "Every service call is a lead — if your truck isn't branded, you're doing free advertising for whoever sees it. Saskatoon plumbers, electricians, HVAC contractors, roofers, and general contractors use True Color for vehicle magnets, coroplast yard signs, ACP aluminum panels, and job-site banners. Vehicle magnets start at $45 on 30mil thick magnetic material — full colour, stack cleanly between jobs, remove without touching your paint. Coroplast yard signs are from $30 each at 18×24\" on our in-house Roland UV printer. ACP aluminum job-site signs start at $39 for 18×24\" and $66 for 24×36\". Rush production is +$40 flat when ordered before 10 AM. Our in-house designer handles layout for $35 flat with a same-day proof. Standard turnaround is 1–3 business days.";
 
 export default function TradeContractorSignsSaskatoon() {
   return (
@@ -70,7 +70,7 @@ export default function TradeContractorSignsSaskatoon() {
           <p>
             Vinyl banners start at $8.25/sqft with grommets always included — a 2×4&prime; banner
             is $66 and a 3×6&prime; is $135. Use them on chain-link fencing, site hoardings, and
-            scaffolding. Business cards for your crew start at $40 for 250. Rush production is
+            scaffolding. Business cards for your crew start at $45 for 250. Rush production is
             +$40 flat, order before 10 AM. Our in-house designer creates your layout for $35 flat
             with a same-day proof. See our{" "}
             <Link
@@ -110,7 +110,7 @@ export default function TradeContractorSignsSaskatoon() {
         },
         {
           name: "Business Cards",
-          from: "250 for $40 | 500 for $65",
+          from: "250 for $45 | 500 for $65",
           slug: "business-cards",
         },
       ]}
@@ -150,7 +150,7 @@ export default function TradeContractorSignsSaskatoon() {
         },
         {
           q: "Do you print business cards for contractors and their crew?",
-          a: "Yes. Business cards are 250 for $40 or 500 for $65 (2-sided). Our designer can set up a trade-branded template for $35 flat so all cards in your crew stay consistent. Rush production is +$40 for same-day turnaround.",
+          a: "Yes. Business cards are 250 for $45 or 500 for $65 (2-sided). Our designer can set up a trade-branded template for $35 flat so all cards in your crew stay consistent. Rush production is +$40 for same-day turnaround.",
         },
         {
           q: "How many magnets do I need per truck and how do I order?",
