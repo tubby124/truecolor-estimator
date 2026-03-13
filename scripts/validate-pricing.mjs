@@ -62,7 +62,7 @@ console.log("\n[2] Checking slugs exist in sitemap.ts ...");
 const sitemapContent = readFile("src/app/sitemap.ts");
 
 for (const slug of slugs) {
-  if (sitemapContent.includes(`"${slug}"`) || sitemapContent.includes(`'${slug}'`) || sitemapContent.includes(`/products/${slug}`)) {
+  if (sitemapContent.includes(`/${slug}`)) {
     pass(`${slug} → sitemap.ts`);
   } else {
     fail(`${slug} NOT FOUND in sitemap.ts — add it to the product routes array`);
@@ -91,7 +91,7 @@ console.log("\n[4] Checking slugs exist in SiteNav.tsx ...");
 const siteNavContent = readFile("src/components/site/SiteNav.tsx");
 
 for (const slug of slugs) {
-  if (siteNavContent.includes(`/products/${slug}`)) {
+  if (siteNavContent.includes(`/${slug}`)) {
     pass(`${slug} → SiteNav.tsx`);
   } else {
     fail(`${slug} NOT FOUND in SiteNav.tsx — product is invisible in nav!`);
