@@ -5,27 +5,27 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Trade Contractor Signs Saskatoon | From $30 | True Color" },
   description:
-    "Vehicle magnets from $45, yard signs from $30, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40. Roland UV printed.",
+    "Vehicle magnets from $45, yard signs from $30, ACP aluminum job-site signs from $60. Saskatoon plumbers, electricians & contractors. Rush +$40. Roland UV printed.",
   alternates: {
     canonical: "/trade-contractor-signs-saskatoon",
   },
   openGraph: {
     title: "Trade Contractor Signs Saskatoon | True Color Display Printing",
     description:
-      "Vehicle magnets from $45, yard signs from $30, ACP aluminum job-site signs from $39. Saskatoon plumbers, electricians & contractors. Rush +$40.",
+      "Vehicle magnets from $45, yard signs from $30, ACP aluminum job-site signs from $60. Saskatoon plumbers, electricians & contractors. Rush +$40.",
     url: "https://truecolorprinting.ca/trade-contractor-signs-saskatoon",
     type: "website",
   },
 };
 
 const description =
-  "Every service call is a lead — if your truck isn't branded, you're doing free advertising for whoever sees it. Saskatoon plumbers, electricians, HVAC contractors, roofers, and general contractors use True Color for vehicle magnets, coroplast yard signs, ACP aluminum panels, and job-site banners. Vehicle magnets start at $45 on 30mil thick magnetic material — full colour, stack cleanly between jobs, remove without touching your paint. Coroplast yard signs are from $30 each at 18×24\" on our in-house Roland UV printer. ACP aluminum job-site signs start at $39 for 18×24\" and $66 for 24×36\". Rush production is +$40 flat when ordered before 10 AM. Our in-house designer handles layout for $35 flat with a same-day proof. Standard turnaround is 1–3 business days.";
+  "Every service call is a lead — if your truck isn't branded, you're doing free advertising for whoever sees it. Saskatoon plumbers, electricians, HVAC contractors, roofers, and general contractors use True Color for vehicle magnets, coroplast yard signs, ACP aluminum panels, and job-site banners. Vehicle magnets start at $45 on 30mil thick magnetic material — full colour, stack cleanly between jobs, remove without touching your paint. Coroplast yard signs are from $30 each at 18×24\" on our in-house Roland UV printer. ACP aluminum job-site signs start at $60 for 18×24\" ($60 minimum applies) and $66 for 24×36\". Rush production is +$40 flat when ordered before 10 AM. Our in-house designer handles layout for $35 flat with a same-day proof. Standard turnaround is 1–3 business days.";
 
 export default function TradeContractorSignsSaskatoon() {
   return (
     <IndustryPage
       title="Trade Contractor Signs Saskatoon"
-      subtitle="Brand every truck and job site in Saskatoon — vehicle magnets from $45, yard signs from $30, ACP aluminum from $39. In-house Roland UV, 1–3 business days."
+      subtitle="Brand every truck and job site in Saskatoon — vehicle magnets from $45, yard signs from $30, ACP aluminum from $60. In-house Roland UV, 1–3 business days."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Trade contractor vehicle magnets and job-site signs printed in Saskatoon"
       description={description}
@@ -63,7 +63,7 @@ export default function TradeContractorSignsSaskatoon() {
             >
               ACP aluminum signs
             </Link>{" "}
-            start at $13/sqft — an 18×24&Prime; panel is $39 and a 24×36&Prime; panel is $66.
+            start at $13/sqft — an 18×24&Prime; panel is $60 ($60 minimum applies) and a 24×36&Prime; panel is $66.
             Aluminum composite holds up through Saskatchewan winters and looks professional mounted
             on any job-site hoarding.
           </p>
@@ -100,7 +100,7 @@ export default function TradeContractorSignsSaskatoon() {
         },
         {
           name: "ACP Aluminum Signs",
-          from: "From $13/sqft — 18×24\" = $39",
+          from: "From $13/sqft — min. $60",
           slug: "acp-signs",
         },
         {
@@ -118,7 +118,7 @@ export default function TradeContractorSignsSaskatoon() {
         "Brand every service call — vehicle magnets on 30mil material stack cleanly and pull off without damaging your paint",
         "Every truck in your fleet becomes a moving billboard — from $45 per magnet set",
         "Yard signs at $24 each (18×24\") — put your name on every job site, 8% off when you order 5+",
-        "ACP aluminum from $39 — rigid, weather-resistant panels that stay professional through Saskatchewan winters",
+        "ACP aluminum from $60 — rigid, weather-resistant panels that stay professional through Saskatchewan winters",
         "Colours won't fade or streak on outdoor signs — we run Roland UV in-house, no outsourcing",
         "Same-day rush for +$40 flat — order before 10 AM and pick up before the job starts",
         "No artwork? No problem — our designer builds your layout for $35 flat, same-day proof",
@@ -134,7 +134,7 @@ export default function TradeContractorSignsSaskatoon() {
         },
         {
           q: "Do you make ACP aluminum job-site signs for contractors?",
-          a: "Yes. ACP aluminum composite signs start at $13/sqft. An 18×24\" panel is $39 and a 24×36\" panel is $66. Aluminum composite is rigid, weather-resistant, and looks professional on site hoardings, building exteriors, and gate posts. Great for permanent signage versus temporary coroplast.",
+          a: "Yes. ACP aluminum composite signs start at $13/sqft. An 18×24\" panel is $60 ($60 minimum applies) and a 24×36\" panel is $66. Aluminum composite is rigid, weather-resistant, and looks professional on site hoardings, building exteriors, and gate posts. Great for permanent signage versus temporary coroplast.",
         },
         {
           q: "Can I get a vinyl banner for my job-site fencing or hoarding?",
