@@ -427,3 +427,45 @@ No code changes needed — CSV edits only.
 | Push changes | `git add . && git commit -m "feat: ..." && git push` |
 | Query Clover data | Use `clover_*` MCP tools (restart Claude Code to reload MCP changes) |
 | Test payment flow | Send email with Pay Now → click button → verify Clover redirect + correct $ amount |
+
+---
+
+## Hooks + Skills Integration
+
+The pricing hooks in scripts/hooks/ automatically enforce skill gates:
+
+### PreToolUse: price-guard.mjs
+Fires before every Edit/Write on project files. Injects context based on file type:
+- page.tsx (new) → reminds to use /truecolor-page skill
+- page.tsx (existing) → loads pricing rules + checks SEO protection
+- products-content.ts → loads fromPrice rules
+- gbp-products.json → reminds to use /gmb-update
+- email templates → reminds to use /ecommerce-ux
+- CSVs → reminds /pricing-review gate (OWNER APPROVAL required)
+- engine code → reminds /e2e-test gate
+
+### PostToolUse: post-edit-price-check.mjs
+Fires after every Edit/Write on page.tsx files. BLOCKS if known wrong patterns found:
+- Banner "from $45" (should be $66)
+- ACP "from $39" (should be $60)
+- Coroplast "from $24" (should be $30)
+- Magnet "from $24/sqft" (should be from $45)
+- Decals "from $8/sqft" (should be $11/sqft)
+- Sqft-based volume discounts (must be QTY-based)
+- Wrong grommet/rush/design prices
+- vercel.app URLs
+
+### Stop: stop-price-validation.mjs
+Fires when Claude finishes any task. Detects what changed and:
+- Runs npm run validate:pricing on page/CSV changes
+- Runs npm test on engine changes
+- Reminds about mandatory gates (/web-design-ux, /e2e-test, /pricing-health, /ecommerce-ux)
+- BLOCKS on validation failures or vercel.app URLs in emails
+
+### Audit command: /audit-prices
+Runs 3 parallel subagents to check all 61+ pages against CSVs. Run weekly or after any price change.
+
+### Key principle
+Hooks are DETERMINISTIC gates (pattern matching, validation runs).
+Skills are INTELLIGENT workflows (research, generation, review).
+Hooks remind you to use skills. Skills do the actual work.
