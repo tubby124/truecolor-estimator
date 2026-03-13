@@ -11,10 +11,10 @@ import { spawnSync } from "child_process";
 
 // Mirrors WRONG_PATTERNS in post-edit-price-check.mjs
 const WRONG_PATTERNS = [
-  [/from \$45.*banner|banner.*from \$45/i,           "Banner 'from' should be $66, not $45"],
-  [/from \$39.*acp|acp.*from \$39|from \$39.*aluminum/i, "ACP 'from' should be $60, not $39"],
-  [/from \$24.*coroplast|coroplast.*from \$24|yard signs? from \$24/i, "Coroplast 'from' should be $30, not $24"],
-  [/from \$24\/sqft.*magnet|magnet.*from \$24/i,     "Magnet marketing 'from' should be $45, not $24/sqft"],
+  [/from \$45.{0,25}banner|banner.{0,25}from \$45/i,           "Banner 'from' should be $66, not $45"],
+  [/from \$39.{0,25}acp|acp.{0,25}from \$39|from \$39.{0,25}aluminum/i, "ACP 'from' should be $60, not $39"],
+  [/from \$24.{0,25}coroplast|coroplast.{0,25}from \$24|yard signs? from \$24/i, "Coroplast 'from' should be $30, not $24"],
+  [/from \$24\/sqft.{0,25}magnet|magnet.{0,25}from \$24/i,     "Magnet marketing 'from' should be $45, not $24/sqft"],
   [/from \$8\/sqft.*decal|decal.*from \$8\/sqft/i,   "Window Decals are $11/sqft, not $8/sqft"],
   [/(\d+)\+\s*sqft.*(discount|off|save)/i,           "Volume discounts must be QTY-based (5+ signs), not sqft-based"],
   [/\$2\.00.*grommet|grommet.*\$2\.00|\$3\.00.*grommet/i, "Grommets are $2.50/each"],

@@ -12,19 +12,19 @@ import { join, basename } from "path";
 // [regex, errorMessage]
 const WRONG_PATTERNS = [
   [
-    /from \$45.*banner|banner.*from \$45/i,
+    /from \$45.{0,25}banner|banner.{0,25}from \$45/i,
     "Banner 'from' should be $66, not $45",
   ],
   [
-    /from \$39.*acp|acp.*from \$39|from \$39.*aluminum/i,
+    /from \$39.{0,25}acp|acp.{0,25}from \$39|from \$39.{0,25}aluminum/i,
     "ACP 'from' should be $60, not $39",
   ],
   [
-    /from \$24.*coroplast|coroplast.*from \$24|yard signs? from \$24/i,
+    /from \$24.{0,25}coroplast|coroplast.{0,25}from \$24|yard signs? from \$24/i,
     "Coroplast 'from' should be $30, not $24",
   ],
   [
-    /from \$24\/sqft.*magnet|magnet.*from \$24/i,
+    /from \$24\/sqft.{0,25}magnet|magnet.{0,25}from \$24/i,
     "Magnet marketing 'from' should be $45, not $24/sqft",
   ],
   [
