@@ -24,19 +24,19 @@ const designDirections = [
     aspect: "3/1" as const,
     items: [
       {
-        src: "/images/industries/healthcare/banner-clinical-professional.png",
+        src: "/images/industries/healthcare/banner-clinical-professional.webp",
         alt: "New Patients Welcome clinic vinyl banner \u2014 navy and white professional style",
         label: "Professional Clinic",
         caption: "Navy + white, medical cross \u2014 new patient announcements, clinic exteriors",
       },
       {
-        src: "/images/industries/healthcare/banner-health-campaign.png",
+        src: "/images/industries/healthcare/banner-health-campaign.webp",
         alt: "Flu Shot Clinic health awareness vinyl banner \u2014 teal gradient walk-ins welcome",
         label: "Seasonal Campaign",
         caption: "Teal gradient, bold typography \u2014 flu clinics, vaccination drives, health fairs",
       },
       {
-        src: "/images/industries/healthcare/banner-event-promo.png",
+        src: "/images/industries/healthcare/banner-event-promo.webp",
         alt: "Health event promotional vinyl banner \u2014 walk-in clinic community promotion",
         label: "Health Event",
         caption: "Sky blue, high-contrast \u2014 walk-in promotions, community health events",
@@ -49,19 +49,19 @@ const designDirections = [
     aspect: "4/3" as const,
     items: [
       {
-        src: "/images/industries/healthcare/display-lobby-directory.png",
+        src: "/images/industries/healthcare/display-lobby-directory.webp",
         alt: "Clinic lobby directory panel \u2014 acrylic wall-mounted suite listing sign",
         label: "Lobby Directory",
         caption: "Suite listings, provider names \u2014 clinic entrances, multi-tenant buildings",
       },
       {
-        src: "/images/industries/healthcare/display-waiting-room-panel.png",
+        src: "/images/industries/healthcare/display-waiting-room-panel.webp",
         alt: "Waiting room foam board education display \u2014 Know Your Numbers annual screening checklist",
         label: "Patient Education",
         caption: "Foam board on easel \u2014 waiting rooms, exam rooms, seasonal health messaging",
       },
       {
-        src: "/images/industries/healthcare/display-acp-permanent.png",
+        src: "/images/industries/healthcare/display-acp-permanent.webp",
         alt: "ACP aluminum composite clinic directory sign \u2014 wall-mounted permanent standoff sign",
         label: "ACP Permanent Panel",
         caption: "Brushed aluminum, standoff mount \u2014 10+ year lifespan, building directories",
@@ -75,13 +75,13 @@ const designDirections = [
     maxCols: 2 as const,
     items: [
       {
-        src: "/images/industries/healthcare/retractable-health-fair.png",
+        src: "/images/industries/healthcare/retractable-health-fair.webp",
         alt: "Community Health Fair retractable banner stand \u2014 free screenings, book your spot",
         label: "Health Fair Display",
         caption: "Community events, flu clinics, trade shows",
       },
       {
-        src: "/images/industries/healthcare/retractable-reception-welcome.png",
+        src: "/images/industries/healthcare/retractable-reception-welcome.webp",
         alt: "Welcome new patients retractable banner stand for clinic reception area",
         label: "Reception Welcome",
         caption: "Clinic reception, waiting room, new patient info",

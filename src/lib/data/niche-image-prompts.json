@@ -10,56 +10,56 @@
           "name": "Professional Clinic Banner",
           "category": "Banners (3:1)",
           "prompt": "Wide vinyl banner for a medical clinic entrance. Navy blue background with white sans-serif text reading 'New Patients Welcome'. Small medical cross icon. Clean, professional, institutional look. Hemmed edges and brass grommets visible at corners. Mounted on a clinic exterior wall. Photorealistic, 1200x400 aspect ratio.",
-          "imagePath": "/images/industries/healthcare/banner-clinical-professional.png"
+          "imagePath": "/images/industries/healthcare/banner-clinical-professional.webp"
         },
         {
           "id": "hc-banner-campaign",
           "name": "Seasonal Health Campaign Banner",
           "category": "Banners (3:1)",
           "prompt": "Wide vinyl banner for a flu shot clinic. Teal-to-dark gradient background with bold white text 'Flu Shot Clinic — Walk-Ins Welcome'. Modern sans-serif typography. Subtle health icons. Mounted on a community health centre exterior. Saskatchewan autumn setting. Photorealistic, 1200x400 aspect ratio.",
-          "imagePath": "/images/industries/healthcare/banner-health-campaign.png"
+          "imagePath": "/images/industries/healthcare/banner-health-campaign.webp"
         },
         {
           "id": "hc-banner-event",
           "name": "Health Event Promo Banner",
           "category": "Banners (3:1)",
           "prompt": "Wide vinyl banner promoting a community health event. Sky blue background with high-contrast white and navy text. 'Walk-In Clinic Open House' messaging. Friendly, approachable design. Hemmed vinyl with grommets. Displayed on a fence outside a community centre. Photorealistic, 1200x400 aspect ratio.",
-          "imagePath": "/images/industries/healthcare/banner-event-promo.png"
+          "imagePath": "/images/industries/healthcare/banner-event-promo.webp"
         },
         {
           "id": "hc-display-lobby",
           "name": "Lobby Directory Panel",
           "category": "Indoor Displays (4:3)",
           "prompt": "Clinic lobby directory panel mounted on a clean white wall. Lists doctor names and suite numbers in a modern sans-serif font. Dark background with white text. Acrylic or ACP panel with standoff mounts creating a floating effect. Well-lit modern medical building lobby. Photorealistic, 1200x900.",
-          "imagePath": "/images/industries/healthcare/display-lobby-directory.png"
+          "imagePath": "/images/industries/healthcare/display-lobby-directory.webp"
         },
         {
           "id": "hc-display-waiting",
           "name": "Patient Education Display",
           "category": "Indoor Displays (4:3)",
           "prompt": "Foam board health education display on a tabletop easel in a medical clinic waiting room. Title 'Know Your Numbers' with a checklist of annual screening tests. Teal and white colour scheme. 24x36 inch foam board. Clean, calming waiting room environment with chairs visible. Photorealistic, 1200x900.",
-          "imagePath": "/images/industries/healthcare/display-waiting-room-panel.png"
+          "imagePath": "/images/industries/healthcare/display-waiting-room-panel.webp"
         },
         {
           "id": "hc-display-acp",
           "name": "ACP Permanent Directory",
           "category": "Indoor Displays (4:3)",
           "prompt": "Brushed aluminum composite panel (ACP) clinic directory sign mounted on a wall with silver standoff hardware. Lists multiple healthcare providers and suite numbers. Professional engraved look with full-colour printing on rigid aluminum. Modern medical office hallway. Photorealistic, 1200x900.",
-          "imagePath": "/images/industries/healthcare/display-acp-permanent.png"
+          "imagePath": "/images/industries/healthcare/display-acp-permanent.webp"
         },
         {
           "id": "hc-retractable-fair",
           "name": "Health Fair Retractable Stand",
           "category": "Retractable Banners (3:8)",
           "prompt": "Retractable roll-up banner stand at a community health fair. The 24x80 inch banner reads 'Community Health Fair — Free Screenings — Book Your Spot'. Teal and white colour scheme with medical icons. Silver telescoping base visible. Convention centre or community hall setting with other booths. Photorealistic, 450x1200.",
-          "imagePath": "/images/industries/healthcare/retractable-health-fair.png"
+          "imagePath": "/images/industries/healthcare/retractable-health-fair.webp"
         },
         {
           "id": "hc-retractable-reception",
           "name": "Reception Welcome Stand",
           "category": "Retractable Banners (3:8)",
           "prompt": "Retractable banner stand in a clinic reception area. The banner reads 'Welcome — New Patients' with the clinic logo and friendly medical imagery. Navy and white colour scheme. Silver base on polished floor. Modern reception desk visible in background. Photorealistic, 450x1200.",
-          "imagePath": "/images/industries/healthcare/retractable-reception-welcome.png"
+          "imagePath": "/images/industries/healthcare/retractable-reception-welcome.webp"
         }
       ]
     },
@@ -123,6 +123,132 @@
           "category": "Retractable Banners (3:8)",
           "prompt": "Retractable banner stand serving as a sponsor recognition wall at a Ramadan charity gala. Gold and navy colour scheme with tiered sponsor logos. 'Thank You To Our Sponsors' heading with Islamic geometric border. Elegant event hall setting. Photorealistic, 450x1200.",
           "imagePath": "/images/seasonal/ramadan/retractable-sponsor-wall.webp"
+        }
+      ]
+    },
+    {
+      "slug": "agriculture-signs-saskatoon",
+      "name": "Agriculture Signs Saskatoon",
+      "type": "landing-page",
+      "prompts": [
+        {
+          "id": "ag-sign-farm-gate",
+          "name": "Farm Gate ID Sign",
+          "category": "Coroplast Signs (4:3)",
+          "prompt": "Coroplast farm gate sign mounted on a wooden fence post at a Saskatchewan farm entrance. 24x36 inch 4mm coroplast with sharp UV printing. Text reads 'PRAIRIE SEED CO. — Private Property — No Unauthorized Entry' with phone number and wheat stalk graphic. Saskatchewan gravel road leading to farmyard, flat prairies, big sky, steel grain bins in background, green wheat fields. Canon EOS R5, 50mm f/1.4, medium DOF f/4. Golden hour morning side-lit. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/agriculture/sign-farm-gate.webp"
+        },
+        {
+          "id": "ag-sign-plot-marker",
+          "name": "Crop Plot Marker Sign",
+          "category": "Coroplast Signs (4:3)",
+          "prompt": "Small coroplast plot marker sign on a wire H-stake in a Saskatchewan crop field. 12x18 inch 4mm coroplast. Text reads 'PLOT 7A — HRS Wheat — AAC Brandon. Trial year 2026. PRAIRIE SEED CO.' Flat prairie crop research field with distinct plot sections, young green crop emerging from dark soil. Canon EOS R5, 85mm f/1.8, shallow DOF f/2.8. Bright overcast. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/agriculture/sign-plot-marker.webp"
+        },
+        {
+          "id": "ag-sign-biosecurity",
+          "name": "Biosecurity / Safety Sign",
+          "category": "Coroplast Signs (4:3)",
+          "prompt": "Biosecurity restricted access coroplast sign on a metal gate at a Saskatchewan livestock operation. 18x12 inch landscape, high-contrast red/white UV print. Text reads 'BIOSECURITY AREA — Authorized Personnel Only. Visitors must report to office.' Red warning triangle icon. Steel corral panels, gravel yard, metal barns, golden stubble fields beyond. Canon EOS R5, 35mm f/2.8, medium DOF f/5.6. Bright mid-morning. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/agriculture/sign-biosecurity.webp"
+        },
+        {
+          "id": "ag-banner-trade-show",
+          "name": "Trade Show Backdrop Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide vinyl banner stretched across the back of an agriculture trade show booth. 4x8 ft 13oz scrim vinyl with grommets. Text reads 'PRAIRIE SEED CO. — Certified Seed for Saskatchewan Farms' with wheat field photography background. Indoor trade show hall, pipe-and-drape, grey carpet, other booths blurred. Canon EOS R5, 35mm f/2.8, medium DOF. Even overhead LED lighting. Photorealistic, 1500x500.",
+          "imagePath": "/images/industries/agriculture/banner-trade-show.webp"
+        },
+        {
+          "id": "ag-banner-seasonal-sale",
+          "name": "Seasonal Farm Sale Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Vinyl banner hung on a chain-link fence at an outdoor farm equipment dealer day event. 3x6 ft 13oz scrim vinyl with grommets. Text reads 'SPRING SEEDING SALE — Up to 20% Off Select Seed Varieties. PRAIRIE SEED CO.' Vibrant green/yellow design. Parked farm equipment behind, gravel lot, flat prairie. Canon EOS R5, 50mm f/1.4, medium DOF. Mid-afternoon natural light. Photorealistic, 1500x500.",
+          "imagePath": "/images/industries/agriculture/banner-seasonal-sale.webp"
+        },
+        {
+          "id": "ag-banner-farm-event",
+          "name": "Farm Open Day Event Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Vinyl welcome banner stretched between two wooden posts at a Saskatchewan farm open day event. 2x6 ft 13oz scrim vinyl. Text reads 'WELCOME TO PRAIRIE SEED CO. — Open Farm Day 2026. Family Friendly. Free Admission.' Saskatchewan acreage entrance, farmhouse visible, families walking, green grass. Canon EOS R5, 35mm f/2.8, medium DOF. Golden hour late afternoon. Photorealistic, 1500x500.",
+          "imagePath": "/images/industries/agriculture/banner-farm-event.webp"
+        },
+        {
+          "id": "ag-magnet-farm-truck",
+          "name": "Farm Truck Door Magnet",
+          "category": "Vehicle Magnets (4:3)",
+          "prompt": "Vehicle magnet on the driver-side door of a white Ford F-250 farm pickup truck. 12x24 inch 30mil magnetic vinyl. Text reads 'PRAIRIE SEED CO. — Certified Seed Dealer. Saskatoon, SK. (306) 555-0142' with green wheat stalk graphic on white background. Saskatchewan gravel road near steel grain bins, golden wheat field background. Canon EOS R5, 85mm f/1.8, shallow DOF f/2.8. Mid-morning daylight. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/agriculture/magnet-farm-truck.webp"
+        },
+        {
+          "id": "ag-magnet-equipment-dealer",
+          "name": "Equipment Dealer Vehicle Magnet",
+          "category": "Vehicle Magnets (4:3)",
+          "prompt": "Vehicle magnet on a white service van door for an ag equipment company. 12x18 inch 30mil magnetic vinyl. Text reads 'PRAIRIE SEED CO. — Sales Representative. Saskatchewan Territory.' Professional green/navy colour scheme. Parking lot of a Saskatchewan farm equipment dealership, tractors and seeders on lot. Canon EOS R5, 85mm f/1.8, shallow DOF f/2.8. Bright overcast. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/agriculture/magnet-equipment-dealer.webp"
+        }
+      ]
+    },
+    {
+      "slug": "agribusiness-signs-saskatchewan",
+      "name": "Agribusiness Signs Saskatchewan",
+      "type": "landing-page",
+      "prompts": [
+        {
+          "id": "agb-sign-dealer-fascia",
+          "name": "Dealer Fascia Sign",
+          "category": "ACP Signs (4:3)",
+          "prompt": "Large ACP aluminum composite fascia sign on the exterior of a Saskatchewan farm equipment dealership. 4x8 ft 3mm ACP with sharp UV print on brushed aluminum. Text reads 'HEARTLAND AG SUPPLY' in bold white on dark green background with equipment icons and 'Saskatoon | Humboldt | Weyburn' locations. Single-storey commercial building, pickup trucks in parking lot, farm equipment on display, flat prairie horizon. Canon EOS R5, 35mm f/2.8, medium DOF f/5.6. Bright mid-morning. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/agribusiness/sign-dealer-fascia.webp"
+        },
+        {
+          "id": "agb-sign-warehouse-id",
+          "name": "Warehouse / Elevator ID Sign",
+          "category": "ACP Signs (4:3)",
+          "prompt": "ACP aluminum identification sign on the exterior of a modern steel grain elevator or agricultural warehouse. 24x36 inch 3mm ACP. Text reads 'HEARTLAND AG SUPPLY — Bin 4A. Hazard class 2. Loading dock.' Building number and safety symbols. Steel grain bins, concrete loading dock, gravel yard. Canon EOS R5, 50mm f/1.4, medium DOF f/4. Bright overcast, autumn with golden stubble fields beyond. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/agribusiness/sign-warehouse-id.webp"
+        },
+        {
+          "id": "agb-sign-storefront",
+          "name": "Retail Storefront Sign",
+          "category": "ACP Signs (4:3)",
+          "prompt": "ACP aluminum storefront sign above the entrance of a Saskatchewan agricultural supply retail store. 3x6 ft 3mm ACP with standoff mounts. Text reads 'HEARTLAND AG SUPPLY — Seeds, Fertilizer, Farm Supplies. Open 7 days.' Window branded decals with hours. Small-city Saskatchewan main street, 2-storey brick building, pickup trucks parked, angle parking. Canon EOS R5, 35mm f/2.8, medium DOF f/5.6. Mid-afternoon. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/agribusiness/sign-storefront.webp"
+        },
+        {
+          "id": "agb-retractable-trade-show",
+          "name": "Trade Show Retractable Stand",
+          "category": "Retractable Banners (3:8)",
+          "prompt": "Retractable banner stand at an agriculture trade show booth. 33x80 inch economy retractable with full-colour print. Text reads 'HEARTLAND AG SUPPLY — Visit Us at Ag in Motion 2026, Booth 142' with product categories listed vertically and green field imagery. Grey expo carpet, pipe-and-drape, table with brochures. Canon EOS R5, 35mm f/2.8, medium DOF. Even LED overhead trade show lighting. Photorealistic, 450x1200.",
+          "imagePath": "/images/industries/agribusiness/retractable-trade-show.webp"
+        },
+        {
+          "id": "agb-retractable-dealer-showroom",
+          "name": "Dealer Showroom Retractable Stand",
+          "category": "Retractable Banners (3:8)",
+          "prompt": "Retractable banner stand in a farm equipment dealer showroom near the entrance. 33x80 inch economy retractable. Text reads 'NEW — 2026 Seed Lineup Available Now. HEARTLAND AG SUPPLY. See our agronomists.' Vertical layout with product images. Polished concrete floor, farm equipment on display, reception desk visible. Canon EOS R5, 50mm f/1.4, shallow DOF f/2.8. Bright retail LED lighting. Photorealistic, 450x1200.",
+          "imagePath": "/images/industries/agribusiness/retractable-dealer-showroom.webp"
+        },
+        {
+          "id": "agb-flyer-product-sheet",
+          "name": "Product Spec Sheet Flyer",
+          "category": "Print Materials (3:4)",
+          "prompt": "Close-up of a double-sided 8.5x11 inch product specification flyer on 80lb gloss, lying on a dealer's desk. HEARTLAND AG SUPPLY branding. Equipment specifications table, product photo, pricing, and dealer contact info. Pen and business card beside the flyer. Canon EOS R5, 85mm f/1.8, overhead angle, shallow DOF. Natural studio lighting. Photorealistic, 900x1200.",
+          "imagePath": "/images/industries/agribusiness/flyer-product-sheet.webp"
+        },
+        {
+          "id": "agb-flyer-seasonal-promo",
+          "name": "Seasonal Promo Flyer",
+          "category": "Print Materials (3:4)",
+          "prompt": "Stack of colourful spring seeding promotion flyers on a retail counter at an agricultural supply store. HEARTLAND AG SUPPLY branding. 'Spring Seed Sale — Order by April 15' headline. Seed variety list with prices. Vibrant green and yellow design on 80lb gloss. Canon EOS R5, 85mm, shallow DOF, overhead angle. Bright retail lighting. Photorealistic, 900x1200.",
+          "imagePath": "/images/industries/agribusiness/flyer-seasonal-promo.webp"
+        },
+        {
+          "id": "agb-postcard-direct-mail",
+          "name": "Direct Mail Postcard",
+          "category": "Print Materials (3:4)",
+          "prompt": "Fan of 4x6 inch postcards on 14pt gloss, spread on a rustic wooden surface. HEARTLAND AG SUPPLY branding. Front: 'New Product Alert — Book Your Spring Consultation' with Saskatchewan wheat field photo. Back visible showing mailing area and dealer address. Canon EOS R5, 85mm, shallow DOF, 3/4 overhead angle. Natural daylight from window. Photorealistic, 900x1200.",
+          "imagePath": "/images/industries/agribusiness/postcard-direct-mail.webp"
         }
       ]
     }

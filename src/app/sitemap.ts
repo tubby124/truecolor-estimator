@@ -48,8 +48,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Industry pages (existing, launched Jan–Feb 2026) ──────────────────────
     { url: `${BASE_URL}/real-estate-signs-saskatoon`, lastModified: new Date("2026-01-20"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/construction-signs-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/agribusiness-signs-saskatchewan`, lastModified: new Date("2025-12-15"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/agriculture-signs-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/agribusiness-signs-saskatchewan`, lastModified: new Date("2026-03-13"), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${BASE_URL}/agriculture-signs-saskatoon`, lastModified: new Date("2026-03-13"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/restaurant-signs-saskatoon`, lastModified: new Date("2026-01-08"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/election-signs`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/event-banners`, lastModified: new Date("2026-01-15"), changeFrequency: "monthly", priority: 0.7 },

@@ -77,11 +77,18 @@ async function fetchWidgetHtml(
       }
     );
 
+    // Add alt attributes to any <img> tags missing them (SEO: Trustindex
+    // widget injects profile photos and logos without alt text).
+    const withAlts = widgetWithSprites.replace(
+      /<img(?![^>]*\balt\b)([^>]*?)(\s*\/?>)/gi,
+      '<img alt="Google reviewer"$1$2'
+    );
+
     // Inline base CSS first, then widget HTML, then our overrides last.
     // Overrides must come AFTER the widget HTML because content.html embeds an
     // inline <style class="scss-content"> at its end with !important rules —
     // putting our CSS after ensures we win the cascade regardless of specificity.
-    const html = `<style>${css}</style>\n${widgetWithSprites}${extraCss ? `\n<style>${extraCss}</style>` : ""}`;
+    const html = `<style>${css}</style>\n${withAlts}${extraCss ? `\n<style>${extraCss}</style>` : ""}`;
     return { html, reviewCount };
   } catch {
     return null;

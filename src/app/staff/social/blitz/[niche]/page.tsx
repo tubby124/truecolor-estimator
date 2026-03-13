@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { LeadsTable } from "@/components/social/LeadsTable";
 import { TemplateTimeline } from "@/components/social/TemplateTimeline";
+import { ImagePromptsPanel } from "@/components/social/ImagePromptsPanel";
 import type { BlitzNiche, BlitzTemplate } from "@/lib/types/blitz";
+import nicheImagePrompts from "@/lib/data/niche-image-prompts.json";
 
 export const dynamic = "force-dynamic";
 
@@ -166,6 +168,26 @@ export default async function NicheDetailPage({ params }: { params: Promise<{ ni
             </p>
           </div>
         </div>
+
+        {/* Image prompts */}
+        {(() => {
+          const nichePrompts = nicheImagePrompts.sources.find(
+            (s) => s.slug === niche.landing_page_slug
+          );
+          if (!nichePrompts || nichePrompts.prompts.length === 0) return null;
+          return (
+            <section>
+              <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                Image Prompts ({nichePrompts.prompts.length})
+              </h2>
+              <ImagePromptsPanel
+                prompts={nichePrompts.prompts}
+                nicheSlug={nicheSlug}
+              />
+            </section>
+          );
+        })()}
 
         {/* Template timeline */}
         {templates.length > 0 && (

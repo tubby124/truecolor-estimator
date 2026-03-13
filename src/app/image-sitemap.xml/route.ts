@@ -109,6 +109,96 @@ const PAGES = [
       },
     ],
   },
+  {
+    loc: `${BASE}/agriculture-signs-saskatoon`,
+    images: [
+      {
+        loc: `${BASE}/images/industries/agriculture/sign-farm-gate.webp`,
+        title: "Coroplast farm gate sign Saskatchewan agriculture",
+        caption: "Coroplast farm gate sign with ranch name and no trespassing warning — Saskatchewan prairie",
+      },
+      {
+        loc: `${BASE}/images/industries/agriculture/sign-plot-marker.webp`,
+        title: "Crop plot marker sign Saskatchewan field trial",
+        caption: "Coroplast crop plot marker sign with variety name — Saskatchewan field research",
+      },
+      {
+        loc: `${BASE}/images/industries/agriculture/sign-biosecurity.webp`,
+        title: "Biosecurity restricted access sign Saskatchewan livestock",
+        caption: "Biosecurity area coroplast sign at Saskatchewan livestock operation entrance",
+      },
+      {
+        loc: `${BASE}/images/industries/agriculture/banner-trade-show.webp`,
+        title: "Agriculture trade show vinyl banner Saskatchewan",
+        caption: "Vinyl trade show banner for Saskatchewan agriculture expo booth backdrop",
+      },
+      {
+        loc: `${BASE}/images/industries/agriculture/banner-seasonal-sale.webp`,
+        title: "Seasonal farm sale banner Saskatchewan seed dealer",
+        caption: "Seasonal farm sale vinyl banner with pricing for Saskatchewan dealer day event",
+      },
+      {
+        loc: `${BASE}/images/industries/agriculture/banner-farm-event.webp`,
+        title: "Farm open day event banner Saskatchewan",
+        caption: "Farm open day event banner welcoming visitors to Saskatchewan acreage",
+      },
+      {
+        loc: `${BASE}/images/industries/agriculture/magnet-farm-truck.webp`,
+        title: "Farm truck vehicle magnet Saskatchewan",
+        caption: "Vehicle magnet on farm truck door with ranch branding — Saskatchewan gravel road",
+      },
+      {
+        loc: `${BASE}/images/industries/agriculture/magnet-equipment-dealer.webp`,
+        title: "Ag equipment dealer vehicle magnet Saskatchewan",
+        caption: "Vehicle magnet on ag equipment dealer service vehicle with company branding",
+      },
+    ],
+  },
+  {
+    loc: `${BASE}/agribusiness-signs-saskatchewan`,
+    images: [
+      {
+        loc: `${BASE}/images/industries/agribusiness/sign-dealer-fascia.webp`,
+        title: "ACP fascia sign Saskatchewan farm equipment dealer",
+        caption: "ACP aluminum fascia sign on Saskatchewan farm equipment dealership exterior",
+      },
+      {
+        loc: `${BASE}/images/industries/agribusiness/sign-warehouse-id.webp`,
+        title: "Warehouse identification sign grain elevator Saskatchewan",
+        caption: "ACP warehouse identification sign for grain elevator or agricultural supply building",
+      },
+      {
+        loc: `${BASE}/images/industries/agribusiness/sign-storefront.webp`,
+        title: "Agricultural retail storefront sign Saskatchewan",
+        caption: "ACP storefront sign for agricultural retail supply store in Saskatchewan town",
+      },
+      {
+        loc: `${BASE}/images/industries/agribusiness/retractable-trade-show.webp`,
+        title: "Trade show retractable banner stand Saskatchewan agriculture",
+        caption: "Retractable banner stand at Saskatchewan agriculture trade show booth display",
+      },
+      {
+        loc: `${BASE}/images/industries/agribusiness/retractable-dealer-showroom.webp`,
+        title: "Dealer showroom retractable banner farm equipment",
+        caption: "Retractable banner stand in farm equipment dealer showroom promoting new product line",
+      },
+      {
+        loc: `${BASE}/images/industries/agribusiness/flyer-product-sheet.webp`,
+        title: "Product specification flyer agricultural equipment dealer",
+        caption: "Product specification flyer for agricultural equipment dealer on 80lb gloss stock",
+      },
+      {
+        loc: `${BASE}/images/industries/agribusiness/flyer-seasonal-promo.webp`,
+        title: "Spring seeding promotion flyer Saskatchewan seed retailer",
+        caption: "Spring seeding promotion flyer for Saskatchewan seed retailer with pricing",
+      },
+      {
+        loc: `${BASE}/images/industries/agribusiness/postcard-direct-mail.webp`,
+        title: "Direct mail postcard Saskatchewan agricultural supply",
+        caption: "Direct mail postcard for Saskatchewan agricultural supply company on 14pt gloss",
+      },
+    ],
+  },
 ];
 
 function escape(str: string): string {
