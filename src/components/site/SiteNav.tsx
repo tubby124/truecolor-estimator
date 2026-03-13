@@ -36,11 +36,11 @@ const PRODUCT_CATEGORIES = [
     links: [
       { label: "Business Cards", href: "/business-cards-saskatoon" },
       { label: "Flyers", href: "/flyer-printing-saskatoon" },
-      { label: "Brochures", href: "/products/brochures" },
+      { label: "Brochures", href: "/brochure-printing-saskatoon" },
       { label: "Rack Cards", href: "/products/rack-cards" },
-      { label: "Postcards", href: "/products/postcards" },
+      { label: "Postcards", href: "/postcard-printing-saskatoon" },
       { label: "Stickers", href: "/sticker-printing-saskatoon" },
-      { label: "Photo Posters", href: "/products/photo-posters" },
+      { label: "Photo Posters", href: "/photo-poster-printing-saskatoon" },
     ],
   },
 ];
