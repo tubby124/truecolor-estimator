@@ -25,7 +25,7 @@ export default function AluminumSignsSaskatoonPage() {
       subtitle="ACP from $13/sqft. 10+ year outdoor lifespan. Professional and permanent."
       heroImage="/images/products/product/acp-aluminum-sign-800x600.webp"
       heroAlt="3mm aluminum composite ACP signs printed in Saskatoon by True Color Display Printing"
-      description="True Color Display Printing produces 3mm aluminum composite (ACP) signs for Saskatoon businesses that need something that lasts. ACP is the go-to material for building directories, commercial real estate signs, permanent site signs, and branded exterior signage. Unlike coroplast, ACP does not bend, warp, fade, or flex. Roland UV ink is printed directly to the panel surface — sharp edges, vivid colour, no lamination needed. Prices start at $13/sqft with volume discounts at 8+ sqft (15% off) and 17+ sqft (23% off). Order online and get an exact price in 30 seconds."
+      description="True Color Display Printing produces 3mm aluminum composite (ACP) signs for Saskatoon businesses that need something that lasts. ACP is the go-to material for building directories, commercial real estate signs, permanent site signs, and branded exterior signage. Unlike coroplast, ACP does not bend, warp, fade, or flex. Roland UV ink is printed directly to the panel surface — sharp edges, vivid colour, no lamination needed. Prices start at $13/sqft with volume discounts at 5+ signs (3% off) and 10+ signs (5% off). Order online and get an exact price in 30 seconds."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -35,7 +35,7 @@ export default function AluminumSignsSaskatoonPage() {
             the kind of sign that&apos;s still looking sharp in 10 years. Unlike coroplast,
             ACP does not bend, warp, or flex. Roland UV ink is printed directly to the panel surface
             — sharp edges, vivid colour, no lamination needed. Prices start at $13/sqft with volume
-            discounts at 8+ sqft (15% off) and 17+ sqft (23% off).
+            discounts at 5+ signs (3% off) and 10+ signs (5% off).
           </p>
           <p className="text-gray-600 leading-relaxed">
             ACP is the go-to material for{" "}
@@ -64,7 +64,7 @@ export default function AluminumSignsSaskatoonPage() {
       ]}
       whyPoints={[
         "3mm aluminum composite — rigid, flat, and weatherproof for 10+ years outdoors",
-        "Prices from $13/sqft — volume discounts at 8+ sqft (15% off) and 17+ sqft (23% off)",
+        "Prices from $13/sqft — volume discounts at 5+ signs (3% off) and 10+ signs (5% off)",
         "Roland UV print directly on panel — no lamination peeling, no fade",
         "Single-sided and double-sided available — ideal for freestanding sign frames",
         "Professional finish for building directories, real estate, and construction sites",
@@ -73,7 +73,7 @@ export default function AluminumSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much do aluminum signs cost in Saskatoon?",
-          a: "ACP aluminum composite signs start at $13/sqft at True Color. An 18×24\" sign is 3 sqft — about $39. A 24×36\" sign is 6 sqft — about $78. Volume discounts kick in at 8+ sqft (15% off) and 17+ sqft (23% off). Get your exact price at /products/acp-signs.",
+          a: "ACP aluminum composite signs start at $13/sqft at True Color. An 18×24\" sign is 3 sqft — about $39. A 24×36\" sign is 6 sqft — about $66. Volume discounts kick in at 5+ signs (3% off) and 10+ signs (5% off). Get your exact price at /products/acp-signs.",
         },
         {
           q: "What is ACP aluminum composite?",

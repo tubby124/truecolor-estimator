@@ -121,7 +121,7 @@ export default function RealEstatePage() {
         },
         {
           q: "How much do real estate signs cost in Saskatoon?",
-          a: "Coroplast yard signs start at $30 for 18×24\" single-sided — the most common REALTOR sign size. 24×36\" double-sided (great for corner lots) from $66. H-stakes are $2.50 each. Vehicle magnets (12×18\") from $36. Business cards (250, 2-sided) from $45. Feature sheets (100, double-sided, 80lb) from $45. Most REALTORS spend $100–$200 to fully kit out a listing.",
+          a: "Coroplast yard signs start at $30 for 18×24\" single-sided — the most common REALTOR sign size. 24×36\" double-sided (great for corner lots) from $84. H-stakes are $2.50 each. Vehicle magnets (12×18\") from $36. Business cards (250, 2-sided) from $45. Feature sheets (100, double-sided, 80lb) from $45. Most REALTORS spend $100–$200 to fully kit out a listing.",
         },
         {
           q: "Where can I get real estate signs printed in Saskatoon?",

@@ -136,7 +136,7 @@ export default function RamadanEidBannersPage() {
           slug: "retractable-banners",
         },
         { name: "Flyers", from: "250 from $110", slug: "flyers" },
-        { name: "Window Decals", from: "from $8/sqft", slug: "window-decals" },
+        { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
       ]}
       whyPoints={[
         "Vinyl banner 2×6ft Iftar dinner banner — $90 + GST, grommets included, ready in 48 hours",

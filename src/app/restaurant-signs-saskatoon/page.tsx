@@ -68,7 +68,7 @@ export default function RestaurantSignsSaskatoonPage() {
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Flyers & Menus", from: "100 for $45", slug: "flyers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
-        { name: "Window Decals", from: "from $8/sqft", slug: "window-decals" },
+        { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
       ]}
       whyPoints={[
