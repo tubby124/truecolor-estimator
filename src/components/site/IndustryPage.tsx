@@ -175,7 +175,7 @@ export function IndustryPage({
                     <div className="relative h-28 w-full">
                       <Image
                         src={img}
-                        alt={p.name}
+                        alt={`${p.name} printed in Saskatoon — True Color Display Printing`}
                         fill
                         className="object-cover"
                         loading="lazy"
