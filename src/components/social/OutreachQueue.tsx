@@ -14,9 +14,11 @@ export function OutreachQueue({ leads }: { leads: BlitzLead[] }) {
     new Set(leads.filter((l) => l.manual_outreach_at).map((l) => l.id)),
   );
   const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function markContacted(leadId: string) {
     setLoading(leadId);
+    setError(null);
     try {
       const res = await fetch("/api/staff/social/blitz/outreach", {
         method: "PATCH",
@@ -25,7 +27,11 @@ export function OutreachQueue({ leads }: { leads: BlitzLead[] }) {
       });
       if (res.ok) {
         setContacted((prev) => new Set([...prev, leadId]));
+      } else {
+        setError(`Failed to mark ${leadId.slice(0, 8)}…`);
       }
+    } catch {
+      setError("Network error — try again");
     } finally {
       setLoading(null);
     }
@@ -33,6 +39,11 @@ export function OutreachQueue({ leads }: { leads: BlitzLead[] }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      {error && (
+        <div className="px-4 py-2 bg-red-50 border-b border-red-100 text-xs text-red-600 font-medium">
+          {error}
+        </div>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

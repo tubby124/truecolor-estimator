@@ -49,3 +49,9 @@ data/tables/*.csv.bak
 .vscode/
 *.swp
 *.swo
+
+# Supabase local state
+supabase/.temp/
+
+# E2E test artifacts
+e2e-screenshots/
