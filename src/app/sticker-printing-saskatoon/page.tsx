@@ -56,7 +56,7 @@ export default function StickerPrintingSaskatoonPage() {
             >
               business cards
             </Link>{" "}
-            (250 for $40) pair well with a sticker order for a consistent brand kit.
+            (250 for $45) pair well with a sticker order for a consistent brand kit.
           </p>
           <p className="text-gray-600 leading-relaxed">
             Need stickers fast? Same-day production is available for a{" "}
@@ -72,7 +72,7 @@ export default function StickerPrintingSaskatoonPage() {
       products={[
         { name: "Stickers (Die-Cut)", from: "100 for $160", slug: "stickers" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
@@ -92,7 +92,7 @@ export default function StickerPrintingSaskatoonPage() {
         },
         {
           q: "What's the minimum sticker order at True Color?",
-          a: "The minimum order is 50 stickers at $95 (4×4\" die-cut). Most customers find 100 at $160 to be the best entry point — the per-unit cost drops significantly and you have enough for a launch campaign or product run.",
+          a: "The minimum order is 25 stickers — starting from $25 (2×2\" die-cut) or $60 (4×4\" die-cut). Most customers find 100 at $160 to be the best entry point — the per-unit cost drops significantly and you have enough for a launch campaign or product run.",
         },
         {
           q: "Are your stickers waterproof and durable outdoors?",

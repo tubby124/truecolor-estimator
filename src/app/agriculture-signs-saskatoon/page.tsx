@@ -58,7 +58,7 @@ export default function AgriculturePage() {
             <Link href="/sticker-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               stickers
             </Link>{" "}
-            start at $95 for 25 die-cut vinyl stickers.
+            start from $25 for 25 die-cut vinyl stickers (2×2") or from $60 (4×4").
           </p>
           <p className="text-gray-600 leading-relaxed">
             Our in-house designer handles layout for $35 flat with same-day proof — bring your farm logo or have us create one. Same-day rush is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Local Saskatoon pickup at 216 33rd St W means no shipping delays before the season starts.
@@ -73,7 +73,7 @@ export default function AgriculturePage() {
         { name: "Flyers", from: "from $45", slug: "flyers" },
         { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-signs" },
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
-        { name: "Stickers", from: "from $95", slug: "stickers" },
+        { name: "Stickers", from: "from $25", slug: "stickers" },
       ]}
       whyPoints={[
         "Outdoor-rated coroplast and ACP signs that handle prairie winters",
@@ -109,7 +109,7 @@ export default function AgriculturePage() {
         },
         {
           q: "Do you print stickers and labels for farm equipment and packaging?",
-          a: "Yes — die-cut vinyl stickers printed on our Roland UV printer. 25 stickers from $95, 100 from $160. Waterproof and UV-resistant. Common uses: equipment branding, seed bag labels, and product packaging stickers.",
+          a: "Yes — die-cut vinyl stickers printed on our Roland UV printer. 25 stickers from $25 (2×2\") or from $60 (4×4\"), 100 from $160. Waterproof and UV-resistant. Common uses: equipment branding, seed bag labels, and product packaging stickers.",
         },
         {
           q: "Can you print business cards and flyers for ag businesses?",
