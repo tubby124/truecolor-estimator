@@ -1,0 +1,130 @@
+{
+  "sources": [
+    {
+      "slug": "healthcare-signs-saskatoon",
+      "name": "Healthcare Signs Saskatoon",
+      "type": "landing-page",
+      "prompts": [
+        {
+          "id": "hc-banner-clinical",
+          "name": "Professional Clinic Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide vinyl banner for a medical clinic entrance. Navy blue background with white sans-serif text reading 'New Patients Welcome'. Small medical cross icon. Clean, professional, institutional look. Hemmed edges and brass grommets visible at corners. Mounted on a clinic exterior wall. Photorealistic, 1200x400 aspect ratio.",
+          "imagePath": "/images/industries/healthcare/banner-clinical-professional.png"
+        },
+        {
+          "id": "hc-banner-campaign",
+          "name": "Seasonal Health Campaign Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide vinyl banner for a flu shot clinic. Teal-to-dark gradient background with bold white text 'Flu Shot Clinic — Walk-Ins Welcome'. Modern sans-serif typography. Subtle health icons. Mounted on a community health centre exterior. Saskatchewan autumn setting. Photorealistic, 1200x400 aspect ratio.",
+          "imagePath": "/images/industries/healthcare/banner-health-campaign.png"
+        },
+        {
+          "id": "hc-banner-event",
+          "name": "Health Event Promo Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide vinyl banner promoting a community health event. Sky blue background with high-contrast white and navy text. 'Walk-In Clinic Open House' messaging. Friendly, approachable design. Hemmed vinyl with grommets. Displayed on a fence outside a community centre. Photorealistic, 1200x400 aspect ratio.",
+          "imagePath": "/images/industries/healthcare/banner-event-promo.png"
+        },
+        {
+          "id": "hc-display-lobby",
+          "name": "Lobby Directory Panel",
+          "category": "Indoor Displays (4:3)",
+          "prompt": "Clinic lobby directory panel mounted on a clean white wall. Lists doctor names and suite numbers in a modern sans-serif font. Dark background with white text. Acrylic or ACP panel with standoff mounts creating a floating effect. Well-lit modern medical building lobby. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/healthcare/display-lobby-directory.png"
+        },
+        {
+          "id": "hc-display-waiting",
+          "name": "Patient Education Display",
+          "category": "Indoor Displays (4:3)",
+          "prompt": "Foam board health education display on a tabletop easel in a medical clinic waiting room. Title 'Know Your Numbers' with a checklist of annual screening tests. Teal and white colour scheme. 24x36 inch foam board. Clean, calming waiting room environment with chairs visible. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/healthcare/display-waiting-room-panel.png"
+        },
+        {
+          "id": "hc-display-acp",
+          "name": "ACP Permanent Directory",
+          "category": "Indoor Displays (4:3)",
+          "prompt": "Brushed aluminum composite panel (ACP) clinic directory sign mounted on a wall with silver standoff hardware. Lists multiple healthcare providers and suite numbers. Professional engraved look with full-colour printing on rigid aluminum. Modern medical office hallway. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/healthcare/display-acp-permanent.png"
+        },
+        {
+          "id": "hc-retractable-fair",
+          "name": "Health Fair Retractable Stand",
+          "category": "Retractable Banners (3:8)",
+          "prompt": "Retractable roll-up banner stand at a community health fair. The 24x80 inch banner reads 'Community Health Fair — Free Screenings — Book Your Spot'. Teal and white colour scheme with medical icons. Silver telescoping base visible. Convention centre or community hall setting with other booths. Photorealistic, 450x1200.",
+          "imagePath": "/images/industries/healthcare/retractable-health-fair.png"
+        },
+        {
+          "id": "hc-retractable-reception",
+          "name": "Reception Welcome Stand",
+          "category": "Retractable Banners (3:8)",
+          "prompt": "Retractable banner stand in a clinic reception area. The banner reads 'Welcome — New Patients' with the clinic logo and friendly medical imagery. Navy and white colour scheme. Silver base on polished floor. Modern reception desk visible in background. Photorealistic, 450x1200.",
+          "imagePath": "/images/industries/healthcare/retractable-reception-welcome.png"
+        }
+      ]
+    },
+    {
+      "slug": "ramadan-eid-banners-saskatoon",
+      "name": "Ramadan & Eid Banners Saskatoon",
+      "type": "landing-page",
+      "prompts": [
+        {
+          "id": "ram-banner-traditional",
+          "name": "Traditional Elegance Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide vinyl banner for a mosque entrance during Eid. Navy blue background with ornate gold Arabic calligraphy reading 'Eid Mubarak'. Hanging lanterns, crescent moon, and Islamic geometric patterns in gold. Formal, elegant, traditional Islamic art style. Hemmed vinyl with grommets. Photorealistic, 1200x400 aspect ratio.",
+          "imagePath": "/images/seasonal/ramadan/banner-traditional.webp"
+        },
+        {
+          "id": "ram-banner-modern",
+          "name": "Modern Minimal Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide vinyl banner with a modern minimalist Eid Mubarak design. White background with an oversized gold crescent moon. Clean sans-serif typography. Subtle geometric border. Contemporary, professional look suitable for university events or restaurants. Photorealistic, 1200x400 aspect ratio.",
+          "imagePath": "/images/seasonal/ramadan/banner-modern-minimal.webp"
+        },
+        {
+          "id": "ram-banner-community",
+          "name": "Community Warm Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide vinyl banner for a community Iftar dinner. Warm sunset gradient background (orange to deep purple). Text reads 'Iftar Night 2026' with a silhouette of a mosque and lanterns. Welcoming, festive community atmosphere. Hemmed vinyl with grommets. Photorealistic, 1200x400 aspect ratio.",
+          "imagePath": "/images/seasonal/ramadan/banner-community-warm.webp"
+        },
+        {
+          "id": "ram-flyer-formal",
+          "name": "Formal Invitation Flyer",
+          "category": "Flyers (3:4)",
+          "prompt": "8.5x11 inch glossy flyer for an Iftar Night event. Cream/off-white background with an elegant gold arabesque border. Formal invitation style with event details (date, time, venue). Mosque silhouette watermark. Suitable for university MSA iftars or formal galas. 80lb glossy stock look. Photorealistic, 900x1200.",
+          "imagePath": "/images/seasonal/ramadan/flyer-formal-invitation.webp"
+        },
+        {
+          "id": "ram-flyer-bold",
+          "name": "Bold Announcement Flyer",
+          "category": "Flyers (3:4)",
+          "prompt": "8.5x11 inch glossy flyer for a community Iftar dinner. Dark green background with bold white and gold text 'Iftar Night'. Features appetizing halal food photography. Event details in clean layout. Suitable for mosque bulletin boards and community halls. Vibrant, eye-catching. Photorealistic, 900x1200.",
+          "imagePath": "/images/seasonal/ramadan/flyer-bold-announcement.webp"
+        },
+        {
+          "id": "ram-flyer-sponsorship",
+          "name": "Sponsorship Layout Flyer",
+          "category": "Flyers (3:4)",
+          "prompt": "8.5x11 inch flyer for a Ramadan charity iftar with a tiered sponsor recognition grid. Gold and cream colour scheme. Sponsor logos in gold/silver/bronze tiers. Islamic geometric patterns. 'Ramadan Charity Iftar — Sponsor Recognition' heading. Professional fundraiser look. Photorealistic, 900x1200.",
+          "imagePath": "/images/seasonal/ramadan/flyer-sponsorship.webp"
+        },
+        {
+          "id": "ram-retractable-welcome",
+          "name": "Welcome Display Stand",
+          "category": "Retractable Banners (3:8)",
+          "prompt": "Retractable roll-up banner stand at a mosque entrance for Ramadan. The 24x80 inch banner reads 'Welcome — Ramadan Iftar Night' with Islamic geometric patterns in deep blue and gold. Crescent moon and lantern motifs. Silver telescoping base. Mosque foyer with shoes at the entrance. Photorealistic, 450x1200.",
+          "imagePath": "/images/seasonal/ramadan/retractable-welcome.webp"
+        },
+        {
+          "id": "ram-retractable-sponsor",
+          "name": "Sponsor Wall Stand",
+          "category": "Retractable Banners (3:8)",
+          "prompt": "Retractable banner stand serving as a sponsor recognition wall at a Ramadan charity gala. Gold and navy colour scheme with tiered sponsor logos. 'Thank You To Our Sponsors' heading with Islamic geometric border. Elegant event hall setting. Photorealistic, 450x1200.",
+          "imagePath": "/images/seasonal/ramadan/retractable-sponsor-wall.webp"
+        }
+      ]
+    }
+  ]
+}
