@@ -1,6 +1,39 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
+
+const designDirections = [
+  {
+    title: "Banner design directions",
+    subtitle: "Tell us which style fits — or send your own artwork and we\u2019ll match it exactly.",
+    aspect: "3/1" as const,
+    items: [
+      { src: "/images/seasonal/ramadan/banner-traditional.webp", alt: "Traditional Elegance — navy gold Eid banner", label: "Traditional Elegance", caption: "Navy, gold calligraphy, lanterns — mosque entrances, formal Eid prayers" },
+      { src: "/images/seasonal/ramadan/banner-modern-minimal.webp", alt: "Modern Minimal — white gold crescent Eid Mubarak banner", label: "Modern Minimal", caption: "White, oversized gold crescent — university events, restaurants, professional iftars" },
+      { src: "/images/seasonal/ramadan/banner-community-warm.webp", alt: "Community Warm — sunset Iftar Night 2026 banner", label: "Community / Warm", caption: "Sunset gradient, iftar table — community dinners, halal restaurants" },
+    ],
+  },
+  {
+    title: "Flyer design directions",
+    subtitle: "250 glossy flyers from $110 + GST — printed same week.",
+    aspect: "3/4" as const,
+    items: [
+      { src: "/images/seasonal/ramadan/flyer-formal-invitation.webp", alt: "Formal invitation flyer for Iftar Night — cream gold arabesque border", label: "Formal Invitation", caption: "Cream, gold arabesque border — university MSA iftars, galas" },
+      { src: "/images/seasonal/ramadan/flyer-bold-announcement.webp", alt: "Bold announcement flyer for Iftar Night — dark green with food photography", label: "Bold Announcement", caption: "Dark green, food photography — community halls, mosque bulletin boards" },
+      { src: "/images/seasonal/ramadan/flyer-sponsorship.webp", alt: "Sponsorship layout flyer for Ramadan charity iftar — gold tiers", label: "Sponsorship Layout", caption: "Gold/cream, tiered sponsor grid — charity iftars, mosque fundraisers" },
+    ],
+  },
+  {
+    title: "Retractable banner directions",
+    subtitle: "24\u00d780\u2033 stand + print complete from $219 + GST — no separate graphic fee.",
+    aspect: "3/8" as const,
+    maxCols: 2 as const,
+    items: [
+      { src: "/images/seasonal/ramadan/retractable-welcome.webp", alt: "Welcome display retractable banner stand for Ramadan Iftar Night", label: "Welcome Display", caption: "Mosque entrances, event registration desks" },
+      { src: "/images/seasonal/ramadan/retractable-sponsor-wall.webp", alt: "Sponsor recognition wall retractable banner for Ramadan charity gala", label: "Sponsor Wall", caption: "Charity galas, mosque fundraisers" },
+    ],
+  },
+];
 
 export const metadata: Metadata = {
   title: { absolute: "Ramadan & Eid Banners Saskatoon | From $66 | True Color" },
@@ -47,85 +80,7 @@ export default function RamadanEidBannersPage() {
             St W, Saskatoon, Saskatchewan.
           </p>
 
-          {/* Design directions — Vinyl Banners */}
-          <div className="mb-10">
-            <h3 className="text-xl font-bold text-[#1c1712] mb-1">Banner design directions</h3>
-            <p className="text-sm text-gray-500 mb-5">Tell us which style fits — or send your own artwork and we&apos;ll match it exactly.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/banner-traditional.webp" alt="Traditional Elegance — navy gold Eid banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
-                </div>
-                <p className="font-semibold text-sm text-[#1c1712]">Traditional Elegance</p>
-                <p className="text-xs text-gray-500 mt-0.5">Navy, gold calligraphy, lanterns — mosque entrances, formal Eid prayers</p>
-              </div>
-              <div>
-                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/banner-modern-minimal.webp" alt="Modern Minimal — white gold crescent Eid Mubarak banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
-                </div>
-                <p className="font-semibold text-sm text-[#1c1712]">Modern Minimal</p>
-                <p className="text-xs text-gray-500 mt-0.5">White, oversized gold crescent — university events, restaurants, professional iftars</p>
-              </div>
-              <div>
-                <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/banner-community-warm.webp" alt="Community Warm — sunset Iftar Night 2026 banner" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
-                </div>
-                <p className="font-semibold text-sm text-[#1c1712]">Community / Warm</p>
-                <p className="text-xs text-gray-500 mt-0.5">Sunset gradient, iftar table — community dinners, halal restaurants</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Design directions — Flyers */}
-          <div className="mb-10">
-            <h3 className="text-xl font-bold text-[#1c1712] mb-1">Flyer design directions</h3>
-            <p className="text-sm text-gray-500 mb-5">250 glossy flyers from $110 + GST — printed same week.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/flyer-formal-invitation.webp" alt="Formal invitation flyer for Iftar Night — cream gold arabesque border" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
-                </div>
-                <p className="font-semibold text-sm text-[#1c1712]">Formal Invitation</p>
-                <p className="text-xs text-gray-500 mt-0.5">Cream, gold arabesque border — university MSA iftars, galas</p>
-              </div>
-              <div>
-                <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/flyer-bold-announcement.webp" alt="Bold announcement flyer for Iftar Night — dark green with food photography" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
-                </div>
-                <p className="font-semibold text-sm text-[#1c1712]">Bold Announcement</p>
-                <p className="text-xs text-gray-500 mt-0.5">Dark green, food photography — community halls, mosque bulletin boards</p>
-              </div>
-              <div>
-                <div className="relative aspect-[3/4] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/flyer-sponsorship.webp" alt="Sponsorship layout flyer for Ramadan charity iftar — gold tiers" fill className="object-cover" sizes="(max-width:640px) 100vw, 33vw" />
-                </div>
-                <p className="font-semibold text-sm text-[#1c1712]">Sponsorship Layout</p>
-                <p className="text-xs text-gray-500 mt-0.5">Gold/cream, tiered sponsor grid — charity iftars, mosque fundraisers</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Design directions — Retractable Banners */}
-          <div>
-            <h3 className="text-xl font-bold text-[#1c1712] mb-1">Retractable banner directions</h3>
-            <p className="text-sm text-gray-500 mb-5">24×80&quot; stand + print complete from $219 + GST — no separate graphic fee.</p>
-            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 max-w-md">
-              <div>
-                <div className="relative aspect-[3/8] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/retractable-welcome.webp" alt="Welcome display retractable banner stand for Ramadan Iftar Night" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
-                </div>
-                <p className="font-semibold text-sm text-[#1c1712]">Welcome Display</p>
-                <p className="text-xs text-gray-500 mt-0.5">Mosque entrances, event registration desks</p>
-              </div>
-              <div>
-                <div className="relative aspect-[3/8] w-full rounded-lg overflow-hidden mb-3">
-                  <Image src="/images/seasonal/ramadan/retractable-sponsor-wall.webp" alt="Sponsor recognition wall retractable banner for Ramadan charity gala" fill className="object-cover" sizes="(max-width:640px) 50vw, 25vw" />
-                </div>
-                <p className="font-semibold text-sm text-[#1c1712]">Sponsor Wall</p>
-                <p className="text-xs text-gray-500 mt-0.5">Charity galas, mosque fundraisers</p>
-              </div>
-            </div>
-          </div>
+          <DesignDirectionGrid sections={designDirections} />
         </>
       }
       products={[

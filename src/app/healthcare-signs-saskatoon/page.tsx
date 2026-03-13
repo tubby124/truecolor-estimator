@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
   title: { absolute: "Healthcare Signs Saskatoon | Clinic Signage | True Color" },
@@ -16,6 +16,79 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
+const designDirections = [
+  {
+    title: "Banner design directions",
+    subtitle: "Tell us which style fits \u2014 or send your own artwork and we\u2019ll match it exactly.",
+    aspect: "3/1" as const,
+    items: [
+      {
+        src: "/images/industries/healthcare/banner-clinical-professional.png",
+        alt: "New Patients Welcome clinic vinyl banner \u2014 navy and white professional style",
+        label: "Professional Clinic",
+        caption: "Navy + white, medical cross \u2014 new patient announcements, clinic exteriors",
+      },
+      {
+        src: "/images/industries/healthcare/banner-health-campaign.png",
+        alt: "Flu Shot Clinic health awareness vinyl banner \u2014 teal gradient walk-ins welcome",
+        label: "Seasonal Campaign",
+        caption: "Teal gradient, bold typography \u2014 flu clinics, vaccination drives, health fairs",
+      },
+      {
+        src: "/images/industries/healthcare/banner-event-promo.png",
+        alt: "Health event promotional vinyl banner \u2014 walk-in clinic community promotion",
+        label: "Health Event",
+        caption: "Sky blue, high-contrast \u2014 walk-in promotions, community health events",
+      },
+    ],
+  },
+  {
+    title: "Indoor display directions",
+    subtitle: "ACP panels from $13/sqft \u00b7 Foam board from $10/sqft \u2014 no separate graphic fee.",
+    aspect: "4/3" as const,
+    items: [
+      {
+        src: "/images/industries/healthcare/display-lobby-directory.png",
+        alt: "Clinic lobby directory panel \u2014 acrylic wall-mounted suite listing sign",
+        label: "Lobby Directory",
+        caption: "Suite listings, provider names \u2014 clinic entrances, multi-tenant buildings",
+      },
+      {
+        src: "/images/industries/healthcare/display-waiting-room-panel.png",
+        alt: "Waiting room foam board education display \u2014 Know Your Numbers annual screening checklist",
+        label: "Patient Education",
+        caption: "Foam board on easel \u2014 waiting rooms, exam rooms, seasonal health messaging",
+      },
+      {
+        src: "/images/industries/healthcare/display-acp-permanent.png",
+        alt: "ACP aluminum composite clinic directory sign \u2014 wall-mounted permanent standoff sign",
+        label: "ACP Permanent Panel",
+        caption: "Brushed aluminum, standoff mount \u2014 10+ year lifespan, building directories",
+      },
+    ],
+  },
+  {
+    title: "Retractable banner directions",
+    subtitle: '24\u00d780" stand + print complete from $219 + GST \u2014 no separate graphic fee.',
+    aspect: "3/8" as const,
+    maxCols: 2 as const,
+    items: [
+      {
+        src: "/images/industries/healthcare/retractable-health-fair.png",
+        alt: "Community Health Fair retractable banner stand \u2014 free screenings, book your spot",
+        label: "Health Fair Display",
+        caption: "Community events, flu clinics, trade shows",
+      },
+      {
+        src: "/images/industries/healthcare/retractable-reception-welcome.png",
+        alt: "Welcome new patients retractable banner stand for clinic reception area",
+        label: "Reception Welcome",
+        caption: "Clinic reception, waiting room, new patient info",
+      },
+    ],
+  },
+];
 
 const descriptionNode = (
   <>
@@ -47,151 +120,7 @@ const descriptionNode = (
       for business cards, ACP suite signs, and same-day turnaround for new associates.
     </p>
 
-    {/* Design directions — Vinyl Banners */}
-    <div className="mb-10">
-      <h3 className="text-xl font-bold text-[#1c1712] mb-1">Banner design directions</h3>
-      <p className="text-sm text-gray-500 mb-5">
-        Tell us which style fits — or send your own artwork and we&apos;ll match it exactly.
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-            <Image
-              src="/images/industries/healthcare/banner-clinical-professional.png"
-              alt="New Patients Welcome clinic vinyl banner — navy and white professional style"
-              fill
-              className="object-cover"
-              sizes="(max-width:640px) 100vw, 33vw"
-            />
-          </div>
-          <p className="font-semibold text-sm text-[#1c1712]">Professional Clinic</p>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Navy + white, medical cross — new patient announcements, clinic exteriors
-          </p>
-        </div>
-        <div>
-          <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-            <Image
-              src="/images/industries/healthcare/banner-health-campaign.png"
-              alt="Flu Shot Clinic health awareness vinyl banner — teal gradient walk-ins welcome"
-              fill
-              className="object-cover"
-              sizes="(max-width:640px) 100vw, 33vw"
-            />
-          </div>
-          <p className="font-semibold text-sm text-[#1c1712]">Seasonal Campaign</p>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Teal gradient, bold typography — flu clinics, vaccination drives, health fairs
-          </p>
-        </div>
-        <div>
-          <div className="relative aspect-[3/1] w-full rounded-lg overflow-hidden mb-3">
-            <Image
-              src="/images/industries/healthcare/banner-event-promo.png"
-              alt="Health event promotional vinyl banner — walk-in clinic community promotion"
-              fill
-              className="object-cover"
-              sizes="(max-width:640px) 100vw, 33vw"
-            />
-          </div>
-          <p className="font-semibold text-sm text-[#1c1712]">Health Event</p>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Sky blue, high-contrast — walk-in promotions, community health events
-          </p>
-        </div>
-      </div>
-    </div>
-
-    {/* Design directions — ACP + Foam Board */}
-    <div className="mb-10">
-      <h3 className="text-xl font-bold text-[#1c1712] mb-1">Indoor display directions</h3>
-      <p className="text-sm text-gray-500 mb-5">
-        ACP panels from $13/sqft · Foam board from $10/sqft — no separate graphic fee.
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden mb-3">
-            <Image
-              src="/images/industries/healthcare/display-lobby-directory.png"
-              alt="Clinic lobby directory panel — acrylic wall-mounted suite listing sign"
-              fill
-              className="object-cover"
-              sizes="(max-width:640px) 100vw, 33vw"
-            />
-          </div>
-          <p className="font-semibold text-sm text-[#1c1712]">Lobby Directory</p>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Suite listings, provider names — clinic entrances, multi-tenant buildings
-          </p>
-        </div>
-        <div>
-          <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden mb-3">
-            <Image
-              src="/images/industries/healthcare/display-waiting-room-panel.png"
-              alt="Waiting room foam board education display — Know Your Numbers annual screening checklist"
-              fill
-              className="object-cover"
-              sizes="(max-width:640px) 100vw, 33vw"
-            />
-          </div>
-          <p className="font-semibold text-sm text-[#1c1712]">Patient Education</p>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Foam board on easel — waiting rooms, exam rooms, seasonal health messaging
-          </p>
-        </div>
-        <div>
-          <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden mb-3">
-            <Image
-              src="/images/industries/healthcare/display-acp-permanent.png"
-              alt="ACP aluminum composite clinic directory sign — wall-mounted permanent standoff sign"
-              fill
-              className="object-cover"
-              sizes="(max-width:640px) 100vw, 33vw"
-            />
-          </div>
-          <p className="font-semibold text-sm text-[#1c1712]">ACP Permanent Panel</p>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Brushed aluminum, standoff mount — 10+ year lifespan, building directories
-          </p>
-        </div>
-      </div>
-    </div>
-
-    {/* Design directions — Retractable Banners */}
-    <div>
-      <h3 className="text-xl font-bold text-[#1c1712] mb-1">Retractable banner directions</h3>
-      <p className="text-sm text-gray-500 mb-5">
-        24×80&quot; stand + print complete from $219 + GST — no separate graphic fee.
-      </p>
-      <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 max-w-md">
-        <div>
-          <div className="relative aspect-[3/8] w-full rounded-lg overflow-hidden mb-3">
-            <Image
-              src="/images/industries/healthcare/retractable-health-fair.png"
-              alt="Community Health Fair retractable banner stand — free screenings, book your spot"
-              fill
-              className="object-cover"
-              sizes="(max-width:640px) 50vw, 25vw"
-            />
-          </div>
-          <p className="font-semibold text-sm text-[#1c1712]">Health Fair Display</p>
-          <p className="text-xs text-gray-500 mt-0.5">Community events, flu clinics, trade shows</p>
-        </div>
-        <div>
-          <div className="relative aspect-[3/8] w-full rounded-lg overflow-hidden mb-3">
-            <Image
-              src="/images/industries/healthcare/retractable-reception-welcome.png"
-              alt="Welcome new patients retractable banner stand for clinic reception area"
-              fill
-              className="object-cover"
-              sizes="(max-width:640px) 50vw, 25vw"
-            />
-          </div>
-          <p className="font-semibold text-sm text-[#1c1712]">Reception Welcome</p>
-          <p className="text-xs text-gray-500 mt-0.5">Clinic reception, waiting room, new patient info</p>
-        </div>
-      </div>
-    </div>
+    <DesignDirectionGrid sections={designDirections} />
   </>
 );
 
