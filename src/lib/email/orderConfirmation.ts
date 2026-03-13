@@ -204,7 +204,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
             : ""}
           ${qrImg}
           <p style="margin: 10px 0 0; font-size: 11px; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            You can also pay anytime from your <a href="https://truecolor-estimator.vercel.app/account" style="color: #9a3412;">order dashboard</a> · Questions? Email <a href="mailto:info@true-color.ca" style="color: #9a3412;">info@true-color.ca</a>
+            You can also pay anytime from your <a href="https://truecolorprinting.ca/account" style="color: #9a3412;">order dashboard</a> · Questions? Email <a href="mailto:info@true-color.ca" style="color: #9a3412;">info@true-color.ca</a>
           </p>
         </div>`
       : `<div style="background: #fdf8ee; border: 1px solid #f0d890; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
@@ -219,7 +219,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
             Your order will be queued once payment is received.
           </p>
           <p style="margin: 0; font-size: 11px; color: #7a5a00; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            Track your order anytime at your <a href="https://truecolor-estimator.vercel.app/account" style="color: #7a5a00;">order dashboard</a>
+            Track your order anytime at your <a href="https://truecolorprinting.ca/account" style="color: #7a5a00;">order dashboard</a>
           </p>
           ${checkout_url
             ? `<div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid #e8d87a;">
@@ -428,7 +428,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                 <p style="margin: 0 0 14px; font-size: 13px; color: #0c4a6e; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   Create a free account to track this order in real time, reorder in one click, and keep your contact and company details saved — perfect for quick invoicing.
                 </p>
-                <a href="https://truecolor-estimator.vercel.app/account?signup=1&amp;email=${encodeURIComponent(contact.email)}"
+                <a href="https://truecolorprinting.ca/account?signup=1&amp;email=${encodeURIComponent(contact.email)}"
                   style="display: inline-block; background: #16C2F3; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 10px 22px; border-radius: 7px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   Create your free account &rarr;
                 </a>
@@ -538,7 +538,7 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
 
   const payNote =
     payment_method === "clover_card"
-      ? `Please complete your payment of $${total.toFixed(2)} CAD at:\n${checkout_url ?? "https://truecolor-estimator.vercel.app"}`
+      ? `Please complete your payment of $${total.toFixed(2)} CAD at:\n${checkout_url ?? "https://truecolorprinting.ca"}`
       : `Please send $${total.toFixed(2)} CAD via Interac e-Transfer to: info@true-color.ca (auto-deposit, no password).`;
 
   const lines = [
@@ -561,7 +561,7 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
     "",
     "--- YOUR ACCOUNT ---",
     `Create a free account to track this order, reorder in one click, and keep your details saved for invoicing:`,
-    `https://truecolor-estimator.vercel.app/account?signup=1&email=${encodeURIComponent(p.contact.email)}`,
+    `https://truecolorprinting.ca/account?signup=1&email=${encodeURIComponent(p.contact.email)}`,
     "",
     "--- PICKUP ---",
     "216 33rd St W, Saskatoon, SK",
