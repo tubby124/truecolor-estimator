@@ -77,7 +77,9 @@ const filePath =
   input?.tool_input?.file_path ?? input?.tool_input?.path ?? "";
 
 // --- File filter ---
-const TRIGGER_PATTERN = /(?:page\.tsx|products-content\.ts)$/;
+// Match any .ts/.tsx file (not just page.tsx) so pricing checks run on
+// components, email templates, and test files at any absolute path.
+const TRIGGER_PATTERN = /\.tsx?$/;
 if (!TRIGGER_PATTERN.test(filePath)) {
   process.exit(0);
 }
