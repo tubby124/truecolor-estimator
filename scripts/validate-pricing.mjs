@@ -42,6 +42,35 @@ function readFile(relPath) {
   return readFileSync(resolve(ROOT, relPath), "utf-8");
 }
 
+// ─── Slug-to-SEO-URL alias map ────────────────────────────────────────────
+// products-content.ts uses short slugs, but SEO pages use different URL patterns.
+// Products without an alias AND without a /products/[slug] route are estimator-only.
+const SEO_ALIASES = {
+  "vinyl-banners":      "/banner-printing-saskatoon",
+  "flyers":             "/flyer-printing-saskatoon",
+  "acp-signs":          "/aluminum-signs-saskatoon",
+  "vehicle-magnets":    "/vehicle-magnets-saskatoon",
+  "foamboard-displays": "/foamboard-printing-saskatoon",
+  "stickers":           "/sticker-printing-saskatoon",
+  "postcards":          "/postcard-printing-saskatoon",
+  "brochures":          "/brochure-printing-saskatoon",
+  "photo-posters":      "/photo-poster-printing-saskatoon",
+};
+
+// Products that are estimator-only (no dedicated SEO page or /products/ route expected)
+const ESTIMATOR_ONLY = new Set([
+  "window-perf",
+  "rack-cards",
+  "door-hangers",
+  "magnet-calendars",
+]);
+
+// SiteNav uses different aliases for some products
+const SITENAV_ALIASES = {
+  ...SEO_ALIASES,
+  "vehicle-magnets": "/custom-magnets-saskatoon",
+};
+
 // ─── Extract slugs from products-content.ts ───────────────────────────────
 console.log("\n[1] Extracting slugs from products-content.ts ...");
 const productsContent = readFile("src/lib/data/products-content.ts");
@@ -62,10 +91,15 @@ console.log("\n[2] Checking slugs exist in sitemap.ts ...");
 const sitemapContent = readFile("src/app/sitemap.ts");
 
 for (const slug of slugs) {
-  if (sitemapContent.includes(`/${slug}`)) {
-    pass(`${slug} → sitemap.ts`);
+  if (ESTIMATOR_ONLY.has(slug)) {
+    pass(`${slug} → skipped (estimator-only, no SEO page expected)`);
   } else {
-    fail(`${slug} NOT FOUND in sitemap.ts — add it to the product routes array`);
+    const seoUrl = SEO_ALIASES[slug] || `/${slug}`;
+    if (sitemapContent.includes(seoUrl)) {
+      pass(`${slug} → sitemap.ts (via ${seoUrl})`);
+    } else {
+      fail(`${slug} NOT FOUND in sitemap.ts — expected ${seoUrl}`);
+    }
   }
 }
 
@@ -91,10 +125,18 @@ console.log("\n[4] Checking slugs exist in SiteNav.tsx ...");
 const siteNavContent = readFile("src/components/site/SiteNav.tsx");
 
 for (const slug of slugs) {
-  if (siteNavContent.includes(`/${slug}`)) {
-    pass(`${slug} → SiteNav.tsx`);
+  if (ESTIMATOR_ONLY.has(slug)) {
+    pass(`${slug} → skipped (estimator-only, no nav entry expected)`);
   } else {
-    fail(`${slug} NOT FOUND in SiteNav.tsx — product is invisible in nav!`);
+    const navUrl = SITENAV_ALIASES[slug] || `/${slug}`;
+    const fallbackUrl = `/products/${slug}`;
+    if (siteNavContent.includes(navUrl)) {
+      pass(`${slug} → SiteNav.tsx (via ${navUrl})`);
+    } else if (siteNavContent.includes(fallbackUrl)) {
+      warn(`${slug} → SiteNav.tsx uses ${fallbackUrl} — should migrate to ${navUrl}`);
+    } else {
+      fail(`${slug} NOT FOUND in SiteNav.tsx — expected ${navUrl}`);
+    }
   }
 }
 
