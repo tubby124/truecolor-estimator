@@ -5,12 +5,12 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Printing Estevan SK | Signs, Banners & Magnets | True Color" },
   description:
-    "Signs and printing for Estevan SK oilfield and energy businesses. Vehicle magnets from $24/sqft, ACP aluminum from $13/sqft. Printed in Saskatoon — shipped to Estevan.",
+    "Signs and printing for Estevan SK oilfield and energy businesses. Vehicle magnets from $45, ACP aluminum from $13/sqft. Printed in Saskatoon — shipped to Estevan.",
   alternates: { canonical: "/printing-estevan-sk" },
   openGraph: {
     title: "Printing Estevan SK | True Color Display Printing",
     description:
-      "Vehicle magnets, ACP aluminum signs, coroplast, and vinyl banners for Estevan SK. Printed in Saskatoon — shipped to Estevan. From $24/sqft for magnets.",
+      "Vehicle magnets, ACP aluminum signs, coroplast, and vinyl banners for Estevan SK. Printed in Saskatoon — shipped to Estevan. Vehicle magnets from $45.",
     url: "https://truecolorprinting.ca/printing-estevan-sk",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -26,7 +26,7 @@ export default function PrintingEstevanPage() {
       subtitle="Vehicle magnets, ACP aluminum signs, coroplast, and vinyl banners for Estevan's oilfield and energy sector — printed in Saskatoon, shipped to Estevan."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Signs and printing for Estevan SK oilfield and energy businesses — True Color Display Printing Saskatoon"
-      description="Oilfield service companies and energy contractors in Estevan need signage that performs on a job site — not a generic print shop that outsources the work and doubles the timeline. True Color prints vehicle magnets from $24/sqft, ACP aluminum from $13/sqft, and coroplast from $8/sqft in-house on Roland UV equipment in Saskatoon. Ship directly to Estevan, about 300km southeast. Order online, approve by email, delivered in 3–5 business days."
+      description="Oilfield service companies and energy contractors in Estevan need signage that performs on a job site — not a generic print shop that outsources the work and doubles the timeline. True Color prints vehicle magnets from $45, ACP aluminum from $13/sqft, and coroplast from $8/sqft in-house on Roland UV equipment in Saskatoon. Ship directly to Estevan, about 300km southeast. Order online, approve by email, delivered in 3–5 business days."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -38,7 +38,7 @@ export default function PrintingEstevanPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vehicle magnets
             </Link>{" "}
-            from $24/sqft (minimum $45) are printed on 30mil magnetic stock — built to hold on
+            from $45 ($24/sqft) are printed on 30mil magnetic stock — built to hold on
             steel service truck doors and oilfield equipment cabs through Saskatchewan winters,
             then remove cleanly when not needed.
           </p>
@@ -74,7 +74,7 @@ export default function PrintingEstevanPage() {
       ]}
       whyPoints={[
         "In-house Roland UV press — no outsourcing, no extra markup, ships direct to Estevan",
-        "Vehicle magnets from $24/sqft — 30mil stock, stays on steel truck doors through SE Saskatchewan winters",
+        "Vehicle magnets from $45 — 30mil stock, stays on steel truck doors through SE Saskatchewan winters",
         "ACP aluminum from $13/sqft — permanent facility and yard signage rated 10+ years outdoors",
         "Coroplast from $8/sqft — Roland UV-printed, weatherproof, H-stakes $2.50 each",
         "Vinyl banners from $8.25/sqft — 13oz outdoor vinyl, hemmed and grommeted as standard",

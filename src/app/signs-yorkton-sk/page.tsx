@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Signs Yorkton SK | Coroplast & Banners | True Color" },
   description:
-    "Custom signs for Yorkton SK businesses. Vehicle magnets from $24/sqft, vinyl banners from $8.25/sqft, coroplast from $8/sqft. Printed in Saskatoon — shipped to Yorkton.",
+    "Custom signs for Yorkton SK businesses. Vehicle magnets from $45, vinyl banners from $8.25/sqft, coroplast from $8/sqft. Printed in Saskatoon — shipped to Yorkton.",
   alternates: { canonical: "/signs-yorkton-sk" },
   openGraph: {
     title: "Signs Yorkton SK | True Color Display Printing",
@@ -26,7 +26,7 @@ export default function SignsYorktonPage() {
       subtitle="Vehicle magnets, vinyl banners, coroplast signs, and ACP aluminum — printed in Saskatoon, shipped to Yorkton."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Signs and printing for Yorkton SK businesses — True Color Display Printing Saskatoon"
-      description="Ag equipment dealers, grain and livestock operations, and retail businesses in Yorkton shouldn't have to wait on a local shop that outsources large-format work. True Color prints vehicle magnets from $24/sqft, vinyl banners from $8.25/sqft, and coroplast from $8/sqft in-house on Roland UV equipment in Saskatoon — and ships directly to Yorkton, about 180km east. Order online, approve your proof by email, delivered in 3–5 business days."
+      description="Ag equipment dealers, grain and livestock operations, and retail businesses in Yorkton shouldn't have to wait on a local shop that outsources large-format work. True Color prints vehicle magnets from $45, vinyl banners from $8.25/sqft, and coroplast from $8/sqft in-house on Roland UV equipment in Saskatoon — and ships directly to Yorkton, about 180km east. Order online, approve your proof by email, delivered in 3–5 business days."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -37,7 +37,7 @@ export default function SignsYorktonPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vehicle magnets
             </Link>{" "}
-            from $24/sqft (minimum $45) give ag equipment dealers and service fleets removable
+            from $45 ($24/sqft) give ag equipment dealers and service fleets removable
             branding on every truck door — stick securely to steel, remove cleanly, no adhesive
             residue.
           </p>
@@ -72,7 +72,7 @@ export default function SignsYorktonPage() {
       ]}
       whyPoints={[
         "In-house Roland UV press — no outsourcing, consistent colour on every order shipped to Yorkton",
-        "Vehicle magnets from $24/sqft — removable fleet branding for ag dealers and service trucks",
+        "Vehicle magnets from $45 — removable fleet branding for ag dealers and service trucks",
         "Vinyl banners from $8.25/sqft — 13oz outdoor vinyl, hemmed and grommeted as standard",
         "Coroplast from $8/sqft — UV-printed, H-stakes $2.50 each, 2–3 year outdoor lifespan",
         "ACP aluminum from $13/sqft — permanent storefronts and facility signs, 10+ year lifespan",

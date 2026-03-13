@@ -41,7 +41,7 @@ export default function PrintingLloydminsterPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               vehicle magnets
             </Link>{" "}
-            from $24/sqft stay on doors at highway speeds and remove without residue.
+            from $45 ($24/sqft) stay on doors at highway speeds and remove without residue.
           </p>
           <p className="text-gray-600 leading-relaxed">
             Vinyl banners from $8.25/sqft for storefronts and job sites. Business cards 250 for
@@ -69,7 +69,7 @@ export default function PrintingLloydminsterPage() {
       ]}
       whyPoints={[
         "Coroplast from $8/sqft — UV-ink, weatherproof, built for prairie job sites",
-        "Vehicle magnets from $24/sqft — highway-speed hold, removable without residue",
+        "Vehicle magnets from $45 — highway-speed hold, removable without residue",
         "ACP aluminum signs from $13/sqft — 10+ year outdoor lifespan for permanent installs",
         "Business cards 250 for $45 — professional full-colour, double-sided",
         "Shipped to Lloydminster SK — order online, proof by email, courier delivery",

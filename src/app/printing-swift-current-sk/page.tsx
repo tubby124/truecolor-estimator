@@ -46,7 +46,7 @@ export default function PrintingSwiftCurrentPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vehicle magnets
             </Link>{" "}
-            from $24/sqft for service trucks, delivery vehicles, and ag equipment.
+            from $45 ($24/sqft) for service trucks, delivery vehicles, and ag equipment.
             ACP aluminum signs from $13/sqft for permanent facility and yard signage
             that lasts 10+ years in southwest SK conditions. Business cards 250 for $45.
             Volume pricing on all orders — no account required. Minimum order $30.
@@ -70,7 +70,7 @@ export default function PrintingSwiftCurrentPage() {
       ]}
       whyPoints={[
         "Coroplast from $8/sqft — UV-printed, weatherproof, ideal for SW Saskatchewan conditions",
-        "Vehicle magnets from $24/sqft — ag equipment and service truck branding",
+        "Vehicle magnets from $45 — ag equipment and service truck branding",
         "ACP aluminum from $13/sqft — permanent yard and facility signage, 10+ year lifespan",
         "Vinyl banners from $8.25/sqft — grommets included, outdoor-rated 13oz vinyl",
         "Business cards 250 for $45 — shipped flat to Swift Current",

@@ -26,7 +26,7 @@ export default function PrintingWeyburnPage() {
       subtitle="Coroplast signs, ACP aluminum, vehicle magnets, and vinyl banners — printed in Saskatoon, shipped to Weyburn."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Signs and printing for Weyburn SK businesses — True Color Display Printing Saskatoon"
-      description="Potash sector contractors, agriculture operations, and retailers in Weyburn shouldn't have to outsource signage through a middleman. True Color prints coroplast from $8/sqft, ACP aluminum from $13/sqft, and vehicle magnets from $24/sqft in-house on Roland UV equipment in Saskatoon — and ships directly to Weyburn, about 240km away. Order online, approve your proof by email, delivered in 3–5 business days."
+      description="Potash sector contractors, agriculture operations, and retailers in Weyburn shouldn't have to outsource signage through a middleman. True Color prints coroplast from $8/sqft, ACP aluminum from $13/sqft, and vehicle magnets from $45 in-house on Roland UV equipment in Saskatoon — and ships directly to Weyburn, about 240km away. Order online, approve your proof by email, delivered in 3–5 business days."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -51,7 +51,7 @@ export default function PrintingWeyburnPage() {
             from $13/sqft are built for permanent facility and yard signage — rigid composite
             panel, UV-printed on our Roland press, rated 10+ years outdoors in southeast
             Saskatchewan conditions. An 18×24&quot; ACP panel is $60 (minimum applies); 24×36&quot; is $66.
-            Vehicle magnets from $24/sqft (minimum $45) for service trucks and industrial fleets.
+            Vehicle magnets from $45 ($24/sqft) for service trucks and industrial fleets.
             Vinyl banners from $8.25/sqft for company events and seasonal promotions.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -75,7 +75,7 @@ export default function PrintingWeyburnPage() {
         "In-house Roland UV press — no middleman markup, ships direct to Weyburn from Saskatoon",
         "Coroplast from $8/sqft — UV-printed, H-stakes $2.50 each, 2–3 year outdoor lifespan",
         "ACP aluminum from $13/sqft — permanent facility signage rated 10+ years in SE Saskatchewan",
-        "Vehicle magnets from $24/sqft — industrial and potash sector fleet branding, removable and reusable",
+        "Vehicle magnets from $45 — industrial and potash sector fleet branding, removable and reusable",
         "Vinyl banners from $8.25/sqft — 13oz outdoor vinyl, hemmed and grommeted as standard",
         "Ships to Weyburn — approve proof by email, 3–5 business days to your door",
         "In-house designer — $35 flat, same-day proof, rush production +$40",

@@ -26,7 +26,7 @@ export default function SignsMooseJawPage() {
       subtitle="Coroplast signs, vinyl banners, and vehicle magnets — printed in Saskatoon, shipped to Moose Jaw."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Signs and printing for Moose Jaw SK businesses — True Color Display Printing Saskatoon"
-      description="True Color Display Printing ships signs, banners, and print products to Moose Jaw businesses. Coroplast from $8/sqft, vinyl banners from $8.25/sqft, vehicle magnets from $24/sqft. Order online, approve your proof by email, delivered to Moose Jaw in 3–5 business days."
+      description="True Color Display Printing ships signs, banners, and print products to Moose Jaw businesses. Coroplast from $8/sqft, vinyl banners from $8.25/sqft, vehicle magnets from $45. Order online, approve your proof by email, delivered to Moose Jaw in 3–5 business days."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -46,7 +46,7 @@ export default function SignsMooseJawPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vehicle magnets
             </Link>{" "}
-            from $24/sqft for service trucks, delivery vehicles, and contractor fleets.
+            from $45 ($24/sqft) for service trucks, delivery vehicles, and contractor fleets.
             Retractable banner stands from $219 for trade shows and events.
             ACP aluminum signs from $13/sqft for permanent storefront and facility signage.
             Volume pricing applies automatically to all orders — no account required.
@@ -71,7 +71,7 @@ export default function SignsMooseJawPage() {
       whyPoints={[
         "Coroplast from $8/sqft — UV-printed, weatherproof, H-stakes $2.50 each",
         "Vinyl banners from $8.25/sqft — grommets and hemming included as standard",
-        "Vehicle magnets from $24/sqft — removable, no adhesive residue",
+        "Vehicle magnets from $45 — removable, no adhesive residue",
         "Retractable banner stands from $219 — complete and ready to use",
         "Ships to Moose Jaw — order online, proof approval by email",
         "In-house designer — from $35 to prep any file format",

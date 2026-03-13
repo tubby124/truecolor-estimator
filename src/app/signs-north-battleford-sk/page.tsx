@@ -26,7 +26,7 @@ export default function SignsNorthBattlefordPage() {
       subtitle="Coroplast signs, vehicle magnets, ACP aluminum, and vinyl banners — printed in Saskatoon, shipped to North Battleford."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Signs and printing for North Battleford SK — True Color Display Printing Saskatoon"
-      description="Grain operations, Indigenous-owned businesses, and contractors in the Battlefords area shouldn't have to settle for a local shop that outsources large-format work. True Color prints coroplast from $8/sqft, ACP aluminum from $13/sqft, and vehicle magnets from $24/sqft in-house on Roland UV equipment in Saskatoon — and ships directly to North Battleford, 140km northwest. Order online, approve your proof by email, delivered in 3–5 business days."
+      description="Grain operations, Indigenous-owned businesses, and contractors in the Battlefords area shouldn't have to settle for a local shop that outsources large-format work. True Color prints coroplast from $8/sqft, ACP aluminum from $13/sqft, and vehicle magnets from $45 in-house on Roland UV equipment in Saskatoon — and ships directly to North Battleford, 140km northwest. Order online, approve your proof by email, delivered in 3–5 business days."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -47,10 +47,10 @@ export default function SignsNorthBattlefordPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vehicle magnets
             </Link>{" "}
-            from $24/sqft (minimum $45) stick securely to steel service truck doors and equipment
+            from $45 ($24/sqft) stick securely to steel service truck doors and equipment
             cabs — remove cleanly with no adhesive residue. ACP aluminum signs from $13/sqft
             for permanent business and facility signage that handles northwest Saskatchewan winters.
-            An 18×24&quot; ACP panel is $39; 24×36&quot; is $66. Vinyl banners from $8.25/sqft for
+            An 18×24&quot; ACP panel is $60 ($60 minimum applies); 24×36&quot; is $66. Vinyl banners from $8.25/sqft for
             seasonal promotions, grand openings, and community events.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -74,7 +74,7 @@ export default function SignsNorthBattlefordPage() {
       whyPoints={[
         "In-house Roland UV press — no outsourcing markup, consistent colour on every order shipped to North Battleford",
         "Coroplast from $8/sqft — UV-printed, weatherproof for 2–3 years, H-stakes $2.50 each",
-        "Vehicle magnets from $24/sqft — service truck and ag equipment branding across northwest SK",
+        "Vehicle magnets from $45 — service truck and ag equipment branding across northwest SK",
         "ACP aluminum from $13/sqft — permanent facility and business signage, 10+ year outdoor lifespan",
         "Vinyl banners from $8.25/sqft — hemmed edges, grommets every 2 ft, 13oz outdoor vinyl",
         "Ships to North Battleford — approve proof by email, 3–5 business days to your door",

@@ -48,7 +48,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               vehicle magnets
             </Link>{" "}
-            from $24/sqft stick securely to steel doors, remove cleanly between seasons, and
+            from $45 ($24/sqft) stick securely to steel doors, remove cleanly between seasons, and
             leave no adhesive residue on your paint.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -71,7 +71,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         "Coroplast from $8/sqft — weather-resistant, UV-printed, survives Saskatchewan freeze/thaw cycles",
         "ACP aluminum signs from $13/sqft — 10+ year lifespan, ideal for permanent farm and equipment yard signage",
         "Volume discounts built in — 10+ signs gets 17% off coroplast, no account needed",
-        "Vehicle and equipment magnets from $24/sqft — removable branding for tractors, trucks, and grain carts",
+        "Vehicle and equipment magnets from $45 — removable branding for tractors, trucks, and grain carts",
         "In-house designer handles low-res logos and rough sketches — no need to hire a graphic designer",
         "Local Saskatoon pickup at 216 33rd St W — no shipping wait, inspect before you leave",
       ]}
