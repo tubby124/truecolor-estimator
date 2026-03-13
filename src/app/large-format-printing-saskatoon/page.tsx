@@ -34,7 +34,7 @@ export default function LargeFormatPrintingSaskatoonPage() {
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               coroplast signs
             </Link>
-            ,{" "}
+            {" from $8/sqft,"}{" "}
             <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               vinyl banners
             </Link>

@@ -25,12 +25,12 @@ export default function BrochurePrintingSaskatoonPage() {
       subtitle="Tri-fold & half-fold brochures from $70/100 on 100lb gloss. Folded and scored in-house."
       heroImage="/images/products/product/brochures-800x600.webp"
       heroAlt="Brochure printing in Saskatoon by True Color Display Printing"
-      description="True Color Display Printing prints and folds brochures in Saskatoon on 100lb gloss text paper. Tri-fold and half-fold available. Minimum 100 brochures. In-house Konica Minolta digital press with in-house folding and scoring — no outsourcing."
+      description="True Color Display Printing prints and folds brochures in Saskatoon from $70 for 100 tri-fold, on 100lb gloss text paper. Tri-fold and half-fold available. Minimum 100 brochures. In-house Konica Minolta digital press with in-house folding and scoring — no outsourcing."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            True Color Display Printing prints and folds brochures in Saskatoon on 100lb gloss text
-            paper. The 100lb weight is noticeably heavier than standard 80lb flyer paper — thick
+            True Color Display Printing prints and folds brochures in Saskatoon from $70 for 100
+            tri-fold, on 100lb gloss text paper. The 100lb weight is noticeably heavier than standard 80lb flyer paper — thick
             enough to hold a fold without cracking, with a smooth gloss surface that makes full-colour
             images and brand photography pop. Folded and scored in-house on our Konica Minolta digital
             press. Minimum 100 brochures, ready in 2–3 business days.

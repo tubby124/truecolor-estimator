@@ -24,12 +24,12 @@ export default function RetractableBannersSaskatoonPage() {
       subtitle="Stand + full-colour print from $219. Ready for your next trade show or event."
       heroImage="/images/products/product/retractable-stand-600x900.webp"
       heroAlt="Retractable banner stand with full-colour print in Saskatoon by True Color Display Printing"
-      description="True Color produces retractable banner stands for Saskatoon trade shows, grand openings, clinics, storefronts, and events. Each unit includes the premium stand hardware and a full-colour Roland UV printed banner — no upselling, no hidden fees. Set up in 30 seconds, packs down to carry under your arm. Replacement graphics are available if your message changes or your banner wears out. Order online, pick up at 216 33rd St W."
+      description="True Color produces retractable banner stands from $219 for Saskatoon trade shows, grand openings, clinics, storefronts, and events. Each unit includes the premium stand hardware and a full-colour Roland UV printed banner — no upselling, no hidden fees. Set up in 30 seconds, packs down to carry under your arm. Replacement graphics are available if your message changes or your banner wears out. Order online, pick up at 216 33rd St W."
       products={[
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
       ]}
       whyPoints={[
         "Stand + full-colour print included from $219 — no hidden hardware charges",

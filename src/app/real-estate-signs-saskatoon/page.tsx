@@ -35,7 +35,7 @@ export default function RealEstatePage() {
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               coroplast yard signs
             </Link>
-            , feature sheets, business cards, postcards, and{" "}
+            {" from $30,"} feature sheets, business cards, postcards, and{" "}
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               vehicle magnets
             </Link>
