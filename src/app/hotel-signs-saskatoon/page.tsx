@@ -26,7 +26,7 @@ export default function HotelSignsSaskatoonPage() {
       subtitle="Conference setup by noon. Your signage is ready."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Hotel and conference centre signs printed in Saskatoon"
-      description="True Color prints signs and displays for hotels, motels, B&Bs, and conference centres in Saskatoon. Foamboard displays from $45 for meeting room signs, event programs, and wayfinding boards. Retractable banners from $219 for conference branding and sponsor displays. Vinyl banners from $66 for outdoor event promotions and seasonal signage. ACP aluminum signs from $39 for permanent exterior directional. Window decals from $45 for lobby and entrance branding. Same-day rush available for +$40 flat on orders placed before 10 AM — event setup today, sign ordered this morning. In-house Roland UV printer. Designer $35 flat. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints signs and displays for hotels, motels, B&Bs, and conference centres in Saskatoon. Foamboard displays from $45 for meeting room signs, event programs, and wayfinding boards. Retractable banners from $219 for conference branding and sponsor displays. Vinyl banners from $66 for outdoor event promotions and seasonal signage. ACP aluminum signs from $60 for permanent exterior directional. Window decals from $45 for lobby and entrance branding. Same-day rush available for +$40 flat on orders placed before 10 AM — event setup today, sign ordered this morning. In-house Roland UV printer. Designer $35 flat. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -53,7 +53,7 @@ export default function HotelSignsSaskatoonPage() {
             registration desks, sponsor recognition displays, and branded lobby entrances — pull
             up before the first guest arrives, roll down after the last one leaves. For permanent
             exterior directional signs — parking entrance, check-in arrows, conference wing
-            indicators — ACP aluminum signs from $39 (18×24&quot;) hold up in Saskatchewan
+            indicators — ACP aluminum signs from $60 ($13/sqft minimum order) hold up in Saskatchewan
             weather year-round. For larger displays and{" "}
             <Link href="/trade-show-displays-saskatoon" className="text-[#16C2F3] underline font-medium">
               trade show display systems
@@ -74,14 +74,14 @@ export default function HotelSignsSaskatoonPage() {
         { name: "Foamboard Displays", from: "from $45", slug: "foamboard-displays" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
-        { name: "ACP Aluminum Signs", from: "from $39", slug: "acp-signs" },
+        { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-signs" },
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
       ]}
       whyPoints={[
         "Meeting room named and ready — 18×24\" foamboard on easel from $45, same day with rush",
         "Registration desk and sponsor wall done — retractable banners from $219, pull up, roll down, store flat",
         "Outdoor event announcement visible from the street — vinyl banners from $66 with grommets",
-        "Parking and check-in arrows that survive Saskatchewan winters — ACP aluminum signs from $39",
+        "Parking and check-in arrows that survive Saskatchewan winters — ACP aluminum signs from $60",
         "Lobby branding and glass partition wayfinding — window decals from $45",
         "Conference starts at noon, order before 10 AM — same-day rush +$40 flat",
         "Consistent colour across every sign in the building — Roland UV in-house, no outsourcing",
@@ -102,7 +102,7 @@ export default function HotelSignsSaskatoonPage() {
         },
         {
           q: "Do you print permanent exterior signs for hotels?",
-          a: "Yes — ACP (aluminum composite panel) signs are weatherproof and suitable for permanent exterior installation. 18×24\" from $39, 24×36\" from $66. Common uses include parking entrance signs, check-in directionals, conference wing indicators, and rate signs. We print in-house on our Roland UV printer — colour stays sharp through Saskatchewan winters.",
+          a: "Yes — ACP (aluminum composite panel) signs are weatherproof and suitable for permanent exterior installation. $13/sqft with a $60 minimum order; 24×36\" signs are $66. Common uses include parking entrance signs, check-in directionals, conference wing indicators, and rate signs. We print in-house on our Roland UV printer — colour stays sharp through Saskatchewan winters.",
         },
         {
           q: "Can you print vinyl banners for outdoor hotel events or seasonal promotions?",

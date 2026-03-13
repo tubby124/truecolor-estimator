@@ -26,7 +26,7 @@ export default function PropertyManagementSignsPage() {
       subtitle="For-rent signs, parking notices, and permanent exterior signage for Saskatoon properties."
       heroImage="/images/products/heroes/realestate-hero-1200x500.webp"
       heroAlt="Property management signs Saskatoon"
-      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $24 each (18×24&quot;), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $39. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $24 each (18×24&quot;), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $60. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -44,8 +44,7 @@ export default function PropertyManagementSignsPage() {
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             For permanent exterior property signage — building name plaques, address signs, and
-            parking lot regulation signs — 3mm or 6mm ACP aluminum composite starts at $39 for
-            18&times;24&quot;. ACP is rigid, rust-proof, and rated for decades outdoors. It&apos;s
+            parking lot regulation signs — 3mm or 6mm ACP aluminum composite is $13/sqft with a $60 minimum order. ACP is rigid, rust-proof, and rated for decades outdoors. It&apos;s
             the standard for strata corporations and multi-family housing operators who need
             wayfinding that won&apos;t warp or yellow over time. Coroplast, by contrast, is the
             right choice for temporary or rotating signage — for-rent, show-suite open, and
@@ -73,7 +72,7 @@ export default function PropertyManagementSignsPage() {
       }
       products={[
         { name: "Coroplast Signs", from: "from $24", slug: "coroplast-signs" },
-        { name: "ACP Aluminum Signs", from: "from $39", slug: "acp-signs" },
+        { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-signs" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
@@ -81,7 +80,7 @@ export default function PropertyManagementSignsPage() {
       whyPoints={[
         "For-rent coroplast signs from $24 each (18×24\") — fill vacancies faster with the right corner placement",
         "Order 5+ coroplast signs and save 8% automatically — no code needed, no minimum spend",
-        "ACP aluminum from $39 (18×24\") for parking lot, entrance, and regulation signs that last decades",
+        "ACP aluminum from $60 for parking lot, entrance, and regulation signs that last decades",
         "Roland UV in-house printer — colour stays vibrant and weather-rated through Saskatchewan winters",
         "Same-day rush for $40 flat — sign up before the weekend, order before 10 AM",
         "In-house designer at $35 flat — no-trespassing, reserved parking, and building ID layouts, same-day proof",
@@ -91,11 +90,11 @@ export default function PropertyManagementSignsPage() {
       faqs={[
         {
           q: "How much do for-rent signs cost in Saskatoon?",
-          a: "Our most popular for-rent sign is 18×24\" coroplast (single-sided) at $24 each. Order 5 or more and save 8% automatically — 10 signs works out to roughly $22 each. H-stakes are $2.50 each for lawn installation. ACP aluminum versions for more permanent rental signage start at $39 for 18×24\".",
+          a: "Our most popular for-rent sign is 18×24\" coroplast (single-sided) at $24 each. Order 5 or more and save 8% automatically — 10 signs works out to roughly $22 each. H-stakes are $2.50 each for lawn installation. ACP aluminum versions for more permanent rental signage are $13/sqft with a $60 minimum.",
         },
         {
           q: "Can I get no-trespassing and reserved parking signs printed here?",
-          a: "Yes — we print no-trespassing, reserved parking, no-dumping, and any other regulation sign on coroplast (temporary/seasonal) or ACP aluminum (permanent exterior). Coroplast 18×24\" is $24. ACP 18×24\" is $39. We match standard regulation wording or use your custom text. In-house designer handles layouts for $35.",
+          a: "Yes — we print no-trespassing, reserved parking, no-dumping, and any other regulation sign on coroplast (temporary/seasonal) or ACP aluminum (permanent exterior). Coroplast 18×24\" is $24. ACP is $60 minimum ($13/sqft). We match standard regulation wording or use your custom text. In-house designer handles layouts for $35.",
         },
         {
           q: "What material is best for outdoor property signs in Saskatchewan?",
