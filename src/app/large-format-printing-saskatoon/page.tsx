@@ -103,7 +103,7 @@ export default function LargeFormatPrintingSaskatoonPage() {
         },
         {
           q: "How much does large format printing cost in Saskatoon?",
-          a: "Prices depend on material and size. A 4×8 coroplast sign is $128 single-sided. A 3×8 vinyl banner is $66. A 4×8 ACP aluminum sign is $416 single-sided. Retractable banners from $219. Quantity discounts start at 10+ pieces. Use the instant quote tool on our website for exact pricing.",
+          a: "Prices depend on material and size. A 4×8 coroplast sign is $232 single-sided. A 3×8 vinyl banner is $180. A 4×8 ACP aluminum sign is $320 single-sided. Retractable banners from $219. Quantity discounts start at 10+ pieces. Use the instant quote tool on our website for exact pricing.",
         },
         {
           q: "What's the largest size you can print?",

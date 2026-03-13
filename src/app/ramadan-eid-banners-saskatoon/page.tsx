@@ -140,7 +140,7 @@ export default function RamadanEidBannersPage() {
       ]}
       whyPoints={[
         "Vinyl banner 2×6ft Iftar dinner banner — $90 + GST, grommets included, ready in 48 hours",
-        "4×8ft mosque entrance banner — $216 + GST — most popular size for Eid prayer congregations",
+        "4×8ft mosque entrance banner — $240 + GST — most popular size for Eid prayer congregations",
         "250 glossy flyers 8.5×11\" for Ramadan specials or halal store promotions — from $110 + GST",
         "Retractable banner stand with full-colour Eid print — $219 complete, no separate graphic fee",
         "Same-day rush for +$40 flat — order before 10 AM, pick up same day — call (306) 954-8688",
@@ -150,7 +150,7 @@ export default function RamadanEidBannersPage() {
       faqs={[
         {
           q: "How much do Ramadan and Eid banners cost in Saskatoon?",
-          a: "A 2×6 ft Iftar dinner banner is $90 + GST at True Color Display Printing in Saskatoon. A 4×8 ft mosque entrance or Eid prayer banner is $216 + GST. All vinyl banners include hemming and grommets. Volume pricing applies automatically for larger orders.",
+          a: "A 2×6 ft Iftar dinner banner is $90 + GST at True Color Display Printing in Saskatoon. A 4×8 ft mosque entrance or Eid prayer banner is $240 + GST. All vinyl banners include hemming and grommets. Volume pricing applies automatically for larger orders.",
         },
         {
           q: "How fast can I get an Eid banner printed in Saskatoon?",

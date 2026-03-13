@@ -64,10 +64,10 @@ export default function RestaurantSignsSaskatoonPage() {
         </>
       }
       products={[
-        { name: "Foamboard Displays", from: "from $8/sqft", slug: "foamboard-displays" },
+        { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Flyers & Menus", from: "100 for $45", slug: "flyers" },
-        { name: "Business Cards", from: "250 for $40", slug: "business-cards" },
+        { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Window Decals", from: "from $8/sqft", slug: "window-decals" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
       ]}
@@ -102,7 +102,7 @@ export default function RestaurantSignsSaskatoonPage() {
         },
         {
           q: "How much does a vinyl banner for a restaurant grand opening cost?",
-          a: "A 2×6 ft vinyl banner is $99. A 3×8 ft banner is $198. Both include full-colour printing, grommets, and hemming. Same-day rush is +$40 flat on orders placed before 10 AM — order the morning of a soft open, pick up by 4 PM.",
+          a: "A 2×6 ft vinyl banner is $90. A 3×8 ft banner is $180. Both include full-colour printing, grommets, and hemming. Same-day rush is +$40 flat on orders placed before 10 AM — order the morning of a soft open, pick up by 4 PM.",
         },
         {
           q: "Can you print window decals for our restaurant storefront?",
@@ -110,7 +110,7 @@ export default function RestaurantSignsSaskatoonPage() {
         },
         {
           q: "Is there a minimum order for restaurant print jobs?",
-          a: "Yes — $30 minimum on most products. Flyers start at $45 for 100, business cards from $40 for 250, vinyl banners from $66 (2×4 ft), foam board menus from $45 (18×24\"). No minimum quantity — you can order just 1 item.",
+          a: "Yes — $30 minimum on most products. Flyers start at $45 for 100, business cards from $45 for 250, vinyl banners from $66 (2×4 ft), foam board menus from $45 (18×24\"). No minimum quantity — you can order just 1 item.",
         },
       ]}
     />

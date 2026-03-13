@@ -99,7 +99,7 @@ export default function EventSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much do event signs cost in Saskatoon?",
-          a: "Vinyl banners start at $8.25/sqft — a 3×8 banner is $66, a 4×8 is $88. Coroplast directional signs start at $8/sqft — an 18×24\" sign is about $24. Foamboard displays start at $45 for 18×24\". Retractable banner stands from $219 including print. Same-day rush adds +$40 flat to the full order.",
+          a: "Vinyl banners start at $8.25/sqft — a 3×8 banner is $180, a 4×8 is $264. Coroplast directional signs start at $8/sqft — an 18×24\" sign is about $24. Foamboard displays start at $45 for 18×24\". Retractable banner stands from $219 including print. Same-day rush adds +$40 flat to the full order.",
         },
         {
           q: "What event signs are most popular in Saskatoon?",
