@@ -12,6 +12,7 @@ export interface EstimateRequest {
   is_rush?: boolean;
   design_status?: DesignStatus;
   pricing_version?: string;
+  skip_min_charge?: boolean;
 }
 
 export interface LineItem {
@@ -42,6 +43,7 @@ export interface EstimateResponse {
   tier_applied: string | null;
   min_charge_applied: boolean;
   min_charge_value: number | null;
+  min_charge_skipped: boolean; // true when skip_min_charge was used and price is below minimum
   rules_fired: string[];
   cost: CostBreakdown | null;
   wave_line_name: string;

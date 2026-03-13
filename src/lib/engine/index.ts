@@ -281,9 +281,18 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   const totalOrderBase = (isFixedSize || isLotPrice) ? basePrice : round2(basePrice * qty);
   let effectiveBase = totalOrderBase;
   let minChargeApplied = false;
+  let minChargeSkipped = false;
   // Preserve pre-minimum price so the UI can show the real item cost
   let baseUnitPrice: number | null = null;
-  if (minCharge > 0 && totalOrderBase < minCharge) {
+  if (minCharge > 0 && totalOrderBase < minCharge && req.skip_min_charge) {
+    // Staff override — don't apply minimum but flag it
+    minChargeSkipped = true;
+    baseUnitPrice = totalOrderBase;
+    if (!isFixedSize && qty > 1 && lineItems.length > 0) {
+      lineItems[0].qty = qty;
+      lineItems[0].line_total = totalOrderBase;
+    }
+  } else if (minCharge > 0 && totalOrderBase < minCharge) {
     baseUnitPrice = totalOrderBase;
     effectiveBase = minCharge;
     minChargeApplied = true;
@@ -372,7 +381,8 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     price_per_sqft: basePricePerSqft,
     tier_applied: tierLabel,
     min_charge_applied: minChargeApplied,
-    min_charge_value: minChargeApplied ? minCharge : null,
+    min_charge_value: (minChargeApplied || minChargeSkipped) ? minCharge : null,
+    min_charge_skipped: minChargeSkipped,
     rules_fired: rulesFired,
     cost,
     wave_line_name: waveName,
@@ -588,6 +598,7 @@ function blocked(reason: string): EstimateResponse {
     tier_applied: null,
     min_charge_applied: false,
     min_charge_value: null,
+    min_charge_skipped: false,
     rules_fired: [],
     cost: null,
     wave_line_name: "",

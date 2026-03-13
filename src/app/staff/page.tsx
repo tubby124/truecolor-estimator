@@ -76,6 +76,7 @@ export default function StaffPage() {
   const [step, setStep] = useState<"pick" | "options">("pick");
   const [proofImage, setProofImage] = useState<ProofImageState | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [skipMinCharge, setSkipMinCharge] = useState(false);
 
   const handleAddToCart = useCallback((itemResult: EstimateResponse, jobDetails: QuoteEmailData["jobDetails"]) => {
     const hasDimensions = jobDetails.widthIn && jobDetails.heightIn;
@@ -102,6 +103,7 @@ export default function StaffPage() {
     });
     setResult(null);
     setProofImage(null);
+    setSkipMinCharge(false);
     setStep("options");
   }, []);
 
@@ -137,6 +139,7 @@ export default function StaffPage() {
           is_rush: state.is_rush,
           design_status: state.design_status,
           pricing_version: "v1_2026-02-19",
+          skip_min_charge: skipMinCharge || undefined,
         };
         const res = await fetch("/api/estimate", {
           method: "POST",
@@ -153,7 +156,7 @@ export default function StaffPage() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [category, state]);
+  }, [category, state, skipMinCharge]);
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -248,6 +251,8 @@ export default function StaffPage() {
                 jobDetails={category ? buildJobDetails(category, state, MATERIAL_LABEL_MAP) : undefined}
                 proofImage={proofImage}
                 onAddToCart={handleAddToCart}
+                skipMinCharge={skipMinCharge}
+                onToggleSkipMinCharge={() => setSkipMinCharge((v) => !v)}
               />
             </div>
           </div>

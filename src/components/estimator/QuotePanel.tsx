@@ -17,9 +17,11 @@ interface Props {
   jobDetails?: QuoteEmailData["jobDetails"];
   proofImage?: ProofImageState | null;
   onAddToCart?: (result: EstimateResponse, jobDetails: QuoteEmailData["jobDetails"]) => void;
+  skipMinCharge?: boolean;
+  onToggleSkipMinCharge?: () => void;
 }
 
-export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode, jobDetails, proofImage, onAddToCart }: Props) {
+export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMode, jobDetails, proofImage, onAddToCart, skipMinCharge, onToggleSkipMinCharge }: Props) {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [waveModalOpen, setWaveModalOpen] = useState(false);
   const [addedFlash, setAddedFlash] = useState(false);
@@ -323,13 +325,104 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
               <span className="text-sm text-green-700 font-medium">${result.price_per_unit.toFixed(2)}/unit</span>
             </div>
           )}
-          {result.min_charge_applied && (
-            <span className="inline-block mt-2 text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-medium">
-              Minimum charge applied (${result.min_charge_value?.toFixed(2)})
-              {result.price_per_unit != null && result.sell_price != null &&
-               result.price_per_unit < result.sell_price &&
-               ` · $${result.price_per_unit.toFixed(2)}/unit`}
-            </span>
+          {/* Minimum charge panel — shows when min applied OR when override is active */}
+          {result.min_charge_applied && result.min_charge_value != null && (
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/60 overflow-hidden text-sm">
+              <div className="px-3 py-2 border-b border-amber-100 flex items-center justify-between">
+                <span className="text-xs font-semibold text-amber-800 uppercase tracking-wider">Minimum Charge</span>
+                <span className="font-bold text-amber-900 tabular-nums">${result.min_charge_value.toFixed(2)}</span>
+              </div>
+              <div className="px-3 py-2 space-y-1">
+                {result.base_unit_price != null && (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-amber-700">Calculated</span>
+                      <span className="tabular-nums text-amber-600 line-through">${result.base_unit_price.toFixed(2)}</span>
+                    </div>
+                    {result.min_charge_value > result.base_unit_price && (
+                      <div className="flex justify-between">
+                        <span className="text-amber-700">Buffer</span>
+                        <span className="tabular-nums text-green-700 font-medium">+${(result.min_charge_value - result.base_unit_price).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+                {result.price_per_unit != null && result.sell_price != null &&
+                 result.price_per_unit < result.sell_price && (
+                  <div className="flex justify-between">
+                    <span className="text-amber-700">Per-unit</span>
+                    <span className="tabular-nums text-amber-800 font-medium">${result.price_per_unit.toFixed(2)}</span>
+                  </div>
+                )}
+                {result.base_unit_price != null && (() => {
+                  const itemQty = result.line_items?.[0]?.qty ?? 1;
+                  const unitPrice = result.base_unit_price! / Math.max(itemQty, 1);
+                  if (unitPrice > 0 && result.min_charge_value! > 0) {
+                    const unitsToExceed = Math.ceil(result.min_charge_value! / unitPrice);
+                    const extraNeeded = unitsToExceed - itemQty;
+                    if (extraNeeded > 0 && extraNeeded <= 20) {
+                      return (
+                        <div className="pt-1 border-t border-amber-100 mt-1">
+                          <p className="text-xs text-amber-600">
+                            Min drops at qty {unitsToExceed} (+{extraNeeded})
+                          </p>
+                        </div>
+                      );
+                    }
+                  }
+                  return null;
+                })()}
+                {/* Override toggle — staff can quote below minimum */}
+                {!isCustomerMode && onToggleSkipMinCharge && (
+                  <div className="pt-1.5 border-t border-amber-100 mt-1.5">
+                    <button
+                      onClick={onToggleSkipMinCharge}
+                      className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
+                    >
+                      Override minimum →
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {/* Red warning when minimum is overridden (skipped) */}
+          {result.min_charge_skipped && result.min_charge_value != null && (
+            <div className="mt-3 rounded-lg border-2 border-red-300 bg-red-50 overflow-hidden text-sm">
+              <div className="px-3 py-2 bg-red-100 border-b border-red-200 flex items-center justify-between">
+                <span className="text-xs font-bold text-red-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  Below Minimum
+                </span>
+                <span className="font-bold text-red-900 tabular-nums">${sellPrice.toFixed(2)}</span>
+              </div>
+              <div className="px-3 py-2 space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-red-700">Minimum for this product</span>
+                  <span className="tabular-nums text-red-800 font-semibold">${result.min_charge_value.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-700">Quoting at</span>
+                  <span className="tabular-nums text-red-900 font-bold">${sellPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-700">Below by</span>
+                  <span className="tabular-nums text-red-600 font-semibold">−${(result.min_charge_value - sellPrice).toFixed(2)}</span>
+                </div>
+                {onToggleSkipMinCharge && (
+                  <div className="pt-1.5 border-t border-red-200 mt-1.5">
+                    <button
+                      onClick={onToggleSkipMinCharge}
+                      className="text-xs text-amber-700 hover:text-amber-800 font-medium transition-colors"
+                    >
+                      ← Restore minimum
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}

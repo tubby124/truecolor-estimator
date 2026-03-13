@@ -143,33 +143,50 @@ export function PriceSummary({
 
               {/* Minimum charge breakdown — shows real item cost vs minimum */}
               {minChargeApplied && minChargeValue != null && (
-                <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg space-y-1.5">
-                  {baseUnitPrice != null && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Your item{qty > 1 ? "s" : ""}</span>
-                      <span className="text-gray-600 tabular-nums">${baseUnitPrice.toFixed(2)}</span>
+                <div className="mt-3 rounded-xl border border-[#16C2F3]/20 bg-gradient-to-br from-[#16C2F3]/[0.06] to-[#16C2F3]/[0.02] overflow-hidden">
+                  {/* Progress bar — visual fill toward minimum */}
+                  {baseUnitPrice != null && minChargeValue > 0 && (
+                    <div className="h-1 bg-[#16C2F3]/10">
+                      <motion.div
+                        className="h-full bg-[#16C2F3] rounded-r-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min((baseUnitPrice / minChargeValue) * 100, 100)}%` }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                      />
                     </div>
                   )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Order minimum</span>
-                    <span className="font-semibold text-[#1c1712] tabular-nums">${minChargeValue.toFixed(2)}</span>
+                  <div className="px-3 py-2.5 space-y-1.5">
+                    {baseUnitPrice != null && (
+                      <div className="flex justify-between items-baseline gap-2 text-sm">
+                        <span className="text-gray-500 whitespace-nowrap">Your item{qty > 1 ? "s" : ""}</span>
+                        <span className="text-gray-400 tabular-nums line-through decoration-gray-300">${baseUnitPrice.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-baseline gap-2">
+                      <span className="text-sm font-medium text-[#1c1712] whitespace-nowrap">You pay</span>
+                      <span className="font-bold text-[#1c1712] tabular-nums text-[15px]">${minChargeValue.toFixed(2)}</span>
+                    </div>
+                    {baseUnitPrice != null && minChargeValue > baseUnitPrice && (
+                      <div className="pt-2 border-t border-[#16C2F3]/15">
+                        <p className="text-[13px] text-[#0e9ec5] font-semibold flex items-center gap-1.5">
+                          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                          </svg>
+                          {(() => {
+                            const unitPrice = baseUnitPrice / Math.max(qty, 1);
+                            if (unitPrice > 0) {
+                              const unitsToExceed = Math.ceil(minChargeValue / unitPrice);
+                              const extraNeeded = unitsToExceed - qty;
+                              if (extraNeeded > 0 && extraNeeded <= 20) {
+                                return `Add ${extraNeeded} more to beat the minimum`;
+                              }
+                            }
+                            return "Increase quantity for better per-unit value";
+                          })()}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  {baseUnitPrice != null && minChargeValue > baseUnitPrice && (
-                    <p className="text-xs text-[#16C2F3] font-medium pt-1 border-t border-gray-200">
-                      {(() => {
-                        // Calculate how many units to beat the minimum
-                        const unitPrice = baseUnitPrice / Math.max(qty, 1);
-                        if (unitPrice > 0) {
-                          const unitsToExceed = Math.ceil(minChargeValue / unitPrice);
-                          const extraNeeded = unitsToExceed - qty;
-                          if (extraNeeded > 0 && extraNeeded <= 20) {
-                            return `Add ${extraNeeded} more to beat the minimum`;
-                          }
-                        }
-                        return "Increase quantity to get the best per-unit value";
-                      })()}
-                    </p>
-                  )}
                 </div>
               )}
 
