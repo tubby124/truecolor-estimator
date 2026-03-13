@@ -8,32 +8,50 @@
  *
  * Also owns the "Request Payment" modal — a form for staff to create a manual
  * payment request, generate a payment link, and email it to the customer.
+ * Supports multi-item orders (up to 5 line items).
  */
 
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
+import { PRODUCT_OPTIONS } from "@/lib/constants/products";
+
+// ─── Types ──────────────────────────────────────────────────────────────────────
+
+interface OrderItem {
+  id: string;
+  product: string;
+  qty: string;
+  details: string;
+  amount: string;
+}
 
 interface FormState {
-  // Customer
   name: string;
   email: string;
   company: string;
   phone: string;
-  // Order
-  description: string;
-  amount: string;
+  items: OrderItem[];
   payment_method: "clover" | "wave";
   notes: string;
 }
 
+function makeItem(): OrderItem {
+  return { id: crypto.randomUUID(), product: "", qty: "1", details: "", amount: "" };
+}
+
 const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
-  description: "", amount: "", payment_method: "clover", notes: "",
+  items: [makeItem()],
+  payment_method: "clover", notes: "",
 };
 
-// ─── Component ─────────────────────────────────────────────────────────────────
+const MAX_ITEMS = 5;
+
+const inputClass = "w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow";
+
+// ─── Component ──────────────────────────────────────────────────────────────────
 
 export function StaffOrdersActions() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -43,10 +61,20 @@ export function StaffOrdersActions() {
   const [success, setSuccess] = useState<{ orderNumber: string; email: string } | null>(null);
   const { toasts, showToast, dismissToast } = useToast();
 
-  const gst = form.amount ? Math.round(parseFloat(form.amount) * 0.05 * 100) / 100 : 0;
-  const pst = form.amount ? Math.round(parseFloat(form.amount) * 0.06 * 100) / 100 : 0;
-  const total = form.amount ? Math.round((parseFloat(form.amount) + gst + pst) * 100) / 100 : 0;
-  const amountValid = form.amount !== "" && !isNaN(parseFloat(form.amount)) && parseFloat(form.amount) > 0;
+  // ── Derived totals ──
+  const itemSubtotals = form.items.map((it) => {
+    const amt = parseFloat(it.amount);
+    return !isNaN(amt) && amt > 0 ? amt : 0;
+  });
+  const subtotal = Math.round(itemSubtotals.reduce((s, a) => s + a, 0) * 100) / 100;
+  const gst = Math.round(subtotal * 0.05 * 100) / 100;
+  const pst = Math.round(subtotal * 0.06 * 100) / 100;
+  const total = Math.round((subtotal + gst + pst) * 100) / 100;
+  const hasValidAmount = subtotal > 0;
+  const allItemsValid = form.items.every((it) => {
+    const amt = parseFloat(it.amount);
+    return it.product.trim() !== "" && !isNaN(amt) && amt > 0;
+  });
 
   function openModal() {
     setForm(EMPTY_FORM);
@@ -57,24 +85,39 @@ export function StaffOrdersActions() {
 
   function closeModal() {
     setModalOpen(false);
-    // Small delay so animation completes before resetting
     setTimeout(() => { setSuccess(null); setError(null); }, 300);
   }
 
-  function set(field: keyof FormState, value: string) {
+  function set(field: keyof Omit<FormState, "items">, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (error) setError(null);
+  }
+
+  function setItem(id: string, field: keyof OrderItem, value: string) {
+    setForm((prev) => ({
+      ...prev,
+      items: prev.items.map((it) => it.id === id ? { ...it, [field]: value } : it),
+    }));
+    if (error) setError(null);
+  }
+
+  function addItem() {
+    if (form.items.length >= MAX_ITEMS) return;
+    setForm((prev) => ({ ...prev, items: [...prev.items, makeItem()] }));
+  }
+
+  function removeItem(id: string) {
+    if (form.items.length <= 1) return;
+    setForm((prev) => ({ ...prev, items: prev.items.filter((it) => it.id !== id) }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
 
-    // Basic client-side validation
     if (!form.name.trim()) { setError("Customer name is required"); return; }
     if (!form.email.trim()) { setError("Customer email is required"); return; }
-    if (!form.description.trim()) { setError("Order description is required"); return; }
-    if (!amountValid) { setError("Enter a valid amount greater than $0"); return; }
+    if (!allItemsValid) { setError("Each item needs a product and amount greater than $0"); return; }
 
     setLoading(true);
     setError(null);
@@ -90,8 +133,12 @@ export function StaffOrdersActions() {
             company: form.company.trim() || undefined,
             phone: form.phone.trim() || undefined,
           },
-          description: form.description.trim(),
-          amount: parseFloat(form.amount),
+          items: form.items.map((it) => ({
+            product: it.product.trim(),
+            qty: parseInt(it.qty) || 1,
+            details: it.details.trim() || undefined,
+            amount: parseFloat(it.amount),
+          })),
           payment_method: form.payment_method,
           notes: form.notes.trim() || undefined,
         }),
@@ -125,21 +172,18 @@ export function StaffOrdersActions() {
           ← Website
         </Link>
 
-        {/* Request Payment */}
         <button
           type="button"
           onClick={openModal}
           className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
           aria-label="Send a manual payment request to a customer"
         >
-          {/* Credit card icon */}
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
           </svg>
           <span>Request Payment</span>
         </button>
 
-        {/* Coupons */}
         <Link
           href="/staff/coupons"
           className="inline-flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
@@ -151,7 +195,6 @@ export function StaffOrdersActions() {
           <span>Coupons</span>
         </Link>
 
-        {/* Social Studio */}
         <Link
           href="/staff/social"
           className="inline-flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
@@ -163,7 +206,6 @@ export function StaffOrdersActions() {
           <span>Social Studio</span>
         </Link>
 
-        {/* Make a Quote */}
         <Link
           href="/staff"
           className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
@@ -180,7 +222,6 @@ export function StaffOrdersActions() {
       <AnimatePresence>
         {modalOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               key="backdrop"
               className="fixed inset-0 bg-black/50 z-40"
@@ -190,7 +231,6 @@ export function StaffOrdersActions() {
               onClick={closeModal}
             />
 
-            {/* Panel */}
             <motion.div
               key="modal"
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -239,7 +279,7 @@ export function StaffOrdersActions() {
                     <div className="flex gap-3 justify-center">
                       <button
                         type="button"
-                        onClick={() => { setForm(EMPTY_FORM); setSuccess(null); setError(null); }}
+                        onClick={() => { setForm({ ...EMPTY_FORM, items: [makeItem()] }); setSuccess(null); setError(null); }}
                         className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
                       >
                         Send Another
@@ -261,172 +301,272 @@ export function StaffOrdersActions() {
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Customer</p>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                          <label htmlFor="pr-name" className="block text-xs font-semibold text-gray-600 mb-1.5">
                             Name <span className="text-red-500">*</span>
                           </label>
                           <input
+                            id="pr-name"
                             type="text"
+                            autoComplete="name"
                             value={form.name}
                             onChange={(e) => set("name", e.target.value)}
                             placeholder="John Smith"
                             required
-                            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                            className={inputClass}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                          <label htmlFor="pr-email" className="block text-xs font-semibold text-gray-600 mb-1.5">
                             Email <span className="text-red-500">*</span>
                           </label>
                           <input
+                            id="pr-email"
                             type="email"
+                            autoComplete="email"
                             value={form.email}
                             onChange={(e) => set("email", e.target.value)}
                             placeholder="john@company.com"
                             required
-                            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                            className={inputClass}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Company</label>
+                          <label htmlFor="pr-company" className="block text-xs font-semibold text-gray-600 mb-1.5">Company</label>
                           <input
+                            id="pr-company"
                             type="text"
+                            autoComplete="organization"
                             value={form.company}
                             onChange={(e) => set("company", e.target.value)}
                             placeholder="Acme Corp (optional)"
-                            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                            className={inputClass}
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
+                          <label htmlFor="pr-phone" className="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
                           <input
+                            id="pr-phone"
                             type="tel"
+                            autoComplete="tel"
                             value={form.phone}
                             onChange={(e) => set("phone", e.target.value)}
                             placeholder="(306) 555-1234 (optional)"
-                            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                            className={inputClass}
                           />
                         </div>
                       </div>
                     </div>
 
-                    {/* ── ORDER ── */}
+                    {/* ── ORDER ITEMS ── */}
                     <div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Order</p>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Order Items</p>
+                        <span className="text-[10px] font-semibold text-gray-300 tabular-nums">{form.items.length} / {MAX_ITEMS}</span>
+                      </div>
+
                       <div className="space-y-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-                            Description <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={form.description}
-                            onChange={(e) => set("description", e.target.value)}
-                            placeholder="e.g. 500 Postcards 5×7 two-sided"
-                            required
-                            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
-                          />
-                        </div>
+                        <AnimatePresence initial={false}>
+                          {form.items.map((item, idx) => (
+                            <motion.div
+                              key={item.id}
+                              initial={{ opacity: 0, y: -8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -8 }}
+                              transition={{ duration: 0.15 }}
+                              className="rounded-xl border border-gray-200 bg-gray-50/50 p-3 space-y-2.5"
+                            >
+                              {/* Item header */}
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                  Item {idx + 1}
+                                  {item.product && <span className="text-gray-300 font-normal ml-1.5 normal-case tracking-normal">{item.product}</span>}
+                                </span>
+                                {form.items.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeItem(item.id)}
+                                    className="text-[10px] text-red-400 hover:text-red-600 font-semibold transition-colors min-h-[28px] px-1.5"
+                                    aria-label={`Remove item ${idx + 1}`}
+                                  >
+                                    Remove
+                                  </button>
+                                )}
+                              </div>
 
-                        {/* Amount + GST + PST + Total row */}
-                        <div className="grid grid-cols-4 gap-3">
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-                              Amount (pre-tax) <span className="text-red-500">*</span>
-                            </label>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
-                              <input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                max="99999"
-                                value={form.amount}
-                                onChange={(e) => set("amount", e.target.value)}
-                                placeholder="0.00"
-                                required
-                                className="w-full pl-7 pr-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5">GST (5%)</label>
-                            <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
-                              {amountValid ? `$${gst.toFixed(2)}` : "—"}
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5">PST (6%)</label>
-                            <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
-                              {amountValid ? `$${pst.toFixed(2)}` : "—"}
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Total</label>
-                            <div className="px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-100 text-sm font-bold text-emerald-700 tabular-nums">
-                              {amountValid ? `$${total.toFixed(2)}` : "—"}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Payment method */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-2">Payment Method</label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {(["clover", "wave"] as const).map((method) => (
-                              <label
-                                key={method}
-                                className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all ${
-                                  form.payment_method === method
-                                    ? "border-emerald-500 bg-emerald-50"
-                                    : "border-gray-200 hover:border-gray-300"
-                                }`}
-                              >
-                                <input
-                                  type="radio"
-                                  name="payment_method"
-                                  value={method}
-                                  checked={form.payment_method === method}
-                                  onChange={() => set("payment_method", method)}
-                                  className="sr-only"
-                                />
-                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                  form.payment_method === method ? "border-emerald-500" : "border-gray-300"
-                                }`}>
-                                  {form.payment_method === method && (
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                                  )}
+                              {/* Product + Qty row */}
+                              <div className="grid grid-cols-[1fr_80px] gap-2">
+                                <div>
+                                  <label htmlFor={`pr-product-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                    Product <span className="text-red-500">*</span>
+                                  </label>
+                                  <select
+                                    id={`pr-product-${item.id}`}
+                                    value={item.product}
+                                    onChange={(e) => setItem(item.id, "product", e.target.value)}
+                                    className={`${inputClass} ${!item.product ? "text-gray-400" : ""}`}
+                                  >
+                                    <option value="">Select product...</option>
+                                    {PRODUCT_OPTIONS.map((opt) => (
+                                      <option key={opt} value={opt}>{opt}</option>
+                                    ))}
+                                  </select>
                                 </div>
                                 <div>
-                                  <p className="text-sm font-semibold text-gray-700">
-                                    {method === "clover" ? "Clover Card" : "Wave Invoice"}
-                                  </p>
-                                  <p className="text-[10px] text-gray-400 leading-tight">
-                                    {method === "clover" ? "Customer pays by card online" : "Wave hosted invoice + PDF"}
-                                  </p>
+                                  <label htmlFor={`pr-qty-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                    Qty
+                                  </label>
+                                  <input
+                                    id={`pr-qty-${item.id}`}
+                                    type="number"
+                                    min="1"
+                                    max="99999"
+                                    value={item.qty}
+                                    onChange={(e) => setItem(item.id, "qty", e.target.value)}
+                                    className={inputClass}
+                                  />
                                 </div>
-                              </label>
-                            ))}
+                              </div>
+
+                              {/* Details + Amount row */}
+                              <div className="grid grid-cols-[1fr_110px] gap-2">
+                                <div>
+                                  <label htmlFor={`pr-details-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                    Details
+                                  </label>
+                                  <input
+                                    id={`pr-details-${item.id}`}
+                                    type="text"
+                                    value={item.details}
+                                    onChange={(e) => setItem(item.id, "details", e.target.value)}
+                                    placeholder="e.g. 24×36 single-sided"
+                                    className={inputClass}
+                                  />
+                                </div>
+                                <div>
+                                  <label htmlFor={`pr-amount-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                    Amount <span className="text-red-500">*</span>
+                                  </label>
+                                  <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
+                                    <input
+                                      id={`pr-amount-${item.id}`}
+                                      type="number"
+                                      step="0.01"
+                                      min="0.01"
+                                      max="99999"
+                                      value={item.amount}
+                                      onChange={(e) => setItem(item.id, "amount", e.target.value)}
+                                      placeholder="0.00"
+                                      className={`${inputClass} pl-7`}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+
+                        {/* Add Item button */}
+                        {form.items.length < MAX_ITEMS && (
+                          <button
+                            type="button"
+                            onClick={addItem}
+                            className="w-full py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-semibold text-gray-400 hover:border-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer"
+                          >
+                            + Add Item
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Totals row */}
+                      <div className="grid grid-cols-4 gap-3 mt-3">
+                        <div>
+                          <p className="text-[10px] font-semibold text-gray-500 mb-1">Subtotal</p>
+                          <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
+                            {hasValidAmount ? `$${subtotal.toFixed(2)}` : "—"}
                           </div>
                         </div>
-
-                        {/* Notes */}
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Notes (optional)</label>
-                          <input
-                            type="text"
-                            value={form.notes}
-                            onChange={(e) => set("notes", e.target.value)}
-                            placeholder="Any notes for the customer or staff..."
-                            maxLength={500}
-                            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
-                          />
+                          <p className="text-[10px] font-semibold text-gray-500 mb-1">GST (5%)</p>
+                          <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
+                            {hasValidAmount ? `$${gst.toFixed(2)}` : "—"}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold text-gray-500 mb-1">PST (6%)</p>
+                          <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
+                            {hasValidAmount ? `$${pst.toFixed(2)}` : "—"}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold text-gray-500 mb-1">Total</p>
+                          <div className="px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-100 text-sm font-bold text-emerald-700 tabular-nums">
+                            {hasValidAmount ? `$${total.toFixed(2)}` : "—"}
+                          </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* ── PAYMENT METHOD ── */}
+                    <div>
+                      <p className="text-xs font-semibold text-gray-600 mb-2">Payment Method</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(["clover", "wave"] as const).map((method) => (
+                          <label
+                            key={method}
+                            className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all ${
+                              form.payment_method === method
+                                ? "border-emerald-500 bg-emerald-50"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="payment_method"
+                              value={method}
+                              checked={form.payment_method === method}
+                              onChange={() => set("payment_method", method)}
+                              className="sr-only"
+                            />
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                              form.payment_method === method ? "border-emerald-500" : "border-gray-300"
+                            }`}>
+                              {form.payment_method === method && (
+                                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-700">
+                                {method === "clover" ? "Pay by Card" : "Send Invoice"}
+                              </p>
+                              <p className="text-[10px] text-gray-400 leading-tight">
+                                {method === "clover"
+                                  ? "Customer gets a link to pay by credit or debit card"
+                                  : "Customer gets an invoice email — pay online or e-transfer"}
+                              </p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    <div>
+                      <label htmlFor="pr-notes" className="block text-xs font-semibold text-gray-600 mb-1.5">Notes (optional)</label>
+                      <input
+                        id="pr-notes"
+                        type="text"
+                        value={form.notes}
+                        onChange={(e) => set("notes", e.target.value)}
+                        placeholder="Any notes for the customer or staff..."
+                        maxLength={500}
+                        className={inputClass}
+                      />
                     </div>
 
                     {/* Error */}
                     {error && (
-                      <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-medium">
+                      <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-medium" role="alert">
                         {error}
                       </div>
                     )}
@@ -443,7 +583,8 @@ export function StaffOrdersActions() {
                       </button>
                       <button
                         type="submit"
-                        disabled={loading || !amountValid}
+                        disabled={loading || !hasValidAmount || !allItemsValid}
+                        aria-busy={loading}
                         className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition-colors"
                       >
                         {loading ? (
@@ -473,7 +614,6 @@ export function StaffOrdersActions() {
         )}
       </AnimatePresence>
 
-      {/* Toast container (handles success/error toast notifications) */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </>
   );

@@ -3,21 +3,29 @@
  *
  * Sends a branded payment request email to a customer.
  * Used by POST /api/staff/manual-order when staff creates a manual payment request.
+ * Supports multi-item orders (renders one row per item).
  *
  * Design matches orderConfirmation.ts: dark header #1c1712, cyan CTA #16C2F3.
  */
 
 import { sendEmail } from "./smtp";
 
+export interface PaymentRequestItem {
+  product: string;
+  qty: number;
+  details?: string;
+  amount: number;
+}
+
 export interface PaymentRequestEmailParams {
   orderNumber: string;
   contact: { name: string; email: string; company?: string | null };
-  description: string;   // e.g. "500 Postcards 5×7 two-sided"
-  subtotal: number;      // pre-tax
+  items: PaymentRequestItem[];
+  subtotal: number;
   gst: number;
   pst: number;
   total: number;
-  paymentUrl: string;    // /pay/{token} for Clover, or Wave viewUrl
+  paymentUrl: string;
   paymentMethod: "clover" | "wave";
   notes?: string | null;
 }
@@ -39,19 +47,34 @@ export async function sendPaymentRequestEmail(
   });
 
   console.log(
-    `[paymentRequest] email sent → ${contact.email} | order ${orderNumber} | total $${total.toFixed(2)}`
+    `[paymentRequest] email sent → ${contact.email} | order ${orderNumber} | total $${total.toFixed(2)} | ${params.items.length} item(s)`
   );
 }
 
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, description, subtotal, gst, pst, total, paymentUrl, paymentMethod, notes } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, notes } = p;
 
   const methodNote =
     paymentMethod === "wave"
       ? "You can view and pay your invoice online using the button below."
       : "Click the button below to pay securely by credit card via Clover.";
+
+  // Build item rows
+  const itemRows = items.map((item) => {
+    const qty = item.qty > 1 ? `${item.qty}x ` : "";
+    const details = item.details?.trim() ? `<span style="font-size: 12px; color: #6b7280; display: block; margin-top: 2px;">${escHtml(item.details)}</span>` : "";
+    return `<tr style="background: #ffffff;">
+      <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; border-bottom: 1px solid #f0ebe4; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        <strong style="font-weight: 600;">${escHtml(qty)}${escHtml(item.product)}</strong>
+        ${details}
+      </td>
+      <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        $${item.amount.toFixed(2)}
+      </td>
+    </tr>`;
+  }).join("\n");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -124,16 +147,14 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                 style="border: 1px solid #e2dbd4; border-radius: 10px; overflow: hidden; margin-bottom: 24px;">
 
                 <tbody>
-                  <!-- Item row -->
-                  <tr style="background: #ffffff;">
-                    <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; border-bottom: 1px solid #f0ebe4; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                      <strong style="font-weight: 600;">${escHtml(description)}</strong>
-                      ${contact.company ? `<span style="font-size: 12px; color: #6b7280; display: block; margin-top: 2px;">${escHtml(contact.company)}</span>` : ""}
+                  <!-- Item rows -->
+                  ${itemRows}
+
+                  ${contact.company ? `<tr style="background: #fafafa;">
+                    <td colspan="2" style="padding: 8px 16px; font-size: 12px; color: #6b7280; border-bottom: 1px solid #f0ebe4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      Company: ${escHtml(contact.company)}
                     </td>
-                    <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                      $${subtotal.toFixed(2)}
-                    </td>
-                  </tr>
+                  </tr>` : ""}
 
                   ${notes ? `<tr style="background: #fafafa;">
                     <td colspan="2" style="padding: 10px 16px; font-size: 13px; color: #6b7280; border-bottom: 1px solid #f0ebe4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
@@ -245,7 +266,13 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, description, subtotal, gst, pst, total, paymentUrl } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl } = p;
+
+  const itemLines = items.map((item) => {
+    const qty = item.qty > 1 ? `${item.qty}x ` : "";
+    const details = item.details?.trim() ? ` — ${item.details}` : "";
+    return `  ${qty}${item.product}${details}  $${item.amount.toFixed(2)}`;
+  });
 
   return [
     `Hi ${contact.name},`,
@@ -253,7 +280,7 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     `True Color Display Printing has sent you a payment request.`,
     "",
     `--- ORDER SUMMARY ---`,
-    `  ${description}`,
+    ...itemLines,
     p.notes ? `  Note: ${p.notes}` : "",
     "",
     `  Subtotal: $${subtotal.toFixed(2)}`,

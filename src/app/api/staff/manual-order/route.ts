@@ -3,10 +3,13 @@
  *
  * Staff-only endpoint. Creates a manual payment request:
  *   1. Upserts customer in Supabase
- *   2. Creates order + order_items (tagged as manual via staff_notes)
+ *   2. Creates order + order_items (one row per item)
  *   3. Creates payment link (Clover /pay/{token} OR Wave hosted invoice)
  *   4. Sends payment request email to customer
  *   5. Sends staff notification
+ *
+ * Accepts multi-item orders: { items: [{ product, qty, details?, amount }] }
+ * Backward compat: if `description` + `amount` present (no items), wraps into single item.
  *
  * Returns: { orderId, orderNumber, paymentUrl }
  */
@@ -22,21 +25,40 @@ import { sanitizeError } from "@/lib/errors/sanitize";
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
 
+interface OrderItemInput {
+  product: string;
+  qty: number;
+  details?: string;
+  amount: number;
+}
+
 export async function POST(req: NextRequest) {
-  // Staff auth check
   const auth = await requireStaffUser();
   if (auth instanceof NextResponse) return auth;
 
   try {
     const body = await req.json() as {
       contact: { name: string; email: string; company?: string; phone?: string };
-      description: string;
-      amount: number;
+      // Multi-item (new)
+      items?: OrderItemInput[];
+      // Legacy single-item (backward compat)
+      description?: string;
+      amount?: number;
       payment_method: "clover" | "wave";
       notes?: string;
     };
 
-    const { contact, description, amount, payment_method, notes } = body;
+    const { contact, payment_method, notes } = body;
+
+    // ── Normalize items (backward compat) ──
+    let items: OrderItemInput[];
+    if (body.items && body.items.length > 0) {
+      items = body.items;
+    } else if (body.description && body.amount) {
+      items = [{ product: "Other", qty: 1, details: body.description, amount: body.amount }];
+    } else {
+      return NextResponse.json({ error: "At least one order item is required" }, { status: 400 });
+    }
 
     // ── Validation ──
     if (!contact?.name?.trim()) {
@@ -45,17 +67,20 @@ export async function POST(req: NextRequest) {
     if (!contact?.email?.trim()) {
       return NextResponse.json({ error: "Customer email is required" }, { status: 400 });
     }
-    if (!description?.trim()) {
-      return NextResponse.json({ error: "Order description is required" }, { status: 400 });
-    }
-    if (!amount || amount <= 0 || isNaN(amount)) {
-      return NextResponse.json({ error: "Amount must be greater than $0" }, { status: 400 });
-    }
-    if (amount > 99999) {
-      return NextResponse.json({ error: "Amount exceeds maximum allowed ($99,999)" }, { status: 400 });
-    }
     if (!["clover", "wave"].includes(payment_method)) {
       return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
+    }
+
+    for (const item of items) {
+      if (!item.product?.trim()) {
+        return NextResponse.json({ error: "Each item requires a product type" }, { status: 400 });
+      }
+      if (!item.amount || item.amount <= 0 || isNaN(item.amount)) {
+        return NextResponse.json({ error: `Amount for "${item.product}" must be greater than $0` }, { status: 400 });
+      }
+      if (item.amount > 99999) {
+        return NextResponse.json({ error: `Amount for "${item.product}" exceeds maximum ($99,999)` }, { status: 400 });
+      }
     }
 
     const supabase = createServiceClient();
@@ -81,10 +106,15 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 2. Calculate totals ──
-    const subtotal = Math.round(amount * 100) / 100;
+    const subtotal = Math.round(items.reduce((s, it) => s + it.amount, 0) * 100) / 100;
     const gst = Math.round(subtotal * GST_RATE * 100) / 100;
     const pst = Math.round(subtotal * PST_RATE * 100) / 100;
     const total = Math.round((subtotal + gst + pst) * 100) / 100;
+
+    // Build combined description for payment links and emails
+    const combinedDescription = items.length === 1
+      ? formatItemLabel(items[0])
+      : items.map((it, i) => `${i + 1}. ${formatItemLabel(it)}`).join("; ");
 
     // ── 3. Create order row (retry on order_number collision) ──
     const orderYear = new Date().getFullYear();
@@ -110,7 +140,7 @@ export async function POST(req: NextRequest) {
           total,
           payment_method: payment_method === "wave" ? "wave" : "clover_card",
           notes: notes?.trim() || null,
-          staff_notes: "Manual order — created by staff via payment request",
+          staff_notes: `Manual order — ${items.length} item(s) created by staff via payment request`,
         })
         .select("id, order_number")
         .single();
@@ -123,26 +153,27 @@ export async function POST(req: NextRequest) {
         console.error("[manual-order] order INSERT:", error);
         return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
       }
-      // 23505 = unique_violation on order_number — retry with new count
     }
 
     if (!order) {
       return NextResponse.json({ error: "Failed to create order after retries" }, { status: 500 });
     }
 
-    // ── 4. Insert order_items row ──
-    void supabase.from("order_items").insert({
-      order_id: order.id,
-      category: "MANUAL",
-      product_name: description.trim(),
-      qty: 1,
-      sides: 1,
-      addons: [],
-      is_rush: false,
-      design_status: "PRINT_READY",
-      unit_price: subtotal,
-      line_total: subtotal,
-    });
+    // ── 4. Insert order_items rows (one per item) ──
+    for (const item of items) {
+      void supabase.from("order_items").insert({
+        order_id: order.id,
+        category: "MANUAL",
+        product_name: formatItemLabel(item),
+        qty: item.qty || 1,
+        sides: 1,
+        addons: [],
+        is_rush: false,
+        design_status: "PRINT_READY",
+        unit_price: Math.round(item.amount * 100) / 100,
+        line_total: Math.round(item.amount * 100) / 100,
+      });
+    }
 
     // ── 5. Generate payment URL ──
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
@@ -150,12 +181,10 @@ export async function POST(req: NextRequest) {
     let paymentUrl: string | null = null;
 
     if (payment_method === "clover") {
-      // Encode a 30-day signed payment token → /pay/{token} creates fresh Clover session on each click
       try {
-        const token = encodePaymentToken(total, description.trim(), contact.email.toLowerCase().trim(), redirectUrl);
+        const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
         paymentUrl = `${siteUrl}/pay/${token}`;
 
-        // Save payment_reference on order (best-effort)
         void supabase
           .from("orders")
           .update({ payment_reference: paymentUrl } as Record<string, unknown>)
@@ -165,30 +194,34 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Failed to generate payment link" }, { status: 500 });
       }
     } else {
-      // Wave: create invoice → approve → Wave sends their own branded invoice email
-      // (Wave's email is reliable, includes PDF, CCes the shop — no viewUrl dependency)
+      // Wave: create invoice → approve → send
       try {
         const waveCustomerId = await createOrFindWaveCustomer(
           contact.email.toLowerCase().trim(),
           contact.name.trim()
         );
 
+        const waveLineItems = items.map((item) => ({
+          description: formatItemLabel(item),
+          unitPrice: Math.round(item.amount * 100) / 100,
+          qty: 1,
+          applyGst: true,
+          applyPst: true,
+        }));
+
         const inv = await createWaveInvoice(
           waveCustomerId,
-          [{ description: description.trim(), unitPrice: subtotal, qty: 1, applyGst: true, applyPst: true }],
+          waveLineItems,
           { orderNumber: order.order_number }
         );
 
-        // Save wave_invoice_id on order (best-effort)
         void supabase
           .from("orders")
           .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
           .eq("id", order.id);
 
-        // Approve invoice → makes it payable and gives it a public URL
         await approveWaveInvoice(inv.invoiceId);
 
-        // Always use Wave's own send: reliable, includes PDF attachment, CCes the shop
         await sendWaveInvoice(inv.invoiceId, contact.email.toLowerCase().trim(), {
           subject: `Invoice from True Color Display Printing — ${order.order_number}`,
           message: `Hi ${contact.name.trim()},\n\nPlease find your invoice attached. Click "Pay Invoice" to pay online.\n\nRef: ${order.order_number}\n\nThank you,\nTrue Color Display Printing\n(306) 954-8688`,
@@ -196,7 +229,7 @@ export async function POST(req: NextRequest) {
 
         console.log(`[manual-order] Wave invoice sent → ${contact.email} | order ${order.order_number}`);
 
-        // Send staff notification (skip customer email — Wave already sent it)
+        // Staff notification (skip customer email — Wave already sent it)
         try {
           const siteUrlForStaff = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
           await sendStaffOrderNotification({
@@ -207,15 +240,15 @@ export async function POST(req: NextRequest) {
               company: contact.company?.trim(),
               phone: contact.phone?.trim(),
             },
-            items: [{
-              product_name: description.trim(),
-              qty: 1,
+            items: items.map((item) => ({
+              product_name: formatItemLabel(item),
+              qty: item.qty || 1,
               width_in: null,
               height_in: null,
               sides: 1,
-              design_status: "PRINT_READY",
-              line_total: subtotal,
-            }],
+              design_status: "PRINT_READY" as const,
+              line_total: Math.round(item.amount * 100) / 100,
+            })),
             subtotal,
             gst,
             pst,
@@ -237,7 +270,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── 6. Send payment request email to customer ──
+    // ── 6. Send payment request email to customer (Clover path only) ──
     try {
       await sendPaymentRequestEmail({
         orderNumber: order.order_number,
@@ -246,7 +279,12 @@ export async function POST(req: NextRequest) {
           email: contact.email.toLowerCase().trim(),
           company: contact.company?.trim() || null,
         },
-        description: description.trim(),
+        items: items.map((item) => ({
+          product: item.product,
+          qty: item.qty || 1,
+          details: item.details,
+          amount: Math.round(item.amount * 100) / 100,
+        })),
         subtotal,
         gst,
         pst,
@@ -269,15 +307,15 @@ export async function POST(req: NextRequest) {
           company: contact.company?.trim(),
           phone: contact.phone?.trim(),
         },
-        items: [{
-          product_name: description.trim(),
-          qty: 1,
+        items: items.map((item) => ({
+          product_name: formatItemLabel(item),
+          qty: item.qty || 1,
           width_in: null,
           height_in: null,
           sides: 1,
-          design_status: "PRINT_READY",
-          line_total: subtotal,
-        }],
+          design_status: "PRINT_READY" as const,
+          line_total: Math.round(item.amount * 100) / 100,
+        })),
         subtotal,
         gst,
         pst,
@@ -297,4 +335,11 @@ export async function POST(req: NextRequest) {
     console.error("[manual-order]", err instanceof Error ? err.message : err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
+}
+
+/** Build a human-readable label for an order item */
+function formatItemLabel(item: OrderItemInput): string {
+  const qty = item.qty > 1 ? `${item.qty}x ` : "";
+  const details = item.details?.trim() ? ` — ${item.details.trim()}` : "";
+  return `${qty}${item.product}${details}`;
 }

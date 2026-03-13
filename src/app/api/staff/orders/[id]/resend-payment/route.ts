@@ -111,7 +111,13 @@ export async function POST(req: NextRequest, { params }: Params) {
           email: customer.email,
           company: customer.company ?? null,
         },
-        description,
+        items: items.length > 0
+          ? items.map((it) => ({
+              product: it.product_name,
+              qty: it.qty || 1,
+              amount: Number(it.line_total),
+            }))
+          : [{ product: description, qty: 1, amount: subtotal }],
         subtotal,
         gst,
         pst,
