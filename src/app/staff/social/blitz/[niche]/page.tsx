@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { LeadsTable } from "@/components/social/LeadsTable";
 import { TemplateTimeline } from "@/components/social/TemplateTimeline";
-import { ImagePromptsPanel } from "@/components/social/ImagePromptsPanel";
 import type { BlitzNiche, BlitzTemplate } from "@/lib/types/blitz";
 import nicheImagePrompts from "@/lib/data/niche-image-prompts.json";
 
@@ -169,23 +168,25 @@ export default async function NicheDetailPage({ params }: { params: Promise<{ ni
           </div>
         </div>
 
-        {/* Image prompts */}
+        {/* Image prompts link */}
         {(() => {
-          const nichePrompts = nicheImagePrompts.sources.find(
+          const nichePromptSource = nicheImagePrompts.sources.find(
             (s) => s.slug === niche.landing_page_slug
           );
-          if (!nichePrompts || nichePrompts.prompts.length === 0) return null;
+          if (!niche.has_landing_page || !niche.landing_page_slug || !nichePromptSource || nichePromptSource.prompts.length === 0) return null;
           return (
-            <section>
-              <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-purple-400" />
-                Image Prompts ({nichePrompts.prompts.length})
-              </h2>
-              <ImagePromptsPanel
-                prompts={nichePrompts.prompts}
-                nicheSlug={nicheSlug}
-              />
-            </section>
+            <Link
+              href={`/staff/social/image-prompts?niche=${niche.landing_page_slug}`}
+              className="flex items-center justify-between bg-white rounded-2xl border border-gray-200 px-5 py-4 hover:border-purple-300 hover:shadow-sm transition-all group/link"
+            >
+              <div>
+                <span className="text-sm font-bold text-[#1c1712]">Image Prompts for {niche.display_name}</span>
+                <span className="text-xs text-gray-400 ml-2">{nichePromptSource.prompts.length} prompts available</span>
+              </div>
+              <svg className="w-4 h-4 text-gray-300 group-hover/link:text-purple-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </Link>
           );
         })()}
 

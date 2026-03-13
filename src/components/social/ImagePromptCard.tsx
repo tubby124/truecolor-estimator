@@ -5,10 +5,10 @@ import { useState } from "react";
 interface Props {
   name: string;
   prompt: string;
-  imagePath: string | null;
+  borderColor?: string;
 }
 
-export function ImagePromptCard({ name, prompt, imagePath }: Props) {
+export function ImagePromptCard({ name, prompt, borderColor }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -22,7 +22,7 @@ export function ImagePromptCard({ name, prompt, imagePath }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-sm transition-all group">
+    <div className={`bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-sm transition-all group border-l-4 ${borderColor || "border-l-gray-200"}`}>
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
           <svg className="w-4 h-4 text-purple-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -49,11 +49,6 @@ export function ImagePromptCard({ name, prompt, imagePath }: Props) {
       <p className="text-xs text-gray-500 leading-relaxed bg-gray-50 rounded-xl p-3 font-mono">
         {prompt}
       </p>
-      {imagePath && (
-        <p className="text-[10px] text-gray-300 mt-2 truncate">
-          Existing: {imagePath}
-        </p>
-      )}
     </div>
   );
 }
