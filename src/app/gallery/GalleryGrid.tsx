@@ -470,15 +470,32 @@ type GalleryItem = {
   category: string;
 };
 
+const SEO_SLUG_MAP: Record<string, string> = {
+  "coroplast-signs": "/coroplast-signs-saskatoon",
+  "vinyl-banners": "/banner-printing-saskatoon",
+  "acp-signs": "/acp-signs-saskatoon",
+  "vehicle-magnets": "/vehicle-magnets-saskatoon",
+  "retractable-banners": "/retractable-banners-saskatoon",
+  "business-cards": "/business-cards-saskatoon",
+  flyers: "/flyer-printing-saskatoon",
+  "window-decals": "/window-decals-saskatoon",
+  "vinyl-lettering": "/vinyl-lettering-saskatoon",
+  stickers: "/sticker-printing-saskatoon",
+  postcards: "/postcard-printing-saskatoon",
+  "magnet-calendars": "/magnet-calendars-saskatoon",
+  "foamboard-displays": "/foamboard-printing-saskatoon",
+  brochures: "/brochure-printing-saskatoon",
+};
+
 function GalleryCard({ item }: { item: GalleryItem }) {
   return (
     <Link
-      href={`/products/${item.slug}`}
+      href={SEO_SLUG_MAP[item.slug] || `/products/${item.slug}`}
       className="group relative overflow-hidden rounded-xl bg-gray-100 aspect-[4/3]"
     >
       <Image
         src={item.src}
-        alt={`${item.label} — True Color Display Printing Saskatoon`}
+        alt={`${item.label} — ${item.category} printing by True Color Display Printing, Saskatoon`}
         fill
         className="object-cover group-hover:scale-105 transition-transform duration-300"
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -526,7 +543,7 @@ export function GalleryGrid() {
             <button
               key={cat}
               onClick={() => { setActiveCategory(cat); setShowAllWork(false); }}
-              className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors min-h-[44px] cursor-pointer ${
                 activeCategory === cat
                   ? "bg-[#16C2F3] text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"

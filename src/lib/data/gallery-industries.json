@@ -1,0 +1,169 @@
+{
+  "industries": [
+    {
+      "slug": "healthcare",
+      "name": "Healthcare & Clinics",
+      "landingPage": "/healthcare-signs-saskatoon",
+      "images": [
+        {
+          "src": "/images/industries/healthcare/banner-clinical-professional.webp",
+          "label": "Clinic Entrance Banner",
+          "productType": "Vinyl Banner",
+          "aspect": "3/1"
+        },
+        {
+          "src": "/images/industries/healthcare/banner-health-campaign.webp",
+          "label": "Flu Shot Campaign Banner",
+          "productType": "Vinyl Banner",
+          "aspect": "3/1"
+        },
+        {
+          "src": "/images/industries/healthcare/banner-new-patients-welcome.webp",
+          "label": "New Patients Welcome Banner",
+          "productType": "Vinyl Banner",
+          "aspect": "3/1"
+        },
+        {
+          "src": "/images/industries/healthcare/display-lobby-directory.webp",
+          "label": "Lobby Directory Panel",
+          "productType": "ACP Sign",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/healthcare/display-acp-permanent.webp",
+          "label": "ACP Clinic Directory",
+          "productType": "ACP Sign",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/healthcare/foamboard-know-your-numbers.webp",
+          "label": "Patient Education Display",
+          "productType": "Foamboard",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/healthcare/retractable-health-fair.webp",
+          "label": "Health Fair Display Stand",
+          "productType": "Retractable Banner",
+          "aspect": "3/8"
+        },
+        {
+          "src": "/images/industries/healthcare/retractable-reception-welcome.webp",
+          "label": "Reception Welcome Stand",
+          "productType": "Retractable Banner",
+          "aspect": "3/8"
+        }
+      ]
+    },
+    {
+      "slug": "agriculture",
+      "name": "Agriculture & Farming",
+      "landingPage": "/agriculture-signs-saskatoon",
+      "images": [
+        {
+          "src": "/images/industries/agriculture/sign-farm-gate.webp",
+          "label": "Farm Gate ID Sign",
+          "productType": "Coroplast Sign",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/agriculture/sign-plot-marker.webp",
+          "label": "Crop Plot Marker",
+          "productType": "Coroplast Sign",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/agriculture/sign-biosecurity.webp",
+          "label": "Biosecurity Warning Sign",
+          "productType": "Coroplast Sign",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/agriculture/banner-trade-show.webp",
+          "label": "Trade Show Backdrop",
+          "productType": "Vinyl Banner",
+          "aspect": "3/1"
+        },
+        {
+          "src": "/images/industries/agriculture/banner-seasonal-sale.webp",
+          "label": "Spring Seeding Sale Banner",
+          "productType": "Vinyl Banner",
+          "aspect": "3/1"
+        },
+        {
+          "src": "/images/industries/agriculture/banner-farm-event.webp",
+          "label": "Farm Open Day Banner",
+          "productType": "Vinyl Banner",
+          "aspect": "3/1"
+        },
+        {
+          "src": "/images/industries/agriculture/magnet-farm-truck.webp",
+          "label": "Farm Truck Door Magnet",
+          "productType": "Vehicle Magnet",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/agriculture/magnet-equipment-dealer.webp",
+          "label": "Equipment Dealer Magnet",
+          "productType": "Vehicle Magnet",
+          "aspect": "4/3"
+        }
+      ]
+    },
+    {
+      "slug": "agribusiness",
+      "name": "Agribusiness & Dealers",
+      "landingPage": "/agribusiness-signs-saskatchewan",
+      "images": [
+        {
+          "src": "/images/industries/agribusiness/sign-dealer-fascia.webp",
+          "label": "Equipment Dealer Fascia",
+          "productType": "ACP Sign",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/agribusiness/sign-warehouse-id.webp",
+          "label": "Warehouse ID Sign",
+          "productType": "ACP Sign",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/agribusiness/sign-storefront.webp",
+          "label": "Retail Storefront Sign",
+          "productType": "ACP Sign",
+          "aspect": "4/3"
+        },
+        {
+          "src": "/images/industries/agribusiness/retractable-trade-show.webp",
+          "label": "Trade Show Display",
+          "productType": "Retractable Banner",
+          "aspect": "3/8"
+        },
+        {
+          "src": "/images/industries/agribusiness/retractable-dealer-showroom.webp",
+          "label": "Dealer Showroom Stand",
+          "productType": "Retractable Banner",
+          "aspect": "3/8"
+        },
+        {
+          "src": "/images/industries/agribusiness/flyer-product-sheet.webp",
+          "label": "Product Spec Sheet",
+          "productType": "Flyer",
+          "aspect": "3/4"
+        },
+        {
+          "src": "/images/industries/agribusiness/flyer-seasonal-promo.webp",
+          "label": "Seasonal Promo Flyer",
+          "productType": "Flyer",
+          "aspect": "3/4"
+        },
+        {
+          "src": "/images/industries/agribusiness/postcard-direct-mail.webp",
+          "label": "Direct Mail Postcard",
+          "productType": "Postcard",
+          "aspect": "3/4"
+        }
+      ]
+    }
+  ]
+}

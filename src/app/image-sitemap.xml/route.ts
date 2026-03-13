@@ -534,6 +534,127 @@ const PAGES = [
         title: "Calendar magnet Prairie Path Shuttle Saskatoon",
         caption: "Fridge magnet calendar for Prairie Path Shuttle — True Color Display Printing, Saskatoon",
       },
+      {
+        loc: `${GAL}/gallery-magnet-calendar-lyndell-concrete.jpg`,
+        title: "Calendar magnet Lyndell Concrete Supply Saskatoon",
+        caption: "Fridge magnet calendar for Lyndell Concrete Supply — True Color Display Printing, Saskatoon",
+      },
+      // Missing gallery images — added 2026-03-13
+      {
+        loc: `${GAL}/gallery-shop-roland-saskatoon-cabs.jpg`,
+        title: "Roland printing Saskatoon Cabs vehicle decals",
+        caption: "Printing Saskatoon Cabs decals on the Roland TrueVIS — True Color Display Printing",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-circle-made-in-canada.jpg`,
+        title: "Custom circle coroplast sign Made in Canada Saskatoon",
+        caption: "Custom circle die-cut coroplast sign — Made in Canada, printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-retail-zaks-pricing.jpg`,
+        title: "Retail pricing signs Zaks Saskatoon coroplast",
+        caption: "Retail pricing coroplast signs for Zak's — printed in Saskatoon by True Color Display Printing",
+      },
+      {
+        loc: `${GAL}/gallery-design-retail-weve-moving.jpg`,
+        title: "We're Moving announcement sign Saskatoon retail",
+        caption: "We're Moving announcement sign for retail business — True Color Display Printing, Saskatoon",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-bjm-graduation.jpg`,
+        title: "Graduation yard sign Bishop James Mahoney Saskatoon",
+        caption: "Graduation yard sign for Bishop James Mahoney — printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${GAL}/gallery-banner-colorful-nails-spa.jpg`,
+        title: "Salon banner Colorful Nails Spa Saskatoon",
+        caption: "Vinyl salon banner for Colorful Nails & Spa — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${GAL}/gallery-banner-hello-warman-petshop.jpg`,
+        title: "Large format banner Hello Warman Pet Shop Saskatchewan",
+        caption: "Large format vinyl banner for Hello Warman Pet Shop — printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${GAL}/gallery-retractable-banner-financial-office.jpg`,
+        title: "Retractable banner stand financial services Saskatoon",
+        caption: "Retractable banner stand for financial services office — True Color, Saskatoon SK",
+      },
+      {
+        loc: `${GAL}/gallery-retractable-banner-client-office.jpg`,
+        title: "Retractable banner client delivery Saskatoon",
+        caption: "Retractable banner stand delivered to client office — True Color Display Printing, Saskatoon",
+      },
+      {
+        loc: `${GAL}/gallery-retractable-shammi-realtor.jpg`,
+        title: "Retractable banner Divine Kreation Realty Saskatoon",
+        caption: "Retractable banner stand for Divine Kreation Realty — printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${GAL}/gallery-retractable-wfg-insurance.jpg`,
+        title: "Retractable banner WFG Insurance Saskatoon",
+        caption: "Retractable banner stand for WFG Insurance agent — True Color, Saskatoon SK",
+      },
+      {
+        loc: `${GAL}/gallery-vehicle-vinyl-ayotte-full-side.jpg`,
+        title: "Full side vinyl wrap Ayotte Service Van Saskatoon",
+        caption: "Full side vinyl wrap on Ayotte service van — True Color Display Printing, Saskatoon",
+      },
+      {
+        loc: `${GAL}/gallery-vinyl-lettering-skbk-trailer.jpg`,
+        title: "Trailer vinyl lettering SKBK Construction Saskatoon",
+        caption: "Vinyl lettering on trailer for SKBK Construction — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${GAL}/gallery-window-decal-pact-agriculture.jpg`,
+        title: "Office window decals PACT agriculture Saskatoon",
+        caption: "Office window decals for PACT agriculture — printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${GAL}/gallery-window-decal-skull-car.jpg`,
+        title: "Custom die-cut window decal skull design Saskatoon",
+        caption: "Custom die-cut skull car window decal — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${GAL}/gallery-vinyl-lettering-mags.jpg`,
+        title: "Large cut vinyl letters MAGS Saskatoon",
+        caption: "Large custom cut vinyl letters for MAGS — True Color Display Printing, Saskatoon",
+      },
+      {
+        loc: `${GAL}/gallery-loyalty-card-prairie-cannabis.jpg`,
+        title: "Loyalty card Prairie Cannabis Saskatoon",
+        caption: "Loyalty punch card for Prairie Cannabis — printed on 14pt stock in Saskatoon by True Color",
+      },
+      {
+        loc: `${GAL}/gallery-business-cards-lilians-hair.jpg`,
+        title: "Business cards Lilian's Hair Studio Saskatoon",
+        caption: "Business cards for Lilian's Hair Studio — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${GAL}/gallery-flyer-pulse-strategies.jpg`,
+        title: "Professional flyer Pulse Strategies CPA Saskatoon",
+        caption: "Professional flyer for Pulse Strategies CPA — printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${GAL}/gallery-large-format-realtor-poster.jpg`,
+        title: "Large format print Kevin Appl REALTOR Saskatoon",
+        caption: "Large format print for Kevin Appl REALTOR — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${GAL}/gallery-flyer-nissen-ramen.jpg`,
+        title: "Restaurant flyer Nissen Dim Sum Ramen Saskatoon",
+        caption: "Restaurant flyer for Nissen Dim Sum Ramen — printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${GAL}/gallery-flyer-sprayright-agri.jpg`,
+        title: "Agricultural flyer SprayRight Saskatchewan",
+        caption: "Agricultural flyer for SprayRight — printed in Saskatoon by True Color Display Printing",
+      },
+      {
+        loc: `${GAL}/gallery-flyer-axis-health.jpg`,
+        title: "Rack cards Axis Health Center Saskatoon",
+        caption: "Rack cards for Axis Health Center — True Color Display Printing, Saskatoon SK",
+      },
     ],
   },
 
@@ -610,6 +731,51 @@ const PAGES = [
   // INDUSTRY PAGES
   // ══════════════════════════════════════════════════════════════════════════
   {
+    loc: `${BASE}/healthcare-signs-saskatoon`,
+    images: [
+      {
+        loc: `${IND}/healthcare/banner-clinical-professional.webp`,
+        title: "Clinic entrance vinyl banner Saskatchewan healthcare",
+        caption: "Professional clinic entrance vinyl banner — printed in Saskatoon for Saskatchewan healthcare",
+      },
+      {
+        loc: `${IND}/healthcare/banner-health-campaign.webp`,
+        title: "Flu shot campaign banner Saskatchewan clinic",
+        caption: "Flu shot clinic campaign vinyl banner — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/healthcare/banner-new-patients-welcome.webp`,
+        title: "New patients welcome banner Saskatchewan medical clinic",
+        caption: "New patients welcome vinyl banner for Saskatchewan medical clinic — True Color Saskatoon",
+      },
+      {
+        loc: `${IND}/healthcare/display-lobby-directory.webp`,
+        title: "Lobby directory panel ACP clinic Saskatchewan",
+        caption: "ACP lobby directory panel for Saskatchewan clinic — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/healthcare/display-acp-permanent.webp`,
+        title: "ACP permanent clinic directory sign Saskatchewan",
+        caption: "Permanent ACP clinic directory sign — printed in Saskatoon by True Color Display Printing",
+      },
+      {
+        loc: `${IND}/healthcare/foamboard-know-your-numbers.webp`,
+        title: "Patient education foamboard display Saskatchewan healthcare",
+        caption: "Patient education foamboard display for Saskatchewan healthcare — True Color Saskatoon",
+      },
+      {
+        loc: `${IND}/healthcare/retractable-health-fair.webp`,
+        title: "Health fair retractable banner stand Saskatchewan",
+        caption: "Retractable banner stand for Saskatchewan health fair — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/healthcare/retractable-reception-welcome.webp`,
+        title: "Reception welcome retractable stand Saskatchewan clinic",
+        caption: "Reception welcome retractable banner stand for Saskatchewan clinic — True Color Saskatoon",
+      },
+    ],
+  },
+  {
     loc: `${BASE}/agriculture-signs-saskatoon`,
     images: [
       {
@@ -633,9 +799,24 @@ const PAGES = [
         caption: "Vinyl trade show banner for Saskatchewan agriculture expo — True Color Display Printing",
       },
       {
+        loc: `${IND}/agriculture/banner-seasonal-sale.webp`,
+        title: "Spring seeding sale banner Saskatchewan agriculture",
+        caption: "Spring seeding sale vinyl banner for Saskatchewan ag dealer — True Color Saskatoon",
+      },
+      {
+        loc: `${IND}/agriculture/banner-farm-event.webp`,
+        title: "Farm open day event banner Saskatchewan",
+        caption: "Farm open day welcome vinyl banner — Saskatchewan agriculture, True Color Display Printing",
+      },
+      {
         loc: `${IND}/agriculture/magnet-farm-truck.webp`,
         title: "Farm truck vehicle magnet Saskatchewan branding",
         caption: "Vehicle magnet on farm truck door with ranch branding — Saskatchewan, True Color Saskatoon",
+      },
+      {
+        loc: `${IND}/agriculture/magnet-equipment-dealer.webp`,
+        title: "Equipment dealer vehicle magnet Saskatchewan agriculture",
+        caption: "Vehicle magnet for agricultural equipment dealer — Saskatchewan, True Color Saskatoon",
       },
     ],
   },
@@ -653,14 +834,29 @@ const PAGES = [
         caption: "ACP warehouse identification sign for grain elevator — printed in Saskatoon by True Color",
       },
       {
+        loc: `${IND}/agribusiness/sign-storefront.webp`,
+        title: "Retail storefront ACP sign Saskatchewan ag supply",
+        caption: "ACP storefront sign for Saskatchewan agricultural supply retail — True Color Saskatoon",
+      },
+      {
         loc: `${IND}/agribusiness/retractable-trade-show.webp`,
         title: "Trade show retractable banner Saskatchewan agriculture",
         caption: "Retractable banner stand at Saskatchewan agriculture trade show — True Color, Saskatoon SK",
       },
       {
+        loc: `${IND}/agribusiness/retractable-dealer-showroom.webp`,
+        title: "Dealer showroom retractable stand Saskatchewan equipment",
+        caption: "Retractable banner stand in Saskatchewan equipment dealer showroom — True Color Saskatoon",
+      },
+      {
         loc: `${IND}/agribusiness/flyer-product-sheet.webp`,
         title: "Product specification flyer agricultural equipment Saskatchewan",
         caption: "Product specification flyer for agricultural equipment dealer — printed in Saskatoon",
+      },
+      {
+        loc: `${IND}/agribusiness/flyer-seasonal-promo.webp`,
+        title: "Seasonal promotion flyer Saskatchewan ag supply",
+        caption: "Seasonal promotion flyer for Saskatchewan ag supply — printed in Saskatoon by True Color",
       },
       {
         loc: `${IND}/agribusiness/postcard-direct-mail.webp`,
