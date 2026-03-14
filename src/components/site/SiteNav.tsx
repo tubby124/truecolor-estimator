@@ -241,12 +241,11 @@ export function SiteNav() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              {openMenu === "products" && (
-                <div
+              <div
                   role="menu"
                   data-menu="products"
                   onKeyDown={(e) => handleDropdownKeyDown(e, "products")}
-                  className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-[540px]"
+                  className={`absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-[540px] ${openMenu === "products" ? "" : "hidden"}`}
                 >
                   <div className="grid grid-cols-3 gap-0 p-3">
                     {PRODUCT_CATEGORIES.map((cat) => (
@@ -268,7 +267,6 @@ export function SiteNav() {
                     ))}
                   </div>
                 </div>
-              )}
             </div>
 
             {/* Industries dropdown */}
@@ -292,12 +290,11 @@ export function SiteNav() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              {openMenu === "industries" && (
-                <div
+              <div
                   role="menu"
                   data-menu="industries"
                   onKeyDown={(e) => handleDropdownKeyDown(e, "industries")}
-                  className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl w-56 z-50"
+                  className={`absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl w-56 z-50 ${openMenu === "industries" ? "" : "hidden"}`}
                 >
                   {INDUSTRY_LINKS.map((link) => (
                     <Link
@@ -310,7 +307,6 @@ export function SiteNav() {
                     </Link>
                   ))}
                 </div>
-              )}
             </div>
 
             {/* Services — plain link */}
@@ -341,10 +337,9 @@ export function SiteNav() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              {openMenu === "about" && (
-                <div
+              <div
                   role="menu"
-                  className="absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-48"
+                  className={`absolute top-full left-0 mt-1 bg-[#1c1712] border border-white/10 rounded-lg shadow-xl z-50 w-48 ${openMenu === "about" ? "" : "hidden"}`}
                 >
                   <Link
                     href="/about"
@@ -368,7 +363,6 @@ export function SiteNav() {
                     Visit Us
                   </Link>
                 </div>
-              )}
             </div>
 
             {/* Our Work — plain link */}
@@ -432,8 +426,7 @@ export function SiteNav() {
       </header>
 
       {/* Mobile Drawer */}
-      {drawerOpen && (
-        <div ref={drawerRef} className="fixed inset-0 z-50 bg-[#1c1712] overflow-y-auto">
+        <div ref={drawerRef} className={`fixed inset-0 z-50 bg-[#1c1712] overflow-y-auto ${drawerOpen ? "" : "hidden"}`}>
           {/* Close button */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <Link href="/" onClick={() => setDrawerOpen(false)}>
@@ -665,7 +658,6 @@ export function SiteNav() {
             </Link>
           </nav>
         </div>
-      )}
     </>
   );
 }

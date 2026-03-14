@@ -35,7 +35,7 @@ export function SiteFooter() {
               Saskatoon&apos;s print shop for signs, banners, magnets, cards, and flyers.
               Transparent pricing. In-house designer. Local pickup.
             </p>
-            <p className="text-xs text-gray-600 mt-4">5.0 ★ on Google · {REVIEW_COUNT} reviews</p>
+            <p className="text-xs text-gray-500 mt-4">5.0 ★ on Google · {REVIEW_COUNT} reviews</p>
           </div>
 
           {/* Col 2: Contact + address */}
@@ -69,101 +69,97 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Col 3: Links */}
+          {/* Col 3: Products & Services */}
           <div>
-            <h3 className="text-white text-sm font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-white text-sm font-semibold mb-4">Products & Services</h3>
             <div className="grid grid-cols-2 gap-x-4 text-sm">
               <div className="space-y-2">
-                <Link href="/products" className="block hover:text-white transition-colors">
-                  Get a Price
-                </Link>
-                <Link href="/graphic-design-saskatoon" className="block hover:text-white transition-colors">
-                  Graphic Design
-                </Link>
-                <Link href="/sign-company-saskatoon" className="block hover:text-white transition-colors">
-                  Sign Company
-                </Link>
-                <Link href="/coroplast-signs-saskatoon" className="block hover:text-white transition-colors">
-                  Coroplast Signs
-                </Link>
-                <Link href="/same-day-printing-saskatoon" className="block hover:text-white transition-colors">
-                  Same-Day Printing
-                </Link>
-                <Link href="/banner-printing-saskatoon" className="block hover:text-white transition-colors">
-                  Vinyl Banners
-                </Link>
-                <Link href="/business-cards-saskatoon" className="block hover:text-white transition-colors">
-                  Business Cards
-                </Link>
-                <Link href="/large-format-printing-saskatoon" className="block hover:text-white transition-colors">
-                  Large Format
-                </Link>
-                <Link href="/flyer-printing-saskatoon" className="block hover:text-white transition-colors">
-                  Flyer Printing
-                </Link>
-                <Link href="/brochure-printing-saskatoon" className="block hover:text-white transition-colors">
-                  Brochure Printing
-                </Link>
-                <Link href="/products/rack-cards" className="block hover:text-white transition-colors">
-                  Rack Cards
-                </Link>
+                <Link href="/products" className="block hover:text-white transition-colors">Get a Price</Link>
+                <Link href="/sign-company-saskatoon" className="block hover:text-white transition-colors">Sign Company</Link>
+                <Link href="/coroplast-signs-saskatoon" className="block hover:text-white transition-colors">Coroplast Signs</Link>
+                <Link href="/banner-printing-saskatoon" className="block hover:text-white transition-colors">Vinyl Banners</Link>
+                <Link href="/business-cards-saskatoon" className="block hover:text-white transition-colors">Business Cards</Link>
+                <Link href="/flyer-printing-saskatoon" className="block hover:text-white transition-colors">Flyer Printing</Link>
+                <Link href="/brochure-printing-saskatoon" className="block hover:text-white transition-colors">Brochure Printing</Link>
+                <Link href="/sticker-printing-saskatoon" className="block hover:text-white transition-colors">Sticker Printing</Link>
+                <Link href="/postcard-printing-saskatoon" className="block hover:text-white transition-colors">Postcard Printing</Link>
+                <Link href="/photo-poster-printing-saskatoon" className="block hover:text-white transition-colors">Photo Posters</Link>
               </div>
               <div className="space-y-2">
-                <Link href="/trade-show-displays-saskatoon" className="block hover:text-white transition-colors">
-                  Trade Shows
-                </Link>
-                <Link href="/retractable-banners-saskatoon" className="block hover:text-white transition-colors">
-                  Retractable Banners
-                </Link>
-                <Link href="/vehicle-magnets-saskatoon" className="block hover:text-white transition-colors">
-                  Vehicle Magnets
-                </Link>
-                <Link href="/event-signs-saskatoon" className="block hover:text-white transition-colors">
-                  Event Signs
-                </Link>
-                <Link href="/construction-signs-saskatoon" className="block hover:text-white transition-colors">
-                  Construction Signs
-                </Link>
-                <Link href="/healthcare-signs-saskatoon" className="block hover:text-white transition-colors">
-                  Healthcare Signs
-                </Link>
-                <Link href="/dental-office-signs-saskatoon" className="block hover:text-white transition-colors">
-                  Dental Office Signs
-                </Link>
-                <Link href="/election-signs" className="block hover:text-white transition-colors">
-                  Election Signs
-                </Link>
-                <Link href="/graduation-banners-saskatoon" className="block hover:text-white transition-colors">
-                  Graduation Banners
-                </Link>
-                <Link href="/real-estate-signs-saskatoon" className="block hover:text-white transition-colors">
-                  Real Estate Signs
-                </Link>
-                <Link href="/agriculture-signs-saskatoon" className="block hover:text-white transition-colors">
-                  Agriculture Signs
-                </Link>
-                <Link href="/gallery" className="block hover:text-white transition-colors">
-                  Our Work
-                </Link>
-                <Link href="/about" className="block hover:text-white transition-colors">
-                  About Us
-                </Link>
-                <a
-                  href="https://g.page/r/CZH6HlbNejQAEAE/review"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block hover:text-white transition-colors"
-                >
-                  ★ Leave a Review
-                </a>
+                <Link href="/vehicle-magnets-saskatoon" className="block hover:text-white transition-colors">Vehicle Magnets</Link>
+                <Link href="/custom-magnets-saskatoon" className="block hover:text-white transition-colors">Custom Magnets</Link>
+                <Link href="/retractable-banners-saskatoon" className="block hover:text-white transition-colors">Retractable Banners</Link>
+                <Link href="/window-decals-saskatoon" className="block hover:text-white transition-colors">Window Decals</Link>
+                <Link href="/wall-graphics-saskatoon" className="block hover:text-white transition-colors">Wall Graphics</Link>
+                <Link href="/vinyl-lettering-saskatoon" className="block hover:text-white transition-colors">Vinyl Lettering</Link>
+                <Link href="/aluminum-signs-saskatoon" className="block hover:text-white transition-colors">Aluminum Signs</Link>
+                <Link href="/foamboard-printing-saskatoon" className="block hover:text-white transition-colors">Foamboard Printing</Link>
+                <Link href="/large-format-printing-saskatoon" className="block hover:text-white transition-colors">Large Format</Link>
+                <Link href="/same-day-printing-saskatoon" className="block hover:text-white transition-colors">Same-Day Printing</Link>
+                <Link href="/graphic-design-saskatoon" className="block hover:text-white transition-colors">Graphic Design</Link>
+                <Link href="/trade-show-displays-saskatoon" className="block hover:text-white transition-colors">Trade Shows</Link>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Saskatchewan cities */}
+        {/* Industries We Serve — full-width grid for all industry pages */}
         <div className="mt-10 pt-8 border-t border-white/5">
-          <p className="text-xs text-gray-600 mb-3 uppercase tracking-wider">Also serving Saskatchewan</p>
+          <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider">Industries We Serve</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-3 md:gap-y-2 text-sm">
+            <Link href="/agriculture-signs-saskatoon" className="hover:text-white transition-colors">Agriculture</Link>
+            <Link href="/agribusiness-signs-saskatchewan" className="hover:text-white transition-colors">Agribusiness</Link>
+            <Link href="/brewery-saskatoon" className="hover:text-white transition-colors">Breweries</Link>
+            <Link href="/car-dealership-signs-saskatoon" className="hover:text-white transition-colors">Car Dealerships</Link>
+            <Link href="/chiropractor-signs-saskatoon" className="hover:text-white transition-colors">Chiropractors</Link>
+            <Link href="/church-banners-saskatoon" className="hover:text-white transition-colors">Churches</Link>
+            <Link href="/construction-signs-saskatoon" className="hover:text-white transition-colors">Construction</Link>
+            <Link href="/daycare-signs-saskatoon" className="hover:text-white transition-colors">Daycares</Link>
+            <Link href="/dental-office-signs-saskatoon" className="hover:text-white transition-colors">Dental Offices</Link>
+            <Link href="/event-signs-saskatoon" className="hover:text-white transition-colors">Events & Weddings</Link>
+            <Link href="/event-banners" className="hover:text-white transition-colors">Event Banners</Link>
+            <Link href="/gym-fitness-signs-saskatoon" className="hover:text-white transition-colors">Gym & Fitness</Link>
+            <Link href="/graduation-banners-saskatoon" className="hover:text-white transition-colors">Graduation</Link>
+            <Link href="/healthcare-signs-saskatoon" className="hover:text-white transition-colors">Healthcare</Link>
+            <Link href="/hotel-signs-saskatoon" className="hover:text-white transition-colors">Hotels</Link>
+            <Link href="/law-office-signs-saskatoon" className="hover:text-white transition-colors">Law Offices</Link>
+            <Link href="/non-profit-signs-saskatoon" className="hover:text-white transition-colors">Non-Profits</Link>
+            <Link href="/pharmacy-signs-saskatoon" className="hover:text-white transition-colors">Pharmacies</Link>
+            <Link href="/property-management-signs-saskatoon" className="hover:text-white transition-colors">Property Management</Link>
+            <Link href="/real-estate-signs-saskatoon" className="hover:text-white transition-colors">Real Estate</Link>
+            <Link href="/restaurant-signs-saskatoon" className="hover:text-white transition-colors">Restaurants</Link>
+            <Link href="/retail-signs-saskatoon" className="hover:text-white transition-colors">Retail Stores</Link>
+            <Link href="/salon-signs-saskatoon" className="hover:text-white transition-colors">Salons</Link>
+            <Link href="/school-signs-saskatoon" className="hover:text-white transition-colors">Schools & Sports</Link>
+            <Link href="/trade-contractor-signs-saskatoon" className="hover:text-white transition-colors">Trade Contractors</Link>
+            <Link href="/election-signs" className="hover:text-white transition-colors">Election Signs</Link>
+            <Link href="/ramadan-eid-banners-saskatoon" className="hover:text-white transition-colors">Ramadan & Eid</Link>
+            <Link href="/st-patricks-day-printing-saskatoon" className="hover:text-white transition-colors">St. Patrick&apos;s Day</Link>
+          </div>
+        </div>
+
+        {/* Quick links row */}
+        <div className="mt-8 pt-6 border-t border-white/5">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <Link href="/gallery" className="hover:text-white transition-colors">Our Work</Link>
+            <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
+            <Link href="/services" className="hover:text-white transition-colors">Services</Link>
+            <Link href="/resources" className="hover:text-white transition-colors">Resources</Link>
+            <Link href="/quote" className="hover:text-white transition-colors">Custom Quote</Link>
+            <a
+              href="https://g.page/r/CZH6HlbNejQAEAE/review"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              ★ Leave a Review
+            </a>
+          </div>
+        </div>
+
+        {/* Saskatchewan cities */}
+        <div className="mt-8 pt-6 border-t border-white/5">
+          <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider">Also serving Saskatchewan</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
             <Link href="/banner-printing-regina" className="hover:text-white transition-colors">Regina</Link>
             <Link href="/signs-prince-albert-sk" className="hover:text-white transition-colors">Prince Albert</Link>
