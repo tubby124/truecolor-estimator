@@ -40,6 +40,184 @@ const nextConfig: NextConfig = {
         destination: "/quote",
         permanent: true,
       },
+
+      // ── Old WordPress URLs → new Next.js equivalents (GSC 404 cleanup 2026-03-13) ──
+
+      // WP product pages → SEO landing pages
+      {
+        source: "/product/banners-and-signage",
+        destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product/business-card-one-side",
+        destination: "/business-cards-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product/business-card-two-side",
+        destination: "/business-cards-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product/flyers-80lb-one-side",
+        destination: "/flyer-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product/flyers-80lb-two-side",
+        destination: "/flyer-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product/flyers-100lb-two-side",
+        destination: "/flyer-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product/retractable-banner",
+        destination: "/products/retractable-banners",
+        permanent: true,
+      },
+      {
+        source: "/product/vinyl-decals-lettering-and-vehicle-decals",
+        destination: "/vinyl-lettering-saskatoon",
+        permanent: true,
+      },
+
+      // WP product category pages → SEO landing pages
+      {
+        source: "/product-category/banners-and-signage",
+        destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product-category/business-cards",
+        destination: "/business-cards-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product-category/flyers-brochures-posters",
+        destination: "/flyer-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product-category/standing-banner",
+        destination: "/products/retractable-banners",
+        permanent: true,
+      },
+      {
+        source: "/product-category/stickers-labels",
+        destination: "/sticker-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product-category/stickers",
+        destination: "/sticker-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product-category/vehicle-graphics-magnets",
+        destination: "/vehicle-magnets-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product-category/uncategorized",
+        destination: "/",
+        permanent: true,
+      },
+
+      // Old WP page slugs → new equivalents
+      {
+        source: "/flyers-2",
+        destination: "/flyer-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/stickers",
+        destination: "/sticker-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/work",
+        destination: "/gallery",
+        permanent: true,
+      },
+      {
+        source: "/banners-and-signage",
+        destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/business-cards",
+        destination: "/business-cards-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/retractable-banner-standing-banners",
+        destination: "/products/retractable-banners",
+        permanent: true,
+      },
+      {
+        source: "/vinyl-decals-lettering-and-vehicle-decals",
+        destination: "/vinyl-lettering-saskatoon",
+        permanent: true,
+      },
+      // /contact has its own page.tsx — DO NOT redirect (would shadow the real page)
+      {
+        source: "/shop",
+        destination: "/",
+        permanent: true,
+      },
+
+      // Dead WP pages → homepage
+      {
+        source: "/hello-world",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/thank-you",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/our-package",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/my-bookings",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/appointment-cancellation-confirmation",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/comments/feed",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/category/uncategorized",
+        destination: "/",
+        permanent: true,
+      },
+
+      // WP system paths → homepage
+      {
+        source: "/author/:slug",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/wp-content/:path*",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
 
