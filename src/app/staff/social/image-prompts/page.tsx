@@ -9,45 +9,147 @@ import { ImagePromptCard } from "@/components/social/ImagePromptCard";
 
 const gbpProducts = gbpData.products.filter((p) => p.imagePrompt);
 
+type NicheStatus = "pending" | "generated" | "live";
+
+const STATUS_CONFIG: Record<NicheStatus, { dot: string; bg: string; text: string; label: string }> = {
+  pending: {
+    dot: "bg-gray-400",
+    bg: "bg-gray-100",
+    text: "text-gray-500",
+    label: "Pending",
+  },
+  generated: {
+    dot: "bg-amber-400",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    label: "Generated",
+  },
+  live: {
+    dot: "bg-green-400",
+    bg: "bg-green-50",
+    text: "text-green-700",
+    label: "Live",
+  },
+};
+
+function StatusBadge({ status }: { status: NicheStatus }) {
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${cfg.bg} ${cfg.text}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+      {cfg.label}
+    </span>
+  );
+}
+
+function NicheCard({
+  slug,
+  name,
+  promptCount,
+  status,
+  isActive,
+  onClick,
+}: {
+  slug: string;
+  name: string;
+  promptCount: number;
+  status: NicheStatus;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer group ${
+        isActive
+          ? "bg-[#1c1712] border-[#1c1712] text-white shadow-md"
+          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-md text-[#1c1712]"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? "bg-[#e63020]" : "bg-[#e63020]"}`} />
+          <span className="text-xs font-black truncate leading-tight">{name}</span>
+        </div>
+        <span className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+          isActive ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+        }`}>
+          {promptCount}
+        </span>
+      </div>
+      <p className={`text-[10px] mb-2 truncate ${isActive ? "text-white/60" : "text-gray-400"}`}>
+        /{slug}
+      </p>
+      <StatusBadge status={status} />
+    </button>
+  );
+}
+
+function GbpCard({ isActive, onClick }: { isActive: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${
+        isActive
+          ? "bg-[#1c1712] border-[#1c1712] text-white shadow-md"
+          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-md text-[#1c1712]"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="w-2 h-2 rounded-full flex-shrink-0 bg-purple-500" />
+          <span className="text-xs font-black truncate leading-tight">GBP Products</span>
+        </div>
+        <span className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+          isActive ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+        }`}>
+          {gbpProducts.length}
+        </span>
+      </div>
+      <p className={`text-[10px] ${isActive ? "text-white/60" : "text-gray-400"}`}>
+        Google Business Profile photos
+      </p>
+    </button>
+  );
+}
+
 function ImagePromptsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const typeParam = searchParams.get("type");
   const nicheParam = searchParams.get("niche");
+  const typeParam = searchParams.get("type");
 
-  const activeType = nicheParam ? "landing" : typeParam;
+  const isGbpActive = typeParam === "gbp";
+  const activeNiche = !isGbpActive ? nicheParam : null;
 
-  const totalNiche = nichePrompts.sources.reduce((sum, s) => sum + s.prompts.length, 0);
-  const totalGbp = gbpProducts.length;
-  const totalAll = totalNiche + totalGbp;
+  function selectNiche(slug: string) {
+    router.push(`/staff/social/image-prompts?niche=${slug}`, { scroll: false });
+  }
 
-  const filteredSources = nicheParam
-    ? nichePrompts.sources.filter((s) => s.slug === nicheParam)
-    : nichePrompts.sources;
+  function selectGbp() {
+    router.push(`/staff/social/image-prompts?type=gbp`, { scroll: false });
+  }
 
-  const filteredNicheCount = filteredSources.reduce((sum, s) => sum + s.prompts.length, 0);
+  function clearFilter() {
+    router.push(`/staff/social/image-prompts`, { scroll: false });
+  }
 
-  const showLanding = !activeType || activeType === "landing";
-  const showGbp = !activeType || activeType === "gbp";
-
-  const visibleCount = (showLanding ? filteredNicheCount : 0) + (showGbp ? totalGbp : 0);
-  const visibleSources = showLanding ? filteredSources.length : 0;
-
-  const nicheSource = nicheParam
-    ? nichePrompts.sources.find((s) => s.slug === nicheParam)
+  const activeNicheSource = activeNiche
+    ? nichePrompts.sources.find((s) => s.slug === activeNiche)
     : null;
 
-  function setFilter(type: string | null, niche: string | null) {
-    const params = new URLSearchParams();
-    if (type) params.set("type", type);
-    if (niche) params.set("niche", niche);
-    const qs = params.toString();
-    router.push(`/staff/social/image-prompts${qs ? `?${qs}` : ""}`, { scroll: false });
-  }
+  const showAllNiches = !activeNiche && !isGbpActive;
+  const nicheSourcesToShow = activeNiche
+    ? nichePrompts.sources.filter((s) => s.slug === activeNiche)
+    : nichePrompts.sources;
+
+  const totalAll =
+    nichePrompts.sources.reduce((sum, s) => sum + s.prompts.length, 0) + gbpProducts.length;
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
+      {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-5">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-2 mb-1">
@@ -59,72 +161,76 @@ function ImagePromptsContent() {
           </div>
           <h1 className="text-xl font-black text-[#1c1712] tracking-tight">ChatGPT Image Prompts</h1>
           <p className="text-xs text-gray-400 mt-0.5 uppercase tracking-widest font-medium">
-            {visibleCount} prompts · {visibleSources} landing pages · {showGbp ? totalGbp : 0} GBP products · copy &amp; paste into ChatGPT
+            {totalAll} prompts · {nichePrompts.sources.length} landing pages · {gbpProducts.length} GBP products · copy &amp; paste into ChatGPT
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6">
-        <div className="sticky top-0 z-10 bg-[#f8f8f8] py-3 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setFilter(null, null)}
-              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
-                !activeType
-                  ? "bg-[#1c1712] text-white"
-                  : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              All ({totalAll})
-            </button>
-            <button
-              onClick={() => setFilter("landing", null)}
-              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
-                activeType === "landing"
-                  ? "bg-[#1c1712] text-white"
-                  : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              Landing Pages ({totalNiche})
-            </button>
-            <button
-              onClick={() => setFilter("gbp", null)}
-              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
-                activeType === "gbp"
-                  ? "bg-[#1c1712] text-white"
-                  : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              GBP Products ({totalGbp})
-            </button>
+        {/* Niche Overview Grid */}
+        <div className="pt-5 pb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">
+              Niches &amp; Status
+            </h2>
+            {(activeNiche || isGbpActive) && (
+              <button
+                onClick={clearFilter}
+                className="text-[10px] font-bold text-gray-400 hover:text-[#e63020] transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <span>&times;</span> Clear filter
+              </button>
+            )}
           </div>
 
-          {nicheSource && (
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs text-gray-500 bg-white border border-gray-200 rounded-full px-3 py-1 flex items-center gap-1.5">
-                {nicheSource.name}
-                <button
-                  onClick={() => setFilter("landing", null)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors font-bold"
-                >
-                  &times;
-                </button>
-              </span>
-            </div>
-          )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {nichePrompts.sources.map((source) => (
+              <NicheCard
+                key={source.slug}
+                slug={source.slug}
+                name={source.name}
+                promptCount={source.prompts.length}
+                status={(source.status as NicheStatus) ?? "pending"}
+                isActive={activeNiche === source.slug}
+                onClick={() => selectNiche(source.slug)}
+              />
+            ))}
+            <GbpCard isActive={isGbpActive} onClick={selectGbp} />
+          </div>
         </div>
 
+        {/* Active filter breadcrumb */}
+        {(activeNicheSource || isGbpActive) && (
+          <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
+            <span className="text-xs text-gray-500 bg-white border border-gray-200 rounded-full px-3 py-1 flex items-center gap-1.5">
+              {isGbpActive ? "GBP Products" : activeNicheSource?.name}
+              <button
+                onClick={clearFilter}
+                className="text-gray-400 hover:text-gray-600 transition-colors font-bold cursor-pointer"
+              >
+                &times;
+              </button>
+            </span>
+          </div>
+        )}
+
+        {/* Prompt Detail Zone */}
         <div className="py-8 space-y-10">
-          {showLanding &&
-            filteredSources.map((source) => (
+          {/* Landing page niche prompts */}
+          {!isGbpActive &&
+            nicheSourcesToShow.map((source) => (
               <section key={source.slug}>
                 <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#e63020]" />
                   {source.name} ({source.prompts.length})
+                  <StatusBadge status={(source.status as NicheStatus) ?? "pending"} />
                 </h2>
                 <p className="text-xs text-gray-400 mb-4">
                   Landing page:{" "}
-                  <Link href={`/${source.slug}`} className="text-gray-500 font-medium hover:text-[#e63020] transition-colors">
+                  <Link
+                    href={`/${source.slug}`}
+                    className="text-gray-500 font-medium hover:text-[#e63020] transition-colors"
+                  >
                     /{source.slug}
                   </Link>
                 </p>
@@ -152,11 +258,12 @@ function ImagePromptsContent() {
               </section>
             ))}
 
-          {showGbp && (
+          {/* GBP product prompts */}
+          {(isGbpActive || showAllNiches) && (
             <section>
               <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-purple-500" />
-                GBP Product Photos ({totalGbp})
+                GBP Product Photos ({gbpProducts.length})
               </h2>
               <p className="text-xs text-gray-400 mb-4">
                 Google Business Profile product listing images

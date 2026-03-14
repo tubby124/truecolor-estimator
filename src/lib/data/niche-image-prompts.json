@@ -4,6 +4,7 @@
       "slug": "healthcare-signs-saskatoon",
       "name": "Healthcare Signs Saskatoon",
       "type": "landing-page",
+      "status": "pending",
       "prompts": [
         {
           "id": "hc-banner-clinical",
@@ -67,6 +68,7 @@
       "slug": "ramadan-eid-banners-saskatoon",
       "name": "Ramadan & Eid Banners Saskatoon",
       "type": "landing-page",
+      "status": "pending",
       "prompts": [
         {
           "id": "ram-banner-traditional",
@@ -130,6 +132,7 @@
       "slug": "agriculture-signs-saskatoon",
       "name": "Agriculture Signs Saskatoon",
       "type": "landing-page",
+      "status": "pending",
       "prompts": [
         {
           "id": "ag-sign-farm-gate",
@@ -193,6 +196,7 @@
       "slug": "agribusiness-signs-saskatchewan",
       "name": "Agribusiness Signs Saskatchewan",
       "type": "landing-page",
+      "status": "pending",
       "prompts": [
         {
           "id": "agb-sign-dealer-fascia",
@@ -256,6 +260,7 @@
       "slug": "mothers-day-printing-saskatoon",
       "name": "Mother's Day Printing",
       "type": "landing-page",
+      "status": "pending",
       "prompts": [
         {
           "id": "md-banner-floral-brunch",
@@ -319,6 +324,69 @@
           "category": "Window Decals (4:3)",
           "prompt": "Pastel pink floral vine window decal applied to the lower corner of a Saskatoon retail storefront window. Full-colour vinyl decal with roses and leaves framing the corner. Interior store visible through glass. Spring daylight. Canon EOS R5, 35mm, street-level angle. Photorealistic, 1200x900.",
           "imagePath": "/images/industries/mothers-day/decal-floral-accent.webp"
+        }
+      ]
+    },
+    {
+      "slug": "poster-printing-saskatoon",
+      "name": "Poster Printing",
+      "type": "landing-page",
+      "prompts": [
+        {
+          "id": "poster-concert-music",
+          "name": "Concert / Music Event Poster",
+          "category": "Event Posters (3:4)",
+          "prompt": "An 18x24 inch concert poster printed on Roland Photobase Matte 220gsm matte paper. Bold typography with a dark background — band name in large white text, event date and venue details in gold accent font. Concert stage lighting visual in background graphic. Poster pinned to a community bulletin board in a Saskatoon coffee shop or music venue. Photorealistic, 900x1200.",
+          "imagePath": "/images/industries/poster-printing/poster-concert-music.webp"
+        },
+        {
+          "id": "poster-fundraiser-gala",
+          "name": "Fundraiser & Gala Poster",
+          "category": "Event Posters (3:4)",
+          "prompt": "An 18x24 inch fundraiser gala event poster printed on matte photo paper. Elegant navy blue and gold design with serif headline: \"Annual Gala — Saskatoon Community Foundation\". Subtext showing event date, venue, ticket info. Subtle watercolour accent border. Poster displayed on an easel in a hotel lobby or community centre foyer. Photorealistic, 900x1200.",
+          "imagePath": "/images/industries/poster-printing/poster-fundraiser-gala.webp"
+        },
+        {
+          "id": "poster-sports-tournament",
+          "name": "Sports Tournament Poster",
+          "category": "Event Posters (3:4)",
+          "prompt": "A 12x18 inch sports tournament announcement poster on matte paper. Bold red and white design with dynamic typography: \"SASKATOON MINOR HOCKEY — SPRING TOURNAMENT\". Player silhouette graphic. Event dates prominently displayed. Poster tacked to a hockey arena bulletin board or gymnasium wall. Saskatchewan arena interior visible in soft background. Photorealistic, 600x900.",
+          "imagePath": "/images/industries/poster-printing/poster-sports-tournament.webp"
+        },
+        {
+          "id": "display-restaurant-specials",
+          "name": "Restaurant Specials Board",
+          "category": "Indoor Display / Foamboard (4:3)",
+          "prompt": "An 18x24 inch foamboard display on a chrome easel in a Saskatoon restaurant. The foamboard print shows daily specials with clean modern typography, food photography, and pricing. Rigid 5mm backing visible at edge. Restaurant interior with warm lighting, tables in background. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/poster-printing/display-restaurant-specials.webp"
+        },
+        {
+          "id": "display-retail-promotion",
+          "name": "Retail Promotion Display",
+          "category": "Indoor Display / Foamboard (4:3)",
+          "prompt": "A 24x36 inch foamboard display standing on a retail store floor next to a product display. Bold seasonal sale design with price callouts. Vivid full-colour printing on rigid foamboard, visible edge depth. Modern Saskatoon retail interior, bright lighting. Product shelving in background. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/poster-printing/display-retail-promotion.webp"
+        },
+        {
+          "id": "display-open-house",
+          "name": "Real Estate Open House Board",
+          "category": "Indoor Display / Foamboard (4:3)",
+          "prompt": "An 18x24 inch foamboard display on a tabletop easel at a real estate open house in Saskatoon. The print shows a floor plan, property highlights, and agent contact info on clean white background. Sitting on an entry table in a modern home interior, natural afternoon light from window. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/poster-printing/display-open-house.webp"
+        },
+        {
+          "id": "retractable-nonprofit-event",
+          "name": "Non-Profit / Event Booth Stand",
+          "category": "Retractable Banners (3:8)",
+          "prompt": "A 33x79 inch retractable banner stand at a Saskatoon non-profit fundraiser booth. The banner graphic shows the organization name prominently at top, mission statement in centre, and call-to-action and contact at bottom. Clean, professional design on vibrant full-colour print. Banner stand chrome base visible. Community event hall setting, tables and people in soft background. Photorealistic, 600x1600.",
+          "imagePath": "/images/industries/poster-printing/retractable-nonprofit-event.webp"
+        },
+        {
+          "id": "retractable-trade-show-display",
+          "name": "Trade Show Display Stand",
+          "category": "Retractable Banners (3:8)",
+          "prompt": "A 33x79 inch deluxe retractable banner stand at a Saskatoon trade show booth. The banner features a bold company brand at top, service highlights in the middle, and QR code plus contact info at bottom. Pull-up stand chrome base on trade show carpet. Adjacent booth displays visible in background. Bright trade show hall lighting. Photorealistic, 600x1600.",
+          "imagePath": "/images/industries/poster-printing/retractable-trade-show-display.webp"
         }
       ]
     }
