@@ -135,6 +135,7 @@ export function SiteFooter() {
             <Link href="/election-signs" className="hover:text-white transition-colors">Election Signs</Link>
             <Link href="/ramadan-eid-banners-saskatoon" className="hover:text-white transition-colors">Ramadan & Eid</Link>
             <Link href="/st-patricks-day-printing-saskatoon" className="hover:text-white transition-colors">St. Patrick&apos;s Day</Link>
+            <Link href="/mothers-day-printing-saskatoon" className="hover:text-white transition-colors">Mother&apos;s Day</Link>
           </div>
         </div>
 

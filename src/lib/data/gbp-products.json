@@ -252,10 +252,12 @@
     { "name": "Healthcare & Clinic Signage", "description": "ACP directories, foam board displays, retractable stands for clinics" },
     { "name": "Agriculture Signage", "description": "Farm gate signs, plot markers, biosecurity signs, truck magnets for Saskatchewan farms" },
     { "name": "Agribusiness Signage", "description": "Dealer fascia signs, warehouse panels, trade show stands, spec sheets for ag suppliers" },
-    { "name": "Seasonal Event Printing", "description": "St. Patrick's Day, graduation, Eid, Canada Day — event-specific banners and decals" }
+    { "name": "Seasonal Event Printing", "description": "St. Patrick's Day, graduation, Eid, Canada Day, Mother's Day — event-specific banners and decals" },
+    { "name": "Mother's Day Printing", "description": "Banners, photo prints, flyers, and window decals for Saskatoon restaurants, spas, and florists celebrating Mother's Day" }
   ],
   "postSchedule": [
     { "campaign": "St. Patrick's Day", "posts": ["Mar 1 — Green banners in stock", "Mar 10 — Order by today for standard turnaround", "Mar 14 — Same-day rush still available"] },
+    { "campaign": "Mother's Day", "posts": ["Apr 20 — Mother's Day is May 10 — order banners now", "May 1 — Flyers, banners, photo prints for Mother's Day", "May 6 — Same-day rush available until May 8"] },
     { "campaign": "Graduation", "posts": ["Apr 15 — Grad banner season starts", "May 10 — Order now for June ceremonies", "May 28 — Same-day rush still available"] },
     { "campaign": "Ramadan/Eid", "posts": ["Mar 1 — Ramadan Mubarak — iftar banners ready", "Mar 15 — Eid al-Fitr coming — order your banner", "Apr 10 — Eid decor printing available"] },
     { "campaign": "Construction", "posts": ["Apr 1 — Job site signs for spring builds", "May 1 — New site? Site sign ready in 48 hours", "Ongoing"] },

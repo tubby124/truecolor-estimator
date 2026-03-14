@@ -72,6 +72,7 @@ const INDUSTRY_LINKS = [
   { label: "Ramadan & Eid", href: "/ramadan-eid-banners-saskatoon" },
   { label: "St. Patrick's Day", href: "/st-patricks-day-printing-saskatoon" },
   { label: "Graduation Banners", href: "/graduation-banners-saskatoon" },
+  { label: "Mother's Day Printing", href: "/mothers-day-printing-saskatoon" },
 ];
 
 export function SiteNav() {

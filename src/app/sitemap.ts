@@ -88,7 +88,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Seasonal pages ────────────────────────────────────────────────────────
     { url: `${BASE_URL}/st-patricks-day-printing-saskatoon`, lastModified: new Date("2026-02-25"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/graduation-banners-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
-    // /mothers-day-printing-saskatoon — add when page is built
+    { url: `${BASE_URL}/mothers-day-printing-saskatoon`, lastModified: new Date("2026-03-14"), changeFrequency: "monthly", priority: 0.85 },
     // /canada-day-printing-saskatoon — add when page is built
     // /back-to-school-signs-saskatoon — add when page is built
 

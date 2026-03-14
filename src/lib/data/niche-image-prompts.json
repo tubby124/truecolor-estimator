@@ -251,6 +251,76 @@
           "imagePath": "/images/industries/agribusiness/postcard-direct-mail.webp"
         }
       ]
+    },
+    {
+      "slug": "mothers-day-printing-saskatoon",
+      "name": "Mother's Day Printing",
+      "type": "landing-page",
+      "prompts": [
+        {
+          "id": "md-banner-floral-brunch",
+          "name": "Restaurant Brunch Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide 2x6 ft vinyl banner hanging on a restaurant patio fence for Mother's Day. Soft pink and white floral background with elegant script: 'Mother's Day Brunch — Sunday May 10'. Gold serif accent text showing 'Reservations: 306-555-0000'. Grommets visible at corners. Saskatchewan spring morning light. Photorealistic, 1200x400.",
+          "imagePath": "/images/industries/mothers-day/banner-floral-brunch.webp"
+        },
+        {
+          "id": "md-banner-spa-wellness",
+          "name": "Spa & Wellness Promo Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide 2x4 ft vinyl banner on a spa exterior wall for Mother's Day. Sage green and blush pink palette with clean sans-serif text: 'Treat Mom — Gift Certificates Available'. Subtle watercolour floral corner accents. Soft natural lighting on a Saskatoon commercial street. Photorealistic, 1200x400.",
+          "imagePath": "/images/industries/mothers-day/banner-spa-wellness.webp"
+        },
+        {
+          "id": "md-banner-gift-shop",
+          "name": "Gift Shop Storefront Banner",
+          "category": "Banners (3:1)",
+          "prompt": "Wide 3x6 ft vinyl banner draped above a gift shop entrance. Warm rose and cream colour palette. Bold headline: 'The Perfect Mother's Day Gift Starts Here'. Grommets at each corner. Spring sunlight on a Saskatoon downtown street. Photorealistic, 1200x400.",
+          "imagePath": "/images/industries/mothers-day/banner-gift-shop.webp"
+        },
+        {
+          "id": "md-photo-portrait-poster",
+          "name": "Photo Portrait Poster",
+          "category": "Photo Prints (4:3)",
+          "prompt": "Large format 18x24 inch glossy photo poster of a smiling woman in her 50s, warm indoor lighting. The print is mounted on a white foam board display easel beside a dining table set for Mother's Day brunch. Rose gold and white table setting. Canon EOS R5, 50mm, natural window light. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/mothers-day/photo-portrait-poster.webp"
+        },
+        {
+          "id": "md-photo-family-collage",
+          "name": "Family Collage Print",
+          "category": "Photo Prints (4:3)",
+          "prompt": "Large format 24x36 inch matte photo print showing a 4-photo family collage layout. Soft white borders between photos, minimal typography: 'For Mom, With Love'. Print is leaning against a mantle with spring flowers. Warm morning light. Canon EOS R5, 35mm, f/2.8. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/mothers-day/photo-family-collage.webp"
+        },
+        {
+          "id": "md-photo-greeting-postcard",
+          "name": "Photo Greeting Postcard",
+          "category": "Photo Prints (4:3)",
+          "prompt": "Stack of 4x6 inch glossy postcards on 14pt gloss card stock, spread on a light wood surface. Front design: pastel floral watercolour border with 'Happy Mother's Day' in script. Envelope beside stack. Canon EOS R5, 85mm, shallow DOF, overhead angle. Soft natural light. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/mothers-day/photo-greeting-postcard.webp"
+        },
+        {
+          "id": "md-flyer-brunch-menu",
+          "name": "Brunch Menu Flyer",
+          "category": "Print Materials (3:4)",
+          "prompt": "Stack of full-letter flyers on 80lb gloss stock for a Saskatoon restaurant Mother's Day brunch. Elegant script heading 'Mother's Day Prix Fixe Brunch — $65 per person'. Menu items listed in clean serif font. Soft pink watercolour background with gold accent line. Canon EOS R5, 85mm, shallow DOF, 3/4 angle. Photorealistic, 900x1200.",
+          "imagePath": "/images/industries/mothers-day/flyer-brunch-menu.webp"
+        },
+        {
+          "id": "md-flyer-salon-promo",
+          "name": "Salon Promotion Flyer",
+          "category": "Print Materials (3:4)",
+          "prompt": "Stack of full-letter flyers on 80lb gloss stock for a Saskatoon hair salon Mother's Day promotion. Bold headline 'Treat Mom to Something Special' on blush pink background. Services list with prices. Gift certificate call-to-action. Modern sans-serif typography. Canon EOS R5, 85mm, overhead angle. Photorealistic, 900x1200.",
+          "imagePath": "/images/industries/mothers-day/flyer-salon-promo.webp"
+        },
+        {
+          "id": "md-decal-floral-accent",
+          "name": "Floral Window Decal",
+          "category": "Window Decals (4:3)",
+          "prompt": "Pastel pink floral vine window decal applied to the lower corner of a Saskatoon retail storefront window. Full-colour vinyl decal with roses and leaves framing the corner. Interior store visible through glass. Spring daylight. Canon EOS R5, 35mm, street-level angle. Photorealistic, 1200x900.",
+          "imagePath": "/images/industries/mothers-day/decal-floral-accent.webp"
+        }
+      ]
     }
   ]
 }
