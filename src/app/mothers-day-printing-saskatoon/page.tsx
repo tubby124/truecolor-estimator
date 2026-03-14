@@ -25,19 +25,19 @@ const designDirections = [
     maxCols: 3 as const,
     items: [
       {
-        src: "/images/industries/mothers-day/banner-floral-brunch.png",
+        src: "/images/industries/mothers-day/banner-floral-brunch.webp",
         alt: "Mother's Day vinyl banner for restaurant brunch event — True Color Display Printing, Saskatoon SK",
         label: "Restaurant Brunch Banner",
         caption: "2×6 ft banner — $90",
       },
       {
-        src: "/images/industries/mothers-day/banner-spa-wellness.png",
+        src: "/images/industries/mothers-day/banner-spa-wellness.webp",
         alt: "Mother's Day spa and wellness promotion banner — True Color Display Printing, Saskatoon SK",
         label: "Spa & Wellness Promo",
         caption: "2×4 ft banner — $66",
       },
       {
-        src: "/images/industries/mothers-day/banner-gift-shop.png",
+        src: "/images/industries/mothers-day/banner-gift-shop.webp",
         alt: "Mother's Day retail gift shop banner in Saskatoon — True Color Display Printing",
         label: "Gift Shop Storefront",
         caption: "3×6 ft banner — $135",
@@ -51,19 +51,19 @@ const designDirections = [
     maxCols: 3 as const,
     items: [
       {
-        src: "/images/industries/mothers-day/photo-portrait-poster.png",
+        src: "/images/industries/mothers-day/photo-portrait-poster.webp",
         alt: "Large format photo portrait print for Mother's Day gift — True Color Display Printing, Saskatoon SK",
         label: "Photo Portrait Poster",
         caption: "18×24\" — $45",
       },
       {
-        src: "/images/industries/mothers-day/photo-family-collage.png",
+        src: "/images/industries/mothers-day/photo-family-collage.webp",
         alt: "Family photo collage print for Mother's Day in Saskatoon — True Color Display Printing",
         label: "Family Collage Print",
         caption: "24×36\" — $65",
       },
       {
-        src: "/images/industries/mothers-day/photo-greeting-postcard.png",
+        src: "/images/industries/mothers-day/photo-greeting-postcard.webp",
         alt: "Mother's Day photo greeting postcard printed in Saskatoon — True Color Display Printing",
         label: "Photo Greeting Postcard",
         caption: "250 cards (4×6\") — $85",
@@ -77,19 +77,19 @@ const designDirections = [
     maxCols: 3 as const,
     items: [
       {
-        src: "/images/industries/mothers-day/flyer-brunch-menu.png",
+        src: "/images/industries/mothers-day/flyer-brunch-menu.webp",
         alt: "Mother's Day brunch menu flyer for Saskatoon restaurant — True Color Display Printing",
         label: "Brunch Menu Flyer",
         caption: "100 full-letter, 2S — $45",
       },
       {
-        src: "/images/industries/mothers-day/flyer-salon-promo.png",
+        src: "/images/industries/mothers-day/flyer-salon-promo.webp",
         alt: "Mother's Day salon promotion flyer in Saskatoon — True Color Display Printing",
         label: "Salon Promotion Flyer",
         caption: "250 full-letter, 2S — $110",
       },
       {
-        src: "/images/industries/mothers-day/decal-floral-accent.png",
+        src: "/images/industries/mothers-day/decal-floral-accent.webp",
         alt: "Mother's Day floral window decal for Saskatoon storefront — True Color Display Printing",
         label: "Window Decal",
         caption: "From $45",

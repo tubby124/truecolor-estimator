@@ -865,6 +865,56 @@ const PAGES = [
       },
     ],
   },
+  {
+    loc: `${BASE}/mothers-day-printing-saskatoon`,
+    images: [
+      {
+        loc: `${IND}/mothers-day/banner-floral-brunch.webp`,
+        title: "Mother's Day restaurant brunch vinyl banner Saskatoon",
+        caption: "Mother's Day brunch vinyl banner for Saskatoon restaurant patio — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/mothers-day/banner-spa-wellness.webp`,
+        title: "Mother's Day spa promotion vinyl banner Saskatoon",
+        caption: "Mother's Day spa and wellness promotion banner — sage green, printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${IND}/mothers-day/banner-gift-shop.webp`,
+        title: "Mother's Day gift shop entrance banner Saskatoon",
+        caption: "Mother's Day gift shop entrance vinyl banner — rose and cream, True Color Display Printing Saskatoon",
+      },
+      {
+        loc: `${IND}/mothers-day/photo-portrait-poster.webp`,
+        title: "Mother's Day photo portrait poster large format Saskatoon",
+        caption: "Large format Mother's Day photo portrait poster on display easel — True Color, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/mothers-day/photo-family-collage.webp`,
+        title: "Mother's Day family photo collage print Saskatoon",
+        caption: "Family photo collage print for Mother's Day — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/mothers-day/photo-greeting-postcard.webp`,
+        title: "Mother's Day photo greeting postcard Saskatoon printing",
+        caption: "Mother's Day photo greeting postcard stack — printed on 14pt gloss in Saskatoon by True Color",
+      },
+      {
+        loc: `${IND}/mothers-day/flyer-brunch-menu.webp`,
+        title: "Mother's Day brunch menu flyer Saskatoon restaurant",
+        caption: "Mother's Day prix fixe brunch menu flyer — 80lb gloss, printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${IND}/mothers-day/flyer-salon-promo.webp`,
+        title: "Mother's Day salon promotion flyer Saskatoon",
+        caption: "Mother's Day salon promotion flyer for Saskatoon hair studio — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/mothers-day/decal-floral-accent.webp`,
+        title: "Mother's Day floral window decal Saskatoon storefront",
+        caption: "Pastel pink floral vine window decal on Saskatoon retail storefront — True Color",
+      },
+    ],
+  },
 ];
 
 function escape(str: string): string {
