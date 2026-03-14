@@ -22,6 +22,8 @@ const MOBILE_RESPONSIVE_CSS = `
   .ti-widget[data-layout-id='16'] .ti-review-item:nth-child(n+4){display:none!important}
   .ti-widget[data-layout-id='16'] .ti-load-more-reviews-container{display:none!important}
   .ti-widget[data-layout-id='16'] .ti-reviews-container .ti-reviews-container-wrapper{margin-bottom:0!important}
+  .ti-widget[data-layout-id='16'] .ti-review-item .ti-review-image{display:none!important}
+  .ti-widget[data-layout-id='16'] .ti-review-item .ti-review-text-container{width:100%!important;max-width:100%!important}
 }`;
 
 
