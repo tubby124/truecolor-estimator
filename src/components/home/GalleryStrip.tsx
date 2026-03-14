@@ -1,7 +1,32 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
-import { InstagramFeed } from "./InstagramFeed";
+
+const GALLERY_PHOTOS = [
+  {
+    src: "/images/gallery/gallery-shop-roland-large-format.webp",
+    alt: "Roland TrueVIS large-format printer in action at True Color Display Printing, Saskatoon",
+  },
+  {
+    src: "/images/gallery/gallery-outdoor-banner-best-donairs.webp",
+    alt: "Outdoor storefront vinyl banner printed for Best Donairs, Saskatoon",
+  },
+  {
+    src: "/images/gallery/gallery-coroplast-realtor-keyshape.webp",
+    alt: "Custom key-shaped coroplast sign for Boyes Group Realtor, Saskatoon",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-vinyl-ayotte-plumbing.webp",
+    alt: "Van vinyl branding for Ayotte Plumbing, printed by True Color Saskatoon",
+  },
+  {
+    src: "/images/gallery/gallery-business-cards-bd-deep-cleaning.webp",
+    alt: "Business cards printed for BD Deep Cleaning, Saskatoon",
+  },
+  {
+    src: "/images/gallery/gallery-retractable-two-men-truck.webp",
+    alt: "Retractable banner stand for Two Men and a Truck, Saskatoon",
+  },
+];
 
 export function GalleryStrip() {
   return (
@@ -11,8 +36,22 @@ export function GalleryStrip() {
           Our work speaks for itself
         </h2>
 
-        {/* Instagram feed — Trustindex widget injected client-side */}
-        <InstagramFeed />
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          {GALLERY_PHOTOS.map((photo) => (
+            <div
+              key={photo.src}
+              className="relative aspect-[4/3] rounded-lg overflow-hidden"
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 50vw, 33vw"
+              />
+            </div>
+          ))}
+        </div>
 
         {/* Bottom row: gallery link + Instagram */}
         <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">

@@ -106,7 +106,7 @@ export async function ReviewsSection() {
   );
 
   return (
-    <section className="bg-white border-b border-gray-100 py-8 overflow-x-hidden">
+    <section className="bg-white border-b border-gray-100 pt-2 pb-16 sm:pb-8 overflow-x-hidden">
       <div className="max-w-6xl mx-auto px-6">
         {/* Reviews widget — 3-col grid on desktop, 1-col image reviews first on mobile */}
         {widget && (
