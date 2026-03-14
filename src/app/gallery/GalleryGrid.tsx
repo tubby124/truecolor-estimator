@@ -487,7 +487,7 @@ const SEO_SLUG_MAP: Record<string, string> = {
   brochures: "/brochure-printing-saskatoon",
 };
 
-function GalleryCard({ item }: { item: GalleryItem }) {
+function GalleryCard({ item, isLCP = false }: { item: GalleryItem; isLCP?: boolean }) {
   return (
     <Link
       href={SEO_SLUG_MAP[item.slug] || `/products/${item.slug}`}
@@ -499,6 +499,7 @@ function GalleryCard({ item }: { item: GalleryItem }) {
         fill
         className="object-cover group-hover:scale-105 transition-transform duration-300"
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        priority={isLCP}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <div className="absolute bottom-0 left-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 opacity-0 group-hover:opacity-100">
@@ -565,7 +566,7 @@ export function GalleryGrid() {
       {/* Real client work */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {visible.map((item, i) => (
-          <GalleryCard key={i} item={item} />
+          <GalleryCard key={i} item={item} isLCP={i === 0} />
         ))}
       </div>
 

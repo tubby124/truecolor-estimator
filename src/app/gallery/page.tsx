@@ -4,12 +4,11 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { GalleryGrid } from "./GalleryGrid";
 import { IndustryShowcase } from "./IndustryShowcase";
-import { InstagramFeed } from "@/components/home/InstagramFeed";
 
 export const metadata: Metadata = {
   title: "Our Work | Print Shop Gallery Saskatoon",
   description:
-    "See real jobs and industry design examples from True Color Display Printing — coroplast signs, vinyl banners, vehicle magnets, business cards and more. Saskatoon print shop.",
+    "Real print jobs from True Color in Saskatoon — coroplast signs, vinyl banners, vehicle magnets, business cards. See our gallery and industry design examples.",
   alternates: { canonical: "/gallery" },
   openGraph: {
     title: "Our Work | Saskatoon Print Shop Gallery",
@@ -28,6 +27,7 @@ const gallerySchema = {
   description:
     "Photo gallery of real print jobs and industry design mockups from True Color Display Printing in Saskatoon — coroplast signs, vinyl banners, vehicle magnets, business cards, and large format prints.",
   url: "https://truecolorprinting.ca/gallery",
+  numberOfItems: 45,
   provider: {
     "@type": "LocalBusiness",
     name: "True Color Display Printing",
@@ -40,6 +40,24 @@ const gallerySchema = {
       postalCode: "S7L 0V5",
       addressCountry: "CA",
     },
+  },
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: 45,
+    itemListElement: [
+      { "@type": "ListItem", position: 1, url: "https://truecolorprinting.ca/coroplast-signs-saskatoon", name: "Coroplast Yard Signs" },
+      { "@type": "ListItem", position: 2, url: "https://truecolorprinting.ca/banner-printing-saskatoon", name: "Vinyl Banners" },
+      { "@type": "ListItem", position: 3, url: "https://truecolorprinting.ca/aluminum-signs-saskatoon", name: "ACP Aluminum Signs" },
+      { "@type": "ListItem", position: 4, url: "https://truecolorprinting.ca/retractable-banners-saskatoon", name: "Retractable Banner Stands" },
+      { "@type": "ListItem", position: 5, url: "https://truecolorprinting.ca/vehicle-magnets-saskatoon", name: "Vehicle Magnets & Vinyl" },
+      { "@type": "ListItem", position: 6, url: "https://truecolorprinting.ca/window-decals-saskatoon", name: "Window Decals" },
+      { "@type": "ListItem", position: 7, url: "https://truecolorprinting.ca/vinyl-lettering-saskatoon", name: "Vinyl Lettering" },
+      { "@type": "ListItem", position: 8, url: "https://truecolorprinting.ca/business-cards-saskatoon", name: "Business Cards" },
+      { "@type": "ListItem", position: 9, url: "https://truecolorprinting.ca/flyer-printing-saskatoon", name: "Flyers" },
+      { "@type": "ListItem", position: 10, url: "https://truecolorprinting.ca/postcard-printing-saskatoon", name: "Postcards" },
+      { "@type": "ListItem", position: 11, url: "https://truecolorprinting.ca/sticker-printing-saskatoon", name: "Stickers" },
+      { "@type": "ListItem", position: 12, url: "https://truecolorprinting.ca/custom-magnets-saskatoon", name: "Calendar Magnets" },
+    ],
   },
 };
 
@@ -103,25 +121,20 @@ export default function GalleryPage() {
           <IndustryShowcase />
         </section>
 
-        {/* Live Instagram feed */}
-        <section className="mt-14">
-          <h2 className="text-2xl font-bold text-[#1c1712] mb-4">
-            Latest from Instagram
-          </h2>
-          <p className="text-gray-500 text-sm mb-6">
-            Follow{" "}
+        {/* Instagram link */}
+        <div className="mt-14 text-center">
+          <p className="text-gray-500 text-sm">
+            See our latest projects on{" "}
             <a
               href="https://www.instagram.com/truecolorprint"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#16C2F3] hover:underline"
+              className="text-[#16C2F3] hover:underline font-semibold"
             >
-              @truecolorprint
-            </a>{" "}
-            for daily project updates.
+              Instagram @truecolorprint →
+            </a>
           </p>
-          <InstagramFeed />
-        </section>
+        </div>
 
         {/* CTA */}
         <div className="mt-12 text-center">
