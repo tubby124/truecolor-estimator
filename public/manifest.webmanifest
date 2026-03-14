@@ -1,0 +1,21 @@
+{
+  "name": "True Color Display Printing",
+  "short_name": "True Color",
+  "description": "Signs, banners, and print products in Saskatoon, SK. See exact prices instantly.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#1c1712",
+  "theme_color": "#16C2F3",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

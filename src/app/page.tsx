@@ -16,7 +16,7 @@ import { MobileStickyBar } from "@/components/home/MobileStickyBar";
 export const metadata: Metadata = {
   title: { absolute: "True Color Display Printing | Saskatoon Signs, Banners & Cards" },
   description:
-    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer, local pickup at 216 33rd St W Saskatoon. See your exact price now — no quote forms.",
+    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon. See your price instantly.",
   alternates: { canonical: "/" },
 };
 
@@ -205,6 +205,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqSchema) }}
       />
       <SiteNav />
+      <h1 className="sr-only">Saskatoon Print Shop — Signs, Banners &amp; Cards | True Color Display Printing</h1>
 
       {/* ── HERO SLIDER ──────────────────────────────────────────────────────── */}
       <HeroSlider />
@@ -299,7 +300,7 @@ export default function HomePage() {
 
       {/* ── PRODUCT GRID ─────────────────────────────────────────────────────── */}
       <section className="reveal-section px-6 py-16 max-w-6xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">What we print</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">Signs, Banners &amp; Print Products — Saskatoon</h2>
         <p className="text-gray-500 mb-10 text-lg">
           Exact prices — no &ldquo;call for a quote.&rdquo; Pick a product and see your number now.
         </p>

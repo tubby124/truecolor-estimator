@@ -11,7 +11,7 @@ const BASE_URL = "https://truecolorprinting.ca";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     // ── Core pages ───────────────────────────────────────────────────────────
-    { url: `${BASE_URL}/`, lastModified: new Date("2026-03-13"), changeFrequency: "weekly", priority: 1.0 },
+    { url: `${BASE_URL}/`, lastModified: new Date("2026-03-14"), changeFrequency: "weekly", priority: 1.0 },
     { url: `${BASE_URL}/products`, lastModified: new Date("2026-03-13"), changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/gallery`, lastModified: new Date("2026-03-13"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/about`, lastModified: new Date("2026-03-11"), changeFrequency: "monthly", priority: 0.6 },
@@ -21,11 +21,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/resources`, lastModified: new Date("2026-01-20"), changeFrequency: "monthly", priority: 0.6 },
 
     // ── Tier 1 SEO landing pages ──────────────────────────────────────────────
-    { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2025-11-15"), changeFrequency: "monthly", priority: 0.95 },
+    { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2026-03-14"), changeFrequency: "monthly", priority: 0.95 },
     { url: `${BASE_URL}/same-day-printing-saskatoon`, lastModified: new Date("2025-11-15"), changeFrequency: "monthly", priority: 0.95 },
 
     // ── Product SEO pages (launched in batches Nov 2025 – Jan 2026) ──────────
-    { url: `${BASE_URL}/banner-printing-saskatoon`, lastModified: new Date("2026-01-10"), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${BASE_URL}/banner-printing-saskatoon`, lastModified: new Date("2026-03-14"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/business-cards-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/vehicle-magnets-saskatoon`, lastModified: new Date("2025-12-10"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/aluminum-signs-saskatoon`, lastModified: new Date("2025-12-18"), changeFrequency: "monthly", priority: 0.85 },
