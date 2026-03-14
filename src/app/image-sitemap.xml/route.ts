@@ -915,6 +915,51 @@ const PAGES = [
       },
     ],
   },
+  {
+    loc: `${BASE}/poster-printing-saskatoon`,
+    images: [
+      {
+        loc: `${IND}/poster-printing/poster-concert-music.webp`,
+        title: "Concert event poster printing Saskatoon music venue",
+        caption: "Concert poster for Midnight Rebel at The Roxy Theatre Saskatoon — printed by True Color Display Printing",
+      },
+      {
+        loc: `${IND}/poster-printing/poster-fundraiser-gala.webp`,
+        title: "Fundraiser gala event poster Saskatoon foamboard display",
+        caption: "Annual gala poster on easel at Delta Bessborough hotel Saskatoon — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/poster-printing/poster-sports-tournament.webp`,
+        title: "Sports tournament poster printing Saskatoon hockey arena",
+        caption: "Saskatoon Minor Hockey spring tournament poster on arena corkboard — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/poster-printing/display-restaurant-specials.webp`,
+        title: "Restaurant daily specials menu display poster Saskatoon",
+        caption: "Daily specials foamboard menu display on easel in Saskatoon restaurant — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/poster-printing/display-retail-promotion.webp`,
+        title: "Retail sale promotion poster display Saskatoon store",
+        caption: "Spring savings sale poster display in Saskatoon retail store — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/poster-printing/display-open-house.webp`,
+        title: "Real estate open house display poster Saskatoon realtor",
+        caption: "Realtor open house property display with floor plan on tabletop stand — True Color, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/poster-printing/retractable-nonprofit-event.webp`,
+        title: "Nonprofit event retractable banner Saskatoon community",
+        caption: "Saskatoon Community Outreach retractable banner stand at charity event — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/poster-printing/retractable-trade-show-display.webp`,
+        title: "Trade show retractable banner display Saskatoon printing",
+        caption: "True Color Display Printing retractable banner at Saskatoon trade show — signs, banners, and business cards",
+      },
+    ],
+  },
 ];
 
 function escape(str: string): string {

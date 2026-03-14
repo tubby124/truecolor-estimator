@@ -26,19 +26,19 @@ const designDirections = [
     maxCols: 3 as const,
     items: [
       {
-        src: "/images/industries/poster-printing/poster-concert-music.png",
+        src: "/images/industries/poster-printing/poster-concert-music.webp",
         alt: "Concert and music event poster printed in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Concert / Music Event",
         caption: "18×24\" — $22",
       },
       {
-        src: "/images/industries/poster-printing/poster-fundraiser-gala.png",
+        src: "/images/industries/poster-printing/poster-fundraiser-gala.webp",
         alt: "Fundraiser gala event poster for Saskatoon non-profit — True Color Display Printing, Saskatoon SK",
         label: "Fundraiser & Gala",
         caption: "18×24\" — $22",
       },
       {
-        src: "/images/industries/poster-printing/poster-sports-tournament.png",
+        src: "/images/industries/poster-printing/poster-sports-tournament.webp",
         alt: "Sports tournament poster for Saskatoon school or recreation league — True Color Display Printing, Saskatoon SK",
         label: "Sports Tournament",
         caption: "12×18\" — $15",
@@ -53,19 +53,19 @@ const designDirections = [
     maxCols: 3 as const,
     items: [
       {
-        src: "/images/industries/poster-printing/display-restaurant-specials.png",
+        src: "/images/industries/poster-printing/display-restaurant-specials.webp",
         alt: "Restaurant daily specials foamboard display printed in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Restaurant Specials Board",
         caption: "18×24\" — $45",
       },
       {
-        src: "/images/industries/poster-printing/display-retail-promotion.png",
+        src: "/images/industries/poster-printing/display-retail-promotion.webp",
         alt: "Retail store promotion foamboard display for Saskatoon business — True Color Display Printing, Saskatoon SK",
         label: "Retail Promotion Display",
         caption: "24×36\" — $65",
       },
       {
-        src: "/images/industries/poster-printing/display-open-house.png",
+        src: "/images/industries/poster-printing/display-open-house.webp",
         alt: "Real estate open house foamboard display board in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Real Estate Open House",
         caption: "18×24\" — $45",
@@ -80,13 +80,13 @@ const designDirections = [
     maxCols: 2 as const,
     items: [
       {
-        src: "/images/industries/poster-printing/retractable-nonprofit-event.png",
+        src: "/images/industries/poster-printing/retractable-nonprofit-event.webp",
         alt: "Non-profit fundraiser retractable banner stand for Saskatoon event — True Color Display Printing, Saskatoon SK",
         label: "Non-Profit / Event Booth",
         caption: "Economy stand — $219",
       },
       {
-        src: "/images/industries/poster-printing/retractable-trade-show-display.png",
+        src: "/images/industries/poster-printing/retractable-trade-show-display.webp",
         alt: "Trade show retractable banner stand display for Saskatoon business — True Color Display Printing, Saskatoon SK",
         label: "Trade Show Display",
         caption: "Deluxe stand — $299",
