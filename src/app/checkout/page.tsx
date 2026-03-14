@@ -532,6 +532,7 @@ export default function CheckoutPage() {
                       className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
                       placeholder="Jane Smith"
                       required
+                      aria-required="true"
                     />
                   </div>
                   <div>
@@ -553,9 +554,12 @@ export default function CheckoutPage() {
                       className={`w-full border rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${emailError ? "border-red-300" : "border-gray-200"}`}
                       placeholder="jane@example.com"
                       required
+                      aria-required="true"
+                      aria-invalid={!!emailError}
+                      aria-describedby={emailError ? "email-error" : undefined}
                     />
                     {emailError && (
-                      <p className="text-sm text-red-600 mt-1">{emailError}</p>
+                      <p id="email-error" className="text-sm text-red-600 mt-1" role="alert">{emailError}</p>
                     )}
                   </div>
                 </div>
@@ -850,7 +854,7 @@ export default function CheckoutPage() {
 
             {/* Error */}
             {error && (
-              <div className="bg-red-50 border border-red-100 rounded-lg px-4 py-3">
+              <div className="bg-red-50 border border-red-100 rounded-lg px-4 py-3" role="alert">
                 <p className="text-red-600 font-semibold text-sm mb-0.5">Something went wrong</p>
                 <p className="text-red-500 text-sm">{error}</p>
                 <p className="text-red-400 text-xs mt-2">
@@ -1044,7 +1048,7 @@ export default function CheckoutPage() {
                   <span>PST (6%)</span>
                   <span>${pst.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-[#1c1712] text-base pt-2">
+                <div className="flex justify-between font-bold text-[#1c1712] text-base pt-2" aria-live="polite">
                   <span>Total</span>
                   <span>${total.toFixed(2)} CAD</span>
                 </div>

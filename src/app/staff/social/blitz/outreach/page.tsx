@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import lazyLoad from "next/dynamic";
 import { createServiceClient } from "@/lib/supabase/server";
-import { OutreachQueue } from "@/components/social/OutreachQueue";
 import type { BlitzLead } from "@/lib/types/blitz";
+
+const OutreachQueue = lazyLoad(
+  () => import("@/components/social/OutreachQueue").then(m => m.OutreachQueue),
+  { loading: () => <div className="animate-pulse h-64 bg-gray-100 rounded-2xl" /> }
+);
 
 export const metadata: Metadata = {
   title: "Manual Outreach Queue — Email Blitz",

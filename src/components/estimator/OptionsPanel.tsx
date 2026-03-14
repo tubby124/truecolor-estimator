@@ -278,7 +278,7 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
 
       {/* Design Status */}
       <FieldGroup label="Design / Artwork">
-        <div className="space-y-2">
+        <div className="space-y-2" role="radiogroup" aria-label="Design / Artwork">
           {[
             { val: "PRINT_READY", label: "Files are print-ready", sub: "No charge" },
             { val: "MINOR_EDIT", label: "Minor edits needed", sub: "+$35.00" },
@@ -288,6 +288,7 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
             <button
               key={opt.val}
               onClick={() => onChange({ design_status: opt.val as DesignStatus })}
+              aria-pressed={state.design_status === opt.val}
               className={`w-full flex justify-between items-center px-4 py-3 rounded-lg border text-sm transition-all ${
                 state.design_status === opt.val
                   ? "border-[var(--brand)] bg-[var(--brand-50)]"
@@ -339,6 +340,8 @@ function AddonToggle({
   return (
     <button
       onClick={onChange}
+      role="checkbox"
+      aria-checked={checked}
       className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-sm transition-all ${
         checked ? activeClass : "border-[var(--border)] bg-white hover:border-gray-300"
       }`}

@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import lazyLoad from "next/dynamic";
 import { createServiceClient } from "@/lib/supabase/server";
-import { ComposeForm } from "@/components/social/ComposeForm";
 import { Skeleton } from "@/components/ui/Skeleton";
+
+const ComposeForm = lazyLoad(
+  () => import("@/components/social/ComposeForm").then(m => m.ComposeForm),
+  { loading: () => <div className="animate-pulse h-96 bg-gray-100 rounded-2xl max-w-3xl mx-auto m-6" /> }
+);
 
 export const metadata: Metadata = {
   title: "Compose — Social Studio — True Color",

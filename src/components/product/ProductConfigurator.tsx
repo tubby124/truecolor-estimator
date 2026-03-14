@@ -255,12 +255,13 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       {/* Tier selector */}
       {product.tierPresets && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Select Your Stand</p>
-          <div className="flex flex-col gap-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="tier-label">Select Your Stand</p>
+          <div className="flex flex-col gap-2" role="radiogroup" aria-labelledby="tier-label">
             {product.tierPresets.map((tier, i) => (
               <button
                 key={tier.label}
                 onClick={() => setSelectedTier(i)}
+                aria-pressed={selectedTier === i}
                 className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-colors active:scale-[0.96] ${
                   selectedTier === i
                     ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -277,12 +278,13 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       {/* Size presets */}
       {!product.tierPresets && product.sizePresets.length > 1 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">{product.sizeSectionLabel ?? "Size"}</p>
-          <div className="flex flex-wrap gap-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="size-label">{product.sizeSectionLabel ?? "Size"}</p>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="size-label">
             {product.sizePresets.map((preset) => (
               <button
                 key={preset.label}
                 onClick={() => { setSelectedSize(preset); setIsCustom(false); }}
+                aria-pressed={!isCustom && selectedSize.label === preset.label}
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
                   !isCustom && selectedSize.label === preset.label
                     ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -414,12 +416,13 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       {/* Sides toggle */}
       {product.sideOptions && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Sides</p>
-          <div className="flex gap-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="sides-label">Sides</p>
+          <div className="flex gap-2" role="radiogroup" aria-labelledby="sides-label">
             {([1, 2] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setSides(s)}
+                aria-pressed={sides === s}
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.95] ${
                   sides === s
                     ? "bg-[#1c1712] text-white border-[#1c1712]"
@@ -435,8 +438,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
 
       {/* Quantity */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Quantity</p>
-        <div className="flex flex-wrap gap-3 pt-4">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="qty-label">Quantity</p>
+        <div className="flex flex-wrap gap-3 pt-4" role="radiogroup" aria-labelledby="qty-label">
           {product.qtyPresets.map((q) => {
             const hint = BULK_HINTS[product.category]?.[q];
             const isMostPopular = MOST_POPULAR_QTY[product.category] === q;
@@ -610,8 +613,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
 
       {/* Design help */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Do You Have a Design File?</p>
-        <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="design-label">Do You Have a Design File?</p>
+        <div className="flex flex-col gap-2" role="radiogroup" aria-labelledby="design-label">
           {[
             { label: "I have a print-ready file", value: "PRINT_READY", note: "" },
             { label: "Minor edits to my file", value: "MINOR_EDIT", note: "+$35" },
@@ -621,6 +624,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             <button
               key={opt.value}
               onClick={() => setDesignStatus(opt.value)}
+              aria-pressed={designStatus === opt.value}
               className={`flex items-center justify-between px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors active:scale-[0.97] ${
                 designStatus === opt.value
                   ? "bg-[#1c1712] text-white border-[#1c1712]"

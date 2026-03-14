@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { useDebounce } from "@/hooks/useDebounce";
 import type { BlitzNiche } from "@/lib/types/blitz";
 
 const STATUS_PILLS: Record<string, { label: string; cls: string }> = {
@@ -22,13 +23,14 @@ interface Props {
 
 export function NicheTable({ niches }: Props) {
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [sortKey, setSortKey] = useState<SortKey>("lead_count");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const filtered = useMemo(() => {
     let result = niches;
-    if (search.trim()) {
-      const q = search.toLowerCase();
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.toLowerCase();
       result = result.filter(
         (n) =>
           n.display_name.toLowerCase().includes(q) ||
@@ -43,7 +45,7 @@ export function NicheTable({ niches }: Props) {
       return sortDir === "desc" ? -cmp : cmp;
     });
     return result;
-  }, [niches, search, sortKey, sortDir]);
+  }, [niches, debouncedSearch, sortKey, sortDir]);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {

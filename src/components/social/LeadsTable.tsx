@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface Lead {
   id: string;
@@ -42,6 +43,44 @@ const STATUS_PILLS: Record<string, string> = {
   queued: "bg-gray-100 text-gray-500",
 };
 
+const LeadRow = React.memo(function LeadRow({ lead }: { lead: Lead }) {
+  return (
+    <tr className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+      <td className="px-4 py-2.5">
+        <span className="font-semibold text-[#1c1712]">{lead.business_name ?? "—"}</span>
+      </td>
+      <td className="px-4 py-2.5 text-gray-500 text-xs">{lead.email ?? "—"}</td>
+      <td className="px-4 py-2.5 text-gray-500 text-xs">{lead.city ?? "—"}</td>
+      <td className="px-4 py-2.5 text-center">
+        <span className={`text-xs font-bold ${
+          lead.score >= 70 ? "text-[#e63020]" : lead.score >= 45 ? "text-amber-500" : "text-gray-400"
+        }`}>
+          {lead.score}
+        </span>
+      </td>
+      <td className="px-4 py-2.5">
+        <div className="flex items-center justify-center gap-0.5">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <span
+              key={i}
+              className={`w-2 h-2 rounded-full ${
+                i < (lead.drip_step ?? 0) ? "bg-[#e63020]" : "bg-gray-200"
+              }`}
+            />
+          ))}
+        </div>
+      </td>
+      <td className="px-4 py-2.5 text-center">
+        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+          STATUS_PILLS[lead.drip_status ?? "queued"] ?? STATUS_PILLS.queued
+        }`}>
+          {lead.drip_status ?? "queued"}
+        </span>
+      </td>
+    </tr>
+  );
+});
+
 interface Props {
   nicheSlug: string;
 }
@@ -54,13 +93,7 @@ export function LeadsTable({ nicheSlug }: Props) {
   const [total, setTotal] = useState(0);
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
-  const [searchDebounced, setSearchDebounced] = useState("");
-
-  // Debounce search
-  useEffect(() => {
-    const t = setTimeout(() => setSearchDebounced(search), 300);
-    return () => clearTimeout(t);
-  }, [search]);
+  const searchDebounced = useDebounce(search, 300);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -166,39 +199,7 @@ export function LeadsTable({ nicheSlug }: Props) {
               </tr>
             ) : (
               leads.map((lead) => (
-                <tr key={lead.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-2.5">
-                    <span className="font-semibold text-[#1c1712]">{lead.business_name ?? "—"}</span>
-                  </td>
-                  <td className="px-4 py-2.5 text-gray-500 text-xs">{lead.email ?? "—"}</td>
-                  <td className="px-4 py-2.5 text-gray-500 text-xs">{lead.city ?? "—"}</td>
-                  <td className="px-4 py-2.5 text-center">
-                    <span className={`text-xs font-bold ${
-                      lead.score >= 70 ? "text-[#e63020]" : lead.score >= 45 ? "text-amber-500" : "text-gray-400"
-                    }`}>
-                      {lead.score}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center justify-center gap-0.5">
-                      {Array.from({ length: 12 }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={`w-2 h-2 rounded-full ${
-                            i < (lead.drip_step ?? 0) ? "bg-[#e63020]" : "bg-gray-200"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-2.5 text-center">
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                      STATUS_PILLS[lead.drip_status ?? "queued"] ?? STATUS_PILLS.queued
-                    }`}>
-                      {lead.drip_status ?? "queued"}
-                    </span>
-                  </td>
-                </tr>
+                <LeadRow key={lead.id} lead={lead} />
               ))
             )}
           </tbody>

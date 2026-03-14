@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import lazyLoad from "next/dynamic";
 import { createServiceClient } from "@/lib/supabase/server";
-import { BlitzPipeline } from "@/components/social/BlitzPipeline";
-import { NicheTable } from "@/components/social/NicheTable";
 import { TriggerButton } from "@/components/social/TriggerButton";
 import type { BlitzNiche, BlitzCampaign } from "@/lib/types/blitz";
+
+const BlitzPipeline = lazyLoad(
+  () => import("@/components/social/BlitzPipeline").then(m => m.BlitzPipeline),
+  { loading: () => <div className="animate-pulse h-48 bg-gray-100 rounded-2xl" /> }
+);
+
+const NicheTable = lazyLoad(
+  () => import("@/components/social/NicheTable").then(m => m.NicheTable),
+  { loading: () => <div className="animate-pulse h-64 bg-gray-100 rounded-2xl" /> }
+);
 
 export const metadata: Metadata = {
   title: "Email Blitz — True Color",
