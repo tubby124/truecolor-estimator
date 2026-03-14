@@ -84,6 +84,7 @@ export function SiteFooter() {
                 <Link href="/sticker-printing-saskatoon" className="block hover:text-white transition-colors">Sticker Printing</Link>
                 <Link href="/postcard-printing-saskatoon" className="block hover:text-white transition-colors">Postcard Printing</Link>
                 <Link href="/photo-poster-printing-saskatoon" className="block hover:text-white transition-colors">Photo Posters</Link>
+                <Link href="/poster-printing-saskatoon" className="block hover:text-white transition-colors">Poster Printing</Link>
               </div>
               <div className="space-y-2">
                 <Link href="/vehicle-magnets-saskatoon" className="block hover:text-white transition-colors">Vehicle Magnets</Link>

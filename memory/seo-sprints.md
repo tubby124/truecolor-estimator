@@ -98,3 +98,41 @@
 
 ### GEO Status: PASS (all 5 criteria met)
 ### SEO Agent D: PASS (title 53 chars, meta 148 chars, canonical set, OG present, 5 internal links)
+
+---
+
+## SEO Phase 18 — New Page: /poster-printing-saskatoon (2026-03-14)
+
+### Summary
+New product SEO landing page targeting generic "poster printing Saskatoon" intent (events, concerts, indoor displays, trade shows). Distinct from existing /photo-poster-printing-saskatoon which targets personal photo prints.
+
+### Page Details
+- **URL:** /poster-printing-saskatoon
+- **Title:** "Poster Printing Saskatoon | From $15 | True Color" (49 chars)
+- **Meta desc:** ~148 chars with price + Roland Photobase Matte 220gsm + location
+- **Primary product slug:** photo-posters
+- **Priority in sitemap:** 0.9
+- **lastmod:** 2026-03-14
+
+### Content Metrics
+- Word count: 400+ (description) + rich descriptionNode
+- FAQs: 8 (all price-anchored)
+- Products array: 5 entries
+- Internal links in descriptionNode: 5
+- DesignDirectionGrid: 3 sections — Event Posters (3:4, 3 items), Indoor Display/Foamboard (4:3, 3 items), Retractable Stands (3:8, 2 items)
+- GEO pass: PASS (spec table, named entities, standalone FAQ answers, address+phone, Roland UV E-E-A-T)
+
+### Files Modified
+- `src/app/poster-printing-saskatoon/page.tsx` — NEW
+- `src/app/sitemap.ts` — added entry (lastmod: 2026-03-14)
+- `src/components/site/SiteNav.tsx` — Poster Printing link added
+- `src/components/site/SiteFooter.tsx` — Poster Printing link added
+- `src/lib/data/gbp-products.json` — product + service + post schedule added
+- `src/lib/data/niche-image-prompts.json` — 8 design direction prompts added
+- `GBP_UPLOAD/niches/poster-printing-saskatoon/image-prompts.md` — 14 ChatGPT prompts (8 design + 6 hero/GBP)
+
+### Pending (after deploy)
+- [ ] Submit /poster-printing-saskatoon to GSC for indexing
+- [ ] Generate 8 design direction images via ChatGPT from image-prompts.md
+- [ ] Run /truecolor-images poster-printing after images generated (Pass 2)
+- [ ] Pages still to build: canada-day-printing-saskatoon, back-to-school-signs-saskatoon

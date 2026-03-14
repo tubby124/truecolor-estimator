@@ -52,6 +52,7 @@ const INDUSTRY_LINKS = [
   { label: "Window Decals", href: "/window-decals-saskatoon" },
   { label: "Sticker Printing", href: "/sticker-printing-saskatoon" },
   { label: "Foamboard Printing", href: "/foamboard-printing-saskatoon" },
+  { label: "Poster Printing", href: "/poster-printing-saskatoon" },
   { label: "Construction", href: "/construction-signs-saskatoon" },
   { label: "Trade Contractors", href: "/trade-contractor-signs-saskatoon" },
   { label: "Real Estate", href: "/real-estate-signs-saskatoon" },

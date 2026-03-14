@@ -142,7 +142,11 @@
       "description": "St. Patrick's Day banners, window decals, and flyers for Saskatoon bars, pubs, and restaurants. Vinyl banner 2×6ft $90 + GST. Window decals from $11/sqft — removable after March 17, no residue on glass. 250 promotional flyers $110. Order by March 10 for standard turnaround. Same-day rush available for +$40. In-house Roland UV printer. Local pickup 216 33rd St W, Saskatoon. Call (306) 954-8688.",
       "imagePath": "public/images/seasonal/st-patricks/hero.png",
       "imagePrompt": "St. Patrick's Day themed vinyl banner hanging inside a Saskatoon pub. Green and gold colours with shamrock designs. The banner is hemmed with grommets visible. Warm pub interior lighting. Photorealistic, 1200x900.",
-      "seasonal": { "active": "Feb 15 – Mar 17", "addBy": "Feb 15", "removeAfter": "Mar 17" }
+      "seasonal": {
+        "active": "Feb 15 – Mar 17",
+        "addBy": "Feb 15",
+        "removeAfter": "Mar 17"
+      }
     },
     {
       "slug": "graduation-banners",
@@ -154,7 +158,11 @@
       "description": "Graduation banners, foam board displays, and retractable stands for Saskatoon schools, universities, and private grad parties. Vinyl banner 2×6ft $90, 4×8ft gym banner $240. Foam board photo display 24×36\" $65. Retractable stand complete $219. Bring your school colours and grad year — in-house designer handles the layout. Order by late May. Same-day rush +$40 flat. Pickup 216 33rd St W. (306) 954-8688.",
       "imagePath": "public/images/seasonal/graduation/hero.png",
       "imagePrompt": "Graduation celebration vinyl banner displayed at a school gymnasium entrance. The banner shows 'Class of 2026' with school colours. Students in caps and gowns walking past. Photorealistic, 1200x900.",
-      "seasonal": { "active": "Apr 1 – Jul 1", "addBy": "Apr 1", "removeAfter": "Jul 1" }
+      "seasonal": {
+        "active": "Apr 1 – Jul 1",
+        "addBy": "Apr 1",
+        "removeAfter": "Jul 1"
+      }
     },
     {
       "slug": "ramadan-eid",
@@ -166,7 +174,11 @@
       "description": "Ramadan and Eid banners, flyers, and retractable stands for Saskatoon mosques, halal restaurants, and Islamic community events. 2×6ft Iftar dinner banner $90. 4×8ft mosque entrance banner $216. Retractable stand complete $219. Print any language — Arabic, Urdu, Bengali. In-house designer. 48-hour turnaround. Same-day rush +$40. Pickup 216 33rd St W. Call (306) 954-8688.",
       "imagePath": "public/images/seasonal/ramadan/banner-eid-mubarak.png",
       "imagePrompt": "Ramadan Mubarak banner displayed at the entrance of a mosque. The banner features Islamic geometric patterns in gold and deep blue with Arabic calligraphy. Warm evening lighting. Photorealistic, 1200x900.",
-      "seasonal": { "active": "Feb 15 – May 15", "addBy": "Feb 15", "removeAfter": "May 15" }
+      "seasonal": {
+        "active": "Feb 15 – May 15",
+        "addBy": "Feb 15",
+        "removeAfter": "May 15"
+      }
     },
     {
       "slug": "construction-signs",
@@ -233,35 +245,161 @@
       "description": "Same-day rush printing in Saskatoon — +$40 flat fee. Order before 10 AM, pick up same business day. Vinyl banners, coroplast signs, foamboard displays, flyers, window decals. In-house Roland UV printer — no outsourcing, no surprises. Call to confirm capacity: (306) 954-8688. Pickup at 216 33rd St W, Saskatoon, SK.",
       "imagePath": null,
       "imagePrompt": "Inside view of a busy print shop with a Roland UV printer running. A finished vinyl banner is being rolled up by a staff member. Clock on the wall showing morning time. Warm, productive workshop atmosphere. Photorealistic, 1200x900."
+    },
+    {
+      "slug": "poster-printing-saskatoon",
+      "name": "Poster Printing — Saskatoon",
+      "category": "Industry Signs",
+      "price": "From $15 (photo posters) · From $45 (foamboard)",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=poster_printing",
+      "description": "Photo posters from $15 on Roland Photobase Matte 220gsm — 18×24\" = $22, 24×36\" = $35. Foamboard displays from $45. Retractable stands from $219. Same-day rush +$40. In-house designer $35. 216 33rd St W, Saskatoon SK. (306) 954-8688.",
+      "imagePath": "/images/industries/poster-printing/display-retail-promotion.webp",
+      "imagePrompt": "A 24x36 inch foamboard display in a Saskatoon retail store showing a seasonal promotion. The print is vivid and sharp on rigid 5mm foamboard sitting on a chrome easel. Modern retail interior. Photorealistic, 1200x900."
     }
   ],
   "services": [
-    { "name": "Banner Printing", "description": "Vinyl banners from $8.25/sqft, hemmed and grommeted, ready in 48 hours" },
-    { "name": "Coroplast Sign Printing", "description": "Yard and job-site signs from $8/sqft, H-wire stakes available" },
-    { "name": "Same-Day Rush Printing", "description": "Any product printed same day for +$40 flat fee — order before 10 AM" },
-    { "name": "Graphic Design", "description": "In-house designer for logos, layouts, and print-ready artwork — $35–50 flat" },
-    { "name": "ACP Aluminum Sign Printing", "description": "Permanent rigid signs from $13/sqft for businesses and contractors" },
-    { "name": "Vehicle Magnet Printing", "description": "Custom truck and car door magnets from $24/sqft" },
-    { "name": "Window Decal Printing", "description": "Removable vinyl decals from $11/sqft — zero residue after removal" },
-    { "name": "Foam Board Display Printing", "description": "Lightweight display panels from $10/sqft for trade shows and events" },
-    { "name": "Retractable Banner Stand Printing", "description": "Complete stands from $219 — stand + full-colour 24×80\" print" },
-    { "name": "Business Card Printing", "description": "250 cards double-sided for $45 + GST — 48-hour turnaround" },
-    { "name": "Flyer & Brochure Printing", "description": "250 glossy flyers from $110 — same-day rush available" },
-    { "name": "Real Estate Sign Printing", "description": "Coroplast yard signs, banners, and magnets for agents" },
-    { "name": "Construction Site Signage", "description": "Job site coroplast, hoarding banners, truck magnets, safety signs" },
-    { "name": "Healthcare & Clinic Signage", "description": "ACP directories, foam board displays, retractable stands for clinics" },
-    { "name": "Agriculture Signage", "description": "Farm gate signs, plot markers, biosecurity signs, truck magnets for Saskatchewan farms" },
-    { "name": "Agribusiness Signage", "description": "Dealer fascia signs, warehouse panels, trade show stands, spec sheets for ag suppliers" },
-    { "name": "Seasonal Event Printing", "description": "St. Patrick's Day, graduation, Eid, Canada Day, Mother's Day — event-specific banners and decals" },
-    { "name": "Mother's Day Printing", "description": "Banners, photo prints, flyers, and window decals for Saskatoon restaurants, spas, and florists celebrating Mother's Day" }
+    {
+      "name": "Banner Printing",
+      "description": "Vinyl banners from $8.25/sqft, hemmed and grommeted, ready in 48 hours"
+    },
+    {
+      "name": "Coroplast Sign Printing",
+      "description": "Yard and job-site signs from $8/sqft, H-wire stakes available"
+    },
+    {
+      "name": "Same-Day Rush Printing",
+      "description": "Any product printed same day for +$40 flat fee — order before 10 AM"
+    },
+    {
+      "name": "Graphic Design",
+      "description": "In-house designer for logos, layouts, and print-ready artwork — $35–50 flat"
+    },
+    {
+      "name": "ACP Aluminum Sign Printing",
+      "description": "Permanent rigid signs from $13/sqft for businesses and contractors"
+    },
+    {
+      "name": "Vehicle Magnet Printing",
+      "description": "Custom truck and car door magnets from $24/sqft"
+    },
+    {
+      "name": "Window Decal Printing",
+      "description": "Removable vinyl decals from $11/sqft — zero residue after removal"
+    },
+    {
+      "name": "Foam Board Display Printing",
+      "description": "Lightweight display panels from $10/sqft for trade shows and events"
+    },
+    {
+      "name": "Retractable Banner Stand Printing",
+      "description": "Complete stands from $219 — stand + full-colour 24×80\" print"
+    },
+    {
+      "name": "Business Card Printing",
+      "description": "250 cards double-sided for $45 + GST — 48-hour turnaround"
+    },
+    {
+      "name": "Flyer & Brochure Printing",
+      "description": "250 glossy flyers from $110 — same-day rush available"
+    },
+    {
+      "name": "Real Estate Sign Printing",
+      "description": "Coroplast yard signs, banners, and magnets for agents"
+    },
+    {
+      "name": "Construction Site Signage",
+      "description": "Job site coroplast, hoarding banners, truck magnets, safety signs"
+    },
+    {
+      "name": "Healthcare & Clinic Signage",
+      "description": "ACP directories, foam board displays, retractable stands for clinics"
+    },
+    {
+      "name": "Agriculture Signage",
+      "description": "Farm gate signs, plot markers, biosecurity signs, truck magnets for Saskatchewan farms"
+    },
+    {
+      "name": "Agribusiness Signage",
+      "description": "Dealer fascia signs, warehouse panels, trade show stands, spec sheets for ag suppliers"
+    },
+    {
+      "name": "Seasonal Event Printing",
+      "description": "St. Patrick's Day, graduation, Eid, Canada Day, Mother's Day — event-specific banners and decals"
+    },
+    {
+      "name": "Mother's Day Printing",
+      "description": "Banners, photo prints, flyers, and window decals for Saskatoon restaurants, spas, and florists celebrating Mother's Day"
+    },
+    {
+      "name": "Poster Printing",
+      "description": "Photo posters from $15 on Roland Photobase Matte 220gsm. Foamboard displays from $45. Retractable banner stands from $219 with graphic included. Same-day rush +$40 flat. In-house designer $35."
+    }
   ],
   "postSchedule": [
-    { "campaign": "St. Patrick's Day", "posts": ["Mar 1 — Green banners in stock", "Mar 10 — Order by today for standard turnaround", "Mar 14 — Same-day rush still available"] },
-    { "campaign": "Mother's Day", "posts": ["Apr 20 — Mother's Day is May 10 — order banners now", "May 1 — Flyers, banners, photo prints for Mother's Day", "May 6 — Same-day rush available until May 8"] },
-    { "campaign": "Graduation", "posts": ["Apr 15 — Grad banner season starts", "May 10 — Order now for June ceremonies", "May 28 — Same-day rush still available"] },
-    { "campaign": "Ramadan/Eid", "posts": ["Mar 1 — Ramadan Mubarak — iftar banners ready", "Mar 15 — Eid al-Fitr coming — order your banner", "Apr 10 — Eid decor printing available"] },
-    { "campaign": "Construction", "posts": ["Apr 1 — Job site signs for spring builds", "May 1 — New site? Site sign ready in 48 hours", "Ongoing"] },
-    { "campaign": "Agriculture", "posts": ["Mar 15 — Seeding season signs ready", "Jun 1 — Ag in Motion booth signage", "Oct 1 — Harvest season farm signs"] },
-    { "campaign": "Agribusiness", "posts": ["Mar 1 — Spring dealer showroom refresh", "Jun 1 — Ag in Motion trade show stands", "Sep 1 — Fall product launch materials"] }
+    {
+      "campaign": "St. Patrick's Day",
+      "posts": [
+        "Mar 1 — Green banners in stock",
+        "Mar 10 — Order by today for standard turnaround",
+        "Mar 14 — Same-day rush still available"
+      ]
+    },
+    {
+      "campaign": "Mother's Day",
+      "posts": [
+        "Apr 20 — Mother's Day is May 10 — order banners now",
+        "May 1 — Flyers, banners, photo prints for Mother's Day",
+        "May 6 — Same-day rush available until May 8"
+      ]
+    },
+    {
+      "campaign": "Graduation",
+      "posts": [
+        "Apr 15 — Grad banner season starts",
+        "May 10 — Order now for June ceremonies",
+        "May 28 — Same-day rush still available"
+      ]
+    },
+    {
+      "campaign": "Ramadan/Eid",
+      "posts": [
+        "Mar 1 — Ramadan Mubarak — iftar banners ready",
+        "Mar 15 — Eid al-Fitr coming — order your banner",
+        "Apr 10 — Eid decor printing available"
+      ]
+    },
+    {
+      "campaign": "Construction",
+      "posts": [
+        "Apr 1 — Job site signs for spring builds",
+        "May 1 — New site? Site sign ready in 48 hours",
+        "Ongoing"
+      ]
+    },
+    {
+      "campaign": "Agriculture",
+      "posts": [
+        "Mar 15 — Seeding season signs ready",
+        "Jun 1 — Ag in Motion booth signage",
+        "Oct 1 — Harvest season farm signs"
+      ]
+    },
+    {
+      "campaign": "Agribusiness",
+      "posts": [
+        "Mar 1 — Spring dealer showroom refresh",
+        "Jun 1 — Ag in Motion trade show stands",
+        "Sep 1 — Fall product launch materials"
+      ]
+    },
+    {
+      "campaign": "Poster Printing",
+      "posts": [
+        "Apr 15 — Spring events season: event poster printing Saskatoon from $15",
+        "Jul 15 — Fringe Festival season: concert and show poster printing same-day available",
+        "Sep 1 — Fall events and trade shows: retractable stands from $219"
+      ]
+    }
   ]
 }
