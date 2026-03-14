@@ -25,7 +25,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 
@@ -49,7 +49,9 @@ export async function POST(req: NextRequest) {
     "sha256=" +
     createHmac("sha256", webhookSecret).update(bodyText).digest("hex");
 
-  if (!signature || signature !== expected) {
+  const sigBuf = Buffer.from(signature);
+  const expectedBuf = Buffer.from(expected);
+  if (!signature || sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) {
     console.warn("[wave-webhook] Invalid or missing signature — possible spoofing attempt");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }

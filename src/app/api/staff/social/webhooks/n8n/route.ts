@@ -13,13 +13,15 @@ export const dynamic = "force-dynamic";
  * n8n should send: x-n8n-secret: process.env.N8N_WEBHOOK_SECRET
  */
 export async function POST(req: Request) {
-  // Validate webhook secret
+  // Validate webhook secret — fail-closed: reject if secret not configured
   const secret = process.env.N8N_WEBHOOK_SECRET;
-  if (secret) {
-    const incoming = req.headers.get("x-n8n-secret");
-    if (incoming !== secret) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!secret) {
+    console.error("[n8n-webhook] N8N_WEBHOOK_SECRET not configured — rejecting");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 401 });
+  }
+  const incoming = req.headers.get("x-n8n-secret");
+  if (incoming !== secret) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   let body: N8nWebhookPayload;
