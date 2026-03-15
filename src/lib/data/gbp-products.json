@@ -591,12 +591,13 @@
         },
         {
           "postType": "Update",
-          "description": "Harvest season is underway — farm gate signs, truck magnets, and field marker signs printed in-house in Saskatoon, ready in 48 hours.\n\nCoroplast signs from $8/sqft — durable through harvest weather. Truck door magnets from $24/sqft, 12×18\" from $45.\n\nNo minimum order. Same-day rush available for +$40 flat — order before 10 AM.\n\n216 33rd St W, Saskatoon. (306) 954-8688.",
-          "publishDate": "September 15, 2026",
+          "description": "Harvest season is coming — get your farm gate signs, truck magnets, and field marker signs printed in Saskatoon before the rush starts.\n\nCoroplast signs from $8/sqft — UV-resistant, built for Saskatchewan weather. Truck door magnets from $24/sqft, 12×18\" from $45. Order now and have them ready before you're in the field.\n\nNo minimum order. Same-day rush available for +$40 flat — order before 10 AM.\n\n216 33rd St W, Saskatoon. (306) 954-8688.\n\n#Saskatoon #SKFarming #AgricultureSigns #HarvestSeason",
+          "publishDate": "August 5, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Learn more",
           "buttonUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agriculture_2026_harvest",
-          "imagePath": "public/images/industries/agriculture/sign-farm-gate.jpg"
+          "imagePath": "public/images/industries/agriculture/sign-farm-gate.jpg",
+          "_sync_note": "Standalone GBP post — no drip email on this date. Pairs with Aug harvest season. Add email step if agriculture drip expanded."
         }
       ]
     },
