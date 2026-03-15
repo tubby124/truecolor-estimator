@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import gbpData from "@/lib/data/gbp-products.json";
 import { GBPProductCard, CopyCategoryButton } from "@/components/social/GBPProductCard";
+import { GBPPostCard } from "@/components/social/GBPPostCard";
+import type { GBPPost } from "@/components/social/GBPPostCard";
 
 export const metadata: Metadata = {
   title: "GBP Products — True Color",
@@ -33,34 +35,24 @@ export default function GBPDashboardPage() {
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
         {/* Post Schedule */}
         <section>
-          <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+          <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-6 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-amber-400" />
-            GBP Post Schedule
+            GBP Post Schedule — {gbpData.postSchedule.reduce((n, s) => n + s.posts.length, 0)} posts across {gbpData.postSchedule.length} campaigns
           </h2>
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="text-left px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Campaign</th>
-                  <th className="text-left px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Post 1</th>
-                  <th className="text-left px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Post 2</th>
-                  <th className="text-left px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Post 3</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gbpData.postSchedule.map((schedule, i) => (
-                  <tr key={i} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-2.5 font-semibold text-[#1c1712]">{schedule.campaign}</td>
-                    {schedule.posts.map((post, j) => (
-                      <td key={j} className="px-5 py-2.5 text-xs text-gray-500">{post}</td>
-                    ))}
-                    {Array.from({ length: Math.max(0, 3 - schedule.posts.length) }).map((_, j) => (
-                      <td key={`empty-${j}`} className="px-5 py-2.5 text-xs text-gray-300">—</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-10">
+            {gbpData.postSchedule.map((schedule, i) => (
+              <div key={i}>
+                <h3 className="text-xs font-black text-[#1c1712] uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  {schedule.campaign}
+                </h3>
+                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {schedule.posts.map((post, j) => (
+                    <GBPPostCard key={j} post={post as GBPPost} index={j} />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 

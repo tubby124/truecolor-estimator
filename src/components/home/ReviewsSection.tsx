@@ -9,10 +9,6 @@ const WIDGET_URL =
 // data-layout-id="16", data-set-id="light-background", data-css-version="2"
 const WIDGET_CSS_URL =
   "https://cdn.trustindex.io/assets/widget-presetted-css/v2/16-light-background.css";
-// Sprite sheet: all reviewer profile photos stacked vertically, 40px per row
-const WIDGET_SPRITE_URL =
-  "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/sprite.jpg";
-
 // On mobile (<768px): 1-column, show 3 reviews (image reviews first per Trustindex sort).
 // Layout 5 (slider) was dropped — it requires JS to set card heights at runtime;
 // without loader.js the ti-reviews-container-wrapper collapses to zero height.
@@ -46,7 +42,6 @@ interface WidgetResult {
 async function fetchWidgetHtml(
   widgetUrl: string,
   cssUrl: string,
-  spriteUrl: string,
   extraCss = "",
 ): Promise<WidgetResult | null> {
   try {
@@ -65,23 +60,31 @@ async function fetchWidgetHtml(
     const countMatch = widgetHtml.match(/>(\d+) reviews</i);
     const reviewCount = countMatch ? parseInt(countMatch[1], 10) : null;
 
-    // Inject sprite background-positions server-side.
-    // loader.js normally does this in JS: querySelectorAll(".ti-profile-img-sprite")
-    // then sets style.background = url(sprite.jpg) at 0 -(index*40)px per reviewer.
-    // CSS confirms height:40px for this layout. We replicate that here.
-    let spriteIdx = 0;
-    const widgetWithSprites = widgetHtml.replace(
-      /(<div[^>]+class="[^"]*ti-profile-img-sprite[^"]*"[^>]*)(>)/g,
+    // Replace sprite divs with CSS initial avatars.
+    // Trustindex's sprite.jpg row order doesn't match the HTML display order
+    // (sprite is pure-recency, HTML groups image-reviews first), so sequential
+    // mapping produces wrong profile photos. Initial avatars are reliable and
+    // don't depend on any external sprite resource.
+    const names: string[] = [];
+    widgetHtml.replace(
+      /<div class="ti-name">\s*<a[^>]*>([^<]+)<\/a>/g,
+      (_, name: string) => { names.push(name.trim()); return _; },
+    );
+    let nameIdx = 0;
+    const widgetWithAvatars = widgetHtml.replace(
+      /(<div[^>]+class="[^"]*ti-profile-img-sprite[^"]*")[^>]*(>)<\/div>/g,
       (_match, tag, close) => {
-        const bg = `background:url('${spriteUrl}') 0 -${spriteIdx * 40}px no-repeat`;
-        spriteIdx++;
-        return `${tag} style="${bg}"${close}`;
-      }
+        const name = names[nameIdx] || "?";
+        const initial = name.charAt(0).toUpperCase();
+        const hue = (initial.charCodeAt(0) * 137) % 360;
+        nameIdx++;
+        return `${tag} style="background:hsl(${hue},45%,55%);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px"${close}${initial}</div>`;
+      },
     );
 
     // Add alt attributes to any <img> tags missing them (SEO: Trustindex
     // widget injects profile photos and logos without alt text).
-    const withAlts = widgetWithSprites.replace(
+    const withAlts = widgetWithAvatars.replace(
       /<img(?![^>]*\balt\b)([^>]*?)(\s*\/?>)/gi,
       '<img alt="Google reviewer"$1$2'
     );
@@ -101,7 +104,6 @@ export async function ReviewsSection() {
   const widget = await fetchWidgetHtml(
     WIDGET_URL,
     WIDGET_CSS_URL,
-    WIDGET_SPRITE_URL,
     MOBILE_RESPONSIVE_CSS,
   );
 

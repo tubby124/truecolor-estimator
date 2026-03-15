@@ -181,6 +181,22 @@
       }
     },
     {
+      "slug": "mothers-day-printing",
+      "name": "Mother's Day Banners & Prints — Saskatoon",
+      "category": "Seasonal Signs & Banners",
+      "price": "From $22 (photo prints) · From $90 (banners)",
+      "cta": "Buy on website",
+      "url": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=mothers_day",
+      "description": "Mother's Day banners, photo prints, foam board displays, window decals, and flyers for Saskatoon restaurants, spas, florists, and gift shops. Vinyl banner 2×6ft — $90. Photo poster 24×36\" on Roland Photobase Matte — $35. Window decals from $11/sqft, removable after May 10 with zero glass residue. In-house designer $35 flat — same-day proof. Order by May 7 for standard 48-hour turnaround. Same-day rush available May 8 for +$40. Pickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+      "imagePath": "public/images/seasonal/mothers-day/hero.webp",
+      "imagePrompt": "Mother's Day vinyl banner hanging in a Saskatoon restaurant window. The banner features a floral design with warm pink and gold colours. Cheerful restaurant interior visible, spring afternoon sunlight. Photorealistic, 1200x900.",
+      "seasonal": {
+        "active": "Apr 15 – May 10",
+        "addBy": "Apr 15",
+        "removeAfter": "May 10"
+      }
+    },
+    {
       "slug": "construction-signs",
       "name": "Construction Signs — Saskatoon Contractors",
       "category": "Industry Signs",
@@ -340,65 +356,313 @@
     {
       "campaign": "St. Patrick's Day",
       "posts": [
-        "Mar 1 — Green banners in stock",
-        "Mar 10 — Order by today for standard turnaround",
-        "Mar 14 — Same-day rush still available"
+        {
+          "postType": "Offer",
+          "title": "St. Patrick's Day Banners — Saskatoon",
+          "description": "Get your bar, pub, or restaurant ready for St. Patrick's Day with custom printed banners and window decals — all printed in-house at 216 33rd St W, Saskatoon.\n\nVinyl banner 2×6ft — $90. Window decals from $11/sqft, removable after March 17 with zero glass residue. Promotional flyers 250 for $110.\n\nAll printed on our in-house Roland UV printer. Ready in 48 hours — no outsourcing, no delays. In-house designer available for $35 flat.\n\nSame-day rush available for +$40 flat — order before 10 AM, pick up same day.\n\nPickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "March 1, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "March 1, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "March 15, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026"
+        },
+        {
+          "postType": "Update",
+          "description": "Standard turnaround is 48 hours — order by Friday, March 13 to guarantee your prints are ready before March 17.\n\nNeed it faster? Same-day rush is +$40 flat. Order before 10 AM on any weekday, pick up that afternoon.\n\nBanners, window decals, and flyers for St. Patrick's Day all printed in-house. No outsourcing. No delays.\n\nCall (306) 954-8688 to confirm availability before you order — 216 33rd St W, Saskatoon.",
+          "publishDate": "March 10, 2026",
+          "publishTime": "9:00 AM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026_update"
+        },
+        {
+          "postType": "Event",
+          "title": "St. Patrick's Day — Saskatoon, March 17",
+          "description": "St. Patrick's Day is this Tuesday — same-day rush printing is still available.\n\nOrder before 10 AM today, tomorrow, or Monday and pick up the same day. +$40 flat rush fee.\n\nVinyl banners, window decals, and flyers all in stock and ready to print at 216 33rd St W, Saskatoon.\n\nCall (306) 954-8688 to confirm capacity.",
+          "publishDate": "March 14, 2026",
+          "publishTime": "9:00 AM",
+          "eventStart": "March 17, 2026",
+          "eventStartTime": "9:00 AM",
+          "eventEnd": "March 17, 2026",
+          "eventEndTime": "11:59 PM",
+          "buttonType": "Call now",
+          "buttonUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026_event"
+        }
       ]
     },
     {
       "campaign": "Mother's Day",
       "posts": [
-        "Apr 20 — Mother's Day is May 10 — order banners now",
-        "May 1 — Flyers, banners, photo prints for Mother's Day",
-        "May 6 — Same-day rush available until May 8"
+        {
+          "postType": "Offer",
+          "title": "Mother's Day Banners & Prints — Saskatoon",
+          "description": "Mother's Day is May 10 — get your restaurant, spa, or retail shop ready with custom printed banners, window decals, and photo posters, all printed in-house in Saskatoon.\n\nVinyl banner 2×6ft — $90. Photo poster 24×36\" on Roland Photobase Matte — $35. Window decals from $11/sqft. Promotional flyers 250 for $110.\n\nIn-house designer available for $35 flat — send your idea and we'll produce a proof same day.\n\nOrder by May 7 for standard 48-hour turnaround. Same-day rush available for +$40 flat.\n\nPickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "April 21, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "April 21, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "May 7, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026"
+        },
+        {
+          "postType": "Event",
+          "title": "Mother's Day 2026 — Order Before May 7",
+          "description": "Mother's Day is Sunday, May 10 — last day for standard turnaround is Thursday, May 7.\n\nBanners for spas, restaurants, and florists. Photo posters and foam board displays for gift shops and memory tables. Window decals for storefronts promoting Mother's Day specials.\n\nAll printed in-house on our Roland UV printer at 216 33rd St W, Saskatoon — no outsourcing.\n\nSame-day rush still available May 8 for +$40 flat. Call (306) 954-8688.",
+          "publishDate": "April 29, 2026",
+          "publishTime": "9:00 AM",
+          "eventStart": "May 10, 2026",
+          "eventStartTime": "9:00 AM",
+          "eventEnd": "May 10, 2026",
+          "eventEndTime": "11:59 PM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026_event"
+        },
+        {
+          "postType": "Update",
+          "description": "Only nine days until Mother's Day — this is the final week to order standard printing before May 10.\n\nLast day for 48-hour turnaround: Thursday, May 7. Order before 10 AM.\n\nAfter May 7: same-day rush only, for +$40 flat.\n\nBanners, photo posters, foam board displays, window decals, and flyers — all printed in-house. In-house designer $35 flat.\n\n216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "May 1, 2026",
+          "publishTime": "9:00 AM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026_update"
+        }
       ]
     },
     {
       "campaign": "Graduation",
       "posts": [
-        "Apr 15 — Grad banner season starts",
-        "May 10 — Order now for June ceremonies",
-        "May 28 — Same-day rush still available"
+        {
+          "postType": "Offer",
+          "title": "Graduation Banners & Photo Displays — Saskatoon",
+          "description": "Graduation season is here — custom banners, foam board photo displays, and retractable stands for Saskatoon schools, universities, and private grad parties.\n\nVinyl banner 2×6ft — $90. Foam board 24×36\" — $65. Retractable stand complete — $219 (stand + 24×80\" print).\n\nBring your school colours and grad year. In-house designer handles the layout for $35 flat — same-day proof.\n\nOrder by late May for standard 48-hour turnaround. Same-day rush available for +$40 flat.\n\nPickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "April 15, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "April 15, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "June 25, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026"
+        },
+        {
+          "postType": "Update",
+          "description": "June ceremonies are 4–6 weeks away — order your graduation banners and photo displays now to avoid the rush.\n\nPopular orders: 2×6ft vinyl banner — $90. 4×8ft gym banner — $240. 24×36\" foam board photo display — $65.\n\nIn-house designer available — send your photo, school logo, and grad year. Proof ready same day for $35 flat.\n\nStandard turnaround: 48 hours. Same-day rush available for +$40.\n\nPickup at 216 33rd St W, Saskatoon. (306) 954-8688.",
+          "publishDate": "May 10, 2026",
+          "publishTime": "9:00 AM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026_update"
+        },
+        {
+          "postType": "Event",
+          "title": "Grad Ceremony Season — Same-Day Rush Available",
+          "description": "Graduation ceremonies are underway across Saskatoon — same-day rush printing is available through the end of June.\n\nOrder any weekday before 10 AM, pick up that afternoon. +$40 flat rush fee.\n\nBanners, foam board displays, retractable stands, and flyers all printed in-house. No outsourcing.\n\nCall (306) 954-8688 to confirm capacity before you place your order. Pickup at 216 33rd St W, Saskatoon.",
+          "publishDate": "May 28, 2026",
+          "publishTime": "9:00 AM",
+          "eventStart": "June 1, 2026",
+          "eventStartTime": "9:00 AM",
+          "eventEnd": "July 1, 2026",
+          "eventEndTime": "11:59 PM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026_event"
+        }
       ]
     },
     {
       "campaign": "Ramadan/Eid",
       "posts": [
-        "Mar 1 — Ramadan Mubarak — iftar banners ready",
-        "Mar 15 — Eid al-Fitr coming — order your banner",
-        "Apr 10 — Eid decor printing available"
+        {
+          "postType": "Offer",
+          "title": "Ramadan & Eid Banners — Saskatoon",
+          "description": "Ramadan Mubarak — custom printed banners, retractable stands, and flyers for Saskatoon mosques, halal restaurants, and community events, all printed in-house.\n\nIftar dinner banner 2×6ft — $90. Mosque entrance banner 4×8ft — $216. Retractable stand complete — $219.\n\nPrint any language — Arabic, Urdu, Bengali. In-house designer available for $35 flat, same-day proof.\n\nOrder early — 48-hour standard turnaround. Same-day rush available for +$40 flat.\n\nPickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "March 1, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "March 1, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "March 28, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026"
+        },
+        {
+          "postType": "Update",
+          "description": "Eid al-Fitr is two weeks away — order your Eid banners and celebration decals now to guarantee standard 48-hour turnaround before the holiday.\n\nLast day for standard turnaround: March 27. After that, same-day rush only for +$40 flat.\n\nBanners, foam board displays, retractable stands, and flyers — all in any language including Arabic, Urdu, and Bengali.\n\n216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "March 15, 2026",
+          "publishTime": "9:00 AM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026_update"
+        },
+        {
+          "postType": "Event",
+          "title": "Eid al-Fitr 2026 — Saskatoon Celebrations",
+          "description": "Eid Mubarak to the Saskatoon Muslim community — same-day rush printing is still available through March 28.\n\nOrder before 10 AM, pick up same day for +$40 flat. Banners, window decals, flyers — printed in any language.\n\n216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "March 25, 2026",
+          "publishTime": "9:00 AM",
+          "eventStart": "March 29, 2026",
+          "eventStartTime": "9:00 AM",
+          "eventEnd": "March 31, 2026",
+          "eventEndTime": "11:59 PM",
+          "buttonType": "Call now",
+          "buttonUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026_event"
+        }
       ]
     },
     {
       "campaign": "Construction",
       "posts": [
-        "Apr 1 — Job site signs for spring builds",
-        "May 1 — New site? Site sign ready in 48 hours",
-        "Ongoing"
+        {
+          "postType": "Offer",
+          "title": "Job Site Signs for Spring Builds — Saskatoon",
+          "description": "Spring build season is here — get your job site signs, truck magnets, and safety banners printed in Saskatoon, ready in 48 hours.\n\nCoroplast site signs from $8/sqft — 18×24\" from $30, 24×36\" from $48. Truck door magnets from $24/sqft. Hoarding banners from $6.75/sqft.\n\nAll printed in-house on our Roland UV printer — no outsourcing, no surprises. In-house designer $35 flat.\n\nSame-day rush available for +$40 flat — order before 10 AM.\n\nPickup at 216 33rd St W, Saskatoon. (306) 954-8688.",
+          "publishDate": "April 1, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "April 1, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "May 31, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026"
+        },
+        {
+          "postType": "Update",
+          "description": "New site starting this month? Your job site sign can be ready in 48 hours.\n\nCoroplast signs from $8/sqft. Hoarding banners from $6.75/sqft. Truck door magnets from $24/sqft.\n\nNo minimum order. In-house designer $35 flat — print-ready files accepted too.\n\nCall (306) 954-8688 to order or get a quote. Pickup at 216 33rd St W, Saskatoon.",
+          "publishDate": "May 1, 2026",
+          "publishTime": "9:00 AM",
+          "buttonType": "Order online",
+          "buttonUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026_may"
+        },
+        {
+          "postType": "Update",
+          "description": "Peak construction season in Saskatoon — job site signs, truck magnets, and safety banners in stock and ready to print.\n\nNo minimum order on any product. Standard 48-hour turnaround, same-day rush available for +$40 flat.\n\nCoroplast signs, hoarding banners, ACP panels, business cards — one shop for everything on your job site.\n\nPickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "June 15, 2026",
+          "publishTime": "9:00 AM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026_peak"
+        }
       ]
     },
     {
       "campaign": "Agriculture",
       "posts": [
-        "Mar 15 — Seeding season signs ready",
-        "Jun 1 — Ag in Motion booth signage",
-        "Oct 1 — Harvest season farm signs"
+        {
+          "postType": "Offer",
+          "title": "Seeding Season Signs — Saskatchewan Farms",
+          "description": "Seeding season is starting — get your farm gate signs, crop plot markers, and biosecurity signs printed in Saskatoon, ready in 48 hours.\n\nCoroplast signs from $8/sqft — UV-resistant, reusable season after season. 18×24\" from $30, 24×36\" from $48.\n\nTruck door magnets from $24/sqft — 12×18\" from $45. H-wire stakes available.\n\nAll printed in-house on our Roland UV printer — no outsourcing. In-house designer $35 flat.\n\nLocal pickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "March 15, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "March 15, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "April 30, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agriculture_2026_spring"
+        },
+        {
+          "postType": "Event",
+          "title": "Ag in Motion 2026 — Booth Signs & Banners",
+          "description": "Ag in Motion 2026 is July 15–17 at Langham, SK — get your trade show booth signs, banners, and retractable stands printed in Saskatoon in time.\n\nRetractable stand complete — $219 (stand + 24×80\" print). Vinyl banner 8ft wide from $8.25/sqft. ACP table sign panels from $13/sqft.\n\nOrder by July 11 for standard 48-hour turnaround. In-house designer available for $35 flat.\n\nPickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "June 25, 2026",
+          "publishTime": "9:00 AM",
+          "eventStart": "July 15, 2026",
+          "eventStartTime": "8:00 AM",
+          "eventEnd": "July 17, 2026",
+          "eventEndTime": "5:00 PM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ag_in_motion_2026"
+        },
+        {
+          "postType": "Update",
+          "description": "Harvest season is underway — farm gate signs, truck magnets, and field marker signs printed in-house in Saskatoon, ready in 48 hours.\n\nCoroplast signs from $8/sqft — durable through harvest weather. Truck door magnets from $24/sqft, 12×18\" from $45.\n\nNo minimum order. Same-day rush available for +$40 flat — order before 10 AM.\n\n216 33rd St W, Saskatoon. (306) 954-8688.",
+          "publishDate": "September 15, 2026",
+          "publishTime": "9:00 AM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agriculture_2026_harvest"
+        }
       ]
     },
     {
       "campaign": "Agribusiness",
       "posts": [
-        "Mar 1 — Spring dealer showroom refresh",
-        "Jun 1 — Ag in Motion trade show stands",
-        "Sep 1 — Fall product launch materials"
+        {
+          "postType": "Offer",
+          "title": "Spring Showroom Refresh — Ag Dealer Signs SK",
+          "description": "Spring is the time to refresh your dealer showroom and storefront — ACP fascia signs, window graphics, and retractable stands printed in Saskatoon.\n\nACP aluminum panels from $13/sqft — permanent, rigid, professional. 24×36\" from $66. 4×8ft from $272. Retractable stand complete — $219. Flyers 250 for $110.\n\nIn-house designer $35 flat — same-day proof. All printed on our Roland UV printer.\n\nPickup at 216 33rd St W, Saskatoon. (306) 954-8688.",
+          "publishDate": "March 1, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "March 1, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "April 30, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agribusiness_2026_spring"
+        },
+        {
+          "postType": "Event",
+          "title": "Ag in Motion 2026 — Dealer Trade Show Stands",
+          "description": "Ag in Motion is July 15–17 at Langham, SK — your booth display is your biggest marketing moment of the year.\n\nRetractable stand complete — $219 (stand + 24×80\" print). Vinyl banner from $8.25/sqft. ACP table sign from $13/sqft. Spec sheet flyers 250 for $110.\n\nOrder by July 11 for standard turnaround. In-house designer $35 flat — send your logo and product list.\n\nPickup 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "June 25, 2026",
+          "publishTime": "9:00 AM",
+          "eventStart": "July 15, 2026",
+          "eventStartTime": "8:00 AM",
+          "eventEnd": "July 17, 2026",
+          "eventEndTime": "5:00 PM",
+          "buttonType": "Learn more",
+          "buttonUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ag_in_motion_2026_agribusiness"
+        },
+        {
+          "postType": "Offer",
+          "title": "Fall Product Launch Signage — Ag Dealers SK",
+          "description": "Fall product launch season — spec sheets, retractable stands, and ACP signage for Saskatchewan ag dealers and farm supply stores.\n\nSpec sheet flyers 250 for $110. Retractable stand complete — $219. ACP aluminum sign 24×36\" from $66.\n\nAll printed in-house on our Roland UV printer. In-house designer $35 flat.\n\nOrder now for 48-hour turnaround. Same-day rush available for +$40 flat.\n\nPickup at 216 33rd St W, Saskatoon. (306) 954-8688.",
+          "publishDate": "September 1, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "September 1, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "October 31, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agribusiness_2026_fall"
+        }
       ]
     },
     {
       "campaign": "Poster Printing",
       "posts": [
-        "Apr 15 — Spring events season: event poster printing Saskatoon from $15",
-        "Jul 15 — Fringe Festival season: concert and show poster printing same-day available",
-        "Sep 1 — Fall events and trade shows: retractable stands from $219"
+        {
+          "postType": "Offer",
+          "title": "Spring Event Poster Printing — Saskatoon",
+          "description": "Spring event season is here — get your event posters, promotional displays, and retractable stands printed in Saskatoon.\n\nPhoto poster on Roland Photobase Matte 220gsm — 18×24\" from $22, 24×36\" from $35. Foam board display 24×36\" from $65. Retractable stand complete — $219.\n\nIn-house designer $35 flat — same-day proof, print-ready files also accepted.\n\nStandard turnaround 48 hours. Same-day rush +$40 flat.\n\nPickup at 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "April 15, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "April 15, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "June 30, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_spring_2026"
+        },
+        {
+          "postType": "Update",
+          "description": "Saskatoon Fringe Festival season — concert posters, show posters, event banners, and retractable stands printed same-day in Saskatoon.\n\nSame-day rush available for +$40 flat — order before 10 AM, pick up same afternoon.\n\nPhoto poster 18×24\" from $22. Foam board 24×36\" from $65. Vinyl banner 2×6ft from $90.\n\nIn-house printer — no outsourcing delays. 216 33rd St W, Saskatoon. Call (306) 954-8688.",
+          "publishDate": "July 15, 2026",
+          "publishTime": "9:00 AM",
+          "buttonType": "Order online",
+          "buttonUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_fringe_2026"
+        },
+        {
+          "postType": "Offer",
+          "title": "Fall Trade Show Posters & Retractable Stands",
+          "description": "Fall trade show and event season — retractable stands, poster prints, and foam board displays printed in Saskatoon for your next show.\n\nRetractable stand complete — $219 (stand + 24×80\" print). Photo poster 24×36\" from $35. Foam board display 24×36\" from $65.\n\nAll printed in-house on our Roland UV printer. In-house designer $35 flat — send your logo and event details.\n\nOrder by date needed minus 2 business days. Same-day rush +$40 flat.\n\nPickup at 216 33rd St W, Saskatoon. (306) 954-8688.",
+          "publishDate": "September 1, 2026",
+          "publishTime": "9:00 AM",
+          "offerStart": "September 1, 2026",
+          "offerStartTime": "9:00 AM",
+          "offerEnd": "November 30, 2026",
+          "offerEndTime": "11:59 PM",
+          "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
+          "redeemUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_fall_2026"
+        }
       ]
     }
   ]
