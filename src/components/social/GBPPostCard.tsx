@@ -9,6 +9,7 @@ export interface GBPPost {
   description: string;
   publishDate: string;
   publishTime: string;
+  imagePath?: string; // e.g. "public/images/seasonal/mothers-day/hero.webp"
   // Offer-only
   offerStart?: string;
   offerStartTime?: string;
@@ -91,6 +92,12 @@ function Row({
   );
 }
 
+const LOCAL_BASE = "/Users/owner/Downloads/TRUE COLOR PRICING /truecolor-estimator/";
+
+function toSrc(imagePath: string): string {
+  return imagePath.startsWith("public/") ? imagePath.slice(6) : imagePath;
+}
+
 const BADGE_STYLES: Record<string, string> = {
   Offer: "bg-green-100 text-green-700 border-green-200",
   Update: "bg-blue-100 text-blue-700 border-blue-200",
@@ -128,9 +135,31 @@ export function GBPPostCard({ post, index }: { post: GBPPost; index: number }) {
         </div>
       </div>
 
+      {/* Image preview */}
+      {post.imagePath && (
+        <div className="relative w-full h-36 bg-gray-100 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={toSrc(post.imagePath)}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+
       {/* Fields */}
       <div className="px-5 py-3">
         <Row label="Post type" value={`${post.postType} ← click in GBP`} />
+
+        {/* Local file path for upload */}
+        {post.imagePath && (
+          <Row
+            label="Local file"
+            value={`${LOCAL_BASE}${post.imagePath}`}
+            copyable
+            mono
+          />
+        )}
 
         {/* Title — Offer + Event only */}
         {post.title !== undefined && (

@@ -367,7 +367,8 @@
           "offerEnd": "March 15, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026"
+          "redeemUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026",
+          "imagePath": "public/images/seasonal/st-patricks/banner-shamrock-green.webp"
         },
         {
           "postType": "Update",
@@ -375,7 +376,8 @@
           "publishDate": "March 10, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026_update"
+          "buttonUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026_update",
+          "imagePath": "public/images/seasonal/st-patricks/banner-pub-modern.webp"
         },
         {
           "postType": "Event",
@@ -388,7 +390,8 @@
           "eventEnd": "March 17, 2026",
           "eventEndTime": "11:59 PM",
           "buttonType": "Call now",
-          "buttonUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026_event"
+          "buttonUrl": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=st_patricks_2026_event",
+          "imagePath": "public/images/seasonal/st-patricks/hero.webp"
         }
       ]
     },
@@ -406,7 +409,8 @@
           "offerEnd": "May 7, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026"
+          "redeemUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026",
+          "imagePath": "public/images/seasonal/mothers-day/banner-storefront-entrance.webp"
         },
         {
           "postType": "Event",
@@ -419,7 +423,8 @@
           "eventEnd": "May 10, 2026",
           "eventEndTime": "11:59 PM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026_event"
+          "buttonUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026_event",
+          "imagePath": "public/images/seasonal/mothers-day/photo-poster-display.webp"
         },
         {
           "postType": "Update",
@@ -427,7 +432,8 @@
           "publishDate": "May 1, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026_update"
+          "buttonUrl": "https://truecolorprinting.ca/mothers-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=mothers_day_2026_update",
+          "imagePath": "public/images/seasonal/mothers-day/hero.webp"
         }
       ]
     },
@@ -445,7 +451,8 @@
           "offerEnd": "June 25, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026"
+          "redeemUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026",
+          "imagePath": "public/images/seasonal/graduation/banner-gold-classic.webp"
         },
         {
           "postType": "Update",
@@ -453,7 +460,8 @@
           "publishDate": "May 10, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026_update"
+          "buttonUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026_update",
+          "imagePath": "public/images/seasonal/graduation/banner-school-colors.webp"
         },
         {
           "postType": "Event",
@@ -466,7 +474,8 @@
           "eventEnd": "July 1, 2026",
           "eventEndTime": "11:59 PM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026_event"
+          "buttonUrl": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=graduation_2026_event",
+          "imagePath": "public/images/seasonal/graduation/hero.webp"
         }
       ]
     },
@@ -484,7 +493,8 @@
           "offerEnd": "March 28, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026"
+          "redeemUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026",
+          "imagePath": "public/images/seasonal/ramadan/banner-eid-mubarak.webp"
         },
         {
           "postType": "Update",
@@ -492,7 +502,8 @@
           "publishDate": "March 15, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026_update"
+          "buttonUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026_update",
+          "imagePath": "public/images/seasonal/ramadan/showcase-banners-3up.webp"
         },
         {
           "postType": "Event",
@@ -505,7 +516,8 @@
           "eventEnd": "March 31, 2026",
           "eventEndTime": "11:59 PM",
           "buttonType": "Call now",
-          "buttonUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026_event"
+          "buttonUrl": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ramadan_2026_event",
+          "imagePath": "public/images/seasonal/ramadan/hero.webp"
         }
       ]
     },
@@ -523,7 +535,8 @@
           "offerEnd": "May 31, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026"
+          "redeemUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026",
+          "imagePath": "public/images/products/heroes/construction-hero-1200x500.webp"
         },
         {
           "postType": "Update",
@@ -531,7 +544,8 @@
           "publishDate": "May 1, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Order online",
-          "buttonUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026_may"
+          "buttonUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026_may",
+          "imagePath": "public/images/industries/construction/email-header-construction-main.webp"
         },
         {
           "postType": "Update",
@@ -539,7 +553,8 @@
           "publishDate": "June 15, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026_peak"
+          "buttonUrl": "https://truecolorprinting.ca/construction-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=construction_2026_peak",
+          "imagePath": "public/images/industries/construction/email-header-construction-followup.webp"
         }
       ]
     },
@@ -557,7 +572,8 @@
           "offerEnd": "April 30, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agriculture_2026_spring"
+          "redeemUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agriculture_2026_spring",
+          "imagePath": "public/images/industries/agriculture/banner-seasonal-sale.webp"
         },
         {
           "postType": "Event",
@@ -570,7 +586,8 @@
           "eventEnd": "July 17, 2026",
           "eventEndTime": "5:00 PM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ag_in_motion_2026"
+          "buttonUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ag_in_motion_2026",
+          "imagePath": "public/images/industries/agriculture/banner-trade-show.webp"
         },
         {
           "postType": "Update",
@@ -578,7 +595,8 @@
           "publishDate": "September 15, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agriculture_2026_harvest"
+          "buttonUrl": "https://truecolorprinting.ca/agriculture-signs-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agriculture_2026_harvest",
+          "imagePath": "public/images/industries/agriculture/sign-farm-gate.webp"
         }
       ]
     },
@@ -596,7 +614,8 @@
           "offerEnd": "April 30, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agribusiness_2026_spring"
+          "redeemUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agribusiness_2026_spring",
+          "imagePath": "public/images/industries/agribusiness/sign-storefront.webp"
         },
         {
           "postType": "Event",
@@ -609,7 +628,8 @@
           "eventEnd": "July 17, 2026",
           "eventEndTime": "5:00 PM",
           "buttonType": "Learn more",
-          "buttonUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ag_in_motion_2026_agribusiness"
+          "buttonUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=ag_in_motion_2026_agribusiness",
+          "imagePath": "public/images/industries/agribusiness/retractable-dealer-showroom.webp"
         },
         {
           "postType": "Offer",
@@ -622,7 +642,8 @@
           "offerEnd": "October 31, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agribusiness_2026_fall"
+          "redeemUrl": "https://truecolorprinting.ca/agribusiness-signs-saskatchewan?utm_source=google_business&utm_medium=gbp_post&utm_campaign=agribusiness_2026_fall",
+          "imagePath": "public/images/industries/agribusiness/sign-dealer-fascia.webp"
         }
       ]
     },
@@ -640,7 +661,8 @@
           "offerEnd": "June 30, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_spring_2026"
+          "redeemUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_spring_2026",
+          "imagePath": "public/images/industries/poster-printing/display-retail-promotion.webp"
         },
         {
           "postType": "Update",
@@ -648,7 +670,8 @@
           "publishDate": "July 15, 2026",
           "publishTime": "9:00 AM",
           "buttonType": "Order online",
-          "buttonUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_fringe_2026"
+          "buttonUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_fringe_2026",
+          "imagePath": "public/images/industries/poster-printing/poster-concert-music.webp"
         },
         {
           "postType": "Offer",
@@ -661,7 +684,8 @@
           "offerEnd": "November 30, 2026",
           "offerEndTime": "11:59 PM",
           "terms": "Valid for new orders only. Pickup at 216 33rd St W, Saskatoon, SK.",
-          "redeemUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_fall_2026"
+          "redeemUrl": "https://truecolorprinting.ca/poster-printing-saskatoon?utm_source=google_business&utm_medium=gbp_post&utm_campaign=poster_fall_2026",
+          "imagePath": "public/images/industries/poster-printing/retractable-trade-show-display.webp"
         }
       ]
     }
