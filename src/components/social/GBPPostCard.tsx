@@ -151,15 +151,25 @@ export function GBPPostCard({ post, index }: { post: GBPPost; index: number }) {
       <div className="px-5 py-3">
         <Row label="Post type" value={`${post.postType} ← click in GBP`} />
 
-        {/* Local file path for upload */}
-        {post.imagePath && (
-          <Row
-            label="Local file"
-            value={`${LOCAL_BASE}${post.imagePath}`}
-            copyable
-            mono
-          />
-        )}
+        {/* Image to upload — filename prominent for Spotlight search */}
+        {post.imagePath && (() => {
+          const filename = post.imagePath.split("/").pop() ?? post.imagePath;
+          const fullPath = `${LOCAL_BASE}${post.imagePath}`;
+          return (
+            <div className="flex gap-3 items-start py-1.5 border-b border-gray-50">
+              <span className="w-36 flex-shrink-0 text-[11px] font-bold text-gray-400 uppercase tracking-wide leading-5">
+                Upload image
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="text-sm font-bold text-[#1c1712] break-all flex-1">{filename}</span>
+                  <CopyBtn text={fullPath} />
+                </div>
+                <span className="text-[10px] text-amber-600 font-semibold">JPG — ready to upload</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Title — Offer + Event only */}
         {post.title !== undefined && (
