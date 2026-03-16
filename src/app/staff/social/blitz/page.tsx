@@ -90,11 +90,11 @@ async function getData() {
     const BREVO_KEY = process.env.BREVO_API_KEY ?? "";
     const [sentRes, scheduledRes] = await Promise.all([
       fetch(
-        "https://api.brevo.com/v3/emailCampaigns?type=classic&status=sent&limit=50&sort=createdAt&order=desc",
+        "https://api.brevo.com/v3/emailCampaigns?type=classic&status=sent&limit=50&sort=desc",
         { headers: { "api-key": BREVO_KEY }, cache: "no-store" }
       ).catch(() => null),
       fetch(
-        "https://api.brevo.com/v3/emailCampaigns?type=classic&status=scheduled&limit=20&sort=scheduledAt&order=asc",
+        "https://api.brevo.com/v3/emailCampaigns?type=classic&status=scheduled&limit=20&sort=asc",
         { headers: { "api-key": BREVO_KEY }, cache: "no-store" }
       ).catch(() => null),
     ]);
