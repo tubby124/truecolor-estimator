@@ -26,7 +26,7 @@ async function getData() {
   try {
     const supabase = createServiceClient();
 
-    const [campaignRes, nicheRes, totalRes, activeRes, completedRes, bouncedRes, pausedRes, outreachRes] =
+    const [campaignRes, nicheRes, totalRes, activeRes, completedRes, bouncedRes, pausedRes, outreachRes, engagementRes] =
       await Promise.all([
         supabase
           .from("tc_campaigns")
@@ -60,7 +60,25 @@ async function getData() {
           .select("*", { count: "exact", head: true })
           .eq("manual_outreach_ready", true)
           .is("manual_outreach_at", null),
+        supabase
+          .from("tc_leads")
+          .select("drip_niche, emails_sent, emails_opened, emails_clicked")
+          .not("drip_status", "eq", "queued"),
       ]);
+
+    const engagementData = engagementRes.data ?? [];
+    const totalEmailsSent = engagementData.reduce((sum, l) => sum + (l.emails_sent ?? 0), 0);
+    const totalOpened = engagementData.reduce((sum, l) => sum + (l.emails_opened ?? 0), 0);
+    const totalClicked = engagementData.reduce((sum, l) => sum + (l.emails_clicked ?? 0), 0);
+
+    const nicheEngagement = engagementData.reduce<Record<string, { sent: number; opened: number; clicked: number }>>((acc, l) => {
+      const niche = l.drip_niche ?? "unknown";
+      if (!acc[niche]) acc[niche] = { sent: 0, opened: 0, clicked: 0 };
+      acc[niche].sent += l.emails_sent ?? 0;
+      acc[niche].opened += l.emails_opened ?? 0;
+      acc[niche].clicked += l.emails_clicked ?? 0;
+      return acc;
+    }, {});
 
     return {
       campaigns: (campaignRes.data ?? []) as BlitzCampaign[],
@@ -73,6 +91,8 @@ async function getData() {
         pausedLeads: pausedRes.count ?? 0,
         outreachPending: outreachRes.count ?? 0,
       },
+      engagement: { totalEmailsSent, totalOpened, totalClicked },
+      nicheEngagement,
       lastEngineRun: campaignRes.data?.[0]?.updated_at ?? null,
     };
   } catch {
@@ -80,6 +100,8 @@ async function getData() {
       campaigns: [],
       niches: [],
       stats: { totalLeads: 0, activeLeads: 0, completedLeads: 0, bouncedLeads: 0, pausedLeads: 0, outreachPending: 0 },
+      engagement: { totalEmailsSent: 0, totalOpened: 0, totalClicked: 0 },
+      nicheEngagement: {},
       lastEngineRun: null,
     };
   }
@@ -107,11 +129,18 @@ function timeAgo(iso: string) {
 }
 
 export default async function BlitzDashboardPage() {
-  const { campaigns, niches, stats, lastEngineRun } = await getData();
+  const { campaigns, niches, stats, engagement, lastEngineRun } = await getData();
 
   const bounceRate = stats.activeLeads + stats.completedLeads + stats.bouncedLeads > 0
     ? ((stats.bouncedLeads / (stats.activeLeads + stats.completedLeads + stats.bouncedLeads)) * 100).toFixed(1)
     : "0";
+
+  const openRate = engagement.totalEmailsSent > 0
+    ? ((engagement.totalOpened / engagement.totalEmailsSent) * 100).toFixed(1)
+    : "0.0";
+  const clickRate = engagement.totalEmailsSent > 0
+    ? ((engagement.totalClicked / engagement.totalEmailsSent) * 100).toFixed(1)
+    : "0.0";
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
@@ -147,7 +176,7 @@ export default async function BlitzDashboardPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Stats bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-10 gap-3">
           <StatCard label="Total leads" value={stats.totalLeads.toLocaleString()} accent="#94a3b8" />
           <StatCard label="Active drip" value={stats.activeLeads} accent="#34d399" />
           <StatCard label="Completed" value={stats.completedLeads} accent="#22c55e" />
@@ -160,6 +189,9 @@ export default async function BlitzDashboardPage() {
             sub={!lastEngineRun ? "No runs yet" : undefined}
             accent="#fbbf24"
           />
+          <StatCard label="Emails Sent" value={engagement.totalEmailsSent.toLocaleString()} accent="#94a3b8" />
+          <StatCard label="Open Rate" value={`${openRate}%`} accent={parseFloat(openRate) >= 20 ? "#34d399" : "#fbbf24"} />
+          <StatCard label="Click Rate" value={`${clickRate}%`} accent={parseFloat(clickRate) >= 3 ? "#34d399" : "#fbbf24"} />
         </div>
 
         {/* Campaign pipeline */}
