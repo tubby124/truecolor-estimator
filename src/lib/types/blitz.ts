@@ -93,6 +93,20 @@ export interface BlitzTemplate {
   created_at: string;
 }
 
+export interface BrevoHtmlCampaign {
+  id: number;
+  name: string;
+  status: "sent" | "scheduled" | "draft";
+  sentDate: string | null;
+  scheduledAt: string | null;
+  stats: {
+    sent: number;
+    delivered: number;
+    uniqueOpens: number;
+    clicks: number;
+  };
+}
+
 export interface BlitzStats {
   totalLeads: number;
   activeLeads: number;

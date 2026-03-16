@@ -3,7 +3,7 @@ import Link from "next/link";
 import lazyLoad from "next/dynamic";
 import { createServiceClient } from "@/lib/supabase/server";
 import { TriggerButton } from "@/components/social/TriggerButton";
-import type { BlitzNiche, BlitzCampaign } from "@/lib/types/blitz";
+import type { BlitzNiche, BlitzCampaign, BrevoHtmlCampaign } from "@/lib/types/blitz";
 
 const BlitzPipeline = lazyLoad(
   () => import("@/components/social/BlitzPipeline").then(m => m.BlitzPipeline),
@@ -13,6 +13,11 @@ const BlitzPipeline = lazyLoad(
 const NicheTable = lazyLoad(
   () => import("@/components/social/NicheTable").then(m => m.NicheTable),
   { loading: () => <div className="animate-pulse h-64 bg-gray-100 rounded-2xl" /> }
+);
+
+const BrevoHtmlCampaignsPanel = lazyLoad(
+  () => import("@/components/social/BrevoHtmlCampaignsPanel").then(m => m.BrevoHtmlCampaignsPanel),
+  { loading: () => <div className="animate-pulse h-48 bg-gray-100 rounded-2xl" /> }
 );
 
 export const metadata: Metadata = {
@@ -80,6 +85,49 @@ async function getData() {
       return acc;
     }, {});
 
+    // Fetch Brevo HTML campaigns (sent + scheduled) in parallel
+    const BREVO_KEY = process.env.BREVO_API_KEY ?? "";
+    const [sentRes, scheduledRes] = await Promise.all([
+      fetch(
+        "https://api.brevo.com/v3/emailCampaigns?type=classic&status=sent&limit=50&sort=createdAt&order=desc",
+        { headers: { "api-key": BREVO_KEY }, cache: "no-store" }
+      ).catch(() => null),
+      fetch(
+        "https://api.brevo.com/v3/emailCampaigns?type=classic&status=scheduled&limit=20&sort=scheduledAt&order=asc",
+        { headers: { "api-key": BREVO_KEY }, cache: "no-store" }
+      ).catch(() => null),
+    ]);
+
+    type BrevoApiCampaign = Record<string, unknown>;
+    type BrevoStats = { globalStats?: Record<string, number> };
+
+    const sentCampaigns: BrevoApiCampaign[] = sentRes?.ok ? ((await sentRes.json()).campaigns ?? []) : [];
+    const scheduledCampaigns: BrevoApiCampaign[] = scheduledRes?.ok ? ((await scheduledRes.json()).campaigns ?? []) : [];
+
+    const brevoHtmlCampaigns: BrevoHtmlCampaign[] = [
+      ...sentCampaigns.map((c) => ({
+        id: c.id as number,
+        name: c.name as string,
+        status: "sent" as const,
+        sentDate: (c.sentDate ?? null) as string | null,
+        scheduledAt: null,
+        stats: {
+          sent: (c.statistics as BrevoStats)?.globalStats?.sent ?? 0,
+          delivered: (c.statistics as BrevoStats)?.globalStats?.delivered ?? 0,
+          uniqueOpens: (c.statistics as BrevoStats)?.globalStats?.uniqueViews ?? 0,
+          clicks: (c.statistics as BrevoStats)?.globalStats?.clickers ?? 0,
+        },
+      })),
+      ...scheduledCampaigns.map((c) => ({
+        id: c.id as number,
+        name: c.name as string,
+        status: "scheduled" as const,
+        sentDate: null,
+        scheduledAt: (c.scheduledAt ?? null) as string | null,
+        stats: { sent: 0, delivered: 0, uniqueOpens: 0, clicks: 0 },
+      })),
+    ];
+
     return {
       campaigns: (campaignRes.data ?? []) as BlitzCampaign[],
       niches: (nicheRes.data ?? []) as BlitzNiche[],
@@ -94,6 +142,7 @@ async function getData() {
       engagement: { totalEmailsSent, totalOpened, totalClicked },
       nicheEngagement,
       lastEngineRun: campaignRes.data?.[0]?.updated_at ?? null,
+      brevoHtmlCampaigns,
     };
   } catch {
     return {
@@ -103,6 +152,7 @@ async function getData() {
       engagement: { totalEmailsSent: 0, totalOpened: 0, totalClicked: 0 },
       nicheEngagement: {},
       lastEngineRun: null,
+      brevoHtmlCampaigns: [],
     };
   }
 }
@@ -129,7 +179,7 @@ function timeAgo(iso: string) {
 }
 
 export default async function BlitzDashboardPage() {
-  const { campaigns, niches, stats, engagement, lastEngineRun } = await getData();
+  const { campaigns, niches, stats, engagement, lastEngineRun, brevoHtmlCampaigns } = await getData();
 
   const bounceRate = stats.activeLeads + stats.completedLeads + stats.bouncedLeads > 0
     ? ((stats.bouncedLeads / (stats.activeLeads + stats.completedLeads + stats.bouncedLeads)) * 100).toFixed(1)
@@ -222,6 +272,21 @@ export default async function BlitzDashboardPage() {
             </div>
           ) : (
             <NicheTable niches={niches} />
+          )}
+        </section>
+
+        {/* Brevo HTML campaigns */}
+        <section>
+          <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-500" />
+            Brevo HTML Campaigns ({brevoHtmlCampaigns.length})
+          </h2>
+          {brevoHtmlCampaigns.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+              <p className="text-sm text-gray-400">No campaigns found — check BREVO_API_KEY</p>
+            </div>
+          ) : (
+            <BrevoHtmlCampaignsPanel campaigns={brevoHtmlCampaigns} />
           )}
         </section>
       </div>
