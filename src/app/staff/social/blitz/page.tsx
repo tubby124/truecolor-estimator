@@ -3,6 +3,7 @@ import Link from "next/link";
 import lazyLoad from "next/dynamic";
 import { createServiceClient } from "@/lib/supabase/server";
 import { TriggerButton } from "@/components/social/TriggerButton";
+import { SyncHtmlListsButton } from "@/components/social/SyncHtmlListsButton";
 import type { BlitzNiche, BlitzCampaign, BrevoHtmlCampaign } from "@/lib/types/blitz";
 
 const BlitzPipeline = lazyLoad(
@@ -219,6 +220,7 @@ export default async function BlitzDashboardPage() {
                 {stats.outreachPending} ready for DM
               </Link>
             )}
+            <SyncHtmlListsButton />
             <TriggerButton />
           </div>
         </div>

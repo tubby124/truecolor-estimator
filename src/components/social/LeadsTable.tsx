@@ -17,6 +17,7 @@ interface Lead {
   emails_opened: number | null;
   rating: number | null;
   review_count: number | null;
+  brevo_html_niches: string[] | null;
 }
 
 interface ApiResponse {
@@ -43,7 +44,10 @@ const STATUS_PILLS: Record<string, string> = {
   queued: "bg-gray-100 text-gray-500",
 };
 
-const LeadRow = React.memo(function LeadRow({ lead }: { lead: Lead }) {
+const LeadRow = React.memo(function LeadRow({ lead, nicheSlug }: { lead: Lead; nicheSlug: string }) {
+  const isHtml = lead.brevo_html_niches?.includes(nicheSlug);
+  const isDrip = lead.drip_step !== null && lead.drip_step > 0;
+
   return (
     <tr className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
       <td className="px-4 py-2.5">
@@ -57,6 +61,19 @@ const LeadRow = React.memo(function LeadRow({ lead }: { lead: Lead }) {
         }`}>
           {lead.score}
         </span>
+      </td>
+      <td className="px-4 py-2.5 text-center hidden md:table-cell">
+        <div className="flex items-center justify-center gap-1 flex-wrap">
+          {isDrip && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">n8n</span>
+          )}
+          {isHtml && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">HTML</span>
+          )}
+          {!isDrip && !isHtml && (
+            <span className="text-xs text-gray-300">—</span>
+          )}
+        </div>
       </td>
       <td className="px-4 py-2.5">
         <div className="flex items-center justify-center gap-0.5">
@@ -175,6 +192,7 @@ export function LeadsTable({ nicheSlug }: Props) {
               <th className="text-left px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Email</th>
               <th className="text-left px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">City</th>
               <th className="text-center px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Score</th>
+              <th className="text-center px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400 hidden md:table-cell">Source</th>
               <th className="text-center px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Drip</th>
               <th className="text-center px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
             </tr>
@@ -184,22 +202,22 @@ export function LeadsTable({ nicheSlug }: Props) {
               // Skeleton rows
               Array.from({ length: 10 }).map((_, i) => (
                 <tr key={i} className="border-t border-gray-100">
-                  {Array.from({ length: 6 }).map((_, j) => (
+                  {Array.from({ length: 7 }).map((_, j) => (
                     <td key={j} className="px-4 py-3">
-                      <div className="h-4 bg-gray-100 rounded animate-pulse" style={{ width: j === 0 ? "70%" : j === 4 ? "100px" : "60%" }} />
+                      <div className="h-4 bg-gray-100 rounded animate-pulse" style={{ width: j === 0 ? "70%" : j === 5 ? "100px" : "60%" }} />
                     </td>
                   ))}
                 </tr>
               ))
             ) : leads.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-400">
                   No leads found
                 </td>
               </tr>
             ) : (
               leads.map((lead) => (
-                <LeadRow key={lead.id} lead={lead} />
+                <LeadRow key={lead.id} lead={lead} nicheSlug={nicheSlug} />
               ))
             )}
           </tbody>

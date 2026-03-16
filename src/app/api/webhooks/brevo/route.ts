@@ -5,12 +5,18 @@
  * observability tables (tc_leads, tc_email_sends) with open/click/bounce/
  * unsubscribe signals.
  *
- * Only processes events tagged "industry-blitz" — all other Brevo emails
- * (order confirmations, review requests, etc.) are silently ignored.
+ * Two email tracks are supported:
  *
- * Setup: Webhook registered in Brevo with Bearer token auth.
- * URL: https://truecolorprinting.ca/api/webhooks/brevo
- * Events: opened, click, unsubscribed, spam, hardBounce
+ * 1. n8n drip track (tag: "industry-blitz")
+ *    - Events matched via message-id → tc_email_sends → tc_leads
+ *    - Agriculture canary + future n8n-enrolled niches
+ *
+ * 2. Brevo HTML track (tag: "brevo-html-blitz")
+ *    - Events matched directly by email → tc_leads
+ *    - Healthcare, Construction, Retail, Sports, Events, Nonprofits, Real Estate
+ *    - REQUIRED: add tag "brevo-html-blitz" to each HTML campaign template in Brevo UI
+ *
+ * All other Brevo emails (order confirmations, review requests) are silently ignored.
  *
  * Auth: Bearer token in Authorization header (set via Brevo webhook auth config)
  * Env var: BREVO_WEBHOOK_SECRET — must match token registered in Brevo
@@ -63,48 +69,61 @@ export async function POST(req: NextRequest) {
     const event = raw as Record<string, unknown>;
     const eventType = event.event as string;
     const messageId = event["message-id"] as string | undefined;
+    const email = (event.email as string | undefined)?.toLowerCase();
     const tags = (event.tags as string[] | undefined) ?? [];
 
-    // Only process blitz emails — ignore order confirmations, review requests etc.
-    if (!tags.includes("industry-blitz")) {
-      continue;
-    }
+    const isBlitzDrip = tags.includes("industry-blitz");
+    const isHtmlBlitz = tags.includes("brevo-html-blitz");
 
-    if (!messageId) {
-      console.warn(
-        "[brevo-webhook] Event missing message-id, skipping",
-        eventType
-      );
+    // Only process events from known blitz tracks
+    if (!isBlitzDrip && !isHtmlBlitz) {
       continue;
     }
 
     const now = new Date().toISOString();
 
     console.log(
-      `[brevo-webhook] Processing event: ${eventType} messageId: ${messageId}`
+      `[brevo-webhook] Processing event: ${eventType} track: ${isBlitzDrip ? "n8n-drip" : "html"} messageId: ${messageId ?? "—"} email: ${email ?? "—"}`
     );
 
     if (eventType === "opened") {
-      // Mark the send record as opened
-      await supabase
-        .from("tc_email_sends")
-        .update({ opened_at: now, status: "opened" })
-        .eq("brevo_message_id", messageId)
-        .eq("status", "sent");
+      if (isBlitzDrip && messageId) {
+        // n8n drip track: match via message-id → tc_email_sends → tc_leads
+        await supabase
+          .from("tc_email_sends")
+          .update({ opened_at: now, status: "opened" })
+          .eq("brevo_message_id", messageId)
+          .eq("status", "sent");
 
-      // Fetch lead_id from the send record, then increment engagement counters
-      const { data: sendRecord } = await supabase
-        .from("tc_email_sends")
-        .select("lead_id")
-        .eq("brevo_message_id", messageId)
-        .maybeSingle();
+        const { data: sendRecord } = await supabase
+          .from("tc_email_sends")
+          .select("lead_id")
+          .eq("brevo_message_id", messageId)
+          .maybeSingle();
 
-      if (sendRecord?.lead_id) {
+        if (sendRecord?.lead_id) {
+          const { data: lead } = await supabase
+            .from("tc_leads")
+            .select("emails_opened")
+            .eq("id", sendRecord.lead_id)
+            .single();
+          if (lead) {
+            await supabase
+              .from("tc_leads")
+              .update({
+                emails_opened: (lead.emails_opened ?? 0) + 1,
+                last_opened_at: now,
+              })
+              .eq("id", sendRecord.lead_id);
+          }
+        }
+      } else if (isHtmlBlitz && email) {
+        // HTML track: match directly by email
         const { data: lead } = await supabase
           .from("tc_leads")
-          .select("emails_opened")
-          .eq("id", sendRecord.lead_id)
-          .single();
+          .select("id, emails_opened")
+          .eq("email", email)
+          .maybeSingle();
         if (lead) {
           await supabase
             .from("tc_leads")
@@ -112,29 +131,46 @@ export async function POST(req: NextRequest) {
               emails_opened: (lead.emails_opened ?? 0) + 1,
               last_opened_at: now,
             })
-            .eq("id", sendRecord.lead_id);
+            .eq("id", lead.id);
         }
       }
     } else if (eventType === "click") {
-      // Mark the send record as clicked
-      await supabase
-        .from("tc_email_sends")
-        .update({ clicked_at: now, status: "clicked" })
-        .eq("brevo_message_id", messageId);
+      if (isBlitzDrip && messageId) {
+        // n8n drip track: match via message-id → tc_email_sends → tc_leads
+        await supabase
+          .from("tc_email_sends")
+          .update({ clicked_at: now, status: "clicked" })
+          .eq("brevo_message_id", messageId);
 
-      // Fetch lead_id from the send record, then increment click counters
-      const { data: sendRecord } = await supabase
-        .from("tc_email_sends")
-        .select("lead_id")
-        .eq("brevo_message_id", messageId)
-        .maybeSingle();
+        const { data: sendRecord } = await supabase
+          .from("tc_email_sends")
+          .select("lead_id")
+          .eq("brevo_message_id", messageId)
+          .maybeSingle();
 
-      if (sendRecord?.lead_id) {
+        if (sendRecord?.lead_id) {
+          const { data: lead } = await supabase
+            .from("tc_leads")
+            .select("emails_clicked")
+            .eq("id", sendRecord.lead_id)
+            .single();
+          if (lead) {
+            await supabase
+              .from("tc_leads")
+              .update({
+                emails_clicked: (lead.emails_clicked ?? 0) + 1,
+                last_clicked_at: now,
+              })
+              .eq("id", sendRecord.lead_id);
+          }
+        }
+      } else if (isHtmlBlitz && email) {
+        // HTML track: match directly by email
         const { data: lead } = await supabase
           .from("tc_leads")
-          .select("emails_clicked")
-          .eq("id", sendRecord.lead_id)
-          .single();
+          .select("id, emails_clicked")
+          .eq("email", email)
+          .maybeSingle();
         if (lead) {
           await supabase
             .from("tc_leads")
@@ -142,11 +178,11 @@ export async function POST(req: NextRequest) {
               emails_clicked: (lead.emails_clicked ?? 0) + 1,
               last_clicked_at: now,
             })
-            .eq("id", sendRecord.lead_id);
+            .eq("id", lead.id);
         }
       }
     } else if (eventType === "unsubscribed" || eventType === "spam") {
-      const email = event.email as string | undefined;
+      // Both tracks: match by email
       if (email) {
         await supabase
           .from("tc_leads")
@@ -159,7 +195,7 @@ export async function POST(req: NextRequest) {
         console.log(`[brevo-webhook] Unsubscribed/spam: ${email}`);
       }
     } else if (eventType === "hardBounce") {
-      const email = event.email as string | undefined;
+      // Both tracks: match by email
       if (email) {
         await supabase
           .from("tc_leads")

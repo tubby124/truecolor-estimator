@@ -22,7 +22,7 @@ export async function GET(
 
   let query = supabase
     .from("tc_leads")
-    .select("id, business_name, email, phone, city, score, drip_status, drip_step, drip_niche, next_email_at, last_brevo_message_id, emails_sent, emails_opened, rating, review_count", { count: "exact" })
+    .select("id, business_name, email, phone, city, score, drip_status, drip_step, drip_niche, next_email_at, last_brevo_message_id, emails_sent, emails_opened, rating, review_count, brevo_html_niches", { count: "exact" })
     .contains("industry_tags", [niche])
     .order("score", { ascending: false })
     .range(from, to);

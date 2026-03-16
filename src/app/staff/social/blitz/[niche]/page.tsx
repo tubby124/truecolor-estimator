@@ -27,7 +27,7 @@ async function getData(nicheSlug: string) {
 
   if (!nicheData) return null;
 
-  const [templatesRes, activeRes, completedRes, bouncedRes, pausedRes, queuedRes] =
+  const [templatesRes, activeRes, completedRes, bouncedRes, pausedRes, queuedRes, collisionRes] =
     await Promise.all([
       supabase
         .from("tc_email_templates")
@@ -59,6 +59,12 @@ async function getData(nicheSlug: string) {
         .select("*", { count: "exact", head: true })
         .contains("industry_tags", [nicheSlug])
         .eq("drip_status", "queued"),
+      // Collision count: leads in BOTH HTML and n8n tracks for this niche
+      supabase
+        .from("tc_leads")
+        .select("*", { count: "exact", head: true })
+        .contains("industry_tags", [nicheSlug])
+        .contains("brevo_html_niches", [nicheSlug]),
     ]);
 
   return {
@@ -71,6 +77,7 @@ async function getData(nicheSlug: string) {
       paused: pausedRes.count ?? 0,
       queued: queuedRes.count ?? 0,
     },
+    collisionCount: collisionRes.count ?? 0,
   };
 }
 
@@ -89,7 +96,7 @@ export default async function NicheDetailPage({ params }: { params: Promise<{ ni
 
   if (!data) notFound();
 
-  const { niche, templates, counts } = data;
+  const { niche, templates, counts, collisionCount } = data;
   const total = counts.active + counts.completed + counts.bounced + counts.paused + counts.queued;
   const bounceRate = counts.active + counts.completed + counts.bounced > 0
     ? ((counts.bounced / (counts.active + counts.completed + counts.bounced)) * 100).toFixed(1)
@@ -136,6 +143,21 @@ export default async function NicheDetailPage({ params }: { params: Promise<{ ni
           <StatCard label="Bounced" value={counts.bounced} accent={counts.bounced > 0 ? "#ef4444" : "#94a3b8"} />
           <StatCard label="Bounce rate" value={`${bounceRate}%`} accent={parseFloat(bounceRate) > 5 ? "#ef4444" : "#34d399"} />
         </div>
+
+        {/* Collision alert */}
+        {collisionCount > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-start gap-3">
+            <span className="text-amber-500 mt-0.5 text-base leading-none">⚠</span>
+            <div>
+              <p className="text-sm font-bold text-amber-800">
+                {collisionCount} {collisionCount === 1 ? "lead" : "leads"} already emailed via Brevo HTML track
+              </p>
+              <p className="text-xs text-amber-600 mt-0.5">
+                These leads are in both the HTML campaign list and tagged for n8n drip enrollment. Enroll with caution to avoid double-emailing.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Health indicators */}
         <div className="grid sm:grid-cols-3 gap-3">
