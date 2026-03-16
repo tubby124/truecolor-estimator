@@ -107,6 +107,21 @@ export interface BrevoHtmlCampaign {
   };
 }
 
+export interface BrevoHtmlNicheStep {
+  day: number;
+  status: "sent" | "scheduled";
+  date: string | null;
+  openRate: number | null;
+}
+
+export interface BrevoHtmlNicheGroup {
+  nicheSlug: string;
+  displayName: string;
+  steps: BrevoHtmlNicheStep[];
+  nextTouchpoint: string | null;
+  htmlContactedCount: number;
+}
+
 export interface BlitzStats {
   totalLeads: number;
   activeLeads: number;

@@ -17,6 +17,17 @@ const STATUS_PILLS: Record<string, { label: string; cls: string }> = {
 type SortKey = "lead_count" | "priority" | "display_name";
 type SortDir = "asc" | "desc";
 
+// Niches currently running on the Brevo HTML scheduled campaign track
+const HTML_TRACK_NICHES = new Set([
+  "construction",
+  "healthcare",
+  "real-estate",
+  "retail",
+  "events",
+  "non-profits",
+  "sports",
+]);
+
 interface Props {
   niches: BlitzNiche[];
 }
@@ -119,6 +130,9 @@ export function NicheTable({ niches }: Props) {
               <th className="text-center px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">
                 Campaign
               </th>
+              <th className="text-center px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400 hidden md:table-cell">
+                Track
+              </th>
               <th className="text-center px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">
                 Status
               </th>
@@ -175,6 +189,23 @@ export function NicheTable({ niches }: Props) {
                       ) : (
                         <span className="text-gray-300 text-xs">No</span>
                       )}
+                    </td>
+                    <td className="px-4 py-2.5 text-center hidden md:table-cell">
+                      <div className="flex items-center justify-center gap-1 flex-wrap">
+                        {niche.has_campaign && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                            n8n drip
+                          </span>
+                        )}
+                        {HTML_TRACK_NICHES.has(niche.niche_slug) && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                            Brevo HTML
+                          </span>
+                        )}
+                        {!niche.has_campaign && !HTML_TRACK_NICHES.has(niche.niche_slug) && (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-2.5 text-center">
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${pill.cls}`}>
