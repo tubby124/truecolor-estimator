@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
+import { SendToSocialModal } from "./SendToSocialModal";
+import { toPublicUrl } from "@/lib/utils/social";
 
 export interface GBPPost {
   postType: "Offer" | "Update" | "Event";
@@ -106,6 +108,7 @@ const BADGE_STYLES: Record<string, string> = {
 
 export function GBPPostCard({ post, index }: { post: GBPPost; index: number }) {
   const [expanded, setExpanded] = useState(false);
+  const [showSendModal, setShowSendModal] = useState(false);
   const charCount = post.description.length;
   const titleLen = post.title?.length ?? 0;
 
@@ -132,6 +135,12 @@ export function GBPPostCard({ post, index }: { post: GBPPost; index: number }) {
           <span className="text-[10px] text-gray-400">
             {post.publishDate} · {post.publishTime}
           </span>
+          <button
+            onClick={() => setShowSendModal(true)}
+            className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border border-[#e63020]/30 text-[#e63020] hover:bg-[#e63020]/5 transition-colors"
+          >
+            -&gt; Queue
+          </button>
         </div>
       </div>
 
@@ -275,6 +284,16 @@ export function GBPPostCard({ post, index }: { post: GBPPost; index: number }) {
           </>
         )}
       </div>
+      <SendToSocialModal
+        isOpen={showSendModal}
+        onClose={() => setShowSendModal(false)}
+        initialData={{
+          imageUrls: post.imagePath ? [toPublicUrl(post.imagePath)] : [],
+          caption: post.description,
+          source: "gbp",
+          scheduleDate: post.publishDate,
+        }}
+      />
     </motion.div>
   );
 }

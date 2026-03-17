@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         },
         {
           type: "text",
-          text: `Generate social media captions for this print job.${contextNote}`,
+          text: `Generate social media captions for this print job. Also include an "alt_text" field in your JSON: a concise, descriptive alt text for this image (under 125 characters, no hashtags, describe what is physically in the image for accessibility).${contextNote}`,
         },
       ];
     } else if (hasCaption) {

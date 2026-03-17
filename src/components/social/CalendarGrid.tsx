@@ -30,6 +30,7 @@ export function CalendarGrid({ initialPosts, campaigns }: Props) {
   const [posts, setPosts] = useState<SocialPost[]>(initialPosts);
   const [today] = useState(new Date());
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [viewMode, setViewMode] = useState<"month" | "quarter">("month");
 
   // Realtime
   useEffect(() => {
@@ -87,6 +88,20 @@ export function CalendarGrid({ initialPosts, campaigns }: Props) {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setViewMode("month")}
+                className={`px-3 py-2 text-xs font-bold transition-colors ${viewMode === "month" ? "bg-[#1c1712] text-white" : "text-gray-500 hover:bg-gray-100"}`}
+              >
+                Month
+              </button>
+              <button
+                onClick={() => setViewMode("quarter")}
+                className={`px-3 py-2 text-xs font-bold transition-colors border-l border-gray-200 ${viewMode === "quarter" ? "bg-[#1c1712] text-white" : "text-gray-500 hover:bg-gray-100"}`}
+              >
+                Quarter
+              </button>
+            </div>
             <button
               onClick={goToday}
               className="text-xs font-bold text-gray-500 hover:text-[#1c1712] px-3 py-2 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200"
@@ -134,6 +149,7 @@ export function CalendarGrid({ initialPosts, campaigns }: Props) {
       )}
 
       <div className="max-w-6xl mx-auto px-6 py-6">
+        {viewMode === "month" && (
         <motion.div
           key={`${year}-${month}`}
           initial={{ opacity: 0, x: 8 }}
@@ -214,6 +230,83 @@ export function CalendarGrid({ initialPosts, campaigns }: Props) {
             })}
           </div>
         </motion.div>
+        )}
+
+        {viewMode === "quarter" && (() => {
+          function renderMiniMonth(y: number, m: number) {
+            const first = new Date(y, m, 1).getDay();
+            const days = new Date(y, m + 1, 0).getDate();
+            const monthLabel = MONTHS[m];
+
+            return (
+              <div key={`${y}-${m}`} className="flex-1 min-w-0">
+                <h3 className="text-xs font-black text-[#1c1712] mb-2 text-center">{monthLabel} {y}</h3>
+                <div className="grid grid-cols-7 gap-px text-center">
+                  {["S","M","T","W","T","F","S"].map((d, i) => (
+                    <div key={i} className="text-[9px] font-bold text-gray-400 py-1">{d}</div>
+                  ))}
+                  {Array.from({ length: first }).map((_, i) => (
+                    <div key={`e-${i}`} />
+                  ))}
+                  {Array.from({ length: days }).map((_, i) => {
+                    const dayNum = i + 1;
+                    const dateStr = isoDate(new Date(y, m, dayNum));
+                    const dayPosts = postsByDate[dateStr] ?? [];
+                    const isToday = dateStr === isoDate(today);
+                    const dayOfWeek = new Date(y, m, dayNum).getDay();
+                    const isPostingDay = dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+
+                    return (
+                      <Link
+                        key={dayNum}
+                        href={`/staff/social/compose?date=${dateStr}`}
+                        className={`relative py-1 text-[10px] rounded transition-colors ${
+                          isToday ? "bg-[#e63020] text-white font-bold" :
+                          dayPosts.length > 0 ? "font-bold text-[#1c1712]" :
+                          isPostingDay ? "text-gray-600 hover:bg-[#e63020]/10" :
+                          "text-gray-300"
+                        }`}
+                      >
+                        {dayNum}
+                        {dayPosts.length > 0 && (
+                          <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5">
+                            {dayPosts.slice(0, 3).map((p, pi) => (
+                              <span
+                                key={pi}
+                                className="w-1 h-1 rounded-full"
+                                style={{ backgroundColor: getCampaignColor(p) }}
+                              />
+                            ))}
+                          </span>
+                        )}
+                        {dayPosts.length === 0 && isPostingDay && (
+                          <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gray-200" />
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <motion.div
+              key={`quarter-${year}-${month}`}
+              initial={{ opacity: 0, x: 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
+            >
+              <div className="grid grid-cols-3 gap-6">
+                {[0, 1, 2].map(offset => renderMiniMonth(
+                  new Date(year, month + offset, 1).getFullYear(),
+                  new Date(year, month + offset, 1).getMonth()
+                ))}
+              </div>
+            </motion.div>
+          );
+        })()}
       </div>
     </div>
   );

@@ -47,6 +47,8 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
   const [activeTab, setActiveTab] = useState<PostStatus | "all">("all");
   const [deleting, setDeleting] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchUpdating, setBatchUpdating] = useState(false);
   const { toasts, showToast, dismissToast } = useToast();
 
   // Realtime subscription
@@ -113,6 +115,92 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
     }
   }
 
+  async function handleDuplicate(post: SocialPost) {
+    try {
+      const res = await fetch("/api/staff/social/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          campaign_id: post.campaign_id,
+          caption_raw: post.caption_raw,
+          caption_instagram: post.caption_instagram,
+          caption_facebook: post.caption_facebook,
+          caption_twitter: post.caption_twitter,
+          hashtags: post.hashtags,
+          image_url: post.image_url,
+          image_urls: post.image_urls ?? [],
+          platforms: post.platforms,
+          status: "draft" as const,
+          post_type: post.post_type,
+          notes: post.notes,
+          source: post.source ?? "manual",
+          alt_text: post.alt_text ?? null,
+        }),
+      });
+      if (!res.ok) throw new Error("Duplicate failed");
+      showToast("Post duplicated as draft", "success");
+    } catch {
+      showToast("Failed to duplicate", "error");
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(p => p.id)));
+    }
+  }
+
+  async function handleBatchStatus(status: PostStatus) {
+    setBatchUpdating(true);
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map(id =>
+          fetch(`/api/staff/social/posts/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+          })
+        )
+      );
+      setPosts(prev => prev.map(p => selectedIds.has(p.id) ? { ...p, status } : p));
+      showToast(`${selectedIds.size} posts → ${status}`, "success");
+      setSelectedIds(new Set());
+    } catch {
+      showToast("Batch update failed", "error");
+    } finally {
+      setBatchUpdating(false);
+    }
+  }
+
+  async function handleBatchDelete() {
+    if (!confirm(`Delete ${selectedIds.size} posts?`)) return;
+    setBatchUpdating(true);
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map(id =>
+          fetch(`/api/staff/social/posts/${id}`, { method: "DELETE" })
+        )
+      );
+      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)));
+      showToast(`${selectedIds.size} posts deleted`, "success");
+      setSelectedIds(new Set());
+    } catch {
+      showToast("Batch delete failed", "error");
+    } finally {
+      setBatchUpdating(false);
+    }
+  }
+
   const tabCounts = STATUS_TABS.reduce((acc, t) => {
     acc[t.key] = t.key === "all" ? posts.length : posts.filter(p => p.status === t.key).length;
     return acc;
@@ -131,12 +219,20 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
               {" · "}<span className="text-green-500 font-medium">● live</span>
             </p>
           </div>
-          <Link
-            href="/staff/social/compose"
-            className="flex items-center gap-2 bg-[#e63020] text-white text-sm font-bold px-4 py-2.5 rounded-lg hover:bg-[#c8281a] transition-colors"
-          >
-            + New Post
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleSelectAll}
+              className="text-xs font-semibold text-gray-500 hover:text-[#1c1712] px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+            >
+              {selectedIds.size === filtered.length && filtered.length > 0 ? "Deselect All" : "Select All"}
+            </button>
+            <Link
+              href="/staff/social/compose"
+              className="flex items-center gap-2 bg-[#e63020] text-white text-sm font-bold px-4 py-2.5 rounded-lg hover:bg-[#c8281a] transition-colors"
+            >
+              + New Post
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -164,6 +260,45 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
         </div>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="bg-[#1c1712] px-6 py-3">
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <span className="text-sm text-white font-semibold">
+              {selectedIds.size} selected
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleBatchStatus("ready")}
+                disabled={batchUpdating}
+                className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                Mark Ready
+              </button>
+              <button
+                onClick={() => handleBatchStatus("draft")}
+                disabled={batchUpdating}
+                className="text-xs font-bold text-white bg-gray-600 hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                Mark Draft
+              </button>
+              <button
+                onClick={handleBatchDelete}
+                disabled={batchUpdating}
+                className="text-xs font-bold text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="text-xs font-bold text-gray-400 hover:text-white px-2 py-1.5 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto px-6 py-6">
         {filtered.length === 0 ? (
           <div className="text-center py-20">
@@ -186,6 +321,16 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
                   className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow transition-shadow overflow-hidden"
                 >
                   <div className="flex items-start gap-4 p-4">
+                    {/* Checkbox */}
+                    <div className="flex items-center self-center flex-shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(post.id)}
+                        onChange={() => toggleSelect(post.id)}
+                        className="w-4 h-4 accent-[#e63020] cursor-pointer"
+                      />
+                    </div>
+
                     {/* Image thumbnail */}
                     <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                       {post.image_url ? (
@@ -255,6 +400,13 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
                           Unready
                         </button>
                       )}
+                      <button
+                        onClick={() => handleDuplicate(post)}
+                        className="text-xs font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors"
+                        title="Duplicate post"
+                      >
+                        Duplicate
+                      </button>
                       <Link
                         href={`/staff/social/${post.id}`}
                         className="text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"

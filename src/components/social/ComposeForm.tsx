@@ -7,6 +7,8 @@ import { CaptionRewriter } from "./CaptionRewriter";
 import { CAMPAIGN_HASHTAGS, CAMPAIGN_COLORS, getSuggestedScheduleDate } from "@/lib/data/social-hashtags";
 import type { SocialCampaign, Platform, PostType } from "@/lib/types/social";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
+import { ImagePicker } from "./ImagePicker";
+import { PostPreview } from "./PostPreview";
 
 const PLATFORMS: { key: Platform; icon: string; label: string }[] = [
   { key: "instagram", icon: "📸", label: "Instagram" },
@@ -65,8 +67,7 @@ export function ComposeForm({ campaigns }: Props) {
   const [captionTwitter, setCaptionTwitter] = useState("");
 
   // Step 3
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageError, setImageError] = useState(false);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [hashtags, setHashtags] = useState("");
 
   // Step 4
@@ -79,7 +80,7 @@ export function ComposeForm({ campaigns }: Props) {
   const campaign = campaigns.find(c => c.id === campaignId);
   useEffect(() => {
     if (!campaign) return;
-    setImageUrl(getAutoImageUrl(campaign.slug, postType));
+    setImageUrls([getAutoImageUrl(campaign.slug, postType)]);
     setHashtags(getHashtagSuggestion(campaign.slug));
     if (campaign.event_date) {
       setScheduleDate(getSuggestedScheduleDate(campaign.event_date, postType));
@@ -110,7 +111,8 @@ export function ComposeForm({ campaigns }: Props) {
         caption_facebook: captionFacebook || null,
         caption_twitter: captionTwitter || null,
         hashtags: hashtags || null,
-        image_url: imageUrl || null,
+        image_url: imageUrls[0] || null,
+        image_urls: imageUrls,
         platforms,
         schedule_time: scheduleTimestamp,
         use_next_free_slot: useNextFreeSlot,
@@ -269,8 +271,7 @@ export function ComposeForm({ campaigns }: Props) {
                     if (r.hashtags?.trim()) setHashtags(r.hashtags);
                   }}
                   onImageUploaded={(url) => {
-                    setImageUrl(url);
-                    setImageError(false);
+                    setImageUrls(prev => prev.includes(url) ? prev : [...prev, url]);
                   }}
                 />
                 {/* Manual override panels if AI not used */}
@@ -305,31 +306,12 @@ export function ComposeForm({ campaigns }: Props) {
             <StepCard key="3" title="Image & Hashtags">
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-semibold text-[#1c1712] mb-2">Image URL</label>
-                  <input
-                    type="url"
-                    value={imageUrl}
-                    onChange={e => { setImageUrl(e.target.value); setImageError(false); }}
-                    placeholder="https://truecolorprinting.ca/images/seasonal/..."
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#e63020]/30 focus:border-[#e63020]"
+                  <label className="block text-sm font-semibold text-[#1c1712] mb-2">Images</label>
+                  <ImagePicker
+                    value={imageUrls}
+                    onChange={setImageUrls}
+                    maxImages={10}
                   />
-                  {imageUrl && (
-                    <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center min-h-32">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={imageUrl}
-                        alt="Post preview"
-                        className={`max-h-48 max-w-full object-contain ${imageError ? "hidden" : ""}`}
-                        onError={() => setImageError(true)}
-                      />
-                      {imageError && (
-                        <div className="p-6 text-center">
-                          <p className="text-4xl mb-2">🖼️</p>
-                          <p className="text-sm text-gray-400">Image not found at this URL</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 <div>
@@ -415,31 +397,14 @@ export function ComposeForm({ campaigns }: Props) {
             <StepCard key="5" title="Preview & Save">
               <div className="space-y-5">
                 {/* IG preview card */}
-                {platforms.includes("instagram") && captionInstagram && (
-                  <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
-                    <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#E1306C] to-[#833AB4] flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">TC</span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-[#1c1712]">truecolorprinting</p>
-                        <p className="text-xs text-gray-400">📍 Saskatoon, SK</p>
-                      </div>
-                    </div>
-                    {imageUrl && !imageError && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imageUrl} alt="" className="w-full object-cover max-h-64" onError={() => setImageError(true)} />
-                    )}
-                    <div className="px-4 py-3">
-                      <p className="text-sm text-[#1c1712] leading-relaxed">{captionInstagram}</p>
-                      <p className="text-xs text-blue-500 mt-2 leading-relaxed">{hashtags}</p>
-                    </div>
-                    <div className="flex items-center gap-5 px-4 py-2.5 border-t border-gray-100 text-gray-400">
-                      <span className="text-lg">❤️</span>
-                      <span className="text-lg">💬</span>
-                      <span className="text-lg">✈️</span>
-                    </div>
-                  </div>
+                {captionInstagram && (
+                  <PostPreview
+                    imageUrls={imageUrls}
+                    caption={platforms.includes("instagram") ? captionInstagram : captionFacebook || captionInstagram}
+                    hashtags={hashtags}
+                    platform={platforms.includes("instagram") ? "instagram" : "facebook"}
+                    onPlatformChange={() => {}}
+                  />
                 )}
 
                 {/* Summary */}

@@ -40,6 +40,9 @@ export interface SocialPost {
   caption_twitter: string | null;
   hashtags: string | null;
   image_url: string | null;
+  image_urls: string[];
+  source: 'manual' | 'gbp' | 'image-prompt' | 'skill' | 'batch';
+  alt_text: string | null;
   platforms: Platform[];
   schedule_date: string | null;
   schedule_time: string | null;
@@ -92,6 +95,9 @@ export interface CreatePostBody {
   caption_twitter?: string;
   hashtags?: string;
   image_url?: string;
+  image_urls?: string[];
+  source?: string;
+  alt_text?: string;
   platforms?: Platform[];
   schedule_date?: string;
   schedule_time?: string;
@@ -116,6 +122,7 @@ export interface CaptionRewriteResponse {
   twitter: string;
   hashtags?: string;  // post-specific hashtag string from AI
   angle?: string;     // AI's one-sentence marketing strategy note
+  alt_text?: string;
 }
 
 // N8N webhook payload

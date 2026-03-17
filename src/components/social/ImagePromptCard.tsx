@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { SendToSocialModal } from "./SendToSocialModal";
 
 interface Props {
   name: string;
   prompt: string;
   borderColor?: string;
+  imageUrl?: string;
 }
 
-export function ImagePromptCard({ name, prompt, borderColor }: Props) {
+export function ImagePromptCard({ name, prompt, borderColor, imageUrl }: Props) {
   const [copied, setCopied] = useState(false);
+  const [showSendModal, setShowSendModal] = useState(false);
 
   async function handleCopy() {
     try {
@@ -45,10 +48,29 @@ export function ImagePromptCard({ name, prompt, borderColor }: Props) {
             </>
           )}
         </button>
+        {imageUrl && (
+          <button
+            onClick={() => setShowSendModal(true)}
+            className="flex items-center gap-1 text-xs font-bold text-purple-600 hover:text-purple-800 px-2.5 py-1 rounded-lg border border-purple-200 hover:bg-purple-50 transition-all flex-shrink-0"
+          >
+            -&gt; Queue
+          </button>
+        )}
       </div>
       <p className="text-xs text-gray-500 leading-relaxed bg-gray-50 rounded-xl p-3 font-mono">
         {prompt}
       </p>
+      {showSendModal && (
+        <SendToSocialModal
+          isOpen={showSendModal}
+          onClose={() => setShowSendModal(false)}
+          initialData={{
+            imageUrls: imageUrl ? [imageUrl] : [],
+            caption: name,
+            source: "image-prompt",
+          }}
+        />
+      )}
     </div>
   );
 }

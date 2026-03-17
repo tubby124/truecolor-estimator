@@ -66,7 +66,7 @@ export async function POST(_req: Request, { params }: Params) {
   if (!post.caption_raw && !post.caption_instagram) {
     return NextResponse.json({ error: "Post needs a caption before it can be published" }, { status: 400 });
   }
-  if (!post.image_url) {
+  if (!post.image_url && (!post.image_urls || post.image_urls.length === 0)) {
     return NextResponse.json({ error: "Post needs an image URL before it can be published" }, { status: 400 });
   }
   if (!post.platforms || post.platforms.length === 0) {
@@ -143,11 +143,12 @@ export async function POST(_req: Request, { params }: Params) {
     }
 
     // Build platform-specific target
+    const isVideo = (post.image_url ?? "").match(/\.(mp4|mov|webm)$/i);
     let target: Record<string, unknown> = { targetType: platform };
     if (platform === "facebook" && account.blotato_page_id) {
-      target = { targetType: "facebook", pageId: account.blotato_page_id, mediaType: "reel" };
+      target = { targetType: "facebook", pageId: account.blotato_page_id, ...(isVideo ? { mediaType: "reel" } : {}) };
     } else if (platform === "instagram") {
-      target = { targetType: "instagram", mediaType: "reel" };
+      target = { targetType: "instagram", ...(isVideo ? { mediaType: "reel" } : {}) };
     } else if (platform === "tiktok") {
       target = {
         targetType: "tiktok",
@@ -166,13 +167,18 @@ export async function POST(_req: Request, { params }: Params) {
         accountId: account.blotato_account_id,
         content: {
           text: captionMap[platform] || post.caption_raw,
-          mediaUrls: [post.image_url],
+          mediaUrls: post.image_urls?.length ? post.image_urls : (post.image_url ? [post.image_url] : []),
           platform,
         },
         target,
       },
       useNextFreeSlot: false,
     };
+
+    // If post has hashtags and platform is Instagram, try sending as firstComment
+    if (platform === "instagram" && post.hashtags) {
+      (payload.post as Record<string, unknown>).firstComment = post.hashtags;
+    }
 
     if (isFuture && scheduleTime) {
       payload.scheduledTime = scheduleTime.toISOString();
@@ -267,6 +273,33 @@ export async function POST(_req: Request, { params }: Params) {
     .single();
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+
+  // Send failure email notification to staff
+  if (finalStatus === "failed" && errorMessage) {
+    try {
+      const { sendEmail } = await import("@/lib/email/smtp");
+      const staffEmail = process.env.STAFF_EMAIL;
+      if (staffEmail) {
+        const captionPreview = (post.caption_raw || post.caption_instagram || "").slice(0, 60);
+        await sendEmail({
+          to: staffEmail,
+          subject: `Social post failed: ${captionPreview || "Untitled"}`,
+          html: `
+            <div style="font-family: system-ui, sans-serif; max-width: 500px;">
+              <h2 style="color: #e63020;">Social Post Failed</h2>
+              <p><strong>Platforms:</strong> ${(post.platforms as string[]).join(", ")}</p>
+              <p><strong>Error:</strong> ${errorMessage}</p>
+              <p><strong>Caption:</strong> ${(post.caption_raw || "").slice(0, 200)}</p>
+              <p><a href="https://truecolorprinting.ca/staff/social/queue" style="color: #e63020; font-weight: bold;">View Queue →</a></p>
+            </div>
+          `,
+          text: `Social post failed. Error: ${errorMessage}. View queue: https://truecolorprinting.ca/staff/social/queue`,
+        });
+      }
+    } catch (emailError) {
+      console.error("[social-publish] Failed to send failure notification email:", emailError);
+    }
+  }
 
   return NextResponse.json({
     ...updated,
