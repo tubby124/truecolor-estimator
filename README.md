@@ -1,6 +1,10 @@
 # True Color Display Printing — Estimator
 
-Internal staff estimator and client quoting tool for True Color Display Printing Ltd., Saskatoon SK.
+**Live site:** [truecolorprinting.ca](https://truecolorprinting.ca)
+
+Staff estimator, client quoting tool, and full e-commerce storefront for True Color Display Printing Ltd., Saskatoon SK.
+
+Built with Next.js, TypeScript, Tailwind CSS, and Supabase. Deployed on Railway.
 
 ## Local Development
 
