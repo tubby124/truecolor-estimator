@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
         const { data: linkData } = await supabase.auth.admin.generateLink({
           type: "magiclink",
           email: customerEmail,
-          options: { redirectTo: `${siteUrl}/account` },
+          options: { redirectTo: `${siteUrl}/account/callback` },
         });
         accountInfo = {
           isNewAccount: true,
