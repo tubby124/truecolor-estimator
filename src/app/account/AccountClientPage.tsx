@@ -190,7 +190,6 @@ export function AccountClientPage() {
   const [password, setPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState("");
-  const [pwResetSent, setPwResetSent] = useState(false);
 
   // Sign-up mode
   const [isSignUp, setIsSignUp] = useState(false);
@@ -360,28 +359,6 @@ export function AccountClientPage() {
       }
     } catch (err) {
       setPwError(err instanceof Error ? err.message : "Could not create account.");
-    } finally {
-      setPwLoading(false);
-    }
-  }
-
-  async function handleForgotPassword() {
-    if (!email.trim()) {
-      setPwError("Enter your email address above first.");
-      return;
-    }
-    setPwError("");
-    setPwLoading(true);
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        email.trim().toLowerCase(),
-        { redirectTo: `${SITE_URL}/account/callback` }
-      );
-      if (error) throw error;
-      setPwResetSent(true);
-    } catch (err) {
-      setPwError(err instanceof Error ? err.message : "Could not send reset email.");
     } finally {
       setPwLoading(false);
     }
@@ -562,20 +539,7 @@ export function AccountClientPage() {
               {isSignUp ? "Create your account" : "Sign in to your account"}
             </h2>
 
-            {pwResetSent ? (
-              <div className="text-center py-4">
-                <p className="font-semibold text-[#1c1712]">Reset link sent!</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Check your inbox for a password reset email.
-                </p>
-                <button
-                  onClick={() => setPwResetSent(false)}
-                  className="mt-4 text-sm text-[#16C2F3] font-semibold hover:underline"
-                >
-                  Back to sign in
-                </button>
-              </div>
-            ) : signUpDone ? (
+            {signUpDone ? (
               <div className="text-center py-4">
                 <p className="font-semibold text-[#1c1712]">Check your inbox!</p>
                 <p className="text-sm text-gray-500 mt-2">
@@ -674,13 +638,12 @@ export function AccountClientPage() {
                 )}
                 <div className="flex items-center justify-between pt-1">
                   {!isSignUp && (
-                    <button
-                      onClick={handleForgotPassword}
-                      type="button"
+                    <Link
+                      href={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ""}`}
                       className="text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
                     >
                       Forgot password?
-                    </button>
+                    </Link>
                   )}
                   <button
                     onClick={() => {
