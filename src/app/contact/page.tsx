@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "Contact True Color — Print Shop Saskatoon SK",
   description:
     "Visit True Color Display Printing, Saskatoon SK — 216 33rd St W. Mon–Fri 9 AM–5 PM. Signs, banners, cards from $30. Same-day rush +$40. In-house Roland UV.",
-  alternates: { canonical: "https://truecolorprinting.ca/contact" },
+  alternates: { canonical: "/contact" },
   openGraph: {
     title: "Contact True Color — Print Shop Saskatoon SK",
     description:

@@ -74,14 +74,27 @@ export default async function ProductPage({ params }: Props) {
     "@type": "Product",
     name: product.name,
     description: product.tagline,
+    url: `https://truecolorprinting.ca/products/${slug}`,
     image: `https://truecolorprinting.ca${product.heroImage}`,
     brand: { "@type": "Brand", name: "True Color Display Printing" },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "5.0",
+      reviewCount: "29",
+      bestRating: "5",
+      worstRating: "1",
+    },
     offers: {
       "@type": "Offer",
+      url: `https://truecolorprinting.ca/products/${slug}`,
       price: priceNum,
       priceCurrency: "CAD",
       availability: "https://schema.org/InStock",
-      seller: { "@type": "LocalBusiness", name: "True Color Display Printing" },
+      seller: {
+        "@type": ["LocalBusiness", "Store"],
+        "@id": "https://truecolorprinting.ca/#localbusiness",
+        name: "True Color Display Printing",
+      },
     },
   };
 
@@ -90,7 +103,7 @@ export default async function ProductPage({ params }: Props) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://truecolorprinting.ca/" },
-      { "@type": "ListItem", position: 2, name: "Products", item: "https://truecolorprinting.ca/quote" },
+      { "@type": "ListItem", position: 2, name: "Products", item: "https://truecolorprinting.ca/products" },
       { "@type": "ListItem", position: 3, name: product.name, item: `https://truecolorprinting.ca/products/${slug}` },
     ],
   };

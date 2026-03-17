@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "Privacy Policy for True Color Display Printing Ltd.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

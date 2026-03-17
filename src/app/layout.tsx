@@ -81,7 +81,7 @@ const websiteSchema = {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: "https://truecolorprinting.ca/quote?q={search_term_string}",
+      urlTemplate: "https://truecolorprinting.ca/quote?product={search_term_string}",
     },
     "query-input": "required name=search_term_string",
   },
@@ -89,7 +89,7 @@ const websiteSchema = {
 
 const localBusinessSchema = {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
+  "@type": ["LocalBusiness", "Store"],
   "@id": "https://truecolorprinting.ca/#localbusiness",
   name: "True Color Display Printing",
   description:
@@ -107,8 +107,18 @@ const localBusinessSchema = {
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: 52.1325,
-    longitude: -106.67,
+    latitude: 52.13254,
+    longitude: -106.67047,
+  },
+  hasMap: "https://maps.google.com/?cid=3278649905558780051",
+  areaServed: {
+    "@type": "GeoCircle",
+    geoMidpoint: {
+      "@type": "GeoCoordinates",
+      latitude: 52.13254,
+      longitude: -106.67047,
+    },
+    geoRadius: "50000",
   },
   openingHoursSpecification: [
     {
@@ -120,6 +130,30 @@ const localBusinessSchema = {
   ],
   priceRange: "$$",
   image: "https://truecolorprinting.ca/truecolorlogo.png",
+  paymentAccepted: "Cash, Credit Card, Debit, E-Transfer",
+  currenciesAccepted: "CAD",
+  knowsAbout: [
+    "Coroplast signs",
+    "Vinyl banner printing",
+    "Large format printing",
+    "Business card printing",
+    "Vehicle magnets",
+    "Window decals",
+    "Vinyl lettering",
+    "Foam board printing",
+    "Roland UV printing",
+  ],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Print Products",
+    itemListElement: [
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Coroplast Signs", url: "https://truecolorprinting.ca/coroplast-signs-saskatoon" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vinyl Banners", url: "https://truecolorprinting.ca/banner-printing-saskatoon" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Business Cards", url: "https://truecolorprinting.ca/business-cards-saskatoon" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Flyers", url: "https://truecolorprinting.ca/flyer-printing-saskatoon" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vehicle Magnets", url: "https://truecolorprinting.ca/custom-magnets-saskatoon" } },
+    ],
+  },
   aggregateRating: {
     "@type": "AggregateRating",
     ratingValue: "5.0",

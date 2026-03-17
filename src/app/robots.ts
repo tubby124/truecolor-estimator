@@ -1,8 +1,21 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
+  const publicDisallow = [
+    "/staff",
+    "/api/",
+    "/pay/",
+    "/cart",
+    "/checkout",
+    "/order-confirmed",
+    "/account",
+    "/account/",
+    "/quote/",
+  ];
+
   return {
     rules: [
+      // AI citation crawlers — ALLOW ALL for maximum LLM visibility
       {
         userAgent: [
           "GPTBot", "OAI-SearchBot", "ChatGPT-User",
@@ -10,21 +23,27 @@ export default function robots(): MetadataRoute.Robots {
           "ClaudeBot", "anthropic-ai",
           "Google-Extended", "Gemini-Web",
           "Bytespider", "cohere-ai",
-          "meta-externalagent",
+          "meta-externalagent", "FacebookBot",
           "Applebot", "Applebot-Extended",
           "Amazonbot", "YouBot", "Diffbot",
+          "CCBot",
         ],
         allow: "/",
-        disallow: ["/staff", "/api/", "/pay/", "/cart", "/checkout", "/order-confirmed", "/account"],
+        disallow: publicDisallow,
       },
+      // Block commercial SEO scrapers — zero ranking value, wastes crawl budget
       {
-        userAgent: "CCBot",
+        userAgent: [
+          "AhrefsBot", "SemrushBot", "MJ12bot",
+          "DotBot", "PetalBot", "DataForSeoBot", "BLEXBot",
+        ],
         disallow: "/",
       },
+      // Default: allow with standard blocks
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/staff", "/api/", "/pay/", "/cart", "/checkout", "/order-confirmed", "/account"],
+        disallow: publicDisallow,
       },
     ],
     sitemap: [

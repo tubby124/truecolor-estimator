@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "Terms of Service for True Color Display Printing Ltd.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {
