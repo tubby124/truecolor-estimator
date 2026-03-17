@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,12 +26,81 @@ export default function WallGraphicsSaskatoonPage() {
       subtitle="Transform any wall. Removable vinyl, full-colour prints, any size. In-house printing."
       heroImage="/images/products/product/decal-window-white-text-800x600.webp"
       heroAlt="Custom wall graphics and vinyl lettering in Saskatoon by True Color Display Printing"
-      description={
-        "Wall graphics are vinyl or rigid-substrate prints applied directly to walls, windows, or partitions to brand a space, display information, or create visual impact. True Color Display Printing produces custom wall graphics in Saskatoon from $11/sqft on an in-house Roland UV printer, with 1–3 business day turnaround and same-day rush available for +$40 flat.\n\nCompared to wallpaper: vinyl wall graphics apply like a large sticker — no glue, no soaking, no professional wallpaper hanger required. Compared to paint: full-colour photo-quality imagery at any custom size, removable and repositionable. Compared to rigid signage: lightweight panels with no wall anchors, ideal for lease spaces and seasonal displays.\n\nIndoor removable vinyl is rated 3–5 years under normal conditions. UV-cured inks resist fading from overhead lighting and indirect sunlight. Roland UV achieves up to 1,200 dpi print resolution on vinyl and rigid substrates.\n\nWall graphics are one of the highest-impact, lowest-cost ways to transform a space — and True Color prints them in Saskatoon without the lead times that come from shipping through a national supplier. Businesses, clinics, schools, retail stores, and restaurants use wall graphics to brand their space, display information, create photo walls, and add colour to otherwise blank walls.\n\nWe print wall graphics on removable vinyl stock, which means zero adhesive residue on drywall, painted surfaces, or brick when you take them down. Ideal for seasonal promotions, lease spaces, or anyone who wants the flexibility to update their décor without repainting. For permanent installations — entrance walls, lobby features, exterior signage — we use permanent vinyl or UV-printed rigid stock depending on the substrate.\n\nOur Roland UV printer handles any size up to 60 inches wide, with no practical length limit on rolled vinyl. Larger installs are done in panels with seams aligned to a natural break point in the design. Our in-house designer can build your layout to scale, match your brand colours, and provide a to-scale proof before anything goes to print — so what you approve is exactly what goes on your wall.\n\nVinyl lettering is a separate product for text-only applications — storefront hours, office door names, vehicle text. Cut on our precision plotter, it has a clean, professional finish with no background material visible. Popular for office windows, glass partitions, clinic doors, and construction site hoardings.\n\nSaskatoon businesses in the Midtown area, Broadway corridor, 8th Street commercial strip, and downtown core use True Color for wall graphics because we're local, fast, and do both the design and the print in one building. Standard turnaround is 1–3 business days. Same-day rush is available for +$40 flat.\n\nInstallation service is available — ask when you order. Pickup at 216 33rd St W, Saskatoon."
+      description="Wall graphics are vinyl or rigid-substrate prints applied directly to walls, windows, or partitions to brand a space, display information, or create visual impact. True Color Display Printing produces custom wall graphics in Saskatoon from $11/sqft on an in-house Roland UV printer, with 1–3 business day turnaround and same-day rush available for +$40 flat."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            Wall graphics are vinyl or rigid-substrate prints applied directly to walls, windows,
+            or partitions to brand a space, display information, or create visual impact. True Color
+            Display Printing produces custom wall graphics in Saskatoon from <strong>$11/sqft</strong> on
+            an in-house Roland UV printer, with 1–3 business day turnaround and same-day rush
+            available for +$40 flat.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            Compared to wallpaper: vinyl wall graphics apply like a large sticker — no glue, no
+            soaking, no professional wallpaper hanger required. Compared to paint: full-colour
+            photo-quality imagery at any custom size, removable and repositionable. Compared to{" "}
+            <Link href="/foamboard-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              rigid signage like foamboard
+            </Link>
+            : lightweight panels with no wall anchors, ideal for lease spaces and seasonal displays.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            Wall graphics are one of the highest-impact, lowest-cost ways to transform a space —
+            and True Color prints them in Saskatoon without the lead times that come from shipping
+            through a national supplier. Businesses, clinics, schools, retail stores, and restaurants
+            use wall graphics to brand their space, display information, create photo walls, and add
+            colour to otherwise blank walls. Indoor removable vinyl is rated 3–5 years under normal
+            conditions. UV-cured inks resist fading from overhead lighting and indirect sunlight.
+            Roland UV achieves up to 1,200 dpi print resolution on vinyl and rigid substrates.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            We print wall graphics on removable vinyl stock — zero adhesive residue on drywall,
+            painted surfaces, or brick when you take them down. Ideal for seasonal promotions, lease
+            spaces, or anyone who wants the flexibility to update their décor without repainting. For
+            permanent installations — entrance walls, lobby features, exterior signage — we use
+            permanent vinyl or UV-printed rigid stock depending on the substrate. Need a durable
+            exterior option?{" "}
+            <Link href="/sign-company-saskatoon" className="text-[#16C2F3] underline font-medium">
+              ACP aluminum signs
+            </Link>{" "}
+            handle outdoor branding from $13/sqft.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            Our Roland UV printer handles any size up to 60 inches wide, with no practical length
+            limit on rolled vinyl. Larger installs are done in panels with seams aligned to a natural
+            break point in the design. Our in-house designer can build your layout to scale, match
+            your brand colours, and provide a to-scale proof before anything goes to print — $35 flat,
+            same-day proof.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            If you only need text on glass or a painted surface —{" "}
+            <Link href="/vinyl-lettering-saskatoon" className="text-[#16C2F3] underline font-medium">
+              vinyl lettering
+            </Link>{" "}
+            is the lower-cost option from $40. Cut on our precision plotter with no background
+            material visible, it&apos;s the standard for storefront hours, office door names, and
+            vehicle text. For{" "}
+            <Link href="/window-decals-saskatoon" className="text-[#16C2F3] underline font-medium">
+              full-colour printed window decals
+            </Link>{" "}
+            — including logos, photos, and gradients — we print those from $11/sqft as well.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Saskatoon businesses in the Midtown area, Broadway corridor, 8th Street commercial strip,
+            and downtown core use True Color for wall graphics because we&apos;re local, fast, and do
+            both the design and the print in one building. Standard turnaround is 1–3 business days.
+            Same-day rush is available for +$40 flat. Installation service available — ask when you
+            order. Pickup at 216 33rd St W, Saskatoon. Call{" "}
+            <a href="tel:+13069548688" className="text-[#16C2F3] underline font-medium">
+              (306) 954-8688
+            </a>.
+          </p>
+        </>
       }
       products={[
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
-        { name: "Vinyl Lettering", from: "custom quote", slug: "vinyl-lettering" },
+        { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
         { name: "Window Perf", from: "from $8/sqft", slug: "window-perf" },
         { name: "ACP Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
