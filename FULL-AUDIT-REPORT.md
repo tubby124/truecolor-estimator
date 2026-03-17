@@ -1,258 +1,219 @@
 # Full SEO Audit — truecolorprinting.ca
 
-**Date:** 2026-03-14
-**Previous Score:** N/A (first codebase-first audit)
-**Seobility Score (reference):** 22% (JS-disabled crawler — not comparable; see note below)
+**Date:** 2026-03-16
+**Previous Score:** 65/100 (2026-03-14)
 **Method:** Codebase-first delta audit — direct file reads, no live crawl
 
-> **Why Seobility says 22%:** Seobility crawls with JavaScript disabled. The homepage H1 lives inside `HeroSlider.tsx` (a `"use client"` component with `useState`) — invisible to any JS-disabled crawler. All SEO *landing pages* use `IndustryPage` (a server component) and DO have SSR-rendered H1s. The fix is simple: add a static H1 to `page.tsx` and remove the conditional one from the slider.
+---
+
+## SEO Health Score: 67 / 100 (+2 from baseline)
+
+| Category | Weight | Prev | Current | Delta | Weighted |
+|----------|--------|------|---------|-------|----------|
+| Technical SEO | 25% | 62 | 66 | +4 | 16.5 |
+| Content Quality | 25% | 60 | 60 | 0 | 15.0 |
+| On-Page SEO | 20% | 60 | 63 | +3 | 12.6 |
+| Schema / Structured Data | 10% | 70 | 71 | +1 | 7.1 |
+| Performance (CWV) | 10% | 72 | 72 | 0 | 7.2 |
+| Images | 5% | 80 | 85 | +5 | 4.25 |
+| AI Search Readiness | 5% | 90 | 90 | 0 | 4.5 |
+| **TOTAL** | 100% | **65** | **67** | **+2** | **67.15** |
 
 ---
 
-## SEO Health Score: 65 / 100
+## What Changed Since 2026-03-14
 
-| Category | Weight | Score | Weighted |
-|----------|--------|-------|----------|
-| Technical SEO | 25% | 62 | 15.5 |
-| Content Quality | 25% | 60 | 15.0 |
-| On-Page SEO | 20% | 60 | 12.0 |
-| Schema / Structured Data | 10% | 70 | 7.0 |
-| Performance (CWV) | 10% | 72 | 7.2 |
-| Images | 5% | 80 | 4.0 |
-| AI Search Readiness | 5% | 90 | 4.5 |
-| **TOTAL** | 100% | | **65.2** |
+### RESOLVED (8 items)
 
-*Seobility's 22% is not comparable — it scores based on JS-disabled crawl. Our codebase audit reads SSR HTML directly.*
+| Item | Was | Now | Wave |
+|------|-----|-----|------|
+| Homepage sr-only H1 | Missing — zero static H1 | `<h1 className="sr-only">` at page.tsx:208 | 1.1 |
+| Homepage meta desc length | 174 chars (truncated in SERP) | 146 chars ✅ | 1.3 |
+| Banner meta desc length | 157 chars | 150 chars ✅ | 1.4 |
+| Coroplast meta desc length | 159 chars | 152 chars ✅ | 1.5 |
+| Homepage H2 | "What we print" (generic, no keyword) | "Signs, Banners & Print Products — Saskatoon" | 1.6 |
+| manifest.webmanifest | 404 on every page load | Exists at `/public/manifest.webmanifest` | 1.7 |
+| image-sitemap.xml route | Missing — robots.ts referenced a 404 | `src/app/image-sitemap.xml/route.ts` created | 3.2 |
+| Image sitemap in robots.ts | Not referenced | Listed in `sitemap[]` array ✅ | 3.3 |
 
----
-
-## Critical Issues (Fix Immediately — Wave 1)
-
-### ISSUE-01 — CRITICAL: Homepage H1 Not in SSR HTML
-**File:** `src/components/home/HeroSlider.tsx:177-180`
-**Problem:** The only H1 on the homepage is inside a `"use client"` component with conditional render:
-```tsx
-{current === 0 && (
-  <h1 className="text-lg md:text-3xl font-black ...">
-    Saskatoon Print Shop — Price it. Proof it. Pick it up today.
-  </h1>
-)}
-```
-A JS-disabled crawler (Seobility, some Googlebot crawl passes, accessibility scanners) sees **zero H1** on the homepage. Next.js does server-render `"use client"` components for the initial state — so `current === 0` does SSR the H1. But there is no guarantee Google always processes the initial state.
-
-**Fix:** Add `<h1 className="sr-only">` in `src/app/page.tsx` after `<SiteNav />`. Remove the conditional `<h1>` in `HeroSlider.tsx` (replace with a plain styled `<p>` or `<div>`).
-**Wave:** 1 | **Risk:** Very Low
+### Still NEW since last audit baseline
+*(none — all prior items still pending or resolved)*
 
 ---
 
-### ISSUE-02 — HIGH: 3 Meta Descriptions Over Character Limit
-| Page | Current Length | Limit | Over By |
-|------|---------------|-------|---------|
-| Homepage (`page.tsx`) | 174 chars | 155 | +19 |
-| `/banner-printing-saskatoon` | 157 chars | 155 | +2 |
-| `/coroplast-signs-saskatoon` | 159 chars | 155 | +4 |
-
-Google truncates at ~155 chars in SERP — the most important words get cut. For the homepage this is the biggest wasted opportunity on the site.
-
-**Current homepage description:** "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer, local pickup at 216 33rd St W Saskatoon. See your exact price now — no quote forms." (174 chars)
-
-**Proposed (145 chars):** "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon. See your price instantly."
-
-**Wave:** 1 | **Risk:** Very Low
+## Category Breakdown
 
 ---
 
-### ISSUE-03 — MEDIUM: Missing `manifest.webmanifest`
-**File:** `src/app/layout.tsx:23` declares `manifest: "/manifest.webmanifest"`
-**Problem:** `public/manifest.webmanifest` does not exist. This causes a 404 on every page load and browser PWA detection fails. Chrome DevTools shows a warning. Not a direct ranking signal but indicates technical debt.
-**Fix:** Create `public/manifest.webmanifest` with basic PWA metadata.
-**Wave:** 1 | **Risk:** Very Low
-
----
-
-### ISSUE-04 — MEDIUM: Weak Homepage H2
-**File:** `src/app/page.tsx` — first H2 reads `<h2>What we print</h2>`
-**Problem:** Generic, no keyword value. Google uses H2s as secondary topical signals.
-**Fix:** Change to `<h2>Signs, Banners & Print Products — Saskatoon</h2>`
-**Wave:** 1 | **Risk:** Low
-
----
-
-## High Priority (Wave 2–3)
-
-### ISSUE-05 — HIGH: DesignDirectionGrid on Zero Ranking Pages
-**Grep check:** `Grep "DesignDirectionGrid" src/app/*/page.tsx` → **0 matches**
-The component exists at `src/components/site/DesignDirectionGrid.tsx` and is a visual trust/authority signal, but it has never been added to any SEO landing page. Images drive engagement, time-on-page, and entity recognition.
-**Affected pages:** All 5 ranking pages, all industry pages
-**Wave:** 2 | **Risk:** Low (content improvement only)
-
----
-
-### ISSUE-06 — MEDIUM: `business-cards-saskatoon` Has No `descriptionNode`
-The page passes a plain `description` string (no JSX `descriptionNode`). Compare with `banner-printing-saskatoon` which has 5 paragraphs + 4 internal links in `descriptionNode`. Business cards is the #1 ranking page — it should have the richest content.
-**Wave:** 2 | **Risk:** Low
-
----
-
-### ISSUE-07 — MEDIUM: No Product Schema on Any Page
-Neither `IndustryPage.tsx` nor any landing page adds `Product` schema with `offers`, `image`, and `aggregateRating`. Google uses Product schema to generate merchant-style SERP features. Minuteman Press has no Product schema either — first mover advantage available.
-**Wave:** 4 | **Risk:** Low
-
----
-
-### ISSUE-08 — LOW: No image-sitemap.xml
-**File check:** `src/app/image-sitemap.xml/route.ts` — does not exist
-An image sitemap improves Google Images indexing of product photos. True Color has many product images that could rank in Google Images for local print queries.
-**Wave:** 3 | **Risk:** Very Low
-
----
-
-## Audit Findings by Category
-
-### Technical SEO — 62/100
+### Technical SEO — 66 / 100 (+4)
 
 | Check | Finding | Status | Wave |
 |-------|---------|--------|------|
-| Sitemap: hardcoded lastmod dates | All 68 pages have hardcoded dates | PASS ✅ | — |
-| Sitemap: /products/* excluded | Correctly excluded with comment | PASS ✅ | — |
-| Redirects: WP legacy URLs | 28+ permanent 301s in next.config.ts | PASS ✅ | — |
-| Redirects: /vinyl-banners-saskatoon | 301 → /banner-printing-saskatoon | PASS ✅ | — |
-| noindex: utility pages | /cart, /checkout, /staff/*, /api/*, /products/* all noindexed | PASS ✅ | — |
-| robots.txt | Comprehensive, AhrefsBot/SemrushBot blocked, sitemap linked | PASS ✅ | — |
-| Homepage H1 in SSR HTML | HeroSlider conditional render — JS-disabled crawlers see no H1 | FAIL ❌ | 1 |
-| Meta desc: homepage | 174 chars — over 155 limit | FAIL ❌ | 1 |
-| Meta desc: banner-printing | 157 chars — 2 over limit | FAIL ❌ | 1 |
-| Meta desc: coroplast-signs | 159 chars — 4 over limit | FAIL ❌ | 1 |
-| manifest.webmanifest | Declared in layout.tsx but file missing from public/ | FAIL ❌ | 1 |
-| Cloudflare email obfuscation | OFF ✅ (confirmed via prior session) | PASS ✅ | — |
-| www. → apex 301 | Cloudflare Redirect Rule active | PASS ✅ | — |
-| true-color.ca 3-hop chain | http → https still 3 hops (Hostinger fix pending) | PENDING | Backlog |
+| Sitemap total pages | 71 pages | — | — |
+| Sitemap no `new Date()` global | All dates hardcoded strings ✅ | PASS | — |
+| Sitemap /products/* excluded | Explicitly excluded with comment ✅ | PASS | — |
+| Sitemap no future dates | All dates ≤ 2026-03-16 ✅ | PASS | — |
+| Layout title default | "True Color Printing \| Signs, Banners & Cards Saskatoon" (54 chars) ✅ | PASS | — |
+| Layout meta desc default | 140 chars ✅ | PASS | — |
+| WebSite SearchAction | Present — urlTemplate pointing to /quote?q= ✅ | PASS | — |
+| LocalBusiness paymentAccepted | Missing | MINOR GAP | Backlog |
+| LocalBusiness currenciesAccepted | Missing | MINOR GAP | Backlog |
+| LocalBusiness hasMap | Missing | MINOR GAP | Backlog |
+| aggregateRating.reviewCount | `String(REVIEW_COUNT)` from lib/reviews ✅ | PASS | — |
+| Homepage static H1 | `sr-only` H1 in page.tsx:208 ✅ | RESOLVED | 1.1 |
+| HeroSlider conditional H1 | Still at HeroSlider.tsx:177 — `{current === 0 && <h1>` | PENDING | 1.2 |
+| manifest.webmanifest | Exists ✅ | RESOLVED | 1.7 |
+| 38 redirects in next.config.ts | WordPress → Next.js 301s, /vinyl-banners-saskatoon, /quote-request | PASS | — |
+| Nav orphan pages | None found — all 71 sitemap pages in nav or footer | PASS | — |
+
+**PENDING issues contributing to -34 deficit:**
+- Conditional H1 still in HeroSlider (should be removed — Wave 1.2)
+- LocalBusiness missing 3 optional properties (paymentAccepted, currenciesAccepted, hasMap) — Backlog
 
 ---
 
-### Content Quality — 60/100
+### Content Quality — 60 / 100 (unchanged)
 
-| Page | Word Count (est) | FAQs | Price in P1 | Saskatoon P1 | Roland UV | Rush $40 | Designer $35 | DesignDir | descriptionNode |
-|------|-----------------|------|-------------|--------------|-----------|----------|--------------|-----------|----------------|
-| business-cards-saskatoon | ~250 | 8 ✅ | ✅ | ✅ | — | ✅ | ✅ | ❌ | ❌ (plain string) |
-| banner-printing-saskatoon | ~350 | 8 ✅ | ✅ | ✅ | — | ✅ | ✅ | ❌ | ✅ (5 paras, 4 links) |
-| flyer-printing-saskatoon | ~300 | 8 ✅ | ✅ | ✅ | — | ✅ | ✅ | ❌ | ✅ (4 paras, 3 links) |
-| coroplast-signs-saskatoon | ~320 | 8 ✅ | ✅ | ✅ | — | ✅ | ✅ | ❌ | ✅ |
-| sign-company-saskatoon | ~500 | 8 ✅ | ✅ | ✅ | — | ✅ | ✅ | ❌ | ✅ |
+#### 5 Ranking Pages
 
-**Note on Roland UV:** Should be confirmed present in description text on each page. Flag for Wave 2 content review if missing.
+| Page | Title (chars) | Meta (chars) | FAQs | Price in P1 | SK in P1 | Roland UV | Rush | Designer | descNode | Links | DDG | Canonical |
+|------|--------------|-------------|------|-------------|----------|-----------|------|----------|----------|-------|-----|-----------|
+| business-cards-saskatoon | 57 ✅ | 155 ✅ | 8 ✅ | $45 ✅ | YES ✅ | ❌ MISSING | ✅ | ✅ | ❌ | 0 | ❌ | ✅ |
+| banner-printing-saskatoon | 56 ✅ | 150 ✅ | 8 ✅ | $8.25/sqft ✅ | YES ✅ | ✅ | ✅ | ✅ | ✅ | 4 | ❌ | ✅ |
+| flyer-printing-saskatoon | 56 ✅ | 152 ✅ | 8 ✅ | $45/100 ✅ | YES ✅ | ❌ (Konica Minolta) | ✅ | ✅ | ✅ | 3 | ❌ | ✅ |
+| coroplast-signs-saskatoon | 54 ✅ | 152 ✅ | 8 ✅ | $8/sqft ✅ | YES ✅ | ✅ | ✅ | ✅ | ✅ | 3 | ❌ | ✅ |
+| sign-company-saskatoon | 54 ✅ | 155 ✅ | 8 ✅ | $8/sqft ✅ | YES ✅ | ✅ | ✅ | ✅ | ❌ | 0 | ❌ | ✅ |
+
+#### Price Drift Check
+
+| Page | Claim | Expected | Status |
+|------|-------|----------|--------|
+| business-cards | "from $45" (250 2S) | "from $45" ✅ | PASS |
+| banner-printing | "from $8.25/sqft" | "$8.25/sqft" ✅ | PASS |
+| flyer-printing | "$45 for 100" | "from $45" ✅ | PASS |
+| coroplast-signs | "$8/sqft" | "$8/sqft" ✅ | PASS |
+| sign-company | "$8/sqft coro, $13/sqft ACP, $8.25/sqft banners" | All correct ✅ | PASS |
+
+**No price drift detected.**
+
+#### Content Issues
+
+- **business-cards-saskatoon**: No `descriptionNode` — all content in plain string, zero internal links in content area. Wave 2.2 PENDING.
+- **business-cards-saskatoon**: No "Roland UV" mention. BCs are printed on Konica Minolta (flatbed), not Roland UV — mentioning "in-house printer" is still relevant but technically Roland UV is wide-format only. Recommend mentioning "in-house Konica Minolta digital press" to maintain E-E-A-T. Wave 2.5.
+- **flyer-printing-saskatoon**: Says "Konica Minolta press" — this is accurate. Acceptable. No Roland UV since Roland is wide-format.
+- **All 5 ranking pages**: No `DesignDirectionGrid` — Wave 2.1, 2.3, 2.4 PENDING (banner, BC, coroplast). Flag flyer and sign-company as additional targets.
+- **sign-company-saskatoon**: Large description string with `\n\n` but no `descriptionNode`. Zero internal links in content. Consider Wave 2 addition.
 
 ---
 
-### On-Page SEO — 60/100
+### On-Page SEO — 63 / 100 (+3)
 
 | Check | Finding | Status |
 |-------|---------|--------|
-| Homepage H1 | Conditional in HeroSlider — not guaranteed SSR | FAIL ❌ |
-| Homepage H2 (first) | "What we print" — no keyword value | FAIL ❌ |
-| business-cards title | 58 chars ✅ | PASS ✅ |
-| banner-printing title | 55 chars ✅ | PASS ✅ |
-| flyer-printing title | 59 chars ✅ | PASS ✅ |
-| coroplast title | 52 chars ✅ | PASS ✅ |
-| sign-company title | 53 chars ✅ | PASS ✅ |
-| Canonical URLs | All landing pages have alternates.canonical | PASS ✅ |
-| Internal linking | banner, flyer, coroplast, sign-company have 2–5 links | PASS ✅ |
-| business-cards internal links | None (plain description, no descriptionNode) | FAIL ❌ |
+| All 5 ranking pages have ≤60 char titles | All pass (54–57 chars) ✅ | PASS |
+| All 5 ranking pages have ≤155 char meta | All pass (150–155 chars) ✅ | RESOLVED |
+| Canonical URLs on all ranking pages | All 5 present ✅ | PASS |
+| Internal links in content | Banner: 4, Flyer: 3, Coroplast: 3, BC: 0, Sign-co: 0 | PARTIAL |
+| H1 on all ranking pages | IndustryPage renders `<h1>{title}</h1>` inside hero section ✅ | PASS |
+
+**Remaining gap:** BC and sign-company pages have zero content-area internal links. Wave 2.2.
 
 ---
 
-### Schema / Structured Data — 70/100
+### Schema / Structured Data — 71 / 100 (+1)
 
-| Schema | Where | Status |
-|--------|-------|--------|
-| LocalBusiness | layout.tsx | PASS ✅ |
-| WebSite + SearchAction | layout.tsx | PASS ✅ |
-| AggregateRating | layout.tsx (reviewCount: 29, ratingValue: 5.0) | PASS ✅ |
-| FAQPage | IndustryPage.tsx (all landing pages) | PASS ✅ |
-| BreadcrumbList | IndustryPage.tsx | PASS ✅ |
-| Product schema | None on any page | MISSING ❌ |
-| Service schema url field | Needs verification | PENDING |
+| Check | Finding | Status | Wave |
+|-------|---------|--------|------|
+| LocalBusiness schema | Present in layout.tsx ✅ | PASS | — |
+| WebSite schema with SearchAction | Present ✅ | PASS | — |
+| Service schema on IndustryPage | Present — name, serviceType, provider, areaServed, description ✅ | PASS | — |
+| Service schema `url` field | Missing — no `url` property in serviceSchema | PENDING | 3.1 |
+| Product schema | Not present | PLANNED | 4 |
+| BreadcrumbList schema | Present when canonicalSlug provided ✅ | PASS | — |
+| FAQPage schema | Present when faqs.length > 0 ✅ | PASS | — |
+| AggregateRating reviewCount | Dynamic from REVIEW_COUNT constant ✅ | PASS | — |
+| Image sitemap route | Created ✅ | RESOLVED | 3.2 |
+| Image sitemap in robots.ts | Referenced ✅ | RESOLVED | 3.3 |
+
+**Note:** Image sitemap route exists but content unverified (can't test live). Verify returns valid XML image sitemap after next deploy.
 
 ---
 
-### Performance (CWV) — 72/100
+### Performance (CWV) — 72 / 100 (unchanged)
 
 | Check | Finding | Status |
 |-------|---------|--------|
-| GTM script strategy | afterInteractive ✅ | PASS ✅ |
-| LCP candidate | HeroSlider image with priority prop ✅ | PASS ✅ |
-| Oversized images | None found (all <500KB) ✅ | PASS ✅ |
-| HeroSlider "use client" | AnimatePresence + motion — heavy client bundle | WATCH |
-| Image format | All WebP ✅ | PASS ✅ |
+| HeroSlider "use client" | Yes — required for state | — |
+| QuoteModal import | Not present in HeroSlider (no dynamic import needed) | — |
+| IndustryPage hero `priority` | `priority` prop on Image = fetchpriority="high" ✅ | PASS |
+| GTM script strategy | `afterInteractive` ✅ | PASS |
+| HeroSlider conditional H1 | Still present — minor extra JS execution | PENDING 1.2 |
 
 ---
 
-### Images — 80/100
+### Images — 85 / 100 (+5)
 
 | Check | Finding | Status |
 |-------|---------|--------|
-| All images < 500KB | Confirmed via bash find | PASS ✅ |
-| WebP format used | All product images are .webp | PASS ✅ |
-| Alt text on ranking pages | All images have descriptive alt text ✅ | PASS ✅ |
-| image-sitemap.xml | Does not exist | MISSING ❌ |
+| Oversized images (>500KB) | None found in public/ ✅ | PASS |
+| image-sitemap.xml route | Created ✅ | RESOLVED |
+| Image format | All product images .webp ✅ | PASS |
+| Hero images on IndustryPage | `priority` set, `fill` + `sizes="100vw"` ✅ | PASS |
 
 ---
 
-### AI Search Readiness — 90/100
+### AI Search Readiness — 90 / 100 (unchanged)
 
 | Check | Finding | Status |
 |-------|---------|--------|
-| llms.txt | Comprehensive — products, prices, FAQs, entity signals | PASS ✅ |
-| robots.txt AI bots | GPTBot, ClaudeBot, PerplexityBot, all allowed | PASS ✅ |
-| Entity depth | Founded 2019, Albert Yeung, Roland UV + Konica Minolta, 216 33rd St W | PASS ✅ |
-| Pricing in llms.txt | All products with exact prices | PASS ✅ |
-| AhrefsBot/SemrushBot | Blocked (keeps competitor intel private) | PASS ✅ |
+| llms.txt | Exists at `/public/llms.txt` ✅ | PASS |
+| robots.ts AI bots | GPTBot, ClaudeBot, PerplexityBot etc. all allowed ✅ | PASS |
+| Image sitemap in robots.ts | Present ✅ | PASS |
 
 ---
 
-## Competitor Context — Minuteman Press Saskatoon
+## Wave Schedule — Updated
 
-| Signal | Minuteman Press Saskatoon | True Color |
-|--------|--------------------------|------------|
-| H1 count | **7 H1 tags** (major error) | 1 (after fix) |
-| Pricing on page | **None** ("price can vary") | Live pricing all products ✅ |
-| Reviews on-page | **None** | 27 Trustindex reviews 5.0★ ✅ |
-| FAQPage schema | None | All landing pages ✅ |
-| Sitemap | No public sitemap | 68 pages ✅ |
-| Product schema | None | None (gap for both) |
-| Free delivery | Mentioned explicitly | Not mentioned |
-| In-house printer | Not mentioned | Roland UV + Konica Minolta ✅ |
-| llms.txt | Does not exist | Comprehensive ✅ |
-
-**Bottom line:** True Color wins on price transparency, reviews, schema, and AI readiness. Minuteman wins on domain authority (national franchise) and product breadth. The H1 fix closes the only real technical gap.
+| Wave | Items | Due | Status |
+|------|-------|-----|--------|
+| Wave 1 | 8 items | 2026-03-14 | 7/8 DONE — only 1.2 remaining |
+| Wave 2 | 6 items | ~2026-03-21 | 0/6 done — START NOW (GSC stable after Wave 1) |
+| Wave 3 | 3 items | ~2026-03-28 | 2/3 done ahead of schedule |
+| Wave 4 | 4 items | ~2026-04-04 | 0/4 — gate on pricing-health check |
+| Wave 5 | 3 items | ~2026-04-11 | 0/3 — CWV audit |
+| Wave 6 | 3 items | ~2026-04-18 | 0/3 — mobile/UX |
 
 ---
 
-## Wave Schedule
+## Top 3 Actions for Wave 2
 
-| Wave | Items | Target Date | Status |
-|------|-------|-------------|--------|
-| 1 | H1 fix + meta desc trim + manifest.webmanifest + H2 keyword | 2026-03-14 | READY |
-| 2 | DesignDirectionGrid on ranking pages + business-cards descriptionNode | 2026-03-21 | PLANNED |
-| 3 | Service schema url field + image-sitemap.xml | 2026-03-28 | PLANNED |
-| 4 | Product schema on landing pages | 2026-04-04 | PLANNED |
-| 5 | CWV improvements (HeroSlider bundle audit) | 2026-04-11 | PLANNED |
-| 6 | Mobile/UX pass | 2026-04-18 | PLANNED |
+1. **Add `DesignDirectionGrid` to business-cards, banner, coroplast, flyer, sign-company ranking pages** — files: all 5 ranking page.tsx files — Wave 2.1/2.3/2.4/new
+2. **Add `descriptionNode` with internal links to business-cards-saskatoon and sign-company-saskatoon** — files: `src/app/business-cards-saskatoon/page.tsx`, `src/app/sign-company-saskatoon/page.tsx` — Wave 2.2/new
+3. **Remove conditional H1 from HeroSlider** (replace with plain `<p>` or `<div>`) — file: `src/components/home/HeroSlider.tsx:177` — Wave 1.2 (still pending)
 
 ---
 
 ## Projected Score by Wave
 
-| After Wave | Projected Score | Delta |
-|-----------|----------------|-------|
-| Baseline (today) | 65 | — |
-| Wave 1 (H1 + meta + manifest + H2) | 72 | +7 |
-| Wave 2 (DesignDirection + BC content) | 78 | +6 |
-| Wave 3 (schema + image sitemap) | 82 | +4 |
-| Wave 4 (Product schema) | 85 | +3 |
-| Wave 5 (CWV) | 88 | +3 |
-| Wave 6 (mobile) | 91 | +3 |
+| After Wave | Projected Score | Key Gain |
+|------------|----------------|----------|
+| Wave 1 complete (now) | 67 | Meta descs, H1, H2, manifest |
+| Wave 2 complete | 71 | DDG, descriptionNodes, content depth |
+| Wave 3 complete | 73 | Service schema url, image sitemap verified |
+| Wave 4 complete | 76 | Product schema |
+| Wave 5 complete | 78 | CWV improvements |
+| Wave 6 complete | 80 | Mobile/UX polish |
 
 ---
 
-*Generated by `/seo-audit` v2.0 — codebase-first, no live crawl.*
+## GSC Rankings — Last Checked 2026-03-12
+
+| Keyword | Position | Page |
+|---------|----------|------|
+| print banner saskatoon | #2 | /banner-printing-saskatoon |
+| flyer printing saskatoon | #3 | /flyer-printing-saskatoon |
+| print store sign saskatoon | #4 | /sign-company-saskatoon |
+| coroplast signs saskatoon | #5 | /coroplast-signs-saskatoon |
+| business cards saskatoon | #1 | /business-cards-saskatoon |
+
+**Next GSC check due: 2026-03-19** (5 days after Wave 1 changes landed ~2026-03-14)

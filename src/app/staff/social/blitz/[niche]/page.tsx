@@ -190,6 +190,28 @@ export default async function NicheDetailPage({ params }: { params: Promise<{ ni
           </div>
         </div>
 
+        {/* Google categories */}
+        {niche.google_categories && niche.google_categories.length > 0 && (
+          <section>
+            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-purple-400" />
+              Google Categories ({niche.google_categories.length})
+            </h2>
+            <div className="bg-white rounded-2xl border border-gray-200 px-5 py-4">
+              <div className="flex flex-wrap gap-1.5">
+                {niche.google_categories.map((cat) => (
+                  <span
+                    key={cat}
+                    className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
+                  >
+                    {cat}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Image prompts link */}
         {(() => {
           const nichePromptSource = nicheImagePrompts.sources.find(

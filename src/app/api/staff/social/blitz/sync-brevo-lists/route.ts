@@ -21,9 +21,9 @@ const NICHE_LIST_MAP: Record<string, number> = {
   healthcare: 14,
   "real-estate": 11,
   retail: 15,
-  events: 16,
-  "non-profits": 17,
-  sports: 18,
+  event: 16,
+  "non-profit": 17,
+  "sports-league": 18,
 };
 
 async function getBrevoListEmails(listId: number, apiKey: string): Promise<string[]> {

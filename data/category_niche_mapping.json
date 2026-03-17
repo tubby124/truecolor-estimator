@@ -6,10 +6,10 @@
     "car-dealership"
   ],
   "ATV rental service": [
-    "retail"
+    "sporting-goods"
   ],
   "ATV repair shop": [
-    "retail"
+    "sporting-goods"
   ],
   "Academic department": [
     "retail"
@@ -27,7 +27,7 @@
     "healthcare"
   ],
   "Addiction treatment center": [
-    "healthcare"
+    "mental-health"
   ],
   "Adoption agency": [
     "printing-competitor"
@@ -45,7 +45,7 @@
     "retail"
   ],
   "Aerial photographer": [
-    "restaurants"
+    "photographer"
   ],
   "After school program": [
     "school"
@@ -135,7 +135,7 @@
     "pet-store"
   ],
   "Antique store": [
-    "retail"
+    "pawn-thrift"
   ],
   "Apartment building": [
     "property-management"
@@ -165,7 +165,7 @@
     "event"
   ],
   "Art gallery": [
-    "retail"
+    "gift-shop"
   ],
   "Art school": [
     "school"
@@ -264,7 +264,7 @@
     "retail"
   ],
   "Baby clothing store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Baby store": [
     "retail"
@@ -312,7 +312,7 @@
     "sports-league"
   ],
   "Bathroom supply store": [
-    "retail"
+    "furniture-home"
   ],
   "Battery wholesaler": [
     "trade-contractor"
@@ -321,7 +321,7 @@
     "campground"
   ],
   "Bead store": [
-    "retail"
+    "gift-shop"
   ],
   "Bearing supplier": [
     "retail"
@@ -345,7 +345,7 @@
     "bar-nightclub"
   ],
   "Bicycle Shop": [
-    "retail"
+    "sporting-goods"
   ],
   "Bicycle rack": [
     "retail"
@@ -390,7 +390,7 @@
     "retail"
   ],
   "Book store": [
-    "retail"
+    "gift-shop"
   ],
   "Bookkeeping service": [
     "accounting"
@@ -408,7 +408,7 @@
     "retail"
   ],
   "Boutique": [
-    "retail"
+    "clothing-boutique"
   ],
   "Bowling alley": [
     "sports-league"
@@ -483,7 +483,7 @@
     "construction"
   ],
   "Cabinet store": [
-    "retail"
+    "furniture-home"
   ],
   "Cadillac dealer": [
     "car-dealership"
@@ -573,13 +573,13 @@
     "agriculture"
   ],
   "Cell phone store": [
-    "restaurants"
+    "electronics-tech"
   ],
   "Cemetery": [
     "funeral"
   ],
   "Certified public accountant": [
-    "bar-nightclub"
+    "accounting"
   ],
   "Chamber of Commerce": [
     "non-profit"
@@ -594,7 +594,7 @@
     "retail"
   ],
   "Cheese shop": [
-    "retail"
+    "food-specialty"
   ],
   "Chemical manufacturer": [
     "trade-contractor"
@@ -621,7 +621,7 @@
     "campground"
   ],
   "Children's clothing store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Children's farm": [
     "agriculture"
@@ -666,13 +666,13 @@
     "trade-contractor"
   ],
   "City Hall": [
-    "non-profit"
+    "government"
   ],
   "City courthouse": [
-    "non-profit"
+    "government"
   ],
   "City government office": [
-    "non-profit"
+    "government"
   ],
   "City park": [
     "campground"
@@ -690,16 +690,16 @@
     "cleaning"
   ],
   "Clothes market": [
-    "retail"
+    "clothing-boutique"
   ],
   "Clothing alteration service": [
-    "retail"
+    "clothing-boutique"
   ],
   "Clothing store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Clothing supplier": [
-    "retail"
+    "clothing-boutique"
   ],
   "Club": [
     "sports-league"
@@ -711,7 +711,7 @@
     "coffee-shop"
   ],
   "Collectibles store": [
-    "retail"
+    "gift-shop"
   ],
   "College": [
     "school"
@@ -735,13 +735,13 @@
     "accounting"
   ],
   "Computer networking service": [
-    "retail"
+    "electronics-tech"
   ],
   "Computer repair service": [
     "construction"
   ],
   "Computer store": [
-    "retail"
+    "electronics-tech"
   ],
   "Concert hall": [
     "retail"
@@ -765,7 +765,7 @@
     "retail"
   ],
   "Consignment shop": [
-    "retail"
+    "pawn-thrift"
   ],
   "Construction company": [
     "construction"
@@ -810,19 +810,19 @@
     "non-profit"
   ],
   "Counselor": [
-    "healthcare"
+    "mental-health"
   ],
   "Countertop store": [
-    "retail"
+    "furniture-home"
   ],
   "Country club": [
     "sports-league"
   ],
   "County court": [
-    "retail"
+    "government"
   ],
   "County government office": [
-    "non-profit"
+    "government"
   ],
   "Courier service": [
     "moving"
@@ -834,7 +834,7 @@
     "salon"
   ],
   "Craft store": [
-    "retail"
+    "gift-shop"
   ],
   "Credit union": [
     "credit-union"
@@ -867,7 +867,7 @@
     "construction"
   ],
   "Custom t-shirt store": [
-    "retail"
+    "clothing-boutique"
   ],
   "DJ service": [
     "retail"
@@ -894,7 +894,7 @@
     "dance-studio"
   ],
   "Dance store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Day care center": [
     "daycare"
@@ -972,7 +972,7 @@
     "moving"
   ],
   "District government office": [
-    "non-profit"
+    "government"
   ],
   "Divorce lawyer": [
     "law-office"
@@ -1002,7 +1002,7 @@
     "retail"
   ],
   "Donations center": [
-    "retail"
+    "pawn-thrift"
   ],
   "Door supplier": [
     "construction"
@@ -1020,7 +1020,7 @@
     "construction"
   ],
   "Driver's license office": [
-    "retail"
+    "government"
   ],
   "Drivers license training school": [
     "school"
@@ -1089,10 +1089,10 @@
     "salon"
   ],
   "Electronics company": [
-    "retail"
+    "electronics-tech"
   ],
   "Electronics store": [
-    "retail"
+    "electronics-tech"
   ],
   "Elementary school": [
     "school"
@@ -1200,7 +1200,7 @@
     "printing-competitor"
   ],
   "Exercise equipment store": [
-    "retail"
+    "sporting-goods"
   ],
   "Exporter": [
     "retail"
@@ -1215,7 +1215,7 @@
     "salon"
   ],
   "Fabric store": [
-    "retail"
+    "gift-shop"
   ],
   "Fabric wholesaler": [
     "trade-contractor"
@@ -1224,7 +1224,7 @@
     "event"
   ],
   "Family counselor": [
-    "healthcare"
+    "mental-health"
   ],
   "Family day care service": [
     "daycare"
@@ -1263,16 +1263,16 @@
     "agriculture"
   ],
   "Fashion accessories store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Fast food restaurant": [
     "restaurants"
   ],
   "Federal government office": [
-    "non-profit"
+    "government"
   ],
   "Federal police": [
-    "non-profit"
+    "emergency-services"
   ],
   "Feed manufacturer": [
     "trade-contractor"
@@ -1308,10 +1308,10 @@
     "cleaning"
   ],
   "Fire department equipment supplier": [
-    "retail"
+    "emergency-services"
   ],
   "Fire station": [
-    "non-profit"
+    "emergency-services"
   ],
   "Fish farm": [
     "agriculture"
@@ -1329,7 +1329,7 @@
     "school"
   ],
   "Flooring store": [
-    "retail"
+    "furniture-home"
   ],
   "Florist": [
     "florist"
@@ -1368,7 +1368,7 @@
     "agriculture"
   ],
   "Formal wear store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Foundation": [
     "non-profit"
@@ -1383,13 +1383,13 @@
     "school"
   ],
   "Fresh food market": [
-    "retail"
+    "food-specialty"
   ],
   "Fried chicken takeaway": [
     "restaurants"
   ],
   "Fruit and vegetable store": [
-    "retail"
+    "food-specialty"
   ],
   "Fuel supplier": [
     "trade-contractor"
@@ -1404,10 +1404,10 @@
     "hvac"
   ],
   "Furniture store": [
-    "retail"
+    "furniture-home"
   ],
   "Game store": [
-    "retail"
+    "gift-shop"
   ],
   "Garbage collection service": [
     "retail"
@@ -1449,10 +1449,10 @@
     "retail"
   ],
   "Gift basket store": [
-    "retail"
+    "gift-shop"
   ],
   "Gift shop": [
-    "retail"
+    "gift-shop"
   ],
   "Glass industry": [
     "construction"
@@ -1497,7 +1497,7 @@
     "restaurants"
   ],
   "Greengrocer": [
-    "retail"
+    "food-specialty"
   ],
   "Greenhouse": [
     "agriculture"
@@ -1515,7 +1515,7 @@
     "sports-league"
   ],
   "Gun shop": [
-    "retail"
+    "sporting-goods"
   ],
   "Gutter cleaning service": [
     "cleaning"
@@ -1608,13 +1608,13 @@
     "non-profit"
   ],
   "Hobby store": [
-    "retail"
+    "gift-shop"
   ],
   "Hockey club": [
     "sports-league"
   ],
   "Hockey supply store": [
-    "retail"
+    "sporting-goods"
   ],
   "Holistic medicine practitioner": [
     "retail"
@@ -1623,7 +1623,7 @@
     "construction"
   ],
   "Home goods store": [
-    "retail"
+    "furniture-home"
   ],
   "Home health care service": [
     "healthcare"
@@ -1659,7 +1659,7 @@
     "healthcare"
   ],
   "Hot tub store": [
-    "retail"
+    "furniture-home"
   ],
   "Hotel": [
     "hotel"
@@ -1686,7 +1686,7 @@
     "property-management"
   ],
   "Hunting store": [
-    "retail"
+    "sporting-goods"
   ],
   "Hydraulic equipment supplier": [
     "retail"
@@ -1695,7 +1695,7 @@
     "construction"
   ],
   "Hypnotherapy service": [
-    "healthcare"
+    "mental-health"
   ],
   "Hyundai dealer": [
     "car-dealership"
@@ -1764,7 +1764,7 @@
     "construction"
   ],
   "Internet service provider": [
-    "retail"
+    "electronics-tech"
   ],
   "Internist": [
     "healthcare"
@@ -1791,10 +1791,10 @@
     "church"
   ],
   "Jewelry designer": [
-    "retail"
+    "jewelry"
   ],
   "Jewelry store": [
-    "retail"
+    "jewelry"
   ],
   "Judo club": [
     "martial-arts"
@@ -1896,10 +1896,10 @@
     "insurance"
   ],
   "Lighting store": [
-    "retail"
+    "furniture-home"
   ],
   "Lingerie store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Liquor store": [
     "bar-nightclub"
@@ -1920,7 +1920,7 @@
     "credit-union"
   ],
   "Local government office": [
-    "non-profit"
+    "government"
   ],
   "Local medical services": [
     "healthcare"
@@ -2004,13 +2004,13 @@
     "school"
   ],
   "Meat packer": [
-    "retail"
+    "food-specialty"
   ],
   "Meat processor": [
-    "retail"
+    "food-specialty"
   ],
   "Meat products store": [
-    "retail"
+    "food-specialty"
   ],
   "Mechanic": [
     "auto-body"
@@ -2061,16 +2061,16 @@
     "restaurants"
   ],
   "Men's clothing store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Mennonite church": [
     "church"
   ],
   "Mental health clinic": [
-    "healthcare"
+    "mental-health"
   ],
   "Mental health service": [
-    "healthcare"
+    "mental-health"
   ],
   "Metal construction company": [
     "construction"
@@ -2094,7 +2094,7 @@
     "school"
   ],
   "Military recruiting office": [
-    "non-profit"
+    "government"
   ],
   "Mill": [
     "trade-contractor"
@@ -2115,7 +2115,7 @@
     "property-management"
   ],
   "Mobile phone repair shop": [
-    "restaurants"
+    "electronics-tech"
   ],
   "Mobility equipment supplier": [
     "retail"
@@ -2145,7 +2145,7 @@
     "retail"
   ],
   "Motorsports store": [
-    "retail"
+    "sporting-goods"
   ],
   "Mountain peak": [
     "retail"
@@ -2160,7 +2160,7 @@
     "moving"
   ],
   "Municipal administration office": [
-    "non-profit"
+    "government"
   ],
   "Museum": [
     "non-profit"
@@ -2205,10 +2205,10 @@
     "non-profit"
   ],
   "Notary public": [
-    "bar-nightclub"
+    "law-office"
   ],
   "Novelty store": [
-    "retail"
+    "gift-shop"
   ],
   "Nursing home": [
     "seniors-care"
@@ -2301,10 +2301,10 @@
     "construction"
   ],
   "Outdoor sports store": [
-    "retail"
+    "sporting-goods"
   ],
   "Outlet store": [
-    "retail"
+    "pawn-thrift"
   ],
   "Pain control clinic": [
     "healthcare"
@@ -2340,7 +2340,7 @@
     "retail"
   ],
   "Party store": [
-    "retail"
+    "gift-shop"
   ],
   "Pastry shop": [
     "bakery"
@@ -2349,7 +2349,7 @@
     "construction"
   ],
   "Pawn shop": [
-    "retail"
+    "pawn-thrift"
   ],
   "Pediatric dentist": [
     "dental"
@@ -2400,19 +2400,19 @@
     "pharmacy"
   ],
   "Phone repair service": [
-    "restaurants"
+    "electronics-tech"
   ],
   "Photo booth": [
-    "restaurants"
+    "photographer"
   ],
   "Photo shop": [
-    "restaurants"
+    "photographer"
   ],
   "Photographer": [
     "photographer"
   ],
   "Photography service": [
-    "restaurants"
+    "photographer"
   ],
   "Photography studio": [
     "photographer"
@@ -2442,7 +2442,7 @@
     "retail"
   ],
   "Picture frame shop": [
-    "retail"
+    "gift-shop"
   ],
   "Pilates studio": [
     "yoga-studio"
@@ -2499,7 +2499,7 @@
     "photographer"
   ],
   "Pottery store": [
-    "retail"
+    "gift-shop"
   ],
   "Poultry farm": [
     "agriculture"
@@ -2529,7 +2529,7 @@
     "tutoring"
   ],
   "Produce market": [
-    "retail"
+    "food-specialty"
   ],
   "Produce wholesaler": [
     "trade-contractor"
@@ -2550,43 +2550,43 @@
     "campground"
   ],
   "Psychiatric hospital": [
-    "healthcare"
+    "mental-health"
   ],
   "Psychiatrist": [
-    "healthcare"
+    "mental-health"
   ],
   "Psychologist": [
-    "healthcare"
+    "mental-health"
   ],
   "Pub": [
     "bar-nightclub"
   ],
   "Public educational institution": [
-    "bar-nightclub"
+    "school"
   ],
   "Public golf course": [
-    "bar-nightclub"
+    "sports-league"
   ],
   "Public health department": [
-    "bar-nightclub"
+    "healthcare"
   ],
   "Public library": [
-    "bar-nightclub"
+    "non-profit"
   ],
   "Public medical center": [
     "healthcare"
   ],
   "Public swimming pool": [
-    "bar-nightclub"
+    "sports-league"
   ],
   "Public university": [
-    "bar-nightclub"
+    "school"
   ],
   "Pump supplier": [
     "retail"
   ],
   "Quilt shop": [
-    "retail"
+    "gift-shop"
   ],
   "RV dealer": [
     "campground"
@@ -2652,7 +2652,7 @@
     "moving"
   ],
   "Registry office": [
-    "non-profit"
+    "government"
   ],
   "Rehabilitation center": [
     "physio"
@@ -2682,7 +2682,7 @@
     "retail"
   ],
   "Rescue squad": [
-    "retail"
+    "emergency-services"
   ],
   "Research institute": [
     "school"
@@ -2754,13 +2754,13 @@
     "school"
   ],
   "Scrapbooking store": [
-    "retail"
+    "gift-shop"
   ],
   "Sculpture": [
     "retail"
   ],
   "Second hand store": [
-    "retail"
+    "pawn-thrift"
   ],
   "Secondary school": [
     "school"
@@ -2796,10 +2796,10 @@
     "church"
   ],
   "Sewing machine store": [
-    "retail"
+    "furniture-home"
   ],
   "Sewing shop": [
-    "retail"
+    "furniture-home"
   ],
   "Sheet metal contractor": [
     "construction"
@@ -2817,7 +2817,7 @@
     "moving"
   ],
   "Shoe store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Shooting range": [
     "sports-league"
@@ -2883,7 +2883,7 @@
     "sports-league"
   ],
   "Software company": [
-    "retail"
+    "electronics-tech"
   ],
   "Solar energy company": [
     "retail"
@@ -2895,7 +2895,7 @@
     "retail"
   ],
   "Souvenir store": [
-    "retail"
+    "gift-shop"
   ],
   "Spa": [
     "salon"
@@ -2907,13 +2907,13 @@
     "healthcare"
   ],
   "Sporting goods store": [
-    "retail"
+    "sporting-goods"
   ],
   "Sports bar": [
     "bar-nightclub"
   ],
   "Sports card store": [
-    "retail"
+    "sporting-goods"
   ],
   "Sports club": [
     "sports-league"
@@ -2934,7 +2934,7 @@
     "school"
   ],
   "Sportswear store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Stable": [
     "retail"
@@ -2946,7 +2946,7 @@
     "retail"
   ],
   "Stationery store": [
-    "retail"
+    "gift-shop"
   ],
   "Steak house": [
     "retail"
@@ -3048,7 +3048,7 @@
     "construction"
   ],
   "Telecommunications service provider": [
-    "retail"
+    "electronics-tech"
   ],
   "Television repair service": [
     "construction"
@@ -3063,7 +3063,7 @@
     "event"
   ],
   "Thrift store": [
-    "retail"
+    "pawn-thrift"
   ],
   "Tile cleaning service": [
     "cleaning"
@@ -3099,7 +3099,7 @@
     "towing"
   ],
   "Toy store": [
-    "retail"
+    "gift-shop"
   ],
   "Toyota dealer": [
     "car-dealership"
@@ -3192,7 +3192,7 @@
     "car-dealership"
   ],
   "Used clothing store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Utility contractor": [
     "construction"
@@ -3201,7 +3201,7 @@
     "retail"
   ],
   "Vacuum cleaner store": [
-    "retail"
+    "furniture-home"
   ],
   "Vacuum cleaning system supplier": [
     "cleaning"
@@ -3231,7 +3231,7 @@
     "retail"
   ],
   "Vintage clothing store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Visitor center": [
     "retail"
@@ -3270,13 +3270,13 @@
     "retail"
   ],
   "Web hosting company": [
-    "retail"
+    "electronics-tech"
   ],
   "Wedding bakery": [
     "bakery"
   ],
   "Wedding photographer": [
-    "restaurants"
+    "photographer"
   ],
   "Wedding planner": [
     "wedding"
@@ -3303,7 +3303,7 @@
     "healthcare"
   ],
   "Western apparel store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Wheel alignment service": [
     "retail"
@@ -3336,16 +3336,16 @@
     "construction"
   ],
   "Wine store": [
-    "retail"
+    "food-specialty"
   ],
   "Winemaking supply store": [
-    "retail"
+    "food-specialty"
   ],
   "Winery": [
     "brewery"
   ],
   "Women's clothing store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Women's health clinic": [
     "healthcare"
@@ -3363,7 +3363,7 @@
     "retail"
   ],
   "Work clothes store": [
-    "retail"
+    "clothing-boutique"
   ],
   "X-ray lab": [
     "healthcare"
@@ -3378,7 +3378,7 @@
     "non-profit"
   ],
   "Youth clothing store": [
-    "retail"
+    "clothing-boutique"
   ],
   "Youth organization": [
     "non-profit"

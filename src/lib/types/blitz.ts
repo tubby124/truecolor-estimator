@@ -69,6 +69,7 @@ export interface BlitzNiche {
   priority: number;
   gbp_posts_generated: boolean;
   landing_page_slug: string | null;
+  google_categories: string[];
   image_prompts: { id: string; name: string; category: string; prompt: string; imagePath: string }[] | null;
   created_at: string;
   updated_at: string;

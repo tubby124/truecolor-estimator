@@ -45,7 +45,8 @@ export function NicheTable({ niches }: Props) {
       result = result.filter(
         (n) =>
           n.display_name.toLowerCase().includes(q) ||
-          n.niche_slug.toLowerCase().includes(q)
+          n.niche_slug.toLowerCase().includes(q) ||
+          (n.google_categories ?? []).some((c) => c.toLowerCase().includes(q))
       );
     }
     result = [...result].sort((a, b) => {
@@ -118,6 +119,9 @@ export function NicheTable({ niches }: Props) {
               >
                 Leads{sortIndicator("lead_count")}
               </th>
+              <th className="text-right px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                Cats
+              </th>
               <th
                 className="text-center px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-400 cursor-pointer hover:text-gray-600 select-none"
                 onClick={() => toggleSort("priority")}
@@ -144,7 +148,7 @@ export function NicheTable({ niches }: Props) {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-400">
+                <td colSpan={9} className="px-4 py-8 text-center text-sm text-gray-400">
                   No niches match &ldquo;{search}&rdquo;
                 </td>
               </tr>
@@ -166,6 +170,9 @@ export function NicheTable({ niches }: Props) {
                     </td>
                     <td className="px-4 py-2.5 text-right font-bold tabular-nums">
                       {niche.lead_count.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-2.5 text-right tabular-nums text-xs text-gray-400">
+                      {(niche.google_categories ?? []).length || "—"}
                     </td>
                     <td className="px-4 py-2.5 text-center">
                       <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${

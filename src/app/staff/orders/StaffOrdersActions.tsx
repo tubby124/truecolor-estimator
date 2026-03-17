@@ -16,6 +16,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
+import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,7 +28,36 @@ interface CustomerLookup {
   orderCount?: number;
 }
 
+interface PastOrderItem {
+  id: string;
+  product_name: string;
+  qty: number;
+  line_total: number;
+  category: string;
+}
+
+interface PastOrder {
+  id: string;
+  order_number: string;
+  status: string;
+  created_at: string;
+  subtotal: number;
+  total: number;
+  is_rush: boolean;
+  order_items: PastOrderItem[] | null;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function matchProduct(productName: string): string {
+  const lower = productName.toLowerCase();
+  return PRODUCT_OPTIONS.find((opt) => lower.includes(opt.toLowerCase())) ?? "Other";
+}
+
+function extractDetails(productName: string): string {
+  const idx = productName.indexOf(" \u2014 ");
+  return idx >= 0 ? productName.slice(idx + 3).trim() : "";
+}
 
 interface OrderItem {
   id: string;
@@ -70,6 +100,9 @@ export function StaffOrdersActions() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ orderNumber: string; email: string } | null>(null);
   const [customerLookup, setCustomerLookup] = useState<CustomerLookup>({ status: "idle" });
+  const [pastOrdersOpen, setPastOrdersOpen] = useState(false);
+  const [pastOrders, setPastOrders] = useState<PastOrder[]>([]);
+  const [pastOrdersLoading, setPastOrdersLoading] = useState(false);
   const lookupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toasts, showToast, dismissToast } = useToast();
 
@@ -104,6 +137,23 @@ export function StaffOrdersActions() {
     }, 400);
   }, []);
 
+  const fetchPastOrders = useCallback(async (email: string) => {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed) return;
+    setPastOrdersLoading(true);
+    try {
+      const res = await fetch(`/api/staff/customer-orders?email=${encodeURIComponent(trimmed)}`);
+      if (!res.ok) return;
+      const data = await res.json() as { orders: PastOrder[] };
+      setPastOrders(data.orders);
+      setPastOrdersOpen(true);
+    } catch {
+      // silent
+    } finally {
+      setPastOrdersLoading(false);
+    }
+  }, []);
+
   // ── Derived totals ──
   const itemSubtotals = form.items.map((it) => {
     const amt = parseFloat(it.amount);
@@ -129,6 +179,8 @@ export function StaffOrdersActions() {
 
   function closeModal() {
     setModalOpen(false);
+    setPastOrdersOpen(false);
+    setPastOrders([]);
     setTimeout(() => { setSuccess(null); setError(null); }, 300);
   }
 
@@ -153,6 +205,19 @@ export function StaffOrdersActions() {
   function removeItem(id: string) {
     if (form.items.length <= 1) return;
     setForm((prev) => ({ ...prev, items: prev.items.filter((it) => it.id !== id) }));
+  }
+
+  function handleReorder(order: PastOrder) {
+    if (!order.order_items || order.order_items.length === 0) return;
+    const reorderItems: OrderItem[] = order.order_items.slice(0, MAX_ITEMS).map((oi) => ({
+      id: crypto.randomUUID(),
+      product: matchProduct(oi.product_name),
+      qty: String(oi.qty),
+      details: extractDetails(oi.product_name),
+      amount: String(oi.line_total),
+    }));
+    setForm((prev) => ({ ...prev, items: reorderItems }));
+    setPastOrdersOpen(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -365,12 +430,24 @@ export function StaffOrdersActions() {
                             <p className="mt-1.5 text-[11px] text-gray-400 font-medium">Looking up customer...</p>
                           )}
                           {customerLookup.status === "found" && (
-                            <div className="mt-1.5 inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-                              <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                              Returning customer
-                              {customerLookup.name && <span className="text-emerald-600 font-normal">· {customerLookup.name}</span>}
-                              {customerLookup.company && <span className="text-emerald-600 font-normal">· {customerLookup.company}</span>}
-                              <span className="text-emerald-500 font-normal">· {customerLookup.orderCount} order{customerLookup.orderCount !== 1 ? "s" : ""}</span>
+                            <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+                              <span className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                                <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                                Returning customer
+                                {customerLookup.name && <span className="text-emerald-600 font-normal">· {customerLookup.name}</span>}
+                                {customerLookup.company && <span className="text-emerald-600 font-normal">· {customerLookup.company}</span>}
+                                <span className="text-emerald-500 font-normal">· {customerLookup.orderCount} order{customerLookup.orderCount !== 1 ? "s" : ""}</span>
+                              </span>
+                              {(customerLookup.orderCount ?? 0) > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => void fetchPastOrders(form.email)}
+                                  disabled={pastOrdersLoading}
+                                  className="text-[11px] font-semibold text-emerald-600 hover:text-emerald-800 underline underline-offset-2 transition-colors disabled:opacity-50"
+                                >
+                                  {pastOrdersLoading ? "Loading..." : "View past orders"}
+                                </button>
+                              )}
                             </div>
                           )}
                           {customerLookup.status === "new" && (
@@ -680,6 +757,115 @@ export function StaffOrdersActions() {
 
                   </form>
                 )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Past Orders Modal ── */}
+      <AnimatePresence>
+        {pastOrdersOpen && (
+          <>
+            <motion.div
+              key="past-orders-backdrop"
+              className="fixed inset-0 bg-black/50 z-[60]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPastOrdersOpen(false)}
+            />
+            <motion.div
+              key="past-orders-modal"
+              className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+            >
+              <div
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[80vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl z-10">
+                  <div>
+                    <h2 className="text-lg font-bold text-[#1c1712]">Past Orders</h2>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {customerLookup.name ?? form.email} — {pastOrders.length} order{pastOrders.length !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPastOrdersOpen(false)}
+                    className="rounded-lg p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                    aria-label="Close past orders"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Orders list */}
+                <div className="px-6 py-4 space-y-4">
+                  {pastOrders.length === 0 ? (
+                    <p className="text-sm text-gray-400 text-center py-6">No past orders found</p>
+                  ) : (
+                    pastOrders.map((order) => (
+                      <div key={order.id} className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+                        {/* Order header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-bold text-[#1c1712] font-mono">{order.order_number}</span>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"}`}>
+                              {STATUS_LABELS[order.status] ?? order.status}
+                            </span>
+                            {order.is_rush && (
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Rush</span>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                            {new Date(order.created_at).toLocaleDateString("en-CA")}
+                          </span>
+                        </div>
+
+                        {/* Items */}
+                        {order.order_items && order.order_items.length > 0 && (
+                          <div className="space-y-1.5 mb-3">
+                            {order.order_items.map((item) => (
+                              <div key={item.id} className="flex items-center justify-between text-sm">
+                                <span className="text-gray-700">
+                                  {item.qty > 1 ? `${item.qty}x ` : ""}{item.product_name}
+                                </span>
+                                <span className="text-gray-500 tabular-nums font-medium ml-2">
+                                  ${item.line_total.toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                          <span className="text-sm font-bold text-[#1c1712] tabular-nums">
+                            Total: ${order.total.toFixed(2)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleReorder(order)}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-800 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-emerald-50"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+                            </svg>
+                            Reorder
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </motion.div>
           </>
