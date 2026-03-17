@@ -29,8 +29,30 @@ export default function CallbackPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    // ── PKCE flow (Pro plan): token arrives as ?token_hash= ────────────────
     const searchParams = new URLSearchParams(window.location.search);
+
+    // ── PKCE flow v2 (publishable key format): ?code= ──────────────────────
+    // Supabase v2.97+ sends ?code= instead of ?token_hash= or #access_token=
+    const code = searchParams.get("code");
+    if (code) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        subscription.unsubscribe();
+        if (event === "PASSWORD_RECOVERY") {
+          window.location.replace("/account?reset=1");
+        } else {
+          window.location.replace("/account");
+        }
+      });
+      supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
+        if (err) {
+          subscription.unsubscribe();
+          setError("Link expired or already used — please request a new one.");
+        }
+      });
+      return;
+    }
+
+    // ── PKCE flow v1 (Pro plan): token arrives as ?token_hash= ────────────────
     const tokenHash = searchParams.get("token_hash");
     const type = (searchParams.get("type") ?? "email") as EmailOtpType;
 
@@ -49,7 +71,7 @@ export default function CallbackPage() {
       return;
     }
 
-    // ── Implicit flow (free plan): SDK auto-processes #access_token= ───────
+    // ── Implicit flow (legacy): SDK auto-processes #access_token= ──────────
     // If there's no hash token, nothing to do — bounce to account page.
     if (!window.location.hash.includes("access_token=")) {
       window.location.replace("/account");
