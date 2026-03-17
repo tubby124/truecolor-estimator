@@ -11,13 +11,23 @@
  * Supports multi-item orders (up to 5 line items).
  */
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 
-// ─── Types ──────────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface CustomerLookup {
+  status: "idle" | "loading" | "found" | "new";
+  name?: string;
+  company?: string | null;
+  phone?: string | null;
+  orderCount?: number;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 interface OrderItem {
   id: string;
@@ -59,7 +69,40 @@ export function StaffOrdersActions() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ orderNumber: string; email: string } | null>(null);
+  const [customerLookup, setCustomerLookup] = useState<CustomerLookup>({ status: "idle" });
+  const lookupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toasts, showToast, dismissToast } = useToast();
+
+  const handleEmailBlur = useCallback(async (email: string) => {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed || !trimmed.includes("@") || !trimmed.includes(".")) {
+      setCustomerLookup({ status: "idle" });
+      return;
+    }
+    if (lookupTimerRef.current) clearTimeout(lookupTimerRef.current);
+    lookupTimerRef.current = setTimeout(async () => {
+      setCustomerLookup({ status: "loading" });
+      try {
+        const res = await fetch(`/api/staff/customer-lookup?email=${encodeURIComponent(trimmed)}`);
+        if (!res.ok) { setCustomerLookup({ status: "idle" }); return; }
+        const data = await res.json() as { exists: boolean; name?: string; company?: string | null; phone?: string | null; orderCount?: number };
+        if (data.exists) {
+          setCustomerLookup({ status: "found", name: data.name, company: data.company, phone: data.phone, orderCount: data.orderCount ?? 0 });
+          // Autofill empty fields
+          setForm((prev) => ({
+            ...prev,
+            name: prev.name.trim() ? prev.name : (data.name ?? prev.name),
+            company: prev.company.trim() ? prev.company : (data.company ?? prev.company),
+            phone: prev.phone.trim() ? prev.phone : (data.phone ?? prev.phone),
+          }));
+        } else {
+          setCustomerLookup({ status: "new" });
+        }
+      } catch {
+        setCustomerLookup({ status: "idle" });
+      }
+    }, 400);
+  }, []);
 
   // ── Derived totals ──
   const itemSubtotals = form.items.map((it) => {
@@ -80,6 +123,7 @@ export function StaffOrdersActions() {
     setForm(EMPTY_FORM);
     setError(null);
     setSuccess(null);
+    setCustomerLookup({ status: "idle" });
     setModalOpen(true);
   }
 
@@ -299,22 +343,8 @@ export function StaffOrdersActions() {
                     {/* ── CUSTOMER ── */}
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Customer</p>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label htmlFor="pr-name" className="block text-xs font-semibold text-gray-600 mb-1.5">
-                            Name <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            id="pr-name"
-                            type="text"
-                            autoComplete="name"
-                            value={form.name}
-                            onChange={(e) => set("name", e.target.value)}
-                            placeholder="John Smith"
-                            required
-                            className={inputClass}
-                          />
-                        </div>
+                      <div className="space-y-3">
+                        {/* Email — first so lookup fires immediately */}
                         <div>
                           <label htmlFor="pr-email" className="block text-xs font-semibold text-gray-600 mb-1.5">
                             Email <span className="text-red-500">*</span>
@@ -324,24 +354,63 @@ export function StaffOrdersActions() {
                             type="email"
                             autoComplete="email"
                             value={form.email}
-                            onChange={(e) => set("email", e.target.value)}
+                            onChange={(e) => { set("email", e.target.value); setCustomerLookup({ status: "idle" }); }}
+                            onBlur={(e) => void handleEmailBlur(e.target.value)}
                             placeholder="john@company.com"
                             required
                             className={inputClass}
                           />
+                          {/* Customer lookup badge */}
+                          {customerLookup.status === "loading" && (
+                            <p className="mt-1.5 text-[11px] text-gray-400 font-medium">Looking up customer...</p>
+                          )}
+                          {customerLookup.status === "found" && (
+                            <div className="mt-1.5 inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                              <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                              Returning customer
+                              {customerLookup.name && <span className="text-emerald-600 font-normal">· {customerLookup.name}</span>}
+                              {customerLookup.company && <span className="text-emerald-600 font-normal">· {customerLookup.company}</span>}
+                              <span className="text-emerald-500 font-normal">· {customerLookup.orderCount} order{customerLookup.orderCount !== 1 ? "s" : ""}</span>
+                            </div>
+                          )}
+                          {customerLookup.status === "new" && (
+                            <div className="mt-1.5 inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                              <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
+                              New customer — account will be created automatically
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <label htmlFor="pr-company" className="block text-xs font-semibold text-gray-600 mb-1.5">Company</label>
-                          <input
-                            id="pr-company"
-                            type="text"
-                            autoComplete="organization"
-                            value={form.company}
-                            onChange={(e) => set("company", e.target.value)}
-                            placeholder="Acme Corp (optional)"
-                            className={inputClass}
-                          />
+                        {/* Name | Company row */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label htmlFor="pr-name" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                              Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              id="pr-name"
+                              type="text"
+                              autoComplete="name"
+                              value={form.name}
+                              onChange={(e) => set("name", e.target.value)}
+                              placeholder="John Smith"
+                              required
+                              className={inputClass}
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="pr-company" className="block text-xs font-semibold text-gray-600 mb-1.5">Company</label>
+                            <input
+                              id="pr-company"
+                              type="text"
+                              autoComplete="organization"
+                              value={form.company}
+                              onChange={(e) => set("company", e.target.value)}
+                              placeholder="Acme Corp (optional)"
+                              className={inputClass}
+                            />
+                          </div>
                         </div>
+                        {/* Phone */}
                         <div>
                           <label htmlFor="pr-phone" className="block text-xs font-semibold text-gray-600 mb-1.5">Phone</label>
                           <input
@@ -410,6 +479,9 @@ export function StaffOrdersActions() {
                                       <option key={opt} value={opt}>{opt}</option>
                                     ))}
                                   </select>
+                                  {item.product && !item.details.trim() && (
+                                    <p className="mt-1 text-[9px] text-amber-500 font-semibold">Add size &amp; specs below for production</p>
+                                  )}
                                 </div>
                                 <div>
                                   <label htmlFor={`pr-qty-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
@@ -431,14 +503,14 @@ export function StaffOrdersActions() {
                               <div className="grid grid-cols-[1fr_110px] gap-2">
                                 <div>
                                   <label htmlFor={`pr-details-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                    Details
+                                    Size &amp; Details
                                   </label>
                                   <input
                                     id={`pr-details-${item.id}`}
                                     type="text"
                                     value={item.details}
                                     onChange={(e) => setItem(item.id, "details", e.target.value)}
-                                    placeholder="e.g. 24×36 single-sided"
+                                    placeholder="e.g. 24×36in, double-sided, H-stakes"
                                     className={inputClass}
                                   />
                                 </div>

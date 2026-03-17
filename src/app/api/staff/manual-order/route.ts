@@ -18,7 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
 import { createOrFindWaveCustomer, createWaveInvoice, approveWaveInvoice, sendWaveInvoice } from "@/lib/wave/invoice";
 import { encodePaymentToken } from "@/lib/payment/token";
-import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
+import { sendPaymentRequestEmail, type AccountInfo } from "@/lib/email/paymentRequest";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { sanitizeError } from "@/lib/errors/sanitize";
 
@@ -105,6 +105,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
     }
 
+    // ── 1b. Create Supabase auth account (non-fatal) ──
+    // Two-step: createUser first (reliable), then generateLink for magic login URL.
+    // generateLink alone has a known Supabase bug where it occasionally fails to
+    // create the user — createUser first avoids this. See: supabase/supabase#22521
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+    let accountInfo: AccountInfo | null = null;
+    try {
+      const customerEmail = contact.email.toLowerCase().trim();
+      const { error: createErr } = await supabase.auth.admin.createUser({
+        email: customerEmail,
+        email_confirm: true,
+        user_metadata: { name: contact.name.trim() },
+      });
+
+      if (!createErr) {
+        // Brand new auth account — generate a magic link so they log in with one click
+        const { data: linkData } = await supabase.auth.admin.generateLink({
+          type: "magiclink",
+          email: customerEmail,
+          options: { redirectTo: `${siteUrl}/account` },
+        });
+        accountInfo = {
+          isNewAccount: true,
+          accountLink: linkData?.properties?.action_link ?? `${siteUrl}/account`,
+        };
+        console.log(`[manual-order] new auth account created → ${customerEmail}`);
+      } else if (
+        createErr.message?.toLowerCase().includes("already") ||
+        createErr.message?.toLowerCase().includes("registered") ||
+        (createErr as { code?: string }).code === "email_exists"
+      ) {
+        // Returning customer — link to account page (they have their password)
+        accountInfo = { isNewAccount: false, accountLink: `${siteUrl}/account` };
+      }
+    } catch (authErr) {
+      console.error("[manual-order] auth account (non-fatal):", authErr instanceof Error ? authErr.message : authErr);
+    }
+
     // ── 2. Calculate totals ──
     const subtotal = Math.round(items.reduce((s, it) => s + it.amount, 0) * 100) / 100;
     const gst = Math.round(subtotal * GST_RATE * 100) / 100;
@@ -176,7 +214,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 5. Generate payment URL ──
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
     const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
     let paymentUrl: string | null = null;
 
@@ -231,7 +268,6 @@ export async function POST(req: NextRequest) {
 
         // Staff notification (skip customer email — Wave already sent it)
         try {
-          const siteUrlForStaff = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
           await sendStaffOrderNotification({
             orderNumber: order.order_number,
             contact: {
@@ -257,7 +293,7 @@ export async function POST(req: NextRequest) {
             payment_method: "wave",
             notes: `[Manual Order — Wave] ${notes?.trim() ?? "Created via staff payment request"}`,
             filePaths: [],
-            siteUrl: siteUrlForStaff,
+            siteUrl,
           });
         } catch (staffEmailErr) {
           console.error("[manual-order] staff notification failed (non-fatal):", staffEmailErr);
@@ -292,6 +328,7 @@ export async function POST(req: NextRequest) {
         paymentUrl: paymentUrl!,
         paymentMethod: payment_method,
         notes: notes?.trim() || null,
+        accountInfo,
       });
     } catch (emailErr) {
       console.error("[manual-order] customer email failed (non-fatal):", emailErr);

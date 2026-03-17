@@ -17,6 +17,11 @@ export interface PaymentRequestItem {
   amount: number;
 }
 
+export interface AccountInfo {
+  isNewAccount: boolean;
+  accountLink: string;
+}
+
 export interface PaymentRequestEmailParams {
   orderNumber: string;
   contact: { name: string; email: string; company?: string | null };
@@ -28,6 +33,7 @@ export interface PaymentRequestEmailParams {
   paymentUrl: string;
   paymentMethod: "clover" | "wave";
   notes?: string | null;
+  accountInfo?: AccountInfo | null;
 }
 
 // ─── Public entry point ───────────────────────────────────────────────────────
@@ -54,7 +60,7 @@ export async function sendPaymentRequestEmail(
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, notes } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, notes, accountInfo } = p;
 
   const methodNote =
     paymentMethod === "wave"
@@ -233,6 +239,32 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                 </p>
               </div>
 
+              ${accountInfo?.isNewAccount ? `
+              <!-- New account section -->
+              <div style="margin-top: 24px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 20px 24px; text-align: center;">
+                <p style="margin: 0 0 4px; font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Your Account
+                </p>
+                <p style="margin: 0 0 14px; font-size: 13px; color: #15803d; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  We've created a free account for you at <strong>truecolorprinting.ca</strong>.<br>
+                  Click below to log in instantly and view your order status, proof, and payment history.
+                </p>
+                <a href="${escHtml(accountInfo.accountLink)}"
+                  style="display: inline-block; background: #16a34a; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  View Your Order Online &rarr;
+                </a>
+                <p style="margin: 10px 0 0; font-size: 11px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Link valid for 1 hour. Set a permanent password anytime from your account page.
+                </p>
+              </div>
+              ` : accountInfo ? `
+              <!-- Returning customer account link -->
+              <p style="margin-top: 20px; margin-bottom: 0; font-size: 13px; color: #6b7280; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                View this and all past orders at
+                <a href="${escHtml(accountInfo.accountLink)}" style="color: #0369a1; text-decoration: none; font-weight: 600;">truecolorprinting.ca/account</a>.
+              </p>
+              ` : ""}
+
             </td>
           </tr>
 
@@ -266,7 +298,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, accountInfo } = p;
 
   const itemLines = items.map((item) => {
     const qty = item.qty > 1 ? `${item.qty}x ` : "";
@@ -295,6 +327,16 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     "",
     `Questions? Reply to this email or call (306) 954-8688.`,
     "",
+    ...(accountInfo?.isNewAccount ? [
+      `--- YOUR ACCOUNT ---`,
+      `We've created a free account for you at truecolorprinting.ca.`,
+      `Log in instantly (link valid 1 hour): ${accountInfo.accountLink}`,
+      `You can set a permanent password from your account page.`,
+      "",
+    ] : accountInfo ? [
+      `View this and all past orders: ${accountInfo.accountLink}`,
+      "",
+    ] : []),
     `True Color Display Printing`,
     `216 33rd St W · Saskatoon, SK`,
     `info@true-color.ca`,
