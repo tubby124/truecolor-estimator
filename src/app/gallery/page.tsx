@@ -136,6 +136,43 @@ export default function GalleryPage() {
           </p>
         </div>
 
+        {/* FAQ */}
+        <section className="mt-16 pt-14 border-t border-gray-100">
+          <h2 className="text-2xl font-bold text-[#1c1712] mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-6 max-w-3xl">
+            {[
+              {
+                q: "What products does True Color print in-house?",
+                a: "We print coroplast yard signs from $8/sqft, 13oz scrim vinyl banners from $8.25/sqft, ACP aluminum signs from $13/sqft, business cards from $45 for 250, flyers from $45 for 100, window decals from $11/sqft, vehicle magnets from $24/sqft, retractable banner stands from $219, foamboard displays from $10/sqft, stickers, postcards, brochures, and photo posters — all on our in-house Roland TrueVIS VG2 UV printer and Konica Minolta production press.",
+              },
+              {
+                q: "Can I see samples before ordering?",
+                a: "Yes — visit our shop at 216 33rd St W, Saskatoon (Mon\u2013Fri 9 AM\u20135 PM) to see material samples and finished products. You can also browse the gallery above to see real client projects and industry design mockups.",
+              },
+              {
+                q: "How fast can I get my order?",
+                a: "Standard turnaround is 1\u20133 business days from artwork approval. Same-day rush production is available for +$40 flat on orders placed before 10 AM. Our in-house designer provides a same-day proof for $35 flat.",
+              },
+              {
+                q: "Do you ship outside Saskatoon?",
+                a: "Yes \u2014 we ship across Saskatchewan. Customer pays shipping; we handle packing and coordination. Local pickup is free at 216 33rd St W, Saskatoon. We also offer installation service at $75 flat rate for most Saskatoon jobs.",
+              },
+              {
+                q: "What file format do I need for printing?",
+                a: "We accept PDF, AI, EPS, PSD, PNG, and JPG files. For best results, send vector files (PDF or AI) at full size with 0.125\u201d bleed. No file? Our in-house designer creates print-ready artwork from sketches or low-res images for $35 flat.",
+              },
+            ].map(({ q, a }) => (
+              <details key={q} className="group border border-gray-100 rounded-xl">
+                <summary className="cursor-pointer px-6 py-4 font-semibold text-[#1c1712] text-sm flex items-center justify-between">
+                  {q}
+                  <span className="text-gray-400 group-open:rotate-45 transition-transform text-lg">+</span>
+                </summary>
+                <p className="px-6 pb-5 text-sm text-gray-600 leading-relaxed">{a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
         {/* CTA */}
         <div className="mt-12 text-center">
           <p className="text-gray-600 mb-5 text-lg">

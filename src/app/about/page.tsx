@@ -132,11 +132,12 @@ export default function AboutPage() {
             <span className="text-[#16C2F3]">Printed here.</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-2xl leading-relaxed">
-            True Color Display Printing is a Saskatoon print shop at 216 33rd St W
-            specializing in large-format printing, signs, banners, vehicle magnets, and business
-            cards for local businesses and organizations across Saskatchewan. We own our presses,
-            employ our own designer, and do every order in-house — no outsourcing, no shipping
-            middlemen, just faster turnaround and real accountability.
+            True Color Display Printing is a Saskatoon print shop at 216 33rd St W.
+            Coroplast signs from $8/sqft, vinyl banners from $8.25/sqft, business cards
+            from $45 for 250, flyers from $45 for 100. In-house designer for $35 flat
+            with a same-day proof. Same-day rush +$40 flat on orders before 10 AM.
+            We own our presses, employ our own designer, and do every order in-house —
+            no outsourcing, no shipping middlemen, just faster turnaround and real accountability.
           </p>
           <p className="text-gray-400 text-base max-w-2xl leading-relaxed mt-4">
             Founded in Saskatoon in 2019, True Color has grown from a single-location shop on
