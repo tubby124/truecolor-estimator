@@ -205,7 +205,7 @@ export default async function ProductPage({ params }: Props) {
                     <div className="relative h-28 w-full">
                       <Image
                         src={PRODUCT_IMAGE_MAP[r.slug]}
-                        alt={r.name}
+                        alt={`${r.name} — printed in Saskatoon by True Color Display Printing`}
                         fill
                         className="object-cover"
                         loading="lazy"

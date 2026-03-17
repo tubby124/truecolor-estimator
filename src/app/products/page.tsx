@@ -87,7 +87,7 @@ export default function ProductsPage() {
                     <div className="relative h-32 w-full">
                       <Image
                         src={img}
-                        alt={product.name}
+                        alt={`${product.name} — True Color Display Printing Saskatoon`}
                         fill
                         className="object-cover"
                         loading="lazy"
