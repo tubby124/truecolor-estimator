@@ -306,7 +306,7 @@ export default function HomePage() {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PRODUCTS.map((p) => (
+          {PRODUCTS.map((p, i) => (
             <Link
               key={p.name}
               href={p.href}
@@ -317,6 +317,7 @@ export default function HomePage() {
                   src={p.img}
                   alt={`${p.name} — True Color Display Printing Saskatoon`}
                   fill
+                  priority={i < 3}
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
@@ -474,13 +475,14 @@ export default function HomePage() {
               Coroplast signs from{" "}
               <strong className="text-[#1c1712]">$30</strong>. Vinyl banners from{" "}
               <strong className="text-[#1c1712]">$66</strong>. 250 business cards for{" "}
-              <strong className="text-[#1c1712]">$40</strong>. Prices you can see right now,
+              <strong className="text-[#1c1712]">$45</strong>. Prices you can see right now,
               without emailing anyone.
             </p>
             <p>
               Got a rough sketch? A low-res logo? No file at all? Our in-house designer
-              handles artwork prep, upscaling, and layout — from your napkin sketch to
-              print-ready in the same visit.
+              handles artwork prep, upscaling, and layout on our Roland UV printer — from
+              your napkin sketch to print-ready in the same visit. Design is $35 flat
+              with a same-day proof.
             </p>
             <p>
               One shop. One order. Local pickup at{" "}
