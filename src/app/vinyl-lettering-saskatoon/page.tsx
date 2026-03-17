@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Vinyl Lettering Saskatoon | Cut Vinyl Text | True Color" },
+  title: { absolute: "Vinyl Lettering Saskatoon | From $40 | True Color" },
   description:
-    "Cut vinyl lettering for Saskatoon storefronts, vehicles & windows from $8.50/sqft, min $40. Hours, door text, boat numbers. Roland UV. Same-day rush +$40.",
+    "Vinyl lettering in Saskatoon from $40 ($8.50/sqft). Storefronts, vehicles, boats, office doors. In-house Roland UV cut vinyl. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/vinyl-lettering-saskatoon" },
   openGraph: {
-    title: "Vinyl Lettering Saskatoon | True Color Display Printing",
+    title: "Vinyl Lettering Saskatoon | From $40 | True Color Display Printing",
     description:
-      "Cut vinyl lettering from $8.50/sqft, min $40. Storefront hours, vehicle doors, office windows. Same-day rush available. Saskatoon pickup 216 33rd St W.",
+      "Vinyl lettering in Saskatoon from $40 ($8.50/sqft). Storefronts, vehicles, boats, office doors. In-house Roland UV cut vinyl. Same-day rush +$40. 216 33rd St W.",
     url: "https://truecolorprinting.ca/vinyl-lettering-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",

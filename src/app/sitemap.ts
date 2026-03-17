@@ -34,7 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Product SEO pages — sprint (2026-03-02) ───────────────────────────────
     { url: `${BASE_URL}/graphic-design-saskatoon`, lastModified: new Date("2026-03-02"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/sign-company-saskatoon`, lastModified: new Date("2026-03-02"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/wall-graphics-saskatoon`, lastModified: new Date("2026-03-02"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/wall-graphics-saskatoon`, lastModified: new Date("2026-03-17"), changeFrequency: "monthly", priority: 0.8 },
 
     // ── Print product SEO pages — sprint (2026-03-03) ────────────────────────
     { url: `${BASE_URL}/flyer-printing-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.9 },
@@ -65,8 +65,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/trade-contractor-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
 
     // ── Product + Industry pages — Sprint B (2026-03-05) ─────────────────────
-    { url: `${BASE_URL}/foamboard-printing-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/vinyl-lettering-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/foamboard-printing-saskatoon`, lastModified: new Date("2026-03-17"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/vinyl-lettering-saskatoon`, lastModified: new Date("2026-03-17"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/postcard-printing-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/photo-poster-printing-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/poster-printing-saskatoon`, lastModified: new Date("2026-03-14"), changeFrequency: "monthly", priority: 0.9 },
