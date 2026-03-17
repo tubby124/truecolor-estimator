@@ -347,12 +347,12 @@ export default function HomePage() {
           <p className="font-bold text-[#1c1712] mb-3">Also available — all priced live:</p>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "Postcards from $35", href: "/products/postcards" },
-              { label: "Stickers from $25", href: "/products/stickers" },
-              { label: "Photo Posters from $15", href: "/products/photo-posters" },
-              { label: "Magnet Calendars from $45", href: "/products/magnet-calendars" },
-              { label: "Retractable Banners from $219", href: "/products/retractable-banners" },
-              { label: "Vinyl Lettering from $40", href: "/products/vinyl-lettering" },
+              { label: "Postcards from $35", href: "/postcard-printing-saskatoon" },
+              { label: "Stickers from $25", href: "/sticker-printing-saskatoon" },
+              { label: "Photo Posters from $15", href: "/photo-poster-printing-saskatoon" },
+              { label: "Custom Magnets from $45", href: "/custom-magnets-saskatoon" },
+              { label: "Retractable Banners from $219", href: "/retractable-banners-saskatoon" },
+              { label: "Vinyl Lettering from $40", href: "/vinyl-lettering-saskatoon" },
             ].map((item) => (
               <Link
                 key={item.href}
