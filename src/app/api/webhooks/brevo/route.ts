@@ -115,6 +115,12 @@ export async function POST(req: NextRequest) {
                 last_opened_at: now,
               })
               .eq("id", sendRecord.lead_id);
+            // Upgrade engagement_state: none → opened (never downgrade)
+            await supabase
+              .from("tc_leads")
+              .update({ engagement_state: "opened" })
+              .eq("id", sendRecord.lead_id)
+              .eq("engagement_state", "none");
           }
         }
       } else if (isHtmlBlitz && email) {
@@ -132,6 +138,12 @@ export async function POST(req: NextRequest) {
               last_opened_at: now,
             })
             .eq("id", lead.id);
+          // Upgrade engagement_state: none → opened (never downgrade)
+          await supabase
+            .from("tc_leads")
+            .update({ engagement_state: "opened" })
+            .eq("id", lead.id)
+            .eq("engagement_state", "none");
         }
       }
     } else if (eventType === "click") {
@@ -162,6 +174,12 @@ export async function POST(req: NextRequest) {
                 last_clicked_at: now,
               })
               .eq("id", sendRecord.lead_id);
+            // Upgrade engagement_state: none|opened → clicked (never downgrade)
+            await supabase
+              .from("tc_leads")
+              .update({ engagement_state: "clicked" })
+              .eq("id", sendRecord.lead_id)
+              .in("engagement_state", ["none", "opened"]);
           }
         }
       } else if (isHtmlBlitz && email) {
@@ -179,6 +197,12 @@ export async function POST(req: NextRequest) {
               last_clicked_at: now,
             })
             .eq("id", lead.id);
+          // Upgrade engagement_state: none|opened → clicked (never downgrade)
+          await supabase
+            .from("tc_leads")
+            .update({ engagement_state: "clicked" })
+            .eq("id", lead.id)
+            .in("engagement_state", ["none", "opened"]);
         }
       }
     } else if (eventType === "unsubscribed" || eventType === "spam") {

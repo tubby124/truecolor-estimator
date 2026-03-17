@@ -32,7 +32,12 @@ async function getData() {
   try {
     const supabase = createServiceClient();
 
-    const [campaignRes, nicheRes, totalRes, activeRes, completedRes, bouncedRes, pausedRes, outreachRes, engagementRes] =
+    const [
+      campaignRes, nicheRes, totalRes, activeRes, completedRes, bouncedRes, pausedRes, outreachRes, engagementRes,
+      segFullRes, segShortRes, segPartnerRes, segSuppressRes,
+      valValidRes, valInvalidRes, valUnvalidatedRes,
+      classifiedRes, unclassifiedRes,
+    ] =
       await Promise.all([
         supabase
           .from("tc_campaigns")
@@ -70,6 +75,18 @@ async function getData() {
           .from("tc_leads")
           .select("drip_niche, emails_sent, emails_opened, emails_clicked")
           .not("drip_status", "eq", "queued"),
+        // Segment counts
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).eq("segment", "full"),
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).eq("segment", "short"),
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).eq("segment", "partner"),
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).eq("segment", "suppress"),
+        // Validation counts
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).eq("validation_status", "valid"),
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).eq("validation_status", "invalid"),
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).is("validation_status", null),
+        // Classification counts
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).not("business_type", "is", null),
+        supabase.from("tc_leads").select("*", { count: "exact", head: true }).is("business_type", null),
       ]);
 
     const engagementData = engagementRes.data ?? [];
@@ -140,6 +157,21 @@ async function getData() {
         pausedLeads: pausedRes.count ?? 0,
         outreachPending: outreachRes.count ?? 0,
       },
+      segments: {
+        full: segFullRes.count ?? 0,
+        short: segShortRes.count ?? 0,
+        partner: segPartnerRes.count ?? 0,
+        suppress: segSuppressRes.count ?? 0,
+      },
+      validation: {
+        valid: valValidRes.count ?? 0,
+        invalid: valInvalidRes.count ?? 0,
+        unvalidated: valUnvalidatedRes.count ?? 0,
+      },
+      classification: {
+        classified: classifiedRes.count ?? 0,
+        unclassified: unclassifiedRes.count ?? 0,
+      },
       engagement: { totalEmailsSent, totalOpened, totalClicked },
       nicheEngagement,
       lastEngineRun: campaignRes.data?.[0]?.updated_at ?? null,
@@ -150,6 +182,9 @@ async function getData() {
       campaigns: [],
       niches: [],
       stats: { totalLeads: 0, activeLeads: 0, completedLeads: 0, bouncedLeads: 0, pausedLeads: 0, outreachPending: 0 },
+      segments: { full: 0, short: 0, partner: 0, suppress: 0 },
+      validation: { valid: 0, invalid: 0, unvalidated: 0 },
+      classification: { classified: 0, unclassified: 0 },
       engagement: { totalEmailsSent: 0, totalOpened: 0, totalClicked: 0 },
       nicheEngagement: {},
       lastEngineRun: null,
@@ -180,7 +215,7 @@ function timeAgo(iso: string) {
 }
 
 export default async function BlitzDashboardPage() {
-  const { campaigns, niches, stats, engagement, lastEngineRun, brevoHtmlCampaigns } = await getData();
+  const { campaigns, niches, stats, segments, validation, classification, engagement, lastEngineRun, brevoHtmlCampaigns } = await getData();
 
   const bounceRate = stats.activeLeads + stats.completedLeads + stats.bouncedLeads > 0
     ? ((stats.bouncedLeads / (stats.activeLeads + stats.completedLeads + stats.bouncedLeads)) * 100).toFixed(1)
@@ -244,6 +279,19 @@ export default async function BlitzDashboardPage() {
           <StatCard label="Emails Sent" value={engagement.totalEmailsSent.toLocaleString()} accent="#94a3b8" />
           <StatCard label="Open Rate" value={`${openRate}%`} accent={parseFloat(openRate) >= 20 ? "#34d399" : "#fbbf24"} />
           <StatCard label="Click Rate" value={`${clickRate}%`} accent={parseFloat(clickRate) >= 3 ? "#34d399" : "#fbbf24"} />
+        </div>
+
+        {/* Segment / Validation / Classification */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-3">
+          <StatCard label="Seg: Full" value={segments.full.toLocaleString()} accent="#34d399" sub="5-step sequence" />
+          <StatCard label="Seg: Short" value={segments.short.toLocaleString()} accent="#fbbf24" sub="3-step sequence" />
+          <StatCard label="Seg: Partner" value={segments.partner.toLocaleString()} accent="#818cf8" sub="supplier track" />
+          <StatCard label="Seg: Suppress" value={segments.suppress.toLocaleString()} accent="#ef4444" sub="no email" />
+          <StatCard label="Valid" value={validation.valid.toLocaleString()} accent="#34d399" />
+          <StatCard label="Invalid" value={validation.invalid.toLocaleString()} accent="#ef4444" />
+          <StatCard label="Unvalidated" value={validation.unvalidated.toLocaleString()} accent="#94a3b8" sub="run MillionVerifier" />
+          <StatCard label="Classified" value={classification.classified.toLocaleString()} accent="#34d399" />
+          <StatCard label="Unclassified" value={classification.unclassified.toLocaleString()} accent="#fbbf24" sub="needs business_type" />
         </div>
 
         {/* Campaign pipeline */}

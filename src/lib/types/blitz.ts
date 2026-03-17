@@ -42,8 +42,15 @@ export interface BlitzLead {
   // Validation
   email_validated: boolean | null;
   email_validation_result: string | null;
+  validation_status: 'valid' | 'risky' | 'invalid' | 'catch_all' | 'unknown' | null;
   unsubscribed_at: string | null;
   last_sent_at: string | null;
+  // Segmentation
+  segment: 'full' | 'partner' | 'short' | 'suppress' | null;
+  email_route: 'core_buyer' | 'supplier' | 'borderline' | null;
+  engagement_state: 'none' | 'opened' | 'clicked' | 'replied';
+  priority_tier: 1 | 2 | 3 | null;
+  suppression_reason: string | null;
   // Meta
   is_customer: boolean | null;
   status: string;
@@ -90,6 +97,9 @@ export interface BlitzTemplate {
   brevo_template_id: number;
   subject: string | null;
   wait_days: number;
+  sequence_version: number;
+  sequence_type: 'full' | 'partner' | 'short';
+  subject_bucket: 'operational' | 'asset_based' | 'local_speed' | 'soft_cta' | 'breakup' | null;
   created_at: string;
 }
 
