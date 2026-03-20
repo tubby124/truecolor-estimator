@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/contact`, lastModified: new Date("2026-03-15"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/services`, lastModified: new Date("2026-03-17"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/quote`, lastModified: new Date("2026-03-13"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${BASE_URL}/resources`, lastModified: new Date("2026-01-20"), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/resources`, lastModified: new Date("2026-03-20"), changeFrequency: "monthly", priority: 0.6 },
 
     // ── Tier 1 SEO landing pages ──────────────────────────────────────────────
     { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2026-03-14"), changeFrequency: "monthly", priority: 0.95 },
@@ -34,7 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Product SEO pages — sprint (2026-03-02) ───────────────────────────────
     { url: `${BASE_URL}/graphic-design-saskatoon`, lastModified: new Date("2026-03-02"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/sign-company-saskatoon`, lastModified: new Date("2026-03-02"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/wall-graphics-saskatoon`, lastModified: new Date("2026-03-17"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/wall-graphics-saskatoon`, lastModified: new Date("2026-03-20"), changeFrequency: "monthly", priority: 0.8 },
 
     // ── Print product SEO pages — sprint (2026-03-03) ────────────────────────
     { url: `${BASE_URL}/flyer-printing-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.9 },
@@ -65,8 +65,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/trade-contractor-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
 
     // ── Product + Industry pages — Sprint B (2026-03-05) ─────────────────────
-    { url: `${BASE_URL}/foamboard-printing-saskatoon`, lastModified: new Date("2026-03-17"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/vinyl-lettering-saskatoon`, lastModified: new Date("2026-03-17"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/foamboard-printing-saskatoon`, lastModified: new Date("2026-03-20"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/vinyl-lettering-saskatoon`, lastModified: new Date("2026-03-20"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/postcard-printing-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/photo-poster-printing-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/poster-printing-saskatoon`, lastModified: new Date("2026-03-14"), changeFrequency: "monthly", priority: 0.9 },

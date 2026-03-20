@@ -7,7 +7,7 @@ import { fetchFeed, fetchMergedFeeds, formatRelativeDate, type FeedItem } from "
 export const revalidate = 21600; // ISR: rebuild every 6 hours
 
 export const metadata: Metadata = {
-  title: "Print & Design Resources | True Color Display Printing Saskatoon",
+  title: "Printing Resources Saskatoon | True Color",
   // FIX 1: trimmed to 155 chars
   description:
     "Printing news, graphic design, small business tips, Saskatchewan agriculture, restaurant, construction & real estate resources — updated every 6 hours for Saskatoon businesses.",
