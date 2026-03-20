@@ -125,7 +125,7 @@ export default function FoamboardPrintingSaskatoon() {
         },
         {
           q: "What thickness of foam board do you print on?",
-          a: "We print on 5mm white foam core. It is rigid enough to stand upright in a display frame or mount flat on a wall with adhesive strips, while light enough to carry and reposition easily. The Roland UV prints directly onto the surface — no laminate required.",
+          a: "We print on 5mm white foam core — $45 for 18×24\" and $65 for 24×36\". It is rigid enough to stand upright in a display frame or mount flat on a wall with adhesive strips, while light enough to carry and reposition easily. Custom sizes are priced at $10/sqft. The Roland UV prints directly onto the surface — no laminate required.",
         },
         {
           q: "Can I use foam board for a restaurant menu board or retail promotional display?",
@@ -141,7 +141,7 @@ export default function FoamboardPrintingSaskatoon() {
         },
         {
           q: "How do I mount a foam board print to a wall?",
-          a: "The most common methods are foam double-sided tape, removable adhesive strips (like Command strips), or small L-bracket wall mounts. The 5mm board is lightweight so most adhesive mounting products work well. We can also score and notch boards for easel back-mounting on request.",
+          a: "The most common methods are foam double-sided tape, removable adhesive strips (like Command strips), or small L-bracket wall mounts — all under $10 at any hardware store. The 5mm board is lightweight so most adhesive mounting products work well. We can also score and notch boards for easel back-mounting on request. Mounting hardware is not included in the $45/$65 print price.",
         },
         {
           q: "How fast can you produce foam board prints in Saskatoon?",

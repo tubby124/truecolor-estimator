@@ -116,6 +116,10 @@ export default function VinylLetteringSaskatoonPage() {
           q: "What colours are available for vinyl lettering?",
           a: "We carry a full range of standard colours in stock, including white, matte black, gloss black, red, dark blue, royal blue, gold, silver, and green. Custom colours are available on request. White is the most popular choice for dark window glass. Black is common for office door suite numbers and interior applications. Call (306) 954-8688 if you need a specific colour match.",
         },
+        {
+          q: "Do you install vinyl lettering or is it pickup only?",
+          a: "Standard orders are pickup at 216 33rd St W, Saskatoon. For storefront or office glass, we offer professional installation starting at $75. Vehicle door lettering is best applied in our shop where we can control temperature and dust for a clean finish. Call (306) 954-8688 to add installation to your order.",
+        },
       ]}
     />
   );

@@ -118,31 +118,31 @@ export default function WallGraphicsSaskatoonPage() {
       faqs={[
         {
           q: "How much do wall graphics cost in Saskatoon?",
-          a: "Removable vinyl wall graphics at True Color start at $11/sqft (minimum $45). A standard 4×8 ft wall graphic runs approximately $250 before design. Exact pricing depends on material, finish, and size — use the quote form on this page or call (306) 954-8688 for a same-day quote.",
+          a: "Removable vinyl wall graphics at True Color start at $11/sqft (minimum $45). A standard 4×8 ft wall graphic runs approximately $280 before design. Exact pricing depends on material, finish, and size — use the quote form on this page or call (306) 954-8688 for a same-day quote.",
         },
         {
           q: "Can wall decals be removed without damaging the wall?",
-          a: "Yes — we use removable vinyl adhesive that peels off drywall, painted surfaces, and glass cleanly. No residue, no paint damage. Ideal for rental spaces, seasonal displays, or businesses that update their décor regularly. Permanent vinyl options are also available for lobby features and exterior applications.",
+          a: "Yes — we use removable vinyl adhesive that peels off drywall, painted surfaces, and glass cleanly. No residue, no paint damage. Removable vinyl starts at $11/sqft. Ideal for rental spaces, seasonal displays, or businesses that update their décor regularly. Permanent vinyl options are also available for lobby features and exterior applications from $13/sqft.",
         },
         {
           q: "What surfaces can vinyl wall graphics go on?",
-          a: "Painted drywall, glass, brick, metal, MDF, and wood. Textured or rough surfaces may require a different vinyl type — mention your wall surface when ordering and we'll confirm the right material. Removable vinyl works best on smooth, clean paint.",
+          a: "Painted drywall, glass, brick, metal, MDF, and wood. All surfaces are priced at $11/sqft for removable vinyl. Textured or rough surfaces may require a different vinyl type — mention your wall surface when ordering and we'll confirm the right material. Removable vinyl works best on smooth, clean paint.",
         },
         {
           q: "What's the difference between wall graphics and wallpaper?",
-          a: "Wall graphics are cut or printed vinyl panels applied to a smooth wall — no glue, no soaking, no professional wallpaper hanger needed. They're applied like a large sticker. Much faster to install and remove than wallpaper. Full-colour photo-quality printing is available on vinyl at any custom size.",
+          a: "Wall graphics are cut or printed vinyl panels applied to a smooth wall — no glue, no soaking, no professional wallpaper hanger needed. They're applied like a large sticker at $11/sqft. Much faster to install and remove than wallpaper. Full-colour photo-quality printing is available on vinyl at any custom size.",
         },
         {
           q: "Can you print custom wall graphics in Saskatoon?",
-          a: "Yes — True Color prints full-colour custom wall graphics in-house on our Roland UV printer. Any design, any size up to 60\" wide. Our in-house designer can build your layout from a rough concept, match brand colours, and provide a to-scale digital proof before printing.",
+          a: "Yes — True Color prints full-colour custom wall graphics in-house on our Roland UV printer. Any design, any size up to 60\" wide, from $11/sqft. Our in-house designer can build your layout from a rough concept, match brand colours, and provide a to-scale digital proof before printing for $35 flat.",
         },
         {
           q: "How long do wall graphics last?",
-          a: "Indoor removable vinyl lasts 3–5 years under normal conditions. Permanent indoor vinyl lasts 5–7 years. Outdoor vinyl (window graphics, exterior walls) is rated 3–5 years UV-resistant. We print with UV-cured inks that resist fading from overhead lighting and indirect sunlight.",
+          a: "Indoor removable vinyl ($11/sqft) lasts 3–5 years under normal conditions. Permanent indoor vinyl lasts 5–7 years. Outdoor vinyl (window graphics, exterior walls) is rated 3–5 years UV-resistant. We print with UV-cured inks that resist fading from overhead lighting and indirect sunlight.",
         },
         {
           q: "Do you install wall graphics?",
-          a: "Installation service is available — ask when you place your order. Most customers with DIY experience install smaller graphics themselves. For larger installs (lobby murals, full retail wall wraps), professional installation is recommended. We can connect you with local installers we work with regularly.",
+          a: "Installation service is available starting at $75 — ask when you place your order. Most customers with DIY experience install smaller graphics themselves. For larger installs (lobby murals, full retail wall wraps), professional installation is recommended and quoted based on wall size.",
         },
         {
           q: "What file do I need to provide for wall graphics?",
