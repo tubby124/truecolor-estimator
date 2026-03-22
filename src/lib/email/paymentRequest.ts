@@ -9,6 +9,11 @@
  */
 
 import { sendEmail } from "./smtp";
+import { emailHeader } from "./components/emailHeader";
+import { emailFooter } from "./components/emailFooter";
+import { accountSection, accountSectionText } from "./components/accountSection";
+import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
+import { escHtml } from "./components/escHtml";
 
 export interface PaymentRequestItem {
   product: string;
@@ -99,17 +104,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 
         <table role="presentation" width="100%" style="max-width: 560px;" cellpadding="0" cellspacing="0">
 
-          <!-- ── DARK HEADER ── -->
-          <tr>
-            <td style="background-color: #1c1712; border-radius: 12px 12px 0 0; padding: 20px 40px; text-align: center;">
-              <p style="margin: 0; font-size: 13px; font-weight: 600; color: #d6cfc7; letter-spacing: 0.08em; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                True Color Display Printing
-              </p>
-              <p style="margin: 4px 0 0; font-size: 11px; color: #7a6a60; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                Saskatoon, Saskatchewan · Canada
-              </p>
-            </td>
-          </tr>
+          ${emailHeader()}
 
           <!-- ── HERO ── -->
           <tr>
@@ -239,51 +234,14 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                 </p>
               </div>
 
-              ${accountInfo?.isNewAccount ? `
-              <!-- New account section -->
-              <div style="margin-top: 24px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 20px 24px; text-align: center;">
-                <p style="margin: 0 0 4px; font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Your Account
-                </p>
-                <p style="margin: 0 0 14px; font-size: 13px; color: #15803d; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  We've created a free account for you at <strong>truecolorprinting.ca</strong>.<br>
-                  Click below to log in instantly and view your order status, proof, and payment history.
-                </p>
-                <a href="${escHtml(accountInfo.accountLink)}"
-                  style="display: inline-block; background: #16a34a; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  View Your Order Online &rarr;
-                </a>
-                <p style="margin: 10px 0 0; font-size: 11px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Link valid for 1 hour. Set a permanent password anytime from your account page.
-                </p>
-              </div>
-              ` : accountInfo ? `
-              <!-- Returning customer account link -->
-              <p style="margin-top: 20px; margin-bottom: 0; font-size: 13px; color: #6b7280; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                View this and all past orders at
-                <a href="${escHtml(accountInfo.accountLink)}" style="color: #0369a1; text-decoration: none; font-weight: 600;">truecolorprinting.ca/account</a>.
-              </p>
-              ` : ""}
+              ${accountInfo ? accountSection({ isNewAccount: accountInfo.isNewAccount, accountLink: accountInfo.accountLink, customerName: contact.name }) : ""}
+
+              ${orderTrackingNudge()}
 
             </td>
           </tr>
 
-          <!-- ── FOOTER ── -->
-          <tr>
-            <td style="background: #1c1712; border-radius: 0 0 12px 12px; padding: 24px 32px; text-align: center;">
-              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #f5f0eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                True Color Display Printing
-              </p>
-              <p style="margin: 0 0 4px; font-size: 12px; color: #9c928a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                216 33rd St W · Saskatoon, SK · Canada
-              </p>
-              <p style="margin: 0; font-size: 12px; color: #9c928a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <a href="tel:+13069548688" style="color: #f08080; text-decoration: none;">(306) 954-8688</a>
-                &nbsp;·&nbsp;
-                <a href="mailto:info@true-color.ca" style="color: #f08080; text-decoration: none;">info@true-color.ca</a>
-              </p>
-            </td>
-          </tr>
+          ${emailFooter()}
 
         </table>
 
@@ -327,31 +285,12 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     "",
     `Questions? Reply to this email or call (306) 954-8688.`,
     "",
-    ...(accountInfo?.isNewAccount ? [
-      `--- YOUR ACCOUNT ---`,
-      `We've created a free account for you at truecolorprinting.ca.`,
-      `Log in instantly (link valid 1 hour): ${accountInfo.accountLink}`,
-      `You can set a permanent password from your account page.`,
-      "",
-    ] : accountInfo ? [
-      `View this and all past orders: ${accountInfo.accountLink}`,
-      "",
-    ] : []),
+    ...(accountInfo ? [accountSectionText({ isNewAccount: accountInfo.isNewAccount, accountLink: accountInfo.accountLink, customerName: contact.name })] : []),
+    orderTrackingNudgeText(),
     `True Color Display Printing`,
     `216 33rd St W · Saskatoon, SK`,
     `info@true-color.ca`,
   ]
     .filter((l) => l !== null && l !== undefined)
     .join("\n");
-}
-
-// ─── HTML escape helper ───────────────────────────────────────────────────────
-
-function escHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

@@ -20,6 +20,8 @@ import { createOrFindWaveCustomer, createWaveInvoice, approveWaveInvoice, sendWa
 import { encodePaymentToken } from "@/lib/payment/token";
 import { sendPaymentRequestEmail, type AccountInfo } from "@/lib/email/paymentRequest";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
+import { sendAccountWelcomeEmail } from "@/lib/email/accountWelcome";
+import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sanitizeError } from "@/lib/errors/sanitize";
 
 const GST_RATE = 0.05;
@@ -266,7 +268,22 @@ export async function POST(req: NextRequest) {
 
         console.log(`[manual-order] Wave invoice sent → ${contact.email} | order ${order.order_number}`);
 
-        // Staff notification (skip customer email — Wave already sent it)
+        // Send account welcome email (Wave doesn't include account info)
+        if (accountInfo) {
+          try {
+            await sendAccountWelcomeEmail({
+              customerName: contact.name.trim(),
+              customerEmail: contact.email.toLowerCase().trim(),
+              orderNumber: order.order_number,
+              isNewAccount: accountInfo.isNewAccount,
+              accountLink: accountInfo.accountLink,
+            });
+          } catch (acctErr) {
+            console.error("[manual-order] account welcome email (non-fatal):", acctErr);
+          }
+        }
+
+        // Staff notification (skip customer payment email — Wave already sent it)
         try {
           await sendStaffOrderNotification({
             orderNumber: order.order_number,
@@ -297,6 +314,25 @@ export async function POST(req: NextRequest) {
           });
         } catch (staffEmailErr) {
           console.error("[manual-order] staff notification failed (non-fatal):", staffEmailErr);
+        }
+
+        // Sync customer to Brevo (non-fatal)
+        try {
+          const nameParts = contact.name.trim().split(/\s+/);
+          await syncCustomerToBrevo({
+            email: contact.email.toLowerCase().trim(),
+            firstName: nameParts[0] || contact.name.trim(),
+            lastName: nameParts.slice(1).join(" ") || undefined,
+            company: contact.company?.trim() || undefined,
+            phone: contact.phone?.trim() || undefined,
+            orderNumber: order.order_number,
+            orderTotal: total,
+            productSummary: items.map((i) => i.product).join(", "),
+            source: "manual_order",
+            accountStatus: accountInfo?.isNewAccount ? "created" : accountInfo ? "active" : "none",
+          });
+        } catch (brevoErr) {
+          console.error("[manual-order] Brevo sync failed (non-fatal):", brevoErr);
         }
 
         return NextResponse.json({ orderId: order.id, orderNumber: order.order_number, paymentUrl: null });
@@ -365,6 +401,25 @@ export async function POST(req: NextRequest) {
       });
     } catch (staffEmailErr) {
       console.error("[manual-order] staff notification failed (non-fatal):", staffEmailErr);
+    }
+
+    // Sync customer to Brevo (non-fatal)
+    try {
+      const nameParts = contact.name.trim().split(/\s+/);
+      await syncCustomerToBrevo({
+        email: contact.email.toLowerCase().trim(),
+        firstName: nameParts[0] || contact.name.trim(),
+        lastName: nameParts.slice(1).join(" ") || undefined,
+        company: contact.company?.trim() || undefined,
+        phone: contact.phone?.trim() || undefined,
+        orderNumber: order.order_number,
+        orderTotal: total,
+        productSummary: items.map((i) => i.product).join(", "),
+        source: "manual_order",
+        accountStatus: accountInfo?.isNewAccount ? "created" : accountInfo ? "active" : "none",
+      });
+    } catch (brevoErr) {
+      console.error("[manual-order] Brevo sync failed (non-fatal):", brevoErr);
     }
 
     return NextResponse.json({ orderId: order.id, orderNumber: order.order_number, paymentUrl });

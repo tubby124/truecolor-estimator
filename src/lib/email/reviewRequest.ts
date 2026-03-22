@@ -9,6 +9,10 @@
  */
 
 import { sendEmail } from "./smtp";
+import { emailHeader } from "./components/emailHeader";
+import { emailFooter } from "./components/emailFooter";
+import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
+import { escHtml } from "./components/escHtml";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,17 +72,7 @@ function buildReviewRequestEmailHtml({
     <tr><td align="center">
       <table role="presentation" width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
 
-        <!-- HEADER -->
-        <tr>
-          <td style="background:#1c1712;border-radius:12px 12px 0 0;padding:20px 40px;text-align:center;">
-            <p style="margin:0;font-size:13px;font-weight:600;color:#d6cfc7;letter-spacing:.08em;text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              True Color Display Printing
-            </p>
-            <p style="margin:4px 0 0;font-size:11px;color:#7a6a60;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              Saskatoon, Saskatchewan &middot; Canada
-            </p>
-          </td>
-        </tr>
+        ${emailHeader()}
 
         <!-- HERO -->
         <tr>
@@ -129,6 +123,8 @@ function buildReviewRequestEmailHtml({
               </table>
             </div>
 
+            ${orderTrackingNudge()}
+
             <!-- "Not happy?" block -->
             <div style="background:#fdf4f4;border:1px solid #f0bfbb;border-radius:8px;padding:14px 16px;margin-bottom:8px;">
               <p style="margin:0;font-size:13px;color:#7a1818;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;">
@@ -141,25 +137,7 @@ function buildReviewRequestEmailHtml({
           </td>
         </tr>
 
-        <!-- FOOTER -->
-        <tr>
-          <td style="background:#1c1712;border-radius:0 0 12px 12px;padding:24px 32px;text-align:center;">
-            <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#f5f0eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              True Color Display Printing
-            </p>
-            <p style="margin:0 0 4px;font-size:12px;color:#9c928a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              216 33rd St W &middot; Saskatoon, SK &middot; Canada
-            </p>
-            <p style="margin:0 0 8px;font-size:12px;color:#9c928a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              <a href="tel:+13069548688" style="color:#f08080;text-decoration:none;">(306) 954-8688</a>
-              &nbsp;&middot;&nbsp;
-              <a href="mailto:info@true-color.ca" style="color:#f08080;text-decoration:none;">info@true-color.ca</a>
-            </p>
-            <p style="margin:0;font-size:11px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              This is a one-time courtesy email for order #${escHtml(orderNumber)}.
-            </p>
-          </td>
-        </tr>
+        ${emailFooter(`This is a one-time courtesy email for order #${escHtml(orderNumber)}.`)}
 
       </table>
     </td></tr>
@@ -186,7 +164,7 @@ If you're happy with the results, we'd love a quick Google review. It helps othe
 ${GOOGLE_REVIEW_URL}
 
 Not 100% happy? Reply to this email or call us at (306) 954-8688 — we'll make it right.
-
+${orderTrackingNudgeText()}
 Thanks for supporting a local Saskatoon business,
 The True Color Team
 
@@ -199,13 +177,3 @@ This is a one-time courtesy email for order #${orderNumber}.
 `;
 }
 
-// ─── HTML escape helper ───────────────────────────────────────────────────────
-
-function escHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}

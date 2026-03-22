@@ -9,6 +9,10 @@
  */
 
 import { sendEmail } from "./smtp";
+import { emailHeader } from "./components/emailHeader";
+import { emailFooter } from "./components/emailFooter";
+import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
+import { escHtml } from "./components/escHtml";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -156,17 +160,7 @@ function buildHtml(p: ProofSentParams): string {
     <tr><td align="center">
       <table role="presentation" width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
 
-        <!-- HEADER -->
-        <tr>
-          <td style="background:#1c1712;border-radius:12px 12px 0 0;padding:20px 40px;text-align:center;">
-            <p style="margin:0;font-size:13px;font-weight:600;color:#d6cfc7;letter-spacing:.08em;text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              True Color Display Printing
-            </p>
-            <p style="margin:4px 0 0;font-size:11px;color:#7a6a60;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              Saskatoon, Saskatchewan · Canada
-            </p>
-          </td>
-        </tr>
+        ${emailHeader()}
 
         <!-- HERO -->
         <tr>
@@ -235,25 +229,12 @@ function buildHtml(p: ProofSentParams): string {
               </p>
             </div>
 
+            ${orderTrackingNudge()}
+
           </td>
         </tr>
 
-        <!-- FOOTER -->
-        <tr>
-          <td style="background:#1c1712;border-radius:0 0 12px 12px;padding:24px 32px;text-align:center;">
-            <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#f5f0eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              True Color Display Printing
-            </p>
-            <p style="margin:0 0 4px;font-size:12px;color:#9c928a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              216 33rd St W · Saskatoon, SK · Canada
-            </p>
-            <p style="margin:0;font-size:12px;color:#9c928a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              <a href="tel:+13069548688" style="color:#f08080;text-decoration:none;">(306) 954-8688</a>
-              &nbsp;·&nbsp;
-              <a href="mailto:info@true-color.ca" style="color:#f08080;text-decoration:none;">info@true-color.ca</a>
-            </p>
-          </td>
-        </tr>
+        ${emailFooter()}
 
       </table>
     </td></tr>
@@ -295,6 +276,7 @@ function buildText(p: ProofSentParams): string {
     ...(message?.trim() ? [`Note from True Color: ${message.trim()}`, ""] : []),
     "Looks good? We'll proceed to print. Have changes? Reply to this email and let us know.",
     "",
+    orderTrackingNudgeText(),
     "— True Color Display Printing",
     "216 33rd St W, Saskatoon, SK",
     "(306) 954-8688",
@@ -302,13 +284,3 @@ function buildText(p: ProofSentParams): string {
   ].join("\n");
 }
 
-// ─── HTML escape ──────────────────────────────────────────────────────────────
-
-function escHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}

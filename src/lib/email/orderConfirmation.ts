@@ -9,6 +9,10 @@
 
 import QRCode from "qrcode";
 import { sendEmail } from "./smtp";
+import { emailHeader } from "./components/emailHeader";
+import { emailFooter } from "./components/emailFooter";
+import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
+import { escHtml } from "./components/escHtml";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -263,17 +267,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
         <!-- Card — max 560px wide -->
         <table role="presentation" width="100%" style="max-width: 560px;" cellpadding="0" cellspacing="0">
 
-          <!-- ── DARK HEADER ── -->
-          <tr>
-            <td style="background-color: #1c1712; border-radius: 12px 12px 0 0; padding: 20px 40px; text-align: center;">
-              <p style="margin: 0; font-size: 13px; font-weight: 600; color: #d6cfc7; letter-spacing: 0.08em; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                True Color Display Printing
-              </p>
-              <p style="margin: 4px 0 0; font-size: 11px; color: #7a6a60; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                Saskatoon, Saskatchewan · Canada
-              </p>
-            </td>
-          </tr>
+          ${emailHeader()}
 
           <!-- ── CONFIRMATION HERO ── -->
           <tr>
@@ -479,6 +473,8 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                     </a>
                   </div>`}
 
+              ${orderTrackingNudge()}
+
               <!-- ── QUESTIONS ── -->
               <div style="background: #fdf4f4; border: 1px solid #f0bfbb; border-radius: 8px; padding: 14px 16px; margin-bottom: 8px;">
                 <p style="margin: 0; font-size: 13px; color: #7a1818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
@@ -491,25 +487,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
             </td>
           </tr>
 
-          <!-- ── FOOTER ── -->
-          <tr>
-            <td style="background: #1c1712; border-radius: 0 0 12px 12px; padding: 24px 32px; text-align: center;">
-              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #f5f0eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                True Color Display Printing
-              </p>
-              <p style="margin: 0 0 4px; font-size: 12px; color: #9c928a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                216 33rd St W · Saskatoon, SK · Canada
-              </p>
-              <p style="margin: 0 0 8px; font-size: 12px; color: #9c928a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                <a href="tel:+13069548688" style="color: #f08080; text-decoration: none;">(306) 954-8688</a>
-                &nbsp;·&nbsp;
-                <a href="mailto:info@true-color.ca" style="color: #f08080; text-decoration: none;">info@true-color.ca</a>
-              </p>
-              <p style="margin: 0; font-size: 11px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                All prices in CAD · GST + PST included
-              </p>
-            </td>
-          </tr>
+          ${emailFooter("All prices in CAD &middot; GST + PST included")}
 
         </table>
         <!-- /Card -->
@@ -574,6 +552,7 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
       ? "--- THANK YOU ---\nEnjoying our work? A quick Google review means the world to us:\nhttps://g.page/r/CZH6HlbNejQAEAE/review"
       : "--- GET $10 OFF YOUR NEXT ORDER ---\nLeave us a Google review and we'll give you $10 off your next order!\nJust screenshot your review and show us at pickup, or reply to this email.\nhttps://g.page/r/CZH6HlbNejQAEAE/review",
     "",
+    orderTrackingNudgeText(),
     "Questions? Reply to this email or call (306) 954-8688.",
     "",
     "True Color Display Printing",
@@ -584,13 +563,3 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
   return lines.join("\n");
 }
 
-// ─── HTML escape helper ───────────────────────────────────────────────────────
-
-function escHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}

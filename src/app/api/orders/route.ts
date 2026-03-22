@@ -22,6 +22,7 @@ import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { estimate } from "@/lib/engine";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -528,7 +529,26 @@ export async function POST(req: NextRequest) {
       console.error("[orders] confirmation email failed (non-fatal):", emailErr);
     }
 
-    // 9. Send staff notification email (non-fatal)
+    // 9. Sync customer to Brevo (non-fatal)
+    try {
+      const nameParts = contact.name.trim().split(/\s+/);
+      await syncCustomerToBrevo({
+        email: contact.email.toLowerCase().trim(),
+        firstName: nameParts[0] || contact.name.trim(),
+        lastName: nameParts.slice(1).join(" ") || undefined,
+        company: contact.company?.trim() || undefined,
+        phone: contact.phone?.trim() || undefined,
+        orderNumber: order.order_number,
+        orderTotal: total,
+        productSummary: items.map((i) => i.product_name).join(", "),
+        source: "checkout",
+        accountStatus: "none",
+      });
+    } catch (brevoErr) {
+      console.error("[orders] Brevo sync failed (non-fatal):", brevoErr);
+    }
+
+    // 10. Send staff notification email (non-fatal)
     try {
       const siteUrlForEmail =
         process.env.NEXT_PUBLIC_SITE_URL ??
