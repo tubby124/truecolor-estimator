@@ -191,7 +191,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   // ── 8. Email staff (non-fatal) ──────────────────────────────────────────────
   try {
     const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolor-estimator.vercel.app";
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 
     // Generate 7-day signed URL for staff email
     let fileUrl = `${SUPABASE_URL}/storage/v1/object/public/print-files/${filePath}`;

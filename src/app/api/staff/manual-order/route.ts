@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
 
     // ── 4. Insert order_items rows (one per item) ──
     for (const item of items) {
-      void supabase.from("order_items").insert({
+      const { error: itemErr } = await supabase.from("order_items").insert({
         order_id: order.id,
         category: "MANUAL",
         product_name: formatItemLabel(item),
@@ -213,6 +213,9 @@ export async function POST(req: NextRequest) {
         unit_price: Math.round(item.amount * 100) / 100,
         line_total: Math.round(item.amount * 100) / 100,
       });
+      if (itemErr) {
+        console.error(`[manual-order] order_items insert failed for order ${order.id}:`, itemErr.message);
+      }
     }
 
     // ── 5. Generate payment URL ──

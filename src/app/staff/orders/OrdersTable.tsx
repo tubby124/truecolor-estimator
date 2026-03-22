@@ -12,6 +12,7 @@ import {
   DESIGN_LABELS,
   VALID_STATUSES,
 } from "@/lib/data/order-constants";
+import { CustomerHistoryWidget } from "./CustomerHistoryWidget";
 
 const SUPABASE_STORAGE_URL =
   `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
@@ -1186,6 +1187,11 @@ export function OrdersTable({ initialOrders }: Props) {
                           )}
                         </div>
                       )}
+                    </div>
+
+                    {/* Customer history */}
+                    <div className="pt-2 border-t border-gray-100">
+                      <CustomerHistoryWidget orderId={order.id} currentOrderId={order.id} />
                     </div>
 
                     {/* Archive / Unarchive */}

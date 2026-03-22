@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Failed to load orders" }, { status: 500 });
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolor-estimator.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 
   const ordersWithPayUrl = (orders ?? []).map((order) => {
     let pay_url: string | null = null;

@@ -15,8 +15,7 @@ import {
 } from "@/lib/data/order-constants";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://truecolor-estimator-o2q38cgso-tubby124s-projects.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 
 const SUPABASE_STORAGE_URL = `${
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"
@@ -247,7 +246,7 @@ export function AccountClientPage() {
       setLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         if (session.user?.email?.toLowerCase() === STAFF_EMAIL) {
           router.replace("/staff/orders");
@@ -255,11 +254,30 @@ export function AccountClientPage() {
         }
         setSession(session as SessionData);
         setLoading(false);
+      } else {
+        setSession(null);
+        setOrders([]);
+        setLoading(false);
       }
     });
 
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        supabase.auth.getSession().then(({ data: { session: s } }) => {
+          if (!s) {
+            setSession(null);
+            setOrders([]);
+          }
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      listener.subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [router]);
 
   // ── Load orders on session ──────────────────────────────────────────────────
 

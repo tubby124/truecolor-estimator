@@ -432,7 +432,7 @@ export async function POST(req: NextRequest) {
 
       const siteUrl =
         process.env.NEXT_PUBLIC_SITE_URL ??
-        "https://truecolor-estimator.vercel.app";
+        "https://truecolorprinting.ca";
       const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
 
       const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl);
@@ -460,7 +460,7 @@ export async function POST(req: NextRequest) {
       try {
         const siteUrl =
           process.env.NEXT_PUBLIC_SITE_URL ??
-          "https://truecolor-estimator.vercel.app";
+          "https://truecolorprinting.ca";
         const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
         const desc =
           items.length === 1
@@ -552,7 +552,7 @@ export async function POST(req: NextRequest) {
     try {
       const siteUrlForEmail =
         process.env.NEXT_PUBLIC_SITE_URL ??
-        "https://truecolor-estimator.vercel.app";
+        "https://truecolorprinting.ca";
       await sendStaffOrderNotification({
         orderNumber: order.order_number,
         contact,
