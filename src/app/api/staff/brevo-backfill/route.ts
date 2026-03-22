@@ -15,6 +15,13 @@ const BREVO_API = "https://api.brevo.com/v3";
 const CUSTOMER_LIST_ID = 25;
 const BREVO_BATCH_SIZE = 10;
 
+function toE164(phone: string): string | null {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return null;
+}
+
 interface OrderRow {
   customer_id: string;
   order_number: string;
@@ -135,7 +142,10 @@ export async function POST() {
 
     if (lastName) attributes.LASTNAME = lastName;
     if (cust.company) attributes.COMPANY = cust.company;
-    if (cust.phone) attributes.SMS = cust.phone;
+    if (cust.phone) {
+      const e164 = toE164(cust.phone);
+      if (e164) attributes.SMS = e164;
+    }
 
     payloads.push({
       email: cust.email.toLowerCase(),

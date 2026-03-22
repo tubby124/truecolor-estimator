@@ -13,6 +13,13 @@
 const BREVO_API = "https://api.brevo.com/v3";
 const CUSTOMER_LIST_ID = 25;
 
+function toE164(phone: string): string | null {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return null;
+}
+
 export interface CustomerSyncParams {
   email: string;
   firstName: string;
@@ -94,7 +101,10 @@ export async function syncCustomerToBrevo(
 
   if (lastName) attributes.LASTNAME = lastName;
   if (company) attributes.COMPANY = company;
-  if (phone) attributes.SMS = phone;
+  if (phone) {
+    const e164 = toE164(phone);
+    if (e164) attributes.SMS = e164;
+  }
 
   const res = await fetch(`${BREVO_API}/contacts`, {
     method: "POST",
