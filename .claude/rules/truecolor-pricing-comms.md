@@ -1,43 +1,25 @@
-# True Color Pricing Communication Rules
+# True Color — Pricing Communication Rules
 
-> This file supplements ~/.claude/rules/brand-voice.md with specific pricing communication patterns. See also: data/PRICING_QUICK_REFERENCE.md for the full pricing reference.
+## Mandatory Check
+Before writing ANY price in a landing page, email, campaign, FAQ, or social post for True Color:
+→ Read `data/PRICING_QUICK_REFERENCE.md` § "Communication Rules" section first.
 
-## Source of truth
-All prices come from data/tables/ CSVs. PRICING_QUICK_REFERENCE.md is the human-readable reference.
+## Quick Reference (4 min-inflated products)
+| Product | Marketing "from" | Real Rate | Min Order |
+|---------|-----------------|-----------|-----------|
+| Coroplast | from $30 | $8/sqft | $30 |
+| ACP Aluminum | from $60 | $13/sqft | $60 |
+| Vehicle Magnets | from $45 | $24/sqft | $45 |
+| Vinyl Lettering | from $40 | $8.50/sqft | $40 |
 
-## The 4 minimum-inflated products
-These products have a minimum order that IS the correct "from" price:
-- Coroplast: $8/sqft rate, $30 minimum → marketing says "from $30"
-- ACP Aluminum: $13/sqft rate, $60 minimum → marketing says "from $60"
-- Vehicle Magnets: $24/sqft rate, $45 minimum → marketing says "from $45"
-- Vinyl Lettering: $8.50/sqft rate, $40 minimum → marketing says "from $40"
-
-## Where to use which price format
-| Context | Format | Example |
-|---------|--------|---------|
-| Marketing headline / CTA | "from $[minimum]" | "Coroplast signs from $30" |
-| FAQ / pricing explanation | rate + minimum | "$8/sqft for orders above the $30 minimum" |
-| Product reference card (IndustryPage) | T1 sqft rate | "$8/sqft" |
-| Ranking page title (FROZEN) | Whatever currently ranks | Do NOT change |
-
-## Common mistakes to avoid
-- "from $8/sqft" for coroplast in marketing → WRONG, use "from $30"
-- "from $45" for banners → WRONG, use "from $66" (smallest real banner = 2×4ft = $66)
-- "from $39" for ACP → WRONG, use "from $60" (minimum order)
-- "from $24" for coroplast → WRONG, use "from $30" (minimum order, not 18×24" calc price)
-- "from $24/sqft" for magnets → WRONG in marketing, use "from $45"
-- "$8/sqft" for window decals → WRONG, decals are $11/sqft
-- "8+ sqft" volume discount → WRONG, always QTY-based ("5+ signs")
-- PST 6% → WRONG, Saskatchewan printing has GST 5% only
-
-## Add-ons (always separate from "from" price)
-- Rush: +$40 flat
-- Design (minor edit): +$35
-- Design (from scratch): +$50
-- Logo vectorization: +$75
-- Grommets: $2.50/each
-- H-stakes: $2.50/each
-- Installation: $75 base
-
-## Tax
-All prices are pre-tax. GST 5% applied at checkout only.
+## Key Rules
+- "from $X" in marketing headlines/titles/meta = the minimum order (what customer actually pays minimum)
+- Sqft rates = FAQ, comparison context, AND product reference cards on IndustryPage
+- Product reference cards (`products` array): use T1 sqft rates for wide-format (matches ranking pages). Marketing headlines/titles/meta use minimums.
+- T1 sqft rates for product cards: Coroplast $8 | Banners $8.25 | ACP $13 | Foamboard $10 | Window Decals $11 | Magnets $24
+- Banners "from $66" = real price (2×4ft), NOT "from $45" (that's the minimum they exceed)
+- Foamboard "from $45" = real price, not inflated
+- Lot-priced products (BCs, flyers, stickers, postcards, brochures, posters) = no minimums, flat totals
+- BC "from $45" = 250 double-sided on 14pt gloss (1S = $40). 500 2S = $65, 1000 2S = $110.
+- Flyer "from $45" = 100 full-letter double-sided on 80lb gloss. 100lb upgrade: 100=$65, 250=$115, 1000=$250.
+- Rush +$40 and Design $35 always mentioned separately, never baked into "from" price
