@@ -55,3 +55,6 @@ supabase/.temp/
 
 # E2E test artifacts
 e2e-screenshots/
+playwright-report/
+test-results/
+playwright/.auth/

@@ -13,7 +13,9 @@
     "test:smoke": "vitest run e2e/",
     "test:payment": "node scripts/test-payment-flow.mjs",
     "gen-og": "node scripts/gen-og.mjs",
-    "validate:pricing": "node scripts/validate-pricing.mjs"
+    "validate:pricing": "node scripts/validate-pricing.mjs",
+    "test:e2e:pw": "playwright test",
+    "test:e2e:pw:ui": "playwright test --ui"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.4.2",
@@ -32,6 +34,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
