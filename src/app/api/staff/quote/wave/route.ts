@@ -20,6 +20,7 @@ import {
   sendWaveInvoice,
   type WaveLineItem,
 } from "@/lib/wave/invoice";
+import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 
 interface JobDetailsMini {
   qty: number;
@@ -170,6 +171,22 @@ export async function POST(req: Request) {
       } catch (notifyErr) {
         console.error("[quote/wave] staff notification failed (non-fatal):", notifyErr);
       }
+    }
+
+    try {
+      const nameParts = name.split(/\s+/);
+      await syncCustomerToBrevo({
+        email: customerEmail.toLowerCase().trim(),
+        firstName: nameParts[0] || name,
+        lastName: nameParts.slice(1).join(" ") || undefined,
+        orderNumber: invoice.invoiceNumber,
+        orderTotal: parseFloat(totalDisplay) || 0,
+        productSummary: jobSummary,
+        source: "quote",
+        accountStatus: "none",
+      });
+    } catch (brevoErr) {
+      console.error("[quote/wave] Brevo sync failed (non-fatal):", brevoErr);
     }
 
     return Response.json({

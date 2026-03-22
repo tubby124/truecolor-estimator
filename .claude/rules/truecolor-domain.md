@@ -60,5 +60,10 @@ After a successful `npm run build` on customer-facing files (pages, components, 
 - If user confirms, run `cd "/Users/owner/Downloads/TRUE COLOR PRICING /truecolor-estimator" && git push`
 - After /truecolor-page completes: remind about manual follow-ups (images, Brevo, social) per `memory/truecolor-automation-chain.md`
 
+## Email Component Pattern
+All new email templates MUST import shared components from `src/lib/email/components/` (Header, Footer, Button, Section, Card).
+Never duplicate header/footer HTML — always use the shared components.
+Examples: orderConfirmation, paymentRequest, reviewRequest, statusUpdate, proofSent.
+
 ## NotebookLM
 Context file: see ~/.claude/notebooklm-guide.md for index. Create project context file at session start if status is STUB NEEDED.

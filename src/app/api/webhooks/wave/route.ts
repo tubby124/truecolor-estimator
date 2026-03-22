@@ -123,6 +123,25 @@ export async function POST(req: NextRequest) {
               });
               console.log(`[wave-webhook] payment confirmed email sent → ${customer.email}`);
             }
+
+            if (customer?.email) {
+              try {
+                await fetch("https://api.brevo.com/v3/contacts", {
+                  method: "POST",
+                  headers: {
+                    "api-key": process.env.BREVO_API_KEY!,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    email: customer.email,
+                    attributes: { LAST_PAYMENT_DATE: new Date().toISOString().slice(0, 10) },
+                    updateEnabled: true,
+                  }),
+                });
+              } catch (brevoErr) {
+                console.error("[wave-webhook] Brevo LAST_PAYMENT_DATE update failed (non-fatal):", brevoErr);
+              }
+            }
           } catch (emailErr) {
             console.error("[wave-webhook] payment email failed (non-fatal):", emailErr);
           }
