@@ -208,6 +208,27 @@ const REAL_WORK = [
 
   // ── Vehicle Signage ──
   {
+    src: "/images/gallery/gallery-vehicle-decal-riverbend-door.webp",
+    label: "Door Panel Decal — RiverBend Auto Glass",
+    from: "from $45",
+    slug: "vehicle-decals",
+    category: "Vehicle",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-decal-riverbend-side.webp",
+    label: "Full Door Vinyl — RiverBend Auto Glass",
+    from: "from $45",
+    slug: "vehicle-decals",
+    category: "Vehicle",
+  },
+  {
+    src: "/images/gallery/gallery-vehicle-decal-riverbend-rear-window.webp",
+    label: "Rear Window Decal — RiverBend Auto Glass",
+    from: "from $45",
+    slug: "vehicle-decals",
+    category: "Vehicle",
+  },
+  {
     src: "/images/gallery/gallery-vehicle-vinyl-ayotte-plumbing.webp",
     label: "Van Vinyl Branding — Ayotte Plumbing",
     from: "from $45",
@@ -485,6 +506,7 @@ const SEO_SLUG_MAP: Record<string, string> = {
   "magnet-calendars": "/magnet-calendars-saskatoon",
   "foamboard-displays": "/foamboard-printing-saskatoon",
   brochures: "/brochure-printing-saskatoon",
+  "vehicle-decals": "/vehicle-decals-saskatoon",
 };
 
 function GalleryCard({ item, isLCP = false }: { item: GalleryItem; isLCP?: boolean }) {
