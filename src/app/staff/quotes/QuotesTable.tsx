@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { QuoteRequest, ItemMeta } from "./page";
 
+type LineItem = { description: string; qty: string; unitPrice: string };
+
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 
 function StatCard({
@@ -330,6 +332,23 @@ function QuoteCard({ quote }: { quote: QuoteRequest }) {
   const [replySending, setReplySending] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
   const [replySent, setReplySent] = useState(false);
+
+  // Quote builder modal
+  const defaultItems = (): LineItem[] =>
+    quote.items.slice(0, 1).map((item) => ({
+      description: [item.product, item.dimensions, item.material].filter(Boolean).join(" — "),
+      qty: String(item.qty || 1),
+      unitPrice: "",
+    }));
+  const [quoteBuilderOpen, setQuoteBuilderOpen] = useState(false);
+  const [lineItems, setLineItems] = useState<LineItem[]>(defaultItems);
+  const [quoteSubject, setQuoteSubject] = useState(
+    `Your Custom Print Quote — True Color Display Printing`
+  );
+  const [quoteNote, setQuoteNote] = useState("");
+  const [quoteSending, setQuoteSending] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [quoteSent, setQuoteSent] = useState(false);
 
   useEffect(() => {
     if (replyOpen && !replyBody) {
