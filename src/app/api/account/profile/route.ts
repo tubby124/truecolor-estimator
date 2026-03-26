@@ -101,9 +101,7 @@ export async function PATCH(req: NextRequest) {
     .eq("email", email)
     .maybeSingle();
 
-  if (!existing) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
-
-  const updates: Record<string, unknown> = {};
+  const updates: Record<string, unknown> = { email };
   if (body.name !== undefined) updates.name = body.name.trim() || null;
   if (body.phone !== undefined) updates.phone = body.phone.trim() || null;
   if (body.address !== undefined) updates.address = body.address.trim() || null;
@@ -113,10 +111,9 @@ export async function PATCH(req: NextRequest) {
     updates.company = newCompany || null;
 
     if (newCompany) {
-      // Append to saved companies list (deduplicated, best-effort)
       try {
         const current: string[] = Array.isArray(
-          (existing as { companies?: unknown }).companies
+          (existing as { companies?: unknown } | null)?.companies
         )
           ? ((existing as { companies: string[] }).companies)
           : [];
@@ -129,10 +126,10 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
-  const { error: updateErr } = await admin
-    .from("customers")
-    .update(updates)
-    .eq("id", existing.id);
+  // Upsert — create the customer row if it doesn't exist yet (e.g. Google OAuth sign-ups)
+  const { error: updateErr } = existing
+    ? await admin.from("customers").update(updates).eq("id", existing.id)
+    : await admin.from("customers").insert(updates);
 
   if (updateErr) {
     console.error("[profile] PATCH error:", updateErr.message);
