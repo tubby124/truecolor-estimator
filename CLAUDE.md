@@ -1,3 +1,14 @@
+@.claude/rules/truecolor-domain.md
+@.claude/rules/truecolor-pricing-safety.md
+@.claude/rules/truecolor-seo-safety.md
+@.claude/rules/truecolor-security.md
+@.claude/rules/truecolor-pricing-comms.md
+@.claude/rules/seo-standards.md
+@.claude/rules/seo-protected-pages.md
+@.claude/rules/brand-voice.md
+@.claude/rules/content-pipeline.md
+@.claude/rules/content-formats.md
+@.claude/rules/payment-tax.md
 @~/.claude/rules/mcp-usage.md
 
 ## Mandatory Skill Gates
