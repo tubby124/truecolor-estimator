@@ -39,6 +39,8 @@ export default function CallbackPage() {
         subscription.unsubscribe();
         if (event === "PASSWORD_RECOVERY") {
           window.location.replace("/account?reset=1");
+        } else if (searchParams.get("type") === "signup") {
+          window.location.replace("/account?welcome=1");
         } else {
           window.location.replace("/account");
         }
@@ -64,7 +66,9 @@ export default function CallbackPage() {
             setError("Link expired or already used — please request a new one.");
           } else {
             window.location.replace(
-              type === "recovery" ? "/account?reset=1" : "/account"
+              type === "recovery" ? "/account?reset=1" :
+              type === "signup" ? "/account?welcome=1" :
+              "/account"
             );
           }
         });

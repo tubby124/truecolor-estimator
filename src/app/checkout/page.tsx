@@ -206,6 +206,34 @@ export default function CheckoutPage() {
       } catch {
         // Non-fatal — continue without pre-fill
       }
+      // Auto-apply WELCOME10 for first-time customers (silent — no-op if code not found or already used)
+      try {
+        const discRes = await fetch("/api/discount/validate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ code: "WELCOME10" }),
+        });
+        if (discRes.ok) {
+          const disc = (await discRes.json()) as {
+            valid?: boolean;
+            code?: string;
+            discount_amount?: number;
+            description?: string;
+          };
+          if (disc.valid && disc.code) {
+            setAppliedDiscount({
+              code: disc.code,
+              amount: disc.discount_amount!,
+              description: disc.description!,
+            });
+          }
+        }
+      } catch {
+        // Non-fatal
+      }
     });
   }, []);
 
@@ -1014,12 +1042,16 @@ export default function CheckoutPage() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-400">
-                    Have a promo code?{" "}
-                    <Link href="/account" className="text-[#16C2F3] hover:underline">
-                      Sign in to apply it.
-                    </Link>
-                  </p>
+                  <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2.5">
+                    <p className="text-xs font-bold text-orange-800 mb-0.5">$10 off your first order</p>
+                    <p className="text-xs text-orange-700">
+                      <Link href="/account?signup=1" className="font-semibold text-orange-900 underline underline-offset-2 hover:opacity-80">
+                        Create a free account
+                      </Link>{" "}
+                      and your discount applies automatically. Code:{" "}
+                      <span className="font-mono font-bold tracking-wider">WELCOME10</span>
+                    </p>
+                  </div>
                 )}
               </div>
 

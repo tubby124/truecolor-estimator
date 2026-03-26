@@ -51,6 +51,9 @@ export function CouponsClient() {
   const [redemptions, setRedemptions] = useState<Record<string, Redemption[]>>({});
   const [redemptionLoading, setRedemptionLoading] = useState<string | null>(null);
 
+  // Welcome code setup
+  const [welcomeSetupLoading, setWelcomeSetupLoading] = useState(false);
+
   // Copy feedback
   const [copiedCode, setCopiedCode] = useState("");
 
@@ -139,6 +142,33 @@ export function CouponsClient() {
     }
   }
 
+  async function createWelcomeCode() {
+    setWelcomeSetupLoading(true);
+    try {
+      const res = await fetch("/api/staff/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: "WELCOME10",
+          type: "custom",
+          discount_amount: 10,
+          description: "$10 off first order — new customer welcome discount",
+          per_account_limit: 1,
+          max_uses: null,
+          expires_at: null,
+        }),
+      });
+      const data = (await res.json()) as { code?: DiscountCode; error?: string };
+      if (data.code) {
+        setCodes((prev) => [data.code!, ...prev]);
+      }
+    } catch {
+      // Non-fatal
+    } finally {
+      setWelcomeSetupLoading(false);
+    }
+  }
+
   function copyCode(code: string) {
     void navigator.clipboard.writeText(code).then(() => {
       setCopiedCode(code);
@@ -147,6 +177,7 @@ export function CouponsClient() {
   }
 
   const reviewCode = codes.find((c) => c.code === "REVIEW10");
+  const welcomeCode = codes.find((c) => c.code === "WELCOME10");
 
   return (
     <div className="min-h-screen bg-white">
@@ -197,6 +228,57 @@ export function CouponsClient() {
                 className="bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors shrink-0"
               >
                 {copiedCode === reviewCode.code ? "✓ Copied!" : "Copy Code"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Welcome Code Hero */}
+        {welcomeCode ? (
+          <div className="bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-2xl p-6">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl font-bold font-mono text-sky-900 tracking-widest">{welcomeCode.code}</span>
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${welcomeCode.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
+                    {welcomeCode.is_active ? "Active" : "Inactive"}
+                  </span>
+                </div>
+                <p className="text-sm text-sky-800 font-medium">
+                  ${Number(welcomeCode.discount_amount).toFixed(2)} off — {welcomeCode.description ?? "New customer welcome discount"}
+                </p>
+                <p className="text-xs text-sky-600 mt-1">
+                  Used {welcomeCode.redemption_count} time{welcomeCode.redemption_count !== 1 ? "s" : ""} total · 1 use per account
+                </p>
+                <p className="text-xs text-sky-600 mt-2">
+                  Auto-applied at checkout for first-time customers. Shown in all signup confirmation emails.
+                </p>
+              </div>
+              <button
+                onClick={() => copyCode(welcomeCode.code)}
+                className="bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors shrink-0"
+              >
+                {copiedCode === welcomeCode.code ? "✓ Copied!" : "Copy Code"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 border-dashed rounded-2xl p-6">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl font-bold font-mono text-sky-900/40 tracking-widest">WELCOME10</span>
+                  <span className="bg-gray-100 text-gray-500 text-xs font-bold px-2.5 py-1 rounded-full">Not set up</span>
+                </div>
+                <p className="text-sm text-sky-800 font-medium">$10 off first order — new customer welcome code</p>
+                <p className="text-xs text-sky-600 mt-1">Auto-applied at checkout. Sent in all signup confirmation emails.</p>
+              </div>
+              <button
+                onClick={() => void createWelcomeCode()}
+                disabled={welcomeSetupLoading}
+                className="bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors shrink-0"
+              >
+                {welcomeSetupLoading ? "Creating…" : "Set Up WELCOME10"}
               </button>
             </div>
           </div>
