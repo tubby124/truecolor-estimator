@@ -11,12 +11,8 @@
  *
  * 2. Implicit flow (free plan default):
  *    URL arrives as: /account/callback#access_token=xxx&type=recovery
- *    → Supabase SDK auto-processes the hash on createClient()
- *    → fires onAuthStateChange with PASSWORD_RECOVERY or SIGNED_IN
- *    → we redirect accordingly
- *
- * DO NOT manually call setSession() — the SDK processes the hash itself and
- * calling setSession() again causes a race condition / token-already-used error.
+ *    → parse hash manually, call setSession() → redirect
+ *    NOTE: createBrowserClient (@supabase/ssr) does NOT auto-process hashes.
  */
 
 import { useEffect, useState } from "react";
@@ -75,33 +71,29 @@ export default function CallbackPage() {
       return;
     }
 
-    // ── Implicit flow (legacy): SDK auto-processes #access_token= ──────────
-    // If there's no hash token, nothing to do — bounce to account page.
-    if (!window.location.hash.includes("access_token=")) {
+    // ── Implicit flow: #access_token= in hash ──────────────────────────────
+    // createBrowserClient (@supabase/ssr) does NOT auto-process hash params —
+    // we must parse manually and call setSession() ourselves.
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = hashParams.get("access_token");
+    const refreshToken = hashParams.get("refresh_token");
+    const hashType = hashParams.get("type");
+
+    if (!accessToken || !refreshToken) {
       window.location.replace("/account");
       return;
     }
 
-    // Let the SDK handle the hash. Listen for the event it fires.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        // User clicked a password reset link → send to the set-password form
-        window.location.replace("/account?reset=1");
-      } else if (event === "SIGNED_IN") {
-        // Email confirmation link (if confirmation ever re-enabled) → account
-        window.location.replace("/account");
-      }
-    });
-
-    // Safety timeout: if the SDK never fires an event (invalid/expired token)
-    const timeout = setTimeout(() => {
-      setError("Link expired or invalid — please request a new one.");
-    }, 6000);
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeout);
-    };
+    supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      .then(({ error: err }) => {
+        if (err) {
+          setError("Link expired or already used — please request a new one.");
+        } else if (hashType === "recovery") {
+          window.location.replace("/account?reset=1");
+        } else {
+          window.location.replace("/account");
+        }
+      });
   }, []);
 
   if (error) {
