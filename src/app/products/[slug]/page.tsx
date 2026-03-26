@@ -26,6 +26,7 @@ const PRODUCT_IMAGE_MAP: Record<string, string> = {
   "brochures":           "/images/products/product/brochures-800x600.webp",
   "photo-posters":       "/images/products/product/photo-posters-800x600.webp",
   "magnet-calendars":    "/images/products/product/magnet-calendars-800x600.webp",
+  "coil-bound-booklets": "/images/products/product/coil-bound-booklet-hero-800x600.webp",
 };
 
 

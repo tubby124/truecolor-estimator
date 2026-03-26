@@ -1115,6 +1115,84 @@ export const PRODUCTS: Record<string, ProductContent> = {
       ],
     },
   },
+  "coil-bound-booklets": {
+    slug: "coil-bound-booklets",
+    name: "Coil-Bound Booklets",
+    tagline: "Full-colour coil-bound booklets. 80lb or 100lb gloss. From $47/book.",
+    description:
+      "Coil-bound booklets (plastic spiral binding) are the go-to format when you need a professional multi-page document that lays flat when open and survives regular handling. True Color prints, cuts, punches, and binds booklets in-house at 216 33rd St W, Saskatoon — no outsourcing, no shipping delays. Standard format is 8.5×11\", double-sided throughout, with a 14pt gloss coated cover. Choose Premium for 80lb gloss text interior pages with a standard unlaminated cover — the right choice for most professional and government documents. Choose Ultra Premium for 100lb gloss text interior (noticeably heavier and more premium feel) with a gloss laminated cover that won't crease or scuff. Both use a 12mm black plastic coil. Page count is typically quoted at approximately 80 pages (40 double-sided sheets); custom page counts are quoted individually — call or email with your specs. Minimum order is 25 books. Pricing is per-lot, not per-page. Common uses in Saskatoon and Saskatchewan: government program guides, training manuals, school handbooks, conference materials, real estate neighbourhood packages, contractor bid packages, sports association rule books, and corporate annual reports. We offer a physical sample before your full run — print one copy of your preferred tier at cost, approve it, then confirm the full order. Turnaround is typically 3–5 business days for standard runs. Rush available (+$40 flat). Pickup at 216 33rd St W.",
+    fromPrice: "$47",
+    category: "BOOKLET",
+    heroImage: "/images/products/product/coil-bound-booklet-hero-800x600.webp",
+    galleryImages: [
+      "/images/products/product/coil-bound-booklet-hero-800x600.webp",
+      "/images/products/product/coil-booklet-stack-professional-800x600.webp",
+      "/images/products/product/coil-booklet-open-spread-800x600.webp",
+      "/images/products/product/coil-booklet-spiral-closeup-800x600.webp",
+      "/images/products/product/coil-booklet-laminate-cover-800x600.webp",
+    ],
+    defaultSides: 2,
+    sideOptions: false,
+    sizeSectionLabel: "Paper Weight & Finish",
+    sizePresets: [
+      { label: "Premium — 80lb Gloss Interior", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_BOOK_80LB" },
+      { label: "Ultra Premium — 100lb + Laminated Cover", width_in: 8.5, height_in: 11, material_code: "PLACEHOLDER_BOOK_100LB" },
+    ],
+    qtyPresets: [25, 50, 100, 250],
+    lotPriced: true,
+    specs: [
+      { label: "Size", value: "8.5×11\" — standard letter" },
+      { label: "Interior (Premium)", value: "80lb gloss text — full colour digital" },
+      { label: "Interior (Ultra Premium)", value: "100lb gloss text — heavier, premium feel" },
+      { label: "Cover", value: "14pt gloss coated — standard or gloss laminated" },
+      { label: "Binding", value: "12mm black plastic coil — lays flat when open" },
+      { label: "Page count", value: "~80 pages standard · custom counts quoted on request" },
+      { label: "Min qty", value: "25 books" },
+      { label: "Turnaround", value: "3–5 business days · rush available (+$40)" },
+    ],
+    whoUsesThis: ["Government", "Education", "Healthcare", "Corporate", "Events", "Construction"],
+    faqs: [
+      {
+        q: "What's the difference between Premium and Ultra Premium?",
+        a: "Premium uses 80lb gloss text for the interior pages — the same weight used for high-quality flyers. Ultra Premium upgrades to 100lb gloss text, which is noticeably thicker and heavier. Ultra Premium also adds a gloss laminated cover that resists scuffs and moisture. At 100 copies, the difference is $8 per book.",
+      },
+      {
+        q: "Can I order a custom page count?",
+        a: "Yes — the catalog pricing is based on approximately 80 pages (40 double-sided sheets). If your document is 40 pages, 120 pages, or any other count, email or call us with your specs and we'll quote it. Pricing adjusts proportionally to the number of sheets.",
+      },
+      {
+        q: "What's the minimum order?",
+        a: "25 books. Below that, the per-book cost rises significantly due to setup and binding labour. For single copies (presentations, drafts), we can do it — just ask for a one-off quote.",
+      },
+      {
+        q: "Can I see a sample before committing to the full run?",
+        a: "Yes — and we recommend it. We'll print one physical copy of your chosen tier at cost before you approve the full order. This is especially valuable for the Ultra Premium tier — holding the laminated cover in your hand tends to sell itself.",
+      },
+      {
+        q: "How do I submit my files?",
+        a: "Supply a print-ready PDF at 8.5×11\" with 1/8\" bleed on all sides. We print double-sided throughout. If you're not sure your file is set up correctly, drop it off or email it and we'll check it at no charge before you commit.",
+      },
+      {
+        q: "How do your prices compare to Staples or UPS Store?",
+        a: "We're typically 9–34% less expensive than Staples walk-in pricing and comparable to UPS Store, with faster turnaround and better paper quality than standard in-store copy centre runs. Online printers that quote cheaply often use lighter paper and take 2–3 weeks with shipping costs that add up fast.",
+      },
+      {
+        q: "What does the lot pricing mean — is it per book or per order?",
+        a: "The price shown is the total for the full lot. At 100 books on the Premium tier, the price is $4,700 — that's $47 per book all-in. At 250 books, it's $10,000 — $40 per book. The more you order, the lower the per-book cost.",
+      },
+    ],
+    relatedSlugs: ["brochures", "flyers", "rack-cards"],
+    materialInfo: {
+      headline: "80lb or 100lb gloss text interior — 14pt gloss cover — 12mm plastic coil",
+      bullets: [
+        "80lb gloss text interior — vibrant full-colour print on quality coated stock",
+        "100lb gloss text (Ultra) — premium weight, noticeably heavier and more substantial",
+        "14pt gloss coated cover — standard, or gloss laminated for the Ultra Premium tier",
+        "12mm black plastic coil binding — opens flat, stays flat, survives regular use",
+        "All printed in-house on Konica Minolta digital press — consistent quality, fast turnaround",
+      ],
+    },
+  },
 };
 
 export const PRODUCT_SLUGS = Object.keys(PRODUCTS);
