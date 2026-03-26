@@ -171,7 +171,7 @@ PR-STICKER-8X8-500,v1_2026-03-11,2026-03-11,STICKER,PLACEHOLDER_STICKER_8X8,1,,,
 PR-STICKER-8X8-1000,v1_2026-03-11,2026-03-11,STICKER,PLACEHOLDER_STICKER_8X8,1,,,1000,1000,,2600.00,,round_up_0.01,,area-ratio x4.00,TRUE
 PR-BOOK-PREM-25,v1_2026-03-26,2026-03-26,BOOKLET,PLACEHOLDER_BOOK_80LB,2,,,25,25,,1625.00,,round_up_0.01,,$65/book × 25 = $1625; 80lb gloss interior + 14pt unlaminated cover; derived from 100qty anchor,TRUE
 PR-BOOK-PREM-50,v1_2026-03-26,2026-03-26,BOOKLET,PLACEHOLDER_BOOK_80LB,2,,,50,50,,2750.00,,round_up_0.01,,$55/book × 50 = $2750; 80lb gloss interior + 14pt unlaminated cover; derived from 100qty anchor,TRUE
-PR-BOOK-PREM-100,v1_2026-03-26,2026-03-26,BOOKLET,PLACEHOLDER_BOOK_80LB,2,,,100,100,,4700.00,,round_up_0.01,,$47/book × 100 = $4700; CONFIRMED from government booklet quote March 2026; 80lb gloss interior,TRUE
+PR-BOOK-PREM-100,v1_2026-03-26,2026-03-26,BOOKLET,PLACEHOLDER_BOOK_80LB,2,,,100,100,,4800.00,,round_up_0.01,,$48/book × 100 = $4800; quoted to Mamun Fish/PADC March 2026; 80lb gloss interior unlaminated,TRUE
 PR-BOOK-PREM-250,v1_2026-03-26,2026-03-26,BOOKLET,PLACEHOLDER_BOOK_80LB,2,,,250,250,,10000.00,,round_up_0.01,,$40/book × 250 = $10000; 80lb gloss interior + 14pt unlaminated cover; bulk discount tier,TRUE
 PR-BOOK-ULTRA-25,v1_2026-03-26,2026-03-26,BOOKLET,PLACEHOLDER_BOOK_100LB,2,,,25,25,,1825.00,,round_up_0.01,,$73/book × 25 = $1825; 100lb gloss interior + 14pt LAMINATED cover; derived from 100qty anchor,TRUE
 PR-BOOK-ULTRA-50,v1_2026-03-26,2026-03-26,BOOKLET,PLACEHOLDER_BOOK_100LB,2,,,50,50,,3150.00,,round_up_0.01,,$63/book × 50 = $3150; 100lb gloss interior + 14pt LAMINATED cover; derived from 100qty anchor,TRUE
