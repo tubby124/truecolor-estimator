@@ -260,6 +260,18 @@ export async function POST(req: NextRequest) {
       console.error("[quote-request] DB save failed:", dbErr);
     }
 
+    // Upsert customer record — create if new, skip if already exists
+    try {
+      await supabase
+        .from("customers")
+        .upsert(
+          { email, name, phone: phone ?? null },
+          { onConflict: "email", ignoreDuplicates: true }
+        );
+    } catch (customerErr) {
+      console.error("[quote-request] customer upsert failed:", customerErr);
+    }
+
     // Staff notification uses outreach sender to avoid Brevo loop-detection block
     // (FROM info@true-color.ca → TO info@true-color.ca was being silently dropped)
     const staffFrom =
