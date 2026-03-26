@@ -272,6 +272,32 @@ export async function POST(req: NextRequest) {
       console.error("[quote-request] customer upsert failed:", customerErr);
     }
 
+    // Auto-create Supabase auth account for new customers (non-fatal).
+    // Two-step pattern: createUser first (reliable), then generateLink.
+    // See: supabase/supabase#22521
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+    let accountMagicLink: string | null = null;
+    try {
+      const { error: createErr } = await supabase.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        user_metadata: { name },
+      });
+
+      if (!createErr) {
+        const { data: linkData } = await supabase.auth.admin.generateLink({
+          type: "magiclink",
+          email,
+          options: { redirectTo: `${siteUrl}/account/callback` },
+        });
+        accountMagicLink = linkData?.properties?.action_link ?? null;
+        console.log(`[quote-request] new auth account created → ${email}`);
+      }
+      // If user already exists, skip silently — they already have login access
+    } catch (authErr) {
+      console.error("[quote-request] auth account (non-fatal):", authErr instanceof Error ? authErr.message : authErr);
+    }
+
     // Staff notification uses outreach sender to avoid Brevo loop-detection block
     // (FROM info@true-color.ca → TO info@true-color.ca was being silently dropped)
     const staffFrom =
@@ -459,16 +485,31 @@ export async function POST(req: NextRequest) {
               or visit us at 216 33rd St W, Saskatoon.
             </p>
 
+            ${accountMagicLink ? `
+            <div style="background: #f0fbff; border: 1px solid #bae6fd; border-radius: 8px; padding: 18px 20px; margin-top: 20px;">
+              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #0c4a6e;">
+                Your True Color account is ready
+              </p>
+              <p style="margin: 0 0 12px; font-size: 13px; color: #374151; line-height: 1.6;">
+                We created a free account so you can track this quote, check on future orders, reorder past jobs, and get quoted faster — all in one place.
+              </p>
+              <a href="${accountMagicLink}" style="display: inline-block; background: #16C2F3; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 10px 24px; border-radius: 6px; margin-bottom: 10px;">
+                View my account →
+              </a>
+              <p style="margin: 0; font-size: 11px; color: #9ca3af;">
+                Link valid for 1 hour · Set a permanent password from your account page
+              </p>
+            </div>` : `
             <div style="background: #f4efe9; border-radius: 8px; padding: 14px 16px; margin-top: 20px;">
               <p style="color: #1c1712; font-size: 13px; font-weight: 700; margin: 0 0 4px;">
-                Order faster next time
+                Track your orders online
               </p>
               <p style="color: #555; font-size: 13px; margin: 0;">
-                Create a free account at
+                Log in at
                 <a href="https://truecolorprinting.ca/account" style="color: #16C2F3;">truecolorprinting.ca/account</a>
-                to track your orders, reorder past jobs, and get quoted faster.
+                to view this quote, reorder past jobs, and get quoted faster.
               </p>
-            </div>
+            </div>`}
 
             <p style="color: #444; margin-top: 16px;">— The True Color Team</p>
           </div>

@@ -62,11 +62,11 @@ ${body.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
       text: body,
     });
 
-    // Mark quote as replied
+    // Mark quote as replied and save reply body
     const supabase = createServiceClient();
     await supabase
       .from("quote_requests")
-      .update({ replied_at: new Date().toISOString() } as Record<string, unknown>)
+      .update({ replied_at: new Date().toISOString(), reply_body: body } as Record<string, unknown>)
       .eq("id", id);
 
     console.log(`[staff/quotes/send-reply] replied to quote ${id} → ${to}`);

@@ -27,6 +27,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const update: Record<string, unknown> = {
       replied_at: body.replied ? new Date().toISOString() : null,
+      reply_body: body.replied ? "Marked as replied (replied outside system)" : null,
     };
     if (typeof body.staff_note === "string") {
       update.staff_note = body.staff_note.trim() || null;
