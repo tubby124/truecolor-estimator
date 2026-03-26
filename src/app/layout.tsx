@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { BackToTop } from "@/components/site/BackToTop";
+import { AuthRedirect } from "@/components/site/AuthRedirect";
 import { REVIEW_COUNT } from "@/lib/reviews";
 
 const geistSans = Geist({
@@ -192,6 +193,7 @@ export default function RootLayout({
         >
           Skip to content
         </a>
+        <AuthRedirect />
         {children}
         <BackToTop />
         <Script
