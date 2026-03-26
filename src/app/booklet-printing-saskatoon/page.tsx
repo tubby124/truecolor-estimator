@@ -25,6 +25,12 @@ export default function BookletPrintingSaskatoonPage() {
       subtitle="Coil-bound booklets from $65/book. 80lb or 100lb gloss interior, 14pt cover, 12mm plastic coil. In-house production."
       heroImage="/images/products/product/coil-bound-booklet-hero-800x600.webp"
       heroAlt="Coil-bound booklet printing in Saskatoon by True Color Display Printing"
+      galleryImages={[
+        { src: "/images/products/product/coil-bound-booklet-hero-800x600.webp", alt: "Coil-bound booklet — professional 8.5x11 print with black plastic spiral binding Saskatoon" },
+        { src: "/images/products/product/coil-booklet-stack-professional-800x600.webp", alt: "Stack of coil-bound booklets — print run ready for delivery, True Color Display Printing Saskatoon" },
+        { src: "/images/products/product/coil-booklet-open-spread-800x600.webp", alt: "Coil-bound booklet open flat — lays completely flat with plastic spiral coil binding" },
+        { src: "/images/products/product/coil-booklet-spiral-closeup-800x600.webp", alt: "Close-up of black plastic coil spiral binding on booklet — 12mm coil through punched pages" },
+      ]}
       description="True Color Display Printing prints and binds coil-bound booklets in Saskatoon. 80lb or 100lb gloss interior, 14pt gloss cover, 12mm black plastic coil — printed, cut, punched, and bound in-house at 216 33rd St W. Minimum 25 books."
       descriptionNode={
         <>
