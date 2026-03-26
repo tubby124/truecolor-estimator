@@ -6,6 +6,7 @@ import Image from "next/image";
 import { CartIcon } from "@/components/site/CartIcon";
 import { AccountIcon } from "@/components/site/AccountIcon";
 import { StaffQuoteButton } from "@/components/site/StaffQuoteButton";
+import { PromoBanner } from "@/components/site/PromoBanner";
 import { User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -205,6 +206,7 @@ export function SiteNav() {
 
   return (
     <>
+      <PromoBanner />
       <header className="bg-[#1c1712] sticky top-0 z-50">
         <div ref={navRef} className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
 
