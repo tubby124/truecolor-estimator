@@ -509,7 +509,9 @@ function QuoteCard({ quote }: { quote: QuoteRequest }) {
             {/* Contact + product summary */}
             <p className="text-sm text-gray-600">
               {quote.email}
-              {quote.phone ? ` · ${quote.phone}` : ""}
+              {quote.phone ? (
+                <> · <a href={`tel:${quote.phone}`} onClick={(e) => e.stopPropagation()} className="hover:text-[#16C2F3] transition-colors">{quote.phone}</a></>
+              ) : ""}
             </p>
             <p className="text-xs text-gray-400 mt-0.5">
               {quote.items[0]?.product || "No product specified"}
@@ -525,27 +527,31 @@ function QuoteCard({ quote }: { quote: QuoteRequest }) {
             </span>
 
             {/* Actions — stopPropagation so clicks don't toggle collapse */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setQuoteBuilderOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
-              title="Send a branded price quote with line items and tax breakdown"
-            >
-              Send Price Quote
-            </button>
+            {!optimisticReplied && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuoteBuilderOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+                  title="Send a branded price quote with line items and tax breakdown"
+                >
+                  Send Price Quote
+                </button>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setReplyOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 bg-[#16C2F3] hover:bg-[#0fa8d6] text-white text-sm font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
-              title="Send a free-text reply email to the customer"
-            >
-              Reply by Email
-            </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setReplyOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 bg-[#16C2F3] hover:bg-[#0fa8d6] text-white text-sm font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+                  title="Send a free-text reply email to the customer"
+                >
+                  Reply by Email
+                </button>
+              </>
+            )}
 
             <button
               onClick={(e) => {
