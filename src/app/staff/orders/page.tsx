@@ -71,12 +71,23 @@ export default async function StaffOrdersPage() {
 
 async function fetchNewQuoteCount(): Promise<number> {
   const supabase = createServiceClient();
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { count } = await supabase
-    .from("quote_requests")
-    .select("*", { count: "exact", head: true })
-    .gte("created_at", cutoff);
-  return count ?? 0;
+  const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  // Count unreplied quotes from the last 7 days (replied_at column may not exist yet)
+  try {
+    const { count } = await supabase
+      .from("quote_requests")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", cutoff)
+      .is("replied_at", null);
+    return count ?? 0;
+  } catch {
+    // Fallback: count all quotes from last 7 days if replied_at column doesn't exist yet
+    const { count } = await supabase
+      .from("quote_requests")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", cutoff);
+    return count ?? 0;
+  }
 }
 
 async function fetchOrders() {

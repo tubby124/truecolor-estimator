@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useOptimistic, useTransition } from "react";
 import type { QuoteRequest, ItemMeta } from "./page";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -53,18 +53,31 @@ function buildMailto(quote: QuoteRequest): string {
   return `mailto:${quote.email}?subject=${subject}&body=${body}`;
 }
 
+/** Build a deep link to the staff estimator pre-filled with customer email */
+function buildEstimateLink(quote: QuoteRequest): string {
+  const params = new URLSearchParams({ email: quote.email });
+  if (quote.name) params.set("customer", quote.name);
+  const product = quote.items[0]?.product;
+  if (product) params.set("product", product);
+  return `/staff?${params.toString()}`;
+}
+
 // ─── QuotesTable ──────────────────────────────────────────────────────────────
 
 export function QuotesTable({ quotes }: { quotes: QuoteRequest[] }) {
-  const [filter, setFilter] = useState<"all" | "recent">("all");
+  type Filter = "all" | "pending" | "recent";
+  const [filter, setFilter] = useState<Filter>("pending");
 
+  const pendingCount = quotes.filter((q) => !q.replied_at).length;
   const recentCount = quotes.filter(
     (q) =>
       Date.now() - new Date(q.created_at).getTime() < 7 * 24 * 60 * 60 * 1000
   ).length;
 
   const filtered =
-    filter === "recent"
+    filter === "pending"
+      ? quotes.filter((q) => !q.replied_at)
+      : filter === "recent"
       ? quotes.filter(
           (q) =>
             Date.now() - new Date(q.created_at).getTime() <
@@ -101,14 +114,14 @@ export function QuotesTable({ quotes }: { quotes: QuoteRequest[] }) {
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6">
         <button
-          onClick={() => setFilter("all")}
+          onClick={() => setFilter("pending")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filter === "all"
+            filter === "pending"
               ? "bg-[#1c1712] text-white"
               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
-          All ({quotes.length})
+          Pending ({pendingCount})
         </button>
         <button
           onClick={() => setFilter("recent")}
@@ -120,6 +133,16 @@ export function QuotesTable({ quotes }: { quotes: QuoteRequest[] }) {
         >
           Last 7 days ({recentCount})
         </button>
+        <button
+          onClick={() => setFilter("all")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filter === "all"
+              ? "bg-[#1c1712] text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          All ({quotes.length})
+        </button>
       </div>
 
       <div className="space-y-4">
@@ -128,7 +151,11 @@ export function QuotesTable({ quotes }: { quotes: QuoteRequest[] }) {
         ))}
         {filtered.length === 0 && (
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
-            <p className="text-gray-500 text-sm">No quotes in the last 7 days</p>
+            <p className="text-gray-500 text-sm">
+              {filter === "pending"
+                ? "All caught up — no pending quotes"
+                : "No quotes in the last 7 days"}
+            </p>
           </div>
         )}
       </div>
@@ -144,16 +171,53 @@ function QuoteCard({ quote }: { quote: QuoteRequest }) {
   const fileLinks = (quote.file_links ?? []).filter(Boolean);
   const isMulti = quote.items.length > 1;
 
+  // Optimistic reply state (works before migration runs too — graceful)
+  const [isPending, startTransition] = useTransition();
+  const [optimisticReplied, setOptimisticReplied] = useOptimistic(
+    !!quote.replied_at
+  );
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteText, setNoteText] = useState(quote.staff_note ?? "");
+
+  async function toggleReplied() {
+    const next = !optimisticReplied;
+    startTransition(async () => {
+      setOptimisticReplied(next);
+      try {
+        await fetch(`/api/staff/quotes/${quote.id}/reply`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ replied: next }),
+        });
+      } catch {
+        // revert handled by useOptimistic on re-render
+      }
+    });
+  }
+
+  async function saveNote() {
+    await fetch(`/api/staff/quotes/${quote.id}/reply`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ replied: optimisticReplied, staff_note: noteText }),
+    });
+    setNoteOpen(false);
+  }
+
   return (
     <div
-      className={`border rounded-xl overflow-hidden ${
-        isNew ? "border-[#16C2F3] shadow-sm" : "border-gray-200"
+      className={`border rounded-xl overflow-hidden transition-opacity ${
+        optimisticReplied
+          ? "border-gray-200 opacity-60"
+          : isNew
+          ? "border-[#16C2F3] shadow-sm"
+          : "border-gray-200"
       }`}
     >
       {/* Header */}
       <div
         className={`px-5 py-4 flex items-start justify-between gap-4 ${
-          isNew ? "bg-sky-50" : "bg-gray-50"
+          optimisticReplied ? "bg-gray-50" : isNew ? "bg-sky-50" : "bg-gray-50"
         }`}
       >
         <div className="min-w-0">
@@ -161,11 +225,15 @@ function QuoteCard({ quote }: { quote: QuoteRequest }) {
             <span className="font-bold text-[#1c1712] text-base">
               {quote.name}
             </span>
-            {isNew && (
+            {optimisticReplied ? (
+              <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                Replied
+              </span>
+            ) : isNew ? (
               <span className="text-xs font-bold bg-[#16C2F3] text-white px-2 py-0.5 rounded-full">
                 New
               </span>
-            )}
+            ) : null}
             {isMulti && (
               <span className="text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
                 {quote.items.length} items
@@ -195,13 +263,39 @@ function QuoteCard({ quote }: { quote: QuoteRequest }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
           <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline">
             {timeAgo(quote.created_at)}
           </span>
+
+          {/* Create Estimate */}
+          <a
+            href={buildEstimateLink(quote)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+            title="Open staff estimator pre-filled with this customer"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Estimate
+          </a>
+
+          {/* Reply */}
           <a
             href={buildMailto(quote)}
-            className="inline-flex items-center gap-1.5 bg-[#16C2F3] hover:bg-[#0fa8d6] text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 bg-[#16C2F3] hover:bg-[#0fa8d6] text-white text-sm font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
           >
             <svg
               className="w-4 h-4"
@@ -218,6 +312,54 @@ function QuoteCard({ quote }: { quote: QuoteRequest }) {
             </svg>
             Reply
           </a>
+
+          {/* Mark replied toggle */}
+          <button
+            onClick={toggleReplied}
+            disabled={isPending}
+            className={`inline-flex items-center gap-1.5 text-sm font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap border ${
+              optimisticReplied
+                ? "border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
+            }`}
+            title={optimisticReplied ? "Mark as pending" : "Mark as replied"}
+          >
+            {optimisticReplied ? (
+              <>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4.5 12.75l6 6 9-13.5"
+                  />
+                </svg>
+                Done
+              </>
+            ) : (
+              <>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Done?
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -298,21 +440,54 @@ function QuoteCard({ quote }: { quote: QuoteRequest }) {
         </div>
       )}
 
-      {/* Timestamp footer */}
-      <div className="px-5 py-2 bg-gray-50 border-t border-gray-100">
-        <span className="text-xs text-gray-400">
-          Received{" "}
-          {new Date(quote.created_at).toLocaleString("en-CA", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-            timeZone: "America/Regina",
-          })}{" "}
-          CST
-        </span>
+      {/* Staff note */}
+      <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-gray-400">
+            Received{" "}
+            {new Date(quote.created_at).toLocaleString("en-CA", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+              timeZone: "America/Regina",
+            })}{" "}
+            CST
+          </span>
+          <button
+            onClick={() => setNoteOpen((v) => !v)}
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {noteText ? "Edit note" : "+ Add note"}
+          </button>
+        </div>
+
+        {noteOpen && (
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Internal note (not sent to customer)"
+              className="flex-1 text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:border-gray-400"
+              onKeyDown={(e) => e.key === "Enter" && saveNote()}
+            />
+            <button
+              onClick={saveNote}
+              className="text-xs font-semibold bg-[#1c1712] text-white px-3 py-1.5 rounded hover:bg-[#2d2620] transition-colors"
+            >
+              Save
+            </button>
+          </div>
+        )}
+
+        {noteText && !noteOpen && (
+          <p className="mt-1 text-xs text-amber-700 bg-amber-50 rounded px-2 py-1">
+            Note: {noteText}
+          </p>
+        )}
       </div>
     </div>
   );

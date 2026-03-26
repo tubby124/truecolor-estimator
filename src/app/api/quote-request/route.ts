@@ -446,7 +446,19 @@ export async function POST(req: NextRequest) {
               <a href="tel:+13069548688" style="color: #16C2F3;">(306) 954-8688</a>
               or visit us at 216 33rd St W, Saskatoon.
             </p>
-            <p style="color: #444;">— The True Color Team</p>
+
+            <div style="background: #f4efe9; border-radius: 8px; padding: 14px 16px; margin-top: 20px;">
+              <p style="color: #1c1712; font-size: 13px; font-weight: 700; margin: 0 0 4px;">
+                Order faster next time
+              </p>
+              <p style="color: #555; font-size: 13px; margin: 0;">
+                Create a free account at
+                <a href="https://truecolorprinting.ca/account" style="color: #16C2F3;">truecolorprinting.ca/account</a>
+                to track your orders, reorder past jobs, and get quoted faster.
+              </p>
+            </div>
+
+            <p style="color: #444; margin-top: 16px;">— The True Color Team</p>
           </div>
           <div style="background: #f4efe9; padding: 14px 30px; font-size: 12px; color: #888;">
             truecolorprinting.ca · 216 33rd St W, Saskatoon · (306) 954-8688
