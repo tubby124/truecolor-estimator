@@ -235,7 +235,7 @@ export async function POST(req: NextRequest) {
         } else {
           const { data: signed } = await supabase.storage
             .from("print-files")
-            .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
+            .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
           fileLinks.push(signed?.signedUrl ?? null);
         }
       } catch (storageErr) {

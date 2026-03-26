@@ -199,6 +199,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create order after retries" }, { status: 500 });
     }
 
+    // Increment customer lifetime stats (non-fatal)
+    void (async () => {
+      try {
+        const { data: c } = await supabase
+          .from("customers")
+          .select("order_count, total_spent")
+          .eq("id", customer.id)
+          .single();
+        if (c) {
+          await supabase
+            .from("customers")
+            .update({
+              order_count: (c.order_count ?? 0) + 1,
+              total_spent: Math.round(((c.total_spent ?? 0) + total) * 100) / 100,
+            })
+            .eq("id", customer.id);
+        }
+      } catch {
+        console.error("[manual-order] customer stats increment failed (non-fatal)");
+      }
+    })();
+
     // ── 4. Insert order_items rows (one per item) ──
     for (const item of items) {
       const { error: itemErr } = await supabase.from("order_items").insert({

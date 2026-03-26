@@ -57,6 +57,7 @@ const MATERIAL_LABEL_MAP: Partial<Record<string, string>> = {
   MAG302437550M: "Magnetic Sheet 30mil",
   RMPS002: "Photo Paper 220gsm",
   ARLPMF7008: "Adhesive Vinyl",
+  RMVN006: "Perforated Window Vinyl",
   RBS33507875S: "Retractable Banner — Economy",
   RBS33507900PSB: "Retractable Banner — Deluxe",
   RBS33507900PREM: "Retractable Banner — Premium",

@@ -309,6 +309,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
     }
 
+    // Increment customer lifetime stats (non-fatal)
+    void (async () => {
+      try {
+        const { data: c } = await supabase
+          .from("customers")
+          .select("order_count, total_spent")
+          .eq("id", customer.id)
+          .single();
+        if (c) {
+          await supabase
+            .from("customers")
+            .update({
+              order_count: (c.order_count ?? 0) + 1,
+              total_spent: Math.round(((c.total_spent ?? 0) + total) * 100) / 100,
+            })
+            .eq("id", customer.id);
+        }
+      } catch {
+        console.error("[orders] customer stats increment failed (non-fatal)");
+      }
+    })();
+
     // Record discount redemption (non-fatal — order is already saved)
     if (discountCodeId && discount > 0) {
       void supabase

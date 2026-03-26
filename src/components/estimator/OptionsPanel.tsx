@@ -103,6 +103,31 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
         </FieldGroup>
       )}
 
+      {/* DECAL material picker — Adhesive Vinyl vs Perforated Window Vinyl */}
+      {category === "DECAL" && (
+        <FieldGroup label="Material">
+          <div className="flex flex-col gap-2">
+            {[
+              { code: "ARLPMF7008", label: "Adhesive Vinyl", sub: "Standard window & surface decals" },
+              { code: "RMVN006", label: "Perforated Window Vinyl", sub: "70/30 perf — see-through from inside" },
+            ].map((mat) => (
+              <button
+                key={mat.code}
+                onClick={() => onChange({ material_code: mat.code })}
+                className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-all ${
+                  state.material_code === mat.code
+                    ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                    : "border-[var(--border)] bg-white hover:border-gray-300"
+                }`}
+              >
+                <span className="block">{mat.label}</span>
+                <span className="block text-xs text-[var(--muted)] font-normal mt-0.5">{mat.sub}</span>
+              </button>
+            ))}
+          </div>
+        </FieldGroup>
+      )}
+
       {/* Dimensions — for sqft-based products */}
       {isSqftBased && (
         <FieldGroup label="Dimensions">
