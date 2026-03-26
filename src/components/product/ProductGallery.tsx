@@ -25,7 +25,7 @@ export function ProductGallery({ images, productName }: Props) {
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#f8f4ef]">
         <Image
           src={images[active]}
-          alt={`${productName} — True Color Display Printing Saskatoon`}
+          alt={`${productName} — ${images[active].split("/").pop()?.replace(/-\d+x\d+\.webp$/, "").replace(/-/g, " ") ?? "True Color Display Printing Saskatoon"}`}
           fill
           className="object-contain cursor-zoom-in"
           sizes="(max-width: 768px) 100vw, 55vw"
@@ -77,7 +77,7 @@ export function ProductGallery({ images, productName }: Props) {
             >
               <Image
                 src={src}
-                alt={`${productName} photo ${i + 1}`}
+                alt={src.split("/").pop()?.replace(/-\d+x\d+\.webp$/, "").replace(/-/g, " ") ?? `${productName} photo ${i + 1}`}
                 fill
                 className="object-cover"
                 sizes="64px"
