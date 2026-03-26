@@ -86,6 +86,21 @@ interface SessionData {
   user: { id: string; email?: string };
 }
 
+interface QuoteRequest {
+  id: string;
+  created_at: string;
+  items: { product: string; qty?: number; notes?: string }[];
+  replied_at: string | null;
+  staff_note: string | null;
+}
+
+interface CustomerProfile {
+  name: string;
+  phone: string;
+  company: string;
+  address: string;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function parseAddons(
@@ -196,6 +211,16 @@ export function AccountClientPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signUpDone, setSignUpDone] = useState(false);
 
+  // Quote requests
+  const [quoteRequests, setQuoteRequests] = useState<QuoteRequest[]>([]);
+  const [quotesLoading, setQuotesLoading] = useState(false);
+
+  // Profile editing
+  const [profile, setProfile] = useState<CustomerProfile>({ name: "", phone: "", company: "", address: "" });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [profileError, setProfileError] = useState("");
+
   // Password reset state
   const [newPassword, setNewPassword] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
@@ -224,6 +249,38 @@ export function AccountClientPage() {
       console.error("[account] fetchOrders:", err);
     } finally {
       setOrdersLoading(false);
+    }
+  }, []);
+
+  const fetchQuotes = useCallback(async (tok: string) => {
+    setQuotesLoading(true);
+    try {
+      const res = await fetch("/api/account/quotes", {
+        headers: { Authorization: `Bearer ${tok}` },
+      });
+      const data: { quotes?: QuoteRequest[] } = await res.json();
+      if (data.quotes) setQuoteRequests(data.quotes);
+    } catch (err) {
+      console.error("[account] fetchQuotes:", err);
+    } finally {
+      setQuotesLoading(false);
+    }
+  }, []);
+
+  const fetchProfile = useCallback(async (tok: string) => {
+    try {
+      const res = await fetch("/api/account/profile", {
+        headers: { Authorization: `Bearer ${tok}` },
+      });
+      const data: Partial<CustomerProfile> = await res.json();
+      setProfile({
+        name: data.name ?? "",
+        phone: data.phone ?? "",
+        company: data.company ?? "",
+        address: data.address ?? "",
+      });
+    } catch (err) {
+      console.error("[account] fetchProfile:", err);
     }
   }, []);
 
@@ -284,12 +341,14 @@ export function AccountClientPage() {
     };
   }, [router]);
 
-  // ── Load orders on session ──────────────────────────────────────────────────
+  // ── Load orders / quotes / profile on session ───────────────────────────────
 
   useEffect(() => {
     if (!session) return;
     fetchOrders(session.access_token);
-  }, [session, fetchOrders]);
+    fetchQuotes(session.access_token);
+    fetchProfile(session.access_token);
+  }, [session, fetchOrders, fetchQuotes, fetchProfile]);
 
   // ── Supabase Realtime: live order sync ─────────────────────────────────────
   // Listens to changes on the orders table (enabled via supabase_realtime publication).
@@ -322,6 +381,8 @@ export function AccountClientPage() {
     await supabase.auth.signOut();
     setSession(null);
     setOrders([]);
+    setQuoteRequests([]);
+    setProfile({ name: "", phone: "", company: "", address: "" });
   }
 
   async function handleGoogleSignIn() {
@@ -446,6 +507,33 @@ export function AccountClientPage() {
     });
     setReorderedId(order.id);
     setTimeout(() => router.push("/cart"), 800);
+  }
+
+  async function handleProfileSave() {
+    if (!session) return;
+    setProfileSaving(true);
+    setProfileError("");
+    setProfileSaved(false);
+    try {
+      const res = await fetch("/api/account/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(profile),
+      });
+      if (!res.ok) {
+        const d: { error?: string } = await res.json();
+        throw new Error(d.error ?? "Save failed");
+      }
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 3000);
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : "Save failed.");
+    } finally {
+      setProfileSaving(false);
+    }
   }
 
   async function handleFileUpload(orderId: string, file: File) {
@@ -1318,6 +1406,127 @@ export function AccountClientPage() {
             })}
           </div>
         )}
+
+        {/* ── Quote Requests ─────────────────────────────────────────────────── */}
+        <div className="mt-14">
+          <h2 className="text-xl font-bold text-[#1c1712] mb-4">Custom quote requests</h2>
+          {quotesLoading ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : quoteRequests.length === 0 ? (
+            <div className="bg-[#f4efe9] rounded-2xl p-6 text-center">
+              <p className="text-gray-500 text-sm mb-3">No quote requests yet.</p>
+              <Link
+                href="/quote-request"
+                className="inline-block text-sm font-bold text-[#16C2F3] hover:underline"
+              >
+                Submit a custom quote &rarr;
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {quoteRequests.map((q) => {
+                const products = Array.isArray(q.items)
+                  ? q.items.map((it) => it.product ?? "Item").join(", ")
+                  : "Custom quote";
+                const date = new Date(q.created_at).toLocaleDateString("en-CA", {
+                  month: "short", day: "numeric", year: "numeric",
+                });
+                return (
+                  <div key={q.id} className="border border-gray-100 rounded-xl px-4 py-4 bg-white">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-[#1c1712] text-sm truncate">{products}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{date}</p>
+                        {q.staff_note && (
+                          <p className="text-sm text-gray-600 mt-2 bg-blue-50 rounded-lg px-3 py-2">
+                            <span className="font-semibold text-[#16C2F3]">Staff note: </span>
+                            {q.staff_note}
+                          </p>
+                        )}
+                      </div>
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${
+                        q.replied_at
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}>
+                        {q.replied_at ? "Replied" : "Pending"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* ── Profile ───────────────────────────────────────────────────────── */}
+        <div className="mt-14 mb-8">
+          <h2 className="text-xl font-bold text-[#1c1712] mb-4">Your profile</h2>
+          <div className="bg-[#f4efe9] rounded-2xl p-6 space-y-4 max-w-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Name</label>
+                <input
+                  type="text"
+                  value={profile.name}
+                  onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Full name"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-[#1c1712] focus:outline-none focus:ring-2 focus:ring-[#16C2F3]/40"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={profile.phone}
+                  onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value }))}
+                  placeholder="(306) 555-0000"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-[#1c1712] focus:outline-none focus:ring-2 focus:ring-[#16C2F3]/40"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Company</label>
+                <input
+                  type="text"
+                  value={profile.company}
+                  onChange={(e) => setProfile((p) => ({ ...p, company: e.target.value }))}
+                  placeholder="Company name (optional)"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-[#1c1712] focus:outline-none focus:ring-2 focus:ring-[#16C2F3]/40"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Address</label>
+                <input
+                  type="text"
+                  value={profile.address}
+                  onChange={(e) => setProfile((p) => ({ ...p, address: e.target.value }))}
+                  placeholder="Delivery address (optional)"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-[#1c1712] focus:outline-none focus:ring-2 focus:ring-[#16C2F3]/40"
+                />
+              </div>
+            </div>
+            {profileError && (
+              <p className="text-sm text-red-600">{profileError}</p>
+            )}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleProfileSave}
+                disabled={profileSaving}
+                className="bg-[#1c1712] text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-black transition-colors disabled:opacity-50"
+              >
+                {profileSaving ? "Saving…" : "Save profile"}
+              </button>
+              {profileSaved && (
+                <span className="text-sm text-green-600 font-semibold">Saved!</span>
+              )}
+            </div>
+          </div>
+        </div>
+
       </main>
       <SiteFooter />
     </div>
