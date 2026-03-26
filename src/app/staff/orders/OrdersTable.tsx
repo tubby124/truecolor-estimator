@@ -350,6 +350,27 @@ export function OrdersTable({ initialOrders }: Props) {
     }
   }
 
+  // ── Send receipt ─────────────────────────────────────────────────────────────
+
+  const [sendingReceiptId, setSendingReceiptId] = useState<string | null>(null);
+  const [receiptSentIds, setReceiptSentIds] = useState<Set<string>>(new Set());
+
+  async function handleSendReceipt(orderId: string, orderNumber: string, customerEmail: string) {
+    setSendingReceiptId(orderId);
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/receipt`, { method: "POST" });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Failed to send receipt");
+      setReceiptSentIds((prev) => new Set(prev).add(orderId));
+      showToast(`Receipt sent to ${customerEmail} for ${orderNumber}`, "success");
+      setTimeout(() => setReceiptSentIds((prev) => { const s = new Set(prev); s.delete(orderId); return s; }), 10000);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to send receipt — try again", "error");
+    } finally {
+      setSendingReceiptId(null);
+    }
+  }
+
   // ── Resend payment link ─────────────────────────────────────────────────────
 
   async function handleResendPayment(orderId: string, orderNumber: string) {
@@ -1107,6 +1128,26 @@ export function OrdersTable({ initialOrders }: Props) {
                         </button>
                         <p className="text-xs text-gray-400 mt-1">
                           Re-emails the customer a fresh payment link
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Send receipt — only for paid orders */}
+                    {order.status !== "pending_payment" && customer?.email && (
+                      <div>
+                        <button
+                          onClick={() => void handleSendReceipt(order.id, order.order_number, customer.email)}
+                          disabled={sendingReceiptId === order.id}
+                          className="text-sm font-semibold px-4 py-2 rounded-lg border border-violet-400 text-violet-600 hover:bg-violet-50 disabled:opacity-50 transition-colors"
+                        >
+                          {sendingReceiptId === order.id
+                            ? "Sending…"
+                            : receiptSentIds.has(order.id)
+                            ? "✓ Receipt sent!"
+                            : "🧾 Send receipt"}
+                        </button>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Emails a payment receipt to {customer.email}
                         </p>
                       </div>
                     )}

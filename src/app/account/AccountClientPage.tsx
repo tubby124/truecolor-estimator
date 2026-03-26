@@ -939,7 +939,8 @@ export function AccountClientPage() {
                   ? Math.round(
                       (Number(order.total) -
                         Number(order.subtotal) -
-                        Number(order.gst)) *
+                        Number(order.gst) -
+                        Number(order.pst ?? 0)) *
                         100
                     ) / 100
                   : 0;
@@ -1217,6 +1218,14 @@ export function AccountClientPage() {
                             ${Number(order.gst).toFixed(2)}
                           </span>
                         </div>
+                        {Number(order.pst ?? 0) > 0 && (
+                          <div className="flex justify-between text-gray-500">
+                            <span>PST (6%)</span>
+                            <span className="font-medium tabular-nums">
+                              ${Number(order.pst).toFixed(2)}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex justify-between border-t border-gray-100 pt-1.5">
                           <span className="font-semibold text-[#1c1712]">
                             Total
@@ -1575,6 +1584,36 @@ function ReceiptModal({
       ? Math.round((Number(order.total) - Number(order.subtotal) - Number(order.gst) - pst) * 100) / 100
       : 0;
 
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  async function handleEmailReceipt() {
+    setEmailSending(true);
+    setEmailError(null);
+    try {
+      const supabase = createClient();
+      const { data: { session: s } } = await supabase.auth.getSession();
+      const res = await fetch("/api/account/receipt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${s?.access_token ?? ""}`,
+        },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to send");
+      }
+      setEmailSent(true);
+    } catch (err) {
+      setEmailError(err instanceof Error ? err.message : "Failed to send receipt");
+    } finally {
+      setEmailSending(false);
+    }
+  }
+
   function handlePrint() {
     window.print();
   }
@@ -1711,20 +1750,42 @@ function ReceiptModal({
           </p>
         </div>
 
-        {/* Print button */}
-        <div className="px-6 pb-6 flex gap-3 print:hidden">
-          <button
-            onClick={handlePrint}
-            className="flex-1 bg-[#1c1712] text-white font-bold py-3 rounded-xl text-sm hover:bg-black transition-colors"
-          >
-            Print / Save PDF
-          </button>
-          <button
-            onClick={onClose}
-            className="flex-1 border border-gray-200 text-gray-600 font-semibold py-3 rounded-xl text-sm hover:border-gray-400 transition-colors"
-          >
-            Close
-          </button>
+        {/* Actions */}
+        <div className="px-6 pb-6 space-y-3 print:hidden">
+          {isPaid && (
+            <div>
+              {emailSent ? (
+                <p className="text-center text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-xl py-3">
+                  ✓ Receipt sent to {email}
+                </p>
+              ) : (
+                <button
+                  onClick={() => void handleEmailReceipt()}
+                  disabled={emailSending}
+                  className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors"
+                >
+                  {emailSending ? "Sending…" : `✉ Email receipt to ${email}`}
+                </button>
+              )}
+              {emailError && (
+                <p className="text-xs text-red-600 mt-1.5 text-center">{emailError}</p>
+              )}
+            </div>
+          )}
+          <div className="flex gap-3">
+            <button
+              onClick={handlePrint}
+              className="flex-1 bg-[#1c1712] text-white font-bold py-3 rounded-xl text-sm hover:bg-black transition-colors"
+            >
+              Print / Save PDF
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 border border-gray-200 text-gray-600 font-semibold py-3 rounded-xl text-sm hover:border-gray-400 transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
