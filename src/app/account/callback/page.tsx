@@ -33,22 +33,22 @@ export default function CallbackPage() {
 
     // ── PKCE flow v2 (publishable key format): ?code= ──────────────────────
     // Supabase v2.97+ sends ?code= instead of ?token_hash= or #access_token=
+    // The type param is included in the redirect URL (e.g. ?code=xxx&type=recovery).
+    // We read type BEFORE exchangeCodeForSession to avoid a race condition where
+    // onAuthStateChange fires SIGNED_IN (for existing session) before the exchange
+    // finishes, incorrectly bouncing recovery users to /account instead of /account?reset=1.
     const code = searchParams.get("code");
     if (code) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-        subscription.unsubscribe();
-        if (event === "PASSWORD_RECOVERY") {
+      const type = searchParams.get("type");
+      supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
+        if (err) {
+          setError("Link expired or already used — please request a new one.");
+        } else if (type === "recovery") {
           window.location.replace("/account?reset=1");
-        } else if (searchParams.get("type") === "signup") {
+        } else if (type === "signup") {
           window.location.replace("/account?welcome=1");
         } else {
           window.location.replace("/account");
-        }
-      });
-      supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
-        if (err) {
-          subscription.unsubscribe();
-          setError("Link expired or already used — please request a new one.");
         }
       });
       return;
