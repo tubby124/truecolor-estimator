@@ -75,6 +75,12 @@ export default async function StaffQuotesPage() {
               ← Website
             </Link>
             <Link
+              href="/staff/customers"
+              className="inline-flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
+            >
+              Customers
+            </Link>
+            <Link
               href="/staff/orders"
               className="inline-flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
             >

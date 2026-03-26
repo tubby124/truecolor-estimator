@@ -282,6 +282,14 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         </Link>
 
         <Link
+          href="/staff/customers"
+          className="inline-flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
+          aria-label="View customers"
+        >
+          Customers
+        </Link>
+
+        <Link
           href="/staff/quotes"
           className="inline-flex items-center gap-1.5 bg-[#16C2F3] hover:bg-[#0fa8d6] text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
           aria-label="View incoming quote requests"
