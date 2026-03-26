@@ -1786,6 +1786,13 @@ function ReceiptModal({
               Close
             </button>
           </div>
+          <Link
+            href={`/account/receipt/${order.id}`}
+            className="block text-center text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
+            target="_blank"
+          >
+            Open as full page (shareable link) ↗
+          </Link>
         </div>
       </div>
     </div>
