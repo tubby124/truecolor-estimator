@@ -92,6 +92,7 @@ interface QuoteRequest {
   items: { product: string; qty?: number; notes?: string }[];
   replied_at: string | null;
   staff_note: string | null;
+  reply_body: string | null;
 }
 
 interface CustomerProfile {
@@ -1441,11 +1442,11 @@ export function AccountClientPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-[#1c1712] text-sm truncate">{products}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{date}</p>
-                        {q.staff_note && (
-                          <p className="text-sm text-gray-600 mt-2 bg-blue-50 rounded-lg px-3 py-2">
-                            <span className="font-semibold text-[#16C2F3]">Staff note: </span>
-                            {q.staff_note}
-                          </p>
+                        {(q.reply_body || q.staff_note) && (
+                          <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg px-3 py-3">
+                            <p className="text-xs font-semibold text-[#16C2F3] uppercase tracking-wide mb-1">Reply from True Color</p>
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{q.reply_body || q.staff_note}</p>
+                          </div>
                         )}
                       </div>
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${

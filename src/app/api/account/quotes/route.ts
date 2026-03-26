@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   const admin = createClient(SUPABASE_URL, process.env.SUPABASE_SECRET_KEY ?? "");
   const { data, error } = await admin
     .from("quote_requests")
-    .select("id, created_at, items, replied_at, staff_note")
+    .select("id, created_at, items, replied_at, staff_note, reply_body")
     .eq("email", email)
     .order("created_at", { ascending: false })
     .limit(20);
