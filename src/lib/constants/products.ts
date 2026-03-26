@@ -5,6 +5,7 @@ export const PRODUCT_OPTIONS = [
   "Vehicle Magnets",
   "Business Cards",
   "Flyers & Brochures",
+  "Coil-Bound Booklets",
   "Paper / Document Printing",
   "Aluminum Composite Signs",
   "Foamboard Displays",

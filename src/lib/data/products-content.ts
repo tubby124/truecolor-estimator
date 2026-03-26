@@ -1131,10 +1131,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
   "coil-bound-booklets": {
     slug: "coil-bound-booklets",
     name: "Coil-Bound Booklets",
-    tagline: "Full-colour coil-bound booklets. 80lb or 100lb gloss. From $48/book.",
+    tagline: "Full-colour coil-bound booklets. 80lb or 100lb gloss. From $65/book.",
     description:
       "Coil-bound booklets (plastic spiral binding) are the go-to format when you need a professional multi-page document that lays flat when open and survives regular handling. True Color prints, cuts, punches, and binds booklets in-house at 216 33rd St W, Saskatoon — no outsourcing, no shipping delays. Standard format is 8.5×11\", double-sided throughout, with a 14pt gloss coated cover. Choose Premium for 80lb gloss text interior pages with a standard unlaminated cover — the right choice for most professional and government documents. Choose Ultra Premium for 100lb gloss text interior (noticeably heavier and more premium feel) with a gloss laminated cover that won't crease or scuff. Both use a 12mm black plastic coil. Page count is typically quoted at approximately 80 pages (40 double-sided sheets); custom page counts are quoted individually — call or email with your specs. Minimum order is 25 books. Pricing is per-lot, not per-page. Common uses in Saskatoon and Saskatchewan: government program guides, training manuals, school handbooks, conference materials, real estate neighbourhood packages, contractor bid packages, sports association rule books, and corporate annual reports. We offer a physical sample before your full run — print one copy of your preferred tier at cost, approve it, then confirm the full order. Turnaround is typically 3–5 business days for standard runs. Rush available (+$40 flat). Pickup at 216 33rd St W.",
-    fromPrice: "$48",
+    fromPrice: "$1,625",
     category: "BOOKLET",
     heroImage: "/images/products/product/coil-bound-booklet-hero-800x600.webp",
     galleryImages: [
@@ -1143,6 +1143,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       "/images/products/product/coil-booklet-open-spread-800x600.webp",
       "/images/products/product/coil-booklet-spiral-closeup-800x600.webp",
       "/images/products/product/coil-booklet-laminate-cover-800x600.webp",
+      "/images/products/product/coil-booklet-open-spread-detail-800x600.webp",
     ],
     defaultSides: 2,
     sideOptions: false,
@@ -1191,7 +1192,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What does the lot pricing mean — is it per book or per order?",
-        a: "The price shown is the total for the full lot. At 100 books on the Premium tier, the price is $4,700 — that's $47 per book all-in. At 250 books, it's $10,000 — $40 per book. The more you order, the lower the per-book cost.",
+        a: "The price shown is the total for the full lot. At 25 books on the Premium tier, the price is $1,625 — that's $65 per book. At 100 books, it's $4,800 — $48 per book. At 250 books, it's $10,000 — $40 per book. The more you order, the lower the per-book cost.",
       },
     ],
     relatedSlugs: ["brochures", "flyers", "rack-cards"],
