@@ -389,11 +389,33 @@ export async function POST(req: NextRequest) {
       html: staffHtml,
     });
 
-    // Customer confirmation
+    // Customer confirmation — summarize submitted items so they can verify their request
     const itemCountText =
       items.length > 1
         ? `your ${items.length}-item quote request`
         : "your quote request";
+
+    const confirmItemRows = items
+      .map((item, i) => {
+        const label = items.length > 1 ? `Item ${i + 1}: ` : "";
+        const details = [
+          item.qty ? `Qty: ${esc(item.qty)}` : null,
+          item.material ? `Material: ${esc(item.material)}` : null,
+          item.dimensions ? `Size: ${esc(item.dimensions)}` : null,
+          item.sides ? `Sides: ${item.sides === "2" ? "Double-sided" : "Single-sided"}` : null,
+          item.notes ? `Notes: ${esc(item.notes)}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        return `
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #1c1712; vertical-align: top;">
+              <strong>${label}${item.product ? esc(item.product) : "Print product"}</strong>
+              ${details ? `<br><span style="color: #6b7280;">${details}</span>` : ""}
+            </td>
+          </tr>`;
+      })
+      .join("");
 
     await sendEmail({
       from,
@@ -409,14 +431,25 @@ export async function POST(req: NextRequest) {
           <div style="padding: 24px 30px; background: #fff;">
             <p style="font-size: 16px; color: #1c1712;">Hi ${esc(name)},</p>
             <p style="color: #444;">
-              Got it! We received ${itemCountText} and will reply within 1 business day.
+              Got it! We received ${itemCountText} and will get back to you within 1 business day.
             </p>
-            <p style="color: #444;">
-              In the meantime, you can call us at
+
+            <p style="font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 8px;">
+              What you submitted
+            </p>
+            <table style="width: 100%; border-collapse: collapse;">
+              ${confirmItemRows}
+            </table>
+
+            <p style="color: #444; margin-top: 20px;">
+              Questions? Call us at
               <a href="tel:+13069548688" style="color: #16C2F3;">(306) 954-8688</a>
               or visit us at 216 33rd St W, Saskatoon.
             </p>
             <p style="color: #444;">— The True Color Team</p>
+          </div>
+          <div style="background: #f4efe9; padding: 14px 30px; font-size: 12px; color: #888;">
+            truecolorprinting.ca · 216 33rd St W, Saskatoon · (306) 954-8688
           </div>
         </div>
       `,

@@ -63,11 +63,18 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
     "True Color Display Printing <info@true-color.ca>";
 
   // Auto-BCC staff on every outgoing email so info@true-color.ca sees all sent mail in Hostinger.
-  // Skip BCC if caller already set one, or if the primary recipient IS the staff email (avoids duplicates).
-  const globalBcc = process.env.SMTP_BCC;
+  // SMTP_BCC supports comma-separated addresses: "a@b.com,c@d.com"
+  // Skip BCC if caller already set one, or if the primary recipient IS one of the BCC addresses.
+  const globalBccRaw = process.env.SMTP_BCC;
+  const globalBcc = globalBccRaw
+    ? globalBccRaw.split(",").map((s) => s.trim()).filter(Boolean)
+    : undefined;
   const toAddresses = (Array.isArray(options.to) ? options.to : [options.to]).join(",");
   const effectiveBcc =
-    options.bcc ?? (globalBcc && !toAddresses.includes(globalBcc) ? globalBcc : undefined);
+    options.bcc ??
+    (globalBcc?.length && !globalBcc.some((b) => toAddresses.includes(b))
+      ? globalBcc
+      : undefined);
 
   const body: Record<string, unknown> = {
     sender: parseAddress(fromRaw),

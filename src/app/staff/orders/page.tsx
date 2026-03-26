@@ -14,9 +14,13 @@ export const dynamic = "force-dynamic";
 export default async function StaffOrdersPage() {
   let orders: Awaited<ReturnType<typeof fetchOrders>> = [];
   let fetchError: string | null = null;
+  let newQuoteCount = 0;
 
   try {
-    orders = await fetchOrders();
+    [orders, newQuoteCount] = await Promise.all([
+      fetchOrders(),
+      fetchNewQuoteCount(),
+    ]);
   } catch (err) {
     fetchError = err instanceof Error ? err.message : "Could not load orders";
   }
@@ -34,7 +38,7 @@ export default async function StaffOrdersPage() {
           </div>
 
           {/* Right: nav actions (Request Payment + Social Studio + Make a Quote) */}
-          <StaffOrdersActions />
+          <StaffOrdersActions newQuoteCount={newQuoteCount} />
         </div>
       </header>
 
@@ -63,6 +67,16 @@ export default async function StaffOrdersPage() {
       </footer>
     </div>
   );
+}
+
+async function fetchNewQuoteCount(): Promise<number> {
+  const supabase = createServiceClient();
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count } = await supabase
+    .from("quote_requests")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", cutoff);
+  return count ?? 0;
 }
 
 async function fetchOrders() {
