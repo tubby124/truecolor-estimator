@@ -13,8 +13,8 @@ const INDUSTRY_PRODUCT_IMAGES: Record<string, string> = {
   "business-cards":      "/images/products/product/business-cards-800x600.webp",
   "foamboard-displays":  "/images/products/product/foamboard-display-800x600.webp",
   "retractable-banners": "/images/products/product/retractable-stand-600x900.webp",
-  "window-decals":       "/images/products/product/vinyl-window-decal-storefront-800x600.webp",
-  "window-perf":         "/images/products/product/window-perf-800x600.webp",
+  "window-decals":       "/images/products/product/window-decal-before-after-800x600.webp",
+  "window-perf":         "/images/products/product/perf-vinyl-interior-seethrough-800x600.webp",
   "vinyl-lettering":     "/images/products/product/vinyl-lettering-800x600.webp",
   "stickers":            "/images/products/product/stickers-800x600.webp",
   "postcards":           "/images/products/product/postcards-800x600.webp",
@@ -37,6 +37,8 @@ export interface IndustryPageProps {
   description: string;
   /** Optional JSX override for description — use when links are needed. `description` is still used for schema. */
   descriptionNode?: React.ReactNode;
+  /** Optional gallery shown below description — images are indexed by Google on this page */
+  galleryImages?: { src: string; alt: string }[];
   products: IndustryProduct[];
   whyPoints: string[];
   faqs: { q: string; a: string }[];
@@ -53,6 +55,7 @@ export function IndustryPage({
   heroAlt,
   description,
   descriptionNode,
+  galleryImages,
   products,
   whyPoints,
   faqs,
@@ -157,6 +160,26 @@ export function IndustryPage({
           <p className="text-gray-600 text-lg leading-relaxed mb-12 max-w-2xl">
             {description}
           </p>
+        )}
+
+        {/* Gallery — indexed by Google on this page */}
+        {galleryImages && galleryImages.length > 0 && (
+          <div className="mb-14">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {galleryImages.map((img) => (
+                <div key={img.src} className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#f8f4ef]">
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Products */}

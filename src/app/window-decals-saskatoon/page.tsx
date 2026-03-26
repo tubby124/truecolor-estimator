@@ -77,6 +77,12 @@ export default function WindowDecalsSaskatoonPage() {
           </p>
         </>
       }
+      galleryImages={[
+        { src: "/images/products/product/window-decal-before-after-800x600.webp", alt: "Custom window decal before and after — True Color Display Printing Saskatoon storefront transformation" },
+        { src: "/images/products/product/window-decal-restaurant-pizza-800x600.webp", alt: "Restaurant pizza window decal — full-colour vinyl storefront graphic Saskatoon" },
+        { src: "/images/products/product/window-decal-barbershop-800x600.webp", alt: "Barbershop window vinyl decal with barber pole logo — custom window graphics Saskatoon" },
+        { src: "/images/products/product/perf-vinyl-interior-seethrough-800x600.webp", alt: "Perforated window vinyl interior view — see-through from inside while displaying full graphic outside" },
+      ]}
       products={[
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Window Perf", from: "from $8/sqft", slug: "window-perf" },
