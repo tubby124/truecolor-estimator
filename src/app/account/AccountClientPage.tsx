@@ -69,7 +69,10 @@ interface Order {
   status: string;
   subtotal: number;
   gst: number;
+  pst: number | null;
   total: number;
+  discount_code: string | null;
+  discount_amount: number | null;
   notes: string | null;
   created_at: string;
   is_rush: boolean;
@@ -194,6 +197,7 @@ export function AccountClientPage() {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [reorderedId, setReorderedId] = useState<string | null>(null);
+  const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
 
   // File upload state
   const [uploadingFile, setUploadingFile] = useState<string | null>(null);
@@ -1015,18 +1019,26 @@ export function AccountClientPage() {
                             </a>
                           )}
                         {order.status !== "pending_payment" && (
-                          <button
-                            onClick={() => handleReorder(order)}
-                            className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
-                              reorderedId === order.id
-                                ? "bg-[#8CC63E] text-white"
-                                : "bg-[#f4efe9] text-[#1c1712] hover:bg-[#16C2F3] hover:text-white"
-                            }`}
-                          >
-                            {reorderedId === order.id
-                              ? "\u2713 Going to cart\u2026"
-                              : "Reorder"}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => setReceiptOrder(order)}
+                              className="text-sm font-semibold px-4 py-2 rounded-lg transition-colors bg-[#f4efe9] text-[#1c1712] hover:bg-[#1c1712] hover:text-white"
+                            >
+                              Receipt
+                            </button>
+                            <button
+                              onClick={() => handleReorder(order)}
+                              className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
+                                reorderedId === order.id
+                                  ? "bg-[#8CC63E] text-white"
+                                  : "bg-[#f4efe9] text-[#1c1712] hover:bg-[#16C2F3] hover:text-white"
+                              }`}
+                            >
+                              {reorderedId === order.id
+                                ? "\u2713 Going to cart\u2026"
+                                : "Reorder"}
+                            </button>
+                          </>
                         )}
                         <span className="text-gray-400 text-sm select-none">
                           {isExpanded ? "\u25b2" : "\u25bc"}
@@ -1530,6 +1542,191 @@ export function AccountClientPage() {
 
       </main>
       <SiteFooter />
+
+      {/* Receipt modal */}
+      {receiptOrder && (
+        <ReceiptModal
+          order={receiptOrder}
+          email={session.user.email ?? ""}
+          onClose={() => setReceiptOrder(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── ReceiptModal ─────────────────────────────────────────────────────────────
+
+function ReceiptModal({
+  order,
+  email,
+  onClose,
+}: {
+  order: Order;
+  email: string;
+  onClose: () => void;
+}) {
+  const PAID_STATUSES = ["payment_received", "in_production", "ready_for_pickup", "complete"];
+  const isPaid = PAID_STATUSES.includes(order.status);
+
+  const pst = order.pst ?? 0;
+  const rushFee =
+    order.is_rush
+      ? Math.round((Number(order.total) - Number(order.subtotal) - Number(order.gst) - pst) * 100) / 100
+      : 0;
+
+  function handlePrint() {
+    window.print();
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 print:bg-white print:p-0 print:block"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto print:shadow-none print:rounded-none print:max-h-none print:overflow-visible">
+
+        {/* Header */}
+        <div className="bg-[#1c1712] px-6 py-5 rounded-t-2xl print:rounded-none flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[#16C2F3] font-black text-lg tracking-tight">TRUE COLOR</span>
+              <span className="text-white/60 text-xs">Display Printing</span>
+            </div>
+            <p className="text-white/50 text-xs">216 33rd St W, Saskatoon SK &nbsp;·&nbsp; info@true-color.ca &nbsp;·&nbsp; (306) 954-8688</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white/40 hover:text-white text-xl leading-none print:hidden"
+            aria-label="Close receipt"
+          >
+            &times;
+          </button>
+        </div>
+
+        {/* Receipt title */}
+        <div className="px-6 pt-5 pb-3 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-black text-[#1c1712] tracking-tight">
+              {isPaid ? "Payment Receipt" : "Order Summary"}
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">{formatDate(order.created_at)}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Order</p>
+            <p className="text-base font-black text-[#1c1712]">{order.order_number}</p>
+          </div>
+        </div>
+
+        {/* Customer info */}
+        <div className="px-6 py-3 border-b border-gray-100 bg-gray-50 text-xs text-gray-500 space-y-0.5">
+          <p><span className="font-semibold text-gray-600">Billed to:</span> {email}</p>
+          <p>
+            <span className="font-semibold text-gray-600">Status:</span>{" "}
+            <span className={`inline-block font-semibold px-2 py-0.5 rounded-full text-[11px] ${STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"}`}>
+              {STATUS_LABELS[order.status] ?? order.status}
+            </span>
+          </p>
+          {order.payment_method && (
+            <p>
+              <span className="font-semibold text-gray-600">Payment method:</span>{" "}
+              {order.payment_method === "clover_card" ? "Credit / debit card" : "Interac e-Transfer"}
+            </p>
+          )}
+        </div>
+
+        {/* Items */}
+        <div className="px-6 py-4">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Items</p>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left text-xs font-semibold text-gray-400 pb-2 pr-2">Description</th>
+                <th className="text-right text-xs font-semibold text-gray-400 pb-2 w-20">Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {order.order_items.map((item) => {
+                const sizeLabel =
+                  item.width_in && item.height_in
+                    ? ` — ${item.width_in}×${item.height_in}"`
+                    : "";
+                const sidesLabel = item.sides === 2 ? " · 2-sided" : "";
+                return (
+                  <tr key={item.id}>
+                    <td className="py-2.5 pr-2 text-[#1c1712]">
+                      <span className="font-semibold">{item.product_name}</span>
+                      <span className="block text-xs text-gray-400">
+                        {`Qty ${item.qty}${sizeLabel}${sidesLabel}`}
+                      </span>
+                    </td>
+                    <td className="py-2.5 text-right font-semibold tabular-nums text-[#1c1712]">
+                      ${Number(item.line_total).toFixed(2)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Totals */}
+        <div className="px-6 pb-4">
+          <div className="border border-gray-100 rounded-xl overflow-hidden">
+            {order.is_rush && rushFee > 0 && (
+              <div className="flex justify-between px-4 py-2 text-sm bg-orange-50 text-orange-700">
+                <span>Rush fee (same-day priority)</span>
+                <span className="font-semibold tabular-nums">+${rushFee.toFixed(2)}</span>
+              </div>
+            )}
+            {order.discount_amount && order.discount_amount > 0 ? (
+              <div className="flex justify-between px-4 py-2 text-sm bg-green-50 text-green-700">
+                <span>Discount{order.discount_code ? ` (${order.discount_code})` : ""}</span>
+                <span className="font-semibold tabular-nums">−${Number(order.discount_amount).toFixed(2)}</span>
+              </div>
+            ) : null}
+            <div className="flex justify-between px-4 py-2 text-sm text-gray-500 border-t border-gray-100">
+              <span>Subtotal</span>
+              <span className="tabular-nums">${Number(order.subtotal).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between px-4 py-2 text-sm text-gray-500">
+              <span>GST (5%)</span>
+              <span className="tabular-nums">${Number(order.gst).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between px-4 py-2 text-sm text-gray-500">
+              <span>PST (6%)</span>
+              <span className="tabular-nums">${pst.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between px-4 py-3 bg-[#1c1712] text-white font-bold text-base">
+              <span>Total (CAD)</span>
+              <span className="tabular-nums">${Number(order.total).toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer note */}
+        <div className="px-6 pb-5">
+          <p className="text-xs text-gray-400 text-center">
+            True Color Display Printing Ltd. &nbsp;·&nbsp; GST# applies &nbsp;·&nbsp; All amounts in CAD
+          </p>
+        </div>
+
+        {/* Print button */}
+        <div className="px-6 pb-6 flex gap-3 print:hidden">
+          <button
+            onClick={handlePrint}
+            className="flex-1 bg-[#1c1712] text-white font-bold py-3 rounded-xl text-sm hover:bg-black transition-colors"
+          >
+            Print / Save PDF
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 border border-gray-200 text-gray-600 font-semibold py-3 rounded-xl text-sm hover:border-gray-400 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
