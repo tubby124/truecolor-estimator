@@ -34,6 +34,30 @@ Staff = email === STAFF_EMAIL (env var)
 ## Tax Rules
 GST (5%) + PST (6%) shown ONLY on checkout. All other pages show pre-tax sell_price.
 PST formula: pst = (sell_price - design_fee) * 0.06 per item
+Rush fee = PST-EXEMPT — do NOT apply PST to rush line items
+GST rate = read from config.v1.csv gst_rate — never hardcode 0.05
+
+## Disabled Products (do NOT re-enable without owner approval)
+- ACP double-sided (ACP 2S)
+- Business cards >1000 qty
+- Postcards single-sided (1S)
+- Brochure 100lb (PLACEHOLDER_100LB — waiting for Spicer quote)
+
+## Wave Accounting
+NEVER use invoiceCreatePayment — use moneyTransactionCreate (Wave API rule, enforced globally)
+
+## Brevo Email
+Sender ID: 1 | 21 lists configured
+All emails via Brevo REST API at src/lib/email/smtp.ts — Railway Hobby blocks all SMTP
+BCC rule: always BCC hasan.sharif.realtor@gmail.com + albert@true-color.ca (not CC — BCC)
+
+## Clover API Filter Syntax
+Multiple filter= params required — NEVER AND-join in one string:
+  CORRECT: url.searchParams.append("filter", "createdTime>=X"); url.searchParams.append("filter", "createdTime<Y")
+  WRONG:   filter=createdTime>=X and createdTime<Y
+
+## Supabase Storage URLs
+File links from storage use SUPABASE_STORAGE_URL env var as base, not the project URL directly.
 
 ## Image & Content Data Files (DO NOT MIX UP)
 | Data File | What Goes Here | Feeds Into | Skill That Updates It |
