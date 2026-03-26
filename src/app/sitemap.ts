@@ -62,6 +62,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Industry pages — Sprint A (2026-03-05) ────────────────────────────────
     { url: `${BASE_URL}/retail-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/window-decals-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/window-perf-saskatoon`, lastModified: new Date("2026-03-26"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/sticker-printing-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/school-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/trade-contractor-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
