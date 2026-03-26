@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendReviewRequestEmail } from "@/lib/email/reviewRequest";
+import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { approveWaveInvoice, sendWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 
 const VALID_STATUSES = [
@@ -159,12 +160,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
-    // Review request email — fires when staff marks order "complete"
+    // Review request + receipt fallback — fires when staff marks order "complete"
     if (status === "complete") {
       try {
         const { data: order } = await supabase
           .from("orders")
-          .select("order_number, customers ( name, email )")
+          .select(`order_number, subtotal, gst, pst, total, is_rush, discount_code,
+                   discount_amount, payment_method, created_at, wave_invoice_id,
+                   order_items ( product_name, qty, width_in, height_in, sides, line_total ),
+                   customers ( name, email )`)
           .eq("id", id)
           .single();
 
@@ -175,11 +179,44 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           const customer = customerRaw as { name: string; email: string } | null;
 
           if (customer?.email) {
+            // Review request
             await sendReviewRequestEmail({
               customerName: customer.name,
               customerEmail: customer.email,
               orderNumber: order.order_number,
             });
+
+            // Receipt fallback — always send our Brevo HTML receipt at complete.
+            // For orders with wave_invoice_id the Wave PDF was already sent at ready_for_pickup.
+            // This ensures every completed order gets at least one receipt in their inbox.
+            try {
+              const items = Array.isArray(order.order_items) ? order.order_items : [];
+              await sendPaymentReceipt({
+                orderNumber: order.order_number,
+                customerName: customer.name,
+                customerEmail: customer.email,
+                createdAt: order.created_at,
+                items: items.map((i) => ({
+                  product_name: i.product_name,
+                  qty: i.qty,
+                  width_in: i.width_in,
+                  height_in: i.height_in,
+                  sides: i.sides,
+                  line_total: Number(i.line_total),
+                })),
+                subtotal: Number(order.subtotal),
+                gst: Number(order.gst),
+                pst: Number(order.pst ?? 0),
+                total: Number(order.total),
+                isRush: Boolean(order.is_rush),
+                discountCode: order.discount_code,
+                discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
+                paymentMethod: order.payment_method,
+              });
+              console.log(`[staff/orders/status] receipt sent at complete → ${customer.email}`);
+            } catch (receiptErr) {
+              console.error("[staff/orders/status] receipt send at complete failed (non-fatal):", receiptErr);
+            }
           }
         }
       } catch (reviewEmailErr) {
