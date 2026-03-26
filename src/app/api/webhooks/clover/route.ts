@@ -14,7 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "crypto";
+import { timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
@@ -27,28 +27,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not read body" }, { status: 400 });
   }
 
-  // Verify HMAC signature from Clover — always required (fail-closed)
-  const tokenSecret = process.env.PAYMENT_TOKEN_SECRET;
-  if (!tokenSecret) {
-    console.error("[clover-webhook] PAYMENT_TOKEN_SECRET not configured — rejecting all webhook calls");
-    return NextResponse.json({ error: "Webhook not configured" }, { status: 401 });
-  }
-
-  const signature = req.headers.get("x-clover-signature") ?? "";
-  const expected = createHmac("sha256", tokenSecret)
-    .update(bodyText)
-    .digest("base64");
-
-  // Use constant-time comparison to prevent timing attacks
-  const sigBuf = Buffer.from(signature);
-  const expectedBuf = Buffer.from(expected);
-  if (
-    !signature ||
-    sigBuf.length !== expectedBuf.length ||
-    !timingSafeEqual(sigBuf, expectedBuf)
-  ) {
-    console.warn("[clover-webhook] Invalid or missing signature — possible spoofing attempt");
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  // Verify request via CLOVER_WEBHOOK_SECRET query param.
+  // Register the webhook in Clover Dashboard with URL:
+  //   https://truecolorprinting.ca/api/webhooks/clover?k=<CLOVER_WEBHOOK_SECRET>
+  // Clover does NOT sign hosted checkout webhook bodies — HMAC approach is not applicable.
+  const webhookSecret = process.env.CLOVER_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    const provided = req.nextUrl.searchParams.get("k") ?? "";
+    const providedBuf = Buffer.from(provided);
+    const expectedBuf = Buffer.from(webhookSecret);
+    const valid =
+      providedBuf.length === expectedBuf.length &&
+      timingSafeEqual(providedBuf, expectedBuf);
+    if (!valid) {
+      console.warn("[clover-webhook] Invalid webhook secret — possible spoofing attempt");
+      return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
+    }
+  } else {
+    console.warn("[clover-webhook] CLOVER_WEBHOOK_SECRET not set — accepting without auth (set env var in Railway)");
   }
 
   let event: Record<string, unknown>;

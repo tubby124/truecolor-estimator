@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { createServiceClient } from "@/lib/supabase/server";
 import { AccountSignupCard } from "@/components/site/AccountSignupCard";
 import { PurchaseEvent } from "@/app/order-confirmed/PurchaseEvent";
+import { CloverPaymentWatcher } from "@/app/order-confirmed/CloverPaymentWatcher";
 import { REVIEW_COUNT } from "@/lib/reviews";
 
 export const metadata: Metadata = {
@@ -111,6 +112,9 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
           We&apos;ve got your order and will have it ready for pickup at{" "}
           <span className="font-semibold text-[#1c1712]">216 33rd St W, Saskatoon</span>.
         </p>
+
+        {/* Poll for payment confirmation while webhook catches up */}
+        {isCloverPending && oid && <CloverPaymentWatcher oid={oid} />}
 
         {/* Clover payment processing notice — shown while webhook hasn't confirmed yet */}
         {isCloverPending && (
