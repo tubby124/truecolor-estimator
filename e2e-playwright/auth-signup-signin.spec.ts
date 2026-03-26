@@ -26,6 +26,12 @@ async function fillSignIn(
   await page.locator("#pw-password").fill(password);
 }
 
+/** Click the password-form Sign In submit button (not the Google OAuth button) */
+async function clickSignIn(page: import("@playwright/test").Page) {
+  // Target exact arrow button text to avoid matching "Sign in with Google"
+  await page.getByRole("button", { name: "Sign in →", exact: true }).click();
+}
+
 // ─── Tests ──────────────────────────────────────────────────────────────────────
 
 base.describe("Auth — Sign Up / Sign In", () => {
@@ -36,7 +42,7 @@ base.describe("Auth — Sign Up / Sign In", () => {
   });
 
   // 1. Sign up new account -> "Check your inbox" confirmation
-  base("sign up shows check-your-inbox confirmation", async ({ page }) => {
+  base("sign up creates account and logs user in immediately", async ({ page }) => {
     const email = testEmail(TEST_SUFFIXES.signup);
 
     // Ensure clean state
@@ -54,12 +60,12 @@ base.describe("Auth — Sign Up / Sign In", () => {
     await page.locator("#pw-password").fill("TestPass123!");
     await page.locator("#pw-confirm").fill("TestPass123!");
 
-    // Submit
+    // Submit — Supabase is configured to skip email confirmation
     await page.getByRole("button", { name: /Create account/i }).click();
 
-    // Expect confirmation
-    await baseExpect(page.getByText("Check your inbox!")).toBeVisible({
-      timeout: 10_000,
+    // signUp() returns a session immediately — user lands on account page
+    await baseExpect(page.getByRole("button", { name: "Sign out", exact: true })).toBeVisible({
+      timeout: 15_000,
     });
     await baseExpect(page.getByText(email)).toBeVisible();
   });
@@ -73,11 +79,11 @@ base.describe("Auth — Sign Up / Sign In", () => {
     await page.waitForSelector("#pw-email");
 
     await fillSignIn(page, email, "TestPass123!");
-    await page.getByRole("button", { name: /Sign in/i }).click();
+    await clickSignIn(page);
 
     // After sign-in, the account page shows "Your orders" with email visible
     await baseExpect(page.getByText(email)).toBeVisible({ timeout: 10_000 });
-    await baseExpect(page.getByText("Sign out")).toBeVisible();
+    await baseExpect(page.getByRole("button", { name: "Sign out", exact: true })).toBeVisible();
   });
 
   // 3. Sign in with wrong password -> error message
@@ -89,7 +95,7 @@ base.describe("Auth — Sign Up / Sign In", () => {
     await page.waitForSelector("#pw-email");
 
     await fillSignIn(page, email, "WrongPassword999!");
-    await page.getByRole("button", { name: /Sign in/i }).click();
+    await clickSignIn(page);
 
     await baseExpect(
       page.getByText(/Invalid (login )?credentials/i)
@@ -105,7 +111,7 @@ base.describe("Auth — Sign Up / Sign In", () => {
     await page.waitForSelector("#pw-email");
 
     await fillSignIn(page, STAFF_EMAIL, staffPassword!);
-    await page.getByRole("button", { name: /Sign in/i }).click();
+    await clickSignIn(page);
 
     await page.waitForURL("**/staff/orders", { timeout: 15_000 });
     await baseExpect(page).toHaveURL(/\/staff\/orders/);
@@ -149,14 +155,14 @@ base.describe("Auth — Sign Up / Sign In", () => {
     await page.waitForSelector("#pw-email");
 
     // Click sign in with empty fields
-    await page.getByRole("button", { name: /Sign in/i }).click();
+    await clickSignIn(page);
 
     // Should still be on the login form (no loading state, no navigation)
     await baseExpect(page.getByText("Sign in to your account")).toBeVisible();
 
     // Fill email but leave password empty
     await page.locator("#pw-email").fill("test@example.com");
-    await page.getByRole("button", { name: /Sign in/i }).click();
+    await clickSignIn(page);
 
     // Still on login form
     await baseExpect(page.getByText("Sign in to your account")).toBeVisible();
@@ -180,9 +186,10 @@ base.describe("Auth — Sign Up / Sign In", () => {
 test.describe("Auth — Authenticated User", () => {
   // 4. Sign out -> returns to login form
   test("sign out returns to login form", async ({ authenticatedPage }) => {
-    await expect(authenticatedPage.getByText("Sign out")).toBeVisible();
+    const signOutBtn = authenticatedPage.getByRole("button", { name: "Sign out", exact: true });
+    await expect(signOutBtn).toBeVisible();
 
-    await authenticatedPage.getByText("Sign out").click();
+    await signOutBtn.click();
 
     // After sign out, the login form should reappear
     await expect(
@@ -190,6 +197,6 @@ test.describe("Auth — Authenticated User", () => {
     ).toBeVisible({ timeout: 10_000 });
 
     // The Sign out button should be gone
-    await expect(authenticatedPage.getByText("Sign out")).not.toBeVisible();
+    await expect(signOutBtn).not.toBeVisible();
   });
 });
