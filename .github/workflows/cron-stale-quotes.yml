@@ -1,0 +1,19 @@
+name: Stale Quotes Alert
+
+on:
+  schedule:
+    # Every hour at :00 UTC
+    - cron: "0 * * * *"
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call stale-quotes cron endpoint
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://truecolorprinting.ca/api/cron/stale-quotes)
+          echo "Response: $STATUS"
+          [ "$STATUS" = "200" ] || exit 1
