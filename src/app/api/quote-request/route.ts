@@ -244,6 +244,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Save to DB before sending emails (non-fatal — email continues even if DB fails)
+    try {
+      await supabase
+        .from("quote_requests")
+        .insert({
+          name,
+          email,
+          phone: phone ?? null,
+          items,
+          file_links: fileLinks.filter(Boolean),
+          raw_ip: ip ?? null,
+        });
+    } catch (dbErr) {
+      console.error("[quote-request] DB save failed:", dbErr);
+    }
+
+    // Staff notification uses outreach sender to avoid Brevo loop-detection block
+    // (FROM info@true-color.ca → TO info@true-color.ca was being silently dropped)
+    const staffFrom =
+      process.env.QUOTE_FROM_EMAIL ??
+      "True Color Display Printing <hello@outreach.true-color.ca>";
     const from =
       process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
     const isMulti = items.length > 1;
@@ -354,9 +375,15 @@ export async function POST(req: NextRequest) {
     `;
 
     // Send staff notification
+    const staffRecipients = [
+      process.env.STAFF_EMAIL ?? "info@true-color.ca",
+      process.env.STAFF_EMAIL_CC,
+      process.env.STAFF_EMAIL_BCC,
+    ].filter(Boolean) as string[];
+
     await sendEmail({
-      from,
-      to: process.env.STAFF_EMAIL ?? "info@true-color.ca",
+      from: staffFrom,
+      to: staffRecipients,
       replyTo: email,
       subject,
       html: staffHtml,
