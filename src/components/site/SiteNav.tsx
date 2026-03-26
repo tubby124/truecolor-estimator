@@ -24,11 +24,12 @@ const PRODUCT_CATEGORIES = [
   {
     label: "Window & Vehicle",
     links: [
-      { label: "Window Decals", href: "/products/window-decals" },
-      { label: "Wall Graphics", href: "/wall-graphics-saskatoon" },
-      { label: "Perforated Window Vinyl", href: "/products/window-perf" },
+      { label: "Vehicle Decals", href: "/vehicle-decals-saskatoon" },
       { label: "Vehicle Magnets", href: "/products/vehicle-magnets" },
       { label: "Vinyl Lettering", href: "/products/vinyl-lettering" },
+      { label: "Window Decals", href: "/products/window-decals" },
+      { label: "Perforated Window Vinyl", href: "/products/window-perf" },
+      { label: "Wall Graphics", href: "/wall-graphics-saskatoon" },
     ],
   },
   {
@@ -41,6 +42,7 @@ const PRODUCT_CATEGORIES = [
       { label: "Postcards", href: "/products/postcards" },
       { label: "Stickers", href: "/products/stickers" },
       { label: "Photo Posters", href: "/products/photo-posters" },
+      { label: "Coil-Bound Booklets", href: "/products/coil-bound-booklets" },
     ],
   },
 ];

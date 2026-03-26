@@ -1,6 +1,7 @@
 export const PRODUCT_OPTIONS = [
   "Coroplast Signs",
   "Vinyl Banners",
+  "Vehicle Decals (Die-Cut Vinyl + Install)",
   "Vehicle Magnets",
   "Business Cards",
   "Flyers & Brochures",
