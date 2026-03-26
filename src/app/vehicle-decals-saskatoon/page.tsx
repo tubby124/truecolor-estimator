@@ -8,15 +8,31 @@ import { Check } from "lucide-react";
 export const metadata: Metadata = {
   title: { absolute: "Vehicle Decals Saskatoon | Die-Cut Vinyl | True Color" },
   description:
-    "Custom die-cut vehicle decals in Saskatoon — full-colour vinyl for door panels, rear windows, and side graphics. From $75 print. Installation quoted separately.",
+    "Custom die-cut vehicle decals in Saskatoon — full-colour vinyl for door panels, rear windows, and side graphics. From $75. Installation quoted separately.",
   alternates: { canonical: "/vehicle-decals-saskatoon" },
   openGraph: {
     title: "Vehicle Decals Saskatoon | Die-Cut Vinyl Printed & Installed | True Color",
     description:
       "Die-cut vehicle decals from $75. Full-colour Roland UV print. Door panels, rear windows, side graphics. Installation quoted separately. Saskatoon.",
     url: "https://truecolorprinting.ca/vehicle-decals-saskatoon",
+    images: [{ url: "/images/gallery/gallery-vehicle-decal-riverbend-side.webp", width: 800, height: 600 }],
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Vehicle Decals Saskatoon | Die-Cut Vinyl | True Color",
+    description: "Die-cut vehicle decals from $75. Door panels, rear windows, side graphics. Printed & installed in Saskatoon.",
+    images: ["/images/gallery/gallery-vehicle-decal-riverbend-side.webp"],
+  },
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://truecolorprinting.ca" },
+    { "@type": "ListItem", position: 2, name: "Vehicle Decals Saskatoon", item: "https://truecolorprinting.ca/vehicle-decals-saskatoon" },
+  ],
 };
 
 const serviceSchema = {
@@ -61,10 +77,8 @@ const SIZES = [
 export default function VehicleDecalsSaskatoonPage() {
   return (
     <div className="min-h-screen bg-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <SiteNav />
 
       <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
@@ -74,7 +88,7 @@ export default function VehicleDecalsSaskatoonPage() {
           <div>
             <p className="text-[#16C2F3] font-semibold text-sm uppercase tracking-wide mb-2">Vehicle Decals Saskatoon</p>
             <h1 className="text-4xl font-bold text-[#1c1712] mb-4 leading-tight">
-              Die-Cut Vehicle Decals — Printed & Installed
+              Vehicle Decals Saskatoon — Die-Cut Vinyl Printed & Installed
             </h1>
             <p className="text-gray-600 text-lg mb-6">
               Full-colour die-cut vinyl for door panels, rear windows, and side graphics. Printed on our Roland UV wide-format press.{" "}
@@ -208,7 +222,7 @@ export default function VehicleDecalsSaskatoonPage() {
               { src: "/images/gallery/gallery-vehicle-decal-riverbend-rear-window.webp", alt: "Rear window decal — RiverBend Auto Glass Toyota RAV4" },
             ].map((img) => (
               <div key={img.src} className="relative aspect-[4/3] rounded-xl overflow-hidden">
-                <Image src={img.src} alt={img.alt} fill className="object-cover" />
+                <Image src={img.src} alt={img.alt} fill className="object-cover" loading="lazy" />
               </div>
             ))}
           </div>
@@ -217,9 +231,30 @@ export default function VehicleDecalsSaskatoonPage() {
           </p>
         </section>
 
+        {/* Related products */}
+        <section className="mb-16">
+          <h2 className="text-xl font-bold text-[#1c1712] mb-4">Related Products</h2>
+          <div className="flex flex-wrap gap-3">
+            {[
+              { label: "Vehicle Magnets — from $45", href: "/vehicle-magnets-saskatoon" },
+              { label: "Window Decals — from $75", href: "/window-decals-saskatoon" },
+              { label: "Vinyl Lettering — from $40", href: "/vinyl-lettering-saskatoon" },
+              { label: "View All Gallery Work", href: "/gallery" },
+            ].map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="border border-gray-200 text-gray-600 text-sm font-medium px-4 py-2 rounded-lg hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {/* FAQ */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold text-[#1c1712] mb-6">FAQ</h2>
+          <h2 className="text-2xl font-bold text-[#1c1712] mb-6">Vehicle Decal FAQ</h2>
           <div className="space-y-4 max-w-3xl">
             {[
               {
@@ -260,7 +295,7 @@ export default function VehicleDecalsSaskatoonPage() {
 
         {/* CTA */}
         <div className="bg-[#1c1712] rounded-2xl p-10 text-center">
-          <h2 className="text-2xl font-bold text-white mb-2">Ready to Brand Your Vehicle?</h2>
+          <p className="text-2xl font-bold text-white mb-2">Ready to Brand Your Vehicle?</p>
           <p className="text-gray-300 mb-6 max-w-md mx-auto text-sm">
             Send us your artwork and vehicle details — we&apos;ll quote print and install separately so you know exactly what you&apos;re paying for.
           </p>
