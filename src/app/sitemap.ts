@@ -40,6 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Print product SEO pages — sprint (2026-03-03) ────────────────────────
     { url: `${BASE_URL}/flyer-printing-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/brochure-printing-saskatoon`, lastModified: new Date("2026-03-03"), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${BASE_URL}/booklet-printing-saskatoon`, lastModified: new Date("2026-03-26"), changeFrequency: "monthly", priority: 0.9 },
 
     // ── Service & hub SEO pages — sprint (2026-03-03) ────────────────────────
     { url: `${BASE_URL}/large-format-printing-saskatoon`, lastModified: new Date("2026-03-03"), changeFrequency: "monthly", priority: 0.9 },
