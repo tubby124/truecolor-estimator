@@ -9,6 +9,7 @@ const PRODUCT_OPTIONS = [
   "ACP Aluminum Signs",
   "Vehicle Magnets",
   "Flyers / Brochures",
+  "Coil-Bound Booklets",
   "Window Decals",
   "Retractable Banners",
   "Stickers",

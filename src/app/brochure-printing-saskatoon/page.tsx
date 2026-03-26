@@ -63,15 +63,19 @@ export default function BrochurePrintingSaskatoonPage() {
             <Link href="/products/postcards" className="text-[#16C2F3] underline font-medium">
               Postcards
             </Link>
-            {" — all printed in-house at 216 33rd St W, Saskatoon."}
+            {" — all printed in-house at 216 33rd St W, Saskatoon. Need a multi-page bound document? "}
+            <Link href="/booklet-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Coil-bound booklets
+            </Link>
+            {" from $65/book."}
           </p>
         </>
       }
       products={[
         { name: "Brochures", from: "from $70", slug: "brochures" },
         { name: "Flyers", from: "from $45", slug: "flyers" },
+        { name: "Coil-Bound Booklets", from: "from $1,625", slug: "coil-bound-booklets" },
         { name: "Business Cards", from: "from $45", slug: "business-cards" },
-        { name: "Postcards", from: "from $35", slug: "postcards" },
       ]}
       whyPoints={[
         "100lb gloss text — noticeably heavier and more premium than standard flyer paper",

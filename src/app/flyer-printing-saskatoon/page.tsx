@@ -65,6 +65,10 @@ export default function FlyerPrintingSaskatoonPage() {
             <Link href="/products/postcards" className="text-[#16C2F3] underline font-medium">
               Postcards
             </Link>
+            {" · "}
+            <Link href="/booklet-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Coil-bound booklets
+            </Link>
             {" — all printed in-house on the same Konica Minolta press."}
           </p>
         </>
@@ -72,8 +76,8 @@ export default function FlyerPrintingSaskatoonPage() {
       products={[
         { name: "Flyers", from: "from $45", slug: "flyers" },
         { name: "Brochures", from: "from $70", slug: "brochures" },
+        { name: "Coil-Bound Booklets", from: "from $1,625", slug: "coil-bound-booklets" },
         { name: "Business Cards", from: "from $45", slug: "business-cards" },
-        { name: "Postcards", from: "from $35", slug: "postcards" },
       ]}
       whyPoints={[
         "80lb or 100lb gloss — exact pricing for both, no hidden upcharges",
