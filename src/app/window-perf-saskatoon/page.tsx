@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Perforated Window Vinyl Saskatoon | From $8/sqft | True Color" },
+  title: { absolute: "Perforated Window Vinyl Saskatoon | $8/sqft | True Color" },
   description:
     "Perforated window vinyl (window perf) from $8/sqft in Saskatoon. 70/30 ratio — see-through from inside, full-colour graphic from outside. In-house Roland UV. Same-day rush +$40.",
   alternates: { canonical: "/window-perf-saskatoon" },
