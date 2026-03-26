@@ -131,6 +131,7 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
                       ...q,
                       replied_at: u.replied_at as string | null,
                       staff_note: u.staff_note as string | null,
+                      reply_body: u.reply_body as string | null,
                     }
                   : q
               )

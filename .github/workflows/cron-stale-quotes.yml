@@ -2,8 +2,8 @@ name: Stale Quotes Alert
 
 on:
   schedule:
-    # Every hour at :00 UTC
-    - cron: "0 * * * *"
+    # Once daily at 14:00 UTC (8am CST / 9am CDT)
+    - cron: "0 14 * * *"
   workflow_dispatch: # allow manual trigger
 
 jobs:
