@@ -89,8 +89,9 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
             ].map((tier) => (
               <button
                 key={tier.material_code}
+                type="button"
                 onClick={() => onChange({ material_code: tier.material_code })}
-                className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-all ${
+                className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-all cursor-pointer ${
                   state.material_code === tier.material_code
                     ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
                     : "border-[var(--border)] bg-white hover:border-gray-300"
@@ -113,8 +114,9 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
             ].map((mat) => (
               <button
                 key={mat.code}
+                type="button"
                 onClick={() => onChange({ material_code: mat.code })}
-                className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-all ${
+                className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-all cursor-pointer ${
                   state.material_code === mat.code
                     ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
                     : "border-[var(--border)] bg-white hover:border-gray-300"
