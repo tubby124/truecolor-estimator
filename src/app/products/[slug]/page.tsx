@@ -7,27 +7,8 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { ProductPageClient } from "@/components/product/ProductPageClient";
 import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
-
-// Product thumbnail images for "Customers also print" cards
-const PRODUCT_IMAGE_MAP: Record<string, string> = {
-  "vinyl-banners":       "/images/products/product/banner-vinyl-colorful-800x600.webp",
-  "coroplast-signs":     "/images/products/product/coroplast-yard-sign-800x600.webp",
-  "vehicle-magnets":     "/images/products/product/vehicle-magnets-800x600.webp",
-  "acp-signs":           "/images/products/product/acp-aluminum-sign-800x600.webp",
-  "flyers":              "/images/products/product/flyers-stack-800x600.webp",
-  "business-cards":      "/images/products/product/business-cards-800x600.webp",
-  "foamboard-displays":  "/images/products/product/foamboard-display-800x600.webp",
-  "retractable-banners": "/images/products/product/retractable-stand-600x900.webp",
-  "window-decals":       "/images/products/product/window-decal-before-after-800x600.webp",
-  "window-perf":         "/images/products/product/perf-vinyl-interior-seethrough-800x600.webp",
-  "vinyl-lettering":     "/images/products/product/vinyl-lettering-800x600.webp",
-  "stickers":            "/images/products/product/stickers-800x600.webp",
-  "postcards":           "/images/products/product/postcards-800x600.webp",
-  "brochures":           "/images/products/product/brochures-800x600.webp",
-  "photo-posters":       "/images/products/product/photo-posters-800x600.webp",
-  "magnet-calendars":    "/images/products/product/magnet-calendars-800x600.webp",
-  "coil-bound-booklets": "/images/products/product/coil-bound-booklet-hero-800x600.webp",
-};
+import { PRODUCT_IMAGES } from "@/lib/data/productImages";
+import { NotifyMeForm } from "@/components/product/NotifyMeForm";
 
 
 interface Props {
@@ -162,7 +143,7 @@ export default async function ProductPage({ params }: Props) {
 
       <main id="main-content" className="max-w-6xl mx-auto px-6 py-10">
         {/* Breadcrumb */}
-        <nav className="text-sm text-gray-400 mb-8 flex items-center gap-2">
+        <nav aria-label="Breadcrumb" className="text-sm text-gray-400 mb-8 flex items-center gap-2">
           <Link href="/" className="hover:text-[#1c1712] transition-colors">Home</Link>
           <span>›</span>
           <Link href="/products" className="hover:text-[#1c1712] transition-colors">Products</Link>
@@ -179,7 +160,8 @@ export default async function ProductPage({ params }: Props) {
               </span>
               <h2 className="text-2xl font-bold text-[#1c1712] mb-3">{product.name}</h2>
               <p className="text-gray-600 max-w-lg mx-auto mb-6">{product.description}</p>
-              <p className="text-sm text-gray-400">Pricing and online ordering coming soon. Call <a href="tel:+13069548688" className="text-[#16C2F3] hover:underline">(306) 954-8688</a> to inquire.</p>
+              <p className="text-sm text-gray-400 mb-6">Pricing and online ordering coming soon. Call <a href="tel:+13069548688" className="text-[#16C2F3] hover:underline">(306) 954-8688</a> to inquire.</p>
+              <NotifyMeForm productName={product.name} productSlug={slug} />
             </div>
           ) : (
             <ProductPageClient product={product} />
@@ -202,10 +184,10 @@ export default async function ProductPage({ params }: Props) {
                   href={`/products/${r.slug}`}
                   className="group border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl hover:border-transparent hover:ring-1 hover:ring-[#16C2F3]/30 transition-all duration-200"
                 >
-                  {PRODUCT_IMAGE_MAP[r.slug] && (
+                  {PRODUCT_IMAGES[r.slug] && (
                     <div className="relative h-28 w-full">
                       <Image
-                        src={PRODUCT_IMAGE_MAP[r.slug]}
+                        src={PRODUCT_IMAGES[r.slug]}
                         alt={`${r.name} — printed in Saskatoon by True Color Display Printing`}
                         fill
                         className="object-cover"

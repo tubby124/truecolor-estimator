@@ -55,7 +55,7 @@ export function QuotesList({ quoteRequests, quotesLoading }: QuotesListProps) {
                       ? "bg-green-100 text-green-700"
                       : "bg-amber-100 text-amber-700"
                   }`}>
-                    {q.replied_at ? "Replied" : "Pending"}
+                    {q.replied_at ? "Quoted" : "Pending Review"}
                   </span>
                 </div>
               </div>

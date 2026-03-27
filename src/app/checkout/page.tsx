@@ -123,6 +123,7 @@ export default function CheckoutPage() {
   const [artworkFiles, setArtworkFiles] = useState<File[]>([]);
   const artworkInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState("");
+  const [uploadedCount, setUploadedCount] = useState(0);
 
   // Rush + payment state
   const [isRush, setIsRush] = useState(false);
@@ -337,6 +338,7 @@ export default function CheckoutPage() {
       // Upload artwork files one-by-one via server-side API (bypasses storage RLS)
       const filePaths: string[] = [];
       if (artworkFiles.length > 0) {
+        setUploadedCount(0);
         for (let i = 0; i < artworkFiles.length; i++) {
           setUploadProgress(`Uploading file ${i + 1} of ${artworkFiles.length}…`);
           try {
@@ -346,6 +348,7 @@ export default function CheckoutPage() {
             if (uploadRes.ok) {
               const { path } = (await uploadRes.json()) as { path: string };
               filePaths.push(path);
+              setUploadedCount((n) => n + 1);
             } else {
               const { error: uploadErr } = (await uploadRes.json()) as { error?: string };
               console.warn("[checkout] upload failed:", uploadErr);
@@ -875,9 +878,20 @@ export default function CheckoutPage() {
               )}
             </section>
 
-            {/* Upload progress */}
+            {/* Upload progress / confirmation */}
             {uploadProgress && (
-              <p className="text-sm text-[#16C2F3] font-medium animate-pulse">{uploadProgress}</p>
+              <div className="flex items-center gap-2 text-sm text-[#16C2F3] font-medium">
+                <svg className="w-4 h-4 animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                {uploadProgress}
+              </div>
+            )}
+            {!uploadProgress && uploadedCount > 0 && (
+              <p className="text-sm text-green-600 font-medium">
+                ✓ {uploadedCount === 1 ? "File uploaded" : `${uploadedCount} files uploaded`}
+              </p>
             )}
 
             {/* Error */}
@@ -1022,13 +1036,13 @@ export default function CheckoutPage() {
                           </div>
                         )}
                         {couponError && (
-                          <p className="text-xs text-red-500 mt-1.5">{couponError}</p>
+                          <p className="text-xs text-red-500 mt-1.5">✗ {couponError}</p>
                         )}
                       </div>
                     ) : (
                       <div className="flex items-center justify-between bg-green-50 border border-green-100 rounded-lg px-3 py-2">
                         <div>
-                          <p className="text-xs font-semibold text-green-700">{appliedDiscount.code} applied</p>
+                          <p className="text-xs font-semibold text-green-700">✓ {appliedDiscount.code} applied — you saved ${discount.toFixed(2)}</p>
                           <p className="text-xs text-green-600">{appliedDiscount.description}</p>
                         </div>
                         <button
