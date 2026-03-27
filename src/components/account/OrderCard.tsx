@@ -216,7 +216,9 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
                         {sizeLabel && (
                           <>{sizeLabel} &middot; </>
                         )}
-                        {item.sides === 2
+                        {item.category === "BOOKLET"
+                          ? "~80 pages"
+                          : item.sides === 2
                           ? "Double-sided"
                           : "Single-sided"}{" "}
                         &middot; Qty {item.qty}

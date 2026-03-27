@@ -202,7 +202,7 @@ export function CustomerProof({
             materialLabel,
             isSqft && widthIn > 0 && heightIn > 0 ? `${fmt(widthFt)}×${fmt(heightFt)} ft` : null,
             qty > 1 ? `×${qty.toLocaleString()}` : "1 unit",
-            sides === 2 ? "2-sided" : "1-sided",
+            category !== "BOOKLET" ? (sides === 2 ? "2-sided" : "1-sided") : null,
           ].filter(Boolean).join(" · ")}
         </p>
       </div>

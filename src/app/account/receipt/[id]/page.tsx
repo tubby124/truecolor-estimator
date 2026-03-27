@@ -224,7 +224,7 @@ export default function ReceiptPage({
             <tbody className="divide-y divide-gray-50">
               {order.order_items.map((item) => {
                 const sizeLabel = item.width_in && item.height_in ? ` — ${item.width_in}×${item.height_in}"` : "";
-                const sidesLabel = item.sides === 2 ? " · 2-sided" : "";
+                const sidesLabel = item.category !== "BOOKLET" && item.sides === 2 ? " · 2-sided" : "";
                 return (
                   <tr key={item.id}>
                     <td className="py-3 pr-4 text-[#1c1712]">

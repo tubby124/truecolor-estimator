@@ -202,7 +202,7 @@ export function AccountClientPage() {
           item.width_in && item.height_in
             ? `${item.width_in}\u00d7${item.height_in}" \u2014 `
             : ""
-        }${item.sides === 2 ? "Double-sided" : "Single-sided"} \u00d7 ${item.qty}`,
+        }${item.category === "BOOKLET" ? "~80 pages" : item.sides === 2 ? "Double-sided" : "Single-sided"} \u00d7 ${item.qty}`,
         config: {
           category: item.category,
           material_code: item.material_code ?? undefined,

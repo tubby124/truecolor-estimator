@@ -123,7 +123,7 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
                   item.width_in && item.height_in
                     ? ` — ${item.width_in}×${item.height_in}"`
                     : "";
-                const sidesLabel = item.sides === 2 ? " · 2-sided" : "";
+                const sidesLabel = item.category !== "BOOKLET" && item.sides === 2 ? " · 2-sided" : "";
                 return (
                   <tr key={item.id}>
                     <td className="py-2.5 pr-2 text-[#1c1712]">

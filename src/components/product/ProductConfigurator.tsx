@@ -238,7 +238,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       designStatus,
       materialCode: effectiveMaterialCode ?? "",
       sizeLabel: isCustomFlexSize ? `${customFlexW}″×${customFlexH}″` : isCustom ? `${customW}″×${customH}″` : selectedSize.label,
-      sidesLabel: sides === 1 ? "Single-sided" : "Double-sided",
+      sidesLabel: product.category === "BOOKLET" ? "~80 pages" : sides === 1 ? "Single-sided" : "Double-sided",
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveWidth, effectiveHeight, effectiveQty, sides, addonQtys, designStatus, selectedTier, isCustom, customW, customH, selectedSize.label]);
