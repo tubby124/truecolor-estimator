@@ -106,10 +106,25 @@ export default function CallbackPage() {
     }
 
     supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
-      .then(({ error: err }) => {
+      .then(({ data, error: err }) => {
         if (err) {
           setError("Link expired or already used — please request a new one.");
-        } else if (hashType === "recovery") {
+          return;
+        }
+        // Fire signup-notify for new OAuth users (implicit flow)
+        const user = data?.user;
+        if (user && hashType !== "recovery") {
+          const ageMs = Date.now() - new Date(user.created_at).getTime();
+          if (ageMs < 120_000) {
+            const name = (user.user_metadata?.full_name ?? user.user_metadata?.name ?? "") as string;
+            fetch("/api/auth/signup-notify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: user.email, name: name || undefined }),
+            }).catch(() => {});
+          }
+        }
+        if (hashType === "recovery") {
           window.location.replace("/account?reset=1");
         } else {
           window.location.replace("/account");
