@@ -36,8 +36,14 @@ export default function CallbackPage() {
     const code = searchParams.get("code");
     if (code) {
       const type = searchParams.get("type");
-      supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
+      supabase.auth.exchangeCodeForSession(code).then(async ({ error: err }) => {
         if (err) {
+          // Code may already be consumed (PKCE race) — check if session exists anyway
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            window.location.replace(type === "recovery" ? "/account?reset=1" : "/account");
+            return;
+          }
           setError("Link expired or already used — please request a new one.");
         } else if (type === "recovery") {
           window.location.replace("/account?reset=1");
