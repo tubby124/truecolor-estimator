@@ -51,7 +51,7 @@ export default function CallbackPage() {
         const user = data?.session?.user;
         if (user && !type) {
           const ageMs = Date.now() - new Date(user.created_at).getTime();
-          if (ageMs < 30_000) {
+          if (ageMs < 120_000) {
             const name = (user.user_metadata?.full_name ?? user.user_metadata?.name ?? "") as string;
             fetch("/api/auth/signup-notify", {
               method: "POST",
