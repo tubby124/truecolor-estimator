@@ -26,6 +26,7 @@ interface OrderItem {
   width_in: number | null;
   height_in: number | null;
   sides: number;
+  category: string;
   line_total: number;
 }
 

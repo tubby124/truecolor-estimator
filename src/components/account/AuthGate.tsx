@@ -16,6 +16,7 @@ interface AuthGateProps {
 export function AuthGate({ onSessionCreated }: AuthGateProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState("");
@@ -87,14 +88,17 @@ export function AuthGate({ onSessionCreated }: AuthGateProps) {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
-        options: { emailRedirectTo: `${SITE_URL}/account/callback` },
+        options: {
+          emailRedirectTo: `${SITE_URL}/account/callback`,
+          data: name.trim() ? { name: name.trim() } : undefined,
+        },
       });
       if (error) throw error;
       // Notify admin of new account (fire-and-forget — non-blocking, non-fatal)
       fetch("/api/auth/signup-notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), name: name.trim() || undefined }),
       }).catch(() => {});
       if (data.session) {
         onSessionCreated(data.session as SessionData);
@@ -160,6 +164,22 @@ export function AuthGate({ onSessionCreated }: AuthGateProps) {
                 <span className="text-xs text-gray-400">or</span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
+              {isSignUp && (
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1" htmlFor="pw-name">
+                    Your name <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    id="pw-name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3]"
+                    placeholder="First and last name"
+                    autoComplete="name"
+                  />
+                </div>
+              )}
               <div>
                 <label
                   className="block text-xs text-gray-500 mb-1"

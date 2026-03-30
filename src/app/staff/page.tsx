@@ -467,6 +467,7 @@ function categoryDisplayName(cat: Category): string {
     DESIGN: "Design Service",
     INSTALLATION: "Installation",
     SERVICE: "Service",
+    BOOKLET: "Booklet",
   };
   return map[cat] ?? cat;
 }

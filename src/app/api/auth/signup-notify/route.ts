@@ -2,13 +2,16 @@
  * POST /api/auth/signup-notify
  *
  * Called client-side after a successful supabase.auth.signUp().
- * Sends an admin notification email so the owner knows a new account was created.
+ * 1. Sends admin notification email (owner knows a new account was created)
+ * 2. Sends welcome email to the new customer
+ * 3. Creates/updates Brevo contact (list 25 — customers)
  *
  * Fire-and-forget from the client — failure here does NOT affect the signup flow.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email/smtp";
+import { sendSignupWelcomeEmail } from "@/lib/email/signupWelcome";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
@@ -24,6 +27,7 @@ export async function POST(req: NextRequest) {
     if (!email || email.length > 254) {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
+    const name = typeof body?.name === "string" ? body.name.trim().slice(0, 100) : "";
 
     const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
     if (!adminEmail) {
@@ -112,8 +116,40 @@ export async function POST(req: NextRequest) {
     ].join("\n");
 
     await sendEmail({ from, to: adminEmail, subject, html, text });
+    console.log(`[signup-notify] admin email sent → ${adminEmail} | new account: ${email}`);
 
-    console.log(`[signup-notify] sent → ${adminEmail} | new account: ${email}`);
+    // ── Welcome email to new customer (non-fatal) ──────────────────────────
+    sendSignupWelcomeEmail({ email, name: name || undefined }).catch((err) => {
+      console.error("[signup-notify] welcome email failed (non-fatal):", err instanceof Error ? err.message : err);
+    });
+
+    // ── Add to Brevo contacts list 25 (customers) (non-fatal) ─────────────
+    const brevoApiKey = process.env.BREVO_API_KEY;
+    if (brevoApiKey) {
+      const nameParts = name ? name.split(/\s+/) : [];
+      const brevoContact: Record<string, unknown> = {
+        email,
+        listIds: [25],
+        updateEnabled: true,
+        attributes: {
+          CUSTOMER_SOURCE: "self_signup",
+          ACCOUNT_STATUS: "created",
+          ...(nameParts[0] ? { FIRSTNAME: nameParts[0] } : {}),
+          ...(nameParts[1] ? { LASTNAME: nameParts.slice(1).join(" ") } : {}),
+        },
+      };
+      fetch("https://api.brevo.com/v3/contacts", {
+        method: "POST",
+        headers: { "api-key": brevoApiKey, "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(brevoContact),
+      }).then((r) => {
+        if (!r.ok) r.text().then((t) => console.error("[signup-notify] brevo contact failed:", t));
+        else console.log(`[signup-notify] brevo contact created → ${email}`);
+      }).catch((err) => {
+        console.error("[signup-notify] brevo contact error (non-fatal):", err instanceof Error ? err.message : err);
+      });
+    }
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     // Non-fatal — log but don't expose error to client

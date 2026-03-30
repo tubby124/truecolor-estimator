@@ -18,7 +18,8 @@ export type Category =
   | "BROCHURE"
   | "DESIGN"
   | "INSTALLATION"
-  | "SERVICE";
+  | "SERVICE"
+  | "BOOKLET";
 
 export type DesignStatus =
   | "PRINT_READY"

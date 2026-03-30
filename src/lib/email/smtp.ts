@@ -112,4 +112,29 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
     const errText = await res.text().catch(() => "");
     throw new Error(`Brevo API error ${res.status}: ${errText}`);
   }
+
+  // Log to email_log (non-fatal — never block email delivery on a DB write)
+  const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SECRET_KEY;
+  if (supabaseUrl && supabaseKey) {
+    const toList = Array.isArray(options.to) ? options.to : [options.to];
+    const rows = toList.map((addr) => ({
+      to_address: parseAddress(addr).email,
+      email_type: options.subject,
+      subject: options.subject,
+      status: "sent",
+    }));
+    fetch(`${supabaseUrl}/rest/v1/email_log`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(rows),
+    }).catch((err) => {
+      console.error("[smtp] email_log write failed (non-fatal):", err instanceof Error ? err.message : err);
+    });
+  }
 }
