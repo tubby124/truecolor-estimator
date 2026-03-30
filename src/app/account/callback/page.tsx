@@ -36,7 +36,7 @@ export default function CallbackPage() {
     const code = searchParams.get("code");
     if (code) {
       const type = searchParams.get("type");
-      supabase.auth.exchangeCodeForSession(code).then(async ({ error: err }) => {
+      supabase.auth.exchangeCodeForSession(code).then(async ({ data, error: err }) => {
         if (err) {
           // Code may already be consumed (PKCE race) — check if session exists anyway
           const { data: { session } } = await supabase.auth.getSession();
@@ -45,7 +45,22 @@ export default function CallbackPage() {
             return;
           }
           setError("Link expired or already used — please request a new one.");
-        } else if (type === "recovery") {
+          return;
+        }
+        // Fire signup-notify for brand-new Google/OAuth users (created within last 30s)
+        const user = data?.session?.user;
+        if (user && !type) {
+          const ageMs = Date.now() - new Date(user.created_at).getTime();
+          if (ageMs < 30_000) {
+            const name = (user.user_metadata?.full_name ?? user.user_metadata?.name ?? "") as string;
+            fetch("/api/auth/signup-notify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: user.email, name: name || undefined }),
+            }).catch(() => {});
+          }
+        }
+        if (type === "recovery") {
           window.location.replace("/account?reset=1");
         } else if (type === "signup") {
           window.location.replace("/account?welcome=1");
