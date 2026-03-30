@@ -42,7 +42,7 @@ export async function sendSignupWelcomeEmail(opts: {
 
         <!-- HERO -->
         <tr>
-          <td style="background:#ffffff;padding:36px 32px 24px;text-align:center;border-top:3px solid #16C2F3;">
+          <td style="background:#ffffff;padding:36px 32px 20px;text-align:center;border-top:3px solid #16C2F3;">
             <div style="display:inline-block;width:50px;height:50px;background:#16C2F3;border-radius:50%;line-height:50px;text-align:center;margin-bottom:16px;">
               <span style="font-size:22px;color:#ffffff;line-height:50px;display:inline-block;">&#10003;</span>
             </div>
@@ -59,16 +59,39 @@ export async function sendSignupWelcomeEmail(opts: {
         <tr>
           <td style="background:#ffffff;padding:8px 32px 32px;">
 
-            <!-- CTA -->
-            <div style="background:#f0fbff;border:1px solid #bae6fd;border-radius:10px;padding:20px 24px;margin-bottom:24px;text-align:center;">
-              <p style="margin:0 0 14px;font-size:13px;color:#0c4a6e;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                Ready to print something? Get an instant quote &mdash; prices update live as you choose size and quantity.
+            <!-- $10 OFF WELCOME OFFER -->
+            <div style="background:linear-gradient(135deg,#0ea5e9 0%,#16C2F3 100%);border-radius:12px;padding:20px 24px;margin-bottom:24px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:.1em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                Welcome offer — first order
               </p>
-              <a href="${siteUrl}/quote"
-                style="display:inline-block;background:#16C2F3;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                Get a Quote &rarr;
-              </a>
+              <p style="margin:0 0 10px;font-size:28px;font-weight:800;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                $10 OFF
+              </p>
+              <div style="display:inline-block;background:rgba(255,255,255,0.2);border:2px dashed rgba(255,255,255,0.6);border-radius:8px;padding:8px 20px;margin-bottom:12px;">
+                <span style="font-size:18px;font-weight:800;color:#ffffff;letter-spacing:.12em;font-family:'Courier New',Courier,monospace;">WELCOME10</span>
+              </div>
+              <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.85);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                Enter at checkout — no minimum order required
+              </p>
             </div>
+
+            <!-- DUAL CTA -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr>
+                <td width="48%" style="padding-right:8px;">
+                  <a href="${siteUrl}/products"
+                    style="display:block;background:#1c1712;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;padding:13px 16px;border-radius:8px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                    Browse Products &rarr;
+                  </a>
+                </td>
+                <td width="48%" style="padding-left:8px;">
+                  <a href="${siteUrl}/quote"
+                    style="display:block;background:#16C2F3;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;padding:13px 16px;border-radius:8px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                    Get a Quote &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>
 
             <!-- What we print -->
             <div style="background:#faf7f4;border:1px solid #e6ddd5;border-radius:10px;padding:16px 20px;margin-bottom:24px;">
@@ -120,6 +143,12 @@ export async function sendSignupWelcomeEmail(opts: {
     "",
     "Your True Color Display Printing account is set up and ready to go.",
     "",
+    "── WELCOME OFFER ──────────────────────────────",
+    "$10 OFF your first order — use code: WELCOME10",
+    "Enter at checkout, no minimum required.",
+    "────────────────────────────────────────────────",
+    "",
+    `Browse all products: ${siteUrl}/products`,
     `Get an instant quote: ${siteUrl}/quote`,
     "",
     "What we print in Saskatoon:",
