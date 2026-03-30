@@ -164,6 +164,242 @@ function ReplyModal({
   );
 }
 
+// ─── SendEmailModal ────────────────────────────────────────────────────────────
+
+function SendEmailModal({
+  customerEmail,
+  defaultSubject,
+  defaultMessage,
+  onClose,
+}: {
+  customerEmail: string;
+  defaultSubject?: string;
+  defaultMessage?: string;
+  onClose: () => void;
+}) {
+  const [subject, setSubject] = useState(defaultSubject ?? "");
+  const [message, setMessage] = useState(defaultMessage ?? "");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function send() {
+    if (!subject.trim() || !message.trim()) return;
+    setSending(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/staff/send-customer-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: customerEmail, subject, message }),
+      });
+      if (!res.ok) {
+        const d = await res.json() as { error?: string };
+        throw new Error(d.error ?? "Send failed");
+      }
+      setSent(true);
+      setTimeout(onClose, 1200);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Send failed");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-[#1c1712] text-sm">Send Email</p>
+            <p className="text-xs text-gray-400 mt-0.5">To: {customerEmail}</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        </div>
+        <div className="px-6 py-4 flex-1 overflow-y-auto space-y-3">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Subject</label>
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:border-transparent"
+              placeholder="Email subject…"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Message</label>
+            <textarea
+              rows={10}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 font-mono focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:border-transparent resize-y"
+              placeholder="Write your message…"
+            />
+          </div>
+        </div>
+        {error && <p className="px-6 pb-2 text-sm text-red-600">{error}</p>}
+        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50">
+            Cancel
+          </button>
+          <button
+            onClick={() => void send()}
+            disabled={sending || sent || !subject.trim() || !message.trim()}
+            className="inline-flex items-center gap-2 bg-[#16C2F3] hover:bg-[#0fa8d6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-colors"
+          >
+            {sent ? "✓ Sent!" : sending ? "Sending…" : "Send Email"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SendDiscountModal ─────────────────────────────────────────────────────────
+
+interface DiscountCode {
+  code: string;
+  discount_amount: number;
+  description: string | null;
+  is_active: boolean;
+}
+
+function SendDiscountModal({
+  customerEmail,
+  customerName,
+  onClose,
+}: {
+  customerEmail: string;
+  customerName: string | null;
+  onClose: () => void;
+}) {
+  const [codes, setCodes] = useState<DiscountCode[]>([]);
+  const [loadingCodes, setLoadingCodes] = useState(true);
+  const [selectedCode, setSelectedCode] = useState<string>("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useState(() => {
+    fetch("/api/staff/coupons")
+      .then((r) => r.json() as Promise<{ codes?: DiscountCode[] }>)
+      .then((d) => {
+        const active = (d.codes ?? []).filter((c) => c.is_active);
+        setCodes(active);
+        if (active.length > 0) setSelectedCode(active[0].code);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingCodes(false));
+  });
+
+  const firstName = customerName?.trim().split(/\s+/)[0] ?? null;
+  const greeting = firstName ? `Hi ${firstName},` : "Hi there,";
+
+  const selected = codes.find((c) => c.code === selectedCode);
+  const discountMessage = selected
+    ? `${greeting}\n\nHere's a discount code for your next order at True Color Display Printing:\n\n    Code: ${selected.code}\n    Saves you: $${selected.discount_amount} CAD\n\nEnter the code at checkout — no minimum order required.\n\nIf you have any questions, give us a call at (306) 954-8688 or email info@true-color.ca.\n\n— True Color Display Printing\n216 33rd St W, Saskatoon`
+    : "";
+
+  async function send() {
+    if (!selected) return;
+    setSending(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/staff/send-customer-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: customerEmail,
+          subject: `$${selected.discount_amount} off your next order — True Color Display Printing`,
+          message: discountMessage,
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json() as { error?: string };
+        throw new Error(d.error ?? "Send failed");
+      }
+      setSent(true);
+      setTimeout(onClose, 1200);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Send failed");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-[#1c1712] text-sm">Send Discount Code</p>
+            <p className="text-xs text-gray-400 mt-0.5">To: {customerEmail}</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        </div>
+        <div className="px-6 py-4 space-y-4">
+          {loadingCodes ? (
+            <p className="text-sm text-gray-400">Loading codes…</p>
+          ) : codes.length === 0 ? (
+            <p className="text-sm text-gray-400">No active discount codes found.</p>
+          ) : (
+            <>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-2">Select code to send</label>
+                <div className="space-y-2">
+                  {codes.map((c) => (
+                    <label key={c.code} className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors ${selectedCode === c.code ? "border-[#16C2F3] bg-blue-50" : "border-gray-200 hover:border-gray-300"}`}>
+                      <input
+                        type="radio"
+                        name="discount-code"
+                        value={c.code}
+                        checked={selectedCode === c.code}
+                        onChange={() => setSelectedCode(c.code)}
+                        className="sr-only"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-[#1c1712] font-mono">{c.code}</span>
+                          <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                            ${c.discount_amount} OFF
+                          </span>
+                        </div>
+                        {c.description && <p className="text-xs text-gray-400 mt-0.5 truncate">{c.description}</p>}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {discountMessage && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Email preview</p>
+                  <pre className="text-xs text-gray-600 bg-gray-50 rounded-lg px-4 py-3 whitespace-pre-wrap leading-relaxed font-mono border border-gray-200 max-h-40 overflow-y-auto">
+                    {discountMessage}
+                  </pre>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        {error && <p className="px-6 pb-2 text-sm text-red-600">{error}</p>}
+        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50">
+            Cancel
+          </button>
+          <button
+            onClick={() => void send()}
+            disabled={sending || sent || !selected || codes.length === 0}
+            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-colors"
+          >
+            {sent ? "✓ Sent!" : sending ? "Sending…" : "Send Code"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── CustomerDetail ────────────────────────────────────────────────────────────
 
 function CustomerDetail({ customer }: { customer: CustomerRow }) {
@@ -171,6 +407,8 @@ function CustomerDetail({ customer }: { customer: CustomerRow }) {
   const [loading, setLoading] = useState(false);
   const [replyTarget, setReplyTarget] = useState<CustomerQuote | null>(null);
   const [localReplied, setLocalReplied] = useState<Record<string, string>>({});
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
   const fetched = useRef(false);
 
   if (!fetched.current) {
@@ -202,6 +440,36 @@ function CustomerDetail({ customer }: { customer: CustomerRow }) {
           <span>
             {customer.order_count} order{customer.order_count !== 1 ? "s" : ""} · {fmtCad(customer.total_spend)} total
           </span>
+        )}
+        {customer.auth_provider && (
+          <span className="text-gray-400">via {customer.auth_provider}</span>
+        )}
+        {!customer.email_confirmed && (
+          <span className="text-amber-500 font-semibold">⚠ Email not confirmed</span>
+        )}
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex flex-wrap gap-2 mb-5">
+        <button
+          onClick={() => setShowEmailModal(true)}
+          className="inline-flex items-center gap-1.5 bg-[#1c1712] hover:bg-[#2d2419] text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors"
+        >
+          ✉ Send Email
+        </button>
+        <button
+          onClick={() => setShowDiscountModal(true)}
+          className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors"
+        >
+          % Send Discount
+        </button>
+        {customer.order_count > 0 && (
+          <a
+            href={`/staff/orders?search=${encodeURIComponent(customer.email)}`}
+            className="inline-flex items-center gap-1.5 bg-[#16C2F3] hover:bg-[#0fa8d6] text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors"
+          >
+            View Orders
+          </a>
         )}
       </div>
 
@@ -297,6 +565,19 @@ function CustomerDetail({ customer }: { customer: CustomerRow }) {
           onSent={handleReplySent}
         />
       )}
+      {showEmailModal && (
+        <SendEmailModal
+          customerEmail={customer.email}
+          onClose={() => setShowEmailModal(false)}
+        />
+      )}
+      {showDiscountModal && (
+        <SendDiscountModal
+          customerEmail={customer.email}
+          customerName={customer.name}
+          onClose={() => setShowDiscountModal(false)}
+        />
+      )}
     </div>
   );
 }
@@ -330,12 +611,14 @@ export function CustomersTable({ customers }: { customers: CustomerRow[] }) {
   const totalOrders = customers.reduce((n, c) => n + c.order_count, 0);
   const totalQuotes = customers.reduce((n, c) => n + c.quote_count, 0);
   const totalUnreplied = customers.reduce((n, c) => n + c.unreplied_quotes, 0);
+  const newAccounts = customers.filter((c) => c.account_only).length;
 
   return (
     <div>
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <StatCard label="Customers" value={customers.length} />
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+        <StatCard label="Accounts" value={customers.length} />
+        <StatCard label="New (no orders)" value={newAccounts} accent={newAccounts > 0 ? "purple" : undefined} />
         <StatCard label="Total Orders" value={totalOrders} />
         <StatCard label="Quotes" value={totalQuotes} />
         <StatCard label="Unreplied" value={totalUnreplied} accent={totalUnreplied > 0 ? "yellow" : undefined} />
@@ -396,6 +679,11 @@ export function CustomersTable({ customers }: { customers: CustomerRow[] }) {
                         </span>
                         {customer.company && (
                           <span className="text-xs text-gray-400 truncate">{customer.company}</span>
+                        )}
+                        {customer.account_only && (
+                          <span className="bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                            New account
+                          </span>
                         )}
                         {customer.unreplied_quotes > 0 && (
                           <span className="bg-amber-400 text-[#1c1712] text-xs font-bold px-2 py-0.5 rounded-full">
@@ -462,12 +750,12 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  accent?: "yellow";
+  accent?: "yellow" | "purple";
 }) {
   return (
     <div className="bg-white border border-gray-100 rounded-xl p-4">
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-      <p className={`text-2xl font-bold tabular-nums ${accent === "yellow" ? "text-amber-600" : "text-[#1c1712]"}`}>
+      <p className={`text-2xl font-bold tabular-nums ${accent === "yellow" ? "text-amber-600" : accent === "purple" ? "text-purple-600" : "text-[#1c1712]"}`}>
         {value}
       </p>
     </div>

@@ -23,6 +23,11 @@ export interface CustomerRow {
   last_order_date: string | null;
   quote_count: number;
   unreplied_quotes: number;
+  /** True = auth account exists but no order has been placed yet */
+  account_only: boolean;
+  /** OAuth provider, e.g. "google", "email" */
+  auth_provider: string | null;
+  email_confirmed: boolean;
 }
 
 export default async function StaffCustomersPage() {
@@ -115,38 +120,34 @@ export default async function StaffCustomersPage() {
 async function fetchCustomers(): Promise<CustomerRow[]> {
   const supabase = createServiceClient();
 
-  // Fetch customers with their orders nested
-  const { data: rawCustomers, error } = await supabase
-    .from("customers")
-    .select(`
-      id, name, email, company, phone, created_at,
-      orders ( id, total, created_at )
-    `)
-    .order("created_at", { ascending: false })
-    .limit(500);
+  // Fetch customers, auth users, and quote counts in parallel
+  const [customersResult, authResult, quoteRowsResult] = await Promise.all([
+    supabase
+      .from("customers")
+      .select(`id, name, email, company, phone, created_at, orders ( id, total, created_at )`)
+      .order("created_at", { ascending: false })
+      .limit(500),
+    supabase.auth.admin.listUsers({ perPage: 1000 }),
+    supabase.from("quote_requests").select("email, replied_at"),
+  ]);
 
-  if (error) throw new Error(error.message);
-
-  // Fetch all quote request counts by email
-  const { data: quoteRows } = await supabase
-    .from("quote_requests")
-    .select("email, replied_at");
+  if (customersResult.error) throw new Error(customersResult.error.message);
 
   const quoteCounts: Record<string, { total: number; unreplied: number }> = {};
-  for (const q of quoteRows ?? []) {
+  for (const q of quoteRowsResult.data ?? []) {
     const e = (q.email as string)?.toLowerCase() ?? "";
     if (!quoteCounts[e]) quoteCounts[e] = { total: 0, unreplied: 0 };
     quoteCounts[e].total++;
     if (!q.replied_at) quoteCounts[e].unreplied++;
   }
 
-  return (rawCustomers ?? []).map((c) => {
+  // Build customer rows from the `customers` table
+  const customerEmailSet = new Set<string>();
+  const rows: CustomerRow[] = (customersResult.data ?? []).map((c) => {
     const orders = (c.orders ?? []) as Array<{ id: string; total: number | null; created_at: string }>;
     const emailKey = (c.email as string)?.toLowerCase() ?? "";
-    const sortedOrders = [...orders].sort((a, b) =>
-      b.created_at.localeCompare(a.created_at)
-    );
-
+    customerEmailSet.add(emailKey);
+    const sortedOrders = [...orders].sort((a, b) => b.created_at.localeCompare(a.created_at));
     return {
       id: c.id as string,
       name: (c.name as string | null) ?? null,
@@ -159,6 +160,42 @@ async function fetchCustomers(): Promise<CustomerRow[]> {
       last_order_date: sortedOrders[0]?.created_at ?? null,
       quote_count: quoteCounts[emailKey]?.total ?? 0,
       unreplied_quotes: quoteCounts[emailKey]?.unreplied ?? 0,
+      account_only: false,
+      auth_provider: null,
+      email_confirmed: true,
     };
   });
+
+  // Add auth users who don't have a customer record (signed up but no order yet)
+  const authUsers = authResult.data?.users ?? [];
+  for (const u of authUsers) {
+    if (!u.email) continue;
+    const emailKey = u.email.toLowerCase();
+    if (customerEmailSet.has(emailKey)) continue;
+    const provider = u.app_metadata?.provider as string | undefined ?? null;
+    rows.push({
+      id: u.id,
+      name: (u.user_metadata?.full_name ?? u.user_metadata?.name ?? null) as string | null,
+      email: u.email,
+      company: null,
+      phone: null,
+      created_at: u.created_at,
+      order_count: 0,
+      total_spend: 0,
+      last_order_date: null,
+      quote_count: quoteCounts[emailKey]?.total ?? 0,
+      unreplied_quotes: quoteCounts[emailKey]?.unreplied ?? 0,
+      account_only: true,
+      auth_provider: provider,
+      email_confirmed: !!u.email_confirmed_at,
+    });
+  }
+
+  // Sort: unreplied first, then most recent
+  rows.sort((a, b) => {
+    if (b.unreplied_quotes !== a.unreplied_quotes) return b.unreplied_quotes - a.unreplied_quotes;
+    return b.created_at.localeCompare(a.created_at);
+  });
+
+  return rows;
 }
