@@ -29,14 +29,46 @@ export async function POST(req: NextRequest) {
     }
     const name = typeof body?.name === "string" ? body.name.trim().slice(0, 100) : "";
 
-    const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
-    if (!adminEmail) {
-      // No admin email configured — skip silently (not an error)
-      return NextResponse.json({ ok: true });
-    }
-
     const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+
+    // ── Welcome email to new customer (non-fatal) ──────────────────────────
+    sendSignupWelcomeEmail({ email, name: name || undefined }).catch((err) => {
+      console.error("[signup-notify] welcome email failed (non-fatal):", err instanceof Error ? err.message : err);
+    });
+
+    // ── Add to Brevo contacts list 25 (customers) (non-fatal) ─────────────
+    const brevoApiKey = process.env.BREVO_API_KEY;
+    if (brevoApiKey) {
+      const nameParts = name ? name.split(/\s+/) : [];
+      const brevoContact: Record<string, unknown> = {
+        email,
+        listIds: [25],
+        updateEnabled: true,
+        attributes: {
+          CUSTOMER_SOURCE: "self_signup",
+          ACCOUNT_STATUS: "created",
+          ...(nameParts[0] ? { FIRSTNAME: nameParts[0] } : {}),
+          ...(nameParts[1] ? { LASTNAME: nameParts.slice(1).join(" ") } : {}),
+        },
+      };
+      fetch("https://api.brevo.com/v3/contacts", {
+        method: "POST",
+        headers: { "api-key": brevoApiKey, "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(brevoContact),
+      }).then((r) => {
+        if (!r.ok) r.text().then((t) => console.error("[signup-notify] brevo contact failed:", t));
+        else console.log(`[signup-notify] brevo contact created → ${email}`);
+      }).catch((err) => {
+        console.error("[signup-notify] brevo contact error (non-fatal):", err instanceof Error ? err.message : err);
+      });
+    }
+
+    const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
+    if (!adminEmail) {
+      // No admin email configured — skip admin notification silently
+      return NextResponse.json({ ok: true });
+    }
 
     const now = new Date().toLocaleString("en-CA", {
       timeZone: "America/Regina",
@@ -117,38 +149,6 @@ export async function POST(req: NextRequest) {
 
     await sendEmail({ from, to: adminEmail, subject, html, text });
     console.log(`[signup-notify] admin email sent → ${adminEmail} | new account: ${email}`);
-
-    // ── Welcome email to new customer (non-fatal) ──────────────────────────
-    sendSignupWelcomeEmail({ email, name: name || undefined }).catch((err) => {
-      console.error("[signup-notify] welcome email failed (non-fatal):", err instanceof Error ? err.message : err);
-    });
-
-    // ── Add to Brevo contacts list 25 (customers) (non-fatal) ─────────────
-    const brevoApiKey = process.env.BREVO_API_KEY;
-    if (brevoApiKey) {
-      const nameParts = name ? name.split(/\s+/) : [];
-      const brevoContact: Record<string, unknown> = {
-        email,
-        listIds: [25],
-        updateEnabled: true,
-        attributes: {
-          CUSTOMER_SOURCE: "self_signup",
-          ACCOUNT_STATUS: "created",
-          ...(nameParts[0] ? { FIRSTNAME: nameParts[0] } : {}),
-          ...(nameParts[1] ? { LASTNAME: nameParts.slice(1).join(" ") } : {}),
-        },
-      };
-      fetch("https://api.brevo.com/v3/contacts", {
-        method: "POST",
-        headers: { "api-key": brevoApiKey, "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(brevoContact),
-      }).then((r) => {
-        if (!r.ok) r.text().then((t) => console.error("[signup-notify] brevo contact failed:", t));
-        else console.log(`[signup-notify] brevo contact created → ${email}`);
-      }).catch((err) => {
-        console.error("[signup-notify] brevo contact error (non-fatal):", err instanceof Error ? err.message : err);
-      });
-    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
