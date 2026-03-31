@@ -106,6 +106,10 @@ export function OrdersTable({ initialOrders }: Props) {
   const [resendingPaymentId, setResendingPaymentId] = useState<string | null>(null);
   const [resendSuccessIds, setResendSuccessIds] = useState<Set<string>>(new Set());
 
+  // Confirm eTransfer — keyed by order id
+  const [confirmingEtransferId, setConfirmingEtransferId] = useState<string | null>(null);
+  const [confirmedEtransferIds, setConfirmedEtransferIds] = useState<Set<string>>(new Set());
+
   // ── Archive ────────────────────────────────────────────────────────────────────
   const [archiveLoading, setArchiveLoading] = useState<Set<string>>(new Set());
   const { toasts, showToast, dismissToast } = useToast();
@@ -344,6 +348,34 @@ export function OrdersTable({ initialOrders }: Props) {
     }
   }
 
+  // ── Confirm eTransfer ─────────────────────────────────────────────────────────
+
+  async function handleConfirmEtransfer(orderId: string, orderNumber: string) {
+    setConfirmingEtransferId(orderId);
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/confirm-etransfer`, { method: "POST" });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Confirmation failed");
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId
+            ? { ...o, status: "payment_received" as (typeof VALID_STATUSES)[number] }
+            : o
+        )
+      );
+      setConfirmedEtransferIds((prev) => new Set(prev).add(orderId));
+      showToast(`${orderNumber} — eTransfer confirmed, receipt sent`, "success");
+      setTimeout(
+        () => setConfirmedEtransferIds((prev) => { const s = new Set(prev); s.delete(orderId); return s; }),
+        10000
+      );
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to confirm — try again", "error");
+    } finally {
+      setConfirmingEtransferId(null);
+    }
+  }
+
   // ── Archive / Unarchive ────────────────────────────────────────────────────
 
   async function handleArchive(orderId: string, orderNumber: string, archive: boolean) {
@@ -507,6 +539,9 @@ export function OrdersTable({ initialOrders }: Props) {
                 sendingReceipt={sendingReceiptId === order.id}
                 receiptSent={receiptSentIds.has(order.id)}
                 onSendReceipt={() => handleSendReceipt(order.id, order.order_number, customer?.email ?? "")}
+                confirmingEtransfer={confirmingEtransferId === order.id}
+                etransferConfirmed={confirmedEtransferIds.has(order.id)}
+                onConfirmEtransfer={() => handleConfirmEtransfer(order.id, order.order_number)}
               />
             );
           })}

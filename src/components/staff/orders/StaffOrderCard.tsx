@@ -28,6 +28,9 @@ interface StaffOrderCardProps {
   sendingReceipt: boolean;
   receiptSent: boolean;
   onSendReceipt: () => void;
+  confirmingEtransfer: boolean;
+  etransferConfirmed: boolean;
+  onConfirmEtransfer: () => void;
 }
 
 export function StaffOrderCard({
@@ -44,9 +47,13 @@ export function StaffOrderCard({
   sendingReceipt,
   receiptSent,
   onSendReceipt,
+  confirmingEtransfer,
+  etransferConfirmed,
+  onConfirmEtransfer,
 }: StaffOrderCardProps) {
   const [overrideStatus, setOverrideStatus] = useState<string>(order.status);
   const [confirmingComplete, setConfirmingComplete] = useState(false);
+  const [showEtransferDialog, setShowEtransferDialog] = useState(false);
   const [staffNoteValue, setStaffNoteValue] = useState(order.staff_notes ?? "");
   const [savingNote, setSavingNote] = useState(false);
   const [savedNote, setSavedNote] = useState(false);
@@ -263,7 +270,7 @@ export function StaffOrderCard({
               {customer?.email}
               {customer?.phone ? ` · ${customer.phone}` : ""}
               {" · "}
-              {order.payment_method === "clover_card" ? "Card" : "e-Transfer"}
+              {order.payment_method === "clover_card" ? "Card" : order.payment_method === "wave" ? "Wave Invoice" : "e-Transfer"}
               {" · $"}
               {Number(order.total).toFixed(2)} CAD
               {" · "}
@@ -295,19 +302,43 @@ export function StaffOrderCard({
                     {isLoadingStatus ? "Sending…" : "Yes — sends review email"}
                   </button>
                 </>
+              ) : showEtransferDialog ? (
+                <>
+                  <button
+                    onClick={() => setShowEtransferDialog(false)}
+                    className="text-sm px-3 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => { onConfirmEtransfer(); setShowEtransferDialog(false); }}
+                    disabled={confirmingEtransfer}
+                    className="bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                  >
+                    {confirmingEtransfer ? "Confirming…" : "Yes — confirm received"}
+                  </button>
+                </>
               ) : (
                 <button
                   onClick={() => {
                     if (nextStatus === "complete") {
                       setConfirmingComplete(true);
+                    } else if (order.payment_method === "etransfer" && nextStatus === "payment_received") {
+                      setShowEtransferDialog(true);
                     } else {
                       onStatusUpdate(nextStatus);
                     }
                   }}
-                  disabled={isLoadingStatus}
+                  disabled={isLoadingStatus || etransferConfirmed}
                   className="bg-[#1c1712] hover:bg-black disabled:opacity-60 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                 >
-                  {isLoadingStatus ? "Updating…" : NEXT_LABEL[order.status]}
+                  {isLoadingStatus
+                    ? "Updating…"
+                    : etransferConfirmed
+                    ? "✓ Confirmed!"
+                    : order.payment_method === "etransfer" && nextStatus === "payment_received"
+                    ? "Confirm eTransfer"
+                    : NEXT_LABEL[order.status]}
                 </button>
               )
             )}
@@ -358,7 +389,7 @@ export function StaffOrderCard({
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Payment</p>
               <p className="text-sm text-gray-700">
-                {order.payment_method === "clover_card" ? "Credit card" : "Interac e-Transfer"}
+                {order.payment_method === "clover_card" ? "Credit card" : order.payment_method === "wave" ? "Wave Invoice" : "Interac e-Transfer"}
               </p>
             </div>
           </div>

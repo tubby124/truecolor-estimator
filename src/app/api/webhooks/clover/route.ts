@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
+import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 
 export async function POST(req: NextRequest) {
@@ -111,6 +112,43 @@ export async function POST(req: NextRequest) {
                     paymentMethod: "clover_card",
                   });
                   console.log(`[clover-webhook] payment confirmed email sent → ${customer.email}`);
+
+                  // Itemized receipt (non-fatal)
+                  try {
+                    const { data: fullOrder } = await supabase
+                      .from("orders")
+                      .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
+                      .eq("id", order.id)
+                      .single();
+                    if (fullOrder) {
+                      const receiptItems = Array.isArray(fullOrder.order_items) ? fullOrder.order_items : [];
+                      await sendPaymentReceipt({
+                        orderNumber: order.order_number,
+                        customerName: customer.name,
+                        customerEmail: customer.email,
+                        createdAt: fullOrder.created_at,
+                        items: receiptItems.map((i) => ({
+                          product_name: i.product_name,
+                          qty: i.qty,
+                          width_in: i.width_in,
+                          height_in: i.height_in,
+                          sides: i.sides,
+                          line_total: Number(i.line_total),
+                        })),
+                        subtotal: Number(fullOrder.subtotal),
+                        gst: Number(fullOrder.gst),
+                        pst: Number(fullOrder.pst ?? 0),
+                        total: Number(fullOrder.total),
+                        isRush: Boolean(fullOrder.is_rush),
+                        discountCode: fullOrder.discount_code ?? null,
+                        discountAmount: fullOrder.discount_amount ? Number(fullOrder.discount_amount) : null,
+                        paymentMethod: "clover_card",
+                      });
+                      console.log(`[clover-webhook] receipt sent → ${customer.email}`);
+                    }
+                  } catch (receiptErr) {
+                    console.error("[clover-webhook] receipt failed (non-fatal):", receiptErr);
+                  }
                 }
 
                 if (customer?.email) {
