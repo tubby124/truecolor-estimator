@@ -138,7 +138,6 @@ src/components/
 │   ├── AuthGate.tsx                     — Supabase session gate + sign-in/sign-up form
 │   ├── OrderCard.tsx                    — single order row with receipt + status stepper
 │   ├── OrdersList.tsx                   — paginated order history list
-│   ├── PasswordResetForm.tsx            — password change form
 │   ├── ProfileForm.tsx                  — name/email update form
 │   ├── QuotesList.tsx                   — quote request history
 │   ├── ReceiptModal.tsx                 — order receipt overlay
@@ -341,7 +340,6 @@ CRON_SECRET                   — protects /api/cron/* routes
 |----|------|-------|
 | TODO-1 | `/staff/quotes` admin view | Model after /staff/orders. `quote_requests` table exists, RLS active. |
 | TODO-2 | SMTP_BCC Railway env | smtp.ts supports comma-separated BCCs. Set Railway var: `SMTP_BCC=hasan.sharif.realtor@gmail.com,albert@true-color.ca` |
-| TODO-3 | DECAL RMVN006 bug | Can't select window perf in OptionsPanel. Investigation needed. |
 | TODO-5 | Spicer quote | 100lb gloss text + 15mil magnet cost — call Spicer before enabling PLACEHOLDER_100LB |
 
 ---
