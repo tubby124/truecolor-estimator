@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
                 customerEmail: customer.email,
                 total: Number(order.total),
                 isRush: Boolean(order.is_rush),
-                paymentMethod: "wave_payments",
+                paymentMethod: "wave",
               });
               console.log(`[wave-webhook] payment confirmed email sent → ${customer.email}`);
 
