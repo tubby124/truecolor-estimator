@@ -79,7 +79,9 @@ export async function sendStaffOrderNotification(
 
   const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
   const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
-  const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
+  // Use outreach sender for staff notifications — Brevo blocks FROM=TO (same address).
+  // hello@outreach.true-color.ca is already a verified Brevo sender (ID 2).
+  const from = "True Color Display Printing <hello@outreach.true-color.ca>";
 
   const paymentLabel =
     payment_method === "clover_card" ? "Card (Clover)" :
@@ -492,7 +494,8 @@ export async function sendCustomerFileRevisionNotification(
   const { orderNumber, customerName, customerEmail, fileName, fileUrl, siteUrl } = params;
 
   const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
-  const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
+  // Use outreach sender for staff notifications — Brevo blocks FROM=TO (same address).
+  const from = "True Color Display Printing <hello@outreach.true-color.ca>";
   const subject = `[File updated] Order ${orderNumber} — ${customerName}`;
 
   const html = `<!DOCTYPE html>

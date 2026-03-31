@@ -85,7 +85,11 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
 
   if (options.text) body.textContent = options.text;
   if (effectiveBcc) body.bcc = toRecipientList(effectiveBcc);
-  if (options.replyTo) body.replyTo = parseAddress(options.replyTo);
+  // replyTo: caller can override; fall back to SMTP_REPLY_TO env var.
+  // Without this, customer "reply" in their email client goes to the From address
+  // (which may be unmonitored). Set SMTP_REPLY_TO=info@true-color.ca in Railway.
+  const effectiveReplyTo = options.replyTo ?? process.env.SMTP_REPLY_TO;
+  if (effectiveReplyTo) body.replyTo = parseAddress(effectiveReplyTo);
   if (options.priority === "high") {
     body.headers = { "X-Priority": "1", Importance: "High" };
   }
