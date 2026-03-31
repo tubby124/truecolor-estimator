@@ -8,7 +8,6 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { addToCart } from "@/lib/cart/cart";
 import { AuthGate } from "@/components/account/AuthGate";
-import { PasswordResetForm } from "@/components/account/PasswordResetForm";
 import { OrdersList } from "@/components/account/OrdersList";
 import { QuotesList } from "@/components/account/QuotesList";
 import { ProfileForm } from "@/components/account/ProfileForm";
@@ -43,10 +42,6 @@ export function AccountClientPage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileError, setProfileError] = useState("");
-
-  const isReset =
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("reset") === "1";
 
   const isWelcome =
     typeof window !== "undefined" &&
@@ -284,12 +279,6 @@ export function AccountClientPage() {
         </main>
       </div>
     );
-  }
-
-  // ── Password reset ───────────────────────────────────────────────────────────
-
-  if (isReset) {
-    return <PasswordResetForm onDone={(s) => { setSession(s); setLoading(false); }} />;
   }
 
   // ── Not logged in ────────────────────────────────────────────────────────────

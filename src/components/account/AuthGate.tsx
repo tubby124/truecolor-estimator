@@ -264,7 +264,7 @@ export function AuthGate({ onSessionCreated }: AuthGateProps) {
                     href={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ""}`}
                     className="text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
                   >
-                    Forgot password?
+                    Email me a sign-in link
                   </Link>
                 )}
                 <button

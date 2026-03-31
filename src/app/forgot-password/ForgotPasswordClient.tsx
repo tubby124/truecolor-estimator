@@ -30,11 +30,11 @@ export function ForgotPasswordClient() {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
-  async function sendReset(emailAddr: string) {
+  async function sendLink(emailAddr: string) {
     const supabase = createClient();
-    // Always show success — never reveal whether the email exists
-    await supabase.auth.resetPasswordForEmail(emailAddr, {
-      redirectTo: `${SITE_URL}/account/callback`,
+    await supabase.auth.signInWithOtp({
+      email: emailAddr,
+      options: { emailRedirectTo: `${SITE_URL}/account/callback` },
     });
   }
 
@@ -47,7 +47,7 @@ export function ForgotPasswordClient() {
     setError("");
     setLoading(true);
     try {
-      await sendReset(email.trim().toLowerCase());
+      await sendLink(email.trim().toLowerCase());
       setSent(true);
       setCooldown(60);
     } catch {
@@ -61,7 +61,7 @@ export function ForgotPasswordClient() {
     if (cooldown > 0 || loading) return;
     setLoading(true);
     try {
-      await sendReset(email.trim().toLowerCase());
+      await sendLink(email.trim().toLowerCase());
       setCooldown(60);
     } catch {
       // Silent — UI already shows confirmation
@@ -77,7 +77,6 @@ export function ForgotPasswordClient() {
         {sent ? (
           <div className="max-w-md">
             <div className="bg-[#f4efe9] rounded-2xl p-10 text-center">
-              {/* Envelope icon */}
               <div className="flex justify-center mb-6">
                 <div className="bg-[#16C2F3]/10 rounded-full p-4">
                   <svg
@@ -101,13 +100,13 @@ export function ForgotPasswordClient() {
                 Check your email
               </h1>
               <p className="text-gray-500 text-sm mb-1">
-                If an account exists for{" "}
-                <span className="font-mono text-[#1c1712]">{email}</span>,
-                you&apos;ll receive a reset link shortly.
+                We sent a sign-in link to{" "}
+                <span className="font-mono text-[#1c1712]">{email}</span>.
+                Click it to sign in instantly — no password needed.
               </p>
               <p className="text-gray-400 text-xs mb-8">
-                Check your spam folder if you don&apos;t see it within 2 minutes.
-                The link expires in 30 minutes.
+                Check your spam folder if you don&apos;t see it within 2
+                minutes. The link expires in 1&nbsp;hour.
               </p>
 
               <button
@@ -115,7 +114,7 @@ export function ForgotPasswordClient() {
                 disabled={cooldown > 0 || loading}
                 className="w-full border border-gray-200 bg-white text-sm font-semibold py-2.5 rounded-lg hover:border-[#16C2F3] hover:text-[#16C2F3] disabled:opacity-50 transition-colors"
               >
-                {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend reset link"}
+                {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend link"}
               </button>
 
               <div className="mt-5">
@@ -131,11 +130,11 @@ export function ForgotPasswordClient() {
         ) : (
           <div className="max-w-md">
             <h1 className="text-3xl font-bold text-[#1c1712] mb-2">
-              Reset your password
+              Get a sign-in link
             </h1>
             <p className="text-gray-500 mb-10 text-sm">
-              Enter your email and we&apos;ll send you a link to set a new
-              password.
+              Enter your email and we&apos;ll send you a link to sign in
+              instantly — no password needed.
             </p>
 
             <div className="bg-[#f4efe9] rounded-2xl p-8">
@@ -170,7 +169,7 @@ export function ForgotPasswordClient() {
                   disabled={loading}
                   className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors text-sm"
                 >
-                  {loading ? "Sending\u2026" : "Send reset link \u2192"}
+                  {loading ? "Sending\u2026" : "Send sign-in link \u2192"}
                 </button>
 
                 <div className="text-center pt-1">
