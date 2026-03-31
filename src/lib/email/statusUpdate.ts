@@ -63,7 +63,7 @@ function buildSubject(p: StatusUpdateParams): string {
 
 function buildHtml(p: StatusUpdateParams): string {
   const { status, orderNumber, customerName, total, isRush, paymentMethod } = p;
-  const paymentLabel = paymentMethod === "clover_card" ? "card payment" : "e-Transfer";
+  const paymentLabel = paymentMethod === "clover_card" ? "card payment" : paymentMethod === "wave" ? "Wave invoice" : "e-Transfer";
 
   const configs = {
     payment_received: {
@@ -207,7 +207,7 @@ function buildHtml(p: StatusUpdateParams): string {
 
 function buildText(p: StatusUpdateParams): string {
   const { status, orderNumber, customerName, total, isRush, paymentMethod } = p;
-  const paymentLabel = paymentMethod === "clover_card" ? "card payment" : "e-Transfer payment";
+  const paymentLabel = paymentMethod === "clover_card" ? "card payment" : paymentMethod === "wave" ? "Wave invoice payment" : "e-Transfer payment";
 
   const messages = {
     payment_received: [

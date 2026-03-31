@@ -85,7 +85,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       try {
         const { data: order } = await supabase
           .from("orders")
-          .select("order_number, total, is_rush, wave_invoice_id, payment_method, customers ( name, email )")
+          .select(`order_number, subtotal, gst, pst, total, is_rush, discount_code,
+                   discount_amount, wave_invoice_id, payment_method, created_at,
+                   order_items ( product_name, qty, width_in, height_in, sides, line_total ),
+                   customers ( name, email )`)
           .eq("id", id)
           .single();
 
@@ -103,7 +106,41 @@ export async function PATCH(req: NextRequest, { params }: Params) {
               customerEmail: customer.email,
               total: Number(order.total),
               isRush: Boolean(order.is_rush),
+              paymentMethod: order.payment_method ?? undefined,
             });
+          }
+
+          // Itemized receipt on payment_received (non-fatal) — covers manual status override
+          // and any orders where the webhook/confirm-etransfer didn't fire the receipt
+          if (status === "payment_received" && customer?.email) {
+            try {
+              const items = Array.isArray(order.order_items) ? order.order_items : [];
+              await sendPaymentReceipt({
+                orderNumber: order.order_number,
+                customerName: customer.name,
+                customerEmail: customer.email,
+                createdAt: order.created_at,
+                items: items.map((i) => ({
+                  product_name: i.product_name,
+                  qty: i.qty,
+                  width_in: i.width_in,
+                  height_in: i.height_in,
+                  sides: i.sides,
+                  line_total: Number(i.line_total),
+                })),
+                subtotal: Number(order.subtotal),
+                gst: Number(order.gst),
+                pst: Number(order.pst ?? 0),
+                total: Number(order.total),
+                isRush: Boolean(order.is_rush),
+                discountCode: order.discount_code ?? null,
+                discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
+                paymentMethod: order.payment_method ?? undefined,
+              });
+              console.log(`[staff/orders/status] receipt sent at payment_received → ${customer.email}`);
+            } catch (receiptErr) {
+              console.error("[staff/orders/status] receipt at payment_received failed (non-fatal):", receiptErr);
+            }
           }
 
           // On payment_received: approve Wave invoice + record payment in Wave accounting
