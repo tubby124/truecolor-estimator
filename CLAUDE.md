@@ -340,9 +340,8 @@ CRON_SECRET                   — protects /api/cron/* routes
 | ID | Task | Notes |
 |----|------|-------|
 | TODO-1 | `/staff/quotes` admin view | Model after /staff/orders. `quote_requests` table exists, RLS active. |
-| TODO-2 | SMTP_BCC dual-address | smtp.ts currently supports one BCC only. Needs to support both hasan@ and albert@. |
+| TODO-2 | SMTP_BCC Railway env | smtp.ts supports comma-separated BCCs. Set Railway var: `SMTP_BCC=hasan.sharif.realtor@gmail.com,albert@true-color.ca` |
 | TODO-3 | DECAL RMVN006 bug | Can't select window perf in OptionsPanel. Investigation needed. |
-| TODO-4 | GBP Place ID | Replace REPLACE_WITH_GOOGLE_PLACE_ID in reviewRequest.ts:32 |
 | TODO-5 | Spicer quote | 100lb gloss text + 15mil magnet cost — call Spicer before enabling PLACEHOLDER_100LB |
 
 ---
