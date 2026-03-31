@@ -26,7 +26,7 @@ interface Props {
 const QTY_TIERS: Record<string, number[]> = {
   FLYER: [25, 50, 100, 250, 500, 1000, 2500, 5000],
   BUSINESS_CARD: [250, 500, 1000, 2500, 5000],
-  BROCHURE: [100, 250, 500],
+  BROCHURE: [100, 250, 500, 1000],
   POSTCARD: [50, 100, 250, 500, 1000],
   STICKER: [50, 100, 250, 500, 1000],
 };
@@ -40,12 +40,11 @@ const SQFT_QTY_PRESETS: Record<string, number[]> = {
   MAGNET:         [1, 2, 4, 5, 10],
   DECAL:          [1, 2, 5, 10],
   VINYL_LETTERING:[1, 2, 5, 10],
-  PHOTO_POSTER:   [1],
   DISPLAY:        [1, 2, 3, 4, 5],
 };
 
 export function OptionsPanel({ category, state, onChange, categoryLabel }: Props) {
-  const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING", "PHOTO_POSTER"].includes(category);
+  const isSqftBased = ["SIGN", "BANNER", "RIGID", "FOAMBOARD", "MAGNET", "DECAL", "VINYL_LETTERING"].includes(category);
   const showSides = ["SIGN", "BUSINESS_CARD"].includes(category);
   const showGrommets = category === "BANNER";
   const showHStake = category === "SIGN";
@@ -124,6 +123,62 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
               >
                 <span className="block">{mat.label}</span>
                 <span className="block text-xs text-[var(--muted)] font-normal mt-0.5">{mat.sub}</span>
+              </button>
+            ))}
+          </div>
+        </FieldGroup>
+      )}
+
+      {/* BROCHURE fold type picker */}
+      {category === "BROCHURE" && (
+        <FieldGroup label="Fold Type">
+          <div className="flex flex-col gap-2">
+            {[
+              { code: "PLACEHOLDER_TF_100LB", label: "Tri-Fold", sub: "Folded into thirds — 6 panels" },
+              { code: "PLACEHOLDER_HF_100LB", label: "Half-Fold", sub: "Folded in half — 4 panels" },
+            ].map((fold) => (
+              <button
+                key={fold.code}
+                type="button"
+                onClick={() => onChange({ material_code: fold.code })}
+                className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition-all cursor-pointer ${
+                  state.material_code === fold.code
+                    ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                    : "border-[var(--border)] bg-white hover:border-gray-300"
+                }`}
+              >
+                <span className="block">{fold.label}</span>
+                <span className="block text-xs text-[var(--muted)] font-normal mt-0.5">{fold.sub}</span>
+              </button>
+            ))}
+          </div>
+        </FieldGroup>
+      )}
+
+      {/* PHOTO_POSTER fixed size picker */}
+      {category === "PHOTO_POSTER" && (
+        <FieldGroup label="Size">
+          <div className="flex flex-wrap gap-2">
+            {[
+              { w: 12, h: 18 },
+              { w: 16, h: 20 },
+              { w: 18, h: 24 },
+              { w: 20, h: 30 },
+              { w: 24, h: 36 },
+              { w: 30, h: 40 },
+              { w: 36, h: 48 },
+            ].map((size) => (
+              <button
+                key={`${size.w}x${size.h}`}
+                type="button"
+                onClick={() => onChange({ width_in: String(size.w), height_in: String(size.h) })}
+                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                  state.width_in === String(size.w) && state.height_in === String(size.h)
+                    ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]"
+                    : "border-[var(--border)] bg-white hover:border-gray-300"
+                }`}
+              >
+                {size.w}&times;{size.h}&rdquo;
               </button>
             ))}
           </div>
