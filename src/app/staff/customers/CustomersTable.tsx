@@ -248,7 +248,7 @@ function SendEmailModal({
             disabled={sending || sent || !subject.trim() || !message.trim()}
             className="inline-flex items-center gap-2 bg-[#16C2F3] hover:bg-[#0fa8d6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-colors"
           >
-            {sent ? "✓ Sent!" : sending ? "Sending…" : "Send Email"}
+            {sent ? "✓ Done! Invoice sent." : sending ? "Assigning…" : "Assign & Send Updated Invoice"}
           </button>
         </div>
       </div>
@@ -266,10 +266,12 @@ interface DiscountCode {
 }
 
 function SendDiscountModal({
+  customerId,
   customerEmail,
   customerName,
   onClose,
 }: {
+  customerId: string;
   customerEmail: string;
   customerName: string | null;
   onClose: () => void;
@@ -293,36 +295,26 @@ function SendDiscountModal({
       .finally(() => setLoadingCodes(false));
   });
 
-  const firstName = customerName?.trim().split(/\s+/)[0] ?? null;
-  const greeting = firstName ? `Hi ${firstName},` : "Hi there,";
-
   const selected = codes.find((c) => c.code === selectedCode);
-  const discountMessage = selected
-    ? `${greeting}\n\nHere's a discount code for your next order at True Color Display Printing:\n\n    Code: ${selected.code}\n    Saves you: $${selected.discount_amount} CAD\n\nEnter the code at checkout — no minimum order required.\n\nIf you have any questions, give us a call at (306) 954-8688 or email info@true-color.ca.\n\n— True Color Display Printing\n216 33rd St W, Saskatoon`
-    : "";
 
   async function send() {
     if (!selected) return;
     setSending(true);
     setError(null);
     try {
-      const res = await fetch("/api/staff/send-customer-email", {
+      const res = await fetch(`/api/staff/customers/${customerId}/assign-discount`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: customerEmail,
-          subject: `$${selected.discount_amount} off your next order — True Color Display Printing`,
-          message: discountMessage,
-        }),
+        body: JSON.stringify({ code: selected.code }),
       });
+      const d = await res.json() as { error?: string };
       if (!res.ok) {
-        const d = await res.json() as { error?: string };
-        throw new Error(d.error ?? "Send failed");
+        throw new Error(d.error ?? "Assignment failed");
       }
       setSent(true);
-      setTimeout(onClose, 1200);
+      setTimeout(onClose, 1500);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Send failed");
+      setError(e instanceof Error ? e.message : "Assignment failed");
     } finally {
       setSending(false);
     }
@@ -371,12 +363,10 @@ function SendDiscountModal({
                   ))}
                 </div>
               </div>
-              {discountMessage && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Email preview</p>
-                  <pre className="text-xs text-gray-600 bg-gray-50 rounded-lg px-4 py-3 whitespace-pre-wrap leading-relaxed font-mono border border-gray-200 max-h-40 overflow-y-auto">
-                    {discountMessage}
-                  </pre>
+              {selected && (
+                <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-xs text-blue-900 leading-relaxed">
+                  This will attach <strong>{selected.code}</strong> to {customerName ?? "this customer"}&apos;s account.
+                  {" "}If they have a pending payment, an updated invoice email with the new lower total will be sent automatically.
                 </div>
               )}
             </>
@@ -573,6 +563,7 @@ function CustomerDetail({ customer }: { customer: CustomerRow }) {
       )}
       {showDiscountModal && (
         <SendDiscountModal
+          customerId={customer.id}
           customerEmail={customer.email}
           customerName={customer.name}
           onClose={() => setShowDiscountModal(false)}

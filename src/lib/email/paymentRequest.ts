@@ -39,6 +39,8 @@ export interface PaymentRequestEmailParams {
   paymentMethod: "clover" | "wave";
   notes?: string | null;
   accountInfo?: AccountInfo | null;
+  discount_code?: string;
+  discount_amount?: number;
 }
 
 // ─── Public entry point ───────────────────────────────────────────────────────
@@ -65,7 +67,7 @@ export async function sendPaymentRequestEmail(
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, notes, accountInfo } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, notes, accountInfo, discount_code, discount_amount } = p;
 
   const methodNote =
     paymentMethod === "wave"
@@ -173,6 +175,16 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                     </td>
                   </tr>
 
+                  <!-- Discount row (only shown when discount is applied) -->
+                  ${discount_code && discount_amount && discount_amount > 0 ? `<tr style="background: #f0fdf4;">
+                    <td style="padding: 4px 16px; font-size: 13px; color: #059669; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      Discount (${escHtml(discount_code)})
+                    </td>
+                    <td style="padding: 4px 16px; font-size: 13px; color: #059669; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      -$${discount_amount.toFixed(2)}
+                    </td>
+                  </tr>` : ""}
+
                   <!-- GST row -->
                   <tr style="background: #f9f6f3;">
                     <td style="padding: 4px 16px 4px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
@@ -256,7 +268,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, accountInfo } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, accountInfo, discount_code, discount_amount } = p;
 
   const itemLines = items.map((item) => {
     const qty = item.qty > 1 ? `${item.qty}x ` : "";
@@ -274,6 +286,7 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     p.notes ? `  Note: ${p.notes}` : "",
     "",
     `  Subtotal: $${subtotal.toFixed(2)}`,
+    ...(discount_code && discount_amount && discount_amount > 0 ? [`  Discount (${discount_code}): -$${discount_amount.toFixed(2)}`] : []),
     `  GST (5%): $${gst.toFixed(2)}`,
     `  PST (6%): $${pst.toFixed(2)}`,
     `  TOTAL:    $${total.toFixed(2)} CAD`,

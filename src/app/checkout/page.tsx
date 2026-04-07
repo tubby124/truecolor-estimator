@@ -207,33 +207,74 @@ export default function CheckoutPage() {
       } catch {
         // Non-fatal — continue without pre-fill
       }
-      // Auto-apply WELCOME10 for first-time customers (silent — no-op if code not found or already used)
+      // Auto-apply staff-assigned pending discount (priority over WELCOME10)
+      let autoApplied = false;
       try {
-        const discRes = await fetch("/api/discount/validate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ code: "WELCOME10" }),
+        const pendRes = await fetch("/api/account/pending-discount", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
         });
-        if (discRes.ok) {
-          const disc = (await discRes.json()) as {
-            valid?: boolean;
-            code?: string;
-            discount_amount?: number;
-            description?: string;
-          };
-          if (disc.valid && disc.code) {
-            setAppliedDiscount({
-              code: disc.code,
-              amount: disc.discount_amount!,
-              description: disc.description!,
+        if (pendRes.ok) {
+          const { code: pendingCode } = (await pendRes.json()) as { code?: string | null };
+          if (pendingCode) {
+            const v = await fetch("/api/discount/validate", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({ code: pendingCode }),
             });
+            if (v.ok) {
+              const d = (await v.json()) as {
+                valid?: boolean;
+                code?: string;
+                discount_amount?: number;
+                description?: string;
+              };
+              if (d.valid && d.code) {
+                setAppliedDiscount({
+                  code: d.code,
+                  amount: d.discount_amount!,
+                  description: d.description!,
+                });
+                autoApplied = true;
+              }
+            }
           }
         }
       } catch {
         // Non-fatal
+      }
+
+      // Auto-apply WELCOME10 for first-time customers (only if no staff-assigned code)
+      if (!autoApplied) {
+        try {
+          const discRes = await fetch("/api/discount/validate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ code: "WELCOME10" }),
+          });
+          if (discRes.ok) {
+            const disc = (await discRes.json()) as {
+              valid?: boolean;
+              code?: string;
+              discount_amount?: number;
+              description?: string;
+            };
+            if (disc.valid && disc.code) {
+              setAppliedDiscount({
+                code: disc.code,
+                amount: disc.discount_amount!,
+                description: disc.description!,
+              });
+            }
+          }
+        } catch {
+          // Non-fatal
+        }
       }
     });
   }, []);

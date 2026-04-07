@@ -331,6 +331,15 @@ export async function POST(req: NextRequest) {
       }
     })();
 
+    // Clear staff-assigned pending discount once consumed (non-fatal)
+    if (validatedDiscountCode) {
+      void supabase
+        .from("customers")
+        .update({ pending_discount_code: null } as Record<string, unknown>)
+        .eq("id", customer.id)
+        .eq("pending_discount_code", validatedDiscountCode); // guard: only clear the code that was actually used
+    }
+
     // Record discount redemption (non-fatal — order is already saved)
     if (discountCodeId && discount > 0) {
       void supabase
