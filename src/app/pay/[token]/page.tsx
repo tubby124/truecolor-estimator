@@ -45,6 +45,23 @@ export default async function PaymentGatewayPage({ params }: Props) {
     const oidMatch = redirectUrl?.match(/[?&]oid=([a-f0-9-]{36})/i);
     const orderId = oidMatch?.[1];
 
+    // Stale link check: if the order's current total doesn't match the token amount,
+    // a newer pay link was generated (e.g. staff applied a discount). Block payment.
+    if (orderId) {
+      const supabase = createServiceClient();
+      const { data: orderCheck } = await supabase
+        .from("orders")
+        .select("total, status")
+        .eq("id", orderId)
+        .maybeSingle();
+      if (orderCheck?.status === "pending_payment") {
+        const dbAmountCents = Math.round(Number(orderCheck.total) * 100);
+        if (dbAmountCents !== amountCents) {
+          return <UpdatedLinkPage />;
+        }
+      }
+    }
+
     const result = await createCloverCheckout(
       amountCents, description, customerEmail, redirectUrl,
       orderId  // externalReferenceId — Clover echoes this back in webhook PAYMENT events
@@ -67,6 +84,59 @@ export default async function PaymentGatewayPage({ params }: Props) {
   }
 
   redirect(checkoutUrl);
+}
+
+function UpdatedLinkPage() {
+  return (
+    <html lang="en">
+      <body
+        style={{
+          margin: 0,
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          background: "#f1f5f9",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 480,
+            margin: "80px auto",
+            padding: "40px 32px",
+            background: "white",
+            borderRadius: 16,
+            boxShadow: "0 1px 8px rgba(0,0,0,0.08)",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: 48, margin: "0 0 16px" }}>📩</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 10px" }}>
+            Your Invoice Has Been Updated
+          </h1>
+          <p style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.6, margin: "0 0 28px" }}>
+            A discount was applied to your order after this link was sent.
+            Please check your email for the updated invoice with the new lower total and a fresh payment link.
+          </p>
+          <a
+            href="mailto:info@true-color.ca?subject=Updated payment link"
+            style={{
+              display: "inline-block",
+              background: "#16C2F3",
+              color: "white",
+              fontWeight: 600,
+              fontSize: 14,
+              padding: "12px 28px",
+              borderRadius: 8,
+              textDecoration: "none",
+            }}
+          >
+            Contact Us →
+          </a>
+          <p style={{ fontSize: 12, color: "#9ca3af", marginTop: 24 }}>
+            True Color Display Printing · info@true-color.ca
+          </p>
+        </div>
+      </body>
+    </html>
+  );
 }
 
 function ExpiredPage() {

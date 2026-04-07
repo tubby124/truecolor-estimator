@@ -16,6 +16,7 @@ import { encodePaymentToken } from "@/lib/payment/token";
 import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
 import { sendEmail } from "@/lib/email/smtp";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { voidWaveInvoice, createOrFindWaveCustomer, createWaveInvoice, approveWaveInvoice, type WaveLineItem } from "@/lib/wave/invoice";
 
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -136,13 +137,6 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ ok: true, action: "code_assigned_no_order" });
     }
 
-    // 7b. Wave invoice present — log warning, continue with Clover-path email
-    if (order.wave_invoice_id) {
-      console.warn(
-        `[assign-discount] order ${order.order_number} has wave_invoice_id ${order.wave_invoice_id} — Wave invoice NOT updated. DB and email will reflect discounted total.`
-      );
-    }
-
     // 8. Tax recalculation
     const rush = order.is_rush ? RUSH_FEE : 0;
     const originalSubtotal = Number(order.subtotal);
@@ -166,6 +160,45 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (upErr) {
       console.error("[assign-discount] order update failed:", upErr);
       return NextResponse.json({ error: "Failed to update order totals" }, { status: 500 });
+    }
+
+    // 9b. Wave invoice present — void old, create new at discounted amounts (non-fatal, fire-and-forget)
+    if (order.wave_invoice_id) {
+      const capturedWaveInvoiceId = order.wave_invoice_id;
+      void (async () => {
+        try {
+          await voidWaveInvoice(capturedWaveInvoiceId).catch((e: unknown) => {
+            console.warn(`[assign-discount] Wave invoiceVoid failed (continuing): ${e instanceof Error ? e.message : e}`);
+          });
+          const waveCustomerId = await createOrFindWaveCustomer(
+            customer.email,
+            (customer.name as string | null) ?? customer.email
+          );
+          const waveItems: WaveLineItem[] = [
+            {
+              description: `True Color Order ${order.order_number} (${dc.code} discount applied)`,
+              unitPrice: newDiscountedSubtotal,
+              qty: 1,
+              applyGst: true,
+              applyPst: true,
+            },
+          ];
+          const inv = await createWaveInvoice(waveCustomerId, waveItems, {
+            isRush: order.is_rush,
+            orderNumber: order.order_number,
+          });
+          await approveWaveInvoice(inv.invoiceId);
+          void supabase
+            .from("orders")
+            .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
+            .eq("id", order.id);
+          console.log(
+            `[assign-discount] Wave invoice replaced: ${capturedWaveInvoiceId} → ${inv.invoiceId} | order ${order.order_number}`
+          );
+        } catch (waveErr) {
+          console.error("[assign-discount] Wave invoice replacement failed (non-fatal):", waveErr instanceof Error ? waveErr.message : waveErr);
+        }
+      })();
     }
 
     // 10. Fresh payment token

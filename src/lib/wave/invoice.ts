@@ -284,6 +284,29 @@ export async function approveWaveInvoice(invoiceId: string): Promise<void> {
 }
 
 // --------------------------------------------------------------------------
+// Void a Wave invoice (DRAFT or APPROVED — not already PAID)
+// --------------------------------------------------------------------------
+
+export async function voidWaveInvoice(invoiceId: string): Promise<void> {
+  const data = await waveQuery<{
+    invoiceVoid: { didSucceed: boolean; inputErrors: { message: string }[] };
+  }>(
+    `mutation($input: InvoiceVoidInput!) {
+      invoiceVoid(input: $input) {
+        didSucceed
+        inputErrors { path message }
+      }
+    }`,
+    { input: { invoiceId } }
+  );
+
+  if (!data.invoiceVoid.didSucceed) {
+    const errs = data.invoiceVoid.inputErrors?.map((e) => e.message).join(", ");
+    throw new Error(`Wave invoiceVoid failed: ${errs}`);
+  }
+}
+
+// --------------------------------------------------------------------------
 // Send an approved invoice to the customer via Wave email
 // --------------------------------------------------------------------------
 
