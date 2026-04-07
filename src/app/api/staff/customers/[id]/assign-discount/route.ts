@@ -233,6 +233,32 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 }
 
+// ─── DELETE: clear pending discount ──────────────────────────────────────────
+
+export async function DELETE(_req: NextRequest, { params }: Params) {
+  const staffCheck = await requireStaffUser();
+  if (staffCheck instanceof NextResponse) return staffCheck;
+
+  try {
+    const { id: customerId } = await params;
+    const supabase = createServiceClient();
+
+    const { error } = await supabase
+      .from("customers")
+      .update({ pending_discount_code: null } as Record<string, unknown>)
+      .eq("id", customerId);
+
+    if (error) {
+      return NextResponse.json({ error: "Failed to clear discount" }, { status: 500 });
+    }
+
+    console.log(`[clear-discount] pending_discount_code cleared for customer ${customerId}`);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
+  }
+}
+
 // ─── Notification email helpers (no pending order) ────────────────────────────
 
 function buildNotificationHtml(

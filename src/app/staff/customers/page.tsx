@@ -28,6 +28,8 @@ export interface CustomerRow {
   /** OAuth provider, e.g. "google", "email" */
   auth_provider: string | null;
   email_confirmed: boolean;
+  /** Staff-assigned pending discount code waiting to be used at checkout */
+  pending_discount_code: string | null;
 }
 
 export default async function StaffCustomersPage() {
@@ -124,7 +126,7 @@ async function fetchCustomers(): Promise<CustomerRow[]> {
   const [customersResult, authResult, quoteRowsResult] = await Promise.all([
     supabase
       .from("customers")
-      .select(`id, name, email, company, phone, created_at, orders ( id, total, created_at )`)
+      .select(`id, name, email, company, phone, created_at, pending_discount_code, orders ( id, total, created_at )`)
       .order("created_at", { ascending: false })
       .limit(500),
     supabase.auth.admin.listUsers({ perPage: 1000 }),
@@ -163,6 +165,7 @@ async function fetchCustomers(): Promise<CustomerRow[]> {
       account_only: false,
       auth_provider: null,
       email_confirmed: true,
+      pending_discount_code: (c.pending_discount_code as string | null) ?? null,
     };
   });
 
@@ -188,6 +191,7 @@ async function fetchCustomers(): Promise<CustomerRow[]> {
       account_only: true,
       auth_provider: provider,
       email_confirmed: !!u.email_confirmed_at,
+      pending_discount_code: null,
     });
   }
 

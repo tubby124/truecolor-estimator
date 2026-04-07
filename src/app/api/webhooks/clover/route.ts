@@ -145,6 +145,36 @@ export async function POST(req: NextRequest) {
                         paymentMethod: "clover_card",
                       });
                       console.log(`[clover-webhook] receipt sent → ${customer.email}`);
+
+                      // Insert discount_redemptions for staff-assigned discounts that bypassed checkout (non-fatal)
+                      if (fullOrder.discount_code) {
+                        try {
+                          const { data: dc } = await supabase
+                            .from("discount_codes")
+                            .select("id")
+                            .ilike("code", fullOrder.discount_code)
+                            .maybeSingle();
+                          if (dc) {
+                            const { count: existing } = await supabase
+                              .from("discount_redemptions")
+                              .select("*", { count: "exact", head: true })
+                              .eq("order_id", order.id);
+                            if ((existing ?? 0) === 0) {
+                              await supabase.from("discount_redemptions").insert({
+                                code_id: dc.id,
+                                customer_id: order.customer_id,
+                                order_id: order.id,
+                                redeemed_at: new Date().toISOString(),
+                              });
+                              console.log(
+                                `[clover-webhook] discount_redemptions inserted — code ${fullOrder.discount_code} | order ${order.order_number}`
+                              );
+                            }
+                          }
+                        } catch (redemptionErr) {
+                          console.error("[clover-webhook] discount_redemptions insert failed (non-fatal):", redemptionErr);
+                        }
+                      }
                     }
                   } catch (receiptErr) {
                     console.error("[clover-webhook] receipt failed (non-fatal):", receiptErr);

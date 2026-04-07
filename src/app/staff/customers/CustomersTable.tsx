@@ -269,11 +269,13 @@ function SendDiscountModal({
   customerId,
   customerEmail,
   customerName,
+  currentPendingCode,
   onClose,
 }: {
   customerId: string;
   customerEmail: string;
   customerName: string | null;
+  currentPendingCode?: string | null;
   onClose: () => void;
 }) {
   const [codes, setCodes] = useState<DiscountCode[]>([]);
@@ -281,6 +283,8 @@ function SendDiscountModal({
   const [selectedCode, setSelectedCode] = useState<string>("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [cleared, setCleared] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useState(() => {
@@ -320,6 +324,26 @@ function SendDiscountModal({
     }
   }
 
+  async function clearDiscount() {
+    setClearing(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/staff/customers/${customerId}/assign-discount`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const d = await res.json() as { error?: string };
+        throw new Error(d.error ?? "Clear failed");
+      }
+      setCleared(true);
+      setTimeout(onClose, 1000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Clear failed");
+    } finally {
+      setClearing(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col">
@@ -331,6 +355,21 @@ function SendDiscountModal({
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
         </div>
         <div className="px-6 py-4 space-y-4">
+          {currentPendingCode && !cleared && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center justify-between gap-3">
+              <p className="text-xs text-amber-800">
+                <strong>{currentPendingCode}</strong> is already pending on this account.
+                Assigning a new code will replace it.
+              </p>
+              <button
+                onClick={() => void clearDiscount()}
+                disabled={clearing || cleared}
+                className="flex-shrink-0 text-xs font-semibold text-amber-700 hover:text-red-600 disabled:opacity-50 underline"
+              >
+                {cleared ? "Cleared ✓" : clearing ? "Clearing…" : "Clear"}
+              </button>
+            </div>
+          )}
           {loadingCodes ? (
             <p className="text-sm text-gray-400">Loading codes…</p>
           ) : codes.length === 0 ? (
@@ -382,7 +421,7 @@ function SendDiscountModal({
             disabled={sending || sent || !selected || codes.length === 0}
             className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-colors"
           >
-            {sent ? "✓ Sent!" : sending ? "Sending…" : "Send Code"}
+            {sent ? "✓ Done! Invoice sent." : sending ? "Assigning…" : "Assign & Send Updated Invoice"}
           </button>
         </div>
       </div>
@@ -566,6 +605,7 @@ function CustomerDetail({ customer }: { customer: CustomerRow }) {
           customerId={customer.id}
           customerEmail={customer.email}
           customerName={customer.name}
+          currentPendingCode={customer.pending_discount_code}
           onClose={() => setShowDiscountModal(false)}
         />
       )}
@@ -679,6 +719,11 @@ export function CustomersTable({ customers }: { customers: CustomerRow[] }) {
                         {customer.unreplied_quotes > 0 && (
                           <span className="bg-amber-400 text-[#1c1712] text-xs font-bold px-2 py-0.5 rounded-full">
                             {customer.unreplied_quotes} pending
+                          </span>
+                        )}
+                        {customer.pending_discount_code && (
+                          <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                            % {customer.pending_discount_code}
                           </span>
                         )}
                       </div>
