@@ -625,6 +625,14 @@ export default function CheckoutPage() {
                           setEmailError("Please enter a valid email address.");
                         } else {
                           setEmailError("");
+                          // TC-9: capture valid email for abandoned checkout recovery
+                          if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                            void fetch("/api/checkout-sessions", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ email: email.trim().toLowerCase(), name: name.trim() || undefined }),
+                            }).catch(() => {/* non-fatal */});
+                          }
                         }
                       }}
                       className={`w-full border rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] ${emailError ? "border-red-300" : "border-gray-200"}`}
