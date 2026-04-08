@@ -21,6 +21,49 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
 
+  const [pdfDownloading, setPdfDownloading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+
+  const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;
+  const customerName = customerRaw?.name ?? null;
+  const customerCompany = customerRaw?.company ?? null;
+  const billedTo = customerName
+    ? customerCompany
+      ? `${customerName} (${customerCompany})`
+      : customerName
+    : email;
+
+  const GST_DISPLAY = process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file";
+
+  async function handleDownloadPdf() {
+    setPdfDownloading(true);
+    setPdfError(null);
+    try {
+      const supabase = createClient();
+      const { data: { session: s } } = await supabase.auth.getSession();
+      const res = await fetch(`/api/receipt/${order.id}/pdf`, {
+        headers: { Authorization: `Bearer ${s?.access_token ?? ""}` },
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(d.error ?? "Failed to generate PDF");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Receipt-${order.order_number}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setPdfError(err instanceof Error ? err.message : "Download failed");
+    } finally {
+      setPdfDownloading(false);
+    }
+  }
+
   async function handleEmailReceipt() {
     setEmailSending(true);
     setEmailError(null);
@@ -92,7 +135,10 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
 
         {/* Customer info */}
         <div className="px-6 py-3 border-b border-gray-100 bg-gray-50 text-xs text-gray-500 space-y-0.5">
-          <p><span className="font-semibold text-gray-600">Billed to:</span> {email}</p>
+          <div>
+            <span className="font-semibold text-gray-600">Billed to:</span>{" "}{billedTo}
+            {customerName && <span className="block text-gray-400 mt-0.5">{email}</span>}
+          </div>
           <p>
             <span className="font-semibold text-gray-600">Status:</span>{" "}
             <span className={`inline-block font-semibold px-2 py-0.5 rounded-full text-[11px] ${STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"}`}>
@@ -179,12 +225,37 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
         {/* Footer note */}
         <div className="px-6 pb-5">
           <p className="text-xs text-gray-400 text-center">
-            True Color Display Printing Ltd. &nbsp;·&nbsp; GST# applies &nbsp;·&nbsp; All amounts in CAD
+            True Color Display Printing Ltd. &nbsp;·&nbsp; {GST_DISPLAY} &nbsp;·&nbsp; All amounts in CAD
           </p>
         </div>
 
         {/* Actions */}
         <div className="px-6 pb-6 space-y-3 print:hidden">
+          {/* Download PDF — primary */}
+          <button
+            onClick={() => void handleDownloadPdf()}
+            disabled={pdfDownloading}
+            className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+          >
+            {pdfDownloading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Generating PDF…
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Download Receipt (PDF)
+              </>
+            )}
+          </button>
+          {pdfError && (
+            <p className="text-xs text-red-600 text-center">{pdfError}</p>
+          )}
+
+          {/* Email receipt — paid only */}
           {isPaid && (
             <div>
               {emailSent ? (
@@ -195,7 +266,7 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
                 <button
                   onClick={() => void handleEmailReceipt()}
                   disabled={emailSending}
-                  className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors"
+                  className="w-full border border-gray-200 text-gray-600 font-semibold py-3 rounded-xl text-sm hover:border-[#16C2F3] hover:text-[#16C2F3] disabled:opacity-60 transition-colors"
                 >
                   {emailSending ? "Sending…" : `✉ Email receipt to ${email}`}
                 </button>
@@ -205,12 +276,13 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
               )}
             </div>
           )}
+
           <div className="flex gap-3">
             <button
               onClick={handlePrint}
               className="flex-1 bg-[#1c1712] text-white font-bold py-3 rounded-xl text-sm hover:bg-black transition-colors"
             >
-              Print / Save PDF
+              🖨 Print
             </button>
             <button
               onClick={onClose}
@@ -224,7 +296,7 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
             className="block text-center text-xs text-gray-400 hover:text-[#16C2F3] transition-colors"
             target="_blank"
           >
-            Open as full page (shareable link) ↗
+            Open as full page ↗
           </Link>
         </div>
       </div>

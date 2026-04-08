@@ -23,7 +23,8 @@ interface OrderSummary {
   status: string;
   payment_method: string;
   payment_reference: string | null;
-  customers?: { email: string } | Array<{ email: string }> | null;
+  receipt_token: string | null;
+  customers?: { email: string; name: string; company: string | null } | Array<{ email: string; name: string; company: string | null }> | null;
 }
 
 export default async function OrderConfirmedPage({ searchParams }: Props) {
@@ -42,7 +43,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       // success AND cancellation/timeout, so we can't trust the redirect alone.
       const { data } = await supabase
         .from("orders")
-        .select("order_number, total, payment_method, payment_reference, status, customers(email)")
+        .select("order_number, total, payment_method, payment_reference, receipt_token, status, customers(email, name, company)")
         .eq("id", oid)
         .single();
 
@@ -230,6 +231,23 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Receipt download — shown once payment is confirmed */}
+        {oid && orderSummary && orderSummary.status !== "pending_payment" && orderSummary.receipt_token && (
+          <div className="mb-8 text-center">
+            <a
+              href={`/api/receipt/${oid}/pdf?token=${orderSummary.receipt_token}`}
+              download
+              className="inline-flex items-center gap-2 bg-[#1c1712] text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-black transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              Download Receipt (PDF)
+            </a>
+            <p className="text-xs text-gray-400 mt-2">For your records or accountant</p>
+          </div>
+        )}
 
         {/* Google Review CTA — highest-intent moment */}
         <div className="mb-8 p-5 bg-yellow-50 border border-yellow-200 rounded-2xl text-center">

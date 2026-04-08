@@ -35,6 +35,10 @@ export interface SendPaymentReceiptParams {
   discountCode?: string | null;
   discountAmount?: number | null;
   paymentMethod: string;
+  /** Order UUID — used to build the PDF download link */
+  oid?: string;
+  /** Guest receipt token — used to build the PDF download link (no login required) */
+  receiptToken?: string | null;
 }
 
 // ─── Public entry point ───────────────────────────────────────────────────────
@@ -59,8 +63,13 @@ export async function sendPaymentReceipt(
 
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://truecolorprinting.ca";
+
 function buildReceiptHtml(p: SendPaymentReceiptParams): string {
   const RUSH_FEE = 40;
+  const receiptPdfUrl = p.oid && p.receiptToken
+    ? `${APP_URL}/api/receipt/${p.oid}/pdf?token=${p.receiptToken}`
+    : null;
 
   const orderDate = new Date(p.createdAt).toLocaleDateString("en-CA", {
     timeZone: "America/Regina",
@@ -207,14 +216,31 @@ function buildReceiptHtml(p: SendPaymentReceiptParams): string {
             </td>
           </tr>
 
+          ${receiptPdfUrl ? `
+          <!-- ── PDF DOWNLOAD CTA ── -->
+          <tr>
+            <td style="background:#ffffff;padding:0 32px 28px;text-align:center;border-top:1px solid #f0ebe4;">
+              <a href="${receiptPdfUrl}"
+                style="display:inline-block;background:#1c1712;color:#ffffff;font-weight:700;font-size:14px;padding:13px 28px;border-radius:10px;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                &#8659;&nbsp; Download Receipt (PDF)
+              </a>
+              <p style="margin:8px 0 0;font-size:11px;color:#9ca3af;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                For your records or accountant &nbsp;&middot;&nbsp; No login required
+              </p>
+            </td>
+          </tr>` : ""}
+
           <!-- ── FOOTER ── -->
           <tr>
             <td style="background:#1c1712;border-radius:0 0 12px 12px;padding:20px 32px;text-align:center;">
               <p style="margin:0 0 4px;font-size:12px;color:#d6cfc7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                True Color Display Printing Ltd. &nbsp;·&nbsp; GST# applies &nbsp;·&nbsp; All amounts in CAD
+                True Color Display Printing Ltd. &nbsp;·&nbsp; ${process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file"} &nbsp;·&nbsp; All amounts in CAD
+              </p>
+              <p style="margin:0 0 4px;font-size:11px;color:#7a6a60;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                216 33rd St W, Saskatoon SK &nbsp;·&nbsp; info@true-color.ca &nbsp;·&nbsp; (306) 954-8688
               </p>
               <p style="margin:0;font-size:11px;color:#7a6a60;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                216 33rd St W, Saskatoon SK &nbsp;·&nbsp; info@true-color.ca &nbsp;·&nbsp; (306) 954-8688
+                <a href="https://truecolorprinting.ca" style="color:#16C2F3;text-decoration:none;">truecolorprinting.ca</a>
               </p>
             </td>
           </tr>
@@ -232,6 +258,9 @@ function buildReceiptHtml(p: SendPaymentReceiptParams): string {
 
 function buildReceiptText(p: SendPaymentReceiptParams): string {
   const RUSH_FEE = 40;
+  const receiptPdfUrl = p.oid && p.receiptToken
+    ? `${APP_URL}/api/receipt/${p.oid}/pdf?token=${p.receiptToken}`
+    : null;
   const orderDate = new Date(p.createdAt).toLocaleDateString("en-CA", {
     timeZone: "America/Regina",
     month: "long",
@@ -273,9 +302,12 @@ function buildReceiptText(p: SendPaymentReceiptParams): string {
     `  PST (6%):     $${p.pst.toFixed(2)}`,
     `  TOTAL:        $${p.total.toFixed(2)} CAD`,
     "",
+    receiptPdfUrl ? `Download Receipt (PDF): ${receiptPdfUrl}` : "",
+    "",
     "True Color Display Printing Ltd.",
     "216 33rd St W, Saskatoon SK · info@true-color.ca · (306) 954-8688",
-    "GST# applies · All amounts in CAD",
+    "truecolorprinting.ca",
+    `${process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file"} · All amounts in CAD`,
   ].filter(Boolean);
 
   return lines.join("\n");

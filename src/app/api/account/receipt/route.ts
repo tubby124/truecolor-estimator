@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     .from("orders")
     .select(
       `id, order_number, status, subtotal, gst, pst, total, is_rush,
-       discount_code, discount_amount, payment_method, created_at,
+       discount_code, discount_amount, payment_method, created_at, receipt_token,
        order_items ( product_name, qty, width_in, height_in, sides, line_total ),
        customers ( name, email )`
     )
@@ -105,6 +105,8 @@ export async function POST(req: NextRequest) {
       discountCode: order.discount_code,
       discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
       paymentMethod: order.payment_method,
+      oid: order.id,
+      receiptToken: (order as { receipt_token?: string | null }).receipt_token ?? null,
     });
 
     return NextResponse.json({ ok: true });

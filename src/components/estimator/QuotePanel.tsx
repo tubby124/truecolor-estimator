@@ -473,7 +473,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
           </div>
           <div className="px-4 py-3 space-y-1.5">
             <CostLine label="Material" value={cost.material_cost} />
-            <CostLine label="Ink" value={cost.ink_cost} />
+            <CostLine label={result.rules_fired.includes("CR-KONICA-CPC") ? "Print CPC (Konica)" : result.rules_fired.includes("CR-ROLAND-INK") ? "Ink (Roland)" : "Ink"} value={cost.ink_cost} />
             <CostLine label="Labor" value={cost.labor_cost} />
             <CostLine label="Overhead" value={cost.overhead_cost} />
             {result.qty_discount_applied && result.qty_discount_pct && (

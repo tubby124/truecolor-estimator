@@ -86,7 +86,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         const { data: order } = await supabase
           .from("orders")
           .select(`order_number, subtotal, gst, pst, total, is_rush, discount_code,
-                   discount_amount, wave_invoice_id, payment_method, created_at,
+                   discount_amount, wave_invoice_id, payment_method, created_at, receipt_token,
                    order_items ( product_name, qty, width_in, height_in, sides, line_total ),
                    customers ( name, email )`)
           .eq("id", id)
@@ -136,6 +136,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
                 discountCode: order.discount_code ?? null,
                 discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
                 paymentMethod: order.payment_method ?? undefined,
+                oid: id,
+                receiptToken: (order as { receipt_token?: string | null }).receipt_token ?? null,
               });
               console.log(`[staff/orders/status] receipt sent at payment_received → ${customer.email}`);
             } catch (receiptErr) {

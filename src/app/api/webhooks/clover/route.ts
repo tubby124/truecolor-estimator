@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
                   try {
                     const { data: fullOrder } = await supabase
                       .from("orders")
-                      .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
+                      .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, receipt_token, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
                       .eq("id", order.id)
                       .single();
                     if (fullOrder) {
@@ -144,6 +144,8 @@ export async function POST(req: NextRequest) {
                         discountCode: fullOrder.discount_code ?? null,
                         discountAmount: fullOrder.discount_amount ? Number(fullOrder.discount_amount) : null,
                         paymentMethod: "clover_card",
+                        oid: order.id,
+                        receiptToken: fullOrder.receipt_token ?? null,
                       });
                       console.log(`[clover-webhook] receipt sent → ${customer.email}`);
 

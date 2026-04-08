@@ -38,7 +38,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
       .select(`
         id, order_number, status, payment_method,
         subtotal, gst, pst, total, is_rush,
-        discount_code, discount_amount, wave_invoice_id, created_at,
+        discount_code, discount_amount, wave_invoice_id, created_at, receipt_token,
         order_items ( product_name, qty, width_in, height_in, sides, line_total ),
         customers ( name, email, marketing_consent )
       `)
@@ -143,6 +143,8 @@ export async function POST(_req: NextRequest, { params }: Params) {
         discountCode: order.discount_code ?? null,
         discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
         paymentMethod: "etransfer",
+        oid: order.id,
+        receiptToken: order.receipt_token ?? null,
       });
       console.log(`[confirm-etransfer] receipt sent → ${customer.email}`);
     } catch (e) {

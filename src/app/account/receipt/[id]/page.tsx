@@ -42,8 +42,10 @@ interface Order {
   discount_code: string | null;
   discount_amount: number | null;
   payment_method: string;
+  receipt_token: string | null;
   created_at: string;
   order_items: OrderItem[];
+  customers?: { name: string; company: string | null } | Array<{ name: string; company: string | null }> | null;
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -63,6 +65,9 @@ export default function ReceiptPage({
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+
+  const [pdfDownloading, setPdfDownloading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -92,6 +97,35 @@ export default function ReceiptPage({
     }
     void load();
   }, [id, router]);
+
+  async function handleDownloadPdf() {
+    setPdfDownloading(true);
+    setPdfError(null);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`/api/receipt/${id}/pdf`, {
+        headers: { Authorization: `Bearer ${session?.access_token ?? ""}` },
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(d.error ?? "Failed to generate PDF");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Receipt-${order?.order_number ?? id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setPdfError(err instanceof Error ? err.message : "Download failed");
+    } finally {
+      setPdfDownloading(false);
+    }
+  }
 
   async function handleEmailReceipt() {
     setEmailSending(true);
@@ -149,6 +183,17 @@ export default function ReceiptPage({
     month: "long", day: "numeric", year: "numeric",
   });
 
+  const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;
+  const customerName = customerRaw?.name ?? null;
+  const customerCompany = customerRaw?.company ?? null;
+  const billedTo = customerName
+    ? customerCompany
+      ? `${customerName} (${customerCompany})`
+      : customerName
+    : email;
+
+  const GST_DISPLAY = process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file";
+
   const paymentLabel =
     order.payment_method === "clover_card"
       ? "Credit / debit card"
@@ -202,7 +247,10 @@ export default function ReceiptPage({
 
         {/* Customer + status row */}
         <div className="px-8 py-4 border-b border-gray-100 bg-gray-50 text-sm text-gray-500 flex flex-wrap gap-x-8 gap-y-1">
-          <p><span className="font-semibold text-gray-600">Billed to:</span> {email}</p>
+          <div>
+            <span className="font-semibold text-gray-600">Billed to:</span>{" "}{billedTo}
+            {customerName && <div className="text-xs text-gray-400 mt-0.5">{email}</div>}
+          </div>
           <p>
             <span className="font-semibold text-gray-600">Status:</span>{" "}
             <span className={`inline-block font-semibold px-2 py-0.5 rounded-full text-xs ${STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"}`}>
@@ -279,12 +327,37 @@ export default function ReceiptPage({
         {/* Footer note */}
         <div className="px-8 pb-4">
           <p className="text-xs text-gray-400 text-center">
-            True Color Display Printing Ltd. &nbsp;·&nbsp; GST# applies &nbsp;·&nbsp; All amounts in CAD
+            True Color Display Printing Ltd. &nbsp;·&nbsp; {GST_DISPLAY} &nbsp;·&nbsp; All amounts in CAD
           </p>
         </div>
 
         {/* Actions — hidden on print */}
         <div className="px-8 pb-8 space-y-3 print:hidden">
+          {/* Download PDF — primary action */}
+          <button
+            onClick={() => void handleDownloadPdf()}
+            disabled={pdfDownloading}
+            className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+          >
+            {pdfDownloading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Generating PDF…
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Download Receipt (PDF)
+              </>
+            )}
+          </button>
+          {pdfError && (
+            <p className="text-xs text-red-600 mt-1 text-center">{pdfError}</p>
+          )}
+
+          {/* Email receipt — paid orders only */}
           {isPaid && (
             <div>
               {emailSent ? (
@@ -295,7 +368,7 @@ export default function ReceiptPage({
                 <button
                   onClick={() => void handleEmailReceipt()}
                   disabled={emailSending}
-                  className="w-full bg-[#16C2F3] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#0fb0dd] disabled:opacity-60 transition-colors"
+                  className="w-full border border-gray-200 text-gray-600 font-semibold py-3 rounded-xl text-sm hover:border-[#16C2F3] hover:text-[#16C2F3] disabled:opacity-60 transition-colors"
                 >
                   {emailSending ? "Sending…" : `✉ Email receipt to ${email}`}
                 </button>
@@ -305,11 +378,13 @@ export default function ReceiptPage({
               )}
             </div>
           )}
+
+          {/* Print fallback */}
           <button
             onClick={() => window.print()}
             className="w-full bg-[#1c1712] text-white font-bold py-3 rounded-xl text-sm hover:bg-black transition-colors"
           >
-            Print / Save PDF
+            🖨 Print
           </button>
           <Link
             href="/account"

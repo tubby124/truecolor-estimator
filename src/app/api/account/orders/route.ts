@@ -63,9 +63,11 @@ export async function GET(req: NextRequest) {
       created_at,
       is_rush,
       payment_method,
+      receipt_token,
       proof_storage_path,
       proof_sent_at,
       file_storage_paths,
+      customers ( name, company ),
       order_items (
         id,
         product_name,

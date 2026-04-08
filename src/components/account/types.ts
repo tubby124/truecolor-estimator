@@ -30,11 +30,13 @@ export interface Order {
   created_at: string;
   is_rush: boolean;
   payment_method: string;
+  receipt_token: string | null;
   pay_url: string | null;
   proof_storage_path: string | null;
   proof_sent_at: string | null;
   file_storage_paths: string[] | null;
   order_items: OrderItem[];
+  customers?: { name: string; company: string | null } | Array<{ name: string; company: string | null }> | null;
 }
 
 export interface SessionData {

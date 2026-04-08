@@ -439,14 +439,17 @@ function computeCost(
   }
 
   if (isKonica) {
-    // Konica: cost per sheet (click charge).
+    // Konica AccurioPress C3070 CPC (cost-per-click).
+    // Contract: Order S00665431, 60-month maintenance, 3% annual escalation.
+    // Colour $0.054 base → escalated per year. B/W $0.011 base (rarely used).
+    // All Konica products are full-colour; rate from config konica_ink_cost_per_sheet.
     // For business cards, divide qty by imposition factor to get number of sheets printed.
     const konicaRate = getConfigNum("konica_ink_cost_per_sheet");
     const imposition = category === "BUSINESS_CARD"
       ? getConfigNum("bc_imposition_factor")
       : 1;
     inkCost = round2(Math.ceil(qty / imposition) * sides * konicaRate);
-    rulesFired.push("CR-PAPER-INK-COLOR");
+    rulesFired.push("CR-KONICA-CPC");
   } else if (sqft) {
     // Roland wide-format ink cost
     const rolandRate = getConfigNum("roland_ink_cost_per_sqft");
