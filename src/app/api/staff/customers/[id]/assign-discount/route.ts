@@ -7,7 +7,7 @@
  *   - If no pending order: sends a "discount is on your account" notification email.
  *
  * Body: { code: string }
- * Returns: { ok: true, action: "invoice_updated" | "code_assigned_no_order", orderId?: string, newTotal?: number }
+ * Returns: { ok: true, action: "invoice_updated" | "code_assigned_no_order", orderCount?: number }
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -107,8 +107,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Failed to attach code to account" }, { status: 500 });
     }
 
-    // 6. Find most recent pending_payment order
-    const { data: order } = await supabase
+    // 6. Find all pending_payment orders for this customer
+    const { data: orders } = await supabase
       .from("orders")
       .select(`
         id, order_number, status, is_rush, subtotal, gst, pst, total,
@@ -117,12 +117,10 @@ export async function POST(req: NextRequest, { params }: Params) {
       `)
       .eq("customer_id", customer.id)
       .eq("status", "pending_payment")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("created_at", { ascending: false });
 
-    // 7a. No pending order — send notification email and return
-    if (!order) {
+    // 7a. No pending orders — send notification email and return
+    if (!orders?.length) {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
       await sendEmail({
         to: customer.email,
@@ -137,6 +135,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ ok: true, action: "code_assigned_no_order" });
     }
 
+    for (const order of orders) {
     // 8. Tax recalculation
     const rush = order.is_rush ? RUSH_FEE : 0;
     const originalSubtotal = Number(order.subtotal);
@@ -251,12 +250,12 @@ export async function POST(req: NextRequest, { params }: Params) {
     console.log(
       `[assign-discount] order ${order.order_number} updated | code=${dc.code} | discount=$${discountAmount} | newTotal=$${newTotal} | email → ${customer.email}`
     );
+    } // end for (const order of orders)
 
     return NextResponse.json({
       ok: true,
       action: "invoice_updated",
-      orderId: order.id,
-      newTotal,
+      orderCount: orders.length,
     });
   } catch (err) {
     console.error("[assign-discount]", err instanceof Error ? err.message : err);
