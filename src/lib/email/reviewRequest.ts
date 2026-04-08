@@ -23,6 +23,7 @@ export interface ReviewRequestParams {
 }
 
 // ─── Google review link ───────────────────────────────────────────────────────
+// verified 2026-04-08 — opens True Color Display Printing Ltd. Google review dialog
 const GOOGLE_REVIEW_URL =
   "https://g.page/r/CZH6HlbNejQAEAE/review";
 
