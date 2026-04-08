@@ -19,6 +19,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
+import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
               try {
                 const { data: customer } = await supabase
                   .from("customers")
-                  .select("email, name")
+                  .select("email, name, marketing_consent")
                   .eq("id", order.customer_id)
                   .single();
                 if (customer) {
@@ -176,27 +177,29 @@ export async function POST(req: NextRequest) {
                         }
                       }
                     }
+
+                    // Brevo sync at payment_received (shifted from order creation — TC-15)
+                    // Inside fullOrder block so order_items are in scope for productSummary
+                    try {
+                      const nameParts = customer.name.trim().split(/\s+/);
+                      const orderItemNames = (Array.isArray(fullOrder?.order_items) ? fullOrder!.order_items as { product_name: string }[] : [])
+                        .map((i) => i.product_name).join(", ");
+                      await syncCustomerToBrevo({
+                        email: customer.email,
+                        firstName: nameParts[0] || customer.name,
+                        lastName: nameParts.slice(1).join(" ") || undefined,
+                        orderNumber: order.order_number,
+                        orderTotal: Number(order.total),
+                        productSummary: orderItemNames,
+                        source: "checkout",
+                        accountStatus: "none",
+                        marketingConsent: (customer as { marketing_consent?: boolean | null }).marketing_consent === true,
+                      });
+                    } catch (brevoErr) {
+                      console.error("[clover-webhook] Brevo sync failed (non-fatal):", brevoErr);
+                    }
                   } catch (receiptErr) {
                     console.error("[clover-webhook] receipt failed (non-fatal):", receiptErr);
-                  }
-                }
-
-                if (customer?.email) {
-                  try {
-                    await fetch("https://api.brevo.com/v3/contacts", {
-                      method: "POST",
-                      headers: {
-                        "api-key": process.env.BREVO_API_KEY!,
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        email: customer.email,
-                        attributes: { LAST_PAYMENT_DATE: new Date().toISOString().slice(0, 10) },
-                        updateEnabled: true,
-                      }),
-                    });
-                  } catch (brevoErr) {
-                    console.error("[clover-webhook] Brevo LAST_PAYMENT_DATE update failed (non-fatal):", brevoErr);
                   }
                 }
               } catch (emailErr) {

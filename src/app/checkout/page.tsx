@@ -125,6 +125,9 @@ export default function CheckoutPage() {
   const [uploadProgress, setUploadProgress] = useState("");
   const [uploadedCount, setUploadedCount] = useState(0);
 
+  // CASL marketing consent — unchecked by default (required by Canadian law)
+  const [marketingConsent, setMarketingConsent] = useState(false);
+
   // Rush + payment state
   const [isRush, setIsRush] = useState(false);
   const [payMethod, setPayMethod] = useState<"clover_card" | "etransfer">("clover_card");
@@ -416,6 +419,7 @@ export default function CheckoutPage() {
         file_storage_paths: filePaths.length > 0 ? filePaths : undefined,
         discount_code: appliedDiscount?.code,
         discount_amount: appliedDiscount?.amount,
+        marketing_consent: marketingConsent,
       };
       const res = await fetch("/api/orders", {
         method: "POST",
@@ -845,6 +849,11 @@ export default function CheckoutPage() {
                   info@true-color.ca
                 </a>
               </p>
+              {artworkFiles.some((f) => /\.(jpe?g|png|webp)$/i.test(f.name)) && (
+                <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
+                  <strong>Heads up:</strong> JPG/PNG files may be low resolution for large-format printing. We&apos;ll review your file and let you know — if upscaling is needed, we can help with that before we print.
+                </p>
+              )}
             </section>
 
             {/* Rush toggle */}
@@ -862,6 +871,26 @@ export default function CheckoutPage() {
                   </p>
                   <p className="text-sm text-gray-500">
                     Ready the same day if ordered before 10 AM. Call to confirm.
+                  </p>
+                </div>
+              </label>
+            </section>
+
+            {/* CASL marketing consent — unchecked by default */}
+            <section>
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={marketingConsent}
+                  onChange={(e) => setMarketingConsent(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-[#16C2F3] shrink-0"
+                />
+                <div>
+                  <p className="text-sm text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
+                    Send me updates on new products, promotions, and print tips
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    You can unsubscribe at any time.
                   </p>
                 </div>
               </label>

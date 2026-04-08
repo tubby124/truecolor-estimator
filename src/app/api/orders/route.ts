@@ -22,7 +22,6 @@ import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { estimate } from "@/lib/engine";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
-import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -39,6 +38,7 @@ export interface CreateOrderRequest {
   file_storage_paths?: string[];
   discount_code?: string;   // optional — re-validated server-side before use
   discount_amount?: number; // client hint only — authoritative amount comes from DB
+  marketing_consent?: boolean; // CASL — explicit opt-in from checkout checkbox
 }
 
 const GST_RATE = 0.05;
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode } = body;
+    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode, marketing_consent } = body;
 
     if (!rawItems?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -165,6 +165,18 @@ export async function POST(req: NextRequest) {
     if (custErr || !customer) {
       console.error("[orders] customer upsert:", custErr);
       return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
+    }
+
+    // Save CASL marketing consent (non-fatal — columns added via migration)
+    if (marketing_consent !== undefined) {
+      void supabase
+        .from("customers")
+        .update({
+          marketing_consent: marketing_consent === true,
+          consent_at: new Date().toISOString(),
+          consent_ip: ip,
+        } as Record<string, unknown>)
+        .eq("id", customer.id);
     }
 
     // Update address if provided (non-fatal — column added via migration, may not exist yet)
@@ -563,24 +575,8 @@ export async function POST(req: NextRequest) {
       console.error("[orders] confirmation email failed (non-fatal):", emailErr);
     }
 
-    // 9. Sync customer to Brevo (non-fatal)
-    try {
-      const nameParts = contact.name.trim().split(/\s+/);
-      await syncCustomerToBrevo({
-        email: contact.email.toLowerCase().trim(),
-        firstName: nameParts[0] || contact.name.trim(),
-        lastName: nameParts.slice(1).join(" ") || undefined,
-        company: contact.company?.trim() || undefined,
-        phone: contact.phone?.trim() || undefined,
-        orderNumber: order.order_number,
-        orderTotal: total,
-        productSummary: items.map((i) => i.product_name).join(", "),
-        source: "checkout",
-        accountStatus: "none",
-      });
-    } catch (brevoErr) {
-      console.error("[orders] Brevo sync failed (non-fatal):", brevoErr);
-    }
+    // 9. Brevo sync deferred to payment_received — see webhooks/clover/route.ts and confirm-etransfer/route.ts
+    // Syncing at pending_payment caused drip emails to fire before payment was confirmed (TC-15).
 
     // 10. Send staff notification email (non-fatal)
     try {

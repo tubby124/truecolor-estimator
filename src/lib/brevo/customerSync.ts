@@ -31,6 +31,7 @@ export interface CustomerSyncParams {
   productSummary: string;
   source: "checkout" | "manual_order" | "quote";
   accountStatus: "active" | "created" | "none";
+  marketingConsent?: boolean; // CASL — only add to drip list when true
 }
 
 /**
@@ -57,6 +58,7 @@ export async function syncCustomerToBrevo(
     productSummary,
     source,
     accountStatus,
+    marketingConsent,
   } = params;
 
   const now = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
@@ -95,7 +97,7 @@ export async function syncCustomerToBrevo(
     LAST_ORDER_NUMBER: orderNumber,
     LAST_PRODUCT: productSummary.slice(0, 100),
     CUSTOMER_SOURCE: source,
-    CONSENT_TYPE: "implied_business",
+    CONSENT_TYPE: marketingConsent === true ? "explicit_opt_in" : "none",
     ACCOUNT_STATUS: accountStatus,
   };
 
@@ -116,7 +118,8 @@ export async function syncCustomerToBrevo(
     body: JSON.stringify({
       email,
       attributes,
-      listIds: [CUSTOMER_LIST_ID],
+      // Only add to drip list on explicit CASL opt-in — CASL requires unchecked-by-default consent
+      ...(marketingConsent === true ? { listIds: [CUSTOMER_LIST_ID] } : {}),
       updateEnabled: true, // update if exists, create if not
     }),
     signal: AbortSignal.timeout(10_000),

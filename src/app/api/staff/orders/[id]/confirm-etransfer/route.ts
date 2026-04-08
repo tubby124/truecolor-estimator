@@ -18,6 +18,7 @@ import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { sendEmail } from "@/lib/email/smtp";
 import { escHtml } from "@/lib/email/components/escHtml";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
+import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -39,7 +40,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
         subtotal, gst, pst, total, is_rush,
         discount_code, discount_amount, wave_invoice_id, created_at,
         order_items ( product_name, qty, width_in, height_in, sides, line_total ),
-        customers ( name, email )
+        customers ( name, email, marketing_consent )
       `)
       .eq("id", id)
       .single();
@@ -60,7 +61,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
     }
 
     const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;
-    const customer = customerRaw as { name: string; email: string } | null;
+    const customer = customerRaw as { name: string; email: string; marketing_consent?: boolean | null } | null;
 
     if (!customer?.email) {
       return NextResponse.json({ error: "No customer email on this order" }, { status: 400 });
@@ -79,6 +80,25 @@ export async function POST(_req: NextRequest, { params }: Params) {
     }
 
     console.log(`[confirm-etransfer] order ${order.order_number} → payment_received`);
+
+    // Brevo sync at payment_received (shifted from order creation — TC-15)
+    try {
+      const nameParts = customer.name.trim().split(/\s+/);
+      const orderItemsRaw = Array.isArray(order.order_items) ? order.order_items : [];
+      await syncCustomerToBrevo({
+        email: customer.email,
+        firstName: nameParts[0] || customer.name,
+        lastName: nameParts.slice(1).join(" ") || undefined,
+        orderNumber: order.order_number,
+        orderTotal: Number(order.total),
+        productSummary: (orderItemsRaw as { product_name: string }[]).map((i) => i.product_name).join(", "),
+        source: "checkout",
+        accountStatus: "none",
+        marketingConsent: customer.marketing_consent === true,
+      });
+    } catch (brevoErr) {
+      console.error("[confirm-etransfer] Brevo sync failed (non-fatal):", brevoErr);
+    }
 
     const items = Array.isArray(order.order_items) ? order.order_items : [];
     const totalStr = Number(order.total).toFixed(2);
