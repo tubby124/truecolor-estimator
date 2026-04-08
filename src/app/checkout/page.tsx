@@ -787,7 +787,10 @@ export default function CheckoutPage() {
 
             {/* Artwork files — multi-file */}
             <section>
-              <h2 className="text-lg font-bold text-[#1c1712] mb-3">Attach your artwork</h2>
+              <h2 className="text-lg font-bold text-[#1c1712] mb-1">Attach your artwork</h2>
+              <p className="text-xs text-gray-500 mb-3">
+                Best quality: <strong>PDF or EPS</strong> (vector, 300 DPI+). JPG/PNG accepted but may need upscaling for large-format prints.
+              </p>
               {/* Hidden file input — triggered by clicking the drop zone */}
               <input
                 ref={artworkInputRef}
@@ -844,7 +847,7 @@ export default function CheckoutPage() {
                 ) : (
                   <div>
                     <p className="text-sm text-gray-500">Drop your files here or click to browse</p>
-                    <p className="text-xs text-gray-400 mt-1">PDF, AI, EPS, JPG, PNG — up to 50 MB each · Select multiple files at once</p>
+                    <p className="text-xs text-gray-400 mt-1">PDF · EPS · AI · JPG · PNG — up to 50 MB each · Select multiple files at once</p>
                   </div>
                 )}
               </div>
