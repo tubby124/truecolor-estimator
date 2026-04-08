@@ -54,6 +54,10 @@ export default async function PaymentGatewayPage({ params }: Props) {
         .select("total, status")
         .eq("id", orderId)
         .maybeSingle();
+      // Block if already paid — prevents duplicate charges when customer clicks link again
+      if (orderCheck?.status === "payment_received" || orderCheck?.status === "completed") {
+        return <AlreadyPaidPage />;
+      }
       if (orderCheck?.status === "pending_payment") {
         const dbAmountCents = Math.round(Number(orderCheck.total) * 100);
         if (dbAmountCents !== amountCents) {
@@ -84,6 +88,59 @@ export default async function PaymentGatewayPage({ params }: Props) {
   }
 
   redirect(checkoutUrl);
+}
+
+function AlreadyPaidPage() {
+  return (
+    <html lang="en">
+      <body
+        style={{
+          margin: 0,
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          background: "#f1f5f9",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 480,
+            margin: "80px auto",
+            padding: "40px 32px",
+            background: "white",
+            borderRadius: 16,
+            boxShadow: "0 1px 8px rgba(0,0,0,0.08)",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: 48, margin: "0 0 16px" }}>✅</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 10px" }}>
+            Payment Already Received
+          </h1>
+          <p style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.6, margin: "0 0 28px" }}>
+            This order has already been paid. No further action is needed.
+            If you have questions, please contact us.
+          </p>
+          <a
+            href="mailto:info@true-color.ca?subject=Payment question"
+            style={{
+              display: "inline-block",
+              background: "#16C2F3",
+              color: "white",
+              fontWeight: 600,
+              fontSize: 14,
+              padding: "12px 28px",
+              borderRadius: 8,
+              textDecoration: "none",
+            }}
+          >
+            Contact Us →
+          </a>
+          <p style={{ fontSize: 12, color: "#9ca3af", marginTop: 24 }}>
+            True Color Display Printing · info@true-color.ca
+          </p>
+        </div>
+      </body>
+    </html>
+  );
 }
 
 function UpdatedLinkPage() {

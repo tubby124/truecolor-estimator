@@ -82,23 +82,43 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       )}
 
       <main id="main-content" className="max-w-2xl mx-auto px-6 py-20 text-center">
-        {/* Animated checkmark */}
+        {/* Poll for payment confirmation while webhook catches up — must be first to start polling immediately */}
+        {isCloverPending && oid && <CloverPaymentWatcher oid={oid} />}
+
+        {/* Icon — pending clock vs confirmed checkmark */}
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-[#16C2F3] rounded-full flex items-center justify-center check-in-anim">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-              stroke="white"
-              className="w-8 h-8"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-            </svg>
-          </div>
+          {isCloverPending ? (
+            <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="white"
+                className="w-8 h-8"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+          ) : (
+            <div className="w-16 h-16 bg-[#16C2F3] rounded-full flex items-center justify-center check-in-anim">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="white"
+                className="w-8 h-8"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+            </div>
+          )}
         </div>
 
-        <h1 className="text-3xl font-bold text-[#1c1712] mb-3">Order received!</h1>
+        <h1 className="text-3xl font-bold text-[#1c1712] mb-3">
+          {isCloverPending ? "Verifying your payment…" : "Order confirmed!"}
+        </h1>
 
         {/* Order number badge */}
         {orderSummary?.order_number && (
@@ -109,12 +129,11 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         )}
 
         <p className="text-gray-500 text-lg mb-10 leading-relaxed">
-          We&apos;ve got your order and will have it ready for pickup at{" "}
-          <span className="font-semibold text-[#1c1712]">216 33rd St W, Saskatoon</span>.
+          {isCloverPending
+            ? "Please wait while we verify your card payment. Do not close this page or pay again."
+            : <>We&apos;ve got your order and will have it ready for pickup at{" "}<span className="font-semibold text-[#1c1712]">216 33rd St W, Saskatoon</span>.</>
+          }
         </p>
-
-        {/* Poll for payment confirmation while webhook catches up */}
-        {isCloverPending && oid && <CloverPaymentWatcher oid={oid} />}
 
         {/* Clover payment processing notice — shown while webhook hasn't confirmed yet */}
         {isCloverPending && (

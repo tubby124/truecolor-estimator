@@ -216,11 +216,9 @@ export async function POST(req: NextRequest, { params }: Params) {
     const payToken = encodePaymentToken(newTotal, description, customer.email, redirectUrl);
     const paymentUrl = `${siteUrl}/pay/${payToken}`;
 
-    // Best-effort: update payment_reference with new URL
-    void supabase
-      .from("orders")
-      .update({ payment_reference: paymentUrl } as Record<string, unknown>)
-      .eq("id", order.id);
+    // NOTE: do NOT update payment_reference — it is set to the order UUID by /pay/[token]
+    // when the customer clicks, and the Clover webhook matches on it.
+    // Overwriting it with the URL breaks webhook matching.
 
     // 11. Send updated payment email
     // Pass originalSubtotal so customer sees pre-discount subtotal, then discount row, then new total

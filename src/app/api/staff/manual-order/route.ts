@@ -249,10 +249,8 @@ export async function POST(req: NextRequest) {
         const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
         paymentUrl = `${siteUrl}/pay/${token}`;
 
-        void supabase
-          .from("orders")
-          .update({ payment_reference: paymentUrl } as Record<string, unknown>)
-          .eq("id", order.id);
+        // NOTE: do NOT set payment_reference to the URL — the Clover webhook matches on it
+        // using the order UUID. /pay/[token] sets it correctly when the customer clicks.
       } catch (tokenErr) {
         console.error("[manual-order] payment token encode:", tokenErr);
         return NextResponse.json({ error: "Failed to generate payment link" }, { status: 500 });

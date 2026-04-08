@@ -466,13 +466,16 @@ export async function POST(req: NextRequest) {
         "https://truecolorprinting.ca";
       const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
 
-      const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl);
+      // Pass order.id as externalReferenceId so Clover echoes it back in PAYMENT webhook events.
+      // This lets the webhook match the order even if the customer bypasses /pay/[token].
+      const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl, order.id);
       checkoutUrl = clover.checkoutUrl;
 
-      // Save Clover session ref (best-effort)
+      // Pre-set payment_reference to order UUID so webhook can match before /pay/[token] is clicked.
+      // /pay/[token] will also set this — no conflict since the value is the same.
       void supabase
         .from("orders")
-        .update({ payment_reference: clover.sessionId } as Record<string, unknown>)
+        .update({ payment_reference: order.id } as Record<string, unknown>)
         .eq("id", order.id);
 
       // Build a durable /pay/{token} URL for the email (30-day validity, creates fresh Clover session on each click)
