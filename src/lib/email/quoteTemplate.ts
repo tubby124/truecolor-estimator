@@ -305,7 +305,7 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
                 <a href="https://truecolorprinting.ca" style="color: #f08080; text-decoration: none;">truecolorprinting.ca</a>
               </p>
               <p style="margin: 0; font-size: 11px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                ${process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file"} · All prices in CAD · Pricing v1_2026-02-19
+                ${process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001"} · All prices in CAD · Pricing v1_2026-02-19
               </p>
             </td>
           </tr>

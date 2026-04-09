@@ -192,7 +192,7 @@ export default function ReceiptPage({
       : customerName
     : email;
 
-  const GST_DISPLAY = process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file";
+  const GST_DISPLAY = process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001";
 
   const paymentLabel =
     order.payment_method === "clover_card"

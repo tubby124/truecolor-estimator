@@ -6,7 +6,7 @@
  */
 
 export function emailFooter(extra?: string): string {
-  const gstNumber = process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file";
+  const gstNumber = process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001";
   const extraLine = extra
     ? `
             <p style="margin:0;font-size:11px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">

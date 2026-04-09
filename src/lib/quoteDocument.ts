@@ -65,7 +65,7 @@ const SHARED_CSS = `
   .item-number { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #9ca3af; margin-bottom: 6px; }
 `;
 
-const GST_NUMBER = process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file";
+const GST_NUMBER = process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001";
 
 const SIGNATURE_FOOTER = `
   <div class="signature-box">

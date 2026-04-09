@@ -93,6 +93,9 @@ const localBusinessSchema = {
   "@type": ["LocalBusiness", "Store"],
   "@id": "https://truecolorprinting.ca/#localbusiness",
   name: "True Color Display Printing",
+  legalName: "True Color Display Printing Ltd.",
+  taxID: "731454914RT0001",
+  vatID: "731454914RT0001",
   description:
     "Saskatoon print shop specializing in coroplast signs, vinyl banners, vehicle magnets, business cards, and large format printing. In-house designer. Instant online pricing.",
   url: "https://truecolorprinting.ca",

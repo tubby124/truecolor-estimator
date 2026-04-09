@@ -57,7 +57,7 @@ const GRAY_BORDER = "#e5e7eb";
 
 const PAID_STATUSES = ["payment_received", "in_production", "ready_for_pickup", "complete"];
 
-const GST_NUMBER = process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file";
+const GST_NUMBER = process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001";
 
 // ─── Styles ────────────────────────────────────────────────────────────────────
 

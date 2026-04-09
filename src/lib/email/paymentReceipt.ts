@@ -234,7 +234,7 @@ function buildReceiptHtml(p: SendPaymentReceiptParams): string {
           <tr>
             <td style="background:#1c1712;border-radius:0 0 12px 12px;padding:20px 32px;text-align:center;">
               <p style="margin:0 0 4px;font-size:12px;color:#d6cfc7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                True Color Display Printing Ltd. &nbsp;·&nbsp; ${process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file"} &nbsp;·&nbsp; All amounts in CAD
+                True Color Display Printing Ltd. &nbsp;·&nbsp; ${process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001"} &nbsp;·&nbsp; All amounts in CAD
               </p>
               <p style="margin:0 0 4px;font-size:11px;color:#7a6a60;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
                 216 33rd St W, Saskatoon SK &nbsp;·&nbsp; info@true-color.ca &nbsp;·&nbsp; (306) 954-8688
@@ -307,7 +307,7 @@ function buildReceiptText(p: SendPaymentReceiptParams): string {
     "True Color Display Printing Ltd.",
     "216 33rd St W, Saskatoon SK · info@true-color.ca · (306) 954-8688",
     "truecolorprinting.ca",
-    `${process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file"} · All amounts in CAD`,
+    `${process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001"} · All amounts in CAD`,
   ].filter(Boolean);
 
   return lines.join("\n");

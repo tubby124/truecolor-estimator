@@ -33,7 +33,7 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
       : customerName
     : email;
 
-  const GST_DISPLAY = process.env.NEXT_PUBLIC_GST_NUMBER ?? "GST# on file";
+  const GST_DISPLAY = process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001";
 
   async function handleDownloadPdf() {
     setPdfDownloading(true);
