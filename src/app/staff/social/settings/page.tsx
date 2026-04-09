@@ -179,7 +179,7 @@ export default async function SettingsPage() {
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
           <h2 className="text-sm font-bold text-[#1c1712] mb-3">Quick Reference</h2>
           <div className="space-y-2 text-xs text-gray-500">
-            <p>📍 <span className="font-semibold text-gray-700">True Color Display Printing</span> · 216 33rd St W, Saskatoon, SK S7L 0P5</p>
+            <p>📍 <span className="font-semibold text-gray-700">True Color Display Printing</span> · 216 33rd St W, Saskatoon, SK S7L 0V1</p>
             <p>🌐 <span className="font-mono">truecolorprinting.ca</span></p>
             <p>📱 AI captions via OpenRouter → <span className="font-mono">anthropic/claude-sonnet-4-6</span></p>
             <p>📤 Social posting via Blotato (n8n community node: <span className="font-mono">n8n-nodes-blotato</span>)</p>

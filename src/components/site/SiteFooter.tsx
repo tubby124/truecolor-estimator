@@ -49,7 +49,7 @@ export function SiteFooter() {
                 className="block hover:text-white transition-colors"
               >
                 216 33rd St W (upstairs)<br />
-                Saskatoon, SK S7L 0V5
+                Saskatoon, SK S7L 0V1
               </a>
               <p className="text-gray-400">Mon–Fri 9 AM – 5 PM</p>
               <a href="tel:+13069548688" className="block hover:text-white transition-colors">

@@ -77,7 +77,7 @@ export default function SignCompanySaskatoonPage() {
         },
         {
           q: "Where can I get a sign made in Saskatoon?",
-          a: "True Color Display Printing is at 216 33rd St W, Saskatoon, SK S7L 0V5 — west side of the city near Circle Drive. We print coroplast, ACP, vinyl banners, vehicle magnets, and window decals in-house with a standard 1–3 business day turnaround. Same-day rush available. Call (306) 954-8688.",
+          a: "True Color Display Printing is at 216 33rd St W, Saskatoon, SK S7L 0V1 — west side of the city near Circle Drive. We print coroplast, ACP, vinyl banners, vehicle magnets, and window decals in-house with a standard 1–3 business day turnaround. Same-day rush available. Call (306) 954-8688.",
         },
       ]}
     />

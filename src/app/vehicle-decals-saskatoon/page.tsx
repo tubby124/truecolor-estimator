@@ -50,7 +50,7 @@ const serviceSchema = {
       streetAddress: "216 33rd St W",
       addressLocality: "Saskatoon",
       addressRegion: "SK",
-      postalCode: "S7L 0V5",
+      postalCode: "S7L 0V1",
       addressCountry: "CA",
     },
     telephone: "+1-306-700-0272",

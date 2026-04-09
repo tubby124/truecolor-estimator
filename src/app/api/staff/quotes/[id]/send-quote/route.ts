@@ -128,7 +128,7 @@ function buildQuoteHtml(opts: {
       <a href="mailto:info@true-color.ca?subject=${encodeURIComponent(`Re: Quote — ${customerName}`)}" style="display:inline-block;background:#e85d04;color:white;text-decoration:none;font-size:14px;font-weight:700;padding:14px 32px;border-radius:6px;">
         Reply to Confirm Your Order
       </a>
-      <p style="font-size:12px;color:#888;margin-top:10px;">Or call us directly: <strong>(306) 244-7701</strong></p>
+      <p style="font-size:12px;color:#888;margin-top:10px;">Or call us directly: <strong>(306) 954-8688</strong></p>
     </div>
   </div>
 
@@ -136,9 +136,9 @@ function buildQuoteHtml(opts: {
   <div style="background:#f8f9fa;border-top:1px solid #e9ecef;padding:24px 40px;">
     <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">True Color Display Printing Ltd.</div>
     <div style="font-size:12px;color:#888;line-height:1.7;">
-      211–220 20th St W, Saskatoon, SK S7M 0W9<br>
-      <a href="mailto:info@true-color.ca" style="color:#e85d04;text-decoration:none;">info@true-color.ca</a> · (306) 244-7701<br>
-      <a href="https://truecolorprinting.ca" style="color:#e85d04;text-decoration:none;">truecolorprinting.ca</a>
+      216 33rd St W (Upstairs), Saskatoon, SK S7L 0V1<br>
+      <a href="mailto:info@true-color.ca" style="color:#e85d04;text-decoration:none;">info@true-color.ca</a> · (306) 954-8688<br>
+      <a href="https://truecolorprinting.ca" style="color:#e85d04;text-decoration:none;">truecolorprinting.ca</a> · GST# ${process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001"}
     </div>
   </div>
 
@@ -176,10 +176,10 @@ function buildQuotePlainText(opts: {
     `PST (6%): $${(subtotal * 0.06).toFixed(2)}`,
     `Total: $${(subtotal * 1.11).toFixed(2)} CAD`,
     "",
-    "Reply to this email or call (306) 244-7701 to confirm your order.",
+    "Reply to this email or call (306) 954-8688 to confirm your order.",
     "",
-    "— True Color Display Printing",
-    "211–220 20th St W, Saskatoon, SK | truecolorprinting.ca",
+    "— True Color Display Printing Ltd.",
+    "216 33rd St W (Upstairs), Saskatoon, SK S7L 0V1 | GST# 731454914RT0001 | truecolorprinting.ca",
   ];
   return lines.join("\n");
 }

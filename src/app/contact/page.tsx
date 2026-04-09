@@ -36,7 +36,7 @@ const localBusinessSchema = {
     streetAddress: "216 33rd St W",
     addressLocality: "Saskatoon",
     addressRegion: "SK",
-    postalCode: "S7L 0V5",
+    postalCode: "S7L 0V1",
     addressCountry: "CA",
   },
   geo: {
@@ -75,7 +75,7 @@ const faqSchema = {
     {
       "@type": "Question",
       name: "Where is True Color Display Printing located?",
-      acceptedAnswer: { "@type": "Answer", text: "216 33rd St W, Saskatoon, SK S7L 0V5. Walk in Monday through Friday, 9 AM to 5 PM." },
+      acceptedAnswer: { "@type": "Answer", text: "216 33rd St W, Saskatoon, SK S7L 0V1. Walk in Monday through Friday, 9 AM to 5 PM." },
     },
     {
       "@type": "Question",
@@ -105,7 +105,7 @@ const MAPS_URL = "https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V5"
 const FAQS = [
   {
     q: "Where is True Color Display Printing located?",
-    a: "We're at 216 33rd St W, Saskatoon, SK S7L 0V5. It's a full in-house print shop — walk in Monday through Friday, 9 AM to 5 PM.",
+    a: "We're at 216 33rd St W, Saskatoon, SK S7L 0V1. It's a full in-house print shop — walk in Monday through Friday, 9 AM to 5 PM.",
   },
   {
     q: "Do you offer same-day printing in Saskatoon?",
@@ -171,7 +171,7 @@ export default function ContactPage() {
               </h1>
               <address className="not-italic text-gray-300 text-base leading-relaxed mb-2">
                 216 33rd St W<br />
-                Saskatoon, SK S7L 0V5
+                Saskatoon, SK S7L 0V1
               </address>
               <p className="text-gray-400 text-sm mb-8">
                 Mon–Fri &nbsp;9 AM – 5 PM &nbsp;&middot;&nbsp; Local pickup only
@@ -247,7 +247,7 @@ export default function ContactPage() {
             </div>
             <address className="not-italic">
               <p className="text-[#1c1712] font-semibold text-sm mb-1">216 33rd St W</p>
-              <p className="text-gray-600 text-sm">Saskatoon, SK S7L 0V5</p>
+              <p className="text-gray-600 text-sm">Saskatoon, SK S7L 0V1</p>
             </address>
             <a
               href={MAPS_URL}
@@ -321,7 +321,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-[#1c1712] font-semibold text-sm">216 33rd St W (upstairs)</p>
-                  <p className="text-gray-500 text-sm">Saskatoon, SK S7L 0V5</p>
+                  <p className="text-gray-500 text-sm">Saskatoon, SK S7L 0V1</p>
                   <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className="text-[#16C2F3] text-xs font-semibold hover:underline mt-1 inline-block cursor-pointer">
                     Get directions →
                   </a>

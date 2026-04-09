@@ -104,7 +104,7 @@ export default function PosterPrintingSaskatoonPage() {
       subtitle="Photo posters from $15 on Roland Photobase Matte 220gsm. Foamboard displays from $45. Retractable stands from $219. Same-day rush +$40."
       heroImage="/images/products/product/photo-posters-800x600.webp"
       heroAlt="Poster printing in Saskatoon by True Color Display Printing — photo posters, foamboard displays, and retractable banner stands"
-      description={`True Color Display Printing offers poster printing in Saskatoon, Saskatchewan, starting from $15 for a 12×18" photo poster on Roland Photobase Matte 220gsm with 1–3 business day turnaround and in-house design for $35 flat. An 18×24" poster is $22, a 24×36" poster is $35, and a 36×48" poster is $65. All posters are printed in-house on a Roland UV printer at 216 33rd St W, Saskatoon SK S7L 0V5 — (306) 954-8688.
+      description={`True Color Display Printing offers poster printing in Saskatoon, Saskatchewan, starting from $15 for a 12×18" photo poster on Roland Photobase Matte 220gsm with 1–3 business day turnaround and in-house design for $35 flat. An 18×24" poster is $22, a 24×36" poster is $35, and a 36×48" poster is $65. All posters are printed in-house on a Roland UV printer at 216 33rd St W, Saskatoon SK S7L 0V1 — (306) 954-8688.
 
 Photo posters on Roland Photobase Matte 220gsm are the standard format for events, concerts, fundraisers, school sports announcements, retail promotions, and real estate open houses in Saskatoon and Saskatchewan. The matte finish reduces glare for indoor display — waiting rooms, event lobbies, restaurant feature walls, clinic bulletin boards. For rigid freestanding display, True Color Display Printing also produces 5mm foamboard-mounted displays starting at $45 for 18×24" and $65 for 24×36". Foamboard displays are self-supporting on an easel and require no frame — standard for trade show presentations, real estate open house boards, and event lobby signage in Saskatoon.
 
@@ -121,7 +121,7 @@ Photo posters on Roland Photobase Matte 220gsm are the standard format for event
 
 True Color Display Printing serves the full range of Saskatoon poster buyers: event planners and non-profits running fundraisers, restaurants promoting seasonal specials, retail stores updating interior displays, schools ordering sports and event posters, real estate agents printing open house boards, and University of Saskatchewan researchers printing academic conference posters (36×48" = $65). The Saskatoon Fringe Festival (late July–August) generates high seasonal demand from 200+ performing artists needing 18×24" and 24×36" event posters. Retractable banner stands ($219, economy, graphic print included) are used by Saskatoon businesses for trade show booths, event displays, and recurring branded presentations that pack into a carry bag between events.
 
-True Color's in-house Photoshop designer handles layout, resizing, colour correction, and new artwork for a flat $35 design fee with a same-day proof — eliminating the need for a separate design vendor before printing. Same-day rush printing is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Walk-ins welcome at 216 33rd St W, Saskatoon SK S7L 0V5. Phone: (306) 954-8688. Every poster printed at True Color Display Printing is produced in-house on the Roland UV printer — no outsourcing, consistent colour, reliable timelines.`}
+True Color's in-house Photoshop designer handles layout, resizing, colour correction, and new artwork for a flat $35 design fee with a same-day proof — eliminating the need for a separate design vendor before printing. Same-day rush printing is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Walk-ins welcome at 216 33rd St W, Saskatoon SK S7L 0V1. Phone: (306) 954-8688. Every poster printed at True Color Display Printing is produced in-house on the Roland UV printer — no outsourcing, consistent colour, reliable timelines.`}
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -173,7 +173,7 @@ True Color's in-house Photoshop designer handles layout, resizing, colour correc
             correction, and new artwork for $35 flat with a same-day proof. Bring a logo file,
             rough description, or reference image — the designer will build a print-ready file
             without back-and-forth between vendors. Design and printing happen at the same location:
-            216 33rd St W, Saskatoon SK S7L 0V5. For event packages, also see{" "}
+            216 33rd St W, Saskatoon SK S7L 0V1. For event packages, also see{" "}
             <Link
               href="/flyer-printing-saskatoon"
               className="text-[#16C2F3] underline font-medium"
@@ -238,7 +238,7 @@ True Color's in-house Photoshop designer handles layout, resizing, colour correc
         },
         {
           q: "Can I get a poster designed and printed at the same shop in Saskatoon?",
-          a: "Yes. True Color Display Printing has an in-house Photoshop designer who handles layout, resizing, colour correction, and new artwork for a flat $35 design fee with a same-day proof. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V5 — no files moving between vendors. Same-day rush is available for +$40 flat on orders placed before 10 AM. Call (306) 954-8688.",
+          a: "Yes. True Color Display Printing has an in-house Photoshop designer who handles layout, resizing, colour correction, and new artwork for a flat $35 design fee with a same-day proof. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors. Same-day rush is available for +$40 flat on orders placed before 10 AM. Call (306) 954-8688.",
         },
       ]}
     />

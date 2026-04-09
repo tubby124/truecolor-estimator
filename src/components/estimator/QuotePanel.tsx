@@ -238,7 +238,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
   <div class="terms">
     50% deposit required to begin production · Balance due on pickup · All prices in CAD · GST (5%) + PST (6%) included<br />
     Prices valid for 30 days from quote date · Questions? Call (306) 954-8688 or email info@true-color.ca<br />
-    True Color Display Printing · 216 33rd St W (Upstairs), Saskatoon SK S7M 0R1
+    True Color Display Printing · 216 33rd St W (Upstairs), Saskatoon SK S7L 0V1
   </div>
 
 </body>

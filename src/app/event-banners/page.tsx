@@ -96,7 +96,7 @@ export default function EventBannersPage() {
         },
         {
           q: "Where is True Color Display Printing located in Saskatoon?",
-          a: "We're at 216 33rd St W, Saskatoon, SK S7L 0V5 — open Monday to Friday, 9 AM to 5 PM. Free local pickup on all orders. For same-day pickup, order before 10 AM and call (306) 954-8688 to confirm capacity.",
+          a: "We're at 216 33rd St W, Saskatoon, SK S7L 0V1 — open Monday to Friday, 9 AM to 5 PM. Free local pickup on all orders. For same-day pickup, order before 10 AM and call (306) 954-8688 to confirm capacity.",
         },
       ]}
     />

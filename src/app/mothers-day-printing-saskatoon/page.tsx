@@ -129,7 +129,7 @@ export default function MothersDayPrintingSaskatoonPage() {
             <Link href="/flyer-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               flyers
             </Link>{" "}
-            to nearby households ahead of the long weekend. True Color&apos;s in-house Photoshop designer preps layouts from a rough description, logo file, or brand colours for $35 flat — most proofs come back the same day. Design and printing happen at 216 33rd St W, Saskatoon SK S7L 0V5 — no files moving between vendors, no delays.
+            to nearby households ahead of the long weekend. True Color&apos;s in-house Photoshop designer preps layouts from a rough description, logo file, or brand colours for $35 flat — most proofs come back the same day. Design and printing happen at 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors, no delays.
           </p>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             The standard order deadline for 1–3 business day turnaround is the Tuesday before Mother&apos;s Day (May 5 for 2026). Same-day rush is available up to May 7–8 for +$40 flat. For{" "}
@@ -200,7 +200,7 @@ export default function MothersDayPrintingSaskatoonPage() {
         },
         {
           q: "Can I get my Mother's Day printing designed and printed at the same shop?",
-          a: "Yes — True Color Display Printing has an in-house Photoshop designer who handles layouts from a rough brief, logo file, brand colours, or photo. Design fee is $35 flat and most proofs come back the same day. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V5 — no files moving between vendors.",
+          a: "Yes — True Color Display Printing has an in-house Photoshop designer who handles layouts from a rough brief, logo file, brand colours, or photo. Design fee is $35 flat and most proofs come back the same day. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors.",
         },
         {
           q: "What's the best banner size for a Mother's Day storefront?",

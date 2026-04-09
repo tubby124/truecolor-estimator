@@ -1,7 +1,8 @@
 # True Color Domain Facts
 
 ## Identity
-True Color Display Printing Ltd. | 216 33rd St W, Saskatoon SK S7L 0V5
+True Color Display Printing Ltd. | 216 33rd St W, Saskatoon SK S7L 0V1
+CRA GST#: 731454914RT0001
 Phone: (306) 954-8688 | Email: info@true-color.ca | Domain: https://truecolorprinting.ca
 Printer: Roland UV (in-house) | Designer: In-house Photoshop, $35 flat, same-day proof
 Rush: +$40 flat, order before 10 AM | Standard turnaround: 1–3 business days
@@ -36,6 +37,7 @@ GST (5%) + PST (6%) shown ONLY on checkout. All other pages show pre-tax sell_pr
 PST formula: pst = (sell_price - design_fee) * 0.06 per item
 Rush fee = PST-EXEMPT — do NOT apply PST to rush line items
 GST rate = read from config.v1.csv gst_rate — never hardcode 0.05
+Receipt/email GST# display: read from NEXT_PUBLIC_GST_NUMBER env var (Railway) — never hardcode
 
 ## Disabled Products (do NOT re-enable without owner approval)
 - ACP double-sided (ACP 2S)
@@ -45,6 +47,8 @@ GST rate = read from config.v1.csv gst_rate — never hardcode 0.05
 
 ## Wave Accounting
 NEVER use invoiceCreatePayment — use moneyTransactionCreate (Wave API rule, enforced globally)
+GST sales tax object has taxNumber=731454914 + showTaxNumberOnInvoices=true (set 2026-04-09)
+Legacy "SK TAX" 11% compound is ARCHIVED — do not reactivate
 
 ## Brevo Email
 Sender ID: 1 | 21 lists configured

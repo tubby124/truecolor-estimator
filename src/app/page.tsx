@@ -173,7 +173,7 @@ const homeFaqSchema = {
       name: "Where is True Color Display Printing located?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "True Color Display Printing is located at 216 33rd St W, Saskatoon, SK S7L 0V5. The shop is open Monday through Friday, 9 AM to 5 PM. All orders are available for local pickup — there is no shipping option, which means no courier wait times and no risk of damaged prints in transit. Customers can drop off their artwork in person or upload a file online, approve a proof by email, and pick up the finished order when it is ready. For same-day pickup, orders must be placed before 10 AM and confirmed by phone at (306) 954-8688. The shop is a full-service in-house print shop with a Roland UV printer on site — no outsourcing to a third-party facility.",
+        text: "True Color Display Printing is located at 216 33rd St W, Saskatoon, SK S7L 0V1. The shop is open Monday through Friday, 9 AM to 5 PM. All orders are available for local pickup — there is no shipping option, which means no courier wait times and no risk of damaged prints in transit. Customers can drop off their artwork in person or upload a file online, approve a proof by email, and pick up the finished order when it is ready. For same-day pickup, orders must be placed before 10 AM and confirmed by phone at (306) 954-8688. The shop is a full-service in-house print shop with a Roland UV printer on site — no outsourcing to a third-party facility.",
       },
     },
     {

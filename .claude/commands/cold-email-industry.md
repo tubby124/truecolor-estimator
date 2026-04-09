@@ -152,7 +152,7 @@ Footer bg: #f9f9f9, border-top 1px #eeeeee
 ```
 
 ### Required footer elements (all 4 — CASL compliance):
-1. Business name + address: "216 33rd St W, Saskatoon, SK S7L 0V5"
+1. Business name + address: "216 33rd St W, Saskatoon, SK S7L 0V1"
 2. Phone: (306) 954-8688
 3. Instagram: `<a href="https://instagram.com/truecolorprint">See recent work →</a>` in #16C2F3
 4. Unsubscribe: `<a href="{{unsubscribeLink}}">Unsubscribe</a>`

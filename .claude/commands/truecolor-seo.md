@@ -14,7 +14,7 @@ metadata:
 ## BUSINESS CONTEXT (read before any SEO work)
 
 **Business:** True Color Display Printing Ltd.
-**Location:** 216 33rd St W, Saskatoon, SK S7L 0V2
+**Location:** 216 33rd St W, Saskatoon, SK S7L 0V1
 **Phone:** (306) 954-8688
 **Domain:** truecolorprinting.ca
 **Stack:** Next.js 16.1.6, TypeScript, Tailwind CSS v4, Railway hosting
@@ -100,7 +100,7 @@ All 7 local competitors are quote-only, phone-only, and answer ZERO buyer questi
     "streetAddress": "216 33rd St W",
     "addressLocality": "Saskatoon",
     "addressRegion": "SK",
-    "postalCode": "S7L 0V2",
+    "postalCode": "S7L 0V1",
     "addressCountry": "CA"
   }
 }

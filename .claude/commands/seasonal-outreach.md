@@ -182,7 +182,7 @@ Footer bg: #f9f9f9, border-top 1px #eeeeee
 ```
 
 **Required footer elements (CASL):**
-1. True Color Display Printing | 216 33rd St W, Saskatoon, SK S7L 0V5
+1. True Color Display Printing | 216 33rd St W, Saskatoon, SK S7L 0V1
 2. (306) 954-8688
 3. `<a href="https://instagram.com/truecolorprint">See recent work →</a>` in #16C2F3
 4. `<a href="{{unsubscribeLink}}">Unsubscribe</a>`
