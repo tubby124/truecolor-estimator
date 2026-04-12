@@ -73,6 +73,21 @@ const PAGES = [
         title: "Coroplast job site signs Saskatoon contractor",
         caption: "Coroplast job site signage for contractors — printed in Saskatoon by True Color Display Printing",
       },
+      {
+        loc: `${IND}/coroplast/sign-real-estate.webp`,
+        title: "Coroplast real estate yard sign Saskatoon — 18×24 for sale",
+        caption: "18×24 coroplast for sale yard sign on H-stake — printed in Saskatoon by True Color Display Printing",
+      },
+      {
+        loc: `${IND}/coroplast/sign-job-site.webp`,
+        title: "Coroplast job site sign Saskatoon — under construction authorized personnel",
+        caption: "24×36 coroplast job site sign on chain-link construction fence — True Color, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/coroplast/sign-election.webp`,
+        title: "Coroplast election yard sign Saskatoon — city council campaign",
+        caption: "Coroplast election campaign yard sign 18×24 on H-stake — printed in Saskatoon, Saskatchewan",
+      },
     ],
   },
   {
@@ -88,6 +103,31 @@ const PAGES = [
         title: "Custom vinyl banners Saskatoon full colour any size",
         caption: "Full-colour vinyl banners for events, storefronts, and trade shows — True Color, Saskatoon SK",
       },
+      {
+        loc: `${IND}/banners/banner-grand-opening.webp`,
+        title: "Grand opening vinyl banner Saskatoon — storefront full colour",
+        caption: "Grand opening vinyl banner hung above storefront entrance — printed in Saskatoon by True Color Display Printing",
+      },
+      {
+        loc: `${IND}/banners/banner-trade-show.webp`,
+        title: "Trade show vinyl banner Saskatoon — convention centre booth display",
+        caption: "Trade show banner on pipe-and-drape system at convention centre — True Color Display Printing, Saskatoon",
+      },
+      {
+        loc: `${IND}/banners/banner-fence-outdoor.webp`,
+        title: "Mesh fence banner Saskatoon — outdoor construction site coming soon",
+        caption: "Mesh vinyl fence banner zip-tied to construction chain-link fence — printed in Saskatoon, Saskatchewan",
+      },
+      {
+        loc: `${IND}/banners/retractable-premium.webp`,
+        title: "Premium retractable banner stand Saskatoon — double-sided aluminum 33×79",
+        caption: "Premium double-sided retractable banner stand with brushed aluminum base — from $219 at True Color, Saskatoon",
+      },
+      {
+        loc: `${IND}/banners/retractable-economy.webp`,
+        title: "Economy retractable banner stand Saskatoon — pull-up full colour",
+        caption: "Economy retractable pull-up banner stand with full-colour print — True Color Display Printing, Saskatoon SK",
+      },
     ],
   },
   {
@@ -98,6 +138,26 @@ const PAGES = [
         title: "Business card printing Saskatoon 14pt gloss 250 for $45",
         caption: "Business cards printed in Saskatoon on 14pt gloss stock — 250 double-sided from $45 at True Color",
       },
+      {
+        loc: `${IND}/business-cards/card-realtor.webp`,
+        title: "Realtor business cards Saskatoon — 14pt gloss REALTOR® design",
+        caption: "Realtor business cards with headshot layout on 14pt gloss stock — True Color Display Printing, Saskatoon",
+      },
+      {
+        loc: `${IND}/business-cards/card-contractor.webp`,
+        title: "Contractor business cards Saskatoon — general contractor trades 14pt gloss",
+        caption: "General contractor business cards on 14pt gloss stock — printed in Saskatoon by True Color",
+      },
+      {
+        loc: `${IND}/business-cards/card-restaurant.webp`,
+        title: "Restaurant business cards Saskatoon — elegant dark gloss finish",
+        caption: "Restaurant business cards with elegant burgundy design on 14pt gloss — True Color, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/business-cards/finish-gloss.webp`,
+        title: "UV gloss vs matte business card finish comparison Saskatoon",
+        caption: "UV gloss vs matte laminate finish comparison on business cards — True Color Display Printing, Saskatoon",
+      },
     ],
   },
   {
@@ -107,6 +167,31 @@ const PAGES = [
         loc: `${IMG}/flyers-stack-800x600.webp`,
         title: "Flyer printing Saskatoon 80lb gloss from $45",
         caption: "Flyers printed in Saskatoon on 80lb gloss stock — 100 double-sided from $45 at True Color",
+      },
+      {
+        loc: `${IND}/flyers/flyer-restaurant-promo.webp`,
+        title: "Restaurant promo flyer Saskatoon — 8.5×11 80lb gloss special offer",
+        caption: "Restaurant promotional flyer on 80lb gloss stock — 100 full-colour flyers from $45 at True Color, Saskatoon",
+      },
+      {
+        loc: `${IND}/flyers/size-letter.webp`,
+        title: "Letter size flyer stack Saskatoon — 8.5×11 80lb gloss full colour",
+        caption: "Stack of letter-size 8.5×11 full-colour flyers on 80lb gloss — printed in Saskatoon by True Color",
+      },
+    ],
+  },
+  {
+    loc: `${BASE}/sign-company-saskatoon`,
+    images: [
+      {
+        loc: `${IND}/sign-company/acp-storefront.webp`,
+        title: "ACP aluminum composite storefront sign Saskatoon — business fascia signage",
+        caption: "Aluminum composite panel fascia sign installed above storefront — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/sign-company/sign-yard-real-estate.webp`,
+        title: "Premium aluminum post-and-panel real estate sign Saskatoon — for sale",
+        caption: "Premium aluminum post-and-panel real estate sign system on residential lawn — True Color, Saskatoon SK",
       },
     ],
   },
@@ -161,7 +246,7 @@ const PAGES = [
     ],
   },
   {
-    loc: `${BASE}/stickers-saskatoon`,
+    loc: `${BASE}/sticker-printing-saskatoon`,
     images: [
       {
         loc: `${IMG}/stickers-800x600.webp`,
