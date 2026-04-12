@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Signs Moose Jaw SK | Coroplast & Banners | True Color" },
@@ -21,6 +22,7 @@ export default function SignsMooseJawPage() {
   return (
     <IndustryPage
       canonicalSlug="signs-moose-jaw-sk"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "signs-moose-jaw-sk")}
       primaryProductSlug="coroplast-signs"
       title="Signs & Printing Moose Jaw SK"
       subtitle="Coroplast signs, vinyl banners, and vehicle magnets — printed in Saskatoon, shipped to Moose Jaw."

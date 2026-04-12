@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Printing Swift Current SK | Signs & Magnets | True Color" },
@@ -21,6 +22,7 @@ export default function PrintingSwiftCurrentPage() {
   return (
     <IndustryPage
       canonicalSlug="printing-swift-current-sk"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "printing-swift-current-sk")}
       primaryProductSlug="coroplast-signs"
       title="Signs & Printing Swift Current SK"
       subtitle="Coroplast signs, banners, vehicle magnets, and business cards — printed in Saskatoon, shipped to Swift Current."

@@ -48,6 +48,8 @@ export interface IndustryPageProps {
   canonicalSlug?: string;
   /** Product page slug for the primary CTA (e.g. "coroplast-signs") — links to /products/[slug] estimator */
   primaryProductSlug?: string;
+  /** Cross-links to sibling city/region pages — renders "Also serving Saskatchewan" footer section */
+  relatedCities?: { name: string; slug: string }[];
 }
 
 export function IndustryPage({
@@ -63,6 +65,7 @@ export function IndustryPage({
   faqs,
   canonicalSlug,
   primaryProductSlug,
+  relatedCities,
 }: IndustryPageProps) {
   const BASE_URL = "https://truecolorprinting.ca";
 
@@ -279,6 +282,25 @@ export function IndustryPage({
             ))}
           </div>
         </div>
+        {/* Also serving — cross-links to sibling city pages */}
+        {relatedCities && relatedCities.length > 0 && (
+          <div className="border-t border-gray-100 pt-8 mt-4">
+            <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+              Also serving Saskatchewan
+            </p>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              {relatedCities.map((city) => (
+                <Link
+                  key={city.slug}
+                  href={`/${city.slug}`}
+                  className="text-sm text-[#16C2F3] hover:underline"
+                >
+                  {city.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       <SiteFooter />

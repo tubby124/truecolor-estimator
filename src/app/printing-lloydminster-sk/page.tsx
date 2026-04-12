@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Printing Lloydminster SK | Signs & Banners | True Color" },
@@ -21,6 +22,7 @@ export default function PrintingLloydminsterPage() {
   return (
     <IndustryPage
       canonicalSlug="printing-lloydminster-sk"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "printing-lloydminster-sk")}
       primaryProductSlug="coroplast-signs"
       title="Signs & Printing Lloydminster SK"
       subtitle="Coroplast signs, vehicle magnets, vinyl banners, and business cards — shipped to Lloydminster from Saskatoon."

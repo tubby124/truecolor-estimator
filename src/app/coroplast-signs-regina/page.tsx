@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Coroplast Signs Regina SK | From $8/sqft | True Color" },
@@ -21,6 +22,7 @@ export default function CoroplastSignsReginaPage() {
   return (
     <IndustryPage
       canonicalSlug="coroplast-signs-regina"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "coroplast-signs-regina")}
       primaryProductSlug="coroplast-signs"
       title="Coroplast Signs Regina SK"
       subtitle="Yard signs, job site signs, and real estate signs from $8/sqft. Printed in Saskatoon — shipped to Regina."

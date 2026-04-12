@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Signs Prince Albert SK | Coroplast & Banners | True Color" },
@@ -21,6 +22,7 @@ export default function SignsPrinceAlbertPage() {
   return (
     <IndustryPage
       canonicalSlug="signs-prince-albert-sk"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "signs-prince-albert-sk")}
       primaryProductSlug="coroplast-signs"
       title="Signs & Printing Prince Albert SK"
       subtitle="Coroplast signs, vinyl banners, and business cards — printed in Saskatoon, shipped to Prince Albert."

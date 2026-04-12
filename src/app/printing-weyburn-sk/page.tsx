@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Printing Weyburn SK | Signs & Banners | True Color" },
@@ -21,6 +22,7 @@ export default function PrintingWeyburnPage() {
   return (
     <IndustryPage
       canonicalSlug="printing-weyburn-sk"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "printing-weyburn-sk")}
       primaryProductSlug="coroplast-signs"
       title="Signs & Printing Weyburn SK"
       subtitle="Coroplast signs, ACP aluminum, vehicle magnets, and vinyl banners — printed in Saskatoon, shipped to Weyburn."

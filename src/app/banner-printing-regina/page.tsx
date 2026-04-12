@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Banner Printing Regina SK | From $8.25/sqft | True Color" },
@@ -21,6 +22,7 @@ export default function BannerPrintingReginaPage() {
   return (
     <IndustryPage
       canonicalSlug="banner-printing-regina"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "banner-printing-regina")}
       primaryProductSlug="vinyl-banners"
       title="Banner Printing Regina SK"
       subtitle="13oz vinyl banners from $8.25/sqft. Printed in Saskatoon — shipped to Regina."

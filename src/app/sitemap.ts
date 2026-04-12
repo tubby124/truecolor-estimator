@@ -96,6 +96,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // /canada-day-printing-saskatoon — add when page is built
     // /back-to-school-signs-saskatoon — add when page is built
 
+    // ── Cluster hub pages (2026-04-13) ───────────────────────────────────────
+    { url: `${BASE_URL}/commercial-signs-saskatoon`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/education-signs-saskatoon`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/community-printing-saskatoon`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/trades-signs-saskatoon`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.85 },
+
     // ── SK city/province pages ────────────────────────────────────────────────
     { url: `${BASE_URL}/banner-printing-regina`, lastModified: new Date("2026-01-25"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/coroplast-signs-regina`, lastModified: new Date("2026-01-25"), changeFrequency: "monthly", priority: 0.75 },
@@ -109,6 +115,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/signs-yorkton-sk`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/printing-estevan-sk`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/printing-weyburn-sk`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.75 },
+
+    // ── SK city×product pages (2026-04-13) ───────────────────────────────────
+    // Regina
+    { url: `${BASE_URL}/vehicle-magnets-regina`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/business-cards-regina`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/flyer-printing-regina`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    // Moose Jaw
+    { url: `${BASE_URL}/coroplast-signs-moose-jaw-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/banner-printing-moose-jaw-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/vehicle-magnets-moose-jaw-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/business-cards-moose-jaw-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/flyer-printing-moose-jaw-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    // Prince Albert
+    { url: `${BASE_URL}/coroplast-signs-prince-albert-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/banner-printing-prince-albert-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/vehicle-magnets-prince-albert-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/business-cards-prince-albert-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/flyer-printing-prince-albert-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    // Yorkton
+    { url: `${BASE_URL}/coroplast-signs-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/banner-printing-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/vehicle-magnets-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/business-cards-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/flyer-printing-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
 
     // ── Legal ─────────────────────────────────────────────────────────────────
     { url: `${BASE_URL}/privacy`, lastModified: new Date("2025-11-15"), changeFrequency: "yearly", priority: 0.3 },

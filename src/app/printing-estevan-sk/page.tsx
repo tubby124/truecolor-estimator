@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Printing Estevan SK | Signs, Banners & Magnets | True Color" },
@@ -21,6 +22,7 @@ export default function PrintingEstevanPage() {
   return (
     <IndustryPage
       canonicalSlug="printing-estevan-sk"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "printing-estevan-sk")}
       primaryProductSlug="vehicle-magnets"
       title="Signs & Printing Estevan SK"
       subtitle="Vehicle magnets, ACP aluminum signs, coroplast, and vinyl banners for Estevan's oilfield and energy sector — printed in Saskatoon, shipped to Estevan."

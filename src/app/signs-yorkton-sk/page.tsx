@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
   title: { absolute: "Signs Yorkton SK | Coroplast & Banners | True Color" },
@@ -21,6 +22,7 @@ export default function SignsYorktonPage() {
   return (
     <IndustryPage
       canonicalSlug="signs-yorkton-sk"
+      relatedCities={CITY_HUB_PAGES.filter((c) => c.slug !== "signs-yorkton-sk")}
       primaryProductSlug="vehicle-magnets"
       title="Signs & Printing Yorkton SK"
       subtitle="Vehicle magnets, vinyl banners, coroplast signs, and ACP aluminum — printed in Saskatoon, shipped to Yorkton."
