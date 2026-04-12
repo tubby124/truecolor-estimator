@@ -43,7 +43,7 @@ export function SiteFooter() {
             <h3 className="text-white text-sm font-semibold mb-4">Find Us</h3>
             <div className="space-y-2 text-sm">
               <a
-                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V5"
+                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block hover:text-white transition-colors"
@@ -81,6 +81,7 @@ export function SiteFooter() {
                 <Link href="/business-cards-saskatoon" className="block hover:text-white transition-colors">Business Cards</Link>
                 <Link href="/flyer-printing-saskatoon" className="block hover:text-white transition-colors">Flyer Printing</Link>
                 <Link href="/brochure-printing-saskatoon" className="block hover:text-white transition-colors">Brochure Printing</Link>
+                <Link href="/booklet-printing-saskatoon" className="block hover:text-white transition-colors">Booklet Printing</Link>
                 <Link href="/sticker-printing-saskatoon" className="block hover:text-white transition-colors">Sticker Printing</Link>
                 <Link href="/postcard-printing-saskatoon" className="block hover:text-white transition-colors">Postcard Printing</Link>
                 <Link href="/photo-poster-printing-saskatoon" className="block hover:text-white transition-colors">Photo Posters</Link>
@@ -91,6 +92,7 @@ export function SiteFooter() {
                 <Link href="/custom-magnets-saskatoon" className="block hover:text-white transition-colors">Custom Magnets</Link>
                 <Link href="/retractable-banners-saskatoon" className="block hover:text-white transition-colors">Retractable Banners</Link>
                 <Link href="/window-decals-saskatoon" className="block hover:text-white transition-colors">Window Decals</Link>
+                <Link href="/window-perf-saskatoon" className="block hover:text-white transition-colors">Window Perf</Link>
                 <Link href="/wall-graphics-saskatoon" className="block hover:text-white transition-colors">Wall Graphics</Link>
                 <Link href="/vinyl-lettering-saskatoon" className="block hover:text-white transition-colors">Vinyl Lettering</Link>
                 <Link href="/aluminum-signs-saskatoon" className="block hover:text-white transition-colors">Aluminum Signs</Link>

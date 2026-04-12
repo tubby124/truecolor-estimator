@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Custom Wall Graphics Saskatoon | From $11/sqft | Roland UV" },
+  title: { absolute: "Wall Graphics Saskatoon | Office Murals & Vinyl Decals | From $11/sqft" },
   description:
-    "Custom wall graphics in Saskatoon from $11/sqft. Removable vinyl for offices, lobbies, retail walls. Photo-quality Roland UV. Designer $35. Rush +$40.",
+    "Transform office walls, lobbies & retail spaces with custom wall graphics from $11/sqft. Removable vinyl — no wall damage. Same-day rush +$40. Local Saskatoon pickup.",
   alternates: { canonical: "/wall-graphics-saskatoon" },
   openGraph: {
-    title: "Custom Wall Graphics Saskatoon | From $11/sqft | Roland UV",
+    title: "Wall Graphics Saskatoon | Office Murals & Vinyl Decals | From $11/sqft",
     description:
-      "Custom wall graphics in Saskatoon from $11/sqft. Removable vinyl for offices, lobbies, retail walls. Photo-quality Roland UV. Designer $35. Rush +$40.",
+      "Transform office walls, lobbies & retail spaces with custom wall graphics from $11/sqft. Removable vinyl — no wall damage. Same-day rush +$40. Local Saskatoon pickup.",
     url: "https://truecolorprinting.ca/wall-graphics-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",

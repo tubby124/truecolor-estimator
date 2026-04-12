@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { StickyMobileCTA } from "@/components/site/StickyMobileCTA";
 
 const INDUSTRY_PRODUCT_IMAGES: Record<string, string> = {
   "vinyl-banners":       "/images/products/product/banner-vinyl-colorful-800x600.webp",
@@ -134,6 +135,7 @@ export function IndustryPage({
           fill
           className="object-cover"
           priority
+          fetchPriority="high"
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent" />
@@ -144,7 +146,7 @@ export function IndustryPage({
           <p className="text-gray-200 text-base md:text-lg mb-4">{subtitle}</p>
           <Link
             href={ctaHref}
-            className="inline-block bg-[#16C2F3] text-white font-bold px-8 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors"
+            className="inline-block bg-[#16C2F3] text-white font-bold px-8 py-3 min-h-[44px] flex items-center justify-center rounded-lg hover:bg-[#0fb0dd] transition-colors"
           >
             Get My Price →
           </Link>
@@ -280,6 +282,7 @@ export function IndustryPage({
       </main>
 
       <SiteFooter />
+      <StickyMobileCTA href={ctaHref} />
     </div>
   );
 }

@@ -201,9 +201,9 @@ export default function RootLayout({
         <BackToTop />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-6HMQT7MNLL"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="ga4-init" strategy="afterInteractive">
+        <Script id="ga4-init" strategy="lazyOnload">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6HMQT7MNLL');`}
         </Script>
         {/* Trustindex loader-cert.js removed — was injecting visible

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
   title: { absolute: "Banner Printing Saskatoon | From $8.25/sqft | True Color" },
@@ -15,6 +16,57 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
+const designDirections = [
+  {
+    title: "Event & Storefront Banners",
+    subtitle:
+      "From $8.25/sqft · 13oz scrim vinyl · hemmed & grommeted standard",
+    aspect: "3/1" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/industries/banners/banner-grand-opening.webp",
+        alt: "Grand opening storefront banner printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Grand Opening",
+        caption: "2×8 ft — $124",
+      },
+      {
+        src: "/images/industries/banners/banner-trade-show.webp",
+        alt: "Trade show booth banner printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Trade Show Booth",
+        caption: "3×8 ft — $180",
+      },
+      {
+        src: "/images/industries/banners/banner-fence-outdoor.webp",
+        alt: "Outdoor event fence banner printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Outdoor Event / Fence",
+        caption: "4×8 ft — $248",
+      },
+    ],
+  },
+  {
+    title: "Retractable Banner Stands",
+    subtitle:
+      "From $219 with graphic · packs into carry bag · 1–3 business days",
+    aspect: "3/8" as const,
+    maxCols: 2 as const,
+    items: [
+      {
+        src: "/images/industries/banners/retractable-economy.webp",
+        alt: "Economy retractable banner stand for Saskatoon event or trade show — True Color Display Printing, Saskatoon SK",
+        label: "Economy Pull-Up",
+        caption: "33×79\" with graphic — $219",
+      },
+      {
+        src: "/images/industries/banners/retractable-premium.webp",
+        alt: "Premium double-sided retractable banner stand for Saskatoon business — True Color Display Printing, Saskatoon SK",
+        label: "Premium Double-Sided",
+        caption: "33×79\" double-sided — $299",
+      },
+    ],
+  },
+];
 
 export default function BannerPrintingSaskatoonPage() {
   return (
@@ -75,6 +127,7 @@ export default function BannerPrintingSaskatoonPage() {
             </Link>
             {" — each page includes occasion-specific sizing guides and pricing."}
           </p>
+          <DesignDirectionGrid sections={designDirections} />
         </>
       }
       products={[

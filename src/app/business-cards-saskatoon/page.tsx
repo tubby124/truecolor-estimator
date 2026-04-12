@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
   title: { absolute: "Business Cards Saskatoon | 250 Cards from $45 | True Color" },
@@ -15,6 +17,57 @@ export const metadata: Metadata = {
   },
 };
 
+const designDirections = [
+  {
+    title: "Professional Business Cards",
+    subtitle:
+      "250 double-sided for $45 · 500 for $65 · 1000 for $110 — 14pt gloss, Konica Minolta digital press",
+    aspect: "4/3" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/industries/business-cards/card-realtor.webp",
+        alt: "Realtor business cards printed in Saskatoon — True Color Display Printing, 216 33rd St W, Saskatoon SK",
+        label: "Realtor / Real Estate",
+        caption: "250 double-sided — $45",
+      },
+      {
+        src: "/images/industries/business-cards/card-contractor.webp",
+        alt: "Contractor and trades business cards printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Contractor / Trades",
+        caption: "500 double-sided — $65",
+      },
+      {
+        src: "/images/industries/business-cards/card-restaurant.webp",
+        alt: "Restaurant and retail business cards printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Restaurant / Retail",
+        caption: "1000 double-sided — $110",
+      },
+    ],
+  },
+  {
+    title: "Card Finishes & Formats",
+    subtitle:
+      "Standard 3.5×2\" · matte on request · single-sided from $40 — in-house designer $35 flat",
+    aspect: "3/4" as const,
+    maxCols: 2 as const,
+    items: [
+      {
+        src: "/images/industries/business-cards/finish-gloss.webp",
+        alt: "Gloss finish business cards printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "14pt Gloss (Standard)",
+        caption: "250 cards — $45",
+      },
+      {
+        src: "/images/industries/business-cards/finish-matte.webp",
+        alt: "Matte finish business cards printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Matte Finish (On Request)",
+        caption: "250 cards — $45",
+      },
+    ],
+  },
+];
+
 export default function BusinessCardsSaskatoonPage() {
   return (
     <IndustryPage
@@ -29,6 +82,49 @@ export default function BusinessCardsSaskatoonPage() {
 Business cards are the most personal marketing tool you carry. Whether you're passing one to a client on a job site, leaving a stack at a local business, or handing them out at a trade show or Chamber of Commerce event, a well-printed card on good stock makes the right impression. Our 14pt gloss is the industry standard — it's thick, holds the colour, and has the right snap when someone takes it from your hand. Matte finish is available on request.
 
 Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready in 1–3 business days. Same-day rush is available for +$40 flat on orders placed before 10 AM. Pickup at 216 33rd St W — no shipping, inspect your cards before you leave."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            True Color Display Printing produces professional business cards for Saskatoon businesses,
+            starting at 250 double-sided cards for $45 on 14pt gloss stock — printed in-house on our
+            Konica Minolta digital press at 216 33rd St W. Standard size 3.5×2&quot;, full-colour
+            both sides. Volume pricing: 500 for $65, 1000 for $110.{" "}
+            <Link href="/products/business-cards" className="text-[#16C2F3] underline font-medium">
+              Get your exact price
+            </Link>{" "}
+            in 30 seconds with the calculator. Same-day rush is available for +$40 flat on orders
+            placed before 10 AM — call (306) 954-8688.
+          </p>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            Business cards are the most personal marketing tool you carry. Whether you&apos;re handing
+            one to a client on a job site, leaving a stack at a local business, or representing yourself
+            at a Saskatoon trade show, a well-printed card on good stock makes the right impression.
+            Our in-house Konica Minolta digital press delivers accurate colour and consistent weight —
+            matte finish available on request.{" "}
+            <Link href="/graphic-design-saskatoon" className="text-[#16C2F3] underline font-medium">
+              In-house designer
+            </Link>{" "}
+            handles layout from your logo and contact info for $35 flat with a same-day proof.
+          </p>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            Pair your cards with{" "}
+            <Link href="/flyer-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              flyer printing from $45
+            </Link>
+            ,{" "}
+            <Link href="/brochure-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              brochures from $70
+            </Link>
+            , or order on a deadline with{" "}
+            <Link href="/same-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              same-day rush printing
+            </Link>
+            . Everything prints in-house — no outsourcing, no shipping wait. Pickup at 216 33rd St W
+            and inspect your cards before you leave.
+          </p>
+          <DesignDirectionGrid sections={designDirections} />
+        </>
+      }
       products={[
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },

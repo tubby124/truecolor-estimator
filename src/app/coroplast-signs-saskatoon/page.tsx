@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
   title: { absolute: "Coroplast Signs Saskatoon | From $8/sqft | True Color" },
@@ -15,6 +16,63 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
+const designDirections = [
+  {
+    title: "Real Estate & Yard Signs",
+    subtitle:
+      "18×24\" from $30 · 24×36\" $48 · H-stakes $2.50 ea — 4mm flute coroplast",
+    aspect: "3/4" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/industries/coroplast/sign-real-estate.webp",
+        alt: "Real estate listing coroplast yard sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Real Estate Listing",
+        caption: "18×24\" — $30",
+      },
+      {
+        src: "/images/industries/coroplast/sign-election.webp",
+        alt: "Election campaign coroplast sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Election / Campaign",
+        caption: "24×36\" — $48",
+      },
+      {
+        src: "/images/industries/coroplast/sign-event-directional.webp",
+        alt: "Event directional coroplast sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Event Directional",
+        caption: "18×24\" — $30",
+      },
+    ],
+  },
+  {
+    title: "Job Site & Construction Signs",
+    subtitle:
+      "4×8 ft from $232 · custom sizes · Roland UV print — weatherproof 2–3 years",
+    aspect: "4/3" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/industries/coroplast/sign-job-site.webp",
+        alt: "Construction job site coroplast sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Construction Job Site",
+        caption: "4×8 ft — $232",
+      },
+      {
+        src: "/images/industries/coroplast/sign-contractor.webp",
+        alt: "Contractor company coroplast sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Contractor Company Sign",
+        caption: "24×48\" — $90",
+      },
+      {
+        src: "/images/industries/coroplast/sign-hoarding.webp",
+        alt: "Construction hoarding coroplast panel printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Hoarding Panel",
+        caption: "4×8 ft — $232",
+      },
+    ],
+  },
+];
 
 export default function CoroplastSignsSaskatoonPage() {
   return (
@@ -53,6 +111,7 @@ export default function CoroplastSignsSaskatoonPage() {
             for corner lots. Any custom size up to 4×8 ft — use the pricing calculator on the
             product page to get your exact price in 30 seconds.
           </p>
+          <DesignDirectionGrid sections={designDirections} />
         </>
       }
       products={[
@@ -72,7 +131,7 @@ export default function CoroplastSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much does a coroplast sign cost in Saskatoon?",
-          a: "Coroplast signs at True Color start at $8/sqft for single-sided printing. An 18×24\" sign is about 3 sqft ($24). A 24×36\" sign is 6 sqft ($48). Volume discounts apply at 5+ signs (8% off) and 10+ signs (17% off). H-stakes are $2.50 each.",
+          a: "Coroplast signs at True Color start at $8/sqft for single-sided printing, with a $30 minimum order. An 18×24\" sign is $30 (minimum applies). A 24×36\" sign is $48. Volume discounts apply at 5+ signs (8% off) and 10+ signs (17% off). H-stakes are $2.50 each.",
         },
         {
           q: "How long do coroplast yard signs last outdoors?",
@@ -96,7 +155,7 @@ export default function CoroplastSignsSaskatoonPage() {
         },
         {
           q: "Do realtors use True Color for listing signs?",
-          a: "Yes — real estate agents are our most frequent repeat customers. A standard 18×24\" single-sided coroplast yard sign is $24. H-stakes are $2.50 each. Many realtors order 5–10 at a time for active listing season. Same-day rush (+$40) means you can order the morning of a listing launch and pick up by 4 PM.",
+          a: "Yes — real estate agents are our most frequent repeat customers. A standard 18×24\" single-sided coroplast yard sign is $30. H-stakes are $2.50 each. Many realtors order 5–10 at a time for active listing season. Same-day rush (+$40) means you can order the morning of a listing launch and pick up by 4 PM.",
         },
         {
           q: "Is there a minimum order for coroplast signs?",

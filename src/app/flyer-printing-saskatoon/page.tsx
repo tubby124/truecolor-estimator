@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
   title: { absolute: "Flyer Printing Saskatoon | 100 Flyers from $45 | True Color" },
@@ -15,6 +16,57 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
+const designDirections = [
+  {
+    title: "Flyer Design Directions",
+    subtitle:
+      "100 for $45 · 250 for $80 · 500 for $130 — 80lb or 100lb gloss, Konica Minolta digital press",
+    aspect: "3/4" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/industries/flyers/flyer-restaurant-promo.webp",
+        alt: "Restaurant and food promo flyer printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Restaurant / Food Promo",
+        caption: "100 double-sided — $45",
+      },
+      {
+        src: "/images/industries/flyers/flyer-grand-opening.webp",
+        alt: "Grand opening event flyer printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Grand Opening Event",
+        caption: "250 double-sided — $80",
+      },
+      {
+        src: "/images/industries/flyers/flyer-open-house.webp",
+        alt: "Real estate open house flyer printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Real Estate Open House",
+        caption: "500 double-sided — $130",
+      },
+    ],
+  },
+  {
+    title: "Sizes & Formats",
+    subtitle:
+      "Letter from $45/100 · Half-letter from $35/100 — double-sided standard",
+    aspect: "4/3" as const,
+    maxCols: 2 as const,
+    items: [
+      {
+        src: "/images/industries/flyers/size-letter.webp",
+        alt: "Letter size 8.5x11 flyer printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Letter 8.5×11\"",
+        caption: "100 from $45",
+      },
+      {
+        src: "/images/industries/flyers/size-half-letter.webp",
+        alt: "Half letter 5.5x8.5 flyer printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Half-Letter 5.5×8.5\"",
+        caption: "100 from $35",
+      },
+    ],
+  },
+];
 
 export default function FlyerPrintingSaskatoonPage() {
   return (
@@ -71,6 +123,7 @@ export default function FlyerPrintingSaskatoonPage() {
             </Link>
             {" — all printed in-house on the same Konica Minolta press."}
           </p>
+          <DesignDirectionGrid sections={designDirections} />
         </>
       }
       products={[

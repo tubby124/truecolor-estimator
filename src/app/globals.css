@@ -78,6 +78,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+@media (max-width: 767px) {
+  body { font-size: 16px; }
+}
+
 /* ─── Margin badge variants ──────────────────────────────────────────────── */
 
 .margin-badge--green {

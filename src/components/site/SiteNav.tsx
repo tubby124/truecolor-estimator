@@ -419,7 +419,7 @@ export function SiteNav() {
             {/* Hamburger — mobile only */}
             <button
               onClick={() => setDrawerOpen(true)}
-              className="sm:hidden p-1 text-white"
+              className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white"
               aria-label="Open menu"
               aria-expanded={drawerOpen}
             >
