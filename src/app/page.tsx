@@ -487,7 +487,7 @@ export default function HomePage() {
             <p>
               One shop. One order. Local pickup at{" "}
               <a
-                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V5"
+                href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#16C2F3] hover:underline"

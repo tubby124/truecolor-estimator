@@ -100,7 +100,7 @@ const faqSchema = {
   ],
 };
 
-const MAPS_URL = "https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V5";
+const MAPS_URL = "https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V1";
 
 const FAQS = [
   {

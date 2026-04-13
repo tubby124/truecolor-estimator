@@ -76,7 +76,7 @@ export default function ServicesPage() {
           <h1 className="text-4xl font-bold text-[#1c1712] mb-3">Printing Services in Saskatoon</h1>
           <p className="text-lg text-gray-600 leading-relaxed max-w-3xl">
             True Color Display Printing is a full-service print shop at{" "}
-            <a href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V5" target="_blank" rel="noopener noreferrer" className="text-[#16C2F3] hover:underline">216 33rd St W, Saskatoon</a>.
+            <a href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V1" target="_blank" rel="noopener noreferrer" className="text-[#16C2F3] hover:underline">216 33rd St W, Saskatoon</a>.
             We print signs, banners, business cards, flyers, decals, and large-format displays on our in-house Roland UV printer.
             Coroplast signs from $30. Vinyl banners from $66. Business cards from $45 for 250. In-house designer for $35 flat with a same-day proof. Same-day rush production for +$40 flat on orders before 10 AM. Standard turnaround is 1&ndash;3 business days.
           </p>
