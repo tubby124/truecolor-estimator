@@ -10,6 +10,8 @@
 @.claude/rules/content-formats.md
 @.claude/rules/payment-tax.md
 @~/.claude/rules/mcp-usage.md
+@/Users/owner/Downloads/Obsidian Vault/memory/memory.md
+@/Users/owner/Downloads/Obsidian Vault/knowledge/concepts/true-color/index-true-color.md
 
 ## Mandatory Skill Gates
 - /pricing-health       → before any pricing CSV or engine deploy
