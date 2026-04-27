@@ -21,7 +21,9 @@ const MANUAL_ORDER_URL = `${BASE_URL}/api/staff/manual-order`;
 // ---------- helpers ----------
 
 function loadEnvSync(): Record<string, string> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const fs = require("node:fs");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const path = require("node:path");
   const envPath = path.resolve(__dirname, "../.env.local");
   if (!fs.existsSync(envPath)) return {};

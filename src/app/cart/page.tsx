@@ -16,7 +16,9 @@ export default function CartPage() {
   const { toasts, showToast, dismissToast } = useToast();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrating from localStorage on mount is the standard pattern
     setItems(getCart());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -25,6 +27,7 @@ export default function CartPage() {
     const updated = removeFromCart(id);
     setItems(updated);
     if (removed) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id: _id, ...rest } = removed;
       showToast("Item removed", "info", {
         label: "Undo",

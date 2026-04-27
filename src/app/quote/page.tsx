@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Turnstile } from "@marsidev/react-turnstile";
@@ -202,12 +203,12 @@ function QuoteForm() {
               We&apos;ll reply to <strong>{email}</strong> within 1 business
               day. Check your inbox for a confirmation.
             </p>
-            <a
+            <Link
               href="/products"
               className="inline-block bg-[#16C2F3] text-white font-bold px-8 py-4 rounded-xl hover:bg-[#0fb0dd] transition-colors cursor-pointer"
             >
               Browse products →
-            </a>
+            </Link>
           </motion.div>
         </main>
         <SiteFooter />

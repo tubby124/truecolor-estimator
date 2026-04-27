@@ -57,7 +57,7 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
       return initialQuotes.map((fresh) => byId.get(fresh.id) ?? fresh);
     });
     setLastSync(new Date());
-  }, [initialQuotes]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialQuotes]);
 
   // Supabase Realtime + 45s poll fallback (mirrors orders page)
   useEffect(() => {
@@ -103,6 +103,7 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
   // Stats
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
+    // eslint-disable-next-line react-hooks/purity -- Date.now() is acceptable here; useMemo only recomputes when quotes change
     const weekCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return {
       pending: quotes.filter((q) => !q.replied_at).length,
@@ -117,6 +118,7 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
     () => ({
       pending: quotes.filter((q) => !q.replied_at).length,
       recent: quotes.filter(
+        // eslint-disable-next-line react-hooks/purity -- Date.now() acceptable in useMemo; recomputed on quotes change
         (q) => Date.now() - new Date(q.created_at).getTime() < 7 * 24 * 60 * 60 * 1000
       ).length,
       all: quotes.length,
@@ -131,6 +133,7 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
     if (filter === "pending") result = result.filter((q) => !q.replied_at);
     else if (filter === "recent")
       result = result.filter(
+        // eslint-disable-next-line react-hooks/purity -- Date.now() acceptable in useMemo
         (q) => Date.now() - new Date(q.created_at).getTime() < 7 * 24 * 60 * 60 * 1000
       );
 

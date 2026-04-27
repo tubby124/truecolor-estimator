@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { CustomerRow } from "./page";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -440,15 +440,17 @@ function CustomerDetail({ customer }: { customer: CustomerRow }) {
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const fetched = useRef(false);
 
-  if (!fetched.current) {
+  useEffect(() => {
+    if (fetched.current) return;
     fetched.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time fetch trigger guarded by ref
     setLoading(true);
     fetch(`/api/staff/customer-quotes?email=${encodeURIComponent(customer.email)}`)
       .then((r) => r.json() as Promise<{ quotes?: CustomerQuote[] }>)
       .then((d) => setQuotes(d.quotes ?? []))
       .catch(() => setQuotes([]))
       .finally(() => setLoading(false));
-  }
+  }, [customer.email]);
 
   function handleReplySent(quoteId: string, body: string) {
     setLocalReplied((prev) => ({ ...prev, [quoteId]: body }));

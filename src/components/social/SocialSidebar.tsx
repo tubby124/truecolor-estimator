@@ -108,14 +108,16 @@ function isActive(pathname: string, href: string, exact = false) {
   return pathname.startsWith(href);
 }
 
-export function SocialSidebar() {
-  const pathname = usePathname();
-  const [hovered, setHovered] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const expanded = hovered;
-
-  const NavContent = ({ showLabels }: { showLabels: boolean }) => (
+function NavContent({
+  showLabels,
+  pathname,
+  onNavigate,
+}: {
+  showLabels: boolean;
+  pathname: string;
+  onNavigate: () => void;
+}) {
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={`flex items-center gap-3 border-b border-white/10 overflow-hidden transition-all duration-200 ${showLabels ? "px-4 py-5" : "px-0 py-5 justify-center"}`}>
@@ -145,7 +147,7 @@ export function SocialSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setMobileOpen(false)}
+              onClick={onNavigate}
               title={!showLabels ? item.label : undefined}
               className={`
                 group relative flex items-center gap-3 rounded-xl text-xs font-bold
@@ -197,7 +199,7 @@ export function SocialSidebar() {
       <div className={`px-2 py-4 border-t border-white/10`}>
         <Link
           href="/staff/orders"
-          onClick={() => setMobileOpen(false)}
+          onClick={onNavigate}
           title={!showLabels ? "Back to Orders" : undefined}
           className={`flex items-center gap-3 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/8 transition-all min-h-[44px] ${showLabels ? "px-3" : "px-0 justify-center"}`}
         >
@@ -221,6 +223,15 @@ export function SocialSidebar() {
       </div>
     </div>
   );
+}
+
+export function SocialSidebar() {
+  const pathname = usePathname();
+  const [hovered, setHovered] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const closeMobile = () => setMobileOpen(false);
+
+  const expanded = hovered;
 
   return (
     <>
@@ -232,7 +243,7 @@ export function SocialSidebar() {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <NavContent showLabels={expanded} />
+        <NavContent showLabels={expanded} pathname={pathname} onNavigate={closeMobile} />
       </motion.aside>
 
       {/* Mobile top bar */}
@@ -282,7 +293,7 @@ export function SocialSidebar() {
                   </svg>
                 </button>
               </div>
-              <NavContent showLabels={true} />
+              <NavContent showLabels={true} pathname={pathname} onNavigate={closeMobile} />
             </motion.aside>
           </>
         )}

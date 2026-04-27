@@ -469,7 +469,7 @@ function computeCost(
   }
 
   let totalCost: number | "PLACEHOLDER" = "PLACEHOLDER";
-  let marginPct: number | null = null;
+  const marginPct: number | null = null;
 
   if (materialCost !== "PLACEHOLDER") {
     totalCost = round2(materialCost + inkCost + laborCost + overheadCost + addonCost);

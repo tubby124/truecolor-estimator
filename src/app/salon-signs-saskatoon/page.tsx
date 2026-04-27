@@ -29,7 +29,7 @@ const descriptionNode = (
     champagne gold, or deep plum. Send your Pantone reference or brand guide and our
     in-house designer matches it for $35 flat with a same-day proof. Foamboard service
     menu displays from $10/sqft replace the laminated handout sheet at reception or each
-    station — an 18×24" board runs $45, a 24×36" runs $65. Grand opening vinyl banners
+    station — an 18×24&quot; board runs $45, a 24×36&quot; runs $65. Grand opening vinyl banners
     start at $66 for a 2×4 ft and pull walk-by traffic during your first weeks open.
     Referral business cards — 250 for $45, 500 for $65 — keep your existing clients
     doing your marketing for you. We print same-day for +$40 flat on orders placed before

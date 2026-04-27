@@ -8,9 +8,11 @@
  *   2. node scripts/seed_march_2026_posts.js
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require("fs");
 const path = require("path");
 const https = require("https");
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 // ── Load .env.local ──────────────────────────────────────────────────────────
 const envPath = path.join(__dirname, "../.env.local");

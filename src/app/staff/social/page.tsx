@@ -102,6 +102,7 @@ export default async function SocialDashboardPage() {
     )[0];
 
   function timeAgo(iso: string) {
+    // eslint-disable-next-line react-hooks/purity -- relative time helper; Date.now() value is acceptable here
     const diff = Date.now() - new Date(iso).getTime();
     const h = Math.floor(diff / 3_600_000);
     const d = Math.floor(diff / 86_400_000);

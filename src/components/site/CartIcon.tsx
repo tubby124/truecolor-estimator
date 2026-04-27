@@ -9,6 +9,7 @@ export function CartIcon() {
 
   useEffect(() => {
     // Read initial count
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrating from localStorage on mount
     setCount(getCartCount());
 
     // Listen for storage changes (cross-tab) and custom cart events

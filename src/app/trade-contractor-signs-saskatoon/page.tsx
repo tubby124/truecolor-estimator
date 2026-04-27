@@ -32,7 +32,7 @@ export default function TradeContractorSignsSaskatoon() {
       descriptionNode={
         <>
           <p>
-            Every service call is a lead — if your truck isn't branded, you're doing free
+            Every service call is a lead — if your truck isn&apos;t branded, you&apos;re doing free
             advertising for whoever sees you drive by. Saskatoon plumbers, electricians, HVAC
             contractors, roofers, and general contractors use True Color to put their name on
             every truck and every job site. We print vehicle magnets, yard signs, ACP panels,

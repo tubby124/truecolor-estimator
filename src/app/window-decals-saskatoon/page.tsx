@@ -30,7 +30,7 @@ export default function WindowDecalsSaskatoonPage() {
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
             A blank storefront window is a missed opportunity — every passerby walks past
-            without knowing what's inside or what's on sale. Custom window graphics turn
+            without knowing what&apos;s inside or what&apos;s on sale. Custom window graphics turn
             that glass into your best-performing sign. Window decals start at{" "}
             <strong>$11/sqft</strong> (minimum $45) — full-colour, UV-safe, and fully
             removable without adhesive residue, so you can change the creative every season

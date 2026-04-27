@@ -22,13 +22,13 @@ const descriptionNode = (
     End-of-month and your lot signage still says last month — that costs sales. Vehicle
     magnets are the fastest fix: from $45 ($24/sqft), they go on a demo or service
     fleet in seconds, remove without adhesive residue, and survive Saskatchewan winters on
-    any steel panel. A standard 12×24" door magnet runs approximately $48. Order a set of
+    any steel panel. A standard 12×24&quot; door magnet runs approximately $48. Order a set of
     10 matching magnets for your service loaners and rebranding is done before lunch.
     Monthly sales promotions drive the bulk of dealer print work: a 3×6 ft vinyl banner for
     your lot starts at $135 with grommets included, and our Roland UV in-house printer
     produces the bold, saturated reds and blacks that stop traffic on a busy strip — printed
     without outsourcing so there are no turnaround surprises when end-of-month hits on a
-    Friday. Coroplast price signs (from $8/sqft) on individual vehicles — 18×24" at $24
+    Friday. Coroplast price signs (from $8/sqft) on individual vehicles — 18×24&quot; at $24
     each — are the fastest-to-produce, most frequently reordered item at any dealership.
     Need permanent lot signage? ACP aluminum composite starts at $13/sqft and is the
     industry standard for exterior durability: rigid, weather-resistant, and rated for 10+

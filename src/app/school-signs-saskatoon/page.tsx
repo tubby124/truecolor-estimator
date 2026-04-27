@@ -33,7 +33,7 @@ export default function SchoolSignsSaskatoon() {
         <>
           <p>
             Tournament weekend is Thursday. Your coroplast signs and gym banner need to be
-            ready by Friday — and you can't afford to wait on a courier from out of province.
+            ready by Friday — and you can&apos;t afford to wait on a courier from out of province.
             Saskatoon K-12 schools, daycares, and school boards get their print done in-house
             at True Color, with same-day rush available for <strong>+$40 flat</strong>.{" "}
             <Link

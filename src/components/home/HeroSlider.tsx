@@ -77,6 +77,7 @@ export function HeroSlider() {
 
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 767px)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrating from matchMedia on mount
     setIsMobile(mql.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mql.addEventListener("change", handler);

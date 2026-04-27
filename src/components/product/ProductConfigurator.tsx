@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { LineItem } from "@/lib/cart/cart";
@@ -338,9 +339,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 call (306) 954-8688
               </a>{" "}
               or{" "}
-              <a href="/products" className="text-[#16C2F3] font-medium hover:underline">
+              <Link href="/products" className="text-[#16C2F3] font-medium hover:underline">
                 request a quote
-              </a>.
+              </Link>.
             </p>
           )}
         </div>
@@ -405,9 +406,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                 call (306) 954-8688
               </a>{" "}
               or{" "}
-              <a href="/products" className="text-[#16C2F3] font-medium hover:underline">
+              <Link href="/products" className="text-[#16C2F3] font-medium hover:underline">
                 request a quote
-              </a>.
+              </Link>.
             </p>
           )}
         </div>
@@ -502,9 +503,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
               Call (306) 954-8688
             </a>{" "}
             or{" "}
-            <a href="/products" className="text-[#16C2F3] font-medium hover:underline">
+            <Link href="/products" className="text-[#16C2F3] font-medium hover:underline">
               get a quote online
-            </a>.
+            </Link>.
           </p>
         )}
         {product.lotPriced && (

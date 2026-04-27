@@ -38,7 +38,7 @@ export default function EventBannersPage() {
             </Link>
             , foam board signs, retractable banner stands, and coroplast directional signs.
             Trade shows, grand openings, charity galas, community fundraisers, farmers markets —
-            we've printed signage for all of it.
+            we&apos;ve printed signage for all of it.
           </p>
           <p className="text-gray-600 leading-relaxed">
             Pricing is clear from the start. A 3×6 ft vinyl banner is $135, grommets and hemming

@@ -29,7 +29,7 @@ export default function RetailSignsSaskatoonPage() {
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
-            When you're running a weekend sale or putting up seasonal signage, you can't wait
+            When you&apos;re running a weekend sale or putting up seasonal signage, you can&apos;t wait
             a week for a print order to ship from out of province. Saskatoon boutiques,
             pharmacies, gift shops, and convenience stores get their banners, window graphics,
             and yard signs printed in-house at True Color — ready in 1–3 business days, or

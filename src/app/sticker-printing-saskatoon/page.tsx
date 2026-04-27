@@ -30,7 +30,7 @@ export default function StickerPrintingSaskatoonPage() {
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
             Cheap stickers crack at the edges in Saskatchewan winters, fade on water bottles,
-            and smear at die-cut lines. Ours don't. We print die-cut vinyl stickers in Saskatoon
+            and smear at die-cut lines. Ours don&apos;t. We print die-cut vinyl stickers in Saskatoon
             on our in-house Roland UV printer — waterproof, scratch-resistant, and colour-accurate
             whether they end up on a jar, a truck panel, or a laptop. Standard pricing:{" "}
             <strong>100 stickers = $160</strong>, <strong>250 = $325</strong>,{" "}

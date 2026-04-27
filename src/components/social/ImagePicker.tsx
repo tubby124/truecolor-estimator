@@ -181,6 +181,7 @@ export function ImagePicker({
 
   useEffect(() => {
     if (activeTab === "library" && !libraryLoaded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- loading state before async fetch
       setLibraryLoading(true);
       fetch("/api/staff/social/images")
         .then((res) => res.json())

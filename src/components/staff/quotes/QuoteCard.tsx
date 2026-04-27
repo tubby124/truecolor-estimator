@@ -8,6 +8,7 @@ import { QuoteReplyModal } from "./QuoteReplyModal";
 
 export function QuoteCard({ quote }: { quote: QuoteRequest }) {
   const isNew =
+    // eslint-disable-next-line react-hooks/purity -- "<24h ago" badge; staleness on re-render is acceptable
     Date.now() - new Date(quote.created_at).getTime() < 24 * 60 * 60 * 1000;
   const fileLinks = (quote.file_links ?? []).filter(Boolean);
   const isMulti = quote.items.length > 1;

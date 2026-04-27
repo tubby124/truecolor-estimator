@@ -8,14 +8,16 @@
  *     await authenticatedPage.goto("/account");
  *     // ... user is already logged in
  *   });
+ *
+ * Note: `use` here is the Playwright fixture param, not React's use hook.
  */
+/* eslint-disable react-hooks/rules-of-hooks */
 import { test as base, expect, type Page, type BrowserContext } from "@playwright/test";
 import {
   createTestUser,
   deleteTestUser,
   deleteTestOrders,
   generateMagicLink,
-  getSiteUrl,
 } from "./supabase-admin";
 
 export interface AuthFixtures {
@@ -28,7 +30,7 @@ export interface AuthFixtures {
 export const test = base.extend<AuthFixtures>({
   authenticatedPage: async ({ browser }, use) => {
     // Create test user
-    const testUser = await createTestUser("pw-fixture");
+    await createTestUser("pw-fixture");
 
     // Get magic link
     const magicLink = await generateMagicLink("pw-fixture");

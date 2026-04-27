@@ -7,12 +7,10 @@ import {
 test.describe("Account dashboard — authenticated", () => {
   test.describe("with orders", () => {
     let orderNumber: string;
-    let orderId: string;
 
     test.beforeEach(async () => {
       const result = await createTestOrder("pw-fixture");
       orderNumber = result.orderNumber;
-      orderId = result.orderId;
     });
 
     test.afterEach(async () => {

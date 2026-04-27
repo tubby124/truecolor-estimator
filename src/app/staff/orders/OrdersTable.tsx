@@ -134,7 +134,7 @@ export function OrdersTable({ initialOrders }: Props) {
       return merged;
     });
     setLastSync(new Date());
-  }, [initialOrders]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialOrders]);
 
   // Supabase Realtime subscription — live order status updates
   useEffect(() => {
