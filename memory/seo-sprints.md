@@ -136,3 +136,53 @@ New product SEO landing page targeting generic "poster printing Saskatoon" inten
 - [ ] Generate 8 design direction images via ChatGPT from image-prompts.md
 - [ ] Run /truecolor-images poster-printing after images generated (Pass 2)
 - [ ] Pages still to build: canada-day-printing-saskatoon, back-to-school-signs-saskatoon
+
+---
+
+## SEO Audit — 2026-04-12 (Delta Audit)
+**Score: 67/100 (flat vs 2026-03-16 baseline)**
+**Method:** Codebase-first delta audit — 3 parallel agents + manual inline checks
+
+### RESOLVED since 2026-03-16 (5 items)
+- Wave 1.2: HeroSlider conditional H1 → `<p>` tag at `HeroSlider.tsx:178` ✅
+- Wave 3.1: Service schema `url` field added at `IndustryPage.tsx:74` ✅
+- Backlog: LocalBusiness `paymentAccepted` "Cash, Credit Card, Debit, E-Transfer" ✅
+- Backlog: LocalBusiness `currenciesAccepted` "CAD" ✅
+- Backlog: LocalBusiness `hasMap` Google Maps CID link ✅
+
+**Wave 1: 8/8 COMPLETE. Wave 3: 3/3 COMPLETE.**
+
+### NEW REGRESSIONS (5 items — net score unchanged)
+- N1: `public/llms.txt:22` sticker price "From $95" — should be "From $25"
+- N2: `public/images/industries/poster-printing/poster-concert-music.jpg` >500KB
+- N3: `/booklet-printing-saskatoon` in sitemap (priority 0.9) — zero nav/footer links (orphan)
+- N4: `/window-perf-saskatoon` in sitemap (priority 0.85) — zero nav/footer links (orphan)
+- N5: `SiteFooter.tsx:47` Maps href uses `S7L+0V5` — should be `S7L+0V1`
+
+### Sitemap growth
+96 pages (was 71 — +25 new pages since last audit). Sprint pages + industry niches + SK city pages.
+
+### Content gap (biggest lever)
+DesignDirectionGrid live on 6 secondary pages but MISSING on all 5 ranking pages. Wave 2 is 3 weeks overdue.
+
+### Category scores
+- Technical SEO: 65 (−1)
+- Content Quality: 60 (flat — Wave 2 still 0/8)
+- On-Page SEO: 63 (flat)
+- Schema: 75 (+4)
+- Performance: 73 (+1)
+- Images: 84 (−1)
+- AI Search: 89 (−1)
+
+### Immediate fix sprint (N1–N5) — before Wave 2
+1. `public/llms.txt:22` — "From $95" → "From $25"
+2. `SiteFooter.tsx:47` — `S7L+0V5` → `S7L+0V1`
+3. `SiteFooter.tsx` Products grid — add booklet-printing + window-perf-saskatoon links
+4. Compress `poster-concert-music.jpg` to <300KB via `gs`
+
+### Projected roadmap
+- After immediate fixes: 69
+- After Wave 2: 72–73
+- After Wave 4 (Product Schema): 75–76
+- After Wave 5 (CWV): 77–78
+- After Wave 6 (Mobile/UX): 79–80
