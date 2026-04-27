@@ -35,7 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Product SEO pages — sprint (2026-03-02) ───────────────────────────────
     { url: `${BASE_URL}/graphic-design-saskatoon`, lastModified: new Date("2026-03-02"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/sign-company-saskatoon`, lastModified: new Date("2026-04-12"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/wall-graphics-saskatoon`, lastModified: new Date("2026-04-12"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/wall-graphics-saskatoon`, lastModified: new Date("2026-04-27"), changeFrequency: "monthly", priority: 0.8 },
 
     // ── Print product SEO pages — sprint (2026-03-03) ────────────────────────
     { url: `${BASE_URL}/flyer-printing-saskatoon`, lastModified: new Date("2026-04-12"), changeFrequency: "monthly", priority: 0.9 },
