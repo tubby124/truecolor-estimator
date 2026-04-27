@@ -69,6 +69,37 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://truecolorprinting.ca/#organization",
+  name: "True Color Display Printing",
+  legalName: "True Color Display Printing Ltd.",
+  alternateName: [
+    "True Color Printing",
+    "True Color Display Printing",
+    "True Color Display Printing Ltd.",
+    "TrueColor Printing",
+  ],
+  url: "https://truecolorprinting.ca",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://truecolorprinting.ca/truecolorlogo.png",
+    width: 512,
+    height: 512,
+  },
+  image: "https://truecolorprinting.ca/og-image.png",
+  email: "info@true-color.ca",
+  telephone: "+13069548688",
+  taxID: "731454914RT0001",
+  vatID: "731454914RT0001",
+  sameAs: [
+    "https://www.instagram.com/truecolorprint",
+    "https://maps.google.com/?cid=3278649905558780051",
+    "https://www.facebook.com/truecolordisplay",
+  ],
+};
+
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -77,7 +108,7 @@ const websiteSchema = {
   url: "https://truecolorprinting.ca",
   description:
     "Instant online pricing for signs, banners, and print products in Saskatoon, SK. No quote forms — see your exact price in 30 seconds.",
-  publisher: { "@id": "https://truecolorprinting.ca/#localbusiness" },
+  publisher: { "@id": "https://truecolorprinting.ca/#organization" },
   potentialAction: {
     "@type": "SearchAction",
     target: {
@@ -94,6 +125,9 @@ const localBusinessSchema = {
   "@id": "https://truecolorprinting.ca/#localbusiness",
   name: "True Color Display Printing",
   legalName: "True Color Display Printing Ltd.",
+  alternateName: ["True Color Printing", "TrueColor Printing"],
+  parentOrganization: { "@id": "https://truecolorprinting.ca/#organization" },
+  logo: "https://truecolorprinting.ca/truecolorlogo.png",
   taxID: "731454914RT0001",
   vatID: "731454914RT0001",
   description:
@@ -210,6 +244,10 @@ export default function RootLayout({
             "Trustmark widget validation failed" error text on every page.
             Reviews widget (ReviewsSection) and Instagram feed (loader-feed.js)
             are independent and unaffected. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
