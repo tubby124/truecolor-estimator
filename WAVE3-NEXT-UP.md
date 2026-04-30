@@ -1,7 +1,7 @@
 # SEO Wave 3 — NEXT UP
 
 > **Read this first when opening the True Color repo for SEO work.**
-> Status as of 2026-04-27. Updated after every wave ships.
+> Status as of 2026-04-30. Updated after every wave ships.
 
 ---
 
@@ -12,6 +12,15 @@
 - `c8f1f95` — wall-graphics title 89→53 chars (fixes 246 imp / 0% CTR)
 
 Both Railway-deployed. Indexing window: 5–14 days for Googlebot recrawl.
+
+**Wave 3b/3c PREPPED 2026-04-30** — exact diffs + draft pages locked in [seo-prep/](seo-prep/). Zero research left. Apply mechanically once gate passes.
+
+- [seo-prep/README.md](seo-prep/README.md) — overview + apply order
+- [seo-prep/WAVE-3B-COMMIT-1-flyer-links.md](seo-prep/WAVE-3B-COMMIT-1-flyer-links.md) — 3-href repoint diff
+- [seo-prep/WAVE-3B-COMMIT-2-sticker-ddg.md](seo-prep/WAVE-3B-COMMIT-2-sticker-ddg.md) — DDG diff (existing images, no generation needed)
+- [seo-prep/wave-3c-printing-near-me-saskatoon.tsx](seo-prep/wave-3c-printing-near-me-saskatoon.tsx) — full page draft
+- [seo-prep/wave-3c-printing-services-saskatoon.tsx](seo-prep/wave-3c-printing-services-saskatoon.tsx) — full page draft
+- [seo-prep/WAVE-3C-WIRING.md](seo-prep/WAVE-3C-WIRING.md) — sitemap + footer wiring + commit messages
 
 ---
 
@@ -45,48 +54,36 @@ Both Railway-deployed. Indexing window: 5–14 days for Googlebot recrawl.
 
 ## Wave 3b — flyer link repoint + sticker DDG (Day 7, ~2026-05-04)
 
-**Files:**
-- `src/app/flyer-printing-saskatoon/page.tsx` — repoint 4 internal `<Link>` hrefs:
-  - `/products/brochures` → `/brochure-printing-saskatoon`
-  - `/products/business-cards` → `/business-cards-saskatoon`
-  - `/products/postcards` → `/postcard-printing-saskatoon`
-  - Keep `/products` as-is (cluster hub, OK)
-  - **Why:** /products/* are noindex utility pages. PageRank flowing to noindex = wasted equity.
-- `src/app/sticker-printing-saskatoon/page.tsx` — apply Wave 2 treatment:
-  - Add `<DesignDirectionGrid>` with 2 sections (sticker design directions + size guide)
-  - Add `descriptionNode` with rich JSX content
-  - Update `niche-image-prompts.json` with sticker mockup prompts
-  - **Why:** Page is converting orders without DDG/descriptionNode (per [[targeting-map]]). Adding both compounds existing demand.
-- Bump sitemap.ts lastmod for both pages only (per safety rule)
+**PREP DONE 2026-04-30.** No more research. Apply diffs from `seo-prep/`.
 
-**Two separate commits** (per wave-safety: never combine content + link changes in one commit).
+**Page already has descriptionNode** — sticker page only needs DDG addition (verified 2026-04-30). Existing sticker images at `/images/products/product/sticker-*.webp` reused — **no new image generation needed.**
 
-**Use these skills:**
-- `/paa-faq flyer-printing-saskatoon` — pull missing PAA questions before edit
-- `/truecolor-page sticker-printing-saskatoon` (re-treat mode) — generate DDG + descriptionNode
+**Two separate commits**:
+- Commit 1: [seo-prep/WAVE-3B-COMMIT-1-flyer-links.md](seo-prep/WAVE-3B-COMMIT-1-flyer-links.md) — 3 hrefs in flyer page (brochures, business-cards, postcards) repointed to `/[product]-saskatoon` equivalents. `/products` cluster hub link kept as-is.
+- Commit 2 (≥24h after Commit 1): [seo-prep/WAVE-3B-COMMIT-2-sticker-ddg.md](seo-prep/WAVE-3B-COMMIT-2-sticker-ddg.md) — `<DesignDirectionGrid>` with 2 sections (5 images total) added to sticker page descriptionNode. FROZEN guardrails listed in the doc.
 
-**Wait 7 days after Wave 3b → re-check GSC → Wave 3c**
+Each commit bumps only its own page's sitemap lastmod (per safety rule).
+
+**Wait 7 days after Wave 3b commit 2 → re-check GSC → Wave 3c**
 
 ---
 
 ## Wave 3c — capture "near me" volume (Day 14, ~2026-05-11)
 
-**New pages:**
-- `src/app/printing-near-me-saskatoon/page.tsx`
-- `src/app/printing-services-saskatoon/page.tsx`
+**PREP DONE 2026-04-30.** Both pages drafted in full at:
+- [seo-prep/wave-3c-printing-near-me-saskatoon.tsx](seo-prep/wave-3c-printing-near-me-saskatoon.tsx)
+- [seo-prep/wave-3c-printing-services-saskatoon.tsx](seo-prep/wave-3c-printing-services-saskatoon.tsx)
 
-**Build via:**
-- `/truecolor-page printing-near-me-saskatoon`
-- `/truecolor-page printing-services-saskatoon`
-
-**Wire into:**
-- `src/components/site/SiteNav.tsx` INDUSTRY_LINKS (or SiteFooter Quick Links)
-- `src/components/site/SiteFooter.tsx` Quick Links
-- `src/app/sitemap.ts` with today's lastmod
+Apply via [seo-prep/WAVE-3C-WIRING.md](seo-prep/WAVE-3C-WIRING.md):
+1. Move drafts → `src/app/[slug]/page.tsx`, strip leading WAVE 3C DRAFT comment block
+2. Commit 1: printing-near-me + sitemap entry + SiteFooter Quick Links
+3. Wait 2–3 days
+4. Commit 2: printing-services + sitemap entry + SiteFooter Quick Links
+5. After ship: flip targeting-map.md rows from "Wave 3c BUILD" to "✅ Wave 3c SHIPPED"
 
 **Why:** GSC shows 130+ impressions/month on "printing near me", "print shop near me", "color printing near me", "printing services near me" — all bouncing off homepage / `/services` at pos 7–9 with 0% CTR. Dedicated hubs capture that volume.
 
-**Anti-cannibalization rule:** these hubs link OUT to product pages but never compete for the product-specific keywords. See [[targeting-map]] for the canonical assignment.
+**Anti-cannibalization rule:** these hubs link OUT to product pages but never compete for the product-specific keywords. Both drafts respect this — primary keywords are the hub queries, never the product queries. See [[targeting-map]] for the canonical assignment.
 
 ---
 
