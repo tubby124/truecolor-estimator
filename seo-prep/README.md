@@ -22,6 +22,20 @@
 4. Two separate commits per wave-safety rule (one per page)
 5. Update logs
 
+### On 2026-05-25+ (Wave 4, after Wave 3c GSC re-check passes)
+
+Wave 4 = 7 commits total. Ship in order, one per day minimum:
+
+1. [WAVE-4-COMMIT-1-image-sitemap-urls.md](WAVE-4-COMMIT-1-image-sitemap-urls.md) — 5 URL slug fixes (lowest risk, can ship anytime post-Wave-3c)
+2. [WAVE-4-COMMIT-2-sign-company-voice-fix.md](WAVE-4-COMMIT-2-sign-company-voice-fix.md) — body voice edit (must precede Commit 7 by 7+ days)
+3. [WAVE-4-COMMIT-3-sitenav-repoint.md](WAVE-4-COMMIT-3-sitenav-repoint.md) — 14 hrefs in megamenu (high blast radius, watch FROZEN pages 14 days)
+4. [WAVE-4-COMMIT-4-orphan-link-in.md](WAVE-4-COMMIT-4-orphan-link-in.md) — footer cluster hubs + 4 city parent link blocks
+5. [WAVE-4-PRODUCT-SCHEMA-ROLLOUT.md](WAVE-4-PRODUCT-SCHEMA-ROLLOUT.md) Commit 5 — IndustryPage schema prop + banner-printing
+6. WAVE-4-PRODUCT-SCHEMA-ROLLOUT.md Commit 6 — business-cards (≥7 days after Commit 5)
+7. WAVE-4-PRODUCT-SCHEMA-ROLLOUT.md Commit 7 — sign-company (≥7 days after both Commit 2 voice fix AND Commit 5 schema prop)
+
+Spacing: Commits 1–4 can be 1 day apart each. Commits 5–7 require ≥7 days each.
+
 ## Why this folder exists
 
 Wave 3a shipped 2026-04-27. Hard rule: 5–7 day wait between waves. Hard gate: 2026-05-02 GSC re-check before any Wave 3b commit. Today is 2026-04-30. Rather than do nothing, all the research/copy/wiring decisions are baked here so the May 2 ship is mechanical.

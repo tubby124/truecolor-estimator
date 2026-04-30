@@ -107,11 +107,26 @@ Apply via [seo-prep/WAVE-3C-WIRING.md](seo-prep/WAVE-3C-WIRING.md):
 
 ---
 
-## Wave 4 — Product schema rollout (DEFERRED)
+## Wave 4 — Cleanup + Product schema rollout (PREPPED 2026-04-30)
 
-Still gated until `/coroplast-signs-saskatoon` and `/flyer-printing-saskatoon` recover from Wave 2 + 3b. Earliest possible: ~2026-05-25 (post-Wave 3c indexing).
+**Earliest ship: 2026-05-25** (post Wave 3c GSC re-check). 7 commits total — see [seo-prep/](seo-prep/):
 
-Files: coroplast, banner, BC, flyer landing pages — add `Product` schema with offers, price, availability. Per [SEO-REMAINING-WAVES.md](SEO-REMAINING-WAVES.md) Wave 4 entry.
+- **Commit 1** ([WAVE-4-COMMIT-1-image-sitemap-urls.md](seo-prep/WAVE-4-COMMIT-1-image-sitemap-urls.md)) — 5 URL slug fixes in image-sitemap.xml (lowest risk, can ship anytime post-Wave-3c)
+- **Commit 2** ([WAVE-4-COMMIT-2-sign-company-voice-fix.md](seo-prep/WAVE-4-COMMIT-2-sign-company-voice-fix.md)) — body voice edit on sign-company (prerequisite for Commit 7, must ship 7+ days before)
+- **Commit 3** ([WAVE-4-COMMIT-3-sitenav-repoint.md](seo-prep/WAVE-4-COMMIT-3-sitenav-repoint.md)) — 14 hrefs in megamenu repointed `/products/*` → `/[product]-saskatoon` (high blast radius, watch FROZEN pages 14 days)
+- **Commit 4** ([WAVE-4-COMMIT-4-orphan-link-in.md](seo-prep/WAVE-4-COMMIT-4-orphan-link-in.md)) — footer cluster hubs row + 4 city parent link blocks (17 orphan pages get inbound links)
+- **Commits 5–7** ([WAVE-4-PRODUCT-SCHEMA-ROLLOUT.md](seo-prep/WAVE-4-PRODUCT-SCHEMA-ROLLOUT.md)) — IndustryPage extended with optional `productSchema` prop; banner-printing → business-cards → sign-company in that order, ≥7 days between each. Run `/pricing-health` before each.
+
+**Sequencing:** Commits 1–4 can ship 1/day. Commits 5–7 require ≥7 days between each.
+
+**FROZEN pages getting touched in Wave 4:** sign-company body (Commit 2), all FROZEN pages via SiteNav (Commit 3), banner+BC+sign-company schemas (Commits 5–7). All under explicit allow-list per [.claude/rules/seo-protected-pages.md](.claude/rules/seo-protected-pages.md).
+
+---
+
+## Wave 5+ (deferred, no prep yet)
+
+- **Wave 5 (Performance/CWV):** P2-3 from [seo-prep/TECHNICAL-AUDIT-2026-04-30.md](seo-prep/TECHNICAL-AUDIT-2026-04-30.md) — INP risk on `/products/[slug]` estimator. Need CrUX field data first.
+- **Wave 6 (Mobile/UX):** P2-1 — Next 16 viewport export deprecation cleanup. Very low priority.
 
 ---
 
