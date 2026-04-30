@@ -13,11 +13,17 @@
 
 Both Railway-deployed. Indexing window: 5–14 days for Googlebot recrawl.
 
-**Wave 3b/3c PREPPED 2026-04-30** — exact diffs + draft pages locked in [seo-prep/](seo-prep/). Zero research left. Apply mechanically once gate passes.
+**Wave 3b/3c PREPPED + AUDITED 2026-04-30** — exact diffs + draft pages locked in [seo-prep/](seo-prep/). Zero research left. Apply mechanically once gate passes.
+
+**Wave 3b is now 3 commits** (was 2). Schema audit found Wave 3a is being silently corrupted in production by duplicate @id nodes on /about + /contact + a NAP-inconsistent phone on /vehicle-decals-saskatoon. Added as Commit 2.
 
 - [seo-prep/README.md](seo-prep/README.md) — overview + apply order
+- [seo-prep/SCHEMA-AUDIT-2026-04-30.md](seo-prep/SCHEMA-AUDIT-2026-04-30.md) — full schema validation
+- [seo-prep/TECHNICAL-AUDIT-2026-04-30.md](seo-prep/TECHNICAL-AUDIT-2026-04-30.md) — site-wide technical audit (78/100)
+- [seo-prep/CONTENT-EEAT-AUDIT-2026-04-30.md](seo-prep/CONTENT-EEAT-AUDIT-2026-04-30.md) — E-E-A-T scores on 7 FROZEN pages
 - [seo-prep/WAVE-3B-COMMIT-1-flyer-links.md](seo-prep/WAVE-3B-COMMIT-1-flyer-links.md) — 3-href repoint diff
-- [seo-prep/WAVE-3B-COMMIT-2-sticker-ddg.md](seo-prep/WAVE-3B-COMMIT-2-sticker-ddg.md) — DDG diff (existing images, no generation needed)
+- [seo-prep/WAVE-3B-COMMIT-2-schema-dedup.md](seo-prep/WAVE-3B-COMMIT-2-schema-dedup.md) — schema integrity fixes (3 files)
+- [seo-prep/WAVE-3B-COMMIT-3-sticker-ddg.md](seo-prep/WAVE-3B-COMMIT-3-sticker-ddg.md) — DDG diff (existing images, no generation needed)
 - [seo-prep/wave-3c-printing-near-me-saskatoon.tsx](seo-prep/wave-3c-printing-near-me-saskatoon.tsx) — full page draft
 - [seo-prep/wave-3c-printing-services-saskatoon.tsx](seo-prep/wave-3c-printing-services-saskatoon.tsx) — full page draft
 - [seo-prep/WAVE-3C-WIRING.md](seo-prep/WAVE-3C-WIRING.md) — sitemap + footer wiring + commit messages
@@ -52,19 +58,21 @@ Both Railway-deployed. Indexing window: 5–14 days for Googlebot recrawl.
 
 ---
 
-## Wave 3b — flyer link repoint + sticker DDG (Day 7, ~2026-05-04)
+## Wave 3b — flyer links + schema dedup + sticker DDG (Day 5–7, ~2026-05-02 → 2026-05-04)
 
 **PREP DONE 2026-04-30.** No more research. Apply diffs from `seo-prep/`.
 
-**Page already has descriptionNode** — sticker page only needs DDG addition (verified 2026-04-30). Existing sticker images at `/images/products/product/sticker-*.webp` reused — **no new image generation needed.**
+**Three separate commits** (single concern each, never bundle):
 
-**Two separate commits**:
-- Commit 1: [seo-prep/WAVE-3B-COMMIT-1-flyer-links.md](seo-prep/WAVE-3B-COMMIT-1-flyer-links.md) — 3 hrefs in flyer page (brochures, business-cards, postcards) repointed to `/[product]-saskatoon` equivalents. `/products` cluster hub link kept as-is.
-- Commit 2 (≥24h after Commit 1): [seo-prep/WAVE-3B-COMMIT-2-sticker-ddg.md](seo-prep/WAVE-3B-COMMIT-2-sticker-ddg.md) — `<DesignDirectionGrid>` with 2 sections (5 images total) added to sticker page descriptionNode. FROZEN guardrails listed in the doc.
+- **Commit 1** ([WAVE-3B-COMMIT-1-flyer-links.md](seo-prep/WAVE-3B-COMMIT-1-flyer-links.md)) — 3 hrefs in flyer page (brochures, business-cards, postcards) repointed to `/[product]-saskatoon` equivalents. `/products` cluster hub link kept as-is.
+- **Commit 2** ([WAVE-3B-COMMIT-2-schema-dedup.md](seo-prep/WAVE-3B-COMMIT-2-schema-dedup.md)) — Schema integrity for Wave 3a. about/page.tsx Organization @id collision replaced with AboutPage. contact/page.tsx LocalBusiness @id collision deleted (layout already injects). vehicle-decals-saskatoon phone NAP fix.
+- **Commit 3** (≥24h after Commit 2) ([WAVE-3B-COMMIT-3-sticker-ddg.md](seo-prep/WAVE-3B-COMMIT-3-sticker-ddg.md)) — `<DesignDirectionGrid>` with 2 sections (5 images total) added to sticker page descriptionNode. Reuses existing sticker .webp images. FROZEN guardrails listed in the doc.
 
-Each commit bumps only its own page's sitemap lastmod (per safety rule).
+Each commit bumps only its own affected pages' sitemap lastmod (per safety rule).
 
-**Wait 7 days after Wave 3b commit 2 → re-check GSC → Wave 3c**
+**After Commit 2: paste 3 URLs into Rich Results Test** (https://truecolorprinting.ca/, /about, /contact) — verify zero schema errors before applying Commit 3.
+
+**Wait 7 days after Wave 3b commit 3 → re-check GSC → Wave 3c**
 
 ---
 

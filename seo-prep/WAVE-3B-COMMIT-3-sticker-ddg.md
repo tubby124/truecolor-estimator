@@ -1,4 +1,6 @@
-# Wave 3b — Commit 2: Sticker DesignDirectionGrid + descriptionNode upgrade
+# Wave 3b — Commit 3: Sticker DesignDirectionGrid + descriptionNode upgrade
+
+> Renumbered from Commit 2 → Commit 3 on 2026-04-30 after schema audit added a new schema-dedup commit at slot 2.
 
 **Why:** `/sticker-printing-saskatoon` is converting orders at pos 5.75 *without* DDG/imagery. Per [targeting-map.md](../../Obsidian%20Vault/Projects/true-color/SEO/targeting-map.md): "Wave 3b adds DDG." Adding DDG + visual content to a converting page is pure compounding — more dwell time, more pages-deep crawl, more E-E-A-T.
 
@@ -115,7 +117,7 @@ feat(seo): add DesignDirectionGrid + visual content to sticker-printing-saskatoo
 Page converts at pos 5.75 without DDG/imagery — adding 5 sticker mockups
 across 2 sections (design directions + sizes/shapes). Reuses existing
 sticker product photos. No title/H1/slug change (page is FROZEN).
-Wave 3b commit 2 of 2.
+Wave 3b commit 3 of 3.
 ```
 
 ---
@@ -142,7 +144,7 @@ Only ADDITIONS allowed: import line, designDirections const, single `<DesignDire
 - [ ] Wait ~2 min Railway deploy
 - [ ] Open https://truecolorprinting.ca/sticker-printing-saskatoon — confirm DDG renders 5 images, 2 sections
 - [ ] Confirm H1 still reads "Sticker Printing Saskatoon"
-- [ ] Update [memory/seo-sprints.md](../memory/seo-sprints.md) Phase 27b entry
-- [ ] Update vault `Projects/true-color/SEO/seo-recovery-log.md` — Wave 3b commit 2 row
+- [ ] Update [memory/seo-sprints.md](../memory/seo-sprints.md) Phase 27c entry
+- [ ] Update vault `Projects/true-color/SEO/seo-recovery-log.md` — Wave 3b commit 3 row
 - [ ] Schedule next GSC check for **2026-05-09** (7 days post Wave 3b ship)
 - [ ] Do NOT proceed to Wave 3c until 2026-05-11 GSC check passes
