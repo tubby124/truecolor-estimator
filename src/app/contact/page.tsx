@@ -21,44 +21,6 @@ export const metadata: Metadata = {
   },
 };
 
-const localBusinessSchema = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "@id": "https://truecolorprinting.ca/#localbusiness",
-  name: "True Color Display Printing",
-  url: "https://truecolorprinting.ca",
-  telephone: "+13069548688",
-  email: "info@true-color.ca",
-  image: "https://truecolorprinting.ca/images/about/shop-exterior.webp",
-  priceRange: "$$",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "216 33rd St W",
-    addressLocality: "Saskatoon",
-    addressRegion: "SK",
-    postalCode: "S7L 0V1",
-    addressCountry: "CA",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: 52.13254,
-    longitude: -106.67047,
-  },
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      opens: "09:00",
-      closes: "17:00",
-    },
-  ],
-  sameAs: [
-    "https://maps.google.com/?cid=3278649905558780051",
-    "https://www.instagram.com/truecolorprint",
-    "https://www.facebook.com/truecolordisplay",
-  ],
-};
-
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -128,10 +90,6 @@ const FAQS = [
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

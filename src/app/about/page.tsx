@@ -19,61 +19,16 @@ export const metadata: Metadata = {
   },
 };
 
-const organizationSchema = {
+const aboutPageSchema = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": "https://truecolorprinting.ca/#organization",
-  name: "True Color Display Printing",
-  url: "https://truecolorprinting.ca",
-  logo: "https://truecolorprinting.ca/truecolorlogo.png",
-  telephone: "+13069548688",
-  email: "info@true-color.ca",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "216 33rd St W",
-    addressLocality: "Saskatoon",
-    addressRegion: "SK",
-    postalCode: "S7L 0V1",
-    addressCountry: "CA",
-  },
-  sameAs: [
-    "https://www.instagram.com/truecolorprint",
-    "https://maps.google.com/?cid=3278649905558780051",
-    "https://www.facebook.com/truecolordisplay",
-  ],
+  "@type": "AboutPage",
+  "@id": "https://truecolorprinting.ca/about#aboutpage",
+  url: "https://truecolorprinting.ca/about",
+  name: "About True Color Display Printing",
   description:
-    "Saskatoon-based print shop operating Roland TrueVIS and Konica Minolta production equipment in-house. Coroplast signs, vinyl banners, vehicle magnets, business cards, and large format printing. Local pickup at 216 33rd St W.",
-  foundingYear: "2019",
-  foundingLocation: {
-    "@type": "Place",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "1629 Ontario Ave",
-      addressLocality: "Saskatoon",
-      addressRegion: "SK",
-      addressCountry: "CA",
-    },
-  },
-  areaServed: [
-    { "@type": "City", name: "Saskatoon" },
-    { "@type": "AdministrativeArea", name: "Saskatchewan" },
-  ],
-  hasOfferCatalog: {
-    "@type": "OfferCatalog",
-    name: "Print Products and Signage",
-    itemListElement: [
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Coroplast Signs" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vinyl Banners" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Business Cards" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "ACP Aluminum Signs" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vehicle Magnets" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Flyers" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Brochures" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Window Decals" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Retractable Banners" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Graphic Design" } },
-    ],
-  },
+    "Meet the team behind True Color Display Printing. Roland TrueVIS UV printer, Konica Minolta press, in-house designer. Local Saskatoon shop at 216 33rd St W.",
+  mainEntity: { "@id": "https://truecolorprinting.ca/#organization" },
+  isPartOf: { "@id": "https://truecolorprinting.ca/#website" },
 };
 
 const EQUIPMENT = [
@@ -117,7 +72,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-white">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutPageSchema) }}
       />
       <SiteNav />
 

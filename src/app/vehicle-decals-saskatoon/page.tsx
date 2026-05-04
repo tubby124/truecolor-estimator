@@ -53,7 +53,7 @@ const serviceSchema = {
       postalCode: "S7L 0V1",
       addressCountry: "CA",
     },
-    telephone: "+1-306-700-0272",
+    telephone: "+13069548688",
   },
   description:
     "Custom die-cut vehicle decals printed on Roland UV wide-format press. Full-colour vinyl for door panels, rear windows, and side graphics. From $14/sqft, minimum $75. Installation quoted separately.",
