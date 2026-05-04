@@ -29,7 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/business-cards-saskatoon`, lastModified: new Date("2026-04-12"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/vehicle-magnets-saskatoon`, lastModified: new Date("2025-12-10"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/vehicle-decals-saskatoon`, lastModified: new Date("2026-05-02"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/aluminum-signs-saskatoon`, lastModified: new Date("2025-12-18"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/aluminum-signs-saskatoon`, lastModified: new Date("2026-05-04"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/retractable-banners-saskatoon`, lastModified: new Date("2026-01-08"), changeFrequency: "monthly", priority: 0.8 },
 
     // ── Product SEO pages — sprint (2026-03-02) ───────────────────────────────

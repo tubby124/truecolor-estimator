@@ -23,8 +23,8 @@ export default function AluminumSignsSaskatoonPage() {
       primaryProductSlug="acp-signs"
       title="Aluminum Signs Saskatoon"
       subtitle="ACP from $13/sqft. 10+ year outdoor lifespan. Professional and permanent."
-      heroImage="/images/products/product/acp-aluminum-sign-800x600.webp"
-      heroAlt="3mm aluminum composite ACP signs printed in Saskatoon by True Color Display Printing"
+      heroImage="/images/products/product/acp-sign-princess-liquidation-800x600.webp"
+      heroAlt="Custom-printed 3mm ACP aluminum sign for Princess Liquidation Savings Center — full-colour Roland UV print, produced in Saskatoon by True Color Display Printing"
       description="True Color Display Printing produces 3mm aluminum composite (ACP) signs for Saskatoon businesses that need something that lasts. ACP is the go-to material for building directories, commercial real estate signs, permanent site signs, and branded exterior signage. Unlike coroplast, ACP does not bend, warp, fade, or flex. Roland UV ink is printed directly to the panel surface — sharp edges, vivid colour, no lamination needed. Prices start at $13/sqft with volume discounts at 5+ signs (3% off) and 10+ signs (5% off). Order online and get an exact price in 30 seconds."
       descriptionNode={
         <>
