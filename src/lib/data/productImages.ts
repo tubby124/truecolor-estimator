@@ -9,7 +9,7 @@ export const PRODUCT_IMAGES: Record<string, string> = {
   "vinyl-banners":       "/images/products/product/banner-vinyl-colorful-800x600.webp",
   "coroplast-signs":     "/images/products/product/coroplast-yard-sign-800x600.webp",
   "vehicle-magnets":     "/images/products/product/vehicle-magnets-800x600.webp",
-  "acp-signs":           "/images/products/product/acp-aluminum-sign-800x600.webp",
+  "acp-signs":           "/images/products/product/acp-sign-princess-liquidation-800x600.webp",
   "flyers":              "/images/products/product/flyers-stack-800x600.webp",
   "business-cards":      "/images/products/product/business-cards-800x600.webp",
   "foamboard-displays":  "/images/products/product/foamboard-display-800x600.webp",

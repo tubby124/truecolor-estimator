@@ -48,6 +48,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MPHCC020",
     heroImage: "/images/products/product/coroplast-yard-sign-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-coroplast-diecut-sasknation-key.webp",
+      "/images/gallery/gallery-coroplast-nextgen-dashcam-giveaway.webp",
       "/images/products/product/coroplast-job-site-800x600.webp",
       "/images/products/product/coroplast-fence-construction-800x600.webp",
       "/images/gallery/gallery-coroplast-realtor-keyshape.webp",
@@ -354,9 +356,11 @@ export const PRODUCTS: Record<string, ProductContent> = {
     fromPrice: "$60",
     category: "RIGID",
     material_code: "RMACP002",
-    heroImage: "/images/products/product/acp-aluminum-sign-800x600.webp",
+    heroImage: "/images/products/product/acp-sign-princess-liquidation-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-acp-pet-planet-customer-parking.webp",
       "/images/products/product/acp-sign-brick-wall-800x600.webp",
+      "/images/products/product/acp-aluminum-sign-800x600.webp",
       "/images/gallery/gallery-acp-cargem-auto-sales.webp",
       "/images/gallery/gallery-acp-mia-casa-construction.webp",
       "/images/gallery/gallery-banner-habesha-convenience.webp",
