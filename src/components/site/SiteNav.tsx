@@ -16,6 +16,7 @@ const PRODUCT_CATEGORIES = [
     links: [
       { label: "Coroplast Signs", href: "/products/coroplast-signs" },
       { label: "ACP Aluminum Signs", href: "/products/acp-signs" },
+      { label: "Custom-Shape Signs", href: "/products/custom-shape-signs" },
       { label: "Vinyl Banners", href: "/products/vinyl-banners" },
       { label: "Foamboard Displays", href: "/products/foamboard-displays" },
       { label: "Retractable Banners", href: "/products/retractable-banners" },

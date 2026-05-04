@@ -1211,6 +1211,88 @@ export const PRODUCTS: Record<string, ProductContent> = {
       ],
     },
   },
+  "custom-shape-signs": {
+    slug: "custom-shape-signs",
+    name: "Custom-Shape Signs",
+    tagline: "Die-cut to any outline — keys, badges, logos, custom shapes.",
+    description:
+      "Custom-shape signs are coroplast or aluminum composite cut to any outline you want — a key shape for an auto dealership, a badge shape for a security company, a custom logo cutout for storefront branding, or any irregular shape that a standard rectangular sign won't deliver. True Color cuts custom shapes in-house at 216 33rd St W, Saskatoon — no outsourcing, no waiting on a third-party fabricator. The base material is 4mm coroplast (the same weatherproof corrugated polypropylene used for our standard yard signs) for outdoor or short-term work, or 3mm ACP (aluminum composite) for permanent installations that need to last 10+ years. The shape is plotted on our cutter from your vector artwork; the print is full-colour Roland UV outdoor ink that bonds permanently to the substrate. Pricing starts at $50 for a small custom-shape coroplast (around 24×24\") which covers the cut setup and material; design assistance to clean up or recreate your artwork as a print-ready vector is +$15 for simple shape work, or +$35 for full custom design. The SaskNation Used Cars key shape pictured above is a typical example: roughly 36×24\", coroplast with green border, full-colour print, cut to the key outline — exactly the kind of branded statement piece that a rectangular sign can't pull off. Common Saskatoon use cases: real estate \"Just Listed\" signs cut to a house outline, dealership signage cut to a key or car outline, gym signs cut to a shield or badge shape, retail directional signs cut to an arrow shape, and tradeshow booth signage cut to a logo silhouette. Supply your shape as a vector PDF, AI, or SVG with the cut path on a separate layer; if you only have a JPG or PNG, our designer recreates the vector for the $15 simple-shape rate. Same-day rush available on most jobs (+$40 flat). Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$50",
+    category: "SIGN",
+    material_code: "MPHCC020",
+    heroImage: "/images/products/product/coroplast-diecut-sasknation-key-800x600.webp",
+    galleryImages: [
+      "/images/gallery/gallery-coroplast-diecut-sasknation-key.webp",
+      "/images/gallery/gallery-coroplast-realtor-keyshape.webp",
+      "/images/products/product/coroplast-yard-sign-800x600.webp",
+      "/images/products/product/acp-aluminum-sign-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "Small (~12×12\")", width_in: 12, height_in: 12 },
+      { label: "Medium (~24×24\")", width_in: 24, height_in: 24 },
+      { label: "Large (~36×24\")", width_in: 36, height_in: 24 },
+      { label: "X-Large (~48×36\")", width_in: 48, height_in: 36 },
+    ],
+    qtyPresets: [1, 5, 10, 25],
+    specs: [
+      { label: "Material", value: "4mm coroplast (outdoor/short-term) or 3mm ACP aluminum composite (permanent)" },
+      { label: "Print", value: "Full-colour Roland UV outdoor ink" },
+      { label: "Cut", value: "In-house plotter cut to your vector outline" },
+      { label: "File required", value: "PDF / AI / SVG with cut path on a separate layer (vector)" },
+      { label: "Design from raster (JPG/PNG)", value: "+$15 simple shape recreation, +$35 full custom design" },
+      { label: "Sides", value: "Single-sided (double-sided custom shapes by quote)" },
+      { label: "Min order", value: "$50 (covers setup + small shape)" },
+      { label: "Turnaround", value: "2–4 business days · same-day rush +$40 flat" },
+    ],
+    whoUsesThis: ["Real Estate", "Retail", "Construction", "Events", "Agriculture"],
+    faqs: [
+      {
+        q: "What's the minimum cost for a custom-shape sign?",
+        a: "$50 covers the cut setup and a small custom-shape coroplast piece (around 12-24\" widest dimension). Larger shapes price by area on top of the setup — a 36×24\" key-shape coroplast typically lands $50-$75 plus any design work.",
+      },
+      {
+        q: "How much is design help if I only have a logo image?",
+        a: "$15 for simple shape recreation (clean tracing of an existing logo or outline), or $35 for full custom design from a rough sketch. Most custom-shape jobs land in the $15 tier — we just need a clean vector cut path.",
+      },
+      {
+        q: "What file format do you need for the cut path?",
+        a: "Vector PDF, AI, or SVG with the cut path on a separate layer (typically named \"CutContour\" or stroked in a spot colour). If you don't have vector artwork, send your highest-resolution raster and we'll recreate it for $15.",
+      },
+      {
+        q: "Coroplast or ACP — which should I pick?",
+        a: "Coroplast for outdoor/short-term work (1–3 years), promotions, real estate, events — base price $50. ACP for permanent installations that need to last 10+ years — starts around $90 for a small custom-shape ACP piece due to the more expensive material.",
+      },
+      {
+        q: "Can you cut any shape?",
+        a: "Almost any 2D outline — keys, badges, shields, arrows, logos, house silhouettes, custom letters, animal shapes. The minimum cut feature is about 1/4\" — very fine details (sharp inner corners under 1/4\") may need to be slightly simplified for the cutter.",
+      },
+      {
+        q: "Can I get double-sided custom-shape signs?",
+        a: "Yes, by quote — double-sided custom shapes require both faces printed and bonded back-to-back, then cut. Adds approximately 60-80% to the single-sided price. Email or call for an exact quote.",
+      },
+      {
+        q: "How does this differ from a regular coroplast yard sign?",
+        a: "Regular coroplast signs are rectangular at standard sizes (12×18\", 18×24\", 24×36\", 4×8 ft) and start at $30. Custom-shape signs are cut to any outline you provide and start at $50 because of the cut setup. If you want a rectangular sign, order from /products/coroplast-signs — it's faster and cheaper.",
+      },
+      {
+        q: "Do you have examples of custom shapes you've made?",
+        a: "Yes — see the gallery above. The SaskNation Used Cars key shape (36×24\" coroplast) is a typical example. We've also done realtor key-shape signs, badge cutouts, custom letter signs, and irregular promotional shapes for retail clients across Saskatoon.",
+      },
+    ],
+    relatedSlugs: ["coroplast-signs", "acp-signs", "stickers"],
+    materialInfo: {
+      headline: "Coroplast or ACP — cut to any outline you want",
+      bullets: [
+        "4mm coroplast for outdoor/short-term — weatherproof, lightweight, $50 base",
+        "3mm ACP for permanent installations — rigid, indefinite outdoor lifespan",
+        "Plotter-cut in-house from your vector artwork — no outsourcing",
+        "Design assist for raster files: $15 simple shape, $35 full design",
+        "Same-day rush available (+$40 flat)",
+      ],
+    },
+  },
 };
 
 export const PRODUCT_SLUGS = Object.keys(PRODUCTS);
