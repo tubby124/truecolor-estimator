@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
   title: { absolute: "Sticker Printing Saskatoon | Die-Cut Vinyl | True Color" },
@@ -15,6 +16,56 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
+const designDirections = [
+  {
+    title: "Sticker Design Directions",
+    subtitle:
+      "100 for $160 · 250 for $325 · 500 for $475 — die-cut vinyl, Roland UV print, waterproof",
+    aspect: "4/3" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/products/product/sticker-diecut-truecolor-logo-800x600.webp",
+        alt: "Custom die-cut vinyl logo sticker printed in Saskatoon — True Color Display Printing",
+        label: "Logo Die-Cut",
+        caption: "100 for $160 — brand identity stickers",
+      },
+      {
+        src: "/images/products/product/sticker-custom-sheet-800x600.webp",
+        alt: "Custom sticker sheet printed in Saskatoon for product packaging — True Color Display Printing",
+        label: "Product / Packaging Stickers",
+        caption: "250 for $325 — labels for jars, bottles, boxes",
+      },
+      {
+        src: "/images/products/product/sticker-laptop-waterbottle-800x600.webp",
+        alt: "Vinyl stickers on laptop and water bottle printed in Saskatoon — True Color Display Printing",
+        label: "Laptop / Bottle / Vehicle",
+        caption: "500 for $475 — promo giveaways + branding",
+      },
+    ],
+  },
+  {
+    title: "Sizes & Shapes",
+    subtitle: "4×4\" default die-cut · custom shapes available · 25-piece minimum from $25",
+    aspect: "4/3" as const,
+    maxCols: 2 as const,
+    items: [
+      {
+        src: "/images/products/product/sticker-diecut-truecolor-logo-800x600.webp",
+        alt: "4 inch die-cut vinyl sticker printed in Saskatoon — True Color Display Printing",
+        label: "4×4\" Die-Cut (Default)",
+        caption: "Most popular — 100 for $160",
+      },
+      {
+        src: "/images/products/product/sticker-custom-sheet-800x600.webp",
+        alt: "Custom shape vinyl sticker printed in Saskatoon — True Color Display Printing",
+        label: "Custom Shape",
+        caption: "Logo outlines, ovals, rounded — quote on request",
+      },
+    ],
+  },
+];
 
 export default function StickerPrintingSaskatoonPage() {
   return (
@@ -67,6 +118,7 @@ export default function StickerPrintingSaskatoonPage() {
             1–3 business days. All orders are ready for local pickup at 216 33rd St W,
             Saskatoon — no shipping delays.
           </p>
+          <DesignDirectionGrid sections={designDirections} />
         </>
       }
       products={[
