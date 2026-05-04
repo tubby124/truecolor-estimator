@@ -126,8 +126,11 @@ export function ProductPageClient({ product }: Props) {
       {/* ── 3-column grid ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_2fr_1.4fr] gap-8 items-start">
 
-        {/* Col 1 — Gallery */}
-        <ProductGallery images={product.galleryImages} productName={product.name} />
+        {/* Col 1 — Gallery (heroImage always first; deduped if already in galleryImages) */}
+        <ProductGallery
+          images={[product.heroImage, ...product.galleryImages.filter((i) => i !== product.heroImage)]}
+          productName={product.name}
+        />
 
         {/* Col 2 — Options (white card) */}
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
