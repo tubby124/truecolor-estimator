@@ -106,15 +106,15 @@ export default function FlyerPrintingSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Looking for folded print? See:{" "}
-            <Link href="/products/brochures" className="text-[#16C2F3] underline font-medium">
+            <Link href="/brochure-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               Brochures (tri-fold &amp; half-fold)
             </Link>
             {" · "}
-            <Link href="/products/business-cards" className="text-[#16C2F3] underline font-medium">
+            <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
               Business cards
             </Link>
             {" · "}
-            <Link href="/products/postcards" className="text-[#16C2F3] underline font-medium">
+            <Link href="/postcard-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               Postcards
             </Link>
             {" · "}
