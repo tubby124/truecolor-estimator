@@ -237,6 +237,55 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
 
+      // ── Crawled-not-indexed cleanup (2026-05-05) — remaining WP legacy URLs ──
+      {
+        source: "/product/stickers",
+        destination: "/sticker-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/product-category/lettering-and-vehicle-decals",
+        destination: "/vinyl-lettering-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/flyers",
+        destination: "/flyer-printing-saskatoon",
+        permanent: true,
+      },
+      // Old WP appointment-booking plugin URLs
+      {
+        source: "/book-appointment",
+        destination: "/quote",
+        permanent: true,
+      },
+      {
+        source: "/cancel-appointment",
+        destination: "/contact",
+        permanent: true,
+      },
+      {
+        source: "/bookingpress-complete-payment",
+        destination: "/quote",
+        permanent: true,
+      },
+      // Old WP RSS feeds (no RSS on Next.js)
+      {
+        source: "/feed",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/thank-you/feed",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/product/banners-and-signage/feed",
+        destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
+
       // WP system paths → homepage
       {
         source: "/author/:slug",
