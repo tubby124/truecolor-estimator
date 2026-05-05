@@ -77,7 +77,7 @@ export function IndustryPage({
     serviceType: "Print Service",
     ...(canonicalSlug ? { url: `${BASE_URL}/${canonicalSlug}` } : {}),
     provider: {
-      "@type": ["LocalBusiness", "Store"],
+      "@type": ["LocalBusiness", "PrintShop"],
       "@id": `${BASE_URL}/#localbusiness`,
       name: "True Color Display Printing",
       url: BASE_URL,

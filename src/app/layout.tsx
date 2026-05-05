@@ -121,7 +121,7 @@ const websiteSchema = {
 
 const localBusinessSchema = {
   "@context": "https://schema.org",
-  "@type": ["LocalBusiness", "Store"],
+  "@type": ["LocalBusiness", "PrintShop"],
   "@id": "https://truecolorprinting.ca/#localbusiness",
   name: "True Color Display Printing",
   legalName: "True Color Display Printing Ltd.",

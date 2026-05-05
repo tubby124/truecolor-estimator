@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${product.name} Saskatoon | ${product.fromPrice} | True Color`,
     description: `${product.name} in Saskatoon — ${product.tagline} From ${product.fromPrice}. Order online, local pickup at 216 33rd St W.`,
-    alternates: { canonical: `/products/${slug}` },
+    robots: { index: false, follow: false },
     openGraph: {
       title: `${product.name} Saskatoon | ${product.fromPrice} | True Color`,
       description: `${product.name} in Saskatoon. ${product.tagline} From ${product.fromPrice}. Local pickup at 216 33rd St W.`,
@@ -59,21 +59,16 @@ export default async function ProductPage({ params }: Props) {
     url: `https://truecolorprinting.ca/products/${slug}`,
     image: `https://truecolorprinting.ca${product.heroImage}`,
     brand: { "@type": "Brand", name: "True Color Display Printing" },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "5.0",
-      reviewCount: "29",
-      bestRating: "5",
-      worstRating: "1",
-    },
     offers: {
       "@type": "Offer",
       url: `https://truecolorprinting.ca/products/${slug}`,
       price: priceNum,
       priceCurrency: "CAD",
+      priceValidUntil: "2026-12-31",
       availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
       seller: {
-        "@type": ["LocalBusiness", "Store"],
+        "@type": ["LocalBusiness", "PrintShop"],
         "@id": "https://truecolorprinting.ca/#localbusiness",
         name: "True Color Display Printing",
       },
@@ -125,6 +120,7 @@ export default async function ProductPage({ params }: Props) {
       "@type": "Offer",
       price: priceNum,
       priceCurrency: "CAD",
+      priceValidUntil: "2026-12-31",
       availability: "https://schema.org/InStock",
     },
   };
