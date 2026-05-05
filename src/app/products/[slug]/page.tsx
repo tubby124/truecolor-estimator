@@ -17,6 +17,7 @@ interface Props {
 
 // Computed once at module load (build time for SSG). Rolls forward each Railway redeploy.
 // Google flags Offers with expired priceValidUntil as invalid rich result.
+// eslint-disable-next-line react-hooks/purity -- module-level build-time constant; not called during render
 const PRICE_VALID_UNTIL = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
 export async function generateStaticParams() {
