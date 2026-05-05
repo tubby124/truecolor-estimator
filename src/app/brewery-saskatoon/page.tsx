@@ -51,10 +51,10 @@ const descriptionNode = (
       </Link>
       . Running a launch event and need banners?{" "}
       <Link
-        href="/event-banners"
+        href="/banner-printing-saskatoon"
         className="text-[#16C2F3] underline font-medium"
       >
-        Visit our event banners page
+        Visit our banner printing page
       </Link>{" "}
       for outdoor sizes, hardware options, and rush availability.
     </p>

@@ -51,7 +51,7 @@ export default function BannerPrintingReginaPage() {
             for a trade show or lobby display? A complete stand with full-colour printing
             starts at $219 — shipped to Regina ready to use right out of the box.
             We also print foamboard signs and{" "}
-            <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               event signage packages
             </Link>{" "}
             that combine banners, stands, and coroplast directionals in one order.

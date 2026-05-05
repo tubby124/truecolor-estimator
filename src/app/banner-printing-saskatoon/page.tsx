@@ -109,23 +109,15 @@ export default function BannerPrintingSaskatoonPage() {
             fee on orders placed before 10 AM — call (306) 954-8688 to confirm capacity.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Need banners for a specific occasion? See:{" "}
-            <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
-              Event banners &amp; signage
-            </Link>
-            {" · "}
+            Need banners for a specific occasion?{" "}
             <Link href="/graduation-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
               Graduation banners
             </Link>
-            {" · "}
-            <Link href="/st-patricks-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
-              St. Patrick&apos;s Day printing
+            {" and "}
+            <Link href="/mothers-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Mother&apos;s Day printing
             </Link>
-            {" · "}
-            <Link href="/ramadan-eid-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
-              Ramadan &amp; Eid banners
-            </Link>
-            {" — each page includes occasion-specific sizing guides and pricing."}
+            {" have occasion-specific sizing guides and pricing. Event banners — grand openings, trade shows, Riders game day, weddings — are quoted directly from this page; just configure your size and quantity above."}
           </p>
           <DesignDirectionGrid sections={designDirections} />
         </>

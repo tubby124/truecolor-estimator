@@ -56,7 +56,7 @@ const gallerySchema = {
       { "@type": "ListItem", position: 9, url: "https://truecolorprinting.ca/flyer-printing-saskatoon", name: "Flyers" },
       { "@type": "ListItem", position: 10, url: "https://truecolorprinting.ca/postcard-printing-saskatoon", name: "Postcards" },
       { "@type": "ListItem", position: 11, url: "https://truecolorprinting.ca/sticker-printing-saskatoon", name: "Stickers" },
-      { "@type": "ListItem", position: 12, url: "https://truecolorprinting.ca/custom-magnets-saskatoon", name: "Calendar Magnets" },
+      { "@type": "ListItem", position: 12, url: "https://truecolorprinting.ca/vehicle-magnets-saskatoon", name: "Calendar Magnets" },
     ],
   },
 };

@@ -148,10 +148,6 @@ export default function MothersDayPrintingSaskatoonPage() {
               Graduation banners
             </Link>
             {" · "}
-            <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
-              Event banners &amp; signage
-            </Link>
-            {" · "}
             <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               Banner printing Saskatoon
             </Link>

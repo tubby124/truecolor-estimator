@@ -43,8 +43,8 @@ export default function HotelSignsSaskatoonPage() {
             bios. A 24×36&quot; board ($65) handles event programs and wayfinding maps. For a
             multi-day conference, a set of foamboard boards covers every room at a fraction of
             permanent sign costs. See full event signage options on the{" "}
-            <Link href="/event-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
-              event signs page
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              banner printing page
             </Link>
             .
           </p>

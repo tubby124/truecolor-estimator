@@ -44,8 +44,8 @@ export default function NonProfitSignsSaskatoonPage() {
             event. Foamboard displays from $45 handle auction item boards, event program signs,
             table numbers, and welcome boards. Vinyl banners from $66 go up outside your venue
             for street visibility. For a full event signage package, browse the{" "}
-            <Link href="/event-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
-              event signs page
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              banner printing page
             </Link>
             {" "}for complete pricing by sign type.
           </p>

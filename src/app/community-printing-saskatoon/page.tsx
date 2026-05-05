@@ -30,12 +30,8 @@ const descriptionNode = (
         Church banners
       </Link>{" "}
       for sermon series, holiday services, and community outreach.{" "}
-      <Link href="/event-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
-        Event signs
-      </Link>{" "}
-      and{" "}
-      <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
-        event banners
+      <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+        Event banners and signs
       </Link>{" "}
       for galas, community fairs, and seasonal celebrations. We print everything in-house —
       no outsourcing, transparent pricing, and volume discounts for organizations that print

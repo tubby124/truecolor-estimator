@@ -41,7 +41,7 @@ export default function RestaurantSignsSaskatoonPage() {
             menus — lightweight, clean edges, easy to swap when prices change. Window decals and
             perforated vinyl for storefront branding start at $45. Planning a grand opening,
             a patio season launch, or a holiday promotion?{" "}
-            <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               Event banners
             </Link>{" "}
             and{" "}

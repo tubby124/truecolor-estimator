@@ -55,8 +55,8 @@ export default function ChurchBannersSaskatoonPage() {
             silent auction item boards. For coroplast parking and wayfinding signs, we print
             18×24&quot; from $30. Need brochures for a community program or outreach campaign?
             Tri-fold brochures run 100 for $70. Visit the{" "}
-            <Link href="/event-banners" className="text-[#16C2F3] underline font-medium">
-              event banners page
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              banner printing page
             </Link>
             {" "}for full sizing and pricing on temporary event signage.
           </p>

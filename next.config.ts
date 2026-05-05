@@ -19,11 +19,11 @@ const nextConfig: NextConfig = {
         destination: "/restaurant-signs-saskatoon",
         permanent: true,
       },
-      // /sports-banners-saskatoon → /banner-printing-saskatoon (was → /event-banners; updated 2026-05-05 when event-banners was consolidated)
+      // /sports-banners-saskatoon → /banner-printing-saskatoon (promoted to 301 on 2026-05-05; was 302 → /event-banners)
       {
         source: "/sports-banners-saskatoon",
         destination: "/banner-printing-saskatoon",
-        permanent: false,
+        permanent: true,
       },
       // /retail-signs-saskatoon has its own page — redirect removed 2026-03-05
       // /agriculture-signs-saskatoon → keep (don't redirect — different keyword target)
@@ -262,12 +262,20 @@ const nextConfig: NextConfig = {
         "/staff/:path*",
         "/account",
         "/account/:path*",
-        "/products/:path+",
         "/api/:path*",
       ].map((source) => ({
         source,
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       })),
+      // /products/:path+ uses noindex,FOLLOW so link equity flows through the
+      // configurator's internal links to the indexable /[product]-saskatoon
+      // SEO landing pages. Metadata API also sets robots:noindex,follow on
+      // those pages — header + metadata must match or the more restrictive
+      // wins (Google honors header first when both present).
+      {
+        source: "/products/:path+",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
+      },
       // ── Security headers on all routes ───────────────────────────────────
       {
         source: "/(.*)",
