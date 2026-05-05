@@ -15,6 +15,10 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+// Computed once at module load (build time for SSG). Rolls forward each Railway redeploy.
+// Google flags Offers with expired priceValidUntil as invalid rich result.
+const PRICE_VALID_UNTIL = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
 export async function generateStaticParams() {
   return PRODUCT_SLUGS.map((slug) => ({ slug }));
 }
@@ -49,8 +53,6 @@ export default async function ProductPage({ params }: Props) {
 
   // Extract numeric price from fromPrice string (e.g. "$30" → "30")
   const priceNum = product.fromPrice.replace(/[^0-9.]/g, "") || "0";
-  // Roll priceValidUntil 12 months from build (Google flags Offers with expired priceValidUntil as invalid)
-  const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
   // JSON-LD structured data
   const productJsonLd = {
@@ -66,7 +68,7 @@ export default async function ProductPage({ params }: Props) {
       url: `https://truecolorprinting.ca/products/${slug}`,
       price: priceNum,
       priceCurrency: "CAD",
-      priceValidUntil,
+      priceValidUntil: PRICE_VALID_UNTIL,
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
       seller: {
@@ -122,7 +124,7 @@ export default async function ProductPage({ params }: Props) {
       "@type": "Offer",
       price: priceNum,
       priceCurrency: "CAD",
-      priceValidUntil,
+      priceValidUntil: PRICE_VALID_UNTIL,
       availability: "https://schema.org/InStock",
     },
   };
