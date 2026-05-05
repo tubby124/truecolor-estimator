@@ -351,7 +351,7 @@ export default function HomePage() {
               { label: "Postcards from $35", href: "/postcard-printing-saskatoon" },
               { label: "Stickers from $25", href: "/sticker-printing-saskatoon" },
               { label: "Photo Posters from $15", href: "/photo-poster-printing-saskatoon" },
-              { label: "Custom Magnets from $45", href: "/custom-magnets-saskatoon" },
+              { label: "Vehicle Magnets from $45", href: "/vehicle-magnets-saskatoon" },
               { label: "Retractable Banners from $219", href: "/retractable-banners-saskatoon" },
               { label: "Vinyl Lettering from $40", href: "/vinyl-lettering-saskatoon" },
             ].map((item) => (

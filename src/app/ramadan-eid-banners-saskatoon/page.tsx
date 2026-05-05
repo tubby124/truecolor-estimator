@@ -49,6 +49,8 @@ export const metadata: Metadata = {
     "halal restaurant banners",
   ],
   alternates: { canonical: "/ramadan-eid-banners-saskatoon" },
+  // Seasonal noindex — flip back to indexed by removing this `robots` block in early March 2027 for next Ramadan season (Eid 2027 ≈ March 20)
+  robots: { index: false, follow: true },
   openGraph: {
     title: "Ramadan & Eid Banners Saskatoon | Iftar Night Printing | True Color",
     description:

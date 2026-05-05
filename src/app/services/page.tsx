@@ -149,7 +149,7 @@ export default function ServicesPage() {
               { label: "Stickers", price: "from $25", href: "/sticker-printing-saskatoon" },
               { label: "Brochures", price: "from $70", href: "/brochure-printing-saskatoon" },
               { label: "Photo Posters", price: "from $15", href: "/photo-poster-printing-saskatoon" },
-              { label: "Custom Magnets", price: "from $45", href: "/custom-magnets-saskatoon" },
+              // /custom-magnets-saskatoon consolidated into /vehicle-magnets-saskatoon (2026-05-05)
             ].map(({ label, price, href }) => (
               <Link
                 key={href}
@@ -175,7 +175,7 @@ export default function ServicesPage() {
               { label: "Sign Company", href: "/sign-company-saskatoon" },
               { label: "Trade Show Displays", href: "/trade-show-displays-saskatoon" },
               { label: "Poster Printing", href: "/poster-printing-saskatoon" },
-              { label: "Event Signs", href: "/event-signs-saskatoon" },
+              { label: "Event Banners", href: "/banner-printing-saskatoon" },
             ].map(({ label, href }) => (
               <Link
                 key={href}
@@ -210,7 +210,7 @@ export default function ServicesPage() {
               { label: "Law Offices", href: "/law-office-signs-saskatoon" },
               { label: "Pharmacies", href: "/pharmacy-signs-saskatoon" },
               { label: "Agriculture", href: "/agriculture-signs-saskatoon" },
-              { label: "Trade Contractors", href: "/trade-contractor-signs-saskatoon" },
+              { label: "Trade Contractors", href: "/construction-signs-saskatoon" },
               { label: "Property Management", href: "/property-management-signs-saskatoon" },
               { label: "Daycares", href: "/daycare-signs-saskatoon" },
               { label: "Chiropractors", href: "/chiropractor-signs-saskatoon" },

@@ -19,10 +19,10 @@ const nextConfig: NextConfig = {
         destination: "/restaurant-signs-saskatoon",
         permanent: true,
       },
-      // /sports-banners-saskatoon → /event-banners (temporary until sports page is built)
+      // /sports-banners-saskatoon → /banner-printing-saskatoon (was → /event-banners; updated 2026-05-05 when event-banners was consolidated)
       {
         source: "/sports-banners-saskatoon",
-        destination: "/event-banners",
+        destination: "/banner-printing-saskatoon",
         permanent: false,
       },
       // /retail-signs-saskatoon has its own page — redirect removed 2026-03-05
@@ -32,6 +32,36 @@ const nextConfig: NextConfig = {
       {
         source: "/vinyl-banners-saskatoon",
         destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
+
+      // ── Cannibalization consolidation (2026-05-05) ──
+      // event-banners + event-signs-saskatoon → banner-printing-saskatoon (decayed parent reclaiming equity)
+      {
+        source: "/event-banners",
+        destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/event-signs-saskatoon",
+        destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
+      // custom-magnets-saskatoon → vehicle-magnets-saskatoon (canonical magnet page)
+      {
+        source: "/custom-magnets-saskatoon",
+        destination: "/vehicle-magnets-saskatoon",
+        permanent: true,
+      },
+      // trade-contractor-signs + trades-signs → construction-signs-saskatoon (3-way merge)
+      {
+        source: "/trade-contractor-signs-saskatoon",
+        destination: "/construction-signs-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/trades-signs-saskatoon",
+        destination: "/construction-signs-saskatoon",
         permanent: true,
       },
       // /quote-request consolidated to /quote (2026-03-13 URL architecture restructure)

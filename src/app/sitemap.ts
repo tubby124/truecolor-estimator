@@ -45,7 +45,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Service & hub SEO pages — sprint (2026-03-03) ────────────────────────
     { url: `${BASE_URL}/large-format-printing-saskatoon`, lastModified: new Date("2026-03-03"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/trade-show-displays-saskatoon`, lastModified: new Date("2026-03-03"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/event-signs-saskatoon`, lastModified: new Date("2026-03-03"), changeFrequency: "monthly", priority: 0.85 },
+    // /event-signs-saskatoon removed 2026-05-05 → 301 to /banner-printing-saskatoon (cannibalization consolidation)
 
     // ── Industry pages (existing, launched Jan–Feb 2026) ──────────────────────
     { url: `${BASE_URL}/real-estate-signs-saskatoon`, lastModified: new Date("2026-01-20"), changeFrequency: "monthly", priority: 0.85 },
@@ -54,8 +54,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/agriculture-signs-saskatoon`, lastModified: new Date("2026-03-13"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/restaurant-signs-saskatoon`, lastModified: new Date("2026-01-08"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/election-signs`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/event-banners`, lastModified: new Date("2026-01-15"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/ramadan-eid-banners-saskatoon`, lastModified: new Date("2026-02-01"), changeFrequency: "monthly", priority: 0.85 },
+    // /event-banners removed 2026-05-05 → 301 to /banner-printing-saskatoon (decayed parent reclaiming equity)
+    // /ramadan-eid-banners-saskatoon removed from sitemap 2026-05-05 — out of season + page now noindex; restore April 2027
     { url: `${BASE_URL}/healthcare-signs-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/dental-office-signs-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
 
@@ -65,7 +65,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/window-perf-saskatoon`, lastModified: new Date("2026-03-26"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/sticker-printing-saskatoon`, lastModified: new Date("2026-05-03"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/school-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/trade-contractor-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
+    // /trade-contractor-signs-saskatoon removed 2026-05-05 → 301 to /construction-signs-saskatoon
 
     // ── Product + Industry pages — Sprint B (2026-03-05) ─────────────────────
     { url: `${BASE_URL}/foamboard-printing-saskatoon`, lastModified: new Date("2026-04-12"), changeFrequency: "monthly", priority: 0.85 },
@@ -73,7 +73,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/postcard-printing-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/photo-poster-printing-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/poster-printing-saskatoon`, lastModified: new Date("2026-03-14"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/custom-magnets-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
+    // /custom-magnets-saskatoon removed 2026-05-05 → 301 to /vehicle-magnets-saskatoon
     { url: `${BASE_URL}/gym-fitness-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/salon-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/car-dealership-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
@@ -91,7 +91,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/for-lease-signs-saskatoon`, lastModified: new Date("2026-05-05"), changeFrequency: "monthly", priority: 0.85 },
 
     // ── Seasonal pages ────────────────────────────────────────────────────────
-    { url: `${BASE_URL}/st-patricks-day-printing-saskatoon`, lastModified: new Date("2026-02-25"), changeFrequency: "monthly", priority: 0.85 },
+    // /st-patricks-day-printing-saskatoon removed from sitemap 2026-05-05 — out of season + page now noindex; restore Feb 2027
     { url: `${BASE_URL}/graduation-banners-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/mothers-day-printing-saskatoon`, lastModified: new Date("2026-03-14"), changeFrequency: "monthly", priority: 0.85 },
     // /canada-day-printing-saskatoon — add when page is built
@@ -101,7 +101,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/commercial-signs-saskatoon`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/education-signs-saskatoon`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/community-printing-saskatoon`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/trades-signs-saskatoon`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.85 },
+    // /trades-signs-saskatoon removed 2026-05-05 → 301 to /construction-signs-saskatoon
 
     // ── SK city/province pages ────────────────────────────────────────────────
     { url: `${BASE_URL}/banner-printing-regina`, lastModified: new Date("2026-01-25"), changeFrequency: "monthly", priority: 0.75 },

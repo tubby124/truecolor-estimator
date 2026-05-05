@@ -16,6 +16,8 @@ export const metadata: Metadata = {
     "window decals saskatoon restaurant",
   ],
   alternates: { canonical: "/st-patricks-day-printing-saskatoon" },
+  // Seasonal noindex — flip back to indexed by removing this `robots` block in early Feb 2027 for next St. Patrick's season
+  robots: { index: false, follow: true },
   openGraph: {
     title: "St. Patrick's Day Printing Saskatoon | Banners & Flyers | True Color",
     description:

@@ -89,7 +89,6 @@ export function SiteFooter() {
               </div>
               <div className="space-y-2">
                 <Link href="/vehicle-magnets-saskatoon" className="block hover:text-white transition-colors">Vehicle Magnets</Link>
-                <Link href="/custom-magnets-saskatoon" className="block hover:text-white transition-colors">Custom Magnets</Link>
                 <Link href="/retractable-banners-saskatoon" className="block hover:text-white transition-colors">Retractable Banners</Link>
                 <Link href="/window-decals-saskatoon" className="block hover:text-white transition-colors">Window Decals</Link>
                 <Link href="/window-perf-saskatoon" className="block hover:text-white transition-colors">Window Perf</Link>
@@ -119,8 +118,7 @@ export function SiteFooter() {
             <Link href="/construction-signs-saskatoon" className="hover:text-white transition-colors">Construction</Link>
             <Link href="/daycare-signs-saskatoon" className="hover:text-white transition-colors">Daycares</Link>
             <Link href="/dental-office-signs-saskatoon" className="hover:text-white transition-colors">Dental Offices</Link>
-            <Link href="/event-signs-saskatoon" className="hover:text-white transition-colors">Events & Weddings</Link>
-            <Link href="/event-banners" className="hover:text-white transition-colors">Event Banners</Link>
+            <Link href="/banner-printing-saskatoon" className="hover:text-white transition-colors">Event Banners</Link>
             <Link href="/gym-fitness-signs-saskatoon" className="hover:text-white transition-colors">Gym & Fitness</Link>
             <Link href="/graduation-banners-saskatoon" className="hover:text-white transition-colors">Graduation</Link>
             <Link href="/healthcare-signs-saskatoon" className="hover:text-white transition-colors">Healthcare</Link>
@@ -134,10 +132,8 @@ export function SiteFooter() {
             <Link href="/retail-signs-saskatoon" className="hover:text-white transition-colors">Retail Stores</Link>
             <Link href="/salon-signs-saskatoon" className="hover:text-white transition-colors">Salons</Link>
             <Link href="/school-signs-saskatoon" className="hover:text-white transition-colors">Schools & Sports</Link>
-            <Link href="/trade-contractor-signs-saskatoon" className="hover:text-white transition-colors">Trade Contractors</Link>
+            <Link href="/construction-signs-saskatoon" className="hover:text-white transition-colors">Trade Contractors</Link>
             <Link href="/election-signs" className="hover:text-white transition-colors">Election Signs</Link>
-            <Link href="/ramadan-eid-banners-saskatoon" className="hover:text-white transition-colors">Ramadan & Eid</Link>
-            <Link href="/st-patricks-day-printing-saskatoon" className="hover:text-white transition-colors">St. Patrick&apos;s Day</Link>
             <Link href="/mothers-day-printing-saskatoon" className="hover:text-white transition-colors">Mother&apos;s Day</Link>
           </div>
         </div>

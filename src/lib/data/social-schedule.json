@@ -1,0 +1,565 @@
+{
+  "_meta": {
+    "generatedFrom": "src/lib/data/gbp-products.json::postSchedule",
+    "generatedAt": "2026-05-05",
+    "platforms": [
+      "instagram",
+      "facebook"
+    ],
+    "imageStrategy": {
+      "source": "public/images/... — 4:3 GBP master",
+      "feed_1x1": "Crop to 1080×1080 — ImageMagick: convert IN -gravity center -resize 1080x1080^ -extent 1080x1080 OUT",
+      "story_9x16": "Crop to 1080×1920 — convert IN -gravity center -resize 1080x1920^ -extent 1080x1920 OUT",
+      "note": "Crop variants deferred — Pass 2. Blotato accepts master file; uploader can crop on ingest."
+    },
+    "blotato": {
+      "ingestionFormat": "POST /api/posts with {imageUrl, caption, scheduledAt, link} per platform",
+      "envVar": "BLOTATO_API_KEY",
+      "wiring": "Build the /staff/social/blotato UI in next session — see vault note 2026-05-05-ddg-image-backfill-and-gbp-dashboard.md"
+    },
+    "totalCampaigns": 10,
+    "totalPosts": 30
+  },
+  "posts": [
+    {
+      "id": "banner-printing-evergreen-01",
+      "campaign": "Banner Printing — Evergreen",
+      "postType": "Offer",
+      "scheduledAt": "2026-05-06T09:00:00-06:00",
+      "imageSource": "public/images/industries/banners/banner-fence-outdoor.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Banner Printing — Saskatoon, From $66\n\nCustom vinyl banners printed in Saskatoon — 13oz scrim with hemmed edges and brass grommets, ready in 48 hours. Popular sizes: 2×4ft from $66, 2×6ft $90, 4×8ft $240. Larger jobs from $6.75/sqft.\n\nPrinted in-house on our Roland UV printer at 216 33rd St W. Weatherproof for outdoor use — holds up in Saskatchewan wind. No outsourcing.\n\nIn-house designer $35 flat, same-day proof. Same-day rush +$40 flat — order before 10 AM, pick up that afternoon.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Banner Printing — Saskatoon, From $66\n\nCustom vinyl banners printed in Saskatoon — 13oz scrim with hemmed edges and brass grommets, ready in 48 hours. Popular sizes: 2×4ft from $66, 2×6ft $90, 4×8ft $240. Larger jobs from $6.75/sqft.\n\nPrinted in-house on our Roland UV printer at 216 33rd St W. Weatherproof for outdoor use — holds up in Saskatchewan wind. No outsourcing.\n\nIn-house designer $35 flat, same-day proof. Same-day rush +$40 flat — order before 10 AM, pick up that afternoon.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #SaskatoonSmallBusiness #VinylBanners #PrintShop #WideFormatPrint #CustomBanners #OutdoorBanners #SaskatoonPrinting #SaskatoonRestaurants #SaskatoonRetail",
+      "link": "https://truecolorprinting.ca/banner-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=banner_evergreen_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "banner-printing-evergreen-02",
+      "campaign": "Banner Printing — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-07-08T09:00:00-06:00",
+      "imageSource": "public/images/industries/banners/banner-grand-opening.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Saskatchewan summer wind takes banners down — ours hold. 13oz scrim vinyl with brass grommets at every corner and rope hems on the long sides. From $8.25/sqft (small) down to $6.75/sqft on bigger runs.\n\nPrinted on our in-house Roland UV printer — colour holds against UV for outdoor seasons. Standard 48-hour turnaround. Same-day rush +$40 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Saskatchewan summer wind takes banners down — ours hold. 13oz scrim vinyl with brass grommets at every corner and rope hems on the long sides. From $8.25/sqft (small) down to $6.75/sqft on bigger runs.\n\nPrinted on our in-house Roland UV printer — colour holds against UV for outdoor seasons. Standard 48-hour turnaround. Same-day rush +$40 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #SaskatoonSmallBusiness #VinylBanners #PrintShop #WideFormatPrint #CustomBanners #OutdoorBanners #SaskatoonPrinting #SaskatoonRestaurants #SaskatoonRetail",
+      "link": "https://truecolorprinting.ca/banner-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=banner_evergreen_summer",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "banner-printing-evergreen-03",
+      "campaign": "Banner Printing — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-09-09T09:00:00-06:00",
+      "imageSource": "public/images/industries/banners/banner-trade-show.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Trade show season is coming — fall conferences, ag shows, and dealer events run September through November. Order banners and retractable stands 2 weeks out to skip the rush window.\n\nVinyl banner 8ft wide from $8.25/sqft. Retractable stand complete (stand + 24×80\" print) — $219. ACP table sign 24×36\" — $66.\n\nIn-house designer $35 flat — send your logo and event details, proof same day.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Trade show season is coming — fall conferences, ag shows, and dealer events run September through November. Order banners and retractable stands 2 weeks out to skip the rush window.\n\nVinyl banner 8ft wide from $8.25/sqft. Retractable stand complete (stand + 24×80\" print) — $219. ACP table sign 24×36\" — $66.\n\nIn-house designer $35 flat — send your logo and event details, proof same day.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #SaskatoonSmallBusiness #VinylBanners #PrintShop #WideFormatPrint #CustomBanners #OutdoorBanners #SaskatoonPrinting #SaskatoonRestaurants #SaskatoonRetail",
+      "link": "https://truecolorprinting.ca/banner-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=banner_evergreen_fall",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "acp-aluminum-signs-evergreen-01",
+      "campaign": "ACP Aluminum Signs — Evergreen",
+      "postType": "Offer",
+      "scheduledAt": "2026-05-13T09:00:00-06:00",
+      "imageSource": "public/images/industries/sign-company/acp-storefront.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "ACP Aluminum Signs — Saskatoon, From $60\n\nACP (aluminum composite panel) signs printed in Saskatoon — permanent, professional, rigid. 3mm aluminum with full-colour UV printing. From $13/sqft single-sided.\n\nPopular for storefronts, office directories, and construction site fascia. Standard sizes: 12×24\" $29, 24×36\" $66, 4×4ft $136, 4×8ft $272. Mount with standoffs for the floating look.\n\nPrinted in-house on our Roland UV printer at 216 33rd St W. Designer $35 flat — same-day proof.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "ACP Aluminum Signs — Saskatoon, From $60\n\nACP (aluminum composite panel) signs printed in Saskatoon — permanent, professional, rigid. 3mm aluminum with full-colour UV printing. From $13/sqft single-sided.\n\nPopular for storefronts, office directories, and construction site fascia. Standard sizes: 12×24\" $29, 24×36\" $66, 4×4ft $136, 4×8ft $272. Mount with standoffs for the floating look.\n\nPrinted in-house on our Roland UV printer at 216 33rd St W. Designer $35 flat — same-day proof.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #ACPSigns #AluminumSigns #StorefrontSigns #CommercialSignage #SaskatoonSigns #OfficeDirectory #SaskatoonPrinting #SaskatoonContractors",
+      "link": "https://truecolorprinting.ca/sign-company-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=acp_evergreen_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "acp-aluminum-signs-evergreen-02",
+      "campaign": "ACP Aluminum Signs — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-07-15T09:00:00-06:00",
+      "imageSource": "public/images/industries/sign-company/acp-office-directory.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Office directories printed on ACP aluminum — floor maps, staff directories, suite numbering, board rooms. 24×36\" from $66. Mount with standoffs for a clean floating look.\n\nFull-colour UV print on rigid 3mm aluminum composite. Won't warp or peel. Designer $35 flat — send your floor plan and we'll lay it out same day.\n\nIn-house at Standard 48-hour turnaround.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Office directories printed on ACP aluminum — floor maps, staff directories, suite numbering, board rooms. 24×36\" from $66. Mount with standoffs for a clean floating look.\n\nFull-colour UV print on rigid 3mm aluminum composite. Won't warp or peel. Designer $35 flat — send your floor plan and we'll lay it out same day.\n\nIn-house at Standard 48-hour turnaround.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #ACPSigns #AluminumSigns #StorefrontSigns #CommercialSignage #SaskatoonSigns #OfficeDirectory #SaskatoonPrinting #SaskatoonContractors",
+      "link": "https://truecolorprinting.ca/sign-company-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=acp_evergreen_directory",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "acp-aluminum-signs-evergreen-03",
+      "campaign": "ACP Aluminum Signs — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-09-16T09:00:00-06:00",
+      "imageSource": "public/images/gallery/gallery-acp-pet-planet-customer-parking.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Pet Planet Saskatoon — customer parking signage. Full-colour ACP aluminum panels mounted at the entrance, holding up year-round in the parking lot. Real client work, real Saskatoon business.\n\nACP signs from $13/sqft — 24×36\" $66, 4×8ft $272. Outdoor-rated, won't warp. In-house designer $35 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Pet Planet Saskatoon — customer parking signage. Full-colour ACP aluminum panels mounted at the entrance, holding up year-round in the parking lot. Real client work, real Saskatoon business.\n\nACP signs from $13/sqft — 24×36\" $66, 4×8ft $272. Outdoor-rated, won't warp. In-house designer $35 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #ACPSigns #AluminumSigns #StorefrontSigns #CommercialSignage #SaskatoonSigns #OfficeDirectory #SaskatoonPrinting #SaskatoonContractors",
+      "link": "https://truecolorprinting.ca/sign-company-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=acp_evergreen_petplanet",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "coroplast-signs-evergreen-01",
+      "campaign": "Coroplast Signs — Evergreen",
+      "postType": "Offer",
+      "scheduledAt": "2026-05-20T09:00:00-06:00",
+      "imageSource": "public/images/industries/coroplast/sign-real-estate.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Coroplast Signs — Saskatoon, From $30\n\nCoroplast yard signs printed in Saskatoon from $8/sqft. 4mm corrugated plastic — lightweight, UV-resistant, reusable season after season. Popular for real estate, job sites, election campaigns, and event directional.\n\nStandard sizes: 18×24\" $30, 24×36\" $48, 4×4ft $120, 4×8ft $232. H-wire stakes available. Bulk pricing kicks in at 5 signs (8% off), 10 (17%), 25 (23%).\n\nIn-house Roland UV printer. Designer $35 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Coroplast Signs — Saskatoon, From $30\n\nCoroplast yard signs printed in Saskatoon from $8/sqft. 4mm corrugated plastic — lightweight, UV-resistant, reusable season after season. Popular for real estate, job sites, election campaigns, and event directional.\n\nStandard sizes: 18×24\" $30, 24×36\" $48, 4×4ft $120, 4×8ft $232. H-wire stakes available. Bulk pricing kicks in at 5 signs (8% off), 10 (17%), 25 (23%).\n\nIn-house Roland UV printer. Designer $35 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #CoroplastSigns #YardSigns #JobSiteSigns #RealEstateSigns #SaskatoonRealEstate #SaskatoonContractors #SaskatoonPrinting #CustomSigns",
+      "link": "https://truecolorprinting.ca/coroplast-signs-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=coroplast_evergreen_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "coroplast-signs-evergreen-02",
+      "campaign": "Coroplast Signs — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-07-22T09:00:00-06:00",
+      "imageSource": "public/images/industries/coroplast/sign-contractor.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Contractor job site signs — 4×8ft coroplast at $232, full-colour UV print, ready in 48 hours. Standard contractor info: company name, phone, project number, subtrade roster.\n\n4mm corrugated plastic stays sharp through Saskatchewan summer rain and wind. Reusable across multiple sites. In-house designer $35 flat — send your logo and project specs.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Contractor job site signs — 4×8ft coroplast at $232, full-colour UV print, ready in 48 hours. Standard contractor info: company name, phone, project number, subtrade roster.\n\n4mm corrugated plastic stays sharp through Saskatchewan summer rain and wind. Reusable across multiple sites. In-house designer $35 flat — send your logo and project specs.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #CoroplastSigns #YardSigns #JobSiteSigns #RealEstateSigns #SaskatoonRealEstate #SaskatoonContractors #SaskatoonPrinting #CustomSigns",
+      "link": "https://truecolorprinting.ca/coroplast-signs-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=coroplast_evergreen_contractor",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "coroplast-signs-evergreen-03",
+      "campaign": "Coroplast Signs — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-09-23T09:00:00-06:00",
+      "imageSource": "public/images/gallery/gallery-coroplast-diecut-sasknation-key.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Custom shape coroplast — die-cut to your logo or product silhouette, not just rectangles. Sask Nation key blank giveaway sign printed and CNC-cut at 216 33rd St W last month.\n\nDie-cut coroplast from $8/sqft + cutting fee. Send a vector file or we'll trace your logo for $35 flat. Standard 48-hour turnaround once shape is approved.\n\nSaskatoon.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Custom shape coroplast — die-cut to your logo or product silhouette, not just rectangles. Sask Nation key blank giveaway sign printed and CNC-cut at 216 33rd St W last month.\n\nDie-cut coroplast from $8/sqft + cutting fee. Send a vector file or we'll trace your logo for $35 flat. Standard 48-hour turnaround once shape is approved.\n\nSaskatoon.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #CoroplastSigns #YardSigns #JobSiteSigns #RealEstateSigns #SaskatoonRealEstate #SaskatoonContractors #SaskatoonPrinting #CustomSigns",
+      "link": "https://truecolorprinting.ca/coroplast-signs-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=coroplast_evergreen_diecut",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "business-cards-evergreen-01",
+      "campaign": "Business Cards — Evergreen",
+      "postType": "Offer",
+      "scheduledAt": "2026-05-27T09:00:00-06:00",
+      "imageSource": "public/images/industries/business-cards/card-realtor.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Business Cards — 250 for $45, Saskatoon\n\nBusiness cards printed in Saskatoon. 250 double-sided on 14pt card stock — $45 + GST. 500 cards $65, 1000 cards $110. Full-colour, matte or gloss finish.\n\nIn-house designer $35 flat — send your logo and info, proof same day. Print-ready files (300dpi PDF) accepted too. Ready in 48 hours.\n\nSame-day rush +$40 flat. Pickup at\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Business Cards — 250 for $45, Saskatoon\n\nBusiness cards printed in Saskatoon. 250 double-sided on 14pt card stock — $45 + GST. 500 cards $65, 1000 cards $110. Full-colour, matte or gloss finish.\n\nIn-house designer $35 flat — send your logo and info, proof same day. Print-ready files (300dpi PDF) accepted too. Ready in 48 hours.\n\nSame-day rush +$40 flat. Pickup at\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #SaskatoonSmallBusiness #BusinessCards #PrintShop #SaskatoonRealtors #SaskatoonRestaurants #NetworkingCards #14ptCardstock #SaskatoonPrinting #LocalPrinter",
+      "link": "https://truecolorprinting.ca/business-cards-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=bc_evergreen_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "business-cards-evergreen-02",
+      "campaign": "Business Cards — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-07-29T09:00:00-06:00",
+      "imageSource": "public/images/industries/business-cards/finish-matte.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Matte vs gloss finish — same price, different feel. Matte 14pt has a soft, modern hand and reads cleanly on dark designs. Gloss 14pt pops colour, photographs better, slightly more durable.\n\n250 cards on either finish: $45. 500: $65. 1000: $110. Full-colour double-sided standard. In-house designer $35 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Matte vs gloss finish — same price, different feel. Matte 14pt has a soft, modern hand and reads cleanly on dark designs. Gloss 14pt pops colour, photographs better, slightly more durable.\n\n250 cards on either finish: $45. 500: $65. 1000: $110. Full-colour double-sided standard. In-house designer $35 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #SaskatoonSmallBusiness #BusinessCards #PrintShop #SaskatoonRealtors #SaskatoonRestaurants #NetworkingCards #14ptCardstock #SaskatoonPrinting #LocalPrinter",
+      "link": "https://truecolorprinting.ca/business-cards-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=bc_evergreen_finish",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "business-cards-evergreen-03",
+      "campaign": "Business Cards — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-09-30T09:00:00-06:00",
+      "imageSource": "public/images/industries/business-cards/finish-gloss.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "1000 business cards for $110 — that's $0.11 a card, double-sided full-colour on 14pt stock. Best value if you hand them out at trade shows, open houses, or door-knocking.\n\nDesigner $35 flat. Print-ready files accepted. Ready in 48 hours, same-day rush +$40 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "1000 business cards for $110 — that's $0.11 a card, double-sided full-colour on 14pt stock. Best value if you hand them out at trade shows, open houses, or door-knocking.\n\nDesigner $35 flat. Print-ready files accepted. Ready in 48 hours, same-day rush +$40 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #SaskatoonSmallBusiness #BusinessCards #PrintShop #SaskatoonRealtors #SaskatoonRestaurants #NetworkingCards #14ptCardstock #SaskatoonPrinting #LocalPrinter",
+      "link": "https://truecolorprinting.ca/business-cards-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=bc_evergreen_bulk",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "sign-company-evergreen-01",
+      "campaign": "Sign Company — Evergreen",
+      "postType": "Offer",
+      "scheduledAt": "2026-06-03T09:00:00-06:00",
+      "imageSource": "public/images/industries/sign-company/acp-storefront.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Sign Company Saskatoon — Storefront to Job Site\n\nOne Saskatoon sign shop for your storefront, job site, and event signage. ACP aluminum panels from $13/sqft for permanent install. Coroplast yard signs from $8/sqft for short-term. Vinyl banners from $8.25/sqft.\n\nIn-house Roland UV printer at 216 33rd St W — no outsourcing. Designer on staff $35 flat — same-day proofs.\n\nStandard 48-hour turnaround. Same-day rush +$40 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Sign Company Saskatoon — Storefront to Job Site\n\nOne Saskatoon sign shop for your storefront, job site, and event signage. ACP aluminum panels from $13/sqft for permanent install. Coroplast yard signs from $8/sqft for short-term. Vinyl banners from $8.25/sqft.\n\nIn-house Roland UV printer at 216 33rd St W — no outsourcing. Designer on staff $35 flat — same-day proofs.\n\nStandard 48-hour turnaround. Same-day rush +$40 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #SaskatoonSigns #SignCompany #StorefrontSigns #JobSiteSigns #WayfindingSigns #SaskatoonContractors #SaskatoonPrinting #CustomSignage",
+      "link": "https://truecolorprinting.ca/sign-company-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=sign_company_evergreen_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "sign-company-evergreen-02",
+      "campaign": "Sign Company — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-08-05T09:00:00-06:00",
+      "imageSource": "public/images/industries/sign-company/acp-hoarding.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Site hoarding panels — full-colour ACP printed for active construction perimeters. Renderings, project info, contractor logos, hoarding-as-marketing. From $13/sqft.\n\nWill survive winter wind and meltwater. Mount-ready. In-house designer $35 flat — send your renderings or we'll lay out from your scope sheet.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Site hoarding panels — full-colour ACP printed for active construction perimeters. Renderings, project info, contractor logos, hoarding-as-marketing. From $13/sqft.\n\nWill survive winter wind and meltwater. Mount-ready. In-house designer $35 flat — send your renderings or we'll lay out from your scope sheet.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #SaskatoonSigns #SignCompany #StorefrontSigns #JobSiteSigns #WayfindingSigns #SaskatoonContractors #SaskatoonPrinting #CustomSignage",
+      "link": "https://truecolorprinting.ca/sign-company-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=sign_company_evergreen_hoarding",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "sign-company-evergreen-03",
+      "campaign": "Sign Company — Evergreen",
+      "postType": "Update",
+      "scheduledAt": "2026-10-07T09:00:00-06:00",
+      "imageSource": "public/images/industries/sign-company/sign-event-directional.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Event directional signage — wayfinding for festivals, weddings, conferences, and trade shows. Coroplast on H-stakes from $30. Foam board on easels from $45. Custom arrow shapes available.\n\nBulk discounts: 8% off at 5 signs, 17% off at 10, 23% off at 25. Order 2 weeks out for standard turnaround. Same-day rush +$40 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Event directional signage — wayfinding for festivals, weddings, conferences, and trade shows. Coroplast on H-stakes from $30. Foam board on easels from $45. Custom arrow shapes available.\n\nBulk discounts: 8% off at 5 signs, 17% off at 10, 23% off at 25. Order 2 weeks out for standard turnaround. Same-day rush +$40 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #SaskatoonBusiness #PrintShop #SaskatoonSigns #SignCompany #StorefrontSigns #JobSiteSigns #WayfindingSigns #SaskatoonContractors #SaskatoonPrinting #CustomSignage",
+      "link": "https://truecolorprinting.ca/sign-company-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=sign_company_evergreen_event",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "canada-day-01",
+      "campaign": "Canada Day",
+      "postType": "Offer",
+      "scheduledAt": "2026-06-10T09:00:00-06:00",
+      "imageSource": "public/images/products/product/banner-13oz-1200x400.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Canada Day Banners + Window Decals — Saskatoon\n\nCanada Day is July 1 — get your bar, restaurant, or retail storefront ready with custom red-and-white banners, window decals, and event flyers, all printed in-house at Vinyl banner 2×6ft — $90. Window decals from $11/sqft, removable after July 1 with zero glass residue. Coroplast event signs from $30. Promotional flyers 250 for $110.\n\nDesigner $35 flat — same-day proof. Order by June 26 for standard 48-hour turnaround.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Canada Day Banners + Window Decals — Saskatoon\n\nCanada Day is July 1 — get your bar, restaurant, or retail storefront ready with custom red-and-white banners, window decals, and event flyers, all printed in-house at Vinyl banner 2×6ft — $90. Window decals from $11/sqft, removable after July 1 with zero glass residue. Coroplast event signs from $30. Promotional flyers 250 for $110.\n\nDesigner $35 flat — same-day proof. Order by June 26 for standard 48-hour turnaround.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #CanadaDay #CanadaDay2026 #HappyCanadaDay #CanadianPride #SaskatoonCelebration #VinylBanners #WindowDecals #SaskatoonRestaurants #SaskatoonBars #SaskatoonRetail",
+      "link": "https://truecolorprinting.ca/canada-day-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=canada_day_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "canada-day-02",
+      "campaign": "Canada Day",
+      "postType": "Update",
+      "scheduledAt": "2026-06-22T09:00:00-06:00",
+      "imageSource": "public/images/industries/coroplast/sign-event-directional.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Three weeks until Canada Day — last call window for standard 48-hour turnaround on banners, decals, and flyers is Friday, June 26.\n\nSame-day rush still available June 29 and 30 for +$40 flat — order before 10 AM, pick up that afternoon.\n\nVinyl banners 2×6ft $90. Window decals from $11/sqft. Coroplast event directional from $30.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Three weeks until Canada Day — last call window for standard 48-hour turnaround on banners, decals, and flyers is Friday, June 26.\n\nSame-day rush still available June 29 and 30 for +$40 flat — order before 10 AM, pick up that afternoon.\n\nVinyl banners 2×6ft $90. Window decals from $11/sqft. Coroplast event directional from $30.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #CanadaDay #CanadaDay2026 #HappyCanadaDay #CanadianPride #SaskatoonCelebration #VinylBanners #WindowDecals #SaskatoonRestaurants #SaskatoonBars #SaskatoonRetail",
+      "link": "https://truecolorprinting.ca/canada-day-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=canada_day_2026_update",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "canada-day-03",
+      "campaign": "Canada Day",
+      "postType": "Event",
+      "scheduledAt": "2026-06-30T09:00:00-06:00",
+      "imageSource": "public/images/products/product/vinyl-window-decal-storefront-800x600.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Canada Day — July 1, Saskatoon\n\nCanada Day is tomorrow — same-day rush printing is still open through this morning. Order before 10 AM for afternoon pickup, +$40 flat rush fee.\n\nBanners, window decals, flyers, event directional — all in stock and ready to print at to confirm capacity.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Canada Day — July 1, Saskatoon\n\nCanada Day is tomorrow — same-day rush printing is still open through this morning. Order before 10 AM for afternoon pickup, +$40 flat rush fee.\n\nBanners, window decals, flyers, event directional — all in stock and ready to print at to confirm capacity.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #CanadaDay #CanadaDay2026 #HappyCanadaDay #CanadianPride #SaskatoonCelebration #VinylBanners #WindowDecals #SaskatoonRestaurants #SaskatoonBars #SaskatoonRetail",
+      "link": "https://truecolorprinting.ca/canada-day-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=canada_day_2026_event",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "back-to-school-01",
+      "campaign": "Back-to-School",
+      "postType": "Offer",
+      "scheduledAt": "2026-07-28T09:00:00-06:00",
+      "imageSource": "public/images/industries/flyers/size-half-letter.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Back-to-School Signs + Flyers — Saskatoon\n\nBack-to-school season for Saskatoon schools, daycares, and tutoring businesses — welcome banners, classroom signage, half-letter flyers for parent handouts, and storefront window decals.\n\nVinyl banner 2×6ft $90. Coroplast classroom sign 18×24\" from $30. Half-letter flyers (5.5×8.5\") 250 for $90. Window decals from $11/sqft.\n\nDesigner $35 flat — send your school colours and logo, proof same day. Order by August 21 for first-day-of-school readiness.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Back-to-School Signs + Flyers — Saskatoon\n\nBack-to-school season for Saskatoon schools, daycares, and tutoring businesses — welcome banners, classroom signage, half-letter flyers for parent handouts, and storefront window decals.\n\nVinyl banner 2×6ft $90. Coroplast classroom sign 18×24\" from $30. Half-letter flyers (5.5×8.5\") 250 for $90. Window decals from $11/sqft.\n\nDesigner $35 flat — send your school colours and logo, proof same day. Order by August 21 for first-day-of-school readiness.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #BackToSchool #BackToSchool2026 #SaskatoonSchools #SaskatoonDaycare #ClassroomSigns #SchoolFlyers #PrintShop #NewSchoolYear #SaskatoonPrinting #SaskatoonBusiness",
+      "link": "https://truecolorprinting.ca/back-to-school-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=b2s_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "back-to-school-02",
+      "campaign": "Back-to-School",
+      "postType": "Update",
+      "scheduledAt": "2026-08-12T09:00:00-06:00",
+      "imageSource": "public/images/industries/flyers/flyer-restaurant-promo.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Daycares and after-school programs — half-letter flyers (5.5×8.5\") for parent pickup folders. 250 for $90, 500 for $130. Cheaper per piece than full letter, easier to fit in a backpack pouch.\n\nDouble-sided full-colour on 80lb gloss. Designer $35 flat — send your program info, we'll lay it out same day. 48-hour turnaround. Same-day rush +$40.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Daycares and after-school programs — half-letter flyers (5.5×8.5\") for parent pickup folders. 250 for $90, 500 for $130. Cheaper per piece than full letter, easier to fit in a backpack pouch.\n\nDouble-sided full-colour on 80lb gloss. Designer $35 flat — send your program info, we'll lay it out same day. 48-hour turnaround. Same-day rush +$40.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #BackToSchool #BackToSchool2026 #SaskatoonSchools #SaskatoonDaycare #ClassroomSigns #SchoolFlyers #PrintShop #NewSchoolYear #SaskatoonPrinting #SaskatoonBusiness",
+      "link": "https://truecolorprinting.ca/back-to-school-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=b2s_2026_daycare",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "back-to-school-03",
+      "campaign": "Back-to-School",
+      "postType": "Event",
+      "scheduledAt": "2026-08-25T09:00:00-06:00",
+      "imageSource": "public/images/industries/healthcare/foamboard-know-your-numbers.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "First Day of School — September 2, 2026\n\nSaskatoon Public + Catholic schools start September 2 — last call for welcome-back banners, hallway signs, and parent-handout flyers.\n\nLast day for standard turnaround: Friday, August 28. Same-day rush after that for +$40 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "First Day of School — September 2, 2026\n\nSaskatoon Public + Catholic schools start September 2 — last call for welcome-back banners, hallway signs, and parent-handout flyers.\n\nLast day for standard turnaround: Friday, August 28. Same-day rush after that for +$40 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #BackToSchool #BackToSchool2026 #SaskatoonSchools #SaskatoonDaycare #ClassroomSigns #SchoolFlyers #PrintShop #NewSchoolYear #SaskatoonPrinting #SaskatoonBusiness",
+      "link": "https://truecolorprinting.ca/back-to-school-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=b2s_2026_event",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "halloween-01",
+      "campaign": "Halloween",
+      "postType": "Offer",
+      "scheduledAt": "2026-09-22T09:00:00-06:00",
+      "imageSource": "public/images/industries/coroplast/sign-hoarding.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Halloween Window Decals + Event Banners — Saskatoon\n\nHalloween is October 31 — get your bar, restaurant, retail storefront, or pop-up haunted attraction printed and mounted in time. Removable window decals, event banners, and pop-up shop hoarding all printed in-house at 216 33rd St W.\n\nWindow decals from $11/sqft, removable after Oct 31 with zero glass residue. Vinyl banner 2×6ft $90. Coroplast pop-up signs from $30. Hoarding panels for haunted attractions from $13/sqft.\n\nDesigner $35 flat. Order by October 26 for standard turnaround. Same-day rush +$40.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Halloween Window Decals + Event Banners — Saskatoon\n\nHalloween is October 31 — get your bar, restaurant, retail storefront, or pop-up haunted attraction printed and mounted in time. Removable window decals, event banners, and pop-up shop hoarding all printed in-house at 216 33rd St W.\n\nWindow decals from $11/sqft, removable after Oct 31 with zero glass residue. Vinyl banner 2×6ft $90. Coroplast pop-up signs from $30. Hoarding panels for haunted attractions from $13/sqft.\n\nDesigner $35 flat. Order by October 26 for standard turnaround. Same-day rush +$40.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #Halloween #HalloweenSaskatoon #WindowDecals #EventSigns #PrintShop #SaskatoonBars #SaskatoonRestaurants #PopUpShop #SaskatoonRetail #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/halloween-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=halloween_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "halloween-02",
+      "campaign": "Halloween",
+      "postType": "Update",
+      "scheduledAt": "2026-10-12T09:00:00-06:00",
+      "imageSource": "public/images/industries/sign-company/sign-event-directional.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "One week to Halloween — last call for standard 48-hour turnaround on window decals, banners, and event signage is October 26.\n\nWindow decals from $11/sqft come off clean after the season. Vinyl banners 2×6ft $90 for storefront promos. Coroplast event signs from $30 for haunted attractions and Halloween pop-ups.\n\nSame-day rush available Oct 27–30 for +$40 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "One week to Halloween — last call for standard 48-hour turnaround on window decals, banners, and event signage is October 26.\n\nWindow decals from $11/sqft come off clean after the season. Vinyl banners 2×6ft $90 for storefront promos. Coroplast event signs from $30 for haunted attractions and Halloween pop-ups.\n\nSame-day rush available Oct 27–30 for +$40 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #Halloween #HalloweenSaskatoon #WindowDecals #EventSigns #PrintShop #SaskatoonBars #SaskatoonRestaurants #PopUpShop #SaskatoonRetail #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/halloween-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=halloween_2026_update",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "halloween-03",
+      "campaign": "Halloween",
+      "postType": "Event",
+      "scheduledAt": "2026-10-26T09:00:00-06:00",
+      "imageSource": "public/images/products/product/vinyl-window-decal-storefront-800x600.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Halloween — October 31, Saskatoon\n\nHalloween is Saturday — same-day rush printing is still open Friday for window decals, banners, and event signs. Order before 10 AM, pick up that afternoon. +$40 flat rush fee.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Halloween — October 31, Saskatoon\n\nHalloween is Saturday — same-day rush printing is still open Friday for window decals, banners, and event signs. Order before 10 AM, pick up that afternoon. +$40 flat rush fee.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #Halloween #HalloweenSaskatoon #WindowDecals #EventSigns #PrintShop #SaskatoonBars #SaskatoonRestaurants #PopUpShop #SaskatoonRetail #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/halloween-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=halloween_2026_event",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "black-friday-01",
+      "campaign": "Black Friday",
+      "postType": "Offer",
+      "scheduledAt": "2026-10-28T09:00:00-06:00",
+      "imageSource": "public/images/industries/sign-company/sign-job-site.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Black Friday Storefront Signage — Saskatoon\n\nBlack Friday is November 27 — get your retail storefront ready with sale banners, window decals, sandwich-board coroplast, and price-flag signage, all printed in 48 hours at Vinyl banner 2×6ft $90, 4×8ft $240. Window decals from $11/sqft (removable). Coroplast sale signs 24×36\" from $48. ACP price flags from $13/sqft.\n\nDesigner $35 flat — send your sale graphics or we'll build them. Order by Nov 24 for in-time delivery.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Black Friday Storefront Signage — Saskatoon\n\nBlack Friday is November 27 — get your retail storefront ready with sale banners, window decals, sandwich-board coroplast, and price-flag signage, all printed in 48 hours at Vinyl banner 2×6ft $90, 4×8ft $240. Window decals from $11/sqft (removable). Coroplast sale signs 24×36\" from $48. ACP price flags from $13/sqft.\n\nDesigner $35 flat — send your sale graphics or we'll build them. Order by Nov 24 for in-time delivery.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #BlackFriday #BlackFriday2026 #SaskatoonRetail #SaleSigns #WindowDecals #SaskatoonShopping #StorefrontSignage #PrintShop #SaskatoonBusiness #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/black-friday-signage-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "black-friday-02",
+      "campaign": "Black Friday",
+      "postType": "Update",
+      "scheduledAt": "2026-11-10T09:00:00-06:00",
+      "imageSource": "public/images/gallery/gallery-coroplast-nextgen-dashcam-giveaway.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Two weeks to Black Friday — last call for sale window decals, hanging banners, and sandwich-board coroplast.\n\nNextGen Dash Cam giveaway sign printed and stake-mounted last month for a Saskatoon retail promo — coroplast at $8/sqft, real customer work. Same delivery windows still open.\n\nWindow decals from $11/sqft. Coroplast 24×36\" from $48.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Two weeks to Black Friday — last call for sale window decals, hanging banners, and sandwich-board coroplast.\n\nNextGen Dash Cam giveaway sign printed and stake-mounted last month for a Saskatoon retail promo — coroplast at $8/sqft, real customer work. Same delivery windows still open.\n\nWindow decals from $11/sqft. Coroplast 24×36\" from $48.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #BlackFriday #BlackFriday2026 #SaskatoonRetail #SaleSigns #WindowDecals #SaskatoonShopping #StorefrontSignage #PrintShop #SaskatoonBusiness #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/black-friday-signage-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026_update",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "black-friday-03",
+      "campaign": "Black Friday",
+      "postType": "Event",
+      "scheduledAt": "2026-11-24T09:00:00-06:00",
+      "imageSource": "public/images/products/product/acp-sign-princess-liquidation-800x600.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Black Friday — November 27, Saskatoon\n\nBlack Friday is this Friday — same-day rush printing still available through Thursday morning. Sale banners, price flags, window decals — order before 10 AM for afternoon pickup. +$40 flat.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Black Friday — November 27, Saskatoon\n\nBlack Friday is this Friday — same-day rush printing still available through Thursday morning. Sale banners, price flags, window decals — order before 10 AM for afternoon pickup. +$40 flat.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #BlackFriday #BlackFriday2026 #SaskatoonRetail #SaleSigns #WindowDecals #SaskatoonShopping #StorefrontSignage #PrintShop #SaskatoonBusiness #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/black-friday-signage-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026_event",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "holiday-season-01",
+      "campaign": "Holiday Season",
+      "postType": "Offer",
+      "scheduledAt": "2026-11-05T09:00:00-06:00",
+      "imageSource": "public/images/industries/flyers/flyer-open-house.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Holiday Window Decals + Banners — Saskatoon\n\nHoliday season — Christmas, Hanukkah, New Year. Get your restaurant, retail shop, or office printed and decorated by early December. Removable window decals, hanging banners, photo posters, and open-house event flyers.\n\nWindow decals from $11/sqft (removable, zero residue). Vinyl banner 2×6ft $90. Photo posters 18×24\" from $22. Open-house flyers 250 for $110.\n\nDesigner $35 flat — send your holiday creative or we'll build it. Order by December 12 for standard turnaround.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Holiday Window Decals + Banners — Saskatoon\n\nHoliday season — Christmas, Hanukkah, New Year. Get your restaurant, retail shop, or office printed and decorated by early December. Removable window decals, hanging banners, photo posters, and open-house event flyers.\n\nWindow decals from $11/sqft (removable, zero residue). Vinyl banner 2×6ft $90. Photo posters 18×24\" from $22. Open-house flyers 250 for $110.\n\nDesigner $35 flat — send your holiday creative or we'll build it. Order by December 12 for standard turnaround.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #HolidaySeason #ChristmasSaskatoon #WindowDecals #HolidayDecor #PrintShop #SaskatoonRetail #SaskatoonRestaurants #OpenHouseFlyers #SaskatoonBusiness #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/holiday-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=holiday_2026",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "holiday-season-02",
+      "campaign": "Holiday Season",
+      "postType": "Update",
+      "scheduledAt": "2026-11-25T09:00:00-06:00",
+      "imageSource": "public/images/industries/flyers/flyer-grand-opening.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Open house and client appreciation flyers for the holidays — restaurants, real estate brokers, financial offices. Half-letter or full letter, 250 from $90.\n\nDesigner $35 flat — send your photo, address, date, and we'll lay it out same day. Standard 48-hour turnaround. Order by Dec 12 for delivery before Christmas week.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Open house and client appreciation flyers for the holidays — restaurants, real estate brokers, financial offices. Half-letter or full letter, 250 from $90.\n\nDesigner $35 flat — send your photo, address, date, and we'll lay it out same day. Standard 48-hour turnaround. Order by Dec 12 for delivery before Christmas week.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #HolidaySeason #ChristmasSaskatoon #WindowDecals #HolidayDecor #PrintShop #SaskatoonRetail #SaskatoonRestaurants #OpenHouseFlyers #SaskatoonBusiness #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/holiday-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=holiday_2026_openhouse",
+      "callToAction": "Order online"
+    },
+    {
+      "id": "holiday-season-03",
+      "campaign": "Holiday Season",
+      "postType": "Event",
+      "scheduledAt": "2026-12-12T09:00:00-06:00",
+      "imageSource": "public/images/products/product/window-decal-coffee-autumn-800x600.webp",
+      "crops": {
+        "feed_1x1": null,
+        "story_9x16": null
+      },
+      "captions": {
+        "instagram": "Last Call Holiday Printing — Saskatoon\n\nLast week before Christmas — same-day rush still open Monday through Thursday for window decals, banners, and event flyers. Order before 10 AM for afternoon pickup. +$40 flat rush fee.\n\nWe close December 24 at 1 PM.\n\nOrder online → truecolorprinting.ca\nLocal pickup or shipping across SK.",
+        "facebook": "Last Call Holiday Printing — Saskatoon\n\nLast week before Christmas — same-day rush still open Monday through Thursday for window decals, banners, and event flyers. Order before 10 AM for afternoon pickup. +$40 flat rush fee.\n\nWe close December 24 at 1 PM.\n\nIn-house at 216 33rd St W, Saskatoon. Call (306) 954-8688 or order online: truecolorprinting.ca"
+      },
+      "hashtags": "#Saskatoon #YXE #HolidaySeason #ChristmasSaskatoon #WindowDecals #HolidayDecor #PrintShop #SaskatoonRetail #SaskatoonRestaurants #OpenHouseFlyers #SaskatoonBusiness #SaskatoonPrinting",
+      "link": "https://truecolorprinting.ca/holiday-printing-saskatoon?utm_source=instagram&utm_medium=social&utm_campaign=holiday_2026_lastcall",
+      "callToAction": "Order online"
+    }
+  ]
+}

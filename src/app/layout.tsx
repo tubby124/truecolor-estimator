@@ -189,7 +189,7 @@ const localBusinessSchema = {
       { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vinyl Banners", url: "https://truecolorprinting.ca/banner-printing-saskatoon" } },
       { "@type": "Offer", itemOffered: { "@type": "Service", name: "Business Cards", url: "https://truecolorprinting.ca/business-cards-saskatoon" } },
       { "@type": "Offer", itemOffered: { "@type": "Service", name: "Flyers", url: "https://truecolorprinting.ca/flyer-printing-saskatoon" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vehicle Magnets", url: "https://truecolorprinting.ca/custom-magnets-saskatoon" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vehicle Magnets", url: "https://truecolorprinting.ca/vehicle-magnets-saskatoon" } },
       { "@type": "Offer", itemOffered: { "@type": "Service", name: "ACP Aluminum Signs", url: "https://truecolorprinting.ca/aluminum-signs-saskatoon" } },
       { "@type": "Offer", itemOffered: { "@type": "Service", name: "Foamboard Displays", url: "https://truecolorprinting.ca/foamboard-printing-saskatoon" } },
       { "@type": "Offer", itemOffered: { "@type": "Service", name: "Window Decals", url: "https://truecolorprinting.ca/window-decals-saskatoon" } },
