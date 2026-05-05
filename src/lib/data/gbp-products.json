@@ -8,7 +8,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/products/vinyl-banners?utm_source=google_business&utm_medium=gbp_product&utm_campaign=vinyl_banners",
       "description": "Vinyl banners printed in Saskatoon in 24–48 hours. 13oz scrim vinyl, hemming and grommets included. Popular sizes: 2×6ft ($90), 2×8ft ($120), 4×8ft ($240). Weatherproof for outdoor use — holds up in Saskatchewan wind. In-house Roland UV printer. Same-day rush available for +$40 flat. Local pickup at 216 33rd St W. No minimum order. Call (306) 954-8688.",
-      "imagePath": "public/images/seasonal/st-patricks/banner-shamrock-green.png",
+      "imagePath": "public/images/products/product/banner-13oz-1200x400.webp",
       "imagePrompt": "Professional wide-format vinyl banner hanging on a fence at a Saskatchewan outdoor event. The banner has vivid full-colour printing with hemmed edges and brass grommets visible at corners. Sunny day, flat prairie background. Photorealistic, 1200x900."
     },
     {
@@ -19,7 +19,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/products/coroplast-signs?utm_source=google_business&utm_medium=gbp_product&utm_campaign=coroplast_signs",
       "description": "Coroplast signs printed in Saskatoon from $8/sqft. 4mm flute corrugated plastic — lightweight, UV-resistant, reusable. Popular for real estate, job sites, and election campaigns. Standard sizes: 18×24\" ($30), 24×36\" ($48), 4×4ft ($120), 4×8ft ($232). H-wire stakes available. Bulk pricing: 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs. Local pickup 216 33rd St W, Saskatoon.",
-      "imagePath": null,
+      "imagePath": "public/images/industries/coroplast/sign-real-estate.webp",
       "imagePrompt": "Corrugated plastic yard sign with full-colour printing staked into a well-maintained lawn in front of a business. The sign is on a metal H-wire stake. Clear sunny day, Saskatchewan residential neighbourhood background. Photorealistic, 1200x900."
     },
     {
@@ -74,7 +74,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/products/vehicle-magnets?utm_source=google_business&utm_medium=gbp_product&utm_campaign=vehicle_magnets",
       "description": "Custom vehicle magnets printed in Saskatoon from $24/sqft. Turn any truck, van, or car into a mobile billboard. Full-colour UV print on flexible magnetic stock. Standard door magnet (12×18\") from $45, large (18×24\") from $72. Removable — no paint damage. Popular for contractors, real estate agents, and delivery businesses. 48-hour turnaround. Local pickup 216 33rd St W. (306) 954-8688.",
-      "imagePath": null,
+      "imagePath": "public/images/products/product/magnet-truck-construction-800x600.webp",
       "imagePrompt": "Custom printed vehicle door magnet on a white work truck. The magnet shows a full-colour business logo and phone number. Parked in a commercial parking lot. Close-up showing the magnet edge slightly raised from the door surface. Photorealistic, 1200x900."
     },
     {
@@ -85,7 +85,7 @@
       "cta": "Get offer",
       "url": "https://truecolorprinting.ca/quote?utm_source=google_business&utm_medium=gbp_product&utm_campaign=vinyl_lettering",
       "description": "Custom vinyl lettering and cut graphics for windows, walls, vehicles, and equipment. Single-colour or multi-colour vinyl. Precision-cut plotter — no print, just the shape. Popular for vehicle door lettering, storefront window text, wall quotes, and equipment decals. Send your logo or text and we'll quote same day. (306) 954-8688.",
-      "imagePath": null,
+      "imagePath": "public/images/gallery/gallery-vinyl-lettering-cowry-kitchen.webp",
       "imagePrompt": "Precision-cut vinyl lettering applied to a storefront glass door showing business hours and a company name. The letters are crisp with no background — just the cut shapes on clear glass. Clean commercial setting. Photorealistic, 1200x900."
     },
     {
@@ -96,7 +96,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/products/business-cards?utm_source=google_business&utm_medium=gbp_product&utm_campaign=business_cards",
       "description": "Business cards printed in Saskatoon. 250 cards double-sided on 14pt card stock for $45 + GST. 500 cards $65, 1000 cards $110. Full-colour, matte or gloss finish. In-house design available ($35 flat) — send your logo and info and we'll layout a print-ready proof. Ready in 48 hours. Same-day rush +$40. Pickup at 216 33rd St W. (306) 954-8688.",
-      "imagePath": null,
+      "imagePath": "public/images/industries/business-cards/card-realtor.webp",
       "imagePrompt": "Stack of professionally printed business cards on 14pt card stock, fanned out on a dark wooden desk. Full-colour double-sided printing visible. Shallow depth of field, studio lighting. Photorealistic, 1200x900."
     },
     {
@@ -107,7 +107,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/products/flyers?utm_source=google_business&utm_medium=gbp_product&utm_campaign=flyers",
       "description": "Flyer printing in Saskatoon — 250 glossy 8.5×11\" flyers on 80lb stock for $110 + GST. 500 flyers $150, 1000 flyers $195. Double-sided printing included. In-house designer available ($35–50). Popular for bars, restaurants, real estate, events, and seasonal promotions. 48-hour turnaround. Same-day rush available. Pickup at 216 33rd St W. Call (306) 954-8688.",
-      "imagePath": "public/images/seasonal/ramadan/flyer-bold-announcement.png",
+      "imagePath": "public/images/industries/flyers/flyer-grand-opening.webp",
       "imagePrompt": "Stack of glossy full-colour printed flyers on a print shop counter. The top flyer shows vivid colours on 80lb glossy stock. Print shop environment with equipment visible in background. Photorealistic, 1200x900."
     },
     {
@@ -118,7 +118,7 @@
       "cta": "Get offer",
       "url": "https://truecolorprinting.ca/quote?utm_source=google_business&utm_medium=gbp_product&utm_campaign=stickers",
       "description": "Custom stickers and labels printed in Saskatoon. Full-colour, any shape — square, circle, or custom die-cut. Waterproof vinyl or paper stock. Bumper stickers, product labels, promotional giveaways. Send your artwork or we design from scratch. Get a same-day quote — call (306) 954-8688 or submit online.",
-      "imagePath": null,
+      "imagePath": "public/images/products/product/sticker-diecut-truecolor-logo-800x600.webp",
       "imagePrompt": "Assortment of custom die-cut stickers in various shapes and sizes spread on a clean white surface. Full-colour printing on waterproof vinyl with glossy finish. Some stickers partially peeled showing the backing paper. Photorealistic, 1200x900."
     },
     {
@@ -129,7 +129,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/products/photo-posters?utm_source=google_business&utm_medium=gbp_product&utm_campaign=photo_posters",
       "description": "Large format photo poster printing in Saskatoon. Gallery-quality prints on photo stock, canvas, or matte paper. Any size up to 60\" wide. Popular for grad photo backdrops, office décor, event signage, and real estate listing photos. Roland UV printer — vibrant colour accuracy. Pickup 216 33rd St W. Call (306) 954-8688 for sizing and pricing.",
-      "imagePath": null,
+      "imagePath": "public/images/products/product/poster-event-easel-800x600.webp",
       "imagePrompt": "Large format photo poster being printed on a wide-format Roland UV printer. The poster shows a vivid landscape photograph emerging from the printer. Print shop environment with rolls of media visible. Photorealistic, 1200x900."
     },
     {
@@ -259,7 +259,7 @@
       "cta": "Call",
       "url": "https://truecolorprinting.ca/same-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=same_day",
       "description": "Same-day rush printing in Saskatoon — +$40 flat fee. Order before 10 AM, pick up same business day. Vinyl banners, coroplast signs, foamboard displays, flyers, window decals. In-house Roland UV printer — no outsourcing, no surprises. Call to confirm capacity: (306) 954-8688. Pickup at 216 33rd St W, Saskatoon, SK.",
-      "imagePath": null,
+      "imagePath": "public/images/gallery/gallery-shop-roland-large-format.webp",
       "imagePrompt": "Inside view of a busy print shop with a Roland UV printer running. A finished vinyl banner is being rolled up by a staff member. Clock on the wall showing morning time. Warm, productive workshop atmosphere. Photorealistic, 1200x900."
     },
     {
