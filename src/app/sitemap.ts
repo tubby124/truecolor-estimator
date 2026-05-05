@@ -88,6 +88,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/pharmacy-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/brewery-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/property-management-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/for-lease-signs-saskatoon`, lastModified: new Date("2026-05-05"), changeFrequency: "monthly", priority: 0.85 },
 
     // ── Seasonal pages ────────────────────────────────────────────────────────
     { url: `${BASE_URL}/st-patricks-day-printing-saskatoon`, lastModified: new Date("2026-02-25"), changeFrequency: "monthly", priority: 0.85 },
