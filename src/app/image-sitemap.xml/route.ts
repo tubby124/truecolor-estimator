@@ -88,6 +88,11 @@ const PAGES = [
         title: "Coroplast election yard sign Saskatoon — city council campaign",
         caption: "Coroplast election campaign yard sign 18×24 on H-stake — printed in Saskatoon, Saskatchewan",
       },
+      {
+        loc: `${IND}/coroplast/sign-hoarding.webp`,
+        title: "Coroplast construction hoarding panel Saskatoon downtown — Coming Summer 2026",
+        caption: "4×8 coroplast construction hoarding panels with building rendering on downtown Saskatoon street — True Color Display Printing",
+      },
     ],
   },
   {
@@ -178,6 +183,16 @@ const PAGES = [
         title: "Letter size flyer stack Saskatoon — 8.5×11 80lb gloss full colour",
         caption: "Stack of letter-size 8.5×11 full-colour flyers on 80lb gloss — printed in Saskatoon by True Color",
       },
+      {
+        loc: `${IND}/flyers/flyer-grand-opening.webp`,
+        title: "Grand opening retail flyer Saskatoon — 8.5×11 80lb gloss full colour stack",
+        caption: "Stack of grand opening retail flyers on 80lb gloss stock — 100 from $45 at True Color Display Printing, Saskatoon",
+      },
+      {
+        loc: `${IND}/flyers/size-half-letter.webp`,
+        title: "Half-letter flyer Saskatoon — 5.5×8.5 menu insert versus 8.5×11 size comparison",
+        caption: "Half-letter 5.5×8.5 restaurant menu insert flyers next to letter-size flyers — True Color Display Printing, Saskatoon SK",
+      },
     ],
   },
   {
@@ -192,6 +207,26 @@ const PAGES = [
         loc: `${IND}/sign-company/sign-yard-real-estate.webp`,
         title: "Premium aluminum post-and-panel real estate sign Saskatoon — for sale",
         caption: "Premium aluminum post-and-panel real estate sign system on residential lawn — True Color, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/sign-company/acp-hoarding.webp`,
+        title: "ACP aluminum hoarding panel Saskatoon — construction site future home dental clinic",
+        caption: "4×8 ACP aluminum composite hoarding panel with building rendering at Saskatoon construction site — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/sign-company/acp-office-directory.webp`,
+        title: "ACP office tenant directory panel Saskatoon — brushed aluminum lobby signage",
+        caption: "Brushed aluminum ACP tenant directory panel in modern Saskatoon office lobby — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/sign-company/sign-event-directional.webp`,
+        title: "Coroplast festival entrance directional sign Saskatoon — community event sponsor logos",
+        caption: "Coroplast festival entrance arrow sign on H-stake at Saskatoon community event — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/sign-company/sign-job-site.webp`,
+        title: "Coroplast contractor job site sign Saskatoon — Project In Progress residential build",
+        caption: "4×8 coroplast job site sign on wood frame at Saskatoon residential new-build — True Color Display Printing",
       },
     ],
   },
