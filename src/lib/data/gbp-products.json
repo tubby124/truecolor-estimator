@@ -63,7 +63,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/products/window-decals?utm_source=google_business&utm_medium=gbp_product&utm_campaign=window_decals",
       "description": "Vinyl window decals printed in Saskatoon from $11/sqft (minimum $45). Removable — zero adhesive residue on glass. Full-colour UV printing. Popular for seasonal promotions, hours of operation, logos, and event advertising on storefronts. Perforated window vinyl also available ($8/sqft) — one-way vision. Local pickup 216 33rd St W. Call (306) 954-8688.",
-      "imagePath": "public/images/seasonal/st-patricks/decal-full-window.png",
+      "imagePath": "public/images/products/product/vinyl-window-decal-storefront-800x600.webp",
       "imagePrompt": "Storefront glass window with a large full-colour vinyl decal showing business branding. The decal is clearly applied to the inside of the glass. Saskatoon commercial street visible in reflection. Photorealistic, 1200x900."
     },
     {
@@ -140,7 +140,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/st-patricks-day-printing-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=st_patricks_day",
       "description": "St. Patrick's Day banners, window decals, and flyers for Saskatoon bars, pubs, and restaurants. Vinyl banner 2×6ft $90 + GST. Window decals from $11/sqft — removable after March 17, no residue on glass. 250 promotional flyers $110. Order by March 10 for standard turnaround. Same-day rush available for +$40. In-house Roland UV printer. Local pickup 216 33rd St W, Saskatoon. Call (306) 954-8688.",
-      "imagePath": "public/images/seasonal/st-patricks/hero.png",
+      "imagePath": "public/images/seasonal/st-patricks/banner-shamrock-green.webp",
       "imagePrompt": "St. Patrick's Day themed vinyl banner hanging inside a Saskatoon pub. Green and gold colours with shamrock designs. The banner is hemmed with grommets visible. Warm pub interior lighting. Photorealistic, 1200x900.",
       "seasonal": {
         "active": "Feb 15 – Mar 17",
@@ -156,7 +156,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/graduation-banners-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=graduation_banners",
       "description": "Graduation banners, foam board displays, and retractable stands for Saskatoon schools, universities, and private grad parties. Vinyl banner 2×6ft $90, 4×8ft gym banner $240. Foam board photo display 24×36\" $65. Retractable stand complete $219. Bring your school colours and grad year — in-house designer handles the layout. Order by late May. Same-day rush +$40 flat. Pickup 216 33rd St W. (306) 954-8688.",
-      "imagePath": "public/images/seasonal/graduation/hero.png",
+      "imagePath": "public/images/seasonal/graduation/hero.jpg",
       "imagePrompt": "Graduation celebration vinyl banner displayed at a school gymnasium entrance. The banner shows 'Class of 2026' with school colours. Students in caps and gowns walking past. Photorealistic, 1200x900.",
       "seasonal": {
         "active": "Apr 1 – Jul 1",
@@ -172,7 +172,7 @@
       "cta": "Buy on website",
       "url": "https://truecolorprinting.ca/ramadan-eid-banners-saskatoon?utm_source=google_business&utm_medium=gbp_product&utm_campaign=ramadan_eid",
       "description": "Ramadan and Eid banners, flyers, and retractable stands for Saskatoon mosques, halal restaurants, and Islamic community events. 2×6ft Iftar dinner banner $90. 4×8ft mosque entrance banner $216. Retractable stand complete $219. Print any language — Arabic, Urdu, Bengali. In-house designer. 48-hour turnaround. Same-day rush +$40. Pickup 216 33rd St W. Call (306) 954-8688.",
-      "imagePath": "public/images/seasonal/ramadan/banner-eid-mubarak.png",
+      "imagePath": "public/images/seasonal/ramadan/banner-eid-mubarak.webp",
       "imagePrompt": "Ramadan Mubarak banner displayed at the entrance of a mosque. The banner features Islamic geometric patterns in gold and deep blue with Arabic calligraphy. Warm evening lighting. Photorealistic, 1200x900.",
       "seasonal": {
         "active": "Feb 15 – May 15",
