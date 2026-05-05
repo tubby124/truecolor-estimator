@@ -93,6 +93,16 @@ const PAGES = [
         title: "Coroplast construction hoarding panel Saskatoon downtown — Coming Summer 2026",
         caption: "4×8 coroplast construction hoarding panels with building rendering on downtown Saskatoon street — True Color Display Printing",
       },
+      {
+        loc: `${IND}/coroplast/sign-event-directional.webp`,
+        title: "Coroplast event parking directional sign Saskatoon — 18×24 PARKING arrow on H-stake",
+        caption: "18×24 coroplast PARKING directional sign on H-stake at Saskatchewan summer event entrance — True Color Display Printing",
+      },
+      {
+        loc: `${IND}/coroplast/sign-contractor.webp`,
+        title: "Coroplast contractor sign Saskatoon — 4×8 chain-link fence residential build",
+        caption: "4×8 coroplast contractor sign zip-tied to chain-link construction fence at Saskatoon residential build — True Color Display Printing",
+      },
     ],
   },
   {
@@ -163,6 +173,11 @@ const PAGES = [
         title: "UV gloss vs matte business card finish comparison Saskatoon",
         caption: "UV gloss vs matte laminate finish comparison on business cards — True Color Display Printing, Saskatoon",
       },
+      {
+        loc: `${IND}/business-cards/finish-matte.webp`,
+        title: "Matte finish business cards Saskatoon — 14pt charcoal architect design",
+        caption: "Matte finish 14pt business cards stacked on walnut desk, no glare — True Color Display Printing, Saskatoon SK",
+      },
     ],
   },
   {
@@ -192,6 +207,11 @@ const PAGES = [
         loc: `${IND}/flyers/size-half-letter.webp`,
         title: "Half-letter flyer Saskatoon — 5.5×8.5 menu insert versus 8.5×11 size comparison",
         caption: "Half-letter 5.5×8.5 restaurant menu insert flyers next to letter-size flyers — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/flyers/flyer-open-house.webp`,
+        title: "Real estate open house flyer Saskatoon — 8.5×11 80lb gloss listing print",
+        caption: "Real estate open house flyer on kitchen island countertop with keys and coffee mug — True Color Display Printing, Saskatoon SK",
       },
     ],
   },
