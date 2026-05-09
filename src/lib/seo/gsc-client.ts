@@ -1,12 +1,20 @@
 /**
  * Google Search Console client — server-side only.
  *
- * Auth: service-account JSON in env var GOOGLE_SERVICE_ACCOUNT_JSON.
- * The service-account email must be added as a User on the GSC property
- * (https://search.google.com/search-console → Settings → Users and permissions).
+ * Auth: OAuth2 refresh token (owner-account identity).
+ * Service-account auth was tried first but Google Search Console rejects
+ * service accounts on personal Gmail-owned properties ("email not found").
+ * OAuth refresh-token auth uses the property owner's identity directly.
  *
- * Property URL: read from env var GSC_SITE_URL (e.g. "sc-domain:truecolorprinting.ca"
- * for domain properties, or "https://truecolorprinting.ca/" for URL-prefix properties).
+ * Required env vars:
+ *   - GSC_OAUTH_CLIENT_ID
+ *   - GSC_OAUTH_CLIENT_SECRET
+ *   - GSC_OAUTH_REFRESH_TOKEN
+ *   - GSC_SITE_URL (e.g. "sc-domain:truecolorprinting.ca" for domain properties,
+ *                  or "https://truecolorprinting.ca/" for URL-prefix properties)
+ *
+ * To generate a refresh token, run:
+ *   node scripts/gsc-oauth-init.mjs
  */
 
 import { google } from "googleapis";
@@ -14,29 +22,26 @@ import type { searchconsole_v1 } from "googleapis";
 
 let cachedClient: searchconsole_v1.Searchconsole | null = null;
 
-function getServiceAccountKey() {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!raw) {
-    throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON env var is not set");
+function getOAuthCreds() {
+  const clientId = process.env.GSC_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GSC_OAUTH_CLIENT_SECRET;
+  const refreshToken = process.env.GSC_OAUTH_REFRESH_TOKEN;
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error(
+      "GSC OAuth env vars missing — need GSC_OAUTH_CLIENT_ID, GSC_OAUTH_CLIENT_SECRET, GSC_OAUTH_REFRESH_TOKEN",
+    );
   }
-  try {
-    return JSON.parse(raw) as { client_email: string; private_key: string };
-  } catch {
-    throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON");
-  }
+  return { clientId, clientSecret, refreshToken };
 }
 
 export function getGscClient(): searchconsole_v1.Searchconsole {
   if (cachedClient) return cachedClient;
 
-  const key = getServiceAccountKey();
-  const jwt = new google.auth.JWT({
-    email: key.client_email,
-    key: key.private_key,
-    scopes: ["https://www.googleapis.com/auth/webmasters.readonly"],
-  });
+  const { clientId, clientSecret, refreshToken } = getOAuthCreds();
+  const auth = new google.auth.OAuth2(clientId, clientSecret);
+  auth.setCredentials({ refresh_token: refreshToken });
 
-  cachedClient = google.searchconsole({ version: "v1", auth: jwt });
+  cachedClient = google.searchconsole({ version: "v1", auth });
   return cachedClient;
 }
 

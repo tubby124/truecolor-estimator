@@ -31,6 +31,10 @@ supabase link --project-ref dczbgraekmzirxknjvwe
 supabase db push migrations/add_seo_gsc_snapshots.sql
 ```
 
+> **Note (2026-05-09):** Service-account auth was tried first but Google Search Console
+> rejects service accounts on personal Gmail-owned properties with "email not found".
+> We pivoted to OAuth refresh-token auth. Steps 2–4 below describe the OAuth flow.
+
 ## Step 2 — Create the Google Cloud service account (~5 min)
 
 1. Open https://console.cloud.google.com/projectcreate
