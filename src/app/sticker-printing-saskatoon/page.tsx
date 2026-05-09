@@ -118,6 +118,17 @@ export default function StickerPrintingSaskatoonPage() {
             1–3 business days. All orders are ready for local pickup at 216 33rd St W,
             Saskatoon — no shipping delays.
           </p>
+          <p className="text-gray-600 leading-relaxed">
+            Looking for <strong>die cut stickers near me</strong> in Saskatoon? Every sticker
+            we print is true die-cut — kiss-cut sheets, contour-cut around your logo, or
+            individual shaped stickers separated to your spec. The die-cut path is built
+            from your vector file (or our designer creates one for $35 flat). We don&apos;t
+            outsource — files cut here, on the same Roland UV that printed them, so the
+            registration is exact and the edges are clean. Looking for{" "}
+            <strong>die cut labels near me</strong> for product packaging? Same process,
+            same pricing — 250 product labels for $325 is the most common run for a
+            Saskatchewan small-business product launch.
+          </p>
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
@@ -161,6 +172,14 @@ export default function StickerPrintingSaskatoonPage() {
         {
           q: "Do you do product labels for packaging in Saskatoon?",
           a: "Yes — our die-cut vinyl stickers work well as product labels for jars, bottles, boxes, and bags. For food packaging, verify with your product's requirements (our stickers are not food-safe certified). We print in any shape and size with full-colour Roland UV output. 250 labels for $325 is a common run for small product launches.",
+        },
+        {
+          q: "Where can I get die cut stickers near me in Saskatoon?",
+          a: "True Color Display Printing at 216 33rd St W, Saskatoon. Every sticker order is true die-cut — contour cut around your shape on the same Roland UV that printed it, no outsourcing. Pricing is 100 for $160, 250 for $325, 500 for $475. Local pickup only (no shipping). Same-day rush available for +$40 flat when ordered before 10 AM. Call (306) 954-8688 to start an order.",
+        },
+        {
+          q: "Do you make custom die cut labels near me for product packaging?",
+          a: "Yes — die-cut labels for jars, bottles, boxes, growler tags, and product packaging are one of our most-ordered sticker types. Pricing is the same as standard stickers (100 for $160, 250 for $325, 500 for $475) and the die-cut path is built from your label outline. Bring your label dimensions and brand assets, and our in-house designer ($35 flat, same-day proof) prepares the file. Most label runs are picked up within 1–3 business days from artwork approval.",
         },
       ]}
     />
