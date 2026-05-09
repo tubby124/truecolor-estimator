@@ -57,9 +57,13 @@ function loadExistingPageSlugs() {
   const sitemapPath = path.join(REPO_ROOT, "src/app/sitemap.ts");
   const src = fs.readFileSync(sitemapPath, "utf8");
   const slugs = new Set();
-  const re = /['"`]\/([\w-]+)['"`]/g;
+  // Matches both bare quoted paths ('/foo') and template-literal paths
+  // (`${BASE_URL}/foo`) — captures the slug segment after the first slash.
+  const re = /\/([a-z][a-z0-9-]+)(?=[`'"\/])/gi;
   let m;
   while ((m = re.exec(src))) slugs.add(m[1]);
+  // Always include the homepage marker.
+  slugs.add("/");
   return slugs;
 }
 
