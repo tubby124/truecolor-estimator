@@ -1,28 +1,29 @@
 /**
  * src/lib/email/smtp.ts
  *
- * Sends transactional email via Brevo REST API (HTTPS, port 443).
+ * Sends transactional email via Resend REST API (HTTPS, port 443).
  *
- * WHY: Railway Hobby plan ($5/mo) blocks ALL outbound SMTP ports (25, 465,
- * 587, 2525) at the platform firewall level — no DNS trick, no nodemailer
- * config, no Brevo SMTP relay (also port 587), no alternate port fixes this.
+ * WHY RESEND (not Brevo): 2026-05-11 — Brevo silently throttled the account to
+ * ~10 sends/day after the Wave 1 Construction campaign tripped anti-abuse. API
+ * returned 201 + messageId but emails never delivered. Resend has separate
+ * transactional infrastructure with no cold-list anti-abuse throttling, and
+ * a generous free tier (3,000/mo, 100/day) that fits True Color's volume.
  *
- * SOLUTION: Brevo transactional email REST API over HTTPS (port 443).
- * Railway does not block outbound HTTPS. No nodemailer needed.
+ * WHY ALSO NOT SMTP: Railway Hobby plan ($5/mo) blocks ALL outbound SMTP ports
+ * (25, 465, 587, 2525) at the platform firewall — no DNS trick, no nodemailer
+ * config, no alternate port fixes this. Resend REST API over HTTPS (port 443)
+ * is the only path that works on Railway Hobby.
  *
- * Required env var: BREVO_API_KEY  (Brevo → Settings → API Keys → v3 key)
- * Sender display name still reads from: SMTP_FROM env var (unchanged)
+ * Required env var: RESEND_API_KEY  (Resend Dashboard → API Keys → Create)
+ * Sender display: SMTP_FROM env var (e.g. 'True Color Display Printing <hello@outreach.true-color.ca>')
+ * Reply-to fallback: SMTP_REPLY_TO env var (e.g. info@true-color.ca)
+ * Auto-BCC: SMTP_BCC env var (comma-separated)
  */
-
-interface EmailRecipient {
-  email: string;
-  name?: string;
-}
 
 export interface SendEmailAttachment {
   content: string; // base64 encoded
   name: string;
-  contentId?: string; // set to enable CID inline image: <img src="cid:contentId">
+  contentId?: string; // optional CID for inline images
 }
 
 export interface SendEmailOptions {
@@ -37,74 +38,74 @@ export interface SendEmailOptions {
   attachments?: SendEmailAttachment[];
 }
 
-/** Parse "Display Name <addr@example.com>" or bare "addr@example.com" */
-function parseAddress(addr: string): EmailRecipient {
-  const match = addr.match(/^(.+?)\s*<(.+?)>$/);
-  if (match) return { name: match[1].trim(), email: match[2].trim() };
-  return { email: addr.trim() };
+/** Strip name part from "Display Name <addr@example.com>" → "addr@example.com" */
+function extractEmail(addr: string): string {
+  const match = addr.match(/^.+?\s*<(.+?)>$/);
+  return match ? match[1].trim() : addr.trim();
 }
 
-function toRecipientList(addr: string | string[]): EmailRecipient[] {
-  return (Array.isArray(addr) ? addr : [addr]).map(parseAddress);
+function toEmailList(addr: string | string[]): string[] {
+  return (Array.isArray(addr) ? addr : [addr]).map((a) => a.trim()).filter(Boolean);
 }
 
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
-  const apiKey = process.env.BREVO_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "BREVO_API_KEY not configured — add it to Railway Variables " +
-        "(Brevo Dashboard → Settings → API Keys → Generate new key)"
+      "RESEND_API_KEY not configured — add it to Railway Variables " +
+        "(Resend Dashboard → API Keys → Create API Key)"
     );
   }
 
-  const fromRaw =
+  const from =
     options.from ??
     process.env.SMTP_FROM ??
-    "True Color Display Printing <info@true-color.ca>";
+    "True Color Display Printing <hello@outreach.true-color.ca>";
 
-  // Auto-BCC staff on every outgoing email so info@true-color.ca sees all sent mail in Hostinger.
-  // SMTP_BCC supports comma-separated addresses: "a@b.com,c@d.com"
-  // Skip BCC if caller already set one, or if the primary recipient IS one of the BCC addresses.
+  // Auto-BCC staff on every outgoing email. SMTP_BCC supports comma-separated:
+  // "a@b.com,c@d.com". Skip BCC if caller already set one, or if the primary
+  // recipient IS one of the BCC addresses.
   const globalBccRaw = process.env.SMTP_BCC;
   const globalBcc = globalBccRaw
     ? globalBccRaw.split(",").map((s) => s.trim()).filter(Boolean)
     : undefined;
-  const toAddresses = (Array.isArray(options.to) ? options.to : [options.to]).join(",");
+  const toAddresses = toEmailList(options.to).map(extractEmail);
   const effectiveBcc =
-    options.bcc ??
-    (globalBcc?.length && !globalBcc.some((b) => toAddresses.includes(b))
-      ? globalBcc
-      : undefined);
+    options.bcc !== undefined
+      ? toEmailList(options.bcc)
+      : globalBcc?.length && !globalBcc.some((b) => toAddresses.includes(extractEmail(b)))
+        ? globalBcc
+        : undefined;
+
+  // Reply-To: caller override, then SMTP_REPLY_TO env var fallback.
+  // Without this, customer "reply" goes to the From address (unmonitored).
+  const effectiveReplyTo = options.replyTo ?? process.env.SMTP_REPLY_TO;
 
   const body: Record<string, unknown> = {
-    sender: parseAddress(fromRaw),
-    to: toRecipientList(options.to),
+    from,
+    to: toEmailList(options.to),
     subject: options.subject,
-    htmlContent: options.html,
+    html: options.html,
   };
 
-  if (options.text) body.textContent = options.text;
-  if (effectiveBcc) body.bcc = toRecipientList(effectiveBcc);
-  // replyTo: caller can override; fall back to SMTP_REPLY_TO env var.
-  // Without this, customer "reply" in their email client goes to the From address
-  // (which may be unmonitored). Set SMTP_REPLY_TO=info@true-color.ca in Railway.
-  const effectiveReplyTo = options.replyTo ?? process.env.SMTP_REPLY_TO;
-  if (effectiveReplyTo) body.replyTo = parseAddress(effectiveReplyTo);
+  if (options.text) body.text = options.text;
+  if (effectiveBcc) body.bcc = effectiveBcc;
+  if (effectiveReplyTo) body.reply_to = effectiveReplyTo;
   if (options.priority === "high") {
     body.headers = { "X-Priority": "1", Importance: "High" };
   }
   if (options.attachments?.length) {
-    body.attachment = options.attachments.map((a) => {
-      const att: Record<string, string> = { content: a.content, name: a.name };
-      if (a.contentId) att.contentId = a.contentId;
+    body.attachments = options.attachments.map((a) => {
+      const att: Record<string, string> = { content: a.content, filename: a.name };
+      if (a.contentId) att.content_id = a.contentId;
       return att;
     });
   }
 
-  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      "api-key": apiKey,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       Accept: "application/json",
     },
@@ -114,16 +115,16 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
-    throw new Error(`Brevo API error ${res.status}: ${errText}`);
+    throw new Error(`Resend API error ${res.status}: ${errText}`);
   }
 
   // Log to email_log (non-fatal — never block email delivery on a DB write)
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SECRET_KEY;
   if (supabaseUrl && supabaseKey) {
-    const toList = Array.isArray(options.to) ? options.to : [options.to];
+    const toList = toEmailList(options.to);
     const rows = toList.map((addr) => ({
-      to_address: parseAddress(addr).email,
+      to_address: extractEmail(addr),
       email_type: options.subject,
       subject: options.subject,
       status: "sent",
