@@ -171,7 +171,9 @@ export function PortalOrderForm({
     return sum + priceFor(product, line, line.qty) * line.qty;
   }, 0);
   const orderMinimum = brokerage.orderMinimum ?? 0;
-  const orderTotal = Math.max(subtotal, orderMinimum);
+  // Only apply the minimum once the agent has actually picked something — empty
+  // cart should read $0, not the floor.
+  const orderTotal = selectedLines.length === 0 ? 0 : Math.max(subtotal, orderMinimum);
   const minimumApplied = subtotal > 0 && subtotal < orderMinimum;
   const minimumGap = minimumApplied ? orderMinimum - subtotal : 0;
 
