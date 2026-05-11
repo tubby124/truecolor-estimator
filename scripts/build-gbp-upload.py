@@ -140,10 +140,20 @@ def main():
             date = date_slug(post.get("publishDate", ""))
             src = resolve_image(post.get("imagePath"))
             if src:
-                ext = src.suffix.lower() or ".webp"
-                dst_name = f"post-{n}-{date}-{title_slug}{ext}"
-                dst = POST_OUT / dst_name
-                shutil.copy2(src, dst)
+                # GBP web composer rejects WebP — convert posts to PNG on copy.
+                src_ext = src.suffix.lower()
+                if src_ext == ".webp":
+                    dst_name = f"post-{n}-{date}-{title_slug}.png"
+                    dst = POST_OUT / dst_name
+                    import subprocess
+                    subprocess.run(
+                        ["sips", "-s", "format", "png", str(src), "--out", str(dst)],
+                        check=False, capture_output=True,
+                    )
+                else:
+                    dst_name = f"post-{n}-{date}-{title_slug}{src_ext or '.jpg'}"
+                    dst = POST_OUT / dst_name
+                    shutil.copy2(src, dst)
                 img_line = f"posts/{dst_name}"
             else:
                 img_line = "(no image)"
