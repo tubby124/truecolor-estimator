@@ -6,7 +6,8 @@ export default defineConfig({
     environment: "node",
     globals: true,
     // e2e/ smoke tests hit the live Vercel URL — run separately with npm run test:smoke
-    exclude: ["**/node_modules/**", "**/e2e/**"],
+    // e2e-playwright/ specs run under Playwright (npx playwright test) — not vitest
+    exclude: ["**/node_modules/**", "**/e2e/**", "**/e2e-playwright/**"],
   },
   resolve: {
     alias: {

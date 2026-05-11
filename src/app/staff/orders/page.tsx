@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
 import { OrdersTable } from "./OrdersTable";
 import { StaffOrdersActions } from "./StaffOrdersActions";
@@ -37,8 +38,10 @@ export default async function StaffOrdersPage() {
             <span className="text-sm font-semibold text-[#1c1712] truncate">Orders</span>
           </div>
 
-          {/* Right: nav actions (Request Payment + Social Studio + Make a Quote) */}
-          <StaffOrdersActions newQuoteCount={newQuoteCount} />
+          {/* Right: nav actions (Manual Order + Custom Quote + Social Studio + Make a Quote) */}
+          <Suspense fallback={null}>
+            <StaffOrdersActions newQuoteCount={newQuoteCount} />
+          </Suspense>
         </div>
       </header>
 

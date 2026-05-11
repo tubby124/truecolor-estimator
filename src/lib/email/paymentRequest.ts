@@ -37,6 +37,9 @@ export interface PaymentRequestEmailParams {
   total: number;
   paymentUrl: string;
   paymentMethod: "clover" | "wave";
+  /** True = customer reviews a quote; no payment URL, CTA invites reply to approve.
+   *  Set by /api/staff/manual-order when the staff toggles "Send quote only". */
+  quoteOnly?: boolean;
   notes?: string | null;
   accountInfo?: AccountInfo | null;
   discount_code?: string;
@@ -48,9 +51,11 @@ export interface PaymentRequestEmailParams {
 export async function sendPaymentRequestEmail(
   params: PaymentRequestEmailParams
 ): Promise<void> {
-  const { orderNumber, contact, total } = params;
+  const { orderNumber, contact, total, quoteOnly } = params;
 
-  const subject = `Payment Request — $${total.toFixed(2)} CAD | True Color Display Printing`;
+  const subject = quoteOnly
+    ? `Your Quote — $${total.toFixed(2)} CAD | True Color Display Printing`
+    : `Payment Request — $${total.toFixed(2)} CAD | True Color Display Printing`;
 
   await sendEmail({
     to: contact.email,
@@ -67,10 +72,12 @@ export async function sendPaymentRequestEmail(
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, notes, accountInfo, discount_code, discount_amount } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, quoteOnly, notes, accountInfo, discount_code, discount_amount } = p;
 
-  const methodNote =
-    paymentMethod === "wave"
+  const heroTitle = quoteOnly ? "Your Quote" : "Payment Request";
+  const methodNote = quoteOnly
+    ? "Review the line items below and reply to this email — or call (306) 954-8688 — to approve. We'll send you the invoice once you confirm."
+    : paymentMethod === "wave"
       ? "You can view and pay your invoice online using the button below."
       : "Click the button below to pay securely by credit card via Clover.";
 
@@ -117,11 +124,12 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
               </div>
 
               <h1 style="margin: 0 0 6px; font-size: 22px; font-weight: 700; color: #111827; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                Payment Request
+                ${heroTitle}
               </h1>
               <p style="margin: 0 0 18px; font-size: 14px; color: #6b7280; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                Hi ${escHtml(contact.name)}, True Color Display Printing has sent you a payment request.
-                ${escHtml(methodNote)}
+                ${quoteOnly
+                  ? `Hi ${escHtml(contact.name)}, here's your quote from True Color Display Printing. ${escHtml(methodNote)}`
+                  : `Hi ${escHtml(contact.name)}, True Color Display Printing has sent you a payment request. ${escHtml(methodNote)}`}
               </p>
 
               <!-- Order number badge -->
@@ -217,11 +225,25 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                 </tbody>
               </table>
 
-              <!-- Payment CTA -->
+              <!-- CTA (Payment or Quote Approval) -->
               <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                Payment
+                ${quoteOnly ? "Approve This Quote" : "Payment"}
               </p>
-              <div style="background: #f0fbff; border: 1px solid #7de0f7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
+              ${quoteOnly ? `<div style="background: #fef9f3; border: 1px solid #f4d9a8; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
+                <p style="margin: 0 0 12px; font-size: 14px; color: #78350f; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  This is a <strong>quote</strong> — no payment is required yet.
+                </p>
+                <p style="margin: 0 0 16px; font-size: 14px; color: #78350f; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Reply to this email or call us to approve, and we'll send you the invoice with payment instructions.
+                </p>
+                <a href="mailto:info@true-color.ca?subject=${encodeURIComponent(`Approve quote ${orderNumber}`)}&body=${encodeURIComponent(`Hi True Color,\n\nI approve quote ${orderNumber} for $${total.toFixed(2)} CAD. Please send me the invoice.\n\nThanks,\n${contact.name}`)}"
+                  style="display: inline-block; background: #1c1712; color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
+                  Approve Quote &rarr;
+                </a>
+                <p style="margin: 14px 0 0; font-size: 11px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Or call <a href="tel:+13069548688" style="color: #0369a1; text-decoration: none;">(306) 954-8688</a>
+                </p>
+              </div>` : `<div style="background: #f0fbff; border: 1px solid #7de0f7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
                 <p style="margin: 0 0 16px; font-size: 14px; color: #0c4a6e; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   Click the button below to pay <strong>$${total.toFixed(2)} CAD</strong> securely online.
                   Your payment is protected by ${paymentMethod === "wave" ? "Wave" : "Clover"}.
@@ -234,7 +256,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                   Questions? Reply to this email or call
                   <a href="tel:+13069548688" style="color: #0369a1; text-decoration: none;">(306) 954-8688</a>
                 </p>
-              </div>
+              </div>`}
 
               <!-- Pickup info -->
               <div style="background: #faf7f4; border: 1px solid #e6ddd5; border-radius: 10px; padding: 14px 18px;">
@@ -268,7 +290,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, accountInfo, discount_code, discount_amount } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, quoteOnly, accountInfo, discount_code, discount_amount } = p;
 
   const itemLines = items.map((item) => {
     const qty = item.qty > 1 ? `${item.qty}x ` : "";
@@ -276,12 +298,25 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     return `  ${qty}${item.product}${details}  $${item.amount.toFixed(2)}`;
   });
 
+  const ctaBlock = quoteOnly
+    ? [
+        `--- APPROVE THIS QUOTE ---`,
+        `This is a quote — no payment is required yet.`,
+        `Reply to this email or call (306) 954-8688 to approve, and we'll send you the invoice.`,
+      ]
+    : [
+        `--- PAY NOW ---`,
+        paymentUrl,
+      ];
+
   return [
     `Hi ${contact.name},`,
     "",
-    `True Color Display Printing has sent you a payment request.`,
+    quoteOnly
+      ? `Here's your quote from True Color Display Printing.`
+      : `True Color Display Printing has sent you a payment request.`,
     "",
-    `--- ORDER SUMMARY ---`,
+    quoteOnly ? `--- QUOTE SUMMARY ---` : `--- ORDER SUMMARY ---`,
     ...itemLines,
     p.notes ? `  Note: ${p.notes}` : "",
     "",
@@ -291,8 +326,7 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     `  PST (6%): $${pst.toFixed(2)}`,
     `  TOTAL:    $${total.toFixed(2)} CAD`,
     "",
-    `--- PAY NOW ---`,
-    paymentUrl,
+    ...ctaBlock,
     "",
     `Reference: ${orderNumber}`,
     "",

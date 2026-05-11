@@ -11,8 +11,9 @@
  * Supports multi-item orders (up to 5 line items).
  */
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
@@ -61,9 +62,11 @@ function extractDetails(productName: string): string {
 
 interface OrderItem {
   id: string;
+  title: string;       // optional project title shown on invoice (e.g. "The Power of Branding")
   product: string;
   qty: string;
   details: string;
+  unitPrice: string;   // optional — when present, amount auto-fills to qty * unitPrice
   amount: string;
 }
 
@@ -74,20 +77,23 @@ interface FormState {
   phone: string;
   items: OrderItem[];
   payment_method: "clover" | "wave";
+  quote_only: boolean; // true = no payment link / Wave draft only
   notes: string;
 }
 
 function makeItem(): OrderItem {
-  return { id: crypto.randomUUID(), product: "", qty: "1", details: "", amount: "" };
+  return { id: crypto.randomUUID(), title: "", product: "", qty: "1", details: "", unitPrice: "", amount: "" };
 }
 
+// Default is quote_only=true. Safer for staff: customer reviews the price first,
+// nobody gets surprise-billed. Staff flips to "Send Invoice Now" when they're sure.
 const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
-  payment_method: "clover", notes: "",
+  payment_method: "wave", quote_only: true, notes: "",
 };
 
-const MAX_ITEMS = 5;
+const MAX_ITEMS = 10;
 
 const inputClass = "w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow";
 
@@ -98,7 +104,22 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{ orderNumber: string; email: string } | null>(null);
+  const [success, setSuccess] = useState<{ orderNumber: string; email: string; quoteOnly: boolean } | null>(null);
+  const searchParams = useSearchParams();
+
+  // Auto-open the modal when arriving from another staff page with:
+  //   ?manual=1     → invoice mode (immediate payment link)
+  //   ?manual=quote → quote-only mode (no payment link until customer approves)
+  useEffect(() => {
+    const manual = searchParams?.get("manual");
+    if (manual === "1" || manual === "quote") {
+      setForm({ ...EMPTY_FORM, quote_only: manual !== "1" });
+      setError(null);
+      setSuccess(null);
+      setCustomerLookup({ status: "idle" });
+      setModalOpen(true);
+    }
+  }, [searchParams]);
   const [customerLookup, setCustomerLookup] = useState<CustomerLookup>({ status: "idle" });
   const [pastOrdersOpen, setPastOrdersOpen] = useState(false);
   const [pastOrders, setPastOrders] = useState<PastOrder[]>([]);
@@ -192,7 +213,21 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   function setItem(id: string, field: keyof OrderItem, value: string) {
     setForm((prev) => ({
       ...prev,
-      items: prev.items.map((it) => it.id === id ? { ...it, [field]: value } : it),
+      items: prev.items.map((it) => {
+        if (it.id !== id) return it;
+        const next: OrderItem = { ...it, [field]: value };
+
+        // Auto-calc amount when staff types a unitPrice OR changes qty (and unitPrice is set).
+        // Typing amount directly overrides — we leave unitPrice alone.
+        if (field === "unitPrice" || field === "qty") {
+          const unit = parseFloat(field === "unitPrice" ? value : next.unitPrice);
+          const qty = parseInt(field === "qty" ? value : next.qty);
+          if (!isNaN(unit) && unit > 0 && !isNaN(qty) && qty > 0) {
+            next.amount = (Math.round(unit * qty * 100) / 100).toFixed(2);
+          }
+        }
+        return next;
+      }),
     }));
     if (error) setError(null);
   }
@@ -211,9 +246,11 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     if (!order.order_items || order.order_items.length === 0) return;
     const reorderItems: OrderItem[] = order.order_items.slice(0, MAX_ITEMS).map((oi) => ({
       id: crypto.randomUUID(),
+      title: "",
       product: matchProduct(oi.product_name),
       qty: String(oi.qty),
       details: extractDetails(oi.product_name),
+      unitPrice: "",
       amount: String(oi.line_total),
     }));
     setForm((prev) => ({ ...prev, items: reorderItems }));
@@ -243,12 +280,15 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
             phone: form.phone.trim() || undefined,
           },
           items: form.items.map((it) => ({
+            title: it.title.trim() || undefined,
             product: it.product.trim(),
             qty: parseInt(it.qty) || 1,
             details: it.details.trim() || undefined,
+            unitPrice: it.unitPrice.trim() ? parseFloat(it.unitPrice) : undefined,
             amount: parseFloat(it.amount),
           })),
           payment_method: form.payment_method,
+          quote_only: form.quote_only,
           notes: form.notes.trim() || undefined,
         }),
       });
@@ -260,8 +300,13 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         return;
       }
 
-      setSuccess({ orderNumber: data.orderNumber!, email: form.email.trim() });
-      showToast(`Payment request sent to ${form.email.trim()}`, "success");
+      setSuccess({ orderNumber: data.orderNumber!, email: form.email.trim(), quoteOnly: form.quote_only });
+      showToast(
+        form.quote_only
+          ? `Quote sent to ${form.email.trim()}`
+          : `Payment request sent to ${form.email.trim()}`,
+        "success"
+      );
     } catch {
       setError("Network error — please check your connection and try again.");
     } finally {
@@ -309,12 +354,13 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
           type="button"
           onClick={openModal}
           className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
-          aria-label="Send a manual payment request to a customer"
+          aria-label="Create a manual order or custom quote for a customer"
+          data-testid="manual-order-trigger"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
           </svg>
-          <span>Request Payment</span>
+          <span>Manual Order</span>
         </button>
 
         <Link
@@ -375,12 +421,19 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
               <div
                 className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
+                data-testid="manual-order-modal"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                   <div>
-                    <h2 className="text-lg font-bold text-[#1c1712]">Send Payment Request</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">Creates an order and emails the customer a payment link</p>
+                    <h2 className="text-lg font-bold text-[#1c1712]" data-testid="modal-title">
+                      {form.quote_only ? "Custom Quote" : "Manual Order"}
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {form.quote_only
+                        ? "Emails the customer a quote — no payment link until you approve it"
+                        : "Creates an order and emails the customer a payment link"}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -402,7 +455,9 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-[#1c1712] mb-2">Payment request sent!</h3>
+                    <h3 className="text-xl font-bold text-[#1c1712] mb-2">
+                      {success.quoteOnly ? "Quote sent!" : "Payment request sent!"}
+                    </h3>
                     <p className="text-sm text-gray-500 mb-1">
                       Email sent to <span className="font-semibold text-gray-700">{success.email}</span>
                     </p>
@@ -429,9 +484,69 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                 ) : (
                   <form onSubmit={(e) => void handleSubmit(e)} className="px-6 py-5 space-y-5">
 
+                    {/* ── MODE PICKER — big two-card chooser. Default: Quote. ── */}
+                    <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Step 1 · Pick what to send</p>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {/* QUOTE CARD */}
+                        <button
+                          type="button"
+                          onClick={() => setForm((prev) => ({ ...prev, quote_only: true }))}
+                          aria-pressed={form.quote_only}
+                          data-testid="mode-quote"
+                          className={`text-left p-3.5 rounded-xl border-2 transition-all ${
+                            form.quote_only
+                              ? "border-emerald-500 bg-emerald-50 shadow-sm"
+                              : "border-gray-200 bg-white hover:border-gray-300"
+                          }`}
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                              form.quote_only ? "border-emerald-500" : "border-gray-300"
+                            }`}>
+                              {form.quote_only && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-bold text-gray-800 leading-tight">📝 Send Quote</p>
+                              <p className="text-[11px] text-gray-500 leading-snug mt-1">
+                                Customer reviews the price. No payment link yet. <strong className="text-emerald-700">Safest — use this first.</strong>
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+
+                        {/* INVOICE CARD */}
+                        <button
+                          type="button"
+                          onClick={() => setForm((prev) => ({ ...prev, quote_only: false }))}
+                          aria-pressed={!form.quote_only}
+                          data-testid="mode-invoice"
+                          className={`text-left p-3.5 rounded-xl border-2 transition-all ${
+                            !form.quote_only
+                              ? "border-emerald-500 bg-emerald-50 shadow-sm"
+                              : "border-gray-200 bg-white hover:border-gray-300"
+                          }`}
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                              !form.quote_only ? "border-emerald-500" : "border-gray-300"
+                            }`}>
+                              {!form.quote_only && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-bold text-gray-800 leading-tight">💳 Send Invoice</p>
+                              <p className="text-[11px] text-gray-500 leading-snug mt-1">
+                                Customer pays now. Sends payment link or Wave invoice. <strong className="text-gray-700">Use after price is agreed.</strong>
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
                     {/* ── CUSTOMER ── */}
                     <div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Customer</p>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Step 2 · Who is it for?</p>
                       <div className="space-y-3">
                         {/* Email — first so lookup fires immediately */}
                         <div>
@@ -529,10 +644,13 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
 
                     {/* ── ORDER ITEMS ── */}
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Order Items</p>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Step 3 · Line items</p>
                         <span className="text-[10px] font-semibold text-gray-300 tabular-nums">{form.items.length} / {MAX_ITEMS}</span>
                       </div>
+                      <p className="text-[11px] text-gray-500 mb-3 leading-snug">
+                        Type any product, any size, any price. Use <strong>Unit Price</strong> when each piece has a per-piece rate (250 cards × $0.18) — the total fills in. Use <strong>Line Total</strong> when you already know the all-in price ($45 flat).
+                      </p>
 
                       <div className="space-y-3">
                         <AnimatePresence initial={false}>
@@ -549,7 +667,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                   Item {idx + 1}
-                                  {item.product && <span className="text-gray-300 font-normal ml-1.5 normal-case tracking-normal">{item.product}</span>}
+                                  {item.title && <span className="text-gray-500 font-semibold ml-1.5 normal-case tracking-normal">{item.title}</span>}
+                                  {!item.title && item.product && <span className="text-gray-300 font-normal ml-1.5 normal-case tracking-normal">{item.product}</span>}
                                 </span>
                                 {form.items.length > 1 && (
                                   <button
@@ -561,6 +680,21 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                     Remove
                                   </button>
                                 )}
+                              </div>
+
+                              {/* Title (optional, shows as invoice line headline) */}
+                              <div>
+                                <label htmlFor={`pr-title-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                  Line Title <span className="text-gray-300 font-normal">(optional — shows on the invoice)</span>
+                                </label>
+                                <input
+                                  id={`pr-title-${item.id}`}
+                                  type="text"
+                                  value={item.title}
+                                  onChange={(e) => setItem(item.id, "title", e.target.value)}
+                                  placeholder='e.g. "The Power of Branding"'
+                                  className={inputClass}
+                                />
                               </div>
 
                               {/* Product + Qty row */}
@@ -600,24 +734,45 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                 </div>
                               </div>
 
-                              {/* Details + Amount row */}
-                              <div className="grid grid-cols-[1fr_110px] gap-2">
+                              {/* Details (full width) */}
+                              <div>
+                                <label htmlFor={`pr-details-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                  Size &amp; Details
+                                </label>
+                                <input
+                                  id={`pr-details-${item.id}`}
+                                  type="text"
+                                  value={item.details}
+                                  onChange={(e) => setItem(item.id, "details", e.target.value)}
+                                  placeholder='e.g. "5mm foamboard, 1-side, 11×17 in, matte lamination"'
+                                  className={inputClass}
+                                />
+                              </div>
+
+                              {/* Unit price + Amount row */}
+                              <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                  <label htmlFor={`pr-details-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                    Size &amp; Details
+                                  <label htmlFor={`pr-unit-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                    Unit Price <span className="text-gray-300 font-normal">(per piece)</span>
                                   </label>
-                                  <input
-                                    id={`pr-details-${item.id}`}
-                                    type="text"
-                                    value={item.details}
-                                    onChange={(e) => setItem(item.id, "details", e.target.value)}
-                                    placeholder="e.g. 24×36in, double-sided, H-stakes"
-                                    className={inputClass}
-                                  />
+                                  <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
+                                    <input
+                                      id={`pr-unit-${item.id}`}
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      max="99999"
+                                      value={item.unitPrice}
+                                      onChange={(e) => setItem(item.id, "unitPrice", e.target.value)}
+                                      placeholder="0.00"
+                                      className={`${inputClass} pl-7`}
+                                    />
+                                  </div>
                                 </div>
                                 <div>
                                   <label htmlFor={`pr-amount-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                    Amount <span className="text-red-500">*</span>
+                                    Line Total <span className="text-red-500">*</span>
                                   </label>
                                   <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
@@ -682,7 +837,14 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
 
                     {/* ── PAYMENT METHOD ── */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-600 mb-2">Payment Method</p>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                        Step 4 · How to bill it
+                      </p>
+                      <p className="text-[11px] text-gray-500 mb-2 leading-snug">
+                        {form.quote_only
+                          ? "We'll prepare the invoice as a draft using your pick — nothing sends to the customer until you convert it from a quote to an invoice."
+                          : "Pick how the customer pays. Wave = emailed invoice (e-transfer or card). Pay by Card = direct Clover card link."}
+                      </p>
                       <div className="grid grid-cols-2 gap-2">
                         {(["clover", "wave"] as const).map((method) => (
                           <label
@@ -710,12 +872,12 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             </div>
                             <div>
                               <p className="text-sm font-semibold text-gray-700">
-                                {method === "clover" ? "Pay by Card" : "Send Invoice"}
+                                {method === "clover" ? "Card Link (Clover)" : "Wave Invoice"}
                               </p>
                               <p className="text-[10px] text-gray-400 leading-tight">
                                 {method === "clover"
                                   ? "Customer gets a link to pay by credit or debit card"
-                                  : "Customer gets an invoice email — pay online or e-transfer"}
+                                  : "Customer gets a Wave email — pay online or e-transfer"}
                               </p>
                             </div>
                           </label>
@@ -770,7 +932,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                           </>
                         ) : (
                           <>
-                            Send Request
+                            {form.quote_only ? "Send Quote" : "Send Invoice"}
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>

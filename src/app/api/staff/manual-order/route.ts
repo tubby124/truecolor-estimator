@@ -28,10 +28,12 @@ const GST_RATE = 0.05;
 const PST_RATE = 0.06;
 
 interface OrderItemInput {
-  product: string;
+  title?: string;       // optional invoice line headline (overrides display name)
+  product: string;      // product category dropdown value
   qty: number;
   details?: string;
-  amount: number;
+  unitPrice?: number;   // optional — for staff reference; amount is what's authoritative
+  amount: number;       // line total in CAD
 }
 
 export async function POST(req: NextRequest) {
@@ -47,10 +49,12 @@ export async function POST(req: NextRequest) {
       description?: string;
       amount?: number;
       payment_method: "clover" | "wave";
+      quote_only?: boolean; // true = don't send payment link / Wave invoice stays as draft
       notes?: string;
     };
 
     const { contact, payment_method, notes } = body;
+    const quoteOnly = body.quote_only === true;
 
     // ── Normalize items (backward compat) ──
     let items: OrderItemInput[];
@@ -180,7 +184,9 @@ export async function POST(req: NextRequest) {
           total,
           payment_method: payment_method === "wave" ? "wave" : "clover_card",
           notes: notes?.trim() || null,
-          staff_notes: `Manual order — ${items.length} item(s) created by staff via payment request`,
+          staff_notes: quoteOnly
+            ? `[QUOTE ONLY] Manual quote — ${items.length} item(s) — no payment link sent. Convert to invoice when customer approves.`
+            : `Manual order — ${items.length} item(s) created by staff via payment request`,
         })
         .select("id, order_number")
         .single();
@@ -245,16 +251,19 @@ export async function POST(req: NextRequest) {
     let paymentUrl: string | null = null;
 
     if (payment_method === "clover") {
-      try {
-        const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
-        paymentUrl = `${siteUrl}/pay/${token}`;
+      if (!quoteOnly) {
+        try {
+          const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
+          paymentUrl = `${siteUrl}/pay/${token}`;
 
-        // NOTE: do NOT set payment_reference to the URL — the Clover webhook matches on it
-        // using the order UUID. /pay/[token] sets it correctly when the customer clicks.
-      } catch (tokenErr) {
-        console.error("[manual-order] payment token encode:", tokenErr);
-        return NextResponse.json({ error: "Failed to generate payment link" }, { status: 500 });
+          // NOTE: do NOT set payment_reference to the URL — the Clover webhook matches on it
+          // using the order UUID. /pay/[token] sets it correctly when the customer clicks.
+        } catch (tokenErr) {
+          console.error("[manual-order] payment token encode:", tokenErr);
+          return NextResponse.json({ error: "Failed to generate payment link" }, { status: 500 });
+        }
       }
+      // quoteOnly Clover: paymentUrl stays null — customer email shows quote-mode CTA.
     } else {
       // Wave: create invoice → approve → send
       try {
@@ -282,14 +291,45 @@ export async function POST(req: NextRequest) {
           .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
           .eq("id", order.id);
 
-        await approveWaveInvoice(inv.invoiceId);
-
-        await sendWaveInvoice(inv.invoiceId, contact.email.toLowerCase().trim(), {
-          subject: `Invoice from True Color Display Printing — ${order.order_number}`,
-          message: `Hi ${contact.name.trim()},\n\nPlease find your invoice attached. Click "Pay Invoice" to pay online.\n\nRef: ${order.order_number}\n\nThank you,\nTrue Color Display Printing\n(306) 954-8688`,
-        });
-
-        console.log(`[manual-order] Wave invoice sent → ${contact.email} | order ${order.order_number}`);
+        if (!quoteOnly) {
+          // Standard flow: approve + send via Wave (Wave emails the customer the invoice + payment link).
+          await approveWaveInvoice(inv.invoiceId);
+          await sendWaveInvoice(inv.invoiceId, contact.email.toLowerCase().trim(), {
+            subject: `Invoice from True Color Display Printing — ${order.order_number}`,
+            message: `Hi ${contact.name.trim()},\n\nPlease find your invoice attached. Click "Pay Invoice" to pay online.\n\nRef: ${order.order_number}\n\nThank you,\nTrue Color Display Printing\n(306) 954-8688`,
+          });
+          console.log(`[manual-order] Wave invoice sent → ${contact.email} | order ${order.order_number}`);
+        } else {
+          // Quote-only: leave Wave invoice as draft and send our own quote-style email to the customer.
+          console.log(`[manual-order] Wave draft created (quote-only) → ${contact.email} | order ${order.order_number} | wave_invoice_id ${inv.invoiceId}`);
+          try {
+            await sendPaymentRequestEmail({
+              orderNumber: order.order_number,
+              contact: {
+                name: contact.name.trim(),
+                email: contact.email.toLowerCase().trim(),
+                company: contact.company?.trim() || null,
+              },
+              items: items.map((item) => ({
+                product: item.title?.trim() || item.product,
+                qty: item.qty || 1,
+                details: item.details,
+                amount: Math.round(item.amount * 100) / 100,
+              })),
+              subtotal,
+              gst,
+              pst,
+              total,
+              paymentUrl: "",  // unused in quote mode
+              paymentMethod: "wave",
+              quoteOnly: true,
+              notes: notes?.trim() || null,
+              accountInfo,
+            });
+          } catch (emailErr) {
+            console.error("[manual-order] quote email failed (non-fatal):", emailErr);
+          }
+        }
 
         // Send account welcome email (Wave doesn't include account info)
         if (accountInfo) {
@@ -331,7 +371,9 @@ export async function POST(req: NextRequest) {
             total,
             is_rush: false,
             payment_method: "wave",
-            notes: `[Manual Order — Wave] ${notes?.trim() ?? "Created via staff payment request"}`,
+            notes: quoteOnly
+              ? `[QUOTE ONLY — Wave draft] ${notes?.trim() ?? "Quote sent — convert to invoice when customer approves"}`
+              : `[Manual Order — Wave] ${notes?.trim() ?? "Created via staff payment request"}`,
             filePaths: [],
             siteUrl,
           });
@@ -365,7 +407,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── 6. Send payment request email to customer (Clover path only) ──
+    // ── 6. Send payment request email to customer (Clover path) ──
+    // In quote-only mode, paymentUrl is empty and the email renders a "Reply to approve" CTA
+    // instead of the Pay Now button.
     try {
       await sendPaymentRequestEmail({
         orderNumber: order.order_number,
@@ -375,7 +419,7 @@ export async function POST(req: NextRequest) {
           company: contact.company?.trim() || null,
         },
         items: items.map((item) => ({
-          product: item.product,
+          product: item.title?.trim() || item.product,
           qty: item.qty || 1,
           details: item.details,
           amount: Math.round(item.amount * 100) / 100,
@@ -384,8 +428,9 @@ export async function POST(req: NextRequest) {
         gst,
         pst,
         total,
-        paymentUrl: paymentUrl!,
+        paymentUrl: paymentUrl ?? "",
         paymentMethod: payment_method,
+        quoteOnly,
         notes: notes?.trim() || null,
         accountInfo,
       });
@@ -418,7 +463,9 @@ export async function POST(req: NextRequest) {
         total,
         is_rush: false,
         payment_method: "clover_pending",
-        notes: `[Manual Order] ${notes?.trim() ?? "Created via staff payment request"}`,
+        notes: quoteOnly
+          ? `[QUOTE ONLY — Clover] ${notes?.trim() ?? "Quote sent — no payment link until customer approves"}`
+          : `[Manual Order] ${notes?.trim() ?? "Created via staff payment request"}`,
         filePaths: [],
         siteUrl,
       });
@@ -452,9 +499,16 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/** Build a human-readable label for an order item */
+/** Build a human-readable label for an order item.
+ *  If a title is supplied (e.g. "The Power of Branding"), it leads, with the product
+ *  category as a parenthetical and details after a dash. */
 function formatItemLabel(item: OrderItemInput): string {
   const qty = item.qty > 1 ? `${item.qty}x ` : "";
   const details = item.details?.trim() ? ` — ${item.details.trim()}` : "";
+  const titled = item.title?.trim();
+  if (titled) {
+    const productSuffix = item.product && item.product !== "Other" ? ` (${item.product})` : "";
+    return `${qty}${titled}${productSuffix}${details}`;
+  }
   return `${qty}${item.product}${details}`;
 }
