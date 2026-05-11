@@ -91,6 +91,7 @@ export function PortalOrderForm({
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const [submittedLines, setSubmittedLines] = useState<LineItem[]>([]);
   const [submittedSubtotal, setSubmittedSubtotal] = useState(0);
+  const [submittedTotal, setSubmittedTotal] = useState(0);
 
   // ─── Returning-agent UX ──────────────────────────────────────────────
   // Pre-fill name/email/phone/shipping from the last successful submission on
@@ -158,6 +159,10 @@ export function PortalOrderForm({
     if (!product) return sum;
     return sum + priceFor(product, line, line.qty) * line.qty;
   }, 0);
+  const orderMinimum = brokerage.orderMinimum ?? 0;
+  const orderTotal = Math.max(subtotal, orderMinimum);
+  const minimumApplied = subtotal > 0 && subtotal < orderMinimum;
+  const minimumGap = minimumApplied ? orderMinimum - subtotal : 0;
 
   async function handleSubmit() {
     setError(null);
@@ -201,6 +206,20 @@ export function PortalOrderForm({
         };
       });
 
+      // Append a synthetic line so staff sees the order-minimum bump in the
+      // notification email and on the staff portal — keeps the indicative total
+      // the agent saw matching what we'll invoice.
+      if (minimumApplied) {
+        items.push({
+          product: "Order minimum adjustment",
+          qty: "1",
+          material: "",
+          dimensions: "",
+          sides: "1",
+          notes: `Subtotal ${fmt(subtotal)} bumped to ${fmt(orderMinimum)} (brokerage portal order min covers proof + setup)`,
+        });
+      }
+
       // For pickup orders we still pass a recognizable marker into shipping_address
       // so staff sees it on the order card and the field stays non-null.
       const shipForApi =
@@ -241,6 +260,7 @@ export function PortalOrderForm({
       // even if `lines` state is later cleared.
       setSubmittedLines(selectedLines);
       setSubmittedSubtotal(subtotal);
+      setSubmittedTotal(orderTotal);
       setSubmittedRef(result.ref ?? null);
       setSent(true);
     } catch (e) {
@@ -318,12 +338,33 @@ export function PortalOrderForm({
                 );
               })}
             </ul>
-            <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
-              <span className="font-semibold text-gray-700">Indicative subtotal</span>
-              <span className="text-lg font-bold tabular-nums text-[#1c1712]">
-                {fmt(submittedSubtotal)}
-              </span>
-            </div>
+            {submittedTotal > submittedSubtotal ? (
+              <>
+                <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200 text-sm">
+                  <span className="text-gray-600">Items subtotal</span>
+                  <span className="tabular-nums text-gray-700">{fmt(submittedSubtotal)}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1 text-sm">
+                  <span className="text-gray-600">Order minimum bump</span>
+                  <span className="tabular-nums text-gray-700">
+                    +{fmt(submittedTotal - submittedSubtotal)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pt-2 mt-1 border-t border-gray-200">
+                  <span className="font-semibold text-gray-700">Indicative total</span>
+                  <span className="text-lg font-bold tabular-nums text-[#1c1712]">
+                    {fmt(submittedTotal)}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
+                <span className="font-semibold text-gray-700">Indicative total</span>
+                <span className="text-lg font-bold tabular-nums text-[#1c1712]">
+                  {fmt(submittedTotal || submittedSubtotal)}
+                </span>
+              </div>
+            )}
             <p className="text-xs text-gray-400 mt-2">
               Taxes + shipping confirmed on the final invoice after proof approval.
             </p>
@@ -523,11 +564,26 @@ export function PortalOrderForm({
               ? "Nothing selected yet"
               : `${selectedLines.length} item${selectedLines.length === 1 ? "" : "s"} selected`}
           </p>
-          <p className="text-2xl font-bold tabular-nums text-[#1c1712]">{fmt(subtotal)}</p>
+          <p className="text-2xl font-bold tabular-nums text-[#1c1712]">{fmt(orderTotal)}</p>
         </div>
+
+        {minimumApplied ? (
+          <div className="text-xs mb-3 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+            <p className="font-semibold text-amber-900 mb-0.5">
+              Order minimum {fmt(orderMinimum)} applied
+            </p>
+            <p className="text-amber-800">
+              Your items add to {fmt(subtotal)}. Add{" "}
+              <span className="font-semibold">{fmt(minimumGap)}</span> more (a couple toppers,
+              or one more directional) and you&apos;ll get more for the same price.
+            </p>
+          </div>
+        ) : null}
+
         <p className="text-xs text-gray-500 mb-4">
-          Indicative subtotal — each price already includes design proof, setup, cutting &
-          packing. Taxes and shipping confirmed on your final invoice after proof approval.
+          Indicative total — per-piece pricing covers material, cutting & packing. The{" "}
+          {fmt(orderMinimum)} order minimum covers our one-time design proof + press setup.
+          Tax + shipping confirmed on your final invoice after proof approval.
         </p>
 
         {error ? (
@@ -633,11 +689,8 @@ function ProductList({
                     <span className="block text-sm text-gray-500 mt-0.5">{product.blurb}</span>
                   ) : null}
                   <span className="block text-sm text-gray-700 mt-1.5">
-                    From{" "}
-                    <span className="font-semibold tabular-nums">
-                      {fromPriceLabel(product)}
-                    </span>{" "}
-                    each
+                    {fmt(priceFor(product, null, 1))}{" "}
+                    <span className="text-gray-500">each</span>
                     {product.bulkTiers && product.bulkTiers.length > 0 ? (
                       <>
                         {" "}·{" "}
@@ -647,11 +700,7 @@ function ProductList({
                             .join(" · ")}
                         </span>
                       </>
-                    ) : (
-                      <span className="text-gray-400">
-                        {" "}· min per design (covers proof + setup)
-                      </span>
-                    )}
+                    ) : null}
                   </span>
                 </span>
               </button>

@@ -91,12 +91,17 @@ export default async function BrokerageOrderPortal({ params }: PageProps) {
             </p>
             <p className="text-xs text-gray-600 leading-relaxed">
               Each item shows its{" "}
-              <span className="font-semibold">per-piece price</span> including the design
-              proof, press setup, cutting, and packing — same fixed cost whether you
-              order 1 or 10. Smaller items (toppers, directionals) have a{" "}
-              <span className="font-semibold">$30 minimum per design</span> because of
-              those built-in costs. Larger signs (For Sale, Open House) drop the per-unit
-              price at 10+ quantity.
+              <span className="font-semibold">honest per-piece price</span> — material,
+              cutting, and packing only. Your whole order also has a{" "}
+              <span className="font-semibold">
+                {brokerage.orderMinimum
+                  ? `$${brokerage.orderMinimum} minimum`
+                  : "small minimum"}
+              </span>{" "}
+              that covers our one-time design proof + press setup (same cost whether you
+              order 1 or 20). Mix and match across designs — toppers, directionals, signs
+              — to clear it together. Big signs (For Sale, Open House) also drop the
+              per-unit price at 10+ quantity.
             </p>
           </div>
 

@@ -79,6 +79,12 @@ export interface Brokerage {
   assetDriveUrl: string;
   /** Cities served — shown on portal for trust + restricts shipping zones */
   citiesServed: string[];
+  /**
+   * Whole-order minimum (CAD, pre-tax). Per-piece prices are honest material+markup;
+   * if the cart subtotal falls below this floor, the order total is bumped to it.
+   * Covers our one-time design proof + press setup costs that don't scale per piece.
+   */
+  orderMinimum?: number;
   /** Grouped product catalog rendered as the order form */
   productGroups: BrokerageProductGroup[];
 }
