@@ -1,12 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type {
   Brokerage,
   BrokerageProductGroup,
   BrokerageProductOption,
 } from "@/lib/data/brokerages";
+
+// localStorage key per-brokerage so an agent who orders from two different
+// brokerage portals (rare but possible) doesn't bleed details across.
+function profileKey(slug: string) {
+  return `tc-portal:${slug}:agent-profile`;
+}
+
+interface SavedProfile {
+  name: string;
+  email: string;
+  phone: string;
+  shippingAddress: string;
+}
 
 interface LineItem {
   productId: string;
@@ -73,6 +86,41 @@ export function PortalOrderForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [recognized, setRecognized] = useState<string | null>(null);
+
+  // ─── Returning-agent UX ──────────────────────────────────────────────
+  // Pre-fill name/email/phone/shipping from the last successful submission on
+  // this device. No backend, no auth — purely a friendly "we remember you"
+  // experience while we wait for Diana's roster + auth-model decision.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(profileKey(brokerage.slug));
+      if (!raw) return;
+      const saved = JSON.parse(raw) as SavedProfile;
+      if (saved.name) setAgentName(saved.name);
+      if (saved.email) setAgentEmail(saved.email);
+      if (saved.phone) setAgentPhone(saved.phone);
+      if (saved.shippingAddress) setShippingAddress(saved.shippingAddress);
+      if (saved.name) setRecognized(saved.name.split(/\s+/)[0]);
+    } catch {
+      // ignore — corrupt/missing storage shouldn't break the form
+    }
+  }, [brokerage.slug]);
+
+  function clearSavedProfile() {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.removeItem(profileKey(brokerage.slug));
+    } catch {
+      // ignore
+    }
+    setAgentName("");
+    setAgentEmail("");
+    setAgentPhone("");
+    setShippingAddress("");
+    setRecognized(null);
+  }
 
   function toggleProduct(p: BrokerageProductOption) {
     setLines((prev) => {
@@ -159,6 +207,18 @@ export function PortalOrderForm({
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(data.error ?? "Submission failed");
       }
+      // Save profile after successful submission so next visit pre-fills.
+      try {
+        const profile: SavedProfile = {
+          name: agentName,
+          email: agentEmail,
+          phone: agentPhone,
+          shippingAddress,
+        };
+        window.localStorage.setItem(profileKey(brokerage.slug), JSON.stringify(profile));
+      } catch {
+        // Silent — storage failure shouldn't block the success state.
+      }
       setSent(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submission failed");
@@ -189,7 +249,23 @@ export function PortalOrderForm({
     <div className="space-y-8">
       {/* Agent details */}
       <section className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-7">
-        <h2 className="text-lg font-bold text-[#1c1712] mb-4">Your details</h2>
+        <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+          <h2 className="text-lg font-bold text-[#1c1712]">Your details</h2>
+          {recognized ? (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-600">
+                Welcome back, <span className="font-semibold text-[#1c1712]">{recognized}</span>
+              </span>
+              <button
+                type="button"
+                onClick={clearSavedProfile}
+                className="text-xs font-semibold text-gray-500 hover:text-gray-700 underline"
+              >
+                Not you?
+              </button>
+            </div>
+          ) : null}
+        </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="agentName" className={LABEL_CLS}>Your full name</label>
