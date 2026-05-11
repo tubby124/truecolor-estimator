@@ -261,7 +261,49 @@ Most popular: 500 (2-sided)
 | 500  | $145    | $104    |
 | 1000 | $196    | $141    |
 
+**130lb Cougar Uncoated Cover — Full 8.5×11":** *(added 2026-05-11 — Remai Modern / Reuben Bugera)*
+| Qty  | 2-Sided | 1-Sided* |
+|------|---------|----------|
+| 100  | $95     | $70      |
+| 250  | $185    | $135     |
+| 500  | $295    | $215     |
+| 1000 | $395    | $285     |
+
+*1-sided tier not in products.v1.csv yet — quote manually if asked.*
+
 Most popular: 500 (80lb 2S)
+
+### When to use 130lb Cougar Uncoated Cover
+
+Premium uncoated cover stock from Domtar. Use ONLY for:
+- Art programs, gallery invitations, museum collateral (Remai Modern, MacKenzie Art Gallery)
+- Fine stationery, fundraiser cards, high-end event programs
+- Anything where the client mentions "uncoated", "natural feel", "premium paper", "art-grade"
+
+**Don't substitute on standard flyer jobs** — the price gap is +70% over 100lb gloss and only justified when the client specifically values the tactile premium stock. Default flyers stay on 80lb gloss.
+
+### Paper tier upgrade rule (teach this to staff)
+
+When a customer asks for a paper upgrade on flyers, use this anchor:
+
+| Base price | × this multiplier | = upgrade price |
+|------------|-------------------|------------------|
+| 80lb gloss | 1.00× (base) | $45 / 100 / 2S letter |
+| 100lb gloss | 1.20-1.25× | $55 / 100 / 2S letter |
+| **130lb Cougar uncoated** | **1.70× over 80lb (or 1.40× over 100lb)** | $95 / 100 / 2S letter |
+
+**Spicer cost (locked 2026-05-11):** $461.039/M ($0.461/sheet) for 18×12 sheets. Case = 375 sheets, includes $25 min order + $15 service fee. **First job out of a fresh case absorbs $40 in overhead — quote accordingly or expect a $40 margin haircut.**
+
+**Source ref:** Spicer quote GN1X5/00 2026-05-11 (info@true-color.ca inbox).
+
+### Common pricing mistakes to avoid (Albert reference)
+
+These mistakes have all happened in real quotes — don't repeat them:
+
+1. **Quoting standard flyer price for premium stock.** 130lb Cougar costs ~44% more in paper alone, plus harder to print on uncoated. Always check what stock the customer asked for BEFORE pricing.
+2. **Forgetting the rush fee.** Any deadline inside 1-3 business days = +$40 rush. Customer says "I need it by Friday" on a Tuesday = rush. Quote it, customer almost always accepts.
+3. **Not factoring case-fee overhead on first-job-out-of-case.** When True Color buys a new paper stock for the first time, the $40 in Spicer min order + service fees comes out of the FIRST job's margin. Add ~$40 to first quote, then drop back to standard tier on repeat orders.
+4. **Sub-$30 margin on premium jobs.** Anything under 30% margin needs explicit owner approval. Above 50% is target. Use the margin badge in the staff portal to verify before sending.
 
 ---
 

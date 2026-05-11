@@ -57,12 +57,15 @@ const SEO_ALIASES = {
   "photo-posters":      "/photo-poster-printing-saskatoon",
 };
 
-// Products that are estimator-only (no dedicated SEO page or /products/ route expected)
+// Products that are estimator-only (no dedicated SEO page or /products/ route expected).
+// /products/* pages are intentionally excluded from sitemap.ts (configurator routes, not SEO).
 const ESTIMATOR_ONLY = new Set([
   "window-perf",
   "rack-cards",
   "door-hangers",
   "magnet-calendars",
+  "coil-bound-booklets",
+  "custom-shape-signs",
 ]);
 
 // SiteNav uses different aliases for some products
@@ -108,9 +111,10 @@ console.log("\n[3] Checking categories exist in CategoryPicker.tsx ...");
 const categoryPickerContent = readFile("src/components/estimator/CategoryPicker.tsx");
 
 for (const cat of categoriesUsed) {
-  // Skip service/display categories that don't need a picker entry
-  if (["DISPLAY", "DESIGN", "INSTALLATION", "SERVICE"].includes(cat)) {
-    pass(`${cat} → skipped (service/display category, not in CategoryPicker)`);
+  // Skip service/display categories that don't need a picker entry.
+  // BOOKLET = placeholder (waiting Spicer 100lb quote), intentionally hidden from staff.
+  if (["DISPLAY", "DESIGN", "INSTALLATION", "SERVICE", "BOOKLET"].includes(cat)) {
+    pass(`${cat} → skipped (service/display/placeholder category, not in CategoryPicker)`);
     continue;
   }
   if (categoryPickerContent.includes(`id: "${cat}"`) || categoryPickerContent.includes(`id: '${cat}'`)) {
