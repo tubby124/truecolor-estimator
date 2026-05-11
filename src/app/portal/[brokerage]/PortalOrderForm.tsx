@@ -82,11 +82,15 @@ export function PortalOrderForm({
   const [agentEmail, setAgentEmail] = useState("");
   const [agentPhone, setAgentPhone] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
+  const [deliveryMode, setDeliveryMode] = useState<"ship" | "pickup">("ship");
   const [lines, setLines] = useState<Record<string, LineItem>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [recognized, setRecognized] = useState<string | null>(null);
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
+  const [submittedLines, setSubmittedLines] = useState<LineItem[]>([]);
+  const [submittedSubtotal, setSubmittedSubtotal] = useState(0);
 
   // ─── Returning-agent UX ──────────────────────────────────────────────
   // Pre-fill name/email/phone/shipping from the last successful submission on
@@ -162,7 +166,11 @@ export function PortalOrderForm({
       setError("Please enter your name and email so we can send the proof.");
       return;
     }
-    if (!shippingAddress.trim()) {
+    if (!agentPhone.trim()) {
+      setError("Phone is required — the courier needs it for delivery.");
+      return;
+    }
+    if (deliveryMode === "ship" && !shippingAddress.trim()) {
       setError("Please enter the address you want this shipped to.");
       return;
     }
@@ -193,19 +201,30 @@ export function PortalOrderForm({
         };
       });
 
+      // For pickup orders we still pass a recognizable marker into shipping_address
+      // so staff sees it on the order card and the field stays non-null.
+      const shipForApi =
+        deliveryMode === "pickup"
+          ? `PICKUP at True Color — 216 33rd St W, Saskatoon SK`
+          : shippingAddress;
+
       const form = new FormData();
       form.append("name", agentName);
       form.append("email", agentEmail);
-      if (agentPhone.trim()) form.append("phone", agentPhone);
+      form.append("phone", agentPhone);
       form.append("items", JSON.stringify(items));
       form.append("brokerage_slug", brokerage.slug);
-      form.append("shipping_address", shippingAddress);
+      form.append("shipping_address", shipForApi);
 
       const res = await fetch("/api/quote-request", { method: "POST", body: form });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(data.error ?? "Submission failed");
       }
+      const result = (await res.json().catch(() => ({}))) as {
+        sent?: boolean;
+        ref?: string | null;
+      };
       // Save profile after successful submission so next visit pre-fills.
       try {
         const profile: SavedProfile = {
@@ -218,6 +237,11 @@ export function PortalOrderForm({
       } catch {
         // Silent — storage failure shouldn't block the success state.
       }
+      // Snapshot what they submitted so the confirmation page can render
+      // even if `lines` state is later cleared.
+      setSubmittedLines(selectedLines);
+      setSubmittedSubtotal(subtotal);
+      setSubmittedRef(result.ref ?? null);
       setSent(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submission failed");
@@ -230,16 +254,104 @@ export function PortalOrderForm({
     return (
       <div
         role="status"
-        className="bg-white border border-green-200 rounded-2xl p-8 text-center"
+        className="bg-white border-2 rounded-2xl overflow-hidden"
+        style={{ borderColor: accent }}
       >
-        <p className="text-2xl font-bold text-[#1c1712] mb-2">Order request received</p>
-        <p className="text-gray-700 mb-4">
-          We&apos;ll send a proof for <span className="font-semibold">{agentName}</span> to{" "}
-          <span className="font-semibold">{agentEmail}</span> within 1 business day.
-        </p>
-        <p className="text-sm text-gray-500">
-          Once you approve the proof we&apos;ll send a Clover payment link straight to your inbox.
-        </p>
+        <div className="p-6 sm:p-8 text-center border-b border-gray-100">
+          <div
+            aria-hidden
+            className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-3"
+            style={{ backgroundColor: `${accent}22` }}
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M5 13l4 4L19 7"
+                stroke={accent}
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <p className="text-2xl font-bold text-[#1c1712] mb-1">
+            Order request received
+          </p>
+          {submittedRef ? (
+            <p className="text-sm text-gray-500 font-mono">
+              Reference <span className="font-bold text-[#1c1712]">#{submittedRef}</span>
+            </p>
+          ) : null}
+        </div>
+
+        {submittedLines.length > 0 ? (
+          <div className="px-6 sm:px-8 py-5 bg-gray-50">
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+              What you ordered
+            </p>
+            <ul className="divide-y divide-gray-200">
+              {submittedLines.map((line) => {
+                const product = productIndex.get(line.productId);
+                if (!product) return null;
+                const unit = priceFor(product, line, line.qty);
+                const matSel = product.materialOptions?.find((m) => m.id === line.materialId);
+                return (
+                  <li
+                    key={line.productId}
+                    className="py-2.5 flex items-center justify-between gap-3 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[#1c1712] truncate">
+                        {product.label}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Qty {line.qty}
+                        {matSel ? ` · ${matSel.label.replace(/ — \$\d+/, "")}` : ""}
+                        {product.sidesPicker
+                          ? ` · ${line.sides === "2" ? "Double-sided" : "Single-sided"}`
+                          : ""}
+                      </p>
+                    </div>
+                    <span className="font-bold tabular-nums text-[#1c1712] flex-shrink-0">
+                      {fmt(unit * line.qty)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
+              <span className="font-semibold text-gray-700">Indicative subtotal</span>
+              <span className="text-lg font-bold tabular-nums text-[#1c1712]">
+                {fmt(submittedSubtotal)}
+              </span>
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              Taxes + shipping confirmed on the final invoice after proof approval.
+            </p>
+          </div>
+        ) : null}
+
+        <div className="px-6 sm:px-8 py-5">
+          <p className="text-sm text-gray-700 mb-3">
+            We&apos;ll send a proof to <span className="font-semibold">{agentEmail}</span> within
+            1 business day. Once you approve it, we&apos;ll send a Clover payment link straight
+            to your inbox.
+          </p>
+          <p className="text-xs text-gray-500">
+            Delivery:{" "}
+            <span className="font-semibold text-gray-700">
+              {deliveryMode === "pickup"
+                ? "Pickup at True Color, Saskatoon"
+                : "Ship via Canada Post"}
+            </span>
+            {deliveryMode === "ship" && shippingAddress ? ` · ${shippingAddress}` : ""}
+          </p>
+          {submittedRef ? (
+            <p className="text-xs text-gray-400 mt-3">
+              Save this reference for follow-up:{" "}
+              <span className="font-mono font-bold">#{submittedRef}</span>
+            </p>
+          ) : null}
+        </div>
       </div>
     );
   }
@@ -291,7 +403,7 @@ export function PortalOrderForm({
             />
           </div>
           <div>
-            <label htmlFor="agentPhone" className={LABEL_CLS}>Phone (optional)</label>
+            <label htmlFor="agentPhone" className={LABEL_CLS}>Phone</label>
             <input
               id="agentPhone"
               type="tel"
@@ -299,27 +411,84 @@ export function PortalOrderForm({
               value={agentPhone}
               onChange={(e) => setAgentPhone(e.target.value)}
               className={INPUT_CLS}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="shippingAddress" className={LABEL_CLS}>
-              Shipping address (Saskatchewan)
-            </label>
-            <input
-              id="shippingAddress"
-              type="text"
-              autoComplete="street-address"
-              placeholder="123 Main St, Saskatoon SK S7K 1A1"
-              value={shippingAddress}
-              onChange={(e) => setShippingAddress(e.target.value)}
-              className={INPUT_CLS}
               required
             />
-            <p className="text-xs text-gray-500 mt-1.5">
-              Canada Post Expedited ground. Free pickup if you&apos;re in Saskatoon — note that
-              under any line item below.
-            </p>
+            <p className="text-xs text-gray-500 mt-1.5">Courier needs this for delivery.</p>
           </div>
+
+          {/* Delivery mode picker — pickup hides the shipping address field */}
+          <div className="sm:col-span-2">
+            <span className={LABEL_CLS}>How should we get this to you?</span>
+            <div className="grid sm:grid-cols-2 gap-2 mt-1.5">
+              <label
+                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  deliveryMode === "ship" ? "border-2" : "border-gray-200 hover:bg-gray-50"
+                }`}
+                style={deliveryMode === "ship" ? { borderColor: accent } : undefined}
+              >
+                <input
+                  type="radio"
+                  name="deliveryMode"
+                  value="ship"
+                  checked={deliveryMode === "ship"}
+                  onChange={() => setDeliveryMode("ship")}
+                  className="mt-0.5 flex-shrink-0"
+                />
+                <span>
+                  <span className="block font-semibold text-[#1c1712] text-sm">
+                    Ship to me
+                  </span>
+                  <span className="block text-xs text-gray-500 mt-0.5">
+                    Canada Post Expedited ground · 1–3 business days within SK
+                  </span>
+                </span>
+              </label>
+              <label
+                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  deliveryMode === "pickup" ? "border-2" : "border-gray-200 hover:bg-gray-50"
+                }`}
+                style={deliveryMode === "pickup" ? { borderColor: accent } : undefined}
+              >
+                <input
+                  type="radio"
+                  name="deliveryMode"
+                  value="pickup"
+                  checked={deliveryMode === "pickup"}
+                  onChange={() => setDeliveryMode("pickup")}
+                  className="mt-0.5 flex-shrink-0"
+                />
+                <span>
+                  <span className="block font-semibold text-[#1c1712] text-sm">
+                    Pickup in Saskatoon (free)
+                  </span>
+                  <span className="block text-xs text-gray-500 mt-0.5">
+                    216 33rd St W · we&apos;ll text you when it&apos;s ready
+                  </span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {deliveryMode === "ship" ? (
+            <div className="sm:col-span-2">
+              <label htmlFor="shippingAddress" className={LABEL_CLS}>
+                Shipping address (Saskatchewan)
+              </label>
+              <input
+                id="shippingAddress"
+                type="text"
+                autoComplete="street-address"
+                placeholder="123 Main St, Saskatoon SK S7K 1A1"
+                value={shippingAddress}
+                onChange={(e) => setShippingAddress(e.target.value)}
+                className={INPUT_CLS}
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1.5">
+                Shipping cost added to your final invoice after proof approval.
+              </p>
+            </div>
+          ) : null}
         </div>
       </section>
 

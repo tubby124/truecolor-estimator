@@ -256,9 +256,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Save to DB before sending emails (non-fatal — email continues even if DB fails)
+    // Save to DB before sending emails (non-fatal — email continues even if DB fails).
+    // Capture the inserted row's id so portal submissions can show a short reference
+    // number on the success page (first 8 chars of the UUID, uppercased).
+    let insertedId: string | null = null;
     try {
-      await supabase
+      const { data: insertedRow } = await supabase
         .from("quote_requests")
         .insert({
           name,
@@ -269,7 +272,10 @@ export async function POST(req: NextRequest) {
           raw_ip: ip ?? null,
           brokerage_slug: brokerageSlug,
           shipping_address: shippingAddress,
-        });
+        })
+        .select("id")
+        .single();
+      insertedId = (insertedRow?.id as string | undefined) ?? null;
     } catch (dbErr) {
       console.error("[quote-request] DB save failed:", dbErr);
     }
@@ -565,7 +571,10 @@ export async function POST(req: NextRequest) {
       `,
     });
 
-    return NextResponse.json({ sent: true });
+    // Short reference for the portal success page: first 8 chars of the UUID
+    // uppercased (e.g. AB345C8E). Falls back to null for legacy non-DB paths.
+    const ref = insertedId ? insertedId.replace(/-/g, "").slice(0, 8).toUpperCase() : null;
+    return NextResponse.json({ sent: true, ref });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to send";
     console.error("[quote-request]", message);
