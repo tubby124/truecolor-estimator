@@ -176,7 +176,6 @@ export function PortalOrderForm({
       const items = selectedLines.map((line) => {
         const product = productIndex.get(line.productId)!;
         const unit = priceFor(product, line, line.qty);
-        const sidesLabel = line.sides === "2" ? "Double-sided" : "Single-sided";
         const matSel = product.materialOptions?.find((m) => m.id === line.materialId);
         const materialLabel = matSel ? matSel.label : product.tcCategory;
         const noteParts = [
