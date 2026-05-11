@@ -20,10 +20,13 @@ If a pricing check or linter flags these — IGNORE THE FLAG. Do not touch these
 
 ## Disabled Products (do NOT re-enable without owner approval)
 
-- ACP double-sided (ACP 2S)
 - Business cards >1000 qty
 - Postcards single-sided (1S)
 - Brochure 100lb (PLACEHOLDER_100LB — waiting for Spicer quote)
+
+## Enabled 2026-05-10 (formerly disabled)
+
+- ACP double-sided (ACP 2S) — owner approved 2026-05-10. Pricing uses **+$6/sqft additive uplift** over 1S tier rate (NOT Coroplast's 1.75× multiplier — ACP panel dominates cost so additive is the cost-honest method). Rules: PR-ACP-D-T1/T2/T3 in pricing_rules.v1.csv.
 
 ## Price Display Rules
 

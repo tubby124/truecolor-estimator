@@ -109,20 +109,24 @@ Grommets: $2.50/each · auto-calculated by engine (max(4, ceil(perimeter_ft/2)))
 ---
 
 ### ACP Aluminum Signs (RIGID · RMACP002 · 3mm)
-| Sqft Range | Price/sqft | Min Charge |
-|------------|-----------|------------|
-| 0–6 sqft   | $13.00    | $60        |
-| 6–24 sqft  | $11.00    | $60        |
-| 24+ sqft   | $10.00    | $60        |
+| Sqft Range | 1S Price/sqft | 2S Price/sqft | Min Charge |
+|------------|---------------|---------------|------------|
+| 0–6 sqft   | $13.00        | $19.00        | $60        |
+| 6–24 sqft  | $11.00        | $17.00        | $60        |
+| 24+ sqft   | $10.00        | $16.00        | $60        |
 
-**Qty bulk discounts:** 5+=3% · 10+=5% · 25+=8%
+**2S formula:** 1S rate + **$6/sqft flat** uplift across all tiers (additive, NOT 1.75× multiplier).
+Reason: ACP panel cost ($1.86/sqft) is ~50% of total cost. Doubling the rate would charge for two panels when one is used. Coroplast uses 1.75× because its panel is much cheaper. ACP enabled 2026-05-10 with owner approval.
+
+**Qty bulk discounts:** 5+=3% · 10+=5% · 25+=8% (apply to both 1S and 2S)
 
 Common sizes:
-| Size | Price |
-|------|-------|
-| 18×24" | $39 (min $60) |
-| 24×36" | $66* |
-| 4×8 ft | $320 |
+| Size | 1S | 2S |
+|------|----|----|
+| 18×24" (3 sqft) | $39 (min $60) | $60 (min applies; raw $57) |
+| 24×30" (5 sqft) | $65 | $95 |
+| 24×36" (6 sqft) | $66* | $114 |
+| 4×8 ft (32 sqft) | $320 | $512 |
 
 *Intentional boundary price — do NOT change.
 

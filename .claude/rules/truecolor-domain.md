@@ -40,10 +40,14 @@ GST rate = read from config.v1.csv gst_rate — never hardcode 0.05
 Receipt/email GST# display: read from NEXT_PUBLIC_GST_NUMBER env var (Railway) — never hardcode
 
 ## Disabled Products (do NOT re-enable without owner approval)
-- ACP double-sided (ACP 2S)
 - Business cards >1000 qty
 - Postcards single-sided (1S)
 - Brochure 100lb (PLACEHOLDER_100LB — waiting for Spicer quote)
+
+## ACP 2S — Enabled 2026-05-10 (Diana Noble brokerage quote trigger)
+- Pricing: +$6/sqft additive uplift over 1S tier (NOT 1.75× — ACP panel cost is 50% of total, additive is cost-honest)
+- Rules: PR-ACP-D-T1 ($19/sqft 0-6 sqft), PR-ACP-D-T2 ($17/sqft 6-24 sqft), PR-ACP-D-T3 ($16/sqft 24+ sqft)
+- Min charge $60 same as 1S
 
 ## Wave Accounting
 NEVER use invoiceCreatePayment — use moneyTransactionCreate (Wave API rule, enforced globally)
