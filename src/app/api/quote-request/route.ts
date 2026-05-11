@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { getBrokerage } from "@/lib/data/brokerages";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -90,6 +91,17 @@ export async function POST(req: NextRequest) {
     const email = ((form.get("email") as string) ?? "").trim();
     const phone = ((form.get("phone") as string) ?? "").trim() || undefined;
     const itemsRaw = (form.get("items") as string) ?? "[]";
+    // Optional brokerage portal fields — present only when the form was
+    // submitted from /portal/[brokerage].
+    const brokerageSlugRaw = ((form.get("brokerage_slug") as string) ?? "").trim();
+    const brokerageSlug = /^[a-z0-9-]{1,64}$/.test(brokerageSlugRaw)
+      ? brokerageSlugRaw
+      : null;
+    const shippingAddressRaw = ((form.get("shipping_address") as string) ?? "").trim();
+    const shippingAddress =
+      shippingAddressRaw.length > 0 && shippingAddressRaw.length <= 300
+        ? shippingAddressRaw
+        : null;
 
     // Contact validation
     if (!name || !email) {
@@ -255,6 +267,8 @@ export async function POST(req: NextRequest) {
           items,
           file_links: fileLinks.filter(Boolean),
           raw_ip: ip ?? null,
+          brokerage_slug: brokerageSlug,
+          shipping_address: shippingAddress,
         });
     } catch (dbErr) {
       console.error("[quote-request] DB save failed:", dbErr);
@@ -307,9 +321,38 @@ export async function POST(req: NextRequest) {
       process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
     const isMulti = items.length > 1;
 
+    // Brokerage portal orders get a distinct subject + extra context block in
+    // the staff email so info@true-color.ca knows to pull artwork from the
+    // brokerage's Drive folder rather than waiting on customer upload.
+    const brokerage = brokerageSlug ? getBrokerage(brokerageSlug) : null;
+    const portalPrefix = brokerage ? `[${brokerage.name} Portal] ` : "";
+
     const subject = isMulti
-      ? `Multi-Item Quote (${items.length} items) — ${name}`
-      : `Quote Request — ${items[0].product} — ${name}`;
+      ? `${portalPrefix}Multi-Item Quote (${items.length} items) — ${name}`
+      : `${portalPrefix}Quote Request — ${items[0].product} — ${name}`;
+
+    const brokerageBlock = brokerage
+      ? `
+        <div style="margin: 0 0 18px; padding: 14px 16px; background: ${brokerage.brandColor}1a; border-left: 4px solid ${brokerage.brandColor}; border-radius: 6px;">
+          <p style="margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #1c1712;">
+            ${esc(brokerage.name)} portal order
+          </p>
+          <p style="margin: 0 0 8px; font-size: 12px; color: #374151;">
+            Broker: ${esc(brokerage.brokerName)} · ${esc(brokerage.brokerEmail)} · ${esc(brokerage.brokerPhone)}
+          </p>
+          <p style="margin: 0 0 4px; font-size: 12px; color: #374151;">
+            <strong>Brand asset folder (staff only — do not forward):</strong>
+          </p>
+          <p style="margin: 0 0 8px; font-size: 12px;">
+            <a href="${esc(brokerage.assetDriveUrl)}" style="color: ${brokerage.brandColor}; font-weight: 600;">${esc(brokerage.assetDriveUrl)}</a>
+          </p>
+          ${
+            shippingAddress
+              ? `<p style="margin: 0; font-size: 12px; color: #374151;"><strong>Ship to:</strong> ${esc(shippingAddress)}</p>`
+              : ""
+          }
+        </div>`
+      : "";
 
     // Build per-item HTML sections for the staff notification email
     const itemSections = items
@@ -400,6 +443,8 @@ export async function POST(req: NextRequest) {
                 : ""
             }
           </table>
+
+          ${brokerageBlock}
 
           <p style="font-weight: 700; font-size: 12px; color: #374151; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px;">
             ${isMulti ? `Items (${items.length})` : "Item Details"}

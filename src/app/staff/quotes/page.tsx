@@ -31,6 +31,8 @@ export interface QuoteRequest {
   replied_at: string | null;
   staff_note: string | null;
   reply_body: string | null;
+  brokerage_slug: string | null;
+  shipping_address: string | null;
 }
 
 export default async function StaffQuotesPage() {
@@ -41,7 +43,9 @@ export default async function StaffQuotesPage() {
     const supabase = createServiceClient();
     const { data, error } = await supabase
       .from("quote_requests")
-      .select("id, created_at, name, email, phone, items, file_links, replied_at, staff_note, reply_body")
+      .select(
+        "id, created_at, name, email, phone, items, file_links, replied_at, staff_note, reply_body, brokerage_slug, shipping_address"
+      )
       .order("created_at", { ascending: false })
       .limit(200);
 

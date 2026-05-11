@@ -5,6 +5,7 @@ import type { QuoteRequest, ItemMeta } from "@/app/staff/quotes/page";
 import { timeAgo, buildEstimateLink } from "./helpers";
 import { QuoteBuilderModal } from "./QuoteBuilderModal";
 import { QuoteReplyModal } from "./QuoteReplyModal";
+import { getBrokerage } from "@/lib/data/brokerages";
 
 export function QuoteCard({ quote }: { quote: QuoteRequest }) {
   const isNew =
@@ -12,6 +13,7 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
     Date.now() - new Date(quote.created_at).getTime() < 24 * 60 * 60 * 1000;
   const fileLinks = (quote.file_links ?? []).filter(Boolean);
   const isMulti = quote.items.length > 1;
+  const brokerage = quote.brokerage_slug ? getBrokerage(quote.brokerage_slug) : null;
 
   // New unreplied quotes start expanded; others collapsed
   const [expanded, setExpanded] = useState(isNew && !quote.replied_at);
@@ -100,6 +102,15 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
                   📎 {fileLinks.length > 1 ? `${fileLinks.length} files` : "Artwork"}
                 </span>
               )}
+              {brokerage && (
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
+                  style={{ backgroundColor: brokerage.brandColor }}
+                  title={`Portal order — ${brokerage.name}`}
+                >
+                  🏷 {brokerage.name}
+                </span>
+              )}
               {noteText && (
                 <span className="text-xs font-semibold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
                   📝 Note
@@ -186,6 +197,55 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
       {/* ── Expanded detail panel ── */}
       {expanded && (
         <div className="border-t border-gray-100">
+          {/* Brokerage portal context — staff-only asset folder + ship-to */}
+          {brokerage && (
+            <div
+              className="px-5 py-4 border-b border-gray-100"
+              style={{ backgroundColor: `${brokerage.brandColor}10` }}
+            >
+              <p
+                className="text-xs font-bold uppercase tracking-wider mb-2"
+                style={{ color: brokerage.brandColor }}
+              >
+                {brokerage.name} portal order
+              </p>
+              <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <p className="text-gray-500 mb-0.5">Broker contact</p>
+                  <p className="font-semibold text-[#1c1712]">
+                    {brokerage.brokerName}
+                  </p>
+                  <p className="text-gray-700">
+                    {brokerage.brokerEmail} · {brokerage.brokerPhone}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 mb-0.5">Brand asset folder</p>
+                  <a
+                    href={brokerage.assetDriveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold underline break-all"
+                    style={{ color: brokerage.brandColor }}
+                  >
+                    Open Drive folder →
+                  </a>
+                  <p className="text-gray-400 mt-0.5">
+                    Pull artwork from here — do not ask agent to upload.
+                  </p>
+                </div>
+                {quote.shipping_address && (
+                  <div className="sm:col-span-2">
+                    <p className="text-gray-500 mb-0.5">Ship to</p>
+                    <p className="font-semibold text-[#1c1712]">
+                      {quote.shipping_address}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Items */}
           <div className="px-5 py-4 bg-white divide-y divide-gray-100">
             {quote.items.map((item: ItemMeta, i: number) => (

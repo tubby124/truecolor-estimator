@@ -1,0 +1,168 @@
+{
+  "slug": "people-1st-realty",
+  "name": "People 1st Realty",
+  "tagline": "Saskatchewan agent signage — printed by True Color, shipped to you.",
+  "brandColor": "#5B95B0",
+  "logoSrc": "/images/brokerages/people-1st-realty-logo.png",
+  "brokerName": "Diana Noble",
+  "brokerEmail": "broker@people1st.ca",
+  "brokerPhone": "780-880-7807",
+  "assetDriveUrl": "https://drive.google.com/drive/folders/PLACEHOLDER_DIANA_TO_PROVIDE",
+  "citiesServed": [
+    "Saskatoon",
+    "Regina",
+    "Prince Albert",
+    "Yorkton",
+    "Moose Jaw",
+    "Swift Current",
+    "Lloydminster",
+    "North Battleford",
+    "Estevan",
+    "Weyburn"
+  ],
+  "productGroups": [
+    {
+      "title": "For Sale Signs",
+      "intro": "Aluminum signs with UV-printed branding. Coroplast directionals for sub-streets and rural use.",
+      "products": [
+        {
+          "id": "for-sale-aluminum-24x30",
+          "label": "For Sale Sign — Aluminum 24×30\"",
+          "blurb": "UV film on aluminum. Grommets 2\" inset.",
+          "unitPrice": 110,
+          "bulkTiers": [{ "minQty": 4, "unitPrice": 99 }],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
+          "sidesPicker": true,
+          "tcCategory": "ACP"
+        },
+        {
+          "id": "for-sale-aluminum-picture-24x30",
+          "label": "For Sale Sign with Photo — Aluminum 24×30\"",
+          "blurb": "UV film on aluminum with agent photo. Grommets 2\" inset.",
+          "unitPrice": 110,
+          "bulkTiers": [{ "minQty": 4, "unitPrice": 100 }],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
+          "sidesPicker": true,
+          "tcCategory": "ACP"
+        },
+        {
+          "id": "for-sale-condo-aluminum-32x12",
+          "label": "For Sale — Condo Sign 32×12\" (double-sided)",
+          "blurb": "Aluminum, UV film, double-sided for hanging.",
+          "unitPrice": 90,
+          "bulkTiers": [{ "minQty": 3, "unitPrice": 76 }],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
+          "tcCategory": "ACP"
+        },
+        {
+          "id": "for-sale-directional-coro-24x12-2s",
+          "label": "For Sale Directional — Coroplast 24×12\" (double-sided)",
+          "blurb": "4mm coroplast. Includes step stakes.",
+          "unitPrice": 33,
+          "bulkTiers": [
+            { "minQty": 10, "unitPrice": 24 },
+            { "minQty": 15, "unitPrice": 20 }
+          ],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
+          "tcCategory": "SIGN"
+        },
+        {
+          "id": "for-sale-directional-coro-erasable-24x12",
+          "label": "For Sale Directional — Coroplast 24×12\" with Erasable Area",
+          "blurb": "4mm coroplast with dry-erase laminate panel. Includes step stakes.",
+          "unitPrice": 35,
+          "bulkTiers": [
+            { "minQty": 10, "unitPrice": 26 },
+            { "minQty": 15, "unitPrice": 22 }
+          ],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
+          "tcCategory": "SIGN"
+        },
+        {
+          "id": "for-sale-directional-coro-24x12-1s",
+          "label": "For Sale Directional — Coroplast 24×12\" (single-sided)",
+          "blurb": "Single-sided for rural / tree-mount. Includes step stakes.",
+          "unitPrice": 24,
+          "bulkTiers": [
+            { "minQty": 10, "unitPrice": 15 },
+            { "minQty": 15, "unitPrice": 10 }
+          ],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
+          "tcCategory": "SIGN"
+        }
+      ]
+    },
+    {
+      "title": "Open House Signs",
+      "intro": "Sandwich boards for property exposure. Coroplast directionals to point visitors to the listing.",
+      "products": [
+        {
+          "id": "open-house-sandwich-1s",
+          "label": "Open House Sandwich Board (single-sided)",
+          "blurb": "UV film. A-frame style. Reusable across listings.",
+          "unitPrice": 125,
+          "bulkTiers": [{ "minQty": 6, "unitPrice": 99 }],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "ACP"
+        },
+        {
+          "id": "open-house-sandwich-2s",
+          "label": "Open House Sandwich Board (double-sided)",
+          "blurb": "UV film. \"Open House\" + \"New Listing\" on opposite faces.",
+          "unitPrice": 170,
+          "bulkTiers": [{ "minQty": 6, "unitPrice": 145 }],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "ACP"
+        },
+        {
+          "id": "open-house-directional-coro-24x12-2s",
+          "label": "Open House Directional — Coroplast 24×12\" (double-sided)",
+          "blurb": "4mm coroplast. Includes step stakes.",
+          "unitPrice": 33,
+          "bulkTiers": [
+            { "minQty": 10, "unitPrice": 24 },
+            { "minQty": 15, "unitPrice": 20 }
+          ],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
+          "tcCategory": "SIGN"
+        },
+        {
+          "id": "open-house-directional-coro-erasable-24x12",
+          "label": "Open House Directional — Coroplast 24×12\" with Erasable Area",
+          "blurb": "4mm coroplast with dry-erase laminate panel. Includes step stakes.",
+          "unitPrice": 35,
+          "bulkTiers": [
+            { "minQty": 10, "unitPrice": 26 },
+            { "minQty": 15, "unitPrice": 22 }
+          ],
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
+          "tcCategory": "SIGN"
+        }
+      ]
+    },
+    {
+      "title": "Sign Toppers",
+      "intro": "Topper bars that bolt to your For Sale frame. Pick the message + material; we print and ship. Enter exact topper text where prompted.",
+      "products": [
+        {
+          "id": "topper-coro-4mm",
+          "label": "Sign Topper — 4mm Coroplast",
+          "blurb": "Standard weight. Lightweight, weather-resistant.",
+          "unitPrice": 23,
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true
+        },
+        {
+          "id": "topper-coro-10mm",
+          "label": "Sign Topper — 10mm Coroplast",
+          "blurb": "Heavyweight. Stiffer, premium feel.",
+          "unitPrice": 28,
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true
+        }
+      ]
+    }
+  ]
+}
