@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getBrokerage } from "@/lib/data/brokerages";
 import { PortalOrderForm } from "./PortalOrderForm";
@@ -22,16 +23,33 @@ export default async function BrokerageOrderPortal({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] text-[#111]">
+      {/* Brand banner — replaces logo/tagline composite; lossless brand expression */}
+      {brokerage.bannerSrc ? (
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <Image
+              src={brokerage.bannerSrc}
+              alt={`${brokerage.name} brand banner`}
+              width={1600}
+              height={420}
+              priority
+              className="w-full h-auto"
+              sizes="(max-width: 768px) 100vw, 1024px"
+            />
+          </div>
+        </div>
+      ) : null}
+
       <header style={{ backgroundColor: accent }} className="text-white">
-        <div className="max-w-3xl mx-auto px-6 py-10 sm:py-14">
-          <p className="text-xs font-semibold uppercase tracking-widest opacity-80 mb-3">
+        <div className="max-w-4xl mx-auto px-6 py-10 sm:py-12">
+          <p className="text-xs font-semibold uppercase tracking-widest opacity-80 mb-2">
             Agent order portal
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold leading-tight">
             {brokerage.name} signage orders
           </h1>
           {brokerage.tagline ? (
-            <p className="mt-3 text-base sm:text-lg opacity-90 max-w-2xl">
+            <p className="mt-3 text-base sm:text-lg opacity-95 max-w-2xl">
               {brokerage.tagline}
             </p>
           ) : null}
@@ -48,7 +66,8 @@ export default async function BrokerageOrderPortal({ params }: PageProps) {
             </div>
             <div>
               <p className="text-xs uppercase tracking-wider opacity-70 mb-1">Ships to</p>
-              <p className="opacity-90">{brokerage.citiesServed.slice(0, 4).join(" · ")}
+              <p className="opacity-90">
+                {brokerage.citiesServed.slice(0, 4).join(" · ")}
                 {brokerage.citiesServed.length > 4 ? " · …" : ""}
               </p>
             </div>
@@ -56,19 +75,19 @@ export default async function BrokerageOrderPortal({ params }: PageProps) {
         </div>
       </header>
 
-      <main id="main-content" className="max-w-3xl mx-auto px-6 py-10">
+      <main id="main-content" className="max-w-4xl mx-auto px-6 py-10">
         <div className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-7 mb-8">
           <h2 className="text-lg font-bold text-[#1c1712] mb-2">How this works</h2>
           <ol className="text-sm text-gray-700 space-y-1.5 list-decimal pl-5">
-            <li>Pick what you need + enter the topper text where prompted.</li>
-            <li>We email you a proof with your brand assets within 1 business day.</li>
+            <li>Pick what you need + pick a topper message from the gallery.</li>
+            <li>We email a proof using your brand assets within 1 business day.</li>
             <li>Approve the proof, get a Clover payment link, pay your own card.</li>
             <li>We print in Saskatoon and ship straight to your address.</li>
           </ol>
           <p className="text-xs text-gray-500 mt-4">
-            Your brand files live with us — you do not need to upload artwork. We pull from{" "}
+            Your brand files live with us — you don&apos;t need to upload artwork. We pull from{" "}
             <span className="font-semibold text-gray-700">{brokerage.name}&apos;s asset folder</span>{" "}
-            to keep brand consistency.
+            to keep brand consistency across every sign.
           </p>
         </div>
 

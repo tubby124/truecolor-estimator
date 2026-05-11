@@ -8,6 +8,15 @@
 // PDFs. We never expose this link to agents — staff opens it server-side when
 // preparing the proof. Stored here so it's one place to update.
 
+export interface BrokerageMaterialOption {
+  /** Stable id — e.g. "4mm" / "10mm" */
+  id: string;
+  /** Display label shown in the dropdown */
+  label: string;
+  /** Per-unit price for this material (CAD, pre-tax) */
+  unitPrice: number;
+}
+
 export interface BrokerageProductOption {
   /** Stable id used in form payload — e.g. "for-sale-aluminum-24x30" */
   id: string;
@@ -15,17 +24,27 @@ export interface BrokerageProductOption {
   label: string;
   /** Short helper line below the label */
   blurb?: string;
-  /** Indicative per-unit price shown to the agent (CAD, pre-tax) */
-  unitPrice: number;
-  /** Discounted per-unit price at a quantity tier */
+  /** Product mockup or topper preview image (public/ path) */
+  imageSrc?: string;
+  /** Aspect orientation for the card image — affects thumbnail framing */
+  imageOrientation?: "landscape" | "portrait" | "topper";
+  /**
+   * Single per-unit price (CAD, pre-tax). Used when materialOptions is absent.
+   * If materialOptions is present, this is ignored and the agent picks a
+   * material instead.
+   */
+  unitPrice?: number;
+  /** Discounted per-unit price at a quantity tier (only when unitPrice set) */
   bulkTiers?: Array<{ minQty: number; unitPrice: number }>;
+  /** Material picker — when present, agent picks one material per line */
+  materialOptions?: BrokerageMaterialOption[];
   /** Available qty options shown in the dropdown */
   qtyOptions: number[];
   /** Whether the agent can pick "Single-sided" / "Double-sided" */
   sidesPicker?: boolean;
   /** True Color SKU / category this maps to internally (for staff reference) */
   tcCategory: string;
-  /** True/false: this product is a sign topper (renders text input for topper text) */
+  /** True/false: this product is a topper variant (e.g. SOLD, OPEN HOUSE) */
   isTopper?: boolean;
 }
 
@@ -34,6 +53,8 @@ export interface BrokerageProductGroup {
   title: string;
   /** Optional intro paragraph */
   intro?: string;
+  /** Layout density for the product grid in this group */
+  layout?: "list" | "topper-grid";
   products: BrokerageProductOption[];
 }
 
@@ -48,6 +69,8 @@ export interface Brokerage {
   brandColor: string;
   /** Optional logo URL (under /public/) */
   logoSrc?: string;
+  /** Optional brand banner image (wide horizontal, used in hero strip) */
+  bannerSrc?: string;
   /** Broker contact — shown in the portal header for trust */
   brokerName: string;
   brokerEmail: string;

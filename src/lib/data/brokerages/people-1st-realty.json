@@ -1,9 +1,9 @@
 {
   "slug": "people-1st-realty",
   "name": "People 1st Realty",
-  "tagline": "Saskatchewan agent signage — printed by True Color, shipped to you.",
-  "brandColor": "#5B95B0",
-  "logoSrc": "/images/brokerages/people-1st-realty-logo.png",
+  "tagline": "More than just real estate. We're a people business.",
+  "brandColor": "#1FB7D3",
+  "bannerSrc": "/images/brokerages/people-1st-realty/brand-banner.jpg",
   "brokerName": "Diana Noble",
   "brokerEmail": "broker@people1st.ca",
   "brokerPhone": "780-880-7807",
@@ -23,12 +23,15 @@
   "productGroups": [
     {
       "title": "For Sale Signs",
-      "intro": "Aluminum signs with UV-printed branding. Coroplast directionals for sub-streets and rural use.",
+      "intro": "Aluminum For Sale signs with UV-printed branding. Coroplast directionals for sub-streets and rural use.",
+      "layout": "list",
       "products": [
         {
           "id": "for-sale-aluminum-24x30",
           "label": "For Sale Sign — Aluminum 24×30\"",
-          "blurb": "UV film on aluminum. Grommets 2\" inset.",
+          "blurb": "UV film on aluminum. Grommets 2\" inset. Mounts to standard frame.",
+          "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-diana.jpg",
+          "imageOrientation": "landscape",
           "unitPrice": 110,
           "bulkTiers": [{ "minQty": 4, "unitPrice": 99 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
@@ -38,7 +41,9 @@
         {
           "id": "for-sale-aluminum-picture-24x30",
           "label": "For Sale Sign with Photo — Aluminum 24×30\"",
-          "blurb": "UV film on aluminum with agent photo. Grommets 2\" inset.",
+          "blurb": "UV film on aluminum with agent photo + QR code. Grommets 2\" inset.",
+          "imageSrc": "/images/brokerages/people-1st-realty/for-sale-portrait-photo.png",
+          "imageOrientation": "portrait",
           "unitPrice": 110,
           "bulkTiers": [{ "minQty": 4, "unitPrice": 100 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
@@ -48,7 +53,9 @@
         {
           "id": "for-sale-condo-aluminum-32x12",
           "label": "For Sale — Condo Sign 32×12\" (double-sided)",
-          "blurb": "Aluminum, UV film, double-sided for hanging.",
+          "blurb": "Aluminum, UV film, double-sided. Designed for hanging in condo lobbies.",
+          "imageSrc": "/images/brokerages/people-1st-realty/for-sale-portrait-condo.png",
+          "imageOrientation": "portrait",
           "unitPrice": 90,
           "bulkTiers": [{ "minQty": 3, "unitPrice": 76 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
@@ -57,7 +64,9 @@
         {
           "id": "for-sale-directional-coro-24x12-2s",
           "label": "For Sale Directional — Coroplast 24×12\" (double-sided)",
-          "blurb": "4mm coroplast. Includes step stakes.",
+          "blurb": "4mm coroplast directional with arrow. Includes step stakes.",
+          "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-directional.png",
+          "imageOrientation": "landscape",
           "unitPrice": 33,
           "bulkTiers": [
             { "minQty": 10, "unitPrice": 24 },
@@ -69,7 +78,9 @@
         {
           "id": "for-sale-directional-coro-erasable-24x12",
           "label": "For Sale Directional — Coroplast 24×12\" with Erasable Area",
-          "blurb": "4mm coroplast with dry-erase laminate panel. Includes step stakes.",
+          "blurb": "4mm coroplast with dry-erase laminate panel for writing price / open house times. Includes step stakes.",
+          "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-template.png",
+          "imageOrientation": "landscape",
           "unitPrice": 35,
           "bulkTiers": [
             { "minQty": 10, "unitPrice": 26 },
@@ -81,7 +92,9 @@
         {
           "id": "for-sale-directional-coro-24x12-1s",
           "label": "For Sale Directional — Coroplast 24×12\" (single-sided)",
-          "blurb": "Single-sided for rural / tree-mount. Includes step stakes.",
+          "blurb": "Single-sided for rural / tree-mount installs. Includes step stakes.",
+          "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-directional.png",
+          "imageOrientation": "landscape",
           "unitPrice": 24,
           "bulkTiers": [
             { "minQty": 10, "unitPrice": 15 },
@@ -95,11 +108,14 @@
     {
       "title": "Open House Signs",
       "intro": "Sandwich boards for property exposure. Coroplast directionals to point visitors to the listing.",
+      "layout": "list",
       "products": [
         {
           "id": "open-house-sandwich-1s",
           "label": "Open House Sandwich Board (single-sided)",
-          "blurb": "UV film. A-frame style. Reusable across listings.",
+          "blurb": "UV film on aluminum. A-frame style. Reusable across listings.",
+          "imageSrc": "/images/brokerages/people-1st-realty/open-house-landscape.png",
+          "imageOrientation": "landscape",
           "unitPrice": 125,
           "bulkTiers": [{ "minQty": 6, "unitPrice": 99 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
@@ -108,7 +124,9 @@
         {
           "id": "open-house-sandwich-2s",
           "label": "Open House Sandwich Board (double-sided)",
-          "blurb": "UV film. \"Open House\" + \"New Listing\" on opposite faces.",
+          "blurb": "UV film on aluminum. \"Open House\" + \"New Listing\" on opposite faces.",
+          "imageSrc": "/images/brokerages/people-1st-realty/open-house-landscape.png",
+          "imageOrientation": "landscape",
           "unitPrice": 170,
           "bulkTiers": [{ "minQty": 6, "unitPrice": 145 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
@@ -117,7 +135,9 @@
         {
           "id": "open-house-directional-coro-24x12-2s",
           "label": "Open House Directional — Coroplast 24×12\" (double-sided)",
-          "blurb": "4mm coroplast. Includes step stakes.",
+          "blurb": "4mm coroplast directional with arrow. Includes step stakes.",
+          "imageSrc": "/images/brokerages/people-1st-realty/open-house-landscape-template.png",
+          "imageOrientation": "landscape",
           "unitPrice": 33,
           "bulkTiers": [
             { "minQty": 10, "unitPrice": 24 },
@@ -130,6 +150,8 @@
           "id": "open-house-directional-coro-erasable-24x12",
           "label": "Open House Directional — Coroplast 24×12\" with Erasable Area",
           "blurb": "4mm coroplast with dry-erase laminate panel. Includes step stakes.",
+          "imageSrc": "/images/brokerages/people-1st-realty/open-house-portrait-directional.png",
+          "imageOrientation": "portrait",
           "unitPrice": 35,
           "bulkTiers": [
             { "minQty": 10, "unitPrice": 26 },
@@ -142,25 +164,164 @@
     },
     {
       "title": "Sign Toppers",
-      "intro": "Topper bars that bolt to your For Sale frame. Pick the message + material; we print and ship. Enter exact topper text where prompted.",
+      "intro": "Topper bars that bolt onto the For Sale frame. Pick the message + material — we print and ship.",
+      "layout": "topper-grid",
       "products": [
         {
-          "id": "topper-coro-4mm",
-          "label": "Sign Topper — 4mm Coroplast",
-          "blurb": "Standard weight. Lightweight, weather-resistant.",
-          "unitPrice": 23,
+          "id": "topper-just-listed",
+          "label": "JUST LISTED",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-just-listed.png",
+          "imageOrientation": "topper",
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
           "tcCategory": "SIGN",
-          "isTopper": true
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
         },
         {
-          "id": "topper-coro-10mm",
-          "label": "Sign Topper — 10mm Coroplast",
-          "blurb": "Heavyweight. Stiffer, premium feel.",
-          "unitPrice": 28,
+          "id": "topper-open-house",
+          "label": "OPEN HOUSE",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-open-house.png",
+          "imageOrientation": "topper",
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
           "tcCategory": "SIGN",
-          "isTopper": true
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-sold",
+          "label": "SOLD",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-sold.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-this-home-is-sold",
+          "label": "THIS HOME IS SOLD!!!",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-this-home-is-sold.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-sold-to-happy-people",
+          "label": "SOLD TO HAPPY PEOPLE",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-sold-to-happy-people.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-new-price",
+          "label": "NEW PRICE",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-new-price.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-priced-to-sell",
+          "label": "PRICED TO SELL",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-priced-to-sell.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-hot-on-the-market",
+          "label": "HOT ON THE MARKET",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-hot-on-the-market.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-going-gone",
+          "label": "GOING…GONE!",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-going-gone.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-come-on-in",
+          "label": "COME ON IN!",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-come-on-in.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-welcome-home",
+          "label": "WELCOME HOME",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-welcome-home.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
+        },
+        {
+          "id": "topper-fall-in-love",
+          "label": "FALL IN LOVE",
+          "imageSrc": "/images/brokerages/people-1st-realty/topper-fall-in-love.png",
+          "imageOrientation": "topper",
+          "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
+          "tcCategory": "SIGN",
+          "isTopper": true,
+          "materialOptions": [
+            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
+            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+          ]
         }
       ]
     }
