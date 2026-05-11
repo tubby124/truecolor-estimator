@@ -47,33 +47,49 @@ const OUT_DIR = path.resolve(__dirname, "../../docs/staff-tutorial");
 
 // ─── data ─────────────────────────────────────────────────────────────────────
 
+// Invoice #980 broken out into the structured fields the modal now uses
+// (material/sides/size/process). These map 1:1 onto Albert's spec block
+// (Material : / Colour : / Size : / Process :) that ends up in the email +
+// Wave PDF.
 const INVOICE_980 = [
   {
     title: "Your Off-Site Creative Department",
     product: "Foamboard Displays",
     qty: "2",
-    details: "5mm foamboard, 1-side, 11×17 in, matte lamination",
+    material: "5mm Foamboard",
+    sidesChipLabel: "1-side",          // emits "One side full colour printing"
+    size: '11" x 17"',
+    process: "Matte lamination",
     unitPrice: "18.00",
   },
   {
     title: "The Power of Branding",
     product: "Foamboard Displays",
     qty: "1",
-    details: "5mm foamboard, 1-side, 18×24 in, matte lamination",
+    material: "5mm Foamboard",
+    sidesChipLabel: "1-side",
+    size: '18" x 24"',
+    process: "Matte lamination",
     unitPrice: "30.00",
   },
   {
     title: "Win 1 Month of Design",
     product: "Paper / Document Printing",
     qty: "1",
-    details: "14pt cardstock, 2-side, 8.5×11 in, matte lamination",
+    material: "14pt Cardstock",
+    sidesChipLabel: "2-side",
+    size: '8.5" x 11"',
+    process: "Matte lamination",
     unitPrice: "10.00",
   },
   {
     title: "",
     product: "Business Cards",
     qty: "250",
-    details: "14pt, 2-side, 3.5×2 in",
+    material: "14pt Cardstock",
+    sidesChipLabel: "2-side",
+    size: '3.5" x 2"',
+    process: "",
     unitPrice: "0.18",
   },
 ] as const;
@@ -152,18 +168,38 @@ test("Custom Quote — reproduce invoice #980 and capture tutorial PNGs", async 
         await addBtn.click();
       }
 
-      // Fill the i-th item's fields (data-testid would be cleaner; selector by order works for now)
+      // The modal uses combobox <input>s for product + spec fields. Each input has
+      // a predictable id prefix (pr-title-, pr-product-, pr-mat-, pr-size-, etc),
+      // so we can index by .nth(i) to target the i-th item.
       const titleInputs = page.locator('input[id^="pr-title-"]');
-      const productSelects = page.locator('select[id^="pr-product-"]');
+      const productInputs = page.locator('input[id^="pr-product-"]');
+      const materialInputs = page.locator('input[id^="pr-mat-"]');
+      const sizeInputs = page.locator('input[id^="pr-size-"]');
+      const processInputs = page.locator('input[id^="pr-proc-"]');
       const qtyInputs = page.locator('input[id^="pr-qty-"]');
-      const detailsInputs = page.locator('input[id^="pr-details-"]');
       const unitInputs = page.locator('input[id^="pr-unit-"]');
       const amountInputs = page.locator('input[id^="pr-amount-"]');
 
       if (line.title) await titleInputs.nth(i).fill(line.title);
-      await productSelects.nth(i).selectOption(line.product);
+
+      // Product field is a combobox now — fill the input, close the dropdown
+      await productInputs.nth(i).fill(line.product);
+      // Close the dropdown by blurring (tab away to qty)
+      await productInputs.nth(i).press("Tab");
+
       await qtyInputs.nth(i).fill(line.qty);
-      await detailsInputs.nth(i).fill(line.details);
+      await materialInputs.nth(i).fill(line.material);
+
+      // Sides is a chip-only field (no free-text input). Click the chip on the i-th row.
+      // Each item card has its own row of 3 sides chips — locate by text within the
+      // modal then take the i-th matching instance.
+      if (line.sidesChipLabel) {
+        const sidesChip = page.locator(`button:has-text("${line.sidesChipLabel}")`).nth(i);
+        await sidesChip.click({ trial: false, force: false }).catch(() => {/* chip absent for this row is ok */});
+      }
+
+      if (line.size) await sizeInputs.nth(i).fill(line.size);
+      if (line.process) await processInputs.nth(i).fill(line.process);
       await unitInputs.nth(i).fill(line.unitPrice);
 
       // Trigger the auto-calc by blurring
@@ -177,6 +213,22 @@ test("Custom Quote — reproduce invoice #980 and capture tutorial PNGs", async 
       });
       await page.screenshot({ path: path.join(OUT_DIR, `0${stepNum}-line-${i + 1}.png`), fullPage: false });
     }
+
+    // ─── Step 7b — Demo the "Add Fee" picker (shipped 2026-05-11) ─────────
+    // Capture a screenshot of the Add Fee picker open, then close it without adding
+    // a fee (Invoice #980 has no fee line).
+    const addFeeBtn = page.getByRole("button", { name: /Add Fee/i });
+    await addFeeBtn.click();
+    await page.waitForTimeout(150);
+    await annotate(page, addFeeBtn, {
+      step: 8,
+      label: "+ Add Fee — Installation / Delivery / Design / Rush / Custom. Every default $ amount is editable per job.",
+      captionPosition: "top",
+    });
+    await page.screenshot({ path: path.join(OUT_DIR, "07b-add-fee-picker.png"), fullPage: false });
+    // Close the picker without selecting
+    await addFeeBtn.click();
+    await page.waitForTimeout(100);
 
     // ─── Step 8 — Highlight the totals panel (invoice #980 expected: $134.31) ──
     const totalsLocator = page.locator("text=Subtotal").first().locator("..").locator("..");
@@ -288,17 +340,39 @@ When you arrive via the **Custom Quote** link, the Quote-only toggle starts ON. 
 
 ![Step 3 — customer fields](./03-customer-fields.png)
 
-Type the customer's email first — if they've ordered before, name/company/phone autofill. New customers get a Supabase account created automatically.
+Two ways to load a customer:
+
+- **Type the email** — if they've ordered before, name/company/phone autofill automatically.
+- **Click "Browse past customers →"** in the top-right of Step 2 — opens a search dialog. Type any part of their name, email, or company. Click a row → all their info fills in. **Best for returning customers when you don't remember their email.**
+
+New customers get a Supabase account created automatically when you send the quote/invoice.
 
 ## 4. Line 1 — "Your Off-Site Creative Department" (foamboard 11×17, qty 2)
 
 ![Step 4 — line 1](./04-line-1.png)
 
-- **Line Title:** "Your Off-Site Creative Department" (shows on invoice as headline)
-- **Product:** Foamboard Displays (the dropdown is for categorization, not pricing)
+Each item card now uses the same shape Albert uses in his quotes — **Material / Sides / Size / Process** as separate fields. Every field accepts a click-a-chip shortcut OR typed text.
+
+- **Line Title:** "Your Off-Site Creative Department" (shows on the invoice as the headline)
+- **Product:** type "Foamboard" — combobox suggests matches. Or pick **Foamboard Displays** from the dropdown. **You can type ANYTHING here** — if it's not in the list (e.g. "Plinko Stickers", "Shelf Talkers", "Yard Signs"), it's used as-is. No more falling back to "Other".
 - **Qty:** 2
-- **Size & Details:** "5mm foamboard, 1-side, 11×17 in, matte lamination"
+- **Material:** click the **5mm Foamboard** chip — fills the field. Or type your own.
+- **Sides:** click **1-side** chip → fills "One side full colour printing" (matches Albert's wording).
+- **Size:** type \`11" x 17"\`
+- **Process:** click **Matte lamination** chip. Multi-select OK — click multiple chips and they join with " / " (e.g. "Gloss lamination / Die cut").
 - **Unit Price:** $18.00 → **Line Total** auto-fills to $36.00
+
+The customer will see this in the email as a clean spec block:
+
+\`\`\`
+Material : 5mm Foamboard
+Colour   : One side full colour printing
+Size     : 11" x 17"
+Process  : Matte lamination
+Quantity : 2
+Unit Price : $ 18.00 for each
+Total amount : $ 36.00 plus tax
+\`\`\`
 
 ## 5. Line 2 — "The Power of Branding" (foamboard 18×24, qty 1)
 
@@ -308,15 +382,15 @@ Click **+ Add Item** at the bottom of the items list (up to 10 lines per quote).
 
 ![Step 5 — line 2](./05-line-2.png)
 
-Same Foamboard Displays category, different size + price.
+Same chip flow — 5mm Foamboard / 1-side / Matte lamination — just a different size.
 
-## 6. Line 3 — "Win 1 Month of Design" (cardstock flyer 8.5×11, qty 1)
+## 6. Line 3 — "Win 1 Month of Design" (cardstock 8.5×11, qty 1)
 
 ![Step 6a — + Add Item](./06a-add-item.png)
 
 ![Step 6 — line 3](./06-line-3.png)
 
-Cardstock with lamination at qty 1 — something the estimator catalog can't generate. Pick **"Paper / Document Printing"** category (or **"Flyers & Brochures"**) and type the exact price.
+Pick **Paper / Document Printing** as the product. Material chip: **14pt Cardstock**. Sides: **2-side**. Process: **Matte lamination**.
 
 ## 7. Line 4 — Business Cards (250 × $0.18)
 
@@ -324,7 +398,25 @@ Cardstock with lamination at qty 1 — something the estimator catalog can't gen
 
 ![Step 7 — line 4](./07-line-4.png)
 
-No title needed — the product name speaks for itself. Type **$0.18** unit price, qty **250** → line total auto-fills to **$45.00**.
+No title needed — the product name speaks for itself. Material **14pt Cardstock**, sides **2-side**, size \`3.5" x 2"\`. Unit Price $0.18 × Qty 250 → line total auto-fills to **$45.00**.
+
+## 7b. (Optional) Add a fee
+
+![Step 7b — Add Fee picker](./07b-add-fee-picker.png)
+
+For Installation, Delivery, Design, Rush, Parking, Removal, or any custom fee — click **+ Add Fee** instead of + Add Item. A picker drops down with the common fee types and their *default* amounts:
+
+- Installation Fee — default $150
+- Delivery Fee — default $60
+- Design Fee — default $40
+- Rush Fee — default $40
+- Removal Service — blank (type your own)
+- Parking Fee — blank
+- Custom Fee — blank
+
+**The default amounts are just hints.** Once added, type whatever this specific job actually costs. A 4-hour install isn't $150 — make it $300. A simple drop-off delivery isn't $60 — make it $20. **Everything is editable per job.**
+
+Fee lines render as a single line in the customer email — no spec block, just **Name : $Amount plus tax**.
 
 ## 8. Confirm totals match Wave invoice #980
 

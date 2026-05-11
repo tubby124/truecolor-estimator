@@ -67,6 +67,90 @@ function extractDetails(productName: string): string {
 }
 
 /**
+ * Parse a stored product_name string back into structured spec fields, so
+ * "Reorder" from a past customer's order fills the new Material/Sides/Size/Process
+ * chips correctly.
+ *
+ * Input shape (from formatItemLabel in the manual-order route):
+ *   "{qty}x {title} ({product}) — {material}, {sides}, {size}, {process}, {details}"
+ *   or
+ *   "{qty}x {product} — {material}, {sides}, {size}, {process}"
+ *
+ * Best-effort heuristic — maps each comma-separated chunk to whichever spec
+ * field it most plausibly belongs to (material/sides/size/process). Anything
+ * we can't classify falls through to `details`. Old orders that predate the
+ * spec-field upgrade will degrade gracefully — fields stay empty, the email
+ * falls back to the legacy 1-line render.
+ */
+function parseProductNameToSpec(productName: string): {
+  title: string;
+  product: string;
+  material: string;
+  sides: string;
+  size: string;
+  process: string;
+  details: string;
+} {
+  const result = { title: "", product: "", material: "", sides: "", size: "", process: "", details: "" };
+  if (!productName) return result;
+
+  // Split off the spec portion (after " — ")
+  const dashIdx = productName.indexOf(" \u2014 ");
+  const namePart = dashIdx >= 0 ? productName.slice(0, dashIdx).trim() : productName.trim();
+  const specPart = dashIdx >= 0 ? productName.slice(dashIdx + 3).trim() : "";
+
+  // namePart shape: "Nx Title (Product)" OR "Nx Product"
+  // Strip qty prefix
+  const qtyStripped = namePart.replace(/^\d+x\s+/i, "").trim();
+
+  // Look for trailing parenthesized product category: "Title (Product)"
+  const parenMatch = qtyStripped.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  if (parenMatch) {
+    result.title = parenMatch[1].trim();
+    result.product = parenMatch[2].trim();
+  } else {
+    result.product = qtyStripped;
+  }
+
+  if (!specPart) return result;
+
+  // Classify each spec chunk by checking against the chip libraries
+  const chunks = specPart.split(/\s*,\s*/).map((s) => s.trim()).filter(Boolean);
+  const sidesValues = new Set(SIDES_CHIPS.map((c) => c.value.toLowerCase()));
+  const processWords = ["lamination", "die cut", "die-cut", "grommet", "h-stake", "pre-mask", "premask", "running number"];
+  const unclassified: string[] = [];
+
+  for (const chunk of chunks) {
+    const lower = chunk.toLowerCase();
+
+    if (!result.material && MATERIAL_CHIPS.some((m) => m.toLowerCase() === lower || lower.includes(m.toLowerCase()))) {
+      // matches a known material chip
+      const matched = MATERIAL_CHIPS.find((m) => m.toLowerCase() === lower || lower.includes(m.toLowerCase()));
+      result.material = matched ?? chunk;
+      continue;
+    }
+    if (!result.sides && sidesValues.has(lower)) {
+      result.sides = chunk;
+      continue;
+    }
+    if (!result.size && /\d.*(?:["']|in\b|cm\b|ft\b|x\s*\d)/i.test(chunk)) {
+      // looks like dimensions: contains a digit + (" or in/cm/ft or x N)
+      result.size = chunk;
+      continue;
+    }
+    if (!result.process && processWords.some((w) => lower.includes(w))) {
+      result.process = chunk;
+      continue;
+    }
+    unclassified.push(chunk);
+  }
+
+  // Anything we couldn't classify becomes free-text details
+  if (unclassified.length > 0) result.details = unclassified.join(", ");
+  return result;
+}
+
+/**
  * OrderItem represents one row in the quote. Two flavours:
  *   - kind="product" — printed item (Coroplast Sign, sticker, etc.) with spec block
  *   - kind="fee"     — service line (Installation, Delivery, Design, Rush, Custom)
@@ -357,20 +441,27 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
 
   function handleReorder(order: PastOrder) {
     if (!order.order_items || order.order_items.length === 0) return;
-    const reorderItems: OrderItem[] = order.order_items.slice(0, MAX_ITEMS).map((oi) => ({
-      id: crypto.randomUUID(),
-      kind: "product" as const,
-      title: "",
-      product: matchProduct(oi.product_name),
-      material: "",
-      sides: "",
-      size: "",
-      process: "",
-      qty: String(oi.qty),
-      details: extractDetails(oi.product_name),
-      unitPrice: "",
-      amount: String(oi.line_total),
-    }));
+    const reorderItems: OrderItem[] = order.order_items.slice(0, MAX_ITEMS).map((oi) => {
+      const spec = parseProductNameToSpec(oi.product_name);
+      // If parser couldn't pull a product out (legacy data, weird names), fall
+      // back to the loose matcher so the combobox still gets a category.
+      const product = spec.product || matchProduct(oi.product_name);
+      const unit = oi.qty > 0 ? Math.round((oi.line_total / oi.qty) * 100) / 100 : 0;
+      return {
+        id: crypto.randomUUID(),
+        kind: "product" as const,
+        title: spec.title,
+        product,
+        material: spec.material,
+        sides: spec.sides,
+        size: spec.size,
+        process: spec.process,
+        qty: String(oi.qty),
+        details: spec.details,
+        unitPrice: unit > 0 ? unit.toFixed(2) : "",
+        amount: String(oi.line_total),
+      };
+    });
     setForm((prev) => ({ ...prev, items: reorderItems }));
     setPastOrdersOpen(false);
   }
