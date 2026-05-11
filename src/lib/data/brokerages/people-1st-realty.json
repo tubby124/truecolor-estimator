@@ -23,17 +23,17 @@
   "productGroups": [
     {
       "title": "For Sale Signs",
-      "intro": "Aluminum For Sale signs with UV-printed branding. Coroplast directionals for sub-streets and rural use.",
+      "intro": "Aluminum For Sale signs with UV-printed branding. Coroplast directionals for sub-streets and rural use. Design fee +$35 if your sign needs a photo composite or copy changes.",
       "layout": "list",
       "products": [
         {
           "id": "for-sale-aluminum-24x30",
           "label": "For Sale Sign — Aluminum 24×30\"",
-          "blurb": "UV film on aluminum. Grommets 2\" inset. Mounts to standard frame.",
+          "blurb": "UV film on aluminum composite panel (ACP). Grommets 2\" inset. Mounts to standard frame.",
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-diana.jpg",
           "imageOrientation": "landscape",
-          "unitPrice": 110,
-          "bulkTiers": [{ "minQty": 4, "unitPrice": 99 }],
+          "unitPrice": 95,
+          "bulkTiers": [{ "minQty": 10, "unitPrice": 90 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
           "sidesPicker": true,
           "tcCategory": "ACP"
@@ -41,11 +41,11 @@
         {
           "id": "for-sale-aluminum-picture-24x30",
           "label": "For Sale Sign with Photo — Aluminum 24×30\"",
-          "blurb": "UV film on aluminum with agent photo + QR code. Grommets 2\" inset.",
+          "blurb": "UV film on ACP with agent photo + QR code. Grommets 2\" inset. One-time +$35 design fee if your photo needs to be composited.",
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-portrait-photo.png",
           "imageOrientation": "portrait",
-          "unitPrice": 110,
-          "bulkTiers": [{ "minQty": 4, "unitPrice": 100 }],
+          "unitPrice": 95,
+          "bulkTiers": [{ "minQty": 10, "unitPrice": 90 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
           "sidesPicker": true,
           "tcCategory": "ACP"
@@ -53,25 +53,20 @@
         {
           "id": "for-sale-condo-aluminum-32x12",
           "label": "For Sale — Condo Sign 32×12\" (double-sided)",
-          "blurb": "Aluminum, UV film, double-sided. Designed for hanging in condo lobbies.",
+          "blurb": "Aluminum composite panel, UV film, double-sided. Designed for hanging in condo lobbies. Minimum-charge price applies.",
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-portrait-condo.png",
           "imageOrientation": "portrait",
-          "unitPrice": 90,
-          "bulkTiers": [{ "minQty": 3, "unitPrice": 76 }],
+          "unitPrice": 60,
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
           "tcCategory": "ACP"
         },
         {
           "id": "for-sale-directional-coro-24x12-2s",
           "label": "For Sale Directional — Coroplast 24×12\" (double-sided)",
-          "blurb": "4mm coroplast directional with arrow. Includes step stakes.",
+          "blurb": "4mm coroplast directional with arrow. Includes step stakes. $30 min charge per sign.",
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-directional.png",
           "imageOrientation": "landscape",
-          "unitPrice": 33,
-          "bulkTiers": [
-            { "minQty": 10, "unitPrice": 24 },
-            { "minQty": 15, "unitPrice": 20 }
-          ],
+          "unitPrice": 30,
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
           "tcCategory": "SIGN"
         },
@@ -82,24 +77,16 @@
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-template.png",
           "imageOrientation": "landscape",
           "unitPrice": 35,
-          "bulkTiers": [
-            { "minQty": 10, "unitPrice": 26 },
-            { "minQty": 15, "unitPrice": 22 }
-          ],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
           "tcCategory": "SIGN"
         },
         {
           "id": "for-sale-directional-coro-24x12-1s",
           "label": "For Sale Directional — Coroplast 24×12\" (single-sided)",
-          "blurb": "Single-sided for rural / tree-mount installs. Includes step stakes.",
+          "blurb": "Single-sided 4mm coroplast for rural / tree-mount installs. Includes step stakes. $30 min charge per sign.",
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-directional.png",
           "imageOrientation": "landscape",
-          "unitPrice": 24,
-          "bulkTiers": [
-            { "minQty": 10, "unitPrice": 15 },
-            { "minQty": 15, "unitPrice": 10 }
-          ],
+          "unitPrice": 30,
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
           "tcCategory": "SIGN"
         }
@@ -107,42 +94,38 @@
     },
     {
       "title": "Open House Signs",
-      "intro": "Sandwich boards for property exposure. Coroplast directionals to point visitors to the listing.",
+      "intro": "Aluminum sandwich boards for property exposure. Coroplast directionals to point visitors to the listing.",
       "layout": "list",
       "products": [
         {
           "id": "open-house-sandwich-1s",
           "label": "Open House Sandwich Board (single-sided)",
-          "blurb": "UV film on aluminum. A-frame style. Reusable across listings.",
+          "blurb": "UV film on aluminum composite panel. A-frame style. Reusable across listings.",
           "imageSrc": "/images/brokerages/people-1st-realty/open-house-landscape.png",
           "imageOrientation": "landscape",
-          "unitPrice": 125,
-          "bulkTiers": [{ "minQty": 6, "unitPrice": 99 }],
+          "unitPrice": 78,
+          "bulkTiers": [{ "minQty": 10, "unitPrice": 74 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
           "tcCategory": "ACP"
         },
         {
           "id": "open-house-sandwich-2s",
           "label": "Open House Sandwich Board (double-sided)",
-          "blurb": "UV film on aluminum. \"Open House\" + \"New Listing\" on opposite faces.",
+          "blurb": "UV film on aluminum composite panel. \"Open House\" + \"New Listing\" on opposite faces.",
           "imageSrc": "/images/brokerages/people-1st-realty/open-house-landscape.png",
           "imageOrientation": "landscape",
-          "unitPrice": 170,
-          "bulkTiers": [{ "minQty": 6, "unitPrice": 145 }],
+          "unitPrice": 114,
+          "bulkTiers": [{ "minQty": 10, "unitPrice": 108 }],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10],
           "tcCategory": "ACP"
         },
         {
           "id": "open-house-directional-coro-24x12-2s",
           "label": "Open House Directional — Coroplast 24×12\" (double-sided)",
-          "blurb": "4mm coroplast directional with arrow. Includes step stakes.",
+          "blurb": "4mm coroplast directional with arrow. Includes step stakes. $30 min charge per sign.",
           "imageSrc": "/images/brokerages/people-1st-realty/open-house-landscape-template.png",
           "imageOrientation": "landscape",
-          "unitPrice": 33,
-          "bulkTiers": [
-            { "minQty": 10, "unitPrice": 24 },
-            { "minQty": 15, "unitPrice": 20 }
-          ],
+          "unitPrice": 30,
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
           "tcCategory": "SIGN"
         },
@@ -153,10 +136,6 @@
           "imageSrc": "/images/brokerages/people-1st-realty/open-house-portrait-directional.png",
           "imageOrientation": "portrait",
           "unitPrice": 35,
-          "bulkTiers": [
-            { "minQty": 10, "unitPrice": 26 },
-            { "minQty": 15, "unitPrice": 22 }
-          ],
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
           "tcCategory": "SIGN"
         }
@@ -164,7 +143,7 @@
     },
     {
       "title": "Sign Toppers",
-      "intro": "Topper bars that bolt onto the For Sale frame. Pick the message + material — we print and ship.",
+      "intro": "Topper bars that bolt onto the For Sale frame. Pick the message + material — we print and ship. $30 min charge per topper.",
       "layout": "topper-grid",
       "products": [
         {
@@ -176,8 +155,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -189,8 +168,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -202,8 +181,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -215,8 +194,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -228,8 +207,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -241,8 +220,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -254,8 +233,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -267,8 +246,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -280,8 +259,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -293,8 +272,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -306,8 +285,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         },
         {
@@ -319,8 +298,8 @@
           "tcCategory": "SIGN",
           "isTopper": true,
           "materialOptions": [
-            { "id": "4mm", "label": "4mm Coroplast — $23", "unitPrice": 23 },
-            { "id": "10mm", "label": "10mm Coroplast — $28", "unitPrice": 28 }
+            { "id": "4mm", "label": "4mm Coroplast — $30", "unitPrice": 30 },
+            { "id": "10mm", "label": "10mm Coroplast — $35", "unitPrice": 35 }
           ]
         }
       ]
