@@ -526,8 +526,8 @@ export function PortalOrderForm({
           <p className="text-2xl font-bold tabular-nums text-[#1c1712]">{fmt(subtotal)}</p>
         </div>
         <p className="text-xs text-gray-500 mb-4">
-          Indicative subtotal — taxes and shipping confirmed on your final invoice after proof
-          approval.
+          Indicative subtotal — each price already includes design proof, setup, cutting &
+          packing. Taxes and shipping confirmed on your final invoice after proof approval.
         </p>
 
         {error ? (
@@ -647,7 +647,11 @@ function ProductList({
                             .join(" · ")}
                         </span>
                       </>
-                    ) : null}
+                    ) : (
+                      <span className="text-gray-400">
+                        {" "}· min per design (covers proof + setup)
+                      </span>
+                    )}
                   </span>
                 </span>
               </button>

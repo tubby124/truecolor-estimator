@@ -84,6 +84,22 @@ export default async function BrokerageOrderPortal({ params }: PageProps) {
             <li>Approve the proof, get a Clover payment link, pay your own card.</li>
             <li>We print in Saskatoon and ship straight to your address.</li>
           </ol>
+
+          <div className="mt-5 pt-4 border-t border-gray-100">
+            <p className="text-sm font-semibold text-[#1c1712] mb-1.5">
+              About the prices you&apos;ll see
+            </p>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Each item shows its{" "}
+              <span className="font-semibold">per-piece price</span> including the design
+              proof, press setup, cutting, and packing — same fixed cost whether you
+              order 1 or 10. Smaller items (toppers, directionals) have a{" "}
+              <span className="font-semibold">$30 minimum per design</span> because of
+              those built-in costs. Larger signs (For Sale, Open House) drop the per-unit
+              price at 10+ quantity.
+            </p>
+          </div>
+
           <p className="text-xs text-gray-500 mt-4">
             Your brand files live with us — you don&apos;t need to upload artwork. We pull from{" "}
             <span className="font-semibold text-gray-700">{brokerage.name}&apos;s asset folder</span>{" "}
