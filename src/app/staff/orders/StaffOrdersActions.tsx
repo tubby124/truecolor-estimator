@@ -16,7 +16,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
-import { PRODUCT_OPTIONS } from "@/lib/constants/products";
+import {
+  PRODUCT_OPTIONS,
+  MATERIAL_CHIPS,
+  SIDES_CHIPS,
+  PROCESS_CHIPS,
+  FEE_PRESETS,
+} from "@/lib/constants/products";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -60,13 +66,29 @@ function extractDetails(productName: string): string {
   return idx >= 0 ? productName.slice(idx + 3).trim() : "";
 }
 
+/**
+ * OrderItem represents one row in the quote. Two flavours:
+ *   - kind="product" — printed item (Coroplast Sign, sticker, etc.) with spec block
+ *   - kind="fee"     — service line (Installation, Delivery, Design, Rush, Custom)
+ *
+ * Structured spec fields (material/sides/process/size) feed the Albert-format
+ * email render. They're all optional — staff can leave them blank and just type
+ * everything into `details` if they want.
+ */
 interface OrderItem {
   id: string;
+  kind: "product" | "fee";
   title: string;       // optional project title shown on invoice (e.g. "The Power of Branding")
-  product: string;
+  product: string;     // for kind="product": category. for kind="fee": fee name (e.g. "Installation Fee")
+  // ── Spec block fields (kind="product" only) ──
+  material: string;    // "4mm Coroplast"
+  sides: string;       // "One side full colour printing"
+  size: string;        // "24 x 36 in"
+  process: string;     // "Gloss lamination / die cut" — multiple values join with " / "
+  // ── Common fields ──
   qty: string;
-  details: string;
-  unitPrice: string;   // optional — when present, amount auto-fills to qty * unitPrice
+  details: string;     // free-text extras (notes, special instructions)
+  unitPrice: string;   // when present, amount auto-fills to qty * unitPrice
   amount: string;
 }
 
@@ -82,7 +104,46 @@ interface FormState {
 }
 
 function makeItem(): OrderItem {
-  return { id: crypto.randomUUID(), title: "", product: "", qty: "1", details: "", unitPrice: "", amount: "" };
+  return {
+    id: crypto.randomUUID(),
+    kind: "product",
+    title: "",
+    product: "",
+    material: "",
+    sides: "",
+    size: "",
+    process: "",
+    qty: "1",
+    details: "",
+    unitPrice: "",
+    amount: "",
+  };
+}
+
+function makeFee(preset: { label: string; defaultAmount: number }): OrderItem {
+  return {
+    id: crypto.randomUUID(),
+    kind: "fee",
+    title: "",
+    product: preset.label,
+    material: "",
+    sides: "",
+    size: "",
+    process: "",
+    qty: "1",
+    details: "",
+    unitPrice: "",
+    amount: preset.defaultAmount > 0 ? preset.defaultAmount.toFixed(2) : "",
+  };
+}
+
+/** Toggle a value into a " / " separated list (for Process chips). */
+function toggleInList(current: string, value: string): string {
+  const parts = current.split(/\s*\/\s*/).map((s) => s.trim()).filter(Boolean);
+  const idx = parts.indexOf(value);
+  if (idx >= 0) parts.splice(idx, 1);
+  else parts.push(value);
+  return parts.join(" / ");
 }
 
 // Default is quote_only=true. Safer for staff: customer reviews the price first,
@@ -124,6 +185,17 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const [pastOrdersOpen, setPastOrdersOpen] = useState(false);
   const [pastOrders, setPastOrders] = useState<PastOrder[]>([]);
   const [pastOrdersLoading, setPastOrdersLoading] = useState(false);
+  const [feePickerOpen, setFeePickerOpen] = useState(false);
+  // Per-item combobox state — which row has its product dropdown open
+  const [productOpenId, setProductOpenId] = useState<string | null>(null);
+  // Customer search (browse all customers) state
+  const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  const [customerSearchQuery, setCustomerSearchQuery] = useState("");
+  const [customerSearchResults, setCustomerSearchResults] = useState<
+    Array<{ id: string; email: string; name: string; company: string | null; phone: string | null; order_count: number }>
+  >([]);
+  const [customerSearchLoading, setCustomerSearchLoading] = useState(false);
+  const customerSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lookupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toasts, showToast, dismissToast } = useToast();
 
@@ -156,6 +228,41 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         setCustomerLookup({ status: "idle" });
       }
     }, 400);
+  }, []);
+
+  const runCustomerSearch = useCallback((q: string) => {
+    if (customerSearchTimerRef.current) clearTimeout(customerSearchTimerRef.current);
+    customerSearchTimerRef.current = setTimeout(async () => {
+      setCustomerSearchLoading(true);
+      try {
+        const res = await fetch(`/api/staff/customer-search?q=${encodeURIComponent(q)}`);
+        if (!res.ok) { setCustomerSearchResults([]); return; }
+        const data = await res.json() as { customers: typeof customerSearchResults };
+        setCustomerSearchResults(data.customers);
+      } catch {
+        setCustomerSearchResults([]);
+      } finally {
+        setCustomerSearchLoading(false);
+      }
+    }, 200);
+  }, [customerSearchResults]);
+
+  const openCustomerSearch = useCallback(() => {
+    setCustomerSearchOpen(true);
+    setCustomerSearchQuery("");
+    runCustomerSearch("");
+  }, [runCustomerSearch]);
+
+  const pickCustomer = useCallback((c: { email: string; name: string; company: string | null; phone: string | null }) => {
+    setForm((prev) => ({
+      ...prev,
+      email: c.email,
+      name: c.name || prev.name,
+      company: c.company ?? prev.company,
+      phone: c.phone ?? prev.phone,
+    }));
+    setCustomerLookup({ status: "found", name: c.name, company: c.company, phone: c.phone, orderCount: 0 });
+    setCustomerSearchOpen(false);
   }, []);
 
   const fetchPastOrders = useCallback(async (email: string) => {
@@ -237,6 +344,12 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     setForm((prev) => ({ ...prev, items: [...prev.items, makeItem()] }));
   }
 
+  function addFee(preset: { label: string; defaultAmount: number }) {
+    if (form.items.length >= MAX_ITEMS) return;
+    setForm((prev) => ({ ...prev, items: [...prev.items, makeFee(preset)] }));
+    setFeePickerOpen(false);
+  }
+
   function removeItem(id: string) {
     if (form.items.length <= 1) return;
     setForm((prev) => ({ ...prev, items: prev.items.filter((it) => it.id !== id) }));
@@ -246,8 +359,13 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     if (!order.order_items || order.order_items.length === 0) return;
     const reorderItems: OrderItem[] = order.order_items.slice(0, MAX_ITEMS).map((oi) => ({
       id: crypto.randomUUID(),
+      kind: "product" as const,
       title: "",
       product: matchProduct(oi.product_name),
+      material: "",
+      sides: "",
+      size: "",
+      process: "",
       qty: String(oi.qty),
       details: extractDetails(oi.product_name),
       unitPrice: "",
@@ -280,8 +398,13 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
             phone: form.phone.trim() || undefined,
           },
           items: form.items.map((it) => ({
+            kind: it.kind,
             title: it.title.trim() || undefined,
             product: it.product.trim(),
+            material: it.material.trim() || undefined,
+            sides: it.sides.trim() || undefined,
+            size: it.size.trim() || undefined,
+            process: it.process.trim() || undefined,
             qty: parseInt(it.qty) || 1,
             details: it.details.trim() || undefined,
             unitPrice: it.unitPrice.trim() ? parseFloat(it.unitPrice) : undefined,
@@ -546,7 +669,16 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
 
                     {/* ── CUSTOMER ── */}
                     <div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Step 2 · Who is it for?</p>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Step 2 · Who is it for?</p>
+                        <button
+                          type="button"
+                          onClick={openCustomerSearch}
+                          className="text-[11px] font-semibold text-emerald-600 hover:text-emerald-800 underline underline-offset-2"
+                        >
+                          Browse past customers →
+                        </button>
+                      </div>
                       <div className="space-y-3">
                         {/* Email — first so lookup fires immediately */}
                         <div>
@@ -666,7 +798,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                               {/* Item header */}
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                  Item {idx + 1}
+                                  {item.kind === "fee" ? "Fee" : `Item ${idx + 1}`}
                                   {item.title && <span className="text-gray-500 font-semibold ml-1.5 normal-case tracking-normal">{item.title}</span>}
                                   {!item.title && item.product && <span className="text-gray-300 font-normal ml-1.5 normal-case tracking-normal">{item.product}</span>}
                                 </span>
@@ -682,127 +814,338 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                 )}
                               </div>
 
-                              {/* Title (optional, shows as invoice line headline) */}
-                              <div>
-                                <label htmlFor={`pr-title-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                  Line Title <span className="text-gray-300 font-normal">(optional — shows on the invoice)</span>
-                                </label>
-                                <input
-                                  id={`pr-title-${item.id}`}
-                                  type="text"
-                                  value={item.title}
-                                  onChange={(e) => setItem(item.id, "title", e.target.value)}
-                                  placeholder='e.g. "The Power of Branding"'
-                                  className={inputClass}
-                                />
-                              </div>
-
-                              {/* Product + Qty row */}
-                              <div className="grid grid-cols-[1fr_80px] gap-2">
-                                <div>
-                                  <label htmlFor={`pr-product-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                    Product <span className="text-red-500">*</span>
-                                  </label>
-                                  <select
-                                    id={`pr-product-${item.id}`}
-                                    value={item.product}
-                                    onChange={(e) => setItem(item.id, "product", e.target.value)}
-                                    className={`${inputClass} ${!item.product ? "text-gray-400" : ""}`}
-                                  >
-                                    <option value="">Select product...</option>
-                                    {PRODUCT_OPTIONS.map((opt) => (
-                                      <option key={opt} value={opt}>{opt}</option>
-                                    ))}
-                                  </select>
-                                  {item.product && !item.details.trim() && (
-                                    <p className="mt-1 text-[9px] text-amber-500 font-semibold">Add size &amp; specs below for production</p>
-                                  )}
-                                </div>
-                                <div>
-                                  <label htmlFor={`pr-qty-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                    Qty
-                                  </label>
-                                  <input
-                                    id={`pr-qty-${item.id}`}
-                                    type="number"
-                                    min="1"
-                                    max="99999"
-                                    value={item.qty}
-                                    onChange={(e) => setItem(item.id, "qty", e.target.value)}
-                                    className={inputClass}
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Details (full width) */}
-                              <div>
-                                <label htmlFor={`pr-details-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                  Size &amp; Details
-                                </label>
-                                <input
-                                  id={`pr-details-${item.id}`}
-                                  type="text"
-                                  value={item.details}
-                                  onChange={(e) => setItem(item.id, "details", e.target.value)}
-                                  placeholder='e.g. "5mm foamboard, 1-side, 11×17 in, matte lamination"'
-                                  className={inputClass}
-                                />
-                              </div>
-
-                              {/* Unit price + Amount row */}
-                              <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                  <label htmlFor={`pr-unit-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                    Unit Price <span className="text-gray-300 font-normal">(per piece)</span>
-                                  </label>
-                                  <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
+                              {item.kind === "fee" ? (
+                                // ── FEE LINE (simpler: just name + amount + notes) ──
+                                <>
+                                  <div>
+                                    <label htmlFor={`pr-fee-name-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                      Fee name <span className="text-red-500">*</span>
+                                    </label>
                                     <input
-                                      id={`pr-unit-${item.id}`}
-                                      type="number"
-                                      step="0.01"
-                                      min="0"
-                                      max="99999"
-                                      value={item.unitPrice}
-                                      onChange={(e) => setItem(item.id, "unitPrice", e.target.value)}
-                                      placeholder="0.00"
-                                      className={`${inputClass} pl-7`}
+                                      id={`pr-fee-name-${item.id}`}
+                                      type="text"
+                                      value={item.product}
+                                      onChange={(e) => setItem(item.id, "product", e.target.value)}
+                                      placeholder='e.g. "Installation Fee"'
+                                      className={inputClass}
                                     />
                                   </div>
-                                </div>
-                                <div>
-                                  <label htmlFor={`pr-amount-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                    Line Total <span className="text-red-500">*</span>
-                                  </label>
-                                  <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
+                                  <div>
+                                    <label htmlFor={`pr-fee-amount-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                      Amount <span className="text-red-500">*</span> <span className="text-gray-300 font-normal">(editable per job)</span>
+                                    </label>
+                                    <div className="relative">
+                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
+                                      <input
+                                        id={`pr-fee-amount-${item.id}`}
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        max="99999"
+                                        value={item.amount}
+                                        onChange={(e) => setItem(item.id, "amount", e.target.value)}
+                                        placeholder="0.00"
+                                        className={`${inputClass} pl-7`}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label htmlFor={`pr-fee-notes-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                      Notes <span className="text-gray-300 font-normal">(optional)</span>
+                                    </label>
                                     <input
-                                      id={`pr-amount-${item.id}`}
-                                      type="number"
-                                      step="0.01"
-                                      min="0.01"
-                                      max="99999"
-                                      value={item.amount}
-                                      onChange={(e) => setItem(item.id, "amount", e.target.value)}
-                                      placeholder="0.00"
-                                      className={`${inputClass} pl-7`}
+                                      id={`pr-fee-notes-${item.id}`}
+                                      type="text"
+                                      value={item.details}
+                                      onChange={(e) => setItem(item.id, "details", e.target.value)}
+                                      placeholder='e.g. "Onsite install, 2 hrs, 2 staff"'
+                                      className={inputClass}
                                     />
                                   </div>
-                                </div>
-                              </div>
+                                </>
+                              ) : (
+                                // ── PRODUCT LINE (with Albert-format spec block) ──
+                                <>
+                                  {/* Title (optional, shows as invoice line headline) */}
+                                  <div>
+                                    <label htmlFor={`pr-title-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                      Line Title <span className="text-gray-300 font-normal">(optional — shows on the invoice)</span>
+                                    </label>
+                                    <input
+                                      id={`pr-title-${item.id}`}
+                                      type="text"
+                                      value={item.title}
+                                      onChange={(e) => setItem(item.id, "title", e.target.value)}
+                                      placeholder='e.g. "The Power of Branding"'
+                                      className={inputClass}
+                                    />
+                                  </div>
+
+                                  {/* Product combobox (typeahead + free-text) + Qty */}
+                                  <div className="grid grid-cols-[1fr_80px] gap-2">
+                                    <div className="relative">
+                                      <label htmlFor={`pr-product-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                        Product <span className="text-red-500">*</span> <span className="text-gray-300 font-normal">(type anything or pick)</span>
+                                      </label>
+                                      <input
+                                        id={`pr-product-${item.id}`}
+                                        type="text"
+                                        value={item.product}
+                                        onChange={(e) => setItem(item.id, "product", e.target.value)}
+                                        onFocus={() => setProductOpenId(item.id)}
+                                        onBlur={() => setTimeout(() => setProductOpenId((cur) => (cur === item.id ? null : cur)), 150)}
+                                        placeholder="Coroplast Signs"
+                                        autoComplete="off"
+                                        className={inputClass}
+                                      />
+                                      {productOpenId === item.id && (
+                                        <div className="absolute z-20 left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                                          {PRODUCT_OPTIONS
+                                            .filter((opt) => !item.product.trim() || opt.toLowerCase().includes(item.product.toLowerCase()))
+                                            .map((opt) => (
+                                              <button
+                                                key={opt}
+                                                type="button"
+                                                onMouseDown={(e) => e.preventDefault()}
+                                                onClick={() => { setItem(item.id, "product", opt); setProductOpenId(null); }}
+                                                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                                              >
+                                                {opt}
+                                              </button>
+                                            ))}
+                                          {PRODUCT_OPTIONS.every((opt) => !opt.toLowerCase().includes(item.product.toLowerCase())) && item.product.trim() && (
+                                            <p className="px-3 py-2 text-xs text-gray-400 italic">No match — &ldquo;{item.product}&rdquo; will be used as-is</p>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <label htmlFor={`pr-qty-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                        Qty
+                                      </label>
+                                      <input
+                                        id={`pr-qty-${item.id}`}
+                                        type="number"
+                                        min="1"
+                                        max="99999"
+                                        value={item.qty}
+                                        onChange={(e) => setItem(item.id, "qty", e.target.value)}
+                                        className={inputClass}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* MATERIAL chips */}
+                                  <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <label htmlFor={`pr-mat-${item.id}`} className="block text-[10px] font-semibold text-gray-500">
+                                        Material <span className="text-gray-300 font-normal">(click a chip or type)</span>
+                                      </label>
+                                      {item.material && (
+                                        <button type="button" onClick={() => setItem(item.id, "material", "")} className="text-[10px] text-gray-400 hover:text-red-500 font-semibold">Clear</button>
+                                      )}
+                                    </div>
+                                    <input
+                                      id={`pr-mat-${item.id}`}
+                                      type="text"
+                                      value={item.material}
+                                      onChange={(e) => setItem(item.id, "material", e.target.value)}
+                                      placeholder="4mm Coroplast"
+                                      className={`${inputClass} mb-1.5`}
+                                    />
+                                    <div className="flex flex-wrap gap-1">
+                                      {MATERIAL_CHIPS.map((chip) => (
+                                        <button
+                                          key={chip}
+                                          type="button"
+                                          onClick={() => setItem(item.id, "material", item.material === chip ? "" : chip)}
+                                          className={`px-2 py-1 rounded-full text-[10px] font-semibold border transition-colors ${
+                                            item.material === chip
+                                              ? "bg-emerald-500 border-emerald-500 text-white"
+                                              : "bg-white border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700"
+                                          }`}
+                                        >
+                                          {chip}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* SIDES + SIZE row */}
+                                  <div className="grid grid-cols-[auto_1fr] gap-3 items-end">
+                                    <div>
+                                      <label className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                        Sides
+                                      </label>
+                                      <div className="flex gap-1">
+                                        {SIDES_CHIPS.map((chip) => (
+                                          <button
+                                            key={chip.label}
+                                            type="button"
+                                            onClick={() => setItem(item.id, "sides", item.sides === chip.value ? "" : chip.value)}
+                                            className={`px-2.5 py-2 rounded-lg text-[11px] font-semibold border transition-colors ${
+                                              item.sides === chip.value
+                                                ? "bg-emerald-500 border-emerald-500 text-white"
+                                                : "bg-white border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700"
+                                            }`}
+                                          >
+                                            {chip.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label htmlFor={`pr-size-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                        Size
+                                      </label>
+                                      <input
+                                        id={`pr-size-${item.id}`}
+                                        type="text"
+                                        value={item.size}
+                                        onChange={(e) => setItem(item.id, "size", e.target.value)}
+                                        placeholder='24" x 36"'
+                                        className={inputClass}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* PROCESS chips (multi-select) */}
+                                  <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <label htmlFor={`pr-proc-${item.id}`} className="block text-[10px] font-semibold text-gray-500">
+                                        Process <span className="text-gray-300 font-normal">(pick any combo)</span>
+                                      </label>
+                                      {item.process && (
+                                        <button type="button" onClick={() => setItem(item.id, "process", "")} className="text-[10px] text-gray-400 hover:text-red-500 font-semibold">Clear</button>
+                                      )}
+                                    </div>
+                                    <input
+                                      id={`pr-proc-${item.id}`}
+                                      type="text"
+                                      value={item.process}
+                                      onChange={(e) => setItem(item.id, "process", e.target.value)}
+                                      placeholder="Gloss lamination / die cut"
+                                      className={`${inputClass} mb-1.5`}
+                                    />
+                                    <div className="flex flex-wrap gap-1">
+                                      {PROCESS_CHIPS.map((chip) => {
+                                        const active = item.process.split(/\s*\/\s*/).map((s) => s.trim()).includes(chip);
+                                        return (
+                                          <button
+                                            key={chip}
+                                            type="button"
+                                            onClick={() => setItem(item.id, "process", toggleInList(item.process, chip))}
+                                            className={`px-2 py-1 rounded-full text-[10px] font-semibold border transition-colors ${
+                                              active
+                                                ? "bg-emerald-500 border-emerald-500 text-white"
+                                                : "bg-white border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700"
+                                            }`}
+                                          >
+                                            {chip}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+
+                                  {/* Notes (free text — extras the chips don't cover) */}
+                                  <div>
+                                    <label htmlFor={`pr-details-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                      Extra notes <span className="text-gray-300 font-normal">(optional)</span>
+                                    </label>
+                                    <input
+                                      id={`pr-details-${item.id}`}
+                                      type="text"
+                                      value={item.details}
+                                      onChange={(e) => setItem(item.id, "details", e.target.value)}
+                                      placeholder='e.g. "Included: measurement & install"'
+                                      className={inputClass}
+                                    />
+                                  </div>
+
+                                  {/* Unit price + Amount row */}
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                      <label htmlFor={`pr-unit-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                        Unit Price <span className="text-gray-300 font-normal">(per piece)</span>
+                                      </label>
+                                      <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
+                                        <input
+                                          id={`pr-unit-${item.id}`}
+                                          type="number"
+                                          step="0.01"
+                                          min="0"
+                                          max="99999"
+                                          value={item.unitPrice}
+                                          onChange={(e) => setItem(item.id, "unitPrice", e.target.value)}
+                                          placeholder="0.00"
+                                          className={`${inputClass} pl-7`}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label htmlFor={`pr-amount-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                        Line Total <span className="text-red-500">*</span>
+                                      </label>
+                                      <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
+                                        <input
+                                          id={`pr-amount-${item.id}`}
+                                          type="number"
+                                          step="0.01"
+                                          min="0.01"
+                                          max="99999"
+                                          value={item.amount}
+                                          onChange={(e) => setItem(item.id, "amount", e.target.value)}
+                                          placeholder="0.00"
+                                          className={`${inputClass} pl-7`}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </>
+                              )}
                             </motion.div>
                           ))}
                         </AnimatePresence>
 
-                        {/* Add Item button */}
+                        {/* Add Item / Add Fee buttons */}
                         {form.items.length < MAX_ITEMS && (
-                          <button
-                            type="button"
-                            onClick={addItem}
-                            className="w-full py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-semibold text-gray-400 hover:border-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer"
-                          >
-                            + Add Item
-                          </button>
+                          <div className="grid grid-cols-2 gap-2 relative">
+                            <button
+                              type="button"
+                              onClick={addItem}
+                              className="py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-semibold text-gray-400 hover:border-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer"
+                            >
+                              + Add Item
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setFeePickerOpen((v) => !v)}
+                              className="py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-semibold text-gray-400 hover:border-emerald-400 hover:text-emerald-600 transition-colors cursor-pointer"
+                            >
+                              + Add Fee
+                            </button>
+                            {feePickerOpen && (
+                              <div className="absolute z-20 left-0 right-0 top-full mt-1 rounded-lg border border-gray-200 bg-white shadow-lg p-2">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 pb-2">Pick a fee (amount editable)</p>
+                                <div className="space-y-0.5">
+                                  {FEE_PRESETS.map((preset) => (
+                                    <button
+                                      key={preset.label}
+                                      type="button"
+                                      onClick={() => addFee(preset)}
+                                      className="w-full flex items-center justify-between text-left px-3 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-md transition-colors"
+                                    >
+                                      <span>{preset.label}</span>
+                                      <span className="text-xs text-gray-400 tabular-nums">{preset.defaultAmount > 0 ? `$${preset.defaultAmount}` : "—"}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
 
@@ -943,6 +1286,90 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
 
                   </form>
                 )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Customer Search Modal ── */}
+      <AnimatePresence>
+        {customerSearchOpen && (
+          <>
+            <motion.div
+              key="cust-search-backdrop"
+              className="fixed inset-0 bg-black/50 z-[60]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setCustomerSearchOpen(false)}
+            />
+            <motion.div
+              key="cust-search-modal"
+              className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+            >
+              <div
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                  <div>
+                    <h2 className="text-lg font-bold text-[#1c1712]">Pick a customer</h2>
+                    <p className="text-xs text-gray-400 mt-0.5">Search name, email, or company</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCustomerSearchOpen(false)}
+                    className="rounded-lg p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                    aria-label="Close customer search"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="px-6 pt-4">
+                  <input
+                    type="text"
+                    value={customerSearchQuery}
+                    onChange={(e) => { setCustomerSearchQuery(e.target.value); runCustomerSearch(e.target.value); }}
+                    placeholder="Type a name, email, or company..."
+                    autoFocus
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2">
+                  {customerSearchLoading ? (
+                    <p className="text-sm text-gray-400 text-center py-4">Searching...</p>
+                  ) : customerSearchResults.length === 0 ? (
+                    <p className="text-sm text-gray-400 text-center py-4">No customers found. Use the email field to add a new customer.</p>
+                  ) : (
+                    customerSearchResults.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => pickCustomer(c)}
+                        className="w-full text-left rounded-xl border border-gray-200 bg-white hover:border-emerald-400 hover:bg-emerald-50 p-3 transition-colors"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-gray-800 truncate">{c.name || c.email}</p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {c.email}{c.company ? ` · ${c.company}` : ""}{c.phone ? ` · ${c.phone}` : ""}
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-semibold text-gray-400 whitespace-nowrap tabular-nums">
+                            {c.order_count} {c.order_count === 1 ? "order" : "orders"}
+                          </span>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
               </div>
             </motion.div>
           </>

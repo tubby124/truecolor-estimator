@@ -20,6 +20,17 @@ export interface PaymentRequestItem {
   qty: number;
   details?: string;
   amount: number;
+  // ── Albert-format spec fields (all optional) ──
+  // When present, the email body renders these as a multi-line spec block matching
+  // the format Albert has used in plain-text quotes for years. Falls back to a
+  // single-line description if none are set (preserves legacy behavior).
+  kind?: "product" | "fee";
+  material?: string;
+  sides?: string;
+  size?: string;
+  process?: string;
+  unitPrice?: number;
+  albertBlock?: string;  // pre-rendered multi-line block from the API route
 }
 
 export interface AccountInfo {
@@ -69,6 +80,93 @@ export async function sendPaymentRequestEmail(
   );
 }
 
+/**
+ * Render one line-item row.
+ *
+ * Three render modes (auto-detected from item shape):
+ *   1. FEE LINE         — kind="fee", short single-line "Name : $X plus tax"
+ *   2. ALBERT BLOCK     — kind="product" + ≥1 spec field (material/sides/size/process),
+ *                         renders multi-line "Material : ... / Colour : ... / Size : ..."
+ *   3. LEGACY FALLBACK  — no spec fields at all, renders the old "Nx Product — Details" format
+ *
+ * Every line in the spec block is conditional — we never print empty fields. The
+ * Quantity + Unit Price lines only appear when meaningful (qty > 1 or unitPrice > 0).
+ */
+function buildItemRowHtml(item: PaymentRequestItem): string {
+  const qtyPrefix = item.qty > 1 ? `${item.qty}x ` : "";
+
+  // ── 1. FEE LINE — no spec block ──
+  if (item.kind === "fee") {
+    const note = item.details?.trim() ? ` <span style="color:#9ca3af; font-weight: normal;">(${escHtml(item.details)})</span>` : "";
+    return `<tr style="background: #ffffff;">
+      <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; border-bottom: 1px solid #f0ebe4; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        <strong style="font-weight: 600;">${escHtml(item.product)}</strong>${note}
+      </td>
+      <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        $${item.amount.toFixed(2)}
+      </td>
+    </tr>`;
+  }
+
+  const hasSpecFields = !!(item.material?.trim() || item.sides?.trim() || item.size?.trim() || item.process?.trim());
+
+  // ── 2. ALBERT BLOCK — spec fields present ──
+  if (hasSpecFields) {
+    // Build the headline. Prefer title (project name) if set, otherwise product name.
+    // If both exist and differ, show "Title (Product)" so the customer sees both.
+    const titled = item.product?.trim() || "";
+    const headlineHtml = `<strong style="font-weight: 600; font-size: 14px; color: #111827;">${escHtml(qtyPrefix)}${escHtml(titled)}</strong>`;
+
+    // One line per filled spec field. Label column ~80px so columns align visually.
+    const specRows: string[] = [];
+    const addRow = (label: string, value: string) => {
+      specRows.push(
+        `<div style="display:flex; gap:8px; font-size:13px; line-height:1.55; color:#374151; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+          <span style="min-width:80px; color:#9ca3af; font-weight:600;">${escHtml(label)}</span>
+          <span style="color:#1f2937;">${escHtml(value)}</span>
+        </div>`
+      );
+    };
+
+    if (item.material?.trim()) addRow("Material", item.material.trim());
+    if (item.sides?.trim()) addRow("Colour", item.sides.trim());
+    if (item.size?.trim()) addRow("Size", item.size.trim());
+    if (item.process?.trim()) addRow("Process", item.process.trim());
+    addRow("Quantity", String(item.qty));
+    if (item.unitPrice && item.unitPrice > 0 && item.qty > 1) {
+      addRow("Unit Price", `$ ${item.unitPrice.toFixed(2)} for each`);
+    }
+    if (item.details?.trim()) addRow("Notes", item.details.trim());
+
+    return `<tr style="background: #ffffff;">
+      <td style="padding: 16px; border-bottom: 1px solid #f0ebe4; vertical-align: top;">
+        ${headlineHtml}
+        <div style="margin-top: 8px;">
+          ${specRows.join("")}
+        </div>
+      </td>
+      <td style="padding: 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        <strong style="font-weight: 700;">$${item.amount.toFixed(2)}</strong>
+        <div style="font-size:11px; color:#9ca3af; font-weight:400; margin-top:2px;">plus tax</div>
+      </td>
+    </tr>`;
+  }
+
+  // ── 3. LEGACY FALLBACK — no spec fields, render the old way ──
+  const details = item.details?.trim()
+    ? `<span style="font-size: 12px; color: #6b7280; display: block; margin-top: 2px;">${escHtml(item.details)}</span>`
+    : "";
+  return `<tr style="background: #ffffff;">
+    <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; border-bottom: 1px solid #f0ebe4; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+      <strong style="font-weight: 600;">${escHtml(qtyPrefix)}${escHtml(item.product)}</strong>
+      ${details}
+    </td>
+    <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+      $${item.amount.toFixed(2)}
+    </td>
+  </tr>`;
+}
+
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
@@ -81,20 +179,10 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
       ? "You can view and pay your invoice online using the button below."
       : "Click the button below to pay securely by credit card via Clover.";
 
-  // Build item rows
-  const itemRows = items.map((item) => {
-    const qty = item.qty > 1 ? `${item.qty}x ` : "";
-    const details = item.details?.trim() ? `<span style="font-size: 12px; color: #6b7280; display: block; margin-top: 2px;">${escHtml(item.details)}</span>` : "";
-    return `<tr style="background: #ffffff;">
-      <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; border-bottom: 1px solid #f0ebe4; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-        <strong style="font-weight: 600;">${escHtml(qty)}${escHtml(item.product)}</strong>
-        ${details}
-      </td>
-      <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-        $${item.amount.toFixed(2)}
-      </td>
-    </tr>`;
-  }).join("\n");
+  // Build item rows.
+  // Renders Albert's spec block (Material/Colour/Size/Process/Quantity/Unit Price/Total)
+  // when structured fields are present, falling back to a 1-line description otherwise.
+  const itemRows = items.map((item) => buildItemRowHtml(item)).join("\n");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -292,10 +380,21 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
   const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, quoteOnly, accountInfo, discount_code, discount_amount } = p;
 
-  const itemLines = items.map((item) => {
-    const qty = item.qty > 1 ? `${item.qty}x ` : "";
-    const details = item.details?.trim() ? ` — ${item.details}` : "";
-    return `  ${qty}${item.product}${details}  $${item.amount.toFixed(2)}`;
+  // Plain-text rendering uses Albert's pre-built block when available (kind="product"
+  // with spec fields), and falls back to a 1-line representation otherwise.
+  const itemLines: string[] = [];
+  items.forEach((item, idx) => {
+    if (idx > 0) itemLines.push("");
+    if (item.albertBlock && item.albertBlock.trim()) {
+      itemLines.push(...item.albertBlock.split("\n").map((l) => `  ${l}`));
+    } else if (item.kind === "fee") {
+      const note = item.details?.trim() ? ` (${item.details.trim()})` : "";
+      itemLines.push(`  ${item.product}${note} : $ ${item.amount.toFixed(2)} plus tax`);
+    } else {
+      const qty = item.qty > 1 ? `${item.qty}x ` : "";
+      const details = item.details?.trim() ? ` — ${item.details.trim()}` : "";
+      itemLines.push(`  ${qty}${item.product}${details}  $${item.amount.toFixed(2)}`);
+    }
   });
 
   const ctaBlock = quoteOnly

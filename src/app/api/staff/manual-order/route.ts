@@ -28,12 +28,19 @@ const GST_RATE = 0.05;
 const PST_RATE = 0.06;
 
 interface OrderItemInput {
-  title?: string;       // optional invoice line headline (overrides display name)
-  product: string;      // product category dropdown value
+  kind?: "product" | "fee";  // default "product" — fee lines skip the spec block
+  title?: string;            // optional invoice line headline (overrides display name)
+  product: string;           // product category OR fee name (e.g. "Installation Fee")
+  // ── Albert-format spec block (kind="product" only — all optional) ──
+  material?: string;         // "4mm Coroplast"
+  sides?: string;            // "One side full colour printing"
+  size?: string;             // "24 x 36 in"
+  process?: string;          // "Gloss lamination / die cut"
+  // ── Common ──
   qty: number;
-  details?: string;
-  unitPrice?: number;   // optional — for staff reference; amount is what's authoritative
-  amount: number;       // line total in CAD
+  details?: string;          // free-text notes (extras the chips don't cover)
+  unitPrice?: number;        // for staff reference; amount is authoritative
+  amount: number;            // line total in CAD
 }
 
 export async function POST(req: NextRequest) {
@@ -272,8 +279,11 @@ export async function POST(req: NextRequest) {
           contact.name.trim()
         );
 
+        // Wave invoice description renders Albert's full spec block (multi-line).
+        // Wave PDFs preserve newlines in line-item descriptions — same format
+        // customers have been getting from Albert directly for years.
         const waveLineItems = items.map((item) => ({
-          description: formatItemLabel(item),
+          description: formatItemAlbertBlock(item),
           unitPrice: Math.round(item.amount * 100) / 100,
           qty: 1,
           applyGst: true,
@@ -311,10 +321,17 @@ export async function POST(req: NextRequest) {
                 company: contact.company?.trim() || null,
               },
               items: items.map((item) => ({
+                kind: item.kind ?? "product",
                 product: item.title?.trim() || item.product,
                 qty: item.qty || 1,
+                material: item.material,
+                sides: item.sides,
+                size: item.size,
+                process: item.process,
                 details: item.details,
+                unitPrice: item.unitPrice,
                 amount: Math.round(item.amount * 100) / 100,
+                albertBlock: formatItemAlbertBlock(item),
               })),
               subtotal,
               gst,
@@ -419,10 +436,17 @@ export async function POST(req: NextRequest) {
           company: contact.company?.trim() || null,
         },
         items: items.map((item) => ({
+          kind: item.kind ?? "product",
           product: item.title?.trim() || item.product,
           qty: item.qty || 1,
+          material: item.material,
+          sides: item.sides,
+          size: item.size,
+          process: item.process,
           details: item.details,
+          unitPrice: item.unitPrice,
           amount: Math.round(item.amount * 100) / 100,
+          albertBlock: formatItemAlbertBlock(item),
         })),
         subtotal,
         gst,
@@ -499,16 +523,72 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/** Build a human-readable label for an order item.
- *  If a title is supplied (e.g. "The Power of Branding"), it leads, with the product
- *  category as a parenthetical and details after a dash. */
+/** Build a single-line human-readable label for an order item.
+ *  Used for order_items.product_name (DB column), Wave invoice fallback, etc.
+ *  When structured spec fields are present they're flattened onto one line. */
 function formatItemLabel(item: OrderItemInput): string {
   const qty = item.qty > 1 ? `${item.qty}x ` : "";
-  const details = item.details?.trim() ? ` — ${item.details.trim()}` : "";
   const titled = item.title?.trim();
+  const product = item.product?.trim() || "Other";
+  const specParts = [
+    item.material?.trim(),
+    item.sides?.trim(),
+    item.size?.trim(),
+    item.process?.trim(),
+    item.details?.trim(),
+  ].filter(Boolean);
+  const specStr = specParts.length > 0 ? ` — ${specParts.join(", ")}` : "";
   if (titled) {
-    const productSuffix = item.product && item.product !== "Other" ? ` (${item.product})` : "";
-    return `${qty}${titled}${productSuffix}${details}`;
+    const productSuffix = product !== "Other" ? ` (${product})` : "";
+    return `${qty}${titled}${productSuffix}${specStr}`;
   }
-  return `${qty}${item.product}${details}`;
+  return `${qty}${product}${specStr}`;
+}
+
+/** Render an item as Albert's plain-text quote block.
+ *  This is what staff customers see in the email body and Wave invoice description.
+ *
+ *  Example output:
+ *    Material : 4mm Coroplast
+ *    Colour : One side full colour printing
+ *    Size : 24" x 36"
+ *    Process : Gloss lamination
+ *    Quantity : 1
+ *    Unit Price : $ 45.00 for each
+ *    Total amount : $ 45.00 plus tax
+ *
+ *  Falls back to a 1-line label for fee items or items missing spec fields. */
+export function formatItemAlbertBlock(item: OrderItemInput): string {
+  if (item.kind === "fee") {
+    // Fee line: simple Name + Amount line. Albert phrases these as separate lines.
+    const note = item.details?.trim() ? ` (${item.details.trim()})` : "";
+    return `${item.product}${note} : $ ${item.amount.toFixed(2)} plus tax`;
+  }
+
+  const lines: string[] = [];
+  if (item.title?.trim()) lines.push(item.title.trim());
+  if (item.material?.trim()) lines.push(`Material : ${item.material.trim()}`);
+  if (item.sides?.trim()) lines.push(`Colour : ${item.sides.trim()}`);
+  if (item.size?.trim()) lines.push(`Size : ${item.size.trim()}`);
+  if (item.process?.trim()) lines.push(`Process : ${item.process.trim()}`);
+  if (item.qty > 0) lines.push(`Quantity : ${item.qty}`);
+  if (item.unitPrice && item.unitPrice > 0 && item.qty > 1) {
+    lines.push(`Unit Price : $ ${item.unitPrice.toFixed(2)} for each`);
+  }
+  lines.push(`Total amount : $ ${item.amount.toFixed(2)} plus tax`);
+
+  // If no spec fields were filled, fall back to the freeform details + product name
+  // so we still show something useful (don't render "Quantity : 1 / Total amount" alone).
+  const hasSpec = item.material || item.sides || item.size || item.process;
+  if (!hasSpec && !item.title?.trim()) {
+    const labelLine = item.product || "Custom item";
+    const detailsLine = item.details?.trim() ? `Details : ${item.details.trim()}` : "";
+    return [labelLine, detailsLine, ...lines].filter(Boolean).join("\n");
+  }
+  if (!hasSpec && item.details?.trim()) {
+    lines.splice(lines.findIndex((l) => l.startsWith("Quantity")), 0, `Details : ${item.details.trim()}`);
+  } else if (item.details?.trim()) {
+    lines.splice(lines.findIndex((l) => l.startsWith("Quantity")), 0, `Notes : ${item.details.trim()}`);
+  }
+  return lines.join("\n");
 }
