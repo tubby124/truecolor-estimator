@@ -30,11 +30,12 @@
         {
           "id": "for-sale-aluminum-24x30",
           "label": "For Sale Sign — Aluminum 24×30\"",
-          "blurb": "UV film on aluminum composite panel (ACP). Grommets 2\" inset. Mounts to standard frame.",
+          "blurb": "UV film on aluminum composite panel (ACP). Mounting holes drilled 2\" inset. Mounts to standard frame.",
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-landscape-diana.jpg",
           "imageOrientation": "landscape",
-          "unitPrice": 95,
-          "bulkTiers": [{ "minQty": 10, "unitPrice": 90 }],
+          "unitPrice": 65,
+          "bulkTiers": [{ "minQty": 10, "unitPrice": 60 }],
+          "sidesUplift": 30,
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
           "sidesPicker": true,
           "tcCategory": "ACP"
@@ -42,11 +43,12 @@
         {
           "id": "for-sale-aluminum-picture-24x30",
           "label": "For Sale Sign with Photo — Aluminum 24×30\"",
-          "blurb": "UV film on ACP with agent photo + QR code. Grommets 2\" inset. One-time +$35 design fee if your photo needs to be composited.",
+          "blurb": "UV film on ACP with agent photo + QR code. Mounting holes drilled 2\" inset. One-time +$35 design fee if your photo needs to be composited.",
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-portrait-photo.png",
           "imageOrientation": "portrait",
-          "unitPrice": 95,
-          "bulkTiers": [{ "minQty": 10, "unitPrice": 90 }],
+          "unitPrice": 65,
+          "bulkTiers": [{ "minQty": 10, "unitPrice": 60 }],
+          "sidesUplift": 30,
           "qtyOptions": [1, 2, 3, 4, 5, 6, 8, 10, 12, 14],
           "sidesPicker": true,
           "tcCategory": "ACP"

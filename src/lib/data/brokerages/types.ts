@@ -36,6 +36,13 @@ export interface BrokerageProductOption {
   unitPrice?: number;
   /** Discounted per-unit price at a quantity tier (only when unitPrice set) */
   bulkTiers?: Array<{ minQty: number; unitPrice: number }>;
+  /**
+   * Per-unit uplift added to unitPrice (and to each bulkTier price) when the
+   * agent picks double-sided. Only applied when sidesPicker is true and sides === "2".
+   * Modeled as additive (not multiplicative) because the panel/material cost stays
+   * constant while only print + ink double — matches True Color ACP cost economics.
+   */
+  sidesUplift?: number;
   /** Material picker — when present, agent picks one material per line */
   materialOptions?: BrokerageMaterialOption[];
   /** Available qty options shown in the dropdown */

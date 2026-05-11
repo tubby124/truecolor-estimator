@@ -43,12 +43,23 @@ function priceFor(product: BrokerageProductOption, line: LineItem | null, qty: n
       product.materialOptions[0];
     return sel.unitPrice;
   }
-  // Fixed-price products with optional qty tiers
+  // Fixed-price products with optional qty tiers + optional sides uplift
   const base = product.unitPrice ?? 0;
-  if (!product.bulkTiers || product.bulkTiers.length === 0) return base;
-  const sorted = [...product.bulkTiers].sort((a, b) => b.minQty - a.minQty);
-  for (const tier of sorted) if (qty >= tier.minQty) return tier.unitPrice;
-  return base;
+  let perUnit = base;
+  if (product.bulkTiers && product.bulkTiers.length > 0) {
+    const sorted = [...product.bulkTiers].sort((a, b) => b.minQty - a.minQty);
+    for (const tier of sorted) {
+      if (qty >= tier.minQty) {
+        perUnit = tier.unitPrice;
+        break;
+      }
+    }
+  }
+  // Add sides uplift when agent picked double-sided (only on products with sidesPicker)
+  if (product.sidesPicker && product.sidesUplift && line?.sides === "2") {
+    perUnit += product.sidesUplift;
+  }
+  return perUnit;
 }
 
 function fmt(n: number): string {
@@ -689,18 +700,43 @@ function ProductList({
                     <span className="block text-sm text-gray-500 mt-0.5">{product.blurb}</span>
                   ) : null}
                   <span className="block text-sm text-gray-700 mt-1.5">
-                    {fmt(priceFor(product, null, 1))}{" "}
-                    <span className="text-gray-500">each</span>
-                    {product.bulkTiers && product.bulkTiers.length > 0 ? (
+                    {product.sidesPicker && product.sidesUplift ? (
                       <>
-                        {" "}·{" "}
-                        <span className="text-gray-500">
-                          {product.bulkTiers
-                            .map((tier) => `${fmt(tier.unitPrice)} at ${tier.minQty}+`)
-                            .join(" · ")}
-                        </span>
+                        {fmt(product.unitPrice ?? 0)}{" "}
+                        <span className="text-gray-500">single-sided</span>
+                        {" · "}
+                        {fmt((product.unitPrice ?? 0) + product.sidesUplift)}{" "}
+                        <span className="text-gray-500">double-sided</span>
+                        {product.bulkTiers && product.bulkTiers.length > 0 ? (
+                          <span className="text-gray-500">
+                            {" · "}
+                            {product.bulkTiers
+                              .map(
+                                (tier) =>
+                                  `${fmt(tier.unitPrice)}/${fmt(
+                                    tier.unitPrice + (product.sidesUplift ?? 0),
+                                  )} at ${tier.minQty}+`,
+                              )
+                              .join(" · ")}
+                          </span>
+                        ) : null}
                       </>
-                    ) : null}
+                    ) : (
+                      <>
+                        {fmt(priceFor(product, null, 1))}{" "}
+                        <span className="text-gray-500">each</span>
+                        {product.bulkTiers && product.bulkTiers.length > 0 ? (
+                          <>
+                            {" "}·{" "}
+                            <span className="text-gray-500">
+                              {product.bulkTiers
+                                .map((tier) => `${fmt(tier.unitPrice)} at ${tier.minQty}+`)
+                                .join(" · ")}
+                            </span>
+                          </>
+                        ) : null}
+                      </>
+                    )}
                   </span>
                 </span>
               </button>
@@ -730,8 +766,14 @@ function ProductList({
                         onChange={(e) => onUpdate(product.id, { sides: e.target.value as "1" | "2" })}
                         className={INPUT_CLS}
                       >
-                        <option value="1">Single-sided</option>
-                        <option value="2">Double-sided</option>
+                        <option value="1">
+                          Single-sided{" "}
+                          {fmt(priceFor(product, { ...line, sides: "1" }, line.qty))}
+                        </option>
+                        <option value="2">
+                          Double-sided{" "}
+                          {fmt(priceFor(product, { ...line, sides: "2" }, line.qty))}
+                        </option>
                       </select>
                     </div>
                   ) : null}
