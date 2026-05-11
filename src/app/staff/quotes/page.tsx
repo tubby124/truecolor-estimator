@@ -33,6 +33,8 @@ export interface QuoteRequest {
   reply_body: string | null;
   brokerage_slug: string | null;
   shipping_address: string | null;
+  is_archived: boolean;
+  archived_at: string | null;
 }
 
 export default async function StaffQuotesPage() {
@@ -44,7 +46,7 @@ export default async function StaffQuotesPage() {
     const { data, error } = await supabase
       .from("quote_requests")
       .select(
-        "id, created_at, name, email, phone, items, file_links, replied_at, staff_note, reply_body, brokerage_slug, shipping_address"
+        "id, created_at, name, email, phone, items, file_links, replied_at, staff_note, reply_body, brokerage_slug, shipping_address, is_archived, archived_at"
       )
       .order("created_at", { ascending: false })
       .limit(200);

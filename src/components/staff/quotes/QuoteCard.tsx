@@ -32,6 +32,28 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
   // Quote builder modal
   const [quoteBuilderOpen, setQuoteBuilderOpen] = useState(false);
 
+  // Optimistic archive state — soft-hides the card immediately.
+  const [optimisticArchived, setOptimisticArchived] = useOptimistic(!!quote.is_archived);
+
+  async function toggleArchived() {
+    const next = !optimisticArchived;
+    if (next && !confirm(`Archive this quote from ${quote.name}? It can be restored from the "Show archived" filter.`)) {
+      return;
+    }
+    startTransition(async () => {
+      setOptimisticArchived(next);
+      try {
+        await fetch(`/api/staff/quotes/${quote.id}/archive`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ archived: next }),
+        });
+      } catch {
+        // reverts on re-render via useOptimistic
+      }
+    });
+  }
+
   async function toggleReplied() {
     const next = !optimisticReplied;
     startTransition(async () => {
@@ -60,7 +82,9 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
   return (
     <div
       className={`border rounded-xl overflow-hidden transition-shadow hover:shadow-sm ${
-        optimisticReplied
+        optimisticArchived
+          ? "border-amber-200 bg-amber-50/30 opacity-60"
+          : optimisticReplied
           ? "border-gray-100 opacity-70"
           : isNew
           ? "border-[#16C2F3]"
@@ -370,12 +394,26 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
                   Open in Estimator ↗
                 </a>
               </div>
-              <button
-                onClick={() => setNoteOpen((v) => !v)}
-                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                {noteText ? "Edit note" : "+ Add note"}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setNoteOpen((v) => !v)}
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {noteText ? "Edit note" : "+ Add note"}
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); void toggleArchived(); }}
+                  disabled={isPending}
+                  className={`text-xs transition-colors ${
+                    optimisticArchived
+                      ? "text-amber-700 hover:text-amber-900 font-semibold"
+                      : "text-gray-400 hover:text-red-600"
+                  }`}
+                  title={optimisticArchived ? "Restore this quote" : "Archive this quote (soft-delete, can be restored)"}
+                >
+                  {optimisticArchived ? "↺ Restore" : "🗑 Archive"}
+                </button>
+              </div>
             </div>
 
             {noteOpen && (

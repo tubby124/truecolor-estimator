@@ -41,6 +41,8 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
   const [filter, setFilter] = useState<"pending" | "recent" | "all">("pending");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
+  // Archived quotes hidden by default — toggle to reveal soft-deleted entries.
+  const [showArchived, setShowArchived] = useState(false);
   const [newQuoteAlert, setNewQuoteAlert] = useState(false);
   const [lastSync, setLastSync] = useState<Date>(new Date());
   const isFirstRender = useRef(true);
@@ -82,6 +84,8 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
                       replied_at: u.replied_at as string | null,
                       staff_note: u.staff_note as string | null,
                       reply_body: u.reply_body as string | null,
+                      is_archived: (u.is_archived as boolean) ?? q.is_archived,
+                      archived_at: (u.archived_at as string | null) ?? q.archived_at,
                     }
                   : q
               )
@@ -100,35 +104,46 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
     };
   }, [router]);
 
+  // Base set for all stats/counts/filters — excludes archived unless toggle on.
+  const visibleBase = useMemo(
+    () => (showArchived ? quotes : quotes.filter((q) => !q.is_archived)),
+    [quotes, showArchived]
+  );
+
+  const archivedCount = useMemo(
+    () => quotes.filter((q) => q.is_archived).length,
+    [quotes]
+  );
+
   // Stats
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
     // eslint-disable-next-line react-hooks/purity -- Date.now() is acceptable here; useMemo only recomputes when quotes change
     const weekCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return {
-      pending: quotes.filter((q) => !q.replied_at).length,
-      repliedToday: quotes.filter((q) => q.replied_at?.slice(0, 10) === today).length,
-      thisWeek: quotes.filter((q) => new Date(q.created_at).getTime() > weekCutoff).length,
-      total: quotes.length,
+      pending: visibleBase.filter((q) => !q.replied_at).length,
+      repliedToday: visibleBase.filter((q) => q.replied_at?.slice(0, 10) === today).length,
+      thisWeek: visibleBase.filter((q) => new Date(q.created_at).getTime() > weekCutoff).length,
+      total: visibleBase.length,
     };
-  }, [quotes]);
+  }, [visibleBase]);
 
   // Filter tab counts
   const counts = useMemo(
     () => ({
-      pending: quotes.filter((q) => !q.replied_at).length,
-      recent: quotes.filter(
+      pending: visibleBase.filter((q) => !q.replied_at).length,
+      recent: visibleBase.filter(
         // eslint-disable-next-line react-hooks/purity -- Date.now() acceptable in useMemo; recomputed on quotes change
         (q) => Date.now() - new Date(q.created_at).getTime() < 7 * 24 * 60 * 60 * 1000
       ).length,
-      all: quotes.length,
+      all: visibleBase.length,
     }),
-    [quotes]
+    [visibleBase]
   );
 
   // Filtered + searched + sorted
   const displayed = useMemo(() => {
-    let result = quotes;
+    let result = visibleBase;
 
     if (filter === "pending") result = result.filter((q) => !q.replied_at);
     else if (filter === "recent")
@@ -153,7 +168,7 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
     else sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
 
     return sorted;
-  }, [quotes, filter, search, sortBy]);
+  }, [visibleBase, filter, search, sortBy]);
 
   if (quotes.length === 0) {
     return (
@@ -229,6 +244,27 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
           </select>
+
+          {archivedCount > 0 && (
+            <button
+              onClick={() => setShowArchived((v) => !v)}
+              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
+                showArchived
+                  ? "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+              title={showArchived ? "Hide archived quotes" : `Show ${archivedCount} archived quote${archivedCount !== 1 ? "s" : ""}`}
+            >
+              {showArchived ? "Hide archived" : "Show archived"}
+              <span
+                className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+                  showArchived ? "bg-white/40 text-amber-900" : "bg-gray-200 text-gray-500"
+                }`}
+              >
+                {archivedCount}
+              </span>
+            </button>
+          )}
 
           <span className="text-sm text-gray-400 whitespace-nowrap">
             {displayed.length} quote{displayed.length !== 1 ? "s" : ""}
