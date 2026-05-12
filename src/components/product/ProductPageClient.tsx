@@ -9,6 +9,7 @@ import { useToast, ToastContainer } from "@/components/ui";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { Category } from "@/lib/data/types";
 import { trackViewItem, trackAddToCart } from "@/lib/analytics";
+import { metaTrackViewContent, metaTrackAddToCart } from "@/lib/analytics/metaPixel";
 import { SameDayClock } from "@/components/home/SameDayClock";
 
 // Friendly material labels shown in the customer proof
@@ -45,12 +46,17 @@ export function ProductPageClient({ product }: Props) {
   const [configData, setConfigData] = useState<ConfigData>(EMPTY_CONFIG);
   const [addedToCart, setAddedToCart] = useState(false);
 
-  // Fire view_item once on mount
+  // Fire view_item once on mount (GA4 + Meta Pixel)
   useEffect(() => {
     trackViewItem({
       item_id: product.slug,
       item_name: product.name,
       item_category: product.category,
+    });
+    metaTrackViewContent({
+      content_ids: [product.slug],
+      content_name: product.name,
+      content_category: product.category,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -110,6 +116,13 @@ export function ProductPageClient({ product }: Props) {
       item_category: product.category,
       price: priceData.price,
       quantity: configData.qty,
+    });
+    // Meta Pixel: AddToCart
+    metaTrackAddToCart({
+      content_ids: [product.slug],
+      content_name: product.name,
+      value: priceData.price,
+      contents: [{ id: product.slug, quantity: configData.qty, item_price: priceData.price / Math.max(configData.qty, 1) }],
     });
 
     setAddedToCart(true);

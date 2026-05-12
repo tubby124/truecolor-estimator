@@ -23,6 +23,7 @@ import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notification
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { classifyFromHeaders } from "@/lib/analytics/referrer";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
+import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -313,6 +314,26 @@ export async function POST(req: NextRequest) {
           campaign: utmCampaign ?? undefined,
         },
       }).catch((err) => console.error("[quote-request] GA4 MP failed (non-fatal):", err));
+
+      // Meta Conversions API — Lead event (server-side, deduped via event_id=quote-{insertedId})
+      void sendMetaCapiEvent({
+        event_name: "Lead",
+        event_id: `quote-${insertedId}`,
+        event_source_url: "https://truecolorprinting.ca/quote",
+        user_data: {
+          email,
+          phone: phone || undefined,
+          client_ip_address: ip,
+          external_id: insertedId,
+        },
+        custom_data: {
+          currency: "CAD",
+          value: 200,
+          content_name: brokerageSlug ? `Quote Portal — ${brokerageSlug}` : "Quote Request",
+          lead_event_source: refClass.source,
+          referrer_medium: refClass.medium,
+        },
+      }).catch((err) => console.error("[quote-request] Meta CAPI failed (non-fatal):", err));
     }
 
     // Side-channel notifications — fire-and-forget. Failures must never break the response.

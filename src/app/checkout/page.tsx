@@ -11,6 +11,7 @@ import { sanitizeError } from "@/lib/errors/sanitize";
 import { REVIEW_COUNT } from "@/lib/reviews";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { trackBeginCheckout } from "@/lib/analytics";
+import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 
 const DEFAULT_GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -174,7 +175,21 @@ export default function CheckoutPage() {
     setMounted(true);
     // GA4: begin_checkout
     const cartTotal = cart.reduce((sum, item) => sum + item.sell_price, 0);
-    trackBeginCheckout({ value: cartTotal, item_count: cart.length });
+    const ga4Items = cart.map((c) => ({
+      item_id: c.product_slug,
+      item_name: c.product_name,
+      item_category: c.category,
+      price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price,
+      quantity: c.qty,
+    }));
+    trackBeginCheckout({ value: cartTotal, item_count: cart.length, items: ga4Items });
+    // Meta Pixel: InitiateCheckout
+    metaTrackInitiateCheckout({
+      content_ids: cart.map((c) => c.product_slug),
+      value: cartTotal,
+      num_items: cart.length,
+      contents: cart.map((c) => ({ id: c.product_slug, quantity: c.qty, item_price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price })),
+    });
 
     // Check if user is already logged in — pre-fill their saved profile
     const supabase = createClient();

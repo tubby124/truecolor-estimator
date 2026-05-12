@@ -23,6 +23,7 @@ import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
+import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -191,6 +192,29 @@ export async function POST(req: NextRequest) {
                           })),
                         },
                       }).catch((err) => console.error("[clover-webhook] GA4 MP failed (non-fatal):", err));
+
+                      // Meta Conversions API — Purchase event (server-side, deduped via event_id=order_number)
+                      void sendMetaCapiEvent({
+                        event_name: "Purchase",
+                        event_id: order.order_number,
+                        event_source_url: "https://truecolorprinting.ca/order-confirmed",
+                        user_data: {
+                          email: customer.email,
+                          external_id: order.customer_id ?? undefined,
+                        },
+                        custom_data: {
+                          currency: "CAD",
+                          value: Number(order.total),
+                          content_type: "product",
+                          content_ids: receiptItems.map((i) => (i.product_name ?? "").slice(0, 100)),
+                          num_items: receiptItems.reduce((s, i) => s + Number(i.qty ?? 1), 0),
+                          contents: receiptItems.map((i) => ({
+                            id: (i.product_name ?? "").slice(0, 100),
+                            quantity: Number(i.qty ?? 1),
+                            item_price: Number(i.qty) > 0 ? Number(i.line_total) / Number(i.qty) : Number(i.line_total),
+                          })),
+                        },
+                      }).catch((err) => console.error("[clover-webhook] Meta CAPI failed (non-fatal):", err));
 
                       // Insert discount_redemptions for staff-assigned discounts that bypassed checkout (non-fatal)
                       if (fullOrder.discount_code) {

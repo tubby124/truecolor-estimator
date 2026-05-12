@@ -5,6 +5,7 @@ import "./globals.css";
 import { BackToTop } from "@/components/site/BackToTop";
 import { AuthRedirect } from "@/components/site/AuthRedirect";
 import { UtmCapture } from "@/components/site/UtmCapture";
+import { MetaPixel } from "@/components/site/MetaPixel";
 import { REVIEW_COUNT } from "@/lib/reviews";
 
 const geistSans = Geist({
@@ -242,6 +243,7 @@ export default function RootLayout({
         <Script id="ga4-init" strategy="lazyOnload">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6HMQT7MNLL');`}
         </Script>
+        <MetaPixel />
         {/* Trustindex loader-cert.js removed — was injecting visible
             "Trustmark widget validation failed" error text on every page.
             Reviews widget (ReviewsSection) and Instagram feed (loader-feed.js)
