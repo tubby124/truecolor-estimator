@@ -22,6 +22,7 @@ import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { estimate } from "@/lib/engine";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { classifyFromHeaders } from "@/lib/analytics/referrer";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -308,6 +309,9 @@ export async function POST(req: NextRequest) {
           notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
           utm_source: utm_source?.slice(0, 100) || null,
           utm_campaign: utm_campaign?.slice(0, 100) || null,
+          referrer_source: classifyFromHeaders(req.headers).source.slice(0, 100),
+          referrer_medium: classifyFromHeaders(req.headers).medium.slice(0, 50),
+          raw_referrer: (req.headers.get("referer") ?? "").slice(0, 500) || null,
         })
         .select("id, order_number")
         .single();

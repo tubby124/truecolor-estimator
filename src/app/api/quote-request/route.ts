@@ -21,6 +21,8 @@ import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { getBrokerage } from "@/lib/data/brokerages";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
+import { classifyFromHeaders } from "@/lib/analytics/referrer";
+import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -258,6 +260,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Classify referrer + capture UTM hint from form (set by /quote client)
+    const refClass = classifyFromHeaders(req.headers);
+    const utmSource = ((form.get("utm_source") as string) ?? "").trim().slice(0, 100) || null;
+    const utmCampaign = ((form.get("utm_campaign") as string) ?? "").trim().slice(0, 100) || null;
+
     // Save to DB before sending emails (non-fatal — email continues even if DB fails).
     // Capture the inserted row's id so portal submissions can show a short reference
     // number on the success page (first 8 chars of the UUID, uppercased).
@@ -274,12 +281,38 @@ export async function POST(req: NextRequest) {
           raw_ip: ip ?? null,
           brokerage_slug: brokerageSlug,
           shipping_address: shippingAddress,
+          referrer_source: refClass.source.slice(0, 100),
+          referrer_medium: refClass.medium.slice(0, 50),
+          raw_referrer: (req.headers.get("referer") ?? "").slice(0, 500) || null,
+          utm_source: utmSource,
+          utm_campaign: utmCampaign,
         })
         .select("id")
         .single();
       insertedId = (insertedRow?.id as string | undefined) ?? null;
     } catch (dbErr) {
       console.error("[quote-request] DB save failed:", dbErr);
+    }
+
+    // GA4 generate_lead event (server-side MP) — fire-and-forget
+    // Estimated lead value: $200 (average quote→order conversion proxy; refine when we have data)
+    if (insertedId) {
+      void sendMeasurementProtocolEvent({
+        event_name: "generate_lead",
+        client_id: deriveClientIdFromCustomer(email),
+        user_id: insertedId,
+        params: {
+          currency: "CAD",
+          value: 200,
+          lead_source: refClass.source,
+          lead_medium: refClass.medium,
+          form_id: "quote-request",
+          form_name: brokerageSlug ? `quote-portal-${brokerageSlug}` : "quote-multi-item",
+          item_count: items.length,
+          source: utmSource ?? refClass.source,
+          campaign: utmCampaign ?? undefined,
+        },
+      }).catch((err) => console.error("[quote-request] GA4 MP failed (non-fatal):", err));
     }
 
     // Side-channel notifications — fire-and-forget. Failures must never break the response.

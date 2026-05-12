@@ -148,6 +148,18 @@ function QuoteForm() {
       });
       if (turnstileToken) fd.append("cf-turnstile-response", turnstileToken);
 
+      // First-touch UTM attribution (set by UtmCapture in layout)
+      try {
+        const raw = window.localStorage.getItem("tc_utm_first_touch");
+        if (raw) {
+          const parsed = JSON.parse(raw) as Record<string, string | number>;
+          if (typeof parsed.utm_source === "string") fd.append("utm_source", parsed.utm_source);
+          if (typeof parsed.utm_campaign === "string") fd.append("utm_campaign", parsed.utm_campaign);
+        }
+      } catch {
+        // localStorage blocked — skip
+      }
+
       const res = await fetch("/api/quote-request", {
         method: "POST",
         body: fd, // No Content-Type header — browser sets multipart boundary
