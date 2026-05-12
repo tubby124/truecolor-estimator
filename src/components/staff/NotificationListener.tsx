@@ -19,6 +19,7 @@ type OrderPayload = { id?: string; order_number?: string; total?: number };
 export default function NotificationListener() {
   const [toasts, setToasts] = useState<ToastEntry[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const toastTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     // Lazy-init the audio element once on mount.
@@ -61,12 +62,16 @@ export default function NotificationListener() {
       // Show toast.
       const toastId = crypto.randomUUID();
       setToasts((prev) => [...prev, { id: toastId, ...entry }]);
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== toastId));
+        toastTimersRef.current = toastTimersRef.current.filter((t) => t !== timerId);
       }, TOAST_DURATION_MS);
+      toastTimersRef.current.push(timerId);
     }
 
     return () => {
+      toastTimersRef.current.forEach(clearTimeout);
+      toastTimersRef.current = [];
       supabase.removeChannel(channel);
     };
   }, []);
