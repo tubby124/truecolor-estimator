@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { sendTelegramNotification } from "../telegram";
+import { sendTelegramNotification, escapeTelegramHtml } from "../telegram";
 
 describe("sendTelegramNotification", () => {
   const ORIGINAL_ENV = process.env;
@@ -45,5 +45,36 @@ describe("sendTelegramNotification", () => {
       new Response("server error", { status: 500 })
     );
     await expect(sendTelegramNotification("hello")).resolves.toBeUndefined();
+  });
+
+  it("does not include err.message in console.error on network failures", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    // Simulate a fetch error whose message contains the bot token (worst case).
+    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new TypeError("fetch failed to https://api.telegram.org/botfake-token/sendMessage")
+    );
+    await sendTelegramNotification("hello");
+    const allLogs = consoleSpy.mock.calls.flat().join(" ");
+    expect(allLogs).not.toContain("fake-token");
+    expect(allLogs).toContain("TypeError");
+    consoleSpy.mockRestore();
+  });
+});
+
+describe("escapeTelegramHtml", () => {
+  it("escapes < > and &", () => {
+    expect(escapeTelegramHtml("<a href=\"evil.com\">x</a>")).toBe(
+      "&lt;a href=\"evil.com\"&gt;x&lt;/a&gt;"
+    );
+    expect(escapeTelegramHtml("Tom & Jerry")).toBe("Tom &amp; Jerry");
+  });
+
+  it("returns the input unchanged when no special chars present", () => {
+    expect(escapeTelegramHtml("Acme Corp")).toBe("Acme Corp");
+    expect(escapeTelegramHtml("smoke@example.com")).toBe("smoke@example.com");
+  });
+
+  it("handles empty string", () => {
+    expect(escapeTelegramHtml("")).toBe("");
   });
 });
