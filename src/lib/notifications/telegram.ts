@@ -14,17 +14,15 @@
  *   Error logging avoids err.message to prevent token-in-URL leakage.
  *
  * Network:
- *   Forces IPv4 via an undici Agent. Railway's IPv6 egress hangs on
+ *   Forces IPv4 DNS resolution. Railway's IPv6 egress hangs on
  *   api.telegram.org (which has both A + AAAA records). Without this,
  *   Node 20 fetch picks the AAAA path and fails with "TypeError: fetch failed".
+ *   setDefaultResultOrder is process-wide, but only flips order (still
+ *   falls back to IPv6 if no A record exists for a given host).
  */
-import { Agent } from "undici";
+import dns from "node:dns";
 
-const TELEGRAM_DISPATCHER = new Agent({
-  // @ts-expect-error — undici Agent.connect.family is runtime-supported but mis-typed in @types/node
-  connect: { family: 4 },
-  connectTimeout: 5_000,
-});
+dns.setDefaultResultOrder("ipv4first");
 const HTML_ESCAPES: Record<string, string> = {
   "<": "&lt;",
   ">": "&gt;",
@@ -55,8 +53,6 @@ export async function sendTelegramNotification(message: string): Promise<void> {
         disable_web_page_preview: true,
       }),
       signal: AbortSignal.timeout(5000),
-      // @ts-expect-error — `dispatcher` is a Node-undici extension to fetch options.
-      dispatcher: TELEGRAM_DISPATCHER,
     });
 
     if (!res.ok) {
