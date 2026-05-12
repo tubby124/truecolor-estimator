@@ -13,6 +13,14 @@ function gtag(...args: unknown[]) {
   }
 }
 
+export interface Ga4Item {
+  item_id: string;
+  item_name: string;
+  item_category?: string;
+  price?: number;
+  quantity?: number;
+}
+
 // Standard ecommerce events
 
 export function trackViewItem(params: {
@@ -48,20 +56,47 @@ export function trackAddToCart(params: {
   });
 }
 
-export function trackBeginCheckout(params: { value: number; item_count: number }) {
-  gtag("event", "begin_checkout", { currency: "CAD", value: params.value, item_count: params.item_count });
+export function trackBeginCheckout(params: { value: number; item_count: number; items?: Ga4Item[] }) {
+  gtag("event", "begin_checkout", {
+    currency: "CAD",
+    value: params.value,
+    item_count: params.item_count,
+    items: params.items ?? [],
+  });
+}
+
+export function trackAddPaymentInfo(params: { value: number; payment_type: string; items?: Ga4Item[] }) {
+  gtag("event", "add_payment_info", {
+    currency: "CAD",
+    value: params.value,
+    payment_type: params.payment_type,
+    items: params.items ?? [],
+  });
 }
 
 export function trackPurchase(params: {
   transaction_id: string;
   value: number;
   payment_method: string;
+  items?: Ga4Item[];
+  tax?: number;
 }) {
   gtag("event", "purchase", {
     currency: "CAD",
     transaction_id: params.transaction_id,
     value: params.value,
     payment_type: params.payment_method,
+    tax: params.tax ?? 0,
+    items: params.items ?? [],
+  });
+}
+
+export function trackGenerateLead(params: { value?: number; lead_source: string; form_id?: string }) {
+  gtag("event", "generate_lead", {
+    currency: "CAD",
+    value: params.value ?? 0,
+    lead_source: params.lead_source,
+    form_id: params.form_id,
   });
 }
 

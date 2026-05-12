@@ -1,0 +1,96 @@
+{
+  "date_iso": "2026-05-12",
+  "source": "seo_gsc_snapshots (Supabase dczbgraekmzirxknjvwe)",
+  "window_days": 90,
+  "total_clicks_90d": 56,
+  "total_impressions_90d": 6799,
+  "avg_position_90d": 22.15,
+  "avg_ctr_90d": 0.0082,
+  "gsc_data_earliest_snapshot": "2026-02-28",
+  "gsc_data_latest_snapshot": "2026-05-09",
+  "gsc_data_freshness_days": 3,
+  "gsc_snapshot_days_covered": 71,
+  "gsc_snapshot_rows": 4404,
+  "top_10_queries": [
+    { "query": "true color printing", "impressions": 108, "clicks": 12, "avg_pos": 2.87 },
+    { "query": "custom stickers saskatoon", "impressions": 32, "clicks": 4, "avg_pos": 8.75 },
+    { "query": "sticker printing saskatoon", "impressions": 52, "clicks": 3, "avg_pos": 5.94 },
+    { "query": "local print shops", "impressions": 15, "clicks": 2, "avg_pos": 5.8 },
+    { "query": "true color display", "impressions": 14, "clicks": 2, "avg_pos": 2.64 },
+    { "query": "uv printing near me", "impressions": 6, "clicks": 2, "avg_pos": 5.5 },
+    { "query": "business cards saskatoon", "impressions": 163, "clicks": 1, "avg_pos": 9.39 },
+    { "query": "printing services near me", "impressions": 47, "clicks": 1, "avg_pos": 8.38 },
+    { "query": "printers saskatoon", "impressions": 26, "clicks": 1, "avg_pos": 16.96 },
+    { "query": "signs saskatoon", "impressions": 23, "clicks": 1, "avg_pos": 24.96 }
+  ],
+  "top_10_pages": [
+    { "page": "https://truecolorprinting.ca/", "impressions": 3237, "clicks": 45, "avg_pos": 18.11 },
+    { "page": "https://truecolorprinting.ca/same-day-printing-saskatoon", "impressions": 29, "clicks": 3, "avg_pos": 21.52 },
+    { "page": "https://truecolorprinting.ca/flyer-printing-saskatoon", "impressions": 670, "clicks": 2, "avg_pos": 38.72 },
+    { "page": "https://truecolorprinting.ca/foamboard-printing-saskatoon", "impressions": 102, "clicks": 2, "avg_pos": 21.21 },
+    { "page": "https://truecolorprinting.ca/sticker-printing-saskatoon", "impressions": 518, "clicks": 1, "avg_pos": 21.97 },
+    { "page": "https://truecolorprinting.ca/contact", "impressions": 37, "clicks": 1, "avg_pos": 20.51 },
+    { "page": "https://truecolorprinting.ca/vinyl-lettering-saskatoon", "impressions": 26, "clicks": 1, "avg_pos": 13.27 },
+    { "page": "https://truecolorprinting.ca/brewery-saskatoon", "impressions": 22, "clicks": 1, "avg_pos": 68.36 },
+    { "page": "https://truecolorprinting.ca/property-management-signs-saskatoon", "impressions": 304, "clicks": 0, "avg_pos": 13.17 },
+    { "page": "https://truecolorprinting.ca/wall-graphics-saskatoon", "impressions": 288, "clicks": 0, "avg_pos": 13.05 }
+  ],
+  "tier_1_money_pages": [
+    "/banner-printing-saskatoon",
+    "/business-cards-saskatoon",
+    "/coroplast-signs-saskatoon",
+    "/flyer-printing-saskatoon",
+    "/sign-company-saskatoon",
+    "/sticker-printing-saskatoon",
+    "/vinyl-lettering-saskatoon",
+    "/agriculture-signs-saskatoon",
+    "/signs-yorkton-sk",
+    "/business-cards-moose-jaw-sk"
+  ],
+  "frozen_pages": [
+    { "slug": "banner-printing-saskatoon", "lock": "meta desc only", "rank": 11.7, "clicks_28d": 2 },
+    { "slug": "aluminum-signs-saskatoon", "lock": "meta desc trim only", "rank": 16.4, "clicks_28d": 2 },
+    { "slug": "sticker-printing-saskatoon", "lock": "FAQ price fix only", "rank": 16, "clicks_28d": 7 },
+    { "slug": "vinyl-lettering-saskatoon", "lock": "meta desc only — DEFEND", "rank": 7.4, "clicks_28d": 5 },
+    { "slug": "agriculture-signs-saskatoon", "lock": "meta desc only — DEFEND", "rank": 6.3, "clicks_28d": 1 },
+    { "slug": "signs-yorkton-sk", "lock": "meta desc only — DEFEND", "rank": 9.7, "clicks_28d": 2 },
+    { "slug": "business-cards-moose-jaw-sk", "lock": "meta desc only — DEFEND", "rank": 6, "clicks_28d": 0 }
+  ],
+  "decayed_pages_eligible_for_rewrite": [
+    { "slug": "business-cards-saskatoon", "rank": 16, "prev_rank": 1 },
+    { "slug": "flyer-printing-saskatoon", "rank": 25, "prev_rank": 3 },
+    { "slug": "sign-company-saskatoon", "rank": 30, "prev_rank": 4 },
+    { "slug": "coroplast-signs-saskatoon", "rank": "not in top pages CSV", "prev_rank": 5 }
+  ],
+  "total_indexed_pages_estimate": 90,
+  "sitemap_url_count": 90,
+  "orders_last_30d": {
+    "total": 14,
+    "payment_received": 1,
+    "pending_payment": 2,
+    "other_status_includes_complete": 11,
+    "avg_total_cad": 306.5,
+    "source": "Supabase orders table"
+  },
+  "ga4_state": {
+    "wired_client_side": true,
+    "measurement_id": "G-6HMQT7MNLL",
+    "loaded_via": "next/script lazyOnload at src/app/layout.tsx:236-242",
+    "wired_server_side": false,
+    "purchase_event_fires_via": "PurchaseEvent client component at src/app/order-confirmed/PurchaseEvent.tsx (gtag only)",
+    "items_array_in_purchase_event": false,
+    "ga4_api_secret_env_var_present": false,
+    "consent_banner_present": false,
+    "casl_marketing_consent_at_checkout": true,
+    "estimated_ga4_purchase_capture_rate": "unknown — fully client-side, ad-blocker + ITP loss expected"
+  },
+  "blind_spots": [
+    "GA4 transaction_id coverage vs orders table — cannot verify until GA4 Realtime + Ecommerce report is sampled with a test order",
+    "No items[] array in trackPurchase — GA4 Ecommerce → Item Sales will be empty even if purchase event fires",
+    "No UTM tagging in Brevo email links audited (grep src/lib/email + src/lib/brevo returned 0) — order rows have utm_source + utm_campaign columns but no inbound UTM source to populate them",
+    "GBP performance telemetry — no dashboard pipeline found",
+    "INP / LCP / CLS — no CrUX or PSI snapshot in repo",
+    "Order source classification — Clover/Wave split is visible but referral source/channel attribution is not captured",
+    "True quote-form lead count — quote_requests table not yet sampled"
+  ]
+}

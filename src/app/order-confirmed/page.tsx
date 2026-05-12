@@ -20,11 +20,14 @@ interface Props {
 interface OrderSummary {
   order_number: string;
   total: number;
+  gst: number | string | null;
+  pst: number | string | null;
   status: string;
   payment_method: string;
   payment_reference: string | null;
   receipt_token: string | null;
   customers?: { email: string; name: string; company: string | null } | Array<{ email: string; name: string; company: string | null }> | null;
+  order_items?: Array<{ product_name: string; category?: string | null; qty: number; line_total: number | string }> | null;
 }
 
 export default async function OrderConfirmedPage({ searchParams }: Props) {
@@ -43,7 +46,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       // success AND cancellation/timeout, so we can't trust the redirect alone.
       const { data } = await supabase
         .from("orders")
-        .select("order_number, total, payment_method, payment_reference, receipt_token, status, customers(email, name, company)")
+        .select("order_number, total, gst, pst, payment_method, payment_reference, receipt_token, status, customers(email, name, company), order_items(product_name, category, qty, line_total)")
         .eq("id", oid)
         .single();
 
@@ -77,8 +80,16 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       {oid && orderSummary && orderSummary.status !== "pending_payment" && (
         <PurchaseEvent
           orderNumber={orderSummary.order_number}
-          total={orderSummary.total}
+          total={Number(orderSummary.total)}
           paymentMethod={orderSummary.payment_method}
+          tax={Number(orderSummary.gst ?? 0) + Number(orderSummary.pst ?? 0)}
+          items={(orderSummary.order_items ?? []).map((i) => ({
+            item_id: (i.product_name ?? "").slice(0, 100),
+            item_name: i.product_name ?? "Unknown",
+            item_category: i.category ?? undefined,
+            price: i.qty > 0 ? Number(i.line_total) / Number(i.qty) : Number(i.line_total),
+            quantity: Number(i.qty ?? 1),
+          }))}
         />
       )}
 

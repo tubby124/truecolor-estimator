@@ -22,6 +22,7 @@ import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/li
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
+import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -169,6 +170,27 @@ export async function POST(req: NextRequest) {
                         receiptToken: fullOrder.receipt_token ?? null,
                       });
                       console.log(`[clover-webhook] receipt sent → ${customer.email}`);
+
+                      // GA4 Measurement Protocol — server-side purchase event (non-fatal, fire-and-forget)
+                      // Captures orders that client-side gtag missed (ad blockers, ITP, corp networks)
+                      void sendMeasurementProtocolEvent({
+                        event_name: "purchase",
+                        client_id: deriveClientIdFromCustomer(order.customer_id ?? order.id),
+                        user_id: order.customer_id ?? undefined,
+                        params: {
+                          transaction_id: order.order_number,
+                          value: Number(order.total),
+                          currency: "CAD",
+                          tax: Number(fullOrder.gst ?? 0) + Number(fullOrder.pst ?? 0),
+                          payment_type: "clover_card",
+                          items: receiptItems.map((i) => ({
+                            item_id: (i.product_name ?? "").slice(0, 100),
+                            item_name: i.product_name ?? "Unknown",
+                            price: Number(i.qty) > 0 ? Number(i.line_total) / Number(i.qty) : Number(i.line_total),
+                            quantity: Number(i.qty ?? 1),
+                          })),
+                        },
+                      }).catch((err) => console.error("[clover-webhook] GA4 MP failed (non-fatal):", err));
 
                       // Insert discount_redemptions for staff-assigned discounts that bypassed checkout (non-fatal)
                       if (fullOrder.discount_code) {

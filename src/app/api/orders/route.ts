@@ -39,6 +39,11 @@ export interface CreateOrderRequest {
   discount_code?: string;   // optional — re-validated server-side before use
   discount_amount?: number; // client hint only — authoritative amount comes from DB
   marketing_consent?: boolean; // CASL — explicit opt-in from checkout checkbox
+  utm_source?: string;     // first-touch attribution — captured by UtmCapture
+  utm_campaign?: string;
+  utm_medium?: string;
+  utm_content?: string;
+  utm_term?: string;
 }
 
 const GST_RATE = 0.05;
@@ -114,7 +119,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode, marketing_consent } = body;
+    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode, marketing_consent, utm_source, utm_campaign } = body;
 
     if (!rawItems?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -301,6 +306,8 @@ export async function POST(req: NextRequest) {
           discount_amount: discount,
           payment_method,
           notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
+          utm_source: utm_source?.slice(0, 100) || null,
+          utm_campaign: utm_campaign?.slice(0, 100) || null,
         })
         .select("id, order_number")
         .single();

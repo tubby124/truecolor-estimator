@@ -186,3 +186,12 @@ DesignDirectionGrid live on 6 secondary pages but MISSING on all 5 ranking pages
 - After Wave 4 (Product Schema): 75–76
 - After Wave 5 (CWV): 77–78
 - After Wave 6 (Mobile/UX): 79–80
+
+## SEO Investigation + Long-Term Plan — 2026-05-12
+
+- 2026-05-12 — Long-term SEO + attribution plan (Waves A-E) — [SEO-LONG-TERM-PLAN-2026-05-12.md](../SEO-LONG-TERM-PLAN-2026-05-12.md)
+- Day-0 baseline frozen at [memory/seo-baseline-2026-05-12.json](seo-baseline-2026-05-12.json) — 56 clicks / 6,799 imp / pos 22.15 / 0.82% CTR (90d)
+- Phase 0-2 finding: GA4 client-side wired (G-6HMQT7MNLL) but NO server-side Measurement Protocol; `trackPurchase` missing `items[]`; UTM columns exist on `orders` but no inbound link tags them. Owner suspicion of broken attribution confirmed.
+- Phase 1 patch spec covers: dual-track GA4 (Wave A in plan), backfill script for last 30d, UTM tagging across Brevo + GBP + social, consent decision documented (CA B2B, no banner).
+- Phase 2 finding: only ONE non-branded query has healthy CTR (sticker printing saskatoon, 5.77%, FROZEN). `/for-lease-signs-saskatoon` ranks pos 2-3 for 237 monthly impressions at 0% CTR = highest-value single-page fix in Wave B.
+- No code changes shipped this session — read-only investigation.

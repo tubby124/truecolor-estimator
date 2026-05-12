@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { BackToTop } from "@/components/site/BackToTop";
 import { AuthRedirect } from "@/components/site/AuthRedirect";
+import { UtmCapture } from "@/components/site/UtmCapture";
 import { REVIEW_COUNT } from "@/lib/reviews";
 
 const geistSans = Geist({
@@ -231,6 +232,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <AuthRedirect />
+        <UtmCapture />
         {children}
         <BackToTop />
         <Script
