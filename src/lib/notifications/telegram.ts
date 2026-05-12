@@ -59,17 +59,9 @@ export async function sendTelegramNotification(message: string): Promise<void> {
       console.error(`[telegram] API ${res.status}`);
     }
   } catch (err) {
-    // Intentionally NOT logging err.message by default — it can contain the
-    // request URL (with bot token) on some Node fetch failures.
-    // Opt-in TC_DEBUG_TELEGRAM=1 redacts the token and logs the rest for diagnosis.
+    // Intentionally NOT logging err.message — it can contain the request URL
+    // (with bot token) on some Node fetch failures.
     const name = err instanceof Error ? err.name : "Unknown";
-    if (process.env.TC_DEBUG_TELEGRAM === "1") {
-      const tok = process.env.TRUE_COLOR_TELEGRAM_BOT_TOKEN ?? "";
-      const raw = err instanceof Error ? err.message : String(err);
-      const redacted = tok ? raw.split(tok).join("[REDACTED_TOKEN]") : raw;
-      console.error(`[telegram] send failed: ${name} | msg=${redacted}`);
-    } else {
-      console.error(`[telegram] send failed: ${name}`);
-    }
+    console.error(`[telegram] send failed: ${name}`);
   }
 }
