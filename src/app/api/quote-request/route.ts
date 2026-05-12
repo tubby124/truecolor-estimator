@@ -19,6 +19,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { getBrokerage } from "@/lib/data/brokerages";
+import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
+import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -278,6 +280,28 @@ export async function POST(req: NextRequest) {
       insertedId = (insertedRow?.id as string | undefined) ?? null;
     } catch (dbErr) {
       console.error("[quote-request] DB save failed:", dbErr);
+    }
+
+    // Side-channel notifications — fire-and-forget. Failures must never break the response.
+    // User-derived values (name, email) are HTML-escaped because Telegram uses parse_mode=HTML.
+    if (insertedId) {
+      const summary = Array.isArray(items) && items.length > 0
+        ? `${items.length} item${items.length === 1 ? "" : "s"}`
+        : "quote";
+      const refShort = insertedId.slice(0, 8).toUpperCase();
+      const safeName = escapeTelegramHtml(name);
+      const safeEmail = escapeTelegramHtml(email);
+      void broadcastStaffNotification("quote.created", {
+        id: insertedId,
+        name,
+        email,
+        summary,
+      }).catch(() => {});
+      void sendTelegramNotification(
+        `📋 <b>New quote request</b> (${refShort})\n` +
+        `<b>${safeName}</b> · ${safeEmail}\n` +
+        `${summary}`
+      ).catch(() => {});
     }
 
     // Upsert customer record — create if new, skip if already exists

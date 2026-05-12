@@ -20,6 +20,8 @@ import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
+import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
+import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -94,6 +96,25 @@ export async function POST(req: NextRequest) {
 
             // Send "payment confirmed" email + mark Wave invoice paid (both non-fatal)
             if (updatedOrders && updatedOrders.length > 0) {
+              // Side-channel notifications — fire-and-forget.
+              // updatedOrders only contains rows that transitioned from pending_payment to payment_received,
+              // so webhook retries on already-paid orders won't fire these.
+              for (const updated of updatedOrders ?? []) {
+                const totalNum = typeof updated.total === "number" ? updated.total : Number(updated.total ?? 0);
+                const orderRef = updated.order_number ?? updated.id;
+                const safeOrderRef = escapeTelegramHtml(String(orderRef));
+                void broadcastStaffNotification("order.paid", {
+                  id: updated.id,
+                  order_number: updated.order_number,
+                  total: totalNum,
+                }).catch(() => {});
+                void sendTelegramNotification(
+                  `💰 <b>Order paid</b>\n` +
+                  `<b>${safeOrderRef}</b> · $${totalNum.toFixed(2)}` +
+                  (updated.is_rush ? "\n⚡ RUSH" : "")
+                ).catch(() => {});
+              }
+
               const order = updatedOrders[0];
 
               try {
