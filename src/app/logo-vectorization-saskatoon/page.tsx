@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Hand-drawn raster-to-vector logo conversion in Saskatoon. AI, EPS, SVG, PDF formats. From $50. Free with $250+ sign or vehicle decal orders.",
     url: "https://truecolorprinting.ca/logo-vectorization-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/images/products/og/logo-vectorization-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
   },
 };

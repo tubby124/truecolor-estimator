@@ -18,6 +18,54 @@ export const metadata: Metadata = {
 // Product categories for the picker
 const PICKER_PRODUCTS = PRODUCT_SLUGS.map((slug) => PRODUCTS[slug]).filter(Boolean);
 
+// SEO-page-only products — no /products/[slug] estimator yet, custom quoting only.
+// These cards link out to the corresponding /[slug]-saskatoon SEO landing page.
+type SeoOnlyCard = { name: string; fromPrice: string; href: string; image: string };
+const SEO_ONLY_CARDS: SeoOnlyCard[] = [
+  {
+    name: "Freezer Labels",
+    fromPrice: "from $5.50/sqft",
+    href: "/freezer-labels-saskatoon",
+    image: "/images/products/heroes/freezer-labels-hero-1200x500.webp",
+  },
+  {
+    name: "Product Labels",
+    fromPrice: "from $5.50/sqft",
+    href: "/product-labels-saskatoon",
+    image: "/images/products/heroes/product-labels-hero-1200x500.webp",
+  },
+  {
+    name: "Cosmetic Labels",
+    fromPrice: "from $5.50/sqft",
+    href: "/cosmetic-labels-saskatoon",
+    image: "/images/products/heroes/cosmetic-labels-hero-1200x500.webp",
+  },
+  {
+    name: "Candle & Jar Labels",
+    fromPrice: "from $5.50/sqft",
+    href: "/candle-jar-labels-saskatoon",
+    image: "/images/products/heroes/candle-jar-labels-hero-1200x500.webp",
+  },
+  {
+    name: "Roll Labels",
+    fromPrice: "custom-quoted",
+    href: "/roll-labels-saskatoon",
+    image: "/images/products/heroes/roll-labels-hero-1200x500.webp",
+  },
+  {
+    name: "Image Upscale",
+    fromPrice: "from $40",
+    href: "/image-upscale-saskatoon",
+    image: "/images/products/heroes/image-upscale-hero-1200x500.webp",
+  },
+  {
+    name: "Logo Vectorization",
+    fromPrice: "from $50",
+    href: "/logo-vectorization-saskatoon",
+    image: "/images/products/heroes/logo-vectorization-hero-1200x500.webp",
+  },
+];
+
 export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-white">
@@ -107,6 +155,44 @@ export default function ProductsPage() {
               </Link>
             );
           })}
+        </div>
+
+        {/* SEO-page-only products (labels + design services) — link to SEO landing pages */}
+        <div className="mb-12">
+          <h2 className="text-xl font-bold text-[#1c1712] mb-2 text-center">
+            Labels &amp; design services
+          </h2>
+          <p className="text-gray-500 text-sm mb-6 text-center">
+            Custom-quoted — get full pricing and specs on each landing page.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {SEO_ONLY_CARDS.map((card) => (
+              <Link
+                key={card.href}
+                href={card.href}
+                className="group relative flex flex-col border border-gray-100 rounded-2xl overflow-hidden hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
+              >
+                <div className="relative h-32 w-full bg-[#f8f4ef]">
+                  <Image
+                    src={card.image}
+                    alt={`${card.name} — True Color Display Printing Saskatoon`}
+                    fill
+                    className="object-cover"
+                    loading="lazy"
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                  />
+                </div>
+                <div className="p-4">
+                  <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                    {card.name}
+                  </p>
+                  <p className="text-xs font-semibold mt-1 text-[#16C2F3]">
+                    {card.fromPrice}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Not sure section */}

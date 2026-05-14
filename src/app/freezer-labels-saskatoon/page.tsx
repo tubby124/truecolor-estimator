@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     description:
       "Freezer-grade adhesive labels for raw pet food, butchers, food manufacturers. From $5.50/sqft. Saskatoon. Local pickup at 216 33rd St W.",
     url: "https://truecolorprinting.ca/freezer-labels-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/images/products/og/freezer-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
   },
 };

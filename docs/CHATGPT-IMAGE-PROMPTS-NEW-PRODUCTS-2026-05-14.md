@@ -123,6 +123,54 @@ All prompts return **photorealistic 800×600 product shots** unless specified ot
 
 ---
 
+## OG Social-Sharing Images (1200×630)
+
+These appear when pages are shared on Facebook, LinkedIn, Twitter/X, Discord, Slack, iMessage previews.
+
+**Aspect:** 1200×630 (Facebook OG / Twitter `summary_large_image` standard).
+**Safe zones:** Keep critical product, logo, and any text in the **center 1000×500** — Twitter, LinkedIn, and iMessage all crop edges differently. Don't put anything important in the outer 100px on any side.
+**Brand:** Reserve a clean area (typically lower-left or upper-right third) for an overlay reading **"True Color Printing"** in white sans-serif over a red `#e63020` block. The image should look great with OR without text overlay (Hasan may decide to layer text in post).
+**Style:** Photorealistic studio-quality shots, same aesthetic as the 800×600 product images above. Slightly more "editorial" composition since OG images compete for attention in feeds.
+
+Each prompt below covers one product type (or the hub). The same OG image is shared across all three city variants (Regina / Moose Jaw / Prince Albert) for that product.
+
+### 1. labels-saskatoon-og-1200x630.webp (hub page)
+> Photorealistic editorial flat-lay shot showcasing the full True Color label-printing range on a soft cream background. Center frame: an artistic arrangement of seven product samples — a frosty plastic freezer container with crisp full-color label, an artisan jar of jam with a country-craft label, an amber glass skincare bottle with elegant minimalist label, a lit glass jar candle with a watercolor botanical label, a roll of custom labels half-unwound, a small cardboard retail box, and a kraft coffee bag. Saskatchewan prairie-craft aesthetic but professional B2B print quality on every label. Soft directional daylight from upper-left, gentle shadows. Lower-right third left clear for "True Color Printing" brand overlay. Each label sharp and readable. 1200x630.
+
+### 2. freezer-labels-og-1200x630.webp
+> Photorealistic editorial wide shot of a stainless steel commercial freezer with one front door open. Inside: three clear plastic containers of frozen raw pet food stacked on metal shelves, each with a perfectly adhered full-color rectangular adhesive label visibly clean and crisp despite frost crystals on the containers. Cool blue-tinted freezer lighting on the products, warm neutral kitchen light around the edges. Center composition keeps the labeled containers in the middle 1000px. Subtle condensation on the plastic. No peeling, no smudging. Slight overhead-rack blur in background suggests commercial volume. Lower-left third clear for brand overlay. 1200x630.
+
+### 3. product-labels-og-1200x630.webp
+> Photorealistic editorial flat-lay on warm wood-grain background. Center frame: an artisan Saskatchewan food brand product lineup — a jar of wildflower honey, a bottle of saskatoon-berry hot sauce, a kraft coffee bag, a small white retail box, a clear PET deli container, and a tin of granola. Each item has a unique custom full-color label with crisp typography, professional barcodes, and a range of finishes (gloss / matte / soft-touch visible). The labels share a refined small-batch design language but feel distinctly different per product. Soft window light from the left, warm shadows. Upper-right third left clear for brand overlay. 1200x630.
+
+### 4. cosmetic-labels-og-1200x630.webp
+> Photorealistic editorial spa-lighting shot of a luxury Saskatchewan skincare product lineup on a polished white marble counter with a soft beige linen runner. Center frame: five elegant products in a row — amber glass serum dropper, frosted white pump bottle, slim brushed-aluminum tube, square cream jar with brushed metal lid, square soap bar wrapped in a band-style label. Each label is minimalist with subtle gold-foil accents, clean serif typography, sage-green / dusty-pink / soft-cream color palette. Visible waterproof BOPP vinyl finish on the bottle labels — slight beading of water droplets on one bottle suggests durability. Soft directional spa light from above-left. Lower-left third clear for brand overlay. 1200x630.
+
+### 5. candle-jar-labels-og-1200x630.webp
+> Photorealistic editorial cozy-evening shot of a Saskatchewan home-fragrance brand display on a dark walnut mantel. Center frame: five glass jar candles in a row — clear glass with visible soy wax, amber glass, white ceramic, mason jar style, and an apothecary jar — each with a wrap-around full-color label featuring botanical illustrations and elegant typography. Three candles lit with warm flickering glow, two unlit. Labels show fragrance names ("Prairie Wildflower", "Winter Birch", "Northern Cedar"). Heat-resistant matte BOPP label material clearly intact, no curling or yellowing near the flames. Warm amber tones throughout, slight depth-of-field blur in background. Upper-right third left clear for brand overlay. 1200x630.
+
+### 6. image-upscale-og-1200x630.webp
+> Photorealistic editorial split-comparison wide shot, professional graphic-design studio aesthetic. LEFT half: a small, blurry, heavily-pixelated low-resolution photo of a generic vintage company logo or old family-style portrait — visibly grainy, JPG compression artifacts, jagged edges. RIGHT half: the exact same image after AI upscaling at 8x resolution — perfectly sharp, all detail restored, clean edges, vibrant accurate colors, looks freshly photographed. Subtle vertical center divider line. Small "BEFORE" tag upper-left, small "AFTER" tag upper-right. Both halves equally lit. Soft neutral studio backdrop. Avoid putting recognizable real brand logos in the image — use a generic invented mark. Center 800px shows the full transformation. 1200x630.
+
+### 7. logo-vectorization-og-1200x630.webp
+> Photorealistic editorial wide shot, professional graphic-design studio aesthetic. LEFT half: a low-resolution JPG of a generic invented company logo displayed on a tablet screen — visible pixelation, jaggy edges, fuzzy curves. RIGHT half: the exact same logo as a perfect vector graphic on a second tablet screen beside it — infinitely smooth bezier curves, crisp lines, anchor points and handle bars subtly visible to hint at the underlying vector geometry. Soft file-format tags beneath each side: "JPG 72dpi" on left, "AI · EPS · SVG · PDF" on right. Subtle dot-grid background. Designer's hand entering frame from lower edge to point at the vector side. Center 800px shows both tablets clearly. 1200x630.
+
+---
+
+## After OG image generation
+
+OG images don't auto-wire — they need code changes in `IndustryPage.tsx` to pull a per-page OG path instead of the global default. Suggested approach when wiring:
+
+1. Add optional `ogImage?: string` prop to `IndustryPage`
+2. Each new page passes its product's OG path (e.g. `/images/products/og/freezer-labels-og-1200x630.webp`)
+3. The 3 city variants per product share one OG (Regina, Moose Jaw, Prince Albert versions of freezer-labels all use the same OG)
+4. Hub page `labels-saskatoon` uses `labels-saskatoon-og-1200x630.webp`
+5. After wiring, hit Facebook Sharing Debugger + LinkedIn Post Inspector to invalidate cached defaults
+
+Suggested folder: `public/images/products/og/` (new subdir, parallel to `heroes/` and `product/`).
+
+---
+
 ## Generation Order (recommended)
 
 Do them in this priority order — the first 4 unlock the most-likely revenue:

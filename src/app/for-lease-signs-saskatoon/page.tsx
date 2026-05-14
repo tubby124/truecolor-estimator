@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Saskatchewan For Lease Signs | Coroplast from $30 Same Day" },
+  title: { absolute: "Lease Signage Saskatchewan | For-Lease Signs from $30" },
   description:
-    "For-lease & for-rent signs across Saskatchewan from $30. 18×24\" coroplast yard signs, post-mounted boards, fence panels. Bulk 5+ save 8%. Same-day +$40.",
+    "Lease signage for Saskatchewan property managers, leasing agents, landlords. 18×24\" coroplast from $30. Same-day +$40. Pickup at 216 33rd St W, Saskatoon.",
   alternates: { canonical: "/for-lease-signs-saskatoon" },
   openGraph: {
-    title: "Saskatchewan For Lease Signs | Coroplast $30, Same-Day",
+    title: "Lease Signage Saskatchewan | For-Lease Signs from $30 | True Color",
     description:
-      "Coroplast for-lease signs across Saskatchewan from $30. 18×24\" yard signs, post-mounted boards, fence panels. Bulk 5+ save 8%. Same-day +$40. Pickup at 216 33rd St W.",
+      "Lease signage and for-lease signs across Saskatchewan from $30. 18×24\" coroplast, post-mounted boards, fence panels. Same-day +$40. Bulk 5+ save 8%.",
     url: "https://truecolorprinting.ca/for-lease-signs-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",

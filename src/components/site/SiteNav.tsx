@@ -49,6 +49,7 @@ const PRODUCT_CATEGORIES = [
   {
     label: "Labels",
     links: [
+      { label: "All Custom Labels Saskatoon", href: "/labels-saskatoon" },
       { label: "Freezer Labels", href: "/freezer-labels-saskatoon" },
       { label: "Product Labels", href: "/product-labels-saskatoon" },
       { label: "Cosmetic Labels", href: "/cosmetic-labels-saskatoon" },

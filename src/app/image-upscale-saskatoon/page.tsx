@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     description:
       "AI image upscaling from $15. Photo restoration from $75. FREE with any $100+ print order. Same-day delivery. Print-ready 300dpi files. Saskatoon print shop.",
     url: "https://truecolorprinting.ca/image-upscale-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/images/products/og/image-upscale-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
   },
 };

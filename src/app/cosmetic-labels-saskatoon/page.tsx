@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     description:
       "Small-batch cosmetic label printing in Saskatoon from $5.50/sqft. 3mil vinyl, full-colour Roland UV, matte or gloss. Local pickup 216 33rd St W.",
     url: "https://truecolorprinting.ca/cosmetic-labels-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/images/products/og/cosmetic-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
   },
 };
