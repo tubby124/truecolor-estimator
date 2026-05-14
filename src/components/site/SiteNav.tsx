@@ -46,6 +46,24 @@ const PRODUCT_CATEGORIES = [
       { label: "Coil-Bound Booklets", href: "/products/coil-bound-booklets" },
     ],
   },
+  {
+    label: "Labels",
+    links: [
+      { label: "Freezer Labels", href: "/freezer-labels-saskatoon" },
+      { label: "Product Labels", href: "/product-labels-saskatoon" },
+      { label: "Cosmetic Labels", href: "/cosmetic-labels-saskatoon" },
+      { label: "Candle & Jar Labels", href: "/candle-jar-labels-saskatoon" },
+      { label: "Roll Labels (Custom Quote)", href: "/roll-labels-saskatoon" },
+    ],
+  },
+  {
+    label: "Design Services",
+    links: [
+      { label: "Graphic Design", href: "/graphic-design-saskatoon" },
+      { label: "Image Upscale & Restoration", href: "/image-upscale-saskatoon" },
+      { label: "Logo Vectorization", href: "/logo-vectorization-saskatoon" },
+    ],
+  },
 ];
 
 const INDUSTRY_LINKS = [

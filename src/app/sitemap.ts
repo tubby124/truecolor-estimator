@@ -90,6 +90,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/property-management-signs-saskatoon`, lastModified: new Date("2026-05-09"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/for-lease-signs-saskatoon`, lastModified: new Date("2026-05-09"), changeFrequency: "monthly", priority: 0.85 },
 
+    // ── Label & service SEO pages — Wave 2026-05-14 product expansion ───────
+    { url: `${BASE_URL}/freezer-labels-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/product-labels-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/cosmetic-labels-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/candle-jar-labels-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/roll-labels-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/image-upscale-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.75 },
+    { url: `${BASE_URL}/logo-vectorization-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.75 },
+
     // ── Seasonal pages ────────────────────────────────────────────────────────
     // /st-patricks-day-printing-saskatoon removed from sitemap 2026-05-05 — out of season + page now noindex; restore Feb 2027
     { url: `${BASE_URL}/graduation-banners-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
