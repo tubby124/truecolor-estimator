@@ -453,20 +453,28 @@ export async function POST(req: NextRequest) {
 
       waveInvoiceId = inv.invoiceId;
 
-      // Save wave_invoice_id back to order (best-effort — schema may not have column yet)
-      void supabase
-        .from("orders")
-        .update({ wave_invoice_id: waveInvoiceId } as Record<string, unknown>)
-        .eq("id", order.id);
+      // Save wave_invoice_id back to order.
+      // CRITICAL: must `await` — `void supabase.update().eq()` does NOT fire the HTTP
+      // request (PostgrestFilterBuilder only executes on await/.then()). Bug found
+      // 2026-05-15 caused 30+ days of Wave orders to have NULL wave_invoice_id
+      // even though the Wave invoice was created successfully.
+      {
+        const { error: updErr } = await supabase
+          .from("orders")
+          .update({ wave_invoice_id: waveInvoiceId } as Record<string, unknown>)
+          .eq("id", order.id);
+        if (updErr) console.error("[orders] wave_invoice_id save failed (non-fatal):", updErr.message);
+      }
 
       // Auto-approve the invoice so it appears in Wave reports and can be sent as a receipt.
       // Non-fatal — order and invoice still exist if this fails.
       try {
         await approveWaveInvoice(waveInvoiceId);
-        void supabase
+        const { error: updErr } = await supabase
           .from("orders")
           .update({ wave_invoice_approved_at: new Date().toISOString() } as Record<string, unknown>)
           .eq("id", order.id);
+        if (updErr) console.error("[orders] wave_invoice_approved_at save failed (non-fatal):", updErr.message);
       } catch (approveErr) {
         console.warn("[orders] Wave invoice auto-approve failed (non-fatal):", approveErr);
       }

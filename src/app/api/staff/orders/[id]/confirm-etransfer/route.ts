@@ -174,10 +174,15 @@ export async function POST(_req: NextRequest, { params }: Params) {
     if (order.wave_invoice_id) {
       try {
         await approveWaveInvoice(order.wave_invoice_id);
-        void supabase
-          .from("orders")
-          .update({ wave_invoice_approved_at: new Date().toISOString() })
-          .eq("id", id);
+        // Must `await` — `void supabase.update().eq()` does NOT fire the HTTP request.
+        // Bug found 2026-05-15 — see commentary in manual-order route.
+        {
+          const { error: updErr } = await supabase
+            .from("orders")
+            .update({ wave_invoice_approved_at: new Date().toISOString() })
+            .eq("id", id);
+          if (updErr) console.error("[confirm-etransfer] wave_invoice_approved_at save failed (non-fatal):", updErr.message);
+        }
 
         const waveCustomerId = await findCustomerByEmail(customer.email).catch(() => null);
         await recordWavePayment(
@@ -188,10 +193,13 @@ export async function POST(_req: NextRequest, { params }: Params) {
           waveCustomerId ?? undefined,
           id, // Supabase order UUID as externalId — idempotency key
         );
-        void supabase
-          .from("orders")
-          .update({ wave_payment_recorded_at: new Date().toISOString() })
-          .eq("id", id);
+        {
+          const { error: updErr } = await supabase
+            .from("orders")
+            .update({ wave_payment_recorded_at: new Date().toISOString() })
+            .eq("id", id);
+          if (updErr) console.error("[confirm-etransfer] wave_payment_recorded_at save failed (non-fatal):", updErr.message);
+        }
         console.log(`[confirm-etransfer] Wave payment recorded (${order.wave_invoice_id})`);
       } catch (e) {
         console.error("[confirm-etransfer] Wave payment recording failed (non-fatal):", e);

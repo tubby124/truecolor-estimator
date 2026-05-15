@@ -165,9 +165,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             if (paymentMethod !== "clover_card") {
               try {
                 await approveWaveInvoice(order.wave_invoice_id);
-                void supabase.from("orders")
-                  .update({ wave_invoice_approved_at: new Date().toISOString() })
-                  .eq("id", id);
+                // Must `await` — `void supabase.update().eq()` does NOT fire the HTTP request.
+                // Bug found 2026-05-15 — see commentary in manual-order route.
+                {
+                  const { error: updErr } = await supabase.from("orders")
+                    .update({ wave_invoice_approved_at: new Date().toISOString() })
+                    .eq("id", id);
+                  if (updErr) console.error("[staff/orders/status] wave_invoice_approved_at save failed (non-fatal):", updErr.message);
+                }
 
                 // Look up Wave customer ID to enable auto-reconciliation against invoice
                 const waveCustomerId = customer?.email
@@ -182,9 +187,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
                   waveCustomerId ?? undefined,
                   id,  // Supabase order UUID as externalId — prevents duplicate transactions
                 );
-                void supabase.from("orders")
-                  .update({ wave_payment_recorded_at: new Date().toISOString() })
-                  .eq("id", id);
+                {
+                  const { error: updErr } = await supabase.from("orders")
+                    .update({ wave_payment_recorded_at: new Date().toISOString() })
+                    .eq("id", id);
+                  if (updErr) console.error("[staff/orders/status] wave_payment_recorded_at save failed (non-fatal):", updErr.message);
+                }
                 console.log(`[staff/orders/status] Wave payment recorded — eTransfer (${order.wave_invoice_id})`);
               } catch (waveErr) {
                 console.error("[staff/orders/status] Wave payment recording failed (non-fatal):", waveErr);

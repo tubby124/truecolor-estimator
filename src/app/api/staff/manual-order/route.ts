@@ -296,10 +296,17 @@ export async function POST(req: NextRequest) {
           { orderNumber: order.order_number }
         );
 
-        void supabase
-          .from("orders")
-          .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
-          .eq("id", order.id);
+        // CRITICAL: must `await` — `void supabase.update().eq()` does NOT fire the HTTP
+        // request (PostgrestFilterBuilder only executes on await/.then()). Bug found
+        // 2026-05-15 caused 30+ days of Wave orders to have NULL wave_invoice_id
+        // even though the Wave invoice was created successfully.
+        {
+          const { error: updErr } = await supabase
+            .from("orders")
+            .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
+            .eq("id", order.id);
+          if (updErr) console.error("[manual-order] wave_invoice_id save failed (non-fatal):", updErr.message);
+        }
 
         if (!quoteOnly) {
           // Standard flow: approve + send via Wave (Wave emails the customer the invoice + payment link).
