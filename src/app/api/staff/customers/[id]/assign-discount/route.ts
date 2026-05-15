@@ -187,10 +187,14 @@ export async function POST(req: NextRequest, { params }: Params) {
             orderNumber: order.order_number,
           });
           await approveWaveInvoice(inv.invoiceId);
-          void supabase
-            .from("orders")
-            .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
-            .eq("id", order.id);
+          // Must `await` — bug found 2026-05-15 (Wave fields silently dropping).
+          {
+            const { error: updErr } = await supabase
+              .from("orders")
+              .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
+              .eq("id", order.id);
+            if (updErr) console.error("[assign-discount] wave_invoice_id save failed (non-fatal):", updErr.message);
+          }
           console.log(
             `[assign-discount] Wave invoice replaced: ${capturedWaveInvoiceId} → ${inv.invoiceId} | order ${order.order_number}`
           );

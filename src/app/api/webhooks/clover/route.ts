@@ -294,11 +294,15 @@ export async function POST(req: NextRequest) {
                     order.id,  // Supabase order UUID as externalId — idempotency key
                   );
 
-                  // Write Wave sync timestamps back to the order row
-                  const now = new Date().toISOString();
-                  void supabase.from("orders")
-                    .update({ wave_invoice_approved_at: now, wave_payment_recorded_at: now })
-                    .eq("id", order.id);
+                  // Write Wave sync timestamps back to the order row.
+                  // Must `await` — bug found 2026-05-15.
+                  {
+                    const now = new Date().toISOString();
+                    const { error: tsErr } = await supabase.from("orders")
+                      .update({ wave_invoice_approved_at: now, wave_payment_recorded_at: now })
+                      .eq("id", order.id);
+                    if (tsErr) console.error("[clover-webhook] Wave timestamps save failed (non-fatal):", tsErr.message);
+                  }
 
                   console.log(`[clover-webhook] Wave invoice marked paid → ${waveInvoiceId}`);
                 } catch (waveErr) {

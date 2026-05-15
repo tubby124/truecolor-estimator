@@ -169,11 +169,13 @@ export async function POST(req: NextRequest, { params }: Params) {
     ? order.order_items[0]?.id
     : null;
 
+  // Must `await` — bug found 2026-05-15.
   if (firstItemId) {
-    void supabase
+    const { error: itemErr } = await supabase
       .from("order_items")
       .update({ file_storage_path: filePath } as Record<string, unknown>)
       .eq("id", firstItemId);
+    if (itemErr) console.error("[upload-file] order_items file_storage_path save failed (non-fatal):", itemErr.message);
   }
 
   // ── 7. Append to orders.file_storage_paths[] (best-effort) ─────────────────
@@ -181,12 +183,15 @@ export async function POST(req: NextRequest, { params }: Params) {
     ? order.file_storage_paths
     : [];
 
-  void supabase
-    .from("orders")
-    .update({
-      file_storage_paths: [...existingPaths, filePath],
-    } as Record<string, unknown>)
-    .eq("id", orderId);
+  {
+    const { error: pathsErr } = await supabase
+      .from("orders")
+      .update({
+        file_storage_paths: [...existingPaths, filePath],
+      } as Record<string, unknown>)
+      .eq("id", orderId);
+    if (pathsErr) console.error("[upload-file] file_storage_paths save failed (non-fatal):", pathsErr.message);
+  }
 
   // ── 8. Email staff (non-fatal) ──────────────────────────────────────────────
   try {

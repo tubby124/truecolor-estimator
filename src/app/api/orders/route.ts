@@ -173,9 +173,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
     }
 
-    // Save CASL marketing consent (non-fatal — columns added via migration)
+    // Save CASL marketing consent (non-fatal — columns added via migration).
+    // Must `await` — void doesn't fire the HTTP request (2026-05-15 audit).
     if (marketing_consent !== undefined) {
-      void supabase
+      const { error: consentErr } = await supabase
         .from("customers")
         .update({
           marketing_consent: marketing_consent === true,
@@ -183,14 +184,16 @@ export async function POST(req: NextRequest) {
           consent_ip: ip,
         } as Record<string, unknown>)
         .eq("id", customer.id);
+      if (consentErr) console.error("[orders] marketing_consent save failed (non-fatal):", consentErr.message);
     }
 
-    // Update address if provided (non-fatal — column added via migration, may not exist yet)
+    // Update address if provided (non-fatal — column added via migration, may not exist yet).
     if (contact.address?.trim()) {
-      void supabase
+      const { error: addrErr } = await supabase
         .from("customers")
         .update({ address: contact.address.trim() } as Record<string, unknown>)
         .eq("id", customer.id);
+      if (addrErr) console.error("[orders] address save failed (non-fatal):", addrErr.message);
     }
 
     // Append company to saved companies[] list (non-fatal — requires migration)
@@ -354,13 +357,14 @@ export async function POST(req: NextRequest) {
       }
     })();
 
-    // Clear staff-assigned pending discount once consumed (non-fatal)
+    // Clear staff-assigned pending discount once consumed (non-fatal). Must `await`.
     if (validatedDiscountCode) {
-      void supabase
+      const { error: clearErr } = await supabase
         .from("customers")
         .update({ pending_discount_code: null } as Record<string, unknown>)
         .eq("id", customer.id)
         .eq("pending_discount_code", validatedDiscountCode); // guard: only clear the code that was actually used
+      if (clearErr) console.error("[orders] pending_discount_code clear failed (non-fatal):", clearErr.message);
     }
 
     // Record discount redemption (non-fatal — order is already saved)
@@ -380,12 +384,14 @@ export async function POST(req: NextRequest) {
         });
     }
 
-    // Save all file paths to order (requires DB migration: file_storage_paths TEXT[] — best-effort)
+    // Save all file paths to order (requires DB migration: file_storage_paths TEXT[] — best-effort).
+    // Must `await`.
     if (file_storage_paths?.length) {
-      void supabase
+      const { error: filesErr } = await supabase
         .from("orders")
         .update({ file_storage_paths } as Record<string, unknown>)
         .eq("id", order.id);
+      if (filesErr) console.error("[orders] file_storage_paths save failed (non-fatal):", filesErr.message);
     }
 
     // 4. Create order_items rows
@@ -504,10 +510,14 @@ export async function POST(req: NextRequest) {
 
       // Pre-set payment_reference to order UUID so webhook can match before /pay/[token] is clicked.
       // /pay/[token] will also set this — no conflict since the value is the same.
-      void supabase
-        .from("orders")
-        .update({ payment_reference: order.id } as Record<string, unknown>)
-        .eq("id", order.id);
+      // CRITICAL: must `await` — bug found 2026-05-15.
+      {
+        const { error: updErr } = await supabase
+          .from("orders")
+          .update({ payment_reference: order.id } as Record<string, unknown>)
+          .eq("id", order.id);
+        if (updErr) console.error("[orders] payment_reference save (Clover) failed (non-fatal):", updErr.message);
+      }
 
       // Build a durable /pay/{token} URL for the email (30-day validity, creates fresh Clover session on each click)
       // The raw checkoutUrl expires after 15 minutes and should not go in emails
@@ -533,10 +543,14 @@ export async function POST(req: NextRequest) {
             : `True Color Order ${order.order_number} (${items.length} items)`;
         const payToken = encodePaymentToken(total, desc, contact.email, redirectUrl);
         checkoutUrl = `${siteUrl}/pay/${payToken}`;
-        void supabase
+        // Note: this is the eTransfer fallback path where payment_reference stores
+        // the /pay/{token} URL (not the order.id). Used by /order-confirmed to
+        // surface a "Pay by card instead" option. Must `await`.
+        const { error: updErr } = await supabase
           .from("orders")
           .update({ payment_reference: checkoutUrl } as Record<string, unknown>)
           .eq("id", order.id);
+        if (updErr) console.error("[orders] payment_reference save (eTransfer fallback) failed (non-fatal):", updErr.message);
       } catch {
         // Non-fatal — eTransfer still works without card fallback
       }

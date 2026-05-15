@@ -73,14 +73,18 @@ export default async function PaymentGatewayPage({ params }: Props) {
     checkoutUrl = result.checkoutUrl;
 
     // Store our own UUID as payment_reference so the Clover webhook can find this order
-    // by matching event.object.externalReferenceId === payment_reference
+    // by matching event.object.externalReferenceId === payment_reference.
+    // CRITICAL: must `await` — `void supabase.update().eq()` does NOT fire the HTTP
+    // request. Bug found 2026-05-15 — caused 30+ days of stuck Clover webhooks
+    // that staff had to manually resolve. See WAVE/Clover audit doc.
     if (orderId) {
       const supabase = createServiceClient();
-      void supabase
+      const { error: updErr } = await supabase
         .from("orders")
         .update({ payment_reference: orderId } as Record<string, unknown>)
         .eq("id", orderId)
         .eq("status", "pending_payment"); // only update if still pending
+      if (updErr) console.error("[pay/token] payment_reference save failed (non-fatal):", updErr.message);
     }
   } catch (err) {
     console.error("[pay/token] Clover checkout failed:", err);
