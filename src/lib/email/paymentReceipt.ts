@@ -9,6 +9,8 @@
 import { sendEmail } from "./smtp";
 import { emailHeader } from "./components/emailHeader";
 import { escHtml } from "./components/escHtml";
+import { preheader } from "./components/preheader";
+import { productAnchor } from "./components/productAnchor";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,9 +51,13 @@ export async function sendPaymentReceipt(
   const html = buildReceiptHtml(params);
   const text = buildReceiptText(params);
 
+  // Product-anchored subject + total $ so customer sees the amount in inbox.
+  const anchor = productAnchor(params.items);
+  const subject = `Receipt — ${anchor} · $${params.total.toFixed(2)}`;
+
   await sendEmail({
     to: params.customerEmail,
-    subject: `Receipt — True Color Order ${params.orderNumber}`,
+    subject,
     html,
     text,
   });
@@ -137,7 +143,7 @@ function buildReceiptHtml(p: SendPaymentReceiptParams): string {
   <title>Receipt — Order ${escHtml(p.orderNumber)}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-
+  ${preheader("Itemized · GST# 731454914RT0001 · PDF download inside for your records.")}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
     style="background-color:#f4efe9;padding:32px 16px;">
     <tr>

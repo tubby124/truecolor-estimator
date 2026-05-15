@@ -126,6 +126,16 @@ export async function POST(req: NextRequest) {
                   .eq("id", order.customer_id)
                   .single();
                 if (customer) {
+                  // Fetch full order WITH items once — used for both the status
+                  // email (so subject can anchor on product name + body renders
+                  // "What you ordered") and the itemized receipt below.
+                  const { data: fullOrder } = await supabase
+                    .from("orders")
+                    .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, receipt_token, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
+                    .eq("id", order.id)
+                    .single();
+                  const receiptItems = fullOrder && Array.isArray(fullOrder.order_items) ? fullOrder.order_items : [];
+
                   await sendOrderStatusEmail({
                     status: "payment_received",
                     orderNumber: order.order_number,
@@ -134,18 +144,20 @@ export async function POST(req: NextRequest) {
                     total: order.total,
                     isRush: order.is_rush,
                     paymentMethod: "clover_card",
+                    items: receiptItems.map((i) => ({
+                      product_name: i.product_name,
+                      qty: i.qty,
+                      width_in: i.width_in,
+                      height_in: i.height_in,
+                      sides: i.sides,
+                      line_total: Number(i.line_total),
+                    })),
                   });
                   console.log(`[clover-webhook] payment confirmed email sent → ${customer.email}`);
 
                   // Itemized receipt (non-fatal)
                   try {
-                    const { data: fullOrder } = await supabase
-                      .from("orders")
-                      .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, receipt_token, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
-                      .eq("id", order.id)
-                      .single();
                     if (fullOrder) {
-                      const receiptItems = Array.isArray(fullOrder.order_items) ? fullOrder.order_items : [];
                       await sendPaymentReceipt({
                         orderNumber: order.order_number,
                         customerName: customer.name,

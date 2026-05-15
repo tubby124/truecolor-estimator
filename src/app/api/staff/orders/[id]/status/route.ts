@@ -99,6 +99,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           const customer = customerRaw as { name: string; email: string } | null;
 
           if (customer?.email) {
+            // Pass line items so the email renders "What you ordered" + the
+            // subject can anchor on the product name (TC-XXXXX is meaningless).
+            const statusItems = Array.isArray(order.order_items) ? order.order_items : [];
             await sendOrderStatusEmail({
               status: status as "payment_received" | "in_production" | "ready_for_pickup",
               orderNumber: order.order_number,
@@ -107,6 +110,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
               total: Number(order.total),
               isRush: Boolean(order.is_rush),
               paymentMethod: order.payment_method ?? undefined,
+              items: statusItems.map((i) => ({
+                product_name: i.product_name,
+                qty: i.qty,
+                width_in: i.width_in,
+                height_in: i.height_in,
+                sides: i.sides,
+                line_total: Number(i.line_total),
+              })),
             });
           }
 
@@ -218,11 +229,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           const customer = customerRaw as { name: string; email: string } | null;
 
           if (customer?.email) {
-            // Review request
+            // Review request — pass items for product-anchored subject
+            const reviewItems = Array.isArray(order.order_items) ? order.order_items : [];
             await sendReviewRequestEmail({
               customerName: customer.name,
               customerEmail: customer.email,
               orderNumber: order.order_number,
+              items: reviewItems.map((i) => ({
+                product_name: i.product_name,
+                qty: i.qty,
+              })),
             });
 
             // Receipt fallback — always send our Brevo HTML receipt at complete.

@@ -13,6 +13,8 @@ import { emailHeader } from "./components/emailHeader";
 import { emailFooter } from "./components/emailFooter";
 import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
 import { escHtml } from "./components/escHtml";
+import { preheader } from "./components/preheader";
+import { productAnchor } from "./components/productAnchor";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -65,10 +67,13 @@ export async function sendOrderConfirmationEmail(
   const from =
     process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
   const bcc = process.env.SMTP_BCC ?? undefined;
+  // Product-anchored subject — customers don't remember TC-XXXXX, they remember
+  // what they bought. First-item anchor (e.g. "50 business cards") + verb.
+  const anchor = productAnchor(items);
   const subject =
     payment_method === "clover_card"
-      ? `Complete your payment — Order ${orderNumber} · True Color Display Printing`
-      : `Order ${orderNumber} received — True Color Display Printing`;
+      ? `Complete your payment — ${anchor}`
+      : `Got your order — ${anchor}`;
 
   // Generate QR code as buffer for card orders — use CID attachment (data URIs are stripped by Gmail)
   const QR_CID = "order-payment-qr@truecolor";
@@ -257,6 +262,11 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
   <title>Order ${escHtml(orderNumber)} confirmed — True Color Display Printing</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4efe9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
+  ${preheader(
+    payment_method === "clover_card"
+      ? "Tap the QR or button below — payment takes 30 seconds."
+      : "Send e-transfer to info@true-color.ca · we start printing once received."
+  )}
 
   <!-- Outer wrapper -->
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"

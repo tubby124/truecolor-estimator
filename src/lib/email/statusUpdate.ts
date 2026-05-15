@@ -17,6 +17,13 @@ import { emailHeader } from "./components/emailHeader";
 import { emailFooter } from "./components/emailFooter";
 import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
 import { escHtml } from "./components/escHtml";
+import { preheader } from "./components/preheader";
+import { productAnchor } from "./components/productAnchor";
+import {
+  orderItemsBlock,
+  orderItemsBlockText,
+  type OrderItemsBlockItem,
+} from "./components/orderItemsBlock";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,6 +35,12 @@ export interface StatusUpdateParams {
   total: number;
   isRush: boolean;
   paymentMethod?: string; // "clover_card" | "etransfer" — affects payment_received wording
+  /**
+   * Order line items — render in body so customer recognises WHICH order this
+   * is about (TC-XXXXX numbers are meaningless to them). Optional for backward
+   * compat with older call sites; new sites SHOULD pass items.
+   */
+  items?: OrderItemsBlockItem[];
 }
 
 
@@ -49,13 +62,31 @@ export async function sendOrderStatusEmail(params: StatusUpdateParams): Promise<
 // ─── Subject lines ────────────────────────────────────────────────────────────
 
 function buildSubject(p: StatusUpdateParams): string {
+  // Product-anchored — customers recognise "your business cards" instantly,
+  // they do NOT remember TC-XXXXX. Falls back to "your order" if no items.
+  const anchor = productAnchor(p.items);
   switch (p.status) {
     case "payment_received":
-      return `Payment received — order ${p.orderNumber} is in the queue`;
+      return `Payment confirmed — printing ${anchor}`;
     case "in_production":
-      return `We're printing your order ${p.orderNumber} now`;
+      return `Your ${anchor} are on the press`;
     case "ready_for_pickup":
-      return `Your order ${p.orderNumber} is ready for pickup!`;
+      return `Your ${anchor} are ready — 216 33rd St W`;
+  }
+}
+
+function buildPreheaderText(p: StatusUpdateParams): string {
+  switch (p.status) {
+    case "payment_received":
+      return p.isRush
+        ? "Rush order in the queue · printing starts today."
+        : "In the queue · printing starts within 1 business day.";
+    case "in_production":
+      return p.isRush
+        ? "Same-day priority · we'll email you the moment it's off the press."
+        : "1–3 business days · we'll email you when ready for pickup.";
+    case "ready_for_pickup":
+      return "Mon–Fri 9 AM – 5 PM · bring your order number to the counter.";
   }
 }
 
@@ -144,7 +175,7 @@ function buildHtml(p: StatusUpdateParams): string {
   <title>${escHtml(buildSubject(p))}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-
+  ${preheader(buildPreheaderText(p))}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
     style="background-color:#f4efe9;padding:32px 16px;">
     <tr><td align="center">
@@ -179,6 +210,8 @@ function buildHtml(p: StatusUpdateParams): string {
         <tr>
           <td style="background:#fff;padding:8px 32px 32px;">
             ${c.bodyContent}
+
+            ${p.items && p.items.length > 0 ? orderItemsBlock(p.items, { heading: "What you ordered" }) : ""}
 
             ${orderTrackingNudge()}
 
@@ -244,11 +277,11 @@ function buildText(p: StatusUpdateParams): string {
 
   return [
     ...messages[status],
-    "",
+    p.items && p.items.length > 0 ? orderItemsBlockText(p.items) : "",
     orderTrackingNudgeText(),
     "Questions? Reply to this email or call (306) 954-8688.",
     "— True Color Display Printing",
     "info@true-color.ca",
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 

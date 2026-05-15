@@ -13,6 +13,8 @@ import { emailHeader } from "./components/emailHeader";
 import { emailFooter } from "./components/emailFooter";
 import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
 import { escHtml } from "./components/escHtml";
+import { preheader } from "./components/preheader";
+import { productAnchor } from "./components/productAnchor";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,6 +22,8 @@ export interface ReviewRequestParams {
   customerName: string;
   customerEmail: string;
   orderNumber: string;
+  /** Optional — used for product-anchored subject ("How did your business cards turn out?") */
+  items?: Array<{ product_name: string; qty: number }>;
 }
 
 // ─── Google review link ───────────────────────────────────────────────────────
@@ -34,7 +38,11 @@ export async function sendReviewRequestEmail(
 ): Promise<void> {
   const from =
     process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
-  const subject = `How did your order ${params.orderNumber} turn out?`;
+  const anchor = productAnchor(params.items);
+  const subject =
+    anchor === "your order"
+      ? `How did your order turn out?`
+      : `How did your ${anchor} turn out?`;
   const html = buildReviewRequestEmailHtml(params);
   const text = buildReviewRequestEmailText(params);
 
@@ -67,7 +75,7 @@ function buildReviewRequestEmailHtml({
   <title>How did your order ${escHtml(orderNumber)} turn out?</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-
+  ${preheader("A quick 30-second favour if you're happy with how it came out.")}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
     style="background-color:#f4efe9;padding:32px 16px;">
     <tr><td align="center">

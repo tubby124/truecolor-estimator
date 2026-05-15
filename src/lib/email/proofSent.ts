@@ -13,6 +13,8 @@ import { emailHeader } from "./components/emailHeader";
 import { emailFooter } from "./components/emailFooter";
 import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
 import { escHtml } from "./components/escHtml";
+import { preheader } from "./components/preheader";
+import { productAnchor } from "./components/productAnchor";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,10 +41,11 @@ export interface ProofSentParams {
 export async function sendProofEmail(params: ProofSentParams): Promise<void> {
   const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
   const proofCount = params.proofUrls.length;
+  const anchor = productAnchor(params.items);
   const subject =
     proofCount > 1
-      ? `${proofCount} proofs ready for your review — Order ${params.orderNumber}`
-      : `Proof ready for your review — Order ${params.orderNumber}`;
+      ? `${proofCount} proofs ready — approve your ${anchor}`
+      : `Proof ready — approve your ${anchor}`;
   const html = buildHtml(params);
   const text = buildText(params);
 
@@ -154,7 +157,7 @@ function buildHtml(p: ProofSentParams): string {
   <title>Proof${proofCount > 1 ? "s" : ""} ready — Order ${escHtml(orderNumber)}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-
+  ${preheader("Reply with approval or changes · your order won't print until you sign off.")}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
     style="background-color:#f4efe9;padding:32px 16px;">
     <tr><td align="center">

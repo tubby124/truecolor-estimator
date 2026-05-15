@@ -106,6 +106,8 @@ export async function POST(_req: NextRequest, { params }: Params) {
     // ── 1. Payment confirmed status email ────────────────────────────────────────
 
     try {
+      // Pass items so the email body renders "What you ordered" + the subject
+      // anchors on product name instead of TC-XXXXX
       await sendOrderStatusEmail({
         status: "payment_received",
         orderNumber: order.order_number,
@@ -114,6 +116,14 @@ export async function POST(_req: NextRequest, { params }: Params) {
         total: Number(order.total),
         isRush: Boolean(order.is_rush),
         paymentMethod: "etransfer",
+        items: items.map((i) => ({
+          product_name: i.product_name,
+          qty: i.qty,
+          width_in: i.width_in,
+          height_in: i.height_in,
+          sides: i.sides,
+          line_total: Number(i.line_total),
+        })),
       });
     } catch (e) {
       console.error("[confirm-etransfer] status email failed (non-fatal):", e);
