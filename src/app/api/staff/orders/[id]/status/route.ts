@@ -19,7 +19,7 @@ import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendReviewRequestEmail } from "@/lib/email/reviewRequest";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
-import { approveWaveInvoice, sendWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
+import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 
 const VALID_STATUSES = [
   "pending_payment",
@@ -98,12 +98,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             : order.customers;
           const customer = customerRaw as { name: string; email: string } | null;
 
-          if (customer?.email) {
-            // Pass line items so the email renders "What you ordered" + the
-            // subject can anchor on the product name (TC-XXXXX is meaningless).
+          // Only email the customer at ready_for_pickup.
+          // payment_received: receipt below is sufficient (was duplicate).
+          // in_production: dead noise — customer doesn't care about the middle stage.
+          // Reducing customer-facing emails from 9 → 4 per order (2026-05-14).
+          if (customer?.email && status === "ready_for_pickup") {
             const statusItems = Array.isArray(order.order_items) ? order.order_items : [];
             await sendOrderStatusEmail({
-              status: status as "payment_received" | "in_production" | "ready_for_pickup",
+              status: "ready_for_pickup",
               orderNumber: order.order_number,
               customerName: customer.name,
               customerEmail: customer.email,
@@ -190,19 +192,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             }
           }
 
-          // On ready_for_pickup: send Wave invoice as receipt (approve already done above)
-          // Both eTransfer and card orders get the receipt email
-          if (status === "ready_for_pickup" && order.wave_invoice_id && customer?.email) {
-            try {
-              await sendWaveInvoice(order.wave_invoice_id, customer.email, {
-                subject: `Receipt — True Color Order ${order.order_number}`,
-                message: `Your order is ready for pickup at 216 33rd St W, Saskatoon. Your payment has been confirmed — please find your receipt attached.`,
-              });
-              console.log(`[staff/orders/status] Wave receipt sent → ${customer.email} (${order.wave_invoice_id})`);
-            } catch (waveErr) {
-              console.error("[staff/orders/status] Wave receipt send failed (non-fatal):", waveErr);
-            }
-          }
+          // Wave invoice approval still happens upstream (line ~154), so accounting
+          // is intact — we just don't email the Wave PDF separately. Customer
+          // already received our itemized receipt at payment_received. Customers
+          // who need the Wave invoice can download it from their account dashboard.
         }
       } catch (emailErr) {
         // Non-fatal — status already updated, just log the email failure
@@ -229,7 +222,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           const customer = customerRaw as { name: string; email: string } | null;
 
           if (customer?.email) {
-            // Review request — pass items for product-anchored subject
+            // Review request — pass items for product-anchored subject.
+            // Receipt was already sent at payment_received (no duplicate at complete).
             const reviewItems = Array.isArray(order.order_items) ? order.order_items : [];
             await sendReviewRequestEmail({
               customerName: customer.name,
@@ -240,38 +234,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
                 qty: i.qty,
               })),
             });
-
-            // Receipt fallback — always send our Brevo HTML receipt at complete.
-            // For orders with wave_invoice_id the Wave PDF was already sent at ready_for_pickup.
-            // This ensures every completed order gets at least one receipt in their inbox.
-            try {
-              const items = Array.isArray(order.order_items) ? order.order_items : [];
-              await sendPaymentReceipt({
-                orderNumber: order.order_number,
-                customerName: customer.name,
-                customerEmail: customer.email,
-                createdAt: order.created_at,
-                items: items.map((i) => ({
-                  product_name: i.product_name,
-                  qty: i.qty,
-                  width_in: i.width_in,
-                  height_in: i.height_in,
-                  sides: i.sides,
-                  line_total: Number(i.line_total),
-                })),
-                subtotal: Number(order.subtotal),
-                gst: Number(order.gst),
-                pst: Number(order.pst ?? 0),
-                total: Number(order.total),
-                isRush: Boolean(order.is_rush),
-                discountCode: order.discount_code,
-                discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
-                paymentMethod: order.payment_method,
-              });
-              console.log(`[staff/orders/status] receipt sent at complete → ${customer.email}`);
-            } catch (receiptErr) {
-              console.error("[staff/orders/status] receipt send at complete failed (non-fatal):", receiptErr);
-            }
           }
         }
       } catch (reviewEmailErr) {

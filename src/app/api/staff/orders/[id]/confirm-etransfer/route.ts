@@ -5,15 +5,13 @@
  * Guards that the order is etransfer + pending_payment before proceeding.
  *
  * Side effects (all non-fatal after status update):
- *   1. sendOrderStatusEmail(payment_received) — "payment confirmed, in queue"
- *   2. sendPaymentReceipt — itemized receipt with line items, taxes, total
- *   3. Staff notification FROM hello@outreach.true-color.ca
- *   4. Wave invoice approved + payment recorded as BANK_TRANSFER
+ *   1. sendPaymentReceipt — itemized receipt with line items, taxes, total
+ *   2. Staff notification FROM hello@outreach.true-color.ca
+ *   3. Wave invoice approved + payment recorded as BANK_TRANSFER
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
-import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { sendEmail } from "@/lib/email/smtp";
 import { escHtml } from "@/lib/email/components/escHtml";
@@ -105,29 +103,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
     // ── 1. Payment confirmed status email ────────────────────────────────────────
 
-    try {
-      // Pass items so the email body renders "What you ordered" + the subject
-      // anchors on product name instead of TC-XXXXX
-      await sendOrderStatusEmail({
-        status: "payment_received",
-        orderNumber: order.order_number,
-        customerName: customer.name,
-        customerEmail: customer.email,
-        total: Number(order.total),
-        isRush: Boolean(order.is_rush),
-        paymentMethod: "etransfer",
-        items: items.map((i) => ({
-          product_name: i.product_name,
-          qty: i.qty,
-          width_in: i.width_in,
-          height_in: i.height_in,
-          sides: i.sides,
-          line_total: Number(i.line_total),
-        })),
-      });
-    } catch (e) {
-      console.error("[confirm-etransfer] status email failed (non-fatal):", e);
-    }
+    // Note: cut the bare "payment confirmed" status email — paymentReceipt
+    // below has everything that one had + line items + GST# + PDF link.
+    // Reduces customer-facing emails per order from 9 → 4 (2026-05-14).
 
     // ── 2. Itemized receipt ──────────────────────────────────────────────────────
 

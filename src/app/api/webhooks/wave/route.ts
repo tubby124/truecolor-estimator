@@ -27,7 +27,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
-import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 
 export async function POST(req: NextRequest) {
@@ -113,33 +112,16 @@ export async function POST(req: NextRequest) {
               .single();
 
             if (customer?.email) {
-              // Fetch full order with items once — used by both status email
-              // (for product-anchored subject + body block) and receipt below.
+              // Fetch full order with items — used for the itemized receipt.
+              // Note: cut the bare "payment confirmed" status email — receipt
+              // below has everything that one had + line items + GST# + PDF.
+              // Customer-facing emails per order: 9 → 4 (2026-05-14).
               const { data: fullOrder } = await supabase
                 .from("orders")
                 .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, receipt_token, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
                 .eq("id", order.id)
                 .single();
               const receiptItems = fullOrder && Array.isArray(fullOrder.order_items) ? fullOrder.order_items : [];
-
-              await sendOrderStatusEmail({
-                status: "payment_received",
-                orderNumber: order.order_number,
-                customerName: customer.name,
-                customerEmail: customer.email,
-                total: Number(order.total),
-                isRush: Boolean(order.is_rush),
-                paymentMethod: "wave",
-                items: receiptItems.map((i) => ({
-                  product_name: i.product_name,
-                  qty: i.qty,
-                  width_in: i.width_in,
-                  height_in: i.height_in,
-                  sides: i.sides,
-                  line_total: Number(i.line_total),
-                })),
-              });
-              console.log(`[wave-webhook] payment confirmed email sent → ${customer.email}`);
 
               // Itemized receipt (non-fatal)
               try {
