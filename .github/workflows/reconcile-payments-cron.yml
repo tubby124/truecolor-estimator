@@ -1,0 +1,40 @@
+# Daily payment reconciliation cron.
+#
+# Hits /api/cron/reconcile-payments at 9 AM MT each day. The endpoint:
+#   - Detects Wave-method orders >1h old without a wave_invoice_id
+#   - Detects Wave invoices that exist but no matching linked Supabase order
+#   - Detects Clover-card orders >24h still pending_payment
+# If any issue found, Telegram-alerts via @truecolorprintingbot.
+# Silent otherwise.
+#
+# Why GitHub Actions instead of Railway cron:
+#   - Free (no extra Railway service / no extra hobby-plan cron seat)
+#   - Lives next to the code, version-controlled, visible
+#   - Works without any Railway dashboard click
+#
+# Background: built after the void-supabase audit (commit 0bb0711, 2026-05-15)
+# as the runtime safety net catching any drift that slips past the lint rule.
+
+name: reconcile-payments-cron
+
+on:
+  schedule:
+    # 16:00 UTC = 09:00 MT during Mountain Daylight Time (MDT, summer)
+    # Shifts to 10:00 MT during Mountain Standard Time (MST, winter) — fine.
+    - cron: "0 16 * * *"
+  workflow_dispatch: {} # manual trigger from Actions tab
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hit /api/cron/reconcile-payments
+        run: |
+          set -e
+          RESPONSE=$(curl -sS \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://truecolorprinting.ca/api/cron/reconcile-payments")
+          echo "Response: $RESPONSE"
+          # Surface in Actions log even when silent (no Telegram fire).
+          echo "$RESPONSE" | python3 -c "import json,sys; d=json.load(sys.stdin); n=d.get('issues_total',0); print(f'::notice::{n} reconciliation issues' if n else '::notice::all clean')"
