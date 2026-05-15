@@ -1,0 +1,41 @@
+# Lint + test on every push to main. Mandatory gate before merge.
+#
+# Catches the `void supabase` bug class (commit 17c5f2a) at PR-review time
+# instead of letting it slip into production.
+#
+# If lint fails, the PR check goes red and Railway will still deploy on
+# push-to-main (we don't gate the deploy itself). Hasan is the sole engineer,
+# so this is informational/early-warning rather than blocking. Iterate to a
+# branch-protection rule once we have additional contributors.
+
+name: lint-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint (includes tc-local/no-void-supabase-builder)
+        run: npx eslint src/ --max-warnings=999
+
+      - name: TypeScript strict check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test

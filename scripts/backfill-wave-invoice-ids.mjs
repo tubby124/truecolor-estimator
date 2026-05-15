@@ -100,12 +100,15 @@ console.log(`\n[2] ${tcInvoices.length} invoices have a matching "True Color Ord
 
 // 3. Pull all orders missing wave_invoice_id
 console.log("\n[3] Pulling Supabase orders with NULL wave_invoice_id...");
+// Drop the payment_method filter — many clover_card orders ALSO have Wave
+// invoices (staff created them via /staff/manual-order). Match any order
+// with NULL wave_invoice_id whose order_number is on Wave's books.
 const orphans = await sbGet(
   "orders",
-  `wave_invoice_id=is.null&payment_method=eq.wave`,
-  "id,order_number,status,wave_invoice_id,wave_invoice_approved_at"
+  `wave_invoice_id=is.null`,
+  "id,order_number,status,wave_invoice_id,wave_invoice_approved_at,payment_method"
 );
-console.log(`    ${orphans.length} Wave-method orders with NULL wave_invoice_id`);
+console.log(`    ${orphans.length} orders total with NULL wave_invoice_id`);
 
 // 4. Match + plan updates
 const updates = [];
