@@ -534,22 +534,15 @@ export async function POST(req: NextRequest) {
  *  Used for order_items.product_name (DB column), Wave invoice fallback, etc.
  *  When structured spec fields are present they're flattened onto one line. */
 function formatItemLabel(item: OrderItemInput): string {
-  const qty = item.qty > 1 ? `${item.qty}x ` : "";
+  // Short label only. Qty/dimensions/sides have their own columns and render
+  // separately in receipts and the staff dashboard. Full spec text lives in the
+  // Wave invoice via formatItemAlbertBlock — don't duplicate it here.
   const titled = item.title?.trim();
   const product = item.product?.trim() || "Other";
-  const specParts = [
-    item.material?.trim(),
-    item.sides?.trim(),
-    item.size?.trim(),
-    item.process?.trim(),
-    item.details?.trim(),
-  ].filter(Boolean);
-  const specStr = specParts.length > 0 ? ` — ${specParts.join(", ")}` : "";
-  if (titled) {
-    const productSuffix = product !== "Other" ? ` (${product})` : "";
-    return `${qty}${titled}${productSuffix}${specStr}`;
+  if (titled && product !== "Other" && titled.toLowerCase() !== product.toLowerCase()) {
+    return `${titled} (${product})`;
   }
-  return `${qty}${product}${specStr}`;
+  return titled || product;
 }
 
 /** Render an item as Albert's plain-text quote block.

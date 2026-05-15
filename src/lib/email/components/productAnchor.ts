@@ -21,9 +21,16 @@ export function productAnchor(items: AnchorItem[] | null | undefined): string {
   if (!items || items.length === 0) return "your order";
 
   const first = items[0];
-  const name = (first.product_name ?? "").trim();
+  const rawName = (first.product_name ?? "").trim();
   const qty = first.qty ?? 0;
-  if (!name) return "your order";
+  if (!rawName) return "your order";
+
+  // Subject-safe: legacy orders (pre-2026-05-15) stored bloated product_name
+  // like "45x Sticker (Stickers / Vinyl Decals) — 3mil Vinyl, 10cm x 15cm, ...".
+  // Strip the "{qty}x " prefix and cut at the first " — " or " (" so subjects
+  // stay short. New orders already write a clean label.
+  const stripped = rawName.replace(/^\d+x\s+/, "");
+  const name = stripped.split(/\s+—\s+|\s+\(/)[0].trim() || stripped;
 
   const namePart = name.toLowerCase();
   const lead = qty > 0 ? `${qty} ${namePart}` : namePart;
