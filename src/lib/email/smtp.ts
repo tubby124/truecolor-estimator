@@ -91,8 +91,30 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
   if (options.text) body.text = options.text;
   if (effectiveBcc) body.bcc = effectiveBcc;
   if (effectiveReplyTo) body.reply_to = effectiveReplyTo;
+
+  // RFC 8058 / Gmail Feb 2024 bulk-sender requirement.
+  // Without List-Unsubscribe + List-Unsubscribe-Post=One-Click headers, Gmail
+  // junks transactional + marketing email wholesale even when SPF/DKIM/DMARC
+  // pass. Identical fix shipped on hasansharif.ca commit e1f10d9 / 2026-05-14.
+  // Primary recipient's address is encoded into the one-click URL so the
+  // endpoint knows who to unsubscribe.
+  const headers: Record<string, string> = {};
+  const primaryRecipient = extractEmail(toAddresses[0] ?? "");
+  if (primaryRecipient) {
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+    const oneClickUrl =
+      `${siteUrl}/api/email/unsubscribe-one-click?email=${encodeURIComponent(primaryRecipient)}`;
+    headers["List-Unsubscribe"] =
+      `<${oneClickUrl}>, <mailto:unsubscribe@true-color.ca?subject=unsubscribe>`;
+    headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
+  }
   if (options.priority === "high") {
-    body.headers = { "X-Priority": "1", Importance: "High" };
+    headers["X-Priority"] = "1";
+    headers["Importance"] = "High";
+  }
+  if (Object.keys(headers).length > 0) {
+    body.headers = headers;
   }
   if (options.attachments?.length) {
     body.attachments = options.attachments.map((a) => {

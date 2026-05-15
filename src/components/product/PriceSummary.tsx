@@ -211,10 +211,24 @@ export function PriceSummary({
                 </p>
               )}
 
-              {/* Tax note */}
-              <p className="text-xs text-gray-400 border-t border-gray-100 pt-3 mt-3">
-                + GST (5%) &amp; PST (6%) added at checkout
-              </p>
+              {/* Tax preview — no sticker shock at checkout (PST formula matches engine Step 10) */}
+              {hasPrice && gst != null && (() => {
+                const pst = Math.max(0, (price! - (designFee || 0)) * 0.06);
+                const totalWithTax = price! + gst + pst;
+                return (
+                  <div className="border-t border-gray-100 pt-3 mt-3">
+                    <div className="flex justify-between items-baseline gap-2">
+                      <span className="text-xs text-gray-500">Total with tax</span>
+                      <span className="text-sm font-semibold text-[#1c1712] tabular-nums">
+                        ${totalWithTax.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-400 tabular-nums mt-0.5">
+                      Incl. GST ${gst.toFixed(2)} · PST (est.) ${pst.toFixed(2)}
+                    </p>
+                  </div>
+                );
+              })()}
             </motion.div>
             </AnimatePresence>
           )}
