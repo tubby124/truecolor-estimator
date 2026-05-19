@@ -78,7 +78,11 @@ export default function StaffPage() {
   const [step, setStep] = useState<"pick" | "options">("pick");
   const [proofImage, setProofImage] = useState<ProofImageState | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [skipMinCharge, setSkipMinCharge] = useState(false);
+  // Staff default: skip the customer-facing minimum charge. Staff quote custom jobs
+  // and know their own economics — the minimum is a website guardrail, not a staff one.
+  // Forced back to false when entering customer-preview mode so the staff sees what
+  // the website would actually quote.
+  const [skipMinCharge, setSkipMinCharge] = useState(true);
 
   const handleAddToCart = useCallback((itemResult: EstimateResponse, jobDetails: QuoteEmailData["jobDetails"]) => {
     const hasDimensions = jobDetails.widthIn && jobDetails.heightIn;
@@ -105,7 +109,7 @@ export default function StaffPage() {
     });
     setResult(null);
     setProofImage(null);
-    setSkipMinCharge(false);
+    setSkipMinCharge(true);
     setStep("options");
   }, []);
 
@@ -256,7 +260,16 @@ export default function StaffPage() {
                 result={result}
                 loading={loading}
                 isCustomerMode={isCustomerMode}
-                onToggleCustomerMode={() => setIsCustomerMode((v) => !v)}
+                onToggleCustomerMode={() => {
+                  // Entering customer mode applies the website minimum (so staff sees
+                  // exactly what the customer would see). Leaving restores the staff
+                  // default of skipping it.
+                  setIsCustomerMode((v) => {
+                    const next = !v;
+                    setSkipMinCharge(!next);
+                    return next;
+                  });
+                }}
                 jobDetails={category ? buildJobDetails(category, state, MATERIAL_LABEL_MAP) : undefined}
                 proofImage={proofImage}
                 onAddToCart={handleAddToCart}

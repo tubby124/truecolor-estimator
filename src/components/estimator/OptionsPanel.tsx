@@ -303,7 +303,7 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
                 min="1"
                 placeholder="Custom qty"
                 value={state.qty}
-                onChange={(e) => onChange({ qty: parseInt(e.target.value) || 1 })}
+                onChange={(e) => onChange({ qty: Math.max(1, parseInt(e.target.value) || 1) })}
                 onFocus={(e) => e.target.select()}
                 className="w-28 border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
               />
@@ -313,7 +313,7 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
               type="number"
               min="1"
               value={state.qty}
-              onChange={(e) => onChange({ qty: parseInt(e.target.value) || 1 })}
+              onChange={(e) => onChange({ qty: Math.max(1, parseInt(e.target.value) || 1) })}
               className="w-24 border border-[var(--border)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)] bg-white"
             />
           )}

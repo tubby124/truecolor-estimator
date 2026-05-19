@@ -304,7 +304,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
       {!isBlocked && (
         <div className="bg-white border border-[var(--border)] rounded-2xl p-6 price-animate">
           <p className="text-xs text-[var(--muted)] mb-1">Subtotal</p>
-          {result.qty_discount_applied && result.qty_discount_pct && result.price_per_unit != null && (
+          {result.qty_discount_applied && result.qty_discount_pct && result.price_per_unit != null && !result.min_charge_applied && (
             <p className="text-sm text-gray-400 line-through leading-none mb-0.5">
               ${(result.price_per_unit / (1 - result.qty_discount_pct / 100)).toFixed(2)} (standard rate)
             </p>
@@ -319,15 +319,33 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
           )}
           {result.qty_discount_applied && result.qty_discount_pct && result.price_per_unit != null && (
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 border border-green-300 text-xs font-semibold px-2.5 py-1 rounded-full">
+              <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                result.min_charge_applied
+                  ? "bg-gray-100 text-gray-500 border-gray-200"
+                  : "bg-green-100 text-green-800 border-green-300"
+              }`}>
                 {result.qty_discount_pct}% bulk discount
               </span>
-              <span className="text-sm text-green-700 font-medium">${result.price_per_unit.toFixed(2)}/unit</span>
+              <span className={`text-sm font-medium ${result.min_charge_applied ? "text-gray-500" : "text-green-700"}`}>
+                ${result.price_per_unit.toFixed(2)}/unit{jobDetails?.qty && jobDetails.qty > 1 ? ` × ${jobDetails.qty}` : ""}
+              </span>
+              {result.min_charge_applied && (
+                <span className="text-[11px] text-amber-700">(absorbed by minimum)</span>
+              )}
             </div>
           )}
-          {/* Minimum charge panel — shows when min applied OR when override is active */}
+          {/* Minimum charge panel — shows when min applied */}
           {result.min_charge_applied && result.min_charge_value != null && (
             <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/60 overflow-hidden text-sm">
+              {/* Progress bar — visual fill toward minimum (matches customer side) */}
+              {result.base_unit_price != null && result.min_charge_value > 0 && (
+                <div className="h-1 bg-amber-100">
+                  <div
+                    className="h-full bg-amber-400 transition-all duration-500"
+                    style={{ width: `${Math.min((result.base_unit_price / result.min_charge_value) * 100, 100)}%` }}
+                  />
+                </div>
+              )}
               <div className="px-3 py-2 border-b border-amber-100 flex items-center justify-between">
                 <span className="text-xs font-semibold text-amber-800 uppercase tracking-wider">Minimum Charge</span>
                 <span className="font-bold text-amber-900 tabular-nums">${result.min_charge_value.toFixed(2)}</span>
@@ -336,35 +354,37 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                 {result.base_unit_price != null && (
                   <>
                     <div className="flex justify-between">
-                      <span className="text-amber-700">Calculated</span>
-                      <span className="tabular-nums text-amber-600 line-through">${result.base_unit_price.toFixed(2)}</span>
+                      <span className="text-amber-700">Job total (pre-min)</span>
+                      <span className="tabular-nums text-amber-700">${result.base_unit_price.toFixed(2)}</span>
                     </div>
                     {result.min_charge_value > result.base_unit_price && (
                       <div className="flex justify-between">
-                        <span className="text-amber-700">Buffer</span>
+                        <span className="text-amber-700">Buffer to min</span>
                         <span className="tabular-nums text-green-700 font-medium">+${(result.min_charge_value - result.base_unit_price).toFixed(2)}</span>
                       </div>
                     )}
                   </>
                 )}
-                {result.price_per_unit != null && result.sell_price != null &&
+                {/* Per-unit only meaningful when qty > 1 */}
+                {(jobDetails?.qty ?? 1) > 1 && result.price_per_unit != null && result.sell_price != null &&
                  result.price_per_unit < result.sell_price && (
                   <div className="flex justify-between">
-                    <span className="text-amber-700">Per-unit</span>
+                    <span className="text-amber-700">Per-unit ({jobDetails!.qty} units)</span>
                     <span className="tabular-nums text-amber-800 font-medium">${result.price_per_unit.toFixed(2)}</span>
                   </div>
                 )}
+                {/* "Add X more to beat the minimum" — uses real job qty, not line_items[0].qty */}
                 {result.base_unit_price != null && (() => {
-                  const itemQty = result.line_items?.[0]?.qty ?? 1;
-                  const unitPrice = result.base_unit_price! / Math.max(itemQty, 1);
-                  if (unitPrice > 0 && result.min_charge_value! > 0) {
-                    const unitsToExceed = Math.ceil(result.min_charge_value! / unitPrice);
-                    const extraNeeded = unitsToExceed - itemQty;
-                    if (extraNeeded > 0 && extraNeeded <= 20) {
+                  const realQty = jobDetails?.qty ?? 1;
+                  const realUnitPrice = result.base_unit_price! / Math.max(realQty, 1);
+                  if (realUnitPrice > 0 && result.min_charge_value! > 0) {
+                    const unitsToExceed = Math.ceil(result.min_charge_value! / realUnitPrice);
+                    const extraNeeded = unitsToExceed - realQty;
+                    if (extraNeeded > 0) {
                       return (
-                        <div className="pt-1 border-t border-amber-100 mt-1">
-                          <p className="text-xs text-amber-600">
-                            Min drops at qty {unitsToExceed} (+{extraNeeded})
+                        <div className="pt-1.5 border-t border-amber-100 mt-1.5">
+                          <p className="text-xs text-amber-700 font-medium">
+                            + Add {extraNeeded.toLocaleString()} more (qty {unitsToExceed.toLocaleString()}) to beat the minimum
                           </p>
                         </div>
                       );
@@ -386,8 +406,27 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
               </div>
             </div>
           )}
-          {/* Red warning when minimum is overridden (skipped) */}
-          {result.min_charge_skipped && result.min_charge_value != null && (
+          {/* Min-skipped state: subtle info chip on staff side (default behavior),
+              full red warning in customer mode (defensive — staff/page.tsx forces
+              skipMinCharge=false on customer toggle, so this shouldn't trigger). */}
+          {result.min_charge_skipped && result.min_charge_value != null && !isCustomerMode && (
+            <div className="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-xs">
+              <span className="text-gray-500">
+                Customer-facing min: <span className="font-semibold tabular-nums text-gray-700">${result.min_charge_value.toFixed(2)}</span>
+                <span className="text-gray-400"> · below by ${(result.min_charge_value - sellPrice).toFixed(2)}</span>
+              </span>
+              {onToggleSkipMinCharge && (
+                <button
+                  onClick={onToggleSkipMinCharge}
+                  className="text-amber-700 hover:text-amber-800 font-medium transition-colors whitespace-nowrap"
+                >
+                  Apply minimum →
+                </button>
+              )}
+            </div>
+          )}
+          {/* Defensive red panel for customer mode (shouldn't normally fire) */}
+          {result.min_charge_skipped && result.min_charge_value != null && isCustomerMode && (
             <div className="mt-3 rounded-lg border-2 border-red-300 bg-red-50 overflow-hidden text-sm">
               <div className="px-3 py-2 bg-red-100 border-b border-red-200 flex items-center justify-between">
                 <span className="text-xs font-bold text-red-800 uppercase tracking-wider flex items-center gap-1.5">

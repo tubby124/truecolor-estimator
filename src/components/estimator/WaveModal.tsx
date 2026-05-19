@@ -87,6 +87,17 @@ export function WaveModal({ result, jobDetails, onClose, cartItems }: Props) {
   const handleCreate = async () => {
     if (!emailValid) { setEmailTouched(true); return; }
 
+    // Below-min safeguard — warn before sending an invoice priced under the customer-facing minimum
+    const belowMinCount = isMultiMode
+      ? cartItems!.filter((it) => it.result.min_charge_skipped).length
+      : result?.min_charge_skipped ? 1 : 0;
+    if (belowMinCount > 0) {
+      const msg = isMultiMode
+        ? `${belowMinCount} item${belowMinCount > 1 ? "s" : ""} in this invoice ${belowMinCount > 1 ? "are" : "is"} below the customer-facing minimum. Send anyway?`
+        : `This quote ($${(result?.sell_price ?? 0).toFixed(2)}) is below the $${(result?.min_charge_value ?? 0).toFixed(2)} minimum. Send anyway?`;
+      if (!window.confirm(msg)) return;
+    }
+
     setSendState("sending");
     setErrorMsg("");
 
@@ -152,7 +163,19 @@ export function WaveModal({ result, jobDetails, onClose, cartItems }: Props) {
   const sellPrice = isMultiMode
     ? cartItems!.reduce((s, it) => s + (it.result.sell_price ?? 0), 0)
     : result?.sell_price ?? 0;
-  const total = Math.round(sellPrice * 1.05 * 100) / 100;
+  // PST = (sell_price − design_fee) × 0.06 per item, summed for multi-item.
+  // Matches engine Step 10 + EmailModal + QuotePanel. (Rush-exempt nuance pending sitewide fix.)
+  const pstAmount = isMultiMode
+    ? Math.round(
+        cartItems!.reduce((s, it) => {
+          const sp = it.result.sell_price ?? 0;
+          const df = it.result.design_fee ?? 0;
+          return s + Math.max(0, (sp - df) * 0.06);
+        }, 0) * 100
+      ) / 100
+    : Math.round(Math.max(0, (sellPrice - (result?.design_fee ?? 0)) * 0.06) * 100) / 100;
+  const gstAmount = Math.round(sellPrice * 0.05 * 100) / 100;
+  const total = Math.round((sellPrice + gstAmount + pstAmount) * 100) / 100;
 
   return (
     <div
@@ -178,8 +201,8 @@ export function WaveModal({ result, jobDetails, onClose, cartItems }: Props) {
             </h2>
             <p className="text-xs text-[var(--muted)] mt-0.5">
               {isMultiMode
-                ? <>{cartItems!.length} items · <span className="font-mono">${total.toFixed(2)} + GST</span></>
-                : <>{jobDetails?.categoryLabel} · <span className="font-mono">${total.toFixed(2)} total incl. GST</span></>
+                ? <>{cartItems!.length} items · <span className="font-mono">${total.toFixed(2)} incl. GST + PST</span></>
+                : <>{jobDetails?.categoryLabel} · <span className="font-mono">${total.toFixed(2)} incl. GST + PST</span></>
               }
             </p>
           </div>
