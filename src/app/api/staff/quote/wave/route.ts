@@ -43,6 +43,17 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// Rule IDs that are PST-exempt per CLAUDE.md / truecolor-domain.md:
+//   Rush fee — explicitly PST-exempt
+//   Design fees — engine treats design_fee as PST-exempt in Step 10
+// All other line items (print sales, add-ons, etc.) are taxable in SK.
+const PST_EXEMPT_RULE_IDS = new Set([
+  "PR-DESIGN-BASIC",
+  "PR-DESIGN-FULL",
+  "PR-DESIGN-LOGO",
+  "PR-ADDON-RUSH",
+]);
+
 export async function POST(req: Request) {
   const staffCheck = await requireStaffUser();
   if (staffCheck instanceof NextResponse) return staffCheck;
@@ -89,6 +100,7 @@ export async function POST(req: Request) {
           unitPrice: li.unit_price,
           qty: li.qty,
           applyGst: true,
+          applyPst: !PST_EXEMPT_RULE_IDS.has(li.rule_id),
         }))
       );
       isRush = items.some((it) => it.jobDetails.isRush);
@@ -109,6 +121,7 @@ export async function POST(req: Request) {
         unitPrice: item.unit_price,
         qty: item.qty,
         applyGst: true,
+        applyPst: !PST_EXEMPT_RULE_IDS.has(item.rule_id),
       }));
       isRush = jobDetails.isRush;
       totalDisplay = quoteData.sell_price?.toFixed(2) ?? "?";
