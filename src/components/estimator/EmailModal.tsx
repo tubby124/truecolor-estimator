@@ -5,6 +5,7 @@ import type { EstimateResponse } from "@/lib/engine/types";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { ProofImageState } from "@/components/estimator/ProductProof";
 import type { CartItem } from "@/lib/types/cart";
+import { computeTax, computeTaxForCart } from "@/lib/pricing/tax";
 
 interface Props {
   // Single-item mode (from QuotePanel)
@@ -138,12 +139,9 @@ export function EmailModal({ result, jobDetails, onClose, proofImage, cartItems 
   const sellPrice = isMultiMode
     ? cartItems!.reduce((s, it) => s + (it.result.sell_price ?? 0), 0)
     : result?.sell_price ?? 0;
-  const designFee = isMultiMode
-    ? cartItems!.reduce((s, it) => s + (it.result.design_fee ?? 0), 0)
-    : result?.design_fee ?? 0;
-  const gst = Math.round(sellPrice * 0.05 * 100) / 100;
-  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
-  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
+  const { gst, pst, total } = isMultiMode
+    ? computeTaxForCart(cartItems!.map((it) => it.result))
+    : computeTax(result ?? { sell_price: 0 });
 
   return (
     // Backdrop

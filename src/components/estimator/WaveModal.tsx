@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { CartItem } from "@/lib/types/cart";
+import { computeTax, computeTaxForCart } from "@/lib/pricing/tax";
 
 interface Props {
   // Single-item mode (from QuotePanel)
@@ -163,19 +164,9 @@ export function WaveModal({ result, jobDetails, onClose, cartItems }: Props) {
   const sellPrice = isMultiMode
     ? cartItems!.reduce((s, it) => s + (it.result.sell_price ?? 0), 0)
     : result?.sell_price ?? 0;
-  // PST = (sell_price − design_fee) × 0.06 per item, summed for multi-item.
-  // Matches engine Step 10 + EmailModal + QuotePanel. (Rush-exempt nuance pending sitewide fix.)
-  const pstAmount = isMultiMode
-    ? Math.round(
-        cartItems!.reduce((s, it) => {
-          const sp = it.result.sell_price ?? 0;
-          const df = it.result.design_fee ?? 0;
-          return s + Math.max(0, (sp - df) * 0.06);
-        }, 0) * 100
-      ) / 100
-    : Math.round(Math.max(0, (sellPrice - (result?.design_fee ?? 0)) * 0.06) * 100) / 100;
-  const gstAmount = Math.round(sellPrice * 0.05 * 100) / 100;
-  const total = Math.round((sellPrice + gstAmount + pstAmount) * 100) / 100;
+  const { total } = isMultiMode
+    ? computeTaxForCart(cartItems!.map((it) => it.result))
+    : computeTax(result ?? { sell_price: 0 });
 
   return (
     <div

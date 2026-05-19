@@ -29,7 +29,8 @@ interface Props {
 }
 
 const EMPTY_PRICE: PriceData = {
-  price: null, loading: false, addonTotal: 0, designFee: 0, gst: null, total: null,
+  price: null, loading: false, addonTotal: 0, designFee: 0, rushFee: 0,
+  gst: null, pst: null, total: null,
   pricePerUnit: null, qtyDiscountPct: null, qtyDiscountApplied: false,
   minChargeApplied: false, minChargeValue: null, baseUnitPrice: null, lineItems: [],
 };
@@ -162,6 +163,7 @@ export function ProductPageClient({ product }: Props) {
             addonTotal={priceData.addonTotal}
             designFee={priceData.designFee}
             gst={priceData.gst}
+            pst={priceData.pst}
             total={priceData.total}
             addedToCart={addedToCart}
             onAddToCart={handleAddToCart}

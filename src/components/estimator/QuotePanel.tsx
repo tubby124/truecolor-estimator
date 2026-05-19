@@ -8,6 +8,7 @@ import { WaveModal } from "@/components/estimator/WaveModal";
 import type { ProofImageState } from "@/components/estimator/ProductProof";
 import { buildSpecDiagramSvg } from "@/lib/diagram";
 import { SITE_URL } from "@/lib/config";
+import { computeTax } from "@/lib/pricing/tax";
 
 interface Props {
   result: EstimateResponse | null;
@@ -48,9 +49,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
   const isBlocked = result.status === "BLOCKED";
   const sellPrice = result.sell_price ?? 0;
   const designFee = result.design_fee ?? 0;
-  const gst = Math.round(sellPrice * 0.05 * 100) / 100;
-  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
-  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
+  const { gst, pst, total } = computeTax(result);
   const cost = result.cost;
 
   const greenThreshold = result.margin_green_threshold ?? 50;
@@ -297,6 +296,20 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
           {result.clarification_notes.map((n, i) => (
             <p key={i} className="text-xs text-red-600">{n}</p>
           ))}
+          <div className="mt-2 pt-2 border-t border-red-200 flex flex-wrap gap-3 text-xs">
+            <a
+              href="/staff/orders?manual=quote"
+              className="text-red-700 font-semibold hover:underline"
+            >
+              Build custom quote →
+            </a>
+            <a
+              href="tel:+13069548688"
+              className="text-red-600 hover:underline"
+            >
+              Call (306) 954-8688
+            </a>
+          </div>
         </div>
       )}
 

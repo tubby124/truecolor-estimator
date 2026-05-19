@@ -14,6 +14,7 @@ import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { CartItem } from "@/lib/types/cart";
 import { LOGO_PATH } from "@/lib/config";
 import type { ProofImageState } from "@/components/estimator/ProductProof";
+import { computeTax } from "@/lib/pricing/tax";
 
 interface EstimatorState {
   width_in: string;
@@ -344,11 +345,7 @@ function CustomerOverlay({
   onClose: () => void;
 }) {
   const sellPrice = result.sell_price ?? 0;
-  const designFee = result.design_fee ?? 0;
-  const gstRate = 0.05;
-  const gst = Math.round(sellPrice * gstRate * 100) / 100;
-  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
-  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
+  const { gst, pst, total } = computeTax(result);
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-y-auto">

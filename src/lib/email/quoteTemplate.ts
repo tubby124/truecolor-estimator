@@ -1,6 +1,7 @@
 import type { EstimateResponse } from "@/lib/engine/types";
 import { logoAbsoluteUrl } from "@/lib/config";
 import { buildSpecDiagramSvg } from "@/lib/diagram";
+import { computeTax } from "@/lib/pricing/tax";
 
 export interface QuoteEmailData {
   customerName?: string;
@@ -32,10 +33,7 @@ export interface QuoteEmailData {
 export function buildQuoteEmailHtml(data: QuoteEmailData): string {
   const { customerName, note, quoteData, jobDetails, siteUrl, hasProofAttachment, proofImageCid, paymentUrl, qrCodeCid, diagramCid } = data;
   const sellPrice = quoteData.sell_price ?? 0;
-  const designFee = quoteData.design_fee ?? 0;
-  const gst = Math.round(sellPrice * 0.05 * 100) / 100;
-  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
-  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
+  const { gst, pst, total } = computeTax(quoteData);
 
   const greeting = customerName ? `Hi ${customerName},` : "Hello,";
   const logoUrl = logoAbsoluteUrl(siteUrl);

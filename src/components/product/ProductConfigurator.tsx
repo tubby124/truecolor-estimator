@@ -7,6 +7,7 @@ import type { LineItem } from "@/lib/cart/cart";
 import { useToast, ToastContainer } from "@/components/ui";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { trackPriceCalculated } from "@/lib/analytics";
+import { computeTax } from "@/lib/pricing/tax";
 
 const BULK_HINTS: Record<string, Record<number, string>> = {
   SIGN:           { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
@@ -60,7 +61,9 @@ export interface PriceData {
   loading: boolean;
   addonTotal: number;
   designFee: number;
+  rushFee: number; // PST-exempt portion of price (0 when not rushed)
   gst: number | null;
+  pst: number | null;
   total: number | null;
   pricePerUnit: number | null;
   qtyDiscountPct: number | null;
@@ -114,6 +117,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [minChargeApplied, setMinChargeApplied] = useState(false);
   const [minChargeValue, setMinChargeValue] = useState<number | null>(null);
   const [baseUnitPrice, setBaseUnitPrice] = useState<number | null>(null);
+  const [rushFee, setRushFee] = useState<number>(0);
+  const [gstRate, setGstRate] = useState<number>(0.05);
 
   const effectiveWidth = isCustomFlexSize ? parseFloat(customFlexW) || 0 : isCustom ? parseFloat(customW) || 0 : selectedSize.width_in;
   const effectiveHeight = isCustomFlexSize ? parseFloat(customFlexH) || 0 : isCustom ? parseFloat(customH) || 0 : selectedSize.height_in;
@@ -163,6 +168,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setMinChargeApplied(data.min_charge_applied ?? false);
         setMinChargeValue(data.min_charge_value ?? null);
         setBaseUnitPrice(data.base_unit_price ?? null);
+        setRushFee(data.rush_fee ?? 0);
+        setGstRate(data.gst_rate ?? 0.05);
         // GA4: price_calculated — fires every time a valid price is returned
         trackPriceCalculated({
           item_id: product.material_code ?? product.category,
@@ -180,6 +187,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setMinChargeApplied(false);
         setMinChargeValue(null);
         setBaseUnitPrice(null);
+        setRushFee(0);
+        setGstRate(0.05);
       }
     } catch (err) {
       showToast(sanitizeError(err), "error");
@@ -209,15 +218,19 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   // Bubble price data to parent
   // NOTE: price is already the engine's sell_price including all addons — do NOT add addonTotal again
   useEffect(() => {
-    const gstCalc = price != null ? price * 0.05 : null;
-    const totalCalc = price != null && gstCalc != null ? price + gstCalc : null;
+    const designFee = DESIGN_FEES[designStatus] ?? 0;
+    const taxes = price != null
+      ? computeTax({ sell_price: price, design_fee: designFee, rush_fee: rushFee, gst_rate: gstRate })
+      : null;
     onPriceChange?.({
       price,
       loading,
       addonTotal,
-      designFee: DESIGN_FEES[designStatus] ?? 0,
-      gst: gstCalc,
-      total: totalCalc,
+      designFee,
+      rushFee,
+      gst: taxes?.gst ?? null,
+      pst: taxes?.pst ?? null,
+      total: taxes?.total ?? null,
       pricePerUnit,
       qtyDiscountPct,
       qtyDiscountApplied,
@@ -226,7 +239,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       baseUnitPrice,
       lineItems,
     });
-  }, [price, loading, addonTotal, designStatus, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, baseUnitPrice, lineItems]);
+  }, [price, loading, addonTotal, designStatus, rushFee, gstRate, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, baseUnitPrice, lineItems]);
 
   // Bubble config to parent (for proof + cart)
   useEffect(() => {

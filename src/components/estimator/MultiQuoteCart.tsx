@@ -6,6 +6,7 @@ import type { CartItem } from "@/lib/types/cart";
 import { printMultiQuote } from "@/lib/quoteDocument";
 import { EmailModal } from "@/components/estimator/EmailModal";
 import { WaveModal } from "@/components/estimator/WaveModal";
+import { computeTaxForCart } from "@/lib/pricing/tax";
 
 interface Props {
   items: CartItem[];
@@ -21,10 +22,7 @@ export function MultiQuoteCart({ items, onRemoveItem, onClearCart }: Props) {
   if (items.length === 0) return null;
 
   const combinedSubtotal = items.reduce((s, it) => s + (it.result.sell_price ?? 0), 0);
-  const combinedDesignFee = items.reduce((s, it) => s + (it.result.design_fee ?? 0), 0);
-  const gst = Math.round(combinedSubtotal * 0.05 * 100) / 100;
-  const pst = Math.round((combinedSubtotal - combinedDesignFee) * 0.06 * 100) / 100;
-  const total = Math.round((combinedSubtotal + gst + pst) * 100) / 100;
+  const { gst, pst, total } = computeTaxForCart(items.map((it) => it.result));
 
   return (
     <>

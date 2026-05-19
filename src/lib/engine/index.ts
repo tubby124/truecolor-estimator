@@ -376,6 +376,8 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     status: clarifications.length > 0 ? "NEEDS_CLARIFICATION" : "QUOTED",
     sell_price: sellPrice,
     design_fee: designFee,
+    rush_fee: rushFee,
+    gst_rate: gstRate,
     line_items: lineItems,
     sqft_calculated: sqft,
     price_per_sqft: basePricePerSqft,
@@ -595,6 +597,9 @@ function blocked(reason: string): EstimateResponse {
   return {
     status: "BLOCKED",
     sell_price: null,
+    design_fee: 0,
+    rush_fee: 0,
+    gst_rate: 0.05,
     line_items: [],
     sqft_calculated: null,
     price_per_sqft: null,

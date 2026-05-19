@@ -13,6 +13,7 @@ interface PriceSummaryProps {
   addonTotal: number;
   designFee: number;
   gst: number | null;
+  pst?: number | null;
   total: number | null;
   pricePerUnit?: number | null;
   qtyDiscountPct?: number | null;
@@ -54,7 +55,7 @@ const QTY_DISCOUNT_TIERS: Partial<Record<Category, { label: string; pct: number 
 };
 
 export function PriceSummary({
-  price, loading, addonTotal, designFee, gst, total,
+  price, loading, addonTotal, designFee, gst, pst, total,
   addedToCart, onAddToCart, productSlug,
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
   pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
@@ -211,24 +212,20 @@ export function PriceSummary({
                 </p>
               )}
 
-              {/* Tax preview — no sticker shock at checkout (PST formula matches engine Step 10) */}
-              {hasPrice && gst != null && (() => {
-                const pst = Math.max(0, (price! - (designFee || 0)) * 0.06);
-                const totalWithTax = price! + gst + pst;
-                return (
-                  <div className="border-t border-gray-100 pt-3 mt-3">
-                    <div className="flex justify-between items-baseline gap-2">
-                      <span className="text-xs text-gray-500">Total with tax</span>
-                      <span className="text-sm font-semibold text-[#1c1712] tabular-nums">
-                        ${totalWithTax.toFixed(2)}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-gray-400 tabular-nums mt-0.5">
-                      Incl. GST ${gst.toFixed(2)} · PST (est.) ${pst.toFixed(2)}
-                    </p>
+              {/* Tax preview — no sticker shock at checkout (uses shared computeTax helper) */}
+              {hasPrice && gst != null && total != null && pst != null && (
+                <div className="border-t border-gray-100 pt-3 mt-3">
+                  <div className="flex justify-between items-baseline gap-2">
+                    <span className="text-xs text-gray-500">Total with tax</span>
+                    <span className="text-sm font-semibold text-[#1c1712] tabular-nums">
+                      ${total.toFixed(2)}
+                    </span>
                   </div>
-                );
-              })()}
+                  <p className="text-[11px] text-gray-400 tabular-nums mt-0.5">
+                    Incl. GST ${gst.toFixed(2)} · PST ${pst.toFixed(2)}
+                  </p>
+                </div>
+              )}
             </motion.div>
             </AnimatePresence>
           )}

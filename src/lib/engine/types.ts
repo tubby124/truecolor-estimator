@@ -37,6 +37,8 @@ export interface EstimateResponse {
   status: "QUOTED" | "NEEDS_CLARIFICATION" | "BLOCKED";
   sell_price: number | null;
   design_fee?: number; // PST-exempt design service portion bundled in sell_price
+  rush_fee?: number;   // PST-exempt rush service portion bundled in sell_price (0 when not rushed)
+  gst_rate?: number;   // GST rate from config.v1.csv — UI should never hardcode 0.05
   line_items: LineItem[];
   sqft_calculated: number | null;
   price_per_sqft: number | null;

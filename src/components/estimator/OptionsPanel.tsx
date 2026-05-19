@@ -275,8 +275,10 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
               </button>
             ))}
           </div>
-          {category === "STICKER" && state.qty < 50 && (
-            <p className="text-xs text-amber-600 mt-1">Minimum order: 50 stickers</p>
+          {category === "STICKER" && state.qty < 25 && (
+            <p className="text-xs text-amber-600 mt-1">
+              Minimum sticker run: 25 pcs. Pick a preset above, or build a custom quote at <a href="/staff/orders?manual=quote" className="underline font-medium">staff/orders</a>.
+            </p>
           )}
         </FieldGroup>
       ) : (isSqftBased || SQFT_QTY_PRESETS[category] !== undefined) ? (
