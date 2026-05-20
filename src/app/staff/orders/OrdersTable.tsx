@@ -91,6 +91,76 @@ function StatCard({
   );
 }
 
+// ─── CSV export ────────────────────────────────────────────────────────────────
+// Generates a CSV of the currently displayed orders (after filter + search + sort)
+// and triggers a browser download. Used for monthly bookkeeping (cross-check
+// against Wave) and for quick sanity-checks ("show me all unpaid Wave orders").
+function downloadOrdersCsv(rows: Order[], filterLabel: string): void {
+  if (rows.length === 0) return;
+
+  const escape = (v: unknown): string => {
+    if (v === null || v === undefined) return "";
+    const s = String(v).replace(/"/g, '""');
+    return /[",\n\r]/.test(s) ? `"${s}"` : s;
+  };
+
+  const header = [
+    "order_number",
+    "status",
+    "is_rush",
+    "is_archived",
+    "customer_name",
+    "customer_email",
+    "customer_phone",
+    "customer_company",
+    "total",
+    "payment_method",
+    "wave_invoice_id",
+    "wave_invoice_approved_at",
+    "wave_payment_recorded_at",
+    "created_at",
+    "notes",
+    "staff_notes",
+  ];
+
+  const lines = rows.map((o) => {
+    const c = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+    return [
+      o.order_number,
+      o.status,
+      o.is_rush ? "yes" : "no",
+      o.is_archived ? "yes" : "no",
+      c?.name ?? "",
+      c?.email ?? "",
+      c?.phone ?? "",
+      c?.company ?? "",
+      o.total ?? "",
+      o.payment_method ?? "",
+      o.wave_invoice_id ?? "",
+      o.wave_invoice_approved_at ?? "",
+      o.wave_payment_recorded_at ?? "",
+      o.created_at,
+      o.notes ?? "",
+      o.staff_notes ?? "",
+    ].map(escape).join(",");
+  });
+
+  const csv = [header.join(","), ...lines].join("\r\n");
+  const now = new Date();
+  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const filename = `truecolor-orders-${filterLabel}-${stamp}.csv`;
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export function OrdersTable({ initialOrders }: Props) {
@@ -469,13 +539,19 @@ export function OrdersTable({ initialOrders }: Props) {
             <button
               key={f}
               onClick={() => setFilter(f)}
+              title={
+                f === "active" ? "Pending payment + paid + in-production"
+                  : f === "complete" ? "Ready for pickup + picked up"
+                  : f === "archived" ? "Manually archived orders"
+                  : "All live orders (does not include archived)"
+              }
               className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
                 filter === f
                   ? f === "archived" ? "bg-gray-500 text-white" : "bg-[#16C2F3] text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {f === "active" ? "Active" : f === "complete" ? "Complete" : f === "archived" ? "Archived" : "All live"}
+              {f === "active" ? "Active" : f === "complete" ? "Complete" : f === "archived" ? "Archived" : "All"}
               <span
                 className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
                   filter === f ? "bg-white/25 text-white" : "bg-gray-200 text-gray-500"
@@ -501,6 +577,14 @@ export function OrdersTable({ initialOrders }: Props) {
           <span className="text-sm text-gray-400 whitespace-nowrap">
             {displayed.length} order{displayed.length !== 1 ? "s" : ""}
           </span>
+          <button
+            onClick={() => downloadOrdersCsv(displayed, filter)}
+            disabled={displayed.length === 0}
+            title="Download the currently filtered + sorted list as a CSV (one row per order)"
+            className="text-xs font-semibold text-gray-500 hover:text-[#16C2F3] disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap underline underline-offset-2"
+          >
+            Export CSV ↓
+          </button>
           <span className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 whitespace-nowrap">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
             Live · {lastSync.toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit" })}
