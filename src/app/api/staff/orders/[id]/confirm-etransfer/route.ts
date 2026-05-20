@@ -15,7 +15,7 @@ import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { sendEmail } from "@/lib/email/smtp";
 import { escHtml } from "@/lib/email/components/escHtml";
-import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
+import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 
 interface Params {
@@ -110,6 +110,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
     // ── 2. Itemized receipt ──────────────────────────────────────────────────────
 
     try {
+      const waveInvoiceUrl = order.wave_invoice_id
+        ? await getWaveInvoicePublicUrl(order.wave_invoice_id).catch(() => null)
+        : null;
       await sendPaymentReceipt({
         orderNumber: order.order_number,
         customerName: customer.name,
@@ -133,8 +136,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
         paymentMethod: "etransfer",
         oid: order.id,
         receiptToken: order.receipt_token ?? null,
+        waveInvoiceUrl,
       });
-      console.log(`[confirm-etransfer] receipt sent → ${customer.email}`);
+      console.log(`[confirm-etransfer] receipt sent → ${customer.email}${waveInvoiceUrl ? " (with Wave PDF)" : ""}`);
     } catch (e) {
       console.error("[confirm-etransfer] receipt failed (non-fatal):", e);
     }

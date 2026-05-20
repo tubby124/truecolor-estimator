@@ -17,7 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
-import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
+import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
@@ -187,6 +187,12 @@ export async function POST(req: NextRequest) {
                   // Itemized receipt (non-fatal)
                   try {
                     if (fullOrder) {
+                      // Fetch Wave invoice viewUrl if this order has a Wave invoice attached.
+                      // Receipt email includes both: TC branded PDF + Wave PAID invoice PDF.
+                      // Wave PDF auto-updates to show "PAID" once recordWavePayment fires below.
+                      const waveInvoiceUrl = order.wave_invoice_id
+                        ? await getWaveInvoicePublicUrl(order.wave_invoice_id).catch(() => null)
+                        : null;
                       await sendPaymentReceipt({
                         orderNumber: order.order_number,
                         customerName: customer.name,
@@ -210,8 +216,9 @@ export async function POST(req: NextRequest) {
                         paymentMethod: "clover_card",
                         oid: order.id,
                         receiptToken: fullOrder.receipt_token ?? null,
+                        waveInvoiceUrl,
                       });
-                      console.log(`[clover-webhook] receipt sent → ${customer.email}`);
+                      console.log(`[clover-webhook] receipt sent → ${customer.email}${waveInvoiceUrl ? " (with Wave PDF)" : ""}`);
 
                       // GA4 Measurement Protocol — server-side purchase event (non-fatal, fire-and-forget)
                       // Captures orders that client-side gtag missed (ad blockers, ITP, corp networks)

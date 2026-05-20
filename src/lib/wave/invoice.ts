@@ -261,6 +261,39 @@ export async function recordWavePayment(
 }
 
 // --------------------------------------------------------------------------
+// Fetch a Wave invoice's public viewUrl by invoice ID. Resolves to the
+// customer-facing PDF on Wave's CDN (works for DRAFT, APPROVED, and PAID
+// states — Wave updates the same URL with the current invoice status).
+//
+// Used by receipt email to give customers both PDF options after payment:
+//   • True Color branded receipt (from /api/receipt/[oid]/pdf)
+//   • Official Wave tax invoice (this URL — flips to "PAID" stamp once
+//     the Clover webhook records payment)
+//
+// Returns null on any failure (no env, no token, API hiccup, invalid ID).
+// Caller treats null as "skip the Wave PDF download button".
+// --------------------------------------------------------------------------
+
+export async function getWaveInvoicePublicUrl(invoiceId: string): Promise<string | null> {
+  try {
+    const data = await waveQuery<{
+      business: { invoice: { id: string; viewUrl: string | null } | null } | null;
+    }>(
+      `query($bizId: ID!, $invId: ID!) {
+        business(id: $bizId) {
+          invoice(id: $invId) { id viewUrl }
+        }
+      }`,
+      { bizId: WAVE_BUSINESS_ID, invId: invoiceId }
+    );
+    return data.business?.invoice?.viewUrl ?? null;
+  } catch (err) {
+    console.error("[getWaveInvoicePublicUrl] failed:", err instanceof Error ? err.message : err);
+    return null;
+  }
+}
+
+// --------------------------------------------------------------------------
 // Approve a DRAFT invoice (required before sending)
 // --------------------------------------------------------------------------
 

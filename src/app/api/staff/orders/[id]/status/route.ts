@@ -19,7 +19,7 @@ import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendReviewRequestEmail } from "@/lib/email/reviewRequest";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
-import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
+import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 
 const VALID_STATUSES = [
   "pending_payment",
@@ -145,6 +145,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           if (status === "payment_received" && customer?.email) {
             try {
               const items = Array.isArray(order.order_items) ? order.order_items : [];
+              const waveInvoiceUrl = order.wave_invoice_id
+                ? await getWaveInvoicePublicUrl(order.wave_invoice_id).catch(() => null)
+                : null;
               await sendPaymentReceipt({
                 orderNumber: order.order_number,
                 customerName: customer.name,
@@ -168,8 +171,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
                 paymentMethod: order.payment_method ?? undefined,
                 oid: id,
                 receiptToken: (order as { receipt_token?: string | null }).receipt_token ?? null,
+                waveInvoiceUrl,
               });
-              console.log(`[staff/orders/status] receipt sent at payment_received → ${customer.email}`);
+              console.log(`[staff/orders/status] receipt sent at payment_received → ${customer.email}${waveInvoiceUrl ? " (with Wave PDF)" : ""}`);
             } catch (receiptErr) {
               console.error("[staff/orders/status] receipt at payment_received failed (non-fatal):", receiptErr);
             }
