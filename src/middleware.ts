@@ -27,9 +27,14 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // getSession reads the JWT from cookies without a network round-trip — correct
+  // for middleware routing per CLAUDE.md rule #13. Server-side staff endpoints
+  // (`requireStaffUser` on /api/staff/*) still re-verify via getUser, so the
+  // actual security boundary is unchanged.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   const path = request.nextUrl.pathname;
 

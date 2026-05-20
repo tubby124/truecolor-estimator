@@ -12,6 +12,7 @@ import { REVIEW_COUNT } from "@/lib/reviews";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { trackBeginCheckout } from "@/lib/analytics";
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
+import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 
 const DEFAULT_GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -322,13 +323,20 @@ export default function CheckoutPage() {
       </div>
     );
 
-  const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
+  // Math must mirror /api/orders/route.ts exactly — divergence between the
+  // checkout preview and the server quote is what burned customers post-overhaul
+  // (preview showed $0.49, API charged $28). Source of truth: order-min.ts.
+  const itemsSubtotal = items.reduce((s, i) => s + i.sell_price, 0);
   const rush = isRush ? RUSH_FEE : 0;
   const gstRate = items[0]?.gst_rate ?? DEFAULT_GST_RATE;
-  const discount = Math.min(appliedDiscount?.amount ?? 0, subtotal + rush);
-  const discountedSubtotal = subtotal - discount;
+  const discount = Math.min(appliedDiscount?.amount ?? 0, itemsSubtotal + rush);
+  const discountedItemsSubtotal = itemsSubtotal - discount;
+  const orderMin = computeOrderMinSurcharge(discountedItemsSubtotal + rush);
+  const smallOrderFee = orderMin.surcharge;
+  const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
+  const subtotal = itemsSubtotal; // line items subtotal (pre-discount, pre-setup-fee) for the "Subtotal" row
   const rawPstBase = items.reduce((s, i) => s + (i.sell_price - (i.design_fee ?? 0)), 0);
-  const pstBase = Math.max(0, rawPstBase - discount);
+  const pstBase = Math.max(0, rawPstBase - discount + smallOrderFee);
   const gst = Math.round((discountedSubtotal + rush) * gstRate * 100) / 100;
   const pst = Math.round(pstBase * PST_RATE * 100) / 100;
   const total = discountedSubtotal + rush + gst + pst;
@@ -1199,6 +1207,12 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-sm text-green-600 font-medium">
                     <span>Discount ({appliedDiscount?.code})</span>
                     <span>−${discount.toFixed(2)}</span>
+                  </div>
+                )}
+                {smallOrderFee > 0 && (
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span title="Tops your order up to our $25 order minimum.">{SMALL_ORDER_FEE_LABEL}</span>
+                    <span>+${smallOrderFee.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm text-gray-500">

@@ -148,11 +148,15 @@ export async function POST(req: NextRequest) {
       }
     } else if (eventType === "click") {
       if (isBlitzDrip && messageId) {
-        // n8n drip track: match via message-id → tc_email_sends → tc_leads
+        // n8n drip track: match via message-id → tc_email_sends → tc_leads.
+        // Status guard mirrors the opened handler — only promote sent/opened
+        // rows to clicked, never overwrite a hard-bounce/complaint row, and
+        // never re-stamp clicked_at if a click was already recorded.
         await supabase
           .from("tc_email_sends")
           .update({ clicked_at: now, status: "clicked" })
-          .eq("brevo_message_id", messageId);
+          .eq("brevo_message_id", messageId)
+          .in("status", ["sent", "opened"]);
 
         const { data: sendRecord } = await supabase
           .from("tc_email_sends")

@@ -48,7 +48,10 @@ describe("STEP 3 — fixed-size exact match", () => {
     expect(result.qty_discount_applied).toBe(false); // fixed-size skips bulk discount
   });
 
-  it("RIGID ACP 24×36 single — returns verbatim fixed price", () => {
+  it("RIGID ACP 24×36 single — sqft-tier price (frozen $66 intro SKU retired 2026-05-19)", () => {
+    // RIGID-ACP3-24X36-S was retired (is_active=FALSE) because qty 1 = $66
+    // and qty 2+ tier-priced at $78/unit produced a per-unit-INCREASE anomaly.
+    // Engine now falls through to PR-ACP-S-T1 ($13/sqft × 6 sqft = $78) at all qtys.
     const result = estimate({
       category: "RIGID",
       material_code: "RMACP002",
@@ -58,8 +61,8 @@ describe("STEP 3 — fixed-size exact match", () => {
       qty: 1,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.tier_applied).toBe("FIXED_SIZE");
-    expect(result.sell_price).toBe(66); // known value from products.v1.csv
+    expect(result.tier_applied).toBe("PR-ACP-S-T1");
+    expect(result.sell_price).toBe(78);
   });
 });
 

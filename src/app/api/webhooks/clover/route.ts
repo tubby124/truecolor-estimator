@@ -32,24 +32,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not read body" }, { status: 400 });
   }
 
-  // Verify request via CLOVER_WEBHOOK_SECRET query param.
+  // Verify request via CLOVER_WEBHOOK_SECRET query param. Fail-CLOSED:
+  // if the env var is unset we reject every webhook (security rule
+  // .claude/rules/truecolor-security.md: "Webhook auth with `if (secret)`
+  // (fail-open) | BLOCK"). The old fail-open path let anyone forge a paid
+  // status by POSTing JSON to the public URL.
   // Register the webhook in Clover Dashboard with URL:
   //   https://truecolorprinting.ca/api/webhooks/clover?k=<CLOVER_WEBHOOK_SECRET>
   // Clover does NOT sign hosted checkout webhook bodies — HMAC approach is not applicable.
   const webhookSecret = process.env.CLOVER_WEBHOOK_SECRET;
-  if (webhookSecret) {
-    const provided = req.nextUrl.searchParams.get("k") ?? "";
-    const providedBuf = Buffer.from(provided);
-    const expectedBuf = Buffer.from(webhookSecret);
-    const valid =
-      providedBuf.length === expectedBuf.length &&
-      timingSafeEqual(providedBuf, expectedBuf);
-    if (!valid) {
-      console.warn("[clover-webhook] Invalid webhook secret — possible spoofing attempt");
-      return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
-    }
-  } else {
-    console.warn("[clover-webhook] CLOVER_WEBHOOK_SECRET not set — accepting without auth (set env var in Railway)");
+  if (!webhookSecret) {
+    console.error("[clover-webhook] CLOVER_WEBHOOK_SECRET not configured — rejecting (fail-closed)");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
+  }
+  const provided = req.nextUrl.searchParams.get("k") ?? "";
+  const providedBuf = Buffer.from(provided);
+  const expectedBuf = Buffer.from(webhookSecret);
+  const valid =
+    providedBuf.length === expectedBuf.length &&
+    timingSafeEqual(providedBuf, expectedBuf);
+  if (!valid) {
+    console.warn("[clover-webhook] Invalid webhook secret — possible spoofing attempt");
+    return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
   }
 
   let event: Record<string, unknown>;
@@ -77,13 +81,57 @@ export async function POST(req: NextRequest) {
       if (matchRef) {
         try {
           const supabase = createServiceClient();
+
+          // Verify the captured amount matches order.total BEFORE marking paid.
+          // The previous version updated solely on payment_reference match, so a
+          // partial capture (or a crafted event with amount=1¢) would still flip
+          // the order to payment_received and trigger the receipt + Wave PAID
+          // recording. Clover hosted-checkout puts amount in cents on event.object.
+          const reportedAmountCents = typeof obj.amount === "number"
+            ? obj.amount
+            : Number(obj.amount ?? 0);
+
+          const { data: pendingOrder, error: fetchErr } = await supabase
+            .from("orders")
+            .select("id, order_number, total, status")
+            .eq("payment_reference", matchRef)
+            .maybeSingle();
+
+          if (fetchErr) {
+            console.error("[clover-webhook] order lookup failed:", fetchErr.message);
+            return NextResponse.json({ ok: true });
+          }
+          if (!pendingOrder) {
+            console.warn(`[clover-webhook] no order found for payment_reference=${matchRef}`);
+            return NextResponse.json({ ok: true });
+          }
+          if (pendingOrder.status !== "pending_payment") {
+            console.log(`[clover-webhook] order ${pendingOrder.order_number} already in status=${pendingOrder.status} — idempotent ack`);
+            return NextResponse.json({ ok: true });
+          }
+
+          const expectedCents = Math.round(Number(pendingOrder.total) * 100);
+          if (reportedAmountCents !== expectedCents) {
+            console.error(
+              `[clover-webhook] AMOUNT MISMATCH on ${pendingOrder.order_number}: expected ${expectedCents}¢ but Clover reported ${reportedAmountCents}¢ — NOT marking paid`
+            );
+            void sendTelegramNotification(
+              `⚠️ <b>Clover amount mismatch</b>\n` +
+              `Order <b>${escapeTelegramHtml(pendingOrder.order_number)}</b>\n` +
+              `Expected: $${(expectedCents / 100).toFixed(2)}\n` +
+              `Received: $${(reportedAmountCents / 100).toFixed(2)}\n` +
+              `Order NOT marked paid — investigate in Clover dashboard.`
+            ).catch(() => {});
+            return NextResponse.json({ ok: true });
+          }
+
           const { data: updatedOrders, error } = await supabase
             .from("orders")
             .update({
               status: "payment_received",
               paid_at: new Date().toISOString(),
             })
-            .eq("payment_reference", matchRef)
+            .eq("id", pendingOrder.id)
             .eq("status", "pending_payment")
             .select("id, order_number, customer_id, total, is_rush, wave_invoice_id");
 

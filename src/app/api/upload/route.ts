@@ -60,11 +60,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const isAllowedMime = ALLOWED_MIME_TYPES.includes(file.type);
+    // Extension is the primary gate — it's what determines the stored path and
+    // how Supabase/browser later previews the file. MIME alone was bypassable:
+    // an attacker could upload `.exe` content with a spoofed `application/pdf`
+    // header and the OR pass it. AI/EPS legitimately arrive with generic MIME
+    // (application/octet-stream), so we tolerate that as long as the extension
+    // is in the allowlist.
     const isAllowedExt = ALLOWED_EXTENSIONS.test(file.name);
-    if (!isAllowedMime && !isAllowedExt) {
+    if (!isAllowedExt) {
       return NextResponse.json(
         { error: "File type not allowed — use PDF, AI, EPS, JPG, PNG, or WebP" },
+        { status: 400 }
+      );
+    }
+    // Reject obvious MIME spoofs (anything claiming to be executable/script).
+    // If MIME is present and not in the allowlist AND not a known-generic type,
+    // reject — this catches `attack.pdf` shipped as `application/x-msdownload`.
+    const GENERIC_MIME = new Set(["", "application/octet-stream"]);
+    if (file.type && !ALLOWED_MIME_TYPES.includes(file.type) && !GENERIC_MIME.has(file.type)) {
+      return NextResponse.json(
+        { error: "File type mismatch — extension and MIME don't agree" },
         { status: 400 }
       );
     }

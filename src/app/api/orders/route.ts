@@ -154,23 +154,57 @@ export async function POST(req: NextRequest) {
 
     const supabase = createServiceClient();
 
-    // 1. Upsert customer
-    const { data: customer, error: custErr } = await supabase
+    // 1. Find-or-insert customer.
+    // The old upsert overwrote name/company/phone on every order — a returning
+    // customer typing "jane" instead of "Jane Smith" or leaving phone blank
+    // wiped their good profile data. The customer profile is owned by /account;
+    // checkout only seeds it on first order. Updates flow through ProfileForm.
+    const emailKey = contact.email.toLowerCase().trim();
+    let customer: { id: string } | null = null;
+
+    const { data: existing, error: lookupErr } = await supabase
       .from("customers")
-      .upsert(
-        {
-          email: contact.email.toLowerCase().trim(),
+      .select("id")
+      .eq("email", emailKey)
+      .maybeSingle();
+
+    if (lookupErr) {
+      console.error("[orders] customer lookup:", lookupErr);
+      return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
+    }
+
+    if (existing) {
+      customer = existing;
+    } else {
+      const { data: inserted, error: insErr } = await supabase
+        .from("customers")
+        .insert({
+          email: emailKey,
           name: contact.name.trim(),
           company: contact.company?.trim() || null,
           phone: contact.phone?.trim() || null,
-        },
-        { onConflict: "email", ignoreDuplicates: false }
-      )
-      .select("id")
-      .single();
+        })
+        .select("id")
+        .single();
+      if (insErr) {
+        // Concurrent first-time orders from the same email — one wins the
+        // unique constraint, the other re-selects.
+        const { data: raced } = await supabase
+          .from("customers")
+          .select("id")
+          .eq("email", emailKey)
+          .maybeSingle();
+        if (!raced) {
+          console.error("[orders] customer insert + re-fetch failed:", insErr);
+          return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
+        }
+        customer = raced;
+      } else {
+        customer = inserted;
+      }
+    }
 
-    if (custErr || !customer) {
-      console.error("[orders] customer upsert:", custErr);
+    if (!customer) {
       return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
     }
 
