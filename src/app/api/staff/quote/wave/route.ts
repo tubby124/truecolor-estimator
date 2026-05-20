@@ -1,23 +1,27 @@
 /**
  * POST /api/staff/quote/wave
  *
- * Creates a Wave invoice from a staff quote. Optionally approves + sends it
- * to the customer via Wave's own email (giving them a hosted payment link).
+ * Creates a Wave invoice from a staff quote. Always DRAFT — never sent via
+ * Wave's hosted-payment email (deprecated 2026-05-20: Wave has no webhooks
+ * on the current plan, so payments through Wave's portal silently desync
+ * from Supabase).
+ *
+ * For sending a payment request to the customer, use /api/staff/manual-order
+ * which creates the Supabase order + sends our paymentRequest email with a
+ * Clover /pay/[token] link. The Clover webhook auto-approves the Wave
+ * invoice + records payment.
  *
  * Actions:
- *   "draft" → create DRAFT invoice only (appears in Wave, not sent)
- *   "send"  → create + approve + send to customer via Wave email
+ *   "draft" → create DRAFT invoice (default, only option)
+ *   "send"  → DEPRECATED — silently downgraded to draft + warning logged
  */
 
 import { NextResponse } from "next/server";
 import { requireStaffUser } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/smtp";
 import type { EstimateResponse } from "@/lib/engine/types";
 import {
   createOrFindWaveCustomer,
   createWaveInvoice,
-  approveWaveInvoice,
-  sendWaveInvoice,
   type WaveLineItem,
 } from "@/lib/wave/invoice";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
@@ -137,53 +141,14 @@ export async function POST(req: Request) {
       memo: `Pickup at 216 33rd St W, Saskatoon SK. Questions? Call (306) 954-8688.`,
     });
 
-    let finalAction: "draft" | "approved" | "sent" = "draft";
+    const finalAction = "draft" as const;
 
-    // 3. If "send": approve then send via Wave email
+    // Send-via-Wave path was deprecated 2026-05-20. Wave's hosted-payment page
+    // is no longer used (no webhooks → silent desync). If staff explicitly
+    // requested "send", we still create the DRAFT but log the deprecation.
+    // Staff should re-create the payment request via /api/staff/manual-order.
     if (action === "send") {
-      try {
-        await approveWaveInvoice(invoice.invoiceId);
-        finalAction = "approved";
-        await sendWaveInvoice(invoice.invoiceId, customerEmail);
-        finalAction = "sent";
-      } catch (sendErr) {
-        console.error("[quote/wave] Approve/send failed (invoice still created):", sendErr);
-      }
-    }
-
-    // Staff summary notification — fires only when invoice was actually sent
-    if (finalAction === "sent") {
-      try {
-        const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
-        const rushLabel = isRush ? " 🚨 RUSH" : "";
-        const multiLabel = isMultiItem ? ` (${body.items!.length} items)` : "";
-        await sendEmail({
-          from: process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>",
-          to: staffEmail,
-          subject: `[Quote Sent] ${name} — ${jobSummary}${rushLabel}${multiLabel} — $${totalDisplay}`,
-          html: `
-            <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1f2937;">
-              <div style="background:#16C2F3;padding:16px 24px;">
-                <p style="margin:0;color:#fff;font-size:16px;font-weight:700;">Quote Sent to Customer</p>
-              </div>
-              <div style="padding:24px;border:1px solid #e5e7eb;border-top:none;">
-                <table style="width:100%;border-collapse:collapse;font-size:14px;">
-                  <tr><td style="padding:6px 0;color:#6b7280;width:120px;">Customer</td><td style="padding:6px 0;font-weight:600;">${name}</td></tr>
-                  <tr><td style="padding:6px 0;color:#6b7280;">Email</td><td style="padding:6px 0;">${customerEmail}</td></tr>
-                  <tr><td style="padding:6px 0;color:#6b7280;">Job</td><td style="padding:6px 0;">${jobSummary}${rushLabel}</td></tr>
-                  <tr><td style="padding:6px 0;color:#6b7280;">Total</td><td style="padding:6px 0;font-weight:600;">$${totalDisplay} + GST</td></tr>
-                  <tr><td style="padding:6px 0;color:#6b7280;">Invoice #</td><td style="padding:6px 0;">${invoice.invoiceNumber}</td></tr>
-                  <tr><td style="padding:6px 0;color:#6b7280;">Sent at</td><td style="padding:6px 0;">${new Date().toLocaleString("en-CA", { timeZone: "America/Regina" })} CST</td></tr>
-                </table>
-                ${invoice.viewUrl ? `<div style="margin-top:16px;"><a href="${invoice.viewUrl}" style="background:#16C2F3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;font-size:14px;">View Wave Invoice</a></div>` : ""}
-              </div>
-            </div>`,
-          text: `Quote sent to ${name} (${customerEmail})\nJob: ${jobSummary}${rushLabel}\nTotal: $${totalDisplay} + GST\nInvoice #: ${invoice.invoiceNumber}\n${invoice.viewUrl ? `View: ${invoice.viewUrl}` : ""}`,
-        });
-        console.log(`[quote/wave] staff notification sent → ${staffEmail}`);
-      } catch (notifyErr) {
-        console.error("[quote/wave] staff notification failed (non-fatal):", notifyErr);
-      }
+      console.warn(`[quote/wave] action="send" deprecated — invoice ${invoice.invoiceId} created as DRAFT only. Use manual-order flow to send payment request via Clover.`);
     }
 
     try {

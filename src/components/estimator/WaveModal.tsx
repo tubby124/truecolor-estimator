@@ -28,7 +28,10 @@ export function WaveModal({ result, jobDetails, onClose, cartItems }: Props) {
   const isMultiMode = cartItems && cartItems.length > 0;
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [sendViaWave, setSendViaWave] = useState(false);
+  // Always create as DRAFT — Wave's hosted-payment "send" path was deprecated
+  // 2026-05-20 (no webhooks → silent desync). Payment requests now route
+  // through manual-order + Clover gateway.
+  const sendViaWave = false;
   const [sendState, setSendState] = useState<SendState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
@@ -246,29 +249,10 @@ export function WaveModal({ result, jobDetails, onClose, cartItems }: Props) {
               />
             </div>
 
-            {/* Send via Wave toggle */}
-            <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5">
-              <input
-                id="wave-send-toggle"
-                type="checkbox"
-                checked={sendViaWave}
-                onChange={(e) => setSendViaWave(e.target.checked)}
-                disabled={sendState === "sending"}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-              />
-              <label htmlFor="wave-send-toggle" className="text-xs text-blue-800 cursor-pointer leading-relaxed">
-                <span className="font-semibold">Send invoice to customer via Wave</span>
-                <br />
-                <span className="text-blue-700">Customer receives a Wave-hosted payment link by email (approve + send)</span>
-              </label>
-            </div>
-
-            {/* Info note */}
+            {/* Info note — Wave's hosted payment page deprecated 2026-05-20 */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
               <p className="text-xs text-gray-500 leading-relaxed">
-                {sendViaWave
-                  ? "Invoice will be approved and emailed to the customer. They can pay online via Wave's hosted payment page."
-                  : "A DRAFT invoice will appear in Wave accounting but won't be sent. Staff can review and send from the Wave dashboard."}
+                A <span className="font-semibold">DRAFT invoice</span> will be created in Wave for bookkeeping. To send a payment link to the customer, use the <span className="font-semibold">Request Payment</span> flow on the staff orders page — the Clover webhook auto-approves the Wave invoice when the customer pays.
               </p>
             </div>
 

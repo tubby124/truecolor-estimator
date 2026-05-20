@@ -1283,7 +1283,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       <p className="text-[11px] text-gray-500 mb-2 leading-snug">
                         {form.quote_only
                           ? "We'll prepare the invoice as a draft using your pick — nothing sends to the customer until you convert it from a quote to an invoice."
-                          : "Pick how the customer pays. Wave = emailed invoice (e-transfer or card). Pay by Card = direct Clover card link."}
+                          : "Both options send a Clover card link to the customer. 'Wave Invoice' also creates an official Wave bookkeeping record (recommended for B2B customers who want a tax invoice for their accounting team)."}
                       </p>
                       <div className="grid grid-cols-2 gap-2">
                         {(["clover", "wave"] as const).map((method) => (
@@ -1312,12 +1312,12 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             </div>
                             <div>
                               <p className="text-sm font-semibold text-gray-700">
-                                {method === "clover" ? "Card Link (Clover)" : "Wave Invoice"}
+                                {method === "clover" ? "Quick Card Link" : "Wave Invoice + Card Link"}
                               </p>
                               <p className="text-[10px] text-gray-400 leading-tight">
                                 {method === "clover"
-                                  ? "Customer gets a link to pay by credit or debit card"
-                                  : "Customer gets a Wave email — pay online or e-transfer"}
+                                  ? "Branded payment email · pays via Clover card · no Wave invoice"
+                                  : "Wave invoice for B2B records · same Clover card payment link"}
                               </p>
                             </div>
                           </label>
