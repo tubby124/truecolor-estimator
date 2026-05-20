@@ -43,6 +43,8 @@ interface Order {
   discount_amount: number | null;
   payment_method: string;
   receipt_token: string | null;
+  paid_at: string | null;
+  wave_payment_recorded_at: string | null;
   created_at: string;
   order_items: OrderItem[];
   customers?: { name: string; company: string | null } | Array<{ name: string; company: string | null }> | null;
@@ -172,8 +174,7 @@ export default function ReceiptPage({
     );
   }
 
-  const PAID_STATUSES = ["payment_received", "in_production", "ready_for_pickup", "complete"];
-  const isPaid = PAID_STATUSES.includes(order.status);
+  const isPaid = Boolean(order.paid_at) || Boolean(order.wave_payment_recorded_at);
   const pst = order.pst ?? 0;
   const rushFee = order.is_rush
     ? Math.round((Number(order.total) - Number(order.subtotal) - Number(order.gst) - pst) * 100) / 100

@@ -31,6 +31,8 @@ export interface Order {
   is_rush: boolean;
   payment_method: string;
   receipt_token: string | null;
+  paid_at: string | null;
+  wave_payment_recorded_at: string | null;
   pay_url: string | null;
   proof_storage_path: string | null;
   proof_sent_at: string | null;

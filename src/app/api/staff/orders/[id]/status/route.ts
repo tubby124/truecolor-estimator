@@ -56,6 +56,23 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const supabase = createServiceClient();
 
+    // Guard: block jumps past payment_received from pending_payment.
+    // Without this, staff can mark an unpaid order "complete" (Gil 2026-05-14 bug)
+    // which skips approveWaveInvoice + recordWavePayment and shows the customer
+    // a PAID receipt for money never collected.
+    const { data: current } = await supabase
+      .from("orders")
+      .select("status, order_number")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (current?.status === "pending_payment" && status !== "pending_payment" && status !== "payment_received") {
+      return NextResponse.json(
+        { error: `Mark payment received first. ${current.order_number} is still awaiting payment — confirm payment before moving to ${status}.` },
+        { status: 400 }
+      );
+    }
+
     // Step 1: Update status (always succeeds — no optional columns)
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
 

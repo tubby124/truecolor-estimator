@@ -64,6 +64,8 @@ export async function GET(req: NextRequest) {
       is_rush,
       payment_method,
       receipt_token,
+      paid_at,
+      wave_payment_recorded_at,
       proof_storage_path,
       proof_sent_at,
       file_storage_paths,

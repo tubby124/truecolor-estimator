@@ -16,7 +16,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
-import { createOrFindWaveCustomer, createWaveInvoice, approveWaveInvoice, sendWaveInvoice } from "@/lib/wave/invoice";
+import { createOrFindWaveCustomer, createWaveInvoice } from "@/lib/wave/invoice";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { sendPaymentRequestEmail, type AccountInfo } from "@/lib/email/paymentRequest";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
@@ -314,13 +314,50 @@ export async function POST(req: NextRequest) {
         }
 
         if (!quoteOnly) {
-          // Standard flow: approve + send via Wave (Wave emails the customer the invoice + payment link).
-          await approveWaveInvoice(inv.invoiceId);
-          await sendWaveInvoice(inv.invoiceId, contact.email.toLowerCase().trim(), {
-            subject: `Invoice from True Color Display Printing — ${order.order_number}`,
-            message: `Hi ${contact.name.trim()},\n\nPlease find your invoice attached. Click "Pay Invoice" to pay online.\n\nRef: ${order.order_number}\n\nThank you,\nTrue Color Display Printing\n(306) 954-8688`,
-          });
-          console.log(`[manual-order] Wave invoice sent → ${contact.email} | order ${order.order_number}`);
+          // Architectural decision 2026-05-20: Wave invoice stays DRAFT until the
+          // Clover webhook fires after customer pays. Customer pays through our
+          // Clover gateway (/pay/[token]) — NOT Wave's hosted payment page —
+          // because Wave has no webhooks on the current plan, so payments through
+          // Wave's portal silently desync from Supabase (caused Gil Magar 2026-05-14
+          // ghost-paid orders + Amber Appl 6-day pending state).
+          // Webhook approves + records the Wave payment when card captures.
+          try {
+            const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
+            const wavePayUrl = `${siteUrl}/pay/${token}`;
+            await sendPaymentRequestEmail({
+              orderNumber: order.order_number,
+              contact: {
+                name: contact.name.trim(),
+                email: contact.email.toLowerCase().trim(),
+                company: contact.company?.trim() || null,
+              },
+              items: items.map((item) => ({
+                kind: item.kind ?? "product",
+                product: item.title?.trim() || item.product,
+                qty: item.qty || 1,
+                material: item.material,
+                sides: item.sides,
+                size: item.size,
+                process: item.process,
+                details: item.details,
+                unitPrice: item.unitPrice,
+                amount: Math.round(item.amount * 100) / 100,
+                albertBlock: formatItemAlbertBlock(item),
+              })),
+              subtotal,
+              gst,
+              pst,
+              total,
+              paymentUrl: wavePayUrl,
+              paymentMethod: "wave",
+              notes: notes?.trim() || null,
+              accountInfo,
+            });
+            console.log(`[manual-order] Wave-invoice order routed via Clover gateway → ${contact.email} | order ${order.order_number} | wave_invoice_id ${inv.invoiceId} (DRAFT until paid)`);
+          } catch (emailErr) {
+            console.error("[manual-order] payment request email failed:", emailErr);
+            return NextResponse.json({ error: "Failed to send payment request email" }, { status: 500 });
+          }
         } else {
           // Quote-only: leave Wave invoice as draft and send our own quote-style email to the customer.
           console.log(`[manual-order] Wave draft created (quote-only) → ${contact.email} | order ${order.order_number} | wave_invoice_id ${inv.invoiceId}`);

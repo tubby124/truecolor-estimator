@@ -4,8 +4,10 @@
  * Staff-only. Re-sends the payment link to the customer for an order
  * that is still in pending_payment status.
  *
- * Clover orders: re-encodes a fresh /pay/{token} and sends paymentRequest email.
- * Wave orders:   re-sends the Wave invoice email via sendWaveInvoice().
+ * All orders (Clover + Wave) re-encode a fresh /pay/{token} and send the
+ * paymentRequest email. Wave invoice (if any) stays DRAFT — the Clover webhook
+ * approves + records payment when the customer pays. Wave's hosted payment
+ * page is no longer used (no webhooks on current plan = silent desync).
  *
  * Guards: staff auth, order must exist, status must be pending_payment.
  */
@@ -14,7 +16,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
-import { sendWaveInvoice } from "@/lib/wave/invoice";
 import { sanitizeError } from "@/lib/errors/sanitize";
 
 interface Params {
@@ -85,48 +86,40 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 
-    if (order.payment_method === "wave" && order.wave_invoice_id) {
-      // Re-send Wave's invoice email
-      await sendWaveInvoice(order.wave_invoice_id, customer.email, {
-        subject: `Invoice from True Color Display Printing — ${order.order_number}`,
-        message: `Hi ${customer.name},\n\nThis is a resend of your invoice. Please click "Pay Invoice" to pay online.\n\nRef: ${order.order_number}\n\nThank you,\nTrue Color Display Printing\n(306) 954-8688`,
-      });
-      console.log(`[resend-payment] Wave invoice resent → ${customer.email} | order ${order.order_number}`);
-    } else {
-      // Clover (or wave without invoice ID): re-encode fresh /pay/{token} and send branded email
-      const redirectUrl = `${siteUrl}/order-confirmed?oid=${id}`;
-      const payToken = encodePaymentToken(total, description, customer.email, redirectUrl);
-      const paymentUrl = `${siteUrl}/pay/${payToken}`;
+    // All orders route through Clover gateway. Wave invoice (if any) stays
+    // DRAFT until webhook approves + records payment.
+    const redirectUrl = `${siteUrl}/order-confirmed?oid=${id}`;
+    const payToken = encodePaymentToken(total, description, customer.email, redirectUrl);
+    const paymentUrl = `${siteUrl}/pay/${payToken}`;
 
-      // NOTE: do NOT update payment_reference here — it is set to the order UUID
-      // by /pay/[token] when the customer clicks, and the Clover webhook matches on it.
-      // Overwriting it with the URL breaks webhook matching.
+    // NOTE: do NOT update payment_reference here — it is set to the order UUID
+    // by /pay/[token] when the customer clicks, and the Clover webhook matches on it.
+    // Overwriting it with the URL breaks webhook matching.
 
-      await sendPaymentRequestEmail({
-        orderNumber: order.order_number,
-        contact: {
-          name: customer.name,
-          email: customer.email,
-          company: customer.company ?? null,
-        },
-        items: items.length > 0
-          ? items.map((it) => ({
-              product: it.product_name,
-              qty: it.qty || 1,
-              amount: Number(it.line_total),
-            }))
-          : [{ product: description, qty: 1, amount: subtotal }],
-        subtotal,
-        gst,
-        pst,
-        total,
-        paymentUrl,
-        paymentMethod: "clover",
-        notes: order.notes as string | null,
-      });
+    await sendPaymentRequestEmail({
+      orderNumber: order.order_number,
+      contact: {
+        name: customer.name,
+        email: customer.email,
+        company: customer.company ?? null,
+      },
+      items: items.length > 0
+        ? items.map((it) => ({
+            product: it.product_name,
+            qty: it.qty || 1,
+            amount: Number(it.line_total),
+          }))
+        : [{ product: description, qty: 1, amount: subtotal }],
+      subtotal,
+      gst,
+      pst,
+      total,
+      paymentUrl,
+      paymentMethod: order.payment_method === "wave" ? "wave" : "clover",
+      notes: order.notes as string | null,
+    });
 
-      console.log(`[resend-payment] Clover link resent → ${customer.email} | order ${order.order_number}`);
-    }
+    console.log(`[resend-payment] payment link resent → ${customer.email} | order ${order.order_number} | wave_invoice_id ${order.wave_invoice_id ?? "none"}`);
 
     return NextResponse.json({ ok: true });
   } catch (err) {

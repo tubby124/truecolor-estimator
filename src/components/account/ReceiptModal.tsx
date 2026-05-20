@@ -8,8 +8,7 @@ import { formatDate } from "./helpers";
 import type { Order } from "./types";
 
 export function ReceiptModal({ order, email, onClose }: { order: Order; email: string; onClose: () => void; }) {
-  const PAID_STATUSES = ["payment_received", "in_production", "ready_for_pickup", "complete"];
-  const isPaid = PAID_STATUSES.includes(order.status);
+  const isPaid = Boolean(order.paid_at) || Boolean(order.wave_payment_recorded_at);
 
   const pst = order.pst ?? 0;
   const rushFee =
