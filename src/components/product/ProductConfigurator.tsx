@@ -70,7 +70,7 @@ export interface PriceData {
   qtyDiscountApplied: boolean;
   minChargeApplied: boolean;
   minChargeValue: number | null;
-  baseUnitPrice: number | null; // pre-minimum price (set only when min charge applies)
+  preMinSubtotal: number | null; // order subtotal pre-min-charge clamp (TOTAL, not per-unit)
   lineItems: LineItem[]; // engine breakdown: base + addons
 }
 
@@ -116,7 +116,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [pricePerUnit, setPricePerUnit] = useState<number | null>(null);
   const [minChargeApplied, setMinChargeApplied] = useState(false);
   const [minChargeValue, setMinChargeValue] = useState<number | null>(null);
-  const [baseUnitPrice, setBaseUnitPrice] = useState<number | null>(null);
+  const [preMinSubtotal, setPreMinSubtotal] = useState<number | null>(null);
   const [rushFee, setRushFee] = useState<number>(0);
   const [gstRate, setGstRate] = useState<number>(0.05);
 
@@ -167,7 +167,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setPricePerUnit(data.price_per_unit ?? null);
         setMinChargeApplied(data.min_charge_applied ?? false);
         setMinChargeValue(data.min_charge_value ?? null);
-        setBaseUnitPrice(data.base_unit_price ?? null);
+        setPreMinSubtotal(data.pre_min_subtotal ?? null);
         setRushFee(data.rush_fee ?? 0);
         setGstRate(data.gst_rate ?? 0.05);
         // GA4: price_calculated — fires every time a valid price is returned
@@ -186,7 +186,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setPricePerUnit(null);
         setMinChargeApplied(false);
         setMinChargeValue(null);
-        setBaseUnitPrice(null);
+        setPreMinSubtotal(null);
         setRushFee(0);
         setGstRate(0.05);
       }
@@ -236,10 +236,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       qtyDiscountApplied,
       minChargeApplied,
       minChargeValue,
-      baseUnitPrice,
+      preMinSubtotal,
       lineItems,
     });
-  }, [price, loading, addonTotal, designStatus, rushFee, gstRate, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, baseUnitPrice, lineItems]);
+  }, [price, loading, addonTotal, designStatus, rushFee, gstRate, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, preMinSubtotal, lineItems]);
 
   // Bubble config to parent (for proof + cart)
   useEffect(() => {

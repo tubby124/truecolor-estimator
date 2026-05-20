@@ -282,18 +282,19 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   let effectiveBase = totalOrderBase;
   let minChargeApplied = false;
   let minChargeSkipped = false;
-  // Preserve pre-minimum price so the UI can show the real item cost
-  let baseUnitPrice: number | null = null;
+  // Preserve the per-job subtotal pre-min so the UI can show the real item cost.
+  // This is the TOTAL (per-unit × qty), not per-unit — name reflects that.
+  let preMinSubtotal: number | null = null;
   if (minCharge > 0 && totalOrderBase < minCharge && req.skip_min_charge) {
     // Staff override — don't apply minimum but flag it
     minChargeSkipped = true;
-    baseUnitPrice = totalOrderBase;
+    preMinSubtotal = totalOrderBase;
     if (!isFixedSize && qty > 1 && lineItems.length > 0) {
       lineItems[0].qty = qty;
       lineItems[0].line_total = totalOrderBase;
     }
   } else if (minCharge > 0 && totalOrderBase < minCharge) {
-    baseUnitPrice = totalOrderBase;
+    preMinSubtotal = totalOrderBase;
     effectiveBase = minCharge;
     minChargeApplied = true;
     if (lineItems.length > 0) {
@@ -398,7 +399,7 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     qty_discount_pct: qtyDiscountPct > 0 ? qtyDiscountPct : null,
     qty_discount_applied: qtyDiscountApplied,
     price_per_unit: pricePerUnit,
-    base_unit_price: baseUnitPrice,
+    pre_min_subtotal: preMinSubtotal,
   };
 }
 
@@ -620,6 +621,6 @@ function blocked(reason: string): EstimateResponse {
     qty_discount_pct: null,
     qty_discount_applied: false,
     price_per_unit: null,
-    base_unit_price: null,
+    pre_min_subtotal: null,
   };
 }

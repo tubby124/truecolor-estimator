@@ -20,7 +20,7 @@ interface PriceSummaryProps {
   qtyDiscountApplied?: boolean;
   minChargeApplied?: boolean;
   minChargeValue?: number | null;
-  baseUnitPrice?: number | null; // pre-minimum real price
+  preMinSubtotal?: number | null; // pre-minimum real price
   lineItems?: LineItem[]; // engine breakdown — used for addon sub-line display
   // Cart
   addedToCart: boolean;
@@ -59,7 +59,7 @@ export function PriceSummary({
   addedToCart, onAddToCart, productSlug,
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
   pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
-  minChargeApplied, minChargeValue, baseUnitPrice, lineItems = [],
+  minChargeApplied, minChargeValue, preMinSubtotal, lineItems = [],
 }: PriceSummaryProps) {
   // Addon sub-lines = engine line_items beyond the first (base product) item
   const addonLines = lineItems.length > 1 ? lineItems.slice(1) : [];
@@ -146,40 +146,40 @@ export function PriceSummary({
               {minChargeApplied && minChargeValue != null && (
                 <div className="mt-3 rounded-xl border border-[#16C2F3]/20 bg-gradient-to-br from-[#16C2F3]/[0.06] to-[#16C2F3]/[0.02] overflow-hidden">
                   {/* Progress bar — visual fill toward minimum */}
-                  {baseUnitPrice != null && minChargeValue > 0 && (
+                  {preMinSubtotal != null && minChargeValue > 0 && (
                     <div className="h-1 bg-[#16C2F3]/10">
                       <motion.div
                         className="h-full bg-[#16C2F3] rounded-r-full"
                         initial={{ width: 0 }}
-                        animate={{ width: `${Math.min((baseUnitPrice / minChargeValue) * 100, 100)}%` }}
+                        animate={{ width: `${Math.min((preMinSubtotal / minChargeValue) * 100, 100)}%` }}
                         transition={{ duration: 0.5, ease: "easeOut" }}
                       />
                     </div>
                   )}
                   <div className="px-3 py-2.5 space-y-1.5">
-                    {baseUnitPrice != null && (
+                    {preMinSubtotal != null && (
                       <div className="flex justify-between items-baseline gap-2 text-sm">
                         <span className="text-gray-500 whitespace-nowrap">Your item{qty > 1 ? "s" : ""}</span>
-                        <span className="text-gray-400 tabular-nums line-through decoration-gray-300">${baseUnitPrice.toFixed(2)}</span>
+                        <span className="text-gray-400 tabular-nums line-through decoration-gray-300">${preMinSubtotal.toFixed(2)}</span>
                       </div>
                     )}
                     <div className="flex justify-between items-baseline gap-2">
                       <span className="text-sm font-medium text-[#1c1712] whitespace-nowrap">You pay</span>
                       <span className="font-bold text-[#1c1712] tabular-nums text-[15px]">${minChargeValue.toFixed(2)}</span>
                     </div>
-                    {baseUnitPrice != null && minChargeValue > baseUnitPrice && (
+                    {preMinSubtotal != null && minChargeValue > preMinSubtotal && (
                       <div className="pt-2 border-t border-[#16C2F3]/15">
                         <p className="text-[13px] text-[#0e9ec5] font-semibold flex items-center gap-1.5">
                           <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
                           </svg>
                           {(() => {
-                            const unitPrice = baseUnitPrice / Math.max(qty, 1);
+                            const unitPrice = preMinSubtotal / Math.max(qty, 1);
                             if (unitPrice > 0) {
                               const unitsToExceed = Math.ceil(minChargeValue / unitPrice);
                               const extraNeeded = unitsToExceed - qty;
-                              if (extraNeeded > 0 && extraNeeded <= 20) {
-                                return `Add ${extraNeeded} more to beat the minimum`;
+                              if (extraNeeded > 0) {
+                                return `Add ${extraNeeded.toLocaleString()} more (qty ${unitsToExceed.toLocaleString()}) to beat the minimum`;
                               }
                             }
                             return "Increase quantity for better per-unit value";

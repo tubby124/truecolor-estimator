@@ -32,7 +32,7 @@ const EMPTY_PRICE: PriceData = {
   price: null, loading: false, addonTotal: 0, designFee: 0, rushFee: 0,
   gst: null, pst: null, total: null,
   pricePerUnit: null, qtyDiscountPct: null, qtyDiscountApplied: false,
-  minChargeApplied: false, minChargeValue: null, baseUnitPrice: null, lineItems: [],
+  minChargeApplied: false, minChargeValue: null, preMinSubtotal: null, lineItems: [],
 };
 
 const EMPTY_CONFIG: ConfigData = {
@@ -180,7 +180,7 @@ export function ProductPageClient({ product }: Props) {
             qtyDiscountApplied={priceData.qtyDiscountApplied}
             minChargeApplied={priceData.minChargeApplied}
             minChargeValue={priceData.minChargeValue}
-            baseUnitPrice={priceData.baseUnitPrice}
+            preMinSubtotal={priceData.preMinSubtotal}
             lineItems={priceData.lineItems}
           />
         </div>

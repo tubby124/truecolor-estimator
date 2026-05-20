@@ -351,11 +351,11 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
           {result.min_charge_applied && result.min_charge_value != null && (
             <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/60 overflow-hidden text-sm">
               {/* Progress bar — visual fill toward minimum (matches customer side) */}
-              {result.base_unit_price != null && result.min_charge_value > 0 && (
+              {result.pre_min_subtotal != null && result.min_charge_value > 0 && (
                 <div className="h-1 bg-amber-100">
                   <div
                     className="h-full bg-amber-400 transition-all duration-500"
-                    style={{ width: `${Math.min((result.base_unit_price / result.min_charge_value) * 100, 100)}%` }}
+                    style={{ width: `${Math.min((result.pre_min_subtotal / result.min_charge_value) * 100, 100)}%` }}
                   />
                 </div>
               )}
@@ -364,16 +364,16 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                 <span className="font-bold text-amber-900 tabular-nums">${result.min_charge_value.toFixed(2)}</span>
               </div>
               <div className="px-3 py-2 space-y-1">
-                {result.base_unit_price != null && (
+                {result.pre_min_subtotal != null && (
                   <>
                     <div className="flex justify-between">
                       <span className="text-amber-700">Job total (pre-min)</span>
-                      <span className="tabular-nums text-amber-700">${result.base_unit_price.toFixed(2)}</span>
+                      <span className="tabular-nums text-amber-700">${result.pre_min_subtotal.toFixed(2)}</span>
                     </div>
-                    {result.min_charge_value > result.base_unit_price && (
+                    {result.min_charge_value > result.pre_min_subtotal && (
                       <div className="flex justify-between">
                         <span className="text-amber-700">Buffer to min</span>
-                        <span className="tabular-nums text-green-700 font-medium">+${(result.min_charge_value - result.base_unit_price).toFixed(2)}</span>
+                        <span className="tabular-nums text-green-700 font-medium">+${(result.min_charge_value - result.pre_min_subtotal).toFixed(2)}</span>
                       </div>
                     )}
                   </>
@@ -387,9 +387,9 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                   </div>
                 )}
                 {/* "Add X more to beat the minimum" — uses real job qty, not line_items[0].qty */}
-                {result.base_unit_price != null && (() => {
+                {result.pre_min_subtotal != null && (() => {
                   const realQty = jobDetails?.qty ?? 1;
-                  const realUnitPrice = result.base_unit_price! / Math.max(realQty, 1);
+                  const realUnitPrice = result.pre_min_subtotal! / Math.max(realQty, 1);
                   if (realUnitPrice > 0 && result.min_charge_value! > 0) {
                     const unitsToExceed = Math.ceil(result.min_charge_value! / realUnitPrice);
                     const extraNeeded = unitsToExceed - realQty;

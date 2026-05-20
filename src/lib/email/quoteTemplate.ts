@@ -103,12 +103,27 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
         </tr>`
       : "";
 
-  const minChargeNote = quoteData.min_charge_applied
-    ? `<tr>
+  // Minimum-charge note — mirrors the customer-side PriceSummary breakdown so the
+  // email customer sees the same "your items would be $X, you pay the $Y minimum" context
+  // they saw on the website. Builds trust + reduces "why is this $45 for one sticker?" replies.
+  const minChargeNote = quoteData.min_charge_applied && quoteData.min_charge_value != null
+    ? (() => {
+        const preMin = quoteData.pre_min_subtotal;
+        const minVal = quoteData.min_charge_value;
+        if (preMin != null && minVal > preMin) {
+          const buffer = minVal - preMin;
+          return `<tr>
         <td colspan="2" style="padding: 4px 16px 8px; font-size: 12px; color: #9a5500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-          Minimum order charge applied
+          Your items would total $${preMin.toFixed(2)} — minimum order charge of $${minVal.toFixed(2)} applied (+$${buffer.toFixed(2)})
         </td>
-      </tr>`
+      </tr>`;
+        }
+        return `<tr>
+        <td colspan="2" style="padding: 4px 16px 8px; font-size: 12px; color: #9a5500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+          Minimum order charge of $${minVal.toFixed(2)} applied
+        </td>
+      </tr>`;
+      })()
     : "";
 
   return `<!DOCTYPE html>

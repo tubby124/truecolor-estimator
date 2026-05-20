@@ -62,6 +62,8 @@ export interface EstimateResponse {
   qty_discount_pct: number | null;
   qty_discount_applied: boolean;
   price_per_unit: number | null;
-  // Pre-minimum base price (set only when min_charge_applied is true)
-  base_unit_price: number | null;
+  // Order subtotal before the minimum-charge clamp.
+  // Set when min_charge_applied OR min_charge_skipped is true.
+  // NOTE: this is the TOTAL for the whole job (per-unit price × qty), not per-unit.
+  pre_min_subtotal: number | null;
 }
