@@ -304,44 +304,30 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     });
   }
 
-  // ── STEP 6: Apply minimum charge ──────────────────────────────────────────
-  // For sqft-priced products: compare total order price (unit price × qty) against minimum.
-  // This ensures bulk orders (e.g. 30 small signs) aren't penalized — the minimum
-  // applies to the whole job, not to each unit individually.
+  // ── STEP 6: Compute total order base ──────────────────────────────────────
+  // Minimum charge enforcement was REMOVED 2026-05-19 by owner decision: "get rid
+  // of this minimum charge bullshit. Just fucking let them parse it, whatever.
+  // We just need to give them the quote."
+  //
+  // Rationale: True Color is a manual-concierge shop (Hasan + Albert quote every
+  // job personally). The customer-facing minimum was a website guardrail that
+  // ended up hiding quantity-scaling on small orders and confusing customers
+  // who were comparing prices on stickers. Owner prefers to show the honest
+  // calculated price and handle pricing exceptions in conversation.
+  //
+  // The CSV `min_charge` column is preserved for reference but no longer enforced.
+  // `min_charge_value` is still returned in the response (informational only).
+  //
   // isFixedSize: exact product match (one price for the whole order)
   // isLotPrice: pricing rule with price_per_unit as a flat print-run price (not per-piece)
   // Both cases: basePrice IS the total — do not multiply by qty
   const totalOrderBase = (isFixedSize || isLotPrice) ? basePrice : round2(basePrice * qty);
-  let effectiveBase = totalOrderBase;
-  let minChargeApplied = false;
-  let minChargeSkipped = false;
-  // Preserve the per-job subtotal pre-min so the UI can show the real item cost.
-  // This is the TOTAL (per-unit × qty), not per-unit — name reflects that.
-  let preMinSubtotal: number | null = null;
-  if (minCharge > 0 && totalOrderBase < minCharge && req.skip_min_charge) {
-    // Staff override — don't apply minimum but flag it
-    minChargeSkipped = true;
-    preMinSubtotal = totalOrderBase;
-    if (!isFixedSize && qty > 1 && lineItems.length > 0) {
-      lineItems[0].qty = qty;
-      lineItems[0].line_total = totalOrderBase;
-    }
-  } else if (minCharge > 0 && totalOrderBase < minCharge) {
-    preMinSubtotal = totalOrderBase;
-    effectiveBase = minCharge;
-    minChargeApplied = true;
-    if (lineItems.length > 0) {
-      lineItems[0].unit_price = minCharge;
-      lineItems[0].line_total = minCharge;
-      lineItems[0].description += ` (min charge $${minCharge.toFixed(2)} applied)`;
-    }
-    // When min charge applies across multiple units, show the effective per-unit
-    // cost so the UI can display "2 × $22.50/unit" rather than a frozen $45.00
-    if (qty > 1 && !isFixedSize) {
-      pricePerUnit = round2(effectiveBase / qty);
-    }
-  } else if (!isFixedSize && qty > 1 && lineItems.length > 0) {
-    // Update line item to show all units correctly (total clears minimum)
+  const effectiveBase = totalOrderBase;
+  const minChargeApplied = false;
+  const minChargeSkipped = false;
+  const preMinSubtotal: number | null = null;
+  if (!isFixedSize && qty > 1 && lineItems.length > 0) {
+    // Update line item to show all units correctly.
     lineItems[0].qty = qty;
     lineItems[0].line_total = totalOrderBase;
   }
@@ -417,7 +403,9 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     price_per_sqft: basePricePerSqft,
     tier_applied: tierLabel,
     min_charge_applied: minChargeApplied,
-    min_charge_value: (minChargeApplied || minChargeSkipped) ? minCharge : null,
+    // Informational only since 2026-05-19 — no longer enforced. UI may show it as
+    // a reference ("our typical floor for this product was $X") but doesn't bind.
+    min_charge_value: minCharge > 0 ? minCharge : null,
     min_charge_skipped: minChargeSkipped,
     rules_fired: rulesFired,
     cost,

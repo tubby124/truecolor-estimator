@@ -207,10 +207,16 @@ describe("STEP 4.5 — bulk qty discount", () => {
   });
 });
 
-// ─── STEP 6: Minimum charge ───────────────────────────────────────────────────
+// ─── STEP 6: Minimum charge enforcement REMOVED (2026-05-19) ─────────────────
+// Owner decision: stop enforcing customer-facing minimums in the engine.
+// True Color is a concierge shop — every quote is reviewed by Hasan or Albert,
+// so the website should show the honest calculated price and pricing exceptions
+// get handled in conversation. The CSV `min_charge` column is preserved as
+// reference data; `min_charge_value` is still returned in the response but is
+// informational only — `min_charge_applied` is always false.
 
-describe("STEP 6 — minimum charge", () => {
-  it("tiny sign (1×1 in) hits minimum charge", () => {
+describe("STEP 6 — minimum charge NO LONGER enforced", () => {
+  it("tiny sign (1×1 in) returns the honest calculated price, NOT the minimum", () => {
     const result = estimate({
       category: "SIGN",
       material_code: "MPHCC020",
@@ -220,10 +226,29 @@ describe("STEP 6 — minimum charge", () => {
       qty: 1,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.min_charge_applied).toBe(true);
+    // Before 2026-05-19 this returned min_charge_applied=true with sell_price=45.
+    // After the change: customer sees the actual calculated tiny-sign price.
+    expect(result.min_charge_applied).toBe(false);
+    expect(result.min_charge_skipped).toBe(false);
     expect(result.sell_price).toBeGreaterThan(0);
-    // min_charge_value should be populated
+    expect(result.sell_price).toBeLessThan(45); // proves we're no longer pinning at min
+    // min_charge_value is still returned for informational display
     expect(result.min_charge_value).toBeGreaterThan(0);
+  });
+
+  it("DECAL 2×3 in at qty 1 returns the actual calculated price, not the $45 min", () => {
+    const result = estimate({
+      category: "DECAL",
+      material_code: "ARLPMF7008",
+      width_in: 2,
+      height_in: 3,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.min_charge_applied).toBe(false);
+    // 0.04 sqft × $11/sqft = $0.44 — that's the honest price now
+    expect(result.sell_price).toBeLessThan(1);
   });
 });
 
@@ -1099,8 +1124,8 @@ describe("POSTCARD 3×4 — qty=50 now QUOTED (Phase 1A fix)", () => {
 });
 
 describe("DECAL sqft tiers — 3 proper bounds (Phase 1B fix)", () => {
-  it("DECAL 2 sqft → min $45 fires (S tier 0–6 @ $11)", () => {
-    // 24×12 = 288 sqin = 2 sqft → $22 → min $45 fires
+  it("DECAL 2 sqft → $22 (S tier 0–6 @ $11) — min charge enforcement REMOVED 2026-05-19", () => {
+    // 24×12 = 288 sqin = 2 sqft → $11 × 2 = $22 (no longer pinned to $45 min)
     const result = estimate({
       category: "DECAL",
       material_code: "ARLPMF7008",
@@ -1110,7 +1135,8 @@ describe("DECAL sqft tiers — 3 proper bounds (Phase 1B fix)", () => {
       qty: 1,
     });
     expect(result.status).toBe("QUOTED");
-    expect(result.sell_price).toBe(45);
+    expect(result.sell_price).toBe(22);
+    expect(result.min_charge_applied).toBe(false);
   });
 
   it("DECAL 8 sqft → $72 (M tier 6.01–20 @ $9/sqft)", () => {

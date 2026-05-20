@@ -105,12 +105,13 @@ test.describe("STICKER engine — area scaling on catch-all material", () => {
     expect(s2x3.line_items[0].description).not.toContain("area-scaled");
   });
 
-  test("non-STICKER categories not touched (regression guard)", async ({ request }) => {
-    // DECAL is sqft-tier with $45 min — area-scaling logic must not touch it.
+  test("non-STICKER categories not touched by area-scaling (regression guard)", async ({ request }) => {
+    // DECAL is sqft-tier (no area-scaling logic). After 2026-05-19 min charge
+    // was killed sitewide, so this is just an honest sqft × rate × qty calc.
     const decal = await estimate(request, { category: "DECAL", material_code: "ARLPMF7008", width_in: 2, height_in: 3, qty: 50 });
     expect(decal.status).toBe("QUOTED");
-    expect(decal.sell_price).toBe(45); // min charge — unchanged
-    expect(decal.min_charge_applied).toBe(true);
+    expect(decal.sell_price).toBe(20); // 0.04 sqft × $11 × 50 × 0.9 (10% bulk) = $19.80 → ceilCent → $20
+    expect(decal.min_charge_applied).toBe(false);
     expect(decal.line_items[0].description).not.toContain("area-scaled");
   });
 

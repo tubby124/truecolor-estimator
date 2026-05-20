@@ -489,7 +489,7 @@ export function StaffOrderCard({
               </p>
               <div className="flex flex-wrap gap-2 items-center">
                 <a
-                  href="https://next.waveapps.com/businesses/0fea8474-b467-4a12-b558-efa4c74c7e3c/invoicing/invoices"
+                  href={`https://next.waveapps.com/businesses/0fea8474-b467-4a12-b558-efa4c74c7e3c/invoicing/invoices/${order.wave_invoice_id}/edit`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-[#16C2F3] hover:underline font-semibold"

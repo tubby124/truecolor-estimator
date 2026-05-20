@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 const CHANNEL_NAME = "tc-staff-notifs";
 const DING_PATH = "/sounds/ding.mp3";
 const TOAST_DURATION_MS = 4000;
+const MUTE_STORAGE_KEY = "tc.notifMuted";
 
 type ToastEntry = {
   id: string;
@@ -18,8 +19,32 @@ type OrderPayload = { id?: string; order_number?: string; total?: number };
 
 export default function NotificationListener() {
   const [toasts, setToasts] = useState<ToastEntry[]>([]);
+  const [muted, setMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const mutedRef = useRef(false);
   const toastTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // Load mute state from localStorage on mount.
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(MUTE_STORAGE_KEY) === "1";
+      setMuted(stored);
+      mutedRef.current = stored;
+    } catch {
+      // localStorage disabled — fine, default to unmuted
+    }
+  }, []);
+
+  const toggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    mutedRef.current = next;
+    try {
+      localStorage.setItem(MUTE_STORAGE_KEY, next ? "1" : "0");
+    } catch {
+      // localStorage disabled — toggle still works in memory
+    }
+  };
 
   useEffect(() => {
     // Lazy-init the audio element once on mount.
@@ -48,7 +73,10 @@ export default function NotificationListener() {
 
     function handleNotification(entry: { title: string; body: string }) {
       // Play ding — may reject if tab is backgrounded or user hasn't interacted yet.
-      audioRef.current?.play().catch(() => {});
+      // Use the ref so live mute changes are honored (state captures in closure go stale).
+      if (!mutedRef.current) {
+        audioRef.current?.play().catch(() => {});
+      }
 
       // Increment localStorage badge.
       try {
@@ -76,23 +104,51 @@ export default function NotificationListener() {
     };
   }, []);
 
-  if (toasts.length === 0) return null;
-
   return (
-    <div
-      aria-live="polite"
-      style={{
-        position: "fixed",
-        bottom: 24,
-        right: 24,
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-        pointerEvents: "none",
-      }}
-    >
-      {toasts.map((t) => (
+    <>
+      {/* Persistent mute toggle — fixed bottom-left, out of the way of toasts. */}
+      <button
+        type="button"
+        onClick={toggleMute}
+        aria-label={muted ? "Unmute staff notification sound" : "Mute staff notification sound"}
+        title={muted ? "Sound muted — click to unmute" : "Click to mute notification ding"}
+        style={{
+          position: "fixed",
+          bottom: 24,
+          left: 24,
+          zIndex: 9999,
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          border: "1px solid rgba(255,255,255,0.1)",
+          background: muted ? "rgba(0,0,0,0.55)" : "rgba(0,0,0,0.35)",
+          color: muted ? "#f87171" : "#9ca3af",
+          fontSize: 16,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backdropFilter: "blur(6px)",
+        }}
+      >
+        {muted ? "🔕" : "🔔"}
+      </button>
+
+      {toasts.length === 0 ? null : (
+        <div
+          aria-live="polite"
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            pointerEvents: "none",
+          }}
+        >
+          {toasts.map((t) => (
         <div
           key={t.id}
           role="status"
@@ -111,6 +167,8 @@ export default function NotificationListener() {
           <div style={{ fontSize: 14, opacity: 0.9 }}>{t.body}</div>
         </div>
       ))}
-    </div>
+        </div>
+      )}
+    </>
   );
 }
