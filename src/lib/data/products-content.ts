@@ -751,9 +751,14 @@ export const PRODUCTS: Record<string, ProductContent> = {
     ],
     defaultSides: 1,
     sideOptions: false,
+    // 1×3 and 2×4 added 2026-05-20 in response to repeat customer requests.
+    // They use ARLPMF7008 (catch-all) so the engine's area-scaling logic prices
+    // them automatically — no new SKU rules needed in pricing_rules.csv.
     sizePresets: [
+      { label: "1×3\"", width_in: 1, height_in: 3, material_code: "ARLPMF7008" },
       { label: "2×2\"", width_in: 2, height_in: 2, material_code: "PLACEHOLDER_STICKER_2X2" },
       { label: "2×3\"", width_in: 2, height_in: 3, material_code: "PLACEHOLDER_STICKER_2X3" },
+      { label: "2×4\"", width_in: 2, height_in: 4, material_code: "ARLPMF7008" },
       { label: "3×3\"", width_in: 3, height_in: 3, material_code: "PLACEHOLDER_STICKER_3X3" },
       { label: "4×4\"", width_in: 4, height_in: 4, material_code: "ARLPMF7008" },
       { label: "4×6\"", width_in: 4, height_in: 6, material_code: "PLACEHOLDER_STICKER_4X6" },
@@ -767,7 +772,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Material", value: "Arlon DPF 510 matte adhesive vinyl — 3.2 mil" },
       { label: "Print", value: "Full-colour UV-resistant digital print" },
       { label: "Cut", value: "Die-cut square — clean edges, no carrier sheet" },
-      { label: "Sizes", value: "2×2\" · 2×3\" · 3×3\" · 4×4\" · 4×6\" · 5×5\" · 6×6\" · 8×8\" — custom shapes by quote" },
+      { label: "Sizes", value: "1×3\" · 2×2\" · 2×3\" · 2×4\" · 3×3\" · 4×4\" · 4×6\" · 5×5\" · 6×6\" · 8×8\" — custom shapes by quote" },
       { label: "Minimum qty", value: "50 stickers" },
       { label: "Adhesive", value: "Removable — peels cleanly from most surfaces" },
     ],
