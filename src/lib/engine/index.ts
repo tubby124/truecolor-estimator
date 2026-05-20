@@ -118,6 +118,39 @@ export function estimate(req: EstimateRequest): EstimateResponse {
         line_total: basePrice,
         rule_id: matchedRuleId,
       });
+
+      // Area-scale STICKER catch-all pricing by actual dimensions.
+      // The PR-STICKER-{25,50,100,250,500,1000} rules use ARLPMF7008 (default material) and
+      // are implicitly priced for the 4×4" reference size. Customers entering custom sizes
+      // like 1×3 or 2×4 (not in the size-preset list) were getting the catch-all flat price
+      // regardless of dimensions — so 1×3 cost the same as 8×8.
+      // Existing size-specific SKUs (PR-STICKER-2X2-*, 2X3-*, 4X6-*, 5X5-*, 8X8-*) use
+      // PLACEHOLDER_STICKER_* material codes, so they don't trigger this scaling.
+      // Verified 2026-05-19: ratio matches existing SKU prices within a few cents:
+      //   4×6 catch-all × 24/16 = $240 (matches PR-STICKER-4X6-100)
+      //   5×5 catch-all × 25/16 = $250 (matches PR-STICKER-5X5-100)
+      //   8×8 catch-all × 64/16 = $640 (matches PR-STICKER-8X8-100)
+      // Floor at $15 to prevent absurdly-low quotes on tiny stickers.
+      if (
+        category === "STICKER" &&
+        unitRule.material_code === "ARLPMF7008" &&
+        req.width_in &&
+        req.height_in
+      ) {
+        const REFERENCE_SQIN = 16; // 4" × 4"
+        const STICKER_PRICE_FLOOR = 15;
+        const requestSqin = req.width_in * req.height_in;
+        if (requestSqin > 0 && Math.abs(requestSqin - REFERENCE_SQIN) > 0.01) {
+          const ratio = requestSqin / REFERENCE_SQIN;
+          const scaled = ceilCent(basePrice * ratio);
+          basePrice = Math.max(scaled, STICKER_PRICE_FLOOR);
+          if (lineItems.length > 0) {
+            lineItems[0].unit_price = basePrice;
+            lineItems[0].line_total = basePrice;
+            lineItems[0].description = `${categoryLabel(category)} – ${dimensionLabel(req.width_in, req.height_in)} – Qty ${qty} (area-scaled from 4×4" reference)`;
+          }
+        }
+      }
     }
 
     // ── STEP 4b: Sqft-tier pricing — requires dimensions ──────────────────
