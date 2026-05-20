@@ -5,6 +5,7 @@ import { encodePaymentToken } from "@/lib/payment/token";
 import { sendEmail, type SendEmailAttachment } from "@/lib/email/smtp";
 import { requireStaffUser } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { computeTax, computeTaxForCart } from "@/lib/pricing/tax";
 
 interface QuoteItem {
   quoteData: EstimateResponse;
@@ -45,10 +46,7 @@ function buildMultiItemEmailHtml(opts: {
   const greeting = customerName ? `Hi ${customerName},` : "Hello,";
 
   const combinedSubtotal = items.reduce((s, it) => s + (it.quoteData.sell_price ?? 0), 0);
-  const combinedDesignFee = items.reduce((s, it) => s + (it.quoteData.design_fee ?? 0), 0);
-  const gst = Math.round(combinedSubtotal * 0.05 * 100) / 100;
-  const pst = Math.round((combinedSubtotal - combinedDesignFee) * 0.06 * 100) / 100;
-  const total = Math.round((combinedSubtotal + gst + pst) * 100) / 100;
+  const { gst, pst, total } = computeTaxForCart(items.map((it) => it.quoteData));
 
   const logoUrl = `${siteUrl}/truecolorlogo.webp`;
 
@@ -170,10 +168,7 @@ function buildMultiItemPlainText(opts: {
   const greeting = customerName ? `Hi ${customerName},` : "Hello,";
 
   const combinedSubtotal = items.reduce((s, it) => s + (it.quoteData.sell_price ?? 0), 0);
-  const combinedDesignFee = items.reduce((s, it) => s + (it.quoteData.design_fee ?? 0), 0);
-  const gst = Math.round(combinedSubtotal * 0.05 * 100) / 100;
-  const pst = Math.round((combinedSubtotal - combinedDesignFee) * 0.06 * 100) / 100;
-  const total = Math.round((combinedSubtotal + gst + pst) * 100) / 100;
+  const { gst, pst, total } = computeTaxForCart(items.map((it) => it.quoteData));
 
   const itemLines = items.map((item, i) => {
     const { quoteData, jobDetails } = item;
@@ -257,12 +252,10 @@ export async function POST(req: Request) {
       const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
       const bcc = process.env.SMTP_BCC ?? undefined;
 
-      // Combined financials for payment token
+      // Combined financials for payment token — uses shared helper so rush_fee + gst_rate are
+      // honoured correctly. computeTaxForCart returns per-item PST summed (rush PST-exempt per item).
       const combinedSubtotal = items.reduce((s, it) => s + (it.quoteData.sell_price ?? 0), 0);
-      const combinedDesignFee = items.reduce((s, it) => s + (it.quoteData.design_fee ?? 0), 0);
-      const combinedGst = Math.round(combinedSubtotal * 0.05 * 100) / 100;
-      const combinedPst = Math.round((combinedSubtotal - combinedDesignFee) * 0.06 * 100) / 100;
-      const combinedTotal = Math.round((combinedSubtotal + combinedGst + combinedPst) * 100) / 100;
+      const { total: combinedTotal } = computeTaxForCart(items.map((it) => it.quoteData));
 
       let paymentUrl: string | undefined;
       let qrCodeBuffer: Buffer | undefined;
@@ -328,11 +321,7 @@ export async function POST(req: Request) {
     let qrCodeBuffer: Buffer | undefined;
     const QR_CID = "qrcode@truecolor";
     if (includePaymentLink && process.env.PAYMENT_TOKEN_SECRET) {
-      const sellPrice = quoteData.sell_price ?? 0;
-      const designFee = quoteData.design_fee ?? 0;
-      const gst = Math.round(sellPrice * 0.05 * 100) / 100;
-      const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
-      const totalWithTax = Math.round((sellPrice + gst + pst) * 100) / 100;
+      const { total: totalWithTax } = computeTax(quoteData);
       const description = `True Color Display Printing — ${jobDetails.categoryLabel}`;
       const token = encodePaymentToken(totalWithTax, description, to);
       paymentUrl = `${siteUrl}/pay/${token}`;
@@ -427,10 +416,7 @@ function buildPlainText({
   paymentUrl?: string;
 }): string {
   const sellPrice = quoteData.sell_price ?? 0;
-  const designFee = quoteData.design_fee ?? 0;
-  const gst = Math.round(sellPrice * 0.05 * 100) / 100;
-  const pst = Math.round((sellPrice - designFee) * 0.06 * 100) / 100;
-  const total = Math.round((sellPrice + gst + pst) * 100) / 100;
+  const { gst, pst, total } = computeTax(quoteData);
   const greeting = customerName ? `Hi ${customerName},` : "Hello,";
 
   const lines = [
