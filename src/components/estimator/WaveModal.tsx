@@ -161,9 +161,6 @@ export function WaveModal({ result, jobDetails, onClose, cartItems }: Props) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const sellPrice = isMultiMode
-    ? cartItems!.reduce((s, it) => s + (it.result.sell_price ?? 0), 0)
-    : result?.sell_price ?? 0;
   const { total } = isMultiMode
     ? computeTaxForCart(cartItems!.map((it) => it.result))
     : computeTax(result ?? { sell_price: 0 });

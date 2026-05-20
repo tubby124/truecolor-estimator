@@ -48,7 +48,6 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
 
   const isBlocked = result.status === "BLOCKED";
   const sellPrice = result.sell_price ?? 0;
-  const designFee = result.design_fee ?? 0;
   const { gst, pst, total } = computeTax(result);
   const cost = result.cost;
 

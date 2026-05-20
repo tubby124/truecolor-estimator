@@ -136,10 +136,7 @@ export function EmailModal({ result, jobDetails, onClose, proofImage, cartItems 
     }
   };
 
-  const sellPrice = isMultiMode
-    ? cartItems!.reduce((s, it) => s + (it.result.sell_price ?? 0), 0)
-    : result?.sell_price ?? 0;
-  const { gst, pst, total } = isMultiMode
+  const { total } = isMultiMode
     ? computeTaxForCart(cartItems!.map((it) => it.result))
     : computeTax(result ?? { sell_price: 0 });
 

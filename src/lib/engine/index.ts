@@ -372,11 +372,12 @@ export function estimate(req: EstimateRequest): EstimateResponse {
     });
   }
 
-  // ── STEP 9: Total sell price ──────────────────────────────────────────────
+  // ── STEP 9: Total sell price (pre-tax) ────────────────────────────────────
+  // gst_rate is exposed on the response for the shared computeTax helper; the
+  // engine itself doesn't include GST in sell_price (per the contract — UI computes
+  // GST + PST via lib/pricing/tax.ts on top of the pre-tax sell_price).
   const gstRate = getConfigNum("gst_rate");
   const subtotal = round2(effectiveBase + addonTotal + designFee + rushFee);
-  const gst = round2(subtotal * gstRate);
-  const total = round2(subtotal + gst);
 
   // ── STEP 10: Cost estimate ────────────────────────────────────────────────
   const cost = computeCost(category, req.material_code, sqft, sides, qty, addons, rulesFired);

@@ -252,9 +252,7 @@ export async function POST(req: Request) {
       const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
       const bcc = process.env.SMTP_BCC ?? undefined;
 
-      // Combined financials for payment token — uses shared helper so rush_fee + gst_rate are
-      // honoured correctly. computeTaxForCart returns per-item PST summed (rush PST-exempt per item).
-      const combinedSubtotal = items.reduce((s, it) => s + (it.quoteData.sell_price ?? 0), 0);
+      // Combined total for payment token — shared helper honours rush_fee + gst_rate per item.
       const { total: combinedTotal } = computeTaxForCart(items.map((it) => it.quoteData));
 
       let paymentUrl: string | undefined;

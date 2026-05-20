@@ -24,12 +24,16 @@ export default function NotificationListener() {
   const mutedRef = useRef(false);
   const toastTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Load mute state from localStorage on mount.
+  // Load mute state from localStorage on mount — one-time hydration of UI
+  // preference, not derived state. The set-state-in-effect rule is intended to
+  // prevent cascading renders from state-derivation patterns; localStorage is
+  // an external system and this is exactly the case useEffect was designed for.
   useEffect(() => {
     try {
       const stored = localStorage.getItem(MUTE_STORAGE_KEY) === "1";
-      setMuted(stored);
       mutedRef.current = stored;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration from localStorage (external system, not state derivation)
+      setMuted(stored);
     } catch {
       // localStorage disabled — fine, default to unmuted
     }
