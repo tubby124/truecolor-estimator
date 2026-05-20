@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { QuoteRequest, ItemMeta } from "@/app/staff/quotes/page";
 
@@ -14,20 +14,18 @@ interface QuoteBuilderModalProps {
 }
 
 export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilderModalProps) {
-  const defaultItems = (): LineItem[] =>
-    quote.items.slice(0, 1).map((item) => ({
+  // Pre-fill ALL items from the customer request (not just the first). Multi-item
+  // quote requests were silently dropping items 2-N — staff had to re-type them.
+  const itemsFromRequest = (): LineItem[] => {
+    const mapped = quote.items.map((item) => ({
       description: [item.product, item.dimensions, item.material].filter(Boolean).join(" — "),
       qty: String(item.qty || 1),
       unitPrice: "",
     }));
+    return mapped.length > 0 ? mapped : [{ description: "", qty: "1", unitPrice: "" }];
+  };
 
-  const [lineItems, setLineItems] = useState<LineItem[]>(() =>
-    quote.items.slice(0, 1).map((item) => ({
-      description: [item.product, item.dimensions, item.material].filter(Boolean).join(" — "),
-      qty: String(item.qty || 1),
-      unitPrice: "",
-    }))
-  );
+  const [lineItems, setLineItems] = useState<LineItem[]>(itemsFromRequest);
   const [quoteSubject, setQuoteSubject] = useState(
     `Your Custom Print Quote — True Color Display Printing`
   );
@@ -35,6 +33,19 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
   const [quoteSending, setQuoteSending] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [quoteSent, setQuoteSent] = useState(false);
+
+  // Escape key closes the modal — standard OS behavior staff expect.
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !quoteSending) {
+        onClose();
+        setQuoteError(null);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onClose, quoteSending]);
 
   async function sendQuote() {
     const items = lineItems.filter((li) => li.description.trim() && li.unitPrice.trim());
@@ -65,7 +76,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
         setTimeout(() => {
           onClose();
           setQuoteSent(false);
-          setLineItems(defaultItems());
+          setLineItems(itemsFromRequest());
           setQuoteNote("");
         }, 1500);
       }
@@ -236,13 +247,15 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                 </button>
               </div>
 
-              {/* Subtotal / tax summary */}
+              {/* Subtotal / tax summary — rounded the same way the API computes it,
+                  so the modal preview never drifts from what the customer email shows. */}
               {(() => {
-                const subtotal = lineItems.reduce((sum, li) => {
+                const subtotal = Math.round(lineItems.reduce((sum, li) => {
                   return sum + (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0);
-                }, 0);
-                const gst = subtotal * 0.05;
-                const pst = subtotal * 0.06;
+                }, 0) * 100) / 100;
+                const gst = Math.round(subtotal * 0.05 * 100) / 100;
+                const pst = Math.round(subtotal * 0.06 * 100) / 100;
+                const total = Math.round((subtotal + gst + pst) * 100) / 100;
                 return subtotal > 0 ? (
                   <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 space-y-1 text-sm">
                     <div className="flex justify-between text-gray-600">
@@ -259,7 +272,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                     </div>
                     <div className="flex justify-between font-bold text-[#1a1a2e] border-t border-gray-200 pt-1 mt-1">
                       <span>Total (with tax)</span>
-                      <span>${(subtotal + gst + pst).toFixed(2)}</span>
+                      <span>${total.toFixed(2)}</span>
                     </div>
                   </div>
                 ) : null;

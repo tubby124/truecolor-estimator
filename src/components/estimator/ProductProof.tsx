@@ -451,18 +451,22 @@ export function ProductProof({
                   ${sellPrice.toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-[var(--muted)]">GST (5%)</span>
-                <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
-                  ${(gstAmount ?? sellPrice * 0.05).toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between text-base font-semibold border-t border-[var(--border)] pt-2 mt-2">
-                <span>Total</span>
-                <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
-                  ${(totalAmount ?? (sellPrice + (gstAmount ?? sellPrice * 0.05))).toFixed(2)}
-                </span>
-              </div>
+              {gstAmount != null && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-[var(--muted)]">GST (5%)</span>
+                  <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
+                    ${gstAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              {totalAmount != null && (
+                <div className="flex justify-between text-base font-semibold border-t border-[var(--border)] pt-2 mt-2">
+                  <span>Total</span>
+                  <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
+                    ${totalAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           {/* Signature line */}

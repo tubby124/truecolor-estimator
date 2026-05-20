@@ -38,13 +38,13 @@ function buildQuoteHtml(opts: {
   const { customerName, lineItems, note } = opts;
   const firstName = customerName.split(/[\s,]/)[0];
 
-  const subtotal = lineItems.reduce(
+  const subtotal = Math.round(lineItems.reduce(
     (sum, li) => sum + (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0),
     0
-  );
-  const gst = subtotal * 0.05;
-  const pst = subtotal * 0.06;
-  const grandTotal = subtotal + gst + pst;
+  ) * 100) / 100;
+  const gst = Math.round(subtotal * 0.05 * 100) / 100;
+  const pst = Math.round(subtotal * 0.06 * 100) / 100;
+  const grandTotal = Math.round((subtotal + gst + pst) * 100) / 100;
 
   const rows = lineItems
     .map((li) => {
@@ -154,10 +154,13 @@ function buildQuotePlainText(opts: {
 }): string {
   const { customerName, lineItems, note } = opts;
   const firstName = customerName.split(/[\s,]/)[0];
-  const subtotal = lineItems.reduce(
+  const subtotal = Math.round(lineItems.reduce(
     (sum, li) => sum + (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0),
     0
-  );
+  ) * 100) / 100;
+  const gst = Math.round(subtotal * 0.05 * 100) / 100;
+  const pst = Math.round(subtotal * 0.06 * 100) / 100;
+  const total = Math.round((subtotal + gst + pst) * 100) / 100;
   const lines = [
     `Hi ${firstName},`,
     "",
@@ -172,9 +175,9 @@ function buildQuotePlainText(opts: {
     }),
     "",
     `Subtotal: $${subtotal.toFixed(2)}`,
-    `GST (5%): $${(subtotal * 0.05).toFixed(2)}`,
-    `PST (6%): $${(subtotal * 0.06).toFixed(2)}`,
-    `Total: $${(subtotal * 1.11).toFixed(2)} CAD`,
+    `GST (5%): $${gst.toFixed(2)}`,
+    `PST (6%): $${pst.toFixed(2)}`,
+    `Total: $${total.toFixed(2)} CAD`,
     "",
     "Reply to this email or call (306) 954-8688 to confirm your order.",
     "",

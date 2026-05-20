@@ -157,9 +157,14 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 2. Calculate totals ──
+    // PST exempts kind="fee" items (design, rush, installation) per CLAUDE.md / truecolor-pricing-safety.md.
+    // GST applies to everything (CRA: services like design ARE GST-taxable in Canada).
     const subtotal = Math.round(items.reduce((s, it) => s + it.amount, 0) * 100) / 100;
+    const pstableSubtotal = Math.round(
+      items.filter((it) => it.kind !== "fee").reduce((s, it) => s + it.amount, 0) * 100
+    ) / 100;
     const gst = Math.round(subtotal * GST_RATE * 100) / 100;
-    const pst = Math.round(subtotal * PST_RATE * 100) / 100;
+    const pst = Math.round(pstableSubtotal * PST_RATE * 100) / 100;
     const total = Math.round((subtotal + gst + pst) * 100) / 100;
 
     // Build combined description for payment links and emails
@@ -287,7 +292,7 @@ export async function POST(req: NextRequest) {
           unitPrice: Math.round(item.amount * 100) / 100,
           qty: 1,
           applyGst: true,
-          applyPst: true,
+          applyPst: item.kind !== "fee", // PST exempt for design/rush/installation fees
         }));
 
         const inv = await createWaveInvoice(

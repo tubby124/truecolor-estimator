@@ -183,6 +183,15 @@ function SendEmailModal({
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Escape closes modal — standard OS behavior.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !sending) onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose, sending]);
+
   async function send() {
     if (!subject.trim() || !message.trim()) return;
     setSending(true);
@@ -223,6 +232,7 @@ function SendEmailModal({
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
+              autoFocus
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:border-transparent"
               placeholder="Email subject…"
             />
@@ -248,7 +258,7 @@ function SendEmailModal({
             disabled={sending || sent || !subject.trim() || !message.trim()}
             className="inline-flex items-center gap-2 bg-[#16C2F3] hover:bg-[#0fa8d6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-colors"
           >
-            {sent ? "✓ Done! Invoice sent." : sending ? "Assigning…" : "Assign & Send Updated Invoice"}
+            {sent ? "✓ Sent" : sending ? "Sending…" : "Send Email"}
           </button>
         </div>
       </div>
@@ -287,7 +297,9 @@ function SendDiscountModal({
   const [cleared, setCleared] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useState(() => {
+  // Fetch active coupons on mount (was incorrectly using useState initializer — fires
+  // twice in React Strict Mode dev; useEffect runs once cleanly).
+  useEffect(() => {
     fetch("/api/staff/coupons")
       .then((r) => r.json() as Promise<{ codes?: DiscountCode[] }>)
       .then((d) => {
@@ -297,7 +309,16 @@ function SendDiscountModal({
       })
       .catch(() => {})
       .finally(() => setLoadingCodes(false));
-  });
+  }, []);
+
+  // Escape closes modal.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !sending && !clearing) onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose, sending, clearing]);
 
   const selected = codes.find((c) => c.code === selectedCode);
 

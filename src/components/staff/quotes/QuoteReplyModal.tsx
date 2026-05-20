@@ -30,6 +30,16 @@ export function QuoteReplyModal({ quote, open, onClose, onSent }: QuoteReplyModa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Escape closes modal.
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !replySending) onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onClose, replySending]);
+
   // Parse the dollar input into cents, or null if blank/invalid.
   const quoteTotalCents = (() => {
     const trimmed = quoteTotalDollars.trim();

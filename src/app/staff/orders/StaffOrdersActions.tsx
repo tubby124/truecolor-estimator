@@ -367,13 +367,18 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   }, []);
 
   // ── Derived totals ──
+  // PST exempts kind="fee" items (design/rush/installation) to match API + Wave invoice line item flags.
+  // Modal preview ↔ manual-order API ↔ Wave invoice must agree — see payment-tax.md.
   const itemSubtotals = form.items.map((it) => {
     const amt = parseFloat(it.amount);
     return !isNaN(amt) && amt > 0 ? amt : 0;
   });
   const subtotal = Math.round(itemSubtotals.reduce((s, a) => s + a, 0) * 100) / 100;
+  const pstableSubtotal = Math.round(
+    form.items.reduce((s, it, i) => s + (it.kind === "fee" ? 0 : itemSubtotals[i]), 0) * 100
+  ) / 100;
   const gst = Math.round(subtotal * 0.05 * 100) / 100;
-  const pst = Math.round(subtotal * 0.06 * 100) / 100;
+  const pst = Math.round(pstableSubtotal * 0.06 * 100) / 100;
   const total = Math.round((subtotal + gst + pst) * 100) / 100;
   const hasValidAmount = subtotal > 0;
   const allItemsValid = form.items.every((it) => {
@@ -780,6 +785,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             id="pr-email"
                             type="email"
                             autoComplete="email"
+                            autoFocus
                             value={form.email}
                             onChange={(e) => { set("email", e.target.value); setCustomerLookup({ status: "idle" }); }}
                             onBlur={(e) => void handleEmailBlur(e.target.value)}
