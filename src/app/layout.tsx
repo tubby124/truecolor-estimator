@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import "./globals.css";
 import { BackToTop } from "@/components/site/BackToTop";
@@ -8,14 +8,24 @@ import { UtmCapture } from "@/components/site/UtmCapture";
 import { MetaPixel } from "@/components/site/MetaPixel";
 import { REVIEW_COUNT } from "@/lib/reviews";
 
-const geistSans = Geist({
+// Self-hosted Geist + Geist Mono variable WOFF2 files. Switched from
+// next/font/google because Railway builds were intermittently failing on
+// build-time Google Fonts fetches — three consecutive deploys died with
+// "Failed to fetch `Geist` from Google Fonts." Bundling the fonts removes
+// the external network dependency at build time entirely.
+// Files sourced from github.com/vercel/geist-font (OFL-licensed).
+const geistSans = localFont({
+  src: "./fonts/Geist-wght.woff2",
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "./fonts/GeistMono-wght.woff2",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
