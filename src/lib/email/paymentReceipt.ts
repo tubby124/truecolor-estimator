@@ -224,25 +224,30 @@ function buildReceiptHtml(p: SendPaymentReceiptParams): string {
             </td>
           </tr>
 
-          ${receiptPdfUrl || p.waveInvoiceUrl ? `
-          <!-- ── PDF DOWNLOAD CTA(s) ── -->
+          ${(() => {
+            // Prefer Wave invoice PDF when available — it's the official CRA-
+            // compatible tax invoice with PAID stamp. Fall back to TC's PDF only
+            // when there's no Wave invoice (e.g. "Quick Card Link" orders that
+            // skip the bookkeeping record). Never show both — decision fatigue.
+            const primaryUrl = p.waveInvoiceUrl ?? receiptPdfUrl;
+            const primaryLabel = p.waveInvoiceUrl ? "Download Tax Invoice (PDF)" : "Download Receipt (PDF)";
+            const subline = p.waveInvoiceUrl
+              ? "Official PAID invoice · For your records or accountant"
+              : "For your records or accountant · No login required";
+            return primaryUrl ? `
+          <!-- ── PDF DOWNLOAD CTA ── -->
           <tr>
             <td style="background:#ffffff;padding:0 32px 28px;text-align:center;border-top:1px solid #f0ebe4;">
-              ${receiptPdfUrl ? `
-              <a href="${receiptPdfUrl}"
-                style="display:inline-block;background:#1c1712;color:#ffffff;font-weight:700;font-size:14px;padding:13px 28px;border-radius:10px;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0 6px 8px;">
-                &#8659;&nbsp; True Color Receipt (PDF)
-              </a>` : ""}
-              ${p.waveInvoiceUrl ? `
-              <a href="${p.waveInvoiceUrl}"
-                style="display:inline-block;background:#ffffff;color:#1c1712;font-weight:700;font-size:14px;padding:12px 26px;border-radius:10px;text-decoration:none;border:2px solid #1c1712;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0 6px 8px;">
-                &#8659;&nbsp; Tax Invoice (Wave PDF)
-              </a>` : ""}
+              <a href="${primaryUrl}"
+                style="display:inline-block;background:#1c1712;color:#ffffff;font-weight:700;font-size:14px;padding:13px 28px;border-radius:10px;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                &#8659;&nbsp; ${primaryLabel}
+              </a>
               <p style="margin:8px 0 0;font-size:11px;color:#9ca3af;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                ${p.waveInvoiceUrl ? "Branded receipt for your records · Wave PDF for your accountant" : "For your records or accountant"} &nbsp;&middot;&nbsp; No login required
+                ${subline}
               </p>
             </td>
-          </tr>` : ""}
+          </tr>` : "";
+          })()}
 
           <!-- ── FOOTER ── -->
           <tr>
@@ -316,8 +321,11 @@ function buildReceiptText(p: SendPaymentReceiptParams): string {
     `  PST (6%):     $${p.pst.toFixed(2)}`,
     `  TOTAL:        $${p.total.toFixed(2)} CAD`,
     "",
-    receiptPdfUrl ? `True Color Receipt (PDF): ${receiptPdfUrl}` : "",
-    p.waveInvoiceUrl ? `Tax Invoice (Wave PDF): ${p.waveInvoiceUrl}` : "",
+    p.waveInvoiceUrl
+      ? `Tax Invoice (PDF): ${p.waveInvoiceUrl}`
+      : receiptPdfUrl
+      ? `Receipt (PDF): ${receiptPdfUrl}`
+      : "",
     "",
     "True Color Display Printing Ltd.",
     "216 33rd St W, Saskatoon SK · info@true-color.ca · (306) 954-8688",
