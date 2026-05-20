@@ -9,12 +9,12 @@ import { REVIEW_COUNT } from "@/lib/reviews";
 export const metadata: Metadata = {
   title: "Contact True Color — Print Shop Saskatoon SK",
   description:
-    "Visit True Color Display Printing, Saskatoon SK — 216 33rd St W. Mon–Fri 9 AM–5 PM. Signs, banners, cards from $30. Same-day rush +$40. In-house Roland UV.",
+    "Visit True Color Display Printing, Saskatoon SK — 216 33rd St W. Mon–Fri 9 AM–5 PM. Signs, banners, cards from $25. Same-day rush +$40. In-house Roland UV.",
   alternates: { canonical: "/contact" },
   openGraph: {
     title: "Contact True Color — Print Shop Saskatoon SK",
     description:
-      "Drop by our Saskatoon shop at 216 33rd St W or send a message. In-house Roland UV printer. Same-day rush +$40. Signs, banners, business cards from $30.",
+      "Drop by our Saskatoon shop at 216 33rd St W or send a message. In-house Roland UV printer. Same-day rush +$40. Signs, banners, business cards from $25.",
     url: "https://truecolorprinting.ca/contact",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -342,7 +342,7 @@ export default function ContactPage() {
               and call to confirm capacity.
             </p>
             <p className="text-gray-600 text-base leading-relaxed">
-              We print <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] hover:underline font-medium">coroplast signs from $30</Link>,{" "}
+              We print <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] hover:underline font-medium">coroplast signs from $25</Link>,{" "}
               <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] hover:underline font-medium">vinyl banners from $66</Link>,{" "}
               <Link href="/business-cards-saskatoon" className="text-[#16C2F3] hover:underline font-medium">business cards from $45</Link>,{" "}
               ACP aluminum signs, vehicle magnets, window decals, flyers, and more.

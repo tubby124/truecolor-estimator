@@ -72,7 +72,7 @@ export default function PrintingSwiftCurrentPage() {
       ]}
       whyPoints={[
         "Coroplast from $8/sqft — UV-printed, weatherproof, ideal for SW Saskatchewan conditions",
-        "Vehicle magnets from $45 — ag equipment and service truck branding",
+        "Vehicle magnets from $24/sqft — ag equipment and service truck branding",
         "ACP aluminum from $13/sqft — permanent yard and facility signage, 10+ year lifespan",
         "Vinyl banners from $8.25/sqft — grommets included, outdoor-rated 13oz vinyl",
         "Business cards 250 for $45 — shipped flat to Swift Current",

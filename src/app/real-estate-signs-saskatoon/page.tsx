@@ -78,14 +78,14 @@ export default function RealEstatePage() {
         </>
       }
       products={[
-        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
+        { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Business Cards", from: "from $45", slug: "business-cards" },
         { name: "Flyers & Feature Sheets", from: "from $45", slug: "flyers" },
         { name: "Postcards", from: "from $35", slug: "postcards" },
         { name: "Vehicle Magnets", from: "from $36", slug: "vehicle-magnets" },
       ]}
       whyPoints={[
-        "18×24\" coroplast yard sign from $30 — standard REALTOR listing size, H-stakes included for $2.50 ea",
+        "18×24\" coroplast yard sign $24 each (single sign tops up to $25 cart min) — standard REALTOR listing size, H-stakes $2.50 ea",
         "Double-sided signs available — face traffic from both directions on corner lots",
         "Same-day rush for $40 flat — listing photos came back late? Still doable",
         "Feature sheets (flyers) from $45 / 100 — gloss stock, double-sided, open house ready",
@@ -121,7 +121,7 @@ export default function RealEstatePage() {
         },
         {
           q: "How much do real estate signs cost in Saskatoon?",
-          a: "Coroplast yard signs start at $30 for 18×24\" single-sided — the most common REALTOR sign size. 24×36\" double-sided (great for corner lots) from $84. H-stakes are $2.50 each. Vehicle magnets (12×18\") from $36. Business cards (250, 2-sided) from $45. Feature sheets (100, double-sided, 80lb) from $45. Most REALTORS spend $100–$200 to fully kit out a listing.",
+          a: "Coroplast yard signs are $24 for 18×24\" single-sided (single signs top up to the $25 order-total minimum at checkout) — the most common REALTOR sign size. 24×36\" double-sided (great for corner lots) from $84. H-stakes are $2.50 each. Vehicle magnets (12×18\") from $36. Business cards (250, 2-sided) from $45. Feature sheets (100, double-sided, 80lb) from $45. Most REALTORS spend $100–$200 to fully kit out a listing.",
         },
         {
           q: "Where can I get real estate signs printed in Saskatoon?",

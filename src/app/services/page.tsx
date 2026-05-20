@@ -134,16 +134,16 @@ export default function ServicesPage() {
           <p className="text-gray-500 mb-6">16 products, all priced live. Click any product to see your exact price.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {[
-              { label: "Coroplast Signs", price: "from $30", href: "/coroplast-signs-saskatoon" },
+              { label: "Coroplast Signs", price: "from $8/sqft", href: "/coroplast-signs-saskatoon" },
               { label: "Vinyl Banners", price: "from $66", href: "/banner-printing-saskatoon" },
               { label: "Business Cards", price: "from $45", href: "/business-cards-saskatoon" },
               { label: "Flyers", price: "from $45", href: "/flyer-printing-saskatoon" },
-              { label: "ACP Aluminum Signs", price: "from $60", href: "/aluminum-signs-saskatoon" },
+              { label: "ACP Aluminum Signs", price: "from $13/sqft", href: "/aluminum-signs-saskatoon" },
               { label: "Foamboard Displays", price: "from $45", href: "/foamboard-printing-saskatoon" },
-              { label: "Window Decals", price: "from $45", href: "/window-decals-saskatoon" },
+              { label: "Window Decals", price: "from $11/sqft", href: "/window-decals-saskatoon" },
               { label: "Wall Graphics", price: "from $11/sqft", href: "/wall-graphics-saskatoon" },
-              { label: "Vinyl Lettering", price: "from $40", href: "/vinyl-lettering-saskatoon" },
-              { label: "Vehicle Magnets", price: "from $45", href: "/vehicle-magnets-saskatoon" },
+              { label: "Vinyl Lettering", price: "from $8.50/sqft", href: "/vinyl-lettering-saskatoon" },
+              { label: "Vehicle Magnets", price: "from $24/sqft", href: "/vehicle-magnets-saskatoon" },
               { label: "Retractable Banners", price: "from $219", href: "/retractable-banners-saskatoon" },
               { label: "Postcards", price: "from $35", href: "/postcard-printing-saskatoon" },
               { label: "Stickers", price: "from $25", href: "/sticker-printing-saskatoon" },

@@ -104,7 +104,7 @@ export default function MothersDayPrintingSaskatoonPage() {
       canonicalSlug="mothers-day-printing-saskatoon"
       primaryProductSlug="vinyl-banners"
       title="Mother's Day Printing Saskatoon"
-      subtitle="Banners from $66 · flyers from $45 · photo prints from $45 · window decals from $45. In-house design $35. Same-day rush +$40."
+      subtitle="Banners from $66 · flyers from $45 · photo prints from $45 · window decals from $11/sqft. In-house design $35. Same-day rush +$40."
       heroImage="/images/products/product/banner-vinyl-colorful-800x600.webp"
       heroAlt="Mother's Day printing in Saskatoon by True Color Display Printing — vinyl banners, photo prints, flyers, and window decals"
       description="True Color Display Printing offers Mother's Day printing in Saskatoon, Saskatchewan, starting from $45 with 1–3 business day turnaround and in-house design for $35 flat. Vinyl banners start at $8.25/sqft (2×6 ft = $90), photo prints from $45 for an 18×24 inch poster and $65 for 24×36 inch, flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. In-house Roland UV flatbed printer — True Color Display Printing controls colour, timeline, and quality without outsourcing. Same-day rush available for +$40 flat when ordered before 10 AM. Saskatoon restaurants, spas, salons, florists, and gift shops order banners, photo prints, and flyers from True Color Display Printing at 216 33rd St W, Saskatoon SK. In-house Photoshop designer preps layouts for $35 flat, same-day proof. Order deadline for standard turnaround: May 5, 2026. Same-day rush available up to May 7–8 for +$40 flat — call (306) 954-8688."
@@ -176,7 +176,7 @@ export default function MothersDayPrintingSaskatoonPage() {
       faqs={[
         {
           q: "How much does Mother's Day printing cost in Saskatoon?",
-          a: "True Color Display Printing offers Mother's Day banners from $8.25/sqft (2×6 ft = $90), photo posters from $45 (18×24\") or $65 (24×36\"), flyers from $45 for 100 full-letter double-sided, window decals from $45, and postcards from $35 for 50 cards. In-house design is $35 flat. Same-day rush is +$40 flat.",
+          a: "True Color Display Printing offers Mother's Day banners from $8.25/sqft (2×6 ft = $90), photo posters from $45 (18×24\") or $65 (24×36\"), flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. In-house design is $35 flat. Same-day rush is +$40 flat.",
         },
         {
           q: "Can you print photos of my mom as a large-format poster?",

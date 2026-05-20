@@ -85,14 +85,14 @@ export default function VinylLetteringSaskatoonPage() {
         </>
       }
       products={[
-        { name: "Vinyl Lettering", from: "from $40", slug: "vinyl-lettering" },
-        { name: "Window Decals", from: "from $45", slug: "window-decals" },
-        { name: "Perforated Window Vinyl", from: "from $40", slug: "window-perf" },
-        { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
-        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
+        { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
+        { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
+        { name: "Perforated Window Vinyl", from: "from $8/sqft", slug: "window-perf" },
+        { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
+        { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
       ]}
       whyPoints={[
-        "From $8.50/sqft, $40 minimum — lowest-cost option when you only need text or single-colour shapes",
+        "From $8.50/sqft (small jobs hit the $25 order-total minimum at checkout) — lowest-cost option when you only need text or single-colour shapes",
         "Roland UV plotter — clean, precise cuts on premium outdoor-rated cast vinyl",
         "5–7 year outdoor life on glass and painted vehicle surfaces",
         "Standard colours: white, black, red, dark blue, gold — available in stock for fast turnaround",

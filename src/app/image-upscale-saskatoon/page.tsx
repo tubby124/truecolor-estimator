@@ -30,9 +30,9 @@ export default function ImageUpscaleSaskatoonPage() {
       }
       products={[
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
-        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
-        { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-signs" },
-        { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
+        { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
+        { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
+        { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Business Cards", from: "from $45 / 250", slug: "business-cards" },
         { name: "Foamboard Displays", from: "from $45", slug: "foamboard-displays" },
       ]}

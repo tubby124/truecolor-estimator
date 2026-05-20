@@ -21,7 +21,7 @@ const designDirections = [
   {
     title: "Real Estate & Yard Signs",
     subtitle:
-      "18×24\" from $30 · 24×36\" $48 · H-stakes $2.50 ea — 4mm flute coroplast",
+      "18×24\" $24 · 24×36\" $48 · H-stakes $2.50 ea — 4mm flute coroplast ($25 order-total min at checkout)",
     aspect: "3/4" as const,
     maxCols: 3 as const,
     items: [

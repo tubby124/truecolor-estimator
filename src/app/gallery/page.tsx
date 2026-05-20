@@ -98,7 +98,7 @@ export default function GalleryPage() {
               Every product shown — {" "}
               <Link href="/business-cards-saskatoon" className="text-[#16C2F3] hover:underline">business cards</Link> from $45,{" "}
               <Link href="/retractable-banners-saskatoon" className="text-[#16C2F3] hover:underline">retractable banner stands</Link> from $219,{" "}
-              <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] hover:underline">vehicle magnets</Link> from $45 — is
+              <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] hover:underline">vehicle magnets</Link> from $24/sqft — is
               available for pickup or delivery across Saskatchewan.
             </p>
           </div>

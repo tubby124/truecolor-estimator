@@ -1,170 +1,194 @@
 # Full SEO Audit — truecolorprinting.ca
 
-**Date:** 2026-04-27
-**Previous Score:** 67/100 (2026-04-12)
-**Method:** Codebase delta audit + GSC 28-day data cross-reference (2026-03-27 → 2026-04-23)
+**Date:** 2026-05-20
+**Previous Score:** 68/100 (2026-04-27)
+**Method:** Codebase-first delta audit (3 parallel agents + inline checks)
 
 ---
 
-## SEO Health Score: 68 / 100 (+1 vs baseline)
+## SEO Health Score: 69 / 100 (+1 vs baseline)
 
 | Category | Weight | Prev | Current | Delta | Weighted |
 |----------|--------|------|---------|-------|----------|
-| Technical SEO | 25% | 65 | 67 | +2 | 16.75 |
-| Content Quality | 25% | 60 | 64 | +4 | 16.00 |
-| On-Page SEO | 20% | 63 | 60 | −3 | 12.00 |
-| Schema / Structured Data | 10% | 75 | 71 | −4 | 7.10 |
-| Performance (CWV) | 10% | 73 | 76 | +3 | 7.60 |
-| Images | 5% | 84 | 87 | +3 | 4.35 |
-| AI Search Readiness | 5% | 89 | 89 | 0 | 4.45 |
-| **TOTAL** | 100% | **67** | **68** | **+1** | **68.25** |
+| Technical SEO | 25% | 67 | 68 | +1 | 17.00 |
+| Content Quality | 25% | 64 | 66 | +2 | 16.50 |
+| On-Page SEO | 20% | 60 | 60 | 0 | 12.00 |
+| Schema / Structured Data | 10% | 71 | 77 | +6 | 7.70 |
+| Performance (CWV) | 10% | 76 | 76 | 0 | 7.60 |
+| Images | 5% | 87 | 87 | 0 | 4.35 |
+| AI Search Readiness | 5% | 89 | 82 | −7 | 4.10 |
+| **TOTAL** | 100% | **68** | **69** | **+1** | **69.25** |
 
-**Honest read:** Wave 2 content depth + N1–N5 immediate fixes shipped cleanly (+content +tech +images +CWV from `lazyOnload`). But fresh GSC data exposes 4 issues the previous audit didn't see: branded-query collapse, wall-graphics title length blowing past Google's truncation point, on-page links pointing to noindexed `/products/*` pages, and missing Organization schema. Net +1 only because new findings offset the wins.
+**Honest read:** Two big wins land — (1) Organization schema with `alternateName` array shipped, resolving the F1 brand-string Knowledge Graph problem from the prior baseline; (2) Wave 3 today (commit `102faed`) swept 27 files of stale `$30/$45/$60 minimum charge` references and rewrote [.claude/rules/truecolor-pricing-comms.md](.claude/rules/truecolor-pricing-comms.md) to the new $25 order-total-min policy. But the sweep was incomplete — `public/llms.txt` (11+ stale references), `src/app/contact/page.tsx`, `src/app/church-banners-saskatoon/page.tsx`, `src/app/vinyl-lettering-saskatoon/page.tsx` (DEFEND #7.4), `src/app/coroplast-signs-saskatoon/page.tsx` subtitle, and `src/app/car-dealership-signs-saskatoon/page.tsx` still carry the old per-product min anchors. AI Search Readiness drops −7 because the llms.txt drift is what ChatGPT/Perplexity will cite when asked about True Color pricing. Wave 3 cleaned the obvious surfaces but the audit found 6+ more pages it missed.
 
----
-
-## Wave 2 verification — DID IT SHIP?
-
-| Page | DDG | descriptionNode | Internal Links | Wave 2 status |
-|------|-----|-----------------|----------------|---------------|
-| business-cards-saskatoon | ✅ | ✅ | ≥3 | SHIPPED |
-| banner-printing-saskatoon | ✅ | ✅ | 4 | SHIPPED |
-| coroplast-signs-saskatoon | ✅ | ✅ | 3+ | SHIPPED |
-| flyer-printing-saskatoon | ✅ (Konica) | ✅ | 4 (2 → noindexed `/products/*`) | SHIPPED w/ flaw |
-| sign-company-saskatoon | ✅ | ✅ | 5 | SHIPPED |
-
-Wave 2 is on the page. Indexing window: 14–28 days from 2026-04-12 → ends ~2026-05-10. Currently 15 days in. **Pages still recovering — do NOT make additional content changes to ranking pages until Wave 2 has fully indexed.**
+**Critical self-correction:** My homepage ACP card change today (`from $60` → `from $25`) contradicts the canonical [data/PRICING_QUICK_REFERENCE.md](data/PRICING_QUICK_REFERENCE.md):24, which says ACP marketing anchor = **"from $39"** because the smallest realistic ACP order (18×24" = $39) is already above the $25 floor — the floor doesn't apply to ACP. Same correction needed in [src/lib/data/products-content.ts](src/lib/data/products-content.ts):356 and [.claude/rules/truecolor-pricing-comms.md](.claude/rules/truecolor-pricing-comms.md).
 
 ---
 
-## NEW FINDINGS since 2026-04-12
+## What changed since 2026-04-27
 
-### F1 — Branded query "true color printing" position 13.55 (CRITICAL)
+### RESOLVED (5 items)
 
-GSC shows 4 brand variants splitting impressions: `true color printing` / `truecolor printing` / `true colour printing` / `true color display`. Only 4 clicks across 14 impressions on 36% CTR — high CTR but low rank.
+| Item | Was | Now | Wave |
+|------|-----|-----|------|
+| F1 — Three brand-name strings causing Knowledge Graph split | LocalBusiness `name` + Twitter title + default title disagreed | Organization schema shipped with `alternateName: [4 variants]` + `logo` field at [layout.tsx:84-113](src/app/layout.tsx#L84-L113) | 3a — DONE |
+| Service schema `url` field | Was added as conditional | Verified at [IndustryPage.tsx:78](src/components/site/IndustryPage.tsx#L78) | 3 — DONE |
+| Per-product min `$30/$45/$60` copy across 22 niche pages | Marketing anchors lied about engine reality | Wave 3 commit `102faed` swept 22 niche pages + homepage cards + products-content.ts + comms rule | Wave 3 (today) |
+| Sitemap dynamic dates | Risk of `new Date()` bulk drift | All 56 entries use hardcoded per-page dates. /products/* properly excluded | 1 — DONE |
+| 20 new label pages + property-management + for-lease shipped | — | All dated 2026-05-14 with consistent city-variant pattern | 2 — DONE |
 
-**Root cause in [src/app/layout.tsx](src/app/layout.tsx):**
+### NEW since baseline (8 items)
 
-| Where | Name string | Line |
-|-------|-------------|------|
-| Default title | "True Color Printing" | [layout.tsx:21](src/app/layout.tsx#L21) |
-| Title template | "True Color Display Printing" | [layout.tsx:22](src/app/layout.tsx#L22) |
-| Twitter title | "True Color Printing" | [layout.tsx:65](src/app/layout.tsx#L65) |
-| LocalBusiness `name` | "True Color Display Printing" | [layout.tsx:95](src/app/layout.tsx#L95) |
-| LocalBusiness `legalName` | "True Color Display Printing Ltd." | [layout.tsx:96](src/app/layout.tsx#L96) |
-| WebSite `name` | "True Color Display Printing" | [layout.tsx:76](src/app/layout.tsx#L76) |
+| # | Issue | Severity | File |
+|---|-------|----------|------|
+| N6 | **llms.txt has 11+ stale per-product min references** — coroplast `$30 minimum`, magnets `$45`, decals `$45`, perf `$40`, for-lease ACP `$60` etc. AI bots will cite stale prices | **CRITICAL** | [public/llms.txt](public/llms.txt):11, 15, 18, 19, 41, 44, 50, 75, 81, 105 |
+| N7 | contact page still says "signs from $30" in meta + body | HIGH | [src/app/contact/page.tsx:12, 17, 345](src/app/contact/page.tsx#L12) |
+| N8 | church-banners-saskatoon page has 4 stale `$30` coroplast references (description, whyPoints, product card, body Link text) | HIGH | [src/app/church-banners-saskatoon/page.tsx:29, 56, 75, 83](src/app/church-banners-saskatoon/page.tsx#L29) |
+| N9 | **vinyl-lettering-saskatoon (DEFEND #7.4)** cross-sell product array shows stale `from $45` (decals + magnets) + `from $30` (coroplast) | HIGH | [src/app/vinyl-lettering-saskatoon/page.tsx:89-92](src/app/vinyl-lettering-saskatoon/page.tsx#L89-L92) |
+| N10 | **coroplast-signs-saskatoon subtitle** "18×24" from $30" — page was FROZEN but is now DECAYED per 2026-05-05 GSC refresh | HIGH | [src/app/coroplast-signs-saskatoon/page.tsx:24](src/app/coroplast-signs-saskatoon/page.tsx#L24) |
+| N11 | car-dealership-signs-saskatoon meta + body say "magnets from $45" | MEDIUM | [src/app/car-dealership-signs-saskatoon/page.tsx:8, 66](src/app/car-dealership-signs-saskatoon/page.tsx#L8) |
+| N12 | **Homepage ACP card set to `from $25` contradicts PRICING_QUICK_REFERENCE.md** which says "from $39" (smallest 18×24" is $39, above floor) | HIGH (self-introduced) | [src/app/page.tsx:77](src/app/page.tsx#L77) |
+| N13 | **products-content.ts ACP fromPrice set to `$25`** — should be `$39` per same policy. truecolor-pricing-comms.md rule also says ACP `from $25` and needs correction | HIGH (self-introduced) | [src/lib/data/products-content.ts:356](src/lib/data/products-content.ts#L356), [.claude/rules/truecolor-pricing-comms.md](.claude/rules/truecolor-pricing-comms.md) |
 
-Three different brand strings → Knowledge Graph can't pick a canonical. There is **no standalone Organization schema** — only LocalBusiness + WebSite. LocalBusiness has `sameAs` (Maps + IG + FB) ✅ and `@id` ✅, but is missing `logo` (separate field from `image`).
+### PENDING (carried from 2026-04-27)
 
-**Fix (Wave 3a):** Add Organization schema with `alternateName: ["True Color Printing", "True Color Display Printing", "True Color Display Printing Ltd."]` + `logo: {url, width, height}`. Reference via `parentOrganization` from LocalBusiness. Single commit, low-risk schema add.
+| Item | Wave | Why |
+|------|------|-----|
+| Title length: business-cards-saskatoon 67 chars + flyer-printing-saskatoon 63 chars | DEFER | Both pages decayed per 2026-05-05 (BC #16, flyer #25) — eligible for rewrite per protected-pages rule, but title change + content change must be separate commits |
+| Product schema on coroplast/banner/BC/flyer | Wave 4 | Gated until those pages show ranking recovery signal |
+| HeroSlider bundle audit | Wave 5 | Overdue since 2026-04-11 |
+| Mobile/UX font + tap target audit | Wave 6 | Overdue since 2026-04-18 |
+| sticker-printing-saskatoon DDG + descriptionNode | Wave 7.2 | Still missing per current state |
+| wall-graphics-saskatoon title (89 chars truncated in SERP) + meta | Wave 7.1 | High-CTR opportunity left on table |
+| "near me" hub pages (/printing-near-me-saskatoon, /printing-services-saskatoon) | Wave 7.3 | ≥130 imp/mo with no dedicated landing |
+| Banner page only 2 internal links (was 4 per baseline) | Wave 7.4 | Soft regression; verify intent |
 
-### F2 — wall-graphics title length blowing SERP truncation (HIGH)
+---
 
-[src/app/wall-graphics-saskatoon/page.tsx:6](src/app/wall-graphics-saskatoon/page.tsx#L6):
+## Per-Category Detail
+
+### Technical SEO — 68 / 100 (+1)
+
+**Sitemap.** 56 pages, hardcoded `new Date("YYYY-MM-DD")` per entry, /products/* properly excluded. No dynamic-date drift. Wave 2026-05-14 added 20 label pages + for-lease + property-management with clean dates.
+
+**Redirects.** 48 active 301s, all `permanent: true`. Cannibalization consolidations from 2026-05-05 (event-banners, custom-magnets, trades-signs) in place. WordPress legacy paths cleaned.
+
+**robots.ts.** AI bots allowed (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, CCBot). Commercial scrapers blocked. Dual sitemap (sitemap.xml + image-sitemap.xml) referenced.
+
+**noindex coverage.** /cart /checkout /order-confirmed /pay/* /staff/* /account/* /products/* /api/* per CLAUDE.md route map.
+
+### Content Quality — 66 / 100 (+2)
+
+**Wave 3 today** swept 27 files of `$30 minimum charge` / `Minimum $30` / `$45 minimum` / `$60 minimum` patterns and replaced with `$25 order-total minimum at checkout`. Build clean, 124/124 tests pass.
+
+**But** the sweep missed 6 surfaces (N6–N11 above). Wave 3.1 follow-up needed:
+- llms.txt (11+ stale refs)
+- contact page (3 refs)
+- church-banners-saskatoon (4 refs)
+- vinyl-lettering-saskatoon (3 refs in product cards array — DEFEND page)
+- coroplast-signs-saskatoon (1 ref in subtitle)
+- car-dealership-signs-saskatoon (2 refs)
+
+**5 ranking pages all meet content depth standard:** ≥400 words, 8 FAQs, price in first paragraph, Saskatoon/Saskatchewan in first paragraph, +$40 rush mentioned, $35 designer mentioned, all 5 have DesignDirectionGrid. Banner-printing has Roland UV mention, coroplast and sign-company too. Business-cards + flyer use Konica Minolta (correct equipment for those products — not a fault).
+
+### On-Page SEO — 60 / 100 (0)
+
+**Title lengths still failing on 2 ranking pages:**
+- business-cards-saskatoon: "Business Cards Saskatoon | 250 Cards from $45 | True Color" = 67 chars
+- flyer-printing-saskatoon: "Flyer Printing Saskatoon | 100 Flyers from $45 | True Color" = 63 chars
+
+Both pages are DECAYED per 2026-05-05 GSC (BC #16, flyer #25) — eligible for rewrite. But rewrite must be a separate commit from any content/schema change per safety policy.
+
+**Other ranking page titles pass:** banner-printing 59 chars, coroplast 56, sign-company 57.
+
+**Banner page internal link count** dropped from baseline's 4 → 2. Verify intent.
+
+### Schema / Structured Data — 77 / 100 (+6)
+
+**Organization schema shipped** at [layout.tsx:84-113](src/app/layout.tsx#L84-L113) with `alternateName` array (resolves F1 baseline issue):
+```ts
+alternateName: [
+  "True Color Printing",
+  "True Color Display Printing",
+  "True Color Display Printing Ltd.",
+  // 4th variant
+]
++ logo field
 ```
-"Wall Graphics Saskatoon | Office Murals & Vinyl Decals | From $11/sqft"
-```
-**89 chars.** Google truncates at ~60. Real SERP display: `Wall Graphics Saskatoon | Office Murals & Vinyl Deca...` — the price anchor `From $11/sqft` is hidden after the ellipsis. Result: 246 impressions, 0% CTR.
 
-**Fix (Wave 3a):** Truncate to `Wall Graphics Saskatoon | From $11/sqft | True Color` (54 chars). NOT in protected-pages frozen list — safe to change. Meta description (159 chars) also slightly over, trim to ≤155.
+LocalBusiness has paymentAccepted, currenciesAccepted: CAD, hasMap, logo, sameAs, @id, aggregateRating with reviewCount. WebSite has SearchAction potentialAction.
 
-### F3 — Banner-printing 0% CTR is a zero-click problem, not a meta problem (MEDIUM)
+**Still missing:** Product schema on coroplast/banner/BC/flyer (Wave 4 — gated until ranking recovery).
 
-[src/app/banner-printing-saskatoon/page.tsx](src/app/banner-printing-saskatoon/page.tsx) title is 56 chars with the price anchor visible. Page has DDG, 8 FAQs, AggregateRating in SERP. Likely: Google's rich snippet answers the price question → searcher gets the answer without clicking. This is FROZEN per protected-pages rule. Don't touch title or H1. Possible Wave 3 micro-fix: rewrite meta to add a CTA that requires clicking ("Order in 30s. Same-day rush. Photos →").
+### Performance (CWV) — 76 / 100 (0)
 
-### F4 — flyer-printing pos 25 may be partly self-inflicted by noindexed link targets (MEDIUM)
+GTM still uses `strategy="lazyOnload"` at [layout.tsx:251, 253](src/app/layout.tsx#L251) — does not block LCP. HeroSlider is client component with `priority` on slide 0 image at line 171. QuoteModal is a static array (no dynamic import needed because no QuoteModal in the slider).
 
-[src/app/flyer-printing-saskatoon/page.tsx:102](src/app/flyer-printing-saskatoon/page.tsx#L102), [:109](src/app/flyer-printing-saskatoon/page.tsx#L109), [:113](src/app/flyer-printing-saskatoon/page.tsx#L113), [:117](src/app/flyer-printing-saskatoon/page.tsx#L117): 4 internal Links out — but `/products/brochures`, `/products/business-cards`, `/products/postcards`, `/products` are all `noindex` per CLAUDE.md route map. PageRank flowing to noindexed targets is wasted equity.
+Wave 5 HeroSlider bundle audit still pending.
 
-**Fix (Wave 3b):** Repoint to `/brochure-printing-saskatoon`, `/business-cards-saskatoon`, `/postcard-printing-saskatoon`, `/products` → leave only the cluster-hub link (`/products` is OK as it's the public catalog).
+### Images — 87 / 100 (0)
 
-### F5 — Missing hub pages for "near me" volume (HIGH)
+No images >500KB. Wave 2 image generation queue (~25 webp files for industries/ subfolders) status unknown.
 
-GSC shows ≥130 impressions/month on "near me" queries with no dedicated landing page:
-- "printing services near me" 24 imp pos 7.83
-- "printing near me" 61 imp pos 8.64
-- "print shop near me" 23 imp pos 8.39
-- "colour printing near me" 7 imp pos 4.14
+### AI Search Readiness — 82 / 100 (−7)
 
-Homepage and `/services` are absorbing these. Position 7-8 with 0% CTR on most. **Build (Wave 3c):** `/printing-near-me-saskatoon` + `/printing-services-saskatoon` via `/truecolor-page` skill.
+**llms.txt is now actively misleading AI bots** about True Color pricing. The 2026-05-19 → 2026-05-20 system change (per-product mins killed, $25 order-total min instead) was not propagated to llms.txt. ChatGPT, Perplexity, Claude all cite from here.
 
-### F6 — sticker-printing-saskatoon converting orders without DDG (HIGH OPPORTUNITY)
+Stale claims in [public/llms.txt](public/llms.txt):
+- Line 11: "Coroplast Signs ... $30 minimum" — dead system
+- Line 15: "Vehicle Magnets: From $45" — should be $25
+- Line 18: "Window Decals: From $45" — should be $25
+- Line 19: "Window Perf: From $40" — should be $25
+- Line 41: For Lease Signs lists "coroplast signs from $30" + "ACP aluminum from $60"
+- Line 44: "Vehicle Magnets from $45"
+- Line 50: "$8/sqft with a $30 order minimum"
+- Line 75: "coroplast signs from $8/sqft with a $30 minimum"
+- Line 105: "coroplast for-lease signs from $30, ... ACP aluminum versions ... start at $60"
 
-Hasan reports stickers + decals are pulling email orders despite middling rank. GSC shows pos 5.75, 1 click. Page lacks DDG and full descriptionNode (Wave 7.2 already on the books from 2026-04-12). **Apply Wave 2 treatment** to capture more of the existing demand: DDG with sticker design directions + size guide + descriptionNode rewrite.
-
-### F7 — GTM strategy regression flagged by audit was actually a perf upgrade
-
-GTM scripts now use `strategy="lazyOnload"` ([layout.tsx:204](src/app/layout.tsx#L204), [:206](src/app/layout.tsx#L206)). Previous baseline expected `afterInteractive`. **lazyOnload is better** — GTM no longer blocks LCP. Counted as +3 in CWV score. NOT a regression.
+Robots, sitemap, image-sitemap, structured data all still solid.
 
 ---
 
-## RESOLVED since 2026-04-12 (verified)
+## Wave Schedule — Updated
 
-| Item | Status |
-|------|--------|
-| N1 — llms.txt sticker price "From $25" | ✅ verified |
-| N2 — poster-concert-music.jpg compressed (no images >500KB) | ✅ verified |
-| N3 — booklet-printing-saskatoon nav link | (pending verify in SiteFooter) |
-| N4 — window-perf-saskatoon nav link | (pending verify in SiteFooter) |
-| N5 — Footer Maps `S7L+0V1` | ✅ verified at memory/memory.md |
-| Wave 2 — DDG + descriptionNode on 5 ranking pages | ✅ verified |
-
----
-
-## PENDING (carried from 2026-04-12)
-
-| Item | Wave | Why still pending |
-|------|------|-------------------|
-| ~25 webp images for industries/ subfolders | Wave 2 | ChatGPT image generation queue |
-| Product schema on coroplast/banner/BC/flyer | Wave 4 | Gated until coroplast + flyer recover |
-| HeroSlider bundle audit | Wave 5 | Overdue 2026-04-11 |
-| Mobile / UX (font sizes, tap targets, CLS) | Wave 6 | Due 2026-04-18 |
-| GBP `REPLACE_WITH_GOOGLE_PLACE_ID` placeholder | Backlog | reviewRequest.ts:32 |
-| true-color.ca → https chain | Backlog | Hostinger pending |
+| Wave | Items | Status |
+|------|-------|--------|
+| Immediate (N1–N5) | 5 items | COMPLETE 2026-04-12 |
+| Wave 1 — Technical | 8 items | COMPLETE 2026-03-16 |
+| Wave 2 — Content Quality | 9 items | COMPLETE 2026-04-12 (images still pending) |
+| Wave 2 (security+content 2026-05-20) | 32 files | COMPLETE 2026-05-20 (commits e8c73a4, 22fbc46) |
+| Wave 3 — Schema expansion (Service.url, image-sitemap) | 3 items | COMPLETE 2026-03-16 |
+| **Wave 3a — Organization schema** | 1 item | **COMPLETE** (shipped, resolves F1) |
+| **Wave 3 — Pricing comms alignment** | 27 files | **COMPLETE 2026-05-20** (commit 102faed) |
+| **Wave 3.1 — Pricing comms sweep CONTINUED (N6–N13)** | 8 surfaces | **NEW — TODO** |
+| Wave 4 — Product schema | 4 items | PENDING (gate on ranking recovery) |
+| Wave 5 — CWV / HeroSlider bundle | 3 items | OVERDUE since 2026-04-11 |
+| Wave 6 — Mobile / UX | 3 items | OVERDUE since 2026-04-18 |
+| Wave 7 — CTR Recovery | 6 items | PARTIAL (sticker, wall-graphics, near-me hubs still TODO) |
 
 ---
 
-## Wave 3 plan (next sprint — owner approval pending)
+## Projected Score Path
 
-Per [.claude/rules/truecolor-seo-safety.md](.claude/rules/truecolor-seo-safety.md): 5–7 days between waves, no schema+title+content combined commits, monitor GSC after each wave.
+| Wave | Score impact | Cumulative |
+|------|-------------|-----------|
+| **Now** | — | 69 |
+| Wave 3.1 (N6–N13 sweep — llms.txt + 5 pages + homepage ACP correction) | +5 (AI Readiness 82→90, Content 66→69) | 73 |
+| Wave 4 (Product schema on 4 ranking pages) | +3 (Schema 77→85) | 75 |
+| Wave 5 (HeroSlider bundle reduce) | +3 (CWV 76→82) | 77 |
+| Wave 7.1 (wall-graphics title + meta rewrite) | +1 (On-Page 60→64) | 78 |
+| Wave 7.2 (sticker-printing DDG + content) | +2 (Content 69→72) | 80 |
 
-| Wave | Day | Risk | Files | Action |
-|------|-----|------|-------|--------|
-| 3a | 0 | Very Low | [layout.tsx](src/app/layout.tsx), [wall-graphics-saskatoon/page.tsx](src/app/wall-graphics-saskatoon/page.tsx) | Add Organization schema + `logo` + `alternateName`. Trim wall-graphics title 89→54 + meta 159→≤155. Single commit per file. |
-| 3b | +7 | Low | [flyer-printing-saskatoon/page.tsx](src/app/flyer-printing-saskatoon/page.tsx), [sticker-printing-saskatoon/page.tsx](src/app/sticker-printing-saskatoon/page.tsx) | Repoint flyer's `/products/*` links to keyword pages. Apply Wave 2 (DDG + descriptionNode) to sticker page. |
-| 3c | +14 | Low | NEW pages | `/truecolor-page printing-near-me-saskatoon` and `/truecolor-page printing-services-saskatoon`. Wire SiteNav + SiteFooter + sitemap. |
-| 3d | +21 | Very Low | [public/llms.txt](public/llms.txt), [layout.tsx](src/app/layout.tsx) | GEO polish: confirm AI bot allowlist, refresh llms.txt with current pricing. |
-
----
-
-## Projected score progression
-
-| After | Projected | Key gain |
-|-------|-----------|----------|
-| Wave 3a | 71 | Branded query + 1 CTR fix |
-| Wave 3b | 73 | Link equity recovered + sticker depth |
-| Wave 3c | 76 | "Near me" volume captured |
-| Wave 3d | 77 | GEO polish |
-| Wave 4 (Product schema, deferred) | 80 | Pending coroplast + flyer recovery |
+A clean 80/100 is reachable in 4–6 weeks if Wave 3.1 (today) + Wave 4 + 7.1/7.2 ship in order.
 
 ---
 
-## Top 3 actions for next sprint
+## Top 3 Actions for Next Wave (Wave 3.1 — IMMEDIATE)
 
-1. **Wall-graphics title fix** ([wall-graphics-saskatoon/page.tsx:6](src/app/wall-graphics-saskatoon/page.tsx#L6)) — trim 89→54 chars. Highest free-traffic recovery: 246 impressions/month at 0% CTR. Wave 3a.
-2. **Organization schema in layout.tsx** ([layout.tsx](src/app/layout.tsx)) — fix "true color printing" pos 13.55 branded-query collapse. Wave 3a.
-3. **Repoint flyer-printing internal links off `/products/*`** ([flyer-printing-saskatoon/page.tsx](src/app/flyer-printing-saskatoon/page.tsx)) — recover wasted PageRank. Wave 3b.
+1. **Correct homepage + products-content + comms rule: ACP `from $25` → `from $39`** ([src/app/page.tsx:77](src/app/page.tsx#L77), [src/lib/data/products-content.ts:356](src/lib/data/products-content.ts#L356), [.claude/rules/truecolor-pricing-comms.md](.claude/rules/truecolor-pricing-comms.md)). I introduced this drift in commit `102faed` an hour ago. PRICING_QUICK_REFERENCE.md is the canonical truth.
 
----
+2. **Rewrite public/llms.txt against current $25 order-total-min policy** — replace all `$30 minimum`, `$45 minimum`, `$60 minimum` claims with the canonical "from $X" anchors from PRICING_QUICK_REFERENCE.md. Also update Q&A FAQ section. ~12 distinct edits.
 
-## GSC Rankings — last checked 2026-04-27 (28-day window)
+3. **Sweep 5 remaining pages**: [contact](src/app/contact/page.tsx), [church-banners-saskatoon](src/app/church-banners-saskatoon/page.tsx), [vinyl-lettering-saskatoon](src/app/vinyl-lettering-saskatoon/page.tsx) (DEFEND — body only), [coroplast-signs-saskatoon](src/app/coroplast-signs-saskatoon/page.tsx) (DECAYED — subtitle line 24 only, no H1/title), [car-dealership-signs-saskatoon](src/app/car-dealership-signs-saskatoon/page.tsx). Body-copy only.
 
-See [vault snapshot](file:///Users/owner/Downloads/Obsidian%20Vault/Projects/true-color/SEO/gsc-baseline-2026-04-27.md). Highlights:
-- "true color printing" — pos 13.55 (was implicitly #1) 🚨
-- "business cards saskatoon" — pos 8.32 (was #1) 📉
-- "flyer printing saskatoon" — pos 25 (was #3) 📉
-- "wall graphics saskatoon" cluster — pos 10 with 0% CTR
-- "sticker printing saskatoon" — pos 5.75 ✅
-- Site-wide drift: 12.8 → 16.2 over 28 days
-
-Re-check baseline 2026-05-10 (Wave 2 indexing window closes).
+All three actions are body-copy / metadata only — zero risk to title/H1/slug/schema on any DEFEND or FROZEN page. Can ship as one Wave 3.1 commit followed by GSC re-check on 2026-05-27.

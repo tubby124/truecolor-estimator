@@ -5,12 +5,12 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Lease Signage Saskatchewan | For-Lease Signs from $30" },
   description:
-    "Lease signage for Saskatchewan property managers, leasing agents, landlords. 18×24\" coroplast from $30. Same-day +$40. Pickup at 216 33rd St W, Saskatoon.",
+    "Lease signage for Saskatchewan property managers, leasing agents, landlords. 18×24\" coroplast at $24 (tops up to $25 cart min). Same-day +$40. Pickup at 216 33rd St W, Saskatoon.",
   alternates: { canonical: "/for-lease-signs-saskatoon" },
   openGraph: {
     title: "Lease Signage Saskatchewan | For-Lease Signs from $30 | True Color",
     description:
-      "Lease signage and for-lease signs across Saskatchewan from $30. 18×24\" coroplast, post-mounted boards, fence panels. Same-day +$40. Bulk 5+ save 8%.",
+      "Lease signage and for-lease signs across Saskatchewan from $8/sqft. 18×24\" coroplast, post-mounted boards, fence panels. Same-day +$40. Bulk 5+ save 8%.",
     url: "https://truecolorprinting.ca/for-lease-signs-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -26,7 +26,7 @@ export default function ForLeaseSignsSaskatoonPage() {
       subtitle="Coroplast for-lease, for-rent, and commercial vacancy signs. Saskatchewan-built. Same-day rush available."
       heroImage="/images/products/heroes/realestate-hero-1200x500.webp"
       heroAlt="For lease and for rent coroplast signs in Saskatoon by True Color Display Printing"
-      description="Commercial properties and rental units in Saskatoon, Saskatchewan need For Lease and For Rent signs that show up clearly from the street. True Color Display Printing prints coroplast for-lease signs from $30 (18×24″ single-sided), post-mounted 24×36″ vacancy boards, and 4×8 ft fence-line panels for industrial or strip-mall vacancies — all on an in-house Roland UV printer with 1–3 business day turnaround. Same-day rush is available for +$40 flat on orders before 10 AM. Order 5 or more signs and save 8% automatically."
+      description="Commercial properties and rental units in Saskatoon, Saskatchewan need For Lease and For Rent signs that show up clearly from the street. True Color Display Printing prints coroplast for-lease signs from $8/sqft (18×24″ single-sided is $24, tops up to the $25 order-total minimum at checkout), post-mounted 24×36″ vacancy boards, and 4×8 ft fence-line panels for industrial or strip-mall vacancies — all on an in-house Roland UV printer with 1–3 business day turnaround. Same-day rush is available for +$40 flat on orders before 10 AM. Order 5 or more signs and save 8% automatically."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -86,16 +86,16 @@ export default function ForLeaseSignsSaskatoonPage() {
         </>
       }
       products={[
-        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
-        { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-signs" },
+        { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
+        { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
-        { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
+        { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
       ]}
       whyPoints={[
-        "Coroplast for-lease signs from $30 (18×24″) — standard yard-sign size for commercial vacancies",
+        "Coroplast for-lease signs from $8/sqft (18×24″ = $24, single signs top up to the $25 cart min) — standard yard-sign size for commercial vacancies",
         "Order 5+ and save 8% automatically — 10+ saves 17%, 25+ saves 23%, no code needed",
-        "ACP aluminum from $60 for permanent or long-term vacancy signage — rated 7–10 years outdoors",
+        "ACP aluminum from $13/sqft for permanent or long-term vacancy signage — rated 7–10 years outdoors",
         "4×8 ft coroplast fence panels for strip-mall and industrial vacancies — $232 each",
         "Roland UV in-house printer — colour stays vibrant through Saskatchewan winters",
         "Same-day rush for +$40 flat — order before 10 AM, pickup by end of day",

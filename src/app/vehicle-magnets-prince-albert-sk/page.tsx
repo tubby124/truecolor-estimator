@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Vehicle Magnets Prince Albert SK | From $45 | True Color" },
+  title: { absolute: "Vehicle Magnets Prince Albert SK | From $24/sqft | True Color" },
   description:
-    "Custom vehicle magnets for Prince Albert SK businesses. From $45 ($24/sqft) — forestry, healthcare, contractors. Printed in Saskatoon, shipped to Prince Albert.",
+    "Custom vehicle magnets for Prince Albert SK businesses. From $24/sqft — forestry, healthcare, contractors. Printed in Saskatoon, shipped to Prince Albert.",
   alternates: { canonical: "/vehicle-magnets-prince-albert-sk" },
   openGraph: {
     title: "Vehicle Magnets Prince Albert SK | True Color Display Printing",
     description:
-      "Custom vehicle magnets from $45 shipped to Prince Albert. Forestry, healthcare, contractor fleet branding. Roland UV-printed — True Color Display Printing, Saskatoon.",
+      "Custom vehicle magnets from $24/sqft shipped to Prince Albert. Forestry, healthcare, contractor fleet branding. Roland UV-printed — True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/vehicle-magnets-prince-albert-sk",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -23,10 +23,10 @@ export default function VehicleMagnetsPrinceAlbertPage() {
       canonicalSlug="vehicle-magnets-prince-albert-sk"
       primaryProductSlug="vehicle-magnets"
       title="Vehicle Magnets Prince Albert SK"
-      subtitle="Removable fleet branding from $45 — printed in Saskatoon, shipped to Prince Albert."
+      subtitle="Removable fleet branding from $24/sqft — printed in Saskatoon, shipped to Prince Albert."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Vehicle magnets for Prince Albert SK fleet branding — True Color Display Printing Saskatoon"
-      description="True Color Display Printing in Saskatoon prints custom vehicle magnets for Prince Albert forestry contractors, healthcare service providers, and tradespeople 140 km north. From $45 ($24/sqft) on the Roland UV press. Weatherproof, paint-safe, and removable."
+      description="True Color Display Printing in Saskatoon prints custom vehicle magnets for Prince Albert forestry contractors, healthcare service providers, and tradespeople 140 km north. From $24/sqft on the Roland UV press. Weatherproof, paint-safe, and removable."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">

@@ -74,7 +74,7 @@ const PRODUCTS = [
   {
     name: "ACP Aluminum Signs",
     category: "Signs",
-    from: "from $25",
+    from: "from $39",
     desc: "3mm aluminum composite. Indoor or outdoor, built to last.",
     img: "/images/products/product/acp-aluminum-sign-800x600.webp",
     href: "/aluminum-signs-saskatoon",
@@ -157,7 +157,7 @@ const homeFaqSchema = {
       name: "How much does printing cost in Saskatoon?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Printing prices at True Color Display Printing in Saskatoon start at: coroplast yard signs from $8/sqft (from $25); vinyl banners from $8.25/sqft (2×4 ft from $66); business cards from $45 for 250 double-sided on 14pt gloss stock; vehicle magnets from $24/sqft (from $25); flyers from $45 for 100 sheets; ACP aluminum signs from $13/sqft (from $25); retractable banners from $219; window decals from $11/sqft (from $25); foamboard displays from $45; stickers from $25; postcards from $35. A $25 order-total minimum applies to all online orders. All prices are pre-tax — GST (5%) and PST (6%) apply at checkout. Volume discounts are automatic: coroplast at 5+ signs saves 8%, 10+ signs saves 17%. See your exact price for any product size and quantity instantly at truecolorprinting.ca/quote — no forms, no phone calls, no waiting for a callback. Local pickup only at 216 33rd St W, Saskatoon.",
+        text: "Printing prices at True Color Display Printing in Saskatoon start at: coroplast yard signs from $8/sqft (from $25); vinyl banners from $8.25/sqft (2×4 ft from $66); business cards from $45 for 250 double-sided on 14pt gloss stock; vehicle magnets from $24/sqft (from $25); flyers from $45 for 100 sheets; ACP aluminum signs from $13/sqft (from $39); retractable banners from $219; window decals from $11/sqft (from $25); foamboard displays from $45; stickers from $25; postcards from $35. A $25 order-total minimum applies to all online orders. All prices are pre-tax — GST (5%) and PST (6%) apply at checkout. Volume discounts are automatic: coroplast at 5+ signs saves 8%, 10+ signs saves 17%. See your exact price for any product size and quantity instantly at truecolorprinting.ca/quote — no forms, no phone calls, no waiting for a callback. Local pickup only at 216 33rd St W, Saskatoon.",
       },
     },
     {

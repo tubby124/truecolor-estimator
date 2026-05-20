@@ -20,7 +20,7 @@ The shop now enforces a **single $25 order-total minimum at checkout** via `src/
 | Product | Marketing "from" | Real Rate | Why this anchor |
 |---------|-----------------|-----------|-----------------|
 | Coroplast | from $25 | $8/sqft (T1) | 18×24" sign = $24 → $25 order floor |
-| ACP Aluminum | from $25 | $13/sqft (T1) | small panels < $25 → $25 order floor |
+| ACP Aluminum | **from $39** | $13/sqft (T1) | smallest realistic 18×24" = $39, above $25 floor → floor doesn't apply |
 | Vehicle Magnets | from $25 | $24/sqft (T1) | small magnets < $25 → $25 order floor |
 | Window Decals | from $25 | $11/sqft (T1) | small decals < $25 → $25 order floor |
 | Foamboard | from $45 | $10/sqft (T1) | smallest realistic display > $25 |

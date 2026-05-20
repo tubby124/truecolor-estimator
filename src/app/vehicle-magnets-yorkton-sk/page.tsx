@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Vehicle Magnets Yorkton SK | From $45 | True Color" },
+  title: { absolute: "Vehicle Magnets Yorkton SK | From $24/sqft | True Color" },
   description:
-    "Custom vehicle magnets for Yorkton SK businesses. From $45 ($24/sqft) — agriculture, retail, contractors. Printed in Saskatoon, shipped to Yorkton.",
+    "Custom vehicle magnets for Yorkton SK businesses. From $24/sqft — agriculture, retail, contractors. Printed in Saskatoon, shipped to Yorkton.",
   alternates: { canonical: "/vehicle-magnets-yorkton-sk" },
   openGraph: {
     title: "Vehicle Magnets Yorkton SK | True Color Display Printing",
     description:
-      "Custom vehicle magnets from $45 shipped to Yorkton. Agriculture, retail, contractor fleet branding. Roland UV-printed — True Color Display Printing, Saskatoon.",
+      "Custom vehicle magnets from $24/sqft shipped to Yorkton. Agriculture, retail, contractor fleet branding. Roland UV-printed — True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/vehicle-magnets-yorkton-sk",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -23,10 +23,10 @@ export default function VehicleMagnetsYorktonPage() {
       canonicalSlug="vehicle-magnets-yorkton-sk"
       primaryProductSlug="vehicle-magnets"
       title="Vehicle Magnets Yorkton SK"
-      subtitle="Removable fleet branding from $45 — printed in Saskatoon, shipped to Yorkton."
+      subtitle="Removable fleet branding from $24/sqft — printed in Saskatoon, shipped to Yorkton."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Vehicle magnets for Yorkton SK fleet branding — True Color Display Printing Saskatoon"
-      description="True Color Display Printing in Saskatoon prints custom vehicle magnets for Yorkton agricultural contractors, retail businesses, and tradespeople 180 km east. From $45 ($24/sqft) on the Roland UV press. Removable, paint-safe, and weatherproof."
+      description="True Color Display Printing in Saskatoon prints custom vehicle magnets for Yorkton agricultural contractors, retail businesses, and tradespeople 180 km east. From $24/sqft on the Roland UV press. Removable, paint-safe, and weatherproof."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">

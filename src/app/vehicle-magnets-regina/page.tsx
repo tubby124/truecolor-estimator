@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Vehicle Magnets Regina SK | From $45 | True Color" },
+  title: { absolute: "Vehicle Magnets Regina SK | From $24/sqft | True Color" },
   description:
-    "Custom vehicle magnets for Regina SK businesses. From $45 ($24/sqft) — fleet branding, oil services, retail. Printed in Saskatoon, shipped to Regina. True Color Display Printing.",
+    "Custom vehicle magnets for Regina SK businesses. From $24/sqft — fleet branding, oil services, retail. Printed in Saskatoon, shipped to Regina. True Color Display Printing.",
   alternates: { canonical: "/vehicle-magnets-regina" },
   openGraph: {
     title: "Vehicle Magnets Regina SK | True Color Display Printing",
     description:
-      "Custom vehicle magnets from $45 shipped to Regina. Fleet branding, oil services, retail. Roland UV-printed — True Color Display Printing, Saskatoon.",
+      "Custom vehicle magnets from $24/sqft shipped to Regina. Fleet branding, oil services, retail. Roland UV-printed — True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/vehicle-magnets-regina",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -23,10 +23,10 @@ export default function VehicleMagnetsReginaPage() {
       canonicalSlug="vehicle-magnets-regina"
       primaryProductSlug="vehicle-magnets"
       title="Vehicle Magnets Regina SK"
-      subtitle="Removable fleet branding from $45 — printed in Saskatoon, shipped to Regina."
+      subtitle="Removable fleet branding from $24/sqft — printed in Saskatoon, shipped to Regina."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Vehicle magnets for Regina SK fleet branding — True Color Display Printing Saskatoon"
-      description="True Color Display Printing in Saskatoon prints custom vehicle magnets for Regina businesses — oil field services, contractors, government fleet vehicles, and retail delivery. From $45 ($24/sqft), printed on our Roland UV press. Shipped directly to Regina in 3–5 business days."
+      description="True Color Display Printing in Saskatoon prints custom vehicle magnets for Regina businesses — oil field services, contractors, government fleet vehicles, and retail delivery. From $24/sqft, printed on our Roland UV press. Shipped directly to Regina in 3–5 business days."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">

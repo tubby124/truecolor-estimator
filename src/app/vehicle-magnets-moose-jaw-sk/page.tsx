@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Vehicle Magnets Moose Jaw SK | From $45 | True Color" },
+  title: { absolute: "Vehicle Magnets Moose Jaw SK | From $24/sqft | True Color" },
   description:
-    "Custom vehicle magnets for Moose Jaw SK businesses. From $45 ($24/sqft) — service businesses, contractors, fleet branding. Printed in Saskatoon, shipped to Moose Jaw.",
+    "Custom vehicle magnets for Moose Jaw SK businesses. From $24/sqft — service businesses, contractors, fleet branding. Printed in Saskatoon, shipped to Moose Jaw.",
   alternates: { canonical: "/vehicle-magnets-moose-jaw-sk" },
   openGraph: {
     title: "Vehicle Magnets Moose Jaw SK | True Color Display Printing",
     description:
-      "Custom vehicle magnets from $45 shipped to Moose Jaw. Service businesses, contractors, fleet branding. Roland UV-printed — True Color Display Printing, Saskatoon.",
+      "Custom vehicle magnets from $24/sqft shipped to Moose Jaw. Service businesses, contractors, fleet branding. Roland UV-printed — True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/vehicle-magnets-moose-jaw-sk",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -23,10 +23,10 @@ export default function VehicleMagnetsMooseJawPage() {
       canonicalSlug="vehicle-magnets-moose-jaw-sk"
       primaryProductSlug="vehicle-magnets"
       title="Vehicle Magnets Moose Jaw SK"
-      subtitle="Removable fleet branding from $45 — printed in Saskatoon, shipped to Moose Jaw."
+      subtitle="Removable fleet branding from $24/sqft — printed in Saskatoon, shipped to Moose Jaw."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Vehicle magnets for Moose Jaw SK service businesses — True Color Display Printing Saskatoon"
-      description="True Color Display Printing in Saskatoon prints custom vehicle magnets for Moose Jaw service businesses, contractors, and tradespeople 75 km southwest. From $45 ($24/sqft) on our Roland UV press. Removable, paint-safe, and weatherproof for Saskatchewan conditions."
+      description="True Color Display Printing in Saskatoon prints custom vehicle magnets for Moose Jaw service businesses, contractors, and tradespeople 75 km southwest. From $24/sqft on our Roland UV press. Removable, paint-safe, and weatherproof for Saskatchewan conditions."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">

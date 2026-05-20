@@ -5,12 +5,12 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Property Management Signs Saskatoon | True Color" },
   description:
-    "For-rent coroplast signs from $30 for Saskatoon property managers. Bulk 5+ save 8%. ACP exterior signs, banners, vehicle magnets. Same-day rush +$40. 216 33rd St W.",
+    "For-rent coroplast signs from $8/sqft for Saskatoon property managers. Bulk 5+ save 8%. ACP exterior signs, banners, vehicle magnets. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/property-management-signs-saskatoon" },
   openGraph: {
     title: "Property Management Signs Saskatoon | True Color Display Printing",
     description:
-      "For-rent coroplast signs from $30. Bulk 5+ save 8%. ACP aluminum, banners, vehicle magnets. Same-day rush available. Local Saskatoon pickup 216 33rd St W.",
+      "For-rent coroplast signs from $8/sqft. Bulk 5+ save 8%. ACP aluminum, banners, vehicle magnets. Same-day rush available. Local Saskatoon pickup 216 33rd St W.",
     url: "https://truecolorprinting.ca/property-management-signs-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -26,7 +26,7 @@ export default function PropertyManagementSignsPage() {
       subtitle="For-rent signs, parking notices, and permanent exterior signage for Saskatoon properties."
       heroImage="/images/products/heroes/realestate-hero-1200x500.webp"
       heroAlt="Property management signs Saskatoon"
-      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $30 (18×24&quot; minimum order), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $60. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $8/sqft (18×24&quot; = $24, single signs top up to the $25 order-total minimum at checkout), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $13/sqft. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -71,21 +71,21 @@ export default function PropertyManagementSignsPage() {
         </>
       }
       products={[
-        { name: "Coroplast Signs", from: "from $30", slug: "coroplast-signs" },
-        { name: "ACP Aluminum Signs", from: "from $60", slug: "acp-signs" },
+        { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
+        { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
-        { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
+        { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Window Decals", from: "from $45", slug: "window-decals" },
       ]}
       whyPoints={[
-        "For-rent coroplast signs from $30 each (18×24\") — fill vacancies faster with the right corner placement",
+        "For-rent coroplast signs $24 each (18×24\" — single signs top up to $25 cart min) — fill vacancies faster with the right corner placement",
         "Order 5+ coroplast signs and save 8% automatically — no code needed, no minimum spend",
-        "ACP aluminum from $60 for parking lot, entrance, and regulation signs that last decades",
+        "ACP aluminum from $13/sqft for parking lot, entrance, and regulation signs that last decades",
         "Roland UV in-house printer — colour stays vibrant and weather-rated through Saskatchewan winters",
         "Same-day rush for $40 flat — sign up before the weekend, order before 10 AM",
         "In-house designer at $35 flat — no-trespassing, reserved parking, and building ID layouts, same-day proof",
         "Vinyl banners from $66 (2×4\') for leasing events and show-suite weekends — grommets included",
-        "Vehicle magnets from $45 for property management fleet trucks — remove on weekends",
+        "Vehicle magnets from $24/sqft for property management fleet trucks — remove on weekends",
       ]}
       faqs={[
         {
@@ -114,7 +114,7 @@ export default function PropertyManagementSignsPage() {
         },
         {
           q: "Can I get my property management company logo on vehicle magnets?",
-          a: "Yes — vehicle magnets from $45 each are popular with property management companies who want branded fleet trucks without permanent wrapping. Magnets are 30mil thick and safe for most vehicle paint. Remove them when staff are off duty. Custom sizes available — call (306) 954-8688 for a quote.",
+          a: "Yes — vehicle magnets from $24/sqft are popular with property management companies who want branded fleet trucks without permanent wrapping. Magnets are 30mil thick and safe for most vehicle paint. Remove them when staff are off duty. Custom sizes available — call (306) 954-8688 for a quote.",
         },
       ]}
     />

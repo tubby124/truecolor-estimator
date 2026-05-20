@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Construction Signs Saskatoon | ACP & Banners | True Color" },
   description:
-    "Job site coroplast signs, safety banners, truck magnets, and hoarding banners for Saskatoon contractors. Coroplast from $30. Same-day rush.",
+    "Job site coroplast signs, safety banners, truck magnets, and hoarding banners for Saskatoon contractors. Coroplast from $8/sqft. Same-day rush.",
   keywords: [
     "construction signs saskatoon",
     "construction site signs saskatoon",
@@ -56,13 +56,13 @@ export default function ConstructionPage() {
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               coroplast site ID signs
             </Link>{" "}
-            (18×24&quot;, $30) with the company name and permit number, a pair of 30mil{" "}
+            (18×24&quot;, $24 each — $25 small-order minimum at checkout) with the company name and permit number, a pair of 30mil{" "}
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               truck door magnets
             </Link>{" "}
-            ($45–90/pair depending on size), and 250 business cards ($45) to hand on-site.
+            ($48–96/pair depending on size, at $24/sqft), and 250 business cards ($45) to hand on-site.
             Home builders and developers add development signage (4×8 ft coroplast, $232) for the lot
-            and directional coroplast signs (18×24&quot;, $30) for subdivision roads. For fencing and
+            and directional coroplast signs (18×24&quot; $24 each, $25 small-order minimum at checkout) for subdivision roads. For fencing and
             hoarding, a full-colour vinyl banner ($8.25/sqft) runs the length of your site perimeter
             and doubles as advertising to passing traffic.
           </p>
@@ -82,7 +82,7 @@ export default function ConstructionPage() {
       }
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
-        { name: "Vehicle Magnets", from: "from $45", slug: "vehicle-magnets" },
+        { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Business Cards", from: "250 from $45", slug: "business-cards" },
       ]}
@@ -90,7 +90,7 @@ export default function ConstructionPage() {
         "Coroplast that survives Saskatchewan winters — UV-resistant, waterproof, 2–3 year outdoor lifespan",
         "18×24\" job site ID sign — $24 ($25 small-order minimum at checkout), ready in 1–3 business days from your logo or sketch",
         "4×8ft home builder development sign — $232 + GST, the standard for new subdivision lots",
-        "30mil truck door magnets that stay on at highway speeds — from $45 per magnet",
+        "30mil truck door magnets that stay on at highway speeds — from $24/sqft (12×18\" door magnet ≈ $36)",
         "Safety signs: Hard Hat Area, No Entry, site ID — coroplast $8/sqft, 18×24\" $24 ($25 small-order min at checkout)",
         "250 business cards from $45 — one stop for signs, magnets, and cards — call (306) 954-8688",
         "In-house designer handles low-res logos, rough sketches, and phone photos — from $35",

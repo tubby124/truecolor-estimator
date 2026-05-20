@@ -353,7 +353,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "3mm aluminum composite. Built to last indoors or out.",
     description:
       "ACP (aluminum composite panel) is what you choose when a sign needs to last indefinitely — permanent business signage, address plaques, site identification boards, and retail directories that need to look sharp 10 years from now. The material consists of two thin aluminum face sheets bonded to a polyethylene core, producing a panel that's rigid but surprisingly lightweight — far easier to handle than solid aluminum plate. True Color prints on ACP with UV-cured digital inks that bond permanently to the surface for rich colour and sharp detail that won't fade, peel, or blister through Saskatchewan temperature swings. Unlike coroplast that flexes in the wind or wood that rots, ACP panels stay perfectly flat and weather-resistant for their entire lifespan. Standard sizes run from 12×18\" up to 4×8 ft. Mounting holes are drilled on request for screw-and-standoff installation; adhesive backing is available for glass or finished walls. Gloss laminate is standard; matte finish is available on request. ACP is the right call for permanent signage on a building exterior, at a gated entrance, or in a lobby. Printed and cut in-house at 216 33rd St W, Saskatoon — no outsourcing, same-day rush available on most sizes.",
-    fromPrice: "$25",
+    fromPrice: "$39",
     category: "RIGID",
     material_code: "RMACP002",
     heroImage: "/images/products/product/acp-sign-princess-liquidation-800x600.webp",

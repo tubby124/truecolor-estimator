@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Vehicle Magnets Saskatoon | From $45 | True Color" },
+  title: { absolute: "Vehicle Magnets Saskatoon | From $24/sqft | True Color" },
   description:
-    "Custom vehicle magnets in Saskatoon from $45. 30mil thick, full colour, removable and reusable. Same-day rush available. Local pickup at 216 33rd St W.",
+    "Custom vehicle magnets in Saskatoon from $24/sqft. 30mil thick, full colour, removable and reusable. Same-day rush available. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/vehicle-magnets-saskatoon" },
   openGraph: {
     title: "Vehicle Magnets Saskatoon | True Color Display Printing",
     description:
-      "30mil vehicle magnets from $45. Full colour, removable, reusable. Same-day available. Local Saskatoon pickup.",
+      "30mil vehicle magnets from $24/sqft. Full colour, removable, reusable. Same-day available. Local Saskatoon pickup.",
     url: "https://truecolorprinting.ca/vehicle-magnets-saskatoon",
     type: "website",
   },
@@ -24,7 +24,7 @@ export default function VehicleMagnetsSaskatoonPage() {
       subtitle="From $24/sqft. 30mil thick. Remove them when you want. Keep your resale value."
       heroImage="/images/products/product/vehicle-magnets-800x600.webp"
       heroAlt="Custom vehicle magnets printed in Saskatoon by True Color Display Printing"
-      description="True Color prints 30mil vehicle magnets for Saskatoon tradespeople, sales reps, election campaigns, and small businesses — from $45. Full-colour Roland UV printing on heavy-gauge magnetic sheeting — bold enough to read from across a parking lot, thick enough to hold in Saskatchewan wind. Unlike a vinyl wrap, magnets come off in 10 seconds and protect your door paint. No permanent commitment, no resale value hit. Order online, get an instant price, pick up at 216 33rd St W."
+      description="True Color prints 30mil vehicle magnets for Saskatoon tradespeople, sales reps, election campaigns, and small businesses — from $24/sqft. Full-colour Roland UV printing on heavy-gauge magnetic sheeting — bold enough to read from across a parking lot, thick enough to hold in Saskatchewan wind. Unlike a vinyl wrap, magnets come off in 10 seconds and protect your door paint. No permanent commitment, no resale value hit. Order online, get an instant price, pick up at 216 33rd St W."
       products={[
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },

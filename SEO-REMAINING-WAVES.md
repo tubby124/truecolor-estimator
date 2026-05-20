@@ -198,18 +198,44 @@ Status: **NEW** — discovered 2026-04-12 from GSC data
 | Immediate Fixes (N1–N5) | 5 items | **COMPLETE** ✅ 2026-04-12 |
 | Wave 1 — Technical | 8 items | **COMPLETE** ✅ 2026-03-16 |
 | Wave 2 — Content Quality | 9 items | **COMPLETE** ✅ 2026-04-12 — images pending |
-| Wave 3 — Schema | 3 items | **COMPLETE** ✅ 2026-03-16 |
+| Wave 3 — Schema (Service.url, image-sitemap, robots reference) | 3 items | **COMPLETE** ✅ 2026-03-16 |
+| Wave 3a — Organization schema + alternateName + logo (resolves F1) | 1 item | **COMPLETE** ✅ |
+| Wave 3 — Pricing comms alignment ($25 order-total min sweep) | 27 files | **COMPLETE** ✅ 2026-05-20 (commit 102faed) |
+| **Wave 3.1 — Pricing comms sweep CONTINUED** | 8 surfaces | **NEW — TODO** |
 | Wave 4 — Product Schema | 4 items | **ON HOLD** — wait for coroplast/flyer recovery signal |
-| Wave 5 — Core Web Vitals | 3 items | 0/3 overdue |
-| Wave 6 — Mobile/UX | 3 items | 0/3 due 2026-04-18 |
-| Wave 7 — CTR Recovery | 6 items | NEW — highest priority after recovery check |
+| Wave 5 — Core Web Vitals | 3 items | 0/3 overdue since 2026-04-11 |
+| Wave 6 — Mobile/UX | 3 items | 0/3 overdue since 2026-04-18 |
+| Wave 7 — CTR Recovery | 6 items | PARTIAL — sticker, wall-graphics, near-me hubs still TODO |
+
+---
+
+## Wave 3.1 — Pricing Comms Sweep Continued (NEW 2026-05-20)
+
+**Trigger:** Full audit 2026-05-20 found 8 surfaces still using stale per-product min anchors despite Wave 3 sweep this morning.
+
+| # | Item | File | Severity |
+|---|------|------|----------|
+| 3.1a | **CRITICAL: ACP homepage card I just set to `from $25` contradicts PRICING_QUICK_REFERENCE.md** — should be `from $39` (smallest 18×24" = $39, above $25 floor so floor doesn't apply) | [src/app/page.tsx:77](src/app/page.tsx#L77) | HIGH (self-introduced) |
+| 3.1b | products-content.ts ACP fromPrice `$25` → `$39` | [src/lib/data/products-content.ts:356](src/lib/data/products-content.ts#L356) | HIGH (self-introduced) |
+| 3.1c | truecolor-pricing-comms.md rule table says ACP `from $25` — fix to `from $39` | [.claude/rules/truecolor-pricing-comms.md](.claude/rules/truecolor-pricing-comms.md) | HIGH (self-introduced) |
+| 3.1d | **llms.txt has 11+ stale per-product min refs** — AI bots cite stale prices | [public/llms.txt](public/llms.txt):11, 15, 18, 19, 41, 44, 50, 75, 81, 105 | **CRITICAL** |
+| 3.1e | contact page meta + body say "signs from $30" | [src/app/contact/page.tsx](src/app/contact/page.tsx):12, 17, 345 | HIGH |
+| 3.1f | church-banners-saskatoon: 4 stale `$30` coroplast refs | [src/app/church-banners-saskatoon/page.tsx](src/app/church-banners-saskatoon/page.tsx):29, 56, 75, 83 | HIGH |
+| 3.1g | **vinyl-lettering-saskatoon (DEFEND #7.4)** cross-sell array shows stale prices | [src/app/vinyl-lettering-saskatoon/page.tsx](src/app/vinyl-lettering-saskatoon/page.tsx):89-92 | HIGH |
+| 3.1h | coroplast-signs-saskatoon subtitle "18×24" from $30" | [src/app/coroplast-signs-saskatoon/page.tsx:24](src/app/coroplast-signs-saskatoon/page.tsx#L24) | HIGH |
+| 3.1i | car-dealership-signs-saskatoon meta + body "magnets from $45" | [src/app/car-dealership-signs-saskatoon/page.tsx](src/app/car-dealership-signs-saskatoon/page.tsx):8, 66 | MEDIUM |
+
+**Plan:** Single commit `wave-3.1`. Body copy + metadata only. Zero changes to title/H1/slug/schema on any DEFEND or FROZEN page. GSC re-check 2026-05-27.
+
+---
 
 **Next session priority order:**
-1. Generate 25 DDG images (ChatGPT) and drop into `public/images/industries/` — unblocks Wave 2 visuals
-2. Wave 7.1: Fix wall-graphics meta title/desc (pos 10, 0% CTR — free traffic on the table)
-3. Wave 7.2: sticker-printing DDG + descriptionNode (most clicked non-homepage page)
-4. Check GSC again in 2–3 weeks to see if coroplast/flyer recovered post-Wave 2 index
-5. Only then proceed to Wave 4 (Product schema)
+1. **Wave 3.1** (above) — ship same day if possible. Score lift +5 (AI Readiness 82→90, Content 66→69).
+2. Generate 25 DDG images (ChatGPT) and drop into `public/images/industries/` — unblocks Wave 2 visuals
+3. Wave 7.1: Fix wall-graphics meta title/desc (pos 10, 0% CTR — free traffic on the table)
+4. Wave 7.2: sticker-printing DDG + descriptionNode (most clicked non-homepage page)
+5. Check GSC 2026-05-27 to see if Wave 3 + Wave 3.1 stabilized rankings
+6. Only then proceed to Wave 4 (Product schema)
 
 ---
 
