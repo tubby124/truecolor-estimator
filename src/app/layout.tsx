@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: "True Color",
   },
   description:
-    "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon. See your price now.",
+    "Coroplast signs from $25. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon. See your price now.",
   metadataBase: new URL("https://truecolorprinting.ca"),
   openGraph: {
     title: "True Color Printing | Signs, Banners & Cards Saskatoon",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "True Color Printing | Signs, Banners & Cards Saskatoon",
     description:
-      "Coroplast signs from $30. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon.",
+      "Coroplast signs from $25. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon.",
     images: ["https://truecolorprinting.ca/og-image.png"],
   },
 };

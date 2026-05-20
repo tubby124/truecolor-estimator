@@ -10,23 +10,12 @@ import { readFileSync } from "fs";
 import { join, basename } from "path";
 
 // [regex, errorMessage]
+// Updated 2026-05-20 — per-product minimum charges were KILLED owner decision.
+// New rule: $25 order-total minimum at checkout (not per-product floors).
+// The old "Banner from $66" / "Coroplast from $30" min-charge guards are gone;
+// removed those checks. PST in Saskatchewan IS 6% (the old "no PST on printing"
+// rule was wrong — see CLAUDE.md + data/PRICING_QUICK_REFERENCE.md).
 const WRONG_PATTERNS = [
-  [
-    /from \$45.{0,25}banner|banner.{0,25}from \$45/i,
-    "Banner 'from' should be $66, not $45",
-  ],
-  [
-    /from \$39.{0,25}acp|acp.{0,25}from \$39|from \$39.{0,25}aluminum/i,
-    "ACP 'from' should be $60, not $39",
-  ],
-  [
-    /from \$24.{0,25}coroplast|coroplast.{0,25}from \$24|yard signs? from \$24/i,
-    "Coroplast 'from' should be $30, not $24",
-  ],
-  [
-    /from \$24\/sqft.{0,25}magnet|magnet.{0,25}from \$24/i,
-    "Magnet marketing 'from' should be $45, not $24/sqft",
-  ],
   [
     /from \$8\/sqft.*decal|decal.*from \$8\/sqft/i,
     "Window Decals are $11/sqft, not $8/sqft",
@@ -42,10 +31,6 @@ const WRONG_PATTERNS = [
   [
     /\$30.*rush|\$50.*rush|rush.*\$30|rush.*\$50/i,
     "Rush is +$40 flat",
-  ],
-  [
-    /PST\s*6%/i,
-    "Saskatchewan has no PST on printing — GST 5% only",
   ],
   [
     /vercel\.app/i,

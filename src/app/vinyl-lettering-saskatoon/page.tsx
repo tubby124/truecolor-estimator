@@ -26,7 +26,7 @@ export default function VinylLetteringSaskatoonPage() {
       subtitle="Vehicle door lettering from $40/door | Boat numbers $40/set | Storefront hours from $40 — cut vinyl, ready same-day."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Vinyl lettering Saskatoon storefront and vehicle"
-      description="Cut vinyl lettering is the cleanest, lowest-cost way to put text and simple shapes on Saskatoon storefront windows, vehicle doors, office glass, boats, and trailers. From $8.50/sqft with a $40 minimum. Vehicle door lettering from $40/door. Boat registration numbers $40/set. Storefront hours and business name from $40. Professionally cut on a Roland UV plotter using outdoor-rated cast vinyl that lasts 5–7 years — no DIY application risk, no 5–9 day shipping wait. Same-day rush +$40 flat. Designer $35 flat. Simple text layout included at no extra charge. Pickup at 216 33rd St W, Saskatoon."
+      description="Cut vinyl lettering is the cleanest, lowest-cost way to put text and simple shapes on Saskatoon storefront windows, vehicle doors, office glass, boats, and trailers. From $8.50/sqft. Vehicle door lettering from $25/door. Boat registration numbers from $25/set. Storefront hours and business name from $25. A $25 order-total minimum applies at checkout. Professionally cut on a Roland UV plotter using outdoor-rated cast vinyl that lasts 5–7 years — no DIY application risk, no 5–9 day shipping wait. Same-day rush +$40 flat. Designer $35 flat. Simple text layout included at no extra charge. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -104,7 +104,7 @@ export default function VinylLetteringSaskatoonPage() {
       faqs={[
         {
           q: "How much does vinyl lettering cost in Saskatoon?",
-          a: "Cut vinyl lettering starts at $8.50/sqft with a $40 minimum. A typical storefront door with business name and hours in two lines (roughly 6×24\") runs $40–$55. Vehicle door lettering (business name, phone, website — two lines per door) usually starts around $40–$60 per door set. Larger storefront window text is priced by the square footage of the lettering area.",
+          a: "Cut vinyl lettering is $8.50/sqft. A typical storefront door with business name and hours in two lines (roughly 6×24\") runs $25–$55. Vehicle door lettering (business name, phone, website — two lines per door) usually starts around $25–$60 per door set. Larger storefront window text is priced by the square footage. A $25 order-total minimum applies at checkout.",
         },
         {
           q: "What is the difference between vinyl lettering and window decals?",

@@ -131,7 +131,7 @@ export default function CoroplastSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much does a coroplast sign cost in Saskatoon?",
-          a: "Coroplast signs at True Color start at $8/sqft for single-sided printing, with a $30 minimum order. An 18×24\" sign is $30 (minimum applies). A 24×36\" sign is $48. Volume discounts apply at 5+ signs (8% off) and 10+ signs (17% off). H-stakes are $2.50 each.",
+          a: "Coroplast signs at True Color are $8/sqft single-sided. An 18×24\" sign is $24, a 24×36\" sign is $48. A $25 order-total minimum applies at checkout. Volume discounts apply at 5+ signs (8% off) and 10+ signs (17% off). H-stakes are $2.50 each.",
         },
         {
           q: "How long do coroplast yard signs last outdoors?",
@@ -159,7 +159,7 @@ export default function CoroplastSignsSaskatoonPage() {
         },
         {
           q: "Is there a minimum order for coroplast signs?",
-          a: "Yes — $30 minimum order. A single 18×24\" sign is $24, so the $30 minimum charge applies automatically for a one-sign order — you pay $30. To avoid this, order 2 signs (2 × $24 = $48) or step up to a 24×36\" sign ($48), both of which clear the minimum. Use the pricing calculator to see your exact total.",
+          a: "Yes — a $25 order-total minimum applies at checkout. A single 18×24\" sign is $24, which gets topped up by a $1 small-order setup fee → you pay $25. To skip the surcharge, order 2 signs ($48) or step up to a 24×36\" sign ($48). Use the pricing calculator to see your exact total.",
         },
       ]}
     />

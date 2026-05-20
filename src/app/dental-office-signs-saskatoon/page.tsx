@@ -121,7 +121,7 @@ export default function DentalOfficeSignsSaskatoonPage() {
         },
         {
           q: "How much do window decals for dental clinic hours cost in Saskatoon?",
-          a: "Window decals start at $11/sqft at True Color Display Printing with a $45 minimum. A typical clinic hours and logo decal (2×3 ft) runs about $66. Frosted privacy film and one-way window graphics are also available. Decals are removable without residue — easy to update when clinic hours change or a new associate joins.",
+          a: "Window decals are $11/sqft at True Color Display Printing. A typical clinic hours and logo decal (2×3 ft) runs about $66. A $25 order-total minimum applies at checkout. Frosted privacy film and one-way window graphics are also available. Decals are removable without residue — easy to update when clinic hours change or a new associate joins.",
         },
         {
           q: "Can you print patient flyers and appointment reminder postcards?",

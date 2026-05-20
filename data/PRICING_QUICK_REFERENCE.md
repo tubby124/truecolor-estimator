@@ -1,5 +1,5 @@
 # True Color Display Printing — Pricing Quick Reference
-**Updated:** 2026-03-12 | **Source of truth:** `data/tables/` CSVs
+**Updated:** 2026-05-20 | **Source of truth:** `data/tables/` CSVs
 **How to update prices:** Edit the CSVs only — no code changes needed. Then `git push main` → live in ~2 min.
 
 ---
@@ -8,51 +8,54 @@
 
 **ALWAYS check this section before writing any price** in a landing page, email, campaign, FAQ, or social post.
 
-### Minimum-Inflated Products (4 products)
+### 2026-05-19 → 2026-05-20 system change (read this first)
 
-These products have a per-product minimum order. The minimum IS the correct "from" price for marketing — it's the smallest amount a customer can pay.
+The old **per-product min charge** model is GONE. Engine returns honest sqft × rate × qty for every product, every size, every quantity. Customers see real per-piece prices browsing the site.
 
-| Product | Real Rate | Min Order | Marketing "from $X" | FAQ / Comparison Text | Configurator Shows |
-|---------|-----------|-----------|--------------------|-----------------------|-------------------|
-| Coroplast Signs | $8.00/sqft | $30 | "from $30" | "$8/sqft for orders above the $30 minimum" | Your item: $24 · Min order: $30 · You pay: $30 |
-| ACP Aluminum | $13.00/sqft | $60 | "from $60" | "$13/sqft for orders above the $60 minimum" | Your item: $39 · Min order: $60 · You pay: $60 |
-| Vehicle Magnets | $24.00/sqft | $45 | "from $45" | "$24/sqft for orders above the $45 minimum" | Your item: $36 · Min order: $45 · You pay: $45 |
-| Vinyl Lettering | $8.50/sqft | $40 | "from $40" | "$8.50/sqft for orders above the $40 minimum" | Your item: $25 · Min order: $40 · You pay: $40 |
+Replaced by a single **$25 order-total minimum** that fires only at customer cart checkout. Below $25 raw subtotal → transparent "Small order setup fee" tops up to $25. Above $25 → no surcharge. Staff `/staff` portal + manual-order route are NOT surcharged (concierge mode).
 
-### NOT Minimum-Inflated (prices are real)
+### Product "from $X" table (post-2026-05-20)
 
-| Product | "From" Price | Why It's Real |
-|---------|-------------|---------------|
-| Vinyl Banners | from $66 | 2×4ft = $66, already above $45 minimum |
-| Foamboard | from $45 | 18×24" = $45, exactly matches minimum (not inflated) |
-| Window Decals | from $45 | Minimum applies but $45 IS the correct starting point |
-| Window Perf | from $40 | Minimum applies but $40 IS the correct starting point |
+The "from $X" is the smallest amount a customer can realistically be quoted online for that product, including the $25 order-total minimum where relevant.
 
-### Lot-Priced Products (flat totals, no minimums)
+| Product | Sqft Rate (T1) | Smallest size raw | What customer pays | Marketing "from $X" |
+|---------|---------------|-------------------|--------------------|---------------------|
+| Coroplast Signs | $8.00/sqft | 18×24" = $24 | $25 (cart min) | **"from $25"** or "from $8/sqft" |
+| ACP Aluminum | $13.00/sqft | 18×24" = $39 | $39 (above min) | **"from $39"** or "from $13/sqft" |
+| Vehicle Magnets | $24.00/sqft | 12×12" = $24 | $25 (cart min) | **"from $25"** or "from $24/sqft" |
+| Vinyl Lettering | $8.50/sqft | 6×18" = $6.38 | $25 (cart min) | **"from $25"** or "from $8.50/sqft" |
+| Vinyl Banners | $8.25/sqft | 2×4 ft = $66 | $66 (above min) | **"from $66"** |
+| Foamboard | $10.00/sqft | 18×24" = $45 | $45 (above min) | **"from $45"** |
+| Window Decals | $11.00/sqft | 12×12" = $11 | $25 (cart min) | **"from $25"** or "from $11/sqft" |
+| Window Perf | $8.00/sqft | 12×12" = $8 | $25 (cart min) | **"from $25"** or "from $8/sqft" |
+
+### Lot-Priced Products (flat totals)
 
 | Product | "From" Price | Notes |
 |---------|-------------|-------|
-| Business Cards | from $45 | 250 qty 2-sided (1S = $40). Marketing default is $45 (2S) since 2S is the standard product. |
-| Flyers | from $45 | 100 qty full-letter 2-sided 80lb. Secondary: $25 (100 half-letter 1S) for half-letter contexts. |
+| Business Cards | from $45 | 250 qty 2-sided 14pt gloss (1S = $40). 2S is the standard product. |
+| Flyers | from $45 | 100 qty full-letter 2-sided 80lb. Secondary: $25 (100 half-letter 1S). |
 | Stickers | from $25 | 25 qty 2×2" |
 | Postcards | from $35 | 50 qty 3×4" |
 | Brochures | from $70 | 100 qty tri-fold |
 | Photo Posters | from $15 | 12×18" |
 | Retractable Banners | from $219 | Economy stand |
-| Magnet Calendars | from $45 | 4×7" (min applies) |
+| Magnet Calendars | from $45 | 4×7" |
 | Rack Cards | from $25 | 100 qty 1-sided |
 
-### Rules
+### Rules (locked 2026-05-20)
 
-1. **Landing pages / emails / campaigns:** Use the "Marketing from $X" column. This is the minimum order — the real starting price a customer will pay.
-2. **FAQs / pricing breakdowns:** Use the "FAQ / Comparison Text" column. Show both the sqft rate AND the minimum so customers understand the structure.
-3. **Never say "from $8/sqft" for coroplast in marketing headlines** — customers can't actually order for $8, the minimum is $30. Exception: FAQ context explaining how pricing works, product reference cards on IndustryPage (see rule 9), and **ranking pages that already use sqft rates in their title** (e.g. "From $8/sqft" in coroplast title ranks #5, "From $8.25/sqft" in banner title ranks #2 — do NOT change these titles).
-4. **Banners "from $66" is correct** — the smallest standard size (2×4ft) costs $66, which is above the $45 minimum. Don't use "from $45".
-5. **Foamboard "from $45" is correct** — it's not inflated, it's the real 18×24" price that happens to match the minimum.
-6. **Rush +$40 flat** — always mention separately, never baked into "from" price.
-7. **Design $35 flat** — always mention separately.
-8. **All prices are pre-tax.** GST 5% + PST 6% shown only at checkout.
-9. **Product reference cards** (`products` array on IndustryPage): use T1 sqft rates for wide-format products, flat totals for lot-priced. This matches ranking pages and product page pricing. Wide-format T1 rates: Coroplast $8/sqft, Banners $8.25/sqft, ACP $13/sqft, Foamboard $10/sqft, Window Decals $11/sqft, Vehicle Magnets $24/sqft.
+1. **Landing pages / emails / campaigns:** Use the "Marketing from $X" column. For products where the smallest size triggers the $25 cart min (coroplast, magnets, vinyl lettering, window decals, window perf), `"from $25"` is the honest minimum customers actually pay. Per-sqft framing ("from $8/sqft") is also fine in headlines + meta.
+2. **FAQs / pricing breakdowns:** Show the sqft rate AND mention the **$25 order-total minimum applies at checkout**. Don't say "$30 minimum" or "$60 minimum" or any per-product floor — those are dead.
+3. **Stickers area-scale.** Engine multiplies the catch-all price by (w × h) / 16 sqin for custom dimensions on ARLPMF7008. 1×3" + 2×4" + every size between gets a distinct price.
+4. **Retired SKUs.** RIGID-ACP3-24X36-S frozen $66 intro retired 2026-05-20. ACP 24×36 is now $78 ($13 × 6 sqft) at every qty. Do not re-enable.
+5. **Banners "from $66" is correct** — smallest 2×4ft = $66, already above $25 cart min.
+6. **Foamboard "from $45" is correct** — smallest 18×24" = $45, already above $25 cart min.
+7. **Rush +$40 flat** — always mention separately. PST-exempt.
+8. **Design $35 flat** — always mention separately. PST-exempt.
+9. **All prices are pre-tax.** GST 5% + PST 6% at checkout. PST formula = `(sell_price − design_fee − rush_fee) × 0.06`.
+10. **Product reference cards** (`products` array on IndustryPage): use T1 sqft rates for wide-format. Wide-format T1: Coroplast $8/sqft, Banners $8.25/sqft, ACP $13/sqft, Foamboard $10/sqft, Window Decals $11/sqft, Vehicle Magnets $24/sqft.
+11. **FROZEN ranking page titles** (do NOT change H1/title/slug): coroplast-signs-saskatoon ("From $8/sqft"), banner-printing-saskatoon ("From $8.25/sqft"), sign-company-saskatoon, business-cards-saskatoon, flyer-printing-saskatoon, sticker-printing-saskatoon, aluminum-signs-saskatoon. Body copy + FAQ updates allowed per SEO wave system.
 
 ---
 

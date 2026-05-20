@@ -47,7 +47,7 @@ const designDirections = [
   },
   {
     title: "Sizes & Shapes",
-    subtitle: "4×4\" default die-cut · custom shapes available · 25-piece minimum from $25",
+    subtitle: "4×4\" default die-cut · custom shapes available · from $25 (25× 2×2\")",
     aspect: "4/3" as const,
     maxCols: 2 as const,
     items: [

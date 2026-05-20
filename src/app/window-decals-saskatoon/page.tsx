@@ -102,7 +102,7 @@ export default function WindowDecalsSaskatoonPage() {
       faqs={[
         {
           q: "How much do custom window decals cost in Saskatoon?",
-          a: "Window decals start at $11/sqft with a minimum order of $45. A standard 12×24\" decal is approximately $22, though the $45 minimum applies to small orders. Larger full-window graphics are priced by square footage. All are printed full-colour on our in-house Roland UV printer.",
+          a: "Window decals are $11/sqft. A standard 12×24\" decal is approximately $22. A $25 order-total minimum applies at checkout — small decals get topped up. Larger full-window graphics are priced by square footage. All are printed full-colour on our in-house Roland UV printer.",
         },
         {
           q: "What's the difference between window decals and perforated window vinyl?",

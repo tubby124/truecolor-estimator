@@ -113,7 +113,7 @@ export default function ForLeaseSignsSaskatoonPage() {
         },
         {
           q: "Should I print for-lease signs on coroplast or ACP aluminum?",
-          a: "Coroplast (4mm corrugated plastic) is the right call for properties that typically lease within 6–18 months — UV-rated, freeze-rated, reusable, and inexpensive. ACP aluminum (3mm rigid composite) is better for long-vacant industrial sites, multi-year commercial leasing campaigns, or building-mounted permanent signage — rated 7–10 years outdoors. Coroplast is $30 minimum; ACP is $60 minimum.",
+          a: "Coroplast (4mm corrugated plastic) is the right call for properties that typically lease within 6–18 months — UV-rated, freeze-rated, reusable, and inexpensive. ACP aluminum (3mm rigid composite) is better for long-vacant industrial sites, multi-year commercial leasing campaigns, or building-mounted permanent signage — rated 7–10 years outdoors. A $25 order-total minimum applies at checkout for both substrates.",
         },
         {
           q: "Can you print for-lease signs same day in Saskatoon?",
@@ -133,7 +133,7 @@ export default function ForLeaseSignsSaskatoonPage() {
         },
         {
           q: "How long do coroplast for-lease signs last outdoors in Saskatchewan?",
-          a: "Properly stored between leasing cycles, coroplast for-lease signs last 2–3 seasons of outdoor use in Saskatchewan. UV exposure will fade unlaminated prints over time. For long-vacant commercial properties where signage stays up year-round for multiple years, ACP aluminum at $60 minimum is the better substrate.",
+          a: "Properly stored between leasing cycles, coroplast for-lease signs last 2–3 seasons of outdoor use in Saskatchewan. UV exposure will fade unlaminated prints over time. For long-vacant commercial properties where signage stays up year-round for multiple years, ACP aluminum is the better substrate (a $25 order-total minimum applies at checkout).",
         },
       ]}
       relatedCities={[

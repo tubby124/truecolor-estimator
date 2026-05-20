@@ -106,11 +106,11 @@ export default function RestaurantSignsSaskatoonPage() {
         },
         {
           q: "Can you print window decals for our restaurant storefront?",
-          a: "Yes — cut-vinyl window decals from $45. For large street-facing windows, perforated vinyl (window perf) lets customers see out while your branding shows on the outside. Pricing depends on size. Call (306) 954-8688 or use our online quote tool.",
+          a: "Yes — cut-vinyl window decals from $11/sqft. For large street-facing windows, perforated vinyl (window perf) lets customers see out while your branding shows on the outside. Pricing depends on size; $25 small-order minimum applies at checkout. Call (306) 954-8688 or use our online quote tool.",
         },
         {
           q: "Is there a minimum order for restaurant print jobs?",
-          a: "Yes — $30 minimum on most products. Flyers start at $45 for 100, business cards from $45 for 250, vinyl banners from $66 (2×4 ft), foam board menus from $45 (18×24\"). No minimum quantity — you can order just 1 item.",
+          a: "No per-item minimum — order just 1 sign. A $25 order-total minimum applies at checkout (orders under $25 are topped up). Flyers start at $45 for 100, business cards from $45 for 250, vinyl banners from $66 (2×4 ft), foam board menus from $45 (18×24\").",
         },
       ]}
     />
