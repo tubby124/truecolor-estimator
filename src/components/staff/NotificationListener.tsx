@@ -52,8 +52,34 @@ export default function NotificationListener() {
 
   useEffect(() => {
     // Lazy-init the audio element once on mount.
-    audioRef.current = new Audio(DING_PATH);
-    audioRef.current.preload = "auto";
+    const audio = new Audio(DING_PATH);
+    audio.preload = "auto";
+    audioRef.current = audio;
+
+    // Chrome/Safari autoplay policy blocks audio.play() until the page has
+    // received a user gesture. Server-pushed broadcast events don't count, so
+    // on first pointer/key/touch we prime the element inside the gesture —
+    // that unlocks programmatic play() for the rest of the session.
+    // Test surface: document.body.dataset.staffAudio = locked|unlocked|blocked.
+    document.body.dataset.staffAudio = "locked";
+    const unlock = () => {
+      audio.muted = true;
+      audio
+        .play()
+        .then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.muted = false;
+          document.body.dataset.staffAudio = "unlocked";
+        })
+        .catch(() => {
+          audio.muted = false;
+          document.body.dataset.staffAudio = "blocked";
+        });
+    };
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+    window.addEventListener("touchstart", unlock, { once: true });
 
     const supabase = createClient();
     const channel = supabase
@@ -76,10 +102,14 @@ export default function NotificationListener() {
       .subscribe();
 
     function handleNotification(entry: { title: string; body: string }) {
-      // Play ding — may reject if tab is backgrounded or user hasn't interacted yet.
-      // Use the ref so live mute changes are honored (state captures in closure go stale).
+      // Use the ref so live mute changes are honored (state captures in
+      // closure go stale). Surface play() failures on body.dataset instead of
+      // silent-swallowing — that's how we missed the autoplay-policy bug.
       if (!mutedRef.current) {
-        audioRef.current?.play().catch(() => {});
+        audioRef.current?.play().catch((err: unknown) => {
+          const name = err instanceof Error ? err.name : "unknown";
+          document.body.dataset.staffAudioLastError = name;
+        });
       }
 
       // Increment localStorage badge.
@@ -102,6 +132,9 @@ export default function NotificationListener() {
     }
 
     return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("touchstart", unlock);
       toastTimersRef.current.forEach(clearTimeout);
       toastTimersRef.current = [];
       supabase.removeChannel(channel);
