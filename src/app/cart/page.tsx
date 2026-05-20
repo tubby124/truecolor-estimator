@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { getCart, removeFromCart, addToCart, type CartItem } from "@/lib/cart/cart";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
+import { computeOrderMinSurcharge, ORDER_MINIMUM_DOLLARS, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { PRODUCT_IMAGES } from "@/lib/data/productImages";
 
 export default function CartPage() {
@@ -39,7 +40,9 @@ export default function CartPage() {
     }
   }
 
-  const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
+  const itemsSubtotal = items.reduce((s, i) => s + i.sell_price, 0);
+  const orderMin = computeOrderMinSurcharge(itemsSubtotal);
+  const subtotal = orderMin.effectiveSubtotal;
 
   if (!mounted)
     return (
@@ -136,9 +139,26 @@ export default function CartPage() {
 
             {/* Order total */}
             <div className="border-t border-gray-200 pt-6 mt-6 space-y-2">
+              {orderMin.applied && (
+                <>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Items</span>
+                    <span className="tabular-nums">${orderMin.subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>{SMALL_ORDER_FEE_LABEL}</span>
+                    <span className="tabular-nums">+${orderMin.surcharge.toFixed(2)}</span>
+                  </div>
+                  <div className="rounded-lg bg-amber-50 border border-amber-100 px-3 py-2 text-xs text-amber-800">
+                    Our small-order minimum is <strong className="tabular-nums">${ORDER_MINIMUM_DOLLARS.toFixed(2)}</strong>.
+                    Add <strong className="tabular-nums">${orderMin.shortfall.toFixed(2)}</strong> more product to skip this setup fee —
+                    you&apos;ll get more for the same price.
+                  </div>
+                </>
+              )}
               <div className="flex justify-between font-bold text-[#1c1712] text-lg">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span className="tabular-nums">${subtotal.toFixed(2)}</span>
               </div>
               <p className="text-xs text-gray-400">GST (5%) + PST (6%) added at checkout</p>
             </div>

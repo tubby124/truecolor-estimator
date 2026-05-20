@@ -21,6 +21,7 @@ import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { estimate } from "@/lib/engine";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { classifyFromHeaders } from "@/lib/analytics/referrer";
 
@@ -269,14 +270,22 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Calculate totals
-    const subtotal = items.reduce((s, i) => s + i.sell_price, 0);
+    const itemsSubtotal = items.reduce((s, i) => s + i.sell_price, 0);
     const rush = is_rush ? RUSH_FEE : 0;
     // Discount reduces pre-tax base (legally correct — reduces taxable amount)
-    const discount = Math.min(validatedDiscount, subtotal + rush); // cap: total can't go negative
-    const discountedSubtotal = subtotal - discount;
+    const discount = Math.min(validatedDiscount, itemsSubtotal + rush); // cap: total can't go negative
+    const discountedItemsSubtotal = itemsSubtotal - discount;
+    // Order-total minimum surcharge — replaces the per-product min charge that was
+    // killed 2026-05-19. If the discounted items total is below the order minimum
+    // ($25), top it up via a transparent "Small order setup fee" line. Discount is
+    // applied first so customers using a coupon don't get unexpectedly bumped.
+    // PST applies to it (setup is a service on tangible goods); GST always applies.
+    const orderMin = computeOrderMinSurcharge(discountedItemsSubtotal + rush);
+    const smallOrderFee = orderMin.surcharge;
+    const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
     // PST applies to printed goods only — design fees (PST-exempt) are subtracted from the PST base
     const rawPstBase = items.reduce((s, i) => s + (i.sell_price - (i.design_fee ?? 0)), 0);
-    const pstBase = Math.max(0, rawPstBase - discount); // discount reduces PST-taxable base
+    const pstBase = Math.max(0, rawPstBase - discount + smallOrderFee); // discount reduces PST-taxable base; setup fee adds to it
     const gst = Math.round((discountedSubtotal + rush) * GST_RATE * 100) / 100;
     const pst = Math.round(pstBase * PST_RATE * 100) / 100;
     const total = discountedSubtotal + rush + gst + pst;
@@ -418,6 +427,26 @@ export async function POST(req: NextRequest) {
       (orderItems[0] as Record<string, unknown>).file_storage_path = file_storage_paths[0];
     }
 
+    // Append the small-order setup fee as a transparent order line so the customer
+    // receipt + order detail page explain the surcharge instead of mystery dollars.
+    if (smallOrderFee > 0) {
+      orderItems.push({
+        order_id: order.id,
+        category: "SERVICE",
+        product_name: SMALL_ORDER_FEE_LABEL,
+        material_code: null,
+        width_in: null,
+        height_in: null,
+        sides: 1,
+        qty: 1,
+        addons: [],
+        is_rush,
+        design_status: "PRINT_READY",
+        unit_price: smallOrderFee,
+        line_total: smallOrderFee,
+      });
+    }
+
     const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
     if (itemsErr) {
       console.error("[orders] order_items insert:", itemsErr);
@@ -451,6 +480,18 @@ export async function POST(req: NextRequest) {
         }
         return lines;
       });
+
+      // Append the small-order setup fee as its own Wave line so the invoice
+      // explains the surcharge transparently to the customer.
+      if (smallOrderFee > 0) {
+        waveItems.push({
+          description: SMALL_ORDER_FEE_LABEL,
+          unitPrice: smallOrderFee,
+          qty: 1,
+          applyGst: true,
+          applyPst: true,
+        });
+      }
 
       const inv = await createWaveInvoice(waveCustomerId, waveItems, {
         isRush: is_rush,
