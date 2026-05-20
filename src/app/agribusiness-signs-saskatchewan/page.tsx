@@ -200,7 +200,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         },
         {
           q: "How much do ACP aluminum building signs cost?",
-          a: "ACP starts at $13/sqft with a $60 minimum. A 24\u00d736\u201d building directory panel is $66. A 4\u00d78 ft dealer fascia is $320. ACP is the professional standard for permanent outdoor signage — rigid, weather-resistant, and lasting 10+ years in Saskatchewan conditions.",
+          a: "ACP is $13/sqft. A 24\u00d736\u201d building directory panel is $78. A 4\u00d78 ft dealer fascia is $320. $25 small-order minimum applies at checkout. ACP is the professional standard for permanent outdoor signage — rigid, weather-resistant, and lasting 10+ years in Saskatchewan conditions.",
         },
         {
           q: "How fast can I get trade show displays printed in Saskatoon?",

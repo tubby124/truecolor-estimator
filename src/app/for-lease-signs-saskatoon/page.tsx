@@ -54,7 +54,7 @@ export default function ForLeaseSignsSaskatoonPage() {
               ACP aluminum
             </Link>{" "}
             from $13/sqft is the better substrate. ACP is rigid, rust-proof, and rated for 7–10
-            years outdoors. A 24×36″ ACP for-lease sign is $66. The minimum order on ACP is $60.
+            years outdoors. A 24×36″ ACP for-lease sign is $78 ($13/sqft × 6 sqft). $25 small-order minimum applies at checkout.
             Coroplast is the right call for properties that lease quickly; ACP is the right call
             for long-vacant industrial or commercial sites where signage stays up for years.
           </p>

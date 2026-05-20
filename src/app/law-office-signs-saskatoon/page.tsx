@@ -25,7 +25,7 @@ const descriptionNode = (
       signs, building directories, and reception wall plaques — rigid, UV-resistant, and built to
       last 10+ years on an exterior fascia or interior wall. Our in-house Roland UV printer locks
       colour panel to panel, so your firm name reads the same on the door sign as it does on the
-      lobby directory. An 18×24&quot; panel is $60 (minimum applies). A 24×36&quot; panel is $66. Bring your slot
+      lobby directory. An 18×24&quot; panel is $39 ($13/sqft × 3 sqft). A 24×36&quot; panel is $78 ($13/sqft × 6 sqft). Bring your slot
       dimensions and we cut to size.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -91,7 +91,7 @@ export default function LawOfficeSignsSaskatoonPage() {
       faqs={[
         {
           q: "What is the best sign material for a law office exterior suite sign?",
-          a: "3mm aluminum composite (ACP) is the standard for exterior suite signs. It's rigid, UV-resistant, and lasts 10+ years on a strip mall fascia or building exterior without warping or fading. ACP signs start at $13/sqft — a standard 18×24\" panel is $60 (minimum applies), a 24×36\" panel is $66. Bring your slot dimensions and we cut to size.",
+          a: "3mm aluminum composite (ACP) is the standard for exterior suite signs. It's rigid, UV-resistant, and lasts 10+ years on a strip mall fascia or building exterior without warping or fading. ACP signs are $13/sqft — a standard 18×24\" panel is $39, a 24×36\" panel is $78. Orders under $25 are topped up to a $25 small-order minimum at checkout. Bring your slot dimensions and we cut to size.",
         },
         {
           q: "Can you print a lobby directory panel for a multi-tenant professional building?",

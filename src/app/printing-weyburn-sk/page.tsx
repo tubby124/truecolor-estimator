@@ -52,7 +52,7 @@ export default function PrintingWeyburnPage() {
             </Link>{" "}
             from $13/sqft are built for permanent facility and yard signage — rigid composite
             panel, UV-printed on our Roland press, rated 10+ years outdoors in southeast
-            Saskatchewan conditions. An 18×24&quot; ACP panel is $60 (minimum applies); 24×36&quot; is $66.
+            Saskatchewan conditions. An 18×24&quot; ACP panel is $39 ($13/sqft × 3 sqft); 24×36&quot; is $78. $25 small-order minimum applies at checkout.
             Vehicle magnets from $45 ($24/sqft) for service trucks and industrial fleets.
             Vinyl banners from $8.25/sqft for company events and seasonal promotions.
           </p>
@@ -97,7 +97,7 @@ export default function PrintingWeyburnPage() {
         },
         {
           q: "What is the best sign product for Weyburn agricultural businesses?",
-          a: "Coroplast signs from $8/sqft are the most popular for ag businesses — yard signs, field signs, and seasonal promotions. H-stakes at $2.50 each for ground mounting. For permanent signs on buildings or gateways, ACP aluminum from $13/sqft (18×24\" = $60 min, 24×36\" = $66) is the better long-term investment.",
+          a: "Coroplast signs from $8/sqft are the most popular for ag businesses — yard signs, field signs, and seasonal promotions. H-stakes at $2.50 each for ground mounting. For permanent signs on buildings or gateways, ACP aluminum from $13/sqft (18×24\" = $39, 24×36\" = $78) is the better long-term investment.",
         },
         {
           q: "Are there local print shops in Weyburn that offer the same products?",

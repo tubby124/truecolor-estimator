@@ -52,7 +52,7 @@ export default function SignsNorthBattlefordPage() {
             from $45 ($24/sqft) stick securely to steel service truck doors and equipment
             cabs — remove cleanly with no adhesive residue. ACP aluminum signs from $13/sqft
             for permanent business and facility signage that handles northwest Saskatchewan winters.
-            An 18×24&quot; ACP panel is $60 ($60 minimum applies); 24×36&quot; is $66. Vinyl banners from $8.25/sqft for
+            An 18×24&quot; ACP panel is $39; 24×36&quot; is $78. $25 small-order minimum applies at checkout. Vinyl banners from $8.25/sqft for
             seasonal promotions, grand openings, and community events.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -97,7 +97,7 @@ export default function SignsNorthBattlefordPage() {
         },
         {
           q: "Can you print ACP aluminum signs for a business in North Battleford?",
-          a: "Yes — ACP aluminum signs from $13/sqft. An 18×24\" panel is $60 ($60 minimum applies), 24×36\" is $66. ACP is the right choice for permanent outdoor business signage — survives 10+ years without fading or warping in harsh Saskatchewan winters. We print on Roland UV and ship flat to North Battleford.",
+          a: "Yes — ACP aluminum signs from $13/sqft. An 18×24\" panel is $39, 24×36\" is $78. $25 small-order minimum applies at checkout. ACP is the right choice for permanent outdoor business signage — survives 10+ years without fading or warping in harsh Saskatchewan winters. We print on Roland UV and ship flat to North Battleford.",
         },
         {
           q: "Is there a local print shop in North Battleford that beats your prices?",
