@@ -64,7 +64,7 @@ const descriptionNode = (
 
     <p className="text-gray-600 text-lg leading-relaxed mb-10">
       Commercial signage budgets vary widely. A coroplast sidewalk sign runs $8/sqft (24×18 is
-      $16 before the $45 minimum). A 3×8 ft vinyl banner for a grand opening is $180.{" "}
+      $16, tops up to the $25 order-total minimum at checkout). A 3×8 ft vinyl banner for a grand opening is $180.{" "}
       <Link href="/aluminum-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
         ACP aluminum exterior signs
       </Link>{" "}
@@ -116,7 +116,7 @@ export default function CommercialSignsSaskatoonPage() {
         },
         {
           q: "How much does commercial signage cost for a small Saskatoon retail business?",
-          a: "A typical package for a new retail location runs $300–$700: one 24×48 ACP exterior sign ($104), a set of window decals ($45 minimum), 250 business cards ($45), and a 3×8 ft vinyl banner for the opening ($180). Same-day rush adds $40 flat. Volume pricing is available for multi-location rollouts — call (306) 954-8688.",
+          a: "A typical package for a new retail location runs $300–$700: one 24×48 ACP exterior sign ($104), a set of window decals (small sets hit the $25 order-total minimum), 250 business cards ($45), and a 3×8 ft vinyl banner for the opening ($180). Same-day rush adds $40 flat. Volume pricing is available for multi-location rollouts — call (306) 954-8688.",
         },
         {
           q: "Can you match my brand colours exactly?",

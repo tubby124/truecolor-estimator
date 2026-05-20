@@ -43,7 +43,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "Durable yard signs that survive Saskatchewan winters.",
     description:
       "Coroplast is 4mm corrugated polypropylene — think cardboard, but fully waterproof, UV-resistant, and built to survive Saskatchewan winters at -40°C. It's the most-ordered outdoor sign material at True Color because it hits the right balance: lightweight enough to install by hand, durable enough for 2–3 years of direct prairie sun. Real estate agents rely on 18×24\" coroplast for listing and open house signs. Contractors bolt 4×8 sheets to site hoardings. Election campaigns order 200+ at a time for lawn placement. Events use 12×18\" directional signs across venue grounds. The material prints beautifully — our Roland TrueVIS UV ink bonds directly to the polypropylene substrate for sharp text and vivid colour that won't peel or bubble. Single-sided is most common. Double-sided (both faces printed and bonded back-to-back) costs roughly 50% more and works well for directional signs visible from both approaches. Add wire H-stakes ($2.50 each) for ground installation or grommets ($2.50 each) for fence and wall mounting — both are available as add-ons in the estimator. True Color prints coroplast signs in-house at 216 33rd St W, Saskatoon. No outsourcing, no minimum quantity. Same-day rush available (+$40 flat) on most orders placed before 10 AM.",
-    fromPrice: "$30",
+    fromPrice: "$25",
     category: "SIGN",
     material_code: "MPHCC020",
     heroImage: "/images/products/product/coroplast-yard-sign-800x600.webp",
@@ -187,7 +187,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "30mil magnets for any vehicle. Remove in seconds.",
     description:
       "30mil vehicle magnets are the smart choice for Saskatoon tradespeople, delivery drivers, and small business owners who want professional fleet branding without a permanent commitment. The '30mil' refers to the thickness of the magnetic sheeting — 30 thousandths of an inch, heavy enough to hold against highway winds on flat steel panels including truck doors, cargo van sides, and equipment hoods. Unlike vinyl wraps or adhesive decals, magnets lift off in seconds and leave zero residue. Protect your vehicle's resale value. Swap branding between trucks. Remove them on personal trips. True Color prints vehicle magnets on our Roland TrueVIS UV equipment — full-colour output that reads clearly at 30 feet. The print surface is white gloss vinyl laminate: sharp logos, vivid brand colours, UV-resistant so they won't fade through a Saskatchewan summer. Most popular size is 12×18\" for truck doors. Step up to 18×24\" for more visibility, or 24×36\" for cargo vans. Order as few as one magnet. Volume discounts kick in at 2 units (8% off) and 5 units (23% off) — popular with contractors branding an entire fleet. Same-day rush available for $40 flat. Pickup at 216 33rd St W, Saskatoon.",
-    fromPrice: "$45",
+    fromPrice: "$25",
     category: "MAGNET",
     material_code: "MAG302437550M",
     heroImage: "/images/products/product/vehicle-magnets-800x600.webp",
@@ -353,7 +353,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "3mm aluminum composite. Built to last indoors or out.",
     description:
       "ACP (aluminum composite panel) is what you choose when a sign needs to last indefinitely — permanent business signage, address plaques, site identification boards, and retail directories that need to look sharp 10 years from now. The material consists of two thin aluminum face sheets bonded to a polyethylene core, producing a panel that's rigid but surprisingly lightweight — far easier to handle than solid aluminum plate. True Color prints on ACP with UV-cured digital inks that bond permanently to the surface for rich colour and sharp detail that won't fade, peel, or blister through Saskatchewan temperature swings. Unlike coroplast that flexes in the wind or wood that rots, ACP panels stay perfectly flat and weather-resistant for their entire lifespan. Standard sizes run from 12×18\" up to 4×8 ft. Mounting holes are drilled on request for screw-and-standoff installation; adhesive backing is available for glass or finished walls. Gloss laminate is standard; matte finish is available on request. ACP is the right call for permanent signage on a building exterior, at a gated entrance, or in a lobby. Printed and cut in-house at 216 33rd St W, Saskatoon — no outsourcing, same-day rush available on most sizes.",
-    fromPrice: "$60",
+    fromPrice: "$25",
     category: "RIGID",
     material_code: "RMACP002",
     heroImage: "/images/products/product/acp-sign-princess-liquidation-800x600.webp",

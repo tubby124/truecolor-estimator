@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Freezer Labels Regina SK | True Color Display Printing",
     description:
-      "3mil vinyl with freezer-grade adhesive (ARLPMF7008). Holds at -18°C. Printed in Saskatoon, shipped to Regina. From $5.50/sqft. $30 minimum.",
+      "3mil vinyl with freezer-grade adhesive (ARLPMF7008). Holds at -18°C. Printed in Saskatoon, shipped to Regina. From $5.50/sqft. $25 order minimum.",
     url: "https://truecolorprinting.ca/freezer-labels-regina",
     images: [{ url: "/images/products/og/freezer-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -76,7 +76,7 @@ export default function FreezerLabelsReginaPage() {
         "3mil vinyl + freezer-grade adhesive (ARLPMF7008) — holds at -18°C through frost cycles",
         "Already shipping this stock to Saskatoon raw pet food makers, butchers, food processors",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
-        "$30 minimum charge — no five-digit MOQ from a label converter",
+        "$25 order-total minimum — no five-digit MOQ from a label converter",
         "Roland UV inks cure to a solid film — print survives freezer-thaw cycles",
         "1–3 business day production + 1–2 business day courier to Regina",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -89,7 +89,7 @@ export default function FreezerLabelsReginaPage() {
         },
         {
           q: "How much do freezer labels cost shipped to Regina?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. A 10×2\" label at quantity 500 runs about $300. Regina courier is customer's cost.",
+          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 10×2\" label at quantity 500 runs about $300. Regina courier is customer's cost.",
         },
         {
           q: "Will the adhesive actually hold in a Regina freezer?",

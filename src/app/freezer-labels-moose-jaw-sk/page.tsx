@@ -76,7 +76,7 @@ export default function FreezerLabelsMooseJawPage() {
         "3mil vinyl + freezer-grade adhesive (ARLPMF7008) — holds at -18°C through frost cycles",
         "Already shipping this stock to Saskatoon raw pet food makers and butchers",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
-        "$30 minimum charge — no MOQ from a label converter",
+        "$25 order-total minimum — no MOQ from a label converter",
         "Roland UV inks cure to a solid film — survives freezer-thaw cycles",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -89,7 +89,7 @@ export default function FreezerLabelsMooseJawPage() {
         },
         {
           q: "How much do freezer labels cost shipped to Moose Jaw?",
-          a: "Sqft-tiered: $5.50/sqft (T1), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. A 10×2\" label at quantity 500 runs about $300. Moose Jaw courier is customer's cost.",
+          a: "Sqft-tiered: $5.50/sqft (T1), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 10×2\" label at quantity 500 runs about $300. Moose Jaw courier is customer's cost.",
         },
         {
           q: "Will the adhesive hold in a Moose Jaw freezer?",
@@ -105,7 +105,7 @@ export default function FreezerLabelsMooseJawPage() {
         },
         {
           q: "Can you do a small first run for a Moose Jaw startup?",
-          a: "Yes — $30 minimum charge covers small format jobs (2–4 sqft total label area). No five-digit MOQ. Start with 100–250 labels and scale up later.",
+          a: "Yes — $25 order-total minimum covers small format jobs (2–4 sqft total label area). No five-digit MOQ. Start with 100–250 labels and scale up later.",
         },
       ]}
       relatedCities={[

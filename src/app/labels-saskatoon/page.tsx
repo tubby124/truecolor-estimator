@@ -107,7 +107,7 @@ export default function LabelsSaskatoonHubPage() {
         "Five label categories under one roof — freezer, product, cosmetic, candle, roll — no need to source from multiple suppliers",
         "3mil vinyl + UV-cured ink — print survives moisture, frost, and bathroom humidity without smudging",
         "Sqft-tier pricing from $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
-        "$30 minimum charge — no five-digit MOQ like a commercial label converter",
+        "$25 order-total minimum — no five-digit MOQ like a commercial label converter",
         "Contour cut to rectangle, oval, circle, or custom shape — setup included in the sqft rate",
         "In-house Roland UV printer at 216 33rd St W — no outsourcing, no file handoffs",
         "1–3 business day turnaround after artwork approval, +$40 flat for same-day rush",

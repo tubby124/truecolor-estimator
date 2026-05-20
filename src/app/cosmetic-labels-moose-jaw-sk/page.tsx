@@ -73,7 +73,7 @@ export default function CosmeticLabelsMooseJawPage() {
         "Waterproof BOPP vinyl — survives bathroom humidity and product spills",
         "Roland UV ink cures to a solid film — no smudging or peeling",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4)",
-        "$30 minimum charge — perfect for farmers market test batches",
+        "$25 order-total minimum — perfect for farmers market test batches",
         "Contour cutting included — rectangle, oval, circle, custom die",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -86,7 +86,7 @@ export default function CosmeticLabelsMooseJawPage() {
         },
         {
           q: "How much do cosmetic labels cost shipped to Moose Jaw?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. A 3×4\" oval at quantity 250 runs about $200. Moose Jaw courier is customer's cost.",
+          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" oval at quantity 250 runs about $200. Moose Jaw courier is customer's cost.",
         },
         {
           q: "Do you print labels for handmade soap and bath bombs?",
@@ -98,7 +98,7 @@ export default function CosmeticLabelsMooseJawPage() {
         },
         {
           q: "Can you do a small first run for a Moose Jaw indie brand?",
-          a: "Yes — $30 minimum charge covers small format jobs. No five-digit MOQ. Start with 50–100 labels for a farmers market test, scale up as the brand grows.",
+          a: "Yes — $25 order-total minimum covers small format jobs. No five-digit MOQ. Start with 50–100 labels for a farmers market test, scale up as the brand grows.",
         },
         {
           q: "What's the turnaround for Moose Jaw cosmetic label orders?",

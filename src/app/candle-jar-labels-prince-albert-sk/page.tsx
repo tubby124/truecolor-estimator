@@ -73,7 +73,7 @@ export default function CandleJarLabelsPrinceAlbertPage() {
         "Heat-resistant adhesive — bonds to warm glass after hot-wax pour without bubbling",
         "Matte BOPP face survives 40+ hour candle burn without yellowing",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4)",
-        "$30 minimum charge — perfect for small startup and indigenous-craft batches",
+        "$25 order-total minimum — perfect for small startup and indigenous-craft batches",
         "Wrap-around bodies, top-of-lid circles, side ingredient panels — any shape included",
         "1–3 business day print + 1 business day courier to Prince Albert",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -86,7 +86,7 @@ export default function CandleJarLabelsPrinceAlbertPage() {
         },
         {
           q: "How much do candle labels cost shipped to Prince Albert?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. A 3×4\" wrap-around at quantity 250 runs about $200.",
+          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" wrap-around at quantity 250 runs about $200.",
         },
         {
           q: "Will the label survive a candle burn without yellowing?",

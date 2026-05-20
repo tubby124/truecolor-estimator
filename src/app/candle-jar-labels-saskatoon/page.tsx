@@ -31,7 +31,7 @@ export default function CandleJarLabelsSaskatoonPage() {
       descriptionNode={
         <>
           <p className="text-gray-700 text-lg leading-relaxed mb-6">
-            Custom labels for candle makers, jam and preserves producers, honey sellers, and mason jar brands across Saskatoon and Saskatchewan. Pricing starts at <strong>$5.50/sqft</strong> on 3mil vinyl with full-colour UV print, with a <strong>$30 minimum order</strong>. Most small candle and jar labels run well under a square foot each, so a typical run of 50–200 labels fits inside the first or second sqft tier. Volume drops the rate fast: 12.01–32 sqft is $5.00/sqft, 32.01–100 sqft is $4.30/sqft, and 100+ sqft drops to $3.20/sqft — useful when you&apos;re stocking up for the holiday market season.
+            Custom labels for candle makers, jam and preserves producers, honey sellers, and mason jar brands across Saskatoon and Saskatchewan. Pricing starts at <strong>$5.50/sqft</strong> on 3mil vinyl with full-colour UV print, with a <strong>$25 order-total minimum</strong> at checkout. Most small candle and jar labels run well under a square foot each, so a typical run of 50–200 labels fits inside the first or second sqft tier. Volume drops the rate fast: 12.01–32 sqft is $5.00/sqft, 32.01–100 sqft is $4.30/sqft, and 100+ sqft drops to $3.20/sqft — useful when you&apos;re stocking up for the holiday market season.
           </p>
           <p className="text-gray-700 leading-relaxed mb-6">
             Labels are printed on <strong>3mil white vinyl</strong> with a permanent adhesive and full-colour Roland UV ink. The matte vinyl face holds up to the warm exterior of a lit candle jar — it doesn&apos;t bubble or peel at typical candle-jar surface temperatures (we&apos;re talking about the outside of an 8oz or 12oz vessel during a normal burn, not direct contact with melted wax). For jam, jelly, honey, and preserves, the labels survive cold storage, the dishwasher splash zone, and the back-of-the-truck trip to a Saskatoon farmers&apos; market in February.
@@ -77,11 +77,11 @@ export default function CandleJarLabelsSaskatoonPage() {
         },
         {
           q: "Can you cut round labels for the tops of preserves jars?",
-          a: "Yes — round die-cut tops are standard. 2.25\" diameter fits regular-mouth 500ml mason lids; 2.75\" fits wide-mouth lids. We contour-cut on the same Roland UV pass, so there's no extra die-cut setup fee beyond the $30 minimum. Mix wraparounds and tops on the same order to consolidate into a higher sqft tier and drop your rate.",
+          a: "Yes — round die-cut tops are standard. 2.25\" diameter fits regular-mouth 500ml mason lids; 2.75\" fits wide-mouth lids. We contour-cut on the same Roland UV pass, so there's no extra die-cut setup fee beyond the $25 order-total minimum at checkout. Mix wraparounds and tops on the same order to consolidate into a higher sqft tier and drop your rate.",
         },
         {
           q: "Are these dishwasher and freezer safe?",
-          a: "The vinyl + UV ink combination handles cold storage and the dishwasher splash zone without lifting. Top-rack dishwasher cycles are fine; bottom-rack repeated washes will eventually degrade any vinyl label. For freezer storage of jam, honey, and preserves — no issue, the adhesive holds at sub-zero temperatures. Quote starts at $30 minimum regardless of run size.",
+          a: "The vinyl + UV ink combination handles cold storage and the dishwasher splash zone without lifting. Top-rack dishwasher cycles are fine; bottom-rack repeated washes will eventually degrade any vinyl label. For freezer storage of jam, honey, and preserves — no issue, the adhesive holds at sub-zero temperatures. Small runs hit the $25 order-total minimum at checkout.",
         },
         {
           q: "How fast can you get labels printed?",

@@ -77,7 +77,7 @@ export default function FreezerLabelsPrinceAlbertPage() {
         "3mil vinyl + freezer-grade adhesive (ARLPMF7008) — holds at -18°C through frost cycles",
         "Already shipping this stock to Saskatoon raw pet food makers, butchers, fisheries",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
-        "$30 minimum charge — no five-digit MOQ from a label converter",
+        "$25 order-total minimum — no five-digit MOQ from a label converter",
         "Roland UV inks cure to a solid film — print survives freezer-thaw cycles",
         "1–3 business day print + 1 business day courier to Prince Albert",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -90,7 +90,7 @@ export default function FreezerLabelsPrinceAlbertPage() {
         },
         {
           q: "How much do freezer labels cost shipped to Prince Albert?",
-          a: "Sqft-tiered: $5.50/sqft (T1), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4). Minimum $30. A 10×2\" label at quantity 500 runs about $300. PA courier cost is typically lowest of our SK lanes.",
+          a: "Sqft-tiered: $5.50/sqft (T1), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4). $25 order minimum. A 10×2\" label at quantity 500 runs about $300. PA courier cost is typically lowest of our SK lanes.",
         },
         {
           q: "Will the adhesive hold in a Prince Albert deep freezer?",

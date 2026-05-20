@@ -77,7 +77,7 @@ export default function ProductLabelsReginaPage() {
         "Gloss, matte, or soft-touch 3mil vinyl — finish choice matches your brand",
         "Contour-cut to any shape — rectangle, oval, circle, custom die — setup included",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
-        "$30 minimum charge — no five-digit MOQ",
+        "$25 order-total minimum — no five-digit MOQ",
         "Waterproof BOPP option available for beverage labels and bath products",
         "1–3 business day print + 1–2 day courier to Regina",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -90,7 +90,7 @@ export default function ProductLabelsReginaPage() {
         },
         {
           q: "How much do product labels cost shipped to Regina?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. Anchor: a 3×4\" label at quantity 500 runs about $300. Regina courier is customer's cost.",
+          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. Anchor: a 3×4\" label at quantity 500 runs about $300. Regina courier is customer's cost.",
         },
         {
           q: "What finishes do you offer for Regina product labels?",

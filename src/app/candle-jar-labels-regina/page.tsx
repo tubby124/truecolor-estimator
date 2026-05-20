@@ -74,7 +74,7 @@ export default function CandleJarLabelsReginaPage() {
         "Heat-resistant adhesive — bonds to warm glass after hot-wax pour without bubbling",
         "Matte BOPP face survives 40+ hour candle burn without yellowing or curling",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
-        "$30 minimum charge — perfect for small home-fragrance startup batches",
+        "$25 order-total minimum — perfect for small home-fragrance startup batches",
         "Wrap-around bodies, top-of-lid circles, side ingredient panels — any shape included",
         "1–3 business day print + 1–2 day courier to Regina",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -87,7 +87,7 @@ export default function CandleJarLabelsReginaPage() {
         },
         {
           q: "How much do candle labels cost shipped to Regina?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. A 3×4\" wrap-around candle label at quantity 250 runs about $200. Regina courier is customer's cost.",
+          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" wrap-around candle label at quantity 250 runs about $200. Regina courier is customer's cost.",
         },
         {
           q: "Will the label survive a candle burn without yellowing?",

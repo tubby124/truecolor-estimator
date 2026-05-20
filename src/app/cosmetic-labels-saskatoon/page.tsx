@@ -49,7 +49,7 @@ export default function CosmeticLabelsSaskatoonPage() {
       faqs={[
         {
           q: "How much do cosmetic labels cost in Saskatoon?",
-          a: "Cosmetic labels at True Color start at $5.50/sqft on 3mil vinyl with a $25 small-order minimum at checkout order. Tier pricing drops to $5.00/sqft over 12 sqft, $4.30/sqft over 32 sqft, and $3.20/sqft over 100 sqft. A typical run of 100 labels at 2×3″ works out to about $25 worth of sqft — so the $30 minimum kicks in. Call (306) 954-8688 for an exact quote on your specific size and quantity.",
+          a: "Cosmetic labels at True Color start at $5.50/sqft on 3mil vinyl with a $25 order-total minimum at checkout. Tier pricing drops to $5.00/sqft over 12 sqft, $4.30/sqft over 32 sqft, and $3.20/sqft over 100 sqft. A typical run of 100 labels at 2×3″ works out to about $25 worth of sqft — right at the order-total floor. Call (306) 954-8688 for an exact quote on your specific size and quantity.",
         },
         {
           q: "What material do you use for cosmetic and skincare labels?",
@@ -65,11 +65,11 @@ export default function CosmeticLabelsSaskatoonPage() {
         },
         {
           q: "Do you offer matte or gloss finish?",
-          a: "Both — and they're the same $5.50/sqft price. Matte reads as natural/apothecary, which suits soap makers, essential oil bottlers, and botanical skincare. Gloss reads as clinical/luxury, which suits perfumes, serums, and high-end cosmetic lines. If you're unsure, we can print a small test of both finishes for $30 minimum so you can hold them against your bottles before committing to a full run.",
+          a: "Both — and they're the same $5.50/sqft price. Matte reads as natural/apothecary, which suits soap makers, essential oil bottlers, and botanical skincare. Gloss reads as clinical/luxury, which suits perfumes, serums, and high-end cosmetic lines. If you're unsure, we can print a small test of both finishes (small tests hit the $25 order-total minimum at checkout) so you can hold them against your bottles before committing to a full run.",
         },
         {
           q: "What sizes work best for cosmetic containers?",
-          a: "Common sizes: 1.5×3″ for narrow dropper bottles and lip balm tubes, 2×3″ for 30ml pump bottles and small jars, 2×4″ for 50–100ml bottles and aluminum tubes. We cut to any custom dimension you supply. A 2×3″ label uses 0.042 sqft, so a 100-piece run is 4.2 sqft — under the $30 minimum, so you'd pay the $30 floor.",
+          a: "Common sizes: 1.5×3″ for narrow dropper bottles and lip balm tubes, 2×3″ for 30ml pump bottles and small jars, 2×4″ for 50–100ml bottles and aluminum tubes. We cut to any custom dimension you supply. A 2×3″ label uses 0.042 sqft, so a 100-piece run is 4.2 sqft — under the $25 order-total minimum at checkout, so you'd pay the $25 order floor.",
         },
         {
           q: "How fast can I get cosmetic labels printed in Saskatoon?",

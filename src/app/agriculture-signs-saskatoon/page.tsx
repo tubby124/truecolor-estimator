@@ -175,7 +175,7 @@ export default function AgricultureSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much do farm gate signs cost in Saskatchewan?",
-          a: "Coroplast farm gate signs at True Color start at $8/sqft with a $25 small-order minimum at checkout. A standard 18\u00d724\u201d gate sign is $24 (you pay the $30 minimum). A 24\u00d736\u201d sign is $48. For permanent farm entrance signs, ACP aluminum starts at $13/sqft ($60 minimum) and lasts 10+ years. Volume: 5+ signs = 8% off, 10+ signs = 17% off coroplast.",
+          a: "Coroplast farm gate signs at True Color start at $8/sqft with a $25 small-order minimum at checkout. A standard 18\u00d724\u201d gate sign is $25 ($24 of sign + the $25 order-total minimum at checkout). A 24\u00d736\u201d sign is $48. For permanent farm entrance signs, ACP aluminum starts at $13/sqft (small panels also hit the $25 order minimum) and lasts 10+ years. Volume: 5+ signs = 8% off, 10+ signs = 17% off coroplast.",
         },
         {
           q: "What is the most durable sign material for Saskatchewan winters?",
@@ -187,7 +187,7 @@ export default function AgricultureSignsSaskatoonPage() {
         },
         {
           q: "Do you print plot markers and field boundary signs?",
-          a: "Yes \u2014 coroplast signs are the standard for field and plot markers. UV-printed with your field number, crop type, or variety name. Typically 12\u00d718\u201d ($30 minimum) or 18\u00d724\u201d ($24). Waterproof and stake-ready. Bulk pricing: 10+ markers = 17% off, 25+ = 23% off.",
+          a: "Yes \u2014 coroplast signs are the standard for field and plot markers. UV-printed with your field number, crop type, or variety name. Typically 12\u00d718\u201d or 18\u00d724\u201d ($24 \u2014 tops up to the $25 order-total minimum at checkout). Waterproof and stake-ready. Bulk pricing: 10+ markers = 17% off, 25+ = 23% off.",
         },
         {
           q: "What printed materials do I need for Ag in Motion or Agribition?",
@@ -199,7 +199,7 @@ export default function AgricultureSignsSaskatoonPage() {
         },
         {
           q: "Are vehicle magnets good for farm trucks?",
-          a: "Yes \u2014 30mil magnetic vinyl magnets from $24/sqft ($45 minimum) stick securely to any steel vehicle. Standard farm truck door size is 12\u00d724\u201d. Removable between seasons with no paint damage. Popular with seed dealers, equipment reps, and ag consultants.",
+          a: "Yes \u2014 30mil magnetic vinyl magnets from $24/sqft (single magnets hit the $25 order-total minimum at checkout) stick securely to any steel vehicle. Standard farm truck door size is 12\u00d724\u201d. Removable between seasons with no paint damage. Popular with seed dealers, equipment reps, and ag consultants.",
         },
         {
           q: "Can I get banners and signs designed if I don\u2019t have a logo?",

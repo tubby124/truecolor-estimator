@@ -109,7 +109,7 @@ export default function CommunityPrintingSaskatoonPage() {
         },
         {
           q: "What's the most cost-effective setup for a community fundraiser event in Saskatoon?",
-          a: "A cost-effective fundraiser package typically includes: one or two 3×8 ft vinyl backdrop banners ($180 each), a set of coroplast directional signs ($45 minimum for a few pieces), 100–200 flyers ($45–$65), and a retractable stand for registration or information ($219). Total is typically $500–$800 depending on quantity. Volume discounts apply on larger orders.",
+          a: "A cost-effective fundraiser package typically includes: one or two 3×8 ft vinyl backdrop banners ($180 each), a set of coroplast directional signs (small sets hit the $25 order-total minimum), 100–200 flyers ($45–$65), and a retractable stand for registration or information ($219). Total is typically $500–$800 depending on quantity. Volume discounts apply on larger orders.",
         },
         {
           q: "How do I reuse signage for recurring annual community events?",

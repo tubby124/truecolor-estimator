@@ -180,7 +180,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
       faqs={[
         {
           q: "What signage do farm equipment dealers need?",
-          a: "The standard setup includes: ACP aluminum building signs for the exterior ($13/sqft, $60 minimum — a 4\u00d78 ft dealer fascia is $320), coroplast lot signs for inventory ($8/sqft, from $30), retractable banner stands for the showroom ($219 each), vehicle magnets for the sales fleet ($24/sqft, from $45), and business cards for staff (250 for $45).",
+          a: "The standard setup includes: ACP aluminum building signs for the exterior ($13/sqft— a 4\u00d78 ft dealer fascia is $320), coroplast lot signs for inventory ($8/sqft, from $25 at checkout), retractable banner stands for the showroom ($219 each), vehicle magnets for the sales fleet ($24/sqft, from $25 at checkout), and business cards for staff (250 for $45).",
         },
         {
           q: "How much does a retractable banner stand cost in Saskatoon?",
@@ -188,7 +188,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         },
         {
           q: "What is the difference between coroplast and aluminum composite signs?",
-          a: "Coroplast ($8/sqft, $30 minimum) is corrugated plastic — lightweight, waterproof, and lasts 2\u20133 years outdoors. Best for seasonal and temporary signage. ACP aluminum ($13/sqft, $60 minimum) is rigid metal composite — weather-proof, fade-resistant, and lasts 10+ years. Best for permanent building signs, dealer fascia, and elevator IDs.",
+          a: "Coroplast ($8/sqft) is corrugated plastic — lightweight, waterproof, and lasts 2\u20133 years outdoors. Best for seasonal and temporary signage. ACP aluminum ($13/sqft) is rigid metal composite — weather-proof, fade-resistant, and lasts 10+ years. Best for permanent building signs, dealer fascia, and elevator IDs.",
         },
         {
           q: "Do you print signs for Canadian Western Agribition exhibitors?",
@@ -196,7 +196,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         },
         {
           q: "Can you print vehicle magnets for a fleet of delivery trucks?",
-          a: "Yes — 30mil magnetic vinyl from $24/sqft ($45 minimum per pair). Standard truck door size is 12\u00d724\u201d. Removable between seasons with no paint damage. Bulk pricing available for fleet orders — 5+ magnets = 5% off, 10+ = 10% off.",
+          a: "Yes — 30mil magnetic vinyl from $24/sqft (single magnets hit the $25 order-total minimum at checkout). Standard truck door size is 12\u00d724\u201d. Removable between seasons with no paint damage. Bulk pricing available for fleet orders — 5+ magnets = 5% off, 10+ = 10% off.",
         },
         {
           q: "How much do ACP aluminum building signs cost?",

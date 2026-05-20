@@ -43,7 +43,7 @@ export default function ProductLabelsSaskatoonPage() {
         "Gloss or matte finish — gloss for jars/bottles, matte for premium beverage and supplements",
         "Any size: 2×3, 3×4, 4×6, or custom-cut to your container spec",
         "1–3 business day standard turnaround, +$40 flat same-day rush before 10 AM",
-        "$30 minimum order — print 50 labels to test the shelf before committing to 1,000",
+        "$25 order-total minimum at checkout — print 50 labels to test the shelf before committing to 1,000",
         "In-house designer at $35 flat for ingredients lists, nutrition blocks, barcodes, EN/FR",
       ]}
       faqs={[

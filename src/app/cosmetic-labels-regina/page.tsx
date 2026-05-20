@@ -77,7 +77,7 @@ export default function CosmeticLabelsReginaPage() {
         "Waterproof BOPP vinyl — survives bathroom humidity and product spills without smudging",
         "Roland UV ink bonds to the vinyl as a solid film — colours stay vivid",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
-        "$30 minimum charge — perfect for small-batch indie launches",
+        "$25 order-total minimum — perfect for small-batch indie launches",
         "Contour-cut to any shape — rectangle, oval, circle, custom die for unique bottles",
         "1–3 business day print + 1–2 day courier to Regina",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -90,7 +90,7 @@ export default function CosmeticLabelsReginaPage() {
         },
         {
           q: "How much do cosmetic labels cost shipped to Regina?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. A 3×4\" oval label at quantity 250 runs about $200. Regina courier is customer's cost.",
+          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" oval label at quantity 250 runs about $200. Regina courier is customer's cost.",
         },
         {
           q: "Will the label survive bathroom moisture?",
@@ -98,7 +98,7 @@ export default function CosmeticLabelsReginaPage() {
         },
         {
           q: "Can you do a small first run for a Regina indie skincare brand?",
-          a: "Yes — $30 minimum charge covers small format jobs. No five-digit MOQ. Start with 100–250 labels for a market test, then scale to production runs as your brand grows. Reorders use the same artwork file — no setup fee.",
+          a: "Yes — $25 order-total minimum covers small format jobs. No five-digit MOQ. Start with 100–250 labels for a market test, then scale to production runs as your brand grows. Reorders use the same artwork file — no setup fee.",
         },
         {
           q: "What's the turnaround for Regina cosmetic label orders?",

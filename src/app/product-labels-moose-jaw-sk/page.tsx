@@ -74,7 +74,7 @@ export default function ProductLabelsMooseJawPage() {
         "Gloss, matte, or soft-touch 3mil vinyl + waterproof BOPP option",
         "Contour cutting included — rectangle, oval, circle, custom die",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4)",
-        "$30 minimum charge — works for small first-run batches",
+        "$25 order-total minimum — works for small first-run batches",
         "UV-cured ink survives bottle moisture and ice-bath beverage chilling",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -87,7 +87,7 @@ export default function ProductLabelsMooseJawPage() {
         },
         {
           q: "How much do product labels cost shipped to Moose Jaw?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. A 3×4\" label at quantity 500 runs about $300. Moose Jaw courier cost is customer's.",
+          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" label at quantity 500 runs about $300. Moose Jaw courier cost is customer's.",
         },
         {
           q: "Do you print beverage labels for Moose Jaw breweries and distilleries?",
@@ -95,7 +95,7 @@ export default function ProductLabelsMooseJawPage() {
         },
         {
           q: "Can you do a small first run for a Moose Jaw startup brand?",
-          a: "Yes — $30 minimum charge covers small-format jobs (2–4 sqft of label total). No five-digit MOQ. Start with 100–250 labels for a market test, scale up as your brand grows.",
+          a: "Yes — $25 order-total minimum covers small-format jobs (2–4 sqft of label total). No five-digit MOQ. Start with 100–250 labels for a market test, scale up as your brand grows.",
         },
         {
           q: "What's the turnaround for Moose Jaw product label orders?",

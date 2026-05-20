@@ -95,7 +95,7 @@ export default function EducationSignsSaskatoonPage() {
       faqs={[
         {
           q: "What signs do Saskatoon schools typically order for enrollment season?",
-          a: "Enrollment season (late July through August) typically calls for coroplast yard signs at $8/sqft — a 24×18 inch sign is $16 before the $45 minimum, so most schools order 3–5 signs per location. Vinyl banners for the school exterior ($8.25/sqft, 4×8 ft is $240) and window decals ($11/sqft) for office hours and contact info are also common. We keep artwork on file for fast annual reorders.",
+          a: "Enrollment season (late July through August) typically calls for coroplast yard signs at $8/sqft — a 24×18 inch sign is $16 (tops up to the $25 order-total minimum at checkout for a single sign), so most schools order 3–5 signs per location. Vinyl banners for the school exterior ($8.25/sqft, 4×8 ft is $240) and window decals ($11/sqft) for office hours and contact info are also common. We keep artwork on file for fast annual reorders.",
         },
         {
           q: "Can you print graduation banners for Saskatoon schools?",

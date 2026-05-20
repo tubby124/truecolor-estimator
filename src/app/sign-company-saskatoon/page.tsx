@@ -22,7 +22,7 @@ const designDirections = [
   {
     title: "Coroplast Sign Applications",
     subtitle:
-      "From $8/sqft · $30 minimum · 4mm flute coroplast · Roland UV in-house",
+      "From $8/sqft · $25 order minimum · 4mm flute coroplast · Roland UV in-house",
     aspect: "3/4" as const,
     maxCols: 3 as const,
     items: [

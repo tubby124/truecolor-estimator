@@ -74,7 +74,7 @@ export default function CosmeticLabelsPrinceAlbertPage() {
         "Waterproof BOPP vinyl — survives bathroom humidity and product spills",
         "Roland UV ink cures to a solid film — no smudging or peeling",
         "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4)",
-        "$30 minimum charge — perfect for indigenous-craft and indie test batches",
+        "$25 order-total minimum — perfect for indigenous-craft and indie test batches",
         "Contour cutting included — rectangle, oval, circle, custom die",
         "1–3 business day print + 1 business day courier to Prince Albert",
         "Same-day rush at +$40 flat when ordered before 10 AM",
@@ -87,7 +87,7 @@ export default function CosmeticLabelsPrinceAlbertPage() {
         },
         {
           q: "How much do cosmetic labels cost shipped to Prince Albert?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). Minimum $30. A 3×4\" oval at quantity 250 runs about $200.",
+          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" oval at quantity 250 runs about $200.",
         },
         {
           q: "Do you print labels for indigenous-craft and natural-product brands in PA?",
