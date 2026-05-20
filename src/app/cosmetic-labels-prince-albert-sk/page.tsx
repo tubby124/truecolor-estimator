@@ -36,7 +36,7 @@ export default function CosmeticLabelsPrinceAlbertPage() {
             shop and couriers to Prince Albert 140 km north. Standard cosmetic stock is{" "}
             <strong>waterproof BOPP vinyl</strong> — survives bathroom humidity, product
             spills on the bottle, and the moisture cycle that happens with any hand soap or
-            lotion. Pricing from <strong>$5.50/sqft</strong> with a $30 minimum charge. Full
+            lotion. Pricing from <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full
             spec on our{" "}
             <Link href="/cosmetic-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               cosmetic labels Saskatoon page

@@ -49,7 +49,7 @@ export default function CosmeticLabelsSaskatoonPage() {
       faqs={[
         {
           q: "How much do cosmetic labels cost in Saskatoon?",
-          a: "Cosmetic labels at True Color start at $5.50/sqft on 3mil vinyl with a $30 minimum order. Tier pricing drops to $5.00/sqft over 12 sqft, $4.30/sqft over 32 sqft, and $3.20/sqft over 100 sqft. A typical run of 100 labels at 2×3″ works out to about $25 worth of sqft — so the $30 minimum kicks in. Call (306) 954-8688 for an exact quote on your specific size and quantity.",
+          a: "Cosmetic labels at True Color start at $5.50/sqft on 3mil vinyl with a $25 small-order minimum at checkout order. Tier pricing drops to $5.00/sqft over 12 sqft, $4.30/sqft over 32 sqft, and $3.20/sqft over 100 sqft. A typical run of 100 labels at 2×3″ works out to about $25 worth of sqft — so the $30 minimum kicks in. Call (306) 954-8688 for an exact quote on your specific size and quantity.",
         },
         {
           q: "What material do you use for cosmetic and skincare labels?",

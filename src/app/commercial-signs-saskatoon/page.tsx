@@ -124,7 +124,7 @@ export default function CommercialSignsSaskatoonPage() {
         },
         {
           q: "Do you offer window decals that can be removed without damaging the glass?",
-          a: "Yes — our window decals are printed on removable vinyl that peels off cleanly without residue. They're ideal for promotional pricing, seasonal campaigns, and business hours. Window decals start at $11/sqft with a $45 minimum.",
+          a: "Yes — our window decals are printed on removable vinyl that peels off cleanly without residue. They're ideal for promotional pricing, seasonal campaigns, and business hours. Window decals start at $11/sqft with a $25 small-order minimum at checkout.",
         },
         {
           q: "How fast can you print commercial signs in Saskatoon?",

@@ -773,14 +773,14 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Print", value: "Full-colour UV-resistant digital print" },
       { label: "Cut", value: "Die-cut square — clean edges, no carrier sheet" },
       { label: "Sizes", value: "1×3\" · 2×2\" · 2×3\" · 2×4\" · 3×3\" · 4×4\" · 4×6\" · 5×5\" · 6×6\" · 8×8\" — custom shapes by quote" },
-      { label: "Minimum qty", value: "50 stickers" },
+      { label: "Minimum qty", value: "25 stickers" },
       { label: "Adhesive", value: "Removable — peels cleanly from most surfaces" },
     ],
     whoUsesThis: ["Retail", "Events", "Food & Bev", "Sports", "Trades"],
     faqs: [
       {
-        q: "Why is the minimum 50 stickers?",
-        a: "Setup and cutting time makes small runs uneconomical. At 50 units the price per sticker drops to $1.90 each. At 1000 units it's $0.65 each.",
+        q: "Is there a minimum order quantity?",
+        a: "25 stickers minimum. Setup and cutting time make smaller runs uneconomical. At 50 units the price per sticker drops to around $1.90 each; at 1000 units it's around $0.65 each. Carts under $25 add a small-order setup fee to reach the $25 order minimum.",
       },
       {
         q: "Can I get custom shapes — circles, die-cut logos?",

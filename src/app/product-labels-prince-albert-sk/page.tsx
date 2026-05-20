@@ -35,7 +35,7 @@ export default function ProductLabelsPrinceAlbertPage() {
             True Color Display Printing prints custom retail product labels at our Saskatoon
             shop and couriers to Prince Albert 140 km north. 3mil vinyl in gloss, matte, or
             soft-touch finish — plus waterproof BOPP for beverage and bath products. Pricing
-            from <strong>$5.50/sqft</strong> with a $30 minimum charge. Full material spec
+            from <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full material spec
             and pricing tiers on our{" "}
             <Link href="/product-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               product labels Saskatoon page

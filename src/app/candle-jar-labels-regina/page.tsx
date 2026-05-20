@@ -37,7 +37,7 @@ export default function CandleJarLabelsReginaPage() {
             <strong>matte BOPP vinyl with heat-resistant adhesive</strong> — bonds to the
             warm glass surface immediately after a hot-wax pour without bubbling, and survives
             a 40+ hour candle burn without yellowing or curling near the flame. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $30 minimum charge. Full spec on our{" "}
+            <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full spec on our{" "}
             <Link href="/candle-jar-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               candle &amp; jar labels Saskatoon page
             </Link>.

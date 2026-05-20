@@ -34,7 +34,7 @@ export default function LabelsSaskatoonHubPage() {
           <p className="text-gray-600 text-lg leading-relaxed">
             True Color Display Printing prints five categories of custom adhesive labels in
             Saskatoon, all on our in-house Roland UV printer at 216 33rd St W. Pricing starts
-            at <strong>$5.50/sqft</strong> on 3mil vinyl with a $30 minimum charge. Four-tier
+            at <strong>$5.50/sqft</strong> on 3mil vinyl with a $25 small-order minimum at checkout charge. Four-tier
             sqft pricing scales down to <strong>$3.20/sqft</strong> beyond 100 sqft — the
             same cost-honest sqft tier we use for stickers and decals. No five-digit MOQ from
             a label converter. Pay for what you order.

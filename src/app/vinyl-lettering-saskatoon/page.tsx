@@ -32,7 +32,7 @@ export default function VinylLetteringSaskatoonPage() {
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             Cut vinyl lettering is the cleanest, lowest-cost way to put text and simple shapes on a
             Saskatoon storefront window, vehicle door, office glass, boat hull, or trailer. Starting
-            from $8.50/sqft with a $40 minimum — no printing, no laminate, just precision-cut
+            from $8.50/sqft with a $25 small-order minimum at checkout — no printing, no laminate, just precision-cut
             single-colour vinyl applied flat. Common jobs include business hours on a front door,
             your company name across a shop window, vehicle door lettering with a phone number, and
             office suite or room numbers. Compare it to{" "}

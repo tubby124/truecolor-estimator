@@ -35,7 +35,7 @@ export default function ProductLabelsReginaPage() {
             True Color Display Printing prints custom retail product labels at our Saskatoon
             shop and ships to Regina businesses 260 km south. Stock options include 3mil
             white vinyl in gloss, matte, or soft-touch finish. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $30 minimum charge. Full pricing tiers and
+            <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full pricing tiers and
             material spec on our{" "}
             <Link href="/product-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               product labels Saskatoon page

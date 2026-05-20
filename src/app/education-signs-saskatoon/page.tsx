@@ -115,7 +115,7 @@ export default function EducationSignsSaskatoonPage() {
         },
         {
           q: "How much do school event banners cost in Saskatoon?",
-          a: "Vinyl banners are priced at $8.25/sqft with a $45 minimum. A 2×6 ft banner is $90, a 3×8 ft banner is $180, a 4×8 ft banner is $240. Retractable banner stands (stand + print) are $219 complete — ideal for gym and auditorium events. Standard turnaround is 1–3 business days. Same-day rush is +$40 flat if ordered before 10 AM.",
+          a: "Vinyl banners are priced at $8.25/sqft with a $25 small-order minimum at checkout. A 2×6 ft banner is $90, a 3×8 ft banner is $180, a 4×8 ft banner is $240. Retractable banner stands (stand + print) are $219 complete — ideal for gym and auditorium events. Standard turnaround is 1–3 business days. Same-day rush is +$40 flat if ordered before 10 AM.",
         },
       ]}
       relatedCities={[
