@@ -42,6 +42,7 @@ export interface Order {
   total: number;
   payment_method: string;
   wave_invoice_id: string | null;
+  wave_invoice_number: string | null;
   wave_invoice_approved_at: string | null;
   wave_payment_recorded_at: string | null;
   created_at: string;

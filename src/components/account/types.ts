@@ -33,6 +33,9 @@ export interface Order {
   receipt_token: string | null;
   paid_at: string | null;
   wave_payment_recorded_at: string | null;
+  wave_invoice_id?: string | null;
+  wave_invoice_number?: string | null;
+  wave_invoice_approved_at?: string | null;
   pay_url: string | null;
   proof_storage_path: string | null;
   proof_sent_at: string | null;

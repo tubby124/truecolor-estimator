@@ -217,27 +217,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create order after retries" }, { status: 500 });
     }
 
-    // Increment customer lifetime stats (non-fatal)
-    void (async () => {
-      try {
-        const { data: c } = await supabase
-          .from("customers")
-          .select("order_count, total_spent")
-          .eq("id", customer.id)
-          .single();
-        if (c) {
-          await supabase
-            .from("customers")
-            .update({
-              order_count: (c.order_count ?? 0) + 1,
-              total_spent: Math.round(((c.total_spent ?? 0) + total) * 100) / 100,
-            })
-            .eq("id", customer.id);
-        }
-      } catch {
-        console.error("[manual-order] customer stats increment failed (non-fatal)");
-      }
-    })();
+    // Customer lifetime stats (order_count / total_spent) are now incremented
+    // at payment_received (Clover webhook, status route, confirm-etransfer)
+    // instead of at order creation. Prevents abandoned-order inflation.
+    // — see src/lib/customers/incrementOrderStats.ts
 
     // ── 4. Insert order_items rows (one per item) ──
     for (const item of items) {
@@ -308,9 +291,12 @@ export async function POST(req: NextRequest) {
         {
           const { error: updErr } = await supabase
             .from("orders")
-            .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
+            .update({
+              wave_invoice_id: inv.invoiceId,
+              wave_invoice_number: inv.invoiceNumber,
+            } as Record<string, unknown>)
             .eq("id", order.id);
-          if (updErr) console.error("[manual-order] wave_invoice_id save failed (non-fatal):", updErr.message);
+          if (updErr) console.error("[manual-order] wave_invoice_id/number save failed (non-fatal):", updErr.message);
         }
 
         if (!quoteOnly) {

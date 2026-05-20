@@ -19,6 +19,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
+import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
@@ -162,6 +163,9 @@ export async function POST(req: NextRequest) {
                   `<b>${safeOrderRef}</b> · $${totalNum.toFixed(2)}` +
                   (updated.is_rush ? "\n⚡ RUSH" : "")
                 ).catch(() => {});
+                // Increment customer lifetime stats now that payment is confirmed
+                // (moved from order-creation to here so abandoned orders don't inflate)
+                void incrementCustomerOrderStats(supabase, updated.customer_id, totalNum);
               }
 
               const order = updatedOrders[0];

@@ -20,7 +20,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 
-const MT_OFFSET_HOURS = 6; // MDT = UTC-6 (May-Nov). MST = UTC-7. Off by 1h Nov-Mar.
+// DST-aware Mountain Time offset for Saskatchewan-adjacent ops.
+// America/Regina is UTC-6 year-round (SK doesn't observe DST), so for True
+// Color (Saskatoon-based) the offset is always 6 — but we compute dynamically
+// so the digest stays correct if the office tz ever changes (Edmonton/MDT
+// would auto-flip to 7 in winter, 6 in summer).
+function mtOffsetHours(): number {
+  const fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/Regina", timeZoneName: "shortOffset" });
+  const parts = fmt.formatToParts(new Date());
+  const tzName = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT-6";
+  // tzName like "GMT-6" or "GMT-7"
+  const m = tzName.match(/GMT([+-]\d+)/);
+  return m ? Math.abs(parseInt(m[1], 10)) : 6;
+}
 
 interface OrderRow {
   order_number: string;
@@ -55,15 +67,16 @@ export async function GET(req: NextRequest) {
   const supabase = createServiceClient();
 
   // "Yesterday in MT" = window ending at today MT 00:00 = UTC NOW shifted -MT_OFFSET hours, then floor to date.
+  const offset = mtOffsetHours();
   const nowUtc = new Date();
-  const nowMt = new Date(nowUtc.getTime() - MT_OFFSET_HOURS * 3600_000);
+  const nowMt = new Date(nowUtc.getTime() - offset * 3600_000);
   const todayMtDateStr = nowMt.toISOString().slice(0, 10); // "YYYY-MM-DD"
   const yesterdayMt = new Date(nowMt.getTime() - 86_400_000);
   const yesterdayMtDateStr = yesterdayMt.toISOString().slice(0, 10);
 
   // Window in UTC: [yesterdayMt 00:00 → todayMt 00:00] = [UTC midnight + offset hours backwards]
-  const windowStartUtc = new Date(`${yesterdayMtDateStr}T00:00:00.000Z`).getTime() + MT_OFFSET_HOURS * 3600_000;
-  const windowEndUtc = new Date(`${todayMtDateStr}T00:00:00.000Z`).getTime() + MT_OFFSET_HOURS * 3600_000;
+  const windowStartUtc = new Date(`${yesterdayMtDateStr}T00:00:00.000Z`).getTime() + offset * 3600_000;
+  const windowEndUtc = new Date(`${todayMtDateStr}T00:00:00.000Z`).getTime() + offset * 3600_000;
   const windowStartIso = new Date(windowStartUtc).toISOString();
   const windowEndIso = new Date(windowEndUtc).toISOString();
 

@@ -488,6 +488,11 @@ export function StaffOrderCard({
                 Wave Accounting
               </p>
               <div className="flex flex-wrap gap-2 items-center">
+                {order.wave_invoice_number && (
+                  <span className="text-xs bg-gray-100 text-gray-700 border border-gray-200 px-2 py-0.5 rounded-full font-mono">
+                    Wave #{order.wave_invoice_number}
+                  </span>
+                )}
                 <a
                   href={`https://next.waveapps.com/businesses/0fea8474-b467-4a12-b558-efa4c74c7e3c/invoicing/invoices/${order.wave_invoice_id}/edit`}
                   target="_blank"
@@ -592,17 +597,32 @@ export function StaffOrderCard({
               Change status
             </p>
             <div className="flex items-center gap-3 flex-wrap">
-              <select
-                value={currentOverride}
-                onChange={(e) => setOverrideStatus(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#16C2F3] bg-white transition-colors"
-              >
-                {VALID_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {STATUS_LABELS[s]}
-                  </option>
-                ))}
-              </select>
+              {(() => {
+                // Pending orders can only transition to payment_received (server
+                // guard rejects any skip — UI mirrors that to prevent confusion).
+                // Once paid, all statuses are selectable.
+                const isPending = order.status === "pending_payment";
+                const allowed: readonly string[] = isPending
+                  ? ["pending_payment", "payment_received"]
+                  : VALID_STATUSES;
+                const selectValue = allowed.includes(currentOverride) ? currentOverride : order.status;
+                return (
+                  <select
+                    value={selectValue}
+                    onChange={(e) => setOverrideStatus(e.target.value)}
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#16C2F3] bg-white transition-colors"
+                  >
+                    {VALID_STATUSES.map((s) => {
+                      const disabled = !allowed.includes(s);
+                      return (
+                        <option key={s} value={s} disabled={disabled}>
+                          {STATUS_LABELS[s]}{disabled ? " · pay first" : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
+                );
+              })()}
               <button
                 onClick={() => onStatusUpdate(currentOverride)}
                 disabled={isLoadingStatus || currentOverride === order.status}
@@ -622,6 +642,11 @@ export function StaffOrderCard({
                 </span>
               </span>
             </div>
+            {order.status === "pending_payment" && (
+              <p className="text-[11px] text-amber-600 mt-2">
+                ⚠ Mark payment received before advancing — required by server guard.
+              </p>
+            )}
           </div>
 
           {/* Resend payment link — only for pending_payment orders */}

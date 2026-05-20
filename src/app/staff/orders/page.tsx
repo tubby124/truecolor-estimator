@@ -111,6 +111,7 @@ async function fetchOrders() {
       total,
       payment_method,
       wave_invoice_id,
+      wave_invoice_number,
       wave_invoice_approved_at,
       wave_payment_recorded_at,
       created_at,

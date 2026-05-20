@@ -16,6 +16,7 @@ import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { sendEmail } from "@/lib/email/smtp";
 import { escHtml } from "@/lib/email/components/escHtml";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
+import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 
 interface Params {
@@ -38,7 +39,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
         subtotal, gst, pst, total, is_rush,
         discount_code, discount_amount, wave_invoice_id, created_at, receipt_token,
         order_items ( product_name, qty, width_in, height_in, sides, line_total ),
-        customers ( name, email, marketing_consent )
+        customer_id, customers ( name, email, marketing_consent )
       `)
       .eq("id", id)
       .single();
@@ -78,6 +79,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
     }
 
     console.log(`[confirm-etransfer] order ${order.order_number} → payment_received`);
+
+    // Bump customer lifetime stats now (moved off order-creation 2026-05-20)
+    await incrementCustomerOrderStats(supabase, order.customer_id, Number(order.total ?? 0));
 
     // Brevo sync at payment_received (shifted from order creation — TC-15)
     try {

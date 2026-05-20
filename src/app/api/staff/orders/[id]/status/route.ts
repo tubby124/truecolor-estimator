@@ -20,6 +20,7 @@ import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendReviewRequestEmail } from "@/lib/email/reviewRequest";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
+import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 
 const VALID_STATUSES = [
   "pending_payment",
@@ -92,6 +93,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       if (tsError) {
         // Non-fatal — status already saved. Columns may not exist yet (run migration).
         console.warn("[staff/orders/status] timestamp update failed (run DB migration):", tsError.message);
+      }
+    }
+
+    // On transition INTO payment_received: bump customer lifetime stats.
+    // Idempotency: only fires when guard above (current.status === "pending_payment")
+    // confirmed the transition is a real change. Webhook retries naturally skipped.
+    if (status === "payment_received" && current?.status === "pending_payment") {
+      const { data: statsOrder } = await supabase
+        .from("orders")
+        .select("customer_id, total")
+        .eq("id", id)
+        .single();
+      if (statsOrder) {
+        await incrementCustomerOrderStats(supabase, statsOrder.customer_id, Number(statsOrder.total ?? 0));
       }
     }
 
