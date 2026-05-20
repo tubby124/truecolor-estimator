@@ -88,7 +88,7 @@ export default async function StaffCustomersPage() {
               href="/staff"
               className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
             >
-              Make a Quote
+              Estimator
             </Link>
           </div>
         </div>

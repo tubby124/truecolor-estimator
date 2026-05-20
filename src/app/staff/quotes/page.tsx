@@ -98,14 +98,14 @@ export default async function StaffQuotesPage() {
               aria-label="Build a custom quote for a job that doesn't fit the estimator"
               title="Quote any job — type custom line items, prices, and titles. Use this for laminated foamboard, one-off cardstock prints, multi-line agency invoices, anything outside the estimator catalog."
             >
-              Custom Quote
+              + New Quote
             </Link>
             <Link
               href="/staff"
               className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
               title="Open the estimator (calculated prices from the catalog)"
             >
-              Make a Quote
+              Estimator
             </Link>
           </div>
         </div>

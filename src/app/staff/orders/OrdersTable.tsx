@@ -129,8 +129,16 @@ export function OrdersTable({ initialOrders }: Props) {
       return;
     }
     setOrders((prev) => {
+      // Old: `existingById.get(fresh.id) ?? fresh` — local state always won, so a
+      // server-side change (webhook fires, manual SQL fix) would never reach the
+      // visible row until full page reload. New: spread fresh under existing so
+      // server values take precedence, while keeping any local-only ephemeral state
+      // that's not on the server (currently none, but defensive).
       const existingById = new Map(prev.map((o) => [o.id, o]));
-      const merged = initialOrders.map((fresh) => existingById.get(fresh.id) ?? fresh);
+      const merged = initialOrders.map((fresh) => {
+        const existing = existingById.get(fresh.id);
+        return existing ? { ...existing, ...fresh } : fresh;
+      });
       return merged;
     });
     setLastSync(new Date());
@@ -149,25 +157,25 @@ export function OrdersTable({ initialOrders }: Props) {
         (payload: { eventType: string; new: Record<string, unknown>; old: { id?: string } }) => {
           if (payload.eventType === "UPDATE") {
             const u = payload.new;
+            // Merge every server-provided field into the local row. The old code only
+            // merged a hand-picked allowlist — fields like is_rush, total_amount,
+            // payment_method, customer_id silently went stale. Staff would see a
+            // stale "RUSH" badge for hours after Wave/webhook flipped is_rush.
+            //
+            // We still need to drop `customers` joined data (Realtime payload doesn't
+            // include join rows) — preserve the existing joined record from local state.
             setOrders((prev) =>
-              prev.map((o) =>
-                o.id === u.id
-                  ? {
-                      ...o,
-                      status: (u.status as (typeof VALID_STATUSES)[number]) ?? o.status,
-                      notes: u.notes !== undefined ? (u.notes as string | null) : o.notes,
-                      staff_notes: u.staff_notes !== undefined ? (u.staff_notes as string | null) : o.staff_notes,
-                      proof_storage_path: u.proof_storage_path !== undefined ? (u.proof_storage_path as string | null) : o.proof_storage_path,
-                      proof_storage_paths: u.proof_storage_paths !== undefined ? (u.proof_storage_paths as string[] | null) : o.proof_storage_paths,
-                      proof_sent_at: u.proof_sent_at !== undefined ? (u.proof_sent_at as string | null) : o.proof_sent_at,
-                      file_storage_paths: u.file_storage_paths !== undefined ? (u.file_storage_paths as string[] | null) : o.file_storage_paths,
-                      wave_invoice_approved_at: u.wave_invoice_approved_at !== undefined ? (u.wave_invoice_approved_at as string | null) : o.wave_invoice_approved_at,
-                      wave_payment_recorded_at: u.wave_payment_recorded_at !== undefined ? (u.wave_payment_recorded_at as string | null) : o.wave_payment_recorded_at,
-                      is_archived: u.is_archived !== undefined ? (u.is_archived as boolean) : o.is_archived,
-                      archived_at: u.archived_at !== undefined ? (u.archived_at as string | null) : o.archived_at,
-                    }
-                  : o
-              )
+              prev.map((o) => {
+                if (o.id !== u.id) return o;
+                const merged = { ...o, ...u } as typeof o;
+                // Preserve relations + ensure status stays in the valid enum
+                merged.customers = o.customers;
+                merged.order_items = o.order_items;
+                if (u.status && !VALID_STATUSES.includes(u.status as (typeof VALID_STATUSES)[number])) {
+                  merged.status = o.status;
+                }
+                return merged;
+              })
             );
             setLastSync(new Date());
           } else if (payload.eventType === "INSERT") {
@@ -467,7 +475,7 @@ export function OrdersTable({ initialOrders }: Props) {
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {f === "active" ? "Active" : f === "complete" ? "Complete" : f === "archived" ? "Archived" : "All"}
+              {f === "active" ? "Active" : f === "complete" ? "Complete" : f === "archived" ? "Archived" : "All live"}
               <span
                 className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
                   filter === f ? "bg-white/25 text-white" : "bg-gray-200 text-gray-500"
