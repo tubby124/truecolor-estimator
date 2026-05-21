@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Property Management Signs Saskatoon | True Color" },
   description:
-    "For-rent coroplast signs from $8/sqft for Saskatoon property managers. Bulk 5+ save 8%. ACP exterior signs, banners, vehicle magnets. Same-day rush +$40. 216 33rd St W.",
+    "For-rent coroplast signs from $8/sqft for Saskatoon property managers. Bulk 5+ save 8%. ACP signs, banners, magnets. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/property-management-signs-saskatoon" },
   openGraph: {
     title: "Property Management Signs Saskatoon | True Color Display Printing",

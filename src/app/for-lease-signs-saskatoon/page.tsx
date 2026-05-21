@@ -3,12 +3,12 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Lease Signage Saskatchewan | For-Lease Signs from $30" },
+  title: { absolute: "Lease Signage Saskatchewan | For-Lease Signs from $8/sqft" },
   description:
-    "Lease signage for Saskatchewan property managers, leasing agents, landlords. 18×24\" coroplast at $24 (tops up to $25 cart min). Same-day +$40. Pickup at 216 33rd St W, Saskatoon.",
+    "Lease signage for SK property managers, leasing agents, landlords. 18×24\" coroplast at $24 ($25 cart min). Same-day +$40. Pickup 216 33rd St W.",
   alternates: { canonical: "/for-lease-signs-saskatoon" },
   openGraph: {
-    title: "Lease Signage Saskatchewan | For-Lease Signs from $30 | True Color",
+    title: "Lease Signage Saskatchewan | For-Lease Signs from $8/sqft | True Color",
     description:
       "Lease signage and for-lease signs across Saskatchewan from $8/sqft. 18×24\" coroplast, post-mounted boards, fence panels. Same-day +$40. Bulk 5+ save 8%.",
     url: "https://truecolorprinting.ca/for-lease-signs-saskatoon",
@@ -37,7 +37,7 @@ export default function ForLeaseSignsSaskatoonPage() {
             </Link>{" "}
             from True Color because they ship in 1–3 business days, hold up through Saskatchewan
             winters, and don&apos;t require a national supplier. Standard 18×24″ yard signs are
-            $30 each. Order 5 or more and save 8% automatically — no code needed.
+            $24 each (single signs top up to the $25 order-total minimum at checkout). Order 5 or more and save 8% automatically — no code needed.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             For higher-visibility commercial vacancies — strip malls, industrial bays, office
@@ -105,7 +105,7 @@ export default function ForLeaseSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much do for-lease signs cost in Saskatoon?",
-          a: "Coroplast for-lease signs at True Color start at $30 for an 18×24″ single-sided yard sign. 24×36″ post-mounted boards are roughly $48. 4×8 ft fence-line panels for larger commercial vacancies are $232. Order 5 or more and save 8% automatically — 10+ saves 17%, 25+ saves 23%. ACP aluminum versions for long-term commercial vacancies start at $60.",
+          a: "Coroplast for-lease signs at True Color are $24 each for an 18×24″ single-sided yard sign (single signs top up to the $25 order-total minimum at checkout). 24×36″ post-mounted boards are roughly $48. 4×8 ft fence-line panels for larger commercial vacancies are $232. Order 5 or more and save 8% automatically — 10+ saves 17%, 25+ saves 23%. ACP aluminum versions for long-term commercial vacancies are $13/sqft.",
         },
         {
           q: "What size should a for-lease sign be?",

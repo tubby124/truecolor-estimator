@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Vehicle Magnets Regina SK | From $24/sqft | True Color" },
   description:
-    "Custom vehicle magnets for Regina SK businesses. From $24/sqft — fleet branding, oil services, retail. Printed in Saskatoon, shipped to Regina. True Color Display Printing.",
+    "Custom vehicle magnets for Regina SK businesses. From $24/sqft — fleet branding, oil services, retail. Printed in Saskatoon, shipped to Regina.",
   alternates: { canonical: "/vehicle-magnets-regina" },
   openGraph: {
     title: "Vehicle Magnets Regina SK | True Color Display Printing",
