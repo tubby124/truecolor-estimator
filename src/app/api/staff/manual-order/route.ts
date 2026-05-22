@@ -23,6 +23,7 @@ import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { sendAccountWelcomeEmail } from "@/lib/email/accountWelcome";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -454,7 +455,16 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ orderId: order.id, orderNumber: order.order_number, paymentUrl: null });
       } catch (waveErr) {
-        console.error("[manual-order] Wave invoice error:", waveErr);
+        const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
+        console.error("[manual-order] Wave invoice error:", msg);
+        void sendTelegramNotification(
+          `⚠️ <b>Wave invoice creation failed</b>\n` +
+          `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
+          `Path: /api/staff/manual-order (staff-driven quote)\n` +
+          `Staff saw the error in the UI and was prompted to try Clover instead.\n` +
+          `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+          `If staff retried via Clover, no further action needed.`
+        ).catch(() => {});
         return NextResponse.json({ error: "Failed to create Wave invoice. Please try Clover instead." }, { status: 500 });
       }
     }

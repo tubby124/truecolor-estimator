@@ -23,6 +23,7 @@ import { estimate } from "@/lib/engine";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { classifyFromHeaders } from "@/lib/analytics/referrer";
 
 export interface CreateOrderRequest {
@@ -534,17 +535,24 @@ export async function POST(req: NextRequest) {
 
       waveInvoiceId = inv.invoiceId;
 
-      // Save wave_invoice_id back to order.
+      // Save wave_invoice_id + wave_invoice_number back to order.
       // CRITICAL: must `await` — `void supabase.update().eq()` does NOT fire the HTTP
       // request (PostgrestFilterBuilder only executes on await/.then()). Bug found
       // 2026-05-15 caused 30+ days of Wave orders to have NULL wave_invoice_id
       // even though the Wave invoice was created successfully.
+      //
+      // wave_invoice_number was missing here until 2026-05-22 — staff "Wave #" badge
+      // was therefore blank on every customer-pays-online order. Manual-order route
+      // wrote both all along.
       {
         const { error: updErr } = await supabase
           .from("orders")
-          .update({ wave_invoice_id: waveInvoiceId } as Record<string, unknown>)
+          .update({
+            wave_invoice_id: waveInvoiceId,
+            wave_invoice_number: inv.invoiceNumber,
+          } as Record<string, unknown>)
           .eq("id", order.id);
-        if (updErr) console.error("[orders] wave_invoice_id save failed (non-fatal):", updErr.message);
+        if (updErr) console.error("[orders] wave_invoice_id/number save failed (non-fatal):", updErr.message);
       }
 
       // Auto-approve the invoice so it appears in Wave reports and can be sent as a receipt.
@@ -560,8 +568,19 @@ export async function POST(req: NextRequest) {
         console.warn("[orders] Wave invoice auto-approve failed (non-fatal):", approveErr);
       }
     } catch (waveErr) {
-      // Wave failure is non-fatal — order still exists, staff can create manually
-      console.error("[orders] Wave invoice creation failed (non-fatal):", waveErr);
+      // Wave failure is non-fatal — order still exists, staff can create manually.
+      // But it MUST alert: silent Wave creation failures mean the customer pays
+      // (Clover gateway still works) and you have no Wave invoice on the books.
+      const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
+      console.error("[orders] Wave invoice creation failed (non-fatal):", msg);
+      void sendTelegramNotification(
+        `🚨 <b>Wave invoice NOT created</b>\n` +
+        `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
+        `Path: /api/orders (customer checkout)\n` +
+        `Customer can still pay via Clover, but no Wave bookkeeping entry exists.\n` +
+        `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+        `Action: create the Wave invoice manually and link it via staff portal.`
+      ).catch(() => {});
     }
 
     // 6. Clover Hosted Checkout (card) or /pay/{token} fallback URL (eTransfer)

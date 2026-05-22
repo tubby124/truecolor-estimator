@@ -109,6 +109,8 @@ export async function createWaveInvoice(
     isRush?: boolean;
     orderNumber?: string;
     memo?: string;
+    /** Explicit invoice title override. Wins over orderNumber-based title. */
+    title?: string;
   }
 ): Promise<WaveInvoiceResult> {
   // Wave invoiceCreate requires productId (ID!) on every line item.
@@ -159,7 +161,8 @@ export async function createWaveInvoice(
         businessId: WAVE_BUSINESS_ID,
         customerId,
         status: "DRAFT",
-        title: opts?.orderNumber ? `True Color Order ${opts.orderNumber}` : "True Color Print Order",
+        title: opts?.title
+          ?? (opts?.orderNumber ? `True Color Order ${opts.orderNumber}` : "True Color Print Order"),
         memo,
         items: lineItems,
       },

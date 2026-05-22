@@ -135,10 +135,18 @@ export async function POST(req: Request) {
     // 1. Find or create Wave customer
     const customerId = await createOrFindWaveCustomer(customerEmail, name);
 
-    // 2. Create the invoice (DRAFT)
+    // 2. Create the invoice (DRAFT).
+    // Title prefix "QUOTE DRAFT —" makes these visible at-a-glance in the Wave
+    // dashboard so they don't pile up unnoticed. The "send" action was
+    // deprecated 2026-05-20 (Wave has no payment webhooks on the current plan),
+    // so any invoice from this route is just a quote document, not a live bill.
+    // Reconcile cron Check 2 will not match these (deliberately — they're not
+    // linked to a TC-XXXX-XXXX order).
+    const quoteTitle = `QUOTE DRAFT — ${name}`.slice(0, 80);
     const invoice = await createWaveInvoice(customerId, waveItems, {
       isRush,
-      memo: `Pickup at 216 33rd St W, Saskatoon SK. Questions? Call (306) 954-8688.`,
+      title: quoteTitle,
+      memo: `Quote draft — not an active bill. Pickup at 216 33rd St W, Saskatoon SK. Questions? Call (306) 954-8688.`,
     });
 
     const finalAction = "draft" as const;

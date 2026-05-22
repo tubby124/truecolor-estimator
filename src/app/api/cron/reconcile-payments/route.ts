@@ -114,10 +114,15 @@ export async function GET(req: NextRequest) {
       { bizId: WAVE_BIZ }
     );
 
-    const TITLE_RE = /^True Color Order (TC-\d{4}-\d{4})$/;
+    // Loosened 2026-05-22 from `^True Color Order (TC-XXXX-XXXX)$` (strict)
+    // to a substring match. The strict form silently broke whenever an
+    // invoice title got renamed (which staff occasionally does in the Wave
+    // UI). Quote drafts titled "QUOTE DRAFT — Customer Name" are skipped
+    // intentionally — they're not linked to a TC order and not bills.
+    const ORDER_NUM_RE = /(TC-\d{4}-\d{4})/;
     const recentTcInvoices = (waveResp.business?.invoices?.edges ?? [])
       .map((e) => e.node)
-      .map((n) => ({ ...n, orderNumber: n.title.match(TITLE_RE)?.[1] }))
+      .map((n) => ({ ...n, orderNumber: n.title.match(ORDER_NUM_RE)?.[1] }))
       .filter((n) => n.orderNumber);
 
     if (recentTcInvoices.length > 0) {
