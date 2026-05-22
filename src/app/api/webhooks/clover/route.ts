@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
             })
             .eq("id", pendingOrder.id)
             .eq("status", "pending_payment")
-            .select("id, order_number, customer_id, total, is_rush, wave_invoice_id");
+            .select("id, order_number, customer_id, total, is_rush, wave_invoice_id, wave_invoice_approved_at, wave_payment_recorded_at");
 
           if (error) {
             console.error("[clover-webhook] order update failed:", error.message);
@@ -170,6 +170,88 @@ export async function POST(req: NextRequest) {
 
               const order = updatedOrders[0];
 
+              // ── Wave: approve invoice + record payment ──────────────────────
+              // MUST run BEFORE the receipt email so the email's "Download Tax
+              // Invoice (PDF)" link points to a Wave invoice that's actually
+              // marked PAID. Bug 2026-05-22: previously ran after the email,
+              // AND approveWaveInvoice threw on already-approved invoices,
+              // which short-circuited recordWavePayment via shared try/catch.
+              // 27 production orders ended up with Wave invoices stuck APPROVED
+              // but unpaid, even though Clover had captured payment. Customers
+              // clicking the receipt link saw "unpaid" tax invoices.
+              //
+              // Fix: split approve and record into independent try/catch +
+              // skip approve if already approved + Telegram alert on failure.
+              let wavePaid = false;
+              const waveInvoiceId = order.wave_invoice_id ?? null;
+              const orderTotal = Number(order.total ?? 0);
+              if (waveInvoiceId && orderTotal > 0) {
+                // 1. Approve invoice if not already approved at order-creation.
+                //    Wave throws on re-approval; we skip rather than swallow so
+                //    the failure path is reserved for genuine API errors.
+                if (!order.wave_invoice_approved_at) {
+                  try {
+                    await approveWaveInvoice(waveInvoiceId);
+                    const { error: tsErr } = await supabase.from("orders")
+                      .update({ wave_invoice_approved_at: new Date().toISOString() })
+                      .eq("id", order.id);
+                    if (tsErr) console.error("[clover-webhook] wave_invoice_approved_at save failed (non-fatal):", tsErr.message);
+                  } catch (approveErr) {
+                    const msg = approveErr instanceof Error ? approveErr.message : String(approveErr);
+                    console.error("[clover-webhook] Wave invoice approve failed (non-fatal):", msg);
+                    void sendTelegramNotification(
+                      `⚠️ <b>Wave approve failed</b>\n` +
+                      `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${orderTotal.toFixed(2)}\n` +
+                      `Invoice ID: <code>${escapeTelegramHtml(waveInvoiceId.slice(0, 24))}…</code>\n` +
+                      `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+                      `Action: manually approve in Wave dashboard.`
+                    ).catch(() => {});
+                  }
+                }
+
+                // 2. Record payment — independent of approve so a missing
+                //    approval (or a re-approval throw) never blocks the cash
+                //    half of the bookkeeping.
+                try {
+                  const { data: orderCustomer } = await supabase
+                    .from("customers")
+                    .select("email")
+                    .eq("id", order.customer_id)
+                    .single();
+                  const waveCustomerId = orderCustomer?.email
+                    ? await findCustomerByEmail(orderCustomer.email).catch(() => null)
+                    : null;
+
+                  await recordWavePayment(
+                    waveInvoiceId,
+                    orderTotal,
+                    "CREDIT_CARD",
+                    `Clover card — Order ${order.order_number}`,
+                    waveCustomerId ?? undefined,
+                    order.id,  // Supabase order UUID as externalId — idempotency key
+                  );
+
+                  const { error: tsErr } = await supabase.from("orders")
+                    .update({ wave_payment_recorded_at: new Date().toISOString() })
+                    .eq("id", order.id);
+                  if (tsErr) console.error("[clover-webhook] wave_payment_recorded_at save failed (non-fatal):", tsErr.message);
+
+                  wavePaid = true;
+                  console.log(`[clover-webhook] Wave payment recorded → ${waveInvoiceId}`);
+                } catch (paymentErr) {
+                  const msg = paymentErr instanceof Error ? paymentErr.message : String(paymentErr);
+                  console.error("[clover-webhook] Wave payment recording failed (non-fatal):", msg);
+                  void sendTelegramNotification(
+                    `🚨 <b>Wave payment NOT recorded</b>\n` +
+                    `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${orderTotal.toFixed(2)}\n` +
+                    `Customer was charged by Clover but Wave bookkeeping is out of sync.\n` +
+                    `Invoice ID: <code>${escapeTelegramHtml(waveInvoiceId.slice(0, 24))}…</code>\n` +
+                    `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+                    `Action: open Wave, record the payment manually against this invoice.`
+                  ).catch(() => {});
+                }
+              }
+
               try {
                 const { data: customer } = await supabase
                   .from("customers")
@@ -191,10 +273,12 @@ export async function POST(req: NextRequest) {
                   // Itemized receipt (non-fatal)
                   try {
                     if (fullOrder) {
-                      // Fetch Wave invoice viewUrl if this order has a Wave invoice attached.
-                      // Receipt email includes both: TC branded PDF + Wave PAID invoice PDF.
-                      // Wave PDF auto-updates to show "PAID" once recordWavePayment fires below.
-                      const waveInvoiceUrl = order.wave_invoice_id
+                      // Fetch Wave invoice viewUrl ONLY when our bookkeeping
+                      // confirms the invoice is PAID in Wave. If recordWavePayment
+                      // failed above, fall back to the TC branded PDF only —
+                      // customers should never receive a "Download Tax Invoice"
+                      // link that points to an unpaid invoice (bug 2026-05-22).
+                      const waveInvoiceUrl = wavePaid && order.wave_invoice_id
                         ? await getWaveInvoicePublicUrl(order.wave_invoice_id).catch(() => null)
                         : null;
                       await sendPaymentReceipt({
@@ -326,48 +410,9 @@ export async function POST(req: NextRequest) {
               } catch (emailErr) {
                 console.error("[clover-webhook] payment confirmed email failed (non-fatal):", emailErr);
               }
-
-              // Mark Wave invoice as PAID (non-fatal)
-              const waveInvoiceId = order.wave_invoice_id ?? null;
-              const orderTotal = Number(order.total ?? 0);
-              if (waveInvoiceId && orderTotal > 0) {
-                try {
-                  await approveWaveInvoice(waveInvoiceId);
-
-                  // Look up customer email for Wave customer ID (auto-reconciliation)
-                  const { data: orderCustomer } = await supabase
-                    .from("customers")
-                    .select("email")
-                    .eq("id", order.customer_id)
-                    .single();
-                  const waveCustomerId = orderCustomer?.email
-                    ? await findCustomerByEmail(orderCustomer.email).catch(() => null)
-                    : null;
-
-                  await recordWavePayment(
-                    waveInvoiceId,
-                    orderTotal,
-                    "CREDIT_CARD",
-                    `Clover card — Order ${order.order_number}`,
-                    waveCustomerId ?? undefined,
-                    order.id,  // Supabase order UUID as externalId — idempotency key
-                  );
-
-                  // Write Wave sync timestamps back to the order row.
-                  // Must `await` — bug found 2026-05-15.
-                  {
-                    const now = new Date().toISOString();
-                    const { error: tsErr } = await supabase.from("orders")
-                      .update({ wave_invoice_approved_at: now, wave_payment_recorded_at: now })
-                      .eq("id", order.id);
-                    if (tsErr) console.error("[clover-webhook] Wave timestamps save failed (non-fatal):", tsErr.message);
-                  }
-
-                  console.log(`[clover-webhook] Wave invoice marked paid → ${waveInvoiceId}`);
-                } catch (waveErr) {
-                  console.error("[clover-webhook] Wave payment recording failed (non-fatal):", waveErr);
-                }
-              }
+              // Wave approve+record was already handled above, before the receipt
+              // email, so the email's Wave PDF link is only included when the
+              // invoice is genuinely marked PAID.
             }
           }
         } catch (err) {
