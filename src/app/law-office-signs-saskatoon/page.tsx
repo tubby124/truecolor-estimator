@@ -91,7 +91,7 @@ export default function LawOfficeSignsSaskatoonPage() {
       faqs={[
         {
           q: "What is the best sign material for a law office exterior suite sign?",
-          a: "3mm aluminum composite (ACP) is the standard for exterior suite signs. It's rigid, UV-resistant, and lasts 10+ years on a strip mall fascia or building exterior without warping or fading. ACP signs are $13/sqft — a standard 18×24\" panel is $39, a 24×36\" panel is $78. Orders under $25 are topped up to a $25 small-order minimum at checkout. Bring your slot dimensions and we cut to size.",
+          a: "3mm aluminum composite (ACP) is the standard for exterior suite signs. It's rigid, UV-resistant, and lasts 10+ years on a strip mall fascia or building exterior without warping or fading. ACP signs are $13/sqft — a standard 18×24\" panel is $39, a 24×36\" panel is $78. Orders under $25 are topped up to a $25 order-total minimum at checkout. Bring your slot dimensions and we cut to size.",
         },
         {
           q: "Can you print a lobby directory panel for a multi-tenant professional building?",

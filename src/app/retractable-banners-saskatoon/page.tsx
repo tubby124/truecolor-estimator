@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,6 +26,36 @@ export default function RetractableBannersSaskatoonPage() {
       heroImage="/images/products/product/retractable-stand-600x900.webp"
       heroAlt="Retractable banner stand with full-colour print in Saskatoon by True Color Display Printing"
       description="True Color produces retractable banner stands from $219 for Saskatoon trade shows, grand openings, clinics, storefronts, and events. Each unit includes the premium stand hardware and a full-colour Roland UV printed banner — no upselling, no hidden fees. Set up in 30 seconds, packs down to carry under your arm. Replacement graphics are available if your message changes or your banner wears out. Order online, pick up at 216 33rd St W."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            True Color produces retractable banner stands from $219 for Saskatoon trade shows, grand
+            openings, clinics, storefronts, and events. The price includes the stand hardware and a
+            full-colour printed banner, so there is no separate hardware surprise at checkout.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            Retractable banners are best when you need a professional display that can move from a
+            lobby to a conference booth to an open house. For wall or fence installs, use{" "}
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              vinyl banners
+            </Link>
+            . For tabletop signs, donor boards, or easel displays, compare{" "}
+            <Link href="/foamboard-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              foamboard printing
+            </Link>{" "}
+            and{" "}
+            <Link href="/trade-show-displays-saskatoon" className="text-[#16C2F3] underline font-medium">
+              trade show displays
+            </Link>
+            .
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Standard turnaround is 1–3 business days after artwork approval. Same-day rush is
+            available for +$40 flat when ordered before 10 AM. If you already own a stand, bring it
+            in and we can check whether a replacement graphic will fit.
+          </p>
+        </>
+      }
       products={[
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },

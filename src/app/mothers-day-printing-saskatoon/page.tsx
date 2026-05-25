@@ -158,7 +158,7 @@ export default function MothersDayPrintingSaskatoonPage() {
       }
       products={[
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
-        { name: "Photo Posters", from: "from $10/sqft", slug: "photo-posters" },
+        { name: "Photo Posters", from: "from $15", slug: "photo-posters" },
         { name: "Flyers", from: "from $45", slug: "flyers" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
@@ -166,7 +166,7 @@ export default function MothersDayPrintingSaskatoonPage() {
         { name: "Postcards", from: "from $35", slug: "postcards" },
       ]}
       whyPoints={[
-        "Print photos of Mom as large-format posters from $45 — portrait, collage, or family shot",
+        "Print photos of Mom as photo posters from $15 — portrait, collage, or family shot",
         "In-house Roland UV flatbed printer — we print, proof, and finish without outsourcing",
         "Design in-house: $35 flat, same-day proof from your logo, photo, or rough description",
         "Same-day rush for +$40 flat when ordered before 10 AM — call (306) 954-8688 to confirm",
@@ -176,7 +176,7 @@ export default function MothersDayPrintingSaskatoonPage() {
       faqs={[
         {
           q: "How much does Mother's Day printing cost in Saskatoon?",
-          a: "True Color Display Printing offers Mother's Day banners from $8.25/sqft (2×6 ft = $90), photo posters from $45 (18×24\") or $65 (24×36\"), flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. In-house design is $35 flat. Same-day rush is +$40 flat.",
+          a: "True Color Display Printing offers Mother's Day banners from $8.25/sqft (2×6 ft = $90), photo posters from $15, flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. In-house design is $35 flat. Same-day rush is +$40 flat.",
         },
         {
           q: "Can you print photos of my mom as a large-format poster?",

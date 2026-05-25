@@ -312,6 +312,7 @@ const nextConfig: NextConfig = {
         "/account",
         "/account/:path*",
         "/api/:path*",
+        "/quote/:id",
       ].map((source) => ({
         source,
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],

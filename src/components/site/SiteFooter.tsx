@@ -178,6 +178,31 @@ export function SiteFooter() {
           </div>
         </div>
 
+        {/* Popular city product pages */}
+        <div className="mt-8 pt-6 border-t border-white/5">
+          <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider">Popular City Products</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 text-sm">
+            <Link href="/vehicle-magnets-regina" className="hover:text-white transition-colors">Vehicle Magnets Regina</Link>
+            <Link href="/business-cards-regina" className="hover:text-white transition-colors">Business Cards Regina</Link>
+            <Link href="/flyer-printing-regina" className="hover:text-white transition-colors">Flyers Regina</Link>
+            <Link href="/coroplast-signs-moose-jaw-sk" className="hover:text-white transition-colors">Coroplast Moose Jaw</Link>
+            <Link href="/banner-printing-moose-jaw-sk" className="hover:text-white transition-colors">Banners Moose Jaw</Link>
+            <Link href="/vehicle-magnets-moose-jaw-sk" className="hover:text-white transition-colors">Magnets Moose Jaw</Link>
+            <Link href="/business-cards-moose-jaw-sk" className="hover:text-white transition-colors">Cards Moose Jaw</Link>
+            <Link href="/flyer-printing-moose-jaw-sk" className="hover:text-white transition-colors">Flyers Moose Jaw</Link>
+            <Link href="/coroplast-signs-prince-albert-sk" className="hover:text-white transition-colors">Coroplast Prince Albert</Link>
+            <Link href="/banner-printing-prince-albert-sk" className="hover:text-white transition-colors">Banners Prince Albert</Link>
+            <Link href="/vehicle-magnets-prince-albert-sk" className="hover:text-white transition-colors">Magnets Prince Albert</Link>
+            <Link href="/business-cards-prince-albert-sk" className="hover:text-white transition-colors">Cards Prince Albert</Link>
+            <Link href="/flyer-printing-prince-albert-sk" className="hover:text-white transition-colors">Flyers Prince Albert</Link>
+            <Link href="/coroplast-signs-yorkton-sk" className="hover:text-white transition-colors">Coroplast Yorkton</Link>
+            <Link href="/banner-printing-yorkton-sk" className="hover:text-white transition-colors">Banners Yorkton</Link>
+            <Link href="/vehicle-magnets-yorkton-sk" className="hover:text-white transition-colors">Magnets Yorkton</Link>
+            <Link href="/business-cards-yorkton-sk" className="hover:text-white transition-colors">Cards Yorkton</Link>
+            <Link href="/flyer-printing-yorkton-sk" className="hover:text-white transition-colors">Flyers Yorkton</Link>
+          </div>
+        </div>
+
         <div className="border-t border-gray-800 mt-10 pt-6 text-xs text-gray-600 flex flex-col sm:flex-row justify-between gap-2">
           <p>© 2026 True Color Display Printing Ltd. All prices in CAD · GST added at checkout.</p>
           <p>

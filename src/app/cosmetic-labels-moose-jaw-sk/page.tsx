@@ -36,7 +36,7 @@ export default function CosmeticLabelsMooseJawPage() {
             Saskatoon shop and ships to Moose Jaw 240 km south. Standard cosmetic stock is{" "}
             <strong>waterproof BOPP vinyl</strong> with a clear or white face — survives
             bathroom humidity and accidental product spills on the bottle. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full spec on our{" "}
+            <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full spec on our{" "}
             <Link href="/cosmetic-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               cosmetic labels Saskatoon page
             </Link>.

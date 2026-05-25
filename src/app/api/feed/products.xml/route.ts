@@ -3,7 +3,8 @@
 // XML format = Google Shopping (g: namespace). Meta Commerce Manager
 // accepts the same feed via the "Use a data feed" option.
 //
-// Live URL: https://truecolorprinting.ca/api/feed/products.xml
+// Public feed URL: https://truecolorprinting.ca/feed/products.xml
+// Legacy API URL remains available for existing external catalog configs.
 //
 // Refreshes from data/tables/products.v1.csv on every request.
 // Cached at the edge for 1 hour to avoid hammering CSV reads.
@@ -25,24 +26,44 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-// Map CSV category to a product landing page slug for `link`
-const CATEGORY_TO_SLUG: Record<string, string> = {
-  SIGN: "coroplast-signs",
-  BANNER: "vinyl-banners",
-  RIGID: "acp-signs",
-  MAGNET: "vehicle-magnets",
-  FLYER: "flyers",
-  BUSINESS_CARD: "business-cards",
-  FOAMBOARD: "foamboard-displays",
-  RETRACTABLE: "retractable-banners",
-  WINDOW_DECAL: "window-decals",
-  WINDOW_PERF: "window-perf",
-  VINYL_LETTERING: "vinyl-lettering",
-  STICKER: "stickers",
-  POSTCARD: "postcards",
-  BROCHURE: "brochures",
-  PHOTO_POSTER: "photo-posters",
-  MAGNET_CALENDAR: "magnet-calendars",
+// Map CSV category to an indexable SEO landing page for `link`.
+const CATEGORY_TO_PATH: Record<string, string> = {
+  SIGN: "/coroplast-signs-saskatoon",
+  BANNER: "/banner-printing-saskatoon",
+  RIGID: "/aluminum-signs-saskatoon",
+  MAGNET: "/vehicle-magnets-saskatoon",
+  FLYER: "/flyer-printing-saskatoon",
+  BUSINESS_CARD: "/business-cards-saskatoon",
+  FOAMBOARD: "/foamboard-printing-saskatoon",
+  DISPLAY: "/retractable-banners-saskatoon",
+  WINDOW_DECAL: "/window-decals-saskatoon",
+  WINDOW_PERF: "/window-perf-saskatoon",
+  VINYL_LETTERING: "/vinyl-lettering-saskatoon",
+  STICKER: "/sticker-printing-saskatoon",
+  POSTCARD: "/postcard-printing-saskatoon",
+  BROCHURE: "/brochure-printing-saskatoon",
+  PHOTO_POSTER: "/photo-poster-printing-saskatoon",
+  BOOKLET: "/booklet-printing-saskatoon",
+};
+
+const CATEGORY_TO_IMAGE_PATH: Record<string, string> = {
+  SIGN: "/images/products/product/coroplast-yard-sign-800x600.webp",
+  BANNER: "/images/products/product/banner-vinyl-colorful-800x600.webp",
+  RIGID: "/images/products/product/acp-aluminum-sign-800x600.webp",
+  MAGNET: "/images/products/product/vehicle-magnets-800x600.webp",
+  FLYER: "/images/products/product/flyers-stack-800x600.webp",
+  BUSINESS_CARD: "/images/products/product/business-cards-800x600.webp",
+  FOAMBOARD: "/images/products/product/foamboard-display-800x600.webp",
+  DISPLAY: "/images/products/product/retractable-stand-600x900.webp",
+  WINDOW_DECAL: "/images/products/product/window-decal-before-after-800x600.webp",
+  WINDOW_PERF: "/images/products/product/window-perf-800x600.webp",
+  VINYL_LETTERING: "/images/products/product/vinyl-lettering-800x600.webp",
+  STICKER: "/images/products/product/stickers-800x600.webp",
+  POSTCARD: "/images/products/product/postcards-800x600.webp",
+  BROCHURE: "/images/products/product/brochures-800x600.webp",
+  PHOTO_POSTER: "/images/products/product/photo-posters-800x600.webp",
+  BOOKLET: "/images/products/product/coil-bound-booklet-hero-800x600.webp",
+  MAGNET_CALENDAR: "/images/products/product/magnet-calendars-800x600.webp",
 };
 
 // Google product_type taxonomy (broad fallback — refine later)
@@ -54,9 +75,10 @@ export async function GET(): Promise<Response> {
   const items = products
     .filter((p) => p.is_active)
     .map((p) => {
-      const slug = CATEGORY_TO_SLUG[p.category] ?? p.category.toLowerCase();
-      const link = `${SITE_URL}/products/${slug}`;
-      const imageLink = `${SITE_URL}/images/industries/${slug}/hero.webp`;
+      const path = CATEGORY_TO_PATH[p.category] ?? "/products";
+      const link = `${SITE_URL}${path}`;
+      const imagePath = CATEGORY_TO_IMAGE_PATH[p.category] ?? "/og-image.png";
+      const imageLink = `${SITE_URL}${imagePath}`;
       const desc = `${p.product_name}. Roland UV in-house print. From Saskatoon. Standard turnaround 1-3 business days. Same-day rush +$40.`;
       return `
     <item>

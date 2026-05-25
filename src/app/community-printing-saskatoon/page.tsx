@@ -46,8 +46,8 @@ const descriptionNode = (
       banner for a fundraiser gala is $240, and a 2×6 ft street-facing banner is $90.
       Coroplast signs from $8/sqft work for directional wayfinding, volunteer recruitment
       drives, and yard sign campaigns.{" "}
-      <Link href="/ramadan-eid-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
-        Ramadan and Eid banners
+      <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+        seasonal event banners
       </Link>{" "}
       for mosques and Islamic community centres are a specialty — culturally accurate
       layouts, Arabic script handling, and fast turnaround before the holy month begins.
@@ -74,7 +74,7 @@ export default function CommunityPrintingSaskatoonPage() {
       primaryProductSlug="vinyl-banners"
       title="Community Printing Saskatoon"
       subtitle="Banners, signs, and printed materials for non-profits, churches, and community events."
-      heroImage="/images/products/heroes/banner-hero-1200x500.webp"
+      heroImage="/images/products/product/banner-vinyl-colorful-800x600.webp"
       heroAlt="Community event banners and non-profit signs printed in Saskatoon by True Color Display Printing"
       description="Affordable printing for Saskatoon non-profits, churches, mosques, and community organizations. Vinyl banners from $8.25/sqft. Coroplast signs from $8/sqft. Foam board displays from $10/sqft. Flyers 100 for $45. Retractable banner stands from $219. Volume pricing available for non-profit organizations. In-house printing at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}

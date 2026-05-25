@@ -56,8 +56,8 @@ export default function RestaurantSignsSaskatoonPage() {
             number and we reproduce it identically. Same-day is available if ordered before 10 AM
             (+$40 flat rush fee). For seasonal promotions like St. Patrick&apos;s Day or
             Thanksgiving, see our{" "}
-            <Link href="/st-patricks-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
-              seasonal printing pages
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              banner printing page
             </Link>{" "}
             — we have event-specific templates ready to go.
           </p>
@@ -106,7 +106,7 @@ export default function RestaurantSignsSaskatoonPage() {
         },
         {
           q: "Can you print window decals for our restaurant storefront?",
-          a: "Yes — cut-vinyl window decals from $11/sqft. For large street-facing windows, perforated vinyl (window perf) lets customers see out while your branding shows on the outside. Pricing depends on size; $25 small-order minimum applies at checkout. Call (306) 954-8688 or use our online quote tool.",
+          a: "Yes — cut-vinyl window decals from $11/sqft. For large street-facing windows, perforated vinyl (window perf) lets customers see out while your branding shows on the outside. Pricing depends on size; $25 order-total minimum applies at checkout. Call (306) 954-8688 or use our online quote tool.",
         },
         {
           q: "Is there a minimum order for restaurant print jobs?",

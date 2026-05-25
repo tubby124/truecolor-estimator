@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Upscaling Moose Jaw SK | From $40 | True Color" },
+  title: { absolute: "Image Upscaling Moose Jaw SK | From $15 | True Color" },
   description:
-    "AI image upscaling and photo enhancement for Moose Jaw businesses. Print-ready files from low-res sources. From $40 flat. Same-day digital delivery.",
+    "AI image upscaling and photo enhancement for Moose Jaw businesses. Print-ready files from low-res sources. From $15. Same-day digital delivery.",
   alternates: { canonical: "/image-upscale-moose-jaw-sk" },
   openGraph: {
     title: "Image Upscaling Moose Jaw SK | True Color Display Printing",
     description:
-      "AI image upscaling 4×–8×. Print-ready files from low-res photos. From $40 flat. Same-day digital delivery to Moose Jaw.",
+      "AI image upscaling and photo restoration. Print-ready files from low-res photos. From $15. Same-day digital delivery to Moose Jaw.",
     url: "https://truecolorprinting.ca/image-upscale-moose-jaw-sk",
     images: [{ url: "/images/products/og/image-upscale-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -23,11 +23,11 @@ export default function ImageUpscaleMooseJawPage() {
       canonicalSlug="image-upscale-moose-jaw-sk"
       primaryProductSlug="stickers"
       title="Image Upscaling — Moose Jaw SK"
-      subtitle="AI image upscaling and photo enhancement for Moose Jaw businesses. From $40. Same-day digital delivery."
+      subtitle="AI image upscaling and photo enhancement for Moose Jaw businesses. From $15. Same-day digital delivery."
       heroImage="/images/products/heroes/image-upscale-hero-1200x500.webp"
       heroAlt="AI image upscaling service for Moose Jaw SK businesses by True Color Display Printing"
       description={
-        "AI image upscaling and photo enhancement for Moose Jaw businesses. From $40 flat per image — print-ready sharp output from blurry, low-resolution, or grainy source files. Built for Moose Jaw realtors, restaurants, breweries, and small businesses with only a tiny logo or phone-shot photo that needs to scale up to a banner, sign, or business card. Processed in-house in Saskatoon, returned same business day via email or Dropbox link. No courier required."
+        "AI image upscaling and photo enhancement for Moose Jaw businesses. From $15 per image — print-ready sharp output from blurry, low-resolution, or grainy source files. Built for Moose Jaw realtors, restaurants, breweries, and small businesses with only a tiny logo or phone-shot photo that needs to scale up to a banner, sign, or business card. Processed in-house in Saskatoon, returned same business day via email or Dropbox link. No courier required."
       }
       descriptionNode={
         <>
@@ -35,8 +35,9 @@ export default function ImageUpscaleMooseJawPage() {
             True Color Display Printing offers AI image upscaling and photo restoration as a
             digital service. Send your low-resolution photo, pixelated logo, or grainy
             photograph and we&apos;ll return a sharp, print-ready high-resolution file via
-            email or Dropbox link. <strong>$40 flat per image</strong> for standard 4×
-            upscaling, $60 for 8× (going from a small phone photo to a 4×8&apos; banner).
+            email or Dropbox link. <strong>$15 basic upscale</strong> handles 2×
+            resolution for prints up to 12×18&quot;; $35 enhanced adds 4× upscaling,
+            noise reduction, and sharpening for banner-sized output.
             Same-business-day digital delivery to Moose Jaw — no shipping cost.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -64,7 +65,7 @@ export default function ImageUpscaleMooseJawPage() {
         </>
       }
       products={[
-        { name: "Image Upscaling", from: "from $40 flat", slug: "stickers" },
+        { name: "Image Upscaling", from: "from $15", slug: "stickers" },
         { name: "Logo Vectorization", from: "from $50 flat", slug: "stickers" },
         { name: "Photo Posters", from: "from $25", slug: "photo-posters" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
@@ -72,7 +73,7 @@ export default function ImageUpscaleMooseJawPage() {
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
       ]}
       whyPoints={[
-        "AI upscaling at 4× ($40) or 8× ($60) — print-ready output from low-res sources",
+        "AI upscaling from $15 — $35 enhanced tier for banner-sized output",
         "Same-business-day digital delivery to Moose Jaw — no courier required",
         "We tell you the right output resolution for your target print size + substrate",
         "Roland UV print quality once upscaled — combine with a True Color print job for one workflow",
@@ -84,7 +85,7 @@ export default function ImageUpscaleMooseJawPage() {
       faqs={[
         {
           q: "How much does image upscaling cost in Moose Jaw?",
-          a: "$40 flat per image for 4× upscaling, $60 for 8× upscaling. Family photo restoration is $40 per photo. Rush (under 4 hours) +$40 flat. No shipping cost — digital delivery.",
+          a: "$15 for basic 2× upscaling, $35 for enhanced 4× upscaling with AI noise reduction and sharpening, and $75 for full photo restoration. Rush (under 4 hours) +$40 flat. No shipping cost — digital delivery.",
         },
         {
           q: "How do I send True Color my photo for upscaling?",

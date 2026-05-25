@@ -72,7 +72,7 @@ export default function EducationSignsSaskatoonPage() {
       primaryProductSlug="coroplast-signs"
       title="Education Signs Saskatoon"
       subtitle="Yard signs, enrollment banners, and event displays for schools and daycares."
-      heroImage="/images/products/heroes/school-hero-1200x500.webp"
+      heroImage="/images/products/heroes/sports-hero-1200x500.webp"
       heroAlt="Education signs and school banners printed in Saskatoon by True Color Display Printing"
       description="Signs and banners for Saskatoon schools, daycares, and educational institutions. Coroplast yard signs from $8/sqft. Vinyl banners from $8.25/sqft. Foam board displays from $10/sqft. ACP aluminum exterior panels from $13/sqft. Business cards, flyers, and retractable banners also available. In-house printing at 216 33rd St W, Saskatoon — 1–3 business day turnaround."
       descriptionNode={descriptionNode}
@@ -115,7 +115,7 @@ export default function EducationSignsSaskatoonPage() {
         },
         {
           q: "How much do school event banners cost in Saskatoon?",
-          a: "Vinyl banners are priced at $8.25/sqft with a $25 small-order minimum at checkout. A 2×6 ft banner is $90, a 3×8 ft banner is $180, a 4×8 ft banner is $240. Retractable banner stands (stand + print) are $219 complete — ideal for gym and auditorium events. Standard turnaround is 1–3 business days. Same-day rush is +$40 flat if ordered before 10 AM.",
+          a: "Vinyl banners are priced at $8.25/sqft with a $25 order-total minimum at checkout. A 2×6 ft banner is $90, a 3×8 ft banner is $180, a 4×8 ft banner is $240. Retractable banner stands (stand + print) are $219 complete — ideal for gym and auditorium events. Standard turnaround is 1–3 business days. Same-day rush is +$40 flat if ordered before 10 AM.",
         },
       ]}
       relatedCities={[

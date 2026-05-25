@@ -92,7 +92,7 @@ export default function WindowPerfSaskatoonPage() {
       faqs={[
         {
           q: "How much does perforated window vinyl cost in Saskatoon?",
-          a: "Window perf starts at $8/sqft with a $25 small-order minimum at checkout order. A 24×48\" (8 sqft) panel is $64. A full 36×72\" storefront panel (18 sqft) is around $126. Pricing scales by square footage — use the estimator at /products/window-perf for exact pricing on your dimensions.",
+          a: "Window perf starts at $8/sqft with a $25 order-total minimum at checkout. A 24×48\" (8 sqft) panel is $64. A full 36×72\" storefront panel (18 sqft) is around $126. Pricing scales by square footage — use the estimator at /products/window-perf for exact pricing on your dimensions.",
         },
         {
           q: "Can people see through window perf from outside?",

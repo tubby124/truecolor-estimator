@@ -96,7 +96,7 @@ export default function VehicleDecalsSaskatoonPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href="/quote-request"
+                href="/quote"
                 className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-center"
               >
                 Get a Quote →
@@ -183,7 +183,7 @@ export default function VehicleDecalsSaskatoonPage() {
             </div>
           </div>
           <Link
-            href="/quote-request"
+            href="/quote"
             className="inline-flex items-center gap-2 bg-[#1c1712] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#2d2418] transition-colors"
           >
             Request Install Quote →
@@ -300,7 +300,7 @@ export default function VehicleDecalsSaskatoonPage() {
             Send us your artwork and vehicle details — we&apos;ll quote print and install separately so you know exactly what you&apos;re paying for.
           </p>
           <Link
-            href="/quote-request"
+            href="/quote"
             className="inline-block bg-[#16C2F3] text-white font-bold px-9 py-4 rounded-lg hover:bg-[#0fb0dd] transition-colors"
           >
             Request a Quote →

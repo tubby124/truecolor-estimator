@@ -13,7 +13,7 @@ const SLIDES = [
     headline: "from $8/sqft",
     sub: "Job site, yard, and directional signs. Survives Saskatchewan winters.",
     cta: "See Exact Prices →",
-    ctaHref: "/products/coroplast-signs",
+    ctaHref: "/coroplast-signs-saskatoon",
   },
   {
     img: "/images/products/product/vehicle-magnets-800x600.webp",
@@ -22,7 +22,7 @@ const SLIDES = [
     headline: "from $24/sqft",
     sub: "30mil magnets for any vehicle. Removable, reusable, full colour.",
     cta: "See Exact Prices →",
-    ctaHref: "/products/vehicle-magnets",
+    ctaHref: "/vehicle-magnets-saskatoon",
   },
   {
     img: "/images/products/product/banner-vinyl-colorful-800x600.webp",
@@ -31,7 +31,7 @@ const SLIDES = [
     headline: "from $8.25/sqft",
     sub: "13oz vinyl for events, storefronts, and trade shows. Any size.",
     cta: "See Exact Prices →",
-    ctaHref: "/products/vinyl-banners",
+    ctaHref: "/banner-printing-saskatoon",
   },
   {
     img: "/images/products/product/acp-aluminum-sign-800x600.webp",
@@ -40,7 +40,7 @@ const SLIDES = [
     headline: "from $13/sqft",
     sub: "3mm aluminum composite — professional, durable, outdoor-ready.",
     cta: "See Exact Prices →",
-    ctaHref: "/products/acp-signs",
+    ctaHref: "/aluminum-signs-saskatoon",
   },
   {
     img: "/images/products/product/business-cards-800x600.webp",
@@ -49,7 +49,7 @@ const SLIDES = [
     headline: "250 for $45",
     sub: "14pt gloss stock, double-sided. Picked up locally in Saskatoon.",
     cta: "See Exact Prices →",
-    ctaHref: "/products/business-cards",
+    ctaHref: "/business-cards-saskatoon",
   },
   {
     img: "/images/products/product/retractable-stand-600x900.webp",
@@ -58,7 +58,7 @@ const SLIDES = [
     headline: "from $219",
     sub: "Premium stand + full-colour print. Ready for your next trade show.",
     cta: "See Exact Prices →",
-    ctaHref: "/products/retractable-banners",
+    ctaHref: "/retractable-banners-saskatoon",
   },
 ];
 

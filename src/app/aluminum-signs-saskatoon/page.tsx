@@ -73,7 +73,7 @@ export default function AluminumSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much do aluminum signs cost in Saskatoon?",
-          a: "ACP aluminum composite signs are $13/sqft at True Color. An 18×24\" sign (3 sqft) is $39. A 24×36\" sign (6 sqft) is $78. $25 small-order minimum applies at checkout. Volume discounts kick in at 5+ signs (3% off) and 10+ signs (5% off). Get your exact price at /acp-signs-saskatoon.",
+          a: "ACP aluminum composite signs are $13/sqft at True Color. An 18×24\" sign (3 sqft) is $39. A 24×36\" sign (6 sqft) is $78. $25 order-total minimum applies at checkout. Volume discounts kick in at 5+ signs (3% off) and 10+ signs (5% off). Get your exact price at /acp-signs-saskatoon.",
         },
         {
           q: "What is ACP aluminum composite?",

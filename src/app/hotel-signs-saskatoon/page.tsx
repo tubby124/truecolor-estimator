@@ -102,7 +102,7 @@ export default function HotelSignsSaskatoonPage() {
         },
         {
           q: "Do you print permanent exterior signs for hotels?",
-          a: "Yes — ACP (aluminum composite panel) signs are weatherproof and suitable for permanent exterior installation. $13/sqft; 24×36\" signs are $78 ($13 × 6 sqft). $25 small-order minimum applies at checkout. Common uses include parking entrance signs, check-in directionals, conference wing indicators, and rate signs. We print in-house on our Roland UV printer — colour stays sharp through Saskatchewan winters.",
+          a: "Yes — ACP (aluminum composite panel) signs are weatherproof and suitable for permanent exterior installation. $13/sqft; 24×36\" signs are $78 ($13 × 6 sqft). $25 order-total minimum applies at checkout. Common uses include parking entrance signs, check-in directionals, conference wing indicators, and rate signs. We print in-house on our Roland UV printer — colour stays sharp through Saskatchewan winters.",
         },
         {
           q: "Can you print vinyl banners for outdoor hotel events or seasonal promotions?",

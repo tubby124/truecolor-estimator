@@ -382,7 +382,7 @@ const REAL_WORK = [
   {
     src: "/images/gallery/gallery-stickers-dyck-farms.webp",
     label: "Sticker Sheets — Dyck Farms",
-    from: "from $95",
+    from: "from $25",
     slug: "stickers",
     category: "Cards & Print",
   },
@@ -503,7 +503,7 @@ const SEO_SLUG_MAP: Record<string, string> = {
   "vinyl-lettering": "/vinyl-lettering-saskatoon",
   stickers: "/sticker-printing-saskatoon",
   postcards: "/postcard-printing-saskatoon",
-  "magnet-calendars": "/magnet-calendars-saskatoon",
+  "magnet-calendars": "/products/magnet-calendars",
   "foamboard-displays": "/foamboard-printing-saskatoon",
   brochures: "/brochure-printing-saskatoon",
   "vehicle-decals": "/vehicle-decals-saskatoon",

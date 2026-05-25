@@ -113,7 +113,7 @@ export default function RealEstatePage() {
         },
         {
           q: "Can I get just-listed postcards to mail to the neighbourhood?",
-          a: "Yes — 4×6\" and 5×7\" postcards on 14pt gloss stock are mailable without an envelope. Perfect for just-listed and just-sold drops to surrounding households. From $40 for 50 postcards (4×6\"). Meet Canada Post admail specs.",
+          a: "Yes — 3×4\", 4×6\", and 5×7\" postcards on 14pt gloss stock are mailable without an envelope. Perfect for just-listed and just-sold drops to surrounding households. Mini postcards start at $35 for 50; standard 4×6\" cards start at $40 for 50. Meet Canada Post admail specs.",
         },
         {
           q: "Do you print open house feature sheets?",

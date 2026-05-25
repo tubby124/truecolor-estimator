@@ -52,7 +52,7 @@ export default function PrintingWeyburnPage() {
             </Link>{" "}
             from $13/sqft are built for permanent facility and yard signage — rigid composite
             panel, UV-printed on our Roland press, rated 10+ years outdoors in southeast
-            Saskatchewan conditions. An 18×24&quot; ACP panel is $39 ($13/sqft × 3 sqft); 24×36&quot; is $78. $25 small-order minimum applies at checkout.
+            Saskatchewan conditions. An 18×24&quot; ACP panel is $39 ($13/sqft × 3 sqft); 24×36&quot; is $78. $25 order-total minimum applies at checkout.
             Vehicle magnets from $24/sqft for service trucks and industrial fleets.
             Vinyl banners from $8.25/sqft for company events and seasonal promotions.
           </p>

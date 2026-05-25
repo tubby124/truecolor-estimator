@@ -35,7 +35,7 @@ export default function ProductLabelsMooseJawPage() {
             True Color Display Printing prints custom retail product labels at our Saskatoon
             shop and ships to Moose Jaw 240 km south. Stock options: 3mil vinyl in gloss,
             matte, or soft-touch — plus waterproof BOPP for beverage and bath products.
-            Pricing from <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full pricing
+            Pricing from <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full pricing
             and material spec on our{" "}
             <Link href="/product-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               product labels Saskatoon page

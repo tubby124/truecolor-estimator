@@ -101,7 +101,7 @@ export default function SignsMooseJawPage() {
         },
         {
           q: "Can I get ACP aluminum signs shipped to Moose Jaw?",
-          a: "Yes — aluminum composite signs are $13/sqft, 3mm thick. Common sizes: 24×36\" = $78, 4×4 ft = $176. $25 small-order minimum applies at checkout. These are permanent signs that last 10+ years outdoors. Ships flat, padded and protected. Timeline: 3–5 business days including shipping.",
+          a: "Yes — aluminum composite signs are $13/sqft, 3mm thick. Common sizes: 24×36\" = $78, 4×4 ft = $176. $25 order-total minimum applies at checkout. These are permanent signs that last 10+ years outdoors. Ships flat, padded and protected. Timeline: 3–5 business days including shipping.",
         },
         {
           q: "Do you do rush orders for Moose Jaw clients?",

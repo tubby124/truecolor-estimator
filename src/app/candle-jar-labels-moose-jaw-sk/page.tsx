@@ -36,7 +36,7 @@ export default function CandleJarLabelsMooseJawPage() {
             our Saskatoon shop and ships to Moose Jaw 240 km south. Standard stock is matte
             BOPP vinyl with heat-resistant adhesive — bonds to warm glass without bubbling and
             survives long candle burns without yellowing. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full spec on our{" "}
+            <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full spec on our{" "}
             <Link href="/candle-jar-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               candle &amp; jar labels Saskatoon page
             </Link>.

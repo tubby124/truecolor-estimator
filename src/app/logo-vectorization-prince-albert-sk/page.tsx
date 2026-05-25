@@ -65,7 +65,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
       }
       products={[
         { name: "Logo Vectorization", from: "from $50 flat", slug: "stickers" },
-        { name: "Image Upscaling", from: "from $40 flat", slug: "stickers" },
+        { name: "Image Upscaling", from: "from $15", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },

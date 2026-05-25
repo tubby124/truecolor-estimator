@@ -36,7 +36,7 @@ export default function FreezerLabelsReginaPage() {
             labels to Regina businesses 260 km south. Standard stock is 3mil white vinyl with
             freezer-grade adhesive (ARLPMF7008) — holds at -18°C through condensation cycles
             and survives Saskatchewan winter ambient temperatures down to -40°C. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. A 10×2&quot; label at
+            <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. A 10×2&quot; label at
             quantity 500 runs about $300. Full pricing tiers and material spec on our{" "}
             <Link href="/freezer-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               freezer labels Saskatoon page

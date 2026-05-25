@@ -35,7 +35,7 @@ export default function FreezerLabelsPrinceAlbertPage() {
             True Color Display Printing prints freezer-grade adhesive labels at our Saskatoon
             shop and couriers to Prince Albert 140 km north. Stock is 3mil white vinyl with
             freezer-grade adhesive (ARLPMF7008) that holds at -18°C through condensation
-            cycles. Pricing from <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge.
+            cycles. Pricing from <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout.
             Material spec and full pricing tiers on our{" "}
             <Link href="/freezer-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               freezer labels Saskatoon page

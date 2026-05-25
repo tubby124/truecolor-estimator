@@ -14,12 +14,12 @@ const PRODUCT_CATEGORIES = [
   {
     label: "Signs & Displays",
     links: [
-      { label: "Coroplast Signs", href: "/products/coroplast-signs" },
+      { label: "Coroplast Signs", href: "/coroplast-signs-saskatoon" },
       { label: "ACP Aluminum Signs", href: "/aluminum-signs-saskatoon" },
       { label: "Custom-Shape Signs", href: "/products/custom-shape-signs" },
-      { label: "Vinyl Banners", href: "/products/vinyl-banners" },
-      { label: "Foamboard Displays", href: "/products/foamboard-displays" },
-      { label: "Retractable Banners", href: "/products/retractable-banners" },
+      { label: "Vinyl Banners", href: "/banner-printing-saskatoon" },
+      { label: "Foamboard Displays", href: "/foamboard-printing-saskatoon" },
+      { label: "Retractable Banners", href: "/retractable-banners-saskatoon" },
     ],
   },
   {
@@ -27,23 +27,23 @@ const PRODUCT_CATEGORIES = [
     links: [
       { label: "Vehicle Decals", href: "/vehicle-decals-saskatoon" },
       { label: "Vehicle Magnets", href: "/vehicle-magnets-saskatoon" },
-      { label: "Vinyl Lettering", href: "/products/vinyl-lettering" },
-      { label: "Window Decals", href: "/products/window-decals" },
-      { label: "Perforated Window Vinyl", href: "/products/window-perf" },
+      { label: "Vinyl Lettering", href: "/vinyl-lettering-saskatoon" },
+      { label: "Window Decals", href: "/window-decals-saskatoon" },
+      { label: "Perforated Window Vinyl", href: "/window-perf-saskatoon" },
       { label: "Wall Graphics", href: "/wall-graphics-saskatoon" },
     ],
   },
   {
     label: "Print & Promo",
     links: [
-      { label: "Business Cards", href: "/products/business-cards" },
+      { label: "Business Cards", href: "/business-cards-saskatoon" },
       { label: "Flyers", href: "/flyer-printing-saskatoon" },
       { label: "Brochures", href: "/brochure-printing-saskatoon" },
       { label: "Rack Cards", href: "/products/rack-cards" },
       { label: "Postcards", href: "/postcard-printing-saskatoon" },
-      { label: "Stickers", href: "/products/stickers" },
+      { label: "Stickers", href: "/sticker-printing-saskatoon" },
       { label: "Photo Posters", href: "/photo-poster-printing-saskatoon" },
-      { label: "Coil-Bound Booklets", href: "/products/coil-bound-booklets" },
+      { label: "Coil-Bound Booklets", href: "/booklet-printing-saskatoon" },
     ],
   },
   {

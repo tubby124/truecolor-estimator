@@ -72,51 +72,6 @@ const pageSchema = {
         ],
       },
     },
-    {
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: "What printing services does True Color Display Printing offer in Saskatoon?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "True Color offers coroplast signs, vinyl banners, ACP aluminum signs, vehicle magnets, business cards, flyers, retractable banners, window decals, and more — plus a full-time in-house graphic designer for custom layouts.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Does True Color print signs for Saskatoon restaurants and food businesses?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes — menu boards, window decals, A-frame signs, vinyl banners, and grand-opening signage for Saskatoon restaurants, cafés, bars, and food trucks. Same-day rush available.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Does True Color print signs for Saskatchewan farms and agribusinesses?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes — coroplast yard signs, ACP aluminum signs, vehicle magnets, and large vinyl banners for SK farms, agribusinesses, co-ops, and equipment dealers. Durable outdoor prairie materials.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Does True Color print real estate signs and open house banners?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes — True Color prints for sale signs, open house banners, directional signs, window graphics, and vehicle magnets for Saskatoon real estate agents and property developers. Fast turnaround for active listings.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "How often is this resource page updated?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Every 6 hours automatically, pulling the latest articles from Printing Impressions, Smashing Magazine, Shopify Blog, BDC Canada, CBC Saskatchewan, Global News Saskatoon, CTV Saskatoon, Saskatoon StarPhoenix, The Western Producer, Grainews, Nation's Restaurant News, Eat North, Daily Commercial News, Canadian Contractor, REM Online, and CREA.",
-          },
-        },
-      ],
-    },
   ],
 };
 

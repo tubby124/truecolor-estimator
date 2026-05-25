@@ -35,7 +35,7 @@ export default function FreezerLabelsMooseJawPage() {
             True Color Display Printing prints freezer-grade adhesive labels at our Saskatoon
             shop and ships to Moose Jaw 240 km south. Stock is 3mil white vinyl with
             freezer-grade adhesive (ARLPMF7008) — holds at -18°C through condensation cycles.
-            Pricing from <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full pricing
+            Pricing from <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full pricing
             tiers and material spec on our{" "}
             <Link href="/freezer-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               freezer labels Saskatoon page

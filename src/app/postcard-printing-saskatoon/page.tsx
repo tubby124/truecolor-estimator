@@ -5,12 +5,12 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Postcard Printing Saskatoon | 4×6 & 5×7 | True Color" },
   description:
-    "Postcard printing in Saskatoon from $40 for 50. 4×6 and 5×7 on 14pt gloss, double-sided. Same-day rush +$40. Real estate, events, promos. 216 33rd St W.",
+    "Postcard printing in Saskatoon from $35. 3×4, 4×6, and 5×7 on 14pt gloss, double-sided. Same-day rush +$40. Pickup at 216 33rd St W.",
   alternates: { canonical: "/postcard-printing-saskatoon" },
   openGraph: {
     title: "Postcard Printing Saskatoon | True Color Display Printing",
     description:
-      "14pt gloss postcards from $40/50. 4×6 and 5×7, double-sided. Same-day rush available. Local Saskatoon pickup at 216 33rd St W.",
+      "14pt gloss postcards from $35. 3×4, 4×6, and 5×7, double-sided. Same-day rush available. Saskatoon pickup at 216 33rd St W.",
     url: "https://truecolorprinting.ca/postcard-printing-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -26,13 +26,14 @@ export default function PostcardPrintingSaskatoonPage() {
       subtitle="Direct mail that lands in hands — not a spam folder."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Postcard printing Saskatoon — 4x6 and 5x7 gloss direct mail"
-      description="True Color prints direct mail postcards in Saskatoon on 14pt gloss stock, double-sided, starting at $40 for 50 postcards (4×6&quot;) or $85 for 250. We print 4×6, 5×7, and 3×4 sizes in-house on our Roland UV printer — colour is sharp, mailable, and Canada Post admail compliant. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof. Popular for real estate just-listed cards, restaurant promos, event invitations, and business announcements. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints direct mail postcards in Saskatoon on 14pt gloss stock, double-sided, starting at $35 for 50 mini postcards (3×4&quot;). Standard 4×6 postcards start at $40 for 50 or $85 for 250. We print 3×4, 4×6, and 5×7 sizes in-house on our Roland UV printer — colour is sharp, mailable, and Canada Post admail compliant. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof. Popular for real estate just-listed cards, restaurant promos, event invitations, and business announcements. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             Email gets ignored. A postcard on a kitchen counter stays there. Saskatchewan businesses
-            use direct mail postcards to cut through the noise — and at $40 for 50 (4×6&quot;, 14pt
-            gloss, double-sided) or $85 for 250, the cost per impression beats most digital channels.
+            use direct mail postcards to cut through the noise — with mini postcards from $35,
+            standard 4×6 cards from $40 for 50, and 4×6 bulk runs at $85 for 250. The cost
+            per impression beats most digital channels.
             We print in-house on our Roland UV printer so colour is vibrant, sharp, and ready for
             Canada Post admail drops. Same-day rush available for +$40 flat on orders placed before 10 AM.
           </p>
@@ -65,6 +66,7 @@ export default function PostcardPrintingSaskatoonPage() {
         </>
       }
       products={[
+        { name: "Mini Postcards 3×4\"", from: "from $35 / 50", slug: "postcards" },
         { name: "Postcards 4×6\"", from: "from $40 / 50", slug: "postcards" },
         { name: "Postcards 5×7\"", from: "from $45 / 50", slug: "postcards" },
         { name: "Flyers", from: "from $45 / 100", slug: "flyers" },
@@ -73,7 +75,7 @@ export default function PostcardPrintingSaskatoonPage() {
       ]}
       whyPoints={[
         "Skip the spam folder — 14pt gloss double-sided cards, Canada Post admail compliant, land in hands",
-        "4×6\" from $40/50 | 250 for $85 | 500 for $140 — no hidden setup fees",
+        "3×4\" from $35/50 | 4×6\" from $40/50 | 250 for $85 — no hidden setup fees",
         "5×7\" from $45/50 | 100 for $50 | 250 for $95 — stands out in a crowded mailbox",
         "Colour that matches your brand exactly — Roland UV in-house, no outsourcing, no colour surprises",
         "Order before 10 AM, pick up today — same-day rush +$40 flat",
@@ -84,7 +86,7 @@ export default function PostcardPrintingSaskatoonPage() {
       faqs={[
         {
           q: "How much does postcard printing cost in Saskatoon?",
-          a: "4×6\" postcards (14pt gloss, double-sided): 50 for $40, 100 for $45, 250 for $85, 500 for $140. 5×7\" postcards: 50 for $45, 100 for $50, 250 for $95. Design is $35 flat if you need a layout built. Same-day rush is +$40 on top of the print cost.",
+          a: "3×4\" mini postcards start at $35 for 50. 4×6\" postcards (14pt gloss, double-sided): 50 for $40, 100 for $45, 250 for $85, 500 for $140. 5×7\" postcards: 50 for $45, 100 for $50, 250 for $95. Design is $35 flat if you need a layout built. Same-day rush is +$40 on top of the print cost.",
         },
         {
           q: "Are your postcards Canada Post admail compliant?",

@@ -326,7 +326,7 @@ const PAGES = [
     ],
   },
   {
-    loc: `${BASE}/postcards-saskatoon`,
+    loc: `${BASE}/postcard-printing-saskatoon`,
     images: [
       {
         loc: `${IMG}/postcards-800x600.webp`,
@@ -351,7 +351,7 @@ const PAGES = [
     ],
   },
   {
-    loc: `${BASE}/brochures-saskatoon`,
+    loc: `${BASE}/brochure-printing-saskatoon`,
     images: [
       {
         loc: `${IMG}/brochures-800x600.webp`,
@@ -441,7 +441,7 @@ const PAGES = [
     ],
   },
   {
-    loc: `${BASE}/photo-posters-saskatoon`,
+    loc: `${BASE}/photo-poster-printing-saskatoon`,
     images: [
       {
         loc: `${IMG}/photo-posters-800x600.webp`,
@@ -465,32 +465,6 @@ const PAGES = [
       },
     ],
   },
-  {
-    loc: `${BASE}/magnet-calendars-saskatoon`,
-    images: [
-      {
-        loc: `${IMG}/magnet-calendars-800x600.webp`,
-        title: "Magnet calendar printing Saskatoon fridge magnets",
-        caption: "Custom magnet calendars printed in Saskatoon — fridge magnets for business promotion",
-      },
-      {
-        loc: `${IMG}/magnet-calendar-fridge-800x600.webp`,
-        title: "Fridge magnet calendar Saskatoon business",
-        caption: "Fridge magnet calendar for Saskatoon business promotion — True Color Display Printing",
-      },
-      {
-        loc: `${IMG}/magnet-calendar-filing-cabinet-800x600.webp`,
-        title: "Filing cabinet magnet calendar Saskatoon office",
-        caption: "Magnet calendar on filing cabinet in Saskatoon office — True Color",
-      },
-      {
-        loc: `${IMG}/magnet-calendar-cards-800x600.webp`,
-        title: "Magnet calendar card printing Saskatoon bulk",
-        caption: "Bulk magnet calendar cards printed in Saskatoon — ready for distribution",
-      },
-    ],
-  },
-
   // ══════════════════════════════════════════════════════════════════════════
   // ABOUT PAGE
   // ══════════════════════════════════════════════════════════════════════════
@@ -821,52 +795,6 @@ const PAGES = [
       },
     ],
   },
-  {
-    loc: `${BASE}/st-patricks-day-printing-saskatoon`,
-    images: [
-      {
-        loc: `${SEA}/st-patricks/banner-shamrock-green.webp`,
-        title: "St. Patrick's Day shamrock vinyl banner Saskatoon",
-        caption: "Classic shamrock St. Patrick's Day vinyl banner — green with white shamrocks, printed in Saskatoon",
-      },
-      {
-        loc: `${SEA}/st-patricks/banner-pub-modern.webp`,
-        title: "St. Patrick's Day pub banner Saskatoon bar event",
-        caption: "Modern dark green St. Patrick's Day bar banner — March 17 event, True Color Saskatoon",
-      },
-      {
-        loc: `${SEA}/st-patricks/banner-celtic-traditional.webp`,
-        title: "Celtic traditional St. Patrick's Day banner Saskatoon",
-        caption: "Celtic traditional St. Patrick's Day banner with harp and gold knotwork — True Color, Saskatoon SK",
-      },
-      {
-        loc: `${SEA}/st-patricks/decal-shamrock-cluster.webp`,
-        title: "Shamrock window decal St. Patrick's Day Saskatoon storefront",
-        caption: "Shamrock cluster window decal for St. Patrick's Day storefront decoration — Saskatoon",
-      },
-    ],
-  },
-  {
-    loc: `${BASE}/ramadan-printing-saskatoon`,
-    images: [
-      {
-        loc: `${SEA}/ramadan/hero.webp`,
-        title: "Ramadan event printing Saskatoon mosque community",
-        caption: "Ramadan event printing for Saskatoon mosques and community centres — True Color Display Printing",
-      },
-      {
-        loc: `${SEA}/ramadan/banner-traditional.webp`,
-        title: "Ramadan Mubarak traditional banner Saskatoon",
-        caption: "Traditional Ramadan Mubarak vinyl banner — printed in Saskatoon by True Color Display Printing",
-      },
-      {
-        loc: `${SEA}/ramadan/retractable-welcome.webp`,
-        title: "Ramadan welcome retractable banner Saskatoon mosque",
-        caption: "Retractable welcome banner for Ramadan events — True Color Display Printing, Saskatoon SK",
-      },
-    ],
-  },
-
   // ══════════════════════════════════════════════════════════════════════════
   // INDUSTRY PAGES
   // ══════════════════════════════════════════════════════════════════════════

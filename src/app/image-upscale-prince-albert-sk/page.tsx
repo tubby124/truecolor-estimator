@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Upscaling Prince Albert SK | From $40 | True Color" },
+  title: { absolute: "Image Upscaling Prince Albert SK | From $15 | True Color" },
   description:
-    "AI image upscaling and photo enhancement for Prince Albert businesses. Print-ready files from low-res sources. From $40 flat. Same-day digital delivery.",
+    "AI image upscaling and photo enhancement for Prince Albert businesses. Print-ready files from low-res sources. From $15. Same-day digital delivery.",
   alternates: { canonical: "/image-upscale-prince-albert-sk" },
   openGraph: {
     title: "Image Upscaling Prince Albert SK | True Color Display Printing",
     description:
-      "AI image upscaling 4×–8×. Print-ready files from low-res photos. From $40 flat. Same-day digital delivery to Prince Albert.",
+      "AI image upscaling and photo restoration. Print-ready files from low-res photos. From $15. Same-day digital delivery to Prince Albert.",
     url: "https://truecolorprinting.ca/image-upscale-prince-albert-sk",
     images: [{ url: "/images/products/og/image-upscale-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -23,11 +23,11 @@ export default function ImageUpscalePrinceAlbertPage() {
       canonicalSlug="image-upscale-prince-albert-sk"
       primaryProductSlug="stickers"
       title="Image Upscaling — Prince Albert SK"
-      subtitle="AI image upscaling and photo enhancement for PA businesses. From $40. Same-day digital delivery."
+      subtitle="AI image upscaling and photo enhancement for PA businesses. From $15. Same-day digital delivery."
       heroImage="/images/products/heroes/image-upscale-hero-1200x500.webp"
       heroAlt="AI image upscaling service for Prince Albert SK businesses by True Color Display Printing"
       description={
-        "AI image upscaling and photo enhancement for Prince Albert businesses. From $40 flat per image — print-ready sharp output from blurry, low-resolution, or grainy source files. Built for PA realtors, tourism operators, hunting/fishing lodges, indigenous-craft brands, and small businesses with only a tiny logo or phone-shot photo. Processed in-house in Saskatoon, returned same business day via email or Dropbox — no courier required. Distance doesn't matter for digital deliverables."
+        "AI image upscaling and photo enhancement for Prince Albert businesses. From $15 per image — print-ready sharp output from blurry, low-resolution, or grainy source files. Built for PA realtors, tourism operators, hunting/fishing lodges, indigenous-craft brands, and small businesses with only a tiny logo or phone-shot photo. Processed in-house in Saskatoon, returned same business day via email or Dropbox — no courier required. Distance doesn't matter for digital deliverables."
       }
       descriptionNode={
         <>
@@ -35,8 +35,9 @@ export default function ImageUpscalePrinceAlbertPage() {
             True Color Display Printing offers AI image upscaling and photo restoration as a
             digital service. Send your low-resolution photo, pixelated logo, or grainy
             photograph and we&apos;ll return a sharp, print-ready high-resolution file via
-            email or Dropbox link. <strong>$40 flat per image</strong> for standard 4×
-            upscaling, $60 for 8× (small phone photo to 4×8&apos; banner resolution).
+            email or Dropbox link. <strong>$15 basic upscale</strong> handles 2×
+            resolution for prints up to 12×18&quot;; $35 enhanced adds 4× upscaling,
+            noise reduction, and sharpening for banner-sized output.
             Same-business-day digital delivery to Prince Albert. Distance is irrelevant for
             digital files — same turnaround whether you&apos;re in PA or downtown Saskatoon.
           </p>
@@ -65,7 +66,7 @@ export default function ImageUpscalePrinceAlbertPage() {
         </>
       }
       products={[
-        { name: "Image Upscaling", from: "from $40 flat", slug: "stickers" },
+        { name: "Image Upscaling", from: "from $15", slug: "stickers" },
         { name: "Logo Vectorization", from: "from $50 flat", slug: "stickers" },
         { name: "Photo Posters", from: "from $25", slug: "photo-posters" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
@@ -73,7 +74,7 @@ export default function ImageUpscalePrinceAlbertPage() {
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
       ]}
       whyPoints={[
-        "AI upscaling at 4× ($40) or 8× ($60) — print-ready output from low-res sources",
+        "AI upscaling from $15 — $35 enhanced tier for banner-sized output",
         "Digital delivery — distance is irrelevant, same turnaround as a downtown Saskatoon customer",
         "We tell you the right output resolution for your target print size + substrate",
         "Roland UV print quality once upscaled — combine with a True Color print job",
@@ -85,7 +86,7 @@ export default function ImageUpscalePrinceAlbertPage() {
       faqs={[
         {
           q: "How much does image upscaling cost in Prince Albert?",
-          a: "$40 flat per image for 4× upscaling, $60 for 8×. Family photo restoration $40 per photo. Rush (under 4 hours) +$40 flat. No shipping cost — digital delivery.",
+          a: "$15 for basic 2× upscaling, $35 for enhanced 4× upscaling with AI noise reduction and sharpening, and $75 for full photo restoration. Rush (under 4 hours) +$40 flat. No shipping cost — digital delivery.",
         },
         {
           q: "Do you charge more because Prince Albert is further north?",

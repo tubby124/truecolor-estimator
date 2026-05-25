@@ -42,8 +42,8 @@ export default function ChurchBannersSaskatoonPage() {
             building fascia, or tent frame to announce service times, special events, or
             holiday gatherings. A 3×6&quot; banner ($135) is visible from the street and holds
             full event details. For{" "}
-            <Link href="/ramadan-eid-banners-saskatoon" className="text-[#16C2F3] underline font-medium">
-              Ramadan and Eid banners
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              seasonal event banners
             </Link>
             {" "}we print on short notice so you&apos;re ready before the month begins.
             Grommets and finished edges are standard — no extra charge.

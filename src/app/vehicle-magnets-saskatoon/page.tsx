@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
@@ -25,6 +26,36 @@ export default function VehicleMagnetsSaskatoonPage() {
       heroImage="/images/products/product/vehicle-magnets-800x600.webp"
       heroAlt="Custom vehicle magnets printed in Saskatoon by True Color Display Printing"
       description="True Color prints 30mil vehicle magnets for Saskatoon tradespeople, sales reps, election campaigns, and small businesses — from $24/sqft. Full-colour Roland UV printing on heavy-gauge magnetic sheeting — bold enough to read from across a parking lot, thick enough to hold in Saskatchewan wind. Unlike a vinyl wrap, magnets come off in 10 seconds and protect your door paint. No permanent commitment, no resale value hit. Order online, get an instant price, pick up at 216 33rd St W."
+      descriptionNode={
+        <>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            True Color prints 30mil vehicle magnets for Saskatoon tradespeople, sales reps, election
+            campaigns, and small businesses — from $24/sqft. They are full-colour, removable, and
+            reusable, so you can brand a work truck during the week and take the sign off after hours.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            Vehicle magnets work best on flat steel panels like truck doors, van doors, and service
+            vehicles. If you need permanent branding, compare{" "}
+            <Link href="/vehicle-decals-saskatoon" className="text-[#16C2F3] underline font-medium">
+              vehicle decals
+            </Link>
+            . If you need site signage to match the truck, pair magnets with{" "}
+            <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              coroplast signs
+            </Link>{" "}
+            or{" "}
+            <Link href="/aluminum-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              ACP aluminum signs
+            </Link>
+            .
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Standard turnaround is 1–3 business days after artwork approval. Same-day rush is
+            available for +$40 flat when ordered before 10 AM. Our in-house designer can clean up a
+            logo or build a simple door layout from scratch for $35.
+          </p>
+        </>
+      }
       products={[
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },

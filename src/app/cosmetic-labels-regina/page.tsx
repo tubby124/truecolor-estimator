@@ -38,7 +38,7 @@ export default function CosmeticLabelsReginaPage() {
             bathroom humidity, accidental product spills on the bottle, and the moisture cycle
             that happens every time someone uses a hand soap or face serum. Roland UV ink
             cures to a solid film so colours stay vivid and the print doesn&apos;t bead off.
-            Pricing from <strong>$5.50/sqft</strong> with a $25 small-order minimum at checkout charge. Full spec on
+            Pricing from <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full spec on
             our{" "}
             <Link href="/cosmetic-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               cosmetic labels Saskatoon page

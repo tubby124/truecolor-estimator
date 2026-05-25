@@ -15,11 +15,6 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-// Computed once at module load (build time for SSG). Rolls forward each Railway redeploy.
-// Google flags Offers with expired priceValidUntil as invalid rich result.
-// eslint-disable-next-line react-hooks/purity -- module-level build-time constant; not called during render
-const PRICE_VALID_UNTIL = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-
 export async function generateStaticParams() {
   return PRODUCT_SLUGS.map((slug) => ({ slug }));
 }
@@ -32,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${product.name} Saskatoon | ${product.fromPrice} | True Color`,
     description: `${product.name} in Saskatoon — ${product.tagline} From ${product.fromPrice}. Order online, local pickup at 216 33rd St W.`,
-    robots: { index: false, follow: false },
+    robots: { index: false, follow: true },
     openGraph: {
       title: `${product.name} Saskatoon | ${product.fromPrice} | True Color`,
       description: `${product.name} in Saskatoon. ${product.tagline} From ${product.fromPrice}. Local pickup at 216 33rd St W.`,
@@ -52,34 +47,6 @@ export default async function ProductPage({ params }: Props) {
   // Related products
   const related = product.relatedSlugs.map((s) => getProduct(s)).filter(Boolean);
 
-  // Extract numeric price from fromPrice string (e.g. "$30" → "30")
-  const priceNum = product.fromPrice.replace(/[^0-9.]/g, "") || "0";
-
-  // JSON-LD structured data
-  const productJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.tagline,
-    url: `https://truecolorprinting.ca/products/${slug}`,
-    image: `https://truecolorprinting.ca${product.heroImage}`,
-    brand: { "@type": "Brand", name: "True Color Display Printing" },
-    offers: {
-      "@type": "Offer",
-      url: `https://truecolorprinting.ca/products/${slug}`,
-      price: priceNum,
-      priceCurrency: "CAD",
-      priceValidUntil: PRICE_VALID_UNTIL,
-      availability: "https://schema.org/InStock",
-      itemCondition: "https://schema.org/NewCondition",
-      seller: {
-        "@type": ["LocalBusiness", "PrintShop"],
-        "@id": "https://truecolorprinting.ca/#localbusiness",
-        name: "True Color Display Printing",
-      },
-    },
-  };
-
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -90,57 +57,12 @@ export default async function ProductPage({ params }: Props) {
     ],
   };
 
-  const faqJsonLd = product.faqs.length > 0 ? {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: product.faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.q,
-      acceptedAnswer: { "@type": "Answer", text: faq.a },
-    })),
-  } : null;
-
-  const serviceJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: `${product.name} Saskatoon`,
-    serviceType: "Print Service",
-    description: product.tagline,
-    provider: {
-      "@type": "LocalBusiness",
-      name: "True Color Display Printing",
-      url: "https://truecolorprinting.ca",
-      telephone: "+13069548688",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "216 33rd St W",
-        addressLocality: "Saskatoon",
-        addressRegion: "SK",
-        postalCode: "S7L 0V1",
-        addressCountry: "CA",
-      },
-    },
-    areaServed: { "@type": "City", name: "Saskatoon" },
-    offers: {
-      "@type": "Offer",
-      price: priceNum,
-      priceCurrency: "CAD",
-      priceValidUntil: PRICE_VALID_UNTIL,
-      availability: "https://schema.org/InStock",
-    },
-  };
-
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
 
       {/* Structured data */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      {faqJsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      )}
 
       <main id="main-content" className="max-w-6xl mx-auto px-6 py-10">
         {/* Breadcrumb */}

@@ -15,7 +15,6 @@ export function LocalShopSection() {
               fill
               className="object-cover object-center"
               sizes="(max-width: 768px) 100vw, 60vw"
-              priority
             />
           </div>
 

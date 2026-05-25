@@ -30,38 +30,6 @@ const breadcrumbSchema = {
   ],
 };
 
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Where is True Color Display Printing located?",
-      acceptedAnswer: { "@type": "Answer", text: "216 33rd St W, Saskatoon, SK S7L 0V1. Walk in Monday through Friday, 9 AM to 5 PM." },
-    },
-    {
-      "@type": "Question",
-      name: "Do you offer same-day printing in Saskatoon?",
-      acceptedAnswer: { "@type": "Answer", text: "Yes. Orders placed before 10 AM qualify for same-day turnaround at a flat +$40 rush fee. Call (306) 954-8688 to confirm availability." },
-    },
-    {
-      "@type": "Question",
-      name: "Can I drop off artwork in person?",
-      acceptedAnswer: { "@type": "Answer", text: "Yes. Bring a USB, a printout, or nothing at all. In-house designer can build artwork from a sketch for $35 flat with a same-day proof." },
-    },
-    {
-      "@type": "Question",
-      name: "Is there a shipping option?",
-      acceptedAnswer: { "@type": "Answer", text: "All orders are local pickup only at 216 33rd St W, Saskatoon. No shipping means no courier delays or damaged prints in transit." },
-    },
-    {
-      "@type": "Question",
-      name: "How do I get a price?",
-      acceptedAnswer: { "@type": "Answer", text: "Use the instant price calculator at truecolorprinting.ca/quote — no forms, no phone calls. See your exact price for any product in 30 seconds." },
-    },
-  ],
-};
-
 const MAPS_URL = "https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V1";
 
 const FAQS = [
@@ -79,7 +47,7 @@ const FAQS = [
   },
   {
     q: "Is there a shipping option?",
-    a: "All orders are local pickup only at 216 33rd St W, Saskatoon. No shipping means no courier delays, no damaged prints in transit, and faster turnaround.",
+    a: "Local pickup is standard at 216 33rd St W, Saskatoon. Courier can be arranged outside Saskatoon at customer cost when the job size and deadline make sense.",
   },
   {
     q: "How do I get a price?",
@@ -93,10 +61,6 @@ export default function ContactPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <SiteNav />
 
@@ -132,7 +96,7 @@ export default function ContactPage() {
                 Saskatoon, SK S7L 0V1
               </address>
               <p className="text-gray-400 text-sm mb-8">
-                Mon–Fri &nbsp;9 AM – 5 PM &nbsp;&middot;&nbsp; Local pickup only
+                Mon–Fri &nbsp;9 AM – 5 PM &nbsp;&middot;&nbsp; Local pickup; courier by request
               </p>
 
               <div className="flex flex-col sm:flex-row flex-wrap gap-3">

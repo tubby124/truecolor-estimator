@@ -175,7 +175,7 @@ export default function AgricultureSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much do farm gate signs cost in Saskatchewan?",
-          a: "Coroplast farm gate signs at True Color start at $8/sqft with a $25 small-order minimum at checkout. A standard 18\u00d724\u201d gate sign is $25 ($24 of sign + the $25 order-total minimum at checkout). A 24\u00d736\u201d sign is $48. For permanent farm entrance signs, ACP aluminum starts at $13/sqft (small panels also hit the $25 order minimum) and lasts 10+ years. Volume: 5+ signs = 8% off, 10+ signs = 17% off coroplast.",
+          a: "Coroplast farm gate signs at True Color start at $8/sqft with a $25 order-total minimum at checkout. A standard 18\u00d724\u201d gate sign is $25 ($24 of sign + the $25 order-total minimum at checkout). A 24\u00d736\u201d sign is $48. For permanent farm entrance signs, ACP aluminum starts at $13/sqft (small panels also hit the $25 order minimum) and lasts 10+ years. Volume: 5+ signs = 8% off, 10+ signs = 17% off coroplast.",
         },
         {
           q: "What is the most durable sign material for Saskatchewan winters?",

@@ -6,7 +6,6 @@ import { BackToTop } from "@/components/site/BackToTop";
 import { AuthRedirect } from "@/components/site/AuthRedirect";
 import { UtmCapture } from "@/components/site/UtmCapture";
 import { MetaPixel } from "@/components/site/MetaPixel";
-import { REVIEW_COUNT } from "@/lib/reviews";
 
 // Self-hosted Geist + Geist Mono variable WOFF2 files. Switched from
 // next/font/google because Railway builds were intermittently failing on
@@ -103,6 +102,7 @@ const organizationSchema = {
   image: "https://truecolorprinting.ca/og-image.png",
   email: "info@true-color.ca",
   telephone: "+13069548688",
+  founder: { "@id": "https://truecolorprinting.ca/#albert-yeung" },
   taxID: "731454914RT0001",
   vatID: "731454914RT0001",
   sameAs: [
@@ -121,14 +121,6 @@ const websiteSchema = {
   description:
     "Instant online pricing for signs, banners, and print products in Saskatoon, SK. No quote forms — see your exact price in 30 seconds.",
   publisher: { "@id": "https://truecolorprinting.ca/#organization" },
-  potentialAction: {
-    "@type": "SearchAction",
-    target: {
-      "@type": "EntryPoint",
-      urlTemplate: "https://truecolorprinting.ca/quote?product={search_term_string}",
-    },
-    "query-input": "required name=search_term_string",
-  },
 };
 
 const localBusinessSchema = {
@@ -139,6 +131,7 @@ const localBusinessSchema = {
   legalName: "True Color Display Printing Ltd.",
   alternateName: ["True Color Printing", "TrueColor Printing"],
   parentOrganization: { "@id": "https://truecolorprinting.ca/#organization" },
+  founder: { "@id": "https://truecolorprinting.ca/#albert-yeung" },
   logo: "https://truecolorprinting.ca/truecolorlogo.png",
   taxID: "731454914RT0001",
   vatID: "731454914RT0001",
@@ -174,8 +167,8 @@ const localBusinessSchema = {
     {
       "@type": "OpeningHoursSpecification",
       dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      opens: "09:00",
-      closes: "17:00",
+      opens: "09:00:00",
+      closes: "17:00:00",
     },
   ],
   priceRange: "$$",
@@ -214,17 +207,27 @@ const localBusinessSchema = {
       { "@type": "Offer", itemOffered: { "@type": "Service", name: "Graphic Design", url: "https://truecolorprinting.ca/graphic-design-saskatoon" } },
     ],
   },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "5.0",
-    reviewCount: String(REVIEW_COUNT),
-    bestRating: "5",
-    worstRating: "1",
-  },
   sameAs: [
     "https://www.instagram.com/truecolorprint",
     "https://maps.google.com/?cid=3278649905558780051",
     "https://www.facebook.com/truecolordisplay",
+  ],
+};
+
+const founderSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "https://truecolorprinting.ca/#albert-yeung",
+  name: "Albert Yeung",
+  jobTitle: "Founder",
+  worksFor: { "@id": "https://truecolorprinting.ca/#organization" },
+  founderOf: { "@id": "https://truecolorprinting.ca/#organization" },
+  knowsAbout: [
+    "Large format printing",
+    "Roland UV printing",
+    "Business card printing",
+    "Vehicle magnets",
+    "Coroplast signs",
   ],
 };
 
@@ -269,6 +272,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(founderSchema) }}
         />
       </body>
     </html>

@@ -54,7 +54,7 @@ export default function ForLeaseSignsSaskatoonPage() {
               ACP aluminum
             </Link>{" "}
             from $13/sqft is the better substrate. ACP is rigid, rust-proof, and rated for 7–10
-            years outdoors. A 24×36″ ACP for-lease sign is $78 ($13/sqft × 6 sqft). $25 small-order minimum applies at checkout.
+            years outdoors. A 24×36″ ACP for-lease sign is $78 ($13/sqft × 6 sqft). $25 order-total minimum applies at checkout.
             Coroplast is the right call for properties that lease quickly; ACP is the right call
             for long-vacant industrial or commercial sites where signage stays up for years.
           </p>
@@ -81,7 +81,8 @@ export default function ForLeaseSignsSaskatoonPage() {
             Same-day rush is available on for-lease signs for +$40 flat when ordered before 10 AM —
             useful when a property hits the market unexpectedly. Standard turnaround is 1–3
             business days from artwork approval. Pickup at 216 33rd St W, Saskatoon (west side near
-            Circle Drive). No shipping — local pickup only.
+            Circle Drive). Local pickup in Saskatoon is standard; courier is available outside
+            Saskatoon at customer cost when the job size and deadline make sense.
           </p>
         </>
       }
