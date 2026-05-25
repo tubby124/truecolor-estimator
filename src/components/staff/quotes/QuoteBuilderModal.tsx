@@ -274,6 +274,9 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                       <span>Total (with tax)</span>
                       <span>${total.toFixed(2)}</span>
                     </div>
+                    <p className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1.5 mt-2">
+                      ✓ Email includes a <strong>Pay ${total.toFixed(2)} now</strong> button (Clover, valid 30 days). Customer can pay immediately — no separate invoice needed.
+                    </p>
                   </div>
                 ) : null;
               })()}

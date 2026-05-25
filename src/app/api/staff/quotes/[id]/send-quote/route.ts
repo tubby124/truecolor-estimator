@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
+import { encodePaymentToken } from "@/lib/payment/token";
 
 interface LineItem {
   description: string;
@@ -30,14 +31,15 @@ function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function buildQuoteHtml(opts: {
-  customerName: string;
-  lineItems: LineItem[];
-  note?: string;
-}): string {
-  const { customerName, lineItems, note } = opts;
-  const firstName = customerName.split(/[\s,]/)[0];
-
+// Subtotal + GST (5%) + PST (6%), rounded the same way the modal preview and
+// the email body compute it — so the Pay Now amount never drifts from the
+// total the customer sees in the quote.
+function computeQuoteTotals(lineItems: LineItem[]): {
+  subtotal: number;
+  gst: number;
+  pst: number;
+  grandTotal: number;
+} {
   const subtotal = Math.round(lineItems.reduce(
     (sum, li) => sum + (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0),
     0
@@ -45,6 +47,20 @@ function buildQuoteHtml(opts: {
   const gst = Math.round(subtotal * 0.05 * 100) / 100;
   const pst = Math.round(subtotal * 0.06 * 100) / 100;
   const grandTotal = Math.round((subtotal + gst + pst) * 100) / 100;
+  return { subtotal, gst, pst, grandTotal };
+}
+
+function buildQuoteHtml(opts: {
+  customerName: string;
+  lineItems: LineItem[];
+  note?: string;
+  payUrl: string;
+  payLabel: string;
+}): string {
+  const { customerName, lineItems, note, payUrl, payLabel } = opts;
+  const firstName = customerName.split(/[\s,]/)[0];
+
+  const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems);
 
   const rows = lineItems
     .map((li) => {
@@ -125,10 +141,11 @@ function buildQuoteHtml(opts: {
 
     <!-- CTA -->
     <div style="text-align:center;margin-bottom:32px;">
-      <a href="mailto:info@true-color.ca?subject=${encodeURIComponent(`Re: Quote — ${customerName}`)}" style="display:inline-block;background:#e85d04;color:white;text-decoration:none;font-size:14px;font-weight:700;padding:14px 32px;border-radius:6px;">
-        Reply to Confirm Your Order
+      <a href="${esc(payUrl)}" style="display:inline-block;background:#059669;color:white;text-decoration:none;font-size:15px;font-weight:700;padding:15px 36px;border-radius:6px;">
+        Pay ${esc(payLabel)} now &rarr;
       </a>
-      <p style="font-size:12px;color:#888;margin-top:10px;">Or call us directly: <strong>(306) 954-8688</strong></p>
+      <p style="font-size:12px;color:#666;margin-top:12px;">Pay securely by credit card to confirm your order — we start production once payment clears (typically same day).</p>
+      <p style="font-size:11px;color:#aaa;margin-top:6px;">Link valid 30 days · Powered by Clover · Questions? Reply to this email or call <strong>(306) 954-8688</strong></p>
     </div>
   </div>
 
@@ -151,16 +168,11 @@ function buildQuotePlainText(opts: {
   customerName: string;
   lineItems: LineItem[];
   note?: string;
+  payUrl: string;
 }): string {
-  const { customerName, lineItems, note } = opts;
+  const { customerName, lineItems, note, payUrl } = opts;
   const firstName = customerName.split(/[\s,]/)[0];
-  const subtotal = Math.round(lineItems.reduce(
-    (sum, li) => sum + (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0),
-    0
-  ) * 100) / 100;
-  const gst = Math.round(subtotal * 0.05 * 100) / 100;
-  const pst = Math.round(subtotal * 0.06 * 100) / 100;
-  const total = Math.round((subtotal + gst + pst) * 100) / 100;
+  const { subtotal, gst, pst, grandTotal: total } = computeQuoteTotals(lineItems);
   const lines = [
     `Hi ${firstName},`,
     "",
@@ -179,7 +191,10 @@ function buildQuotePlainText(opts: {
     `PST (6%): $${pst.toFixed(2)}`,
     `Total: $${total.toFixed(2)} CAD`,
     "",
-    "Reply to this email or call (306) 954-8688 to confirm your order.",
+    `Pay securely by credit card to confirm your order: ${payUrl}`,
+    "(Link valid 30 days. Powered by Clover.)",
+    "",
+    "Questions? Reply to this email or call (306) 954-8688.",
     "",
     "— True Color Display Printing Ltd.",
     "216 33rd St W (Upstairs), Saskatoon, SK S7L 0V1 | GST# 731454914RT0001 | truecolorprinting.ca",
@@ -211,11 +226,28 @@ export async function POST(req: NextRequest, { params }: Params) {
     const emailSubject =
       subject?.trim() || "Your Custom Print Quote — True Color Display Printing";
 
+    // Mint a Pay Now link for the tax-included grand total. Same HMAC gateway as
+    // order payments and the send-reply path: /pay/[token] re-creates a fresh
+    // Clover checkout on every click, so the 15-min Clover session expiry never
+    // matters. The decoded amount is HMAC-signed — the URL can't be tampered.
+    const { grandTotal } = computeQuoteTotals(lineItems);
+    const totalCents = Math.round(grandTotal * 100);
+    const shortId = id.slice(0, 8);
+    const cloverDescription = `Quote #${shortId} — ${customerName}`.slice(0, 90);
+    const token = encodePaymentToken(grandTotal, cloverDescription, to);
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca").replace(/\/$/, "");
+    const payUrl = `${siteUrl}/pay/${encodeURIComponent(token)}`;
+    const payLabel = grandTotal.toLocaleString("en-CA", {
+      style: "currency",
+      currency: "CAD",
+      minimumFractionDigits: 2,
+    });
+
     await sendEmail({
       to,
       subject: emailSubject,
-      html: buildQuoteHtml({ customerName, lineItems, note }),
-      text: buildQuotePlainText({ customerName, lineItems, note }),
+      html: buildQuoteHtml({ customerName, lineItems, note, payUrl, payLabel }),
+      text: buildQuotePlainText({ customerName, lineItems, note, payUrl }),
     });
 
     const supabase = createServiceClient();
@@ -224,7 +256,12 @@ export async function POST(req: NextRequest, { params }: Params) {
       .join(", ");
     await supabase
       .from("quote_requests")
-      .update({ replied_at: new Date().toISOString(), reply_body: `[Price quote sent] ${quoteSummary}` } as Record<string, unknown>)
+      .update({
+        replied_at: new Date().toISOString(),
+        reply_body: `[Price quote sent · Pay Now ${payLabel}] ${quoteSummary}`,
+        quote_total_cents: totalCents,
+        quote_total_description: cloverDescription,
+      } as Record<string, unknown>)
       .eq("id", id);
 
     console.log(`[staff/quotes/send-quote] sent branded quote to ${to} for quote ${id}`);
