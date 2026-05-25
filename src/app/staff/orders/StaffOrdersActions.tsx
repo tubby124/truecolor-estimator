@@ -12,7 +12,6 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   FlyerPicker,

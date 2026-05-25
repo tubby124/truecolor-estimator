@@ -7,7 +7,6 @@ import {
   FlyerPicker,
   useFlyerCatalog,
   type FlyerSelection,
-  type FlyerSku,
 } from "@/components/staff/FlyerPicker";
 
 interface EstimatorState {
@@ -74,7 +73,7 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
 
   // Map a flyer selection back onto the engine inputs in EstimatorState, so the
   // existing /api/estimate call resolves the exact SKU the picker shows.
-  const onFlyerChange = (next: FlyerSelection, _resolved: FlyerSku | null) => {
+  const onFlyerChange = (next: FlyerSelection) => {
     const rep = next.sizeKey ? flyerCatalog.find((s) => s.sizeKey === next.sizeKey) : undefined;
     const matSku =
       next.sizeKey && next.paperLabel

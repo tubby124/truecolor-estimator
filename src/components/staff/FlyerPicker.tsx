@@ -112,6 +112,18 @@ function uniqBy<T>(arr: T[], key: (t: T) => string | number): T[] {
   return arr.filter((s, i, a) => a.findIndex((x) => key(x) === key(s)) === i);
 }
 
+// Module-level so it isn't re-created on every render (would remount + drop focus).
+function Row({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-700/70 w-12 shrink-0">
+        {label}
+      </span>
+      <div className="flex flex-wrap gap-1">{children}</div>
+    </div>
+  );
+}
+
 export function FlyerPicker({ catalog, selection, onChange }: Props) {
   if (catalog.length === 0) {
     return (
@@ -147,14 +159,6 @@ export function FlyerPicker({ catalog, selection, onChange }: Props) {
         ? "bg-emerald-500 border-emerald-500 text-white"
         : "bg-white border-emerald-200 text-emerald-700 hover:border-emerald-400"
     }`;
-  const Row = ({ label, children }: { label: string; children: ReactNode }) => (
-    <div className="flex items-center gap-2">
-      <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-700/70 w-12 shrink-0">
-        {label}
-      </span>
-      <div className="flex flex-wrap gap-1">{children}</div>
-    </div>
-  );
 
   return (
     <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3 space-y-2">
