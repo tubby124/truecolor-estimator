@@ -260,6 +260,49 @@ export async function POST(req: NextRequest) {
         }
       }
       // quoteOnly Clover: paymentUrl stays null — customer email shows quote-mode CTA.
+
+      // Bookkeeping parity: every manual order/quote now gets a Wave DRAFT invoice,
+      // matching the website checkout path (/api/orders) which always creates one.
+      // The customer still pays through the Clover gateway; the Clover webhook
+      // approves + records the payment against this invoice once the card captures
+      // (it reads order.wave_invoice_id — NULL meant the webhook could never back-fill).
+      // Non-fatal: a Wave outage must not block the Clover payment link.
+      try {
+        const waveCustomerId = await createOrFindWaveCustomer(
+          contact.email.toLowerCase().trim(),
+          contact.name.trim()
+        );
+        const waveLineItems = items.map((item) => ({
+          description: formatItemAlbertBlock(item),
+          unitPrice: Math.round(item.amount * 100) / 100,
+          qty: 1,
+          applyGst: true,
+          applyPst: item.kind !== "fee", // PST exempt for design/rush/installation fees
+        }));
+        const inv = await createWaveInvoice(waveCustomerId, waveLineItems, {
+          orderNumber: order.order_number,
+          title: quoteOnly ? `QUOTE DRAFT — ${contact.name.trim()}` : undefined,
+        });
+        const { error: updErr } = await supabase
+          .from("orders")
+          .update({
+            wave_invoice_id: inv.invoiceId,
+            wave_invoice_number: inv.invoiceNumber,
+          } as Record<string, unknown>)
+          .eq("id", order.id);
+        if (updErr) console.error("[manual-order] wave_invoice_id/number save failed (non-fatal):", updErr.message);
+        console.log(`[manual-order] Clover-path Wave draft created → order ${order.order_number} | wave_invoice_id ${inv.invoiceId} (DRAFT until paid)`);
+      } catch (waveErr) {
+        const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
+        console.error("[manual-order] Clover-path Wave invoice creation failed (non-fatal):", msg);
+        void sendTelegramNotification(
+          `⚠️ <b>Wave draft NOT created (Clover order)</b>\n` +
+          `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
+          `Customer can still pay via Clover, but no Wave bookkeeping entry exists.\n` +
+          `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+          `Action: create the Wave invoice manually and link it via staff portal.`
+        ).catch(() => {});
+      }
     } else {
       // Wave: create invoice → approve → send
       try {
