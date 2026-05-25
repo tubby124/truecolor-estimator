@@ -1,0 +1,30 @@
+name: Blitz Reply Suppression
+
+on:
+  schedule:
+    # Hourly. Scans the last 72h each run (idempotent — re-runs over an
+    # overlapping window don't double-act), so a skipped run self-heals.
+    - cron: "15 * * * *"
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: "Dry run (no writes/blacklist/alerts)"
+        type: boolean
+        default: false
+
+jobs:
+  process-replies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Process info@ replies → suppress matched blitz leads
+        run: |
+          DRY=""
+          if [ "${{ github.event.inputs.dryRun }}" = "true" ]; then DRY="?dryRun=1"; fi
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://truecolorprinting.ca/api/cron/process-blitz-replies${DRY}")
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1)
+          echo "Status: $STATUS"
+          echo "Body: $BODY"
+          [ "$STATUS" = "200" ] || exit 1
