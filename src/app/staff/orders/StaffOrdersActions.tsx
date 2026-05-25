@@ -12,6 +12,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -24,6 +25,24 @@ import {
   FEE_PRESETS,
 } from "@/lib/constants/products";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
+
+// Flyer catalog SKU shape — mirrors src/lib/data/flyer-catalog.ts FlyerSku.
+// Declared locally so this client component doesn't import the server-only
+// catalog module (which reads CSVs from disk). Data arrives via the
+// /api/staff/flyer-pricing endpoint, which runs the real pricing engine.
+type FlyerSku = {
+  productId: string;
+  sizeKey: string;
+  sizeLabel: string;
+  widthIn: number;
+  heightIn: number;
+  materialCode: string;
+  paperLabel: string;
+  sides: 1 | 2;
+  qty: number;
+  price: number;
+  unitPrice: number;
+};
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -265,6 +284,23 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
       setModalOpen(true);
     }
   }, [searchParams]);
+
+  // Load the engine-priced flyer catalog the first time the modal opens.
+  useEffect(() => {
+    if (!modalOpen || flyerLoadedRef.current) return;
+    flyerLoadedRef.current = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/staff/flyer-pricing");
+        if (!res.ok) return;
+        const data = (await res.json()) as { skus?: FlyerSku[] };
+        if (Array.isArray(data.skus)) setFlyerSkus(data.skus);
+      } catch {
+        // Non-fatal: staff can still type a price manually if the catalog fails to load.
+      }
+    })();
+  }, [modalOpen]);
+
   const [customerLookup, setCustomerLookup] = useState<CustomerLookup>({ status: "idle" });
   const [pastOrdersOpen, setPastOrdersOpen] = useState(false);
   const [pastOrders, setPastOrders] = useState<PastOrder[]>([]);
@@ -272,6 +308,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const [feePickerOpen, setFeePickerOpen] = useState(false);
   // Per-item combobox state — which row has its product dropdown open
   const [productOpenId, setProductOpenId] = useState<string | null>(null);
+  // Flyer catalog (priced through the live engine). Loaded once when the modal
+  // first opens so staff flyer prices always match the website.
+  const [flyerSkus, setFlyerSkus] = useState<FlyerSku[]>([]);
+  const flyerLoadedRef = useRef(false);
   // Customer search (browse all customers) state
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
   const [customerSearchQuery, setCustomerSearchQuery] = useState("");
@@ -426,6 +466,61 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
       }),
     }));
     if (error) setError(null);
+  }
+
+  // Batch-update several fields of one item at once (avoids the per-field
+  // unitPrice auto-calc fighting us when we set unitPrice + amount together).
+  function patchItem(id: string, patch: Partial<OrderItem>) {
+    setForm((prev) => ({
+      ...prev,
+      items: prev.items.map((it) => (it.id === id ? { ...it, ...patch } : it)),
+    }));
+    if (error) setError(null);
+  }
+
+  // Cascading flyer selector: Size → Paper → Sides → Qty. Each pick clears the
+  // levels below it, then if the four together resolve to exactly one SKU we
+  // patch the engine price + specs in. This is the ONLY source of flyer prices
+  // on the staff side, so they always equal the website quote.
+  function sidesToValue(sides: 1 | 2 | undefined): string {
+    return sides === 2 ? SIDES_CHIPS[1].value : sides === 1 ? SIDES_CHIPS[0].value : "";
+  }
+  function valueToSides(value: string): 1 | 2 | undefined {
+    if (value === SIDES_CHIPS[1].value) return 2;
+    if (value === SIDES_CHIPS[0].value) return 1;
+    return undefined;
+  }
+  function flyerSelect(
+    id: string,
+    item: OrderItem,
+    level: "size" | "paper" | "sides" | "qty",
+    value: string | number,
+  ) {
+    let sizeKey = flyerSkus.find((s) => s.sizeLabel === item.size)?.sizeKey;
+    let paperLabel: string | undefined = item.material || undefined;
+    let sides = valueToSides(item.sides);
+    let qty: number | undefined = parseInt(item.qty) || undefined;
+
+    if (level === "size") { sizeKey = String(value); paperLabel = undefined; sides = undefined; qty = undefined; }
+    else if (level === "paper") { paperLabel = String(value); sides = undefined; qty = undefined; }
+    else if (level === "sides") { sides = Number(value) as 1 | 2; qty = undefined; }
+    else { qty = Number(value); }
+
+    const sku = flyerSkus.find(
+      (s) => s.sizeKey === sizeKey && s.paperLabel === paperLabel && s.sides === sides && s.qty === qty,
+    );
+
+    const patch: Partial<OrderItem> = {
+      size: sizeKey ? flyerSkus.find((s) => s.sizeKey === sizeKey)?.sizeLabel ?? item.size : "",
+      material: paperLabel ?? "",
+      sides: sidesToValue(sides),
+      qty: qty !== undefined ? String(qty) : "",
+    };
+    if (sku) {
+      patch.unitPrice = sku.unitPrice.toFixed(2);
+      patch.amount = sku.price.toFixed(2);
+    }
+    patchItem(id, patch);
   }
 
   function addItem() {
@@ -1032,6 +1127,103 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                     </div>
                                   </div>
 
+                                  {/* FLYER engine picker — only for flyer products.
+                                      Size → Paper → Sides → Qty, priced by the live engine. */}
+                                  {/flyer/i.test(item.product) && (() => {
+                                    const cat = flyerSkus;
+                                    if (cat.length === 0) {
+                                      return (
+                                        <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3 text-[11px] text-emerald-700">
+                                          Loading flyer prices…
+                                        </div>
+                                      );
+                                    }
+                                    const uniq = <T,>(arr: T[], key: (t: T) => string | number) =>
+                                      arr.filter((s, i, a) => a.findIndex((x) => key(x) === key(s)) === i);
+
+                                    const selSizeKey = cat.find((s) => s.sizeLabel === item.size)?.sizeKey;
+                                    const selPaper = item.material || undefined;
+                                    const selSides = valueToSides(item.sides);
+                                    const selQty = parseInt(item.qty) || undefined;
+
+                                    const sizes = uniq(cat, (s) => s.sizeKey);
+                                    const papers = uniq(cat.filter((s) => s.sizeKey === selSizeKey), (s) => s.paperLabel);
+                                    const sidesOpts = uniq(
+                                      cat.filter((s) => s.sizeKey === selSizeKey && s.paperLabel === selPaper),
+                                      (s) => s.sides,
+                                    );
+                                    const qtys = cat
+                                      .filter((s) => s.sizeKey === selSizeKey && s.paperLabel === selPaper && s.sides === selSides)
+                                      .sort((a, b) => a.qty - b.qty);
+                                    const resolved = cat.find(
+                                      (s) => s.sizeKey === selSizeKey && s.paperLabel === selPaper && s.sides === selSides && s.qty === selQty,
+                                    );
+
+                                    const pill = (active: boolean) =>
+                                      `px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-colors ${
+                                        active
+                                          ? "bg-emerald-500 border-emerald-500 text-white"
+                                          : "bg-white border-emerald-200 text-emerald-700 hover:border-emerald-400"
+                                      }`;
+                                    const Row = ({ label, children }: { label: string; children: ReactNode }) => (
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-700/70 w-12 shrink-0">{label}</span>
+                                        <div className="flex flex-wrap gap-1">{children}</div>
+                                      </div>
+                                    );
+
+                                    return (
+                                      <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3 space-y-2">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                                          Flyer price · live engine
+                                        </p>
+                                        <Row label="Size">
+                                          {sizes.map((s) => (
+                                            <button key={s.sizeKey} type="button" className={pill(selSizeKey === s.sizeKey)}
+                                              onClick={() => flyerSelect(item.id, item, "size", s.sizeKey)}>
+                                              {s.sizeLabel}
+                                            </button>
+                                          ))}
+                                        </Row>
+                                        {selSizeKey && (
+                                          <Row label="Paper">
+                                            {papers.map((s) => (
+                                              <button key={s.paperLabel} type="button" className={pill(selPaper === s.paperLabel)}
+                                                onClick={() => flyerSelect(item.id, item, "paper", s.paperLabel)}>
+                                                {s.paperLabel}
+                                              </button>
+                                            ))}
+                                          </Row>
+                                        )}
+                                        {selSizeKey && selPaper && (
+                                          <Row label="Sides">
+                                            {sidesOpts.map((s) => (
+                                              <button key={s.sides} type="button" className={pill(selSides === s.sides)}
+                                                onClick={() => flyerSelect(item.id, item, "sides", s.sides)}>
+                                                {s.sides === 2 ? "Double-sided" : "Single-sided"}
+                                              </button>
+                                            ))}
+                                          </Row>
+                                        )}
+                                        {selSizeKey && selPaper && selSides && (
+                                          <Row label="Qty">
+                                            {qtys.map((s) => (
+                                              <button key={s.qty} type="button" className={pill(selQty === s.qty)}
+                                                onClick={() => flyerSelect(item.id, item, "qty", s.qty)}>
+                                                {s.qty}
+                                              </button>
+                                            ))}
+                                          </Row>
+                                        )}
+                                        {resolved && (
+                                          <p className="text-[11px] font-semibold text-emerald-800 pt-0.5">
+                                            ✓ ${resolved.price.toFixed(2)} for {resolved.qty} (${resolved.unitPrice.toFixed(2)}/ea) — matches website
+                                          </p>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+
                                   {/* MATERIAL chips */}
                                   <div>
                                     <div className="flex items-center justify-between mb-1">
@@ -1283,7 +1475,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       <p className="text-[11px] text-gray-500 mb-2 leading-snug">
                         {form.quote_only
                           ? "We'll prepare the invoice as a draft using your pick — nothing sends to the customer until you convert it from a quote to an invoice."
-                          : "Both options send a Clover card link to the customer. 'Wave Invoice' also creates an official Wave bookkeeping record (recommended for B2B customers who want a tax invoice for their accounting team)."}
+                          : "Both options send a Clover card link and create a Wave invoice record for your books. 'Wave Invoice' tags the order as a B2B Wave sale (recommended for customers who want a tax invoice for their accounting team)."}
                       </p>
                       <div className="grid grid-cols-2 gap-2">
                         {(["clover", "wave"] as const).map((method) => (
@@ -1316,7 +1508,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                               </p>
                               <p className="text-[10px] text-gray-400 leading-tight">
                                 {method === "clover"
-                                  ? "Branded payment email · pays via Clover card · no Wave invoice"
+                                  ? "Branded payment email · pays via Clover card · creates Wave draft"
                                   : "Wave invoice for B2B records · same Clover card payment link"}
                               </p>
                             </div>
