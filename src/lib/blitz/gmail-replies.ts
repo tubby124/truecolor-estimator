@@ -96,6 +96,21 @@ function stripQuotedHistory(raw: string): string {
   return out.join("\n").trim();
 }
 
+/** RFC 3834 + common heuristics for vacation / auto-responder mail. */
+function isAutoReply(
+  autoSubmitted: string,
+  precedence: string,
+  xAutoreply: string,
+  subject: string
+): boolean {
+  if (autoSubmitted && autoSubmitted.toLowerCase() !== "no") return true;
+  if (["bulk", "auto_reply", "junk", "list"].includes(precedence.toLowerCase())) return true;
+  if (xAutoreply) return true;
+  return /out of (the )?office|automatic reply|auto-?reply|on vacation|away from (the )?office|currently away/i.test(
+    subject
+  );
+}
+
 /**
  * List inbound replies to info@true-color.ca over the last `hours`.
  * Excludes mail sent by us (info@ / outreach subdomain).
@@ -124,6 +139,12 @@ export async function listRecentReplies(hours: number): Promise<InboundReply[]> 
     const internalDate = Number(msg.data.internalDate ?? 0);
     const cutoff = Date.now() - hours * 60 * 60 * 1000;
     if (internalDate && internalDate < cutoff) continue;
+
+    // Skip auto-responders / out-of-office so they don't wrongly pause a lead
+    // or spam the human-alert channel.
+    if (isAutoReply(get("Auto-Submitted"), get("Precedence"), get("X-Autoreply"), get("Subject"))) {
+      continue;
+    }
 
     replies.push({
       messageId: id,

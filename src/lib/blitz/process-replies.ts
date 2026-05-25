@@ -6,17 +6,15 @@
  * reply back to tc_leads. (See campaign-cleanup-log.md — Caelia sat queued 7
  * days after "please stop contacting me".)
  *
- * For each inbound reply matched to a blitz lead:
- *   - "optout" → drip_status=unsubscribed, suppression_reason=replied_optout,
- *                next_email_at=null  +  Brevo blacklist
- *   - "reply"  → drip_status=paused, suppression_reason=replied_warm,
- *                next_email_at=null  +  Telegram alert for human follow-up
+ * Three tiers, escalating (a lead's recorded state never downgrades):
+ *   reply   (rank 1) → drip_status=paused,        suppression_reason=replied_warm    + Telegram alert
+ *   decline (rank 2) → drip_status=unsubscribed,   suppression_reason=replied_decline (no blacklist, no alert)
+ *   optout  (rank 3) → drip_status=unsubscribed,   suppression_reason=replied_optout  + Brevo blacklist
  *
- * Both set suppression_reason, which the v2 drip engine already honours
- * (skips any lead with suppression_reason set), so sends stop immediately.
- *
- * Idempotent: a lead already in the target terminal state is skipped, so
- * re-runs over an overlapping time window don't double-act or re-alert.
+ * suppression_reason is the field the v2 drip engine already honours (it skips
+ * any lead with it set), so sends stop immediately. Idempotent: we only act when
+ * the new tier outranks the lead's current recorded tier, so overlapping re-runs
+ * don't double-act or re-alert, and escalation (warm → optout) still fires.
  */
 
 import { createServiceClient } from "@/lib/supabase/server";
@@ -36,22 +34,27 @@ export interface ProcessResult {
   scanned: number;
   matched: number;
   removed: { email: string; business: string | null; brevo: number | "skipped" }[];
+  declined: { email: string; business: string | null }[];
   paused: { email: string; business: string | null }[];
   skipped: { email: string; reason: string }[];
   dryRun: boolean;
 }
 
+const RANK: Record<ReplyClass, number> = { reply: 1, decline: 2, optout: 3 };
+const REASON_RANK: Record<string, number> = {
+  replied_warm: 1,
+  replied_decline: 2,
+  replied_optout: 3,
+};
+
 async function brevoBlacklist(email: string): Promise<number> {
   const key = process.env.BREVO_API_KEY;
   if (!key) return 0;
-  const res = await fetch(
-    `https://api.brevo.com/v3/contacts/${encodeURIComponent(email)}`,
-    {
-      method: "PUT",
-      headers: { "api-key": key, "Content-Type": "application/json" },
-      body: JSON.stringify({ emailBlacklisted: true }),
-    }
-  );
+  const res = await fetch(`https://api.brevo.com/v3/contacts/${encodeURIComponent(email)}`, {
+    method: "PUT",
+    headers: { "api-key": key, "Content-Type": "application/json" },
+    body: JSON.stringify({ emailBlacklisted: true }),
+  });
   return res.status;
 }
 
@@ -81,6 +84,7 @@ export async function processBlitzReplies(opts: {
     scanned: replies.length,
     matched: 0,
     removed: [],
+    declined: [],
     paused: [],
     skipped: [],
     dryRun,
@@ -100,64 +104,66 @@ export async function processBlitzReplies(opts: {
     }
     result.matched += 1;
 
-    const klass: ReplyClass = classifyReply(reply.bodyText, reply.subject);
+    const klass = classifyReply(reply.bodyText, reply.subject);
     const business = matched[0].business_name;
 
-    if (klass === "optout") {
-      // Skip if every matched row is already unsubscribed.
-      if (matched.every((l) => l.drip_status === "unsubscribed")) {
-        result.skipped.push({ email, reason: "already unsubscribed" });
-        continue;
-      }
-      if (dryRun) {
-        result.removed.push({ email, business, brevo: "skipped" });
-        continue;
-      }
-      await supabase
-        .from("tc_leads")
-        .update({
-          drip_status: "unsubscribed",
-          suppression_reason: "replied_optout",
-          unsubscribed_at: now,
-          next_email_at: null,
-        })
-        .eq("email", email);
-      const brevo = await brevoBlacklist(email);
-      result.removed.push({ email, business, brevo });
-    } else {
-      // "reply" → pause cold drip, ping a human. Skip if already handled.
-      const alreadyHandled = matched.every(
-        (l) =>
-          l.suppression_reason === "replied_warm" ||
-          l.suppression_reason === "replied_optout" ||
-          l.drip_status === "unsubscribed"
-      );
-      if (alreadyHandled) {
-        result.skipped.push({ email, reason: "reply already handled" });
-        continue;
-      }
-      if (dryRun) {
-        result.paused.push({ email, business });
-        continue;
-      }
-      await supabase
-        .from("tc_leads")
-        .update({
-          drip_status: "paused",
-          suppression_reason: "replied_warm",
-          next_email_at: null,
-        })
-        .eq("email", email);
-      result.paused.push({ email, business });
+    // Only act if the new tier outranks the lead's current recorded tier.
+    const currentRank = Math.max(
+      0,
+      ...matched.map((l) => REASON_RANK[l.suppression_reason ?? ""] ?? 0)
+    );
+    if (RANK[klass] <= currentRank) {
+      result.skipped.push({ email, reason: `already handled (tier ${currentRank})` });
+      continue;
+    }
 
-      const preview = reply.bodyText.slice(0, 300);
-      await sendTelegramNotification(
-        `📨 <b>Blitz reply — needs a human</b>\n` +
-          `<b>${escapeTelegramHtml(business ?? email)}</b> (${escapeTelegramHtml(email)})\n` +
-          `Subject: ${escapeTelegramHtml(reply.subject)}\n\n` +
-          `${escapeTelegramHtml(preview)}\n\n` +
-          `Cold drip paused. Reply from info@true-color.ca.`
-      );
+    if (klass === "optout") {
+      if (!dryRun) {
+        await supabase
+          .from("tc_leads")
+          .update({
+            drip_status: "unsubscribed",
+            suppression_reason: "replied_optout",
+            unsubscribed_at: now,
+            next_email_at: null,
+          })
+          .eq("email", email);
+      }
+      const brevo = dryRun ? "skipped" : await brevoBlacklist(email);
+      result.removed.push({ email, business, brevo });
+    } else if (klass === "decline") {
+      if (!dryRun) {
+        await supabase
+          .from("tc_leads")
+          .update({
+            drip_status: "unsubscribed",
+            suppression_reason: "replied_decline",
+            unsubscribed_at: now,
+            next_email_at: null,
+          })
+          .eq("email", email);
+      }
+      result.declined.push({ email, business });
+    } else {
+      // "reply" → pause cold drip, ping a human.
+      if (!dryRun) {
+        await supabase
+          .from("tc_leads")
+          .update({
+            drip_status: "paused",
+            suppression_reason: "replied_warm",
+            next_email_at: null,
+          })
+          .eq("email", email);
+        await sendTelegramNotification(
+          `📨 <b>Blitz reply — needs a human</b>\n` +
+            `<b>${escapeTelegramHtml(business ?? email)}</b> (${escapeTelegramHtml(email)})\n` +
+            `Subject: ${escapeTelegramHtml(reply.subject)}\n\n` +
+            `${escapeTelegramHtml(reply.bodyText.slice(0, 300))}\n\n` +
+            `Cold drip paused. Reply from info@true-color.ca.`
+        );
+      }
+      result.paused.push({ email, business });
     }
   }
 

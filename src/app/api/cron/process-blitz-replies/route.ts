@@ -19,6 +19,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { processBlitzReplies } from "@/lib/blitz/process-replies";
+import { sendTelegramNotification } from "@/lib/notifications/telegram";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,10 +42,15 @@ export async function GET(req: NextRequest) {
     const result = await processBlitzReplies({ hours, dryRun });
     return NextResponse.json({ ok: true, ms: Date.now() - startedAt, ...result });
   } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown";
     console.error("[process-blitz-replies] failed", err);
-    return NextResponse.json(
-      { ok: false, error: err instanceof Error ? err.message : "unknown" },
-      { status: 500 }
-    );
+    // Alert on failure — a silently-broken reply processor means the drip
+    // quietly resumes emailing people who replied (the original bug).
+    if (!dryRun) {
+      await sendTelegramNotification(
+        `🚨 <b>Blitz reply processor FAILED</b>\nCold drip may resume emailing repliers.\nError: ${message}`
+      ).catch(() => {});
+    }
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
