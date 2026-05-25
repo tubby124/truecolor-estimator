@@ -14,6 +14,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import {
+  FlyerPicker,
+  useFlyerCatalog,
+  type FlyerSelection,
+} from "@/components/staff/FlyerPicker";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
@@ -26,23 +31,8 @@ import {
 } from "@/lib/constants/products";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
 
-// Flyer catalog SKU shape — mirrors src/lib/data/flyer-catalog.ts FlyerSku.
-// Declared locally so this client component doesn't import the server-only
-// catalog module (which reads CSVs from disk). Data arrives via the
-// /api/staff/flyer-pricing endpoint, which runs the real pricing engine.
-type FlyerSku = {
-  productId: string;
-  sizeKey: string;
-  sizeLabel: string;
-  widthIn: number;
-  heightIn: number;
-  materialCode: string;
-  paperLabel: string;
-  sides: 1 | 2;
-  qty: number;
-  price: number;
-  unitPrice: number;
-};
+// FlyerSku + the FlyerPicker now live in src/components/staff/FlyerPicker.tsx —
+// the single flyer selector shared by this modal and the /staff estimator.
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -285,21 +275,9 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     }
   }, [searchParams]);
 
-  // Load the engine-priced flyer catalog the first time the modal opens.
-  useEffect(() => {
-    if (!modalOpen || flyerLoadedRef.current) return;
-    flyerLoadedRef.current = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/staff/flyer-pricing");
-        if (!res.ok) return;
-        const data = (await res.json()) as { skus?: FlyerSku[] };
-        if (Array.isArray(data.skus)) setFlyerSkus(data.skus);
-      } catch {
-        // Non-fatal: staff can still type a price manually if the catalog fails to load.
-      }
-    })();
-  }, [modalOpen]);
+  // Engine-priced flyer catalog — shared hook, fetched once and cached across
+  // the estimator + this modal so staff flyer prices always match the website.
+  const flyerSkus = useFlyerCatalog();
 
   const [customerLookup, setCustomerLookup] = useState<CustomerLookup>({ status: "idle" });
   const [pastOrdersOpen, setPastOrdersOpen] = useState(false);
@@ -308,10 +286,6 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const [feePickerOpen, setFeePickerOpen] = useState(false);
   // Per-item combobox state — which row has its product dropdown open
   const [productOpenId, setProductOpenId] = useState<string | null>(null);
-  // Flyer catalog (priced through the live engine). Loaded once when the modal
-  // first opens so staff flyer prices always match the website.
-  const [flyerSkus, setFlyerSkus] = useState<FlyerSku[]>([]);
-  const flyerLoadedRef = useRef(false);
   // Customer search (browse all customers) state
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
   const [customerSearchQuery, setCustomerSearchQuery] = useState("");
@@ -490,39 +464,6 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     if (value === SIDES_CHIPS[0].value) return 1;
     return undefined;
   }
-  function flyerSelect(
-    id: string,
-    item: OrderItem,
-    level: "size" | "paper" | "sides" | "qty",
-    value: string | number,
-  ) {
-    let sizeKey = flyerSkus.find((s) => s.sizeLabel === item.size)?.sizeKey;
-    let paperLabel: string | undefined = item.material || undefined;
-    let sides = valueToSides(item.sides);
-    let qty: number | undefined = parseInt(item.qty) || undefined;
-
-    if (level === "size") { sizeKey = String(value); paperLabel = undefined; sides = undefined; qty = undefined; }
-    else if (level === "paper") { paperLabel = String(value); sides = undefined; qty = undefined; }
-    else if (level === "sides") { sides = Number(value) as 1 | 2; qty = undefined; }
-    else { qty = Number(value); }
-
-    const sku = flyerSkus.find(
-      (s) => s.sizeKey === sizeKey && s.paperLabel === paperLabel && s.sides === sides && s.qty === qty,
-    );
-
-    const patch: Partial<OrderItem> = {
-      size: sizeKey ? flyerSkus.find((s) => s.sizeKey === sizeKey)?.sizeLabel ?? item.size : "",
-      material: paperLabel ?? "",
-      sides: sidesToValue(sides),
-      qty: qty !== undefined ? String(qty) : "",
-    };
-    if (sku) {
-      patch.unitPrice = sku.unitPrice.toFixed(2);
-      patch.amount = sku.price.toFixed(2);
-    }
-    patchItem(id, patch);
-  }
-
   function addItem() {
     if (form.items.length >= MAX_ITEMS) return;
     setForm((prev) => ({ ...prev, items: [...prev.items, makeItem()] }));
@@ -1127,100 +1068,35 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                     </div>
                                   </div>
 
-                                  {/* FLYER engine picker — only for flyer products.
-                                      Size → Paper → Sides → Qty, priced by the live engine. */}
+                                  {/* FLYER engine picker — shared <FlyerPicker>,
+                                      same component + engine the /staff estimator uses. */}
                                   {/flyer/i.test(item.product) && (() => {
-                                    const cat = flyerSkus;
-                                    if (cat.length === 0) {
-                                      return (
-                                        <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3 text-[11px] text-emerald-700">
-                                          Loading flyer prices…
-                                        </div>
-                                      );
-                                    }
-                                    const uniq = <T,>(arr: T[], key: (t: T) => string | number) =>
-                                      arr.filter((s, i, a) => a.findIndex((x) => key(x) === key(s)) === i);
-
-                                    const selSizeKey = cat.find((s) => s.sizeLabel === item.size)?.sizeKey;
-                                    const selPaper = item.material || undefined;
-                                    const selSides = valueToSides(item.sides);
-                                    const selQty = parseInt(item.qty) || undefined;
-
-                                    const sizes = uniq(cat, (s) => s.sizeKey);
-                                    const papers = uniq(cat.filter((s) => s.sizeKey === selSizeKey), (s) => s.paperLabel);
-                                    const sidesOpts = uniq(
-                                      cat.filter((s) => s.sizeKey === selSizeKey && s.paperLabel === selPaper),
-                                      (s) => s.sides,
-                                    );
-                                    const qtys = cat
-                                      .filter((s) => s.sizeKey === selSizeKey && s.paperLabel === selPaper && s.sides === selSides)
-                                      .sort((a, b) => a.qty - b.qty);
-                                    const resolved = cat.find(
-                                      (s) => s.sizeKey === selSizeKey && s.paperLabel === selPaper && s.sides === selSides && s.qty === selQty,
-                                    );
-
-                                    const pill = (active: boolean) =>
-                                      `px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-colors ${
-                                        active
-                                          ? "bg-emerald-500 border-emerald-500 text-white"
-                                          : "bg-white border-emerald-200 text-emerald-700 hover:border-emerald-400"
-                                      }`;
-                                    const Row = ({ label, children }: { label: string; children: ReactNode }) => (
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-700/70 w-12 shrink-0">{label}</span>
-                                        <div className="flex flex-wrap gap-1">{children}</div>
-                                      </div>
-                                    );
-
+                                    const selection: FlyerSelection = {
+                                      sizeKey: flyerSkus.find((s) => s.sizeLabel === item.size)?.sizeKey,
+                                      paperLabel: item.material || undefined,
+                                      sides: valueToSides(item.sides),
+                                      qty: parseInt(item.qty) || undefined,
+                                    };
                                     return (
-                                      <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3 space-y-2">
-                                        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">
-                                          Flyer price · live engine
-                                        </p>
-                                        <Row label="Size">
-                                          {sizes.map((s) => (
-                                            <button key={s.sizeKey} type="button" className={pill(selSizeKey === s.sizeKey)}
-                                              onClick={() => flyerSelect(item.id, item, "size", s.sizeKey)}>
-                                              {s.sizeLabel}
-                                            </button>
-                                          ))}
-                                        </Row>
-                                        {selSizeKey && (
-                                          <Row label="Paper">
-                                            {papers.map((s) => (
-                                              <button key={s.paperLabel} type="button" className={pill(selPaper === s.paperLabel)}
-                                                onClick={() => flyerSelect(item.id, item, "paper", s.paperLabel)}>
-                                                {s.paperLabel}
-                                              </button>
-                                            ))}
-                                          </Row>
-                                        )}
-                                        {selSizeKey && selPaper && (
-                                          <Row label="Sides">
-                                            {sidesOpts.map((s) => (
-                                              <button key={s.sides} type="button" className={pill(selSides === s.sides)}
-                                                onClick={() => flyerSelect(item.id, item, "sides", s.sides)}>
-                                                {s.sides === 2 ? "Double-sided" : "Single-sided"}
-                                              </button>
-                                            ))}
-                                          </Row>
-                                        )}
-                                        {selSizeKey && selPaper && selSides && (
-                                          <Row label="Qty">
-                                            {qtys.map((s) => (
-                                              <button key={s.qty} type="button" className={pill(selQty === s.qty)}
-                                                onClick={() => flyerSelect(item.id, item, "qty", s.qty)}>
-                                                {s.qty}
-                                              </button>
-                                            ))}
-                                          </Row>
-                                        )}
-                                        {resolved && (
-                                          <p className="text-[11px] font-semibold text-emerald-800 pt-0.5">
-                                            ✓ ${resolved.price.toFixed(2)} for {resolved.qty} (${resolved.unitPrice.toFixed(2)}/ea) — matches website
-                                          </p>
-                                        )}
-                                      </div>
+                                      <FlyerPicker
+                                        catalog={flyerSkus}
+                                        selection={selection}
+                                        onChange={(next, resolved) => {
+                                          const patch: Partial<OrderItem> = {
+                                            size: next.sizeKey
+                                              ? flyerSkus.find((s) => s.sizeKey === next.sizeKey)?.sizeLabel ?? ""
+                                              : "",
+                                            material: next.paperLabel ?? "",
+                                            sides: sidesToValue(next.sides),
+                                            qty: next.qty !== undefined ? String(next.qty) : "",
+                                          };
+                                          if (resolved) {
+                                            patch.unitPrice = resolved.unitPrice.toFixed(2);
+                                            patch.amount = resolved.price.toFixed(2);
+                                          }
+                                          patchItem(item.id, patch);
+                                        }}
+                                      />
                                     );
                                   })()}
 

@@ -3,6 +3,12 @@
 import { useState } from "react";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { Addon } from "@/lib/data/types";
+import {
+  FlyerPicker,
+  useFlyerCatalog,
+  type FlyerSelection,
+  type FlyerSku,
+} from "@/components/staff/FlyerPicker";
 
 interface EstimatorState {
   width_in: string;
@@ -48,7 +54,40 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
   const showSides = ["SIGN", "BUSINESS_CARD"].includes(category);
   const showGrommets = category === "BANNER";
   const showHStake = category === "SIGN";
-  const showQtyTier = QTY_TIERS[category] !== undefined;
+  const isFlyer = category === "FLYER";
+  // Flyers get the dedicated FlyerPicker (size/paper/sides/qty) instead of the
+  // generic qty tier — same picker + same engine the orders modal uses.
+  const showQtyTier = QTY_TIERS[category] !== undefined && !isFlyer;
+
+  // Flyer catalog (engine-priced SKUs). Fetched once; only meaningful for flyers.
+  const flyerCatalog = useFlyerCatalog();
+  const flyerW = parseFloat(state.width_in);
+  const flyerH = parseFloat(state.height_in);
+  const flyerSelection: FlyerSelection = isFlyer
+    ? {
+        sizeKey: flyerCatalog.find((s) => s.widthIn === flyerW && s.heightIn === flyerH)?.sizeKey,
+        paperLabel: flyerCatalog.find((s) => s.materialCode === state.material_code)?.paperLabel,
+        sides: state.sides,
+        qty: state.qty || undefined,
+      }
+    : {};
+
+  // Map a flyer selection back onto the engine inputs in EstimatorState, so the
+  // existing /api/estimate call resolves the exact SKU the picker shows.
+  const onFlyerChange = (next: FlyerSelection, _resolved: FlyerSku | null) => {
+    const rep = next.sizeKey ? flyerCatalog.find((s) => s.sizeKey === next.sizeKey) : undefined;
+    const matSku =
+      next.sizeKey && next.paperLabel
+        ? flyerCatalog.find((s) => s.sizeKey === next.sizeKey && s.paperLabel === next.paperLabel)
+        : undefined;
+    onChange({
+      width_in: rep ? String(rep.widthIn) : "",
+      height_in: rep ? String(rep.heightIn) : "",
+      material_code: matSku ? matSku.materialCode : "",
+      sides: next.sides ?? state.sides,
+      qty: next.qty ?? 0,
+    });
+  };
 
   // Track whether user has interacted with dimension inputs (for validation UX)
   const [widthTouched, setWidthTouched] = useState(false);
@@ -182,6 +221,15 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
               </button>
             ))}
           </div>
+        </FieldGroup>
+      )}
+
+      {/* FLYER — dedicated picker (size · paper · sides · qty), engine-priced.
+          Same component the manual-order modal uses, so both surfaces resolve
+          to the identical SKU + price from src/lib/engine. */}
+      {isFlyer && (
+        <FieldGroup label="Flyer Options">
+          <FlyerPicker catalog={flyerCatalog} selection={flyerSelection} onChange={onFlyerChange} />
         </FieldGroup>
       )}
 

@@ -138,8 +138,11 @@ export default function StaffPage() {
         const body = {
           category,
           material_code: state.material_code || undefined,
-          width_in: isSqftBased ? w : undefined,
-          height_in: isSqftBased ? h : undefined,
+          // Pass dimensions whenever they're set — sqft products need them for
+          // area, fixed-size products (flyers) need them to match the exact SKU
+          // (8.5×11 full vs 8.5×5.5 half). Qty-only products leave them empty.
+          width_in: w > 0 ? w : undefined,
+          height_in: h > 0 ? h : undefined,
           sides: state.sides,
           qty: state.qty,
           addons: state.addons,
