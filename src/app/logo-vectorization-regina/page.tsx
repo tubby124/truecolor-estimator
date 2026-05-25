@@ -74,7 +74,7 @@ export default function LogoVectorizationReginaPage() {
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
-        { name: "Vinyl Lettering", from: "from $40", slug: "vinyl-lettering" },
+        { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
       ]}
       whyPoints={[
         "True vector output — scalable from business card to billboard without loss",

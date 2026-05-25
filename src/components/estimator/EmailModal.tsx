@@ -84,14 +84,14 @@ export function EmailModal({ result, jobDetails, onClose, proofImage, cartItems 
   const handleSend = async () => {
     if (!emailValid) { setEmailTouched(true); return; }
 
-    // Below-min safeguard — warn before emailing a quote priced under the customer-facing minimum
+    // Checkout-floor safeguard — warn before emailing a quote priced under the customer-facing cart floor.
     const belowMinCount = isMultiMode
       ? cartItems!.filter((it) => it.result.min_charge_skipped).length
       : result?.min_charge_skipped ? 1 : 0;
     if (belowMinCount > 0) {
       const msg = isMultiMode
-        ? `${belowMinCount} item${belowMinCount > 1 ? "s" : ""} in this quote ${belowMinCount > 1 ? "are" : "is"} below the customer-facing minimum. Send anyway?`
-        : `This quote ($${(result?.sell_price ?? 0).toFixed(2)}) is below the $${(result?.min_charge_value ?? 0).toFixed(2)} minimum. Send anyway?`;
+        ? `${belowMinCount} item${belowMinCount > 1 ? "s" : ""} in this quote ${belowMinCount > 1 ? "are" : "is"} below the customer checkout floor. Send anyway?`
+        : `This quote ($${(result?.sell_price ?? 0).toFixed(2)}) is below the $${(result?.min_charge_value ?? 0).toFixed(2)} customer checkout floor. Send anyway?`;
       if (!window.confirm(msg)) return;
     }
 

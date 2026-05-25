@@ -74,7 +74,7 @@ export default function RestaurantSignsSaskatoonPage() {
       whyPoints={[
         "Foam board menu boards from $45 (18×24\") — no lamination needed for indoor use",
         "Vinyl banners for patio, windows, and promos — from $66",
-        "Window decals and perforated vinyl for storefront branding — from $45",
+        "Window decals and perforated vinyl for storefront branding — from $11/sqft",
         "Same-day available when ordered before 10 AM — confirmed by phone call",
         "In-house designer handles low-res logos, photo-heavy menus, and seasonal promos",
         "Reprints match your previous order exactly — bring your order number",

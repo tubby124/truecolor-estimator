@@ -4,7 +4,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Agribusiness Signs Saskatchewan | From $60 | True Color" },
+  title: { absolute: "Agribusiness Signs Saskatchewan | From $13/sqft | True Color" },
   description:
     "Signs for SK agribusiness — equipment dealers, seed retailers, grain co-ops. ACP from $13/sqft, retractable stands $219. In-house design $35. Saskatoon pickup.",
   alternates: { canonical: "/agribusiness-signs-saskatchewan" },
@@ -99,7 +99,7 @@ const descriptionNode = (
       <Link href="/aluminum-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
         ACP aluminum building signs
       </Link>{" "}
-      from $60 ($13/sqft) deliver a professional storefront that lasts 10+ years through
+      from $13/sqft deliver a professional storefront that lasts 10+ years through
       Saskatchewan weather. Multi-location dealers ordering matching signage for branches in
       Humboldt, Kindersley, and Weyburn get consistent colour and branding from our in-house
       Roland UV printer.
@@ -132,7 +132,7 @@ const descriptionNode = (
       <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
         Vehicle magnets
       </Link>{" "}
-      from $45 brand delivery trucks and field rep vehicles across the province.
+      from $24/sqft brand delivery trucks and field rep vehicles across the province.
     </p>
     <p className="text-gray-600 leading-relaxed mb-10">
       Our in-house designer builds print-ready layouts from your brand guide, a rough sketch, or

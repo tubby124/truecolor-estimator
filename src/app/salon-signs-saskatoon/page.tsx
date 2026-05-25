@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Salon Signs Saskatoon | Window Decals From $45 | True Color" },
+  title: { absolute: "Salon Signs Saskatoon | Window Decals from $11/sqft" },
   description:
     "Window decals from $11/sqft, service menu foamboards, and referral cards from $45 for Saskatoon hair salons, nail salons, and spas. Pickup at 216 33rd St W.",
   alternates: { canonical: "/salon-signs-saskatoon" },
@@ -21,7 +21,7 @@ const descriptionNode = (
   <>
     A potential client decides whether to walk into your salon in about three seconds —
     before they read your reviews, before they check your Instagram. That decision happens
-    at your storefront window. Window decals from $11/sqft (minimum $45) are the single
+    at your storefront window. Window decals from $11/sqft are the single
     most impactful print piece for a Saskatoon hair salon, nail salon, spa, or barber shop:
     a well-designed window communicates your price range, your aesthetic, and your services
     before anyone opens the door. Colour accuracy matters here — our Roland UV in-house
@@ -83,7 +83,7 @@ export default function SalonSignsSaskatoonPage() {
       faqs={[
         {
           q: "How much does window vinyl cost for a salon storefront in Saskatoon?",
-          a: "Window decals are priced from $11/sqft with a minimum of $45. A typical salon door panel (roughly 24×36 inches = 6 sqft) runs approximately $66–$75 depending on coverage. A larger display window with price list, logo, and accent panels might range from $120–$200 depending on square footage. Our in-house designer can lay out the full window for $35 flat.",
+          a: "Window decals are priced from $11/sqft; $25 order-total minimum applies at checkout. A typical salon door panel (roughly 24×36 inches = 6 sqft) runs approximately $66–$75 depending on coverage. A larger display window with price list, logo, and accent panels might range from $120–$200 depending on square footage. Our in-house designer can lay out the full window for $35 flat.",
         },
         {
           q: "Can you match our salon's brand colours exactly on printed materials?",

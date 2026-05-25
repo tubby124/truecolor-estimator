@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Perforated Window Vinyl Saskatoon | $8/sqft | True Color" },
   description:
-    "Perforated window vinyl (window perf) from $8/sqft in Saskatoon. 70/30 ratio — see-through from inside, full-colour graphic from outside. In-house Roland UV. Same-day rush +$40.",
+    "Window perf from $8/sqft in Saskatoon. See through from inside, full-colour outside. In-house Roland UV print. Same-day rush +$40.",
   alternates: { canonical: "/window-perf-saskatoon" },
   openGraph: {
     title: "Perforated Window Vinyl Saskatoon | True Color Display Printing",
@@ -25,7 +25,7 @@ export default function WindowPerfSaskatoonPage() {
       subtitle="Turn your storefront windows into full-colour billboards — see-through from inside, fully branded from outside."
       heroImage="/images/products/product/perf-vinyl-interior-seethrough-800x600.webp"
       heroAlt="Perforated window vinyl interior view — see-through from inside while showing full-colour graphic outside"
-      description="Perforated window vinyl (window perf) from $8/sqft (minimum $40) in Saskatoon. The 70/30 perforation pattern gives you a continuous full-colour graphic visible to people outside, while staff and customers inside retain a clear view of the street. Printed on Roland UV with outdoor-rated inks. Applied like a standard decal, removed cleanly when your campaign ends."
+      description="Perforated window vinyl (window perf) from $8/sqft in Saskatoon. The 70/30 perforation pattern gives you a continuous full-colour graphic visible to people outside, while staff and customers inside retain a clear view of the street. Printed on Roland UV with outdoor-rated inks. Applied like a standard decal, removed cleanly when your campaign ends."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -33,7 +33,7 @@ export default function WindowPerfSaskatoonPage() {
             window without blocking interior visibility or natural light. The 70/30 pattern means
             70% of the surface is printed — passersby outside see your full graphic continuously —
             while the 30% open perforation lets people inside see out clearly. Window perf starts
-            at <strong>$8/sqft</strong> (minimum $40) and is printed on our in-house Roland UV
+            at <strong>$8/sqft</strong> and is printed on our in-house Roland UV
             printer at 216 33rd St W, Saskatoon.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -82,7 +82,7 @@ export default function WindowPerfSaskatoonPage() {
       ]}
       whyPoints={[
         "Brand your windows without blocking visibility — 70% printed coverage, 30% open perforations",
-        "From $8/sqft (min $40) — custom-sized to your exact window dimensions",
+        "From $8/sqft — custom-sized to your exact window dimensions",
         "Passersby see your full-colour graphic; staff inside see the street clearly",
         "Printed on Roland UV with outdoor inks — 2–3 years rated Saskatchewan exposure",
         "Applies like a standard decal, removes cleanly when your campaign or lease ends",

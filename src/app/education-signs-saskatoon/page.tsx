@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Education Signs Saskatoon | School & Daycare | True Color" },
   description:
-    "Signs and banners for Saskatoon schools, daycares, and educational institutions. Coroplast yard signs, vinyl banners, foam board displays. From $8/sqft. True Color Display Printing.",
+    "Signs and banners for Saskatoon schools and daycares. Coroplast yard signs, vinyl banners, and foam board displays from $8/sqft.",
   alternates: { canonical: "/education-signs-saskatoon" },
   openGraph: {
     title: "Education Signs Saskatoon | True Color Display Printing",
@@ -107,7 +107,7 @@ export default function EducationSignsSaskatoonPage() {
         },
         {
           q: "Do you print foam board displays for school science fairs and hallway exhibits?",
-          a: "Yes — 3/16\" foam board at $10/sqft (minimum $45) is the standard for science fair backboards and hallway display panels. A 36×48 inch display board is $105. Foam board is lightweight enough for students to carry and can be mounted with adhesive strips or displayed on a tabletop easel. In-house design available for $35 flat if you need a professional layout.",
+          a: "Yes — 3/16\" foam board at $10/sqft (standard 18×24\" fixed SKU from $45) is the standard for science fair backboards and hallway display panels. A 36×48 inch display board is $105. Foam board is lightweight enough for students to carry and can be mounted with adhesive strips or displayed on a tabletop easel. In-house design available for $35 flat if you need a professional layout.",
         },
         {
           q: "Can you handle printing for multiple schools across a Saskatoon school division?",

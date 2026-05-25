@@ -1,10 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
+import { UTM_COOKIE_NAME, UTM_KEYS, UTM_TTL_DAYS } from "@/lib/analytics/utm";
 
-const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
 const LS_KEY = "tc_utm_first_touch";
-const TTL_DAYS = 30;
+
+function persistAttribution(payload: Record<string, string | number>) {
+  const maxAge = UTM_TTL_DAYS * 24 * 60 * 60;
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${UTM_COOKIE_NAME}=${encodeURIComponent(JSON.stringify(payload))}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
+
+  try {
+    window.localStorage.setItem(LS_KEY, JSON.stringify(payload));
+  } catch {
+    // Cookie fallback above is enough for server-side attribution.
+  }
+}
 
 export function UtmCapture() {
   useEffect(() => {
@@ -23,22 +34,26 @@ export function UtmCapture() {
 
     if (!hasAny) return;
 
+    let existing: string | null = null;
     try {
-      const existing = window.localStorage.getItem(LS_KEY);
+      existing = window.localStorage.getItem(LS_KEY);
       if (existing) {
-        const parsed = JSON.parse(existing) as { captured_at: number };
+        const parsed = JSON.parse(existing) as Record<string, string | number> & { captured_at: number };
         const ageMs = Date.now() - parsed.captured_at;
-        if (ageMs < TTL_DAYS * 24 * 60 * 60 * 1000) {
-          // First-touch attribution — keep the original. Skip overwrite.
+        if (ageMs < UTM_TTL_DAYS * 24 * 60 * 60 * 1000) {
+          // First-touch attribution — keep the original and refresh the cookie fallback.
+          persistAttribution(parsed);
           return;
         }
       }
-      window.localStorage.setItem(
-        LS_KEY,
-        JSON.stringify({ ...captured, captured_at: Date.now() })
-      );
     } catch {
-      // localStorage may be blocked — fail silent
+      // localStorage may be blocked — still try the cookie fallback below.
+    }
+
+    try {
+      persistAttribution({ ...captured, captured_at: Date.now() });
+    } catch {
+      // Browser storage may be blocked — attribution capture should never block browsing.
     }
   }, []);
 
@@ -52,7 +67,7 @@ export function readUtmFromStorage(): Record<string, string> | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Record<string, string | number>;
     const ageMs = Date.now() - Number(parsed.captured_at ?? 0);
-    if (ageMs > TTL_DAYS * 24 * 60 * 60 * 1000) return null;
+    if (ageMs > UTM_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
     const out: Record<string, string> = {};
     for (const k of UTM_KEYS) {
       if (typeof parsed[k] === "string") out[k] = parsed[k] as string;

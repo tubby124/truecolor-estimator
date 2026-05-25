@@ -1,6 +1,6 @@
 # SEO Remaining Waves — truecolorprinting.ca
 
-**Last updated:** 2026-04-12
+**Last updated:** 2026-05-25
 **Full audit:** `FULL-AUDIT-REPORT.md`
 **GSC baseline (2026-03-12):** BC #1 | banner #2 | flyer #3 | sign #4 | coroplast #5
 **GSC actual (2026-04-12):** See ranking slip section below — baseline is no longer accurate
@@ -201,7 +201,10 @@ Status: **NEW** — discovered 2026-04-12 from GSC data
 | Wave 3 — Schema (Service.url, image-sitemap, robots reference) | 3 items | **COMPLETE** ✅ 2026-03-16 |
 | Wave 3a — Organization schema + alternateName + logo (resolves F1) | 1 item | **COMPLETE** ✅ |
 | Wave 3 — Pricing comms alignment ($25 order-total min sweep) | 27 files | **COMPLETE** ✅ 2026-05-20 (commit 102faed) |
-| **Wave 3.1 — Pricing comms sweep CONTINUED** | 8 surfaces | **NEW — TODO** |
+| Wave 3.1 — Pricing comms sweep continued | 8 surfaces | **COMPLETE** ✅ 2026-05-20 |
+| Wave 3.2 — Post-audit cleanup | 3 fix-up items | **COMPLETE** ✅ 2026-05-20 |
+| **Wave 3.3 — Trust drift cleanup** | stale minimum/pricing copy + guard rails | **COMPLETE** ✅ 2026-05-25 |
+| **Wave 3.4 — Internal linking + meta batch** | orphan links + priority meta trims | **PARTIAL** ✅ 2026-05-25 |
 | Wave 4 — Product Schema | 4 items | **ON HOLD** — wait for coroplast/flyer recovery signal |
 | Wave 5 — Core Web Vitals | 3 items | 0/3 overdue since 2026-04-11 |
 | Wave 6 — Mobile/UX | 3 items | 0/3 overdue since 2026-04-18 |
@@ -209,9 +212,9 @@ Status: **NEW** — discovered 2026-04-12 from GSC data
 
 ---
 
-## Wave 3.1 — Pricing Comms Sweep Continued (NEW 2026-05-20)
+## Wave 3.1 — Pricing Comms Sweep Continued (COMPLETE 2026-05-20)
 
-**Trigger:** Full audit 2026-05-20 found 8 surfaces still using stale per-product min anchors despite Wave 3 sweep this morning.
+**Trigger:** Full audit 2026-05-20 found 8 surfaces still using stale per-product min anchors despite Wave 3 sweep that morning.
 
 | # | Item | File | Severity |
 |---|------|------|----------|
@@ -225,17 +228,57 @@ Status: **NEW** — discovered 2026-04-12 from GSC data
 | 3.1h | coroplast-signs-saskatoon subtitle "18×24" from $30" | [src/app/coroplast-signs-saskatoon/page.tsx:24](src/app/coroplast-signs-saskatoon/page.tsx#L24) | HIGH |
 | 3.1i | car-dealership-signs-saskatoon meta + body "magnets from $45" | [src/app/car-dealership-signs-saskatoon/page.tsx](src/app/car-dealership-signs-saskatoon/page.tsx):8, 66 | MEDIUM |
 
-**Plan:** Single commit `wave-3.1`. Body copy + metadata only. Zero changes to title/H1/slug/schema on any DEFEND or FROZEN page. GSC re-check 2026-05-27.
+**Status:** Complete per `memory/seo-sprints.md` Phase 24. Body copy + metadata only. Zero intentional title/H1/slug/schema changes on protected DEFEND/FROZEN pages.
+
+---
+
+## Wave 3.2 — Post-Audit Cleanup (COMPLETE 2026-05-20)
+
+**Trigger:** Follow-up verification after Wave 3.1 found one stale for-lease FAQ, 3 long meta descriptions, and stale sitemap dates for pages edited during Wave 3/Wave 3.1.
+
+| # | Item | File | Status |
+|---|------|------|--------|
+| 3.2a | for-lease FAQ stale "$30" phrasing | `src/app/for-lease-signs-saskatoon/page.tsx` | COMPLETE |
+| 3.2b | Trim overlong meta descriptions | `for-lease`, `property-management`, `vehicle-magnets-regina` | COMPLETE |
+| 3.2c | Bump honest sitemap lastmod dates for pages edited 2026-05-20 | `src/app/sitemap.ts` | COMPLETE |
+
+---
+
+## Wave 3.3 — Trust Drift Cleanup (NEW 2026-05-25)
+
+**Trigger:** 2026-05-25 `/seo-audit` found the site is technically healthier than the 2026-05-20 report, but stale pricing examples still leak into protected and high-value pages. This is the current highest-risk SEO issue because it weakens snippet trust and AI answer consistency.
+
+| # | Item | File | Severity |
+|---|------|------|----------|
+| 3.3a | Fix remaining coroplast `$30` examples; use `$8/sqft`, `$24 raw`, or `$25 order-total minimum` per context | `src/app/coroplast-signs-saskatoon/page.tsx`, `src/app/sign-company-saskatoon/page.tsx`, `src/app/real-estate-signs-saskatoon/page.tsx`, `src/app/agriculture-signs-saskatoon/page.tsx`, `src/app/services/page.tsx` | HIGH |
+| 3.3b | Correct flyer DDG tier prices: `250 for $80` and `500 for $130` conflict with reference `250=$110`, `500=$135` | `src/app/flyer-printing-saskatoon/page.tsx` | HIGH |
+| 3.3c | Verify Sign Company ACP `4x8 ft — $416` against CSV/source of truth before editing; quick reference common size says `4x8 ft = $320` | `src/app/sign-company-saskatoon/page.tsx`, `data/PRICING_QUICK_REFERENCE.md`, `data/tables/*` | HIGH |
+| 3.3d | Refresh llms.txt review count/date so AI file matches `REVIEW_COUNT` and current review state | `public/llms.txt`, `src/lib/reviews.ts` | LOW |
+| 3.3e | Emit `reviewCount` as numeric instead of string if schema validator confirms expected output | `src/app/layout.tsx` | LOW |
+| 3.3f | Keep protected-page safety: body copy only on protected pages; do not combine title/H1/schema edits with pricing copy cleanup | protected SEO pages | RULE |
+
+**Plan:** One narrow trust-cleanup commit after verifying the ACP price from CSV/source. No H1/title/schema changes on protected pages in the same commit.
+
+---
+
+## Wave 3.4 — Internal Linking + Meta Batch (NEW 2026-05-25)
+
+**Trigger:** 2026-05-25 audit found 40 sitemap-indexed pages without SiteNav/SiteFooter links and 48 page meta descriptions over 155 chars. Protected ranking pages are clean; the issue is mostly newer city-variant and programmatic pages.
+
+| # | Item | Scope | Priority |
+|---|------|-------|----------|
+| 3.4a | Add discoverable internal links for sitemap-indexed orphan pages, prioritizing label/service pages and city/product pages | 40 pages | MEDIUM |
+| 3.4b | Trim non-protected meta descriptions over 155 chars; prioritize city pages, resources, window-perf, booklet, community/commercial/education hubs | 48 descriptions | MEDIUM |
+| 3.4c | Review 3 legacy retractable-banner redirects that currently land on noindex `/products/retractable-banners` | `next.config.ts` | MEDIUM |
 
 ---
 
 **Next session priority order:**
-1. **Wave 3.1** (above) — ship same day if possible. Score lift +5 (AI Readiness 82→90, Content 66→69).
-2. Generate 25 DDG images (ChatGPT) and drop into `public/images/industries/` — unblocks Wave 2 visuals
-3. Wave 7.1: Fix wall-graphics meta title/desc (pos 10, 0% CTR — free traffic on the table)
-4. Wave 7.2: sticker-printing DDG + descriptionNode (most clicked non-homepage page)
-5. Check GSC 2026-05-27 to see if Wave 3 + Wave 3.1 stabilized rankings
-6. Only then proceed to Wave 4 (Product schema)
+1. **Wave 3.3 trust drift cleanup** — stale coroplast/flyer/ACP examples, then llms review count.
+2. **Wave 3.4 internal linking + meta batch** — connect orphan sitemap pages and trim long descriptions.
+3. **Wave 4 Product schema** — only after pricing drift is clean.
+4. **Wave 5 HeroSlider/CWV audit** — client island and bundle review.
+5. **Wave 7 content recovery** — flyer/coroplast visible content depth and banner internal link count.
 
 ---
 

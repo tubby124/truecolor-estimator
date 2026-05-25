@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Hotel Signs Saskatoon | Event Printing | True Color" },
   description:
-    "Hotel and conference centre signs in Saskatoon from $45. Foamboard, retractable banners, vinyl banners, ACP exterior signs, window decals. Same-day rush +$40. 216 33rd St W.",
+    "Hotel and conference signs in Saskatoon. Foamboard, retractable banners, vinyl banners, ACP signs, and window decals. Same-day rush +$40.",
   alternates: { canonical: "/hotel-signs-saskatoon" },
   openGraph: {
     title: "Hotel Signs Saskatoon | True Color Display Printing",
@@ -75,7 +75,7 @@ export default function HotelSignsSaskatoonPage() {
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
-        { name: "Window Decals", from: "from $45", slug: "window-decals" },
+        { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
       ]}
       whyPoints={[
         "Meeting room named and ready — 18×24\" foamboard on easel from $45, same day with rush",

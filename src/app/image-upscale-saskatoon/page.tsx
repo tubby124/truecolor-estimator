@@ -61,7 +61,7 @@ export default function ImageUpscaleSaskatoonPage() {
         },
         {
           q: "Can you restore an old or damaged family photo for a memorial sign?",
-          a: "Yes — this is the $75 restoration tier. We repair torn edges, remove scratches and creases, fix faded colour, fill in missing corners, and upscale the result to print resolution. Most commonly used for memorial signs, gravestone artwork, and celebration-of-life displays. Turnaround is 1–2 business days because damaged-photo repair needs manual Photoshop work, not just AI cleanup. Pair with a $30 coroplast yard sign or a $45 foamboard display and the restoration is free.",
+          a: "Yes — this is the $75 restoration tier. We repair torn edges, remove scratches and creases, fix faded colour, fill in missing corners, and upscale the result to print resolution. Most commonly used for memorial signs, gravestone artwork, and celebration-of-life displays. Turnaround is 1–2 business days because damaged-photo repair needs manual Photoshop work, not just AI cleanup. Pair with a $24 raw coroplast yard sign ($25 if ordered alone) or a $45 foamboard display and the restoration is free.",
         },
         {
           q: "What file formats do you accept?",

@@ -109,7 +109,7 @@ export default function CarDealershipSignsSaskatoonPage() {
         },
         {
           q: "Do you do window decals for auto dealership showroom glass?",
-          a: "Yes — window decals are popular for showroom entrance doors, service bay windows, and promotional display areas. Priced from $11/sqft (minimum $45). Common uses at dealerships: service hours, seasonal promotion panels, brand accent graphics, and financing offer displays. Our Roland UV printer handles full-colour artwork including gradients and photography.",
+          a: "Yes — window decals are popular for showroom entrance doors, service bay windows, and promotional display areas. Priced from $11/sqft; small jobs top up to the $25 order-total minimum at checkout. Common uses at dealerships: service hours, seasonal promotion panels, brand accent graphics, and financing offer displays. Our Roland UV printer handles full-colour artwork including gradients and photography.",
         },
       ]}
     />

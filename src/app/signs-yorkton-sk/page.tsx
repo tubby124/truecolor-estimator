@@ -92,7 +92,7 @@ export default function SignsYorktonPage() {
         },
         {
           q: "Do you print vehicle magnets for Yorkton ag equipment and service fleets?",
-          a: "Yes — 30mil vehicle magnets from $24/sqft (minimum $45). Popular with Yorkton ag equipment dealers, grain buyers, and service companies. Custom rectangle or shaped. Stick securely to steel doors, remove cleanly with no adhesive residue — ideal for seasonal fleet branding.",
+          a: "Yes — 30mil vehicle magnets from $24/sqft (small jobs top up to the $25 order-total minimum at checkout). Popular with Yorkton ag equipment dealers, grain buyers, and service companies. Custom rectangle or shaped. Stick securely to steel doors, remove cleanly with no adhesive residue — ideal for seasonal fleet branding.",
         },
         {
           q: "Can you print vinyl banners for events in Yorkton?",
@@ -104,7 +104,7 @@ export default function SignsYorktonPage() {
         },
         {
           q: "Do you have a minimum order for Yorkton customers?",
-          a: "No minimum. Order a single vehicle magnet or one banner. Volume pricing applies automatically — coroplast drops from $8/sqft at higher quantities. Business cards start at 250 for $45 and flyers at 100 for $45, both shipped to Yorkton.",
+          a: "A $25 order-total minimum applies at checkout. Order a single vehicle magnet or one banner. Volume pricing applies automatically — coroplast drops from $8/sqft at higher quantities. Business cards start at 250 for $45 and flyers at 100 for $45, both shipped to Yorkton.",
         },
       ]}
     />

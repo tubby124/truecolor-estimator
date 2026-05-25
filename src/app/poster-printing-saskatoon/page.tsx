@@ -200,7 +200,7 @@ True Color's in-house Photoshop designer handles layout, resizing, colour correc
         { name: "Flyers", from: "from $45", slug: "flyers" },
       ]}
       whyPoints={[
-        "Photo posters from $15 on Roland Photobase Matte 220gsm — no minimum, single prints welcome",
+        "Photo posters from $15 on Roland Photobase Matte 220gsm — single prints welcome",
         "No-frame display: 5mm foamboard mounts from $45 sit on any easel, ready to place",
         "In-house Roland UV printer — True Color Display Printing controls colour and timeline, no outsourcing",
         "In-house Photoshop designer: $35 flat, same-day proof from logo, description, or reference image",

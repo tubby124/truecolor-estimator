@@ -116,9 +116,13 @@ export function SiteFooter() {
             <Link href="/chiropractor-signs-saskatoon" className="hover:text-white transition-colors">Chiropractors</Link>
             <Link href="/church-banners-saskatoon" className="hover:text-white transition-colors">Churches</Link>
             <Link href="/construction-signs-saskatoon" className="hover:text-white transition-colors">Construction</Link>
+            <Link href="/commercial-signs-saskatoon" className="hover:text-white transition-colors">Commercial Signs</Link>
+            <Link href="/community-printing-saskatoon" className="hover:text-white transition-colors">Community Printing</Link>
             <Link href="/daycare-signs-saskatoon" className="hover:text-white transition-colors">Daycares</Link>
             <Link href="/dental-office-signs-saskatoon" className="hover:text-white transition-colors">Dental Offices</Link>
+            <Link href="/education-signs-saskatoon" className="hover:text-white transition-colors">Education</Link>
             <Link href="/banner-printing-saskatoon" className="hover:text-white transition-colors">Event Banners</Link>
+            <Link href="/for-lease-signs-saskatoon" className="hover:text-white transition-colors">For-Lease Signs</Link>
             <Link href="/gym-fitness-signs-saskatoon" className="hover:text-white transition-colors">Gym & Fitness</Link>
             <Link href="/graduation-banners-saskatoon" className="hover:text-white transition-colors">Graduation</Link>
             <Link href="/healthcare-signs-saskatoon" className="hover:text-white transition-colors">Healthcare</Link>

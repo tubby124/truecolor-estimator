@@ -71,7 +71,7 @@ export async function sendSignupWelcomeEmail(opts: {
                 <span style="font-size:18px;font-weight:800;color:#ffffff;letter-spacing:.12em;font-family:'Courier New',Courier,monospace;">WELCOME10</span>
               </div>
               <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.85);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                Enter at checkout — no minimum order required
+                Enter at checkout — $25 order-total minimum applies
               </p>
             </div>
 
@@ -145,7 +145,7 @@ export async function sendSignupWelcomeEmail(opts: {
     "",
     "── WELCOME OFFER ──────────────────────────────",
     "$10 OFF your first order — use code: WELCOME10",
-    "Enter at checkout, no minimum required.",
+    "Enter at checkout; $25 order-total minimum applies.",
     "────────────────────────────────────────────────",
     "",
     `Browse all products: ${siteUrl}/products`,

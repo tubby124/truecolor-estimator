@@ -51,7 +51,7 @@ export default function RollLabelsSaskatoonPage() {
         { name: "Stickers", from: "from $45 / 50", slug: "stickers" },
         { name: "Business Cards", from: "from $45 / 250", slug: "business-cards" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
-        { name: "Vinyl Lettering", from: "from $40", slug: "vinyl-lettering" },
+        { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
       ]}
       whyPoints={[
         "Reference pricing — 1,000 labels ≈ $325, 5,000 ≈ $1,395, 10,000 ≈ $2,395 (quoted exactly to your specs)",

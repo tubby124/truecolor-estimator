@@ -110,7 +110,7 @@ export default function ChiropractorSignsSaskatoonPage() {
         },
         {
           q: "What window decal options work for a physiotherapy or massage clinic?",
-          a: "Window decals from $11/sqft (minimum $45) are common for health and wellness storefronts. Options include frosted privacy panels for treatment room windows, full-colour logo and hours graphics for the front door, and promotional decals for seasonal campaigns. All are removable without residue.",
+          a: "Window decals from $11/sqft (small jobs top up to the $25 order-total minimum at checkout) are common for health and wellness storefronts. Options include frosted privacy panels for treatment room windows, full-colour logo and hours graphics for the front door, and promotional decals for seasonal campaigns. All are removable without residue.",
         },
         {
           q: "How fast can you print new patient flyers for a clinic promotion?",

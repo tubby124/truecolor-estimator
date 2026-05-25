@@ -48,10 +48,10 @@ export default function PrintingSwiftCurrentPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               Vehicle magnets
             </Link>{" "}
-            from $45 ($24/sqft) for service trucks, delivery vehicles, and ag equipment.
+            from $24/sqft for service trucks, delivery vehicles, and ag equipment.
             ACP aluminum signs from $13/sqft for permanent facility and yard signage
             that lasts 10+ years in southwest SK conditions. Business cards 250 for $45.
-            Volume pricing on all orders — no account required. Minimum order $30.
+            Volume pricing on all orders — no account required. A $25 order-total minimum applies at checkout.
           </p>
           <p className="text-gray-600 leading-relaxed">
             To order for Swift Current delivery: call (306) 954-8688 or submit your quote at
@@ -97,7 +97,7 @@ export default function PrintingSwiftCurrentPage() {
         },
         {
           q: "What's the minimum order for Swift Current?",
-          a: "Minimum order is $30. A single 24×36\" coroplast sign at $48 clears the minimum on its own. Volume discounts apply automatically — 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs.",
+          a: "A $25 order-total minimum applies at checkout. A single 24×36\" coroplast sign at $48 clears the minimum on its own. Volume discounts apply automatically — 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs.",
         },
         {
           q: "Is there a local print shop in Swift Current that competes with your prices?",

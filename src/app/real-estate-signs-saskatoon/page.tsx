@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Real Estate Signs Saskatoon | From $30 | True Color" },
+  title: { absolute: "Real Estate Signs Saskatoon | From $8/sqft | True Color" },
   description:
-    "Coroplast yard signs for Saskatoon REALTORS from $30. Feature sheets, business cards, vehicle magnets & postcards. Same-day rush. Pickup 216 33rd St W.",
+    "Coroplast yard signs for Saskatoon REALTORS from $8/sqft. Feature sheets, business cards, vehicle magnets & postcards. Same-day rush. Pickup 216 33rd St W.",
   alternates: { canonical: "/real-estate-signs-saskatoon" },
   openGraph: {
     title: "Real Estate Signs Saskatoon | True Color Display Printing",
     description:
-      "Yard signs from $30. Feature sheets, cards, vehicle magnets. Same-day rush available. Local Saskatoon pickup at 216 33rd St W.",
+      "Yard signs from $8/sqft. Feature sheets, cards, vehicle magnets. Same-day rush available. Local Saskatoon pickup at 216 33rd St W.",
     url: "https://truecolorprinting.ca/real-estate-signs-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -35,7 +35,7 @@ export default function RealEstatePage() {
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               coroplast yard signs
             </Link>
-            {" from $30,"} feature sheets, business cards, postcards, and{" "}
+            {" from $8/sqft,"} feature sheets, business cards, postcards, and{" "}
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               vehicle magnets
             </Link>
@@ -97,7 +97,7 @@ export default function RealEstatePage() {
       faqs={[
         {
           q: "What size yard sign do most Saskatoon REALTORS order?",
-          a: "18×24\" is the standard and most popular — visible from the street, fits standard H-stakes, and priced from $30. 24×36\" is common for higher-visibility listings, corner lots, and rural acreages. Both are available in single or double-sided.",
+          a: "18×24\" is the standard and most popular — visible from the street, fits standard H-stakes, and priced from $8/sqft. 24×36\" is common for higher-visibility listings, corner lots, and rural acreages. Both are available in single or double-sided.",
         },
         {
           q: "How fast can you print yard signs in Saskatoon?",

@@ -24,6 +24,7 @@ import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { classifyFromHeaders } from "@/lib/analytics/referrer";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
+import { mergeUtmAttribution } from "@/lib/analytics/utm";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -261,10 +262,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Classify referrer + capture UTM hint from form (set by /quote client)
+    // Classify referrer + capture first-touch UTM from form/cookie.
     const refClass = classifyFromHeaders(req.headers);
-    const utmSource = ((form.get("utm_source") as string) ?? "").trim().slice(0, 100) || null;
-    const utmCampaign = ((form.get("utm_campaign") as string) ?? "").trim().slice(0, 100) || null;
+    const utm = mergeUtmAttribution(
+      {
+        utm_source: form.get("utm_source"),
+        utm_medium: form.get("utm_medium"),
+        utm_campaign: form.get("utm_campaign"),
+        utm_content: form.get("utm_content"),
+        utm_term: form.get("utm_term"),
+      },
+      req.headers.get("cookie"),
+    );
 
     // Save to DB before sending emails (non-fatal — email continues even if DB fails).
     // Capture the inserted row's id so portal submissions can show a short reference
@@ -282,11 +291,11 @@ export async function POST(req: NextRequest) {
           raw_ip: ip ?? null,
           brokerage_slug: brokerageSlug,
           shipping_address: shippingAddress,
-          referrer_source: refClass.source.slice(0, 100),
-          referrer_medium: refClass.medium.slice(0, 50),
+          referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
+          referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
           raw_referrer: (req.headers.get("referer") ?? "").slice(0, 500) || null,
-          utm_source: utmSource,
-          utm_campaign: utmCampaign,
+          utm_source: utm.utm_source ?? null,
+          utm_campaign: utm.utm_campaign ?? null,
         })
         .select("id")
         .single();
@@ -310,8 +319,9 @@ export async function POST(req: NextRequest) {
           form_id: "quote-request",
           form_name: brokerageSlug ? `quote-portal-${brokerageSlug}` : "quote-multi-item",
           item_count: items.length,
-          source: utmSource ?? refClass.source,
-          campaign: utmCampaign ?? undefined,
+          source: utm.utm_source ?? refClass.source,
+          medium: utm.utm_medium ?? refClass.medium,
+          campaign: utm.utm_campaign ?? undefined,
         },
       }).catch((err) => console.error("[quote-request] GA4 MP failed (non-fatal):", err));
 

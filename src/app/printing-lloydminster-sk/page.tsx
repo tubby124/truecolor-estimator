@@ -43,7 +43,7 @@ export default function PrintingLloydminsterPage() {
             <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
               vehicle magnets
             </Link>{" "}
-            from $45 ($24/sqft) stay on doors at highway speeds and remove without residue.
+            from $24/sqft stay on doors at highway speeds and remove without residue.
           </p>
           <p className="text-gray-600 leading-relaxed">
             Vinyl banners from $8.25/sqft for storefronts and job sites. Business cards 250 for

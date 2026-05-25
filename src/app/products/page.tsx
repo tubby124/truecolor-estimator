@@ -54,7 +54,7 @@ const SEO_ONLY_CARDS: SeoOnlyCard[] = [
   },
   {
     name: "Image Upscale",
-    fromPrice: "from $40",
+    fromPrice: "from $8/sqft",
     href: "/image-upscale-saskatoon",
     image: "/images/products/heroes/image-upscale-hero-1200x500.webp",
   },
@@ -80,6 +80,24 @@ export default function ProductsPage() {
           <p className="text-gray-500 text-lg">
             Pick a product — see your exact price instantly. No forms. No callbacks.
           </p>
+        </div>
+
+        <div className="mb-8 rounded-xl border border-[#16C2F3]/30 bg-[#eefaff] px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <h2 className="text-lg font-bold text-[#1c1712]">
+              Looking for poster printing in Saskatoon?
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-gray-600">
+              Use the poster page for event posters, foamcore mounting, and photo poster options
+              from $15.
+            </p>
+          </div>
+          <Link
+            href="/poster-printing-saskatoon"
+            className="mt-4 inline-flex shrink-0 items-center justify-center rounded-lg bg-[#1c1712] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-black sm:mt-0"
+          >
+            Poster pricing
+          </Link>
         </div>
 
         {/* Product picker grid */}

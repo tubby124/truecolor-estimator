@@ -112,7 +112,7 @@ export default function PostcardPrintingSaskatoonPage() {
         },
         {
           q: "Where can I get postcards printed in Saskatoon?",
-          a: "True Color Display Printing at 216 33rd St W, Saskatoon — (306) 954-8688. We print in-house on our Roland UV printer, offer same-day rush, and have an in-house designer for $35 flat. No minimums on design, no hidden fees on print.",
+          a: "True Color Display Printing at 216 33rd St W, Saskatoon — (306) 954-8688. We print in-house on our Roland UV printer, offer same-day rush, and have an in-house designer for $35 flat. No hidden print fees; small carts top up to the $25 order-total minimum at checkout.",
         },
       ]}
     />

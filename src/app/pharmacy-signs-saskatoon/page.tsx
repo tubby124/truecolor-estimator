@@ -98,7 +98,7 @@ export default function PharmacySignsSaskatoonPage() {
         },
         {
           q: "Can you print window decals for a seasonal health campaign?",
-          a: "Yes — window decals from $11/sqft (minimum $45) are ideal for seasonal pharmacy campaigns. Apply them for flu season in October, update for spring allergy season in March, and back-to-school immunizations in August. All decals are removable without residue, so seasonal updates don&apos;t damage the glass.",
+          a: "Yes — window decals from $11/sqft (small jobs top up to the $25 order-total minimum at checkout) are ideal for seasonal pharmacy campaigns. Apply them for flu season in October, update for spring allergy season in March, and back-to-school immunizations in August. All decals are removable without residue, so seasonal updates don&apos;t damage the glass.",
         },
         {
           q: "How fast can you print signage for a vaccination clinic announcement?",

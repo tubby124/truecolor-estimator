@@ -338,15 +338,15 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
               }`}>
                 {result.qty_discount_pct}% bulk discount
               </span>
-              <span className={`text-sm font-medium ${result.min_charge_applied ? "text-gray-500" : "text-green-700"}`}>
-                ${result.price_per_unit.toFixed(2)}/unit{jobDetails?.qty && jobDetails.qty > 1 ? ` × ${jobDetails.qty}` : ""}
-              </span>
-              {result.min_charge_applied && (
-                <span className="text-[11px] text-amber-700">(absorbed by minimum)</span>
-              )}
-            </div>
-          )}
-          {/* Minimum charge panel — shows when min applied */}
+                <span className={`text-sm font-medium ${result.min_charge_applied ? "text-gray-500" : "text-green-700"}`}>
+                  ${result.price_per_unit.toFixed(2)}/unit{jobDetails?.qty && jobDetails.qty > 1 ? ` × ${jobDetails.qty}` : ""}
+                </span>
+                {result.min_charge_applied && (
+                <span className="text-[11px] text-amber-700">(absorbed by small-order fee)</span>
+                )}
+              </div>
+            )}
+          {/* Legacy small-order fee panel — shows only for old quote payloads. */}
           {result.min_charge_applied && result.min_charge_value != null && (
             <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/60 overflow-hidden text-sm">
               {/* Progress bar — visual fill toward minimum (matches customer side) */}
@@ -359,19 +359,19 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                 </div>
               )}
               <div className="px-3 py-2 border-b border-amber-100 flex items-center justify-between">
-                <span className="text-xs font-semibold text-amber-800 uppercase tracking-wider">Minimum Charge</span>
+                <span className="text-xs font-semibold text-amber-800 uppercase tracking-wider">Small-Order Fee</span>
                 <span className="font-bold text-amber-900 tabular-nums">${result.min_charge_value.toFixed(2)}</span>
               </div>
               <div className="px-3 py-2 space-y-1">
                 {result.pre_min_subtotal != null && (
                   <>
                     <div className="flex justify-between">
-                      <span className="text-amber-700">Job total (pre-min)</span>
+                        <span className="text-amber-700">Job total before fee</span>
                       <span className="tabular-nums text-amber-700">${result.pre_min_subtotal.toFixed(2)}</span>
                     </div>
                     {result.min_charge_value > result.pre_min_subtotal && (
                       <div className="flex justify-between">
-                        <span className="text-amber-700">Buffer to min</span>
+                        <span className="text-amber-700">Small-order fee</span>
                         <span className="tabular-nums text-green-700 font-medium">+${(result.min_charge_value - result.pre_min_subtotal).toFixed(2)}</span>
                       </div>
                     )}
@@ -385,7 +385,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                     <span className="tabular-nums text-amber-800 font-medium">${result.price_per_unit.toFixed(2)}</span>
                   </div>
                 )}
-                {/* "Add X more to beat the minimum" — uses real job qty, not line_items[0].qty */}
+                {/* "Add X more to clear the small-order fee" — uses real job qty, not line_items[0].qty */}
                 {result.pre_min_subtotal != null && (() => {
                   const realQty = jobDetails?.qty ?? 1;
                   const realUnitPrice = result.pre_min_subtotal! / Math.max(realQty, 1);
@@ -396,7 +396,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                       return (
                         <div className="pt-1.5 border-t border-amber-100 mt-1.5">
                           <p className="text-xs text-amber-700 font-medium">
-                            + Add {extraNeeded.toLocaleString()} more (qty {unitsToExceed.toLocaleString()}) to beat the minimum
+                            + Add {extraNeeded.toLocaleString()} more (qty {unitsToExceed.toLocaleString()}) to clear the small-order fee
                           </p>
                         </div>
                       );
@@ -404,14 +404,14 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                   }
                   return null;
                 })()}
-                {/* Override toggle — staff can quote below minimum */}
+                {/* Override toggle — staff can quote below the customer checkout floor */}
                 {!isCustomerMode && onToggleSkipMinCharge && (
                   <div className="pt-1.5 border-t border-amber-100 mt-1.5">
                     <button
                       onClick={onToggleSkipMinCharge}
                       className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
                     >
-                      Override minimum →
+                      Override checkout floor →
                     </button>
                   </div>
                 )}
@@ -424,7 +424,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
           {result.min_charge_skipped && result.min_charge_value != null && !isCustomerMode && (
             <div className="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-xs">
               <span className="text-gray-500">
-                Customer-facing min: <span className="font-semibold tabular-nums text-gray-700">${result.min_charge_value.toFixed(2)}</span>
+                Customer checkout floor: <span className="font-semibold tabular-nums text-gray-700">${result.min_charge_value.toFixed(2)}</span>
                 <span className="text-gray-400"> · below by ${(result.min_charge_value - sellPrice).toFixed(2)}</span>
               </span>
               {onToggleSkipMinCharge && (
@@ -432,7 +432,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                   onClick={onToggleSkipMinCharge}
                   className="text-amber-700 hover:text-amber-800 font-medium transition-colors whitespace-nowrap"
                 >
-                  Apply minimum →
+                  Apply checkout floor →
                 </button>
               )}
             </div>
@@ -445,13 +445,13 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
-                  Below Minimum
+                  Below Checkout Floor
                 </span>
                 <span className="font-bold text-red-900 tabular-nums">${sellPrice.toFixed(2)}</span>
               </div>
               <div className="px-3 py-2 space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-red-700">Minimum for this product</span>
+                  <span className="text-red-700">Customer checkout floor</span>
                   <span className="tabular-nums text-red-800 font-semibold">${result.min_charge_value.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
@@ -468,7 +468,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
                       onClick={onToggleSkipMinCharge}
                       className="text-xs text-amber-700 hover:text-amber-800 font-medium transition-colors"
                     >
-                      ← Restore minimum
+                      ← Restore checkout floor
                     </button>
                   </div>
                 )}

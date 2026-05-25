@@ -120,7 +120,7 @@ export default function BrewerySaskatoonPage() {
         },
         {
           q: "Do you print window decals for taproom storefronts?",
-          a: "Yes — window decals from $11/sqft (minimum $45) are a common order for Saskatoon taprooms. Popular designs include frosted privacy panels, full-colour logo and hours graphics, and seasonal promotion overlays. All decals are removable without residue so you can update for seasonal campaigns without damaging the glass.",
+          a: "Yes — window decals from $11/sqft (small jobs top up to the $25 order-total minimum at checkout) are a common order for Saskatoon taprooms. Popular designs include frosted privacy panels, full-colour logo and hours graphics, and seasonal promotion overlays. All decals are removable without residue so you can update for seasonal campaigns without damaging the glass.",
         },
       ]}
     />

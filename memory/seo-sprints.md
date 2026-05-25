@@ -195,3 +195,94 @@ DesignDirectionGrid live on 6 secondary pages but MISSING on all 5 ranking pages
 - Phase 1 patch spec covers: dual-track GA4 (Wave A in plan), backfill script for last 30d, UTM tagging across Brevo + GBP + social, consent decision documented (CA B2B, no banner).
 - Phase 2 finding: only ONE non-branded query has healthy CTR (sticker printing saskatoon, 5.77%, FROZEN). `/for-lease-signs-saskatoon` ranks pos 2-3 for 237 monthly impressions at 0% CTR = highest-value single-page fix in Wave B.
 - No code changes shipped this session — read-only investigation.
+
+## SEO Phase 26 — Full Codebase SEO Audit (2026-05-25)
+
+### Files changed
+- `FULL-AUDIT-REPORT.md` — rewritten with 2026-05-25 score and findings
+- `SEO-REMAINING-WAVES.md` — Wave 3.1 marked complete, Wave 3.2 documented, Wave 3.3/3.4 added
+- `memory/seo-sprints.md` — appended this audit entry
+
+### What was checked
+- Codebase-first audit only; no live crawl.
+- 3 parallel audit lanes: technical/schema, content/on-page, performance/images/AI.
+- Inline checks: sitemap vs nav/footer, DesignDirectionGrid presence, ranking-page metadata, stale price/minimum grep, meta length batch, oversized image scan.
+
+### Current score
+- Previous report baseline: 69/100 (2026-05-20)
+- Current audit estimate: **74/100**
+- Main gains: all 5 protected ranking pages now pass title/meta length, llms.txt is cleaned up, image sitemap exists, no `public/images` files over 500KB, robots.ts is AI-friendly.
+
+### What was deferred / flagged
+- Wave 3.3: stale price trust drift still exists — coroplast `$30` examples, flyer grid prices (`250=$80`, `500=$130`), Sign Company ACP `4x8 ft` price conflict, llms.txt review count date.
+- Wave 3.4: 40 sitemap-indexed pages lack nav/footer links; 48 non-protected meta descriptions exceed 155 chars; 3 legacy redirects land on noindex `/products/retractable-banners`.
+- Wave 4: Product schema still missing and `reviewCount` emits as a string.
+- Wave 5: HeroSlider remains a client island; slide 0 exists but LCP still deserves a bundle/CWV audit.
+
+### Next steps
+- Ship Wave 3.3 first as body-copy trust cleanup only; verify ACP price against CSV/source before editing.
+- Then Wave 3.4 internal linking + meta batch.
+- Do not combine protected-page title/H1/schema changes with the pricing cleanup commit.
+
+## SEO Phase 27 — Deep Pricing Trust + SEO Plumbing Fixes (2026-05-25)
+
+### What shipped
+- Removed stale per-product minimum language from live pages, product content, GBP data, social schedule, email/staff UI, and guard scripts.
+- Reframed customer-facing copy around the real model: raw product pricing plus the `$25 order-total minimum` at checkout.
+- Updated pricing docs and hooks so old `$30/$40/$45/$60/$75 minimum` rules do not get reintroduced.
+- Repointed retractable-banner WordPress redirects to `/retractable-banners-saskatoon`.
+- Added nav/footer links for high-priority orphan pages: commercial signs, education signs, community printing, and for-lease signs.
+- Trimmed priority long metadata descriptions and updated sitemap lastmod for changed indexable pages.
+
+### Verification
+- `npm run validate:pricing` ✅ 0 errors, 2 existing warnings.
+- `npm test -- src/lib/pricing/__tests__/order-min.test.ts src/lib/engine/__tests__/engine.test.ts` ✅ 113 tests passed.
+- `git diff --check` ✅ clean.
+- `npm run build` ✅ production build passed.
+
+## SEO Phase 28 — GSC CTR Rescue + Attribution Capture Patch (2026-05-25)
+
+### Source
+- `scripts/seo-opportunities.mjs --days=28` and `--days=90`
+- 28d GSC: 21 clicks, 2,579 impressions, 0.81% CTR, avg position 18.50
+- Top actionable bleed: `/for-lease-signs-saskatoon` at 244 impressions, avg position 3.03, 0 clicks
+- Attribution audit: 79 orders / $15,942.61 over 90d, but 0 UTM-tagged orders and only 2 referrer-tagged orders
+
+### What shipped
+- Added server-readable first-touch UTM cookie fallback while preserving localStorage capture.
+- Order and quote APIs now fall back to the UTM cookie and use UTM source/medium for attribution fields when present.
+- `/for-lease-signs-saskatoon`: title/meta/H1/subtitle tightened around "For Lease Signs Saskatchewan" and "lease signage Saskatchewan"; added reusable/used lease signage FAQ.
+- `/property-management-signs-saskatoon`: de-cannibalized toward broader property-management intent, linked exact lease-signage traffic to `/for-lease-signs-saskatoon`, fixed stale vehicle magnet price copy.
+- `/sticker-printing-saskatoon`: frozen-safe body/FAQ expansion for die-cut stickers/labels and corrected internal links to indexed SEO pages.
+- Updated sticker sitemap lastmod to 2026-05-25.
+
+### Expected outcome
+- Lease-sign CTR should move from 0% toward 3%+ after re-crawl.
+- Future GBP/social/email traffic with UTMs should populate order/quote attribution instead of disappearing after internal navigation.
+- Sticker die-cut query cluster should gain relevance without touching protected title/H1 metadata.
+
+### Re-check date
+- 2026-06-01 for GSC CTR/ranking movement.
+- Immediately after deploy for UTM capture by placing one test quote/order with `?utm_source=test&utm_medium=qa&utm_campaign=phase28`.
+
+## SEO Phase 29 — Local Print + Flyer/Poster/Wall Intent Cleanup (2026-05-25)
+
+### Source
+- Same 28d/90d GSC pull as Phase 28.
+- Homepage queries showed broad "Saskatoon print shop / local printing" impressions with low CTR.
+- `/flyer-printing-saskatoon` had stale body-card prices despite ranking pressure.
+- `/products` was catching poster-printing intent without a strong route to `/poster-printing-saskatoon`.
+- `/wall-graphics-saskatoon` had decay and lacked explicit "wall covering" / "large wall graphics Saskatoon" wording.
+
+### What shipped
+- Homepage metadata and product-grid intro now say "Saskatoon print shop" and route poster intent to `/poster-printing-saskatoon`.
+- Homepage stale coroplast example changed from `$30` to `$25`.
+- `/flyer-printing-saskatoon`: corrected visible 250/500 flyer card prices to `$110` and `$135`, and added frozen-safe local flyer intent copy without touching title/H1/slug.
+- `/products`: added a prominent poster-printing callout linking to `/poster-printing-saskatoon`.
+- `/wall-graphics-saskatoon`: updated title/meta/H1 language around wall graphics and removable wall coverings; added "large wall graphics in Saskatoon" and wall-covering FAQ.
+
+### Expected outcome
+- Better homepage relevance for local print-shop queries.
+- Fewer stale-price trust leaks on the flyer page.
+- Stronger internal routing for poster searchers landing on the generic product picker.
+- Wall graphics page should regain relevance for wall-covering and large-wall-graphic query variants.

@@ -19,9 +19,11 @@ import { spawnSync } from "child_process";
 // --- Wrong-pattern definitions (mirrors post-edit-price-check.mjs) ---
 const WRONG_PATTERNS = [
   [/from \$45.{0,25}banner|banner.{0,25}from \$45/i, "Banner 'from' should be $66, not $45"],
-  [/from \$39.{0,25}acp|acp.{0,25}from \$39|from \$39.{0,25}aluminum/i, "ACP 'from' should be $60, not $39"],
-  [/from \$24.{0,25}coroplast|coroplast.{0,25}from \$24|yard signs? from \$24/i, "Coroplast 'from' should be $30, not $24"],
-  [/from \$24\/sqft.{0,25}magnet|magnet.{0,25}from \$24/i, "Magnet marketing 'from' should be $45, not $24/sqft"],
+  [/from \$60.{0,25}acp|acp.{0,25}from \$60|from \$60.{0,25}aluminum/i, "ACP no longer has a $60 per-product minimum; use $39 or $13/sqft"],
+  [/from \$30.{0,25}coroplast|coroplast.{0,25}from \$30|yard signs? from \$30/i, "Coroplast no longer has a $30 per-product minimum; use $25 or $8/sqft"],
+  [/from \$45.{0,25}magnet|magnet.{0,25}from \$45/i, "Magnets no longer have a $45 per-product minimum; use $25 or $24/sqft"],
+  [/from \$40.{0,25}lettering|lettering.{0,25}from \$40/i, "Vinyl lettering no longer has a $40 per-product minimum; use $25 or $8.50/sqft"],
+  [/minimum\s+\$(30|40|45|60|75)|\$(30|40|45|60|75)\s+minimum/i, "Do not publish old per-product minimums; use the $25 order-total minimum where relevant"],
   [/from \$8\/sqft.*decal|decal.*from \$8\/sqft/i, "Window Decals are $11/sqft, not $8/sqft"],
   [/(\d+)\+\s*sqft.*(discount|off|save)/i, "Volume discounts must be QTY-based (5+ signs), not sqft-based"],
   [/\$2\.00.*grommet|grommet.*\$2\.00|\$3\.00.*grommet/i, "Grommets are $2.50/each"],
@@ -32,11 +34,11 @@ const WRONG_PATTERNS = [
 
 const EXCEPTION_PATTERNS = [
   /fromPrice\s*[=:]/i,
-  /above\s+the\s+\$\d+\s+minimum/i,
+  /\$25\s+order-total\s+minimum/i,
+  /\$25\s+cart\s+floor/i,
   /for\s+orders\s+above/i,
   /\/sqft\s+for\s+orders/i,
-  /minimum\s+is\s+\$\d+/i,
-  /\/sqft.*minimum|minimum.*\/sqft/i,
+  /minimum\s+quantity|minimum\s+qty/i,
 ];
 
 // --- Category matchers ---

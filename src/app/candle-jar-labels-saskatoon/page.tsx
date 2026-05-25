@@ -4,7 +4,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Candle & Jar Labels Saskatoon | from $5.50/sqft | True Color" },
   description:
-    "Candle jar, mason jar, and preserves labels printed in Saskatoon. 3mil vinyl, full-colour Roland UV print from $5.50/sqft. Wraparounds, round die-cuts, 1–3 day turnaround.",
+    "Candle jar and preserves labels printed in Saskatoon. 3mil vinyl, Roland UV print from $5.50/sqft. Wraparounds, die-cuts, 1–3 day turnaround.",
   alternates: { canonical: "/candle-jar-labels-saskatoon" },
   openGraph: {
     title: "Candle & Jar Labels Saskatoon | from $5.50/sqft | True Color",
@@ -47,7 +47,7 @@ export default function CandleJarLabelsSaskatoonPage() {
       products={[
         { name: "Candle & Jar Labels", from: "from $5.50/sqft", slug: "stickers" },
         { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Vinyl Lettering", from: "from $40", slug: "vinyl-lettering" },
+        { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Business Cards", from: "from $45 / 250", slug: "business-cards" },
         { name: "Postcards", from: "from $58 / 250", slug: "postcards" },
@@ -65,7 +65,7 @@ export default function CandleJarLabelsSaskatoonPage() {
       faqs={[
         {
           q: "How much do candle and jar labels cost in Saskatoon?",
-          a: "Pricing is by total square footage: $5.50/sqft for 0–12 sqft, $5.00/sqft for 12.01–32 sqft, $4.30/sqft for 32.01–100 sqft, and $3.20/sqft above 100 sqft. Minimum order is $30. A typical run of 100 candle labels at 2.5×3.5\" each works out to roughly 6 sqft — so about $33 in label stock, then divide by your label count for unit cost.",
+          a: "Pricing is by total square footage: $5.50/sqft for 0–12 sqft, $5.00/sqft for 12.01–32 sqft, $4.30/sqft for 32.01–100 sqft, and $3.20/sqft above 100 sqft. A $25 order-total minimum applies at checkout. A typical run of 100 candle labels at 2.5×3.5\" each works out to roughly 6 sqft — so about $33 in label stock, then divide by your label count for unit cost.",
         },
         {
           q: "Will the labels survive a lit candle?",
@@ -93,7 +93,7 @@ export default function CandleJarLabelsSaskatoonPage() {
         },
         {
           q: "Where do I pick up labels in Saskatoon?",
-          a: "True Color Display Printing — 216 33rd St W, Saskatoon, SK. Call (306) 954-8688 or email info@true-color.ca. We print everything in-house on a Roland UV printer, no outsourcing. Local pickup is free; we can also ship across Saskatchewan. Minimum order is $30, design is $35 flat, same-day rush is +$40 flat.",
+          a: "True Color Display Printing — 216 33rd St W, Saskatoon, SK. Call (306) 954-8688 or email info@true-color.ca. We print everything in-house on a Roland UV printer, no outsourcing. Local pickup is free; we can also ship across Saskatchewan. $25 order-total minimum applies at checkout, design is $35 flat, same-day rush is +$40 flat.",
         },
       ]}
     />

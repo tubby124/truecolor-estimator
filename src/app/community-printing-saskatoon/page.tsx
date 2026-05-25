@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Community Printing Saskatoon | Non-Profit & Church | True Color" },
   description:
-    "Affordable printing for Saskatoon non-profits, churches, and community events. Banners from $8.25/sqft, coroplast from $8/sqft. Volume pricing available. True Color Display Printing.",
+    "Affordable printing for Saskatoon non-profits, churches, and events. Banners from $8.25/sqft, coroplast from $8/sqft, volume pricing available.",
   alternates: { canonical: "/community-printing-saskatoon" },
   openGraph: {
     title: "Community Printing Saskatoon | True Color Display Printing",

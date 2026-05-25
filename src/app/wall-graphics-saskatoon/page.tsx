@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Wall Graphics Saskatoon | From $11/sqft | True Color" },
+  title: { absolute: "Wall Graphics & Wall Coverings Saskatoon | From $11/sqft" },
   description:
-    "Custom wall graphics in Saskatoon from $11/sqft. Removable vinyl — no wall damage. Same-day rush +$40. In-house designer $35. Pickup at 216 33rd St W.",
+    "Wall graphics and removable wall coverings in Saskatoon from $11/sqft. Large vinyl murals, office walls, retail displays. Rush +$40.",
   alternates: { canonical: "/wall-graphics-saskatoon" },
   openGraph: {
-    title: "Wall Graphics Saskatoon | From $11/sqft | True Color",
+    title: "Wall Graphics & Wall Coverings Saskatoon | From $11/sqft",
     description:
-      "Custom wall graphics in Saskatoon from $11/sqft. Removable vinyl — no wall damage. Same-day rush +$40.",
+      "Wall graphics and removable wall coverings in Saskatoon from $11/sqft. Large vinyl murals, office walls, retail displays. Rush +$40.",
     url: "https://truecolorprinting.ca/wall-graphics-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -22,9 +22,9 @@ export default function WallGraphicsSaskatoonPage() {
     <IndustryPage
       canonicalSlug="wall-graphics-saskatoon"
       primaryProductSlug="window-decals"
-      title="Wall Graphics — Saskatoon"
+      title="Wall Graphics & Wall Coverings Saskatoon"
       subtitle="Transform any wall. Removable vinyl, full-colour prints, any size. In-house printing."
-      heroImage="/images/products/product/decal-window-white-text-800x600.webp"
+      heroImage="/images/products/product/vinyl-lettering-office-wall-800x600.webp"
       heroAlt="Custom wall graphics and vinyl lettering in Saskatoon by True Color Display Printing"
       description="Wall graphics are vinyl or rigid-substrate prints applied directly to walls, windows, or partitions to brand a space, display information, or create visual impact. True Color Display Printing produces custom wall graphics in Saskatoon from $11/sqft on an in-house Roland UV printer, with 1–3 business day turnaround and same-day rush available for +$40 flat."
       descriptionNode={
@@ -32,9 +32,9 @@ export default function WallGraphicsSaskatoonPage() {
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             Wall graphics are vinyl or rigid-substrate prints applied directly to walls, windows,
             or partitions to brand a space, display information, or create visual impact. True Color
-            Display Printing produces custom wall graphics in Saskatoon from <strong>$11/sqft</strong> on
-            an in-house Roland UV printer, with 1–3 business day turnaround and same-day rush
-            available for +$40 flat.
+            Display Printing produces large wall graphics in Saskatoon and custom wall covering
+            panels from <strong>$11/sqft</strong> on an in-house Roland UV printer, with 1–3
+            business day turnaround and same-day rush available for +$40 flat.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             Compared to wallpaper: vinyl wall graphics apply like a large sticker — no glue, no
@@ -78,7 +78,7 @@ export default function WallGraphicsSaskatoonPage() {
             <Link href="/vinyl-lettering-saskatoon" className="text-[#16C2F3] underline font-medium">
               vinyl lettering
             </Link>{" "}
-            is the lower-cost option from $40. Cut on our precision plotter with no background
+            is the lower-cost option from $8.50/sqft. Cut on our precision plotter with no background
             material visible, it&apos;s the standard for storefront hours, office door names, and
             vehicle text. For{" "}
             <Link href="/window-decals-saskatoon" className="text-[#16C2F3] underline font-medium">
@@ -118,7 +118,7 @@ export default function WallGraphicsSaskatoonPage() {
       faqs={[
         {
           q: "How much do wall graphics cost in Saskatoon?",
-          a: "Removable vinyl wall graphics at True Color start at $11/sqft (minimum $45). A standard 4×8 ft wall graphic runs approximately $280 before design. Exact pricing depends on material, finish, and size — use the quote form on this page or call (306) 954-8688 for a same-day quote.",
+          a: "Removable vinyl wall graphics at True Color start at $11/sqft; small jobs top up to the $25 order-total minimum at checkout. A standard 4×8 ft wall graphic runs approximately $280 before design. Exact pricing depends on material, finish, and size — use the quote form on this page or call (306) 954-8688 for a same-day quote.",
         },
         {
           q: "Can wall decals be removed without damaging the wall?",
@@ -135,6 +135,10 @@ export default function WallGraphicsSaskatoonPage() {
         {
           q: "Can you print custom wall graphics in Saskatoon?",
           a: "Yes — True Color prints full-colour custom wall graphics in-house on our Roland UV printer. Any design, any size up to 60\" wide, from $11/sqft. Our in-house designer can build your layout from a rough concept, match brand colours, and provide a to-scale digital proof before printing for $35 flat.",
+        },
+        {
+          q: "Do you print wall coverings in Saskatoon?",
+          a: "Yes — removable wall coverings, office wall murals, retail feature walls, and branded wall panels are printed locally in Saskatoon from $11/sqft. For walls wider than 60 inches, we panel the print and align seams around natural breaks in the artwork.",
         },
         {
           q: "How long do wall graphics last?",

@@ -156,7 +156,7 @@ export default function StPatricksDayPage() {
         },
         {
           q: "What's the best signage for a Saskatoon bar or pub during St. Patrick's Day?",
-          a: "A vinyl banner on the exterior (2×6 ft, $90) announces the event to passing foot and vehicle traffic. Window decals from $11/sqft are cost-effective for storefronts — minimum $45. For inside the venue, a retractable banner stand ($219 complete) works well near the entrance. Flyers (250 for $110) distributed around the neighbourhood drive foot traffic in the days before March 17.",
+          a: "A vinyl banner on the exterior (2×6 ft, $90) announces the event to passing foot and vehicle traffic. Window decals from $11/sqft are cost-effective for storefronts; small jobs top up to the $25 order-total minimum at checkout. For inside the venue, a retractable banner stand ($219 complete) works well near the entrance. Flyers (250 for $110) distributed around the neighbourhood drive foot traffic in the days before March 17.",
         },
         {
           q: "How far in advance should I order St. Patrick's Day printing in Saskatoon?",
@@ -164,7 +164,7 @@ export default function StPatricksDayPage() {
         },
         {
           q: "Do you print window decals for St. Patrick's Day promotions in Saskatoon?",
-          a: "Yes — vinyl window decals at $11/sqft (minimum $45) are popular for Saskatoon restaurants and retail shops running St. Patrick's Day promotions. Decals are removable after the event with no adhesive residue on glass. For temporary promotions, perforated window vinyl ($8/sqft) lets customers see out while your design faces the street.",
+          a: "Yes — vinyl window decals at $11/sqft are popular for Saskatoon restaurants and retail shops running St. Patrick's Day promotions. Decals are removable after the event with no adhesive residue on glass. For temporary promotions, perforated window vinyl ($8/sqft) lets customers see out while your design faces the street.",
         },
         {
           q: "Where can I get St. Patrick's Day printing done same day in Saskatoon?",

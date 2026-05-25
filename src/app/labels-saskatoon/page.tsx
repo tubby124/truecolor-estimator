@@ -27,7 +27,7 @@ export default function LabelsSaskatoonHubPage() {
       heroImage="/images/products/heroes/freezer-labels-hero-1200x500.webp"
       heroAlt="Custom adhesive labels printed in Saskatoon by True Color Display Printing"
       description={
-        "Custom adhesive labels printed in Saskatoon, starting at $5.50/sqft on 3mil vinyl. Whether you need freezer-grade labels that survive -18°C deep freezers, retail product labels for a Saskatchewan-made artisan brand, waterproof cosmetic labels for a skincare line, heat-resistant labels for candle jars, or thousands of identical labels delivered on a continuous roll for an automated packaging line — we print all of it in-house at 216 33rd St W on our Roland UV printer. No outsourcing, no five-digit minimum order quantities, no waiting on a label broker. Same-day rush available at +$40 flat for orders placed before 10 AM. In-house Photoshop designer builds label layouts at $35 flat with a same-day proof."
+        "Custom adhesive labels printed in Saskatoon, starting at $5.50/sqft on 3mil vinyl. Whether you need freezer-grade labels that survive -18°C deep freezers, retail product labels for a Saskatchewan-made artisan brand, waterproof cosmetic labels for a skincare line, heat-resistant labels for candle jars, or thousands of identical labels delivered on a continuous roll for an automated packaging line — we print all of it in-house at 216 33rd St W on our Roland UV printer. No outsourcing, no five-digit case quantities, no waiting on a label broker. Same-day rush available at +$40 flat for orders placed before 10 AM. In-house Photoshop designer builds label layouts at $35 flat with a same-day proof."
       }
       descriptionNode={
         <>
@@ -120,7 +120,7 @@ export default function LabelsSaskatoonHubPage() {
         },
         {
           q: "How much do custom labels cost in Saskatoon?",
-          a: "Pricing starts at $5.50/sqft on 3mil vinyl, with four sqft tiers that scale down as orders grow: $5.50 for 0–12 sqft, $5.00 for 12–32 sqft, $4.30 for 32–100 sqft, $3.20 for 100+ sqft. Minimum charge is $30 per order. Real-world anchor: a 10×2\" label at quantity 500 runs about $300. Roll labels are custom-quoted because the run size, die shape, and material core all affect setup.",
+          a: "Pricing starts at $5.50/sqft on 3mil vinyl, with four sqft tiers that scale down as orders grow: $5.50 for 0–12 sqft, $5.00 for 12–32 sqft, $4.30 for 32–100 sqft, $3.20 for 100+ sqft. A $25 order-total minimum applies at checkout. Real-world anchor: a 10×2\" label at quantity 500 runs about $300. Roll labels are custom-quoted because the run size, die shape, and material core all affect setup.",
         },
         {
           q: "What's the turnaround on custom labels?",

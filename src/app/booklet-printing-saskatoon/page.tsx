@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Booklet Printing Saskatoon | Coil-Bound | True Color" },
   description:
-    "Coil-bound booklet printing in Saskatoon from $1,625 for 25 books. 80lb or 100lb gloss interior, 14pt cover, 12mm black plastic coil. In-house, 3–5 day turnaround. Pickup 216 33rd St W.",
+    "Coil-bound booklet printing in Saskatoon from $65/book at 25 copies. 80lb or 100lb gloss, 14pt cover, in-house binding. Pickup 216 33rd St W.",
   alternates: { canonical: "/booklet-printing-saskatoon" },
   openGraph: {
     title: "Booklet Printing Saskatoon | Coil-Bound | True Color Display Printing",

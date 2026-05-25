@@ -105,7 +105,7 @@ export default function PrintingWeyburnPage() {
         },
         {
           q: "Is there a minimum order for Weyburn customers?",
-          a: "No minimum. You can order a single coroplast sign or one set of vehicle magnets. Volume discounts apply automatically at higher quantities. Business cards start at 250 for $45, flyers at 100 for $45, both shipped to Weyburn.",
+          a: "A $25 order-total minimum applies at checkout. You can order a single coroplast sign or one set of vehicle magnets. Volume discounts apply automatically at higher quantities. Business cards start at 250 for $45, flyers at 100 for $45, both shipped to Weyburn.",
         },
       ]}
     />

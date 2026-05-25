@@ -3,12 +3,12 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Lease Signage Saskatchewan | For-Lease Signs from $8/sqft" },
+  title: { absolute: "For Lease Signs Saskatchewan | Lease Signage from $8/sqft" },
   description:
-    "Lease signage for SK property managers, leasing agents, landlords. 18×24\" coroplast at $24 ($25 cart min). Same-day +$40. Pickup 216 33rd St W.",
+    "For lease signs and lease signage for Saskatchewan property managers. 18×24\" coroplast at $24 ($25 cart min). Same-day +$40. Saskatoon pickup.",
   alternates: { canonical: "/for-lease-signs-saskatoon" },
   openGraph: {
-    title: "Lease Signage Saskatchewan | For-Lease Signs from $8/sqft | True Color",
+    title: "For Lease Signs Saskatchewan | Lease Signage from $8/sqft | True Color",
     description:
       "Lease signage and for-lease signs across Saskatchewan from $8/sqft. 18×24\" coroplast, post-mounted boards, fence panels. Same-day +$40. Bulk 5+ save 8%.",
     url: "https://truecolorprinting.ca/for-lease-signs-saskatoon",
@@ -22,21 +22,21 @@ export default function ForLeaseSignsSaskatoonPage() {
     <IndustryPage
       canonicalSlug="for-lease-signs-saskatoon"
       primaryProductSlug="coroplast-signs"
-      title="For Lease Signs Saskatoon"
-      subtitle="Coroplast for-lease, for-rent, and commercial vacancy signs. Saskatchewan-built. Same-day rush available."
+      title="For Lease Signs Saskatchewan"
+      subtitle="Coroplast for-lease, for-rent, and commercial vacancy signs for Saskatoon and Saskatchewan property teams."
       heroImage="/images/products/heroes/realestate-hero-1200x500.webp"
       heroAlt="For lease and for rent coroplast signs in Saskatoon by True Color Display Printing"
       description="Commercial properties and rental units in Saskatoon, Saskatchewan need For Lease and For Rent signs that show up clearly from the street. True Color Display Printing prints coroplast for-lease signs from $8/sqft (18×24″ single-sided is $24, tops up to the $25 order-total minimum at checkout), post-mounted 24×36″ vacancy boards, and 4×8 ft fence-line panels for industrial or strip-mall vacancies — all on an in-house Roland UV printer with 1–3 business day turnaround. Same-day rush is available for +$40 flat on orders before 10 AM. Order 5 or more signs and save 8% automatically."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            Commercial property managers, leasing agents, and landlords in Saskatoon order
-            coroplast{" "}
+            Commercial property managers, leasing agents, and landlords looking for{" "}
+            <strong>lease signage in Saskatchewan</strong> order coroplast{" "}
             <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
               for-lease and for-rent signs
             </Link>{" "}
-            from True Color because they ship in 1–3 business days, hold up through Saskatchewan
-            winters, and don&apos;t require a national supplier. Standard 18×24″ yard signs are
+            from True Color because they print locally, ship in 1–3 business days, hold up
+            through Saskatchewan winters, and don&apos;t require a national supplier. Standard 18×24″ yard signs are
             $24 each (single signs top up to the $25 order-total minimum at checkout). Order 5 or more and save 8% automatically — no code needed.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
@@ -90,7 +90,7 @@ export default function ForLeaseSignsSaskatoonPage() {
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Vinyl Banners", from: "from $66", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
-        { name: "Window Decals", from: "from $45", slug: "window-decals" },
+        { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
       ]}
       whyPoints={[
         "Coroplast for-lease signs from $8/sqft (18×24″ = $24, single signs top up to the $25 cart min) — standard yard-sign size for commercial vacancies",
@@ -122,6 +122,10 @@ export default function ForLeaseSignsSaskatoonPage() {
         {
           q: "Do you offer bulk pricing for property managers?",
           a: "Yes — order 5 or more coroplast signs and save 8% automatically. 10+ saves 17%, 25+ saves 23%. For portfolios over 50 signs (strata corporations, multi-family operators, commercial brokerages), call (306) 954-8688 for a custom volume quote. We work with property management companies across Saskatoon and surrounding RMs.",
+        },
+        {
+          q: "Can you update or reprint used lease signage?",
+          a: "Yes. If you already have used lease signage from an older listing, we can reprint the same layout, update the phone number, change a broker logo, or rebuild the file if all you have is a photo. For clean re-use across multiple properties, we recommend a simple coroplast layout with interchangeable contact details. Design setup is $35 when file rebuilding is needed.",
         },
         {
           q: "Can you design a for-lease sign if I don't have a file?",

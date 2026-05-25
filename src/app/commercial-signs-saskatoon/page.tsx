@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Commercial Signs Saskatoon | Retail & Business | True Color" },
   description:
-    "Commercial signage for Saskatoon retailers, car dealerships, salons, gyms, and breweries. Coroplast, ACP aluminum, vinyl banners, window decals. In-house printing at 216 33rd St W.",
+    "Commercial signs for Saskatoon retailers, dealerships, salons, gyms, and breweries. Coroplast, ACP, banners, and window decals printed in-house.",
   alternates: { canonical: "/commercial-signs-saskatoon" },
   openGraph: {
     title: "Commercial Signs Saskatoon | True Color Display Printing",

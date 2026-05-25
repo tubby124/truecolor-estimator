@@ -42,7 +42,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Coroplast Signs",
     tagline: "Durable yard signs that survive Saskatchewan winters.",
     description:
-      "Coroplast is 4mm corrugated polypropylene — think cardboard, but fully waterproof, UV-resistant, and built to survive Saskatchewan winters at -40°C. It's the most-ordered outdoor sign material at True Color because it hits the right balance: lightweight enough to install by hand, durable enough for 2–3 years of direct prairie sun. Real estate agents rely on 18×24\" coroplast for listing and open house signs. Contractors bolt 4×8 sheets to site hoardings. Election campaigns order 200+ at a time for lawn placement. Events use 12×18\" directional signs across venue grounds. The material prints beautifully — our Roland TrueVIS UV ink bonds directly to the polypropylene substrate for sharp text and vivid colour that won't peel or bubble. Single-sided is most common. Double-sided (both faces printed and bonded back-to-back) costs roughly 50% more and works well for directional signs visible from both approaches. Add wire H-stakes ($2.50 each) for ground installation or grommets ($2.50 each) for fence and wall mounting — both are available as add-ons in the estimator. True Color prints coroplast signs in-house at 216 33rd St W, Saskatoon. No outsourcing, no minimum quantity. Same-day rush available (+$40 flat) on most orders placed before 10 AM.",
+      "Coroplast is 4mm corrugated polypropylene — think cardboard, but fully waterproof, UV-resistant, and built to survive Saskatchewan winters at -40°C. It's the most-ordered outdoor sign material at True Color because it hits the right balance: lightweight enough to install by hand, durable enough for 2–3 years of direct prairie sun. Real estate agents rely on 18×24\" coroplast for listing and open house signs. Contractors bolt 4×8 sheets to site hoardings. Election campaigns order 200+ at a time for lawn placement. Events use 12×18\" directional signs across venue grounds. The material prints beautifully — our Roland TrueVIS UV ink bonds directly to the polypropylene substrate for sharp text and vivid colour that won't peel or bubble. Single-sided is most common. Double-sided (both faces printed and bonded back-to-back) costs roughly 50% more and works well for directional signs visible from both approaches. Add wire H-stakes ($2.50 each) for ground installation or grommets ($2.50 each) for fence and wall mounting — both are available as add-ons in the estimator. True Color prints coroplast signs in-house at 216 33rd St W, Saskatoon. No outsourcing. Small carts top up to the $25 order-total minimum at checkout. Same-day rush available (+$40 flat) on most orders placed before 10 AM.",
     fromPrice: "$25",
     category: "SIGN",
     material_code: "MPHCC020",
@@ -239,7 +239,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "250 cards on 14pt gloss stock. $45.",
     description:
       "14pt gloss card stock is the benchmark for professional business cards in Canada — thick enough to feel substantial in hand, smooth enough for sharp full-colour printing on both sides. At True Color, business cards run on our Konica Minolta digital production press for precise colour matching and a consistent result across every card in the run. The standard 250-card run is $45 double-sided — front design plus a printed reverse, included in the same price since both faces run in one pass. The universal 3.5×2\" format fits every card holder, wallet slot, and Rolodex. Bring a design file (PDF, AI, or EPS preferred) and we'll prep it for print. No design yet? Our in-house designer creates business card layouts from scratch for $50, or updates your existing design for $35 — usually completed the same day. Quantities: 250, 500, or 1000 cards. The per-card cost drops meaningfully at 500 and 1000, so if you distribute them at networking events or on job sites, order up. Single-sided is also available for a leaner look. Business cards are ready for pickup at 216 33rd St W, Saskatoon in 1–3 business days, or next-day with same-day rush.",
-    fromPrice: "$45",
+    fromPrice: "$25",
     category: "BUSINESS_CARD",
     material_code: "PLACEHOLDER_14PT",
     heroImage: "/images/products/product/business-cards-800x600.webp",
@@ -540,7 +540,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "One-way vision graphics. Full colour outside, see-through inside.",
     description:
       "Perforated window vinyl lets you turn a glass storefront into a billboard — full-colour graphic visible from the street, while people inside can still see out through the perforations. The 70/30 ratio means 70% of the surface is printed coverage and 30% is open perforations. From outside: a vivid, continuous graphic. From inside: a screen-like view that preserves natural light and sightlines. True Color prints window perf on 6 mil Vision Perf material with Roland UV outdoor inks — rated for 2–3 years of Saskatchewan outdoor exposure. It applies like a standard adhesive decal and peels cleanly when you want to refresh the graphic. Common applications in Saskatoon: restaurant and café windows with seasonal menu graphics, vehicle rear windows for fleet branding and election campaigns, fitness studio glass partitions, and retail franchise storefronts. Window perf works best on exterior-facing smooth glass. Avoid applying over existing tinted film or frosted glass. Custom panel sizes available — enter your exact window dimensions in the estimator. For multi-panel installations across wide windows, we recommend on-site installation ($75 base rate) to ensure panel alignment and clean seams. For a single panel, self-installation on flat glass is straightforward. Pickup at 216 33rd St W, Saskatoon.",
-    fromPrice: "$40",
+    fromPrice: "$25",
     category: "DECAL",
     material_code: "RMVN006",
     heroImage: "/images/products/product/perf-vinyl-interior-seethrough-800x600.webp",
@@ -609,8 +609,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Vinyl Lettering",
     tagline: "Cut vinyl letters for store hours, addresses, and names.",
     description:
-      "Vinyl lettering is the clean, minimalist choice for store hours, business names, suite numbers, and directional text — no printing involved, just precision-cut letters from solid-colour vinyl film. The result is a sharp, professional look that can't be replicated with a printed sticker at the same cost. Priced by bounding box area at $8.50/sqft with a $40 minimum order. A typical set of window hours on a retail door runs $40–$65 depending on the size of the lettering. Available in white, black, red, blue, gold, and other colours on request — no upcharge for colour selection. Where vinyl lettering beats a printed decal: any application where you want a single clean colour that reads sharp from a distance without the visible edge or background of a full decal sheet. Window hours on a front door. Business name above a reception desk. Address numbers on a building exterior. Company name on a truck door without a magnet. Lettering is cut and delivered on transfer tape — peel the backing, position the tape against the surface, press firmly, and peel the tape away. Or add installation service ($75 flat) and we'll align and apply it for you in our shop. Pickup at 216 33rd St W, Saskatoon. Same-day rush available.",
-    fromPrice: "$40",
+      "Vinyl lettering is the clean, minimalist choice for store hours, business names, suite numbers, and directional text — no printing involved, just precision-cut letters from solid-colour vinyl film. The result is a sharp, professional look that can't be replicated with a printed sticker at the same cost. Priced by bounding box area at $8.50/sqft; small jobs top up to the $25 order-total minimum at checkout. A typical set of window hours on a retail door runs $40–$65 depending on the size of the lettering. Available in white, black, red, blue, gold, and other colours on request — no upcharge for colour selection. Where vinyl lettering beats a printed decal: any application where you want a single clean colour that reads sharp from a distance without the visible edge or background of a full decal sheet. Window hours on a front door. Business name above a reception desk. Address numbers on a building exterior. Company name on a truck door without a magnet. Lettering is cut and delivered on transfer tape — peel the backing, position the tape against the surface, press firmly, and peel the tape away. Or add installation service ($75 flat) and we'll align and apply it for you in our shop. Pickup at 216 33rd St W, Saskatoon. Same-day rush available.",
+    fromPrice: "$25",
     category: "VINYL_LETTERING",
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/vinyl-lettering-800x600.webp",
@@ -637,7 +637,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Method", value: "Die-cut (no print) — precision plotter cut from coloured vinyl" },
       { label: "Colours", value: "White, black, red, blue, gold — other colours available on request" },
       { label: "Pricing", value: "By bounding box area — enter the width × height of your text block" },
-      { label: "Minimum", value: "$40 minimum order" },
+      { label: "Checkout floor", value: "$25 order-total minimum at checkout" },
       { label: "Application", value: "Glass, painted walls, smooth metal, vehicle doors" },
     ],
     whoUsesThis: ["Retail", "Restaurant", "Healthcare", "Office", "Trades"],
@@ -656,7 +656,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What's the minimum order?",
-        a: "The minimum charge is $40. A typical set of store hours on a door runs $40–$65 depending on size.",
+        a: "Vinyl lettering is priced at $8.50/sqft; small jobs top up to the $25 order-total minimum at checkout. A typical set of store hours on a door runs $40–$65 depending on size.",
       },
       {
         q: "Do you install vinyl lettering?",
@@ -1011,7 +1011,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Photo Posters",
     tagline: "220gsm matte poster paper. Seven sizes. From $15.",
     description:
-      "220gsm matte poster paper produces a rich, non-glossy finish that eliminates glare under overhead lighting — ideal for framed prints, clinic walls, gallery displays, school hallways, and any space with fluorescent or track lighting. True Color prints photo posters on our wide-format Roland TrueVIS equipment, which handles photographic image detail at sizes up to 36\" wide without visible pixel loss. Seven standard sizes are available: 12×18\", 16×20\", 18×24\", 20×30\", 24×36\", 30×40\", and 36×48\". Sizes 12×18\" through 24×36\" correspond to standard IKEA and retail frame dimensions — order the poster and grab a matching frame in the same trip. Minimum file resolution: 100 DPI at the print size (a 24×36\" print needs at least a 2400×3600 pixel file). Supply 150–300 DPI for the sharpest result; we'll flag any low-resolution files before printing so there are no surprises. Each poster is priced individually — no minimum run, order one or ten. Common uses in Saskatoon: event feature posters, team and graduation photos, real estate development renderings, restaurant menu wall art, and clinic patient education displays. Oversized prints beyond 36×48\" are available on banner material by request. Pickup at 216 33rd St W.",
+      "220gsm matte poster paper produces a rich, non-glossy finish that eliminates glare under overhead lighting — ideal for framed prints, clinic walls, gallery displays, school hallways, and any space with fluorescent or track lighting. True Color prints photo posters on our wide-format Roland TrueVIS equipment, which handles photographic image detail at sizes up to 36\" wide without visible pixel loss. Seven standard sizes are available: 12×18\", 16×20\", 18×24\", 20×30\", 24×36\", 30×40\", and 36×48\". Sizes 12×18\" through 24×36\" correspond to standard IKEA and retail frame dimensions — order the poster and grab a matching frame in the same trip. Minimum file resolution: 100 DPI at the print size (a 24×36\" print needs at least a 2400×3600 pixel file). Supply 150–300 DPI for the sharpest result; we'll flag any low-resolution files before printing so there are no surprises. Each poster is priced individually — single posters are welcome; carts under $25 top up at checkout. Common uses in Saskatoon: event feature posters, team and graduation photos, real estate development renderings, restaurant menu wall art, and clinic patient education displays. Oversized prints beyond 36×48\" are available on banner material by request. Pickup at 216 33rd St W.",
     fromPrice: "$15",
     category: "PHOTO_POSTER",
     material_code: "RMPS002",
@@ -1040,7 +1040,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Finish", value: "Matte — no glare, frame-ready" },
       { label: "Sizes", value: "12×18\", 16×20\", 18×24\", 20×30\", 24×36\", 30×40\", 36×48\"" },
       { label: "Print", value: "Full-colour digital, single-sided" },
-      { label: "Pricing", value: "Per unit — order individual posters, no minimum" },
+      { label: "Pricing", value: "Per unit — order individual posters; small carts top up to $25 at checkout" },
     ],
     whoUsesThis: ["Events", "Photography", "Retail", "Healthcare", "Sports"],
     faqs: [
@@ -1096,7 +1096,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Material", value: "30mil flexible magnetic sheeting — same as vehicle magnets" },
       { label: "Print surface", value: "White gloss vinyl laminate — full colour" },
       { label: "Common sizes", value: "4×7\", 5×7\", 5×8\", 4×9\", 8.5×11\" — or any custom size" },
-      { label: "Min order", value: "$45 (team bulk pricing available at 50+)" },
+      { label: "Checkout floor", value: "$25 order-total minimum; team bulk pricing available at 50+" },
       { label: "Use", value: "Fridge magnets, team schedules, realtor calendars, promo giveaways" },
     ],
     whoUsesThis: ["Sports Teams", "Real Estate", "Construction", "Agriculture", "Events"],
@@ -1248,7 +1248,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "File required", value: "PDF / AI / SVG with cut path on a separate layer (vector)" },
       { label: "Design from raster (JPG/PNG)", value: "+$15 simple shape recreation, +$35 full custom design" },
       { label: "Sides", value: "Single-sided (double-sided custom shapes by quote)" },
-      { label: "Min order", value: "$50 (covers setup + small shape)" },
+      { label: "Setup", value: "$50 starting price covers cut setup + small shape" },
       { label: "Turnaround", value: "2–4 business days · same-day rush +$40 flat" },
     ],
     whoUsesThis: ["Real Estate", "Retail", "Construction", "Events", "Agriculture"],

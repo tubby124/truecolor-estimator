@@ -56,20 +56,20 @@ const serviceSchema = {
     telephone: "+13069548688",
   },
   description:
-    "Custom die-cut vehicle decals printed on Roland UV wide-format press. Full-colour vinyl for door panels, rear windows, and side graphics. From $14/sqft, minimum $75. Installation quoted separately.",
+    "Custom die-cut vehicle decals printed on Roland UV wide-format press. Full-colour vinyl for door panels, rear windows, and side graphics. From $14/sqft; $25 order-total minimum applies at checkout. Installation quoted separately.",
   offers: {
     "@type": "Offer",
-    price: "75",
+    price: "25",
     priceCurrency: "CAD",
-    description: "Die-cut vehicle vinyl — from $14/sqft, minimum $75 print-only",
+    description: "Die-cut vehicle vinyl — from $14/sqft; $25 order-total minimum at checkout",
   },
 };
 
 const SIZES = [
-  { name: "Small decal (up to 5.4 sqft)", sqft: "min", print: "$75", note: "Business logos, small graphics" },
-  { name: "Door panel (29×16.5\")", sqft: "3.3 sqft", print: "$75*", note: "Standard car/SUV door" },
+  { name: "Small decal", sqft: "custom", print: "$14/sqft", note: "Business logos, small graphics" },
+  { name: "Door panel (29×16.5\")", sqft: "3.3 sqft", print: "$46.20", note: "Standard car/SUV door" },
   { name: "Large door panel (36×24\")", sqft: "6 sqft", print: "$84", note: "Van or truck door" },
-  { name: "Rear window (32.5×11\")", sqft: "2.5 sqft", print: "$75*", note: "Car/SUV back glass" },
+  { name: "Rear window (32.5×11\")", sqft: "2.5 sqft", print: "$35", note: "Car/SUV back glass" },
   { name: "Rear window large (48×18\")", sqft: "6 sqft", print: "$84", note: "Truck or van rear" },
   { name: "Full side panel (72×24\")", sqft: "12 sqft", print: "$168", note: "Van/truck side graphic" },
 ];
@@ -92,7 +92,7 @@ export default function VehicleDecalsSaskatoonPage() {
             </h1>
             <p className="text-gray-600 text-lg mb-6">
               Full-colour die-cut vinyl for door panels, rear windows, and side graphics. Printed on our Roland UV wide-format press.{" "}
-              <strong>From $14/sqft, minimum $75.</strong> Installation quoted separately.
+              <strong>From $14/sqft; $25 order-total minimum applies at checkout.</strong> Installation quoted separately.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
@@ -126,7 +126,7 @@ export default function VehicleDecalsSaskatoonPage() {
           <p className="text-gray-500 text-sm mb-6">
             Print-only — you apply it yourself, or add installation as a separate line item.
             <br />
-            <span className="text-xs">* Minimum $75 applies. $14/sqft above minimum.</span>
+            <span className="text-xs">Orders under $25 are topped up at checkout. Installation is quoted separately.</span>
           </p>
           <div className="overflow-x-auto rounded-xl border border-gray-100">
             <table className="w-full text-sm">
@@ -149,7 +149,7 @@ export default function VehicleDecalsSaskatoonPage() {
                 ))}
                 <tr className="bg-gray-50">
                   <td colSpan={4} className="px-5 py-3.5 text-xs text-gray-400">
-                    Custom size? Use the formula: (width × height in inches) ÷ 144 = sqft × $14. Minimum $75.
+                    Custom size? Use the formula: (width × height in inches) ÷ 144 = sqft × $14. Orders under $25 are topped up at checkout.
                   </td>
                 </tr>
               </tbody>
@@ -236,9 +236,9 @@ export default function VehicleDecalsSaskatoonPage() {
           <h2 className="text-xl font-bold text-[#1c1712] mb-4">Related Products</h2>
           <div className="flex flex-wrap gap-3">
             {[
-              { label: "Vehicle Magnets — from $45", href: "/vehicle-magnets-saskatoon" },
-              { label: "Window Decals — from $75", href: "/window-decals-saskatoon" },
-              { label: "Vinyl Lettering — from $40", href: "/vinyl-lettering-saskatoon" },
+              { label: "Vehicle Magnets — from $24/sqft", href: "/vehicle-magnets-saskatoon" },
+              { label: "Window Decals — from $11/sqft", href: "/window-decals-saskatoon" },
+              { label: "Vinyl Lettering — from $8.50/sqft", href: "/vinyl-lettering-saskatoon" },
               { label: "View All Gallery Work", href: "/gallery" },
             ].map(({ label, href }) => (
               <Link
@@ -259,7 +259,7 @@ export default function VehicleDecalsSaskatoonPage() {
             {[
               {
                 q: "How much does a vehicle decal cost in Saskatoon?",
-                a: "Print-only starts at $75 (minimum job charge). Above that, it's $14/sqft. A standard door panel (29×16.5\") is 3.3 sqft — $75 minimum applies. A full van side panel (72×24\") is 12 sqft — $168. Installation is quoted separately starting at $75 for a simple job.",
+                a: "Print-only vehicle decals are $14/sqft with a $25 order-total minimum at checkout. A standard door panel (29×16.5\") is 3.3 sqft — about $46.20 print-only. A full van side panel (72×24\") is 12 sqft — $168. Installation is quoted separately starting at $75 for a simple job.",
               },
               {
                 q: "Why is installation quoted separately?",

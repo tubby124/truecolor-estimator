@@ -16,7 +16,7 @@ import { MobileStickyBar } from "@/components/home/MobileStickyBar";
 export const metadata: Metadata = {
   title: { absolute: "True Color Display Printing | Saskatoon Signs, Banners & Cards" },
   description:
-    "Coroplast signs from $25. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon. See your price instantly.",
+    "Saskatoon print shop for signs, banners, cards, flyers, stickers, and same-day rush printing. Live prices, in-house design, pickup at 216 33rd St W.",
   alternates: { canonical: "/" },
 };
 
@@ -90,7 +90,7 @@ const PRODUCTS = [
   {
     name: "Window Decals",
     category: "Windows",
-    from: "from $45",
+    from: "from $11/sqft",
     desc: "Full-colour adhesive vinyl for storefronts, vehicles, and glass doors.",
     img: "/images/gallery/gallery-window-decal-swiss-barber.webp",
     href: "/window-decals-saskatoon",
@@ -98,7 +98,7 @@ const PRODUCTS = [
   {
     name: "Perforated Window Vinyl",
     category: "Windows",
-    from: "from $40",
+    from: "from $8/sqft",
     desc: "One-way vision graphics. Full colour outside, see-through inside.",
     img: "/images/products/product/window-perf-800x600.webp",
     href: "/products/window-perf",
@@ -302,7 +302,8 @@ export default function HomePage() {
       <section className="reveal-section px-6 py-16 max-w-6xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">Signs, Banners &amp; Print Products — Saskatoon</h2>
         <p className="text-gray-500 mb-10 text-lg">
-          Exact prices — no &ldquo;call for a quote.&rdquo; Pick a product and see your number now.
+          Exact prices from a local Saskatoon print shop — no &ldquo;call for a quote.&rdquo;
+          Pick a product and see your number now.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -350,10 +351,11 @@ export default function HomePage() {
             {[
               { label: "Postcards from $35", href: "/postcard-printing-saskatoon" },
               { label: "Stickers from $25", href: "/sticker-printing-saskatoon" },
+              { label: "Poster Printing from $15", href: "/poster-printing-saskatoon" },
               { label: "Photo Posters from $15", href: "/photo-poster-printing-saskatoon" },
               { label: "Vehicle Magnets from $25", href: "/vehicle-magnets-saskatoon" },
               { label: "Retractable Banners from $219", href: "/retractable-banners-saskatoon" },
-              { label: "Vinyl Lettering from $40", href: "/vinyl-lettering-saskatoon" },
+              { label: "Vinyl Lettering from $8.50/sqft", href: "/vinyl-lettering-saskatoon" },
             ].map((item) => (
               <Link
                 key={item.href}
@@ -473,7 +475,7 @@ export default function HomePage() {
           <div className="space-y-5 text-gray-600 text-lg mb-10">
             <p>
               Coroplast signs from{" "}
-              <strong className="text-[#1c1712]">$30</strong>. Vinyl banners from{" "}
+              <strong className="text-[#1c1712]">$25</strong>. Vinyl banners from{" "}
               <strong className="text-[#1c1712]">$66</strong>. 250 business cards for{" "}
               <strong className="text-[#1c1712]">$45</strong>. Prices you can see right now,
               without emailing anyone.
@@ -522,7 +524,7 @@ export default function HomePage() {
               16 products. All priced live. No quote forms.
             </h2>
             <p className="text-gray-400">
-              Retractable banners from $219 · Brochures from $70 · Postcards from $35 · Stickers from $25 · Photo posters from $15 · Vinyl lettering from $40 · Magnet calendars from $45 — see your exact price in 30 seconds.
+              Retractable banners from $219 · Brochures from $70 · Postcards from $35 · Stickers from $25 · Photo posters from $15 · Vinyl lettering from $8.50/sqft · Magnet calendars from $45 — see your exact price in 30 seconds.
             </p>
           </div>
           <Link

@@ -25,14 +25,14 @@ export default function WindowDecalsSaskatoonPage() {
       subtitle="Custom window graphics, perforated vinyl, and lettering for storefronts, offices, and vehicles — no permanent commitment."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Custom window decals and perforated vinyl for Saskatoon storefronts"
-      description="Saskatoon businesses use True Color Display Printing for custom window decals, perforated window vinyl, and vinyl lettering. Window decals start at $11/sqft (minimum $45) and are printed full-colour on our in-house Roland UV printer. Perforated window vinyl starts at $8/sqft (minimum $40) — see out, brand in, no obstruction to interior visibility. Vinyl lettering from $8.50/sqft for hours, contact info, and logo text. All window graphics are UV-safe, removable without residue, and suitable for storefronts, offices, and vehicles. Standard turnaround is 1–3 business days. Same-day rush +$40 flat. In-house designer $35 flat with same-day proof."
+      description="Saskatoon businesses use True Color Display Printing for custom window decals, perforated window vinyl, and vinyl lettering. Window decals start at $11/sqft and are printed full-colour on our in-house Roland UV printer. Perforated window vinyl starts at $8/sqft; $25 order-total minimum applies at checkout — see out, brand in, no obstruction to interior visibility. Vinyl lettering from $8.50/sqft for hours, contact info, and logo text. All window graphics are UV-safe, removable without residue, and suitable for storefronts, offices, and vehicles. Standard turnaround is 1–3 business days. Same-day rush +$40 flat. In-house designer $35 flat with same-day proof."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
             A blank storefront window is a missed opportunity — every passerby walks past
             without knowing what&apos;s inside or what&apos;s on sale. Custom window graphics turn
             that glass into your best-performing sign. Window decals start at{" "}
-            <strong>$11/sqft</strong> (minimum $45) — full-colour, UV-safe, and fully
+            <strong>$11/sqft</strong> — full-colour, UV-safe, and fully
             removable without adhesive residue, so you can change the creative every season
             without repainting. We cut and print everything in-house on our Roland UV printer
             in Saskatoon. No shipping. Local pickup at 216 33rd St W.
@@ -46,7 +46,7 @@ export default function WindowDecalsSaskatoonPage() {
             >
               perforated window vinyl
             </Link>{" "}
-            (window perf) starts at <strong>$8/sqft</strong> (minimum $40). The
+            (window perf) starts at <strong>$8/sqft</strong>. The
             perforated pattern lets you see out while passersby see your full-colour graphic.
             It blocks glare, adds branding, and is removed cleanly when your campaign ends
             or your lease is up. For addresses, hours, taglines, and logo text, our{" "}
@@ -56,7 +56,7 @@ export default function WindowDecalsSaskatoonPage() {
             >
               vinyl lettering
             </Link>{" "}
-            starts at <strong>$8.50/sqft</strong> (minimum $40) — cut-to-shape with no
+            starts at <strong>$8.50/sqft</strong> — cut-to-shape with no
             background panel, for a clean glass-etched look.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -92,7 +92,7 @@ export default function WindowDecalsSaskatoonPage() {
       ]}
       whyPoints={[
         "Update your storefront every season — decals remove without residue, no repainting needed",
-        "Window decals from $11/sqft (min $45) — full-colour, UV-safe, sized to your exact glass",
+        "Window decals from $11/sqft — full-colour, UV-safe, sized to your exact glass",
         "Perforated vinyl from $8/sqft — customers outside see your graphic, staff inside see the street",
         "Vinyl lettering from $8.50/sqft — hours, phone number, or logo text with a clean etched-glass look",
         "We run Roland UV in-house, so colour is consistent and there are no outsourcing surprises",
@@ -106,7 +106,7 @@ export default function WindowDecalsSaskatoonPage() {
         },
         {
           q: "What's the difference between window decals and perforated window vinyl?",
-          a: "Window decals are solid vinyl — fully opaque, applied to the outside of your glass for maximum colour impact. Perforated vinyl (window perf) has a micro-hole pattern that lets you see out from inside while displaying your graphic to people outside. Perf starts at $8/sqft (min $40) and works well for retail windows where interior visibility matters.",
+          a: "Window decals are solid vinyl — fully opaque, applied to the outside of your glass for maximum colour impact. Perforated vinyl (window perf) has a micro-hole pattern that lets you see out from inside while displaying your graphic to people outside. Perf starts at $8/sqft; $25 order-total minimum applies at checkout and works well for retail windows where interior visibility matters.",
         },
         {
           q: "Will window decals damage my glass or leave residue when removed?",
@@ -114,7 +114,7 @@ export default function WindowDecalsSaskatoonPage() {
         },
         {
           q: "Can you print vinyl lettering for my store hours and phone number?",
-          a: "Yes — vinyl lettering starts at $8.50/sqft with a minimum of $40. This is cut-to-shape text with no background, giving a clean etched-glass look. Common uses: business hours, address, phone number, tagline, or logo text. We produce it in any colour and size you specify.",
+          a: "Yes — vinyl lettering starts at $8.50/sqft; $25 order-total minimum applies at checkout. This is cut-to-shape text with no background, giving a clean etched-glass look. Common uses: business hours, address, phone number, tagline, or logo text. We produce it in any colour and size you specify.",
         },
         {
           q: "Can you do same-day window graphics in Saskatoon?",

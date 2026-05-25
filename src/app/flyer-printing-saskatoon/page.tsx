@@ -21,7 +21,7 @@ const designDirections = [
   {
     title: "Flyer Design Directions",
     subtitle:
-      "100 for $45 · 250 for $80 · 500 for $130 — 80lb or 100lb gloss, Konica Minolta digital press",
+      "100 for $45 · 250 for $110 · 500 for $135 — 80lb or 100lb gloss, Konica Minolta digital press",
     aspect: "3/4" as const,
     maxCols: 3 as const,
     items: [
@@ -35,13 +35,13 @@ const designDirections = [
         src: "/images/industries/flyers/flyer-grand-opening.webp",
         alt: "Grand opening event flyer printed in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Grand Opening Event",
-        caption: "250 double-sided — $80",
+        caption: "250 double-sided — $110",
       },
       {
         src: "/images/industries/flyers/flyer-open-house.webp",
         alt: "Real estate open house flyer printed in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Real Estate Open House",
-        caption: "500 double-sided — $130",
+        caption: "500 double-sided — $135",
       },
     ],
   },
@@ -86,6 +86,12 @@ export default function FlyerPrintingSaskatoonPage() {
             (8.5×11&quot;), minimum 100 flyers. Price per flyer drops sharply at 250 and 500+ — the
             more you order, the lower the unit cost. Same-day rush available for +$40 flat on orders
             placed before 10 AM.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
+            If you searched for flyer printing in Saskatoon because you need something in hand this
+            week, start with the standard 8.5×11&quot; 80lb gloss run. It is the practical choice for
+            restaurants, events, contractors, real estate handouts, nonprofit notices, and door-to-door
+            promotions where clear colour and fast pickup matter more than oversized custom specs.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             Choose 80lb gloss for everyday flyers — restaurant menus, event programs, door hangers,

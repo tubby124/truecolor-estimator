@@ -12,10 +12,14 @@ import { join, basename } from "path";
 // [regex, errorMessage]
 // Updated 2026-05-20 — per-product minimum charges were KILLED owner decision.
 // New rule: $25 order-total minimum at checkout (not per-product floors).
-// The old "Banner from $66" / "Coroplast from $30" min-charge guards are gone;
-// removed those checks. PST in Saskatchewan IS 6% (the old "no PST on printing"
+// Old per-product floor copy ($30/$40/$45/$60/$75 minimums) must stay gone.
+// PST in Saskatchewan IS 6% (the old "no PST on printing"
 // rule was wrong — see CLAUDE.md + data/PRICING_QUICK_REFERENCE.md).
 const WRONG_PATTERNS = [
+  [
+    /minimum\s+\$(30|40|45|60|75)|\$(30|40|45|60|75)\s+minimum/i,
+    "Do not publish old per-product minimums; use the $25 order-total minimum where relevant",
+  ],
   [
     /from \$8\/sqft.*decal|decal.*from \$8\/sqft/i,
     "Window Decals are $11/sqft, not $8/sqft",
@@ -42,11 +46,11 @@ const WRONG_PATTERNS = [
 // Covers: product reference card sqft rates (fromPrice prop) and FAQ explanations.
 const EXCEPTION_PATTERNS = [
   /fromPrice\s*[=:]/i,                  // product card sqft rate prop (rule 9)
-  /above\s+the\s+\$\d+\s+minimum/i,     // FAQ: "X/sqft for orders above the $Y minimum"
+  /\$25\s+order-total\s+minimum/i,
+  /\$25\s+cart\s+floor/i,
   /for\s+orders\s+above/i,              // FAQ explanation
   /\/sqft\s+for\s+orders/i,             // FAQ explanation
-  /minimum\s+is\s+\$\d+/i,             // FAQ explanation
-  /\/sqft.*minimum|minimum.*\/sqft/i,   // any sqft + minimum pairing
+  /minimum\s+qty|minimum\s+quantity/i,
 ];
 
 // --- Read stdin ---

@@ -25,7 +25,7 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 | Vehicle Magnets | $24.00/sqft | 12×12" = $24 | $25 (cart min) | **"from $25"** or "from $24/sqft" |
 | Vinyl Lettering | $8.50/sqft | 6×18" = $6.38 | $25 (cart min) | **"from $25"** or "from $8.50/sqft" |
 | Vinyl Banners | $8.25/sqft | 2×4 ft = $66 | $66 (above min) | **"from $66"** |
-| Foamboard | $10.00/sqft | 18×24" = $45 | $45 (above min) | **"from $45"** |
+| Foamboard | $10.00/sqft | 18×24" fixed SKU = $45 | $45 (above min) | **"from $45"** or "18×24 from $45" |
 | Window Decals | $11.00/sqft | 12×12" = $11 | $25 (cart min) | **"from $25"** or "from $11/sqft" |
 | Window Perf | $8.00/sqft | 12×12" = $8 | $25 (cart min) | **"from $25"** or "from $8/sqft" |
 
@@ -50,7 +50,7 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 3. **Stickers area-scale.** Engine multiplies the catch-all price by (w × h) / 16 sqin for custom dimensions on ARLPMF7008. 1×3" + 2×4" + every size between gets a distinct price.
 4. **Retired SKUs.** RIGID-ACP3-24X36-S frozen $66 intro retired 2026-05-20. ACP 24×36 is now $78 ($13 × 6 sqft) at every qty. Do not re-enable.
 5. **Banners "from $66" is correct** — smallest 2×4ft = $66, already above $25 cart min.
-6. **Foamboard "from $45" is correct** — smallest 18×24" = $45, already above $25 cart min.
+6. **Foamboard "from $45" is correct for the standard 18×24 fixed SKU**. Custom smaller foamboard can price by sqft, but landing pages should anchor the common 18×24 at $45 unless the page explicitly says custom sqft pricing.
 7. **Rush +$40 flat** — always mention separately. PST-exempt.
 8. **Design $35 flat** — always mention separately. PST-exempt.
 9. **All prices are pre-tax.** GST 5% + PST 6% at checkout. PST formula = `(sell_price − design_fee − rush_fee) × 0.06`.
@@ -61,12 +61,14 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 
 ## Wide Format (Roland) — Sqft-Based Pricing
 
+**Important:** `min_charge` values remain in `data/tables/pricing_rules.v1.csv` as legacy reference columns only. They are not enforced by the engine. Customer checkout uses the single $25 order-total minimum described above.
+
 ### Coroplast Signs (SIGN · MPHCC020 · 4mm Corrugated)
-| Sqft Range | Price/sqft | Min Charge |
-|------------|-----------|------------|
-| 0–12 sqft  | $8.00     | $30        |
-| 12–32 sqft | $7.50     | $30        |
-| 32+ sqft   | $7.25     | $30        |
+| Sqft Range | Price/sqft |
+|------------|-----------|
+| 0–12 sqft  | $8.00     |
+| 12–32 sqft | $7.50     |
+| 32+ sqft   | $7.25     |
 
 **Double-sided:** T1=$14.00 · T2=$13.13 · T3=$12.69 /sqft
 
@@ -85,11 +87,11 @@ Common sizes:
 ---
 
 ### Vinyl Banners (BANNER · RMBF004 · 13oz Scrim)
-| Sqft Range | Price/sqft | Min Charge |
-|------------|-----------|------------|
-| 0–12 sqft  | $8.25     | $45        |
-| 12–32 sqft | $7.50     | $45        |
-| 32+ sqft   | $6.75     | $45        |
+| Sqft Range | Price/sqft |
+|------------|-----------|
+| 0–12 sqft  | $8.25     |
+| 12–32 sqft | $7.50     |
+| 32+ sqft   | $6.75     |
 
 **Qty bulk discounts:** 5+=5% · 10+=10% · 25+=15%
 
@@ -112,11 +114,11 @@ Grommets: $2.50/each · auto-calculated by engine (max(4, ceil(perimeter_ft/2)))
 ---
 
 ### ACP Aluminum Signs (RIGID · RMACP002 · 3mm)
-| Sqft Range | 1S Price/sqft | 2S Price/sqft | Min Charge |
-|------------|---------------|---------------|------------|
-| 0–6 sqft   | $13.00        | $19.00        | $60        |
-| 6–24 sqft  | $11.00        | $17.00        | $60        |
-| 24+ sqft   | $10.00        | $16.00        | $60        |
+| Sqft Range | 1S Price/sqft | 2S Price/sqft |
+|------------|---------------|---------------|
+| 0–6 sqft   | $13.00        | $19.00        |
+| 6–24 sqft  | $11.00        | $17.00        |
+| 24+ sqft   | $10.00        | $16.00        |
 
 **2S formula:** 1S rate + **$6/sqft flat** uplift across all tiers (additive, NOT 1.75× multiplier).
 Reason: ACP panel cost ($1.86/sqft) is ~50% of total cost. Doubling the rate would charge for two panels when one is used. Coroplast uses 1.75× because its panel is much cheaper. ACP enabled 2026-05-10 with owner approval.
@@ -126,7 +128,7 @@ Reason: ACP panel cost ($1.86/sqft) is ~50% of total cost. Doubling the rate wou
 Common sizes:
 | Size | 1S | 2S |
 |------|----|----|
-| 18×24" (3 sqft) | $39 (min $60) | $60 (min applies; raw $57) |
+| 18×24" (3 sqft) | $39 | $57 |
 | 24×30" (5 sqft) | $65 | $95 |
 | 24×36" (6 sqft) | $66* | $114 |
 | 4×8 ft (32 sqft) | $320 | $512 |
@@ -136,61 +138,59 @@ Common sizes:
 ---
 
 ### Foamboard Displays (FOAMBOARD · GENERIC_FOAM · 5mm)
-| Sqft Range | Price/sqft | Min Charge |
-|------------|-----------|------------|
-| 0–6 sqft   | $10.00    | $45        |
-| 6–15 sqft  | $9.00     | $45        |
-| 15+ sqft   | $8.50     | $45        |
+| Sqft Range | Price/sqft |
+|------------|-----------|
+| 0–6 sqft   | $10.00    |
+| 6–15 sqft  | $9.00     |
+| 15+ sqft   | $8.50     |
 
 **Qty bulk discounts:** 5+=8% · 10+=12% · 25+=15%
 
 Common sizes:
 | Size | Price |
 |------|-------|
-| 18×24" | $45 (min applies) |
+| 18×24" | $45 (fixed SKU) |
 | 24×36" | $65 |
 
 ---
 
 ### Vehicle Magnets (MAGNET · MAG302437550M · 30mil)
-| Sqft Range | Price/sqft | Min Charge |
-|------------|-----------|------------|
-| 0–6 sqft   | $24.00    | $45        |
-| 6–20 sqft  | $22.00    | $45        |
-| 20+ sqft   | $18.00    | $45        |
+| Sqft Range | Price/sqft |
+|------------|-----------|
+| 0–6 sqft   | $24.00    |
+| 6–20 sqft  | $22.00    |
+| 20+ sqft   | $18.00    |
 
 **Qty bulk discounts:** 5+=5% · 10+=10%
 
-> **Minimum $45 — no exceptions.** Validator enforces this.
-
-Magnet Calendars (any size, sqft-based — $24/sqft): 4×7"=$45min · 5×7"=$45min · 5×8"=$60/10 · 8.5×11"=$140/10 · Custom size supported
+Magnet Calendars (any size, sqft-based — $24/sqft): 4×7" raw $4.67 each · 5×7" raw $5.83 each · 5×8" raw $6.67 each · 8.5×11" raw $15.58 each · $25 order-total minimum applies at checkout to small carts · Custom size supported
 
 ---
 
 ### Window Decals (DECAL · ARLPMF7008 · Arlon DPF 510 Matte Vinyl)
-| Sqft Range   | Price/sqft | Min Charge |
-|--------------|-----------|------------|
-| 0–6 sqft     | $11.00    | $45        |
-| 6.01–20 sqft | $9.00     | $45        |
-| 20.01+ sqft  | $7.50     | $45        |
+| Sqft Range   | Price/sqft |
+|--------------|-----------|
+| 0–6 sqft     | $11.00    |
+| 6.01–20 sqft | $9.00     |
+| 20.01+ sqft  | $7.50     |
 
 **Qty bulk discounts:** 5+=5% · 10+=10%
 
 ---
 
 ### Perforated Window Vinyl (DECAL · RMVN006 · Vision Perf 70/30)
-| Sqft Range | Price/sqft | Min Charge |
-|------------|-----------|------------|
-| 0–12 sqft  | $8.00     | $40        |
-| 12–32 sqft | $7.50     | $40        |
-| 32+ sqft   | $7.00     | $40        |
+| Sqft Range | Price/sqft |
+|------------|-----------|
+| 0–12 sqft  | $8.00     |
+| 12–32 sqft | $7.50     |
+| 32+ sqft   | $7.00     |
 
 **Qty bulk discounts:** 5+=5% · 10+=10%
 
 ---
 
 ### Vinyl Lettering (VINYL_LETTERING · ARLPMF7008 · Cut Vinyl)
-$8.50/sqft · Min $40
+$8.50/sqft · $25 order-total minimum applies at checkout to small carts
 
 **Qty bulk discounts:** 5+=8%
 

@@ -4,14 +4,14 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Agriculture Signs Saskatoon | From $30 | True Color" },
+  title: { absolute: "Agriculture Signs Saskatoon | From $8/sqft | True Color" },
   description:
-    "Farm signs, acreage markers & trade show banners for SK agriculture. Coroplast from $30. In-house Roland UV printer. Same-day rush +$40. Saskatoon pickup.",
+    "Farm signs, acreage markers & trade show banners for SK agriculture. Coroplast from $8/sqft. In-house Roland UV printer. Same-day rush +$40. Saskatoon pickup.",
   alternates: { canonical: "/agriculture-signs-saskatoon" },
   openGraph: {
     title: "Agriculture Signs Saskatchewan | True Color Display Printing",
     description:
-      "Farm gate signs, plot markers, trade show banners, and truck magnets for Saskatchewan ag businesses. Coroplast from $30. Local Saskatoon pickup.",
+      "Farm gate signs, plot markers, trade show banners, and truck magnets for Saskatchewan ag businesses. Coroplast from $8/sqft. Local Saskatoon pickup.",
     url: "https://truecolorprinting.ca/agriculture-signs-saskatoon",
     type: "website",
   },
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const designDirections = [
   {
     title: "Coroplast sign directions",
-    subtitle: "From $30 per sign \u00b7 UV-printed, waterproof, stake-ready.",
+    subtitle: "From $8/sqft \u00b7 $25 order-total minimum at checkout \u00b7 UV-printed, waterproof, stake-ready.",
     aspect: "4/3" as const,
     items: [
       {
@@ -99,7 +99,7 @@ const descriptionNode = (
       </Link>{" "}
       and acreage markers to trade show banners and truck door magnets. Our in-house Roland UV
       printer produces weatherproof signage that handles prairie winters, spring mud, and summer
-      sun without fading or peeling. Coroplast signs start at $30 — the standard for field plot
+      sun without fading or peeling. Coroplast signs start at $8/sqft — the standard for field plot
       markers, for-sale signs, and gate identification across Saskatchewan farmland.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -110,7 +110,7 @@ const descriptionNode = (
       <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] underline font-medium">
         Vehicle magnets
       </Link>{" "}
-      from $45 turn farm trucks and equipment sales vehicles into mobile advertising across rural
+      from $24/sqft turn farm trucks and equipment sales vehicles into mobile advertising across rural
       Saskatchewan.{" "}
       <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
         Business cards
@@ -195,7 +195,7 @@ export default function AgricultureSignsSaskatoonPage() {
         },
         {
           q: "Do I need OHS safety signs on my Saskatchewan farm?",
-          a: "Saskatchewan farms with employees are required to post safety notices under the Saskatchewan Employment Act. Common OHS signs include: restricted access, biosecurity protocol, chemical storage, and livestock hazard warnings. Coroplast is the standard material \u2014 waterproof, UV-resistant, from $30.",
+          a: "Saskatchewan farms with employees are required to post safety notices under the Saskatchewan Employment Act. Common OHS signs include: restricted access, biosecurity protocol, chemical storage, and livestock hazard warnings. Coroplast is the standard material \u2014 waterproof, UV-resistant, from $8/sqft; a single 18×24\" sign tops up to the $25 checkout minimum if ordered alone.",
         },
         {
           q: "Are vehicle magnets good for farm trucks?",

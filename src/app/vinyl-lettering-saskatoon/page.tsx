@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Custom Vinyl Lettering Saskatoon | From $40 | Same-Day" },
+  title: { absolute: "Custom Vinyl Lettering Saskatoon | From $8.50/sqft" },
   description:
-    "Custom vinyl lettering in Saskatoon from $40 ($8.50/sqft). Storefronts, vehicles, boats, office doors. In-house Roland UV cut vinyl. Same-day rush +$40.",
+    "Custom vinyl lettering in Saskatoon from $8.50/sqft. Storefronts, vehicles, boats, office doors. In-house Roland UV cut vinyl. Same-day rush +$40.",
   alternates: { canonical: "/vinyl-lettering-saskatoon" },
   openGraph: {
-    title: "Custom Vinyl Lettering Saskatoon | From $40 | Same-Day Rush",
+    title: "Custom Vinyl Lettering Saskatoon | From $8.50/sqft Rush",
     description:
-      "Custom vinyl lettering in Saskatoon from $40 ($8.50/sqft). Storefronts, vehicles, boats, office doors. In-house Roland UV cut vinyl. Same-day rush +$40.",
+      "Custom vinyl lettering in Saskatoon from $8.50/sqft. Storefronts, vehicles, boats, office doors. In-house Roland UV cut vinyl. Same-day rush +$40.",
     url: "https://truecolorprinting.ca/vinyl-lettering-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -23,7 +23,7 @@ export default function VinylLetteringSaskatoonPage() {
       canonicalSlug="vinyl-lettering-saskatoon"
       primaryProductSlug="vinyl-lettering"
       title="Vinyl Lettering Saskatoon"
-      subtitle="Vehicle door lettering from $40/door | Boat numbers $40/set | Storefront hours from $40 — cut vinyl, ready same-day."
+      subtitle="Vehicle door lettering from $8.50/sqft | Boat numbers and storefront hours priced by size — cut vinyl, ready same-day."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Vinyl lettering Saskatoon storefront and vehicle"
       description="Cut vinyl lettering is the cleanest, lowest-cost way to put text and simple shapes on Saskatoon storefront windows, vehicle doors, office glass, boats, and trailers. From $8.50/sqft. Vehicle door lettering from $25/door. Boat registration numbers from $25/set. Storefront hours and business name from $25. A $25 order-total minimum applies at checkout. Professionally cut on a Roland UV plotter using outdoor-rated cast vinyl that lasts 5–7 years — no DIY application risk, no 5–9 day shipping wait. Same-day rush +$40 flat. Designer $35 flat. Simple text layout included at no extra charge. Pickup at 216 33rd St W, Saskatoon."
@@ -51,13 +51,13 @@ export default function VinylLetteringSaskatoonPage() {
             factory paint when it&apos;s time to update.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
-            <strong>Vehicle Door Lettering — from $40/door.</strong> The most common order is your
+            <strong>Vehicle Door Lettering — from $8.50/sqft.</strong> The most common order is your
             business name, phone number, and website in two to three lines on each door. A typical
             single door set (roughly 12&times;24&quot;) starts around $40–$55.{" "}
             <strong>Boat Registration Numbers — $40/set.</strong> Transport Canada requires
             registration numbers to be at least 7.5cm tall on both sides of the bow. We cut them
             from outdoor-rated marine vinyl — usually ready same-day or next-day.{" "}
-            <strong>Storefront Hours &amp; Name — from $40.</strong> Business hours on a front door,
+            <strong>Storefront Hours &amp; Name — from $8.50/sqft.</strong> Business hours on a front door,
             your company name across a shop window, or office suite numbers. If you need a fully
             printed graphic instead of plain text,{" "}
             <Link href="/wall-graphics-saskatoon" className="text-[#16C2F3] underline font-medium">

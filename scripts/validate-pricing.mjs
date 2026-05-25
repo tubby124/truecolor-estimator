@@ -71,7 +71,7 @@ const ESTIMATOR_ONLY = new Set([
 // SiteNav uses different aliases for some products
 const SITENAV_ALIASES = {
   ...SEO_ALIASES,
-  "vehicle-magnets": "/custom-magnets-saskatoon",
+  "vehicle-magnets": "/vehicle-magnets-saskatoon",
 };
 
 // ─── Extract slugs from products-content.ts ───────────────────────────────
@@ -156,8 +156,8 @@ for (const slug of slugs) {
   }
 }
 
-// ─── Check 5: MAGNET minimum $45 ──────────────────────────────────────────
-console.log("\n[6] Checking MAGNET prices >= $45 minimum ...");
+// ─── Check 5: MAGNET rows remain parseable under checkout-min model ───────
+console.log("\n[6] Checking MAGNET prices are parseable raw prices ...");
 const productsCsv = readFile("data/tables/products.v1.csv");
 const magnetRows = productsCsv.split("\n").filter((line) => line.includes(",MAGNET,"));
 
@@ -165,10 +165,10 @@ for (const row of magnetRows) {
   const cols = row.split(",");
   const price = parseFloat(cols[8]);
   const productId = cols[0];
-  if (!isNaN(price) && price < 45) {
-    fail(`${productId} price $${price} is below $45 MAGNET minimum`);
+  if (isNaN(price) || price < 0) {
+    fail(`${productId} has invalid MAGNET price: ${cols[8]}`);
   } else if (!isNaN(price)) {
-    pass(`${productId} price $${price} >= $45 ✓`);
+    pass(`${productId} raw price $${price} is parseable`);
   }
 }
 

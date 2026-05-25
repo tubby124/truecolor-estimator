@@ -79,8 +79,8 @@ export default function StaffPage() {
   const [step, setStep] = useState<"pick" | "options">("pick");
   const [proofImage, setProofImage] = useState<ProofImageState | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  // Staff default: skip the customer-facing minimum charge. Staff quote custom jobs
-  // and know their own economics — the minimum is a website guardrail, not a staff one.
+  // Staff default: skip the customer-facing checkout floor. Staff quote custom jobs
+  // and know their own economics — the cart floor is a website guardrail, not a staff one.
   // Forced back to false when entering customer-preview mode so the staff sees what
   // the website would actually quote.
   const [skipMinCharge, setSkipMinCharge] = useState(true);
@@ -416,7 +416,7 @@ function CustomerOverlay({
 
         {result.min_charge_applied && (
           <p className="text-xs text-[var(--muted)] mb-4">
-            Minimum order charge applied
+            Small-order setup fee applied
             {result.price_per_unit != null && result.sell_price != null &&
              result.price_per_unit < result.sell_price &&
              ` · $${result.price_per_unit.toFixed(2)}/unit`}

@@ -142,7 +142,7 @@ export function PriceSummary({
                 </div>
               )}
 
-              {/* Minimum charge breakdown — shows real item cost vs minimum */}
+              {/* Legacy small-order fee breakdown for old quote payloads. */}
               {minChargeApplied && minChargeValue != null && (
                 <div className="mt-3 rounded-xl border border-[#16C2F3]/20 bg-gradient-to-br from-[#16C2F3]/[0.06] to-[#16C2F3]/[0.02] overflow-hidden">
                   {/* Progress bar — visual fill toward minimum */}
@@ -179,7 +179,7 @@ export function PriceSummary({
                               const unitsToExceed = Math.ceil(minChargeValue / unitPrice);
                               const extraNeeded = unitsToExceed - qty;
                               if (extraNeeded > 0) {
-                                return `Add ${extraNeeded.toLocaleString()} more (qty ${unitsToExceed.toLocaleString()}) to beat the minimum`;
+                                return `Add ${extraNeeded.toLocaleString()} more (qty ${unitsToExceed.toLocaleString()}) to clear the small-order fee`;
                               }
                             }
                             return "Increase quantity for better per-unit value";

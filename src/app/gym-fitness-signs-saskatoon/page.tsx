@@ -86,7 +86,7 @@ export default function GymFitnessSignsSaskatoonPage() {
         },
         {
           q: "What signage does a new CrossFit box or martial arts studio typically need?",
-          a: "Most new fitness studios order a combination of: one outdoor grand opening banner (3×6 ft, $135), one or two retractable banners for reception ($219–$349), window decals for the storefront glass ($11/sqft, min $45), and a foamboard class schedule board for the lobby (from $10/sqft). Our designer bundles the artwork across all pieces for $35 flat.",
+          a: "Most new fitness studios order a combination of: one outdoor grand opening banner (3×6 ft, $135), one or two retractable banners for reception ($219–$349), window decals for the storefront glass ($11/sqft, with small jobs topped up to the $25 order-total minimum at checkout), and a foamboard class schedule board for the lobby (from $10/sqft). Our designer bundles the artwork across all pieces for $35 flat.",
         },
         {
           q: "Can you match my gym's brand colours exactly?",
@@ -106,7 +106,7 @@ export default function GymFitnessSignsSaskatoonPage() {
         },
         {
           q: "Do you do window lettering and vinyl cutouts for gym storefronts?",
-          a: "Yes — vinyl lettering starts from $8.50/sqft (minimum $40) and window decals start from $11/sqft (minimum $45). Common uses for gyms: logo on glass doors, class schedule window panels, and promotional colour accent blocks. Our Roland UV printer also produces full-colour decals if your artwork includes photos or gradients.",
+          a: "Yes — vinyl lettering starts from $8.50/sqft and window decals start from $11/sqft; small jobs top up to the $25 order-total minimum at checkout. Common uses for gyms: logo on glass doors, class schedule window panels, and promotional colour accent blocks. Our Roland UV printer also produces full-colour decals if your artwork includes photos or gradients.",
         },
       ]}
     />

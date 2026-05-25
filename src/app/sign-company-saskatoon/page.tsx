@@ -30,7 +30,7 @@ const designDirections = [
         src: "/images/industries/sign-company/sign-yard-real-estate.webp",
         alt: "Real estate yard sign printed on coroplast in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Real Estate Yard Sign",
-        caption: "18×24\" — $30",
+        caption: "18×24\" — $24 raw",
       },
       {
         src: "/images/industries/sign-company/sign-job-site.webp",
@@ -69,7 +69,7 @@ const designDirections = [
         src: "/images/industries/sign-company/acp-hoarding.webp",
         alt: "Construction hoarding ACP panel printed in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Construction Hoarding",
-        caption: "4×8 ft — $416",
+        caption: "4×8 ft — $320",
       },
     ],
   },
@@ -112,7 +112,7 @@ export default function SignCompanySaskatoonPage() {
           </p>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             Coroplast (4mm corrugated plastic) suits temporary outdoor signs — real estate listings,
-            job site identification, election campaigns, and event directionals. Starting at $30 with
+            job site identification, election campaigns, and event directionals. Starting at $8/sqft with
             H-stakes at $2.50 each. ACP aluminum composite (3mm rigid panel) is the permanent choice
             for storefront signs, office directories, and building exteriors — rated 7–10 years
             outdoors, starting at $13/sqft. Our{" "}
@@ -127,13 +127,13 @@ export default function SignCompanySaskatoonPage() {
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
-        { name: "Vinyl Lettering", from: "from $40", slug: "vinyl-lettering" },
+        { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
       ]}
       whyPoints={[
-        "Coroplast yard signs from $8/sqft — 18×24\" for $30, 4×8 ft for $232, H-stakes $2.50 ea",
+        "Coroplast yard signs from $8/sqft — 18×24\" for $24 raw, 4×8 ft for $232, H-stakes $2.50 ea",
         "ACP aluminum signs from $13/sqft — 24×36\" for $78, permanent outdoor-rated substrate",
         "Vehicle magnets from $24/sqft — removable, no paint damage, full-colour UV print",
         "Vinyl lettering for windows, vehicles, and equipment — precision plotter, clean edge finish",
@@ -145,7 +145,7 @@ export default function SignCompanySaskatoonPage() {
       faqs={[
         {
           q: "How much do coroplast signs cost in Saskatoon?",
-          a: "Coroplast signs at True Color start at $8/sqft single-sided. Common sizes: 18×24\" = $30, 24×36\" = $48, 4×4 ft = $120, 4×8 ft = $232. Volume pricing: 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs. H-wire ground stakes are $2.50 each.",
+          a: "Coroplast signs at True Color start at $8/sqft single-sided. Common sizes: 18×24\" = $24 raw, 24×36\" = $48, 4×4 ft = $120, 4×8 ft = $232. Volume pricing: 8% off at 5+ signs, 17% off at 10+ signs, 23% off at 25+ signs. H-wire ground stakes are $2.50 each.",
         },
         {
           q: "What's the difference between coroplast and ACP aluminum signs?",

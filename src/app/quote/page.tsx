@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { readUtmFromStorage } from "@/components/site/UtmCapture";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 import { REVIEW_COUNT } from "@/lib/reviews";
 
@@ -148,16 +149,11 @@ function QuoteForm() {
       });
       if (turnstileToken) fd.append("cf-turnstile-response", turnstileToken);
 
-      // First-touch UTM attribution (set by UtmCapture in layout)
-      try {
-        const raw = window.localStorage.getItem("tc_utm_first_touch");
-        if (raw) {
-          const parsed = JSON.parse(raw) as Record<string, string | number>;
-          if (typeof parsed.utm_source === "string") fd.append("utm_source", parsed.utm_source);
-          if (typeof parsed.utm_campaign === "string") fd.append("utm_campaign", parsed.utm_campaign);
+      const utm = readUtmFromStorage();
+      if (utm) {
+        for (const [key, value] of Object.entries(utm)) {
+          fd.append(key, value);
         }
-      } catch {
-        // localStorage blocked — skip
       }
 
       const res = await fetch("/api/quote-request", {

@@ -95,14 +95,14 @@ export default function StickerPrintingSaskatoonPage() {
             stickers as part of a broader branding package — business cards, packaging
             inserts, window decals — we handle all of it in one shop. Our{" "}
             <Link
-              href="/products/window-decals"
+              href="/window-decals-saskatoon"
               className="text-[#16C2F3] underline font-medium"
             >
               window decals
             </Link>{" "}
             (from $11/sqft) and{" "}
             <Link
-              href="/products/business-cards"
+              href="/business-cards-saskatoon"
               className="text-[#16C2F3] underline font-medium"
             >
               business cards
@@ -128,6 +128,20 @@ export default function StickerPrintingSaskatoonPage() {
             <strong>die cut labels near me</strong> for product packaging? Same process,
             same pricing — 250 product labels for $325 is the most common run for a
             Saskatchewan small-business product launch.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            For packaging-heavy orders, we separate sticker jobs by use: promo stickers for
+            giveaways, die-cut product labels for jars and bottles, and larger vinyl decals for
+            windows or equipment. If your label needs exact sizing, bring the container
+            dimensions and we build the cut line around the finished piece. For label systems
+            across several SKUs, see our{" "}
+            <Link
+              href="/product-labels-saskatoon"
+              className="text-[#16C2F3] underline font-medium"
+            >
+              product labels
+            </Link>{" "}
+            page.
           </p>
           <DesignDirectionGrid sections={designDirections} />
         </>
@@ -180,6 +194,10 @@ export default function StickerPrintingSaskatoonPage() {
         {
           q: "Do you make custom die cut labels near me for product packaging?",
           a: "Yes — die-cut labels for jars, bottles, boxes, growler tags, and product packaging are one of our most-ordered sticker types. Pricing is the same as standard stickers (100 for $160, 250 for $325, 500 for $475) and the die-cut path is built from your label outline. Bring your label dimensions and brand assets, and our in-house designer ($35 flat, same-day proof) prepares the file. Most label runs are picked up within 1–3 business days from artwork approval.",
+        },
+        {
+          q: "What is the difference between die-cut stickers and die-cut labels?",
+          a: "Die-cut stickers are usually ordered for giveaways, laptops, water bottles, vehicles, and brand promos. Die-cut labels use the same print-and-cut process but are sized for packaging — jars, bottles, bags, boxes, and product containers. Both are printed on waterproof vinyl, both can follow a custom shape, and both are picked up locally at 216 33rd St W in Saskatoon.",
         },
       ]}
     />

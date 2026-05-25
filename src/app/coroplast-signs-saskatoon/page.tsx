@@ -29,7 +29,7 @@ const designDirections = [
         src: "/images/industries/coroplast/sign-real-estate.webp",
         alt: "Real estate listing coroplast yard sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Real Estate Listing",
-        caption: "18×24\" — $30",
+        caption: "18×24\" — $24 raw",
       },
       {
         src: "/images/industries/coroplast/sign-election.webp",
@@ -41,7 +41,7 @@ const designDirections = [
         src: "/images/industries/coroplast/sign-event-directional.webp",
         alt: "Event directional coroplast sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Event Directional",
-        caption: "18×24\" — $30",
+        caption: "18×24\" — $24 raw",
       },
     ],
   },

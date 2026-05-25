@@ -112,7 +112,7 @@ export default function FoamboardPrintingSaskatoon() {
       whyPoints={[
         "Polished at close range: Roland UV prints full-colour, photo-quality directly onto foam — no laminate, no visual degradation",
         "5mm white foam core — rigid enough to wall-mount flat, light enough to carry to a trade show without checking luggage",
-        "18×24\" starts at $45 | 24×36\" starts at $65 — no minimum order, no setup fees",
+        "18×24\" starts at $45 | 24×36\" starts at $65 — custom smaller carts top up to the $25 checkout floor",
         "We print same-day for +$40 flat — order before 10 AM, pick up same day in Saskatoon",
         "In-house designer for $35 flat, same-day proof — show up with a logo and a list of points, leave with a file-ready layout",
         "Mounts with adhesive strips, foam tape, or a standard wall bracket — no framing, no installation crew",

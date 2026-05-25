@@ -106,7 +106,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/product/retractable-banner",
-        destination: "/products/retractable-banners",
+        destination: "/retractable-banners-saskatoon",
         permanent: true,
       },
       {
@@ -133,7 +133,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/product-category/standing-banner",
-        destination: "/products/retractable-banners",
+        destination: "/retractable-banners-saskatoon",
         permanent: true,
       },
       {
@@ -185,7 +185,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/retractable-banner-standing-banners",
-        destination: "/products/retractable-banners",
+        destination: "/retractable-banners-saskatoon",
         permanent: true,
       },
       {

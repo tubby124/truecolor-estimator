@@ -93,7 +93,7 @@ export default function SignsNorthBattlefordPage() {
         },
         {
           q: "Do you print vehicle magnets for ag and service trucks in the Battlefords?",
-          a: "Yes — 30mil vehicle magnets from $24/sqft (minimum $45). Custom rectangle or shaped. They stick securely to steel truck doors, remove cleanly, and are a popular choice for grain farmers, oilfield service crews, and contractors working northwest Saskatchewan.",
+          a: "Yes — 30mil vehicle magnets from $24/sqft (small jobs top up to the $25 order-total minimum at checkout). Custom rectangle or shaped. They stick securely to steel truck doors, remove cleanly, and are a popular choice for grain farmers, oilfield service crews, and contractors working northwest Saskatchewan.",
         },
         {
           q: "Can you print ACP aluminum signs for a business in North Battleford?",
@@ -105,7 +105,7 @@ export default function SignsNorthBattlefordPage() {
         },
         {
           q: "What is the minimum order for North Battleford customers?",
-          a: "No minimum order. You can order a single coroplast sign or one vehicle magnet. Volume discounts apply automatically as your order quantity grows. Business cards start at 250 for $45, flyers at 100 for $45.",
+          a: "A $25 order-total minimum applies at checkout. You can order a single coroplast sign or one vehicle magnet. Volume discounts apply automatically as your order quantity grows. Business cards start at 250 for $45, flyers at 100 for $45.",
         },
       ]}
     />

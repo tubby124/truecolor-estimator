@@ -105,7 +105,7 @@ export default function DaycareSignsSaskatoonPage() {
         },
         {
           q: "What window graphics work for a daycare storefront?",
-          a: "Window decals from $11/sqft (minimum $45) are standard for daycare storefronts. Common uses: hours of operation, licensing information, age groups served, and colourful brand graphics that communicate a welcoming environment. Decals are removable and can be updated seasonally without damaging the glass.",
+          a: "Window decals from $11/sqft (small jobs top up to the $25 order-total minimum at checkout) are standard for daycare storefronts. Common uses: hours of operation, licensing information, age groups served, and colourful brand graphics that communicate a welcoming environment. Decals are removable and can be updated seasonally without damaging the glass.",
         },
         {
           q: "How fast can you print signs for an enrollment deadline?",
@@ -113,7 +113,7 @@ export default function DaycareSignsSaskatoonPage() {
         },
         {
           q: "Can I order foamboard displays for a classroom or lobby?",
-          a: "Yes — foam board displays from $10/sqft (minimum $45 for 18×24\") are common for daycare lobbies and classrooms. Use them for program schedules, daily routines, parent communication boards, and seasonal theme displays. Lightweight and easy to reprint each semester.",
+          a: "Yes — foam board displays from $10/sqft (standard 18×24\" fixed SKU from $45) are common for daycare lobbies and classrooms. Use them for program schedules, daily routines, parent communication boards, and seasonal theme displays. Lightweight and easy to reprint each semester.",
         },
         {
           q: "Do you print flyers for summer camp or after-school program promotion?",

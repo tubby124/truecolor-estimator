@@ -25,6 +25,7 @@ import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/o
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { classifyFromHeaders } from "@/lib/analytics/referrer";
+import { mergeUtmAttribution } from "@/lib/analytics/utm";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode, marketing_consent, utm_source, utm_campaign } = body;
+    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode, marketing_consent, utm_source, utm_campaign, utm_medium, utm_content, utm_term } = body;
 
     if (!rawItems?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -339,6 +340,12 @@ export async function POST(req: NextRequest) {
         .select("*", { count: "exact", head: true });
       const orderNumber = `TC-${orderYear}-${String((orderCount ?? 0) + 1).padStart(4, "0")}`;
 
+      const refClass = classifyFromHeaders(req.headers);
+      const utm = mergeUtmAttribution(
+        { utm_source, utm_campaign, utm_medium, utm_content, utm_term },
+        req.headers.get("cookie"),
+      );
+
       const { data, error } = await supabase
         .from("orders")
         .insert({
@@ -354,10 +361,10 @@ export async function POST(req: NextRequest) {
           discount_amount: discount,
           payment_method,
           notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
-          utm_source: utm_source?.slice(0, 100) || null,
-          utm_campaign: utm_campaign?.slice(0, 100) || null,
-          referrer_source: classifyFromHeaders(req.headers).source.slice(0, 100),
-          referrer_medium: classifyFromHeaders(req.headers).medium.slice(0, 50),
+          utm_source: utm.utm_source ?? null,
+          utm_campaign: utm.utm_campaign ?? null,
+          referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
+          referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
           raw_referrer: (req.headers.get("referer") ?? "").slice(0, 500) || null,
         })
         .select("id, order_number")

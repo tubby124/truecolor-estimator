@@ -54,8 +54,9 @@ if (!editType) {
 
 // --- Context templates per edit type ---
 const KEY_PRICES = `KEY PRICES (verify against PRICING_QUICK_REFERENCE.md):
-  Coroplast from=$30 | Banners from=$66 | ACP from=$60
-  Magnets from=$45 | Decals=$11/sqft | Lettering from=$40
+  Customer checkout floor=$25 order-total minimum, not per-product minimums
+  Coroplast from=$25 or $8/sqft | Banners from=$66 | ACP from=$39 or $13/sqft
+  Magnets from=$25 or $24/sqft | Decals from=$25 or $11/sqft | Lettering from=$25 or $8.50/sqft
   Volume discounts=QTY-based ONLY ("5+ signs", never "8+ sqft")
   IndustryPage product cards: T1 sqft rates
   Rush=+$40 flat | Design=$35 flat | always separate`;
@@ -90,13 +91,13 @@ Every fromPrice, FAQ answer, and description price MUST match data/PRICING_QUICK
 Run /pricing-health after any changes.
 
 fromPrice rules:
-  Wide-format sqft products: use marketing "from" price (minimum order), NOT calculated sqft price
+  Wide-format sqft products: use marketing "from" price from the $25 cart-floor model, or use the T1 sqft rate
   Lot-priced products: use lowest tier flat total
   Product reference cards: use T1 sqft rate
 
 fromPrice reference:
-  Coroplast=$30 | Banners=$66 | ACP=$60 | Magnets=$45
-  Decals=$45 | Foamboard=$45 | Lettering=$40
+  Coroplast=$25 or $8/sqft | Banners=$66 | ACP=$39 or $13/sqft | Magnets=$25 or $24/sqft
+  Decals=$25 or $11/sqft | Foamboard=$45 standard 18×24 or $10/sqft custom | Lettering=$25 or $8.50/sqft
   BC=$45 | Flyers=$45 | Stickers=$25
   Postcards=$35 | Brochures=$70 | Posters=$15
 
@@ -147,7 +148,7 @@ Engine flow: loader.ts (CSV parse) -> engine/index.ts (5-step calc)
   Step 4: sqft formula (pricing_rules.v1.csv)
   Step 4.5: qty bulk discount — ONLY fires when basePricePerSqft !== null
   Step 5: lot price flag check (isLotPrice prevents qty multiplication)
-  Step 6: minimum charge (order-level, not per-unit)
+  Step 6: no per-product minimum clamp; customer cart minimum lives in src/lib/pricing/order-min.ts
 
 Tax: GST(5%)+PST(6%) on checkout ONLY. PST formula: (sell_price - design_fee) * 0.06
 Rush fee is PST-exempt.

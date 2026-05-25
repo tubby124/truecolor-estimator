@@ -49,7 +49,7 @@ export default function ProductLabelsSaskatoonPage() {
       faqs={[
         {
           q: "How much do product labels cost in Saskatoon?",
-          a: "Our pricing is tiered by total square footage: $5.50/sqft for orders under 12 sqft, $5.00/sqft from 12 to 32 sqft, $4.30/sqft from 32 to 100 sqft, and $3.20/sqft above 100 sqft. Minimum order is $30 to cover setup and run cost. A typical 3×4\" label run of 500 pieces is about $217 — roughly $0.43 per label, full-colour, ready to apply.",
+          a: "Our pricing is tiered by total square footage: $5.50/sqft for orders under 12 sqft, $5.00/sqft from 12 to 32 sqft, $4.30/sqft from 32 to 100 sqft, and $3.20/sqft above 100 sqft. A $25 order-total minimum applies at checkout. A typical 3×4\" label run of 500 pieces is about $217 — roughly $0.43 per label, full-colour, ready to apply.",
         },
         {
           q: "What material do you use for product and food labels?",
@@ -61,7 +61,7 @@ export default function ProductLabelsSaskatoonPage() {
         },
         {
           q: "Can you print small runs to test a new SKU?",
-          a: "Yes — that's one of the biggest reasons Saskatchewan food and beverage brands use us. Minimum order is $30, which is roughly 50 to 80 labels depending on size. There's no setup fee on top, no plate charge, no minimum-quantity penalty. Print 50 to validate the shelf design, come back next week for the production run when the artwork is locked.",
+          a: "Yes — that's one of the biggest reasons Saskatchewan food and beverage brands use us. A $25 order-total minimum applies at checkout. There's no setup fee on top, no plate charge, no large minimum-quantity penalty. Print 50 to validate the shelf design, come back next week for the production run when the artwork is locked.",
         },
         {
           q: "How fast can I get product labels in Saskatoon?",

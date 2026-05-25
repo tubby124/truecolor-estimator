@@ -6,12 +6,12 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 export const metadata: Metadata = {
   title: { absolute: "Printing Services Saskatoon | Design & Install | True Color" },
   description:
-    "Full-service print shop in Saskatoon. Signs from $30, banners from $66, cards from $45. In-house Roland UV, designer $35, rush +$40. 216 33rd St W.",
+    "Full-service print shop in Saskatoon. Coroplast from $8/sqft, banners from $66, cards from $45. In-house Roland UV, designer $35, rush +$40. 216 33rd St W.",
   alternates: { canonical: "/services" },
   openGraph: {
     title: "Printing Services Saskatoon | Design & Install | True Color",
     description:
-      "Full-service print shop in Saskatoon. Signs from $30, banners from $66, cards from $45. In-house Roland UV, designer $35, rush +$40. 216 33rd St W.",
+      "Full-service print shop in Saskatoon. Coroplast from $8/sqft, banners from $66, cards from $45. In-house Roland UV, designer $35, rush +$40. 216 33rd St W.",
     url: "https://truecolorprinting.ca/services",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -78,7 +78,7 @@ export default function ServicesPage() {
             True Color Display Printing is a full-service print shop at{" "}
             <a href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V1" target="_blank" rel="noopener noreferrer" className="text-[#16C2F3] hover:underline">216 33rd St W, Saskatoon</a>.
             We print signs, banners, business cards, flyers, decals, and large-format displays on our in-house Roland UV printer.
-            Coroplast signs from $30. Vinyl banners from $66. Business cards from $45 for 250. In-house designer for $35 flat with a same-day proof. Same-day rush production for +$40 flat on orders before 10 AM. Standard turnaround is 1&ndash;3 business days.
+            Coroplast signs from $8/sqft. Vinyl banners from $66. Business cards from $45 for 250. In-house designer for $35 flat with a same-day proof. Same-day rush production for +$40 flat on orders before 10 AM. Standard turnaround is 1&ndash;3 business days.
           </p>
         </div>
 

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Photo Poster Printing Saskatoon | True Color Display Printing",
     description:
-      "Photo posters from $15. Roland Photobase Matte 220gsm. 12×18\" to 36×48\". No minimum order. Same-day rush available. Local Saskatoon pickup 216 33rd St W.",
+      "Photo posters from $15. Roland Photobase Matte 220gsm. 12×18\" to 36×48\". Single prints welcome; small carts top up to the $25 order-total minimum at checkout. Same-day rush available. Local Saskatoon pickup 216 33rd St W.",
     url: "https://truecolorprinting.ca/photo-poster-printing-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -23,10 +23,10 @@ export default function PhotoPosterPrintingSaskatoonPage() {
       canonicalSlug="photo-poster-printing-saskatoon"
       primaryProductSlug="photo-posters"
       title="Photo Poster Printing Saskatoon"
-      subtitle="One print or fifty — from $15, no minimum, picked up same day with rush."
+      subtitle="One print or fifty — from $15, single prints welcome, picked up same day with rush."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Photo poster printing Saskatoon"
-      description="True Color prints photo posters in Saskatoon on Roland Photobase Matte 220gsm — a premium 220gsm matte photo paper that delivers gallery-quality colour and sharp detail at every size. Pricing starts at $15 for 12×18&quot;, up to $65 for 36×48&quot;. No minimum order — single prints welcome. Popular use cases include event and wedding photography prints, real estate open house property photos, office and retail display art, sports team photos, and home décor enlargements. Standard turnaround is 1–3 business days. Same-day rush available for $40 flat on orders before 10 AM. In-house designer available for $35. Pickup at 216 33rd St W, Saskatoon."
+      description="True Color prints photo posters in Saskatoon on Roland Photobase Matte 220gsm — a premium 220gsm matte photo paper that delivers gallery-quality colour and sharp detail at every size. Pricing starts at $15 for 12×18&quot;, up to $65 for 36×48&quot;. Single prints are welcome; small carts top up to the $25 order-total minimum at checkout. Popular use cases include event and wedding photography prints, real estate open house property photos, office and retail display art, sports team photos, and home décor enlargements. Standard turnaround is 1–3 business days. Same-day rush available for $40 flat on orders before 10 AM. In-house designer available for $35. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -35,7 +35,7 @@ export default function PhotoPosterPrintingSaskatoonPage() {
             the print ready on time. We print photo posters in Saskatoon on Roland Photobase Matte
             220gsm, a heavyweight matte photo paper that renders sharp detail and accurate colour at
             every size. Pricing starts at $15 for 12&times;18&quot; and runs to $65 for
-            36&times;48&quot;. No minimum — single prints are welcome, with no setup fees.{" "}
+            36&times;48&quot;. Single prints are welcome; small carts top up to the $25 order-total minimum at checkout.{" "}
             <Link href="/products/photo-posters" className="text-[#16C2F3] underline font-medium">
               Order a photo poster
             </Link>{" "}
@@ -80,8 +80,8 @@ export default function PhotoPosterPrintingSaskatoonPage() {
       ]}
       whyPoints={[
         "Colour that holds at large sizes — Roland Photobase Matte 220gsm delivers sharp detail from 12×18\" to 36×48\"",
-        "Sizes from 12×18\" ($15) to 36×48\" ($65) — full range covered in one shop, no minimum order",
-        "Order one print or fifty at the same per-unit price — no setup fees, no quantity lock-in",
+        "Sizes from 12×18\" ($15) to 36×48\" ($65) — full range covered in one shop, single prints welcome",
+        "Order one print or fifty at the same per-unit price — $25 order-total minimum at checkout, no quantity lock-in",
         "Every poster matches your banners and signs — same Roland UV printer for consistent colour across jobs",
         "Event photo ready before the weekend — same-day rush $40 flat on orders before 10 AM",
         "Crops corrected, white balance fixed, file print-ready — in-house designer $35 flat, same-day proof",
@@ -91,7 +91,7 @@ export default function PhotoPosterPrintingSaskatoonPage() {
       faqs={[
         {
           q: "How much does photo poster printing cost in Saskatoon?",
-          a: "Our photo poster prices are: 12×18\"=$15 | 16×20\"=$18 | 18×24\"=$22 | 20×30\"=$28 | 24×36\"=$35 | 30×40\"=$48 | 36×48\"=$65. All printed on Roland Photobase Matte 220gsm. No minimum order and no setup fees — single prints are welcome.",
+          a: "Our photo poster prices are: 12×18\"=$15 | 16×20\"=$18 | 18×24\"=$22 | 20×30\"=$28 | 24×36\"=$35 | 30×40\"=$48 | 36×48\"=$65. All printed on Roland Photobase Matte 220gsm. Single prints are welcome; small carts top up to the $25 order-total minimum at checkout.",
         },
         {
           q: "What paper do you use for photo poster printing?",
@@ -99,7 +99,7 @@ export default function PhotoPosterPrintingSaskatoonPage() {
         },
         {
           q: "Is there a minimum order for photo poster printing?",
-          a: "No — there is no minimum order. Single prints are welcome at the same per-unit price. Whether you need one 24×36\" print for your office or 50 copies of a 16×20\" for an event, the price is the same per poster with no setup fee.",
+          a: "Single prints are welcome at the same per-unit price. Whether you need one 24×36\" print for your office or 50 copies of a 16×20\" for an event, the price is the same per poster; small carts top up to the $25 order-total minimum at checkout.",
         },
         {
           q: "Can you print real estate property photos as posters for an open house?",
@@ -115,7 +115,7 @@ export default function PhotoPosterPrintingSaskatoonPage() {
         },
         {
           q: "Do you print sports team photos as large posters?",
-          a: "Yes — team photos are a popular use for our photo poster service. Common sizes are 20×30\" at $28 and 24×36\" at $35. These are frequently ordered for dressing room walls, school hallways, and sponsor appreciation displays. No minimum, so you can order one print or multiples of the same file at the same per-unit price.",
+          a: "Yes — team photos are a popular use for our photo poster service. Common sizes are 20×30\" at $28 and 24×36\" at $35. These are frequently ordered for dressing room walls, school hallways, and sponsor appreciation displays. Single prints are welcome, so you can order one print or multiples of the same file at the same per-unit price.",
         },
       ]}
     />

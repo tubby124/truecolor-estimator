@@ -32,9 +32,9 @@ export default function CosmeticLabelsSaskatoonPage() {
         { name: "Vinyl Labels (3mil)", from: "from $5.50/sqft", slug: "stickers" },
         { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
-        { name: "Vinyl Lettering", from: "from $40", slug: "vinyl-lettering" },
+        { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
         { name: "Business Cards", from: "from $45 / 250", slug: "business-cards" },
-        { name: "Postcards", from: "from $45 / 100", slug: "postcards" },
+        { name: "Postcards", from: "from $35 / 50", slug: "postcards" },
       ]}
       whyPoints={[
         "3mil cast vinyl (ARLPMF7008) — wraps curved bottles without lifting",
