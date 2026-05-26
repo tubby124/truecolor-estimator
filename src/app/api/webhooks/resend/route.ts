@@ -4,27 +4,16 @@
  * Resend Webhooks → updates email_log rows with delivery outcomes.
  * Captures: delivered / opened / clicked / bounced / complained / delivery_delayed.
  *
- * Today email_log only knows status="sent" because we log on POST success. The
- * webhook closes the loop — bounces, blocks, complaints, opens, clicks all
- * become visible on /staff/lifecycle.
+ * Auth: Svix HMAC-SHA256 (Resend's native signing mechanism).
+ *   RESEND_WEBHOOK_SECRET = the whsec_... value from Resend dashboard.
+ *   Verifies svix-id / svix-timestamp / svix-signature headers.
+ *   Rejects payloads older than 5 minutes (replay protection).
  *
- * Auth: Resend signs webhooks with a shared secret via the Svix headers
- *   (svix-id, svix-timestamp, svix-signature). For simplicity v1 we verify a
- *   simple Bearer token via Authorization header (Resend supports custom
- *   headers on webhook config). Set RESEND_WEBHOOK_SECRET in Railway, then
- *   configure the matching header in Resend dashboard.
- *
- * Fail-closed: missing env var → 503. Bad token → 401.
- *
- * Wire-up:
- *   Resend Dashboard → Webhooks → Add Endpoint
- *     URL:       https://truecolorprinting.ca/api/webhooks/resend
- *     Events:    email.delivered, email.opened, email.clicked,
- *                email.bounced, email.complained, email.delivery_delayed
- *     Headers:   Authorization: Bearer <RESEND_WEBHOOK_SECRET>
+ * Fail-closed: missing env var → 503. Bad signature → 401.
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 
 interface ResendWebhookEvent {
@@ -40,19 +29,69 @@ interface ResendWebhookEvent {
   };
 }
 
+function verifySvixSignature(
+  body: string,
+  svixId: string,
+  svixTimestamp: string,
+  svixSignature: string,
+  secret: string
+): boolean {
+  // Svix verification: HMAC-SHA256(msgId.timestamp.body, base64decoded(secret))
+  const rawSecret = secret.startsWith("whsec_")
+    ? Buffer.from(secret.slice(6), "base64")
+    : Buffer.from(secret, "base64");
+
+  const signedContent = `${svixId}.${svixTimestamp}.${body}`;
+  const expected = createHmac("sha256", rawSecret).update(signedContent).digest("base64");
+
+  // svix-signature may contain multiple sigs: "v1,<b64> v1,<b64>"
+  const sigs = svixSignature.split(" ").filter((s) => s.startsWith("v1,")).map((s) => s.slice(3));
+  return sigs.some((sig) => {
+    try {
+      const sigBuf = Buffer.from(sig, "base64");
+      const expBuf = Buffer.from(expected, "base64");
+      return sigBuf.length === expBuf.length && timingSafeEqual(sigBuf, expBuf);
+    } catch {
+      return false;
+    }
+  });
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.RESEND_WEBHOOK_SECRET;
   if (!secret) {
     return NextResponse.json({ error: "RESEND_WEBHOOK_SECRET not configured" }, { status: 503 });
   }
-  const auth = req.headers.get("Authorization");
-  if (auth !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  let bodyText: string;
+  try {
+    bodyText = await req.text();
+  } catch {
+    return NextResponse.json({ error: "Could not read body" }, { status: 400 });
+  }
+
+  const svixId = req.headers.get("svix-id") ?? "";
+  const svixTimestamp = req.headers.get("svix-timestamp") ?? "";
+  const svixSignature = req.headers.get("svix-signature") ?? "";
+
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    return NextResponse.json({ error: "Missing Svix headers" }, { status: 401 });
+  }
+
+  // Replay protection: reject payloads older than 5 minutes
+  const tsMs = parseInt(svixTimestamp, 10) * 1000;
+  if (isNaN(tsMs) || Math.abs(Date.now() - tsMs) > 5 * 60 * 1000) {
+    return NextResponse.json({ error: "Timestamp out of tolerance" }, { status: 401 });
+  }
+
+  if (!verifySvixSignature(bodyText, svixId, svixTimestamp, svixSignature, secret)) {
+    console.warn("[resend-webhook] Invalid Svix signature — possible spoofing attempt");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   let event: ResendWebhookEvent;
   try {
-    event = (await req.json()) as ResendWebhookEvent;
+    event = JSON.parse(bodyText) as ResendWebhookEvent;
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
