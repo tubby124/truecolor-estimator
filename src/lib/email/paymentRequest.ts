@@ -313,38 +313,26 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                 </tbody>
               </table>
 
-              <!-- CTA (Payment or Quote Approval) -->
+              <!-- CTA — Pay Now (same button for quote + invoice; the quote IS the invoice) -->
               <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                ${quoteOnly ? "Approve This Quote" : "Payment"}
+                ${quoteOnly ? "Approve & Pay" : "Payment"}
               </p>
-              ${quoteOnly ? `<div style="background: #fef9f3; border: 1px solid #f4d9a8; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
-                <p style="margin: 0 0 12px; font-size: 14px; color: #78350f; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  This is a <strong>quote</strong> — no payment is required yet.
-                </p>
-                <p style="margin: 0 0 16px; font-size: 14px; color: #78350f; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Reply to this email or call us to approve, and we'll send you the invoice with payment instructions.
-                </p>
-                <a href="mailto:info@true-color.ca?subject=${encodeURIComponent(`Approve quote ${orderNumber}`)}&body=${encodeURIComponent(`Hi True Color,\n\nI approve quote ${orderNumber} for $${total.toFixed(2)} CAD. Please send me the invoice.\n\nThanks,\n${contact.name}`)}"
-                  style="display: inline-block; background: #1c1712; color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
-                  Approve Quote &rarr;
-                </a>
-                <p style="margin: 14px 0 0; font-size: 11px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Or call <a href="tel:+13069548688" style="color: #0369a1; text-decoration: none;">(306) 954-8688</a>
-                </p>
-              </div>` : `<div style="background: #f0fbff; border: 1px solid #7de0f7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
+              <div style="background: #f0fbff; border: 1px solid #7de0f7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
                 <p style="margin: 0 0 16px; font-size: 14px; color: #0c4a6e; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Click the button below to pay <strong>$${total.toFixed(2)} CAD</strong> securely online.
-                  Your payment is protected by ${paymentMethod === "wave" ? "Wave" : "Clover"}.
+                  ${quoteOnly
+                    ? `Pay <strong>$${total.toFixed(2)} CAD</strong> to lock in your quote — or reply to this email if you'd like changes first.`
+                    : `Click the button below to pay <strong>$${total.toFixed(2)} CAD</strong> securely online. Your payment is protected by Clover.`}
                 </p>
                 <a href="${escHtml(paymentUrl)}"
                   style="display: inline-block; background: #16C2F3; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
                   Pay $${total.toFixed(2)} Now &rarr;
                 </a>
                 <p style="margin: 14px 0 0; font-size: 11px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Questions? Reply to this email or call
-                  <a href="tel:+13069548688" style="color: #0369a1; text-decoration: none;">(306) 954-8688</a>
+                  ${quoteOnly
+                    ? `Need changes? Reply to this email or call <a href="tel:+13069548688" style="color: #0369a1; text-decoration: none;">(306) 954-8688</a>`
+                    : `Questions? Reply to this email or call <a href="tel:+13069548688" style="color: #0369a1; text-decoration: none;">(306) 954-8688</a>`}
                 </p>
-              </div>`}
+              </div>
 
               <!-- Pickup info -->
               <div style="background: #faf7f4; border: 1px solid #e6ddd5; border-radius: 10px; padding: 14px 18px;">
@@ -399,9 +387,11 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
 
   const ctaBlock = quoteOnly
     ? [
-        `--- APPROVE THIS QUOTE ---`,
-        `This is a quote — no payment is required yet.`,
-        `Reply to this email or call (306) 954-8688 to approve, and we'll send you the invoice.`,
+        `--- APPROVE & PAY ---`,
+        `Pay $${total.toFixed(2)} CAD to lock in your quote:`,
+        paymentUrl,
+        ``,
+        `Need changes? Reply to this email or call (306) 954-8688.`,
       ]
     : [
         `--- PAY NOW ---`,

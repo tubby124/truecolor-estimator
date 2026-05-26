@@ -190,7 +190,7 @@ interface FormState {
   company: string;
   phone: string;
   items: OrderItem[];
-  payment_method: "clover" | "wave";
+  payment_method: "clover";
   quote_only: boolean; // true = no payment link / Wave draft only
   notes: string;
 }
@@ -243,7 +243,7 @@ function toggleInList(current: string, value: string): string {
 const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
-  payment_method: "wave", quote_only: true, notes: "",
+  payment_method: "clover", quote_only: true, notes: "",
 };
 
 const MAX_ITEMS = 10;
@@ -1353,53 +1353,18 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       </div>
                     </div>
 
-                    {/* ── PAYMENT METHOD ── */}
+                    {/* ── PAYMENT METHOD (info only — Clover Pay Now is the only path) ── */}
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-                        Step 4 · How to bill it
+                        Step 4 · How it&apos;s billed
                       </p>
-                      <p className="text-[11px] text-gray-500 mb-2 leading-snug">
-                        {form.quote_only
-                          ? "We'll prepare the invoice as a draft using your pick — nothing sends to the customer until you convert it from a quote to an invoice."
-                          : "Both options send a Clover card link and create a Wave invoice record for your books. 'Wave Invoice' tags the order as a B2B Wave sale (recommended for customers who want a tax invoice for their accounting team)."}
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {(["clover", "wave"] as const).map((method) => (
-                          <label
-                            key={method}
-                            className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all ${
-                              form.payment_method === method
-                                ? "border-emerald-500 bg-emerald-50"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="payment_method"
-                              value={method}
-                              checked={form.payment_method === method}
-                              onChange={() => set("payment_method", method)}
-                              className="sr-only"
-                            />
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                              form.payment_method === method ? "border-emerald-500" : "border-gray-300"
-                            }`}>
-                              {form.payment_method === method && (
-                                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold text-gray-700">
-                                {method === "clover" ? "Quick Card Link" : "Wave Invoice + Card Link"}
-                              </p>
-                              <p className="text-[10px] text-gray-400 leading-tight">
-                                {method === "clover"
-                                  ? "Branded payment email · pays via Clover card · creates Wave draft"
-                                  : "Wave invoice for B2B records · same Clover card payment link"}
-                              </p>
-                            </div>
-                          </label>
-                        ))}
+                      <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 px-4 py-3">
+                        <p className="text-sm font-semibold text-gray-800">Clover Pay Now</p>
+                        <p className="text-[11px] text-gray-600 leading-snug mt-0.5">
+                          {form.quote_only
+                            ? "Customer gets a quote email with a Clover Pay Now button — they can pay to confirm or reply with changes. A Wave invoice is created in the background for your books."
+                            : "Customer gets a branded invoice email with a Clover Pay Now button. A Wave invoice is auto-created for your books and marked paid by the Clover webhook on capture."}
+                        </p>
                       </div>
                     </div>
 

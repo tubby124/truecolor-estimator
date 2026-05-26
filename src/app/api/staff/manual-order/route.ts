@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
       // Legacy single-item (backward compat)
       description?: string;
       amount?: number;
-      payment_method: "clover" | "wave";
-      quote_only?: boolean; // true = don't send payment link / Wave invoice stays as draft
+      payment_method: "clover";
+      quote_only?: boolean; // true = email frames as "Quote — pay to confirm or reply for changes"; false = "Payment Request"
       notes?: string;
     };
 
@@ -81,8 +81,11 @@ export async function POST(req: NextRequest) {
     if (!contact?.email?.trim()) {
       return NextResponse.json({ error: "Customer email is required" }, { status: 400 });
     }
-    if (!["clover", "wave"].includes(payment_method)) {
-      return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
+    // Wave-as-payment-channel was retired 2026-05-26 — Wave is now bookkeeping only.
+    // Every manual order pays through Clover (/pay/[token]); Wave draft is created
+    // server-side for the books. Customer never interacts with a Wave-hosted link.
+    if (payment_method !== "clover") {
+      return NextResponse.json({ error: "Invalid payment method (only 'clover' is supported)" }, { status: 400 });
     }
 
     for (const item of items) {
@@ -195,10 +198,10 @@ export async function POST(req: NextRequest) {
           gst,
           pst,
           total,
-          payment_method: payment_method === "wave" ? "wave" : "clover_card",
+          payment_method: "clover_card",
           notes: notes?.trim() || null,
           staff_notes: quoteOnly
-            ? `[QUOTE ONLY] Manual quote — ${items.length} item(s) — no payment link sent. Convert to invoice when customer approves.`
+            ? `[QUOTE] Manual quote — ${items.length} item(s) — Pay Now link sent; customer can pay to confirm or reply for changes.`
             : `Manual order — ${items.length} item(s) created by staff via payment request`,
         })
         .select("id, order_number")
@@ -246,275 +249,63 @@ export async function POST(req: NextRequest) {
     const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
     let paymentUrl: string | null = null;
 
-    if (payment_method === "clover") {
-      if (!quoteOnly) {
-        try {
-          const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
-          paymentUrl = `${siteUrl}/pay/${token}`;
-
-          // NOTE: do NOT set payment_reference to the URL — the Clover webhook matches on it
-          // using the order UUID. /pay/[token] sets it correctly when the customer clicks.
-        } catch (tokenErr) {
-          console.error("[manual-order] payment token encode:", tokenErr);
-          return NextResponse.json({ error: "Failed to generate payment link" }, { status: 500 });
-        }
-      }
-      // quoteOnly Clover: paymentUrl stays null — customer email shows quote-mode CTA.
-
-      // Bookkeeping parity: every manual order/quote now gets a Wave DRAFT invoice,
-      // matching the website checkout path (/api/orders) which always creates one.
-      // The customer still pays through the Clover gateway; the Clover webhook
-      // approves + records the payment against this invoice once the card captures
-      // (it reads order.wave_invoice_id — NULL meant the webhook could never back-fill).
-      // Non-fatal: a Wave outage must not block the Clover payment link.
-      try {
-        const waveCustomerId = await createOrFindWaveCustomer(
-          contact.email.toLowerCase().trim(),
-          contact.name.trim()
-        );
-        const waveLineItems = items.map((item) => ({
-          description: formatItemAlbertBlock(item),
-          unitPrice: Math.round(item.amount * 100) / 100,
-          qty: 1,
-          applyGst: true,
-          applyPst: item.kind !== "fee", // PST exempt for design/rush/installation fees
-        }));
-        const inv = await createWaveInvoice(waveCustomerId, waveLineItems, {
-          orderNumber: order.order_number,
-          title: quoteOnly ? `QUOTE DRAFT — ${contact.name.trim()}` : undefined,
-        });
-        const { error: updErr } = await supabase
-          .from("orders")
-          .update({
-            wave_invoice_id: inv.invoiceId,
-            wave_invoice_number: inv.invoiceNumber,
-          } as Record<string, unknown>)
-          .eq("id", order.id);
-        if (updErr) console.error("[manual-order] wave_invoice_id/number save failed (non-fatal):", updErr.message);
-        console.log(`[manual-order] Clover-path Wave draft created → order ${order.order_number} | wave_invoice_id ${inv.invoiceId} (DRAFT until paid)`);
-      } catch (waveErr) {
-        const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
-        console.error("[manual-order] Clover-path Wave invoice creation failed (non-fatal):", msg);
-        void sendTelegramNotification(
-          `⚠️ <b>Wave draft NOT created (Clover order)</b>\n` +
-          `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
-          `Customer can still pay via Clover, but no Wave bookkeeping entry exists.\n` +
-          `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
-          `Action: create the Wave invoice manually and link it via staff portal.`
-        ).catch(() => {});
-      }
-    } else {
-      // Wave: create invoice → approve → send
-      try {
-        const waveCustomerId = await createOrFindWaveCustomer(
-          contact.email.toLowerCase().trim(),
-          contact.name.trim()
-        );
-
-        // Wave invoice description renders Albert's full spec block (multi-line).
-        // Wave PDFs preserve newlines in line-item descriptions — same format
-        // customers have been getting from Albert directly for years.
-        const waveLineItems = items.map((item) => ({
-          description: formatItemAlbertBlock(item),
-          unitPrice: Math.round(item.amount * 100) / 100,
-          qty: 1,
-          applyGst: true,
-          applyPst: item.kind !== "fee", // PST exempt for design/rush/installation fees
-        }));
-
-        const inv = await createWaveInvoice(
-          waveCustomerId,
-          waveLineItems,
-          { orderNumber: order.order_number }
-        );
-
-        // CRITICAL: must `await` — `void supabase.update().eq()` does NOT fire the HTTP
-        // request (PostgrestFilterBuilder only executes on await/.then()). Bug found
-        // 2026-05-15 caused 30+ days of Wave orders to have NULL wave_invoice_id
-        // even though the Wave invoice was created successfully.
-        {
-          const { error: updErr } = await supabase
-            .from("orders")
-            .update({
-              wave_invoice_id: inv.invoiceId,
-              wave_invoice_number: inv.invoiceNumber,
-            } as Record<string, unknown>)
-            .eq("id", order.id);
-          if (updErr) console.error("[manual-order] wave_invoice_id/number save failed (non-fatal):", updErr.message);
-        }
-
-        if (!quoteOnly) {
-          // Architectural decision 2026-05-20: Wave invoice stays DRAFT until the
-          // Clover webhook fires after customer pays. Customer pays through our
-          // Clover gateway (/pay/[token]) — NOT Wave's hosted payment page —
-          // because Wave has no webhooks on the current plan, so payments through
-          // Wave's portal silently desync from Supabase (caused Gil Magar 2026-05-14
-          // ghost-paid orders + Amber Appl 6-day pending state).
-          // Webhook approves + records the Wave payment when card captures.
-          try {
-            const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
-            const wavePayUrl = `${siteUrl}/pay/${token}`;
-            await sendPaymentRequestEmail({
-              orderNumber: order.order_number,
-              contact: {
-                name: contact.name.trim(),
-                email: contact.email.toLowerCase().trim(),
-                company: contact.company?.trim() || null,
-              },
-              items: items.map((item) => ({
-                kind: item.kind ?? "product",
-                product: item.title?.trim() || item.product,
-                qty: item.qty || 1,
-                material: item.material,
-                sides: item.sides,
-                size: item.size,
-                process: item.process,
-                details: item.details,
-                unitPrice: item.unitPrice,
-                amount: Math.round(item.amount * 100) / 100,
-                albertBlock: formatItemAlbertBlock(item),
-              })),
-              subtotal,
-              gst,
-              pst,
-              total,
-              paymentUrl: wavePayUrl,
-              paymentMethod: "wave",
-              notes: notes?.trim() || null,
-              accountInfo,
-            });
-            console.log(`[manual-order] Wave-invoice order routed via Clover gateway → ${contact.email} | order ${order.order_number} | wave_invoice_id ${inv.invoiceId} (DRAFT until paid)`);
-          } catch (emailErr) {
-            console.error("[manual-order] payment request email failed:", emailErr);
-            return NextResponse.json({ error: "Failed to send payment request email" }, { status: 500 });
-          }
-        } else {
-          // Quote-only: leave Wave invoice as draft and send our own quote-style email to the customer.
-          console.log(`[manual-order] Wave draft created (quote-only) → ${contact.email} | order ${order.order_number} | wave_invoice_id ${inv.invoiceId}`);
-          try {
-            await sendPaymentRequestEmail({
-              orderNumber: order.order_number,
-              contact: {
-                name: contact.name.trim(),
-                email: contact.email.toLowerCase().trim(),
-                company: contact.company?.trim() || null,
-              },
-              items: items.map((item) => ({
-                kind: item.kind ?? "product",
-                product: item.title?.trim() || item.product,
-                qty: item.qty || 1,
-                material: item.material,
-                sides: item.sides,
-                size: item.size,
-                process: item.process,
-                details: item.details,
-                unitPrice: item.unitPrice,
-                amount: Math.round(item.amount * 100) / 100,
-                albertBlock: formatItemAlbertBlock(item),
-              })),
-              subtotal,
-              gst,
-              pst,
-              total,
-              paymentUrl: "",  // unused in quote mode
-              paymentMethod: "wave",
-              quoteOnly: true,
-              notes: notes?.trim() || null,
-              accountInfo,
-            });
-          } catch (emailErr) {
-            console.error("[manual-order] quote email failed (non-fatal):", emailErr);
-          }
-        }
-
-        // Send account welcome email (Wave doesn't include account info)
-        if (accountInfo) {
-          try {
-            await sendAccountWelcomeEmail({
-              customerName: contact.name.trim(),
-              customerEmail: contact.email.toLowerCase().trim(),
-              orderNumber: order.order_number,
-              isNewAccount: accountInfo.isNewAccount,
-              accountLink: accountInfo.accountLink,
-            });
-          } catch (acctErr) {
-            console.error("[manual-order] account welcome email (non-fatal):", acctErr);
-          }
-        }
-
-        // Staff notification (skip customer payment email — Wave already sent it)
-        try {
-          await sendStaffOrderNotification({
-            orderNumber: order.order_number,
-            contact: {
-              name: contact.name.trim(),
-              email: contact.email.toLowerCase().trim(),
-              company: contact.company?.trim(),
-              phone: contact.phone?.trim(),
-            },
-            items: items.map((item) => ({
-              product_name: formatItemLabel(item),
-              qty: item.qty || 1,
-              width_in: null,
-              height_in: null,
-              sides: 1,
-              design_status: "PRINT_READY" as const,
-              line_total: Math.round(item.amount * 100) / 100,
-            })),
-            subtotal,
-            gst,
-            pst,
-            total,
-            is_rush: false,
-            payment_method: "wave",
-            notes: quoteOnly
-              ? `[QUOTE ONLY — Wave draft] ${notes?.trim() ?? "Quote sent — convert to invoice when customer approves"}`
-              : `[Manual Order — Wave] ${notes?.trim() ?? "Created via staff payment request"}`,
-            filePaths: [],
-            siteUrl,
-          });
-        } catch (staffEmailErr) {
-          console.error("[manual-order] staff notification failed (non-fatal):", staffEmailErr);
-        }
-
-        // Sync customer to Brevo (non-fatal)
-        try {
-          const nameParts = contact.name.trim().split(/\s+/);
-          await syncCustomerToBrevo({
-            email: contact.email.toLowerCase().trim(),
-            firstName: nameParts[0] || contact.name.trim(),
-            lastName: nameParts.slice(1).join(" ") || undefined,
-            company: contact.company?.trim() || undefined,
-            phone: contact.phone?.trim() || undefined,
-            orderNumber: order.order_number,
-            orderTotal: total,
-            productSummary: items.map((i) => i.product).join(", "),
-            source: "manual_order",
-            accountStatus: accountInfo?.isNewAccount ? "created" : accountInfo ? "active" : "none",
-          });
-        } catch (brevoErr) {
-          console.error("[manual-order] Brevo sync failed (non-fatal):", brevoErr);
-        }
-
-        return NextResponse.json({ orderId: order.id, orderNumber: order.order_number, paymentUrl: null });
-      } catch (waveErr) {
-        const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
-        console.error("[manual-order] Wave invoice error:", msg);
-        void sendTelegramNotification(
-          `⚠️ <b>Wave invoice creation failed</b>\n` +
-          `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
-          `Path: /api/staff/manual-order (staff-driven quote)\n` +
-          `Staff saw the error in the UI and was prompted to try Clover instead.\n` +
-          `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
-          `If staff retried via Clover, no further action needed.`
-        ).catch(() => {});
-        return NextResponse.json({ error: "Failed to create Wave invoice. Please try Clover instead." }, { status: 500 });
-      }
+    // Generate Pay Now token for EVERY manual order, including quote-only.
+    // The quote IS the invoice — customer can pay it to confirm OR reply to ask
+    // for changes. No more "no payment link until you approve" orphan state that
+    // bit TC-2026-0113 (Damon Miller, 2026-05-26).
+    try {
+      const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
+      paymentUrl = `${siteUrl}/pay/${token}`;
+    } catch (tokenErr) {
+      console.error("[manual-order] payment token encode:", tokenErr);
+      return NextResponse.json({ error: "Failed to generate payment link" }, { status: 500 });
     }
 
-    // ── 6. Send payment request email to customer (Clover path) ──
-    // In quote-only mode, paymentUrl is empty and the email renders a "Reply to approve" CTA
-    // instead of the Pay Now button.
+    // Bookkeeping parity: every manual order/quote gets a Wave DRAFT invoice for
+    // the books. Customer pays through the Clover gateway (/pay/[token]); the
+    // Clover webhook approves + records the payment against this invoice on
+    // capture (it reads order.wave_invoice_id). Non-fatal: a Wave outage must
+    // not block the Clover payment link.
+    try {
+      const waveCustomerId = await createOrFindWaveCustomer(
+        contact.email.toLowerCase().trim(),
+        contact.name.trim()
+      );
+      const waveLineItems = items.map((item) => ({
+        description: formatItemAlbertBlock(item),
+        unitPrice: Math.round(item.amount * 100) / 100,
+        qty: 1,
+        applyGst: true,
+        applyPst: item.kind !== "fee", // PST exempt for design/rush/installation fees
+      }));
+      const inv = await createWaveInvoice(waveCustomerId, waveLineItems, {
+        orderNumber: order.order_number,
+        title: quoteOnly ? `QUOTE DRAFT — ${contact.name.trim()}` : undefined,
+      });
+      const { error: updErr } = await supabase
+        .from("orders")
+        .update({
+          wave_invoice_id: inv.invoiceId,
+          wave_invoice_number: inv.invoiceNumber,
+        } as Record<string, unknown>)
+        .eq("id", order.id);
+      if (updErr) console.error("[manual-order] wave_invoice_id/number save failed (non-fatal):", updErr.message);
+      console.log(`[manual-order] Wave draft created → order ${order.order_number} | wave_invoice_id ${inv.invoiceId} (DRAFT until paid)`);
+    } catch (waveErr) {
+      const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
+      console.error("[manual-order] Wave invoice creation failed (non-fatal):", msg);
+      void sendTelegramNotification(
+        `⚠️ <b>Wave draft NOT created</b>\n` +
+        `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
+        `Customer can still pay via Clover, but no Wave bookkeeping entry exists.\n` +
+        `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+        `Action: create the Wave invoice manually and link it via staff portal.`
+      ).catch(() => {});
+    }
+
+    // ── 6. Send payment request email to customer ──
+    // Both quote-only and not-quote-only modes include the Pay Now link. The
+    // quote IS the invoice — customer pays it to confirm or replies for changes.
     try {
       await sendPaymentRequestEmail({
         orderNumber: order.order_number,
