@@ -28,6 +28,8 @@ import type { SeoRankMovers, SeoMover } from "./SeoRankMoversPanel";
 import type { PriceConsistencyRow } from "./PriceConsistencyPanel";
 import { checkPriceConsistency } from "@/lib/data/price-consistency";
 import type { RefundPendingRow } from "./RefundsPendingPanel";
+import type { WaveWebhookEvent } from "./WaveWebhookPanel";
+import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
@@ -77,6 +79,8 @@ export interface LifecycleData {
   seoMovers: SeoRankMovers;
   priceConsistency: PriceConsistencyRow[];
   refundsPending: RefundPendingRow[];
+  waveWebhookEvents: WaveWebhookEvent[];
+  emailDeliveryHealth: EmailDeliveryHealth;
 }
 
 export async function fetchLifecycleData(): Promise<LifecycleData> {
@@ -97,6 +101,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     heartbeatRes,
     paidWaveRes,
     auditRes,
+    webhookEventsRes,
+    emailDeliveryRes,
   ] = await Promise.all([
     supabase
       .from("orders")
@@ -152,6 +158,18 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       .gte("at", cutoff)
       .order("at", { ascending: false })
       .limit(500),
+    // Wave webhook event log — last 30 events regardless of time window
+    supabase
+      .from("webhook_events")
+      .select("id, received_at, event_type, resource_id, matched_order_id, ok, detail")
+      .eq("event_source", "wave")
+      .order("received_at", { ascending: false })
+      .limit(30),
+    // Email delivery health — aggregate counts for last 7 days
+    supabase
+      .from("email_log")
+      .select("id, sent_at, delivered_at, opened_at, bounced_at")
+      .gte("sent_at", cutoff),
   ]);
 
   const orders = ordersRes.data ?? [];
@@ -163,6 +181,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   const heartbeatRaw = heartbeatRes.data ?? [];
   const paidWave = paidWaveRes.data ?? [];
   const auditRaw = auditRes.data ?? [];
+  const webhookEventsRaw = webhookEventsRes.data ?? [];
+  const emailDeliveryRaw = emailDeliveryRes.data ?? [];
 
   // ── derive lifecycle rows (existing logic, plus pay_link pip) ─────────────
   const customerEmails = new Set<string>();
@@ -865,6 +885,39 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   // Suppress unused locals (used for type inference but variables themselves not referenced after)
   void seoToday; void seoPrior;
 
+  // ── derive wave webhook events ────────────────────────────────────────────
+  // We already fetched all orders in the 7-day window; build a quick id→number map.
+  // Webhook events for orders outside the 7-day window won't get a number resolved
+  // (they'll show matched_order_number: null), which is fine — the UUID is still shown.
+  const orderNumberById = new Map<string, string>();
+  for (const o of orders) {
+    if (o.id && o.order_number) orderNumberById.set(o.id, o.order_number);
+  }
+  const waveWebhookEvents: WaveWebhookEvent[] = webhookEventsRaw.map((e) => ({
+    id: String(e.id),
+    received_at: e.received_at,
+    event_type: e.event_type,
+    resource_id: e.resource_id ?? null,
+    matched_order_id: e.matched_order_id ?? null,
+    matched_order_number: e.matched_order_id ? (orderNumberById.get(e.matched_order_id) ?? null) : null,
+    ok: e.ok,
+    detail: e.detail ?? null,
+  }));
+
+  // ── derive email delivery health ──────────────────────────────────────────
+  const sentCount = emailDeliveryRaw.length;
+  const deliveredCount = emailDeliveryRaw.filter((r) => r.delivered_at).length;
+  const openedCount = emailDeliveryRaw.filter((r) => r.opened_at).length;
+  const bouncedCount = emailDeliveryRaw.filter((r) => r.bounced_at).length;
+  const emailDeliveryHealth: EmailDeliveryHealth = {
+    sent: sentCount,
+    delivered: deliveredCount,
+    opened: openedCount,
+    bounced: bouncedCount,
+    delivery_rate_pct: sentCount > 0 ? Math.round((deliveredCount / sentCount) * 100) : null,
+    open_rate_pct: deliveredCount > 0 ? Math.round((openedCount / deliveredCount) * 100) : null,
+  };
+
   return {
     rows,
     heartbeats,
@@ -885,6 +938,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     seoMovers,
     priceConsistency: checkPriceConsistency(),
     refundsPending: await fetchRefundsPending(supabase, now),
+    waveWebhookEvents,
+    emailDeliveryHealth,
   };
 }
 

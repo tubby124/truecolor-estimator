@@ -66,6 +66,30 @@ export async function POST(req: NextRequest) {
   const eventData = event.data as Record<string, unknown> | undefined;
   const resource = eventData?.resource as Record<string, unknown> | undefined;
 
+  const supabase = createServiceClient();
+
+  // Helper — log every event to webhook_events (non-fatal: never break the webhook)
+  async function logWebhookEvent(opts: {
+    eventType: string;
+    resourceId: string | null;
+    matchedOrderId: string | null;
+    ok: boolean;
+    detail: string;
+  }) {
+    try {
+      await supabase.from("webhook_events").insert({
+        event_source: "wave",
+        event_type: opts.eventType,
+        resource_id: opts.resourceId,
+        matched_order_id: opts.matchedOrderId,
+        ok: opts.ok,
+        detail: opts.detail,
+      });
+    } catch (err) {
+      console.error("[wave-webhook] webhook_events log failed (non-fatal):", err);
+    }
+  }
+
   // Only handle invoice.paid events
   if (
     eventData?.resourceType === "invoice" &&
@@ -76,8 +100,6 @@ export async function POST(req: NextRequest) {
     console.log("[wave-webhook] invoice paid event →", waveInvoiceId);
 
     try {
-      const supabase = createServiceClient();
-
       // Look up the order by wave_invoice_id
       const { data: order, error } = await supabase
         .from("orders")
@@ -87,10 +109,24 @@ export async function POST(req: NextRequest) {
 
       if (error || !order) {
         console.warn("[wave-webhook] No order found for wave_invoice_id:", waveInvoiceId);
+        await logWebhookEvent({
+          eventType: "invoice.paid",
+          resourceId: waveInvoiceId,
+          matchedOrderId: null,
+          ok: false,
+          detail: "no order found for wave_invoice_id",
+        });
       } else if (order.status !== "pending_payment") {
         console.log(
           `[wave-webhook] Order ${order.order_number} already past pending_payment (status: ${order.status}) — skipping`
         );
+        await logWebhookEvent({
+          eventType: "invoice.paid",
+          resourceId: waveInvoiceId,
+          matchedOrderId: order.id,
+          ok: true,
+          detail: `order ${order.order_number} already ${order.status} — skipped`,
+        });
       } else {
         // Advance order to payment_received
         const { error: updateErr } = await supabase
@@ -100,8 +136,22 @@ export async function POST(req: NextRequest) {
 
         if (updateErr) {
           console.error("[wave-webhook] order update failed:", updateErr.message);
+          await logWebhookEvent({
+            eventType: "invoice.paid",
+            resourceId: waveInvoiceId,
+            matchedOrderId: order.id,
+            ok: false,
+            detail: `order update failed: ${updateErr.message}`,
+          });
         } else {
           console.log(`[wave-webhook] order ${order.order_number} → payment_received`);
+          await logWebhookEvent({
+            eventType: "invoice.paid",
+            resourceId: waveInvoiceId,
+            matchedOrderId: order.id,
+            ok: true,
+            detail: `order ${order.order_number} → payment_received`,
+          });
 
           // Send payment confirmed email (non-fatal)
           try {
@@ -184,7 +234,17 @@ export async function POST(req: NextRequest) {
       console.error("[wave-webhook] unexpected error:", err);
     }
   } else {
+    const eventType = eventData?.resourceType
+      ? `${eventData.resourceType}.${resource?.status ?? "unknown"}`
+      : "unknown";
     console.log("[wave-webhook] unhandled event — resourceType:", eventData?.resourceType, "status:", resource?.status);
+    await logWebhookEvent({
+      eventType,
+      resourceId: (resource?.id as string | null) ?? null,
+      matchedOrderId: null,
+      ok: true,
+      detail: "unhandled event type — no action taken",
+    });
   }
 
   // Always return 200 — Wave retries on non-200

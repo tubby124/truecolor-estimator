@@ -28,19 +28,15 @@ import { recordAuditEvent } from "@/lib/audit/record";
 interface WaveInvoiceState {
   id: string;
   invoiceNumber: string;
-  status: string;        // DRAFT | SAVED | UNPAID | PARTIAL | PAID | OVERPAID
-  approvedAt: string | null;
-  payments?: {
-    edges: Array<{
-      node: {
-        id: string;
-        amount: { raw: string };
-        paymentMethod: string;
-        memo: string | null;
-        transferDate: string;
-      };
-    }>;
-  };
+  // DRAFT | SAVED | UNPAID | OVERDUE | PARTIAL | PAID | OVERPAID
+  // Wave public API does NOT expose approvedAt or payment-level records.
+  // We detect "approved" as any status that is no longer DRAFT (i.e. sent/visible).
+  // We detect "paid" via status === PAID and amountDue.raw === 0.
+  status: string;
+  createdAt: string;
+  modifiedAt: string;
+  amountDue: { raw: number };
+  amountPaid: { raw: number };
 }
 
 const INVOICE_QUERY = `
@@ -50,18 +46,10 @@ const INVOICE_QUERY = `
         id
         invoiceNumber
         status
-        approvedAt
-        payments {
-          edges {
-            node {
-              id
-              amount { raw }
-              paymentMethod
-              memo
-              transferDate
-            }
-          }
-        }
+        createdAt
+        modifiedAt
+        amountDue { raw }
+        amountPaid { raw }
       }
     }
   }
@@ -112,9 +100,11 @@ export async function GET(req: NextRequest) {
 
         const updates: Record<string, unknown> = {};
 
-        // Backfill approved_at if Wave shows approved but local doesn't
-        if (!o.wave_invoice_approved_at && inv.approvedAt) {
-          updates.wave_invoice_approved_at = inv.approvedAt;
+        // Backfill wave_invoice_approved_at: Wave has no "approvedAt" field.
+        // We treat any invoice that has moved past DRAFT as "approved" (sent/visible
+        // to the customer). Use modifiedAt as the timestamp proxy.
+        if (!o.wave_invoice_approved_at && inv.status !== "DRAFT") {
+          updates.wave_invoice_approved_at = inv.modifiedAt;
           approvedBackfilled++;
           void recordAuditEvent({
             actor_type: "cron",
@@ -125,35 +115,31 @@ export async function GET(req: NextRequest) {
             detail: {
               source: "wave-poll-backfill",
               wave_invoice_number: inv.invoiceNumber,
-              approved_at: inv.approvedAt,
+              wave_status: inv.status,
+              approved_at: inv.modifiedAt,
             },
           });
         }
 
-        // Backfill payment timestamp if Wave shows paid but local doesn't.
-        // Use the most recent payment's transferDate.
-        if (!o.wave_payment_recorded_at && inv.status === "PAID") {
-          const payments = inv.payments?.edges ?? [];
-          const latest = payments
-            .map((e) => e.node)
-            .sort((a, b) => b.transferDate.localeCompare(a.transferDate))[0];
-          if (latest) {
-            updates.wave_payment_recorded_at = `${latest.transferDate}T00:00:00Z`;
-            paymentBackfilled++;
-            void recordAuditEvent({
-              actor_type: "cron",
-              actor_id: "wave-poll",
-              event_type: "wave.payment_recorded",
-              entity_type: "order",
-              entity_id: o.id,
-              detail: {
-                source: "wave-poll-backfill",
-                wave_invoice_number: inv.invoiceNumber,
-                payment_method: latest.paymentMethod,
-                amount: latest.amount.raw,
-              },
-            });
-          }
+        // Backfill wave_payment_recorded_at if Wave shows paid but local doesn't.
+        // Wave public API doesn't expose individual payment records — use modifiedAt
+        // as the best available timestamp when status is PAID and amountDue is 0.
+        if (!o.wave_payment_recorded_at && inv.status === "PAID" && inv.amountDue.raw === 0) {
+          updates.wave_payment_recorded_at = inv.modifiedAt;
+          paymentBackfilled++;
+          void recordAuditEvent({
+            actor_type: "cron",
+            actor_id: "wave-poll",
+            event_type: "wave.payment_recorded",
+            entity_type: "order",
+            entity_id: o.id,
+            detail: {
+              source: "wave-poll-backfill",
+              wave_invoice_number: inv.invoiceNumber,
+              amount_paid: inv.amountPaid.raw,
+              modified_at: inv.modifiedAt,
+            },
+          });
         }
 
         if (Object.keys(updates).length > 0) {
