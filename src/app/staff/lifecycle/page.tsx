@@ -144,27 +144,43 @@ async function fetchLifecycle(): Promise<LifecycleRow[]> {
   );
 
   // email_log is keyed on to_address (no order_id link), so we match by (email + time window)
+  const orderIds = orders.map((o) => o.id);
+
   let emailLog: Array<{
     to_address: string | null;
     subject: string | null;
-    created_at: string | null;
+    sent_at: string | null;
     status: string | null;
+    order_id: string | null;
   }> = [];
   if (customerEmails.length > 0) {
-    const { data: log } = await supabase
+    // Pull by (order_id IN ours) OR (to_address IN customer emails) so we catch
+    // both the backfilled/linked rows AND the legacy unlinked rows.
+    const { data: byOrderId } = await supabase
       .from("email_log")
-      .select("to_address, subject, created_at, status")
-      .gte("created_at", cutoff)
+      .select("to_address, subject, sent_at, status, order_id")
+      .in("order_id", orderIds)
+      .limit(2000);
+    const { data: byEmail } = await supabase
+      .from("email_log")
+      .select("to_address, subject, sent_at, status, order_id")
+      .gte("sent_at", cutoff)
       .in("to_address", customerEmails)
       .limit(2000);
-    emailLog = log ?? [];
+    const seen = new Set<string>();
+    for (const row of [...(byOrderId ?? []), ...(byEmail ?? [])]) {
+      const key = `${row.sent_at ?? ""}::${row.to_address ?? ""}::${row.subject ?? ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      emailLog.push(row);
+    }
   }
 
   // Staff notifications go to info@true-color.ca — fetch separately
   const { data: staffLog } = await supabase
     .from("email_log")
-    .select("to_address, subject, created_at, status")
-    .gte("created_at", cutoff)
+    .select("to_address, subject, sent_at, status, order_id")
+    .gte("sent_at", cutoff)
     .ilike("subject", "NEW ORDER%")
     .limit(2000);
 
@@ -177,13 +193,14 @@ async function fetchLifecycle(): Promise<LifecycleRow[]> {
     const createdAt = o.created_at ? new Date(o.created_at) : new Date();
     const ageHours = (now - createdAt.getTime()) / (1000 * 60 * 60);
 
-    // Find emails sent to this customer since order creation
-    const orderEmails = emailLog.filter(
-      (e) =>
-        e.to_address?.toLowerCase() === customerEmail &&
-        e.created_at &&
-        new Date(e.created_at).getTime() >= createdAt.getTime()
-    );
+    // Prefer order_id link when present (accurate); fall back to (email + time window).
+    const orderEmails = emailLog.filter((e) => {
+      if (e.order_id === o.id) return true;
+      if (e.order_id) return false; // linked to a different order
+      if (e.to_address?.toLowerCase() !== customerEmail) return false;
+      if (!e.sent_at) return false;
+      return new Date(e.sent_at).getTime() >= createdAt.getTime();
+    });
 
     const orderNumber = o.order_number ?? "";
     const hasSubject = (patterns: RegExp[]): boolean =>

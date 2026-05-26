@@ -36,6 +36,14 @@ export interface SendEmailOptions {
   text?: string;
   priority?: "high" | "normal" | "low";
   attachments?: SendEmailAttachment[];
+  /**
+   * Lifecycle linkage — when set, the email_log row is tagged with the order
+   * and customer so /staff/lifecycle can show a real-time green pip without
+   * relying on (email + time window) heuristics. Callers SHOULD pass these
+   * whenever the email belongs to a specific order or customer.
+   */
+  orderId?: string;
+  customerId?: string;
 }
 
 /** Strip name part from "Display Name <addr@example.com>" → "addr@example.com" */
@@ -150,6 +158,8 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
       email_type: options.subject,
       subject: options.subject,
       status: "sent",
+      ...(options.orderId ? { order_id: options.orderId } : {}),
+      ...(options.customerId ? { customer_id: options.customerId } : {}),
     }));
     fetch(`${supabaseUrl}/rest/v1/email_log`, {
       method: "POST",
