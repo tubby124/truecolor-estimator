@@ -134,7 +134,7 @@ async function main() {
   console.log("Fetching Supabase paid orders…");
   const { data: sbOrders, error: sbErr } = await sb
     .from("orders")
-    .select("order_number, total, payment_method, paid_at, status, wave_invoice_id, wave_payment_recorded_at")
+    .select("order_number, total, payment_method, paid_at, status, wave_invoice_id, wave_payment_recorded_at, payment_reference")
     .not("paid_at", "is", null)
     .gte("paid_at", cutoff)
     .not("order_number", "like", "TEST-%")  // exclude harness test rows
@@ -267,32 +267,50 @@ async function main() {
 
     cloverTotal = successfulPayments.reduce((acc, p) => acc + (p.amount ?? 0), 0) / 100; // cents → dollars
     cloverOrders = successfulPayments;
-    console.log(`  Clover successful payments: ${successfulPayments.length}, total ${$(cloverTotal)}`);
 
-    // Cross-check Clover vs Supabase clover_card orders
+    // ── POS-OUT semantics (Hasan decision 2026-05-25) ──────────────────────
+    // Verified against live Clover data 2026-05-25: the externalReferenceId we set
+    // at hosted checkout does NOT propagate to the REST payment.order object, so
+    // reference-matching is impossible. The reliable discriminator is the physical
+    // device: walk-in terminal sales carry order.device + order.employee; website
+    // hosted-checkout payments do NOT. We therefore:
+    //   • classify website payments = those WITHOUT order.device
+    //   • match each website clover_card Supabase order to a website Clover payment
+    //     by amount (cents), greedy single-consume
+    //   • treat device-backed payments as POS walk-ins → informational, never flagged
+    const isWalkIn = (p) => Boolean(p.order?.device);
+    const websitePayments = successfulPayments.filter((p) => !isWalkIn(p));
+    const walkInPayments = successfulPayments.filter(isWalkIn);
+    const walkInTotal = walkInPayments.reduce((a, p) => a + (p.amount ?? 0), 0) / 100;
+
     const sbCloverTotal = sum(sbClover);
-    const cloverDelta = Math.abs(sbCloverTotal - cloverTotal);
-
+    console.log(`  Clover successful payments: ${successfulPayments.length}, total ${$(cloverTotal)}`);
+    console.log(`    website (online): ${websitePayments.length}, total ${$((cloverTotal - walkInTotal))}`);
+    console.log(`    POS walk-in (device): ${walkInPayments.length}, total ${$(walkInTotal)} — out of scope, not flagged`);
     console.log(`  Supabase clover_card paid: ${sbClover.length} orders, total ${$(sbCloverTotal)}`);
 
-    if (Math.abs(successfulPayments.length - sbClover.length) > 2) {
-      // Allow ±2 for POS terminal walk-in sales (those don't have Supabase rows)
-      const msg = `Clover payment count (${successfulPayments.length}) vs Supabase clover_card orders (${sbClover.length}) — delta ${successfulPayments.length - sbClover.length}`;
-      console.log(`  ⚠  ${msg}`);
-      console.log(`     Note: POS terminal walk-in sales appear in Clover but NOT Supabase — confirm if gap = walk-in count`);
-      issues.push(msg);
-    } else {
-      console.log(`  ✅ Clover payment count matches Supabase clover_card orders (±2 for POS walk-ins)`);
+    // Greedy amount-match: each website Clover payment can satisfy at most one order.
+    const availableCents = websitePayments.map((p) => p.amount ?? 0);
+    const sbCloverUnmatched = [];
+    for (const o of sbClover) {
+      const cents = Math.round(Number(o.total ?? 0) * 100);
+      const idx = availableCents.findIndex((c) => Math.abs(c - cents) <= 1); // ±1¢ rounding
+      if (idx === -1) {
+        sbCloverUnmatched.push(o);
+      } else {
+        availableCents.splice(idx, 1); // consume it
+      }
     }
 
-    if (cloverDelta > 1.00) {
-      // Allow $1 tolerance for POS walk-ins (unknown dollar amounts)
-      const msg = `Clover total ${$(cloverTotal)} vs Supabase clover_card total ${$(sbCloverTotal)} — delta ${$(cloverDelta)}`;
-      console.log(`  ⚠  ${msg}`);
-      console.log(`     Note: If POS walk-in sales exist, this delta is expected — confirm manually`);
-      issues.push(msg);
+    if (sbCloverUnmatched.length > 0) {
+      console.log(`  ❌ ${sbCloverUnmatched.length} website clover_card order(s) marked paid but NO website Clover payment of matching amount:`);
+      for (const o of sbCloverUnmatched.slice(0, 5)) {
+        console.log(`     • ${o.order_number}  ${$(o.total)}  paid ${o.paid_at?.slice(0, 10)}`);
+      }
+      console.log(`     DANGEROUS direction — we recorded money Clover may not have collected. Verify in Clover dashboard.`);
+      issues.push(`${sbCloverUnmatched.length} website clover_card order(s) paid in Supabase with no matching Clover payment`);
     } else {
-      console.log(`  ✅ Clover total within $1.00 of Supabase clover_card total`);
+      console.log(`  ✅ Every website clover_card order has a matching website Clover payment`);
     }
 
   } catch (cloverErr) {
