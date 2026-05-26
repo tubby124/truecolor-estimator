@@ -169,6 +169,8 @@ All crons gated by `CRON_SECRET`. No cron heartbeat / last-ran timestamp yet →
 
 **Done:**
 - `scripts/harness/webhook-health.mjs` + `npm run harness:webhooks[:probe]`. Live prod probe: Clover/Wave/Brevo all **alive + fail-closed (401)**. ✅ This answers "are the payment webhooks up and rejecting forgeries."
+- `scripts/harness/reconcile-check.mjs` + `npm run harness:reconcile[:7d]`. Read-only 3-way Supabase↔Wave↔Clover audit. ✅ First run flagged: TC-2026-0111 wave_payment_recorded_at NULL (cron heals), **Wave PAID=0 vs 4 wave-linked Supabase orders (likely stale Wave webhook URL)**, Clover +4/+$1,687 (POS walk-ins — Domain D scope pending).
+- `src/app/api/health/route.ts` (enhanced) + `scripts/harness/config-check.mjs` + `npm run harness:config`. Severity-aware Railway env-shape probe. ✅ Prod: all FAIL checks pass; one WARN — `PAYMENT_TOKEN_SECRET` below 64-hex (works; do NOT rotate casually).
 
 **NEW findings → folded into next phase (were not in the plan before):**
 1. **Wave webhook setup doc points at a `vercel.app` URL** (`webhooks/wave/route.ts` lines 10-12) — but prod is Railway/truecolorprinting.ca. **VERIFY the actual URL registered in the Wave dashboard.** If stale → every Wave payment silently fails to sync. Highest-priority manual check.
