@@ -17,16 +17,34 @@ import { classifyEmail } from "./EmailFeedPanel";
 import type { CouponRedemption } from "./CouponsPanel";
 import type { WaveDraftRow } from "./WaveDraftPanel";
 import type { ActivityEvent } from "./ActivityFeedPanel";
+import type { BookkeepingRiskRow } from "./BookkeepingRiskPanel";
+import type { HealthSnapshot } from "./HealthTiles";
+import type { PendingCouponRow } from "./PendingCouponsPanel";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
 
+// Every cron expected to call recordCronRun() at the end of a successful run.
+// Window = max acceptable age between runs. Stale = alert.
+// 2026-05-26 audit findings:
+//   - Original list used underscore names (payment_failure_recovery, wave_reconcile,
+//     daily_digest, keepalive) — but the crons actually record kebab-case names
+//     (payment-followup, reconcile-payments, daily-payment-digest, keepalive).
+//     Heartbeat panel was silently showing every row as stale because no row in
+//     cron_runs matched the expected names. Fixed to use actual recorded names.
+//   - aging-orders, stale-quotes, gsc-sync, keepalive previously had no heartbeat
+//     call at all → now instrumented (this commit) and added here.
+//   - keepalive window 2h → 26h (was flagging false positives — runs daily).
+// gsc-backfill and process-blitz-replies are manual-trigger only, not scheduled,
+// so they're intentionally excluded from this list (no expected cadence).
 const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
-  { name: "payment_failure_recovery", maxAgeHours: 26 },
-  { name: "review_request", maxAgeHours: 26 },
-  { name: "wave_reconcile", maxAgeHours: 26 },
-  { name: "keepalive", maxAgeHours: 2 },
-  { name: "daily_digest", maxAgeHours: 26 },
+  { name: "payment-followup",       maxAgeHours: 2  },  // hourly
+  { name: "stale-quotes",           maxAgeHours: 2  },  // hourly
+  { name: "daily-payment-digest",   maxAgeHours: 26 },  // daily 13:00 UTC
+  { name: "reconcile-payments",     maxAgeHours: 26 },  // daily 15:00 UTC
+  { name: "aging-orders",           maxAgeHours: 26 },  // daily 09:00 MT
+  { name: "keepalive",              maxAgeHours: 26 },  // daily 12:00 UTC
+  { name: "gsc-sync",               maxAgeHours: 26 },  // daily
 ];
 
 export interface LifecycleData {
@@ -39,6 +57,9 @@ export interface LifecycleData {
   redemptions: CouponRedemption[];
   waveDrafts: WaveDraftRow[];
   activity: ActivityEvent[];
+  bookkeepingRisks: BookkeepingRiskRow[];
+  health: HealthSnapshot;
+  pendingCoupons: PendingCouponRow[];
 }
 
 export async function fetchLifecycleData(): Promise<LifecycleData> {
@@ -510,6 +531,116 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   // Newest first
   activity.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
 
+  // ── derive Bookkeeping risks (audit-surfaced silent-fail surfaces) ───────
+  const bookkeepingRisks: BookkeepingRiskRow[] = [];
+  const PAID_STATES = new Set(["paid", "in_production", "ready_for_pickup", "completed"]);
+  // We need ALL orders (not just 7d) to catch historical silent desyncs — we already
+  // fetched paidWave for this purpose; pull the broader silent-fail conditions from it.
+  for (const o of paidWave) {
+    const customer = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+    const customerName = customer?.name ?? "—";
+    const createdAt = o.created_at ? new Date(o.created_at) : new Date();
+    const ageHours = (now - createdAt.getTime()) / (1000 * 60 * 60);
+    const totalNum = Number(o.total ?? 0);
+    const isPaid = PAID_STATES.has(o.status ?? "");
+    if (!o.wave_invoice_id && isPaid) {
+      bookkeepingRisks.push({
+        id: o.id, order_number: o.order_number ?? "", customer_name: customerName,
+        status: o.status ?? "—", payment_method: "—", total: totalNum, age_hours: ageHours,
+        category: "no_wave_invoice",
+        diagnosis: "Order is paid but has no Wave invoice. Wave API likely failed at order creation.",
+        remediation: "Open Wave dashboard → create invoice manually for this customer + amount. Then link the wave_invoice_id to this order in staff portal.",
+      });
+    }
+    if (o.wave_invoice_id && o.wave_invoice_approved_at && !o.wave_payment_recorded_at && isPaid) {
+      bookkeepingRisks.push({
+        id: o.id, order_number: o.order_number ?? "", customer_name: customerName,
+        status: o.status ?? "—", payment_method: "—", total: totalNum, age_hours: ageHours,
+        category: "half_recorded",
+        diagnosis: "Wave invoice approved but payment never recorded. Customer's tax invoice shows UNPAID (2026-05-22 bug class).",
+        remediation: "Open Wave invoice → record payment manually for the captured amount. Then re-check 'wave_payment_recorded_at' is set.",
+      });
+    }
+    // Inconsistent invoice id vs number
+    if ((o.wave_invoice_id && !o.wave_invoice_number) || (!o.wave_invoice_id && o.wave_invoice_number)) {
+      bookkeepingRisks.push({
+        id: o.id, order_number: o.order_number ?? "", customer_name: customerName,
+        status: o.status ?? "—", payment_method: "—", total: totalNum, age_hours: ageHours,
+        category: "invoice_number_hole",
+        diagnosis: "wave_invoice_id / wave_invoice_number mismatch — one is set without the other.",
+        remediation: "Verify Wave invoice exists; backfill the missing column from the Wave API.",
+      });
+    }
+  }
+  // Also surface SLA violations + NULL payment_reference from in-window orders
+  for (const o of orders) {
+    if (o.status === "pending_payment") {
+      const createdAt = o.created_at ? new Date(o.created_at) : new Date();
+      const ageHours = (now - createdAt.getTime()) / (1000 * 60 * 60);
+      if (ageHours > 72) {
+        const customer = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+        bookkeepingRisks.push({
+          id: o.id, order_number: o.order_number ?? "", customer_name: customer?.name ?? "—",
+          status: o.status, payment_method: o.payment_method ?? "—", total: Number(o.total ?? 0), age_hours: ageHours,
+          category: "sla_violation",
+          diagnosis: "Order has been pending_payment for over 72h — payment-followup cron should have recovered or staff should have voided.",
+          remediation: "Either resend a fresh Pay Now link via the Orphans panel OR void/archive the order.",
+        });
+      }
+    }
+  }
+
+  // ── derive Health tiles ─────────────────────────────────────────────────
+  const cutoff24Ms = now - 24 * 60 * 60 * 1000;
+  const ordersIn24h = orders.filter((o) => o.created_at && new Date(o.created_at).getTime() >= cutoff24Ms);
+  const emails24h = emailLog.filter((e) => e.sent_at && new Date(e.sent_at).getTime() >= cutoff24Ms);
+  const payLinks7d = emailLog.filter((e) => /^(Payment Request|Your Quote|Your Custom Print Quote|Complete your payment)/i.test(e.subject ?? ""));
+  const payLinks24h = payLinks7d.filter((e) => e.sent_at && new Date(e.sent_at).getTime() >= cutoff24Ms);
+  const signups24h = customers.filter((c) => c.created_at && new Date(c.created_at).getTime() >= cutoff24Ms);
+  const redemptions24h = redemptions.filter((r) => r.redeemed_at && new Date(r.redeemed_at).getTime() >= cutoff24Ms);
+  const revenue7d = orders
+    .filter((o) => o.wave_payment_recorded_at)
+    .reduce((sum, o) => sum + Number(o.total ?? 0), 0);
+  const revenue24h = orders
+    .filter((o) => o.wave_payment_recorded_at && new Date(o.wave_payment_recorded_at).getTime() >= cutoff24Ms)
+    .reduce((sum, o) => sum + Number(o.total ?? 0), 0);
+  const paymentsCaptured7d = orders.filter((o) => o.wave_payment_recorded_at).length;
+  const paymentsCaptured24h = orders.filter((o) => o.wave_payment_recorded_at && new Date(o.wave_payment_recorded_at).getTime() >= cutoff24Ms).length;
+  const health: HealthSnapshot = {
+    orders_24h: ordersIn24h.length,
+    orders_7d: orders.length,
+    revenue_24h: revenue24h,
+    revenue_7d: revenue7d,
+    emails_24h: emails24h.length,
+    emails_7d: emailLog.length,
+    pay_links_24h: payLinks24h.length,
+    pay_links_7d: payLinks7d.length,
+    signups_24h: signups24h.length,
+    signups_7d: customers.length,
+    coupons_redeemed_24h: redemptions24h.length,
+    coupons_redeemed_7d: redemptions.length,
+    payments_captured_24h: paymentsCaptured24h,
+    payments_captured_7d: paymentsCaptured7d,
+  };
+
+  // ── derive Pending coupons (issued but not redeemed) ────────────────────
+  const { data: pendingCouponsRaw } = await supabase
+    .from("customers")
+    .select("id, email, name, pending_discount_code, updated_at, order_count")
+    .not("pending_discount_code", "is", null);
+  const pendingCoupons: PendingCouponRow[] = (pendingCouponsRaw ?? []).map((c) => {
+    const updatedAt = c.updated_at ? new Date(c.updated_at) : new Date();
+    return {
+      customer_id: c.id,
+      customer_name: c.name ?? "",
+      customer_email: c.email ?? "",
+      code: c.pending_discount_code ?? "",
+      issued_age_hours: (now - updatedAt.getTime()) / (1000 * 60 * 60),
+      customer_order_count: Number(c.order_count ?? 0),
+    };
+  });
+  pendingCoupons.sort((a, b) => b.issued_age_hours - a.issued_age_hours);
+
   return {
     rows,
     heartbeats,
@@ -520,5 +651,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     redemptions: redemptionRows,
     waveDrafts,
     activity,
+    bookkeepingRisks,
+    health,
+    pendingCoupons,
   };
 }

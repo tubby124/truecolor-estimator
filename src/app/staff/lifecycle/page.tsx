@@ -28,6 +28,9 @@ import { EmailFeedPanel } from "./EmailFeedPanel";
 import { CouponsPanel } from "./CouponsPanel";
 import { WaveDraftPanel } from "./WaveDraftPanel";
 import { ActivityFeedPanel } from "./ActivityFeedPanel";
+import { BookkeepingRiskPanel } from "./BookkeepingRiskPanel";
+import { HealthTiles } from "./HealthTiles";
+import { PendingCouponsPanel } from "./PendingCouponsPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -79,13 +82,16 @@ export default async function LifecyclePage() {
           </div>
         ) : data ? (
           <div className="space-y-2">
+            <HealthTiles snap={data.health} />
             <HeartbeatsPanel heartbeats={data.heartbeats} />
+            <BookkeepingRiskPanel rows={data.bookkeepingRisks} />
             <OrphanPanel orphans={data.orphans} />
             <WaveDraftPanel rows={data.waveDrafts} />
             <LifecycleTable rows={data.rows} />
             <ActivityFeedPanel events={data.activity} />
             <QuotesPanel quotes={data.quotes} />
             <SignupsPanel signups={data.signups} />
+            <PendingCouponsPanel rows={data.pendingCoupons} />
             <CouponsPanel redemptions={data.redemptions} />
             <EmailFeedPanel events={data.emailFeed} />
           </div>

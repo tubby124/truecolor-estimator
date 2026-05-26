@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
+import { recordCronRun } from "@/lib/cron/heartbeat";
 
 const FROM = "True Color Display Printing <hello@outreach.true-color.ca>";
 const DIGEST_TO = "info@true-color.ca";
@@ -62,6 +63,7 @@ export async function GET(req: NextRequest) {
 
   if (pending.length === 0 && production.length === 0) {
     console.log("[aging-orders] no aging orders — digest skipped");
+    await recordCronRun("aging-orders", true, "no aging orders");
     return NextResponse.json({ ok: true, stalePending: 0, staleProduction: 0 });
   }
 
@@ -164,6 +166,8 @@ export async function GET(req: NextRequest) {
   console.log(
     `[aging-orders] digest sent → ${DIGEST_TO} | stalePending=${pending.length} | staleProduction=${production.length}`
   );
+
+  await recordCronRun("aging-orders", true, `pending=${pending.length} prod=${production.length}`);
 
   return NextResponse.json({
     ok: true,

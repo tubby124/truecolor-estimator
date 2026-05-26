@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
+import { recordCronRun } from "@/lib/cron/heartbeat";
 
 function esc(s: string) {
   return s
@@ -48,6 +49,7 @@ export async function GET(req: NextRequest) {
 
     const count = stale?.length ?? 0;
     if (count === 0) {
+      await recordCronRun("stale-quotes", true, "no stale quotes");
       return NextResponse.json({ ok: true, stale: 0 });
     }
 
@@ -116,10 +118,12 @@ export async function GET(req: NextRequest) {
     });
 
     console.log(`[stale-quotes] alert sent — ${count} stale quote(s)`);
+    await recordCronRun("stale-quotes", true, `stale=${count}`);
     return NextResponse.json({ ok: true, stale: count });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Stale-quotes cron failed";
     console.error("[stale-quotes]", msg);
+    await recordCronRun("stale-quotes", false, msg.slice(0, 200));
     return NextResponse.json({ ok: false, error: msg }, { status: 500 });
   }
 }

@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { pullGscRows } from "@/lib/seo/gsc-client";
+import { recordCronRun } from "@/lib/cron/heartbeat";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -103,6 +104,7 @@ export async function GET(req: NextRequest) {
       `[gsc-sync] OK | range ${dateFromStr}..${dateToStr} | rows ${totalRows} | upserts ${totalUpserts} | ${elapsedMs}ms`,
     );
 
+    await recordCronRun("gsc-sync", true, `rows=${totalRows} upserts=${totalUpserts} ${elapsedMs}ms`);
     return NextResponse.json({
       ok: true,
       dateFrom: dateFromStr,
@@ -124,6 +126,7 @@ export async function GET(req: NextRequest) {
       error_message: message.slice(0, 500),
     });
 
+    await recordCronRun("gsc-sync", false, message.slice(0, 200));
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }

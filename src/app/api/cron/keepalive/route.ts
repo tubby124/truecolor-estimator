@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { recordCronRun } from "@/lib/cron/heartbeat";
 
 export async function GET(req: NextRequest) {
   // Verify request is from Vercel Cron (or a trusted caller with the secret)
@@ -36,15 +37,18 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       console.error("[keepalive] Supabase ping failed:", error.message);
+      await recordCronRun("keepalive", false, error.message.slice(0, 200));
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
 
     const timestamp = new Date().toISOString();
     console.log(`[keepalive] Supabase ping OK | orders: ${count ?? 0} | ${timestamp}`);
+    await recordCronRun("keepalive", true, `orders=${count ?? 0}`);
     return NextResponse.json({ ok: true, orderCount: count ?? 0, timestamp });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Keepalive failed";
     console.error("[keepalive] unexpected error:", message);
+    await recordCronRun("keepalive", false, message.slice(0, 200));
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
