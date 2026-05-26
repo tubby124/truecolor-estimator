@@ -16,6 +16,8 @@
     "validate:pricing": "node scripts/validate-pricing.mjs",
     "harness:webhooks": "node scripts/harness/webhook-health.mjs",
     "harness:webhooks:probe": "node scripts/harness/webhook-health.mjs --probe",
+    "harness:reconcile": "node scripts/harness/reconcile-check.mjs",
+    "harness:reconcile:7d": "node scripts/harness/reconcile-check.mjs --days 7",
     "test:e2e:pw": "playwright test",
     "test:e2e:pw:ui": "playwright test --ui"
   },
