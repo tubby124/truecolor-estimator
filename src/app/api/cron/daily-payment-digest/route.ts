@@ -146,15 +146,69 @@ export async function GET(req: NextRequest) {
 
   const waveStuckRows: OrderRow[] = (waveStuck as OrderRow[] | null) ?? [];
 
+  // 3c. Cron health — detect SILENT cron death. The digest reads the cron_runs
+  //     heartbeat table and flags any monitored cron that hasn't run within its
+  //     window. This is the autonomous surfacing of the heartbeat data: if a
+  //     cron silently stops (CRON_SECRET drift, pg_cron unscheduled), every
+  //     downstream protection dies invisibly. The digest itself can't report
+  //     its OWN death — but a missing morning digest IS that signal to Hasan.
+  //     Windows: reconcile-payments daily (36h), payment-followup hourly (5h).
+  const CRON_WINDOWS_HOURS: Record<string, number> = {
+    "reconcile-payments": 36,
+    "payment-followup": 5,
+  };
+  const staleCrons: { name: string; ageHours: number | null; window: number }[] = [];
+  {
+    const { data: cronRows, error: cronErr } = await supabase
+      .from("cron_runs")
+      .select("cron_name, ran_at")
+      .in("cron_name", Object.keys(CRON_WINDOWS_HOURS))
+      .order("ran_at", { ascending: false })
+      .limit(100);
+    if (!cronErr) {
+      const latest: Record<string, string> = {};
+      for (const r of (cronRows as { cron_name: string; ran_at: string }[] | null) ?? []) {
+        if (!latest[r.cron_name]) latest[r.cron_name] = r.ran_at;
+      }
+      for (const [name, win] of Object.entries(CRON_WINDOWS_HOURS)) {
+        const last = latest[name];
+        if (!last) {
+          staleCrons.push({ name, ageHours: null, window: win });
+          continue;
+        }
+        const ageHours = (Date.now() - new Date(last).getTime()) / 3_600_000;
+        if (ageHours > win) staleCrons.push({ name, ageHours, window: win });
+      }
+    }
+    // cronErr (table missing) is silently ignored — never break the digest.
+  }
+
   // ── Build Telegram message ────────────────────────────────────────────────
   const lines: string[] = [];
   const dateLabel = yesterdayMt.toLocaleDateString("en-CA", { month: "long", day: "numeric" });
 
-  const hasAnyActivity = paidRows.length > 0 || pendingRows.length > 0 || ghostRows.length > 0 || waveStuckRows.length > 0;
+  const hasAnyActivity = paidRows.length > 0 || pendingRows.length > 0 || ghostRows.length > 0 || waveStuckRows.length > 0 || staleCrons.length > 0;
+
+  // Reusable cron-death lines — appended in both quiet + active branches.
+  const cronHealthLines: string[] = [];
+  if (staleCrons.length > 0) {
+    cronHealthLines.push(`🚨 <b>CRON SILENT — not running:</b>`);
+    for (const c of staleCrons) {
+      const age = c.ageHours === null ? "never recorded" : `last ran ${c.ageHours.toFixed(0)}h ago (window ${c.window}h)`;
+      cronHealthLines.push(`   • <code>${escapeTelegramHtml(c.name)}</code> — ${age}`);
+    }
+    cronHealthLines.push(`   <i>Downstream emails/recovery/recon may be silently stopped. Check pg_cron + CRON_SECRET.</i>`);
+  }
 
   if (!hasAnyActivity) {
     lines.push(`<b>✅ True Color · ${escapeTelegramHtml(dateLabel)}</b>`);
     lines.push(`Quiet day. $0 collected. No outstanding flags.`);
+  } else if (staleCrons.length > 0 && paidRows.length === 0 && pendingRows.length === 0 && ghostRows.length === 0 && waveStuckRows.length === 0) {
+    // Quiet on money but a cron is down — lead with the alarm.
+    lines.push(`<b>📊 True Color · Daily Digest · ${escapeTelegramHtml(dateLabel)}</b>`);
+    lines.push(`Quiet day on payments, but:`);
+    lines.push("");
+    lines.push(...cronHealthLines);
   } else {
     lines.push(`<b>📊 True Color · Daily Digest · ${escapeTelegramHtml(dateLabel)}</b>`);
     lines.push("");
@@ -217,6 +271,12 @@ export async function GET(req: NextRequest) {
       lines.push(`⚠ <b>Health flags:</b>`);
       lines.push(...flagLines);
     }
+
+    // Cron-death alarm always rides along if present (separate from health flags).
+    if (cronHealthLines.length > 0) {
+      lines.push("");
+      lines.push(...cronHealthLines);
+    }
   }
 
   const message = lines.join("\n");
@@ -237,6 +297,7 @@ export async function GET(req: NextRequest) {
     health_flags: {
       ghost_complete: ghostRows.length,
       wave_stuck_24h: waveStuckRows.length,
+      stale_crons: staleCrons.map((c) => c.name),
     },
   });
 }
