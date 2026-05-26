@@ -51,6 +51,7 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "keepalive",              maxAgeHours: 26 },  // daily 12:00 UTC
   { name: "gsc-sync",               maxAgeHours: 26 },  // daily
   { name: "dashboard-alerts",       maxAgeHours: 2  },  // hourly Telegram push layer
+  { name: "wave-poll",              maxAgeHours: 7  },  // every 6h — backfills Wave state changes the webhook missed
 ];
 
 export interface LifecycleData {

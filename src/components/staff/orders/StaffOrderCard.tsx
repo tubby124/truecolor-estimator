@@ -11,6 +11,7 @@ import {
 } from "@/lib/data/order-constants";
 import { CustomerHistoryWidget } from "@/app/staff/orders/CustomerHistoryWidget";
 import type { Order } from "@/app/staff/orders/OrdersTable";
+import { RepriceModal } from "./RepriceModal";
 
 const SUPABASE_STORAGE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
 
@@ -70,6 +71,8 @@ export function StaffOrderCard({
   const [proofUploading, setProofUploading] = useState(false);
   const [proofSentId, setProofSentId] = useState<string | null>(null);
   const [proofError, setProofError] = useState<string | null>(null);
+  const [repriceOpen, setRepriceOpen] = useState(false);
+  const [repriceResult, setRepriceResult] = useState<{ new_total: number; delta: number; mode: string; pay_link_url: string | null } | null>(null);
 
   const customer = Array.isArray(order.customers) ? order.customers[0] : order.customers;
   const nextStatus = NEXT_STATUS[order.status];
@@ -342,6 +345,20 @@ export function StaffOrderCard({
                 </button>
               )
             )}
+            {!order.is_archived && (
+              order.status === "pending_payment" ||
+              order.status === "payment_received" ||
+              order.status === "in_production"
+            ) && (
+              <button
+                onClick={() => setRepriceOpen(true)}
+                className="text-sm px-3 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 rounded-lg text-amber-800 transition-colors font-medium"
+                aria-label="Reprice this order"
+                title="Adjust the price + email customer"
+              >
+                Reprice
+              </button>
+            )}
             <button
               onClick={() => onToggleExpand()}
               className="text-sm px-3 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
@@ -352,6 +369,25 @@ export function StaffOrderCard({
           </div>
         </div>
       </div>
+      {repriceOpen && (
+        <RepriceModal
+          orderId={order.id}
+          orderNumber={order.order_number}
+          customerName={(Array.isArray(order.customers) ? order.customers[0] : order.customers)?.name ?? "—"}
+          customerEmail={(Array.isArray(order.customers) ? order.customers[0] : order.customers)?.email ?? ""}
+          currentTotal={Number(order.total ?? 0)}
+          onClose={() => setRepriceOpen(false)}
+          onSuccess={(result) => {
+            setRepriceResult(result);
+            setRepriceOpen(false);
+            // Light page refresh to pull updated total + staff_notes
+            if (typeof window !== "undefined") window.location.reload();
+          }}
+        />
+      )}
+      {repriceResult && (
+        <div className="hidden" data-reprice-completed={repriceResult.mode} />
+      )}
 
       {/* ── Expanded section ── */}
       {isExpanded && (

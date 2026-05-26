@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -353,4 +354,19 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry — only wraps the config when SENTRY_DSN is set. Without the env var
+// the import is a no-op pass-through, so local builds with no Sentry account
+// remain clean. Source maps upload only happens when SENTRY_AUTH_TOKEN is also
+// set (Railway prod). 2026-05-26 — added per Round 4 harness work.
+export default process.env.SENTRY_DSN
+  ? withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      reactComponentAnnotation: { enabled: true },
+      tunnelRoute: "/monitoring",
+      disableLogger: true,
+      automaticVercelMonitors: false,
+    })
+  : nextConfig;

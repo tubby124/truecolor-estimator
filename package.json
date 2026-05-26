@@ -27,6 +27,7 @@
     "@marsidev/react-turnstile": "^1.4.2",
     "@react-pdf/renderer": "^4.4.0",
     "@resvg/resvg-js": "^2.6.2",
+    "@sentry/nextjs": "^10.54.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-virtual": "^3.13.22",
