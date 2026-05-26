@@ -77,11 +77,22 @@ export default async function LifecyclePage() {
       </header>
 
       <main id="main-content" className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-[#1c1712]">Lifecycle</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Last 7 days · every customer touchpoint in one place
-          </p>
+        <div className="mb-6 flex items-end justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold text-[#1c1712]">Lifecycle</h1>
+            <p className="text-gray-500 text-sm mt-1">
+              Last 7 days · every customer touchpoint in one place
+            </p>
+          </div>
+          {data?.fetched_at && (
+            <div className="text-right">
+              <div className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Snapshot</div>
+              <div className="text-xs text-gray-600 font-mono">
+                {new Date(data.fetched_at).toLocaleString("en-CA", { dateStyle: "short", timeStyle: "medium" })}
+              </div>
+              <a href="/staff/lifecycle" className="text-[11px] text-amber-600 hover:text-amber-700 underline">refresh</a>
+            </div>
+          )}
         </div>
 
         {fetchError ? (

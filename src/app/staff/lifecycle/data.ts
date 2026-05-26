@@ -81,6 +81,7 @@ export interface LifecycleData {
   refundsPending: RefundPendingRow[];
   waveWebhookEvents: WaveWebhookEvent[];
   emailDeliveryHealth: EmailDeliveryHealth;
+  fetched_at: string;
 }
 
 export async function fetchLifecycleData(): Promise<LifecycleData> {
@@ -813,12 +814,25 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     .neq("status", "draft")
     .order("launched_at", { ascending: false, nullsFirst: false })
     .limit(8);
+  // Pull the most recent send across ALL time so we can flag silent-death when
+  // an active campaign exists but the drip stopped firing (>48h since last send).
+  const { data: lastSendRow } = await supabase
+    .from("tc_email_sends")
+    .select("sent_at")
+    .order("sent_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const lastSendAt = (lastSendRow?.sent_at as string | undefined) ?? blitzSends[0]?.sent_at ?? null;
+  const activeCampaigns = (campaignsRaw ?? []).filter((c) => c.status === "active");
+  const lastSendAgeH = lastSendAt ? (now - new Date(lastSendAt).getTime()) / 3_600_000 : Infinity;
+  const blitzStale = activeCampaigns.length > 0 && lastSendAgeH > 48;
   const blitz: BlitzSnapshot = {
     total_leads: Number(totalLeadsCount ?? 0),
     emails_sent_24h: blitzSends.length,
     emails_opened_24h: blitzSends.filter((s) => s.opened_at).length,
     emails_clicked_24h: blitzSends.filter((s) => s.clicked_at).length,
-    last_send_at: blitzSends[0]?.sent_at ?? null,
+    last_send_at: lastSendAt,
+    is_stale: blitzStale,
     active_campaigns: (campaignsRaw ?? []).map((c) => ({
       slug: c.campaign_slug ?? "",
       name: c.campaign_name ?? "",
@@ -835,11 +849,16 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   const seoPrior = new Date(now - 7 * 24 * 60 * 60 * 1000);
   const seoTodayCutoff = new Date(now - 36 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const seoPriorCutoff = new Date(now - 8 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  // Filter at DB level: only rows with meaningful impressions count toward movers.
+  // Was pulling up to 10k rows; the post-fetch impressions<5 filter discarded most.
+  // Tightened query reduces both row transfer and memory pressure.
   const { data: seoRows } = await supabase
     .from("seo_gsc_snapshots")
     .select("snapshot_date, query, page, clicks, impressions, position")
     .gte("snapshot_date", seoPriorCutoff)
-    .limit(10000);
+    .gte("impressions", 5)
+    .order("snapshot_date", { ascending: false })
+    .limit(5000);
   // Build per-(query, page) most-recent vs ~7d-prior pairs
   const seoLatest = new Map<string, { date: string; clicks: number; impressions: number; position: number }>();
   const seoPriorMap = new Map<string, { date: string; position: number }>();
@@ -940,6 +959,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     refundsPending: await fetchRefundsPending(supabase, now),
     waveWebhookEvents,
     emailDeliveryHealth,
+    fetched_at: new Date(now).toISOString(),
   };
 }
 

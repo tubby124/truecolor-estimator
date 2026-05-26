@@ -12,6 +12,7 @@ export interface BlitzSnapshot {
   emails_opened_24h: number;
   emails_clicked_24h: number;
   last_send_at: string | null;
+  is_stale: boolean;
   active_campaigns: Array<{
     slug: string;
     name: string;
@@ -46,7 +47,14 @@ export function IndustryBlitzPanel({ snap }: { snap: BlitzSnapshot }) {
     <section className="mb-6">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Industry blitz pipeline</h2>
-        <span className="text-xs text-gray-600">last send {fmtRelative(snap.last_send_at)}</span>
+        <div className="flex items-center gap-2">
+          {snap.is_stale && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-800" title="Active campaign exists but no sends in 48h+">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> stalled
+            </span>
+          )}
+          <span className="text-xs text-gray-600">last send {fmtRelative(snap.last_send_at)}</span>
+        </div>
       </div>
 
       {/* Quick stats */}
