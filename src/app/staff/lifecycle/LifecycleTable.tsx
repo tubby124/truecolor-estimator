@@ -136,7 +136,7 @@ export function LifecycleTable({ rows }: { rows: LifecycleRow[] }) {
               <th className="px-3 py-2 text-center font-semibold" title="Wave draft created">W-Draft</th>
               <th className="px-3 py-2 text-center font-semibold" title="Wave payment recorded">W-Paid</th>
               <th className="px-3 py-2 text-center font-semibold" title="Customer order confirmation email">Confirm</th>
-              <th className="px-3 py-2 text-center font-semibold" title="Pay link / quote email sent">Pay Link</th>
+              <th className="px-3 py-2 text-center font-semibold" title="Pay Now link delivered to customer (Payment Request / Your Quote / Complete your payment)">Pay Link</th>
               <th className="px-3 py-2 text-center font-semibold" title="Receipt email sent">Receipt</th>
               <th className="px-3 py-2 text-center font-semibold" title="Proof sent / approval email">Proof</th>
               <th className="px-3 py-2 text-center font-semibold" title="Staff NEW ORDER notification">Staff</th>
