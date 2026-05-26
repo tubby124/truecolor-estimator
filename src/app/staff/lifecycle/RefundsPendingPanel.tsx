@@ -104,7 +104,7 @@ export function RefundsPendingPanel({ rows }: { rows: RefundPendingRow[] }) {
       </div>
       <p className="text-xs text-gray-400 mt-2">
         Manual refund flow: open the Clover dashboard → find the original payment → refund the line for the amount shown → POST to <code className="bg-white px-1 rounded">/api/staff/orders/[id]/refund-processed</code> to clear the row.
-        Auto-Clover-refund integration is deferred until explicit owner sign-off (it's a real money operation that needs careful testing).
+        Auto-Clover-refund integration is deferred until explicit owner sign-off (it&apos;s a real money operation that needs careful testing).
       </p>
     </section>
   );
