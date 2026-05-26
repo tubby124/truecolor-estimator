@@ -21,45 +21,63 @@ export interface EmailEvent {
 }
 
 export type EmailType =
-  | "pay_link"          // Payment Request / Your Quote / Complete your payment / order TC-XXXX is waiting
+  | "pay_link"          // Payment Request / Your Quote / Complete your payment / Your Custom Print Quote
   | "order_confirm"     // Order TC-XXXX received / confirmed
   | "receipt"           // Receipt — TC-XXXX
-  | "account_ready"    // Your True Color account is ready
-  | "welcome"          // Welcome to True Color
+  | "account_ready"     // Your True Color account is ready / Your True Color account
+  | "welcome"           // Welcome to True Color
   | "proof"             // proofs ready / approve your
   | "review_request"    // How did your order turn out
+  | "status_update"     // Payment confirmed / on the press / are ready / eTransfer confirmed / file updated
+  | "coupon_issued"     // Your $X discount is ready
+  | "staff_reply"       // Re: <original subject> (send-reply / staff manual email)
   | "staff_notif"       // NEW ORDER / NEW ACCOUNT
-  | "follow_up"         // payment-followup / stale-quotes
+  | "follow_up"         // payment-followup / "is waiting" / "left something"
+  | "digest"            // Aging Orders Digest
   | "cron_alert"        // ⚠️ quotes waiting / system alert
   | "other";
 
 export function classifyEmail(subject: string): EmailType {
   const s = subject ?? "";
+  // Staff/admin first (these go to info@true-color.ca or staff addresses)
   if (/^NEW ORDER|^NEW ACCOUNT/i.test(s)) return "staff_notif";
+  if (/^True Color — Aging Orders Digest/i.test(s)) return "digest";
   if (/^⚠️|alert|system check/i.test(s)) return "cron_alert";
+  // Customer-facing
   if (/^Welcome to True Color/i.test(s)) return "welcome";
-  if (/account is ready/i.test(s)) return "account_ready";
-  if (/^Receipt —/i.test(s) || /payment received/i.test(s)) return "receipt";
+  if (/account is ready|^Your True Color account/i.test(s)) return "account_ready";
+  if (/discount is ready/i.test(s)) return "coupon_issued";
+  if (/^Receipt —/i.test(s)) return "receipt";
   if (/proofs? ready|approve your/i.test(s)) return "proof";
-  if (/How did your order|review/i.test(s)) return "review_request";
-  if (/is waiting|quotes? waiting|left something/i.test(s)) return "follow_up";
-  if (/^Payment Request|^Your Quote|Complete your payment/i.test(s)) return "pay_link";
+  if (/How did your .* turn out|review/i.test(s)) return "review_request";
+  // Status transitions
+  if (/^Payment confirmed|on the press|are ready —|eTransfer confirmed|\[File updated\]/i.test(s)) return "status_update";
+  // Follow-up / abandoned
+  if (/is waiting|left something/i.test(s)) return "follow_up";
+  // Pay-link bearing
+  if (/^Payment Request|^Your Quote|^Your Custom Print Quote|Complete your payment/i.test(s)) return "pay_link";
   if (/Order .* received|Order .* confirmed/i.test(s)) return "order_confirm";
+  // Staff reply (catch-all for "Re:" prefix)
+  if (/^Re:\s/i.test(s)) return "staff_reply";
   return "other";
 }
 
 const TYPE_LABELS: Record<EmailType, { label: string; tone: string }> = {
   pay_link:       { label: "Pay link",      tone: "bg-blue-100 text-blue-800" },
   order_confirm:  { label: "Order confirm", tone: "bg-emerald-100 text-emerald-800" },
-  receipt:        { label: "Receipt",        tone: "bg-emerald-100 text-emerald-800" },
-  account_ready:  { label: "Account ready",  tone: "bg-cyan-100 text-cyan-800" },
-  welcome:        { label: "Welcome",        tone: "bg-cyan-100 text-cyan-800" },
-  proof:          { label: "Proof",          tone: "bg-purple-100 text-purple-800" },
-  review_request: { label: "Review req",     tone: "bg-purple-100 text-purple-800" },
-  staff_notif:    { label: "Staff",          tone: "bg-gray-200 text-gray-700" },
-  follow_up:      { label: "Follow-up",      tone: "bg-amber-100 text-amber-800" },
-  cron_alert:     { label: "Cron alert",     tone: "bg-amber-100 text-amber-800" },
-  other:          { label: "Other",          tone: "bg-gray-100 text-gray-600" },
+  receipt:        { label: "Receipt",       tone: "bg-emerald-100 text-emerald-800" },
+  account_ready:  { label: "Account ready", tone: "bg-cyan-100 text-cyan-800" },
+  welcome:        { label: "Welcome",       tone: "bg-cyan-100 text-cyan-800" },
+  proof:          { label: "Proof",         tone: "bg-purple-100 text-purple-800" },
+  review_request: { label: "Review req",    tone: "bg-purple-100 text-purple-800" },
+  status_update:  { label: "Status",        tone: "bg-indigo-100 text-indigo-800" },
+  coupon_issued:  { label: "Coupon issued", tone: "bg-pink-100 text-pink-800" },
+  staff_reply:    { label: "Staff reply",   tone: "bg-teal-100 text-teal-800" },
+  staff_notif:    { label: "Staff notif",   tone: "bg-gray-200 text-gray-700" },
+  follow_up:      { label: "Follow-up",     tone: "bg-amber-100 text-amber-800" },
+  digest:         { label: "Digest",        tone: "bg-amber-100 text-amber-800" },
+  cron_alert:     { label: "Cron alert",    tone: "bg-amber-100 text-amber-800" },
+  other:          { label: "Other",         tone: "bg-gray-100 text-gray-600" },
 };
 
 function fmtTime(iso: string): string {

@@ -16,6 +16,7 @@ import type { EmailEvent } from "./EmailFeedPanel";
 import { classifyEmail } from "./EmailFeedPanel";
 import type { CouponRedemption } from "./CouponsPanel";
 import type { WaveDraftRow } from "./WaveDraftPanel";
+import type { ActivityEvent } from "./ActivityFeedPanel";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
@@ -37,6 +38,7 @@ export interface LifecycleData {
   emailFeed: EmailEvent[];
   redemptions: CouponRedemption[];
   waveDrafts: WaveDraftRow[];
+  activity: ActivityEvent[];
 }
 
 export async function fetchLifecycleData(): Promise<LifecycleData> {
@@ -59,7 +61,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   ] = await Promise.all([
     supabase
       .from("orders")
-      .select("id, order_number, status, payment_method, total, is_rush, wave_invoice_id, wave_invoice_number, wave_payment_recorded_at, proof_sent_at, created_at, customers (name, email)")
+      .select("id, order_number, status, payment_method, total, is_rush, wave_invoice_id, wave_invoice_number, wave_invoice_approved_at, wave_payment_recorded_at, proof_sent_at, created_at, customers (name, email)")
       .gte("created_at", cutoff)
       .order("created_at", { ascending: false })
       .limit(200),
@@ -383,6 +385,131 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     };
   });
 
+  // ── derive unified activity feed (events from timestamps) ───────────────
+  const activity: ActivityEvent[] = [];
+
+  // Signups
+  for (const c of customers) {
+    if (!c.created_at) continue;
+    activity.push({
+      id: `signup:${c.id}`,
+      at: c.created_at,
+      type: "signup",
+      actor: "customer",
+      who_name: c.name ?? null,
+      who_email: c.email ?? null,
+      detail: c.pending_discount_code ? `coupon issued: ${c.pending_discount_code}` : "new account",
+      order_id: null,
+      order_number: null,
+    });
+  }
+
+  // Order events (multiple per order)
+  for (const o of orders) {
+    const customer = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+    const who_name = customer?.name ?? null;
+    const who_email = customer?.email ?? null;
+    const totalStr = `$${Number(o.total ?? 0).toFixed(2)}`;
+
+    if (o.created_at) {
+      activity.push({
+        id: `order_placed:${o.id}`,
+        at: o.created_at,
+        type: "order_placed",
+        actor: "customer",
+        who_name, who_email,
+        detail: `${totalStr} · ${o.payment_method ?? "—"} · ${o.is_rush ? "RUSH" : "standard"}`,
+        order_id: o.id,
+        order_number: o.order_number ?? null,
+      });
+    }
+    if (o.wave_invoice_approved_at) {
+      activity.push({
+        id: `wave_approved:${o.id}`,
+        at: o.wave_invoice_approved_at,
+        type: "wave_approved",
+        actor: "staff",
+        who_name, who_email,
+        detail: `Wave #${o.wave_invoice_number ?? "?"} approved · ${totalStr}`,
+        order_id: o.id,
+        order_number: o.order_number ?? null,
+      });
+    }
+    if (o.wave_payment_recorded_at) {
+      activity.push({
+        id: `payment_recorded:${o.id}`,
+        at: o.wave_payment_recorded_at,
+        type: "payment_recorded",
+        actor: "system",
+        who_name, who_email,
+        detail: `payment captured + Wave updated · ${totalStr}`,
+        order_id: o.id,
+        order_number: o.order_number ?? null,
+      });
+    }
+    if (o.proof_sent_at) {
+      activity.push({
+        id: `proof_sent:${o.id}`,
+        at: o.proof_sent_at,
+        type: "proof_sent",
+        actor: "staff",
+        who_name, who_email,
+        detail: "proof emailed to customer",
+        order_id: o.id,
+        order_number: o.order_number ?? null,
+      });
+    }
+  }
+
+  // Quote requests + replies
+  for (const q of quotes) {
+    if (q.created_at) {
+      const itemsArr: Array<Record<string, unknown>> = Array.isArray(q.items) ? q.items : [];
+      activity.push({
+        id: `quote_received:${q.id}`,
+        at: q.created_at,
+        type: "quote_received",
+        actor: "customer",
+        who_name: q.name ?? null,
+        who_email: q.email ?? null,
+        detail: `${itemsArr.length} item(s)${q.quote_total_cents ? ` · $${(q.quote_total_cents / 100).toFixed(2)}` : ""}`,
+        order_id: null,
+        order_number: null,
+      });
+    }
+    if (q.replied_at) {
+      activity.push({
+        id: `quote_replied:${q.id}`,
+        at: q.replied_at,
+        type: "quote_replied",
+        actor: "staff",
+        who_name: q.name ?? null,
+        who_email: q.email ?? null,
+        detail: q.quote_total_cents ? `replied with quote $${(q.quote_total_cents / 100).toFixed(2)}` : "staff replied",
+        order_id: null,
+        order_number: null,
+      });
+    }
+  }
+
+  // Coupon redemptions
+  for (const r of redemptionRows) {
+    activity.push({
+      id: `coupon_redeemed:${r.id}`,
+      at: r.redeemed_at,
+      type: "coupon_redeemed",
+      actor: "customer",
+      who_name: null,
+      who_email: r.customer_email,
+      detail: `${r.code} · -$${r.amount_saved.toFixed(2)}`,
+      order_id: r.order_id,
+      order_number: r.order_number,
+    });
+  }
+
+  // Newest first
+  activity.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+
   return {
     rows,
     heartbeats,
@@ -392,5 +519,6 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     emailFeed,
     redemptions: redemptionRows,
     waveDrafts,
+    activity,
   };
 }

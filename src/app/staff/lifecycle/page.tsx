@@ -27,6 +27,7 @@ import { SignupsPanel } from "./SignupsPanel";
 import { EmailFeedPanel } from "./EmailFeedPanel";
 import { CouponsPanel } from "./CouponsPanel";
 import { WaveDraftPanel } from "./WaveDraftPanel";
+import { ActivityFeedPanel } from "./ActivityFeedPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -82,12 +83,25 @@ export default async function LifecyclePage() {
             <OrphanPanel orphans={data.orphans} />
             <WaveDraftPanel rows={data.waveDrafts} />
             <LifecycleTable rows={data.rows} />
+            <ActivityFeedPanel events={data.activity} />
             <QuotesPanel quotes={data.quotes} />
             <SignupsPanel signups={data.signups} />
             <CouponsPanel redemptions={data.redemptions} />
             <EmailFeedPanel events={data.emailFeed} />
           </div>
         ) : null}
+
+        <section className="mt-10 p-5 rounded-xl border border-gray-200 bg-gray-50">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">What this dashboard does NOT see yet</h3>
+          <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+            <li><strong>Supabase Auth emails</strong> (signup verification, password reset, magic-link). Sent by Supabase, not our app → never hit <code className="bg-white px-1 rounded">email_log</code>. To close: subscribe to Supabase Auth webhooks and log them.</li>
+            <li><strong>Wave-sent emails</strong> (Wave can email customers when an invoice is approved through Wave UI). Not in our log. To close: poll Wave invoice events or stop using Wave-side sending (we already retired this flow 2026-05-26).</li>
+            <li><strong>Brevo campaign sends</strong> (bulk marketing). Tracked in Brevo, not here. To close: pull Brevo campaign events into a separate panel.</li>
+            <li><strong>Order status transitions</strong> (e.g. pending_payment → in_production triggered by Albert) — only visible if they have a timestamp column (proof_sent_at, wave_payment_recorded_at). Manual status flips are invisible. To close: add an <code className="bg-white px-1 rounded">audit_events</code> table + write on every transition.</li>
+            <li><strong>Failed email sends</strong> — Resend rejections, soft bounces, blocks. <code className="bg-white px-1 rounded">smtp.ts</code> only logs <code className="bg-white px-1 rounded">status: &quot;sent&quot;</code> on success. To close: pull Resend webhook events into the log.</li>
+            <li><strong>Customer support replies inbound</strong> — replies to info@true-color.ca don&apos;t hit this dashboard. To close: forward via Brevo inbound parsing or Gmail API.</li>
+          </ul>
+        </section>
       </main>
 
       <footer className="border-t border-gray-100 py-5 text-center text-xs text-gray-400">
