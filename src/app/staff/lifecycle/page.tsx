@@ -146,7 +146,7 @@ async function fetchLifecycle(): Promise<LifecycleRow[]> {
   // email_log is keyed on to_address (no order_id link), so we match by (email + time window)
   const orderIds = orders.map((o) => o.id);
 
-  let emailLog: Array<{
+  const emailLog: Array<{
     to_address: string | null;
     subject: string | null;
     sent_at: string | null;
