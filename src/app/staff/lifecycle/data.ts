@@ -27,6 +27,7 @@ import type { BlitzSnapshot } from "./IndustryBlitzPanel";
 import type { SeoRankMovers, SeoMover } from "./SeoRankMoversPanel";
 import type { PriceConsistencyRow } from "./PriceConsistencyPanel";
 import { checkPriceConsistency } from "@/lib/data/price-consistency";
+import type { RefundPendingRow } from "./RefundsPendingPanel";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
@@ -75,6 +76,7 @@ export interface LifecycleData {
   blitz: BlitzSnapshot;
   seoMovers: SeoRankMovers;
   priceConsistency: PriceConsistencyRow[];
+  refundsPending: RefundPendingRow[];
 }
 
 export async function fetchLifecycleData(): Promise<LifecycleData> {
@@ -882,5 +884,70 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     blitz,
     seoMovers,
     priceConsistency: checkPriceConsistency(),
+    refundsPending: await fetchRefundsPending(supabase, now),
   };
+}
+
+async function fetchRefundsPending(
+  supabase: ReturnType<typeof createServiceClient>,
+  now: number,
+): Promise<RefundPendingRow[]> {
+  // Pull every order.repriced event with a negative delta + every later
+  // order.refund_processed event. A reprice is "pending" iff there's no
+  // matching refund_processed entry on the same order_id AFTER its audit_at.
+  const { data: repriced } = await supabase
+    .from("audit_events")
+    .select("id, at, entity_id, detail")
+    .eq("event_type", "order.repriced")
+    .order("at", { ascending: false })
+    .limit(200);
+  const repricedRows = (repriced ?? []).filter((r) => {
+    const detail = (r.detail ?? {}) as Record<string, unknown>;
+    return typeof detail.delta === "number" && (detail.delta as number) < -0.01;
+  });
+  if (repricedRows.length === 0) return [];
+
+  const orderIds = Array.from(new Set(repricedRows.map((r) => r.entity_id).filter(Boolean) as string[]));
+  const { data: processed } = await supabase
+    .from("audit_events")
+    .select("entity_id, at")
+    .eq("event_type", "order.refund_processed")
+    .in("entity_id", orderIds);
+  const processedByOrder = new Map<string, string>();
+  for (const r of processed ?? []) {
+    const existing = processedByOrder.get(r.entity_id);
+    if (!existing || r.at > existing) processedByOrder.set(r.entity_id, r.at);
+  }
+
+  const { data: orders } = await supabase
+    .from("orders")
+    .select("id, order_number, customers(name, email)")
+    .in("id", orderIds);
+  const orderById = new Map((orders ?? []).map((o) => [o.id, o]));
+
+  const rows: RefundPendingRow[] = [];
+  for (const r of repricedRows) {
+    const o = orderById.get(r.entity_id);
+    if (!o) continue;
+    const customer = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+    const detail = (r.detail ?? {}) as Record<string, unknown>;
+    const processedAt = processedByOrder.get(r.entity_id);
+    // Refund is "already processed" iff a refund_processed event came AFTER this reprice
+    const alreadyProcessed = processedAt ? processedAt > r.at : false;
+    rows.push({
+      audit_id: r.id,
+      audit_at: r.at,
+      order_id: r.entity_id,
+      order_number: o.order_number ?? "",
+      customer_email: customer?.email ?? "",
+      customer_name: customer?.name ?? "—",
+      refund_amount: Math.abs(Number(detail.delta ?? 0)),
+      new_total: Number(detail.new_total ?? 0),
+      original_total: Number(detail.original_total ?? 0),
+      reason: String(detail.reason ?? "—"),
+      age_hours: (now - new Date(r.at).getTime()) / (1000 * 60 * 60),
+      already_processed: alreadyProcessed,
+    });
+  }
+  return rows;
 }

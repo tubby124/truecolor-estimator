@@ -65,9 +65,18 @@ const MARKETING_ANCHORS: Array<{
   product_id: string;
   note: string;
 }> = [
-  { category: "BANNER",    config_label: "Banner 'from $66' → 2×4 ft",       expected_from: 66, product_id: "BANNER-V13-2X4FT",  note: "Banner from-anchor backed by smallest active SKU" },
-  { category: "RIGID",     config_label: "ACP 'from $39' → 18×24″",          expected_from: 39, product_id: "RIGID-ACP3-18X24-S", note: "ACP from-anchor backed by smallest active SKU" },
-  { category: "FOAMBOARD", config_label: "Foamboard 'from $45' → 18×24″",    expected_from: 45, product_id: "FOAM-5MM-18X24-S",   note: "Foamboard from-anchor backed by 18×24 fixed SKU" },
+  // Sqft-tier categories — verified against smallest active SKU
+  { category: "BANNER",        config_label: "Banner 'from $66' → 2×4 ft",         expected_from: 66, product_id: "BANNER-V13-2X4FT",   note: "Smallest active banner SKU" },
+  { category: "RIGID",         config_label: "ACP 'from $39' → 18×24″",            expected_from: 39, product_id: "RIGID-ACP3-18X24-S", note: "Smallest active ACP SKU" },
+  { category: "FOAMBOARD",     config_label: "Foamboard 'from $45' → 18×24″",      expected_from: 45, product_id: "FOAM-5MM-18X24-S",   note: "18×24 fixed SKU" },
+  // Lot-priced categories — verified against the SKU each "from $X" claim references
+  { category: "BUSINESS_CARD", config_label: "BC 'from $45' → 250 qty 14pt 2S",    expected_from: 45, product_id: "BC-14PT-250-2S",     note: "250 qty 14pt double-sided" },
+  { category: "FLYER",         config_label: "Flyer 'from $45' → 100 qty 80lb",    expected_from: 45, product_id: "FLYER-80LB-100",     note: "100 qty 80lb full-letter" },
+  { category: "STICKER",       config_label: "Stickers 'from $25' → 25 qty 2×2",   expected_from: 25, product_id: "STICKER-2X2-25",     note: "25 qty 2×2 stickers" },
+  { category: "POSTCARD",      config_label: "Postcards 'from $35' → 50 qty 3×4",  expected_from: 35, product_id: "PC-3X4-50",          note: "50 qty 3×4 postcards" },
+  { category: "BROCHURE",      config_label: "Brochures 'from $70' → 100 qty TF",  expected_from: 70, product_id: "BROCH-TF-100",       note: "100 qty tri-fold brochures" },
+  { category: "PHOTO_POSTER",  config_label: "Photo poster 'from $15' → 12×18",    expected_from: 15, product_id: "POST-12X18",         note: "12×18 photo poster" },
+  { category: "DISPLAY",       config_label: "Retractable banner 'from $219'",     expected_from: 219, product_id: "DISP-RETRACT-ECO",   note: "Economy retractable stand + print" },
 ];
 
 export function checkPriceConsistency(): PriceConsistencyRow[] {

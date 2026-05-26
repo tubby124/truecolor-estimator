@@ -25,7 +25,7 @@ New tables (run true-color-leads-schema.sql to create): tc_leads (upsert_tc_lead
 Source of truth: data/tables/*.csv — edit CSVs only, push main → live in ~2 min
 Run `/pricing-health` before EVERY pricing deploy
 Three models: SQFT-based | LOT-price (is_lot_price=TRUE) | Per-unit DISPLAY
-NEVER fix: BANNER-V13-2X6FT $90 | RIGID-ACP3-24X36-S $66 | SIGN-CORO4-4X8FT-S $232 (intentional)
+NEVER fix: BANNER-V13-2X6FT $90 | SIGN-CORO4-4X8FT-S $232 (intentional). RIGID-ACP3-24X36-S was retired 2026-05-20 — full reason in .claude/rules/truecolor-pricing-safety.md.
 
 ## Auth Rules
 Use getSession() for UI — NEVER getUser()

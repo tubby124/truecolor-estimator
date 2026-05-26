@@ -5,10 +5,21 @@
 | SKU | Sell Price | Why |
 |-----|-----------|-----|
 | BANNER-V13-2X6FT | $90 | Owner-set intentional price |
-| RIGID-ACP3-24X36-S | $66 | Owner-set intentional price |
 | SIGN-CORO4-4X8FT-S | $232 | Owner-set intentional price |
 
 If a pricing check or linter flags these — IGNORE THE FLAG. Do not touch these rows.
+
+**Retired locks (do NOT re-lock):**
+- `RIGID-ACP3-24X36-S` — was locked at $66; retired 2026-05-20 because the
+  frozen price caused a per-unit INCREASE at qty 2+ (qty1 used frozen $66
+  but qty2+ fell through to the sqft tier @ $13/sqft × 6 sqft = $78). Engine
+  now uses T1 sqft @ $13/sqft consistently for all qty. The retired SKU
+  stays in CSV with `is_active=FALSE`. Surfaced via the price-consistency
+  drift panel (`/staff/lifecycle`) until the doc-drift entry clears.
+
+Authoritative drift detector: `src/lib/data/price-consistency.ts` — extend
+`LOCKED_SKUS` there whenever a new intentional fixed price is added so the
+CI test guards it automatically.
 
 ## Before Editing data/tables/*.csv
 
