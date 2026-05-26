@@ -157,20 +157,33 @@ async function main() {
   console.log(`    wave        : ${sbWave.length} orders ${$(sum(sbWave))}`);
   if (sbOther.length) console.log(`    other       : ${sbOther.length} orders ${$(sum(sbOther))}`);
 
-  // ── 1a. Drift: paid orders with wave_invoice_id but no wave_payment_recorded_at
+  // ── 1a. Wave income booked? THE authoritative signal ──────────────────────
+  // Staff never manually mark Wave invoices paid (esp. e-transfer/cash), so Wave
+  // INVOICE STATUS is meaningless here — invoices sit OVERDUE forever by design.
+  // What actually matters is whether the INCOME was booked via moneyTransactionCreate.
+  // Our code sets wave_payment_recorded_at right after that succeeds, so a paid
+  // order with wave_invoice_id but NULL wave_payment_recorded_at = income NOT in
+  // Wave's books = real drift (reconcile-payments cron auto-heals it).
   const driftRows = sbAll.filter(
     (o) => o.wave_invoice_id && !o.wave_payment_recorded_at
   );
   if (driftRows.length) {
-    console.log(`\n  ⚠  ${driftRows.length} order(s) paid in Supabase but wave_payment_recorded_at is NULL:`);
+    console.log(`\n  ❌ ${driftRows.length} paid order(s) whose income is NOT booked in Wave (wave_payment_recorded_at NULL):`);
     for (const o of driftRows.slice(0, 10)) {
       console.log(`     • ${o.order_number}  ${$(o.total)}  ${o.payment_method}  paid ${o.paid_at?.slice(0, 10)}`);
     }
-    issues.push(`${driftRows.length} paid order(s) missing wave_payment_recorded_at — run reconcile-payments cron to auto-heal`);
+    issues.push(`${driftRows.length} paid order(s) missing wave_payment_recorded_at (income not booked in Wave) — run reconcile-payments cron to auto-heal`);
+  } else {
+    console.log(`\n  ✅ Every paid order with a Wave invoice has its income booked (wave_payment_recorded_at set)`);
   }
 
-  // ── 2. Wave: invoice status for TC orders in window ──────────────────────
-  console.log("\nFetching Wave invoices…");
+  // ── 2. Wave invoice status — FYI ONLY, never a pass/fail signal ───────────
+  // Confirmed with Hasan 2026-05-25: staff never reconcile Wave invoices to PAID
+  // (especially e-transfer/cash), so invoices stay OVERDUE/APPROVED indefinitely
+  // by design. Invoice status therefore carries ZERO payment information here.
+  // We print the histogram purely as context; the real payment signal is the
+  // wave_payment_recorded_at check above (income booked via moneyTransactionCreate).
+  console.log("\nFetching Wave invoice statuses (FYI only — not a payment signal)…");
   const waveResp = await waveQuery(
     `query($bizId: ID!) {
       business(id: $bizId) {
@@ -188,8 +201,6 @@ async function main() {
 
   const ORDER_RE = /(TC-\d{4}-\d{4})/;
   const allWaveInvoices = (waveResp?.business?.invoices?.edges ?? []).map((e) => e.node);
-
-  // Map order_number → Wave invoice status (all statuses, not just PAID)
   const waveStatusByOrder = {};
   for (const inv of allWaveInvoices) {
     const onum = inv.title?.match(ORDER_RE)?.[1];
@@ -197,35 +208,13 @@ async function main() {
   }
 
   const sbWithWave = sbAll.filter((o) => o.wave_invoice_id);
-  const sbWithWaveTotal = sum(sbWithWave);
-  console.log(`  Supabase orders with wave_invoice_id: ${sbWithWave.length}, total ${$(sbWithWaveTotal)}`);
-
-  // For each Supabase paid order, show the Wave invoice status.
   const waveStatusCounts = {};
-  const notPaidInWave = [];
   for (const o of sbWithWave) {
-    const st = waveStatusByOrder[o.order_number] ?? "NOT_FOUND";
+    const st = waveStatusByOrder[o.order_number] ?? "NOT_LINKED_BY_TITLE";
     waveStatusCounts[st] = (waveStatusCounts[st] ?? 0) + 1;
-    if (st !== "PAID") notPaidInWave.push({ ...o, waveStatus: st });
   }
-  console.log(`  Wave invoice status of paid Supabase orders: ${JSON.stringify(waveStatusCounts)}`);
-
-  // IMPORTANT: this shop records income via moneyTransactionCreate (hard rule:
-  // never invoiceCreatePayment). That books the income but does NOT flip the
-  // invoice to PAID — so OVERDUE-but-income-recorded may be the INTENDED state,
-  // not a failure. Until Hasan confirms intent, this is a WARNING, not a hard
-  // issue (does not fail exit code). See vault 2026-05-25-harness-progress.
-  if (notPaidInWave.length > 0) {
-    console.log(`  ⚠  ${notPaidInWave.length} Supabase-paid order(s) whose Wave invoice is NOT marked PAID:`);
-    for (const o of notPaidInWave.slice(0, 8)) {
-      console.log(`     • ${o.order_number}  ${$(o.total)}  ${o.payment_method}  → Wave: ${o.waveStatus}`);
-    }
-    console.log(`     NOTE: likely expected — moneyTransactionCreate books income without flipping`);
-    console.log(`     invoice status. Pending Hasan confirmation. Reclassify to FAIL if not intended.`);
-    warnings.push(`${notPaidInWave.length} Supabase-paid order(s) have a non-PAID Wave invoice (statuses: ${JSON.stringify(waveStatusCounts)}) — confirm moneyTransactionCreate-vs-invoice-PAID intent`);
-  } else {
-    console.log(`  ✅ All Supabase wave-linked orders show PAID in Wave`);
-  }
+  console.log(`  Wave invoice status histogram (informational): ${JSON.stringify(waveStatusCounts)}`);
+  console.log(`  (OVERDUE/APPROVED is normal — staff don't mark invoices paid. Income is tracked via wave_payment_recorded_at, checked above.)`);
 
   // ── 3. Clover: payments in window ────────────────────────────────────────
   let cloverOrders = [];
