@@ -20,6 +20,11 @@ import type { ActivityEvent } from "./ActivityFeedPanel";
 import type { BookkeepingRiskRow } from "./BookkeepingRiskPanel";
 import type { HealthSnapshot } from "./HealthTiles";
 import type { PendingCouponRow } from "./PendingCouponsPanel";
+import type { CartAbandonRow } from "./CartAbandonPanel";
+import type { FailedEmailRow } from "./FailedEmailsPanel";
+import type { TelegramHealth } from "./TelegramHealthPanel";
+import type { BlitzSnapshot } from "./IndustryBlitzPanel";
+import type { SeoRankMovers, SeoMover } from "./SeoRankMoversPanel";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
@@ -61,6 +66,11 @@ export interface LifecycleData {
   bookkeepingRisks: BookkeepingRiskRow[];
   health: HealthSnapshot;
   pendingCoupons: PendingCouponRow[];
+  cartAbandons: CartAbandonRow[];
+  failedEmails: FailedEmailRow[];
+  telegramHealth: TelegramHealth;
+  blitz: BlitzSnapshot;
+  seoMovers: SeoRankMovers;
 }
 
 export async function fetchLifecycleData(): Promise<LifecycleData> {
@@ -688,6 +698,167 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   });
   pendingCoupons.sort((a, b) => b.issued_age_hours - a.issued_age_hours);
 
+  // ── Round 3: cart abandons ───────────────────────────────────────────────
+  const orderEmailSet = new Set(
+    orders
+      .map((o) => {
+        const c = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+        return c?.email?.toLowerCase() ?? null;
+      })
+      .filter((e): e is string => !!e)
+  );
+  const { data: checkoutSessionsRaw } = await supabase
+    .from("checkout_sessions")
+    .select("id, email, name, created_at, followup_sent_at")
+    .gte("created_at", cutoff)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  const cartAbandons: CartAbandonRow[] = (checkoutSessionsRaw ?? [])
+    .filter((cs) => cs.email && !orderEmailSet.has(cs.email.toLowerCase()))
+    .map((cs) => {
+      const createdAt = cs.created_at ? new Date(cs.created_at) : new Date();
+      return {
+        id: cs.id,
+        email: cs.email,
+        name: cs.name ?? "",
+        created_at: cs.created_at,
+        age_hours: (now - createdAt.getTime()) / (1000 * 60 * 60),
+        followup_sent: !!cs.followup_sent_at,
+      };
+    });
+
+  // ── Round 3: failed emails ──────────────────────────────────────────────
+  const { data: failedRaw } = await supabase
+    .from("email_log")
+    .select("id, sent_at, to_address, subject, status, bounced_at, complained_at, delivery_delayed_at, last_event_detail")
+    .or("bounced_at.not.is.null,complained_at.not.is.null,delivery_delayed_at.not.is.null")
+    .gte("sent_at", cutoff)
+    .order("sent_at", { ascending: false })
+    .limit(100);
+  const failedEmails: FailedEmailRow[] = (failedRaw ?? []).map((e) => {
+    let failure_type: FailedEmailRow["failure_type"] = "bounced";
+    let failure_at = e.sent_at ?? new Date().toISOString();
+    if (e.complained_at) { failure_type = "complained"; failure_at = e.complained_at; }
+    else if (e.bounced_at) { failure_type = "bounced"; failure_at = e.bounced_at; }
+    else if (e.delivery_delayed_at) { failure_type = "delivery_delayed"; failure_at = e.delivery_delayed_at; }
+    return {
+      id: e.id,
+      sent_at: e.sent_at ?? new Date().toISOString(),
+      to_address: e.to_address ?? "",
+      subject: e.subject ?? "",
+      status: e.status ?? "",
+      failure_type,
+      failure_at,
+      detail: e.last_event_detail,
+    };
+  });
+
+  // ── Round 3: Telegram health ────────────────────────────────────────────
+  const { data: telegramRaw } = await supabase
+    .from("telegram_log")
+    .select("sent_at, ok, error, category")
+    .gte("sent_at", new Date(cutoff24Ms).toISOString())
+    .order("sent_at", { ascending: false })
+    .limit(500);
+  const tgRows = telegramRaw ?? [];
+  const tgOk = tgRows.filter((r) => r.ok).length;
+  const tgFail = tgRows.filter((r) => !r.ok);
+  const telegramHealth: TelegramHealth = {
+    total_24h: tgRows.length,
+    ok_24h: tgOk,
+    fail_24h: tgFail.length,
+    last_failure_at: tgFail[0]?.sent_at ?? null,
+    last_failure_error: tgFail[0]?.error ?? null,
+    last_failure_category: tgFail[0]?.category ?? null,
+  };
+
+  // ── Round 3: Industry blitz snapshot ────────────────────────────────────
+  const { count: totalLeadsCount } = await supabase
+    .from("tc_leads")
+    .select("*", { count: "exact", head: true });
+  const { data: blitzSendsRaw } = await supabase
+    .from("tc_email_sends")
+    .select("sent_at, opened_at, clicked_at")
+    .gte("sent_at", new Date(cutoff24Ms).toISOString());
+  const blitzSends = blitzSendsRaw ?? [];
+  const { data: campaignsRaw } = await supabase
+    .from("tc_campaigns")
+    .select("campaign_slug, campaign_name, status, total_sent, emails_sent, opens, clicks, orders_generated")
+    .neq("status", "draft")
+    .order("launched_at", { ascending: false, nullsFirst: false })
+    .limit(8);
+  const blitz: BlitzSnapshot = {
+    total_leads: Number(totalLeadsCount ?? 0),
+    emails_sent_24h: blitzSends.length,
+    emails_opened_24h: blitzSends.filter((s) => s.opened_at).length,
+    emails_clicked_24h: blitzSends.filter((s) => s.clicked_at).length,
+    last_send_at: blitzSends[0]?.sent_at ?? null,
+    active_campaigns: (campaignsRaw ?? []).map((c) => ({
+      slug: c.campaign_slug ?? "",
+      name: c.campaign_name ?? "",
+      status: c.status ?? "—",
+      sent: Number(c.total_sent ?? c.emails_sent ?? 0),
+      opens: Number(c.opens ?? 0),
+      clicks: Number(c.clicks ?? 0),
+      orders_generated: Number(c.orders_generated ?? 0),
+    })),
+  };
+
+  // ── Round 3: SEO rank movers (vs 7d ago) ────────────────────────────────
+  const seoToday = new Date(now);
+  const seoPrior = new Date(now - 7 * 24 * 60 * 60 * 1000);
+  const seoTodayCutoff = new Date(now - 36 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const seoPriorCutoff = new Date(now - 8 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const { data: seoRows } = await supabase
+    .from("seo_gsc_snapshots")
+    .select("snapshot_date, query, page, clicks, impressions, position")
+    .gte("snapshot_date", seoPriorCutoff)
+    .limit(10000);
+  // Build per-(query, page) most-recent vs ~7d-prior pairs
+  const seoLatest = new Map<string, { date: string; clicks: number; impressions: number; position: number }>();
+  const seoPriorMap = new Map<string, { date: string; position: number }>();
+  for (const r of seoRows ?? []) {
+    if (!r.query || !r.page || r.position == null) continue;
+    const key = `${r.query}|${r.page}`;
+    const isRecent = r.snapshot_date >= seoTodayCutoff;
+    const isPrior = r.snapshot_date <= seoPriorCutoff;
+    if (isRecent) {
+      const cur = seoLatest.get(key);
+      if (!cur || r.snapshot_date > cur.date) {
+        seoLatest.set(key, { date: r.snapshot_date, clicks: Number(r.clicks ?? 0), impressions: Number(r.impressions ?? 0), position: Number(r.position) });
+      }
+    } else if (isPrior) {
+      const cur = seoPriorMap.get(key);
+      if (!cur || r.snapshot_date > cur.date) {
+        seoPriorMap.set(key, { date: r.snapshot_date, position: Number(r.position) });
+      }
+    }
+  }
+  const moves: SeoMover[] = [];
+  for (const [key, latest] of seoLatest) {
+    const prior = seoPriorMap.get(key);
+    if (!prior) continue;
+    if (latest.impressions < 5) continue; // ignore noise
+    const delta = prior.position - latest.position;
+    if (Math.abs(delta) < 1) continue;
+    const [query, page] = key.split("|");
+    moves.push({
+      query, page,
+      current_pos: latest.position,
+      prior_pos: prior.position,
+      delta,
+      current_clicks: latest.clicks,
+      current_impressions: latest.impressions,
+    });
+  }
+  moves.sort((a, b) => b.delta - a.delta);
+  const seoMovers: SeoRankMovers = {
+    winners: moves.filter((m) => m.delta > 0).slice(0, 8),
+    losers: moves.filter((m) => m.delta < 0).slice(-8).reverse(),
+  };
+  // Suppress unused locals (used for type inference but variables themselves not referenced after)
+  void seoToday; void seoPrior;
+
   return {
     rows,
     heartbeats,
@@ -701,5 +872,10 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     bookkeepingRisks,
     health,
     pendingCoupons,
+    cartAbandons,
+    failedEmails,
+    telegramHealth,
+    blitz,
+    seoMovers,
   };
 }

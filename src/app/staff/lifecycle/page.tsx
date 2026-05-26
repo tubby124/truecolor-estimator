@@ -31,6 +31,11 @@ import { ActivityFeedPanel } from "./ActivityFeedPanel";
 import { BookkeepingRiskPanel } from "./BookkeepingRiskPanel";
 import { HealthTiles } from "./HealthTiles";
 import { PendingCouponsPanel } from "./PendingCouponsPanel";
+import { CartAbandonPanel } from "./CartAbandonPanel";
+import { FailedEmailsPanel } from "./FailedEmailsPanel";
+import { TelegramHealthPanel } from "./TelegramHealthPanel";
+import { IndustryBlitzPanel } from "./IndustryBlitzPanel";
+import { SeoRankMoversPanel } from "./SeoRankMoversPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -84,15 +89,20 @@ export default async function LifecyclePage() {
           <div className="space-y-2">
             <HealthTiles snap={data.health} />
             <HeartbeatsPanel heartbeats={data.heartbeats} />
+            <TelegramHealthPanel h={data.telegramHealth} />
             <BookkeepingRiskPanel rows={data.bookkeepingRisks} />
             <OrphanPanel orphans={data.orphans} />
             <WaveDraftPanel rows={data.waveDrafts} />
+            <CartAbandonPanel rows={data.cartAbandons} />
+            <FailedEmailsPanel rows={data.failedEmails} />
             <LifecycleTable rows={data.rows} />
             <ActivityFeedPanel events={data.activity} />
             <QuotesPanel quotes={data.quotes} />
             <SignupsPanel signups={data.signups} />
             <PendingCouponsPanel rows={data.pendingCoupons} />
             <CouponsPanel redemptions={data.redemptions} />
+            <SeoRankMoversPanel movers={data.seoMovers} />
+            <IndustryBlitzPanel snap={data.blitz} />
             <EmailFeedPanel events={data.emailFeed} />
           </div>
         ) : null}
