@@ -629,6 +629,17 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         </Link>
 
         <Link
+          href="/staff/lifecycle"
+          className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
+          aria-label="Open order lifecycle dashboard"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Lifecycle</span>
+        </Link>
+
+        <Link
           href="/staff/social"
           className="inline-flex items-center gap-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
           aria-label="Open Social Studio"
