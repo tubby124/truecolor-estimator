@@ -150,7 +150,9 @@ export function EmailFeedPanel({ events }: { events: EmailEvent[] }) {
                       {t.label}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-xs text-gray-700 truncate max-w-[200px]" title={e.to_address}>{e.to_address}</td>
+                  <td className="px-3 py-2 text-xs truncate max-w-[200px]" title={e.to_address}>
+                    <Link href={`/staff/lifecycle/customer/${encodeURIComponent(e.to_address)}`} className="text-blue-700 hover:underline">{e.to_address}</Link>
+                  </td>
                   <td className="px-3 py-2 text-xs text-gray-800 truncate max-w-[360px]" title={e.subject}>{e.subject}</td>
                   <td className="px-3 py-2 text-xs">
                     {e.order_number ? (

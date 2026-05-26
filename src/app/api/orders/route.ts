@@ -26,6 +26,7 @@ import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { classifyFromHeaders } from "@/lib/analytics/referrer";
 import { mergeUtmAttribution } from "@/lib/analytics/utm";
+import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 
 export interface CreateOrderRequest {
   items: CartItem[];
@@ -385,6 +386,26 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
     }
+
+    // Audit event: order created (non-fatal — see src/lib/audit/record.ts)
+    const reqCtx = extractRequestContext(req);
+    void recordAuditEvent({
+      actor_type: "customer",
+      actor_id: contact.email.toLowerCase().trim(),
+      event_type: "order.created",
+      entity_type: "order",
+      entity_id: order.id,
+      detail: {
+        order_number: order.order_number,
+        total,
+        payment_method,
+        is_rush,
+        item_count: items.length,
+        discount_code: validatedDiscountCode ?? null,
+      },
+      ip: reqCtx.ip,
+      user_agent: reqCtx.user_agent,
+    });
 
     // Increment customer lifetime stats (non-fatal)
     void (async () => {

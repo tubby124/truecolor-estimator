@@ -148,6 +148,15 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
     throw new Error(`Resend API error ${res.status}: ${errText}`);
   }
 
+  // Capture provider message id so the Resend webhook can update this row later.
+  let providerMessageId: string | null = null;
+  try {
+    const json = await res.clone().json();
+    providerMessageId = json?.id ?? null;
+  } catch {
+    /* Resend always returns JSON on 2xx; ignore parse fail */
+  }
+
   // Log to email_log (non-fatal — never block email delivery on a DB write)
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SECRET_KEY;
@@ -158,6 +167,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
       email_type: options.subject,
       subject: options.subject,
       status: "sent",
+      ...(providerMessageId ? { provider_message_id: providerMessageId } : {}),
       ...(options.orderId ? { order_id: options.orderId } : {}),
       ...(options.customerId ? { customer_id: options.customerId } : {}),
     }));

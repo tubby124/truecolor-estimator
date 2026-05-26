@@ -24,6 +24,7 @@ import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notification
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -140,6 +141,23 @@ export async function POST(req: NextRequest) {
             console.error("[clover-webhook] order update failed:", error.message);
           } else {
             const count = updatedOrders?.length ?? 0;
+            // Audit event: payment received via Clover webhook
+            if (count > 0 && updatedOrders?.[0]) {
+              void recordAuditEvent({
+                actor_type: "system",
+                actor_id: "clover-webhook",
+                event_type: "order.status_changed",
+                entity_type: "order",
+                entity_id: updatedOrders[0].id,
+                detail: {
+                  from: "pending_payment",
+                  to: "payment_received",
+                  order_number: updatedOrders[0].order_number,
+                  amount_cents: reportedAmountCents,
+                  clover_order_id: cloverOrderId,
+                },
+              });
+            }
             console.log(
               `[clover-webhook] order confirmed via webhook | Clover order: ${cloverOrderId} | rows updated: ${count}`
             );

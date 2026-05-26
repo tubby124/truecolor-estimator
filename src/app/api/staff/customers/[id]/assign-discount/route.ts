@@ -17,6 +17,7 @@ import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
 import { sendEmail } from "@/lib/email/smtp";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { voidWaveInvoice, createOrFindWaveCustomer, createWaveInvoice, approveWaveInvoice, type WaveLineItem } from "@/lib/wave/invoice";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -106,6 +107,20 @@ export async function POST(req: NextRequest, { params }: Params) {
       console.error("[assign-discount] failed to set pending_discount_code:", pendErr);
       return NextResponse.json({ error: "Failed to attach code to account" }, { status: 500 });
     }
+
+    // Audit event: coupon issued by staff
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "coupon.issued",
+      entity_type: "customer",
+      entity_id: customer.id,
+      detail: {
+        code: dc.code,
+        discount_amount: dc.discount_amount,
+        customer_email: customer.email,
+      },
+    });
 
     // 6. Find all pending_payment orders for this customer
     const { data: orders } = await supabase

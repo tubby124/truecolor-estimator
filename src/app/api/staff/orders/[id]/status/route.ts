@@ -22,6 +22,7 @@ import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 const VALID_STATUSES = [
   "pending_payment",
@@ -82,6 +83,21 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       console.error("[staff/orders/status]", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // Audit event: staff manually moved status
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "order.status_changed",
+      entity_type: "order",
+      entity_id: id,
+      detail: {
+        from: current?.status ?? "unknown",
+        to: status,
+        order_number: current?.order_number ?? null,
+        manual: true,
+      },
+    });
 
     // Step 2: Update timestamp columns — non-fatal if columns don't exist yet in schema
     const timestamps: Record<string, string> = {};

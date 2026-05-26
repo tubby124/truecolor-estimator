@@ -75,12 +75,41 @@ export async function POST(req: NextRequest) {
     const isBlitzDrip = tags.includes("industry-blitz");
     const isHtmlBlitz = tags.includes("brevo-html-blitz");
 
-    // Only process events from known blitz tracks
+    const now = new Date().toISOString();
+
+    // ── Universal email_log update (Round 2 harness) ─────────────────────
+    // Any Brevo event that matches an email_log row gets recorded — this
+    // captures opens/clicks/bounces on transactional + campaign emails,
+    // regardless of tag. Non-blocking; if no row matches, skip silently.
+    if (messageId) {
+      const eventUpdates: Record<string, unknown> = { last_event_detail: `brevo:${eventType}` };
+      let newStatus: string | null = null;
+      switch (eventType) {
+        case "delivered":      eventUpdates.delivered_at = now; newStatus = "delivered"; break;
+        case "opened":
+        case "unique_opened":  eventUpdates.opened_at = now; break;
+        case "click":          eventUpdates.clicked_at = now; break;
+        case "hard_bounce":
+        case "soft_bounce":    eventUpdates.bounced_at = now; newStatus = "bounced"; break;
+        case "spam":           eventUpdates.complained_at = now; newStatus = "spam"; break;
+        case "deferred":       eventUpdates.delivery_delayed_at = now; newStatus = "delivery_delayed"; break;
+      }
+      if (newStatus) eventUpdates.status = newStatus;
+      if (Object.keys(eventUpdates).length > 1) {
+        const { error: emailLogErr } = await supabase
+          .from("email_log")
+          .update(eventUpdates)
+          .eq("provider_message_id", messageId);
+        if (emailLogErr) {
+          console.error("[brevo-webhook] email_log update failed (non-fatal):", emailLogErr.message);
+        }
+      }
+    }
+
+    // Only process blitz-specific tables for events from known blitz tracks
     if (!isBlitzDrip && !isHtmlBlitz) {
       continue;
     }
-
-    const now = new Date().toISOString();
 
     console.log(
       `[brevo-webhook] Processing event: ${eventType} track: ${isBlitzDrip ? "n8n-drip" : "html"} messageId: ${messageId ?? "—"} email: ${email ?? "—"}`

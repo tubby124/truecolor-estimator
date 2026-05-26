@@ -4,7 +4,10 @@
  * Shows: welcome email delivered? account-ready email delivered? first-order
  * placed? coupon issued? — so Hasan can see at a glance which signups
  * converted and which sit cold.
+ *
+ * Each customer email links to /staff/lifecycle/customer/[email] drill-down.
  */
+import Link from "next/link";
 
 export interface SignupRow {
   id: string;
@@ -89,7 +92,7 @@ export function SignupsPanel({ signups }: { signups: SignupRow[] }) {
               <tr key={s.id} className={s.order_count === 0 && s.age_hours > 24 ? "bg-amber-50/30" : "hover:bg-gray-50"}>
                 <td className="px-3 py-2">
                   <div className="font-medium text-gray-900 truncate max-w-[200px]">{s.name || "—"}</div>
-                  <div className="text-xs text-gray-500 truncate max-w-[200px]">{s.email}</div>
+                  <Link href={`/staff/lifecycle/customer/${encodeURIComponent(s.email)}`} className="text-xs text-blue-700 hover:underline truncate max-w-[200px] block">{s.email}</Link>
                 </td>
                 <td className="px-3 py-2 text-center"><Pip ok={s.welcome_email_sent} label="Welcome" /></td>
                 <td className="px-3 py-2 text-center"><Pip ok={s.account_ready_email_sent} label="Account ready" /></td>

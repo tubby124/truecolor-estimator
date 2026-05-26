@@ -45,6 +45,7 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "aging-orders",           maxAgeHours: 26 },  // daily 09:00 MT
   { name: "keepalive",              maxAgeHours: 26 },  // daily 12:00 UTC
   { name: "gsc-sync",               maxAgeHours: 26 },  // daily
+  { name: "dashboard-alerts",       maxAgeHours: 2  },  // hourly Telegram push layer
 ];
 
 export interface LifecycleData {
@@ -79,6 +80,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     couponRes,
     heartbeatRes,
     paidWaveRes,
+    auditRes,
   ] = await Promise.all([
     supabase
       .from("orders")
@@ -127,6 +129,13 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       .or("wave_invoice_id.is.null,wave_payment_recorded_at.is.null")
       .order("created_at", { ascending: false })
       .limit(100),
+    // audit_events (Round 2 — ground-truth event log; supersedes inferred-from-timestamps for newly-recorded events)
+    supabase
+      .from("audit_events")
+      .select("id, at, actor_type, actor_id, event_type, entity_type, entity_id, detail")
+      .gte("at", cutoff)
+      .order("at", { ascending: false })
+      .limit(500),
   ]);
 
   const orders = ordersRes.data ?? [];
@@ -137,6 +146,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   const couponCodes = couponRes.data ?? [];
   const heartbeatRaw = heartbeatRes.data ?? [];
   const paidWave = paidWaveRes.data ?? [];
+  const auditRaw = auditRes.data ?? [];
 
   // ── derive lifecycle rows (existing logic, plus pay_link pip) ─────────────
   const customerEmails = new Set<string>();
@@ -525,6 +535,43 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       detail: `${r.code} · -$${r.amount_saved.toFixed(2)}`,
       order_id: r.order_id,
       order_number: r.order_number,
+    });
+  }
+
+  // Merge in audit_events (ground-truth event log — supersedes inferred events
+  // for the same entity+event_type pair where both exist). For now both render;
+  // the audit-sourced row is distinguishable by its id prefix "audit:".
+  const auditTypeMap: Record<string, { type: ActivityEvent["type"]; label: (d: Record<string, unknown> | null) => string }> = {
+    "order.created": {
+      type: "order_placed",
+      label: (d) => `$${Number(d?.total ?? 0).toFixed(2)} · ${d?.payment_method ?? "—"} · ${d?.is_rush ? "RUSH" : "standard"}`,
+    },
+    "order.status_changed": {
+      type: "payment_recorded",
+      label: (d) => `${d?.from ?? "?"} → ${d?.to ?? "?"}${d?.manual ? " · manual" : ""}`,
+    },
+    "coupon.issued": {
+      type: "coupon_redeemed", // closest match in current type enum; could split later
+      label: (d) => `code: ${d?.code ?? "?"}`,
+    },
+  };
+  for (const ae of auditRaw) {
+    const mapped = auditTypeMap[ae.event_type];
+    if (!mapped) continue;
+    const detail = (ae.detail ?? null) as Record<string, unknown> | null;
+    const orderNumber = detail?.order_number as string | undefined ?? null;
+    const customerEmail = detail?.customer_email as string | undefined ?? (ae.actor_type === "customer" ? (ae.actor_id ?? null) : null);
+    const actorMapped: ActivityEvent["actor"] = ae.actor_type === "cron" ? "system" : (ae.actor_type as ActivityEvent["actor"]);
+    activity.push({
+      id: `audit:${ae.id}`,
+      at: ae.at,
+      type: mapped.type,
+      actor: actorMapped,
+      who_name: null,
+      who_email: customerEmail,
+      detail: mapped.label(detail),
+      order_id: ae.entity_type === "order" ? ae.entity_id : null,
+      order_number: orderNumber,
     });
   }
 

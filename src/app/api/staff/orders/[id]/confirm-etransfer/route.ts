@@ -19,6 +19,7 @@ import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvo
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -82,6 +83,22 @@ export async function POST(_req: NextRequest, { params }: Params) {
     }
 
     console.log(`[confirm-etransfer] order ${order.order_number} → payment_received`);
+
+    // Audit event: staff confirmed eTransfer
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "order.status_changed",
+      entity_type: "order",
+      entity_id: order.id,
+      detail: {
+        from: "pending_payment",
+        to: "payment_received",
+        order_number: order.order_number,
+        method: "etransfer",
+        amount: Number(order.total ?? 0),
+      },
+    });
 
     // Bump customer lifetime stats now (moved off order-creation 2026-05-20)
     await incrementCustomerOrderStats(supabase, order.customer_id, Number(order.total ?? 0));
