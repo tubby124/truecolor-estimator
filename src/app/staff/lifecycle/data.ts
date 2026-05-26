@@ -30,6 +30,7 @@ import { checkPriceConsistency } from "@/lib/data/price-consistency";
 import type { RefundPendingRow } from "./RefundsPendingPanel";
 import type { WaveWebhookEvent } from "./WaveWebhookPanel";
 import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
+import type { StaffAction } from "./StaffActionsPanel";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
@@ -81,6 +82,7 @@ export interface LifecycleData {
   refundsPending: RefundPendingRow[];
   waveWebhookEvents: WaveWebhookEvent[];
   emailDeliveryHealth: EmailDeliveryHealth;
+  staffActions: StaffAction[];
   fetched_at: string;
 }
 
@@ -923,6 +925,27 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     detail: e.detail ?? null,
   }));
 
+  // ── derive staff actions + customer pay-link clicks ────────────────────────
+  // Every staff button press recorded via recordAuditEvent, plus customer
+  // clicks on /pay/[token] links (actor_type='customer', event_type contains
+  // 'pay_link_clicked'). The ActivityFeed below shows inferred events from
+  // timestamp columns; this panel is the ground-truth button-press log.
+  const staffActions: StaffAction[] = auditRaw
+    .filter((ae) =>
+      ae.actor_type === "staff" ||
+      (ae.actor_type === "customer" && ae.event_type === "order.pay_link_clicked")
+    )
+    .map((ae) => ({
+      id: String(ae.id),
+      at: ae.at,
+      actor: ae.actor_id ?? "staff",
+      event_type: ae.event_type,
+      entity_type: ae.entity_type,
+      entity_id: ae.entity_id,
+      order_number: ae.entity_type === "order" ? (orderNumberById.get(ae.entity_id) ?? null) : null,
+      detail: (ae.detail ?? null) as Record<string, unknown> | null,
+    }));
+
   // ── derive email delivery health ──────────────────────────────────────────
   const sentCount = emailDeliveryRaw.length;
   const deliveredCount = emailDeliveryRaw.filter((r) => r.delivered_at).length;
@@ -959,6 +982,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     refundsPending: await fetchRefundsPending(supabase, now),
     waveWebhookEvents,
     emailDeliveryHealth,
+    staffActions,
     fetched_at: new Date(now).toISOString(),
   };
 }

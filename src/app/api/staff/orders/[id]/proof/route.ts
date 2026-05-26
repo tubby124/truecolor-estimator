@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendProofEmail } from "@/lib/email/proofSent";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 const MAX_FILE_SIZE = 52_428_800; // 50 MB per file
 
@@ -206,6 +207,20 @@ export async function POST(req: NextRequest, { params }: Params) {
     console.log(
       `[staff/proof] uploaded ${newPaths.length} proof(s) → order ${order.order_number} | total: ${allProofPaths.length}`
     );
+
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "order.proof_sent",
+      entity_type: "order",
+      entity_id: orderId,
+      detail: {
+        order_number: order.order_number,
+        recipient: customer.email,
+        new_proofs_count: newPaths.length,
+        total_proofs_count: allProofPaths.length,
+      },
+    });
 
     return NextResponse.json({ ok: true, latestProofPath, allProofPaths });
   } catch (err) {

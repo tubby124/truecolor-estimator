@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -127,6 +128,20 @@ export async function POST(req: NextRequest, { params }: Params) {
     console.log(
       `[staff/orders/reply] sent → ${customer.email} | order ${order.order_number} | subject "${subject.trim()}"`
     );
+
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "order.customer_email_sent",
+      entity_type: "order",
+      entity_id: id,
+      detail: {
+        order_number: order.order_number,
+        recipient: customer.email,
+        subject: subject.trim().slice(0, 200),
+        body_chars: message.length,
+      },
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { encodePaymentToken } from "@/lib/payment/token";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 interface LineItem {
   description: string;
@@ -265,6 +266,21 @@ export async function POST(req: NextRequest, { params }: Params) {
       .eq("id", id);
 
     console.log(`[staff/quotes/send-quote] sent branded quote to ${to} for quote ${id}`);
+
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "quote.priced_quote_sent",
+      entity_type: "quote",
+      entity_id: id,
+      detail: {
+        recipient: to,
+        customer_name: customerName,
+        line_items_count: lineItems.length,
+        total_cents: totalCents,
+      },
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to send quote";

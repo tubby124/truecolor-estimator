@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -33,6 +34,15 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: "Failed to update code." }, { status: 500 });
   }
 
+  void recordAuditEvent({
+    actor_type: "staff",
+    actor_id: authResult.email ?? "staff",
+    event_type: body.is_active ? "coupon.activated" : "coupon.deactivated",
+    entity_type: "coupon",
+    entity_id: id,
+    detail: { code: data.code, is_active: data.is_active },
+  });
+
   return NextResponse.json({ code: data });
 }
 
@@ -52,6 +62,15 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
   if (error) {
     return NextResponse.json({ error: "Failed to deactivate code." }, { status: 500 });
   }
+
+  void recordAuditEvent({
+    actor_type: "staff",
+    actor_id: authResult.email ?? "staff",
+    event_type: "coupon.deactivated",
+    entity_type: "coupon",
+    entity_id: id,
+    detail: { source: "DELETE" },
+  });
 
   return NextResponse.json({ success: true });
 }

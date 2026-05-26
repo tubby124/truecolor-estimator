@@ -10,6 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -42,6 +43,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       console.error("[staff/orders/archive]", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: archived ? "order.archived" : "order.unarchived",
+      entity_type: "order",
+      entity_id: id,
+      detail: { archived },
+    });
 
     return NextResponse.json({ ok: true, archived });
   } catch (err) {

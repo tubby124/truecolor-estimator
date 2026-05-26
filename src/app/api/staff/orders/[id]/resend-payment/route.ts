@@ -17,6 +17,7 @@ import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -120,6 +121,20 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
 
     console.log(`[resend-payment] payment link resent → ${customer.email} | order ${order.order_number} | wave_invoice_id ${order.wave_invoice_id ?? "none"}`);
+
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "order.payment_link_resent",
+      entity_type: "order",
+      entity_id: id,
+      detail: {
+        order_number: order.order_number,
+        recipient: customer.email,
+        total,
+        payment_method: order.payment_method ?? "clover",
+      },
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

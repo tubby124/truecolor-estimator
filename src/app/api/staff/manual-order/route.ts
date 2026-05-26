@@ -24,6 +24,7 @@ import { sendAccountWelcomeEmail } from "@/lib/email/accountWelcome";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -394,6 +395,21 @@ export async function POST(req: NextRequest) {
     } catch (brevoErr) {
       console.error("[manual-order] Brevo sync failed (non-fatal):", brevoErr);
     }
+
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: auth.email ?? "staff",
+      event_type: quoteOnly ? "order.manual_quote_created" : "order.manual_created",
+      entity_type: "order",
+      entity_id: order.id,
+      detail: {
+        order_number: order.order_number,
+        customer_email: contact.email,
+        item_count: items.length,
+        payment_method: body.payment_method ?? "clover",
+        quote_only: quoteOnly,
+      },
+    });
 
     return NextResponse.json({ orderId: order.id, orderNumber: order.order_number, paymentUrl });
   } catch (err) {

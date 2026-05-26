@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export async function POST(req: NextRequest) {
   const authResult = await requireStaffUser();
@@ -72,6 +73,20 @@ export async function POST(req: NextRequest) {
       replyTo: "info@true-color.ca",
     });
     console.log(`[send-customer-email] sent to ${to} | subject: "${subject}" | by: ${authResult.email}`);
+
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: authResult.email ?? "staff",
+      event_type: "customer.email_sent",
+      entity_type: "customer",
+      entity_id: to,
+      detail: {
+        recipient: to,
+        subject: subject.slice(0, 200),
+        body_chars: message.length,
+      },
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[send-customer-email] failed:", err instanceof Error ? err.message : err);

@@ -40,6 +40,7 @@ import { PriceConsistencyPanel } from "./PriceConsistencyPanel";
 import { RefundsPendingPanel } from "./RefundsPendingPanel";
 import { WaveWebhookPanel } from "./WaveWebhookPanel";
 import { EmailDeliveryHealthPanel } from "./EmailDeliveryHealthPanel";
+import { StaffActionsPanel } from "./StaffActionsPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -115,6 +116,7 @@ export default async function LifecyclePage() {
             <CartAbandonPanel rows={data.cartAbandons} />
             <FailedEmailsPanel rows={data.failedEmails} />
             <LifecycleTable rows={data.rows} />
+            <StaffActionsPanel actions={data.staffActions} />
             <ActivityFeedPanel events={data.activity} />
             <QuotesPanel quotes={data.quotes} />
             <SignupsPanel signups={data.signups} />

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { decodePaymentToken } from "@/lib/payment/token";
 import { createCloverCheckout } from "@/lib/payment/clover";
 import { createServiceClient } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -85,6 +86,15 @@ export default async function PaymentGatewayPage({ params }: Props) {
         .eq("id", orderId)
         .eq("status", "pending_payment"); // only update if still pending
       if (updErr) console.error("[pay/token] payment_reference save failed (non-fatal):", updErr.message);
+
+      void recordAuditEvent({
+        actor_type: "customer",
+        actor_id: customerEmail ?? null,
+        event_type: "order.pay_link_clicked",
+        entity_type: "order",
+        entity_id: orderId,
+        detail: { amount_cents: amountCents, description },
+      });
     }
   } catch (err) {
     console.error("[pay/token] Clover checkout failed:", err);

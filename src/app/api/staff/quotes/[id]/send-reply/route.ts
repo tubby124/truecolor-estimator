@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { encodePaymentToken } from "@/lib/payment/token";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -149,6 +150,22 @@ ${escHtml(body)}
       `[staff/quotes/send-reply] replied to quote ${id} → ${to}` +
       (totalCentsForDb !== null ? ` (with Pay Now $${(totalCentsForDb / 100).toFixed(2)})` : "")
     );
+
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "quote.reply_sent",
+      entity_type: "quote",
+      entity_id: id,
+      detail: {
+        recipient: to,
+        subject: subject.slice(0, 200),
+        has_pay_now: totalCentsForDb !== null,
+        quote_total_cents: totalCentsForDb,
+        body_chars: body.length,
+      },
+    });
+
     return NextResponse.json({ ok: true, total_cents: totalCentsForDb });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to send reply";

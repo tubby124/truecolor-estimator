@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 export async function GET() {
   const authResult = await requireStaffUser();
@@ -83,6 +84,23 @@ export async function POST(req: NextRequest) {
     }
     console.error("[staff/coupons] create error:", error);
     return NextResponse.json({ error: "Failed to create code." }, { status: 500 });
+  }
+
+  if (data?.id) {
+    void recordAuditEvent({
+      actor_type: "staff",
+      actor_id: authResult.email ?? "staff",
+      event_type: "coupon.created",
+      entity_type: "coupon",
+      entity_id: data.id,
+      detail: {
+        code: data.code,
+        type: data.type,
+        discount_amount: data.discount_amount,
+        max_uses: data.max_uses,
+        expires_at: data.expires_at,
+      },
+    });
   }
 
   return NextResponse.json({ code: { ...data, redemption_count: 0 } }, { status: 201 });
