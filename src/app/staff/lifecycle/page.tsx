@@ -36,6 +36,7 @@ import { FailedEmailsPanel } from "./FailedEmailsPanel";
 import { TelegramHealthPanel } from "./TelegramHealthPanel";
 import { IndustryBlitzPanel } from "./IndustryBlitzPanel";
 import { SeoRankMoversPanel } from "./SeoRankMoversPanel";
+import { PriceConsistencyPanel } from "./PriceConsistencyPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -90,6 +91,7 @@ export default async function LifecyclePage() {
             <HealthTiles snap={data.health} />
             <HeartbeatsPanel heartbeats={data.heartbeats} />
             <TelegramHealthPanel h={data.telegramHealth} />
+            <PriceConsistencyPanel rows={data.priceConsistency} />
             <BookkeepingRiskPanel rows={data.bookkeepingRisks} />
             <OrphanPanel orphans={data.orphans} />
             <WaveDraftPanel rows={data.waveDrafts} />

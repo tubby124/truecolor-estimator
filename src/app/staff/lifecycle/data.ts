@@ -25,6 +25,8 @@ import type { FailedEmailRow } from "./FailedEmailsPanel";
 import type { TelegramHealth } from "./TelegramHealthPanel";
 import type { BlitzSnapshot } from "./IndustryBlitzPanel";
 import type { SeoRankMovers, SeoMover } from "./SeoRankMoversPanel";
+import type { PriceConsistencyRow } from "./PriceConsistencyPanel";
+import { checkPriceConsistency } from "@/lib/data/price-consistency";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
@@ -72,6 +74,7 @@ export interface LifecycleData {
   telegramHealth: TelegramHealth;
   blitz: BlitzSnapshot;
   seoMovers: SeoRankMovers;
+  priceConsistency: PriceConsistencyRow[];
 }
 
 export async function fetchLifecycleData(): Promise<LifecycleData> {
@@ -878,5 +881,6 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     telegramHealth,
     blitz,
     seoMovers,
+    priceConsistency: checkPriceConsistency(),
   };
 }
