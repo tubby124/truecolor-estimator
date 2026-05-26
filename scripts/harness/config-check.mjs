@@ -29,7 +29,6 @@ try {
 
   const data = await res.json();
   const checks = data.checks ?? [];
-  const issues = data.issues ?? [];
 
   if (checks.length === 0) {
     console.log("⚠️  /api/health returned no checks — endpoint may be the old minimal version.");
@@ -38,19 +37,29 @@ try {
   }
 
   for (const c of checks) {
-    const icon = c.ok ? "✅" : "❌";
+    const icon = c.ok ? "✅" : c.severity === "warn" ? "⚠️ " : "❌";
     const note = c.note ? `  ← ${c.note}` : "";
     console.log(`  ${icon}  ${c.name}${note}`);
   }
 
+  const fails = checks.filter((c) => !c.ok && c.severity === "fail");
+  const warns = checks.filter((c) => !c.ok && c.severity === "warn");
+
   console.log("");
-  if (issues.length === 0) {
+  if (fails.length === 0 && warns.length === 0) {
     console.log("✅  All config checks passed — Railway prod env is clean.\n");
     process.exit(0);
-  } else {
-    console.log(`❌  ${issues.length} config issue${issues.length > 1 ? "s" : ""}. Fix in Railway dashboard → Variables.\n`);
+  }
+  if (warns.length > 0) {
+    console.log(`⚠️  ${warns.length} warning${warns.length > 1 ? "s" : ""} (works, but worth addressing when safe).`);
+  }
+  if (fails.length > 0) {
+    console.log(`❌  ${fails.length} FAILURE${fails.length > 1 ? "S" : ""} — fix in Railway dashboard → Variables. These break flows.\n`);
     process.exit(1);
   }
+  // warnings only → exit 0 (don't fail CI on hygiene items)
+  console.log("");
+  process.exit(0);
 } catch (err) {
   console.error(`❌ Config check failed: ${err.message}`);
   process.exit(1);
