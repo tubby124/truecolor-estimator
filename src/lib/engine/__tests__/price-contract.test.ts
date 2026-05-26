@@ -25,6 +25,7 @@
 
 import { describe, it, expect } from "vitest";
 import { estimate } from "../index";
+import type { EstimateRequest } from "../types";
 import { getProducts } from "@/lib/data/loader";
 
 // Compact, reviewable price fingerprint per config.
@@ -43,12 +44,13 @@ describe("Price contract — every active product through the engine", () => {
     const matrix: Record<string, string> = {};
 
     for (const p of products) {
+      // CSV values are trusted-valid; cast to the request's narrow types.
       matrix[p.product_id] = fingerprint({
-        category: p.category,
+        category: p.category as EstimateRequest["category"],
         material_code: p.material_code,
         width_in: p.width_in,
         height_in: p.height_in,
-        sides: p.sides,
+        sides: p.sides as EstimateRequest["sides"],
         qty: p.qty,
       });
     }
