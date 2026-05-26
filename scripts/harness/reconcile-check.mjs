@@ -127,7 +127,8 @@ const rpad = (s, w) => String(s).padStart(w);
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   console.log(`\n🔍 Three-way reconciliation — last ${DAYS} days (since ${cutoff.slice(0, 10)})\n`);
-  const issues = [];
+  const issues = [];   // hard failures → exit 1
+  const warnings = []; // works-but-confirm → reported, exit stays 0
   let exitCode = 0;
 
   // ── 1. Supabase: all paid orders in window ────────────────────────────────
@@ -168,8 +169,8 @@ async function main() {
     issues.push(`${driftRows.length} paid order(s) missing wave_payment_recorded_at — run reconcile-payments cron to auto-heal`);
   }
 
-  // ── 2. Wave: PAID invoices in window ─────────────────────────────────────
-  console.log("\nFetching Wave PAID invoices…");
+  // ── 2. Wave: invoice status for TC orders in window ──────────────────────
+  console.log("\nFetching Wave invoices…");
   const waveResp = await waveQuery(
     `query($bizId: ID!) {
       business(id: $bizId) {
@@ -188,43 +189,42 @@ async function main() {
   const ORDER_RE = /(TC-\d{4}-\d{4})/;
   const allWaveInvoices = (waveResp?.business?.invoices?.edges ?? []).map((e) => e.node);
 
-  // Filter to TC-order PAID invoices within our window
-  const waveInvoices = allWaveInvoices.filter((inv) => {
-    if (!inv.title?.match(ORDER_RE)) return false;
-    if (inv.status !== "PAID") return false;
-    return new Date(inv.createdAt) >= new Date(cutoff);
-  });
+  // Map order_number → Wave invoice status (all statuses, not just PAID)
+  const waveStatusByOrder = {};
+  for (const inv of allWaveInvoices) {
+    const onum = inv.title?.match(ORDER_RE)?.[1];
+    if (onum) waveStatusByOrder[onum] = inv.status;
+  }
 
-  console.log(`  Wave PAID invoices: ${waveInvoices.length} (totals pulled from Supabase linked rows)`);
-
-  // ── 2a. Cross-check Wave vs Supabase
-  // Every Supabase paid order with a wave_invoice_id should have a PAID Wave invoice.
-  // We match by order number embedded in the invoice title.
   const sbWithWave = sbAll.filter((o) => o.wave_invoice_id);
   const sbWithWaveTotal = sum(sbWithWave);
-
-  // Build set of order numbers from Wave PAID invoices
-  const waveOrderNumbers = new Set(
-    waveInvoices.map((inv) => inv.title.match(ORDER_RE)?.[1]).filter(Boolean)
-  );
-
-  const sbNotInWave = sbWithWave.filter((o) => !waveOrderNumbers.has(o.order_number));
-
   console.log(`  Supabase orders with wave_invoice_id: ${sbWithWave.length}, total ${$(sbWithWaveTotal)}`);
 
-  if (waveInvoices.length !== sbWithWave.length) {
-    const msg = `Wave PAID count (${waveInvoices.length}) ≠ Supabase orders with wave_invoice_id (${sbWithWave.length})`;
-    console.log(`  ⚠  ${msg}`);
-    issues.push(msg);
+  // For each Supabase paid order, show the Wave invoice status.
+  const waveStatusCounts = {};
+  const notPaidInWave = [];
+  for (const o of sbWithWave) {
+    const st = waveStatusByOrder[o.order_number] ?? "NOT_FOUND";
+    waveStatusCounts[st] = (waveStatusCounts[st] ?? 0) + 1;
+    if (st !== "PAID") notPaidInWave.push({ ...o, waveStatus: st });
   }
-  if (sbNotInWave.length > 0) {
-    console.log(`  ⚠  ${sbNotInWave.length} Supabase order(s) with wave_invoice_id but NO matching PAID Wave invoice:`);
-    for (const o of sbNotInWave.slice(0, 5)) {
-      console.log(`     • ${o.order_number}  ${$(o.total)}  ${o.payment_method}`);
+  console.log(`  Wave invoice status of paid Supabase orders: ${JSON.stringify(waveStatusCounts)}`);
+
+  // IMPORTANT: this shop records income via moneyTransactionCreate (hard rule:
+  // never invoiceCreatePayment). That books the income but does NOT flip the
+  // invoice to PAID — so OVERDUE-but-income-recorded may be the INTENDED state,
+  // not a failure. Until Hasan confirms intent, this is a WARNING, not a hard
+  // issue (does not fail exit code). See vault 2026-05-25-harness-progress.
+  if (notPaidInWave.length > 0) {
+    console.log(`  ⚠  ${notPaidInWave.length} Supabase-paid order(s) whose Wave invoice is NOT marked PAID:`);
+    for (const o of notPaidInWave.slice(0, 8)) {
+      console.log(`     • ${o.order_number}  ${$(o.total)}  ${o.payment_method}  → Wave: ${o.waveStatus}`);
     }
-    issues.push(`${sbNotInWave.length} Supabase paid order(s) not found as PAID in Wave`);
+    console.log(`     NOTE: likely expected — moneyTransactionCreate books income without flipping`);
+    console.log(`     invoice status. Pending Hasan confirmation. Reclassify to FAIL if not intended.`);
+    warnings.push(`${notPaidInWave.length} Supabase-paid order(s) have a non-PAID Wave invoice (statuses: ${JSON.stringify(waveStatusCounts)}) — confirm moneyTransactionCreate-vs-invoice-PAID intent`);
   } else {
-    console.log(`  ✅ All Supabase wave-linked orders appear PAID in Wave`);
+    console.log(`  ✅ All Supabase wave-linked orders show PAID in Wave`);
   }
 
   // ── 3. Clover: payments in window ────────────────────────────────────────
@@ -368,10 +368,14 @@ async function main() {
 
   // ── 5. Summary ────────────────────────────────────────────────────────────
   console.log("\n" + "═".repeat(70));
+  if (warnings.length > 0) {
+    console.log(`⚠  ${warnings.length} WARNING${warnings.length > 1 ? "S" : ""} (works / confirm intent — does not fail):`);
+    for (const w of warnings) console.log(`   • ${w}`);
+    console.log("");
+  }
   if (issues.length === 0) {
-    console.log("✅  CLEAN — all three systems in agreement");
+    console.log("✅  CLEAN — no hard mismatches across the three systems");
     console.log(`    Supabase: ${sbAll.length} paid orders ${$(sum(sbAll))}`);
-    console.log(`    Wave:     ${waveInvoices.length} PAID TC-order invoices`);
     if (!cloverSkipped) console.log(`    Clover:   ${cloverOrders.length} payments ${$(cloverTotal)}`);
   } else {
     exitCode = 1;
