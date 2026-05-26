@@ -320,25 +320,50 @@ async function main() {
     issues.push(`Clover API unavailable: ${cloverErr.message.slice(0, 100)}`);
   }
 
-  // ── 4. Cron heartbeat: check last-ran timestamps ──────────────────────────
-  // The reconcile-payments cron should have run within the last 36 hours.
-  // We infer this from the most recently updated order's wave_payment_recorded_at
-  // or lack of known drift — not ideal but we have no cron-last-ran table yet.
-  // TODO: add a cron_runs table (see Phase 1 backlog).
-  console.log("\nCron heartbeat check (inferred from data):");
+  // ── 4. Cron heartbeat: read cron_runs table for last-ran timestamps ───────
+  // Each payment cron writes a cron_runs row at end of run (fail-quiet). A
+  // missing recent row = the cron silently didn't execute (pg_cron stopped,
+  // CRON_SECRET rotated out of sync, endpoint 401). Per-cron staleness window.
+  console.log("\nCron heartbeat check (from cron_runs table):");
 
-  const { data: recentlyRecovered } = await sb
-    .from("orders")
-    .select("order_number, wave_payment_recorded_at")
-    .not("wave_payment_recorded_at", "is", null)
-    .gte("wave_payment_recorded_at", new Date(Date.now() - 36 * 3600_000).toISOString())
-    .limit(1);
+  // name → max hours allowed since last run before we alert
+  const CRON_WINDOWS = {
+    "reconcile-payments": 36, // daily 9 AM MT
+    "daily-payment-digest": 36, // daily 13:00 UTC
+    "payment-followup": 4, // hourly
+  };
 
-  if (recentlyRecovered?.length) {
-    console.log(`  ✅ reconcile-payments cron appears active (ran in last 36h)`);
+  const { data: cronRows, error: cronErr } = await sb
+    .from("cron_runs")
+    .select("cron_name, ran_at, ok")
+    .order("ran_at", { ascending: false })
+    .limit(200);
+
+  if (cronErr) {
+    // Table likely not created yet (migration pending). Not a recon failure —
+    // just note it so the harness is honest about coverage.
+    console.log(`  ℹ️  cron_runs table not readable (${cronErr.message.slice(0, 60)}).`);
+    console.log(`     Apply migration 20260525123000_cron_runs_heartbeat.sql to enable heartbeat checks.`);
   } else {
-    // Not necessarily broken — just no recoveries. Check payment_followup cron instead.
-    console.log(`  ℹ️  No wave_payment_recorded_at updates in last 36h (expected if nothing was stuck)`);
+    const latestByName = {};
+    for (const row of cronRows ?? []) {
+      if (!latestByName[row.cron_name]) latestByName[row.cron_name] = row;
+    }
+    for (const [name, maxHours] of Object.entries(CRON_WINDOWS)) {
+      const last = latestByName[name];
+      if (!last) {
+        console.log(`  ⚠  ${name}: no run ever recorded (expected within ${maxHours}h)`);
+        issues.push(`Cron '${name}' has never recorded a heartbeat — verify it is scheduled + running`);
+        continue;
+      }
+      const ageHours = (Date.now() - new Date(last.ran_at).getTime()) / 3600_000;
+      if (ageHours > maxHours) {
+        console.log(`  ❌ ${name}: last ran ${ageHours.toFixed(1)}h ago (window ${maxHours}h) — SILENT DEATH`);
+        issues.push(`Cron '${name}' last ran ${ageHours.toFixed(1)}h ago, exceeds ${maxHours}h window`);
+      } else {
+        console.log(`  ✅ ${name}: last ran ${ageHours.toFixed(1)}h ago (within ${maxHours}h)`);
+      }
+    }
   }
 
   // ── 5. Summary ────────────────────────────────────────────────────────────

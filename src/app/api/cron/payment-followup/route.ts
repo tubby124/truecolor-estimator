@@ -16,6 +16,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { escHtml } from "@/lib/email/components/escHtml";
+import { recordCronRun } from "@/lib/cron/heartbeat";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 const FROM = "True Color Display Printing <hello@outreach.true-color.ca>";
@@ -235,5 +236,6 @@ export async function GET(req: NextRequest) {
     console.error("[payment-followup] TC-9 block failed:", err);
   }
 
+  await recordCronRun("payment-followup", true, `tc9=${tc9Sent} tc10=${tc10Sent}`);
   return NextResponse.json({ ok: true, tc9: tc9Sent, tc10: tc10Sent });
 }

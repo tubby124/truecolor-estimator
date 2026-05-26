@@ -33,6 +33,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, type WavePaymentMethod } from "@/lib/wave/invoice";
+import { recordCronRun } from "@/lib/cron/heartbeat";
 
 const WAVE_GQL = "https://gql.waveapps.com/graphql/public";
 const WAVE_BIZ = "QnVzaW5lc3M6MGZlYTg0NzQtYjQ2Ny00YTEyLWI1NTgtZWZhNGM3NGM3ZTNj";
@@ -341,6 +342,7 @@ export async function GET(req: NextRequest) {
   }
 
   console.log(`[reconcile-payments] ${issues.length} issues found, ${recoveredCount} auto-recovered`);
+  await recordCronRun("reconcile-payments", true, `${issues.length} issues, ${recoveredCount} recovered`);
   return NextResponse.json({
     ok: true,
     issues_total: issues.length,

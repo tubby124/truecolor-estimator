@@ -19,6 +19,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
+import { recordCronRun } from "@/lib/cron/heartbeat";
 
 // DST-aware Mountain Time offset for Saskatchewan-adjacent ops.
 // America/Regina is UTC-6 year-round (SK doesn't observe DST), so for True
@@ -225,6 +226,7 @@ export async function GET(req: NextRequest) {
 
   console.log(`[daily-digest] ${dateLabel} · collected=${fmtMoney(collectedTotal)} pending7d=${pendingRows.length} ghost=${ghostRows.length} waveStuck=${waveStuckRows.length}`);
 
+  await recordCronRun("daily-payment-digest", true, `collected ${fmtMoney(collectedTotal)}, pending7d ${pendingRows.length}`);
   return NextResponse.json({
     ok: true,
     date_mt: yesterdayMtDateStr,
