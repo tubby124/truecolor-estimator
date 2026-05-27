@@ -41,6 +41,7 @@ import { RefundsPendingPanel } from "./RefundsPendingPanel";
 import { WebhookHealthPanel } from "./WebhookHealthPanel";
 import { EmailDeliveryHealthPanel } from "./EmailDeliveryHealthPanel";
 import { StaffActionsPanel } from "./StaffActionsPanel";
+import { StatusRollupPanel } from "./StatusRollupPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -103,16 +104,27 @@ export default async function LifecyclePage() {
           </div>
         ) : data ? (
           <div className="space-y-2">
+            <StatusRollupPanel rollup={data.rollup} />
             <HealthTiles snap={data.health} />
-            <HeartbeatsPanel heartbeats={data.heartbeats} />
-            <WebhookHealthPanel groups={data.webhookGroups} />
+            <div id="panel-cron-heartbeats" className="scroll-mt-20">
+              <HeartbeatsPanel heartbeats={data.heartbeats} />
+            </div>
+            <div id="panel-webhook-health" className="scroll-mt-20">
+              <WebhookHealthPanel groups={data.webhookGroups} />
+            </div>
             <TelegramHealthPanel h={data.telegramHealth} />
             <EmailDeliveryHealthPanel health={data.emailDeliveryHealth} />
             <PriceConsistencyPanel rows={data.priceConsistency} />
-            <BookkeepingRiskPanel rows={data.bookkeepingRisks} />
+            <div id="panel-bookkeeping-risk" className="scroll-mt-20">
+              <BookkeepingRiskPanel rows={data.bookkeepingRisks} />
+            </div>
             <RefundsPendingPanel rows={data.refundsPending} />
-            <OrphanPanel orphans={data.orphans} />
-            <WaveDraftPanel rows={data.waveDrafts} />
+            <div id="panel-orphans" className="scroll-mt-20">
+              <OrphanPanel orphans={data.orphans} />
+            </div>
+            <div id="panel-wave-drafts" className="scroll-mt-20">
+              <WaveDraftPanel rows={data.waveDrafts} />
+            </div>
             <CartAbandonPanel rows={data.cartAbandons} />
             <FailedEmailsPanel rows={data.failedEmails} />
             <LifecycleTable rows={data.rows} />
