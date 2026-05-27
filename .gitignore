@@ -58,3 +58,6 @@ e2e-screenshots/
 playwright-report/
 test-results/
 playwright/.auth/
+
+# local-only Claude Code settings (per-machine hooks/MCP toggles)
+.claude/settings.local.json
