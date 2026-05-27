@@ -118,11 +118,27 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
   }
 
   // ── Orphan orders ─────────────────────────────────────────────────────────
-  if (inputs.orphans.length > 0) {
+  // Urgent = customer-noted urgency (call/funeral/rush/urgent/asap) OR age > 12h.
+  // These get a red telegram within the hour. Non-urgent stay yellow.
+  // TC-2026-0115/0116 (Rodney Russell, funeral, 2026-05-27) was the trigger
+  // for this escalation — sat unpaid with "call to confirm" notes and no push.
+  const URGENT_NOTES = /\b(call|funeral|urgent|rush|asap|emergency)\b/i;
+  const urgent = inputs.orphans.filter(
+    (o) => o.age_hours > 12 || (o.notes != null && URGENT_NOTES.test(o.notes))
+  );
+  if (urgent.length > 0) {
+    reds.push({
+      key: "orphans:urgent",
+      panel: "panel-orphans",
+      label: `${urgent.length} urgent unpaid order(s)`,
+    });
+  }
+  const nonUrgent = inputs.orphans.length - urgent.length;
+  if (nonUrgent > 0) {
     yellows.push({
       key: "orphans",
       panel: "panel-orphans",
-      label: `Orphans: ${inputs.orphans.length}`,
+      label: `Orphans: ${nonUrgent}`,
     });
   }
 

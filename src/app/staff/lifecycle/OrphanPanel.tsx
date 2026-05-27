@@ -26,6 +26,7 @@ export interface Orphan {
   payment_method: string;
   pay_link_url: string; // server-generated recovery URL (HMAC token)
   wave_invoice_number: string | null;
+  notes: string | null; // customer notes — feeds urgency detection in rollup
 }
 
 function fmtAge(hours: number): string {

@@ -30,6 +30,7 @@ import { checkPriceConsistency } from "@/lib/data/price-consistency";
 import type { RefundPendingRow } from "./RefundsPendingPanel";
 import type { WebhookEvent, WebhookSourceGroup } from "./WebhookHealthPanel";
 import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
+import { buildEmailVolumeSnapshot, type EmailVolumeSnapshot } from "./EmailVolumePanel";
 import type { StaffAction } from "./StaffActionsPanel";
 import { buildRollup, type StatusRollup } from "@/lib/lifecycle/rollup";
 
@@ -83,6 +84,7 @@ export interface LifecycleData {
   refundsPending: RefundPendingRow[];
   webhookGroups: WebhookSourceGroup[];
   emailDeliveryHealth: EmailDeliveryHealth;
+  emailVolume: EmailVolumeSnapshot;
   staffActions: StaffAction[];
   rollup: StatusRollup;
   fetched_at: string;
@@ -111,7 +113,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   ] = await Promise.all([
     supabase
       .from("orders")
-      .select("id, order_number, status, payment_method, total, is_rush, wave_invoice_id, wave_invoice_number, wave_invoice_approved_at, wave_payment_recorded_at, proof_sent_at, created_at, customers (name, email)")
+      .select("id, order_number, status, payment_method, total, is_rush, wave_invoice_id, wave_invoice_number, wave_invoice_approved_at, wave_payment_recorded_at, proof_sent_at, created_at, notes, customers (name, email)")
       .gte("created_at", cutoff)
       .order("created_at", { ascending: false })
       .limit(200),
@@ -172,10 +174,13 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       .order("received_at", { ascending: false })
       .limit(120),
     // Email delivery health — aggregate counts for last 7 days
+    // to_address pulled here so we can derive the per-recipient volume panel
+    // off the same query (no extra round-trip).
     supabase
       .from("email_log")
-      .select("id, sent_at, delivered_at, opened_at, bounced_at")
-      .gte("sent_at", cutoff),
+      .select("id, sent_at, delivered_at, opened_at, bounced_at, to_address")
+      .gte("sent_at", cutoff)
+      .limit(5000),
   ]);
 
   const orders = ordersRes.data ?? [];
@@ -281,6 +286,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       payment_method: row.payment_method,
       pay_link_url: payLinkUrl,
       wave_invoice_number: order?.wave_invoice_number ?? null,
+      notes: (order as { notes?: string | null } | undefined)?.notes ?? null,
     });
   }
   orphans.sort((a, b) => b.age_hours - a.age_hours);
@@ -1010,6 +1016,17 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     open_rate_pct: deliveredCount > 0 ? Math.round((openedCount / deliveredCount) * 100) : null,
   };
 
+  // ── per-recipient volume snapshot ────────────────────────────────────────
+  // Same email_log rows, grouped by to_address. Surfaces noisy staff inboxes
+  // so we can trim CC/BCC config before customers start hitting spam folders.
+  const emailVolume = buildEmailVolumeSnapshot(
+    emailDeliveryRaw
+      .filter((r): r is typeof r & { to_address: string; sent_at: string } =>
+        typeof r.to_address === "string" && typeof r.sent_at === "string"
+      )
+      .map((r) => ({ to_address: r.to_address, sent_at: r.sent_at }))
+  );
+
   // ── derive status rollup ─────────────────────────────────────────────────
   // Pure function — single source of truth shared with /api/cron/dashboard-alerts.
   // Adding a new silent-fail surface = ONE registration in buildRollup; both
@@ -1045,6 +1062,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     refundsPending: await fetchRefundsPending(supabase, now),
     webhookGroups,
     emailDeliveryHealth,
+    emailVolume,
     staffActions,
     rollup,
     fetched_at: new Date(now).toISOString(),
