@@ -9,6 +9,7 @@
 @.claude/rules/content-pipeline.md
 @.claude/rules/content-formats.md
 @.claude/rules/payment-tax.md
+@.claude/rules/lifecycle-rollup-contract.md
 @~/.claude/rules/mcp-usage.md
 @/Users/owner/Downloads/Obsidian Vault/memory/memory.md
 @/Users/owner/Downloads/Obsidian Vault/knowledge/concepts/true-color/index-true-color.md

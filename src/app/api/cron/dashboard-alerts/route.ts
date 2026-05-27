@@ -1,12 +1,18 @@
 /**
- * GET /api/cron/dashboard-alerts
+ * GET /api/cron/dashboard-alerts — hourly push layer for /staff/lifecycle.
  *
- * Push layer for /staff/lifecycle. Runs hourly. Scans for red conditions
- * (orphans, Wave half-recorded, stale crons, no_wave_invoice on paid) and
- * fires ONE Telegram message per category if any rows match.
+ * Reads the SAME rollup the dashboard renders (src/lib/lifecycle/rollup.ts),
+ * diffs against last tick's red set (stored in dashboard_alert_state), and
+ * Telegrams the delta:
  *
- * Idempotency: dashboard_alert_state tracks last-fired per category, plus
- * the last count. Only re-fires when the count changes OR after a 6h cooldown.
+ *   NEW red       → 🚨 "X just broke" (with link to the panel anchor)
+ *   STILL red     → suppress for COOLDOWN_HOURS, then send a reminder
+ *   CLEARED red   → ✅ "X resolved"
+ *
+ * Why this shape: there's one source of truth for what counts as a "red
+ * condition" — buildRollup. Add a new silent-fail check there and BOTH the
+ * dashboard tile AND this cron pick it up automatically. No more inline
+ * Telegram at the failure site, no more drift between screen and alerts.
  *
  * Auth: Authorization: Bearer ${CRON_SECRET}
  */
@@ -15,14 +21,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordCronRun } from "@/lib/cron/heartbeat";
+import { fetchLifecycleData } from "@/app/staff/lifecycle/data";
 
 const COOLDOWN_HOURS = 6;
-const STUCK_PENDING_HOURS = 24;
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 
-interface AlertCategory {
-  category: string;
-  count: number;
-  message: string;
+// Key prefix for state rows owned by this cron. Lets us identify (and clean
+// up) only OUR state rows without touching anything else.
+const STATE_PREFIX = "rollup:";
+
+function dashboardLink(panel: string): string {
+  return `${SITE_URL}/staff/lifecycle#${encodeURIComponent(panel)}`;
 }
 
 export async function GET(req: NextRequest) {
@@ -35,153 +44,87 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = createServiceClient();
-  const alerts: AlertCategory[] = [];
-  const now = Date.now();
 
   try {
-    // ── Orphans: pending_payment > 24h, no pay-link email logged ─────────
-    const cutoff24h = new Date(now - STUCK_PENDING_HOURS * 60 * 60 * 1000).toISOString();
-    const { data: stuck } = await supabase
-      .from("orders")
-      .select("id, order_number, total, created_at, customers(email)")
-      .eq("status", "pending_payment")
-      .lt("created_at", cutoff24h)
-      .order("created_at", { ascending: true })
-      .limit(50);
-    const stuckArr = stuck ?? [];
-    if (stuckArr.length > 0) {
-      const lines = stuckArr.slice(0, 5).map((o) => {
-        const c = Array.isArray(o.customers) ? o.customers[0] : o.customers;
-        return `• <b>${escapeTelegramHtml(o.order_number ?? "?")}</b> · ${escapeTelegramHtml(c?.email ?? "")} · $${Number(o.total ?? 0).toFixed(2)}`;
-      });
-      const more = stuckArr.length > 5 ? `\n…and ${stuckArr.length - 5} more` : "";
-      alerts.push({
-        category: "orphans_stuck_pending",
-        count: stuckArr.length,
-        message:
-          `🚨 <b>${stuckArr.length} orphan order(s) — pending_payment > 24h</b>\n\n` +
-          lines.join("\n") + more +
-          `\n\nOpen <a href="https://truecolorprinting.ca/staff/lifecycle">/staff/lifecycle</a> Orphans panel for one-click recovery URLs.`,
-      });
-    }
+    const lifecycle = await fetchLifecycleData();
+    const currentReds = lifecycle.rollup.reds;
+    const currentKeys = new Set(currentReds.map((r) => `${STATE_PREFIX}${r.key}`));
 
-    // ── Wave half-recorded: paid order, Wave approved, payment not recorded ──
-    const { data: halfRecorded } = await supabase
-      .from("orders")
-      .select("id, order_number, total, wave_invoice_number")
-      .in("status", ["paid", "in_production", "ready_for_pickup", "completed"])
-      .not("wave_invoice_approved_at", "is", null)
-      .is("wave_payment_recorded_at", null)
-      .limit(50);
-    const halfArr = halfRecorded ?? [];
-    if (halfArr.length > 0) {
-      alerts.push({
-        category: "wave_half_recorded",
-        count: halfArr.length,
-        message:
-          `⚠️ <b>${halfArr.length} paid order(s) with Wave invoice APPROVED but payment NOT recorded</b>\n\n` +
-          halfArr.slice(0, 5).map((o) => `• <b>${escapeTelegramHtml(o.order_number ?? "?")}</b> · Wave #${o.wave_invoice_number ?? "?"} · $${Number(o.total ?? 0).toFixed(2)}`).join("\n") +
-          (halfArr.length > 5 ? `\n…and ${halfArr.length - 5} more` : "") +
-          `\n\nCustomer's tax invoice shows UNPAID — open Wave invoice → record payment manually.`,
-      });
-    }
-
-    // ── No Wave invoice on paid order ────────────────────────────────────
-    const { data: noWave } = await supabase
-      .from("orders")
-      .select("id, order_number, total")
-      .in("status", ["paid", "in_production", "ready_for_pickup", "completed"])
-      .is("wave_invoice_id", null)
-      .limit(50);
-    const noWaveArr = noWave ?? [];
-    if (noWaveArr.length > 0) {
-      alerts.push({
-        category: "no_wave_invoice",
-        count: noWaveArr.length,
-        message:
-          `⚠️ <b>${noWaveArr.length} paid order(s) with NO Wave invoice</b>\n\n` +
-          noWaveArr.slice(0, 5).map((o) => `• <b>${escapeTelegramHtml(o.order_number ?? "?")}</b> · $${Number(o.total ?? 0).toFixed(2)}`).join("\n") +
-          (noWaveArr.length > 5 ? `\n…and ${noWaveArr.length - 5} more` : "") +
-          `\n\nMoney captured in Clover, nothing in Wave books. Create Wave invoice manually.`,
-      });
-    }
-
-    // ── Stale crons ──────────────────────────────────────────────────────
-    const EXPECTED = [
-      { name: "payment-followup",       maxAgeHours: 2  },
-      { name: "stale-quotes",           maxAgeHours: 2  },
-      { name: "daily-payment-digest",   maxAgeHours: 26 },
-      { name: "reconcile-payments",     maxAgeHours: 26 },
-      { name: "aging-orders",           maxAgeHours: 26 },
-      { name: "keepalive",              maxAgeHours: 26 },
-      { name: "gsc-sync",               maxAgeHours: 26 },
-    ];
-    const { data: heartbeats } = await supabase
-      .from("cron_runs")
-      .select("cron_name, ran_at")
-      .order("ran_at", { ascending: false })
-      .limit(200);
-    const latestByName = new Map<string, string>();
-    for (const h of heartbeats ?? []) {
-      if (!h.cron_name || !h.ran_at) continue;
-      if (!latestByName.has(h.cron_name)) latestByName.set(h.cron_name, h.ran_at);
-    }
-    const stale: Array<{ name: string; hoursAgo: number | null }> = [];
-    for (const exp of EXPECTED) {
-      const ran = latestByName.get(exp.name);
-      if (!ran) {
-        stale.push({ name: exp.name, hoursAgo: null });
-        continue;
-      }
-      const hoursAgo = (now - new Date(ran).getTime()) / (1000 * 60 * 60);
-      if (hoursAgo > exp.maxAgeHours) {
-        stale.push({ name: exp.name, hoursAgo });
-      }
-    }
-    if (stale.length > 0) {
-      alerts.push({
-        category: "stale_crons",
-        count: stale.length,
-        message:
-          `⚠️ <b>${stale.length} cron(s) silently stopped</b>\n\n` +
-          stale.map((s) => `• ${escapeTelegramHtml(s.name)} — ${s.hoursAgo === null ? "never ran" : `${Math.round(s.hoursAgo)}h ago`}`).join("\n") +
-          `\n\nLikely CRON_SECRET drift or Railway/pg_cron issue. Investigate <a href="https://truecolorprinting.ca/staff/lifecycle">/staff/lifecycle</a> heartbeats panel.`,
-      });
-    }
-
-    // ── Idempotency check + fire ─────────────────────────────────────────
+    // Load every state row we own.
     const { data: priorStates } = await supabase
       .from("dashboard_alert_state")
-      .select("category, last_fired_at, last_count");
+      .select("category, last_fired_at, last_detail")
+      .like("category", `${STATE_PREFIX}%`);
     const stateByCategory = new Map((priorStates ?? []).map((s) => [s.category, s]));
 
-    const fired: string[] = [];
-    const skipped: string[] = [];
-    for (const a of alerts) {
-      const prior = stateByCategory.get(a.category);
-      const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
-      const recentlyFired = prior?.last_fired_at && (now - new Date(prior.last_fired_at).getTime()) < cooldownMs;
-      const countUnchanged = prior?.last_count === a.count;
-      if (recentlyFired && countUnchanged) {
-        skipped.push(a.category);
+    const now = Date.now();
+    const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
+    const newAlerts: string[] = [];
+    const repeatAlerts: string[] = [];
+    const clearedAlerts: string[] = [];
+    const suppressed: string[] = [];
+
+    // 1. Fire / suppress for current reds
+    for (const red of currentReds) {
+      const stateKey = `${STATE_PREFIX}${red.key}`;
+      const prior = stateByCategory.get(stateKey);
+      const isNew = !prior;
+      const cooldownExpired = prior?.last_fired_at
+        ? now - new Date(prior.last_fired_at).getTime() >= cooldownMs
+        : true;
+
+      if (!isNew && !cooldownExpired) {
+        suppressed.push(red.key);
         continue;
       }
-      await sendTelegramNotification(a.message, `dashboard:${a.category}`);
+
+      const emoji = isNew ? "🚨" : "🔁";
+      const header = isNew ? "JUST BROKE" : `still red (${COOLDOWN_HOURS}h+ reminder)`;
+      const msg =
+        `${emoji} <b>${escapeTelegramHtml(header)}</b>\n` +
+        `${escapeTelegramHtml(red.label)}\n\n` +
+        `→ <a href="${dashboardLink(red.panel)}">open ${escapeTelegramHtml(red.panel)}</a>`;
+      await sendTelegramNotification(msg, `rollup:${red.key}`);
+
       await supabase.from("dashboard_alert_state").upsert({
-        category: a.category,
+        category: stateKey,
         last_fired_at: new Date().toISOString(),
-        last_count: a.count,
-        last_detail: `${a.count} rows`,
+        last_count: null,
+        last_detail: red.label.slice(0, 200),
       });
-      fired.push(a.category);
+
+      if (isNew) newAlerts.push(red.key);
+      else repeatAlerts.push(red.key);
     }
 
-    await recordCronRun("dashboard-alerts", true, `fired=${fired.length} skipped=${skipped.length} alerts=${alerts.length}`);
+    // 2. Cleared reds: state exists but the rollup no longer flags it
+    for (const [stateKey, state] of stateByCategory) {
+      if (currentKeys.has(stateKey)) continue;
+      const key = stateKey.slice(STATE_PREFIX.length);
+      const msg =
+        `✅ <b>RESOLVED</b>\n` +
+        `${escapeTelegramHtml(state.last_detail ?? key)}\n\n` +
+        `Dashboard is back to GREEN on this signal.`;
+      await sendTelegramNotification(msg, `rollup:${key}:cleared`);
+      await supabase.from("dashboard_alert_state").delete().eq("category", stateKey);
+      clearedAlerts.push(key);
+    }
+
+    const detail =
+      `reds=${currentReds.length} ` +
+      `new=${newAlerts.length} ` +
+      `repeat=${repeatAlerts.length} ` +
+      `cleared=${clearedAlerts.length} ` +
+      `suppressed=${suppressed.length}`;
+    await recordCronRun("dashboard-alerts", true, detail);
+
     return NextResponse.json({
       ok: true,
-      categories_evaluated: alerts.length,
-      fired,
-      skipped,
+      current_reds: currentReds.length,
+      new_alerts: newAlerts,
+      repeat_alerts: repeatAlerts,
+      cleared_alerts: clearedAlerts,
+      suppressed,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Dashboard alerts failed";
