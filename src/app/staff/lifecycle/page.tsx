@@ -38,7 +38,7 @@ import { IndustryBlitzPanel } from "./IndustryBlitzPanel";
 import { SeoRankMoversPanel } from "./SeoRankMoversPanel";
 import { PriceConsistencyPanel } from "./PriceConsistencyPanel";
 import { RefundsPendingPanel } from "./RefundsPendingPanel";
-import { WaveWebhookPanel } from "./WaveWebhookPanel";
+import { WebhookHealthPanel } from "./WebhookHealthPanel";
 import { EmailDeliveryHealthPanel } from "./EmailDeliveryHealthPanel";
 import { StaffActionsPanel } from "./StaffActionsPanel";
 
@@ -105,7 +105,7 @@ export default async function LifecyclePage() {
           <div className="space-y-2">
             <HealthTiles snap={data.health} />
             <HeartbeatsPanel heartbeats={data.heartbeats} />
-            <WaveWebhookPanel events={data.waveWebhookEvents} />
+            <WebhookHealthPanel groups={data.webhookGroups} />
             <TelegramHealthPanel h={data.telegramHealth} />
             <EmailDeliveryHealthPanel health={data.emailDeliveryHealth} />
             <PriceConsistencyPanel rows={data.priceConsistency} />

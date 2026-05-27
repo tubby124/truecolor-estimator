@@ -28,7 +28,7 @@ import type { SeoRankMovers, SeoMover } from "./SeoRankMoversPanel";
 import type { PriceConsistencyRow } from "./PriceConsistencyPanel";
 import { checkPriceConsistency } from "@/lib/data/price-consistency";
 import type { RefundPendingRow } from "./RefundsPendingPanel";
-import type { WaveWebhookEvent } from "./WaveWebhookPanel";
+import type { WebhookEvent, WebhookSourceGroup } from "./WebhookHealthPanel";
 import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
 import type { StaffAction } from "./StaffActionsPanel";
 
@@ -80,7 +80,7 @@ export interface LifecycleData {
   seoMovers: SeoRankMovers;
   priceConsistency: PriceConsistencyRow[];
   refundsPending: RefundPendingRow[];
-  waveWebhookEvents: WaveWebhookEvent[];
+  webhookGroups: WebhookSourceGroup[];
   emailDeliveryHealth: EmailDeliveryHealth;
   staffActions: StaffAction[];
   fetched_at: string;
@@ -161,13 +161,14 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       .gte("at", cutoff)
       .order("at", { ascending: false })
       .limit(500),
-    // Wave webhook event log — last 30 events regardless of time window
+    // Webhook event log — last N per source (wave + clover). We pull a larger
+    // pool then split client-side; this keeps the round-trip count flat.
     supabase
       .from("webhook_events")
-      .select("id, received_at, event_type, resource_id, matched_order_id, ok, detail")
-      .eq("event_source", "wave")
+      .select("id, received_at, event_source, event_type, resource_id, matched_order_id, ok, detail")
+      .in("event_source", ["wave", "clover"])
       .order("received_at", { ascending: false })
-      .limit(30),
+      .limit(120),
     // Email delivery health — aggregate counts for last 7 days
     supabase
       .from("email_log")
@@ -906,7 +907,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   // Suppress unused locals (used for type inference but variables themselves not referenced after)
   void seoToday; void seoPrior;
 
-  // ── derive wave webhook events ────────────────────────────────────────────
+  // ── derive webhook event groups (wave + clover) ───────────────────────────
   // We already fetched all orders in the 7-day window; build a quick id→number map.
   // Webhook events for orders outside the 7-day window won't get a number resolved
   // (they'll show matched_order_number: null), which is fine — the UUID is still shown.
@@ -914,9 +915,11 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   for (const o of orders) {
     if (o.id && o.order_number) orderNumberById.set(o.id, o.order_number);
   }
-  const waveWebhookEvents: WaveWebhookEvent[] = webhookEventsRaw.map((e) => ({
+  const cutoff24Iso = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  const allWebhookEvents: WebhookEvent[] = webhookEventsRaw.map((e) => ({
     id: String(e.id),
     received_at: e.received_at,
+    event_source: e.event_source ?? "unknown",
     event_type: e.event_type,
     resource_id: e.resource_id ?? null,
     matched_order_id: e.matched_order_id ?? null,
@@ -924,6 +927,22 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     ok: e.ok,
     detail: e.detail ?? null,
   }));
+  const buildGroup = (source: string, label: string): WebhookSourceGroup => {
+    const all = allWebhookEvents.filter((e) => e.event_source === source);
+    const in24h = all.filter((e) => e.received_at >= cutoff24Iso);
+    return {
+      source,
+      label,
+      events: all.slice(0, 30),
+      last_event_at: all[0]?.received_at ?? null,
+      total_24h: in24h.length,
+      failed_24h: in24h.filter((e) => !e.ok).length,
+    };
+  };
+  const webhookGroups: WebhookSourceGroup[] = [
+    buildGroup("wave", "Wave"),
+    buildGroup("clover", "Clover"),
+  ];
 
   // ── derive staff actions + customer pay-link clicks ────────────────────────
   // Every staff button press recorded via recordAuditEvent, plus customer
@@ -980,7 +999,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     seoMovers,
     priceConsistency: checkPriceConsistency(),
     refundsPending: await fetchRefundsPending(supabase, now),
-    waveWebhookEvents,
+    webhookGroups,
     emailDeliveryHealth,
     staffActions,
     fetched_at: new Date(now).toISOString(),
