@@ -421,6 +421,12 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
 
   // ── derive heartbeats ────────────────────────────────────────────────────
   const latestByName = new Map<string, { ran_at: string; ok: boolean; detail: string | null }>();
+  // Per-cron 24h windows: total runs + errored runs (ok=false OR detail "errors=N>0").
+  // Captures the wave-poll silent-fail pattern: ok=true was returned because
+  // wave_errors < candidates.length / 2, yet "errors=5" appears in detail.
+  const cron24hStats = new Map<string, { total: number; errored: number }>();
+  const cutoff24Ms24 = now - 24 * 60 * 60 * 1000;
+  const errorsTokenRe = /\berrors?=(\d+)/i;
   for (const row of heartbeatRaw) {
     if (!row.cron_name || !row.ran_at) continue;
     if (!latestByName.has(row.cron_name)) {
@@ -430,9 +436,18 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
         detail: row.detail ?? null,
       });
     }
+    if (new Date(row.ran_at).getTime() < cutoff24Ms24) continue;
+    const stat = cron24hStats.get(row.cron_name) ?? { total: 0, errored: 0 };
+    stat.total += 1;
+    const match = row.detail ? errorsTokenRe.exec(row.detail) : null;
+    const detailErrors = match ? Number(match[1]) : 0;
+    if (!row.ok || detailErrors > 0) stat.errored += 1;
+    cron24hStats.set(row.cron_name, stat);
   }
   const heartbeats: Heartbeat[] = EXPECTED_CRONS.map((c) => {
     const latest = latestByName.get(c.name);
+    const stat = cron24hStats.get(c.name) ?? { total: 0, errored: 0 };
+    const errRate = stat.total > 0 ? stat.errored / stat.total : null;
     if (!latest) {
       return {
         name: c.name,
@@ -442,6 +457,9 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
         ok: false,
         stale: true,
         detail: "never ran",
+        runs_24h: stat.total,
+        errored_runs_24h: stat.errored,
+        error_rate_24h: errRate,
       };
     }
     const hoursAgo = (now - new Date(latest.ran_at).getTime()) / (1000 * 60 * 60);
@@ -453,6 +471,9 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       ok: latest.ok,
       stale: hoursAgo > c.maxAgeHours,
       detail: latest.detail,
+      runs_24h: stat.total,
+      errored_runs_24h: stat.errored,
+      error_rate_24h: errRate,
     };
   });
 
