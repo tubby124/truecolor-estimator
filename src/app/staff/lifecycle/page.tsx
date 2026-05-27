@@ -40,6 +40,7 @@ import { PriceConsistencyPanel } from "./PriceConsistencyPanel";
 import { RefundsPendingPanel } from "./RefundsPendingPanel";
 import { WebhookHealthPanel } from "./WebhookHealthPanel";
 import { EmailDeliveryHealthPanel } from "./EmailDeliveryHealthPanel";
+import { EmailVolumePanel } from "./EmailVolumePanel";
 import { StaffActionsPanel } from "./StaffActionsPanel";
 import { StatusRollupPanel } from "./StatusRollupPanel";
 
@@ -114,6 +115,9 @@ export default async function LifecyclePage() {
             </div>
             <TelegramHealthPanel h={data.telegramHealth} />
             <EmailDeliveryHealthPanel health={data.emailDeliveryHealth} />
+            <div id="panel-email-volume" className="scroll-mt-20">
+              <EmailVolumePanel snapshot={data.emailVolume} />
+            </div>
             <PriceConsistencyPanel rows={data.priceConsistency} />
             <div id="panel-bookkeeping-risk" className="scroll-mt-20">
               <BookkeepingRiskPanel rows={data.bookkeepingRisks} />

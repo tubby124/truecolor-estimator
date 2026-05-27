@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { sendSignupWelcomeEmail } from "@/lib/email/signupWelcome";
+import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
@@ -36,6 +37,15 @@ export async function POST(req: NextRequest) {
     sendSignupWelcomeEmail({ email, name: name || undefined }).catch((err) => {
       console.error("[signup-notify] welcome email failed (non-fatal):", err instanceof Error ? err.message : err);
     });
+
+    // ── Telegram push to ops (non-fatal) ──────────────────────────────────
+    // Real-time signal that someone created an account. Pairs with the order
+    // orphan rollup so a "signed up but never paid" customer surfaces fast.
+    void sendTelegramNotification(
+      `📋 <b>New account</b>\n` +
+      `${escapeTelegramHtml(name || "(no name)")} · ${escapeTelegramHtml(email)}`,
+      "signup:account_created"
+    );
 
     // ── Add to Brevo contacts list 25 (customers) (non-fatal) ─────────────
     const brevoApiKey = process.env.BREVO_API_KEY;
