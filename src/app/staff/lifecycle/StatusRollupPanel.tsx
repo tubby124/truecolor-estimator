@@ -1,8 +1,9 @@
 /**
  * StatusRollupPanel — single 2-second-scan answer to "is anything wrong?"
  *
- * Pinned at the top of /staff/lifecycle. Aggregates pre-derived signals from
- * every panel (no re-querying — inputs come from data.ts).
+ * Pinned at the top of /staff/lifecycle. Renders the rollup shape built by
+ * @/lib/lifecycle/rollup — the SAME function /api/cron/dashboard-alerts uses
+ * to fire Telegram. Types live in the lib so drift is impossible.
  *
  *   GREEN  = nothing red anywhere
  *   YELLOW = N warnings (clickable list of which panels)
@@ -11,15 +12,7 @@
  * Anchor hrefs link to id="panel-X" wrappers added on the lifecycle page.
  */
 
-export interface RollupIssue {
-  panel: string;        // anchor id on page.tsx
-  label: string;        // short human-readable: "Bookkeeping risk: 2 critical"
-}
-
-export interface StatusRollup {
-  reds: RollupIssue[];
-  yellows: RollupIssue[];
-}
+import type { RollupIssue, StatusRollup } from "@/lib/lifecycle/rollup";
 
 function Tile({ tone, title, subtitle, items }: {
   tone: "green" | "yellow" | "red";

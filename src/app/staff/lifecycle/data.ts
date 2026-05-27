@@ -31,7 +31,7 @@ import type { RefundPendingRow } from "./RefundsPendingPanel";
 import type { WebhookEvent, WebhookSourceGroup } from "./WebhookHealthPanel";
 import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
 import type { StaffAction } from "./StaffActionsPanel";
-import type { StatusRollup, RollupIssue } from "./StatusRollupPanel";
+import { buildRollup, type StatusRollup } from "@/lib/lifecycle/rollup";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
@@ -1010,47 +1010,18 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     open_rate_pct: deliveredCount > 0 ? Math.round((openedCount / deliveredCount) * 100) : null,
   };
 
-  // ── derive status rollup (reuses already-computed panel data) ────────────
-  const reds: RollupIssue[] = [];
-  const yellows: RollupIssue[] = [];
-
-  // BookkeepingRiskPanel — severity 1 = red, 2-3 = yellow (see panel's CATEGORY_LABEL)
-  const sev1Cats = new Set(["no_wave_invoice", "half_recorded"]);
-  const sev1Count = bookkeepingRisks.filter((r) => sev1Cats.has(r.category)).length;
-  const sev23Count = bookkeepingRisks.length - sev1Count;
-  if (sev1Count > 0) reds.push({ panel: "panel-bookkeeping-risk", label: `Bookkeeping risk: ${sev1Count} critical` });
-  if (sev23Count > 0) yellows.push({ panel: "panel-bookkeeping-risk", label: `Bookkeeping risk: ${sev23Count} warning` });
-
-  // WebhookHealthPanel — last 24h ok=false count per source
-  for (const g of webhookGroups) {
-    if (g.failed_24h > 0) reds.push({ panel: "panel-webhook-health", label: `${g.label} webhook: ${g.failed_24h} failed (24h)` });
-  }
-
-  // Reconcile cron unverified in latest run (detail: "N issues, R recovered, U unverified")
-  const reconcile = latestByName.get("reconcile-payments");
-  if (reconcile?.detail) {
-    const unverifiedMatch = /(\d+)\s+unverified/i.exec(reconcile.detail);
-    const unverified = unverifiedMatch ? Number(unverifiedMatch[1]) : 0;
-    if (unverified > 0) reds.push({ panel: "panel-cron-heartbeats", label: `Reconcile: ${unverified} unverified` });
-  }
-
-  // Cron heartbeat stale > 2× expected interval
-  for (const h of heartbeats) {
-    if (h.hours_ago !== null && h.hours_ago > 2 * h.max_age_hours) {
-      reds.push({ panel: "panel-cron-heartbeats", label: `${h.name} stale ${Math.round(h.hours_ago)}h (max ${h.max_age_hours}h)` });
-    } else if (h.error_rate_24h !== null && h.error_rate_24h > 0) {
-      yellows.push({ panel: "panel-cron-heartbeats", label: `${h.name}: ${Math.round(h.error_rate_24h * 100)}% error rate (24h)` });
-    }
-  }
-
-  // WaveDraftPanel — count entries created/updated in last 24h
-  const waveDrafts24h = waveDrafts.filter((d) => d.paid_age_hours < 24).length;
-  if (waveDrafts24h > 0) yellows.push({ panel: "panel-wave-drafts", label: `Wave drafts: ${waveDrafts24h} (24h)` });
-
-  // OrphanPanel
-  if (orphans.length > 0) yellows.push({ panel: "panel-orphans", label: `Orphans: ${orphans.length}` });
-
-  const rollup: StatusRollup = { reds, yellows };
+  // ── derive status rollup ─────────────────────────────────────────────────
+  // Pure function — single source of truth shared with /api/cron/dashboard-alerts.
+  // Adding a new silent-fail surface = ONE registration in buildRollup; both
+  // the dashboard tile AND the Telegram alert layer pick it up automatically.
+  const rollup: StatusRollup = buildRollup({
+    bookkeepingRisks,
+    webhookGroups,
+    heartbeats,
+    waveDrafts,
+    orphans,
+    reconcileDetail: latestByName.get("reconcile-payments")?.detail ?? null,
+  });
 
   return {
     rows,
