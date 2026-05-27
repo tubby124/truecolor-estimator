@@ -73,7 +73,7 @@ Other `sendEmail(` call sites: `api/auth/signup-notify`, `api/notify-me`, `api/s
 | Surface | File | Covered |
 |---|---|---|
 | Wave client | `src/lib/wave/client.ts` | N |
-| Wave invoice (DRAFT create + `moneyTransactionCreate` — never `invoiceCreatePayment`) | `src/lib/wave/invoice.ts` | N (seed scripts exist) |
+| Wave invoice (DRAFT create + approve + `invoicePaymentCreateManual` for payments — never `moneyTransactionCreate` for invoice payments) | `src/lib/wave/invoice.ts` | N (seed scripts exist) |
 | Clover payment | `src/lib/payment/clover.ts` | N |
 | Payment token (HMAC) | `src/lib/payment/token.ts` | N |
 | Order stats increment | `src/lib/customers/incrementOrderStats.ts` | N |

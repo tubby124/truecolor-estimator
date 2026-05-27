@@ -54,11 +54,43 @@ async function waveQuery<T>(query: string, variables: Record<string, unknown>): 
 }
 
 interface ReconcileIssue {
-  kind: "wave_invoice_missing" | "wave_orphan" | "clover_stuck" | "wave_payment_missing" | "wave_recovery_failed";
+  kind:
+    | "wave_invoice_missing"
+    | "wave_orphan"
+    | "clover_stuck"
+    | "wave_payment_missing"
+    | "wave_recovery_failed"
+    | "wave_payment_zombie"
+    | "wave_approve_failed"
+    | "wave_recovery_unverified";
   order_number?: string;
   wave_invoice_number?: string;
   detail: string;
   age_hours?: number;
+}
+
+// Re-query a Wave invoice's amountPaid for verification / zombie detection.
+// Returns null on any failure so callers can skip rather than crash the cron.
+async function fetchWaveInvoiceAmountPaid(invoiceId: string): Promise<{ amountPaid: number; invoiceNumber: string | null } | null> {
+  try {
+    const data = await waveQuery<{
+      business: { invoice: { id: string; invoiceNumber: string | null; amountPaid: { value: string } | null } | null } | null;
+    }>(
+      `query($bizId: ID!, $invId: ID!) {
+        business(id: $bizId) {
+          invoice(id: $invId) { id invoiceNumber amountPaid { value } }
+        }
+      }`,
+      { bizId: WAVE_BIZ, invId: invoiceId }
+    );
+    const inv = data.business?.invoice;
+    if (!inv) return null;
+    const v = inv.amountPaid?.value;
+    return { amountPaid: v ? Number(v) : 0, invoiceNumber: inv.invoiceNumber ?? null };
+  } catch (err) {
+    console.error("[reconcile] fetchWaveInvoiceAmountPaid failed:", err instanceof Error ? err.message : err);
+    return null;
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -196,6 +228,7 @@ export async function GET(req: NextRequest) {
   // Recovery successes are logged silently. Recovery failures fire a Telegram
   // alert with a manual action prompt — never silent on real bookkeeping drift.
   let recoveredCount = 0;
+  let unverifiedCount = 0;
   const cutoff10min = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data: stuckPayments, error: err4 } = await supabase
     .from("orders")
@@ -275,7 +308,36 @@ export async function GET(req: NextRequest) {
         const { error: tsErr } = await supabase.from("orders")
           .update({ wave_payment_recorded_at: new Date().toISOString() })
           .eq("order_number", orderNum);
-        if (tsErr) console.error(`[reconcile] check 4 ts save failed for ${orderNum}:`, tsErr.message);
+        if (tsErr) {
+          console.error(`[reconcile] check 4 ts save failed for ${orderNum}:`, tsErr.message);
+        }
+
+        // Defense-in-depth verification: re-query Wave to confirm amountPaid
+        // actually landed. The new recordWavePayment (post-2026-05-26 fix)
+        // already verifies internally — this catches partial/network failures
+        // that could still leave drift between our timestamp and Wave's books.
+        const verify = await fetchWaveInvoiceAmountPaid(invoiceId);
+        if (verify && verify.amountPaid < total - 0.01) {
+          // Back out the timestamp we just set — Wave still shows underpaid.
+          if (!tsErr) {
+            await supabase.from("orders")
+              .update({ wave_payment_recorded_at: null })
+              .eq("order_number", orderNum);
+          }
+          unverifiedCount++;
+          console.error(
+            `[reconcile] check 4 unverified → ${orderNum}: recordWavePayment success but Wave shows $${verify.amountPaid.toFixed(2)} of $${total.toFixed(2)}`
+          );
+          issues.push({
+            kind: "wave_recovery_unverified",
+            order_number: orderNum,
+            wave_invoice_number: verify.invoiceNumber ?? undefined,
+            detail: `recordWavePayment returned success but Wave still shows $${verify.amountPaid.toFixed(2)} paid of $${total.toFixed(2)} expected · timestamp rolled back · manual: open Wave invoice → record payment via invoicePaymentCreateManual`,
+            age_hours: ageHours,
+          });
+          continue;
+        }
+
         recoveredCount++;
         console.log(`[reconcile] check 4 recovered → ${orderNum} ($${total.toFixed(2)} ${o.payment_method})`);
       } catch (recoverErr) {
@@ -293,6 +355,117 @@ export async function GET(req: NextRequest) {
 
   if (recoveredCount > 0) {
     console.log(`[reconcile] check 4 healed ${recoveredCount} stuck Wave payment record(s)`);
+  }
+
+  // ── Check 5: Wave-payment ZOMBIES (alert only — no auto-heal) ─────────────
+  // Order says we recorded the Wave payment (wave_payment_recorded_at IS NOT
+  // NULL) but Wave's books still show the invoice underpaid. This is the
+  // exact failure mode TC-2026-0111 hit — Check 4 cannot see it because its
+  // predicate requires wave_payment_recorded_at IS NULL.
+  //
+  // Scope is bounded to the last 90 days to keep Wave API calls bounded; the
+  // older backlog gets cleared by a separate one-shot backfill, not this cron.
+  // No auto-heal — re-running recordWavePayment on a "we think it's paid"
+  // order is too risky (could double-charge). Surface for manual action only.
+  const zombieCutoff90d = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: maybeZombies, error: err5 } = await supabase
+    .from("orders")
+    .select("order_number, total, wave_invoice_id, wave_payment_recorded_at")
+    .not("wave_invoice_id", "is", null)
+    .not("wave_payment_recorded_at", "is", null)
+    .not("paid_at", "is", null)
+    .gt("wave_payment_recorded_at", zombieCutoff90d)
+    .order("wave_payment_recorded_at", { ascending: false })
+    .limit(100);
+
+  if (err5) {
+    console.error("[reconcile] check 5 query failed:", err5.message);
+  } else {
+    for (const o of maybeZombies ?? []) {
+      const total = Number(o.total ?? 0);
+      const orderNum = o.order_number ?? "?";
+      const invoiceId = o.wave_invoice_id;
+      if (!invoiceId || total <= 0) continue;
+
+      const verify = await fetchWaveInvoiceAmountPaid(invoiceId);
+      if (!verify) continue; // API hiccup — skip rather than false-alert
+
+      if (verify.amountPaid < total - 0.01) {
+        console.warn(
+          `[reconcile] check 5 zombie → ${orderNum}: ts says paid, Wave shows $${verify.amountPaid.toFixed(2)} of $${total.toFixed(2)}`
+        );
+        issues.push({
+          kind: "wave_payment_zombie",
+          order_number: orderNum,
+          wave_invoice_number: verify.invoiceNumber ?? undefined,
+          detail: `$${total.toFixed(2)} expected · Wave shows $${verify.amountPaid.toFixed(2)} paid · inv #${verify.invoiceNumber ?? "?"} · manual action: open Wave invoice → record payment via invoicePaymentCreateManual`,
+        });
+      }
+    }
+  }
+
+  // ── Check 6: Unapproved-pending (auto-heal) ───────────────────────────────
+  // Orders with a Wave invoice but no approved timestamp — Wave invoice stays
+  // DRAFT forever, customer never sees a clean tax invoice. TC-2026-0113/0114
+  // hit this today.
+  //
+  // Skip the first hour after creation (matches Check 1's grace window) so
+  // we're not racing the normal createInvoice → approve sequence.
+  const cutoff1hCheck6 = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { data: unapprovedPending, error: err6 } = await supabase
+    .from("orders")
+    .select("order_number, wave_invoice_id, created_at, status")
+    .not("wave_invoice_id", "is", null)
+    .is("wave_invoice_approved_at", null)
+    .eq("status", "pending_payment")
+    .lt("created_at", cutoff1hCheck6)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (err6) {
+    console.error("[reconcile] check 6 query failed:", err6.message);
+  } else {
+    for (const o of unapprovedPending ?? []) {
+      const orderNum = o.order_number ?? "?";
+      const invoiceId = o.wave_invoice_id;
+      if (!invoiceId) continue;
+      const ageHours = Math.floor((Date.now() - new Date(o.created_at).getTime()) / 3600_000);
+
+      try {
+        await approveWaveInvoice(invoiceId);
+        const { error: tsErr } = await supabase.from("orders")
+          .update({ wave_invoice_approved_at: new Date().toISOString() })
+          .eq("order_number", orderNum);
+        if (tsErr) {
+          console.error(`[reconcile] check 6 ts save failed for ${orderNum}:`, tsErr.message);
+        } else {
+          recoveredCount++;
+          console.log(`[reconcile] check 6 approved → ${orderNum}`);
+        }
+      } catch (approveErr) {
+        const msg = approveErr instanceof Error ? approveErr.message : String(approveErr);
+        // Same idempotency pattern as Check 4 — Wave returns inputErrors
+        // when re-approving an already-approved invoice. Treat as success
+        // and still write our timestamp (vault note 2026-05-22).
+        if (/already|approved|not.+draft/i.test(msg)) {
+          const { error: tsErr } = await supabase.from("orders")
+            .update({ wave_invoice_approved_at: new Date().toISOString() })
+            .eq("order_number", orderNum);
+          if (!tsErr) {
+            recoveredCount++;
+            console.log(`[reconcile] check 6 already_approved → ${orderNum} (ts healed)`);
+          }
+        } else {
+          console.error(`[reconcile] check 6 approve genuinely failed for ${orderNum}:`, msg);
+          issues.push({
+            kind: "wave_approve_failed",
+            order_number: orderNum,
+            detail: `Wave invoice still DRAFT after ${ageHours}h · approve failed: ${msg.slice(0, 120)} · manual: open Wave → Approve invoice`,
+            age_hours: ageHours,
+          });
+        }
+      }
+    }
   }
 
   // ── Alert via Telegram if any issues ──────────────────────────────────────
@@ -329,9 +502,32 @@ export async function GET(req: NextRequest) {
         lines.push(`  • ${escapeTelegramHtml(i.order_number ?? "?")} — ${escapeTelegramHtml(i.detail)}`);
       }
     }
+    if (groupedByKind.wave_payment_zombie?.length) {
+      lines.push(`\n<b>🧟 Wave payment zombies</b> (${groupedByKind.wave_payment_zombie.length})`);
+      lines.push(`<i>Our DB says paid but Wave shows underpaid. Manual action required — do NOT re-run recordWavePayment automatically.</i>`);
+      for (const i of groupedByKind.wave_payment_zombie.slice(0, 8)) {
+        lines.push(`  • ${escapeTelegramHtml(i.order_number ?? "?")} — ${escapeTelegramHtml(i.detail)}`);
+      }
+    }
+    if (groupedByKind.wave_recovery_unverified?.length) {
+      lines.push(`\n<b>⚠ Wave recovery UNVERIFIED — auto-rolled back timestamp</b> (${groupedByKind.wave_recovery_unverified.length})`);
+      lines.push(`<i>recordWavePayment returned success but Wave still shows underpaid. Timestamp was reverted so next run re-attempts.</i>`);
+      for (const i of groupedByKind.wave_recovery_unverified.slice(0, 8)) {
+        lines.push(`  • ${escapeTelegramHtml(i.order_number ?? "?")} — ${escapeTelegramHtml(i.detail)}`);
+      }
+    }
+    if (groupedByKind.wave_approve_failed?.length) {
+      lines.push(`\n<b>📝 Wave invoice approve failed</b> (${groupedByKind.wave_approve_failed.length})`);
+      for (const i of groupedByKind.wave_approve_failed.slice(0, 8)) {
+        lines.push(`  • ${escapeTelegramHtml(i.order_number ?? "?")} — ${escapeTelegramHtml(i.detail)}`);
+      }
+    }
 
     if (recoveredCount > 0) {
-      lines.push(`\n<i>✓ Auto-recovered ${recoveredCount} stuck Wave payment record${recoveredCount === 1 ? "" : "s"} this run.</i>`);
+      lines.push(`\n<i>✓ Auto-recovered ${recoveredCount} stuck record${recoveredCount === 1 ? "" : "s"} this run (payments + approvals).</i>`);
+    }
+    if (unverifiedCount > 0) {
+      lines.push(`<i>⚠ ${unverifiedCount} recovery attempt${unverifiedCount === 1 ? "" : "s"} unverified — timestamps rolled back.</i>`);
     }
     lines.push(`\n<i>Run scripts/backfill-wave-invoice-ids.mjs --apply for Wave gaps.</i>`);
     lines.push(`<i>Cross-check via Clover MCP for stuck Clover orders.</i>`);
@@ -341,17 +537,27 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  console.log(`[reconcile-payments] ${issues.length} issues found, ${recoveredCount} auto-recovered`);
-  await recordCronRun("reconcile-payments", true, `${issues.length} issues, ${recoveredCount} recovered`);
+  console.log(
+    `[reconcile-payments] ${issues.length} issues found, ${recoveredCount} auto-recovered, ${unverifiedCount} unverified`
+  );
+  await recordCronRun(
+    "reconcile-payments",
+    true,
+    `${issues.length} issues, ${recoveredCount} recovered, ${unverifiedCount} unverified`
+  );
   return NextResponse.json({
     ok: true,
     issues_total: issues.length,
     auto_recovered: recoveredCount,
+    unverified: unverifiedCount,
     by_kind: {
       wave_invoice_missing: issues.filter((i) => i.kind === "wave_invoice_missing").length,
       wave_orphan: issues.filter((i) => i.kind === "wave_orphan").length,
       clover_stuck: issues.filter((i) => i.kind === "clover_stuck").length,
       wave_recovery_failed: issues.filter((i) => i.kind === "wave_recovery_failed").length,
+      wave_payment_zombie: issues.filter((i) => i.kind === "wave_payment_zombie").length,
+      wave_recovery_unverified: issues.filter((i) => i.kind === "wave_recovery_unverified").length,
+      wave_approve_failed: issues.filter((i) => i.kind === "wave_approve_failed").length,
     },
   });
 }

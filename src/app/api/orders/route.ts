@@ -584,7 +584,11 @@ export async function POST(req: NextRequest) {
       }
 
       // Auto-approve the invoice so it appears in Wave reports and can be sent as a receipt.
-      // Non-fatal — order and invoice still exist if this fails.
+      // Non-fatal — order and invoice still exist if this fails. But silent-fail is NOT
+      // ok: if approve fails, the invoice stays DRAFT and customers can't pay through
+      // the Wave-hosted link. Mirror the outer Wave-creation alert pattern so staff find
+      // out instantly (audit row + Telegram). TC-2026-0113 / TC-2026-0114 were stuck
+      // because this used to be a bare console.warn.
       try {
         await approveWaveInvoice(waveInvoiceId);
         const { error: updErr } = await supabase
@@ -593,7 +597,29 @@ export async function POST(req: NextRequest) {
           .eq("id", order.id);
         if (updErr) console.error("[orders] wave_invoice_approved_at save failed (non-fatal):", updErr.message);
       } catch (approveErr) {
-        console.warn("[orders] Wave invoice auto-approve failed (non-fatal):", approveErr);
+        const approveMsg = approveErr instanceof Error ? approveErr.message : String(approveErr);
+        console.warn("[orders] Wave invoice auto-approve failed (non-fatal):", approveMsg);
+        void recordAuditEvent({
+          actor_type: "system",
+          actor_id: "api/orders",
+          event_type: "wave.approve_failed",
+          entity_type: "order",
+          entity_id: order.id,
+          detail: {
+            wave_invoice_id: waveInvoiceId,
+            wave_invoice_number: inv.invoiceNumber,
+            order_number: order.order_number,
+            error: approveMsg.slice(0, 500),
+            source: "/api/orders auto-approve",
+          },
+        });
+        void sendTelegramNotification(
+          `⚠️ <b>Wave invoice approve FAILED</b>\n` +
+          `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
+          `Wave invoice ${escapeTelegramHtml(inv.invoiceNumber ?? waveInvoiceId)} stays DRAFT — customer can't pay.\n` +
+          `Error: ${escapeTelegramHtml(approveMsg.slice(0, 200))}\n` +
+          `Action: open Wave → invoice → manually Approve. Then retry payment.`
+        ).catch(() => {});
       }
     } catch (waveErr) {
       // Wave failure is non-fatal — order still exists, staff can create manually.

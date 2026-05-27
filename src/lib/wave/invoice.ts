@@ -184,82 +184,109 @@ export async function createWaveInvoice(
 }
 
 // --------------------------------------------------------------------------
-// Record a payment in Wave via moneyTransactionCreate.
+// Record a payment in Wave via invoicePaymentCreateManual.
 //
-// Wave has no public `invoicePaymentCreate` mutation — payments are recorded
-// as general income transactions. Wave auto-reconciles matching transactions
-// (same customer + amount) against outstanding invoices.
+// This mutation directly links the payment to the invoice and marks the
+// invoice as PAID (or PARTIAL). Verified live in prod 2026-05-26 — the
+// previous moneyTransactionCreate path created orphan deposits and never
+// closed the invoice, which is why this was rewritten.
 //
-// Requires env vars: WAVE_INCOME_ACCOUNT_ID + WAVE_BANK_ACCOUNT_ID
-// If either is missing, skips gracefully (non-fatal — status update still succeeds).
+// Requires env var: WAVE_BANK_ACCOUNT_ID (deposit account). Throws early
+// if missing — silent no-op was the failure mode we're killing.
 //
-// externalId = Supabase order UUID → idempotency key prevents duplicate transactions
-// if the same order is processed twice (e.g. double-click, webhook + status route).
+// After the mutation succeeds, re-queries the invoice's amountPaid and
+// throws if it didn't actually close — catches silent-success-but-failed.
 // --------------------------------------------------------------------------
 
 export type WavePaymentMethod = "CREDIT_CARD" | "BANK_TRANSFER" | "CASH" | "CHECK" | "OTHER";
 
+// Our enum → Wave's InvoicePaymentMethod enum
+const WAVE_PAYMENT_METHOD_MAP: Record<WavePaymentMethod, string> = {
+  CREDIT_CARD: "CREDIT_CARD",
+  BANK_TRANSFER: "BANK_TRANSFER",
+  CASH: "CASH",
+  CHECK: "CHEQUE",
+  OTHER: "OTHER",
+};
+
 export async function recordWavePayment(
-  _invoiceId: string,        // kept for caller API compat — not used by moneyTransactionCreate
+  invoiceId: string,
   amount: number,            // dollars, e.g. 125.55
   method: WavePaymentMethod,
   note?: string,
-  customerId?: string,       // Wave customer ID — enables auto-reconciliation against invoice
-  externalId?: string,       // Supabase order UUID — idempotency key
+  _customerId?: string,      // kept for caller API compat — not used by invoicePaymentCreateManual
+  _externalId?: string,      // kept for caller API compat — not used by invoicePaymentCreateManual
 ): Promise<void> {
-  const incomeAccountId = process.env.WAVE_INCOME_ACCOUNT_ID;
   const bankAccountId = process.env.WAVE_BANK_ACCOUNT_ID;
 
-  if (!incomeAccountId || !bankAccountId) {
-    console.warn(
-      "[recordWavePayment] WAVE_INCOME_ACCOUNT_ID or WAVE_BANK_ACCOUNT_ID not configured — skipping Wave payment recording"
+  if (!bankAccountId) {
+    throw new Error(
+      "[recordWavePayment] WAVE_BANK_ACCOUNT_ID not configured — cannot record payment in Wave"
     );
-    return;
   }
 
   const paymentDate = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-  const description = note ?? `Payment received — ${method}`;
+  const memo = note ?? `Payment received — ${method}`;
+  const amountStr = amount.toFixed(2);
 
-  const lineItem: Record<string, unknown> = {
-    accountId: incomeAccountId,
-    amount: amount.toFixed(2),
-    balance: "INCREASE",
+  const input = {
+    invoiceId,
+    paymentAccountId: bankAccountId,
+    amount: amountStr,
+    paymentDate,
+    paymentMethod: WAVE_PAYMENT_METHOD_MAP[method],
+    exchangeRate: "1",
+    memo,
   };
-  if (customerId) lineItem.customerId = customerId;
-
-  const input: Record<string, unknown> = {
-    businessId: WAVE_BUSINESS_ID,
-    date: paymentDate,
-    description,
-    anchor: {
-      accountId: bankAccountId,
-      amount: amount.toFixed(2),
-      direction: "DEPOSIT",
-    },
-    lineItems: [lineItem],
-  };
-  if (externalId) input.externalId = externalId;
 
   const data = await waveQuery<{
-    moneyTransactionCreate: {
+    invoicePaymentCreateManual: {
       didSucceed: boolean;
-      inputErrors: { message: string }[];
-      transaction: { id: string } | null;
+      inputErrors: { path: string; message: string; code: string }[] | null;
+      invoicePayment: {
+        id: string;
+        amount: string;
+        paymentDate: string;
+        paymentMethod: string;
+        account: { id: string; name: string } | null;
+      } | null;
     };
   }>(
-    `mutation($input: MoneyTransactionCreateInput!) {
-      moneyTransactionCreate(input: $input) {
+    `mutation R($input: InvoicePaymentCreateManualInput!) {
+      invoicePaymentCreateManual(input: $input) {
         didSucceed
-        inputErrors { path message }
-        transaction { id }
+        inputErrors { path message code }
+        invoicePayment { id amount paymentDate paymentMethod account { id name } }
       }
     }`,
     { input }
   );
 
-  if (!data.moneyTransactionCreate.didSucceed) {
-    const errs = data.moneyTransactionCreate.inputErrors?.map((e) => e.message).join(", ");
-    throw new Error(`Wave moneyTransactionCreate failed: ${errs}`);
+  if (!data.invoicePaymentCreateManual.didSucceed) {
+    const errs = data.invoicePaymentCreateManual.inputErrors?.map((e) => `${e.path}: ${e.message}`).join(", ");
+    throw new Error(`Wave invoicePaymentCreateManual failed: ${errs}`);
+  }
+
+  // Verification step: re-query the invoice to confirm it's actually marked paid.
+  // Catches the silent-success-but-actually-failed mode.
+  const verify = await waveQuery<{
+    business: { invoice: { id: string; amountPaid: { value: string } | null } | null } | null;
+  }>(
+    `query($bizId: ID!, $invId: ID!) {
+      business(id: $bizId) {
+        invoice(id: $invId) { id amountPaid { value } }
+      }
+    }`,
+    { bizId: WAVE_BUSINESS_ID, invId: invoiceId }
+  );
+
+  const amountPaidStr = verify.business?.invoice?.amountPaid?.value;
+  const amountPaid = amountPaidStr ? Number(amountPaidStr) : 0;
+
+  if (amountPaid < amount - 0.01) {
+    throw new Error(
+      `Wave payment created but invoice not closed: amountPaid=${amountPaid} expected>=${amount}`
+    );
   }
 }
 

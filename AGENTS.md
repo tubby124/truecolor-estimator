@@ -332,7 +332,7 @@ CRON_SECRET                   — protects /api/cron/* routes
 11. **Clover filter syntax = multiple `filter=` params.** Do NOT join with `AND` — it breaks the API.
 12. **`redirect()` outside try/catch.** It throws internally — wrapping kills it.
 13. **getSession() not getUser() for UI.** getUser() makes an extra network call and is for server-side verification only.
-14. **Wave: NEVER invoiceCreatePayment.** Use moneyTransactionCreate.
+14. **Wave invoice payments: use `invoicePaymentCreateManual`.** This is the only mutation that links the payment to the invoice so it flips to PAID. `moneyTransactionCreate` is for non-invoice bookkeeping only — using it for an invoice payment creates an orphan deposit and leaves the invoice OVERDUE forever (caused 28+ zombie invoices 2026-05-22 to 2026-05-26).
 
 ---
 

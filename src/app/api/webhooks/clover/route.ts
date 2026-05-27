@@ -62,15 +62,57 @@ export async function POST(req: NextRequest) {
   try {
     event = JSON.parse(bodyText) as Record<string, unknown>;
   } catch {
+    // Best-effort log of unparseable bodies — use a fresh service client since
+    // the main one isn't created until inside the PAYMENT branch.
+    try {
+      const supabaseEarly = createServiceClient();
+      await supabaseEarly.from("webhook_events").insert({
+        event_source: "clover",
+        event_type: "unknown",
+        resource_id: null,
+        matched_order_id: null,
+        ok: false,
+        detail: "invalid JSON body",
+      });
+    } catch (logErr) {
+      console.error("[clover-webhook] webhook_events log failed (non-fatal):", logErr);
+    }
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   console.log("[clover-webhook] received event type:", event.type);
 
+  // Supabase client + non-fatal webhook_events logger — shared across every
+  // exit path below so the staff lifecycle dashboard sees every Clover hit.
+  const supabase = createServiceClient();
+  const eventTypeStr = typeof event.type === "string" ? event.type : "unknown";
+
+  async function logWebhookEvent(opts: {
+    eventType: string;
+    resourceId: string | null;
+    matchedOrderId: string | null;
+    ok: boolean;
+    detail: string;
+  }) {
+    try {
+      await supabase.from("webhook_events").insert({
+        event_source: "clover",
+        event_type: opts.eventType,
+        resource_id: opts.resourceId,
+        matched_order_id: opts.matchedOrderId,
+        ok: opts.ok,
+        detail: opts.detail,
+      });
+    } catch (err) {
+      console.error("[clover-webhook] webhook_events log failed (non-fatal):", err);
+    }
+  }
+
   // Handle payment capture events
   // Clover sends type=PAYMENT with object.status=captured when card is charged
   if (event.type === "PAYMENT") {
     const obj = event.object as Record<string, unknown> | undefined;
+    const paymentId = (obj?.id ?? obj?.paymentId) as string | undefined;
     if (obj?.status === "captured" || obj?.status === "paid") {
       // Primary: externalReferenceId = our Supabase order UUID (set in createCloverCheckout)
       // Fallback: cloverOrderId = Clover's internal order ID (for backward compat)
@@ -80,10 +122,18 @@ export async function POST(req: NextRequest) {
 
       console.log(`[clover-webhook] matching by ${extRef ? "externalReferenceId" : "cloverOrderId"}: ${matchRef}`);
 
+      if (!matchRef) {
+        await logWebhookEvent({
+          eventType: eventTypeStr,
+          resourceId: paymentId ?? null,
+          matchedOrderId: null,
+          ok: false,
+          detail: "PAYMENT captured but no externalReferenceId or orderId on payload",
+        });
+      }
+
       if (matchRef) {
         try {
-          const supabase = createServiceClient();
-
           // Verify the captured amount matches order.total BEFORE marking paid.
           // The previous version updated solely on payment_reference match, so a
           // partial capture (or a crafted event with amount=1¢) would still flip
@@ -101,14 +151,35 @@ export async function POST(req: NextRequest) {
 
           if (fetchErr) {
             console.error("[clover-webhook] order lookup failed:", fetchErr.message);
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef,
+              matchedOrderId: null,
+              ok: false,
+              detail: `order lookup failed: ${fetchErr.message}`,
+            });
             return NextResponse.json({ ok: true });
           }
           if (!pendingOrder) {
             console.warn(`[clover-webhook] no order found for payment_reference=${matchRef}`);
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef,
+              matchedOrderId: null,
+              ok: false,
+              detail: `no order found for payment_reference=${matchRef}`,
+            });
             return NextResponse.json({ ok: true });
           }
           if (pendingOrder.status !== "pending_payment") {
             console.log(`[clover-webhook] order ${pendingOrder.order_number} already in status=${pendingOrder.status} — idempotent ack`);
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef,
+              matchedOrderId: pendingOrder.id,
+              ok: true,
+              detail: `order ${pendingOrder.order_number} already ${pendingOrder.status} — skipped`,
+            });
             return NextResponse.json({ ok: true });
           }
 
@@ -124,6 +195,13 @@ export async function POST(req: NextRequest) {
               `Received: $${(reportedAmountCents / 100).toFixed(2)}\n` +
               `Order NOT marked paid — investigate in Clover dashboard.`
             ).catch(() => {});
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef,
+              matchedOrderId: pendingOrder.id,
+              ok: false,
+              detail: `amount_mismatch: expected $${(expectedCents / 100).toFixed(2)} got $${(reportedAmountCents / 100).toFixed(2)} on order ${pendingOrder.order_number}`,
+            });
             return NextResponse.json({ ok: true });
           }
 
@@ -139,6 +217,13 @@ export async function POST(req: NextRequest) {
 
           if (error) {
             console.error("[clover-webhook] order update failed:", error.message);
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef,
+              matchedOrderId: pendingOrder.id,
+              ok: false,
+              detail: `order update failed: ${error.message}`,
+            });
           } else {
             const count = updatedOrders?.length ?? 0;
             // Audit event: payment received via Clover webhook
@@ -161,6 +246,15 @@ export async function POST(req: NextRequest) {
             console.log(
               `[clover-webhook] order confirmed via webhook | Clover order: ${cloverOrderId} | rows updated: ${count}`
             );
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef,
+              matchedOrderId: pendingOrder.id,
+              ok: true,
+              detail: count > 0
+                ? `order ${pendingOrder.order_number} → payment_received (captured)`
+                : `order ${pendingOrder.order_number} update returned 0 rows — race with another writer`,
+            });
 
             // Send "payment confirmed" email + mark Wave invoice paid (both non-fatal)
             if (updatedOrders && updatedOrders.length > 0) {
@@ -435,9 +529,34 @@ export async function POST(req: NextRequest) {
           }
         } catch (err) {
           console.error("[clover-webhook] unexpected error:", err);
+          await logWebhookEvent({
+            eventType: eventTypeStr,
+            resourceId: paymentId ?? matchRef ?? null,
+            matchedOrderId: null,
+            ok: false,
+            detail: `unexpected error: ${err instanceof Error ? err.message : String(err)}`,
+          });
         }
       }
+    } else {
+      // PAYMENT event but not a captured/paid status (e.g. pending, voided)
+      await logWebhookEvent({
+        eventType: eventTypeStr,
+        resourceId: paymentId ?? null,
+        matchedOrderId: null,
+        ok: true,
+        detail: `PAYMENT status=${String(obj?.status ?? "unknown")} — no action taken`,
+      });
     }
+  } else {
+    // Non-PAYMENT event (Clover may send others if extra subscriptions are added)
+    await logWebhookEvent({
+      eventType: eventTypeStr,
+      resourceId: null,
+      matchedOrderId: null,
+      ok: true,
+      detail: "unhandled event type — no action taken",
+    });
   }
 
   // Always return 200 — Clover retries on non-200
