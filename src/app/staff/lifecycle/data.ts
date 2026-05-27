@@ -617,6 +617,14 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       type: "coupon_redeemed", // closest match in current type enum; could split later
       label: (d) => `code: ${d?.code ?? "?"}`,
     },
+    "wave.approve_failed": {
+      type: "wave_approve_failed",
+      label: (d) => {
+        const inv = d?.wave_invoice_number ?? d?.wave_invoice_id ?? "?";
+        const err = typeof d?.error === "string" ? (d.error as string).slice(0, 80) : "no message";
+        return `Wave inv ${inv} stuck DRAFT · ${err}`;
+      },
+    },
   };
   for (const ae of auditRaw) {
     const mapped = auditTypeMap[ae.event_type];
