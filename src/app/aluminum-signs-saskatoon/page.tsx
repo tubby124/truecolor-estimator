@@ -106,6 +106,42 @@ export default function AluminumSignsSaskatoonPage() {
             start at $8/sqft and offer a 2–3 year outdoor lifespan. Pickup at 216 33rd St W,
             Saskatoon — same-day rush available (+$40 flat).
           </p>
+          <p className="text-gray-600 leading-relaxed">
+            What ACP aluminum actually is, and why it lasts: 3mm aluminum composite panel —
+            two thin aluminum skins bonded to a polyethylene core. The result is a rigid,
+            flat, lightweight panel that won&apos;t warp, rust, or flex in the wind. We print
+            directly onto the painted aluminum surface with our in-house Roland UV press;
+            the ink is UV-cured at the moment of contact and bonds chemically to the painted
+            coating. No lamination layer, no peeling, no chalky fade. The combination of
+            aluminum substrate + UV-cured ink produces a sign rated for 10+ years of
+            Saskatchewan outdoor service — through freeze-thaw cycles, prairie sun, and
+            wind. Indoor lifespans are essentially unlimited.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Saskatoon-specific commercial demand patterns: storefront signs (24×36″ = $78,
+            mounted with standoff brackets on a fascia or stucco wall) are the most common
+            order, especially for retail along 8th Street, Broadway, and 33rd Street West.
+            Office directory boards (custom sizes, often 18×24″ or 24×36″ at $39–$78) for
+            multi-tenant commercial buildings — strata corporations and property managers
+            order these in batches. Parking lot regulation signs (12×18″ = $19.50 raw, hits
+            the $25 cart min as a single piece) mounted on existing posts. Construction
+            hoarding panels (4×8 ft = $320) — large building developments where the sign
+            stays up for the duration of a multi-year project. Volume discounts kick in at
+            5+ signs (3% off), 10+ (5%), 25+ (8%) — the smaller discounts compared to
+            coroplast reflect ACP&apos;s narrower margin structure.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            When to choose ACP over coroplast: any application where the sign needs to look
+            sharp for more than 2–3 years. Permanent storefront identification, building
+            entrance signs, parking lot regulations, building directories, any sign that&apos;s
+            going on a wall with standoff brackets. ACP is the right call when removability
+            is not a feature you need — once installed, it&apos;s staying. The $30 premium for
+            a 24×36″ ACP over a coroplast equivalent ($78 vs $48) buys you 5–7× the outdoor
+            lifespan, which works out to roughly $4/year amortized — cheaper than the
+            replacement labour of swapping a coroplast sign in year 3. For temporary
+            seasonal or campaign signage where signs come down within the lifecycle of a
+            single event, coroplast remains the right substrate.
+          </p>
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
