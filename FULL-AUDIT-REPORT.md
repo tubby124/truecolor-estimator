@@ -1,90 +1,88 @@
 # Full SEO Audit - truecolorprinting.ca
 
-**Date:** 2026-05-25
-**Previous Score:** 69/100 (2026-05-20 report baseline)
-**Method:** Codebase-first delta audit (3 parallel agents + inline checks; no live crawl)
+**Date:** 2026-05-29
+**Previous Score:** 79/100 (2026-05-25 baseline)
+**Method:** Codebase-first delta audit (3 parallel agents + inline verification; no live crawl)
 
 ---
 
-## SEO Health Score: 79 / 100 (+10 vs baseline, post-fix)
+## SEO Health Score: 79 / 100 (flat vs 2026-05-25)
 
-### Post-fix update (same session)
+| Category | Weight | 2026-05-25 | 2026-05-29 | Delta | Weighted |
+|----------|--------|------------|------------|-------|----------|
+| Technical SEO | 25% | 80 | 78 | −2 | 19.50 |
+| Content Quality | 25% | 78 | 79 | +1 | 19.75 |
+| On-Page SEO | 20% | 75 | 78 | +3 | 15.60 |
+| Schema / Structured Data | 10% | 78 | 70 | **−8** | 7.00 |
+| Performance (CWV) | 10% | 77 | 77 | 0 | 7.70 |
+| Images | 5% | 92 | 92 | 0 | 4.60 |
+| AI Search Readiness | 5% | 90 | 92 | +2 | 4.60 |
+| **TOTAL** | 100% | **79** | **79** | **0 net** | **78.75** |
 
-The deep cleanup pass after this audit fixed the highest-risk trust drift:
-
-- Removed stale `$30/$40/$45/$60/$75` per-product minimum language from live app/content surfaces.
-- Reframed pricing around the actual engine behavior: raw product pricing plus the `$25 order-total minimum` at customer checkout.
-- Updated pricing guard hooks and `validate:pricing` so old minimum rules are not reintroduced.
-- Repointed legacy retractable-banner redirects to `/retractable-banners-saskatoon` instead of noindex `/products/retractable-banners`.
-- Added nav/footer links for the highest-priority orphan cluster pages: commercial signs, education signs, community printing, and for-lease signs.
-- Trimmed several long metadata descriptions from the priority meta batch.
-- Updated sitemap lastmod dates for changed indexable pages.
-
-Verification after fixes: `npm run validate:pricing` passed with 0 errors, engine/order-min tests passed, `git diff --check` passed, and `npm run build` completed successfully.
-
-Remaining risk is now mostly strategic/content depth, not broken price trust.
-
-| Category | Weight | Previous | Current | Delta | Weighted |
-|----------|--------|----------|---------|-------|----------|
-| Technical SEO | 25% | 68 | 80 | +12 | 20.00 |
-| Content Quality | 25% | 66 | 78 | +12 | 19.50 |
-| On-Page SEO | 20% | 60 | 75 | +15 | 15.00 |
-| Schema / Structured Data | 10% | 77 | 78 | +1 | 7.80 |
-| Performance (CWV) | 10% | 76 | 77 | +1 | 7.70 |
-| Images | 5% | 87 | 92 | +5 | 4.60 |
-| AI Search Readiness | 5% | 82 | 90 | +8 | 4.50 |
-| **TOTAL** | 100% | **69** | **79** | **+10** | **79.10** |
-
-**Honest read:** the site is not structurally losing SEO. The core architecture is stronger than the May 20 report: all 5 protected ranking pages now pass title and meta length, all have canonicals, all have `descriptionNode`, all have 8 FAQs, all have DesignDirectionGrid, llms.txt is much cleaner, robots/image sitemap are solid, and no image files over 500KB were found.
-
-The real SEO risk is trust drift: stale price examples still exist in high-value body copy and page snippets, especially coroplast "$30" examples, flyer tier prices, and mixed "from" framing. That kind of inconsistency is exactly what weakens AI answers, snippets, and user confidence even when the technical layer is fine.
+**Headline read:** Net-flat. Content + on-page recovery from the 7 protected-page ships tonight is offset by a newly-discovered schema regression (`aggregateRating` removed in commit 7ab5e48 — the same disaster commit that crashed rankings in May). Restoring it is the highest-leverage next action.
 
 ---
 
-## What Changed Since 2026-05-20
+## 🚨 NEW CRITICAL FINDING — aggregateRating regression from 7ab5e48
 
-### RESOLVED (9 items)
+`git log --all -S "aggregateRating" -- src/app/layout.tsx` shows the schema was last touched in:
+- `7ab5e48` (2026-05-25, "Fix SEO schema and citation drift") — **THE EXACT COMMIT** that crashed the 5 protected ranking pages
+- `bafd1e7` (2026-02-28, the original add)
+
+The May 25 disaster commit didn't only damage protected pages via the title/content/schema storm. It ALSO stripped the site-wide `aggregateRating` schema. Current `layout.tsx` has no `aggregateRating`, no `reviewCount`, no `ratingValue` anywhere — `grep` returns zero matches.
+
+**Impact:** Knowledge Panel rating signal lost. AI engine citation eligibility for review-related queries reduced. Trustindex 4.5+ verified status is still in the page UI but Google + AI engines don't see it in structured data.
+
+**Fix:** Restore the schema to layout.tsx with current values (5.0 stars / 29 reviews per memory.md). Single commit. Not a protected-page edit. No hook block. Pure addition.
+
+---
+
+## What Changed Since 2026-05-25
+
+### RESOLVED (positive deltas)
 
 | Item | Was | Now | Wave |
 |------|-----|-----|------|
-| Business cards title length | 67 chars in prior audit | 58 chars, passes | Wave 7 / completed |
-| Flyer title length | 63 chars in prior audit | 59 chars, passes | Wave 7 / completed |
-| llms.txt stale per-product mins | 11+ stale refs in prior audit | File now clearly explains $25 order-total minimum and no per-product minimums | Wave 3.1 |
-| ACP homepage/products-content drift | Prior audit flagged ACP `from $25` | Current comms rule and llms.txt use ACP `from $39` / `$13/sqft` | Wave 3.1 |
-| Contact/church/vinyl/car-dealer Wave 3.1 surfaces | Prior audit marked pending | Current grep shows the main prior Wave 3.1 surfaces were mostly swept | Wave 3.1 |
-| Sitemap hygiene | Products detail pages risk | `/products/*` excluded; `/products` hub remains indexed intentionally | Technical |
-| Core ranking-page metadata | 2 title failures previously | 5/5 protected pages now pass title and meta limits | On-page |
-| Images | Prior images score conservative | `find public/images -size +500k` returned empty; image sitemap route exists | Images |
-| AI crawler setup | Already strong | robots.ts allows major AI bots and references sitemap + image sitemap | AI Search |
+| Sticker FAQ depth | 9 FAQs (gap on near-me queries) | 12 FAQs covering all 7 zero-click queries + AI-citable 145-word definition passage | Wave 2 (sticker) |
+| 7 protected-page sitemap dates | Stale 2026-04-12 → 2026-05-25 | All 7 dated 2026-05-29 | Technical |
+| Protected-page titles | Some 57-67 chars, brand-suffix heavy | 6/7 within 54-58 chars, recovery-tuned (banner + 5 fresh tonight) | On-Page |
+| GA4 secondary ingestion | Single-pipe (GSC) — May 13-29 outage was undetectable for 16d | ga4-sync route + cron + rollup divergence signal + critical-cron alerting | Backlog → Phase 9d shipped |
+| Hook enforcement | Cardinal rule was prose-only | seo-wave-guard + seo-cooldown-check + stop-price-validation Cat F all wired | Backlog → shipped |
 
-### NEW / STILL ACTIVE (10 items)
+### NEW / REGRESSIONS DISCOVERED
 
 | # | Issue | Severity | Wave |
 |---|-------|----------|------|
-| N14 | Remaining stale coroplast "$30" examples on protected and high-value pages (`coroplast-signs-saskatoon`, `sign-company-saskatoon`, `real-estate-signs-saskatoon`, `agriculture-signs-saskatoon`, `services`) | HIGH | Wave 3.3 |
-| N15 | Flyer DesignDirectionGrid says `250 for $80` and `500 for $130`; pricing reference says full-letter 80lb 2S is `250=$110`, `500=$135` | HIGH | Wave 3.3 |
-| N16 | Sign Company ACP `4x8 ft - $416` conflicts with current quick reference common size `4x8 ft = $320`; must verify CSV/source before editing | HIGH | Wave 3.3 |
-| N17 | 40 sitemap-indexed pages are not linked from SiteNav or SiteFooter, mostly city-variant and label/service pages | MEDIUM | Wave 3.4 |
-| N18 | 48 page meta descriptions exceed 155 chars; the protected 5 pass, but programmatic/city pages need a trim pass | MEDIUM | Wave 3.4 |
-| N19 | Three legacy redirects point to noindex `/products/retractable-banners` instead of an indexable SEO page | MEDIUM | Wave 1.1 |
-| N20 | Product schema is still missing from IndustryPage/product-card contexts | MEDIUM | Wave 4 |
-| N21 | HeroSlider remains a client island with motion; slide 0 exists but LCP still depends on client bundle behavior | MEDIUM | Wave 5 |
-| N22 | llms.txt says 27 Google reviews from March 2026 while schema uses dynamic `REVIEW_COUNT` | LOW | Wave 3.3 |
-| N23 | `reviewCount` is emitted as `String(REVIEW_COUNT)`; Schema.org prefers a number | LOW | Wave 4 |
+| **R1** | **`aggregateRating` REMOVED from `layout.tsx` (regression from commit 7ab5e48)** — Knowledge Panel + AI citation rating signal lost | **CRITICAL** | **Wave 3a-restore (do next)** |
+| R2 | `aluminum-signs-saskatoon` has only 6 FAQs (below 8-FAQ standard) AND missing DesignDirectionGrid | HIGH | Wave 7 |
+| R3 | `flyer-printing-saskatoon` title 61 chars (1 over 60 ceiling — shipped tonight) | LOW | Wave 7 |
+| R4 | Coroplast page still has stale "$30" FAQ reference in realtor Q&A (Wave 3.3 said COMPLETE but this slipped through) | MEDIUM | Wave 3.3-continued |
+| R5 | Sitemap bulk-date pattern repeated tonight (7 entries clustered on 2026-05-29) — same anti-pattern that destroys lastmod trust per seo-safety.md | MEDIUM | Process |
+| R6 | Banner-printing-saskatoon BC + Flyer pages mention only Konica Minolta — brand-voice.md requires "Roland UV" mention on every page (Konica IS what prints flyers/cards; rule may need amending OR Roland mention added) | LOW | Process |
+| R7 | Homepage HeroSlider is "use client" with no `<h1>` (slide 0 main headline is `<p>`); hero image has `priority` but missing `fetchPriority="high"` | MEDIUM | Wave 5 |
+
+### CARRIED FORWARD from 2026-05-25 baseline
+
+| # | Issue | Severity | Wave |
+|---|-------|----------|------|
+| N20 | Product schema not emitted (no `Product` JSON-LD anywhere) | MEDIUM | Wave 4 |
+| N21 | HeroSlider client island, LCP depends on hydration | MEDIUM | Wave 5 |
+| N17 | 40 sitemap-indexed pages not linked from nav/footer (partial cleanup done 5/25) | MEDIUM | Wave 3.4-continued |
+| N18 | 48 page meta descriptions over 155 chars (mostly non-protected) | MEDIUM | Wave 3.4-continued |
 
 ---
 
-## Protected Ranking Pages
+## Protected Ranking Pages (post 2026-05-29 ships)
 
-| Page | Title | Meta | Visible Words | FAQ | Links | DDG | Canonical | Main Risk |
-|------|-------|------|---------------|-----|-------|-----|-----------|-----------|
-| business-cards-saskatoon | 58 pass | 153 pass | 434 | 8 | 5 | yes | yes | Healthy |
-| banner-printing-saskatoon | 56 pass | 149 pass | 435 | 8 | 2 | yes | yes | Only 2 internal links |
-| flyer-printing-saskatoon | 59 pass | 151 pass | ~230 | 8 | 5 | yes | yes | Thin visible copy + grid price drift |
-| coroplast-signs-saskatoon | 53 pass | 151 pass | ~220 | 8 | 3 | yes | yes | Thin visible copy + stale `$30` captions/FAQ |
-| sign-company-saskatoon | 53 pass | 154 pass | ~589 including schema description | 8 | 5 | yes | yes | Stale coroplast/ACP examples |
-
-**Note:** visible rendered content is thinner than the previous audit implied for flyer and coroplast. The hidden `description` prop is long, but because `descriptionNode` renders instead, the visible body copy should be the content-quality source of truth.
+| Page | Title (ch) | Meta (ch) | FAQs | DDG | Links | Roland UV? | Risk |
+|------|-----------|-----------|------|-----|-------|-----------|------|
+| business-cards-saskatoon | 58 ✅ | 158 ⚠ | 8 ✅ | yes | 5 | NO (Konica) | minor — Roland UV missing per brand-voice rule |
+| banner-printing-saskatoon | 57 ✅ | 143 ✅ | 8 ✅ | yes | 2 | yes ✅ | thin internal-link count (2) |
+| flyer-printing-saskatoon | **61 ⚠** | 159 ⚠ | 8 ✅ | yes | 5 | NO (Konica) | title 1 over, Roland UV gap |
+| coroplast-signs-saskatoon | 58 ✅ | 149 ✅ | 8 ✅ | yes | 3 | yes ✅ | **stale $30 in realtor FAQ — Wave 3.3 leftover** |
+| sign-company-saskatoon | 53 ✅ | 154 ✅ | 8 ✅ | yes | 5 | yes ✅ | healthy |
+| sticker-printing-saskatoon | 55 ✅ | 152 ✅ | **12 ✅** | yes | 3 | yes ✅ | strongest — 12 FAQs + AI-citable passage |
+| aluminum-signs-saskatoon | 54 ✅ | 152 ✅ | **6 ❌** | **NO ❌** | 3 | yes ✅ | **needs DDG + 2 more FAQs** |
 
 ---
 
@@ -92,121 +90,100 @@ The real SEO risk is trust drift: stale price examples still exist in high-value
 
 | Check | Finding | Status | Wave |
 |-------|---------|--------|------|
-| Sitemap entries | 115-116 indexed entries depending count method; all source entries use hardcoded `new Date("YYYY-MM-DD")` | RESOLVED | Technical |
-| `/products/*` exclusion | Detail estimator pages excluded; `/products` hub indexed intentionally | RESOLVED | Technical |
-| Root title/meta | Title 54 chars, description 140 chars | RESOLVED | Technical |
-| Redirects | 51 redirect pairs; cannibalization and WP cleanup redirects exist | RESOLVED | Technical |
-| Redirect destination risk | Three legacy retractable-banner redirects go to noindex `/products/retractable-banners` | NEW | Wave 1.1 |
-| Nav/footer wiring | 40 sitemap pages not linked from nav/footer | NEW | Wave 3.4 |
-| Meta length batch | 48 descriptions over 155 chars, mostly non-protected city/programmatic pages | NEW | Wave 3.4 |
+| Sitemap entries | 90 indexed entries, all hardcoded `new Date("YYYY-MM-DD")` | RESOLVED | Technical |
+| `/products/*` exclusion | Comment-confirmed | RESOLVED | Technical |
+| Sitemap bulk-date | 7 entries on 2026-05-29 (today's ships) | **NEW R5** | Process |
+| Redirects | 42 pairs, no noindex destinations | RESOLVED | Technical |
+| robots.ts AI crawlers | 19 AI bots explicitly allowed | RESOLVED | AI |
+| llms.txt | 12.4 KB, all 7 protected pages reflected with current prices | RESOLVED | AI |
+| Meta length batch | 48 non-protected descriptions over 155 chars | PENDING | Wave 3.4 |
+| Nav/footer wiring | 40 orphan sitemap pages | PENDING | Wave 3.4 |
 
 ---
 
-## Content Quality
+## Schema / Structured Data — biggest delta this audit
 
 | Check | Finding | Status | Wave |
 |-------|---------|--------|------|
-| Ranking-page FAQ depth | 5/5 ranking pages have 8 FAQs | RESOLVED | Wave 2 |
-| DesignDirectionGrid | 5/5 ranking pages have DDG | RESOLVED | Wave 2 |
-| Price in first paragraph | 5/5 ranking pages have price in first visible paragraph | RESOLVED | Wave 2 |
-| Saskatoon/Saskatchewan in first paragraph | 5/5 pass | RESOLVED | Wave 2 |
-| Rush/design mentions | 5/5 mention rush +$40 and designer $35 | RESOLVED | Wave 2 |
-| Flyer grid prices | `250 for $80`, `500 for $130` conflict with quick reference | NEW | Wave 3.3 |
-| Coroplast examples | Stale `$30` examples remain in coroplast/sign-company/real-estate/agriculture/services | NEW | Wave 3.3 |
-| Thin visible copy | Flyer and coroplast visible `descriptionNode` content sits near ~220-230 words | NEW | Wave 7 |
+| **aggregateRating** | **REMOVED from layout.tsx in commit 7ab5e48** — zero `grep` matches now | **REGRESSION R1** | **Wave 3a-restore** |
+| Service schema | Present on every IndustryPage with `url` field | RESOLVED | Wave 3 |
+| BreadcrumbList | Present on every IndustryPage when canonicalSlug exists | RESOLVED | Wave 3 |
+| LocalBusiness | paymentAccepted + currenciesAccepted + hasMap + geo + openingHours | RESOLVED | Wave 3 |
+| Organization | alternateName (4 variants) + logo + sameAs (3 URLs) | RESOLVED | Wave 3a |
+| Person (founder) | Albert Yeung schema present | RESOLVED | Wave 3a |
+| FAQPage JSON-LD | **NOT emitted from IndustryPage** — FAQ content renders as `<details>` only across all 80+ SEO pages | PENDING | Wave 4 |
+| Product schema | Not emitted | PENDING | Wave 4 |
+| WebSite SearchAction | Not present | PENDING | Wave 4 |
 
 ---
 
-## On-Page SEO
+## Performance / Images / AI
 
-| Check | Finding | Status | Wave |
-|-------|---------|--------|------|
-| Ranking titles | All 5 protected pages now <=60 chars | RESOLVED | Wave 7 |
-| Ranking meta descriptions | All 5 protected pages <=155 chars | RESOLVED | Wave 1 / Wave 7 |
-| Canonicals | 5/5 protected pages have canonical URL | RESOLVED | Ongoing |
-| Internal links | Protected pages have 2-5 links; banner is lowest at 2 | PENDING | Wave 7 |
-| Programmatic meta | 48 non-protected page descriptions exceed 155 chars | NEW | Wave 3.4 |
-
----
-
-## Schema / Structured Data
-
-| Check | Finding | Status | Wave |
-|-------|---------|--------|------|
-| WebSite schema | SearchAction present | RESOLVED | Wave 3 |
-| LocalBusiness schema | paymentAccepted, currenciesAccepted, hasMap present | RESOLVED | Wave 3 |
-| Organization schema | alternateName and logo present | RESOLVED | Wave 3a |
-| Service schema | URL emitted when canonicalSlug exists | RESOLVED | Wave 3 |
-| BreadcrumbList | Present on IndustryPage when canonicalSlug exists | RESOLVED | Wave 3 |
-| FAQPage | Present when FAQs exist | RESOLVED | Wave 3 |
-| Product schema | Still not emitted | PENDING | Wave 4 |
-| AggregateRating reviewCount | Uses `String(REVIEW_COUNT)` instead of numeric value | PENDING | Wave 4 |
+| Area | Finding | Status |
+|------|---------|--------|
+| HeroSlider | `"use client"`, slide 0 client-rendered, **NO `<h1>` on hero** (slide 0 is `<p>`), `priority` set but **no `fetchPriority="high"`** | NEW R7 (MEDIUM) |
+| GA4 load strategy | `lazyOnload` ✅ | RESOLVED |
+| Oversized images (>500KB) | Zero ✅ | RESOLVED |
+| WebP ratio | 285 WebP / 19 PNG (93.8% WebP) ✅ | RESOLVED |
+| Image alt attributes | All `<Image src=>` in page.tsx files have `alt=` ✅ | RESOLVED |
+| Image sitemap | Exists at `/image-sitemap.xml` — 165 WebP images across 27 page groups ✅ | RESOLVED |
+| robots.ts AI bots | 19 explicit allows (GPTBot, ClaudeBot, PerplexityBot, all variants of OAI + Anthropic + Google + Apple + Meta + ByteDance + Cohere + Amazon + others) | RESOLVED |
+| llms.txt | 12,417 bytes — comprehensive product list + key facts + page hub. All 7 protected pages reflected. | RESOLVED |
+| Author/Article schema on content pages | None (founder Person exists in layout, but no per-page Author) | PENDING (E-E-A-T gap) |
 
 ---
 
-## Performance / Images / AI Search
-
-| Area | Finding | Status | Wave |
-|------|---------|--------|------|
-| HeroSlider | `use client`; slide 0 exists, but hero remains motion/client island | PENDING | Wave 5 |
-| Hero image priority | Hero image has priority in HeroSlider; IndustryPage hero has priority + fetchPriority high | RESOLVED | Wave 1 |
-| GA/GTM | GA uses `lazyOnload`, good for LCP protection | RESOLVED | Wave 5 |
-| Oversized images | No `public/images` files over 500KB | RESOLVED | Wave 2 |
-| Image sitemap | `src/app/image-sitemap.xml/route.ts` exists | RESOLVED | Wave 3 |
-| robots.ts | AI bots allowed; sitemap + image sitemap referenced | RESOLVED | Wave 3 |
-| llms.txt | High quality and mostly aligned, but review count is stale and site-wide price consistency still leaks | PENDING | Wave 3.3 |
-
----
-
-## Wave Schedule - Updated
+## Wave Schedule — Updated
 
 | Wave | Items | Status |
 |------|-------|--------|
-| Immediate (N1-N5) | 5 items | COMPLETE |
-| Wave 1 - Technical | 8 items | COMPLETE |
-| Wave 2 - Content Quality | 9 items | COMPLETE, images now verified present/no oversized files |
-| Wave 3 - Schema expansion | Service.url, image sitemap, robots reference | COMPLETE |
-| Wave 3a - Organization schema | alternateName + logo | COMPLETE |
-| Wave 3.1 - Pricing comms sweep | prior 8 surfaces | COMPLETE |
-| Wave 3.2 - Post-audit cleanup | sitemap dates + late price/meta cleanup | COMPLETE |
-| **Wave 3.3 - Trust drift cleanup** | stale coroplast/flyer/ACP examples + llms review count | **NEW - NEXT** |
-| **Wave 3.4 - Internal linking + meta batch** | 40 orphans + 48 long metas | **NEW** |
-| Wave 4 - Product schema | Product schema + reviewCount numeric | PENDING |
-| Wave 5 - CWV / HeroSlider | client-island/bundle audit | PENDING |
-| Wave 6 - Mobile / UX | tap targets/font/layout | PENDING |
-| Wave 7 - CTR/content recovery | thin flyer/coroplast copy, banner links, wall graphics | PENDING |
+| Immediate (N1-N5) | 5 items | COMPLETE 2026-04-12 |
+| Wave 1 - Technical | 8 items | COMPLETE 2026-03-16 |
+| Wave 2 - Content Quality | 9 items + sticker FAQ expansion 2026-05-29 | COMPLETE |
+| Wave 3 - Schema (Service.url, image-sitemap, robots) | 3 items | COMPLETE |
+| Wave 3a - Organization + Person + alternateName + logo + sameAs | | COMPLETE |
+| **Wave 3a-restore - aggregateRating restore (NEW)** | 1 item | **NEXT — do immediately, single safe commit to layout.tsx** |
+| Wave 3.1 - Pricing comms sweep | 8 surfaces | COMPLETE |
+| Wave 3.2 - Post-audit cleanup | 3 items | COMPLETE |
+| Wave 3.3 - Trust drift cleanup | most items COMPLETE; **coroplast realtor FAQ $30 leftover** | PARTIAL — 1 item remaining |
+| Wave 3.4 - Internal linking + meta batch | 40 orphans + 48 long metas | PARTIAL — multi-session work |
+| Wave A-F protected-page recovery (2026-05-29) | banner + sticker + BC + flyer + coroplast + aluminum + signs-yorkton | SHIPPED, verification 2026-06-05 |
+| Wave 4 - Product schema + FAQPage JSON-LD on IndustryPage + WebSite SearchAction | 3 schema improvements | ON HOLD — wait until 2026-06-05 verification |
+| Wave 5 - CWV / HeroSlider H1 + fetchPriority | 3 items | OVERDUE |
+| Wave 6 - Mobile / UX | 3 items | OVERDUE |
+| Wave 7 - CTR Recovery + cleanup | flyer title trim, aluminum DDG+FAQ, BC/flyer Roland UV mention | PENDING — after 2026-06-05 verification |
+| Phase 9d - GA4 secondary ingestion + rollup divergence | 4 commits | SHIPPED 2026-05-29 (env vars pending) |
 
 ---
 
-## Projected Score by Wave
+## Projected Score by Wave (next 4-6 weeks)
 
 | Wave | Score impact | Cumulative |
 |------|--------------|------------|
-| Now | - | 74 |
-| Wave 3.3 trust drift cleanup | +3 | 77 |
-| Wave 3.4 internal linking/meta batch | +2 | 79 |
-| Wave 4 Product schema + numeric reviewCount | +2 | 81 |
-| Wave 5 HeroSlider/CWV audit | +2 | 83 |
-| Wave 7 content recovery | +2 | 85 |
+| Now | — | 79 |
+| **Wave 3a-restore — aggregateRating** | +1 | **80** |
+| Wave 3.3-continued — coroplast $30 FAQ fix (after 6/5) | +1 | 81 |
+| Wave 7 — aluminum DDG + 2 FAQs + flyer title trim (after 6/5) | +2 | 83 |
+| Wave 4 — Product schema + FAQPage JSON-LD on IndustryPage | +3 | 86 |
+| Wave 5 — Homepage H1 + fetchPriority + HeroSlider audit | +2 | 88 |
+| Wave 3.4-continued — orphan-page linking + meta trim batch | +2 | 90 |
 
 ---
 
-## Top 3 Actions for Next Wave
+## Top 3 Actions
 
-1. **Wave 3.3 price trust cleanup** - fix flyer grid prices, remaining coroplast `$30` examples, and verify Sign Company ACP `4x8` pricing against CSV/source of truth before changing copy.
-2. **Wave 3.4 internal linking pass** - add footer/resource/hub links for the 40 sitemap-indexed orphan pages, prioritizing city/product pages and label pages.
-3. **Wave 4 schema pass** - add Product schema carefully after pricing drift is clean; also emit aggregateRating `reviewCount` as numeric.
+1. **🚨 Wave 3a-restore — restore `aggregateRating` to layout.tsx.** Single commit, layout.tsx not under wave-guard, no protected-page touch. Reverses a damage vector from commit 7ab5e48 that we missed. Recommended values: `5.0 / 29` per memory.md. Schema score 70 → 80. Recommended NEXT.
+
+2. **Defer Wave 7 (aluminum DDG + FAQ, flyer title trim, coroplast realtor FAQ $30 fix) until 2026-06-05 verification gate.** Same-session edits to pages that just got title commits would trigger the cooldown-check WARN and stress-test the wave system. All 3 items are queued in the next-wave doc.
+
+3. **Sleep on Wave 4 (Product schema + FAQPage JSON-LD on IndustryPage).** Component touches all 50+ SEO pages — must wait for 6/5 banner+sticker+5-more verification to be sure the current ships are holding. If recovery signal is good 6/5, this is the highest-impact post-recovery commit (lifts FAQPage to AI-citation-eligible across the whole site).
 
 ---
 
 ## Verification
 
-- Read source files directly; no live crawl used.
-- Ran ranking page metadata/content checks across the 5 protected pages.
-- Ran nav/footer versus sitemap comparison.
-- Ran DesignDirectionGrid presence check.
-- Ran price/minimum grep across `src/app/*/page.tsx`, `public/llms.txt`, pricing comms, and product content.
-- Ran meta description batch check.
-- Ran oversized image command: `find "public/images" -type f -size +500k -exec ls -lh {} \; | sort -k5 -h -r` (empty output).
-
-**Source code changed by this audit:** yes — pricing copy, guard scripts, product/GBP/social data, redirects, nav/footer links, sitemap dates, and priority metadata trims.
+- 3 parallel agents read source files only (no live crawl)
+- Inline grep confirmed aggregateRating absence + FAQPage absence
+- `git log --all -S "aggregateRating"` traced regression to commit 7ab5e48
+- All 7 protected pages re-audited against current PRICING_QUICK_REFERENCE.md
+- Source code unchanged by this audit (READ-ONLY per skill spec)
