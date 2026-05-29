@@ -121,6 +121,46 @@ export default function SignCompanySaskatoonPage() {
             </Link>{" "}
             handles layouts for $35 flat with a same-day proof — no separate design vendor needed.
           </p>
+          <p className="text-gray-600 leading-relaxed">
+            Saskatoon demand patterns we serve weekly: retail storefronts along 8th Street,
+            Broadway, and 33rd Street West order ACP aluminum facia signs ($78 for 24×36″,
+            $320 for 4×8 ft) plus matching window decals and vinyl lettering for door
+            graphics. Local contractors, plumbers, electricians, and HVAC companies order
+            vehicle magnet sets ($24/sqft, removable + reusable) plus coroplast job site
+            signs ($24 each for 18×24″, 5+ bulk saves 8%) plus business cards ($45 for 250)
+            as a brand-kit bundle. Real estate teams pair coroplast yard signs with magnetic
+            riders for property updates. Event organizers run vinyl banners ($66 for 2×4 ft)
+            for grand openings, conferences, sponsor displays, and seasonal promos.
+            Government and education customers issue purchase orders for ACP wayfinding,
+            building identification, and parking lot regulations — typical RFP cycle, custom
+            volume quote available at (306) 954-8688.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Production differentiator: design, print, and cutting all happen in the same
+            building at 216 33rd St W. The Roland UV press is calibrated weekly to a known
+            target so colour from our digital business-card press matches colour from the
+            wide-format Roland — when you hand someone a business card next to a vehicle
+            magnet next to a coroplast yard sign, all three carry the same brand colour.
+            No jobs leave the building. No broker markup. The in-house designer ($35 flat,
+            same-day proof) handles file prep, vector conversion, sketch-to-print rebuilds,
+            and brand kit consistency across substrates. Most jobs ship in 1–3 business
+            days from artwork approval; same-day rush is +$40 flat on orders placed before
+            10 AM.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Material selection at a glance: coroplast ($8/sqft, 2–3 year life) for
+            temporary outdoor signage where signs come down within the campaign cycle —
+            real estate listings, election campaigns, event directionals, job site
+            identification. ACP aluminum ($13/sqft, 10+ year life) for permanent storefront
+            and building signage that stays up indefinitely. Vinyl banner ($8.25/sqft) for
+            flexible-hang applications across fences and storefront facades, where
+            grommet-mounting and roll-up storage matter. Vehicle magnet ($24/sqft) for
+            mobile fleet branding that removes cleanly between shifts. Vinyl lettering
+            ($8.50/sqft) for windows, vehicle door text, and equipment IDs where the
+            background needs to be transparent or where text-only application is the goal.
+            Window decals ($11/sqft) for full-colour storefront promotions and stickers
+            (from $25 for 25× 2×2″) for product packaging, giveaways, and brand promos.
+          </p>
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
