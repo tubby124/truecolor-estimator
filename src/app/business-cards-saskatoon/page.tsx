@@ -4,9 +4,9 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Business Cards Saskatoon | 250 Cards from $45 | True Color" },
+  title: { absolute: "Business Cards Saskatoon — 250 for $45, Next-Day Pickup" },
   description:
-    "Custom business card printing in Saskatoon. 250 cards from $45, double-sided 14pt gloss. Same-day rush +$40. In-house designer $35. Pickup 216 33rd St W.",
+    "250 double-sided business cards in Saskatoon for $45 — 14pt gloss, same-day rush +$40, pickup at 216 33rd St W. In-house designer $35 flat, proof same day.",
   alternates: { canonical: "/business-cards-saskatoon" },
   openGraph: {
     title: "Business Cards Saskatoon | True Color Display Printing",
