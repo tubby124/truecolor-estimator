@@ -4,9 +4,9 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Flyer Printing Saskatoon | 100 Flyers from $45 | True Color" },
+  title: { absolute: "Flyer Printing Saskatoon — 100 Flyers $45, Same-Day Available" },
   description:
-    "Flyer printing in Saskatoon from $45/100 on 80lb gloss. Full-colour double-sided, 100lb upgrade available. Same-day rush +$40. Pickup at 216 33rd St W.",
+    "Saskatoon flyer printing from $45/100, double-sided 80lb gloss. 250 for $110, 500 for $135, 1,000 for $185. Same-day rush available. Local pickup, no shipping.",
   alternates: { canonical: "/flyer-printing-saskatoon" },
   openGraph: {
     title: "Flyer Printing Saskatoon | True Color Display Printing",
