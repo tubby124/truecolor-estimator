@@ -90,13 +90,36 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
     }
   }
 
-  // ── Cron heartbeats: stale > 2× expected = red, error rate > 0 = yellow ───
+  // ── Cron heartbeats: stale > 2× expected = red, persistent external-API
+  //    failure = red, transient error rate > 0 = yellow ───────────────────────
+  //
+  // Why CRITICAL_EXTERNAL_CRONS escalates to red instead of yellow:
+  // The 2026-05-13 → 2026-05-29 gsc-sync outage ran daily but returned
+  // `invalid_grant` every time. hours_ago stayed at ~24h (not stale) and
+  // error_rate_24h was 100%, which the old code surfaced as YELLOW only —
+  // dashboard only, no Telegram. Result: nobody noticed for 16 days while
+  // ranking pages decayed. External-API auth failures are not transient; if
+  // half the runs fail in 24h, the auth is dead and needs hands-on rotation.
+  const CRITICAL_EXTERNAL_CRONS = new Set(["gsc-sync"]);
+  const CRITICAL_FAIL_THRESHOLD = 0.5;
+
   for (const h of inputs.heartbeats) {
     if (h.hours_ago !== null && h.hours_ago > 2 * h.max_age_hours) {
       reds.push({
         key: `cron:${h.name}:stale`,
         panel: "panel-cron-heartbeats",
         label: `${h.name} stale ${Math.round(h.hours_ago)}h (max ${h.max_age_hours}h)`,
+      });
+    } else if (
+      CRITICAL_EXTERNAL_CRONS.has(h.name) &&
+      h.runs_24h >= 1 &&
+      h.error_rate_24h !== null &&
+      h.error_rate_24h >= CRITICAL_FAIL_THRESHOLD
+    ) {
+      reds.push({
+        key: `cron:${h.name}:persistent-fail`,
+        panel: "panel-cron-heartbeats",
+        label: `${h.name}: ${Math.round(h.error_rate_24h * 100)}% error rate (24h) — external API auth likely dead`,
       });
     } else if (h.error_rate_24h !== null && h.error_rate_24h > 0) {
       yellows.push({
