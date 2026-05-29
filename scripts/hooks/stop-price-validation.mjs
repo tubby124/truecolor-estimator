@@ -436,6 +436,32 @@ try {
           `(ChatGPT, Perplexity) use this for authorship attribution. DO NOT REMOVE.`,
       );
     }
+
+    // H — force-dynamic + revalidate=0 (Phase 52, 2026-05-29)
+    //
+    // Without these, Next.js default s-maxage=31536000 caches HTML for 1 year.
+    // After a redeploy, Googlebot/Perplexity/ChatGPT still see stale content
+    // until the cache happens to revalidate. Discovered 2026-05-29 when
+    // coroplast body expansion (Phase 48) wasn't reaching default-URL crawlers.
+    const hasForceDynamic = /export\s+const\s+dynamic\s*=\s*["']force-dynamic["']/.test(layoutContent);
+    const hasRevalidate0 = /export\s+const\s+revalidate\s*=\s*0/.test(layoutContent);
+    if (!hasForceDynamic) {
+      blockers.push(
+        `[ISR CACHE FIX MISSING — export const dynamic = "force-dynamic" stripped from layout.tsx]\n` +
+          `Without force-dynamic, Next.js applies s-maxage=31536000 (1 YEAR CDN cache) on\n` +
+          `Server Components. Crawlers see stale HTML for hours/days after every deploy.\n` +
+          `Restoration: add at top of layout.tsx after imports:\n` +
+          `  export const dynamic = "force-dynamic";\n` +
+          `  export const revalidate = 0;`,
+      );
+    }
+    if (!hasRevalidate0) {
+      blockers.push(
+        `[ISR CACHE FIX MISSING — export const revalidate = 0 stripped from layout.tsx]\n` +
+          `Add back after the dynamic export:\n` +
+          `  export const revalidate = 0;`,
+      );
+    }
   }
 } catch {
   // Don't break the hook itself on filesystem errors.

@@ -28,6 +28,21 @@ const geistMono = localFont({
   display: "swap",
 });
 
+// ─── Render strategy ───────────────────────────────────────────────────────
+// force-dynamic + revalidate=0 disables the default 1-year CDN cache
+// (`s-maxage=31536000`) that Next.js applies to Server Components. Without
+// these, redeployed HTML stays cached for up to a year — Googlebot, Perplexity,
+// ChatGPT, and normal users all see stale content for hours/days after every
+// deploy. Discovered 2026-05-29 (Phase 52) — coroplast body expansion shipped
+// at 21:30 wasn't visible to default-URL requests until a cache-bust query
+// forced revalidation.
+//
+// Stop hook Category H (scripts/hooks/stop-price-validation.mjs) BLOCKS
+// session end if either directive disappears. DO NOT REMOVE without owner
+// approval — the 1-year cache failure mode would return immediately.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: {
     default: "True Color Printing | Signs, Banners & Cards Saskatoon",
