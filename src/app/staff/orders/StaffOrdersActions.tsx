@@ -801,7 +801,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             <div className="flex-1">
                               <p className="text-sm font-bold text-gray-800 leading-tight">💳 Send Invoice</p>
                               <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer pays now. Sends payment link or Wave invoice. <strong className="text-gray-700">Use after price is agreed.</strong>
+                                Customer pays now. Sends a Clover Pay Now link (or e-Transfer fallback). <strong className="text-gray-700">Use after price is agreed.</strong>
                               </p>
                             </div>
                           </div>
