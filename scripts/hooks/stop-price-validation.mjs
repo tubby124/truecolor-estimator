@@ -326,6 +326,49 @@ if (protectedPagesTouched.length > 0) {
   }
 }
 
+// --- Category G: aggregateRating presence in layout.tsx ---
+//
+// Born from 2026-05-29 audit: commit 7ab5e48 silently removed aggregateRating
+// from layout.tsx on May 25 along with crashing 5 ranking pages. Nobody noticed
+// for 4 days because schema is invisible. This check fails session end if the
+// aggregateRating block is missing from layout.tsx so a future commit cannot
+// silently strip it again.
+try {
+  const layoutPath = "src/app/layout.tsx";
+  if (existsSync(layoutPath)) {
+    const layoutContent = readFileSync(layoutPath, "utf8");
+    const hasAggregateRating = /aggregateRating\s*:\s*{/.test(layoutContent);
+    const hasReviewCountImport = /REVIEW_COUNT/.test(layoutContent);
+    if (!hasAggregateRating) {
+      blockers.push(
+        `[REQUIRED SCHEMA MISSING — aggregateRating block stripped from src/app/layout.tsx]\n` +
+          `The aggregateRating schema must exist in localBusinessSchema. Commit 7ab5e48 silently\n` +
+          `removed it on 2026-05-25 (the same disaster commit that crashed 5 ranking pages).\n` +
+          `Restoration shipped 2026-05-29. This hook now blocks session end if it disappears again.\n` +
+          `\n` +
+          `Restore by adding to localBusinessSchema (between currenciesAccepted and knowsAbout):\n` +
+          `  aggregateRating: {\n` +
+          `    "@type": "AggregateRating",\n` +
+          `    ratingValue: RATING_VALUE,\n` +
+          `    reviewCount: REVIEW_COUNT,\n` +
+          `    bestRating: "5",\n` +
+          `    worstRating: "1",\n` +
+          `  },\n` +
+          `\n` +
+          `Also confirm: import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";`,
+      );
+    } else if (!hasReviewCountImport) {
+      blockers.push(
+        `[REQUIRED IMPORT MISSING — REVIEW_COUNT not imported in src/app/layout.tsx]\n` +
+          `aggregateRating block uses REVIEW_COUNT but the import is missing. Add:\n` +
+          `  import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";`,
+      );
+    }
+  }
+} catch {
+  // Don't break the hook itself on filesystem errors.
+}
+
 // --- Output ---
 if (blockers.length > 0) {
   const output = {

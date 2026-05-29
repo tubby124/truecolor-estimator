@@ -6,6 +6,7 @@ import { BackToTop } from "@/components/site/BackToTop";
 import { AuthRedirect } from "@/components/site/AuthRedirect";
 import { UtmCapture } from "@/components/site/UtmCapture";
 import { MetaPixel } from "@/components/site/MetaPixel";
+import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 
 // Self-hosted Geist + Geist Mono variable WOFF2 files. Switched from
 // next/font/google because Railway builds were intermittently failing on
@@ -175,6 +176,17 @@ const localBusinessSchema = {
   image: "https://truecolorprinting.ca/truecolorlogo.png",
   paymentAccepted: "Cash, Credit Card, Debit, E-Transfer",
   currenciesAccepted: "CAD",
+  // Restored 2026-05-29 — aggregateRating was silently removed by commit
+  // 7ab5e48 (the May 25 disaster commit). REVIEW_COUNT + RATING_VALUE come
+  // from src/lib/reviews.ts. Stop hook Category G now blocks session end if
+  // this block disappears again. DO NOT REMOVE.
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: RATING_VALUE,
+    reviewCount: REVIEW_COUNT,
+    bestRating: "5",
+    worstRating: "1",
+  },
   knowsAbout: [
     "Coroplast signs",
     "Vinyl banner printing",
