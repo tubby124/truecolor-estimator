@@ -20,7 +20,7 @@
  * Per vault: Projects/true-color/2026-05-29-product-configurator-unification-wave1-plan.md
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { LineItem } from "@/lib/cart/cart";
