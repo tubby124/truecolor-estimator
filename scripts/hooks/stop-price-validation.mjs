@@ -12,9 +12,10 @@
  * Reminders are non-blocking (additionalContext). Only real failures block.
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, existsSync, statSync } from "fs";
 import { join } from "path";
 import { spawnSync } from "child_process";
+import { homedir } from "os";
 
 // --- Wrong-pattern definitions (mirrors post-edit-price-check.mjs) ---
 const WRONG_PATTERNS = [
@@ -231,6 +232,98 @@ if (ui.length > 0) {
     `UI COMPONENT CHANGES detected (${ui.length} file${ui.length > 1 ? "s" : ""}).`,
     `  Mandatory gate: /web-design-ux before shipping.`,
   );
+}
+
+// ========== CATEGORY F: Protected SEO page sprint-log gate ==========
+// If any staged page.tsx change targets a slug listed in seo-protected-pages.md,
+// require memory/seo-sprints.md to have been modified TODAY before allowing
+// session end. Forces the mandatory sprint log update from AGENTS.md.
+function getProtectedSlugs() {
+  const p = join(cwd, ".claude/rules/seo-protected-pages.md");
+  if (!existsSync(p)) return new Set();
+  const content = readFileSync(p, "utf8");
+  const lines = content.split("\n");
+  let inSection = false;
+  let dataStarted = false;
+  const slugs = new Set();
+  for (const line of lines) {
+    if (/^##\s+Protected pages/i.test(line)) {
+      inSection = true;
+      dataStarted = false;
+      continue;
+    }
+    if (inSection && /^##\s+/.test(line)) break;
+    if (!inSection) continue;
+    if (!line.startsWith("|")) continue;
+    if (/^\|\s*-+/.test(line)) {
+      dataStarted = true;
+      continue;
+    }
+    if (!dataStarted) continue;
+    const cells = line.split("|").map((s) => s.trim());
+    const slug = cells[1];
+    if (slug && /^[a-z0-9][a-z0-9-]+[a-z0-9]$/.test(slug)) slugs.add(slug);
+  }
+  return slugs;
+}
+
+const protectedSlugs = getProtectedSlugs();
+const protectedPagesTouched = pages.filter((f) => {
+  const m = f.match(/src\/app\/([a-z0-9-]+)\/page\.tsx$/);
+  return m && protectedSlugs.has(m[1]);
+});
+
+if (protectedPagesTouched.length > 0) {
+  const sprintLogPath = join(
+    homedir(),
+    ".claude/projects/-Users-owner-Downloads-TRUE-COLOR-PRICING-/memory/seo-sprints.md",
+  );
+  let touchedToday = false;
+  if (existsSync(sprintLogPath)) {
+    const mtime = statSync(sprintLogPath).mtime;
+    const now = new Date();
+    touchedToday =
+      mtime.getUTCFullYear() === now.getUTCFullYear() &&
+      mtime.getUTCMonth() === now.getUTCMonth() &&
+      mtime.getUTCDate() === now.getUTCDate();
+  }
+  if (!touchedToday) {
+    // Distinguish auto-comment touches from real phase entries by reading the file
+    let hasRealEntryToday = false;
+    if (existsSync(sprintLogPath)) {
+      try {
+        const content = readFileSync(sprintLogPath, "utf8");
+        const todayISO = new Date().toISOString().slice(0, 10);
+        const phaseRegex = new RegExp(
+          `^##\\s+SEO Phase[^\\n]*${todayISO}\\)`,
+          "m",
+        );
+        hasRealEntryToday = phaseRegex.test(content);
+      } catch {}
+    }
+    if (!hasRealEntryToday) {
+      blockers.push(
+        `[PROTECTED SEO PAGE TOUCHED BUT SPRINT LOG NOT UPDATED]\n` +
+          `Staged changes to protected page(s): ${protectedPagesTouched.join(", ")}\n` +
+          `\n` +
+          `memory/seo-sprints.md has no "## SEO Phase ... (${new Date()
+            .toISOString()
+            .slice(0, 10)})" entry today.\n` +
+          `Per AGENTS.md "SEO Sprint Log — NON-NEGOTIABLE RULE": append a phase entry\n` +
+          `before ending the session.\n` +
+          `\n` +
+          `Path: ${sprintLogPath}\n` +
+          `Format:\n` +
+          `  ## SEO Phase [N] — [Short Title] (${new Date()
+            .toISOString()
+            .slice(0, 10)})\n` +
+          `  - Files changed: ...\n` +
+          `  - What shipped: ...\n` +
+          `  - What was deferred/flagged: ...\n` +
+          `  - Next steps / trigger date: ...`,
+      );
+    }
+  }
 }
 
 // --- Output ---
