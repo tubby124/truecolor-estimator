@@ -44,6 +44,12 @@ next-env.d.ts
 # Pricing CSV backups
 data/tables/*.csv.bak
 
+# SEO wave-audit script output (scripts/seo-wave-audit.mjs)
+# Outputs to stdout; some runs redirect to memory/. Files are transient analysis,
+# not source. Vault copies live in Projects/true-color/SEO/.
+memory/seo-wave-audit-*.txt
+memory/seo-wave-audit-*.json
+
 # Editor directories
 .idea/
 .vscode/
