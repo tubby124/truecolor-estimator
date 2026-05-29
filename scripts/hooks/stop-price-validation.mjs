@@ -326,42 +326,114 @@ if (protectedPagesTouched.length > 0) {
   }
 }
 
-// --- Category G: aggregateRating presence in layout.tsx ---
+// --- Category G: required layout.tsx schemas must all be present ---
 //
 // Born from 2026-05-29 audit: commit 7ab5e48 silently removed aggregateRating
 // from layout.tsx on May 25 along with crashing 5 ranking pages. Nobody noticed
-// for 4 days because schema is invisible. This check fails session end if the
-// aggregateRating block is missing from layout.tsx so a future commit cannot
-// silently strip it again.
+// for 4 days because schema is invisible.
+//
+// Phase 41 (2026-05-29) locked aggregateRating + REVIEW_COUNT import.
+// Phase 45 (2026-05-29) extended this to lock the other 3 core schemas too —
+// Organization entity-graph properties, WebSite publisher link, LocalBusiness
+// geo + openingHours, and Person founder schema. Any of these going missing
+// in a future "schema cleanup" commit will now block session end with a
+// paste-ready restoration snippet.
 try {
   const layoutPath = "src/app/layout.tsx";
   if (existsSync(layoutPath)) {
     const layoutContent = readFileSync(layoutPath, "utf8");
+
+    // G.1 — aggregateRating + REVIEW_COUNT (Phase 41 original)
     const hasAggregateRating = /aggregateRating\s*:\s*{/.test(layoutContent);
     const hasReviewCountImport = /REVIEW_COUNT/.test(layoutContent);
     if (!hasAggregateRating) {
       blockers.push(
-        `[REQUIRED SCHEMA MISSING — aggregateRating block stripped from src/app/layout.tsx]\n` +
-          `The aggregateRating schema must exist in localBusinessSchema. Commit 7ab5e48 silently\n` +
-          `removed it on 2026-05-25 (the same disaster commit that crashed 5 ranking pages).\n` +
-          `Restoration shipped 2026-05-29. This hook now blocks session end if it disappears again.\n` +
-          `\n` +
-          `Restore by adding to localBusinessSchema (between currenciesAccepted and knowsAbout):\n` +
+        `[REQUIRED SCHEMA MISSING — aggregateRating stripped from layout.tsx]\n` +
+          `Restoration: in localBusinessSchema, add between currenciesAccepted and knowsAbout:\n` +
           `  aggregateRating: {\n` +
           `    "@type": "AggregateRating",\n` +
           `    ratingValue: RATING_VALUE,\n` +
           `    reviewCount: REVIEW_COUNT,\n` +
-          `    bestRating: "5",\n` +
-          `    worstRating: "1",\n` +
+          `    bestRating: "5", worstRating: "1",\n` +
           `  },\n` +
-          `\n` +
-          `Also confirm: import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";`,
+          `Also import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";`,
       );
     } else if (!hasReviewCountImport) {
       blockers.push(
-        `[REQUIRED IMPORT MISSING — REVIEW_COUNT not imported in src/app/layout.tsx]\n` +
-          `aggregateRating block uses REVIEW_COUNT but the import is missing. Add:\n` +
+        `[REQUIRED IMPORT MISSING — REVIEW_COUNT not imported in layout.tsx]\n` +
           `  import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";`,
+      );
+    }
+
+    // G.2 — Organization schema entity-graph properties (Wave 3a — branded query fix)
+    const orgBlockMatch = layoutContent.match(/const\s+organizationSchema\s*=\s*{[\s\S]*?};/);
+    if (orgBlockMatch) {
+      const orgBlock = orgBlockMatch[0];
+      const hasAlternateName = /alternateName\s*:/.test(orgBlock);
+      const hasLogo = /logo\s*:/.test(orgBlock);
+      const hasSameAs = /sameAs\s*:/.test(orgBlock);
+      if (!hasAlternateName || !hasLogo || !hasSameAs) {
+        blockers.push(
+          `[REQUIRED SCHEMA PROPERTIES MISSING — Organization entity graph in layout.tsx]\n` +
+            `organizationSchema must have alternateName (array), logo (ImageObject), sameAs (array).\n` +
+            `These power Knowledge Graph entity consolidation for branded queries — commit 18b0ce0\n` +
+            `restored these on 2026-04-27 after a similar regression. DO NOT REMOVE.\n` +
+            `Currently missing: ${[!hasAlternateName && "alternateName", !hasLogo && "logo", !hasSameAs && "sameAs"].filter(Boolean).join(", ")}`,
+        );
+      }
+    } else {
+      blockers.push(
+        `[REQUIRED SCHEMA MISSING — organizationSchema const not found in layout.tsx]\n` +
+          `The Organization schema is the parent of LocalBusiness + WebSite entity graph.\n` +
+          `Restore from commit 18b0ce0 if removed.`,
+      );
+    }
+
+    // G.3 — WebSite schema publisher link (entity graph integrity)
+    const hasWebsiteSchema = /const\s+websiteSchema\s*=\s*{/.test(layoutContent);
+    const websiteHasPublisher = /websiteSchema[\s\S]*?publisher\s*:\s*{\s*"@id"/.test(layoutContent);
+    if (hasWebsiteSchema && !websiteHasPublisher) {
+      blockers.push(
+        `[ENTITY GRAPH BROKEN — websiteSchema missing publisher link in layout.tsx]\n` +
+          `WebSite schema must link to Organization via:\n` +
+          `  publisher: { "@id": "https://truecolorprinting.ca/#organization" },\n` +
+          `Without this, Knowledge Graph cannot consolidate WebSite + Organization entity.`,
+      );
+    }
+
+    // G.4 — LocalBusiness NAP + hours (deception detection: bad NAP destroys local SEO)
+    const lbBlockMatch = layoutContent.match(/const\s+localBusinessSchema\s*=\s*{[\s\S]*?};/);
+    if (lbBlockMatch) {
+      const lbBlock = lbBlockMatch[0];
+      const hasGeo = /geo\s*:\s*{/.test(lbBlock);
+      const hasOpeningHours = /openingHoursSpecification/.test(lbBlock);
+      const hasAddress = /address\s*:\s*{/.test(lbBlock);
+      const hasPostalS7L0V1 = /S7L\s*0V1/.test(lbBlock);
+      if (!hasGeo || !hasOpeningHours || !hasAddress) {
+        blockers.push(
+          `[REQUIRED LOCAL SEO PROPERTIES MISSING — localBusinessSchema in layout.tsx]\n` +
+            `Required: geo (GeoCoordinates), openingHoursSpecification, address (PostalAddress).\n` +
+            `Currently missing: ${[!hasGeo && "geo", !hasOpeningHours && "openingHoursSpecification", !hasAddress && "address"].filter(Boolean).join(", ")}\n` +
+            `These are the structured NAP signal — removal destroys local pack visibility.`,
+        );
+      } else if (!hasPostalS7L0V1) {
+        blockers.push(
+          `[POSTAL CODE DRIFT — localBusinessSchema postal code is NOT S7L 0V1]\n` +
+            `Per memory.md and Wave business profile, authoritative postal code is "S7L 0V1".\n` +
+            `Historically miscoded as S7L 0V5/0V2/0P5/S7M 0R1/0W9. Confirm correct postal code.`,
+        );
+      }
+    }
+
+    // G.5 — Person founder schema (E-E-A-T entity link)
+    const hasFounderSchema = /const\s+founderSchema\s*=\s*{/.test(layoutContent);
+    const founderHasId = /founderSchema[\s\S]*?"@id"\s*:\s*"[^"]*#albert-yeung"/.test(layoutContent);
+    if (!hasFounderSchema || !founderHasId) {
+      blockers.push(
+        `[E-E-A-T SCHEMA MISSING — founderSchema (Person, #albert-yeung) in layout.tsx]\n` +
+          `Required Person schema for the founder, with @id "#albert-yeung", powers the\n` +
+          `E-E-A-T entity link from Organization/LocalBusiness founder properties. AI engines\n` +
+          `(ChatGPT, Perplexity) use this for authorship attribution. DO NOT REMOVE.`,
       );
     }
   }
