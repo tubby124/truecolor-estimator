@@ -24,45 +24,27 @@
 import type { Category } from "@/lib/data/types";
 import { getFlyerCatalog, type FlyerSku } from "./flyer-catalog";
 import { getProducts, getPricingRules } from "./loader";
+import {
+  STICKER_CONFIG,
+  type OptionChoice,
+  type OptionControl,
+  type ProductConfigShape,
+  type QtySnapResult,
+  snapQtyToTier,
+} from "./sticker-config";
 
-/** A single control rendered by a configurator UI. */
-export interface OptionControl {
-  key:
-    | "width_in"
-    | "height_in"
-    | "sides"
-    | "qty"
-    | "material_code"
-    | "finish"
-    | "design_status"
-    | "is_rush"
-    | "size_preset";
-  label: string;
-  kind: "number" | "select" | "toggle" | "chip" | "preset_grid";
-  required: boolean;
-  defaultValue?: string | number | boolean;
-  /** Valid choices for select/chip kinds. Empty if the control accepts any value. */
-  choices?: Array<{ value: string | number; label: string; help?: string }>;
-  /** Min / max bounds for number inputs. */
-  min?: number;
-  max?: number;
-  /** UI hint — display only. */
-  hint?: string;
-}
+// Re-export client-safe symbols so existing imports keep working. Anything
+// that touches CSVs (the full registry, FLYER, BUSINESS_CARD, sqft cats) must
+// stay in this file — that's why this file imports loader.ts and is therefore
+// SERVER-SIDE ONLY. Client code (UnifiedConfigurator) imports STICKER_CONFIG
+// directly from sticker-config.ts to keep the loader off the client bundle.
+export { snapQtyToTier };
+export type { OptionChoice, OptionControl, QtySnapResult };
 
-export interface ProductConfig {
-  category: Category;
-  label: string;
-  /** True when the category prices off (width × height × qty) — sqft tier. */
-  isSqftCategory: boolean;
-  /** True when the category prices off a fixed SKU list (flyers, business cards, etc.). */
-  isLotCategory: boolean;
-  /** Controls to render, in display order. */
-  controls: OptionControl[];
-  /** Fixed SKU list when `isLotCategory` is true. */
+/** ProductConfig extends the shared shape with `skus` for SKU-list lot
+ *  categories (flyers — see getFlyerCatalog). */
+export interface ProductConfig extends ProductConfigShape {
   skus?: FlyerSku[];
-  /** Whether this config is fully wired through to a UI today, or still skeleton. */
-  status: "live" | "skeleton";
 }
 
 const LABEL_BY_CATEGORY: Partial<Record<Category, string>> = {
@@ -229,9 +211,15 @@ function buildRegistry(): Partial<Record<Category, ProductConfig>> {
     };
   }
 
-  // Sqft categories — generic sqft controls (skeleton; UIs can migrate when ready)
+  // STICKER — live config sourced from the client-safe sticker-config.ts module
+  // so UnifiedConfigurator can import it without dragging the CSV loader into
+  // the client bundle. See header comment in sticker-config.ts for the rule.
+  r.STICKER = { ...STICKER_CONFIG };
+
+  // Sqft categories — generic sqft controls (skeleton; UIs can migrate when ready).
+  // STICKER is intentionally NOT in this list — it has its own custom config above.
   const sqftCats: Category[] = [
-    "BANNER", "RIGID", "SIGN", "STICKER", "DECAL", "MAGNET",
+    "BANNER", "RIGID", "SIGN", "DECAL", "MAGNET",
     "FOAMBOARD", "VINYL_LETTERING", "PHOTO_POSTER",
   ];
   for (const cat of sqftCats) {

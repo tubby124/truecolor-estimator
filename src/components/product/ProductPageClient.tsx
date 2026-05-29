@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { addToCart } from "@/lib/cart/cart";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductConfigurator, type PriceData, type ConfigData } from "@/components/product/ProductConfigurator";
+import { UnifiedConfigurator } from "@/components/product/UnifiedConfigurator";
 import { PriceSummary } from "@/components/product/PriceSummary";
 import { useToast, ToastContainer } from "@/components/ui";
 import type { ProductContent } from "@/lib/data/products-content";
@@ -11,6 +12,7 @@ import type { Category } from "@/lib/data/types";
 import { trackViewItem, trackAddToCart } from "@/lib/analytics";
 import { metaTrackViewContent, metaTrackAddToCart } from "@/lib/analytics/metaPixel";
 import { SameDayClock } from "@/components/home/SameDayClock";
+import { flags } from "@/lib/flags";
 
 // Friendly material labels shown in the customer proof
 const MATERIAL_LABELS: Record<string, string> = {
@@ -146,13 +148,27 @@ export function ProductPageClient({ product }: Props) {
           productName={product.name}
         />
 
-        {/* Col 2 — Options (white card) */}
+        {/* Col 2 — Options (white card). Wave 1: stickers behind public flag
+            mount the UnifiedConfigurator (reads from getProductConfig). All
+            other products + stickers when the flag is off keep the existing
+            ProductConfigurator. PriceSummary + Add to Cart sit outside, drive
+            by the same PriceData/ConfigData callbacks → no payment-path
+            changes either way. */}
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <ProductConfigurator
-            product={product}
-            onPriceChange={handlePriceChange}
-            onConfigChange={handleConfigChange}
-          />
+          {product.slug === "stickers" && flags.useProductConfigStickerPublic() ? (
+            <UnifiedConfigurator
+              category={product.category as Category}
+              mode="customer"
+              onPriceChange={handlePriceChange}
+              onConfigChange={handleConfigChange}
+            />
+          ) : (
+            <ProductConfigurator
+              product={product}
+              onPriceChange={handlePriceChange}
+              onConfigChange={handleConfigChange}
+            />
+          )}
         </div>
 
         {/* Col 3 — Sticky price panel (desktop only) */}

@@ -7,6 +7,7 @@ import { OptionsPanel } from "@/components/estimator/OptionsPanel";
 import { QuotePanel } from "@/components/estimator/QuotePanel";
 import { ProductProof } from "@/components/estimator/ProductProof";
 import { MultiQuoteCart } from "@/components/estimator/MultiQuoteCart";
+import { UnifiedConfigurator } from "@/components/product/UnifiedConfigurator";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { Addon } from "@/lib/data/types";
 import type { EstimateResponse } from "@/lib/engine/types";
@@ -15,6 +16,8 @@ import type { CartItem } from "@/lib/types/cart";
 import { LOGO_PATH } from "@/lib/config";
 import type { ProofImageState } from "@/components/estimator/ProductProof";
 import { computeTax } from "@/lib/pricing/tax";
+import { flags } from "@/lib/flags";
+import type { ConfigData } from "@/components/product/ProductConfigurator";
 
 interface EstimatorState {
   width_in: string;
@@ -103,8 +106,11 @@ export default function StaffPage() {
       ...DEFAULT_STATE,
       material_code: MATERIAL_MAP[cat] ?? "",
       qty: ["FLYER", "BUSINESS_CARD", "BROCHURE", "POSTCARD", "STICKER"].includes(cat) ? 250 : 1,
-      // Flyers, brochures, postcards are always double-sided — no 1S products exist in catalog
-      sides: ["FLYER", "BROCHURE", "POSTCARD"].includes(cat) ? 2 : DEFAULT_STATE.sides,
+      // Flyers/brochures/postcards: no 1S products in catalog → always 2S.
+      // BUSINESS_CARD: 2S is the common default + matches what the public product page defaults to
+      // (BC-14PT-250-2S=$45 vs 1S=$40). Before 2026-05-29 BC was missing from this list →
+      // staff defaulted to 1S and silently under-quoted BCs by $5/$15/$30 at 250/500/1000 qty.
+      sides: ["FLYER", "BROCHURE", "POSTCARD", "BUSINESS_CARD"].includes(cat) ? 2 : DEFAULT_STATE.sides,
       // Retractable banners are always 33.5" × 80" — pre-fill so proof renders immediately
       ...(cat === "DISPLAY" ? { width_in: "33.5", height_in: "80" } : {}),
     });
@@ -118,9 +124,17 @@ export default function StaffPage() {
     setState((prev) => ({ ...prev, ...updates }));
   }, []);
 
+  // Wave 1 — when STICKER is picked AND the staff flag is on, the
+  // UnifiedConfigurator owns the estimate flow (calls /api/estimate itself,
+  // emits the raw EstimateResponse via onResponse). Skip the parent effect to
+  // avoid double-fetching. Default (flag off) keeps the legacy estimate flow.
+  const useUnifiedStickerStaff =
+    category === "STICKER" && flags.useProductConfigStickerStaff();
+
   // Debounced estimate fetch
   useEffect(() => {
     if (!category) return;
+    if (useUnifiedStickerStaff) return; // UnifiedConfigurator drives this slice
 
     const w = parseFloat(state.width_in);
     const h = parseFloat(state.height_in);
@@ -166,7 +180,27 @@ export default function StaffPage() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [category, state, skipMinCharge]);
+  }, [category, state, skipMinCharge, useUnifiedStickerStaff]);
+
+  // UnifiedConfigurator handlers (only used when useUnifiedStickerStaff is true).
+  // Update parent state from ConfigData so ProductProof, MultiQuoteCart, and
+  // job-detail builders all see fresh values. Update result from the raw
+  // EstimateResponse so QuotePanel renders normally.
+  const handleUnifiedResponse = useCallback((response: EstimateResponse | null, loading: boolean) => {
+    setResult(response);
+    setLoading(loading);
+  }, []);
+  const handleUnifiedConfig = useCallback((config: ConfigData) => {
+    setState((prev) => ({
+      ...prev,
+      width_in: config.widthIn > 0 ? String(config.widthIn) : prev.width_in,
+      height_in: config.heightIn > 0 ? String(config.heightIn) : prev.height_in,
+      qty: config.qty,
+      sides: config.sides,
+      material_code: config.materialCode,
+      design_status: (config.designStatus as DesignStatus) ?? prev.design_status,
+    }));
+  }, []);
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -228,16 +262,28 @@ export default function StaffPage() {
         {/* Step 2: Options + Live Quote */}
         {step === "options" && category && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            {/* Left: Options */}
+            {/* Left: Options. Wave 1 — STICKER behind staff flag mounts the
+                UnifiedConfigurator (reads getProductConfig + owns estimate
+                fetch). All other categories + STICKER when the flag is off
+                use the legacy OptionsPanel. */}
             <div className="bg-white border border-[var(--border)] rounded-2xl p-6">
               <h2 className="text-sm font-semibold text-[var(--muted)] uppercase tracking-widest mb-5">
                 Job Details
               </h2>
-              <OptionsPanel
-                category={category}
-                state={state}
-                onChange={handleStateChange}
-              />
+              {useUnifiedStickerStaff ? (
+                <UnifiedConfigurator
+                  category="STICKER"
+                  mode="staff"
+                  onResponse={handleUnifiedResponse}
+                  onConfigChange={handleUnifiedConfig}
+                />
+              ) : (
+                <OptionsPanel
+                  category={category}
+                  state={state}
+                  onChange={handleStateChange}
+                />
+              )}
             </div>
 
             {/* Right: Proof + Live Quote */}
