@@ -95,6 +95,11 @@ export function UnifiedConfigurator({
   );
   const [isRush, setIsRush] = useState<boolean>(prefilled?.isRush ?? false);
   const [manualOverride, setManualOverride] = useState<string>("");
+  // STICKER-specific V2 inputs — only rendered when sticker V2 is active.
+  // Material chip drives engine material_code (white/clear/perf). Shape chip
+  // drives engine.shape (circle = +80%, die_cut = no premium per V2 data).
+  const [stickerMaterial, setStickerMaterial] = useState<"ARLPMF7008" | "ARLPMF7008_CLEAR" | "RMVN006">("ARLPMF7008");
+  const [stickerShape, setStickerShape] = useState<"square" | "circle" | "die_cut">("square");
   // priceData ONLY tracks fetched results. The "no inputs → empty" case is
   // a derived render-time computation below (avoids set-state-in-effect).
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
@@ -103,16 +108,22 @@ export function UnifiedConfigurator({
   const isCustom = selectedSize?.custom === true;
   const effectiveW = isCustom ? parseFloat(customW) || 0 : selectedSize?.width_in ?? 0;
   const effectiveH = isCustom ? parseFloat(customH) || 0 : selectedSize?.height_in ?? 0;
-  const effectiveMaterial = selectedSize?.material_code ?? "";
+  // When V2 is on and category is STICKER, the material chip overrides the
+  // preset's material_code (presets use the existing PLACEHOLDER_STICKER_*
+  // family for size routing, but V2 needs to know vinyl_white vs vinyl_clear
+  // vs perf_8mil — so the chip wins).
+  const v2Active = category === "STICKER" && flags.useStickerPricingV2();
+  const effectiveMaterial = v2Active
+    ? stickerMaterial
+    : selectedSize?.material_code ?? "";
 
   // Qty snap — UI rounds UP to nearest tier when requested qty isn't on a tier.
   // The engine's legacy lot rules use qty_min===qty_max so off-tier qty returns
   // BLOCKED. When STICKER_PRICING_V2 is on, the V2 model accepts ANY qty
   // (continuous tier-based pricing), so we skip the snap behavior entirely.
   const requestedQty = parseInt(qtyInput, 10) || 0;
-  const stickerV2Active = category === "STICKER" && flags.useStickerPricingV2();
   const snap =
-    stickerV2Active || !cfg?.qty_snap_to_tier || !cfg.qty_tiers || requestedQty <= 0
+    v2Active || !cfg?.qty_snap_to_tier || !cfg.qty_tiers || requestedQty <= 0
       ? { snapped: false, from: requestedQty, to: requestedQty, exceeded_max: false }
       : snapQtyToTier(requestedQty, cfg.qty_tiers);
   const effectiveQty = snap.to;
