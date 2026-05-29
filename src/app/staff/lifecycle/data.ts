@@ -675,8 +675,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
         id: o.id, order_number: o.order_number ?? "", customer_name: customerName,
         status: o.status ?? "—", payment_method: "—", total: totalNum, age_hours: ageHours,
         category: "no_wave_invoice",
-        diagnosis: "Order is paid but has no Wave invoice. Wave API likely failed at order creation.",
-        remediation: "Open Wave dashboard → create invoice manually for this customer + amount. Then link the wave_invoice_id to this order in staff portal.",
+        diagnosis: "Order is paid but has no bookkeeping invoice — accounting API likely failed at order creation.",
+        remediation: "Open accounting dashboard → create invoice manually for this customer + amount. Then link the invoice ID to this order in staff portal.",
       });
     }
     if (o.wave_invoice_id && o.wave_invoice_approved_at && !o.wave_payment_recorded_at && isPaid) {
@@ -684,8 +684,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
         id: o.id, order_number: o.order_number ?? "", customer_name: customerName,
         status: o.status ?? "—", payment_method: "—", total: totalNum, age_hours: ageHours,
         category: "half_recorded",
-        diagnosis: "Wave invoice approved but payment never recorded. Customer's tax invoice shows UNPAID (2026-05-22 bug class).",
-        remediation: "Open Wave invoice → record payment manually for the captured amount. Then re-check 'wave_payment_recorded_at' is set.",
+        diagnosis: "Invoice approved but payment never recorded. Customer's tax invoice shows UNPAID (2026-05-22 bug class).",
+        remediation: "Open invoice in accounting dashboard → record payment manually for the captured amount. Then re-check the payment is reconciled.",
       });
     }
     // Inconsistent invoice id vs number
@@ -694,8 +694,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
         id: o.id, order_number: o.order_number ?? "", customer_name: customerName,
         status: o.status ?? "—", payment_method: "—", total: totalNum, age_hours: ageHours,
         category: "invoice_number_hole",
-        diagnosis: "wave_invoice_id / wave_invoice_number mismatch — one is set without the other.",
-        remediation: "Verify Wave invoice exists; backfill the missing column from the Wave API.",
+        diagnosis: "Bookkeeping invoice ID / number mismatch — one is set without the other.",
+        remediation: "Verify invoice exists in the accounting dashboard; backfill the missing column from the accounting API.",
       });
     }
   }
@@ -980,7 +980,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     };
   };
   const webhookGroups: WebhookSourceGroup[] = [
-    buildGroup("wave", "Wave"),
+    buildGroup("wave", "Bookkeeping"),
     buildGroup("clover", "Clover"),
   ];
 

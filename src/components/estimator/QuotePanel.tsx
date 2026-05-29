@@ -549,7 +549,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
       {/* Wave line name */}
       {!isCustomerMode && !isBlocked && result.wave_line_name && (
         <div className="bg-white border border-[var(--border)] rounded-xl px-4 py-3">
-          <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-widest mb-1.5">Wave Invoice Line</p>
+          <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-widest mb-1.5">Invoice Line Item</p>
           <div className="flex items-center gap-2">
             <p className="text-sm font-mono flex-1 text-gray-700">{result.wave_line_name}</p>
             <CopyButton text={result.wave_line_name} />

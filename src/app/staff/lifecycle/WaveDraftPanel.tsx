@@ -34,7 +34,7 @@ export function WaveDraftPanel({ rows }: { rows: WaveDraftRow[] }) {
     return (
       <section className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Wave bookkeeping</h2>
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Bookkeeping</h2>
           <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">all paid orders reconciled</span>
         </div>
       </section>
@@ -47,7 +47,7 @@ export function WaveDraftPanel({ rows }: { rows: WaveDraftRow[] }) {
   return (
     <section className="mb-6">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Wave bookkeeping — needs attention</h2>
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Bookkeeping — needs attention</h2>
         <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded ring-1 ring-amber-200">
           {missing.length > 0 ? `${missing.length} missing · ` : ""}{drafts.length > 0 ? `${drafts.length} unapproved` : ""}
         </span>
@@ -59,7 +59,7 @@ export function WaveDraftPanel({ rows }: { rows: WaveDraftRow[] }) {
               <th className="px-3 py-2 text-left font-semibold">Order</th>
               <th className="px-3 py-2 text-left font-semibold">Customer</th>
               <th className="px-3 py-2 text-right font-semibold">Total</th>
-              <th className="px-3 py-2 text-left font-semibold">Wave state</th>
+              <th className="px-3 py-2 text-left font-semibold">Status</th>
               <th className="px-3 py-2 text-left font-semibold">Action</th>
               <th className="px-3 py-2 text-right font-semibold">Paid age</th>
             </tr>
@@ -74,7 +74,7 @@ export function WaveDraftPanel({ rows }: { rows: WaveDraftRow[] }) {
                 <td className="px-3 py-2 text-right font-mono text-xs text-gray-800">${r.total.toFixed(2)}</td>
                 <td className="px-3 py-2 text-xs">
                   {r.reason === "missing_invoice" ? (
-                    <span className="text-red-700 font-semibold">No Wave invoice</span>
+                    <span className="text-red-700 font-semibold">No invoice on file</span>
                   ) : (
                     <>
                       <span className="font-mono text-amber-700">#{r.wave_invoice_number ?? "?"}</span>
@@ -84,8 +84,8 @@ export function WaveDraftPanel({ rows }: { rows: WaveDraftRow[] }) {
                 </td>
                 <td className="px-3 py-2 text-xs text-gray-700">
                   {r.reason === "missing_invoice"
-                    ? "Create Wave invoice manually in Wave dashboard"
-                    : "Open Wave invoice → Approve → Record payment"}
+                    ? "Create invoice manually in accounting dashboard"
+                    : "Open invoice → Approve → Record payment"}
                 </td>
                 <td className="px-3 py-2 text-right font-mono text-xs text-amber-700 font-semibold">{fmtAge(r.paid_age_hours)}</td>
               </tr>

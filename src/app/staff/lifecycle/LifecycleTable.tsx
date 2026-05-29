@@ -118,8 +118,8 @@ export function LifecycleTable({ rows }: { rows: LifecycleRow[] }) {
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <SummaryCard label="Orders (7d)" value={totals.orders} tone="neutral" />
         <SummaryCard label="Stuck" value={totals.stuck} tone={totals.stuck > 0 ? "bad" : "good"} />
-        <SummaryCard label="Wave drafted" value={`${totals.wave_drafted}/${totals.orders}`} tone={totals.wave_drafted === totals.orders ? "good" : "warn"} />
-        <SummaryCard label="Wave paid" value={totals.wave_paid} tone="neutral" />
+        <SummaryCard label="Bookkept" value={`${totals.wave_drafted}/${totals.orders}`} tone={totals.wave_drafted === totals.orders ? "good" : "warn"} />
+        <SummaryCard label="Reconciled" value={totals.wave_paid} tone="neutral" />
         <SummaryCard label="No confirm email" value={totals.confirm_missing} tone={totals.confirm_missing > 0 ? "warn" : "good"} />
         <SummaryCard label="No staff notif" value={totals.staff_notif_missing} tone={totals.staff_notif_missing > 0 ? "warn" : "good"} />
       </div>
@@ -133,8 +133,8 @@ export function LifecycleTable({ rows }: { rows: LifecycleRow[] }) {
               <th className="px-3 py-2 text-left font-semibold">Customer</th>
               <th className="px-3 py-2 text-left font-semibold">Status</th>
               <th className="px-3 py-2 text-right font-semibold">Total</th>
-              <th className="px-3 py-2 text-center font-semibold" title="Wave draft created">W-Draft</th>
-              <th className="px-3 py-2 text-center font-semibold" title="Wave payment recorded">W-Paid</th>
+              <th className="px-3 py-2 text-center font-semibold" title="Bookkeeping draft created">Bk</th>
+              <th className="px-3 py-2 text-center font-semibold" title="Bookkeeping payment recorded">Bk✓</th>
               <th className="px-3 py-2 text-center font-semibold" title="Customer order confirmation email">Confirm</th>
               <th className="px-3 py-2 text-center font-semibold" title="Pay Now link delivered to customer (Payment Request / Your Quote / Complete your payment)">Pay Link</th>
               <th className="px-3 py-2 text-center font-semibold" title="Receipt email sent">Receipt</th>
@@ -163,8 +163,8 @@ export function LifecycleTable({ rows }: { rows: LifecycleRow[] }) {
                   </td>
                   <td className="px-3 py-2">{statusBadge(r.status, r.stuck_pending_payment)}</td>
                   <td className="px-3 py-2 text-right font-mono text-xs text-gray-700">{fmtCurrency(r.total)}</td>
-                  <td className="px-3 py-2 text-center"><Pip ok={!!r.wave_invoice_id} label="Wave draft" muted={!waveExpected} /></td>
-                  <td className="px-3 py-2 text-center"><Pip ok={r.wave_paid} label="Wave paid" muted={!waveExpected || r.status === "pending_payment"} /></td>
+                  <td className="px-3 py-2 text-center"><Pip ok={!!r.wave_invoice_id} label="Bookkeeping draft" muted={!waveExpected} /></td>
+                  <td className="px-3 py-2 text-center"><Pip ok={r.wave_paid} label="Bookkeeping paid" muted={!waveExpected || r.status === "pending_payment"} /></td>
                   <td className="px-3 py-2 text-center"><Pip ok={r.emails.customer_confirm} label="Customer confirm" /></td>
                   <td className="px-3 py-2 text-center"><Pip ok={r.emails.pay_link} label="Pay link" muted={r.payment_method === "etransfer"} /></td>
                   <td className="px-3 py-2 text-center"><Pip ok={r.emails.receipt} label="Receipt" muted={!receiptExpected} /></td>

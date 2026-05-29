@@ -86,7 +86,7 @@ export function OrphanPanel({ orphans }: { orphans: Orphan[] }) {
                 <td className="px-3 py-2 font-mono text-xs text-gray-800 whitespace-nowrap">
                   <Link href={`/staff/orders?focus=${o.id}`} className="text-blue-700 hover:underline">{o.order_number}</Link>
                   {o.wave_invoice_number && (
-                    <div className="text-[10px] text-gray-400 mt-0.5">Wave #{o.wave_invoice_number}</div>
+                    <div className="text-[10px] text-gray-400 mt-0.5">Inv #{o.wave_invoice_number}</div>
                   )}
                 </td>
                 <td className="px-3 py-2">

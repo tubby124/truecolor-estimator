@@ -50,8 +50,8 @@ export interface ActivityEvent {
 const TYPE_LABELS: Record<ActivityType, { label: string; tone: string; actor: ActivityEvent["actor"] }> = {
   signup:           { label: "Signed up",       tone: "bg-cyan-100 text-cyan-800",     actor: "customer" },
   order_placed:     { label: "Order placed",    tone: "bg-emerald-100 text-emerald-800", actor: "customer" },
-  wave_approved:    { label: "Wave approved",   tone: "bg-amber-100 text-amber-800",   actor: "staff"    },
-  wave_approve_failed: { label: "Wave approve FAILED", tone: "bg-red-100 text-red-800",  actor: "system"   },
+  wave_approved:    { label: "Invoice approved",   tone: "bg-amber-100 text-amber-800",   actor: "staff"    },
+  wave_approve_failed: { label: "Invoice approve FAILED", tone: "bg-red-100 text-red-800",  actor: "system"   },
   payment_recorded: { label: "Payment captured", tone: "bg-blue-100 text-blue-800",    actor: "system"   },
   proof_sent:       { label: "Proof sent",      tone: "bg-purple-100 text-purple-800", actor: "staff"    },
   quote_received:   { label: "Quote received",  tone: "bg-emerald-50 text-emerald-700", actor: "customer" },

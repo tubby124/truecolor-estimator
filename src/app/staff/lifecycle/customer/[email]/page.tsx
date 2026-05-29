@@ -151,8 +151,8 @@ export default async function CustomerDrilldownPage({ params }: Props) {
     });
     if (o.wave_invoice_approved_at) timeline.push({
       at: o.wave_invoice_approved_at, source: "order", type: "wave_approved",
-      label: "Wave invoice approved",
-      detail: `Wave #${o.wave_invoice_number ?? "?"}`,
+      label: "Invoice approved",
+      detail: `Inv #${o.wave_invoice_number ?? "?"}`,
       order_number: o.order_number ?? null, order_id: o.id,
     });
     if (o.wave_payment_recorded_at) timeline.push({

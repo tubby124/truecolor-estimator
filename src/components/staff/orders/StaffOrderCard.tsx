@@ -273,7 +273,7 @@ export function StaffOrderCard({
               {customer?.email}
               {customer?.phone ? ` · ${customer.phone}` : ""}
               {" · "}
-              {order.payment_method === "clover_card" ? "Card" : order.payment_method === "wave" ? "Wave Invoice" : "e-Transfer"}
+              {order.payment_method === "clover_card" ? "Card" : order.payment_method === "wave" ? "Invoice" : "e-Transfer"}
               {" · $"}
               {Number(order.total).toFixed(2)} CAD
               {" · "}
@@ -425,7 +425,7 @@ export function StaffOrderCard({
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Payment</p>
               <p className="text-sm text-gray-700">
-                {order.payment_method === "clover_card" ? "Credit card" : order.payment_method === "wave" ? "Wave Invoice" : "Interac e-Transfer"}
+                {order.payment_method === "clover_card" ? "Credit card" : order.payment_method === "wave" ? "Invoice" : "Interac e-Transfer"}
               </p>
             </div>
           </div>
@@ -517,16 +517,16 @@ export function StaffOrderCard({
             </div>
           </div>
 
-          {/* Wave Accounting status */}
+          {/* Bookkeeping status */}
           {order.wave_invoice_id && (
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                Wave Accounting
+                Bookkeeping
               </p>
               <div className="flex flex-wrap gap-2 items-center">
                 {order.wave_invoice_number && (
                   <span className="text-xs bg-gray-100 text-gray-700 border border-gray-200 px-2 py-0.5 rounded-full font-mono">
-                    Wave #{order.wave_invoice_number}
+                    Inv #{order.wave_invoice_number}
                   </span>
                 )}
                 <a
@@ -535,7 +535,7 @@ export function StaffOrderCard({
                   rel="noopener noreferrer"
                   className="text-xs text-[#16C2F3] hover:underline font-semibold"
                 >
-                  Open Wave →
+                  Open invoice →
                 </a>
                 {order.wave_invoice_approved_at ? (
                   <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">

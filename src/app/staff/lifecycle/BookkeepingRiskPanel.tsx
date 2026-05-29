@@ -36,8 +36,8 @@ export interface BookkeepingRiskRow {
 }
 
 const CATEGORY_LABEL: Record<BookkeepingRiskCategory, { label: string; tone: string; severity: number }> = {
-  no_wave_invoice:     { label: "No Wave invoice",       tone: "bg-red-100 text-red-800",       severity: 1 },
-  half_recorded:       { label: "Wave half-recorded",    tone: "bg-red-100 text-red-800",       severity: 1 },
+  no_wave_invoice:     { label: "No invoice",            tone: "bg-red-100 text-red-800",       severity: 1 },
+  half_recorded:       { label: "Payment half-recorded", tone: "bg-red-100 text-red-800",       severity: 1 },
   null_payment_ref:    { label: "NULL payment_reference", tone: "bg-amber-100 text-amber-800", severity: 2 },
   invoice_number_hole: { label: "Invoice number hole",    tone: "bg-amber-100 text-amber-800", severity: 3 },
   sla_violation:       { label: "Pending > 72h",         tone: "bg-amber-100 text-amber-800",  severity: 2 },
