@@ -23,20 +23,21 @@ const PRICING_VERSION = "v1_2026-02-19";
 
 /** Translate engine material_code → V2 material classifier.
  *  ARLPMF7008 + all PLACEHOLDER_STICKER_* = vinyl_white (3mil vinyl).
- *  RMVN006 = perf_8mil (perforated window vinyl, 8mil).
+ *  ARLPMF7008_CLEAR = vinyl_clear (clear-background variant, 1.44× premium).
+ *  RMVN006 = perf_8mil (perforated window vinyl, 8mil — flat sqft rate).
  *  Anything else → default to vinyl_white. */
 function v2Material(materialCode: string | undefined): StickerMaterial {
   if (!materialCode) return "vinyl_white";
   if (materialCode === "RMVN006") return "perf_8mil";
+  if (materialCode === "ARLPMF7008_CLEAR") return "vinyl_clear";
   if (materialCode === "ARLPMF7008") return "vinyl_white";
   if (materialCode.startsWith("PLACEHOLDER_STICKER_")) return "vinyl_white";
   return "vinyl_white";
 }
 
-/** Engine doesn't expose shape today; default to "square". Future: pass shape
- *  via EstimateRequest.finish or a new field. */
-function v2Shape(_req: EstimateRequest): StickerShape {
-  return "square";
+/** Sticker shape — passed through from EstimateRequest. Default "square". */
+function v2Shape(req: EstimateRequest): StickerShape {
+  return req.shape ?? "square";
 }
 
 /** Engine doesn't expose finish; default to gloss (matches Albert's data —

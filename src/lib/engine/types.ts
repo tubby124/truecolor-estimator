@@ -13,6 +13,9 @@ export interface EstimateRequest {
   design_status?: DesignStatus;
   pricing_version?: string;
   skip_min_charge?: boolean;
+  /** Sticker-specific (V2 model): cut shape — affects circle/die-cut multipliers.
+   *  Defaults to "square" if not provided. Ignored by non-STICKER categories. */
+  shape?: "square" | "circle" | "die_cut";
 }
 
 export interface LineItem {
