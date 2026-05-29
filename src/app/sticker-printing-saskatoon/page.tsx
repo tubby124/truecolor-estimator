@@ -119,6 +119,9 @@ export default function StickerPrintingSaskatoonPage() {
             Saskatoon — no shipping delays.
           </p>
           <p className="text-gray-600 leading-relaxed">
+            <strong>What does &quot;custom stickers near me&quot; mean at True Color in Saskatoon?</strong> It means die-cut vinyl stickers printed in-house at 216 33rd St W on a Roland UV press — 100 stickers for $160, 250 for $325, 500 for $475 on the default 4×4&quot; size. Every order is true die-cut: contour-cut around your custom shape (not just kiss-cut on a sheet), printed on durable waterproof vinyl, with no edge cracking through Saskatchewan winters. Looking for <strong>custom labels near me</strong> for jars, candles, cosmetics, growler tags, or freezer-rated packaging across Saskatchewan? Same Roland UV process, same pricing tier — the die-cut path is built around your label outline and proofed same-day before any vinyl gets cut. Same-day rush is +$40 flat (order before 10 AM); standard turnaround is 1–3 business days. In-house designer $35 flat with same-day proof.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
             Looking for <strong>die cut stickers near me</strong> in Saskatoon? Every sticker
             we print is true die-cut — kiss-cut sheets, contour-cut around your logo, or
             individual shaped stickers separated to your spec. The die-cut path is built
@@ -164,40 +167,52 @@ export default function StickerPrintingSaskatoonPage() {
       ]}
       faqs={[
         {
-          q: "How much does sticker printing cost in Saskatoon?",
-          a: "Die-cut vinyl stickers are priced at 100 for $160, 250 for $325, and 500 for $475. Default size is 4×4\". Custom sizes and shapes are available — contact us for a quote. All stickers are full-colour UV print on waterproof vinyl.",
+          q: "Where can I get custom stickers near me in Saskatoon?",
+          a: "True Color Display Printing at 216 33rd St W, Saskatoon — full-colour custom stickers from 100 for $160, 250 for $325, 500 for $475 on waterproof die-cut vinyl. Every order is printed in-house on our Roland UV press, so the colour you see in the proof is the colour you pick up. Same-day rush available for +$40 flat when ordered before 10 AM.",
         },
         {
-          q: "What's the minimum sticker order at True Color?",
-          a: "The minimum order is 25 stickers — starting from $25 (2×2\" die-cut) or $60 (4×4\" die-cut). Most customers find 100 at $160 to be the best entry point — the per-unit cost drops significantly and you have enough for a launch campaign or product run.",
-        },
-        {
-          q: "Are your stickers waterproof and durable outdoors?",
-          a: "Yes — we print on durable waterproof vinyl using our in-house Roland UV printer. The UV-cured ink is scratch-resistant and holds up in outdoor conditions, including Saskatchewan winters. Die-cut edges are clean with no ink bleeding. Suitable for vehicles, outdoor equipment, water bottles, and packaging.",
-        },
-        {
-          q: "Can you print stickers in a custom shape — not just square?",
-          a: "Yes — die-cut means we cut to any shape you provide. Common shapes include circles, ovals, rounded rectangles, and custom logo outlines. Our in-house designer ($35 flat) can prepare your die-cut path if you don't have a vector file ready.",
-        },
-        {
-          q: "Can I get stickers same-day in Saskatoon?",
-          a: "Yes — same-day production is available for a +$40 flat rush fee when ordered before 10 AM. Call (306) 954-8688 to confirm material and capacity. Standard turnaround without rush is 1–3 business days after artwork approval.",
-        },
-        {
-          q: "Do you do product labels for packaging in Saskatoon?",
-          a: "Yes — our die-cut vinyl stickers work well as product labels for jars, bottles, boxes, and bags. For food packaging, verify with your product's requirements (our stickers are not food-safe certified). We print in any shape and size with full-colour Roland UV output. 250 labels for $325 is a common run for small product launches.",
+          q: "Where can I get custom labels near me in Saskatchewan?",
+          a: "We print custom die-cut labels in Saskatoon for Saskatchewan small businesses — candle jars, cosmetics, food packaging, growlers, freezer products, beauty bottles. Standard run is 100 labels for $160 or 250 for $325 on waterproof Roland UV vinyl. Bring the container dimensions and our in-house designer ($35 flat) builds the cut line around the finished piece — same-day proof, 1–3 business day production.",
         },
         {
           q: "Where can I get die cut stickers near me in Saskatoon?",
-          a: "True Color Display Printing at 216 33rd St W, Saskatoon. Every sticker order is true die-cut — contour cut around your shape on the same Roland UV that printed it, no outsourcing. Pricing is 100 for $160, 250 for $325, 500 for $475. Local pickup only (no shipping). Same-day rush available for +$40 flat when ordered before 10 AM. Call (306) 954-8688 to start an order.",
+          a: "True Color at 216 33rd St W, Saskatoon prints true die-cut stickers — cut along your logo or custom shape on the same Roland UV that printed them, no outsourcing. Standard pricing is 100 for $160, 250 for $325, 500 for $475 with the 4×4\" default size. Custom shapes and sizes quoted on request, same-day rush available for +$40 flat.",
         },
         {
-          q: "Do you make custom die cut labels near me for product packaging?",
-          a: "Yes — die-cut labels for jars, bottles, boxes, growler tags, and product packaging are one of our most-ordered sticker types. Pricing is the same as standard stickers (100 for $160, 250 for $325, 500 for $475) and the die-cut path is built from your label outline. Bring your label dimensions and brand assets, and our in-house designer ($35 flat, same-day proof) prepares the file. Most label runs are picked up within 1–3 business days from artwork approval.",
+          q: "Do you make custom die cut stickers near me for laptops, water bottles, and vehicles?",
+          a: "Yes — die-cut vinyl stickers from $160 / 100 hold up on laptops, water bottles, helmets, vehicle panels, and outdoor signage. Our Roland UV ink is scratch-resistant and waterproof, no edge cracking through Saskatchewan winters. For larger vehicle branding, see our vehicle magnets from $24/sqft and window decals from $11/sqft — all printed in the same Saskatoon shop.",
         },
         {
-          q: "What is the difference between die-cut stickers and die-cut labels?",
-          a: "Die-cut stickers are usually ordered for giveaways, laptops, water bottles, vehicles, and brand promos. Die-cut labels use the same print-and-cut process but are sized for packaging — jars, bottles, bags, boxes, and product containers. Both are printed on waterproof vinyl, both can follow a custom shape, and both are picked up locally at 216 33rd St W in Saskatoon.",
+          q: "Do you make custom die cut labels near me for product packaging in Saskatchewan?",
+          a: "Yes — die-cut labels for jars, bottles, growler tags, freezer products, and cosmetic packaging are one of our most-ordered sticker types. Pricing matches standard stickers: 100 labels for $160, 250 for $325, 500 for $475. Bring your label dimensions and our in-house designer ($35 flat) prepares the file with a same-day proof — pickup at 216 33rd St W in 1–3 business days.",
+        },
+        {
+          q: "What's the difference between die-cut and kiss-cut stickers?",
+          a: "Die-cut stickers are cut all the way through both the vinyl and the backing — each sticker comes out as a separate piece in your custom shape. Kiss-cut stickers cut only the vinyl, leaving the backing intact so multiple stickers stay on one sheet. True Color prints true die-cut as standard — every sticker contour-cut around your shape. Pricing is the same either way: 100 for $160, 250 for $325.",
+        },
+        {
+          q: "How much do custom die-cut stickers cost in Saskatoon?",
+          a: "Standard die-cut vinyl stickers are 100 for $160, 250 for $325, and 500 for $475 on the default 4×4\" size. Smaller 2×2\" start from $45 / 100 and larger 8×8\" run $640 / 100. The 4×4\" per-unit drops from $1.60 at 100 to $0.65 at 1,000. Full price grid lives on the instant calculator at /products/stickers.",
+        },
+        {
+          q: "Are your stickers waterproof and rated for Saskatchewan winters?",
+          a: "Yes — Roland UV-cured ink on durable vinyl is waterproof, scratch-resistant, and tested through Saskatchewan freeze-thaw cycles without cracking, fading, or peeling at die-cut edges. Suitable for outdoor signage, vehicle panels, water bottles, dishwashers (top-rack), and freezer packaging. Add a matte or gloss laminate on request for extra abrasion resistance.",
+        },
+        {
+          q: "What's the minimum sticker order at True Color?",
+          a: "25 stickers is our minimum, starting at $25 for 25× 2×2\" die-cut or $60 for 25× 4×4\". Most customers find 100 at $160 the best entry point — per-unit cost drops to $1.60 vs $2.40 at the 25-piece minimum. A $25 order-total minimum applies at checkout on the very smallest carts.",
+        },
+        {
+          q: "Can you print stickers in custom shapes — circles, ovals, logo outlines?",
+          a: "Yes — die-cut means contour-cut to any shape: circles, ovals, rounded rectangles, custom logo outlines, growler tags, candle-jar wraps, any vector silhouette. If you have an Illustrator or PDF file with the cut path, we use it as-is. No file? Our in-house designer prepares the die-cut path for $35 flat with a same-day proof.",
+        },
+        {
+          q: "Can I get same-day stickers in Saskatoon?",
+          a: "Yes — same-day production for +$40 flat when ordered before 10 AM. Call (306) 954-8688 to confirm material capacity for your quantity. Most same-day orders are ready for pickup by 4–5 PM at 216 33rd St W. Standard turnaround without rush is 1–3 business days after artwork approval.",
+        },
+        {
+          q: "What file format do I need for custom die-cut stickers?",
+          a: "We accept PDF, AI, EPS (vector preferred), or PNG/JPG at 300 dpi minimum at the print size. Vector files let us pull a clean die-cut path directly from your shape. If your file is a low-res phone photo or Word doc, our in-house designer rebuilds it print-ready for $35 flat with a same-day proof — no surprise charges.",
         },
       ]}
     />

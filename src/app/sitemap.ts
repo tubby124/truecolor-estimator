@@ -63,7 +63,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/retail-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/window-decals-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/window-perf-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/sticker-printing-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/sticker-printing-saskatoon`, lastModified: new Date("2026-05-29"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/school-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     // /trade-contractor-signs-saskatoon removed 2026-05-05 → 301 to /construction-signs-saskatoon
 
