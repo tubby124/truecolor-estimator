@@ -42,6 +42,14 @@ export interface RollupInputs {
   reconcileDetail: string | null;
   /** Days since `.claude/rules/seo-protected-pages.md` was last refreshed. */
   seoProtectedPagesStaleDays: number | null;
+  /**
+   * Percent divergence between GSC clicks and GA4 organic sessions over the
+   * last stable 7-day window (max(a,b)-min(a,b))/max(a,b)*100. Null when one
+   * or both sides have zero data (e.g. ga4-sync hasn't backfilled yet).
+   * Fires YELLOW above 50% — meaningful divergence means one of the two
+   * ingestion pipes is silently broken, even if both heartbeats are green.
+   */
+  gscVsGa4DivergencePct: number | null;
 }
 
 const SEV1_CATEGORIES = new Set(["no_wave_invoice", "half_recorded"]);
@@ -102,7 +110,10 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
   // dashboard only, no Telegram. Result: nobody noticed for 16 days while
   // ranking pages decayed. External-API auth failures are not transient; if
   // half the runs fail in 24h, the auth is dead and needs hands-on rotation.
-  const CRITICAL_EXTERNAL_CRONS = new Set(["gsc-sync"]);
+  // ga4-sync joins the critical set as defense-in-depth — if it dies the same
+  // way gsc-sync did (auth expiry, quota), we need to see RED before another
+  // 16-day silent window. Both pipes are now on the same fail-loud contract.
+  const CRITICAL_EXTERNAL_CRONS = new Set(["gsc-sync", "ga4-sync"]);
   const CRITICAL_FAIL_THRESHOLD = 0.5;
 
   for (const h of inputs.heartbeats) {
@@ -153,6 +164,22 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
         label: `seo-protected-pages.md ${inputs.seoProtectedPagesStaleDays}d old (28d cadence)`,
       });
     }
+  }
+
+  // ── GSC vs GA4 organic-traffic divergence (Phase 9d defense-in-depth) ─────
+  //
+  // Both heartbeats can be green (cron returns 200) while one pipe is silently
+  // returning stale or partial data — GSC OAuth refresh-token expiry returned
+  // empty result sets without an HTTP error for the first few hours of the
+  // May 2026 outage. Cross-checking the two pulls against each other catches
+  // that class of failure: GSC clicks (organic) and GA4 organic-search sessions
+  // are not identical metrics but should track within ~50% on any healthy site.
+  if (inputs.gscVsGa4DivergencePct !== null && inputs.gscVsGa4DivergencePct > 50) {
+    yellows.push({
+      key: "seo:gsc-vs-ga4-divergence",
+      panel: "panel-cron-heartbeats",
+      label: `GSC clicks vs GA4 organic sessions ${inputs.gscVsGa4DivergencePct}% divergent (7d) — one pipe may be silently broken`,
+    });
   }
 
   // ── Wave drafts (24h) ─────────────────────────────────────────────────────

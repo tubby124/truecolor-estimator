@@ -60,6 +60,7 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "aging-orders",           maxAgeHours: 26 },  // daily 09:00 MT
   { name: "keepalive",              maxAgeHours: 26 },  // daily 12:00 UTC
   { name: "gsc-sync",               maxAgeHours: 26 },  // daily
+  { name: "ga4-sync",               maxAgeHours: 26 },  // daily — Phase 9d defense-in-depth alongside gsc-sync
   { name: "dashboard-alerts",       maxAgeHours: 2  },  // hourly Telegram push layer
   { name: "wave-poll",              maxAgeHours: 7  },  // every 6h — backfills Wave state changes the webhook missed
 ];
@@ -1029,6 +1030,48 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       .map((r) => ({ to_address: r.to_address, sent_at: r.sent_at }))
   );
 
+  // ── GSC vs GA4 organic-traffic divergence (Phase 9d) ─────────────────────
+  // Compare summed clicks/sessions over a stable 7-day window. The window
+  // ends 2 days back to dodge GSC's 2-3 day ingestion lag and GA4's <48h lag.
+  // Wrapped in try/catch so a missing analytics_ga4_snapshots table (migration
+  // not yet applied) doesn't break the whole rollup.
+  const divEnd = new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const divStart = new Date(now - 9 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const { data: gscClicksRaw } = await supabase
+    .from("seo_gsc_snapshots")
+    .select("clicks")
+    .gte("snapshot_date", divStart)
+    .lte("snapshot_date", divEnd);
+  const gscClicks7d = (gscClicksRaw ?? []).reduce(
+    (s, r) => s + (Number((r as { clicks: number | null }).clicks) || 0),
+    0,
+  );
+  let ga4Sessions7d = 0;
+  let ga4HasData = false;
+  try {
+    const { data: ga4Raw, error: ga4Err } = await supabase
+      .from("analytics_ga4_snapshots")
+      .select("sessions")
+      .gte("snapshot_date", divStart)
+      .lte("snapshot_date", divEnd);
+    if (!ga4Err && ga4Raw && ga4Raw.length > 0) {
+      ga4Sessions7d = ga4Raw.reduce(
+        (s, r) => s + (Number((r as { sessions: number | null }).sessions) || 0),
+        0,
+      );
+      ga4HasData = true;
+    }
+  } catch {
+    // Table not yet migrated — leave divergence null so the rollup signal
+    // stays silent until both pipes are live.
+  }
+  let gscVsGa4DivergencePct: number | null = null;
+  if (gscClicks7d > 0 && ga4HasData && ga4Sessions7d > 0) {
+    const max = Math.max(gscClicks7d, ga4Sessions7d);
+    const diff = Math.abs(gscClicks7d - ga4Sessions7d);
+    gscVsGa4DivergencePct = Math.round((diff / max) * 100);
+  }
+
   // ── derive status rollup ─────────────────────────────────────────────────
   // Pure function — single source of truth shared with /api/cron/dashboard-alerts.
   // Adding a new silent-fail surface = ONE registration in buildRollup; both
@@ -1041,6 +1084,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     orphans,
     reconcileDetail: latestByName.get("reconcile-payments")?.detail ?? null,
     seoProtectedPagesStaleDays: getSeoProtectedPagesStaleDays(),
+    gscVsGa4DivergencePct,
   });
 
   return {
