@@ -4,9 +4,9 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Banner Printing Saskatoon | From $8.25/sqft | True Color" },
+  title: { absolute: "Vinyl Banner Printing Saskatoon | $8.25/sqft | True Color" },
   description:
-    "Vinyl banner printing in Saskatoon from $8.25/sqft. Any size, grommets included. Events, storefronts, trade shows. Same-day rush +$40. 216 33rd St W.",
+    "Custom vinyl banner printing in Saskatoon from $8.25/sqft. 13oz scrim, grommets included, any size. 2×6 ft banner $90. Same-day rush +$40 flat.",
   alternates: { canonical: "/banner-printing-saskatoon" },
   openGraph: {
     title: "Banner Printing Saskatoon | True Color Display Printing",
