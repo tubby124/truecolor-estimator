@@ -20,7 +20,7 @@
  * Per vault: Projects/true-color/2026-05-29-product-configurator-unification-wave1-plan.md
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { LineItem } from "@/lib/cart/cart";
@@ -64,29 +64,28 @@ export function UnifiedConfigurator({
   // Wave 1 — client bundle only knows about STICKER. Other categories are
   // promoted in subsequent waves; until then the component renders a fallback
   // (the flag-gating at the mount site already prevents this branch from
-  // firing for non-STICKER categories).
-  const cfg: ProductConfigShape | null = useMemo(
-    () => (category === "STICKER" ? STICKER_CONFIG : null),
-    [category],
-  );
+  // firing for non-STICKER categories). React Compiler auto-memoizes these
+  // direct derivations — no manual useMemo wrappers needed (and they trip
+  // react-hooks/preserve-manual-memoization on dep mismatch).
+  const cfg: ProductConfigShape | null = category === "STICKER" ? STICKER_CONFIG : null;
+  const sizeControl = cfg?.controls.find((c) => c.key === "size_preset");
+  const sizeChoices: OptionChoice[] = sizeControl?.choices ?? [];
 
-  const sizeControl = useMemo(() => cfg?.controls.find((c) => c.key === "size_preset"), [cfg]);
-  const sizeChoices = useMemo(() => sizeControl?.choices ?? [], [sizeControl]);
-
-  const initialChoice = useMemo<OptionChoice | null>(() => {
+  // useState lazy initializer — runs once on mount, no need to memoize. Picks
+  // the prefilled-material choice if any, else the configured default, else
+  // the first non-custom choice in the list.
+  const [selectedSize, setSelectedSize] = useState<OptionChoice | null>(() => {
     if (prefilled?.materialCode && sizeChoices.length > 0) {
       const match = sizeChoices.find((c) => c.material_code === prefilled.materialCode);
       if (match) return match;
     }
-    const defaultValue = sizeControl?.defaultValue;
-    if (defaultValue !== undefined) {
-      const match = sizeChoices.find((c) => c.value === defaultValue);
+    const dv = sizeControl?.defaultValue;
+    if (dv !== undefined) {
+      const match = sizeChoices.find((c) => c.value === dv);
       if (match) return match;
     }
     return defaultChoice(sizeChoices);
-  }, [sizeChoices, sizeControl, prefilled?.materialCode]);
-
-  const [selectedSize, setSelectedSize] = useState<OptionChoice | null>(initialChoice);
+  });
   const [customW, setCustomW] = useState<string>(String(prefilled?.widthIn ?? 4));
   const [customH, setCustomH] = useState<string>(String(prefilled?.heightIn ?? 4));
   const [qtyInput, setQtyInput] = useState<string>(String(prefilled?.qty ?? 100));
@@ -95,6 +94,8 @@ export function UnifiedConfigurator({
   );
   const [isRush, setIsRush] = useState<boolean>(prefilled?.isRush ?? false);
   const [manualOverride, setManualOverride] = useState<string>("");
+  // priceData ONLY tracks fetched results. The "no inputs → empty" case is
+  // a derived render-time computation below (avoids set-state-in-effect).
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
 
   // Derived effective inputs — preset choice's W/H/material unless Custom is picked.
@@ -105,26 +106,29 @@ export function UnifiedConfigurator({
 
   // Qty snap — UI rounds UP to nearest tier when requested qty isn't on a tier.
   // The engine's lot rules use qty_min===qty_max so off-tier qty returns BLOCKED.
+  // Direct computation — React Compiler memoizes automatically.
   const requestedQty = parseInt(qtyInput, 10) || 0;
-  const snap = useMemo(() => {
-    if (!cfg?.qty_snap_to_tier || !cfg.qty_tiers || requestedQty <= 0) {
-      return { snapped: false, from: requestedQty, to: requestedQty, exceeded_max: false };
-    }
-    return snapQtyToTier(requestedQty, cfg.qty_tiers);
-  }, [cfg?.qty_snap_to_tier, cfg?.qty_tiers, requestedQty]);
+  const snap =
+    !cfg?.qty_snap_to_tier || !cfg.qty_tiers || requestedQty <= 0
+      ? { snapped: false, from: requestedQty, to: requestedQty, exceeded_max: false }
+      : snapQtyToTier(requestedQty, cfg.qty_tiers);
   const effectiveQty = snap.to;
+  const inputsValid = effectiveW > 0 && effectiveH > 0 && effectiveQty > 0 && !!effectiveMaterial;
+  // Render-time derivation — when inputs aren't valid yet, show empty data
+  // without invoking setState in an effect.
+  const emittedPriceData: PriceData = inputsValid ? priceData : EMPTY_PRICE;
 
   const sides: 1 | 2 = 1; // Wave 1: stickers are sides=1 only (owner decision 2026-05-29).
 
   // Debounced engine call — same shape as staff page + ProductConfigurator.
+  // The "empty/invalid inputs" case is handled via render-time derivation
+  // (emittedPriceData above) so we don't sync-setState inside this effect.
   useEffect(() => {
-    if (!effectiveW || !effectiveH || effectiveQty <= 0 || !effectiveMaterial) {
-      setPriceData(EMPTY_PRICE);
+    if (!inputsValid) {
       onResponse?.(null, false);
       return;
     }
     let cancelled = false;
-    setPriceData((prev) => ({ ...prev, loading: true }));
     onResponse?.(null, true);
     const timer = setTimeout(async () => {
       try {
