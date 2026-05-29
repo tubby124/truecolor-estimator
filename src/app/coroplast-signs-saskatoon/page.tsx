@@ -111,6 +111,39 @@ export default function CoroplastSignsSaskatoonPage() {
             for corner lots. Any custom size up to 4×8 ft — use the pricing calculator on the
             product page to get your exact price in 30 seconds.
           </p>
+          <p className="text-gray-600 leading-relaxed">
+            What coroplast actually is, and why it works in Saskatchewan: 4mm corrugated polypropylene
+            fluted board — two skins separated by an internal flute structure that gives the sheet
+            rigidity without weight. We print directly to the surface on our in-house Roland UV
+            press, where the ink is UV-cured the instant it lands on the substrate. No lamination
+            layer to bubble or peel. The Roland UV process produces a scratch-resistant, waterproof,
+            freeze-rated print that handles Saskatchewan winters without cracking at the flute edges
+            and survives a prairie summer of direct sun without fading. Standard 2–3 year outdoor
+            lifespan with proper installation; longer if stored indoors between deployments.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Saskatoon-specific demand patterns we see most: real estate listing season (March
+            through September) drives weekly orders of 18×24″ yard signs at $24 each — most agents
+            keep a stock of 5–10 signs at a time, hitting the 5+ bulk tier (8% off). Election cycles
+            (provincial spring, municipal fall) trigger 200–500 sign campaigns where the 25+ tier
+            (23% off) makes the per-sign cost drop below $20. Construction hoardings — 4×8 ft
+            panels at $232 each — go up for the duration of a project, where coroplast&apos;s
+            2–3 year life span matches the build timeline exactly. Job site safety and trade
+            company signage, event directional signs for venues like SaskTel Centre or Prairieland
+            Park, and corner-lot political campaigns all run on the same substrate at the same
+            tier rates.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            When to choose coroplast vs ACP aluminum: coroplast wins on cost ($8/sqft vs $13/sqft)
+            and on temporary applications where signs come down within 1–3 years — real estate,
+            events, election campaigns, seasonal promos, construction projects. ACP wins on
+            permanence and finish — building entrance signs, parking lot regulations, multi-year
+            commercial leasing campaigns, anything mounted to a wall with standoff brackets that
+            needs to still look sharp in a decade. For a 24×36″ sign, coroplast is $48 and ACP is
+            $78 — a $30 premium for ~7× the outdoor lifespan. We print both substrates in-house on
+            the same Roland UV press; the choice is about how long the sign needs to stay up, not
+            about quality.
+          </p>
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
