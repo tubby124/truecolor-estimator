@@ -4,7 +4,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Flyer Printing Saskatoon — 100 Flyers $45, Same-Day Available" },
+  title: { absolute: "Flyer Printing Saskatoon — 100 for $45, Same-Day Rush" },
   description:
     "Saskatoon flyer printing from $45/100, double-sided 80lb gloss. 250 for $110, 500 for $135, 1,000 for $185. Same-day rush available. Local pickup, no shipping.",
   alternates: { canonical: "/flyer-printing-saskatoon" },
