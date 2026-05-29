@@ -40,6 +40,8 @@ export interface RollupInputs {
   orphans: Orphan[];
   /** Latest reconcile-payments cron_runs.detail string (e.g. "3 issues, 1 recovered, 2 unverified"). */
   reconcileDetail: string | null;
+  /** Days since `.claude/rules/seo-protected-pages.md` was last refreshed. */
+  seoProtectedPagesStaleDays: number | null;
 }
 
 const SEV1_CATEGORIES = new Set(["no_wave_invoice", "half_recorded"]);
@@ -126,6 +128,29 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
         key: `cron:${h.name}:errors`,
         panel: "panel-cron-heartbeats",
         label: `${h.name}: ${Math.round(h.error_rate_24h * 100)}% error rate (24h)`,
+      });
+    }
+  }
+
+  // ── SEO protected-pages doc staleness ─────────────────────────────────────
+  //
+  // The May 2026 ranking decay went unnoticed for 60 days because the doc
+  // said positions that no longer existed. The PostToolUse seo-cooldown-check
+  // hook catches this at EDIT time, but only when somebody is editing — a
+  // truly silent window (no SEO work for 35+ days) wouldn't trip it. This
+  // daily rollup signal fires regardless of edit activity.
+  if (inputs.seoProtectedPagesStaleDays !== null) {
+    if (inputs.seoProtectedPagesStaleDays > 35) {
+      reds.push({
+        key: "seo:protected-pages:stale",
+        panel: "panel-cron-heartbeats",
+        label: `seo-protected-pages.md stale ${inputs.seoProtectedPagesStaleDays}d (>35d threshold)`,
+      });
+    } else if (inputs.seoProtectedPagesStaleDays > 28) {
+      yellows.push({
+        key: "seo:protected-pages:approaching-stale",
+        panel: "panel-cron-heartbeats",
+        label: `seo-protected-pages.md ${inputs.seoProtectedPagesStaleDays}d old (28d cadence)`,
       });
     }
   }

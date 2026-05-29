@@ -33,6 +33,8 @@ import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
 import { buildEmailVolumeSnapshot, type EmailVolumeSnapshot } from "./EmailVolumePanel";
 import type { StaffAction } from "./StaffActionsPanel";
 import { buildRollup, type StatusRollup } from "@/lib/lifecycle/rollup";
+import { readFileSync, existsSync, statSync } from "fs";
+import { join } from "path";
 
 const WINDOW_DAYS = 7;
 const STUCK_PENDING_PAYMENT_HOURS = 24;
@@ -1038,6 +1040,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     waveDrafts,
     orphans,
     reconcileDetail: latestByName.get("reconcile-payments")?.detail ?? null,
+    seoProtectedPagesStaleDays: getSeoProtectedPagesStaleDays(),
   });
 
   return {
@@ -1067,6 +1070,23 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     rollup,
     fetched_at: new Date(now).toISOString(),
   };
+}
+
+function getSeoProtectedPagesStaleDays(): number | null {
+  const docPath = join(process.cwd(), ".claude/rules/seo-protected-pages.md");
+  if (!existsSync(docPath)) return null;
+  try {
+    const content = readFileSync(docPath, "utf8");
+    const m = content.match(/Last refreshed:\s*(\d{4}-\d{2}-\d{2})/);
+    if (m) {
+      const refDate = new Date(`${m[1]}T00:00:00Z`);
+      return Math.floor((Date.now() - refDate.getTime()) / 86_400_000);
+    }
+    const mtime = statSync(docPath).mtime.getTime();
+    return Math.floor((Date.now() - mtime) / 86_400_000);
+  } catch {
+    return null;
+  }
 }
 
 async function fetchRefundsPending(
