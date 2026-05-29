@@ -148,7 +148,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // ── SK city pages — Sprint C (2026-03-05) ─────────────────────────────────
     { url: `${BASE_URL}/signs-north-battleford-sk`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.75 },
-    { url: `${BASE_URL}/signs-yorkton-sk`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.75 },
+    { url: `${BASE_URL}/signs-yorkton-sk`, lastModified: new Date("2026-05-29"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/printing-estevan-sk`, lastModified: new Date("2026-05-20"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/printing-weyburn-sk`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.75 },
 

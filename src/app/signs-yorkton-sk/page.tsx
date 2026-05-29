@@ -4,9 +4,9 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { CITY_HUB_PAGES } from "@/lib/data/cities";
 
 export const metadata: Metadata = {
-  title: { absolute: "Signs Yorkton SK | Coroplast & Banners | True Color" },
+  title: { absolute: "Yorkton SK Signs & Printing — Banners $66, Coroplast $8/sqft" },
   description:
-    "Custom signs for Yorkton SK businesses. Vehicle magnets from $24/sqft, vinyl banners from $8.25/sqft, coroplast from $8/sqft. Printed in Saskatoon — shipped to Yorkton.",
+    "Yorkton SK sign printing — 2×4 ft banner $66, coroplast $8/sqft, magnets $24/sqft. Printed in Saskatoon, shipped to Yorkton. 3–5 business days.",
   alternates: { canonical: "/signs-yorkton-sk" },
   openGraph: {
     title: "Signs Yorkton SK | True Color Display Printing",
