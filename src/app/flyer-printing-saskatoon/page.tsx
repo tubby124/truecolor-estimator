@@ -102,6 +102,29 @@ export default function FlyerPrintingSaskatoonPage() {
             standard quantities — select your paper weight in the estimator.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
+            Flyers print on our in-house Konica Minolta C7090 digital press — the right tool for
+            paper products where colour accuracy and per-sheet cost both matter. If your campaign
+            also needs outdoor signage (event banners, yard signs, retractable stands), those run
+            on our{" "}
+            <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
+              Roland UV
+            </Link>{" "}
+            wide-format press in the same building — same colour profile, same shop, one pickup.
+            Saskatoon restaurants ordering menu flyers often add coroplast A-frame signs for the
+            sidewalk; real estate teams bundle open-house flyers with{" "}
+            <Link href="/real-estate-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
+              yard signs
+            </Link>{" "}
+            and{" "}
+            <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
+              business cards
+            </Link>
+            ; community groups pair event flyers with vinyl banners for the venue. Bundling under
+            one order keeps the artwork consistent, the proof cycle synchronized, and the pickup
+            single-trip. The Konica press is calibrated weekly to match our Roland output so when
+            you hand a flyer next to a sign next to a business card, they all match.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
             Custom sizes (half-letter 5.5×8.5&quot;, legal 8.5×14&quot;, or fully custom dimensions)
             are available on request. Use the estimator to price letter-size runs; for other sizes
             call (306) 954-8688 or{" "}
