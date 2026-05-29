@@ -334,6 +334,18 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                 </p>
               </div>
 
+              <!-- e-Transfer alternative -->
+              <div style="background: #fdfaf5; border: 1px solid #e8dcc4; border-radius: 10px; padding: 16px 18px; margin-bottom: 24px;">
+                <p style="margin: 0 0 6px; font-size: 13px; font-weight: 600; color: #1c1712; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Prefer Interac e-Transfer?
+                </p>
+                <p style="margin: 0; font-size: 13px; color: #4a3728; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  Send <strong>$${total.toFixed(2)} CAD</strong> to
+                  <a href="mailto:info@true-color.ca" style="color: #0369a1; text-decoration: none; font-weight: 600;">info@true-color.ca</a>
+                  and put <strong>${escHtml(orderNumber)}</strong> in the message. We&rsquo;ll confirm receipt and start production within 1 business day.
+                </p>
+              </div>
+
               <!-- Pickup info -->
               <div style="background: #faf7f4; border: 1px solid #e6ddd5; border-radius: 10px; padding: 14px 18px;">
                 <p style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #1c1712; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
@@ -398,6 +410,13 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
         paymentUrl,
       ];
 
+  const etransferBlock = [
+    ``,
+    `--- PREFER E-TRANSFER? ---`,
+    `Send $${total.toFixed(2)} CAD to info@true-color.ca and put ${orderNumber} in the message.`,
+    `We'll confirm receipt and start production within 1 business day.`,
+  ];
+
   return [
     `Hi ${contact.name},`,
     "",
@@ -416,6 +435,7 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     `  TOTAL:    $${total.toFixed(2)} CAD`,
     "",
     ...ctaBlock,
+    ...etransferBlock,
     "",
     `Reference: ${orderNumber}`,
     "",
