@@ -1,6 +1,58 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
+
+const designDirections = [
+  {
+    title: "ACP Building Applications",
+    subtitle:
+      "From $13/sqft · 3mm aluminum composite · 10-year outdoor rating · Roland UV print",
+    aspect: "4/3" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/industries/sign-company/acp-storefront.webp",
+        alt: "ACP aluminum storefront wall sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Storefront Wall Sign",
+        caption: "24×36\" — $78",
+      },
+      {
+        src: "/images/industries/sign-company/acp-office-directory.webp",
+        alt: "ACP aluminum office directory sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Office Directory",
+        caption: "Custom size — from $13/sqft",
+      },
+      {
+        src: "/images/industries/sign-company/acp-hoarding.webp",
+        alt: "Construction hoarding ACP panel printed in Saskatoon — True Color Display Printing, Saskatoon SK",
+        label: "Construction Hoarding",
+        caption: "4×8 ft — $320",
+      },
+    ],
+  },
+  {
+    title: "Aluminum Sign Examples",
+    subtitle:
+      "Roland UV printed directly on 3mm ACP panel · vivid colour · no lamination peel",
+    aspect: "4/3" as const,
+    maxCols: 2 as const,
+    items: [
+      {
+        src: "/images/products/product/acp-sign-brick-wall-800x600.webp",
+        alt: "Custom ACP aluminum sign mounted on brick wall in Saskatoon — True Color Display Printing",
+        label: "Brick-Wall Mount",
+        caption: "Standoff bracket install — quote on request",
+      },
+      {
+        src: "/images/products/product/acp-sign-princess-liquidation-800x600.webp",
+        alt: "ACP aluminum signage for Princess Liquidation Savings Center — full-colour Roland UV print, Saskatoon",
+        label: "Retail Storefront",
+        caption: "Custom design + print + cut",
+      },
+    ],
+  },
+];
 
 export const metadata: Metadata = {
   title: { absolute: "Saskatoon ACP Signs | $13/sqft, 10-Year Building Signs" },
@@ -54,6 +106,7 @@ export default function AluminumSignsSaskatoonPage() {
             start at $8/sqft and offer a 2–3 year outdoor lifespan. Pickup at 216 33rd St W,
             Saskatoon — same-day rush available (+$40 flat).
           </p>
+          <DesignDirectionGrid sections={designDirections} />
         </>
       }
       products={[
@@ -94,6 +147,14 @@ export default function AluminumSignsSaskatoonPage() {
         {
           q: "What file format do I need for aluminum signs?",
           a: "PDF or JPG at 150 dpi minimum. Vector files (AI, EPS) are preferred for logos and text-heavy designs. Our in-house designer can clean up or recreate artwork — usually $35–$50 depending on complexity.",
+        },
+        {
+          q: "What's the difference between 1-sided and 2-sided ACP aluminum signs?",
+          a: "1-sided ACP is printed full-colour on one face only — the back is bare aluminum, suited for wall-mounted signs where only one side is visible. 2-sided ACP prints both faces (each at +$6/sqft over the 1-sided tier) — used for freestanding signs, post-mounted directories, and any application where both sides need to be read. A 24×36″ panel is $78 single-sided or $114 double-sided. ACP doesn't warp or bend, so both finishes look sharp for 10+ years outdoors.",
+        },
+        {
+          q: "How do I mount ACP aluminum signs to a building?",
+          a: "Most ACP signs mount with standoff brackets (4 corners, drilled through the panel) or industrial VHB tape for smaller indoor panels. For brick or concrete exteriors, masonry anchors with stainless brackets. We don't install — you'll work with a local sign installer or your facilities team. ACP is rigid and won't crack at the bracket points, so installation is straightforward. Tell us your mount method when ordering so we can position the file correctly.",
         },
       ]}
     />
