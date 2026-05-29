@@ -1372,8 +1372,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                         <p className="text-sm font-semibold text-gray-800">Clover Pay Now</p>
                         <p className="text-[11px] text-gray-600 leading-snug mt-0.5">
                           {form.quote_only
-                            ? "Customer gets a quote email with a Clover Pay Now button — they can pay to confirm or reply with changes. A Wave invoice is created in the background for your books."
-                            : "Customer gets a branded invoice email with a Clover Pay Now button. A Wave invoice is auto-created for your books and marked paid by the Clover webhook on capture."}
+                            ? "Customer gets a quote email with a Clover Pay Now button (e-Transfer to info@true-color.ca shown as fallback). They can pay to confirm or reply with changes. Your books are updated automatically when payment is confirmed."
+                            : "Customer gets a branded invoice email with a Clover Pay Now button (e-Transfer to info@true-color.ca shown as fallback). Your books are updated automatically the moment Clover confirms payment."}
                         </p>
                       </div>
                     </div>
