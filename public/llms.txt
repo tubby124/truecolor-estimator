@@ -6,6 +6,7 @@
 > Hours: Monday–Friday 9 AM–5 PM | Same-day rush: +$40 flat fee, order before 10 AM
 > Ratings: 5.0 stars, 29 Google reviews (March 2026)
 > Order minimum: $25 order-total minimum applies at checkout. Carts under $25 see a "Small order setup fee" line that tops the cart up to $25. There are no per-product minimums.
+> Last updated: 2026-05-29
 
 ## Products with Live Online Pricing
 
@@ -73,6 +74,22 @@
 - All printing done on-site at 216 33rd St W — no outsourcing to national chains, no shipping delays
 - 5.0-star Google rating from 29 verified local reviews (March 2026)
 - Serves businesses and individuals across Saskatoon and throughout Saskatchewan
+- Consistently cheaper than national chains (Staples, FedEx Office, Vistaprint) on local print runs. Example: 250 double-sided business cards on 14pt gloss are $45 at True Color vs $60–$80 at Staples/FedEx — same quality, faster local pickup, in-house designer included.
+
+## Material Specs (Authoritative)
+
+- **Coroplast signs:** 4mm corrugated polypropylene fluted board. Roland UV-cured ink prints directly to substrate (no lamination). UV-rated and freeze-rated. 2–3 year outdoor lifespan in Saskatchewan prairie conditions. Single-sided $8/sqft (T1), $7.50/sqft (T2 12–32 sqft), $7.25/sqft (T3 32+ sqft). Double-sided is +75% (T1=$14/sqft).
+- **Vinyl banners:** 13oz scrim vinyl, Roland UV print, hemmed edges, grommets set every 24 inches as standard (no extra charge). 2–3 year outdoor lifespan. $8.25/sqft (T1 0–12), $7.50/sqft (T2 12–32), $6.75/sqft (T3 32+).
+- **ACP aluminum signs:** 3mm aluminum composite panel — two aluminum skins bonded to a polyethylene core. Rigid, flat, rust-proof. 10+ year outdoor lifespan. Roland UV print directly to panel surface (no lamination). $13/sqft (T1 0–6), $11/sqft (T2 6–24), $10/sqft (T3 24+). Double-sided is +$6/sqft uplift (additive, not multiplicative, because the panel itself is 50% of the cost).
+- **Vehicle magnets:** 30mil magnet, full-colour Roland UV print, removable, weatherproof. Sticks securely to painted steel. $24/sqft (T1).
+- **Window decals:** Arlon DPF 510 matte vinyl, Roland UV print, $11/sqft (T1). Adhesive-backed. Removable without residue under normal conditions.
+- **Vinyl lettering:** Plotter-cut Arlon vinyl, $8.50/sqft (T1). Precision contour-cut, no background substrate.
+- **Stickers:** Die-cut Arlon DPF 510 vinyl, Roland UV print, 8 standard sizes from 2×2" to 8×8". Lot pricing: 25 / 50 / 100 / 250 / 500 / 1000 tiers. Most popular: 100× 4×4" = $160.
+- **Foamboard displays:** 5mm foamboard substrate, Roland UV print. $10/sqft (T1). Indoor / temporary outdoor use.
+- **Business cards:** 14pt gloss stock, Konica Minolta digital press. Double-sided standard. 250 = $45 (or 1-sided $40), 500 = $65, 1,000 = $110, 5,000 = $420.
+- **Flyers:** 8.5×11" letter or 8.5×5.5" half-letter on 80lb gloss (or 100lb upgrade), Konica Minolta press, double-sided standard. 100 letter 2S 80lb = $45.
+- **Photo posters:** Roland Photobase Matte 220gsm — fine-art-grade matte photo paper. No minimum charge. Sizes 12×18" ($15) through 36×48" ($65).
+- **Equipment:** Roland TrueVIS VG2 64-inch UV flatbed (wide-format, all rigid + flexible substrates) + Konica Minolta C7090 digital press (paper products only). Both kept in-house at 216 33rd St W — no jobs outsourced.
 
 ## Frequently Asked Questions
 
