@@ -95,6 +95,11 @@ export function UnifiedConfigurator({
   );
   const [isRush, setIsRush] = useState<boolean>(prefilled?.isRush ?? false);
   const [manualOverride, setManualOverride] = useState<string>("");
+  // STICKER-specific V2 inputs — only rendered when sticker V2 is active.
+  // Material chip drives engine material_code (white/clear/perf). Shape chip
+  // drives engine.shape (circle = +80%, die_cut = no premium per V2 data).
+  const [stickerMaterial, setStickerMaterial] = useState<"ARLPMF7008" | "ARLPMF7008_CLEAR" | "RMVN006">("ARLPMF7008");
+  const [stickerShape, setStickerShape] = useState<"square" | "circle" | "die_cut">("square");
   // priceData ONLY tracks fetched results. The "no inputs → empty" case is
   // a derived render-time computation below (avoids set-state-in-effect).
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
@@ -103,16 +108,22 @@ export function UnifiedConfigurator({
   const isCustom = selectedSize?.custom === true;
   const effectiveW = isCustom ? parseFloat(customW) || 0 : selectedSize?.width_in ?? 0;
   const effectiveH = isCustom ? parseFloat(customH) || 0 : selectedSize?.height_in ?? 0;
-  const effectiveMaterial = selectedSize?.material_code ?? "";
+  // When V2 is on and category is STICKER, the material chip overrides the
+  // preset's material_code (presets use the existing PLACEHOLDER_STICKER_*
+  // family for size routing, but V2 needs to know vinyl_white vs vinyl_clear
+  // vs perf_8mil — so the chip wins).
+  const v2Active = category === "STICKER" && flags.useStickerPricingV2();
+  const effectiveMaterial = v2Active
+    ? stickerMaterial
+    : selectedSize?.material_code ?? "";
 
   // Qty snap — UI rounds UP to nearest tier when requested qty isn't on a tier.
   // The engine's legacy lot rules use qty_min===qty_max so off-tier qty returns
   // BLOCKED. When STICKER_PRICING_V2 is on, the V2 model accepts ANY qty
   // (continuous tier-based pricing), so we skip the snap behavior entirely.
   const requestedQty = parseInt(qtyInput, 10) || 0;
-  const stickerV2Active = category === "STICKER" && flags.useStickerPricingV2();
   const snap =
-    stickerV2Active || !cfg?.qty_snap_to_tier || !cfg.qty_tiers || requestedQty <= 0
+    v2Active || !cfg?.qty_snap_to_tier || !cfg.qty_tiers || requestedQty <= 0
       ? { snapped: false, from: requestedQty, to: requestedQty, exceeded_max: false }
       : snapQtyToTier(requestedQty, cfg.qty_tiers);
   const effectiveQty = snap.to;
@@ -148,6 +159,8 @@ export function UnifiedConfigurator({
             design_status: designStatus,
             is_rush: isRush,
             pricing_version: "v1_2026-02-19",
+            // Sticker V2: pass shape so engine can apply circle/die_cut math.
+            ...(v2Active ? { shape: stickerShape } : {}),
           }),
         });
         if (!res.ok) {
@@ -198,7 +211,7 @@ export function UnifiedConfigurator({
     return () => { cancelled = true; clearTimeout(timer); };
   }, [
     inputsValid, category, effectiveMaterial, effectiveW, effectiveH, effectiveQty,
-    designStatus, isRush, onResponse,
+    designStatus, isRush, onResponse, v2Active, stickerShape,
   ]);
 
   // Emit callbacks on every meaningful state change so parent can drive cart /
@@ -236,6 +249,72 @@ export function UnifiedConfigurator({
 
   return (
     <div className="space-y-6">
+      {/* STICKER V2 — Material chip (white vinyl / clear vinyl / perforated 8mil) */}
+      {v2Active && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Material</p>
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Material">
+            {([
+              { value: "ARLPMF7008",       label: "White vinyl",   sub: "3mil · standard" },
+              { value: "ARLPMF7008_CLEAR", label: "Clear vinyl",   sub: "3mil · +44%" },
+              { value: "RMVN006",          label: "Perforated",    sub: "8mil window" },
+            ] as const).map((mat) => {
+              const selected = stickerMaterial === mat.value;
+              return (
+                <button
+                  key={mat.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setStickerMaterial(mat.value)}
+                  className={`px-3 py-2 text-sm rounded-xl border transition-all text-left ${
+                    selected
+                      ? "border-[var(--brand)] bg-[var(--brand)] text-white font-semibold"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  <div className="font-semibold">{mat.label}</div>
+                  <div className={`text-xs ${selected ? "text-white/80" : "text-gray-400"}`}>{mat.sub}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* STICKER V2 — Shape chip (square / circle / custom die-cut) */}
+      {v2Active && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Shape</p>
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Shape">
+            {([
+              { value: "square",  label: "Square",          sub: "Standard cut" },
+              { value: "circle",  label: "Circle",          sub: "+80% (cut path)" },
+              { value: "die_cut", label: "Custom die-cut",  sub: "Same as square" },
+            ] as const).map((sh) => {
+              const selected = stickerShape === sh.value;
+              return (
+                <button
+                  key={sh.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setStickerShape(sh.value)}
+                  className={`px-3 py-2 text-sm rounded-xl border transition-all text-left ${
+                    selected
+                      ? "border-[var(--brand)] bg-[var(--brand)] text-white font-semibold"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  <div className="font-semibold">{sh.label}</div>
+                  <div className={`text-xs ${selected ? "text-white/80" : "text-gray-400"}`}>{sh.sub}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Size preset grid */}
       {sizeControl && (
         <div>
