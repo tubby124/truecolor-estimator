@@ -31,6 +31,7 @@ import {
   type OptionChoice,
   type ProductConfigShape,
 } from "@/lib/data/sticker-config";
+import { flags } from "@/lib/flags";
 import type { PriceData, ConfigData } from "./ProductConfigurator";
 
 interface UnifiedConfiguratorProps {
@@ -105,11 +106,13 @@ export function UnifiedConfigurator({
   const effectiveMaterial = selectedSize?.material_code ?? "";
 
   // Qty snap — UI rounds UP to nearest tier when requested qty isn't on a tier.
-  // The engine's lot rules use qty_min===qty_max so off-tier qty returns BLOCKED.
-  // Direct computation — React Compiler memoizes automatically.
+  // The engine's legacy lot rules use qty_min===qty_max so off-tier qty returns
+  // BLOCKED. When STICKER_PRICING_V2 is on, the V2 model accepts ANY qty
+  // (continuous tier-based pricing), so we skip the snap behavior entirely.
   const requestedQty = parseInt(qtyInput, 10) || 0;
+  const stickerV2Active = category === "STICKER" && flags.useStickerPricingV2();
   const snap =
-    !cfg?.qty_snap_to_tier || !cfg.qty_tiers || requestedQty <= 0
+    stickerV2Active || !cfg?.qty_snap_to_tier || !cfg.qty_tiers || requestedQty <= 0
       ? { snapped: false, from: requestedQty, to: requestedQty, exceeded_max: false }
       : snapQtyToTier(requestedQty, cfg.qty_tiers);
   const effectiveQty = snap.to;

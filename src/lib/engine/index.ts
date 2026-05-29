@@ -3,6 +3,8 @@
 
 import { getPricingRules, getProducts, getMaterials, getServices, getConfigNum, getQtyDiscounts } from "../data/loader";
 import type { EstimateRequest, EstimateResponse, LineItem, CostBreakdown } from "./types";
+import { flags } from "@/lib/flags";
+import { runStickerV2 } from "./sticker-v2-bridge";
 
 const PRICING_VERSION = "v1_2026-02-19";
 
@@ -34,6 +36,17 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   const isRush = req.is_rush ?? false;
   const designStatus = req.design_status ?? "PRINT_READY";
   const addons = req.addons ?? [];
+
+  // ── STICKER V2 short-circuit ─────────────────────────────────────────────
+  // When NEXT_PUBLIC_USE_STICKER_PRICING_V2 is on, route STICKER through the
+  // data-driven model (sticker-model-v2.ts) which fits 90% of Albert's actual
+  // historical quotes within ±25%. Bypasses the existing 11-step path for
+  // stickers only — all other categories continue to use the engine below.
+  if (category === "STICKER" && flags.useStickerPricingV2()) {
+    const v2 = runStickerV2(req);
+    if (v2) return v2;
+    // If V2 returned null (shouldn't happen with valid inputs), fall through.
+  }
 
   // ── STEP 2: Compute sqft ──────────────────────────────────────────────────
   let sqft: number | null = null;
