@@ -122,6 +122,19 @@ Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready i
             . Everything prints in-house — no outsourcing, no shipping wait. Pickup at 216 33rd St W
             and inspect your cards before you leave.
           </p>
+          <p className="text-gray-600 text-lg leading-relaxed mb-6">
+            Saskatoon professionals choose us across categories: real estate agents at eXp,
+            Royal LePage, Re/Max, and Coldwell Banker reorder every 60–90 days as listing
+            seasons turn. Trade contractors — plumbers, electricians, HVAC, framing, roofing —
+            order 500-card sets at $65 to leave on every job site and quote. Restaurants and
+            cafes hand cards to walk-ins. Lawyers, accountants, and consultants pick the 1000
+            tier at $110 for chamber events and conferences. Compared to Staples or FedEx
+            Office, where 250 double-sided cards run $60–$80, our $45 is consistently
+            $15–$35 cheaper per run — same 14pt gloss, same colour accuracy, faster turnaround
+            because the press is two rooms away from the front counter. The Konica Minolta
+            C7090 digital press is calibrated weekly to match our wide-format Roland UV output,
+            so cards bundled with vehicle magnets or signs all read the same brand colour.
+          </p>
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
