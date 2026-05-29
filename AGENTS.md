@@ -21,6 +21,7 @@
 - /ecommerce-ux         → before any checkout/order/email feature ships
 - /e2e-test             → before every production push to Railway
 - /truecolor-page       → before any new SEO landing page
+- /tc-seo-opportunities → before editing ANY existing SEO page.tsx (loads fresh 28-day GSC rollup, confirms protected status, surfaces the right next-action — paa-faq, title rewrite, internal-link build, or no-touch). Enforced by hooks: blocks edits when `.claude/rules/seo-protected-pages.md` is >35 days stale.
 
 ## SEO Sprint Log — NON-NEGOTIABLE RULE
 After ANY of the following, you MUST immediately update:
@@ -440,6 +441,14 @@ Fires before every Edit/Write. Injects context based on file type:
 - `data/tables/*.csv` → reminds /pricing-review gate (OWNER APPROVAL required)
 - engine code → reminds /e2e-test gate
 
+### PreToolUse: seo-wave-guard.mjs (added 2026-05-29)
+Fires before Edit/Write/MultiEdit on `src/app/<slug>/page.tsx`, `src/app/sitemap.ts`, or `src/components/site/IndustryPage.tsx`. BLOCKS (exit 2) when:
+- Editing a protected page while ANOTHER protected page has uncommitted changes (one-page-per-commit wave rule)
+- The working tree would have >2 page.tsx files dirty after this edit (hard cap, regardless of protected status)
+- A protected page has staged additions touching BOTH title/description/H1 AND schema (Service/FAQPage/BreadcrumbList/jsonLd) in the same commit
+
+Reads the DEFEND list from `.claude/rules/seo-protected-pages.md`. Born from the 2026-05-25 commit 7ab5e48 incident that crashed 5 ranking pages.
+
 ### PostToolUse: post-edit-price-check.mjs
 Fires after every Edit/Write on page.tsx files. BLOCKS if wrong patterns found:
 - Banner "from $45" (should be $66)
@@ -450,12 +459,19 @@ Fires after every Edit/Write on page.tsx files. BLOCKS if wrong patterns found:
 - Sqft-based volume discounts (must be QTY-based)
 - `railway.app` URLs in email templates
 
+### PostToolUse: seo-cooldown-check.mjs (added 2026-05-29)
+Fires after Edit/Write/MultiEdit on the same paths as seo-wave-guard.mjs:
+- BLOCKS if `.claude/rules/seo-protected-pages.md` "Last refreshed" header is >35 days old (Phase 9b — stale wave decisions caused the original 60-day blind spot)
+- WARNS (non-blocking) if editing a protected page <5 days after its last commit (cooldown reminder)
+- Auto-appends an HTML-comment line to `memory/seo-sprints.md` tracking the edit (deduped within a session)
+
 ### Stop: stop-price-validation.mjs
 Fires when Claude finishes any task. Detects what changed and:
 - Runs `npm run validate:pricing` on page/CSV changes
 - Runs `npm test` on engine changes
 - Reminds about mandatory gates (/web-design-ux, /e2e-test, /pricing-health, /ecommerce-ux)
 - BLOCKS on validation failures or railway.app URLs in emails
+- BLOCKS session end if a protected page was touched without a fresh `## SEO Phase [N] — ... (YYYY-MM-DD)` entry in `memory/seo-sprints.md` for today (Hook 2c — enforces the sprint-log non-negotiable rule)
 
 ### Key principle
 Hooks are DETERMINISTIC gates (pattern matching, validation runs).

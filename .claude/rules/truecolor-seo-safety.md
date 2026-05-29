@@ -1,5 +1,43 @@
 # True Color SEO Safety Rules
 
+## What Happened: Commit 7ab5e48 (2026-05-25) — DO NOT REPEAT
+
+On 2026-05-25, commit `7ab5e48` "Fix SEO schema and citation drift" touched **80+ pages in a single shot**, including **5 protected ranking pages**:
+
+| Page | Pre-commit position | Post-commit (May 29) |
+|------|--------------------|----------------------|
+| business-cards-saskatoon | #1 → #16 (May 5) | #22.1 |
+| banner-printing-saskatoon | #2 → #11.7 (May 5) | **#33.2** |
+| flyer-printing-saskatoon | #3 → #25 (May 5) | #40.6 |
+| sign-company-saskatoon | #4 → #30 (May 5) | (3 imp / 2 days — noise) |
+| coroplast-signs-saskatoon | #5 → dropped from top pages (May 5) | #44.7 |
+
+Every page in this table was hit in the **same commit** with **title + content + schema changes simultaneously**, in direct violation of the rules below. The Wave System rule existed; nothing enforced it.
+
+### Hard rules going forward (enforced by hooks since 2026-05-29)
+
+1. **ONE protected page per commit, ever.** Editing a second protected page while a first is uncommitted is blocked at PreToolUse by `scripts/hooks/seo-wave-guard.mjs`.
+2. **2 page.tsx files maximum per SEO commit** regardless of protected status. The 80+ file commit would have been blocked at file #3.
+3. **Title/H1/description + schema NEVER ship in the same commit on a protected page.** Split into two commits 7+ days apart.
+4. **5–7 day GSC observation between waves on a protected page.** Enforced by `scripts/hooks/seo-cooldown-check.mjs` as a non-blocking warning so hotfixes can still ship with explicit rationale.
+5. **Protected-pages doc must be refreshed within 35 days of any SEO edit.** Older than that, edits block at PostToolUse. The doc going stale was the root cause that allowed the 7ab5e48 violation to land on already-decayed pages — `seo-protected-pages.md` said positions that were already 60+ days dead.
+
+### Hook scripts (do not delete or rename — they are wired in .claude/settings.json)
+
+- `scripts/hooks/seo-wave-guard.mjs` — PreToolUse, exits with code 2 on rule violation
+- `scripts/hooks/seo-cooldown-check.mjs` — PostToolUse, blocks on staleness and warns on cooldown
+- `scripts/hooks/stop-price-validation.mjs` — Stop, blocks session end if a protected page change has no fresh sprint-log entry
+
+## What the GSC "Blocked by robots.txt" alert means (do NOT panic)
+
+When Search Console fires "Blocked by robots.txt" emails about truecolorprinting.ca paths, check what's blocked before assuming a problem:
+
+- [src/app/robots.ts](src/app/robots.ts) only disallows transactional / private paths: `/staff/`, `/api/`, `/pay/`, `/cart`, `/checkout`, `/account/`, `/quote/`. These SHOULD be blocked.
+- All public SEO pages remain crawlable.
+- GSC will index a `/staff/...` URL it discovered via a stray link or referrer, then alert that it's blocked. This is **expected behavior** for a noindex+disallow path.
+
+**Action when this alert fires:** Confirm the blocked URL is in the disallow list above. If yes, no action needed — close the alert. Do NOT loosen `robots.ts`. The 2026-05-29 instance of this alert is what triggered the diagnosis that uncovered the GSC cron failure and the wave-rule violation; the alert itself was a red herring.
+
 ## SEO Sprint Log — MANDATORY UPDATE ON EVERY CHANGE
 
 **File to update:** `~/.claude/projects/-Users-owner-Downloads-TRUE-COLOR-PRICING-/memory/seo-sprints.md`
