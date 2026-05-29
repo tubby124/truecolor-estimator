@@ -259,18 +259,28 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ orderNumber: string; email: string; quoteOnly: boolean } | null>(null);
   const searchParams = useSearchParams();
+  // Tracks which ?manual value we've already auto-opened on so we don't reset
+  // the form every time useSearchParams returns a new reference (Next.js 16
+  // re-renders can give a fresh ReadonlyURLSearchParams object even when the
+  // URL hasn't changed — without this guard, typing in the form triggers
+  // re-renders that wipe everything the user entered).
+  const lastConsumedManualRef = useRef<string | null>(null);
 
   // Auto-open the modal when arriving from another staff page with:
   //   ?manual=1     → invoice mode (immediate payment link)
   //   ?manual=quote → quote-only mode (no payment link until customer approves)
   useEffect(() => {
-    const manual = searchParams?.get("manual");
-    if (manual === "1" || manual === "quote") {
+    const manual = searchParams?.get("manual") ?? null;
+    const isManualOpen = manual === "1" || manual === "quote";
+    if (isManualOpen && lastConsumedManualRef.current !== manual) {
+      lastConsumedManualRef.current = manual;
       setForm({ ...EMPTY_FORM, quote_only: manual !== "1" });
       setError(null);
       setSuccess(null);
       setCustomerLookup({ status: "idle" });
       setModalOpen(true);
+    } else if (!isManualOpen) {
+      lastConsumedManualRef.current = null;
     }
   }, [searchParams]);
 
