@@ -1,0 +1,23 @@
+name: GA4 Daily Sync
+
+on:
+  schedule:
+    # Daily at 14:00 UTC (08:00 Saskatchewan). One hour after gsc-sync (13:30 UTC)
+    # so both ingestions complete before the daily reconcile picks them up.
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull GA4 last 7 days into Supabase
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://truecolorprinting.ca/api/cron/ga4-sync)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1)
+          echo "Status: $STATUS"
+          echo "Body: $BODY"
+          [ "$STATUS" = "200" ] || exit 1
