@@ -155,7 +155,7 @@ export default function CoroplastSignsSaskatoonPage() {
         },
         {
           q: "Do realtors use True Color for listing signs?",
-          a: "Yes — real estate agents are our most frequent repeat customers. A standard 18×24\" single-sided coroplast yard sign is $30. H-stakes are $2.50 each. Many realtors order 5–10 at a time for active listing season. Same-day rush (+$40) means you can order the morning of a listing launch and pick up by 4 PM.",
+          a: "Yes — real estate agents are our most frequent repeat customers. A standard 18×24\" single-sided coroplast yard sign is $24 raw (single signs top up to the $25 order-total minimum at checkout). H-stakes are $2.50 each. Many realtors order 5–10 at a time for active listing season (5+ saves 8%, 10+ saves 17%). Same-day rush (+$40) means you can order the morning of a listing launch and pick up by 4 PM.",
         },
         {
           q: "Is there a minimum order for coroplast signs?",

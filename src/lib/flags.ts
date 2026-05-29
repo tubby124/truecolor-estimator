@@ -3,25 +3,52 @@
  *
  * Two flags per category to allow phased exposure (staff first, observe, then
  * public). Both default false → legacy code path until the flag is explicitly
- * set "true" on Railway env.
+ * set "true" on Railway env (or .env.local for dev).
  *
  * NEXT_PUBLIC_ prefix is required because these flags are read by client
  * components ("use client"). NOT secrets — they're public switches.
  *
- * Rollout pattern (per vault: 2026-05-29-product-configurator-unification-wave1-plan):
+ * CRITICAL: each access MUST be a LITERAL property reference like
+ * `process.env.NEXT_PUBLIC_FOO`. Next.js' webpack replaces these at build
+ * time via static analysis — dynamic access like `process.env[name]` would
+ * fall through to runtime, where on the client process.env is empty {} and
+ * the flag silently reads OFF. That bug shipped in c71f2a1 and caused
+ * stickers to never appear in dev even with .env.local set. Fixed here.
+ *
+ * Rollout pattern (per vault 2026-05-29-product-configurator-unification-wave1):
  *   1. Flip _STAFF=true → Albert sees the new staff configurator
  *   2. Watch 3–4 days. If clean, flip _PUBLIC=true → customers see the new product page
- *   3. If anything breaks on either side: flip that flag to "false" — 30-second rollback
+ *   3. If anything breaks: flip the failing flag to "false" — 30-second rollback
  */
-
-function readBoolFlag(name: string): boolean {
-  // process.env is inlined at build time for NEXT_PUBLIC_ vars — safe in client.
-  const raw = process.env[name];
-  return raw === "true";
-}
 
 export const flags = {
   // Wave 1 — Stickers
-  useProductConfigStickerStaff: () => readBoolFlag("NEXT_PUBLIC_USE_PRODUCT_CONFIG_STICKER_STAFF"),
-  useProductConfigStickerPublic: () => readBoolFlag("NEXT_PUBLIC_USE_PRODUCT_CONFIG_STICKER_PUBLIC"),
+  useProductConfigStickerStaff: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_STICKER_STAFF === "true",
+  useProductConfigStickerPublic: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_STICKER_PUBLIC === "true",
+
+  // Wave 2 — Booklets
+  useProductConfigBookletStaff: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_BOOKLET_STAFF === "true",
+  useProductConfigBookletPublic: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_BOOKLET_PUBLIC === "true",
+
+  // Wave 3 — Display (retractable banners)
+  useProductConfigDisplayStaff: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_DISPLAY_STAFF === "true",
+  useProductConfigDisplayPublic: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_DISPLAY_PUBLIC === "true",
+
+  // Wave 4 — Decals (window-decals + window-perf)
+  useProductConfigDecalStaff: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_DECAL_STAFF === "true",
+  useProductConfigDecalPublic: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_DECAL_PUBLIC === "true",
+
+  // Wave 5 — Brochures
+  useProductConfigBrochureStaff: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_BROCHURE_STAFF === "true",
+  useProductConfigBrochurePublic: () =>
+    process.env.NEXT_PUBLIC_USE_PRODUCT_CONFIG_BROCHURE_PUBLIC === "true",
 };
