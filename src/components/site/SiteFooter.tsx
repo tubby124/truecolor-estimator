@@ -89,6 +89,7 @@ export function SiteFooter() {
               </div>
               <div className="space-y-2">
                 <Link href="/vehicle-magnets-saskatoon" className="block hover:text-white transition-colors">Vehicle Magnets</Link>
+                <Link href="/vehicle-decals-saskatoon" className="block hover:text-white transition-colors">Vehicle Decals</Link>
                 <Link href="/retractable-banners-saskatoon" className="block hover:text-white transition-colors">Retractable Banners</Link>
                 <Link href="/window-decals-saskatoon" className="block hover:text-white transition-colors">Window Decals</Link>
                 <Link href="/window-perf-saskatoon" className="block hover:text-white transition-colors">Window Perf</Link>
@@ -200,6 +201,46 @@ export function SiteFooter() {
             <Link href="/vehicle-magnets-yorkton-sk" className="hover:text-white transition-colors">Magnets Yorkton</Link>
             <Link href="/business-cards-yorkton-sk" className="hover:text-white transition-colors">Cards Yorkton</Link>
             <Link href="/flyer-printing-yorkton-sk" className="hover:text-white transition-colors">Flyers Yorkton</Link>
+          </div>
+        </div>
+
+        {/* Custom Labels & Stickers */}
+        <div className="mt-8 pt-6 border-t border-white/5">
+          <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider">Custom Labels & Stickers</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 text-sm">
+            <Link href="/labels-saskatoon" className="hover:text-white transition-colors">Custom Labels Saskatoon</Link>
+            <Link href="/candle-jar-labels-saskatoon" className="hover:text-white transition-colors">Candle Jar Labels</Link>
+            <Link href="/cosmetic-labels-saskatoon" className="hover:text-white transition-colors">Cosmetic Labels</Link>
+            <Link href="/freezer-labels-saskatoon" className="hover:text-white transition-colors">Freezer Labels</Link>
+            <Link href="/product-labels-saskatoon" className="hover:text-white transition-colors">Product Labels</Link>
+            <Link href="/roll-labels-saskatoon" className="hover:text-white transition-colors">Roll Labels</Link>
+            <Link href="/candle-jar-labels-regina" className="hover:text-white transition-colors">Candle Labels Regina</Link>
+            <Link href="/cosmetic-labels-regina" className="hover:text-white transition-colors">Cosmetic Labels Regina</Link>
+            <Link href="/freezer-labels-regina" className="hover:text-white transition-colors">Freezer Labels Regina</Link>
+            <Link href="/product-labels-regina" className="hover:text-white transition-colors">Product Labels Regina</Link>
+            <Link href="/candle-jar-labels-moose-jaw-sk" className="hover:text-white transition-colors">Candle Labels Moose Jaw</Link>
+            <Link href="/cosmetic-labels-moose-jaw-sk" className="hover:text-white transition-colors">Cosmetic Labels Moose Jaw</Link>
+            <Link href="/freezer-labels-moose-jaw-sk" className="hover:text-white transition-colors">Freezer Labels Moose Jaw</Link>
+            <Link href="/product-labels-moose-jaw-sk" className="hover:text-white transition-colors">Product Labels Moose Jaw</Link>
+            <Link href="/candle-jar-labels-prince-albert-sk" className="hover:text-white transition-colors">Candle Labels Prince Albert</Link>
+            <Link href="/cosmetic-labels-prince-albert-sk" className="hover:text-white transition-colors">Cosmetic Labels Prince Albert</Link>
+            <Link href="/freezer-labels-prince-albert-sk" className="hover:text-white transition-colors">Freezer Labels Prince Albert</Link>
+            <Link href="/product-labels-prince-albert-sk" className="hover:text-white transition-colors">Product Labels Prince Albert</Link>
+          </div>
+        </div>
+
+        {/* AI Design Services */}
+        <div className="mt-8 pt-6 border-t border-white/5">
+          <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider">AI Design Services</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 text-sm">
+            <Link href="/logo-vectorization-saskatoon" className="hover:text-white transition-colors">Logo Vectorization</Link>
+            <Link href="/image-upscale-saskatoon" className="hover:text-white transition-colors">Image Upscale</Link>
+            <Link href="/logo-vectorization-regina" className="hover:text-white transition-colors">Logo Vec Regina</Link>
+            <Link href="/image-upscale-regina" className="hover:text-white transition-colors">Image Upscale Regina</Link>
+            <Link href="/logo-vectorization-moose-jaw-sk" className="hover:text-white transition-colors">Logo Vec Moose Jaw</Link>
+            <Link href="/image-upscale-moose-jaw-sk" className="hover:text-white transition-colors">Image Upscale Moose Jaw</Link>
+            <Link href="/logo-vectorization-prince-albert-sk" className="hover:text-white transition-colors">Logo Vec Prince Albert</Link>
+            <Link href="/image-upscale-prince-albert-sk" className="hover:text-white transition-colors">Image Upscale Prince Albert</Link>
           </div>
         </div>
 
