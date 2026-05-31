@@ -8,6 +8,11 @@ describe("sendTelegramNotification", () => {
       ...ORIGINAL_ENV,
       TRUE_COLOR_TELEGRAM_BOT_TOKEN: "fake-token",
       TRUE_COLOR_TELEGRAM_CHAT_ID: "12345",
+      // Keep tests hermetic when developer shells export production Supabase vars.
+      SUPABASE_URL: "",
+      NEXT_PUBLIC_SUPABASE_URL: "",
+      SUPABASE_SECRET_KEY: "",
+      SUPABASE_SERVICE_KEY: "",
     };
     vi.spyOn(global, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), { status: 200 })
