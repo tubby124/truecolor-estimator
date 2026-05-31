@@ -67,3 +67,6 @@ playwright/.auth/
 
 # local-only Claude Code settings (per-machine hooks/MCP toggles)
 .claude/settings.local.json
+
+# Per-run audit logs from one-off reconcile/archive scripts
+logs/
