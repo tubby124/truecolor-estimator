@@ -129,12 +129,16 @@ export async function createWaveInvoice(
   }));
 
   if (opts?.isRush) {
+    // Rush is PST-EXEMPT (service surcharge, not on tangible goods) but
+    // GST-taxable per truecolor-domain.md. Pre-2026-05-31 this sent taxes: []
+    // which under-charged Wave by 5% of $40 = $2 vs. the DB-calculated total
+    // (the GST drift behind TC-2026-0047 and similar).
     lineItems.push({
       productId: WAVE_PRINT_PRODUCT_ID,
       description: "Rush production fee — same-day turnaround",
       quantity: "1",
       unitPrice: "40.00",
-      taxes: [],
+      taxes: [{ salesTaxId: WAVE_GST_TAX_ID }],
     });
   }
 
