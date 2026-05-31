@@ -61,6 +61,7 @@ interface ReconcileIssue {
     | "wave_payment_missing"
     | "wave_recovery_failed"
     | "wave_payment_zombie"
+    | "wave_total_mismatch"
     | "wave_approve_failed"
     | "wave_recovery_unverified";
   order_number?: string;
@@ -69,24 +70,30 @@ interface ReconcileIssue {
   age_hours?: number;
 }
 
-// Re-query a Wave invoice's amountPaid for verification / zombie detection.
+// Re-query a Wave invoice's amountPaid + total for verification / zombie detection.
 // Returns null on any failure so callers can skip rather than crash the cron.
-async function fetchWaveInvoiceAmountPaid(invoiceId: string): Promise<{ amountPaid: number; invoiceNumber: string | null } | null> {
+// Pre-2026-05-31 this only returned amountPaid — adding `total` lets Check 5 also
+// detect wave_total_mismatch (DB total ≠ Wave invoice total) which would otherwise
+// look like a permanent zombie even after the correct charged amount is recorded.
+async function fetchWaveInvoiceAmountPaid(invoiceId: string): Promise<{ amountPaid: number; total: number; invoiceNumber: string | null } | null> {
   try {
     const data = await waveQuery<{
-      business: { invoice: { id: string; invoiceNumber: string | null; amountPaid: { value: string } | null } | null } | null;
+      business: { invoice: { id: string; invoiceNumber: string | null; amountPaid: { value: string } | null; total: { value: string } | null } | null } | null;
     }>(
       `query($bizId: ID!, $invId: ID!) {
         business(id: $bizId) {
-          invoice(id: $invId) { id invoiceNumber amountPaid { value } }
+          invoice(id: $invId) { id invoiceNumber amountPaid { value } total { value } }
         }
       }`,
       { bizId: WAVE_BIZ, invId: invoiceId }
     );
     const inv = data.business?.invoice;
     if (!inv) return null;
-    const v = inv.amountPaid?.value;
-    return { amountPaid: v ? Number(v) : 0, invoiceNumber: inv.invoiceNumber ?? null };
+    return {
+      amountPaid: inv.amountPaid?.value ? Number(inv.amountPaid.value) : 0,
+      total: inv.total?.value ? Number(inv.total.value) : 0,
+      invoiceNumber: inv.invoiceNumber ?? null,
+    };
   } catch (err) {
     console.error("[reconcile] fetchWaveInvoiceAmountPaid failed:", err instanceof Error ? err.message : err);
     return null;
@@ -390,6 +397,26 @@ export async function GET(req: NextRequest) {
       const verify = await fetchWaveInvoiceAmountPaid(invoiceId);
       if (!verify) continue; // API hiccup — skip rather than false-alert
 
+      // Check 7 (inline with Check 5): Wave invoice total ≠ DB total.
+      // Catches invoice-build drift (discount-drop, rush-GST, phantom-line) that
+      // would otherwise look like permanent zombies even after the correct
+      // charged amount is recorded against the wrong-total Wave invoice. Surfaces
+      // separately so it's clear the fix is "edit the Wave invoice", not "record
+      // another payment". Pre-2026-05-31 these accumulated invisibly behind the
+      // zombie alert. NEVER auto-heal — invoice edits are irreversible from API.
+      if (Math.abs(total - verify.total) > 0.01) {
+        console.warn(
+          `[reconcile] check 7 total mismatch → ${orderNum}: DB $${total.toFixed(2)}, Wave invoice $${verify.total.toFixed(2)}`
+        );
+        issues.push({
+          kind: "wave_total_mismatch",
+          order_number: orderNum,
+          wave_invoice_number: verify.invoiceNumber ?? undefined,
+          detail: `DB $${total.toFixed(2)} ≠ Wave $${verify.total.toFixed(2)} (Δ $${Math.abs(total - verify.total).toFixed(2)}) · inv #${verify.invoiceNumber ?? "?"} · manual: open Wave invoice → adjust lines to match DB total before recording payment`,
+        });
+        continue; // skip zombie check — total mismatch supersedes
+      }
+
       if (verify.amountPaid < total - 0.01) {
         console.warn(
           `[reconcile] check 5 zombie → ${orderNum}: ts says paid, Wave shows $${verify.amountPaid.toFixed(2)} of $${total.toFixed(2)}`
@@ -506,6 +533,13 @@ export async function GET(req: NextRequest) {
       lines.push(`\n<b>🧟 Wave payment zombies</b> (${groupedByKind.wave_payment_zombie.length})`);
       lines.push(`<i>Our DB says paid but Wave shows underpaid. Manual action required — do NOT re-run recordWavePayment automatically.</i>`);
       for (const i of groupedByKind.wave_payment_zombie.slice(0, 8)) {
+        lines.push(`  • ${escapeTelegramHtml(i.order_number ?? "?")} — ${escapeTelegramHtml(i.detail)}`);
+      }
+    }
+    if (groupedByKind.wave_total_mismatch?.length) {
+      lines.push(`\n<b>🧮 Wave invoice total ≠ DB total</b> (${groupedByKind.wave_total_mismatch.length})`);
+      lines.push(`<i>Invoice was built at a different amount than what was charged — recording the payment will NOT close it. Edit the Wave invoice lines first.</i>`);
+      for (const i of groupedByKind.wave_total_mismatch.slice(0, 8)) {
         lines.push(`  • ${escapeTelegramHtml(i.order_number ?? "?")} — ${escapeTelegramHtml(i.detail)}`);
       }
     }
