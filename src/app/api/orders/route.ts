@@ -544,6 +544,22 @@ export async function POST(req: NextRequest) {
         return lines;
       });
 
+      // Apply validated discount as a negative-amount Wave line. DB subtracts
+      // discount from the pre-tax base (line ~314) and from the PST base (~325);
+      // mirror that here so Wave invoice total = DB total. Without this, Wave
+      // sees the full pre-discount amount and the invoice stays $X.XX +
+      // tax-on-discount over-due forever even after the customer pays the
+      // correct discounted total via Clover (caused 3 zombies pre-2026-05-31).
+      if (discount > 0) {
+        waveItems.push({
+          description: `Discount${validatedDiscountCode ? ` (${validatedDiscountCode})` : ""}`,
+          unitPrice: -discount,
+          qty: 1,
+          applyGst: true,
+          applyPst: true,
+        });
+      }
+
       // Append the small-order setup fee as its own Wave line so the invoice
       // explains the surcharge transparently to the customer.
       if (smallOrderFee > 0) {
