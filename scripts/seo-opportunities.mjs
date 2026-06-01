@@ -73,10 +73,31 @@ function loadFrozenSlugs() {
   if (!fs.existsSync(protectedPath)) return new Set();
   const src = fs.readFileSync(protectedPath, "utf8");
   const frozen = new Set();
-  // Lines that mention "DEFEND" or "meta desc only" are protected
-  const tableRe = /\|\s*([\w-]+)\s*\|.*?\|\s*(DEFEND|meta desc only|FAQ price fix only)/gi;
-  let m;
-  while ((m = tableRe.exec(src))) frozen.add(m[1]);
+  // Lock-level cells often include markdown emphasis and qualifiers, e.g.
+  // "**DEFEND (PROMOTED)**". Parse table cells instead of relying on a
+  // brittle whole-line regex so protected pages are not routed to title edits.
+  for (const line of src.split("\n")) {
+    if (!line.startsWith("|") || /^\|\s*-+/.test(line)) continue;
+    const cells = line.split("|").map((cell) => cell.trim());
+    const slug = cells[1];
+    if (!slug || !/^[a-z0-9][a-z0-9-]+[a-z0-9]$/.test(slug)) continue;
+
+    const normalizedCells = cells.map((cell) =>
+      cell
+        .replace(/\*\*/g, "")
+        .replace(/`/g, "")
+        .trim()
+        .toLowerCase(),
+    );
+    const isLocked = normalizedCells.some(
+      (cell) =>
+        cell.includes("defend") ||
+        cell.includes("meta desc only") ||
+        cell.includes("faq price fix only") ||
+        cell.includes("frozen"),
+    );
+    if (isLocked) frozen.add(slug);
+  }
   return frozen;
 }
 
