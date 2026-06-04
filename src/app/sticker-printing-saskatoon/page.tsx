@@ -146,6 +146,18 @@ export default function StickerPrintingSaskatoonPage() {
             </Link>{" "}
             page.
           </p>
+          <p className="text-gray-600 leading-relaxed">
+            Not sure whether to order individual die-cut stickers or a sticker sheet? Individual
+            die-cut stickers work best for handouts, retail inserts, laptop stickers, water-bottle
+            promos, and product-label runs where each label needs to peel cleanly on its own.
+            Sticker sheets are better when you want several small designs grouped together for
+            events, maker markets, or sample packs. The same price grid applies to the finished
+            size: a 4×4&quot; default run is <strong>100 for $160</strong>,{" "}
+            <strong>250 for $325</strong>, and <strong>500 for $475</strong>; small 2×2&quot;
+            runs start at <strong>25 for $25</strong>. We can place multiple designs on one
+            sheet if the margins and cut spacing are clean enough, or build that file for{" "}
+            <strong>$35 flat</strong> with a same-day proof.
+          </p>
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
@@ -191,6 +203,10 @@ export default function StickerPrintingSaskatoonPage() {
           a: "Die-cut stickers are cut all the way through both the vinyl and the backing — each sticker comes out as a separate piece in your custom shape. Kiss-cut stickers cut only the vinyl, leaving the backing intact so multiple stickers stay on one sheet. True Color prints true die-cut as standard — every sticker contour-cut around your shape. Pricing is the same either way: 100 for $160, 250 for $325.",
         },
         {
+          q: "Are sticker sheets cheaper than individual die-cut stickers?",
+          a: "Sticker sheets can be cheaper when several small designs fit inside one finished sheet, but individual die-cut stickers are better for handouts, product packaging, and retail inserts. We price by finished size and quantity: 2×2\" starts at 25 for $25, while the common 4×4\" run is 100 for $160 or 250 for $325. If your sheet needs multiple cut paths, our designer can set it up for $35 flat with a same-day proof.",
+        },
+        {
           q: "How much do custom die-cut stickers cost in Saskatoon?",
           a: "Standard die-cut vinyl stickers are 100 for $160, 250 for $325, and 500 for $475 on the default 4×4\" size. Smaller 2×2\" start from $45 / 100 and larger 8×8\" run $640 / 100. The 4×4\" per-unit drops from $1.60 at 100 to $0.65 at 1,000. Full price grid lives on the instant calculator at /products/stickers.",
         },
@@ -207,12 +223,20 @@ export default function StickerPrintingSaskatoonPage() {
           a: "Yes — die-cut means contour-cut to any shape: circles, ovals, rounded rectangles, custom logo outlines, growler tags, candle-jar wraps, any vector silhouette. If you have an Illustrator or PDF file with the cut path, we use it as-is. No file? Our in-house designer prepares the die-cut path for $35 flat with a same-day proof.",
         },
         {
+          q: "Can I put multiple designs on one custom sticker sheet?",
+          a: "Yes — you can combine multiple small stickers on one sheet if each design has enough spacing for clean cutting. The job still follows the sticker size grid, so a 4×4\" finished sheet starts at 25 for $60, 100 for $160, and 250 for $325. Send the artwork as a PDF or AI file with cut paths, or have our Saskatoon designer build the sheet for $35 flat.",
+        },
+        {
           q: "Can I get same-day stickers in Saskatoon?",
           a: "Yes — same-day production for +$40 flat when ordered before 10 AM. Call (306) 954-8688 to confirm material capacity for your quantity. Most same-day orders are ready for pickup by 4–5 PM at 216 33rd St W. Standard turnaround without rush is 1–3 business days after artwork approval.",
         },
         {
           q: "What file format do I need for custom die-cut stickers?",
           a: "We accept PDF, AI, EPS (vector preferred), or PNG/JPG at 300 dpi minimum at the print size. Vector files let us pull a clean die-cut path directly from your shape. If your file is a low-res phone photo or Word doc, our in-house designer rebuilds it print-ready for $35 flat with a same-day proof — no surprise charges.",
+        },
+        {
+          q: "Do complex sticker shapes cost more than circles or rectangles?",
+          a: "Most logo outlines, circles, ovals, and rounded rectangles use the normal die-cut price grid: 100 4×4\" stickers for $160, 250 for $325, or 500 for $475. Very detailed edges, interior cutouts, or many designs on one sheet may need a quick file-prep review before we quote. If the cut path needs rebuilding, design setup is $35 flat with a same-day proof.",
         },
       ]}
     />
