@@ -6,7 +6,7 @@ import {
   type ManualOrderContactForm,
 } from "../customer-identity";
 
-const baseForm: ManualOrderContactForm = {
+const typedForm: ManualOrderContactForm = {
   name: "Alice Old",
   email: "old@example.com",
   company: "Old Co",
@@ -22,7 +22,7 @@ const blankForm: ManualOrderContactForm = {
 
 describe("staff manual-order customer identity harness", () => {
   it("explicit pick overwrites everything — intentional, even when blanks come back", () => {
-    const next = applyPickedCustomer(baseForm, {
+    const next = applyPickedCustomer(typedForm, {
       email: "new@example.com",
       name: "Bob New",
       company: null,
@@ -39,7 +39,7 @@ describe("staff manual-order customer identity harness", () => {
 
   it("ignores stale lookup responses when the form email has already moved on", () => {
     const action = classifyCustomerLookup(
-      { ...baseForm, email: "latest@example.com" },
+      { ...typedForm, email: "latest@example.com" },
       "older@example.com",
       { exists: true, name: "Older Customer", company: "Older Co", phone: "306-333-3333" },
     );
@@ -48,54 +48,12 @@ describe("staff manual-order customer identity harness", () => {
   });
 
   it("returns no_match when the lookup confirms no saved customer exists", () => {
-    const action = classifyCustomerLookup(baseForm, "old@example.com", { exists: false });
+    const action = classifyCustomerLookup(typedForm, "old@example.com", { exists: false });
     expect(action.kind).toBe("no_match");
   });
 
-  it("autofills blank fields when the form has no typed data to protect", () => {
+  it("offers the saved data on a blank form with NO conflicts — never autofills silently", () => {
     const action = classifyCustomerLookup(blankForm, "old@example.com", {
-      exists: true,
-      name: "Bob New",
-      company: "New Co",
-      phone: "306-222-2222",
-    });
-
-    expect(action.kind).toBe("autofill");
-    if (action.kind !== "autofill") return;
-    expect(action.form).toEqual({
-      name: "Bob New",
-      email: "old@example.com",
-      company: "New Co",
-      phone: "306-222-2222",
-    });
-    expect(action.filledFields.sort()).toEqual(["company", "name", "phone"]);
-  });
-
-  it("autofills only the blank fields when some typed values already match saved data", () => {
-    const partialForm: ManualOrderContactForm = {
-      name: "Bob New",
-      email: "old@example.com",
-      company: "",
-      phone: "",
-    };
-
-    const action = classifyCustomerLookup(partialForm, "old@example.com", {
-      exists: true,
-      name: "Bob New",
-      company: "New Co",
-      phone: "306-222-2222",
-    });
-
-    expect(action.kind).toBe("autofill");
-    if (action.kind !== "autofill") return;
-    expect(action.form.name).toBe("Bob New");
-    expect(action.form.company).toBe("New Co");
-    expect(action.form.phone).toBe("306-222-2222");
-    expect(action.filledFields.sort()).toEqual(["company", "phone"]);
-  });
-
-  it("offers — never overwrites — when typed values diverge from saved data", () => {
-    const action = classifyCustomerLookup(baseForm, "old@example.com", {
       exists: true,
       name: "Bob New",
       company: "New Co",
@@ -109,10 +67,23 @@ describe("staff manual-order customer identity harness", () => {
       company: "New Co",
       phone: "306-222-2222",
     });
+    expect(action.conflicts).toEqual([]);
+  });
+
+  it("offers the saved data with conflicts marked when typed values diverge from saved", () => {
+    const action = classifyCustomerLookup(typedForm, "old@example.com", {
+      exists: true,
+      name: "Bob New",
+      company: "New Co",
+      phone: "306-222-2222",
+    });
+
+    expect(action.kind).toBe("offer");
+    if (action.kind !== "offer") return;
     expect(action.conflicts.sort()).toEqual(["company", "name", "phone"]);
   });
 
-  it("offers only on the specific conflicting fields — single-field divergence", () => {
+  it("marks only the specific diverging fields as conflicts (single-field divergence)", () => {
     const oneConflict: ManualOrderContactForm = {
       name: "Bob New",
       email: "old@example.com",
@@ -132,7 +103,7 @@ describe("staff manual-order customer identity harness", () => {
     expect(action.conflicts).toEqual(["company"]);
   });
 
-  it("treats whitespace-only typed values as blank for autofill purposes", () => {
+  it("treats whitespace-only typed values as blank when computing conflicts", () => {
     const spaced: ManualOrderContactForm = {
       name: "Bob New",
       email: "old@example.com",
@@ -147,10 +118,9 @@ describe("staff manual-order customer identity harness", () => {
       phone: "306-222-2222",
     });
 
-    expect(action.kind).toBe("autofill");
-    if (action.kind !== "autofill") return;
-    expect(action.form.company).toBe("New Co");
-    expect(action.form.phone).toBe("306-222-2222");
+    expect(action.kind).toBe("offer");
+    if (action.kind !== "offer") return;
+    expect(action.conflicts).toEqual([]);
   });
 
   it("normalizes submit contact: trims, lowercases email, empty strings → undefined", () => {

@@ -26,10 +26,9 @@ export interface LookupClassifierInput {
   orderCount?: number;
 }
 
-export type CustomerLookupAction<T extends ManualOrderContactForm> =
+export type CustomerLookupAction<_T extends ManualOrderContactForm> =
   | { kind: "ignore_stale_email" }
   | { kind: "no_match" }
-  | { kind: "autofill"; form: T; saved: SavedCustomerData; filledFields: Array<"name" | "company" | "phone"> }
   | { kind: "offer"; saved: SavedCustomerData; conflicts: Array<"name" | "company" | "phone"> };
 
 function trimEq(a: string | null | undefined, b: string | null | undefined): boolean {
@@ -38,15 +37,21 @@ function trimEq(a: string | null | undefined, b: string | null | undefined): boo
 
 /**
  * Decide what to do with a customer-lookup response. Pure inspector — does not mutate
- * the form. Caller branches on `kind` and either:
+ * the form. Caller branches on `kind`:
  *   - "ignore_stale_email" → drop the response (email field has changed since request fired)
  *   - "no_match" → set UI status to "new"
- *   - "autofill" → caller calls setForm(prev => action.form) to fill blank fields
- *   - "offer" → caller shows a banner with `saved` data + [Use saved] / [Keep mine] buttons
+ *   - "offer" → caller shows a banner with `saved` data + [Use saved] / [Start fresh] buttons
  *
- * "autofill" only fires when every typed field either matches the saved value or is blank.
- * The moment a typed value diverges from saved, we switch to "offer" and never overwrite
- * the staff member's input silently.
+ * NEVER autofills silently — even on a blank form. The system stores one customer record
+ * per email, and any given email might be associated with multiple business contexts
+ * (e.g. a broker placing orders for several different organizations). Silently filling
+ * the form based on past orders surprises staff who are placing a fresh order under that
+ * email for a different entity. The banner makes saved data discoverable without
+ * destroying the staff member's intent.
+ *
+ * `conflicts` is the list of fields where the typed value diverges from saved — used
+ * by the UI to upgrade the banner from "friendly suggestion" to "warning" styling when
+ * the staff member has already typed values that would be overwritten.
  */
 export function classifyCustomerLookup<T extends ManualOrderContactForm>(
   form: T,
@@ -71,29 +76,15 @@ export function classifyCustomerLookup<T extends ManualOrderContactForm>(
   };
 
   const conflicts: Array<"name" | "company" | "phone"> = [];
-  const filledFields: Array<"name" | "company" | "phone"> = [];
-
   for (const field of ["name", "company", "phone"] as const) {
     const typed = form[field].trim();
     const savedValue = field === "name" ? saved.name : saved[field] ?? "";
-
-    if (typed === "") {
-      if (savedValue.trim()) filledFields.push(field);
-    } else if (!trimEq(typed, savedValue)) {
+    if (typed !== "" && !trimEq(typed, savedValue)) {
       conflicts.push(field);
     }
   }
 
-  if (conflicts.length > 0) {
-    return { kind: "offer", saved, conflicts };
-  }
-
-  const next: T = { ...form };
-  if (filledFields.includes("name")) next.name = saved.name;
-  if (filledFields.includes("company")) next.company = saved.company ?? "";
-  if (filledFields.includes("phone")) next.phone = saved.phone ?? "";
-
-  return { kind: "autofill", form: next, saved, filledFields };
+  return { kind: "offer", saved, conflicts };
 }
 
 /**
