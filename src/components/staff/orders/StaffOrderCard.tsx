@@ -13,6 +13,9 @@ import { CustomerHistoryWidget } from "@/app/staff/orders/CustomerHistoryWidget"
 import type { Order } from "@/app/staff/orders/OrdersTable";
 import { RepriceModal } from "./RepriceModal";
 import { PaymentLedgerPanel } from "./PaymentLedgerPanel";
+import { OrderHeroBlock } from "./OrderHeroBlock";
+
+type OrderTab = "items" | "payments" | "files" | "activity";
 
 // Feature flag — UI panel only renders when `NEXT_PUBLIC_FEATURE_PAYMENT_LEDGER=1`.
 // The migration + API routes can ship without exposing the UI; flip the env var to
@@ -79,6 +82,7 @@ export function StaffOrderCard({
   const [proofError, setProofError] = useState<string | null>(null);
   const [repriceOpen, setRepriceOpen] = useState(false);
   const [repriceResult, setRepriceResult] = useState<{ new_total: number; delta: number; mode: string; pay_link_url: string | null } | null>(null);
+  const [activeTab, setActiveTab] = useState<OrderTab>("items");
 
   const customer = Array.isArray(order.customers) ? order.customers[0] : order.customers;
   const nextStatus = NEXT_STATUS[order.status];
@@ -395,55 +399,62 @@ export function StaffOrderCard({
         <div className="hidden" data-reprice-completed={repriceResult.mode} />
       )}
 
-      {/* ── Expanded section ── */}
+      {/* ── Expanded section — hero + tabs + utility row ── */}
       {isExpanded && (
-        <div className="border-t border-gray-100 bg-gray-50 p-5 space-y-6">
+        <div className="border-t border-gray-100 bg-gray-50">
 
-          {/* Customer info block */}
-          <div className="flex flex-wrap gap-x-8 gap-y-3">
-            <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Customer</p>
-              <p className="text-sm font-semibold text-gray-800">{customer?.name ?? "—"}</p>
-              {customer?.company && (
-                <p className="text-xs text-gray-500">{customer.company}</p>
-              )}
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Email</p>
-              <a
-                href={`mailto:${customer?.email}`}
-                className="text-sm text-[#16C2F3] hover:underline"
-              >
-                {customer?.email ?? "—"}
-              </a>
-            </div>
-            {customer?.phone && (
-              <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Phone</p>
-                <a
-                  href={`tel:${customer.phone}`}
-                  className="text-sm text-[#16C2F3] hover:underline"
-                >
-                  {customer.phone}
-                </a>
-              </div>
-            )}
-            <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Payment</p>
-              <p className="text-sm text-gray-700">
-                {order.payment_method === "clover_card" ? "Credit card" : order.payment_method === "wave" ? "Invoice" : "Interac e-Transfer"}
-              </p>
-            </div>
+          {/* HERO — owns the "what should happen next" decision and surfaces the
+              1-3 most relevant actions inline. Replaces the old customer-info +
+              payment-ledger sections so staff doesn't have to scan for the next move. */}
+          <div className="bg-white border-b border-gray-200 p-5">
+            <OrderHeroBlock
+              order={order}
+              isLoadingStatus={isLoadingStatus}
+              onStatusUpdate={onStatusUpdate}
+              resendingPayment={resendingPayment}
+              resendSuccess={resendSuccess}
+              onResendPayment={onResendPayment}
+              sendingReceipt={sendingReceipt}
+              receiptSent={receiptSent}
+              onSendReceipt={onSendReceipt}
+              onJumpToTab={setActiveTab}
+            />
           </div>
 
-          {/* Payment ledger (feature-flagged) — split / partial payments */}
-          {PAYMENT_LEDGER_ENABLED && (
-            <PaymentLedgerPanel
-              orderId={order.id}
-              orderNumber={order.order_number}
-              orderTotal={Number(order.total ?? 0)}
-            />
-          )}
+          {/* TABS NAV */}
+          <div className="bg-white border-b border-gray-200 px-5">
+            <nav className="flex gap-1 -mb-px" aria-label="Order details">
+              {([
+                { id: "items" as const, label: "Items" },
+                { id: "payments" as const, label: "Payments" },
+                { id: "files" as const, label: "Files" },
+                { id: "activity" as const, label: "Activity" },
+              ]).map((tab) => {
+                const active = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+                      active
+                        ? "border-[#1c1712] text-[#1c1712]"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* TAB CONTENT */}
+          <div className="p-5 space-y-6">
+
+          {/* ─── ITEMS TAB ─── line items + totals + customer notes + staff notes + bookkeeping */}
+          {activeTab === "items" && <>
 
           {/* Order items table */}
           {order.order_items && order.order_items.length > 0 && (
@@ -620,6 +631,23 @@ export function StaffOrderCard({
             </div>
           </div>
 
+          </>}{/* end ITEMS tab */}
+
+          {/* ─── PAYMENTS TAB ─── ledger + Wave details + record payment form */}
+          {activeTab === "payments" && <>
+            <PaymentLedgerPanel
+              orderId={order.id}
+              orderNumber={order.order_number}
+              orderTotal={Number(order.total ?? 0)}
+            />
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Card payments are recorded automatically when Clover&apos;s webhook fires. For e-Transfer or cash, click <span className="font-semibold text-gray-600">+ Record payment</span> above and enter the payer + amount. Splits and multi-party payments record one row per payer.
+            </p>
+          </>}
+
+          {/* ─── FILES TAB ─── artwork + send proof + sent proofs + Preview PDF */}
+          {activeTab === "files" && <>
+
           {/* Artwork files — all files */}
           {artworkFiles.length > 0 && (
             <div>
@@ -642,88 +670,9 @@ export function StaffOrderCard({
             </div>
           )}
 
-          {/* Change status (override — any direction) */}
-          <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-              Change status
-            </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              {(() => {
-                // Pending orders can only transition to payment_received (server
-                // guard rejects any skip — UI mirrors that to prevent confusion).
-                // Once paid, all statuses are selectable.
-                const isPending = order.status === "pending_payment";
-                const allowed: readonly string[] = isPending
-                  ? ["pending_payment", "payment_received"]
-                  : VALID_STATUSES;
-                const selectValue = allowed.includes(currentOverride) ? currentOverride : order.status;
-                return (
-                  <select
-                    value={selectValue}
-                    onChange={(e) => setOverrideStatus(e.target.value)}
-                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#16C2F3] bg-white transition-colors"
-                  >
-                    {VALID_STATUSES.map((s) => {
-                      const disabled = !allowed.includes(s);
-                      return (
-                        <option key={s} value={s} disabled={disabled}>
-                          {STATUS_LABELS[s]}{disabled ? " · pay first" : ""}
-                        </option>
-                      );
-                    })}
-                  </select>
-                );
-              })()}
-              <button
-                onClick={() => onStatusUpdate(currentOverride)}
-                disabled={isLoadingStatus || currentOverride === order.status}
-                className="text-sm font-semibold px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoadingStatus ? "Updating…" : "Update →"}
-              </button>
-              <span className="text-xs text-gray-400">
-                Currently:{" "}
-                <span
-                  aria-label={`Status: ${STATUS_LABELS[order.status] ?? order.status}`}
-                  className={`font-semibold px-1.5 py-0.5 rounded ${
-                    STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {STATUS_LABELS[order.status] ?? order.status}
-                </span>
-              </span>
-            </div>
-            {order.status === "pending_payment" && (
-              <p className="text-[11px] text-amber-600 mt-2">
-                ⚠ Mark payment received before advancing — required by server guard.
-              </p>
-            )}
-          </div>
-
-          {/* Resend payment link — only for pending_payment orders */}
-          {order.status === "pending_payment" && (
-            <div>
-              <button
-                onClick={() => onResendPayment()}
-                disabled={resendingPayment}
-                className="text-sm font-semibold px-4 py-2 rounded-lg border border-emerald-400 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 transition-colors"
-              >
-                {resendingPayment
-                  ? "Sending…"
-                  : resendSuccess
-                  ? "✓ Resent!"
-                  : "↩ Resend payment link"}
-              </button>
-              <p className="text-xs text-gray-400 mt-1">
-                Re-emails the customer a fresh payment link
-              </p>
-            </div>
-          )}
-
-          {/* Preview / download the invoice or receipt PDF — works for any
-              order status. Renders unpaid invoices, partial-payment receipts,
-              and paid receipts from the same artifact. Auth via the order's
-              receipt_token (guest token — staff bypass not needed). */}
+          {/* Preview / download the invoice or receipt PDF — kept inside Files tab
+              for discoverability even though the hero also has it. Same /api/receipt
+              endpoint, status auto-updates based on the payment ledger. */}
           {order.receipt_token && (
             <div>
               <a
@@ -735,137 +684,12 @@ export function StaffOrderCard({
                 📄 {order.status === "pending_payment" ? "Preview invoice PDF" : "Preview receipt PDF"}
               </a>
               <p className="text-xs text-gray-400 mt-1">
-                Opens the current PDF (status auto-updates as payments land).
+                Opens the current PDF — status auto-updates as payments land.
               </p>
             </div>
           )}
 
-          {/* Send receipt — only for paid orders */}
-          {order.status !== "pending_payment" && customer?.email && (
-            <div>
-              <button
-                onClick={() => onSendReceipt()}
-                disabled={sendingReceipt}
-                className="text-sm font-semibold px-4 py-2 rounded-lg border border-violet-400 text-violet-600 hover:bg-violet-50 disabled:opacity-50 transition-colors"
-              >
-                {sendingReceipt
-                  ? "Sending…"
-                  : receiptSent
-                  ? "✓ Receipt sent!"
-                  : "🧾 Send receipt"}
-              </button>
-              <p className="text-xs text-gray-400 mt-1">
-                Emails a payment receipt to {customer.email}
-              </p>
-            </div>
-          )}
-
-          {/* Message customer */}
-          <div>
-            <button
-              onClick={() => toggleReply()}
-              className={`text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
-                replyOpen
-                  ? "border-gray-300 bg-white text-gray-500"
-                  : "border-[#16C2F3] text-[#16C2F3] hover:bg-[#16C2F3] hover:text-white"
-              }`}
-            >
-              {replyOpen ? "✕ Close message" : "✉ Message customer"}
-            </button>
-
-            {replyOpen && (
-              <div className="mt-4 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <span className="font-semibold text-gray-400 text-xs uppercase tracking-widest">
-                    To:
-                  </span>
-                  <span className="font-medium text-gray-700">
-                    {customer?.name} &lt;{customer?.email}&gt;
-                  </span>
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    value={replySubject}
-                    onChange={(e) => setReplySubject(e.target.value)}
-                    disabled={replySent}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#16C2F3] transition-colors disabled:opacity-60"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">
-                    Message
-                  </label>
-                  <textarea
-                    value={replyMessage}
-                    onChange={(e) => setReplyMessage(e.target.value)}
-                    disabled={replySent}
-                    rows={6}
-                    placeholder={`Hi ${customer?.name ?? "there"},\n\nYour order is…`}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#16C2F3] transition-colors resize-none disabled:opacity-60 font-sans"
-                  />
-                </div>
-
-                {replyError && (
-                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                    {replyError}
-                  </p>
-                )}
-
-                {replySent ? (
-                  <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3 font-semibold">
-                    ✓ Message sent to {customer?.email}
-                  </p>
-                ) : (
-                  <button
-                    onClick={() => void sendReply()}
-                    disabled={
-                      replySending ||
-                      !replySubject.trim() ||
-                      !replyMessage.trim()
-                    }
-                    className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {replySending ? "Sending…" : "Send message →"}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Customer history */}
-          <div className="pt-2 border-t border-gray-100">
-            <CustomerHistoryWidget orderId={order.id} currentOrderId={order.id} />
-          </div>
-
-          {/* Archive / Unarchive */}
-          <div className="pt-2 border-t border-gray-100 flex items-center gap-3">
-            {!order.is_archived ? (
-              <button
-                onClick={() => onArchive(true)}
-                disabled={archiveLoading}
-                className="text-sm font-semibold px-4 py-2 rounded-lg border border-gray-200 text-gray-400 hover:border-red-200 hover:text-red-400 hover:bg-red-50 disabled:opacity-50 transition-colors"
-              >
-                {archiveLoading ? "Archiving…" : "Archive order"}
-              </button>
-            ) : (
-              <button
-                onClick={() => onArchive(false)}
-                disabled={archiveLoading}
-                className="text-sm font-semibold px-4 py-2 rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50 disabled:opacity-50 transition-colors"
-              >
-                {archiveLoading ? "Restoring…" : "↩ Unarchive order"}
-              </button>
-            )}
-            <span className="text-xs text-gray-300">Orders are never deleted</span>
-          </div>
-
-          {/* Upload proof */}
+          {/* Upload proof + sent proofs list */}
           <div>
             <button
               onClick={() => {
@@ -885,10 +709,9 @@ export function StaffOrderCard({
                   : "border-violet-400 text-violet-600 hover:bg-violet-50"
               }`}
             >
-              {proofOpen ? "✕ Close proof panel" : "🖼 Upload proof"}
+              {proofOpen ? "✕ Close proof panel" : "🖼 Send a proof to customer"}
             </button>
 
-            {/* Show list of all sent proofs */}
             {proofUrls.length > 0 && !proofOpen && (
               <div className="mt-1.5 space-y-1">
                 {proofUrls.map((url, i) => (
@@ -975,6 +798,189 @@ export function StaffOrderCard({
               </div>
             )}
           </div>
+
+          </>}{/* end FILES tab */}
+
+          {/* ─── ACTIVITY TAB ─── message customer + customer history of past orders */}
+          {activeTab === "activity" && <>
+
+          {/* Message customer */}
+          <div>
+            <button
+              onClick={() => toggleReply()}
+              className={`text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
+                replyOpen
+                  ? "border-gray-300 bg-white text-gray-500"
+                  : "border-[#16C2F3] text-[#16C2F3] hover:bg-[#16C2F3] hover:text-white"
+              }`}
+            >
+              {replyOpen ? "✕ Close message" : "✉ Message customer"}
+            </button>
+
+            {replyOpen && (
+              <div className="mt-4 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span className="font-semibold text-gray-400 text-xs uppercase tracking-widest">
+                    To:
+                  </span>
+                  <span className="font-medium text-gray-700">
+                    {customer?.name} &lt;{customer?.email}&gt;
+                  </span>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">
+                    Subject
+                  </label>
+                  <input
+                    type="text"
+                    value={replySubject}
+                    onChange={(e) => setReplySubject(e.target.value)}
+                    disabled={replySent}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#16C2F3] transition-colors disabled:opacity-60"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">
+                    Message
+                  </label>
+                  <textarea
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    disabled={replySent}
+                    rows={6}
+                    placeholder={`Hi ${customer?.name ?? "there"},\n\nYour order is…`}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#16C2F3] transition-colors resize-none disabled:opacity-60 font-sans"
+                  />
+                </div>
+
+                {replyError && (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    {replyError}
+                  </p>
+                )}
+
+                {replySent ? (
+                  <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3 font-semibold">
+                    ✓ Message sent to {customer?.email}
+                  </p>
+                ) : (
+                  <button
+                    onClick={() => void sendReply()}
+                    disabled={
+                      replySending ||
+                      !replySubject.trim() ||
+                      !replyMessage.trim()
+                    }
+                    className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {replySending ? "Sending…" : "Send message →"}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Customer history of past orders by this email */}
+          <div className="pt-2 border-t border-gray-100">
+            <CustomerHistoryWidget orderId={order.id} currentOrderId={order.id} />
+          </div>
+
+          </>}{/* end ACTIVITY tab */}
+
+          </div>{/* /tab content wrapper */}
+
+          {/* UTILITY ROW — power-user actions (status override + archive). Collapsed
+              by default so they don't compete with the hero's primary actions. */}
+          <details className="border-t border-gray-200 bg-gray-100 group">
+            <summary className="cursor-pointer px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-widest hover:text-gray-700 select-none">
+              ⚙ Order tools
+              <span className="ml-2 text-gray-400 font-normal normal-case tracking-normal">
+                · manual status override · archive
+              </span>
+            </summary>
+            <div className="px-5 pb-5 pt-1 space-y-5">
+
+              {/* Change status (manual override — any direction) */}
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                  Manual status override
+                </p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {(() => {
+                    const isPending = order.status === "pending_payment";
+                    const allowed: readonly string[] = isPending
+                      ? ["pending_payment", "payment_received"]
+                      : VALID_STATUSES;
+                    const selectValue = allowed.includes(currentOverride) ? currentOverride : order.status;
+                    return (
+                      <select
+                        value={selectValue}
+                        onChange={(e) => setOverrideStatus(e.target.value)}
+                        className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#16C2F3] bg-white transition-colors"
+                      >
+                        {VALID_STATUSES.map((s) => {
+                          const disabled = !allowed.includes(s);
+                          return (
+                            <option key={s} value={s} disabled={disabled}>
+                              {STATUS_LABELS[s]}{disabled ? " · pay first" : ""}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    );
+                  })()}
+                  <button
+                    onClick={() => onStatusUpdate(currentOverride)}
+                    disabled={isLoadingStatus || currentOverride === order.status}
+                    className="text-sm font-semibold px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isLoadingStatus ? "Updating…" : "Update →"}
+                  </button>
+                  <span className="text-xs text-gray-400">
+                    Currently:{" "}
+                    <span
+                      aria-label={`Status: ${STATUS_LABELS[order.status] ?? order.status}`}
+                      className={`font-semibold px-1.5 py-0.5 rounded ${
+                        STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {STATUS_LABELS[order.status] ?? order.status}
+                    </span>
+                  </span>
+                </div>
+                {order.status === "pending_payment" && (
+                  <p className="text-[11px] text-amber-600 mt-2">
+                    ⚠ Mark payment received before advancing — required by server guard.
+                  </p>
+                )}
+              </div>
+
+              {/* Archive / Unarchive */}
+              <div className="flex items-center gap-3">
+                {!order.is_archived ? (
+                  <button
+                    onClick={() => onArchive(true)}
+                    disabled={archiveLoading}
+                    className="text-sm font-semibold px-4 py-2 rounded-lg border border-gray-200 text-gray-400 hover:border-red-200 hover:text-red-400 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                  >
+                    {archiveLoading ? "Archiving…" : "Archive order"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => onArchive(false)}
+                    disabled={archiveLoading}
+                    className="text-sm font-semibold px-4 py-2 rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50 disabled:opacity-50 transition-colors"
+                  >
+                    {archiveLoading ? "Restoring…" : "↩ Unarchive order"}
+                  </button>
+                )}
+                <span className="text-xs text-gray-300">Orders are never deleted</span>
+              </div>
+
+            </div>
+          </details>
 
         </div>
       )}
