@@ -65,6 +65,7 @@ export const metadata: Metadata = {
       "Aluminum and ACP signs in Saskatoon from $39 or $13/sqft. 3mm composite panels for storefront, directory and building signs.",
     url: "https://truecolorprinting.ca/aluminum-signs-saskatoon",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
 };
 

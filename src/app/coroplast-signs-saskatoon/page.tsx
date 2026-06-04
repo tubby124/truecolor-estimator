@@ -14,6 +14,7 @@ export const metadata: Metadata = {
       "Coroplast sign printing in Saskatoon from $25 or $8/sqft. Yard signs, real estate, job site and election signs with local pickup.",
     url: "https://truecolorprinting.ca/coroplast-signs-saskatoon",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
 };
 

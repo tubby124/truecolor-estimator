@@ -14,6 +14,7 @@ export const metadata: Metadata = {
       "Banner printing in Saskatoon from $66 for 2×4 ft. 13oz vinyl, grommets and hemming included, local pickup, same-day rush available.",
     url: "https://truecolorprinting.ca/banner-printing-saskatoon",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
 };
 

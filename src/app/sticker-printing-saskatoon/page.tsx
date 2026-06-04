@@ -14,6 +14,7 @@ export const metadata: Metadata = {
       "Custom die-cut vinyl stickers for Saskatoon businesses. 100 for $160, 250 for $325. Waterproof, UV print, same-day rush available. Local pickup.",
     url: "https://truecolorprinting.ca/sticker-printing-saskatoon",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
 };
 
