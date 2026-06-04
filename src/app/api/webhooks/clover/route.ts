@@ -25,6 +25,7 @@ import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { summarizeOrderPayments, type OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -145,7 +146,7 @@ export async function POST(req: NextRequest) {
 
           const { data: pendingOrder, error: fetchErr } = await supabase
             .from("orders")
-            .select("id, order_number, total, status")
+            .select("id, order_number, total, status, customer_id, customers ( name, email, company )")
             .eq("payment_reference", matchRef)
             .maybeSingle();
 
@@ -184,15 +185,21 @@ export async function POST(req: NextRequest) {
           }
 
           const expectedCents = Math.round(Number(pendingOrder.total) * 100);
-          if (reportedAmountCents !== expectedCents) {
+          const orderTotalDollars = Number(pendingOrder.total);
+          const reportedDollars = reportedAmountCents / 100;
+
+          // Sanity: amount must be positive and not exceed the order total by
+          // more than a $1 tolerance (catches crafted/replay events while still
+          // allowing legitimate splits and partial payments).
+          if (reportedAmountCents <= 0 || reportedAmountCents > expectedCents + 100) {
             console.error(
-              `[clover-webhook] AMOUNT MISMATCH on ${pendingOrder.order_number}: expected ${expectedCents}¢ but Clover reported ${reportedAmountCents}¢ — NOT marking paid`
+              `[clover-webhook] BAD AMOUNT on ${pendingOrder.order_number}: Clover reported ${reportedAmountCents}¢ (order total ${expectedCents}¢) — NOT recording`
             );
             void sendTelegramNotification(
-              `⚠️ <b>Clover amount mismatch</b>\n` +
+              `⚠️ <b>Clover amount out of range</b>\n` +
               `Order <b>${escapeTelegramHtml(pendingOrder.order_number)}</b>\n` +
-              `Expected: $${(expectedCents / 100).toFixed(2)}\n` +
-              `Received: $${(reportedAmountCents / 100).toFixed(2)}\n` +
+              `Order total: $${(expectedCents / 100).toFixed(2)}\n` +
+              `Received: $${reportedDollars.toFixed(2)}\n` +
               `Order NOT marked paid — investigate in Clover dashboard.`
             ).catch(() => {});
             await logWebhookEvent({
@@ -200,10 +207,130 @@ export async function POST(req: NextRequest) {
               resourceId: paymentId ?? matchRef,
               matchedOrderId: pendingOrder.id,
               ok: false,
-              detail: `amount_mismatch: expected $${(expectedCents / 100).toFixed(2)} got $${(reportedAmountCents / 100).toFixed(2)} on order ${pendingOrder.order_number}`,
+              detail: `bad_amount: $${reportedDollars.toFixed(2)} (max $${(expectedCents / 100).toFixed(2)})`,
             });
             return NextResponse.json({ ok: true });
           }
+
+          // ── Auto-record the ledger row ───────────────────────────────────
+          // Every Clover payment lands in order_payments. Idempotent via the
+          // partial unique index on (method, external_reference) where status='recorded'.
+          // Payer defaults to the customer on the order — staff can edit later
+          // if the payer was actually someone else (split-payment workflow).
+          const orderCustomer = Array.isArray(pendingOrder.customers)
+            ? pendingOrder.customers[0]
+            : pendingOrder.customers;
+          const payerName = (orderCustomer as { name?: string | null } | null)?.name ?? null;
+          const payerCompany = (orderCustomer as { company?: string | null } | null)?.company ?? null;
+          const payerEmail = (orderCustomer as { email?: string | null } | null)?.email ?? null;
+
+          const ledgerInsert = {
+            order_id: pendingOrder.id,
+            amount: reportedDollars,
+            currency: "CAD",
+            method: "clover",
+            status: "recorded",
+            payer_name: payerName,
+            payer_company: payerCompany,
+            payer_email: payerEmail,
+            external_reference: paymentId ?? null,
+            recorded_by: "clover-webhook",
+            notes: `Auto-recorded from Clover webhook (payment ${paymentId ?? "unknown"})`,
+            metadata: { clover_payment_id: paymentId ?? null, clover_order_id: cloverOrderId ?? null },
+          };
+          const { error: ledgerInsertErr } = await supabase
+            .from("order_payments")
+            .insert(ledgerInsert);
+
+          // 23505 = unique_violation → already recorded for this Clover payment ID. Idempotent ack.
+          if (ledgerInsertErr && (ledgerInsertErr as { code?: string }).code !== "23505") {
+            console.error("[clover-webhook] ledger insert failed:", ledgerInsertErr.message);
+            void sendTelegramNotification(
+              `🚨 <b>Ledger insert failed</b>\n` +
+              `Order <b>${escapeTelegramHtml(pendingOrder.order_number)}</b> · $${reportedDollars.toFixed(2)}\n` +
+              `Customer was charged by Clover but the ledger row never landed.\n` +
+              `Error: ${escapeTelegramHtml(ledgerInsertErr.message.slice(0, 200))}\n` +
+              `Action: record the payment manually in the staff Payments tab.`
+            ).catch(() => {});
+            // Don't return — still try to update the order status as a best-effort fallback.
+          }
+
+          // Read the full ledger AFTER our insert so the sum includes this payment.
+          const { data: ledgerRows } = await supabase
+            .from("order_payments")
+            .select("amount, method, status")
+            .eq("order_id", pendingOrder.id);
+          const ledgerEntries: OrderPaymentLedgerEntry[] = ((ledgerRows ?? []) as Array<{ amount: number | string; method: string; status: string | null }>).map((r) => ({
+            amount: Number(r.amount),
+            method: r.method as OrderPaymentLedgerEntry["method"],
+            status: (r.status ?? "recorded") as OrderPaymentLedgerEntry["status"],
+          }));
+          const ledgerSummary = summarizeOrderPayments(orderTotalDollars, ledgerEntries);
+          const isFullyPaid = ledgerSummary.status === "paid" || ledgerSummary.status === "overpaid";
+
+          // If ledger sum hasn't reached order total, leave the order pending.
+          // Telegram alert tells staff a partial landed and what's left.
+          if (!isFullyPaid) {
+            console.log(
+              `[clover-webhook] partial payment recorded on ${pendingOrder.order_number}: ` +
+              `$${ledgerSummary.amountPaid.toFixed(2)} of $${orderTotalDollars.toFixed(2)} ` +
+              `(balance $${ledgerSummary.balanceDue.toFixed(2)})`
+            );
+            void sendTelegramNotification(
+              `💸 <b>Partial payment received</b>\n` +
+              `Order <b>${escapeTelegramHtml(pendingOrder.order_number)}</b>\n` +
+              `Just received: $${reportedDollars.toFixed(2)}\n` +
+              `Paid so far: $${ledgerSummary.amountPaid.toFixed(2)} of $${orderTotalDollars.toFixed(2)}\n` +
+              `Balance due: $${ledgerSummary.balanceDue.toFixed(2)}\n` +
+              `Order status stays pending until the balance is paid.`
+            ).catch(() => {});
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef,
+              matchedOrderId: pendingOrder.id,
+              ok: true,
+              detail: `partial: $${reportedDollars.toFixed(2)} recorded; ledger=$${ledgerSummary.amountPaid.toFixed(2)}/$${orderTotalDollars.toFixed(2)}`,
+            });
+
+            // Wave still needs to know about the partial — invoicePaymentCreateManual
+            // accepts partials and Wave tracks the running total per invoice. Fail-soft.
+            try {
+              const { data: pendingOrderWave } = await supabase
+                .from("orders")
+                .select("wave_invoice_id, wave_invoice_approved_at, customer_id")
+                .eq("id", pendingOrder.id)
+                .single();
+              if (pendingOrderWave?.wave_invoice_id) {
+                if (!pendingOrderWave.wave_invoice_approved_at) {
+                  await approveWaveInvoice(pendingOrderWave.wave_invoice_id);
+                  await supabase.from("orders")
+                    .update({ wave_invoice_approved_at: new Date().toISOString() })
+                    .eq("id", pendingOrder.id);
+                }
+                await recordWavePayment(
+                  pendingOrderWave.wave_invoice_id,
+                  reportedDollars,
+                  "CREDIT_CARD",
+                  `Clover card — Order ${pendingOrder.order_number} (partial)`,
+                  undefined,
+                  paymentId ?? pendingOrder.id,
+                );
+              }
+            } catch (waveErr) {
+              const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
+              console.error("[clover-webhook] Wave partial recording failed (non-fatal):", msg);
+              void sendTelegramNotification(
+                `⚠️ <b>Wave partial payment NOT recorded</b>\n` +
+                `Order <b>${escapeTelegramHtml(pendingOrder.order_number)}</b> · $${reportedDollars.toFixed(2)}\n` +
+                `Ledger has it, but Wave is out of sync for this partial.\n` +
+                `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+                `Action: open Wave, record the payment manually.`
+              ).catch(() => {});
+            }
+
+            return NextResponse.json({ ok: true });
+          }
+          // Full payment achieved — fall through to mark paid + run side effects.
 
           const { data: updatedOrders, error } = await supabase
             .from("orders")
@@ -334,13 +461,17 @@ export async function POST(req: NextRequest) {
                     ? await findCustomerByEmail(orderCustomer.email).catch(() => null)
                     : null;
 
+                  // Record THIS specific payment to Wave (not the full order total)
+                  // so the multi-payment flow doesn't double-record what the partial
+                  // branch already wrote. For single-payment flow, reportedDollars
+                  // === orderTotal so behavior is unchanged.
                   await recordWavePayment(
                     waveInvoiceId,
-                    orderTotal,
+                    reportedDollars,
                     "CREDIT_CARD",
                     `Clover card — Order ${order.order_number}`,
                     waveCustomerId ?? undefined,
-                    order.id,  // Supabase order UUID as externalId — idempotency key
+                    paymentId ?? order.id,  // unique-per-Clover-payment idempotency key
                   );
 
                   const { error: tsErr } = await supabase.from("orders")
