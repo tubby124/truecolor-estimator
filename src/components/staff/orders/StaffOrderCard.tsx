@@ -12,6 +12,12 @@ import {
 import { CustomerHistoryWidget } from "@/app/staff/orders/CustomerHistoryWidget";
 import type { Order } from "@/app/staff/orders/OrdersTable";
 import { RepriceModal } from "./RepriceModal";
+import { PaymentLedgerPanel } from "./PaymentLedgerPanel";
+
+// Feature flag — UI panel only renders when `NEXT_PUBLIC_FEATURE_PAYMENT_LEDGER=1`.
+// The migration + API routes can ship without exposing the UI; flip the env var to
+// turn it on per environment. Backend is gated by requireStaffUser() in any case.
+const PAYMENT_LEDGER_ENABLED = process.env.NEXT_PUBLIC_FEATURE_PAYMENT_LEDGER === "1";
 
 const SUPABASE_STORAGE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
 
@@ -429,6 +435,15 @@ export function StaffOrderCard({
               </p>
             </div>
           </div>
+
+          {/* Payment ledger (feature-flagged) — split / partial payments */}
+          {PAYMENT_LEDGER_ENABLED && (
+            <PaymentLedgerPanel
+              orderId={order.id}
+              orderNumber={order.order_number}
+              orderTotal={Number(order.total ?? 0)}
+            />
+          )}
 
           {/* Order items table */}
           {order.order_items && order.order_items.length > 0 && (
