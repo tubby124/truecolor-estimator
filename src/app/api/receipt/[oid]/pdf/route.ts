@@ -17,7 +17,10 @@ import type { DocumentProps } from "@react-pdf/renderer";
 import { createElement } from "react";
 import type { ReactElement } from "react";
 import { ReceiptPdf } from "@/lib/receipt/ReceiptPdf";
-import type { ReceiptPdfData } from "@/lib/receipt/ReceiptPdf";
+import type { ReceiptPdfData, ReceiptPdfPaymentLedgerEntry } from "@/lib/receipt/ReceiptPdf";
+import { createServiceClient } from "@/lib/supabase/server";
+import { summarizeOrderPayments, type OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
+import { encodePaymentToken } from "@/lib/payment/token";
 
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
@@ -120,6 +123,80 @@ export async function GET(
 
   const items = Array.isArray(order.order_items) ? order.order_items : [];
 
+  // ── Payment ledger lookup ────────────────────────────────────────────────────
+  // Used for: amountPaid + balanceDue (shown on every PDF), the per-payment
+  // ledger table (split / partial payments), and the unpaid-state Pay Now URL.
+  // Fail-soft: any lookup error falls back to amountPaid=0 so the PDF still
+  // generates (just as an invoice/order summary without ledger detail).
+  let amountPaid = 0;
+  let balanceDue = total;
+  let paymentLedger: ReceiptPdfPaymentLedgerEntry[] = [];
+  try {
+    const svc = createServiceClient();
+    const { data: rows } = await svc
+      .from("order_payments")
+      .select("amount, method, status, payer_name, payer_company, payer_email, recorded_at")
+      .eq("order_id", oid)
+      .order("recorded_at", { ascending: true });
+
+    const ledgerRows = (rows ?? []) as Array<{
+      amount: number | string;
+      method: string;
+      status: string | null;
+      payer_name: string | null;
+      payer_company: string | null;
+      payer_email: string | null;
+      recorded_at: string | null;
+    }>;
+
+    const ledgerForSummary: OrderPaymentLedgerEntry[] = ledgerRows.map((r) => ({
+      amount: Number(r.amount),
+      method: r.method as OrderPaymentLedgerEntry["method"],
+      status: (r.status ?? "recorded") as OrderPaymentLedgerEntry["status"],
+    }));
+    const summary = summarizeOrderPayments(total, ledgerForSummary);
+    amountPaid = summary.amountPaid;
+    balanceDue = summary.balanceDue;
+
+    paymentLedger = ledgerRows
+      .filter((r) => (r.status ?? "recorded") === "recorded")
+      .map((r) => ({
+        amount: Number(r.amount),
+        method: r.method,
+        payer: r.payer_company?.trim() || r.payer_name?.trim() || r.payer_email?.trim() || null,
+        recordedAt: r.recorded_at
+          ? new Date(r.recorded_at).toLocaleDateString("en-CA", {
+              timeZone: "America/Regina",
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : null,
+      }));
+  } catch (err) {
+    console.warn("[receipt/pdf] ledger lookup failed — falling back to unpaid:", err instanceof Error ? err.message : err);
+  }
+
+  // ── Pay Now URL (only when there's still a balance owing) ────────────────────
+  // Uses the same HMAC-signed payment-token pattern as the staff "resend payment
+  // link" flow so the URL survives Clover's 15-minute checkout-session expiry.
+  // Pre-payment + post-partial-payment both produce a fresh link sized to the
+  // remaining balance.
+  let payUrl: string | null = null;
+  if (balanceDue > 0.01) {
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+      const token = encodePaymentToken(
+        balanceDue,
+        `True Color Order ${order.order_number}`,
+        customer?.email ?? undefined,
+      );
+      payUrl = `${siteUrl}/pay/${token}`;
+    } catch (err) {
+      console.warn("[receipt/pdf] could not build pay URL:", err instanceof Error ? err.message : err);
+    }
+  }
+
   const data: ReceiptPdfData = {
     orderNumber: order.order_number,
     orderDate,
@@ -145,12 +222,22 @@ export async function GET(
     rushFee,
     discountCode: order.discount_code ?? null,
     discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
+    amountPaid,
+    balanceDue,
+    paymentLedger,
+    payUrl,
+    etransferEmail: balanceDue > 0.01 ? "info@true-color.ca" : null,
   };
 
   // ── Render PDF ────────────────────────────────────────────────────────────────
   try {
-    const isPaid = PAID_STATUSES.includes(order.status);
-    const titleWord = isPaid ? "Receipt" : "Order-Summary";
+    // Filename reflects ledger-derived state (matches the doc kind shown in the
+    // header) so customers and staff get a self-explanatory filename whether
+    // they're saving an invoice or a paid receipt.
+    const ledgerPaid = amountPaid >= total - 0.01;
+    const isPaid = ledgerPaid || (amountPaid <= 0.01 && PAID_STATUSES.includes(order.status));
+    const isPartial = !isPaid && amountPaid > 0.01;
+    const titleWord = isPaid ? "Receipt" : isPartial ? "Invoice-Partial" : "Invoice";
     const filename = `${titleWord}-${order.order_number}.pdf`;
 
     const element = createElement(ReceiptPdf, { data }) as ReactElement<DocumentProps>;

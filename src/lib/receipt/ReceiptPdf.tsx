@@ -28,6 +28,13 @@ export interface ReceiptPdfItem {
   line_total: number;
 }
 
+export interface ReceiptPdfPaymentLedgerEntry {
+  amount: number;
+  method: string;           // "clover" | "etransfer" | "cash" | "wave" | "other"
+  payer: string | null;     // display label (company > name > email)
+  recordedAt: string | null;
+}
+
 export interface ReceiptPdfData {
   orderNumber: string;
   orderDate: string;       // formatted: "April 8, 2026"
@@ -45,6 +52,16 @@ export interface ReceiptPdfData {
   rushFee: number;
   discountCode: string | null;
   discountAmount: number | null;
+  // Ledger-derived payment state. When the document is generated pre-payment
+  // (invoice mode) the route handler sets `amountPaid=0` and surfaces e-transfer
+  // instructions + a Clover Pay Now link. Post-payment it shows the paid badge
+  // and the ledger entries. Both share the same artifact so customers always
+  // get a consistent True Color document — see /api/receipt/[oid]/pdf.
+  amountPaid: number;
+  balanceDue: number;
+  paymentLedger: ReceiptPdfPaymentLedgerEntry[];
+  payUrl: string | null;             // Clover Pay Now link, null after paid
+  etransferEmail: string | null;     // e.g. info@true-color.ca when unpaid
 }
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -56,6 +73,14 @@ const GRAY_LIGHT = "#f9fafb";
 const GRAY_BORDER = "#e5e7eb";
 
 const PAID_STATUSES = ["payment_received", "in_production", "ready_for_pickup", "complete"];
+
+function paymentMethodLabel(method: string): string {
+  if (method === "clover") return "Card";
+  if (method === "etransfer") return "e-Transfer";
+  if (method === "cash") return "Cash";
+  if (method === "wave") return "Wave";
+  return "Other";
+}
 
 const GST_NUMBER = process.env.NEXT_PUBLIC_GST_NUMBER ?? "731454914RT0001";
 
@@ -113,6 +138,101 @@ const s = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     letterSpacing: 1,
+  },
+  partialBadge: {
+    backgroundColor: "#f59e0b",
+    color: "#ffffff",
+    fontFamily: "Helvetica-Bold",
+    fontSize: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    letterSpacing: 1,
+  },
+  unpaidBadge: {
+    backgroundColor: "#dc2626",
+    color: "#ffffff",
+    fontFamily: "Helvetica-Bold",
+    fontSize: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    letterSpacing: 1,
+  },
+
+  // Amount-due banner (unpaid / partial invoice)
+  dueBanner: {
+    marginHorizontal: 40,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#fcd34d",
+    backgroundColor: "#fffbeb",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  dueLabel: {
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    color: "#92400e",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+  },
+  dueAmount: {
+    fontSize: 18,
+    fontFamily: "Helvetica-Bold",
+    color: "#b45309",
+  },
+
+  // Pay options + ledger blocks
+  payBox: {
+    marginHorizontal: 40,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: GRAY_BORDER,
+    backgroundColor: GRAY_LIGHT,
+  },
+  payHeading: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: GRAY_MED,
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    marginBottom: 6,
+  },
+  payLine: {
+    fontSize: 9,
+    color: BRAND_DARK,
+    marginBottom: 3,
+    lineHeight: 1.4,
+  },
+  payUrlLine: {
+    fontSize: 8.5,
+    color: BRAND_CYAN,
+    marginTop: 2,
+  },
+
+  ledgerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  ledgerLeft: {
+    fontSize: 9,
+    color: BRAND_DARK,
+  },
+  ledgerAmount: {
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    color: BRAND_DARK,
   },
 
   // Title row
@@ -332,7 +452,13 @@ function itemDescription(item: ReceiptPdfItem): string {
 // ─── Document ─────────────────────────────────────────────────────────────────
 
 export function ReceiptPdf({ data }: { data: ReceiptPdfData }) {
-  const isPaid = PAID_STATUSES.includes(data.status);
+  // Document state: derived from ledger first, falls back to order.status for
+  // legacy orders that haven't been migrated to the ledger yet.
+  const ledgerPaid = data.amountPaid >= data.total - 0.01;
+  const isPaid = ledgerPaid || (data.amountPaid <= 0.01 && PAID_STATUSES.includes(data.status));
+  const isPartial = !isPaid && data.amountPaid > 0.01;
+  const docKind = isPaid ? "Payment Receipt" : isPartial ? "Invoice — Partially Paid" : "Invoice";
+  const docFileLabel = isPaid ? "Receipt" : "Invoice";
 
   const billedTo = data.customerCompany
     ? `${data.customerName} (${data.customerCompany})`
@@ -340,7 +466,7 @@ export function ReceiptPdf({ data }: { data: ReceiptPdfData }) {
 
   return (
     <Document
-      title={`Receipt — True Color Order ${data.orderNumber}`}
+      title={`${docFileLabel} — True Color Order ${data.orderNumber}`}
       author="True Color Display Printing Ltd."
     >
       <Page size="LETTER" style={s.page}>
@@ -356,15 +482,19 @@ export function ReceiptPdf({ data }: { data: ReceiptPdfData }) {
               216 33rd St W, Saskatoon SK  ·  info@true-color.ca  ·  (306) 954-8688
             </Text>
           </View>
-          {isPaid && <Text style={s.paidBadge}>PAID</Text>}
+          {isPaid ? (
+            <Text style={s.paidBadge}>PAID</Text>
+          ) : isPartial ? (
+            <Text style={s.partialBadge}>PARTIAL</Text>
+          ) : (
+            <Text style={s.unpaidBadge}>UNPAID</Text>
+          )}
         </View>
 
         {/* ── Title row ── */}
         <View style={s.titleRow}>
           <View>
-            <Text style={s.receiptTitle}>
-              {isPaid ? "Payment Receipt" : "Order Summary"}
-            </Text>
+            <Text style={s.receiptTitle}>{docKind}</Text>
             <Text style={s.receiptDate}>{data.orderDate}</Text>
           </View>
           <View>
@@ -442,6 +572,53 @@ export function ReceiptPdf({ data }: { data: ReceiptPdfData }) {
             </View>
           </View>
         </View>
+
+        {/* ── Amount due banner (only when unpaid / partial) ── */}
+        {!isPaid && (
+          <View style={s.dueBanner} wrap={false}>
+            <Text style={s.dueLabel}>Amount Due</Text>
+            <Text style={s.dueAmount}>${data.balanceDue.toFixed(2)}</Text>
+          </View>
+        )}
+
+        {/* ── Pay options (unpaid / partial) ── */}
+        {!isPaid && (
+          <View style={s.payBox} wrap={false}>
+            <Text style={s.payHeading}>Ways to pay</Text>
+            {data.payUrl && (
+              <View>
+                <Text style={s.payLine}>• Card (Clover) — pay securely online via the link below.</Text>
+                <Text style={s.payUrlLine}>{data.payUrl}</Text>
+              </View>
+            )}
+            {data.etransferEmail && (
+              <Text style={s.payLine}>
+                • Interac e-Transfer — send ${data.balanceDue.toFixed(2)} to {data.etransferEmail}. Reference order {data.orderNumber}.
+              </Text>
+            )}
+          </View>
+        )}
+
+        {/* ── Payments recorded (partial / paid with multiple entries) ── */}
+        {data.paymentLedger.length > 0 && (
+          <View style={s.payBox} wrap={false}>
+            <Text style={s.payHeading}>Payments recorded</Text>
+            {data.paymentLedger.map((entry, i) => (
+              <View key={i} style={s.ledgerRow}>
+                <Text style={s.ledgerLeft}>
+                  {entry.recordedAt ? `${entry.recordedAt}  ·  ` : ""}
+                  {paymentMethodLabel(entry.method)}
+                  {entry.payer ? `  ·  ${entry.payer}` : ""}
+                </Text>
+                <Text style={s.ledgerAmount}>${entry.amount.toFixed(2)}</Text>
+              </View>
+            ))}
+            <View style={[s.ledgerRow, { paddingTop: 6, borderBottomWidth: 0 }]}>
+              <Text style={[s.ledgerLeft, { fontFamily: "Helvetica-Bold" }]}>Total paid</Text>
+              <Text style={s.ledgerAmount}>${data.amountPaid.toFixed(2)}</Text>
+            </View>
+          </View>
+        )}
 
         {/* ── Footer ── */}
         <View style={s.footer}>
