@@ -336,7 +336,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         const data = await res.json() as { exists: boolean; name?: string; company?: string | null; phone?: string | null; orderCount?: number };
 
         // Classify against the LATEST form (read via ref, not the closure's stale value).
-        // Branches: ignore_stale_email · no_match · autofill (blanks only) · offer (typed values diverge).
+        // Branches: ignore_stale_email · no_match · offer (NEVER autofills silently).
         const action = classifyCustomerLookup(formRef.current, trimmed, data);
         switch (action.kind) {
           case "ignore_stale_email":
@@ -344,19 +344,12 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
           case "no_match":
             setCustomerLookup({ status: "new" });
             return;
-          case "autofill":
-            setForm(action.form);
-            setCustomerLookup({
-              status: "found",
-              name: action.saved.name,
-              company: action.saved.company,
-              phone: action.saved.phone,
-              orderCount: data.orderCount ?? 0,
-            });
-            return;
           case "offer":
-            // Never overwrite typed values — show a banner with the saved values
-            // and let staff explicitly accept or keep what they typed.
+            // Always show the banner — even on a blank form. The same email may be
+            // associated with multiple business contexts (e.g. a broker placing orders
+            // for several different organizations), so the staff member always picks
+            // explicitly. Banner styling differs between "no conflicts" (friendly
+            // suggestion) and "conflicts" (warning that typed values would be overwritten).
             setCustomerLookup({
               status: "offer",
               name: action.saved.name,
@@ -928,6 +921,16 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                   {pastOrdersLoading ? "Loading..." : "View past orders"}
                                 </button>
                               )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setForm((prev) => ({ ...prev, name: "", company: "", phone: "" }));
+                                  setCustomerLookup({ status: "new" });
+                                }}
+                                className="text-[11px] font-semibold text-gray-500 hover:text-gray-800 underline underline-offset-2 transition-colors"
+                              >
+                                Clear contact
+                              </button>
                             </div>
                           )}
                           {customerLookup.status === "new" && (
@@ -936,39 +939,52 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                               New customer — account will be created automatically
                             </div>
                           )}
-                          {customerLookup.status === "offer" && customerLookup.saved && (
-                            <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
-                              <div className="flex items-start gap-2">
-                                <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[12px] font-semibold text-amber-900">
-                                    Saved customer matched — different from what you typed
-                                  </p>
-                                  <div className="mt-1 text-[11px] text-amber-800 space-y-0.5">
-                                    {customerLookup.saved.name && <p>· Name: <span className="font-medium">{customerLookup.saved.name}</span></p>}
-                                    {customerLookup.saved.company && <p>· Company: <span className="font-medium">{customerLookup.saved.company}</span></p>}
-                                    {customerLookup.saved.phone && <p>· Phone: <span className="font-medium">{customerLookup.saved.phone}</span></p>}
-                                  </div>
-                                  <div className="mt-2 flex items-center gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => acceptCustomerOffer(customerLookup.saved!, customerLookup.orderCount ?? 0)}
-                                      className="text-[11px] font-semibold px-2.5 py-1 rounded-md bg-amber-600 text-white hover:bg-amber-700 transition-colors"
-                                    >
-                                      Use saved data
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => dismissCustomerOffer(customerLookup.saved!, customerLookup.orderCount ?? 0)}
-                                      className="text-[11px] font-semibold px-2.5 py-1 rounded-md border border-amber-300 text-amber-800 bg-white hover:bg-amber-100 transition-colors"
-                                    >
-                                      Keep what I typed
-                                    </button>
+                          {customerLookup.status === "offer" && customerLookup.saved && (() => {
+                            const hasConflicts = (customerLookup.conflicts?.length ?? 0) > 0;
+                            // Friendly suggestion when the form has nothing to lose; warning when
+                            // accepting would overwrite values the staff member already typed.
+                            const tone = hasConflicts
+                              ? { border: "border-amber-200", bg: "bg-amber-50", icon: "text-amber-600", title: "text-amber-900", body: "text-amber-800", primaryBtn: "bg-amber-600 hover:bg-amber-700", secondaryBtn: "border-amber-300 text-amber-800 hover:bg-amber-100" }
+                              : { border: "border-emerald-200", bg: "bg-emerald-50", icon: "text-emerald-600", title: "text-emerald-900", body: "text-emerald-800", primaryBtn: "bg-emerald-600 hover:bg-emerald-700", secondaryBtn: "border-emerald-300 text-emerald-800 hover:bg-emerald-100" };
+                            const heading = hasConflicts
+                              ? "Saved customer matched — different from what you typed"
+                              : `Saved customer for this email · ${customerLookup.orderCount ?? 0} order${(customerLookup.orderCount ?? 0) !== 1 ? "s" : ""}`;
+                            return (
+                              <div className={`mt-2 rounded-lg border ${tone.border} ${tone.bg} px-3 py-2.5`}>
+                                <div className="flex items-start gap-2">
+                                  <svg className={`w-4 h-4 mt-0.5 flex-shrink-0 ${tone.icon}`} fill="currentColor" viewBox="0 0 20 20">
+                                    {hasConflicts
+                                      ? <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                                      : <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />}
+                                  </svg>
+                                  <div className="flex-1 min-w-0">
+                                    <p className={`text-[12px] font-semibold ${tone.title}`}>{heading}</p>
+                                    <div className={`mt-1 text-[11px] ${tone.body} space-y-0.5`}>
+                                      {customerLookup.saved.name && <p>· Name: <span className="font-medium">{customerLookup.saved.name}</span></p>}
+                                      {customerLookup.saved.company && <p>· Company: <span className="font-medium">{customerLookup.saved.company}</span></p>}
+                                      {customerLookup.saved.phone && <p>· Phone: <span className="font-medium">{customerLookup.saved.phone}</span></p>}
+                                    </div>
+                                    <div className="mt-2 flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => acceptCustomerOffer(customerLookup.saved!, customerLookup.orderCount ?? 0)}
+                                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-md text-white transition-colors ${tone.primaryBtn}`}
+                                      >
+                                        Use saved data
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => dismissCustomerOffer(customerLookup.saved!, customerLookup.orderCount ?? 0)}
+                                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border bg-white transition-colors ${tone.secondaryBtn}`}
+                                      >
+                                        {hasConflicts ? "Keep what I typed" : "No thanks, start fresh"}
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
                         </div>
                         {/* Name | Company row */}
                         <div className="grid grid-cols-2 gap-3">
