@@ -4,14 +4,14 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Coroplast Yard Signs Saskatoon | $8/sqft Real Estate Signs" },
+  title: { absolute: "Coroplast Signs Saskatoon | Yard Signs from $25" },
   description:
-    "Coroplast yard signs in Saskatoon from $8/sqft — 18×24″ for $24, 4×8 ft for $232. Same-day rush +$40, H-stakes $2.50. Local pickup at 216 33rd St W.",
+    "Coroplast sign printing in Saskatoon from $25 or $8/sqft. Yard, real estate, job site and election signs. H-stakes $2.50, rush +$40.",
   alternates: { canonical: "/coroplast-signs-saskatoon" },
   openGraph: {
-    title: "Coroplast Signs Saskatoon | True Color Display Printing",
+    title: "Coroplast Signs Saskatoon | Yard Signs from $25",
     description:
-      "Coroplast yard signs from $8/sqft. Job site, real estate, and election signs. Same-day available. Saskatoon local pickup.",
+      "Coroplast sign printing in Saskatoon from $25 or $8/sqft. Yard signs, real estate, job site and election signs with local pickup.",
     url: "https://truecolorprinting.ca/coroplast-signs-saskatoon",
     type: "website",
   },

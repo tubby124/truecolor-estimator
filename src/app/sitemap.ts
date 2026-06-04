@@ -21,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/resources`, lastModified: new Date("2026-04-12"), changeFrequency: "monthly", priority: 0.6 },
 
     // ── Tier 1 SEO landing pages ──────────────────────────────────────────────
-    { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2026-05-29"), changeFrequency: "monthly", priority: 0.95 },
+    { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.95 },
     { url: `${BASE_URL}/same-day-printing-saskatoon`, lastModified: new Date("2025-11-15"), changeFrequency: "monthly", priority: 0.95 },
 
     // ── Product SEO pages (launched in batches Nov 2025 – Jan 2026) ──────────
