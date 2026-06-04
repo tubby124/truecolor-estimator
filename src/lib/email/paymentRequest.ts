@@ -48,8 +48,8 @@ export interface PaymentRequestEmailParams {
   total: number;
   paymentUrl: string;
   paymentMethod: "clover" | "wave";
-  /** True = customer reviews a quote; no payment URL, CTA invites reply to approve.
-   *  Set by /api/staff/manual-order when the staff toggles "Send quote only". */
+  /** True = quote-framed email with an Approve & Pay CTA. The paymentUrl is still required
+   *  because quote emails let the customer pay immediately to approve the quote. */
   quoteOnly?: boolean;
   notes?: string | null;
   accountInfo?: AccountInfo | null;
@@ -174,7 +174,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 
   const heroTitle = quoteOnly ? "Your Quote" : "Payment Request";
   const methodNote = quoteOnly
-    ? "Review the line items below and reply to this email — or call (306) 954-8688 — to approve. We'll send you the invoice once you confirm."
+    ? "Review the line items below. You can pay the Clover link to approve and lock in the quote, or reply to this email — or call (306) 954-8688 — if you'd like changes first."
     : paymentMethod === "wave"
       ? "You can view and pay your invoice online using the button below."
       : "Click the button below to pay securely by credit card via Clover.";

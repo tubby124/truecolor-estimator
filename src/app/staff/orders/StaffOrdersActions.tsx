@@ -29,6 +29,11 @@ import {
   FEE_PRESETS,
 } from "@/lib/constants/products";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
+import {
+  applyCustomerLookupResult,
+  applyPickedCustomer,
+  normalizeContactForSubmit,
+} from "@/lib/staff/customer-identity";
 
 // FlyerSku + the FlyerPicker now live in src/components/staff/FlyerPicker.tsx —
 // the single flyer selector shared by this modal and the /staff estimator.
@@ -191,7 +196,7 @@ interface FormState {
   phone: string;
   items: OrderItem[];
   payment_method: "clover";
-  quote_only: boolean; // true = no payment link / Wave draft only
+  quote_only: boolean; // true = quote-framed email with Clover Pay Now link; false = invoice-framed payment request
   notes: string;
 }
 
@@ -238,8 +243,8 @@ function toggleInList(current: string, value: string): string {
   return parts.join(" / ");
 }
 
-// Default is quote_only=true. Safer for staff: customer reviews the price first,
-// nobody gets surprise-billed. Staff flips to "Send Invoice Now" when they're sure.
+// Default is quote_only=true. Safer for staff: customer sees quote-framed copy,
+// can pay the Clover link to approve, or reply with changes before production starts.
 const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
@@ -267,8 +272,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const lastConsumedManualRef = useRef<string | null>(null);
 
   // Auto-open the modal when arriving from another staff page with:
-  //   ?manual=1     → invoice mode (immediate payment link)
-  //   ?manual=quote → quote-only mode (no payment link until customer approves)
+  //   ?manual=1     → invoice mode (payment request copy + Clover Pay Now link)
+  //   ?manual=quote → quote mode (quote copy + Clover Pay Now link to approve/pay)
   useEffect(() => {
     const manual = searchParams?.get("manual") ?? null;
     const isManualOpen = manual === "1" || manual === "quote";
@@ -320,14 +325,12 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         if (!res.ok) { setCustomerLookup({ status: "idle" }); return; }
         const data = await res.json() as { exists: boolean; name?: string; company?: string | null; phone?: string | null; orderCount?: number };
         if (data.exists) {
+          const result = applyCustomerLookupResult(form, trimmed, data);
+          setForm(result.form);
+          if (result.warning) {
+            console.warn(result.warning);
+          }
           setCustomerLookup({ status: "found", name: data.name, company: data.company, phone: data.phone, orderCount: data.orderCount ?? 0 });
-          // Autofill empty fields
-          setForm((prev) => ({
-            ...prev,
-            name: prev.name.trim() ? prev.name : (data.name ?? prev.name),
-            company: prev.company.trim() ? prev.company : (data.company ?? prev.company),
-            phone: prev.phone.trim() ? prev.phone : (data.phone ?? prev.phone),
-          }));
         } else {
           setCustomerLookup({ status: "new" });
         }
@@ -335,7 +338,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         setCustomerLookup({ status: "idle" });
       }
     }, 400);
-  }, []);
+  }, [form]);
 
   const runCustomerSearch = useCallback((q: string) => {
     if (customerSearchTimerRef.current) clearTimeout(customerSearchTimerRef.current);
@@ -361,16 +364,11 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   }, [runCustomerSearch]);
 
   const pickCustomer = useCallback((c: { email: string; name: string; company: string | null; phone: string | null }) => {
-    setForm((prev) => ({
-      ...prev,
-      email: c.email,
-      name: c.name || prev.name,
-      company: c.company ?? prev.company,
-      phone: c.phone ?? prev.phone,
-    }));
+    const updated = applyPickedCustomer(form, c);
+    setForm(updated);
     setCustomerLookup({ status: "found", name: c.name, company: c.company, phone: c.phone, orderCount: 0 });
     setCustomerSearchOpen(false);
-  }, []);
+  }, [form]);
 
   const fetchPastOrders = useCallback(async (email: string) => {
     const trimmed = email.trim().toLowerCase();
@@ -528,16 +526,12 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     setError(null);
 
     try {
+      const contact = normalizeContactForSubmit(form);
       const res = await fetch("/api/staff/manual-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contact: {
-            name: form.name.trim(),
-            email: form.email.trim(),
-            company: form.company.trim() || undefined,
-            phone: form.phone.trim() || undefined,
-          },
+          contact,
           items: form.items.map((it) => ({
             kind: it.kind,
             title: it.title.trim() || undefined,
@@ -706,7 +700,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                     </h2>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {form.quote_only
-                        ? "Emails the customer a quote — no payment link until you approve it"
+                        ? "Emails a quote with a Clover Pay Now link — customer can pay to approve or reply with changes"
                         : "Creates an order and emails the customer a payment link"}
                     </p>
                   </div>
@@ -784,7 +778,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             <div className="flex-1">
                               <p className="text-sm font-bold text-gray-800 leading-tight">📝 Send Quote</p>
                               <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer reviews the price. No payment link yet. <strong className="text-emerald-700">Safest — use this first.</strong>
+                                Customer reviews the price and gets a Pay Now link. They can pay to approve or reply with changes. <strong className="text-emerald-700">Safest — use this first.</strong>
                               </p>
                             </div>
                           </div>

@@ -368,7 +368,7 @@ export async function POST(req: NextRequest) {
         is_rush: false,
         payment_method: "clover_pending",
         notes: quoteOnly
-          ? `[QUOTE ONLY — Clover] ${notes?.trim() ?? "Quote sent — no payment link until customer approves"}`
+          ? `[QUOTE — Clover Pay Now] ${notes?.trim() ?? "Quote sent with Pay Now link — customer can pay to approve or reply with changes"}`
           : `[Manual Order] ${notes?.trim() ?? "Created via staff payment request"}`,
         filePaths: [],
         siteUrl,
