@@ -4,14 +4,14 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Vinyl Banner Printing Saskatoon | $8.25/sqft | True Color" },
+  title: { absolute: "Banner Printing Saskatoon | Vinyl Banners from $66" },
   description:
-    "Custom vinyl banner printing in Saskatoon from $8.25/sqft. 13oz scrim, grommets included, any size. 2×6 ft banner $90. Same-day rush +$40 flat.",
+    "Banner printing in Saskatoon from $66 for 2×4 ft or $8.25/sqft. 13oz vinyl, grommets and hemming included. Local pickup, rush +$40.",
   alternates: { canonical: "/banner-printing-saskatoon" },
   openGraph: {
-    title: "Banner Printing Saskatoon | True Color Display Printing",
+    title: "Banner Printing Saskatoon | Vinyl Banners from $66",
     description:
-      "Vinyl banners from $8.25/sqft in Saskatoon. Any size, grommets included, same-day rush available.",
+      "Banner printing in Saskatoon from $66 for 2×4 ft. 13oz vinyl, grommets and hemming included, local pickup, same-day rush available.",
     url: "https://truecolorprinting.ca/banner-printing-saskatoon",
     type: "website",
   },
