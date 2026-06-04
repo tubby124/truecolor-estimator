@@ -55,14 +55,14 @@ const designDirections = [
 ];
 
 export const metadata: Metadata = {
-  title: { absolute: "Saskatoon ACP Signs | $13/sqft, 10-Year Building Signs" },
+  title: { absolute: "Aluminum Signs Saskatoon | ACP Signs from $39" },
   description:
-    "Permanent ACP aluminum signs in Saskatoon from $13/sqft. Storefronts, directories, hoarding — 10-year lifespan, same-day rush +$40. Pickup, no shipping.",
+    "Aluminum and ACP signs in Saskatoon from $39 or $13/sqft. 3mm composite panels for storefront, directory, parking and building signs.",
   alternates: { canonical: "/aluminum-signs-saskatoon" },
   openGraph: {
-    title: "Aluminum Signs Saskatoon | True Color Display Printing",
+    title: "Aluminum Signs Saskatoon | ACP Signs from $39",
     description:
-      "ACP aluminum signs from $13/sqft. 3mm composite, 10+ year outdoor lifespan. Same-day available. Local Saskatoon pickup.",
+      "Aluminum and ACP signs in Saskatoon from $39 or $13/sqft. 3mm composite panels for storefront, directory and building signs.",
     url: "https://truecolorprinting.ca/aluminum-signs-saskatoon",
     type: "website",
   },
