@@ -29,6 +29,12 @@ import {
   FEE_PRESETS,
 } from "@/lib/constants/products";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
+import {
+  applyPickedCustomer,
+  classifyCustomerLookup,
+  normalizeContactForSubmit,
+  type SavedCustomerData,
+} from "@/lib/staff/customer-identity";
 
 // FlyerSku + the FlyerPicker now live in src/components/staff/FlyerPicker.tsx —
 // the single flyer selector shared by this modal and the /staff estimator.
@@ -36,11 +42,15 @@ import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface CustomerLookup {
-  status: "idle" | "loading" | "found" | "new";
+  status: "idle" | "loading" | "found" | "new" | "offer";
   name?: string;
   company?: string | null;
   phone?: string | null;
   orderCount?: number;
+  // When status === "offer": saved values that diverge from what staff typed.
+  // The form keeps the typed values; banner offers an explicit "Use saved" override.
+  saved?: SavedCustomerData;
+  conflicts?: Array<"name" | "company" | "phone">;
 }
 
 interface PastOrderItem {
@@ -289,6 +299,11 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const flyerSkus = useFlyerCatalog();
 
   const [customerLookup, setCustomerLookup] = useState<CustomerLookup>({ status: "idle" });
+  // formRef tracks the latest form without busting useCallback identity. The lookup
+  // debounce reads formRef.current inside its setTimeout so we never rebuild the
+  // callback on every keystroke (which would defeat the debounce).
+  const formRef = useRef(form);
+  useEffect(() => { formRef.current = form; }, [form]);
   const [pastOrdersOpen, setPastOrdersOpen] = useState(false);
   const [pastOrders, setPastOrders] = useState<PastOrder[]>([]);
   const [pastOrdersLoading, setPastOrdersLoading] = useState(false);
@@ -319,22 +334,72 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         const res = await fetch(`/api/staff/customer-lookup?email=${encodeURIComponent(trimmed)}`);
         if (!res.ok) { setCustomerLookup({ status: "idle" }); return; }
         const data = await res.json() as { exists: boolean; name?: string; company?: string | null; phone?: string | null; orderCount?: number };
-        if (data.exists) {
-          setCustomerLookup({ status: "found", name: data.name, company: data.company, phone: data.phone, orderCount: data.orderCount ?? 0 });
-          // Autofill empty fields
-          setForm((prev) => ({
-            ...prev,
-            name: prev.name.trim() ? prev.name : (data.name ?? prev.name),
-            company: prev.company.trim() ? prev.company : (data.company ?? prev.company),
-            phone: prev.phone.trim() ? prev.phone : (data.phone ?? prev.phone),
-          }));
-        } else {
-          setCustomerLookup({ status: "new" });
+
+        // Classify against the LATEST form (read via ref, not the closure's stale value).
+        // Branches: ignore_stale_email · no_match · autofill (blanks only) · offer (typed values diverge).
+        const action = classifyCustomerLookup(formRef.current, trimmed, data);
+        switch (action.kind) {
+          case "ignore_stale_email":
+            return;
+          case "no_match":
+            setCustomerLookup({ status: "new" });
+            return;
+          case "autofill":
+            setForm(action.form);
+            setCustomerLookup({
+              status: "found",
+              name: action.saved.name,
+              company: action.saved.company,
+              phone: action.saved.phone,
+              orderCount: data.orderCount ?? 0,
+            });
+            return;
+          case "offer":
+            // Never overwrite typed values — show a banner with the saved values
+            // and let staff explicitly accept or keep what they typed.
+            setCustomerLookup({
+              status: "offer",
+              name: action.saved.name,
+              company: action.saved.company,
+              phone: action.saved.phone,
+              orderCount: data.orderCount ?? 0,
+              saved: action.saved,
+              conflicts: action.conflicts,
+            });
+            return;
         }
       } catch {
         setCustomerLookup({ status: "idle" });
       }
     }, 400);
+  }, []);
+
+  // Accept the offer banner — explicit overwrite (user clicked "Use saved").
+  const acceptCustomerOffer = useCallback((saved: SavedCustomerData, orderCount: number) => {
+    setForm((prev) => applyPickedCustomer(prev, {
+      email: prev.email,
+      name: saved.name,
+      company: saved.company,
+      phone: saved.phone,
+    }));
+    setCustomerLookup({
+      status: "found",
+      name: saved.name,
+      company: saved.company,
+      phone: saved.phone,
+      orderCount,
+    });
+  }, []);
+
+  // Dismiss the offer banner — keep what staff typed.
+  const dismissCustomerOffer = useCallback((saved: SavedCustomerData, orderCount: number) => {
+    setCustomerLookup({
+      status: "found",
+      name: saved.name,
+      company: saved.company,
+      phone: saved.phone,
+      orderCount,
+    });
   }, []);
 
   const runCustomerSearch = useCallback((q: string) => {
@@ -361,13 +426,9 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   }, [runCustomerSearch]);
 
   const pickCustomer = useCallback((c: { email: string; name: string; company: string | null; phone: string | null }) => {
-    setForm((prev) => ({
-      ...prev,
-      email: c.email,
-      name: c.name || prev.name,
-      company: c.company ?? prev.company,
-      phone: c.phone ?? prev.phone,
-    }));
+    // Explicit overwrite — staff just clicked a customer in the search dropdown,
+    // so destroying typed values is intentional.
+    setForm((prev) => applyPickedCustomer(prev, c));
     setCustomerLookup({ status: "found", name: c.name, company: c.company, phone: c.phone, orderCount: 0 });
     setCustomerSearchOpen(false);
   }, []);
@@ -532,12 +593,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contact: {
-            name: form.name.trim(),
-            email: form.email.trim(),
-            company: form.company.trim() || undefined,
-            phone: form.phone.trim() || undefined,
-          },
+          contact: normalizeContactForSubmit(form),
           items: form.items.map((it) => ({
             kind: it.kind,
             title: it.title.trim() || undefined,
@@ -878,6 +934,39 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             <div className="mt-1.5 inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1 text-[11px] font-semibold text-blue-700">
                               <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
                               New customer — account will be created automatically
+                            </div>
+                          )}
+                          {customerLookup.status === "offer" && customerLookup.saved && (
+                            <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+                              <div className="flex items-start gap-2">
+                                <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[12px] font-semibold text-amber-900">
+                                    Saved customer matched — different from what you typed
+                                  </p>
+                                  <div className="mt-1 text-[11px] text-amber-800 space-y-0.5">
+                                    {customerLookup.saved.name && <p>· Name: <span className="font-medium">{customerLookup.saved.name}</span></p>}
+                                    {customerLookup.saved.company && <p>· Company: <span className="font-medium">{customerLookup.saved.company}</span></p>}
+                                    {customerLookup.saved.phone && <p>· Phone: <span className="font-medium">{customerLookup.saved.phone}</span></p>}
+                                  </div>
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => acceptCustomerOffer(customerLookup.saved!, customerLookup.orderCount ?? 0)}
+                                      className="text-[11px] font-semibold px-2.5 py-1 rounded-md bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+                                    >
+                                      Use saved data
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => dismissCustomerOffer(customerLookup.saved!, customerLookup.orderCount ?? 0)}
+                                      className="text-[11px] font-semibold px-2.5 py-1 rounded-md border border-amber-300 text-amber-800 bg-white hover:bg-amber-100 transition-colors"
+                                    >
+                                      Keep what I typed
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
