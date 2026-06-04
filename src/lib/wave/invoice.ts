@@ -220,7 +220,7 @@ export async function recordWavePayment(
   note?: string,
   _customerId?: string,      // kept for caller API compat — not used by invoicePaymentCreateManual
   _externalId?: string,      // kept for caller API compat — not used by invoicePaymentCreateManual
-): Promise<void> {
+): Promise<string | null> {
   const bankAccountId = process.env.WAVE_BANK_ACCOUNT_ID;
 
   if (!bankAccountId) {
@@ -271,8 +271,13 @@ export async function recordWavePayment(
     throw new Error(`Wave invoicePaymentCreateManual failed: ${errs}`);
   }
 
-  // Verification step: re-query the invoice to confirm it's actually marked paid.
-  // Catches the silent-success-but-actually-failed mode.
+  const invoicePaymentId = data.invoicePaymentCreateManual.invoicePayment?.id ?? null;
+  if (!invoicePaymentId) {
+    throw new Error("Wave invoicePaymentCreateManual succeeded without returning invoicePayment.id");
+  }
+
+  // Verification step: re-query the invoice to confirm Wave's invoice paid amount moved.
+  // Catches the silent-success-but-actually-failed mode for full-order payments.
   const verify = await waveQuery<{
     business: { invoice: { id: string; amountPaid: { value: string } | null } | null } | null;
   }>(
@@ -292,6 +297,8 @@ export async function recordWavePayment(
       `Wave payment created but invoice not closed: amountPaid=${amountPaid} expected>=${amount}`
     );
   }
+
+  return invoicePaymentId;
 }
 
 // --------------------------------------------------------------------------
