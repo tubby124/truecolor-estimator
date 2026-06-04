@@ -248,12 +248,13 @@ function toggleInList(current: string, value: string): string {
   return parts.join(" / ");
 }
 
-// Default is quote_only=true. Safer for staff: customer reviews the price first,
-// nobody gets surprise-billed. Staff flips to "Send Invoice Now" when they're sure.
+// quote_only is forced to false — the mode toggle was retired 2026-06-04. Every send is
+// an invoice with a Pay Now link; customers who want to pay by e-transfer get that option
+// in the email body and staff mark it paid via the payment ledger panel.
 const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
-  payment_method: "clover", quote_only: true, notes: "",
+  payment_method: "clover", quote_only: false, notes: "",
 };
 
 const MAX_ITEMS = 10;
@@ -276,15 +277,15 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   // re-renders that wipe everything the user entered).
   const lastConsumedManualRef = useRef<string | null>(null);
 
-  // Auto-open the modal when arriving from another staff page with:
-  //   ?manual=1     → invoice mode (immediate payment link)
-  //   ?manual=quote → quote-only mode (no payment link until customer approves)
+  // Auto-open the modal when arriving from another staff page with ?manual=1 or
+  // ?manual=quote. Both now open the same invoice flow — quote mode was retired
+  // 2026-06-04 along with the mode-picker UI.
   useEffect(() => {
     const manual = searchParams?.get("manual") ?? null;
     const isManualOpen = manual === "1" || manual === "quote";
     if (isManualOpen && lastConsumedManualRef.current !== manual) {
       lastConsumedManualRef.current = manual;
-      setForm({ ...EMPTY_FORM, quote_only: manual !== "1" });
+      setForm({ ...EMPTY_FORM });
       setError(null);
       setSuccess(null);
       setCustomerLookup({ status: "idle" });
@@ -613,13 +614,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         return;
       }
 
-      setSuccess({ orderNumber: data.orderNumber!, email: form.email.trim(), quoteOnly: form.quote_only });
-      showToast(
-        form.quote_only
-          ? `Quote sent to ${form.email.trim()}`
-          : `Payment request sent to ${form.email.trim()}`,
-        "success"
-      );
+      setSuccess({ orderNumber: data.orderNumber!, email: form.email.trim(), quoteOnly: false });
+      showToast(`Invoice sent to ${form.email.trim()}`, "success");
     } catch {
       setError("Network error — please check your connection and try again.");
     } finally {
@@ -751,12 +747,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                 <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                   <div>
                     <h2 className="text-lg font-bold text-[#1c1712]" data-testid="modal-title">
-                      {form.quote_only ? "Custom Quote" : "Manual Order"}
+                      Send Invoice
                     </h2>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {form.quote_only
-                        ? "Emails the customer a quote — no payment link until you approve it"
-                        : "Creates an order and emails the customer a payment link"}
+                      Emails the customer an invoice with a Pay Now link (or e-Transfer fallback).
                     </p>
                   </div>
                   <button
@@ -780,7 +774,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-[#1c1712] mb-2">
-                      {success.quoteOnly ? "Quote sent!" : "Payment request sent!"}
+                      Invoice sent!
                     </h3>
                     <p className="text-sm text-gray-500 mb-1">
                       Email sent to <span className="font-semibold text-gray-700">{success.email}</span>
@@ -808,65 +802,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                 ) : (
                   <form onSubmit={(e) => void handleSubmit(e)} className="px-6 py-5 space-y-5">
 
-                    {/* ── MODE PICKER — big two-card chooser. Default: Quote. ── */}
-                    <div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Step 1 · Pick what to send</p>
-                      <div className="grid grid-cols-2 gap-2.5">
-                        {/* QUOTE CARD */}
-                        <button
-                          type="button"
-                          onClick={() => setForm((prev) => ({ ...prev, quote_only: true }))}
-                          aria-pressed={form.quote_only}
-                          data-testid="mode-quote"
-                          className={`text-left p-3.5 rounded-xl border-2 transition-all ${
-                            form.quote_only
-                              ? "border-emerald-500 bg-emerald-50 shadow-sm"
-                              : "border-gray-200 bg-white hover:border-gray-300"
-                          }`}
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                              form.quote_only ? "border-emerald-500" : "border-gray-300"
-                            }`}>
-                              {form.quote_only && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-bold text-gray-800 leading-tight">📝 Send Quote</p>
-                              <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer reviews the price. No payment link yet. <strong className="text-emerald-700">Safest — use this first.</strong>
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-
-                        {/* INVOICE CARD */}
-                        <button
-                          type="button"
-                          onClick={() => setForm((prev) => ({ ...prev, quote_only: false }))}
-                          aria-pressed={!form.quote_only}
-                          data-testid="mode-invoice"
-                          className={`text-left p-3.5 rounded-xl border-2 transition-all ${
-                            !form.quote_only
-                              ? "border-emerald-500 bg-emerald-50 shadow-sm"
-                              : "border-gray-200 bg-white hover:border-gray-300"
-                          }`}
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                              !form.quote_only ? "border-emerald-500" : "border-gray-300"
-                            }`}>
-                              {!form.quote_only && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-bold text-gray-800 leading-tight">💳 Send Invoice</p>
-                              <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer pays now. Sends a Clover Pay Now link (or e-Transfer fallback). <strong className="text-gray-700">Use after price is agreed.</strong>
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
+                    {/* Mode picker removed 2026-06-04 — every send IS an invoice with a Pay Now link.
+                        The previous quote vs. invoice toggle was cosmetic (same backend, same email payload)
+                        and confused staff more than it helped. quote_only stays in form state set to false
+                        until the next branch retires the column entirely. */}
 
                     {/* ── CUSTOMER ── */}
                     <div>
@@ -1474,11 +1413,9 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                         Step 4 · How it&apos;s billed
                       </p>
                       <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 px-4 py-3">
-                        <p className="text-sm font-semibold text-gray-800">Clover Pay Now</p>
+                        <p className="text-sm font-semibold text-gray-800">Clover Pay Now + e-Transfer fallback</p>
                         <p className="text-[11px] text-gray-600 leading-snug mt-0.5">
-                          {form.quote_only
-                            ? "Customer gets a quote email with a Clover Pay Now button (e-Transfer to info@true-color.ca shown as fallback). They can pay to confirm or reply with changes. Your books are updated automatically when payment is confirmed."
-                            : "Customer gets a branded invoice email with a Clover Pay Now button (e-Transfer to info@true-color.ca shown as fallback). Your books are updated automatically the moment Clover confirms payment."}
+                          Customer gets a branded invoice email with a Clover Pay Now button and instructions to e-Transfer info@true-color.ca as a fallback. Card payments auto-mark the order paid the moment Clover confirms. For e-Transfers, mark the payment manually in the order&apos;s payment ledger panel.
                         </p>
                       </div>
                     </div>
@@ -1530,7 +1467,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                           </>
                         ) : (
                           <>
-                            {form.quote_only ? "Send Quote" : "Send Invoice"}
+                            Send Invoice
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>

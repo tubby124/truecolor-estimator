@@ -93,12 +93,12 @@ export default async function StaffQuotesPage() {
               Orders
             </Link>
             <Link
-              href="/staff/orders?manual=quote"
+              href="/staff/orders?manual=1"
               className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 min-h-[44px] rounded-lg transition-colors whitespace-nowrap"
-              aria-label="Build a custom quote for a job that doesn't fit the estimator"
-              title="Quote any job — type custom line items, prices, and titles. Use this for laminated foamboard, one-off cardstock prints, multi-line agency invoices, anything outside the estimator catalog."
+              aria-label="Send an invoice for a job that doesn't fit the estimator"
+              title="Invoice any job — type custom line items, prices, and titles. Use this for laminated foamboard, one-off cardstock prints, multi-line agency invoices, anything outside the estimator catalog."
             >
-              + New Quote
+              + New Invoice
             </Link>
             <Link
               href="/staff"

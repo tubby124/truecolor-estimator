@@ -229,11 +229,11 @@ export default function StaffPage() {
           <div className="flex items-center gap-3">
             <Link href="/" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">← Website</Link>
             <Link
-              href="/staff/orders?manual=quote"
+              href="/staff/orders?manual=1"
               className="text-sm font-bold text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
-              title="+ New Quote — type any line item, any price. Use this when the estimator doesn't cover the job (lamination, custom sizes, agency invoices, etc.)"
+              title="+ New Invoice — type any line item, any price, send the customer an invoice with a Pay Now link."
             >
-              + New Quote
+              + New Invoice
             </Link>
             <Link href="/staff/orders" className="text-sm text-[#16C2F3] hover:underline">Orders →</Link>
             <span className="text-xs text-[var(--muted)] font-mono hidden sm:block">v1_2026-02-24 · STAFF</span>
