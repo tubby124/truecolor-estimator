@@ -720,6 +720,26 @@ export function StaffOrderCard({
             </div>
           )}
 
+          {/* Preview / download the invoice or receipt PDF — works for any
+              order status. Renders unpaid invoices, partial-payment receipts,
+              and paid receipts from the same artifact. Auth via the order's
+              receipt_token (guest token — staff bypass not needed). */}
+          {order.receipt_token && (
+            <div>
+              <a
+                href={`/api/receipt/${order.id}/pdf?token=${order.receipt_token}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                📄 {order.status === "pending_payment" ? "Preview invoice PDF" : "Preview receipt PDF"}
+              </a>
+              <p className="text-xs text-gray-400 mt-1">
+                Opens the current PDF (status auto-updates as payments land).
+              </p>
+            </div>
+          )}
+
           {/* Send receipt — only for paid orders */}
           {order.status !== "pending_payment" && customer?.email && (
             <div>

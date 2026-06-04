@@ -54,6 +54,7 @@ export interface Order {
   file_storage_paths: string[] | null;
   is_archived: boolean;
   archived_at: string | null;
+  receipt_token: string | null;
   customers: Customer[] | Customer | null;
   order_items: OrderItem[] | null;
 }
