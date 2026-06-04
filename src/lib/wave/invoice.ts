@@ -28,6 +28,8 @@ export interface WaveInvoiceResult {
   invoiceNumber: string;
   pdfUrl: string | null;
   viewUrl: string | null;
+  /** ISO timestamp when invoice was approved in Wave. Null when invoice is still DRAFT. */
+  approvedAt: string | null;
 }
 
 // --------------------------------------------------------------------------
@@ -99,7 +101,11 @@ export async function createOrFindWaveCustomer(
 }
 
 // --------------------------------------------------------------------------
-// Public: create invoice (DRAFT — not sent)
+// Public: create invoice. Defaults to DRAFT for backwards compatibility.
+// Pass `approveImmediately: true` to auto-approve to SAVED (UNPAID) so the
+// invoice shows up in Wave's accounts-receivable view right away — needed
+// for staff-sent invoices where the customer should see a real invoice
+// document, not a draft.
 // --------------------------------------------------------------------------
 
 export async function createWaveInvoice(
@@ -111,6 +117,8 @@ export async function createWaveInvoice(
     memo?: string;
     /** Explicit invoice title override. Wins over orderNumber-based title. */
     title?: string;
+    /** When true, invoice is approved immediately after creation so it lands in A/R. */
+    approveImmediately?: boolean;
   }
 ): Promise<WaveInvoiceResult> {
   // Wave invoiceCreate requires productId (ID!) on every line item.
@@ -179,11 +187,27 @@ export async function createWaveInvoice(
   }
 
   const inv = data.invoiceCreate.invoice;
+
+  // Auto-approve when requested. Fail-soft: if approval fails (Wave hiccup,
+  // permissions, etc.) we still return a usable invoice — the reconciler cron
+  // catches stragglers and retries. This way a transient Wave error doesn't
+  // block a successful Supabase order + customer email send.
+  let approvedAt: string | null = null;
+  if (opts?.approveImmediately) {
+    try {
+      await approveWaveInvoice(inv.id);
+      approvedAt = new Date().toISOString();
+    } catch (err) {
+      console.warn(`[createWaveInvoice] auto-approve failed (non-fatal) for ${inv.id}:`, err instanceof Error ? err.message : err);
+    }
+  }
+
   return {
     invoiceId: inv.id,
     invoiceNumber: inv.invoiceNumber,
     pdfUrl: inv.pdfUrl ?? null,
     viewUrl: inv.viewUrl ?? null,
+    approvedAt,
   };
 }
 

@@ -279,19 +279,23 @@ export async function POST(req: NextRequest) {
         applyGst: true,
         applyPst: item.kind !== "fee", // PST exempt for design/rush/installation fees
       }));
+      // Staff-sent invoices auto-approve in Wave so they appear in A/R immediately.
+      // Customer sees a real invoice document (Wave viewUrl); accounting reflects
+      // the outstanding balance the same day the invoice goes out, not when it gets paid.
       const inv = await createWaveInvoice(waveCustomerId, waveLineItems, {
         orderNumber: order.order_number,
-        title: quoteOnly ? `QUOTE DRAFT — ${contact.name.trim()}` : undefined,
+        approveImmediately: true,
       });
       const { error: updErr } = await supabase
         .from("orders")
         .update({
           wave_invoice_id: inv.invoiceId,
           wave_invoice_number: inv.invoiceNumber,
+          wave_invoice_approved_at: inv.approvedAt,
         } as Record<string, unknown>)
         .eq("id", order.id);
-      if (updErr) console.error("[manual-order] wave_invoice_id/number save failed (non-fatal):", updErr.message);
-      console.log(`[manual-order] Wave draft created → order ${order.order_number} | wave_invoice_id ${inv.invoiceId} (DRAFT until paid)`);
+      if (updErr) console.error("[manual-order] wave_invoice save failed (non-fatal):", updErr.message);
+      console.log(`[manual-order] Wave invoice created → order ${order.order_number} | wave_invoice_id ${inv.invoiceId} | approved=${inv.approvedAt ? "yes" : "no"}`);
     } catch (waveErr) {
       const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
       console.error("[manual-order] Wave invoice creation failed (non-fatal):", msg);
