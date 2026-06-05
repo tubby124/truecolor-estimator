@@ -121,8 +121,6 @@ async function telegram(message) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const $ = (n) => `$${Number(n).toFixed(2)}`;
-const pad = (s, w) => String(s).padEnd(w);
-const rpad = (s, w) => String(s).padStart(w);
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
@@ -279,27 +277,44 @@ async function main() {
     console.log(`  Supabase clover_card paid: ${sbClover.length} orders, total ${$(sbCloverTotal)}`);
 
     // Greedy amount-match: each website Clover payment can satisfy at most one order.
-    const availableCents = websitePayments.map((p) => p.amount ?? 0);
+    const availableWebsitePayments = websitePayments.map((p) => ({
+      id: p.id,
+      createdTime: p.createdTime,
+      amount: p.amount ?? 0,
+      orderId: p.order?.id ?? null,
+    }));
     const sbCloverUnmatched = [];
     for (const o of sbClover) {
       const cents = Math.round(Number(o.total ?? 0) * 100);
-      const idx = availableCents.findIndex((c) => Math.abs(c - cents) <= 1); // ±1¢ rounding
+      const idx = availableWebsitePayments.findIndex((p) => Math.abs(p.amount - cents) <= 1); // ±1¢ rounding
       if (idx === -1) {
         sbCloverUnmatched.push(o);
       } else {
-        availableCents.splice(idx, 1); // consume it
+        availableWebsitePayments.splice(idx, 1); // consume it
       }
     }
 
     if (sbCloverUnmatched.length > 0) {
-      console.log(`  ❌ ${sbCloverUnmatched.length} website clover_card order(s) marked paid but NO website Clover payment of matching amount:`);
+      console.log(`  ⚠  ${sbCloverUnmatched.length} clover_card paid order(s) could not be proven by website Clover amount matching:`);
       for (const o of sbCloverUnmatched.slice(0, 5)) {
         console.log(`     • ${o.order_number}  ${$(o.total)}  paid ${o.paid_at?.slice(0, 10)}`);
       }
-      console.log(`     DANGEROUS direction — we recorded money Clover may not have collected. Verify in Clover dashboard.`);
-      issues.push(`${sbCloverUnmatched.length} website clover_card order(s) paid in Supabase with no matching Clover payment`);
+      console.log(`     Legacy/advisory direction — older manual/POS recoveries often lack order_payments ledger rows. Verify in Clover dashboard if this list changes unexpectedly.`);
+      warnings.push(`${sbCloverUnmatched.length} clover_card paid order(s) could not be proven by website Clover amount matching`);
     } else {
       console.log(`  ✅ Every website clover_card order has a matching website Clover payment`);
+    }
+
+    if (availableWebsitePayments.length > 0) {
+      console.log(`  ❌ ${availableWebsitePayments.length} website Clover payment(s) were collected but no paid Supabase clover_card order matched:`);
+      for (const p of availableWebsitePayments.slice(0, 5)) {
+        const created = p.createdTime ? new Date(p.createdTime).toISOString().slice(0, 16) : "unknown time";
+        console.log(`     • ${p.id ?? "unknown-id"}  ${$(p.amount / 100)}  ${created}  Clover order ${p.orderId ?? "unknown"}`);
+      }
+      console.log(`     DANGEROUS direction — Clover collected money but the site may still show pending/unpaid. Find the order by amount/time and recover it.`);
+      issues.push(`${availableWebsitePayments.length} website Clover payment(s) collected with no matching paid Supabase order`);
+    } else {
+      console.log(`  ✅ Every website Clover payment is represented by a paid Supabase clover_card order`);
     }
 
   } catch (cloverErr) {
@@ -317,9 +332,9 @@ async function main() {
 
   // name → max hours allowed since last run before we alert
   const CRON_WINDOWS = {
-    "reconcile-payments": 36, // daily 9 AM MT
-    "daily-payment-digest": 36, // daily 13:00 UTC
-    "payment-followup": 4, // hourly
+    "reconcile-payments": { maxHours: 36, hard: true }, // daily 9 AM MT
+    "daily-payment-digest": { maxHours: 36, hard: true }, // daily 13:00 UTC
+    "payment-followup": { maxHours: 4, hard: false }, // hourly reminder emails, not payment settlement
   };
 
   const { data: cronRows, error: cronErr } = await sb
@@ -338,17 +353,22 @@ async function main() {
     for (const row of cronRows ?? []) {
       if (!latestByName[row.cron_name]) latestByName[row.cron_name] = row;
     }
-    for (const [name, maxHours] of Object.entries(CRON_WINDOWS)) {
+    for (const [name, cfg] of Object.entries(CRON_WINDOWS)) {
+      const { maxHours, hard } = cfg;
       const last = latestByName[name];
       if (!last) {
         console.log(`  ⚠  ${name}: no run ever recorded (expected within ${maxHours}h)`);
-        issues.push(`Cron '${name}' has never recorded a heartbeat — verify it is scheduled + running`);
+        const msg = `Cron '${name}' has never recorded a heartbeat — verify it is scheduled + running`;
+        if (hard) issues.push(msg);
+        else warnings.push(msg);
         continue;
       }
       const ageHours = (Date.now() - new Date(last.ran_at).getTime()) / 3600_000;
       if (ageHours > maxHours) {
-        console.log(`  ❌ ${name}: last ran ${ageHours.toFixed(1)}h ago (window ${maxHours}h) — SILENT DEATH`);
-        issues.push(`Cron '${name}' last ran ${ageHours.toFixed(1)}h ago, exceeds ${maxHours}h window`);
+        console.log(`${hard ? "  ❌" : "  ⚠ "} ${name}: last ran ${ageHours.toFixed(1)}h ago (window ${maxHours}h) — SILENT DEATH`);
+        const msg = `Cron '${name}' last ran ${ageHours.toFixed(1)}h ago, exceeds ${maxHours}h window`;
+        if (hard) issues.push(msg);
+        else warnings.push(msg);
       } else {
         console.log(`  ✅ ${name}: last ran ${ageHours.toFixed(1)}h ago (within ${maxHours}h)`);
       }
