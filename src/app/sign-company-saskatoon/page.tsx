@@ -4,14 +4,14 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Sign Company Saskatoon | Coroplast & ACP | True Color" },
+  title: { absolute: "Sign Company Saskatoon | Signs, Banners & Decals" },
   description:
-    "Saskatoon sign company — coroplast from $8/sqft, ACP aluminum from $13/sqft, vinyl lettering, vehicle magnets. Same-day rush +$40. Print at 216 33rd St W.",
+    "Sign company in Saskatoon for coroplast signs from $25, ACP aluminum from $39, banners from $66, vehicle magnets and window decals. Local pickup.",
   alternates: { canonical: "/sign-company-saskatoon" },
   openGraph: {
-    title: "Sign Company Saskatoon | Coroplast, ACP & Vinyl | True Color",
+    title: "Sign Company Saskatoon | Signs, Banners & Decals",
     description:
-      "Full-service sign company in Saskatoon. Coroplast from $8/sqft, ACP from $13/sqft, same-day rush available. Local pickup 216 33rd St W.",
+      "Sign company in Saskatoon for coroplast signs from $25, ACP aluminum from $39, banners from $66, vehicle magnets and window decals. Local pickup.",
     url: "https://truecolorprinting.ca/sign-company-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
