@@ -2,6 +2,37 @@
 
 ---
 
+## SEO Phase 64/65 — Emergency recovery checkpoint (2026-06-05)
+
+**Trigger:** Hasan asked to update all findings after the accelerated SEO recovery push.
+
+**What shipped live June 4-5:**
+- Sticker FAQ/body expansion: `c0124c8`
+- Banner metadata rewrite: `1632223`
+- Coroplast metadata rewrite: `aeb7031`
+- Aluminum/ACP metadata rewrite: `b8a4389`
+- OG image follow-up for sticker/banner/coroplast/aluminum: `de75dcf`
+- Sign-company metadata rewrite: `80425ee`
+- Flyer metadata rewrite + OG image: `46d6e32`
+- Graphic-design logo-design body/FAQ support: `6f0adc4`
+- Wall-graphics near-me body/FAQ support: `c91c8f7`
+- Business-cards metadata rewrite to reclaim homepage cannibalization: `831b91c`
+
+**Current finding:**
+- Homepage is not currently cooked. Direct GSC rollup improved avg position from `19.55` prior 14d to `15.44` recent 14d.
+- Homepage problem is CTR + cannibalization, not collapse.
+- `business cards saskatoon` was cannibalized by homepage: homepage avg pos `8.11`, dedicated page avg pos `23.2`; fixed with `831b91c`.
+- Sticker remains the strongest DEFEND/FROZEN page; do not touch sticker title/meta despite CTR warnings.
+
+**Verification:**
+- Latest commit `831b91c` passed local ESLint, TypeScript, tests (`170/170`), build, GitHub CI, Railway deploy, live SEO curl checks, and browser smoke.
+
+**Next trigger:**
+- No more protected-page edits until at least `2026-06-12`.
+- Re-run `/tc-seo-opportunities --days=28`, direct homepage rollup, and business-card cannibalization query before next SEO wave.
+
+---
+
 ## SEO Phase 1 — Infrastructure (Pre-2026-03-12)
 - WP legacy 301 redirects (28+) in next.config.ts
 - /vinyl-banners-saskatoon → 301 → /banner-printing-saskatoon

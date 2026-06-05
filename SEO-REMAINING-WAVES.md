@@ -1,9 +1,54 @@
 # SEO Remaining Waves — truecolorprinting.ca
 
-**Last updated:** 2026-05-25
+**Last updated:** 2026-06-05
 **Full audit:** `FULL-AUDIT-REPORT.md`
 **GSC baseline (2026-03-12):** BC #1 | banner #2 | flyer #3 | sign #4 | coroplast #5
 **GSC actual (2026-04-12):** See ranking slip section below — baseline is no longer accurate
+
+---
+
+## 🚑 Emergency Recovery Checkpoint — 2026-06-05 (CURRENT TRUTH)
+
+**Status:** recovery waves shipped, deployed, and live-verified. Do not continue stacking protected-page edits until the next GSC read no earlier than **2026-06-12**.
+
+### What shipped June 4-5
+
+| Page | Commit | Wave | Live status |
+|------|--------|------|-------------|
+| `sticker-printing-saskatoon` | `c0124c8` | FAQ/body support for sticker sheet + die-cut intent | live |
+| `banner-printing-saskatoon` | `1632223` | metadata rewrite | live |
+| `coroplast-signs-saskatoon` | `aeb7031` | metadata rewrite | live |
+| `aluminum-signs-saskatoon` | `b8a4389` | metadata rewrite | live |
+| sticker/banner/coroplast/aluminum OG images | `de75dcf` | `og:image` follow-up | live |
+| `sign-company-saskatoon` | `80425ee` | metadata rewrite | live |
+| `flyer-printing-saskatoon` | `46d6e32` | metadata rewrite + `og:image` | live |
+| `graphic-design-saskatoon` | `6f0adc4` | body/FAQ support for `logo design saskatoon` | live |
+| `wall-graphics-saskatoon` | `c91c8f7` | body/FAQ support for `wall graphics near me` | live |
+| `business-cards-saskatoon` | `831b91c` | metadata rewrite to reclaim homepage cannibalization | live |
+
+### Verified
+
+- GitHub `lint-test` passed for latest commit `831b91c`.
+- Railway production deploy succeeded for latest commit `831b91c`.
+- Live HTML verified for affected pages: title, meta description, canonical, `og:image`, no accidental `noindex`, and sitemap lastmod.
+- Browser smoke passed on affected live pages with no console errors.
+
+### Current GSC read
+
+- GSC snapshot freshness: **2026-02-28 → 2026-06-01**.
+- Homepage is **not cooked**: direct rollup improved recent-vs-prior from avg pos `19.55` to `15.44`. Do not rewrite homepage metadata yet.
+- Homepage problem is **CTR + cannibalization**, not collapse:
+  - `printing near me`: homepage pos `10.68`, 53 impressions, 0 clicks.
+  - `printing saskatoon`: homepage pos `9.58`, 40 impressions, 0 clicks.
+  - `business cards saskatoon`: homepage pos `8.11`, 35 impressions, 0 clicks while dedicated page was pos `23.2`; fixed by `831b91c`.
+- Generic opportunity script still shows sticker title/CTR as the largest live issue, but sticker is DEFEND/FROZEN. Do not touch sticker title/meta.
+
+### Hold / next decision
+
+1. **Hold protected pages until 2026-06-12.** Re-run `/tc-seo-opportunities --days=28` and direct page rollups before more edits.
+2. **Watch cannibalization:** confirm `business cards saskatoon` shifts from `/` back to `/business-cards-saskatoon`.
+3. **Homepage:** audit only. If `printing near me` / `print shop saskatoon` remain high-impression, low-CTR after June 12, plan a homepage CTR/body/internal-link wave separately.
+4. **Remaining lower-priority candidates:** photo posters, vinyl lettering, postcards, foamboard, same-day printing. Do not edit before recovery pages settle.
 
 ---
 
@@ -208,7 +253,7 @@ Status: **NEW** — discovered 2026-04-12 from GSC data
 | Wave 4 — Product Schema | 4 items | **ON HOLD** — wait for coroplast/flyer recovery signal |
 | Wave 5 — Core Web Vitals | 3 items | 0/3 overdue since 2026-04-11 |
 | Wave 6 — Mobile/UX | 3 items | 0/3 overdue since 2026-04-18 |
-| Wave 7 — CTR Recovery | 6 items | PARTIAL — sticker, wall-graphics, near-me hubs still TODO |
+| Wave 7 — CTR Recovery | 6 items | PARTIAL — sticker FAQ/body, wall-graphics body/FAQ, and BC metadata shipped; homepage near-me hold until 2026-06-12 |
 
 ---
 

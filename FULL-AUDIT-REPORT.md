@@ -1,5 +1,49 @@
 # Full SEO Audit - truecolorprinting.ca
 
+## 2026-06-05 Emergency Recovery Addendum
+
+This report's scored baseline remains the 2026-05-29 audit below. The current operational truth changed on 2026-06-04/2026-06-05 after the accelerated recovery batch.
+
+### Shipped + live verified
+
+| Page | Commit | Change |
+|------|--------|--------|
+| `sticker-printing-saskatoon` | `c0124c8` | FAQ/body support for sticker-sheet + die-cut intent |
+| `banner-printing-saskatoon` | `1632223` | metadata rewrite |
+| `coroplast-signs-saskatoon` | `aeb7031` | metadata rewrite |
+| `aluminum-signs-saskatoon` | `b8a4389` | metadata rewrite |
+| sticker/banner/coroplast/aluminum | `de75dcf` | page-level `og:image` restoration |
+| `sign-company-saskatoon` | `80425ee` | metadata rewrite |
+| `flyer-printing-saskatoon` | `46d6e32` | metadata rewrite + page-level `og:image` |
+| `graphic-design-saskatoon` | `6f0adc4` | body/FAQ support for `logo design saskatoon` |
+| `wall-graphics-saskatoon` | `c91c8f7` | body/FAQ support for `wall graphics near me` |
+| `business-cards-saskatoon` | `831b91c` | metadata rewrite for homepage cannibalization |
+
+### Verification
+
+- Local: targeted ESLint, `npx tsc --noEmit`, `npm test` (`170/170`), `npm run build`.
+- CI: GitHub `lint-test` passed on `831b91c`.
+- Deploy: Railway production deploy succeeded on `831b91c`.
+- Live: affected pages verified for title, meta description, canonical, `og:image`, no `noindex`, and sitemap lastmod.
+- Browser smoke: affected live pages opened cleanly with no console/page errors.
+
+### Updated findings
+
+- Homepage is **not currently a decay page**. Direct GSC rollup improved recent-vs-prior from avg pos `19.55` to `15.44`. Do not rewrite homepage metadata yet.
+- Homepage remains a **CTR + cannibalization risk** for `printing near me`, `printing saskatoon`, and print-shop terms.
+- `business cards saskatoon` cannibalization was actionable: homepage served avg pos `8.11`, dedicated page avg pos `23.2`; `831b91c` was shipped to reclaim the query.
+- Sticker is still the strongest/most sensitive page. Current GSC flags sticker CTR/title issues, but it is DEFEND/FROZEN. Do not touch sticker title/meta.
+- Next GSC checkpoint: **2026-06-12 or later**. Re-run `/tc-seo-opportunities --days=28`, direct homepage rollup, and business-card cannibalization query before any further protected-page work.
+
+### Current next queue
+
+1. Observe recovery pages until 2026-06-12.
+2. Verify whether `business cards saskatoon` shifts from `/` to `/business-cards-saskatoon`.
+3. Decide whether homepage deserves a CTR/body/internal-link wave for `printing near me` and `print shop saskatoon`.
+4. Only after recovery pages settle: consider lower-priority candidates such as photo posters, vinyl lettering, postcards, foamboard, and same-day printing.
+
+---
+
 **Date:** 2026-05-29
 **Previous Score:** 79/100 (2026-05-25 baseline)
 **Method:** Codebase-first delta audit (3 parallel agents + inline verification; no live crawl)
