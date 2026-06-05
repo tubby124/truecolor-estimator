@@ -4,15 +4,16 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Flyer Printing Saskatoon — 100 for $45, Same-Day Rush" },
+  title: { absolute: "Flyer Printing Saskatoon | 100 Flyers from $45" },
   description:
-    "Saskatoon flyer printing from $45/100, double-sided 80lb gloss. 250 for $110, 500 for $135, 1,000 for $185. Same-day rush available. Local pickup, no shipping.",
+    "Flyer printing in Saskatoon from $45 for 100 full-colour double-sided flyers. 80lb or 100lb gloss, same-day rush +$40, local pickup.",
   alternates: { canonical: "/flyer-printing-saskatoon" },
   openGraph: {
-    title: "Flyer Printing Saskatoon | True Color Display Printing",
+    title: "Flyer Printing Saskatoon | 100 Flyers from $45",
     description:
-      "Print flyers in Saskatoon from $45/100. 80lb or 100lb gloss, double-sided, same-day rush available.",
+      "Flyer printing in Saskatoon from $45 for 100 full-colour double-sided flyers. 80lb or 100lb gloss, same-day rush +$40, local pickup.",
     url: "https://truecolorprinting.ca/flyer-printing-saskatoon",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
   },
 };
