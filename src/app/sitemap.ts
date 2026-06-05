@@ -26,7 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // ── Product SEO pages (launched in batches Nov 2025 – Jan 2026) ──────────
     { url: `${BASE_URL}/banner-printing-saskatoon`, lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/business-cards-saskatoon`, lastModified: new Date("2026-05-29"), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${BASE_URL}/business-cards-saskatoon`, lastModified: new Date("2026-06-05"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/vehicle-magnets-saskatoon`, lastModified: new Date("2026-05-20"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/vehicle-decals-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/aluminum-signs-saskatoon`, lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.85 },

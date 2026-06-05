@@ -4,15 +4,16 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Business Cards Saskatoon — 250 for $45, Next-Day Pickup" },
+  title: { absolute: "Business Cards Saskatoon | 250 Cards from $45" },
   description:
-    "250 double-sided business cards in Saskatoon for $45 — 14pt gloss, same-day rush +$40, pickup at 216 33rd St W. In-house designer $35 flat, proof same day.",
+    "Business card printing in Saskatoon from $45 for 250 double-sided 14pt gloss cards. Same-day rush +$40, in-house design $35, local pickup.",
   alternates: { canonical: "/business-cards-saskatoon" },
   openGraph: {
-    title: "Business Cards Saskatoon | True Color Display Printing",
+    title: "Business Cards Saskatoon | 250 Cards from $45",
     description:
-      "250 business cards from $45. Double-sided 14pt gloss. Same-day rush. Local Saskatoon pickup.",
+      "Business card printing in Saskatoon from $45 for 250 double-sided 14pt gloss cards. Same-day rush +$40, in-house design $35, local pickup.",
     url: "https://truecolorprinting.ca/business-cards-saskatoon",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
   },
 };
