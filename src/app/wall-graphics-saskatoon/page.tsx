@@ -74,6 +74,13 @@ export default function WallGraphicsSaskatoonPage() {
             same-day proof.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
+            If you searched for wall graphics near me, the useful question is whether the shop can
+            print, proof, and prep the panels locally without shipping delays. True Color prints wall
+            graphics in Saskatoon from $11/sqft, prepares install-ready panels with overlap notes,
+            and offers installation service starting at $75 for local jobs. Pickup is at 216 33rd St W,
+            with same-day rush available for +$40 flat when the schedule allows.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-6">
             If you only need text on glass or a painted surface —{" "}
             <Link href="/vinyl-lettering-saskatoon" className="text-[#16C2F3] underline font-medium">
               vinyl lettering
@@ -135,6 +142,18 @@ export default function WallGraphicsSaskatoonPage() {
         {
           q: "Can you print custom wall graphics in Saskatoon?",
           a: "Yes — True Color prints full-colour custom wall graphics in-house on our Roland UV printer. Any design, any size up to 60\" wide, from $11/sqft. Our in-house designer can build your layout from a rough concept, match brand colours, and provide a to-scale digital proof before printing for $35 flat.",
+        },
+        {
+          q: "Where can I get wall graphics near me in Saskatoon?",
+          a: "True Color prints wall graphics locally at 216 33rd St W in Saskatoon from $11/sqft. We handle proofing, panel setup, local pickup, and installation service starting at $75 for most Saskatoon jobs.",
+        },
+        {
+          q: "Can you make wall graphics install-ready?",
+          a: "Yes. We prepare wall graphics as install-ready vinyl panels with scale checks, overlap notes, and a digital proof before printing. Design setup is $35 flat, wall graphics start at $11/sqft, and same-day rush is +$40 flat when production capacity is available.",
+        },
+        {
+          q: "How should I prepare my wall before installing graphics?",
+          a: "Clean, smooth, fully cured paint gives the best result for removable wall graphics from $11/sqft. Avoid fresh paint, dust, texture, and moisture; if the wall is rough or high-risk, ask about installation service starting at $75 before printing.",
         },
         {
           q: "Do you print wall coverings in Saskatoon?",
