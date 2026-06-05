@@ -58,6 +58,8 @@ const DAYS = (() => {
 const SEND_TELEGRAM = process.argv.includes("--telegram");
 
 const cutoff = new Date(Date.now() - DAYS * 86_400_000).toISOString();
+const orderLookupCutoff = new Date(Date.now() - Math.max(DAYS + 60, 90) * 86_400_000).toISOString();
+const PAID_STATUSES = new Set(["payment_received", "in_production", "ready_for_pickup", "complete"]);
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const sb = createClient(
@@ -129,19 +131,25 @@ async function main() {
   const warnings = []; // works-but-confirm → reported, exit stays 0
   let exitCode = 0;
 
-  // ── 1. Supabase: all paid orders in window ────────────────────────────────
-  console.log("Fetching Supabase paid orders…");
-  const { data: sbOrders, error: sbErr } = await sb
+  // ── 1. Supabase: paid / paid-like orders ──────────────────────────────────
+  // Pull a wider created_at window than the report window. Customers can pay an
+  // old payment request weeks later, and Clover only gives us payment time.
+  // The report window below still uses paid_at/created_at, but matching needs
+  // enough historical order context to avoid false orphan-payment alarms.
+  console.log("Fetching Supabase paid / paid-like orders…");
+  const { data: sbOrderCandidates, error: sbErr } = await sb
     .from("orders")
-    .select("order_number, total, payment_method, paid_at, status, wave_invoice_id, wave_payment_recorded_at, payment_reference")
-    .not("paid_at", "is", null)
-    .gte("paid_at", cutoff)
+    .select("order_number, total, payment_method, paid_at, status, created_at, wave_invoice_id, wave_payment_recorded_at, payment_reference")
+    .gte("created_at", orderLookupCutoff)
     .not("order_number", "like", "TEST-%")  // exclude harness test rows
-    .order("paid_at", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (sbErr) throw new Error(`Supabase: ${sbErr.message}`);
 
-  const sbAll = sbOrders ?? [];
+  const isInWindow = (o) =>
+    (o.paid_at && new Date(o.paid_at).getTime() >= new Date(cutoff).getTime()) ||
+    (PAID_STATUSES.has(o.status) && new Date(o.created_at).getTime() >= new Date(cutoff).getTime());
+  const sbAll = (sbOrderCandidates ?? []).filter(isInWindow);
   const sbClover = sbAll.filter((o) => o.payment_method === "clover_card");
   const sbWave = sbAll.filter((o) => o.payment_method === "wave");
   const sbEtransfer = sbAll.filter((o) => o.payment_method === "etransfer");
@@ -154,6 +162,17 @@ async function main() {
   console.log(`    etransfer   : ${sbEtransfer.length} orders ${$(sum(sbEtransfer))}`);
   console.log(`    wave        : ${sbWave.length} orders ${$(sum(sbWave))}`);
   if (sbOther.length) console.log(`    other       : ${sbOther.length} orders ${$(sum(sbOther))}`);
+
+  const paidStatusMissingPaidAt = sbAll.filter((o) => PAID_STATUSES.has(o.status) && !o.paid_at);
+  if (paidStatusMissingPaidAt.length) {
+    console.log(`\n  ❌ ${paidStatusMissingPaidAt.length} paid-status order(s) have paid_at NULL:`);
+    for (const o of paidStatusMissingPaidAt.slice(0, 10)) {
+      console.log(`     • ${o.order_number}  ${$(o.total)}  ${o.payment_method}  status=${o.status}  created ${o.created_at?.slice(0, 10)}`);
+    }
+    issues.push(`${paidStatusMissingPaidAt.length} paid-status order(s) missing paid_at — dashboards/receipt logic can falsely treat them as settled`);
+  } else {
+    console.log(`  ✅ Every paid-status order in scope has paid_at set`);
+  }
 
   // ── 1a. Wave income booked? THE authoritative signal ──────────────────────
   // Staff never manually mark Wave invoices paid (esp. e-transfer/cash), so Wave
@@ -276,21 +295,24 @@ async function main() {
     console.log(`    POS walk-in (device): ${walkInPayments.length}, total ${$(walkInTotal)} — out of scope, not flagged`);
     console.log(`  Supabase clover_card paid: ${sbClover.length} orders, total ${$(sbCloverTotal)}`);
 
-    // Greedy amount-match: each website Clover payment can satisfy at most one order.
-    const availableWebsitePayments = websitePayments.map((p) => ({
+    // Forward check: paid site clover_card orders should be explainable by a
+    // website Clover payment. This remains advisory because older manual/POS
+    // recoveries predate the ledger and sometimes only have amount/time clues.
+    const availableWebsitePaymentsForForward = websitePayments.map((p) => ({
       id: p.id,
       createdTime: p.createdTime,
       amount: p.amount ?? 0,
       orderId: p.order?.id ?? null,
     }));
     const sbCloverUnmatched = [];
-    for (const o of sbClover) {
+    const cloverMatchOrders = (sbOrderCandidates ?? []).filter((o) => o.payment_method === "clover_card" && (o.paid_at || PAID_STATUSES.has(o.status)));
+    for (const o of cloverMatchOrders) {
       const cents = Math.round(Number(o.total ?? 0) * 100);
-      const idx = availableWebsitePayments.findIndex((p) => Math.abs(p.amount - cents) <= 1); // ±1¢ rounding
+      const idx = availableWebsitePaymentsForForward.findIndex((p) => Math.abs(p.amount - cents) <= 1); // ±1¢ rounding
       if (idx === -1) {
-        sbCloverUnmatched.push(o);
+        if (isInWindow(o)) sbCloverUnmatched.push(o);
       } else {
-        availableWebsitePayments.splice(idx, 1); // consume it
+        availableWebsitePaymentsForForward.splice(idx, 1); // consume it
       }
     }
 
@@ -305,16 +327,63 @@ async function main() {
       console.log(`  ✅ Every website clover_card order has a matching website Clover payment`);
     }
 
-    if (availableWebsitePayments.length > 0) {
-      console.log(`  ❌ ${availableWebsitePayments.length} website Clover payment(s) were collected but no paid Supabase clover_card order matched:`);
-      for (const p of availableWebsitePayments.slice(0, 5)) {
+    // Reverse check: every website Clover payment should be represented by a
+    // paid / paid-like order somewhere in the wider order lookup window. Match
+    // by ledger reference first, then by amount + temporal proximity. This is
+    // the critical direction that catches "Clover collected, site still pending".
+    const paidLikeOrdersForReverse = (sbOrderCandidates ?? []).filter(
+      (o) => o.paid_at || PAID_STATUSES.has(o.status)
+    );
+    const websitePaymentsWithoutPaidOrder = [];
+    const websitePaymentsAmbiguous = [];
+    const websitePaymentsMatchedNonClover = [];
+    for (const p of websitePayments) {
+      const amountCents = p.amount ?? 0;
+      const createdMs = Number(p.createdTime ?? 0);
+      const candidates = paidLikeOrdersForReverse.filter((o) => {
+        const amountMatches = Math.abs(Math.round(Number(o.total ?? 0) * 100) - amountCents) <= 1;
+        if (!amountMatches) return false;
+        const anchors = [o.paid_at, o.created_at].filter(Boolean).map((d) => new Date(d).getTime());
+        return anchors.some((t) => Math.abs(t - createdMs) <= 45 * 86_400_000);
+      });
+      if (candidates.length === 0) {
+        websitePaymentsWithoutPaidOrder.push({ payment: p, candidates });
+      } else if (candidates.length > 1) {
+        websitePaymentsAmbiguous.push({ payment: p, candidates });
+      } else if (candidates[0].payment_method !== "clover_card") {
+        websitePaymentsMatchedNonClover.push({ payment: p, order: candidates[0] });
+      }
+    }
+
+    if (websitePaymentsWithoutPaidOrder.length > 0) {
+      console.log(`  ❌ ${websitePaymentsWithoutPaidOrder.length} website Clover payment(s) were collected but no paid Supabase order matched:`);
+      for (const row of websitePaymentsWithoutPaidOrder.slice(0, 5)) {
+        const p = row.payment;
         const created = p.createdTime ? new Date(p.createdTime).toISOString().slice(0, 16) : "unknown time";
-        console.log(`     • ${p.id ?? "unknown-id"}  ${$(p.amount / 100)}  ${created}  Clover order ${p.orderId ?? "unknown"}`);
+        console.log(`     • ${p.id ?? "unknown-id"}  ${$(Number(p.amount ?? 0) / 100)}  ${created}  Clover order ${p.order?.id ?? "unknown"}`);
       }
       console.log(`     DANGEROUS direction — Clover collected money but the site may still show pending/unpaid. Find the order by amount/time and recover it.`);
-      issues.push(`${availableWebsitePayments.length} website Clover payment(s) collected with no matching paid Supabase order`);
+      issues.push(`${websitePaymentsWithoutPaidOrder.length} website Clover payment(s) collected with no matching paid Supabase order`);
     } else {
-      console.log(`  ✅ Every website Clover payment is represented by a paid Supabase clover_card order`);
+      console.log(`  ✅ Every website Clover payment is represented by a paid Supabase order`);
+    }
+
+    if (websitePaymentsAmbiguous.length > 0) {
+      console.log(`  ⚠  ${websitePaymentsAmbiguous.length} website Clover payment(s) match multiple paid Supabase orders by amount/time:`);
+      for (const row of websitePaymentsAmbiguous.slice(0, 5)) {
+        const p = row.payment;
+        console.log(`     • ${p.id ?? "unknown-id"}  ${$(Number(p.amount ?? 0) / 100)}  candidates: ${row.candidates.map((o) => o.order_number).join(", ")}`);
+      }
+      warnings.push(`${websitePaymentsAmbiguous.length} website Clover payment(s) have ambiguous paid-order matches`);
+    }
+
+    if (websitePaymentsMatchedNonClover.length > 0) {
+      console.log(`  ⚠  ${websitePaymentsMatchedNonClover.length} website Clover payment(s) match paid orders whose payment_method is not clover_card:`);
+      for (const row of websitePaymentsMatchedNonClover.slice(0, 5)) {
+        const p = row.payment;
+        console.log(`     • ${p.id ?? "unknown-id"}  ${$(Number(p.amount ?? 0) / 100)}  → ${row.order.order_number} (${row.order.payment_method})`);
+      }
+      warnings.push(`${websitePaymentsMatchedNonClover.length} website Clover payment(s) matched non-clover payment_method orders`);
     }
 
   } catch (cloverErr) {
