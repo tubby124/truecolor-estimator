@@ -46,4 +46,35 @@ describe("UTM attribution helpers", () => {
 
     expect(parseUtmCookie(`${UTM_COOKIE_NAME}=${cookiePayload}`)).toEqual({});
   });
+
+  it("preserves landing_path and landing_referrer from the first-touch cookie", () => {
+    const cookiePayload = encodeURIComponent(JSON.stringify({
+      landing_path: "/products/vinyl-banners",
+      landing_referrer: "https://www.google.com/",
+      captured_at: Date.now(),
+    }));
+
+    expect(parseUtmCookie(`${UTM_COOKIE_NAME}=${cookiePayload}`)).toEqual({
+      landing_path: "/products/vinyl-banners",
+      landing_referrer: "https://www.google.com/",
+    });
+  });
+
+  it("merges landing_referrer from cookie alongside explicit utm hints", () => {
+    const cookiePayload = encodeURIComponent(JSON.stringify({
+      landing_path: "/coroplast-signs-saskatoon",
+      landing_referrer: "https://maps.google.com/",
+      captured_at: Date.now(),
+    }));
+
+    const merged = mergeUtmAttribution(
+      { utm_source: "brevo", utm_campaign: "spring_drip" },
+      `${UTM_COOKIE_NAME}=${cookiePayload}`,
+    );
+
+    expect(merged.utm_source).toBe("brevo");
+    expect(merged.utm_campaign).toBe("spring_drip");
+    expect(merged.landing_path).toBe("/coroplast-signs-saskatoon");
+    expect(merged.landing_referrer).toBe("https://maps.google.com/");
+  });
 });

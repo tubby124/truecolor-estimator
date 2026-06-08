@@ -20,6 +20,7 @@
     "harness:reconcile:7d": "node scripts/harness/reconcile-check.mjs --days 7",
     "harness:config": "node scripts/harness/config-check.mjs",
     "harness:config:local": "node scripts/harness/config-check.mjs --base http://localhost:3000",
+    "harness:journey": "node scripts/harness/customer-journey.mjs",
     "test:e2e:pw": "playwright test",
     "test:e2e:pw:ui": "playwright test --ui"
   },

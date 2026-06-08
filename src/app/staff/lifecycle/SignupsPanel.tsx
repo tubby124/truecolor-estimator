@@ -21,12 +21,48 @@ export interface SignupRow {
   account_ready_email_sent: boolean;
   coupon_issued: boolean;
   coupon_redeemed: boolean;
+  // Attribution from their first order (null if no order placed yet)
+  first_order_source: string | null;          // referrer_source — google, google-maps, chatgpt, direct, internal, etc.
+  first_order_medium: string | null;          // referrer_medium — organic, local, ai-search, direct, etc.
+  first_order_utm_source: string | null;
+  first_order_utm_campaign: string | null;
+  first_order_raw_referrer: string | null;    // full URL for tooltip
 }
 
 function fmtAge(hours: number): string {
   if (hours < 1) return `${Math.round(hours * 60)}m`;
   if (hours < 24) return `${Math.round(hours)}h`;
   return `${Math.round(hours / 24)}d`;
+}
+
+function SourceChip({ row }: { row: SignupRow }) {
+  const src = row.first_order_source;
+  const med = row.first_order_medium;
+  const campaign = row.first_order_utm_campaign;
+  const utmSrc = row.first_order_utm_source;
+  if (!src) {
+    return <span className="text-xs text-gray-400">—</span>;
+  }
+  const color =
+    med === "ai-search" ? "bg-purple-100 text-purple-800" :
+    med === "local" ? "bg-emerald-100 text-emerald-800" :
+    med === "organic" ? "bg-sky-100 text-sky-800" :
+    med === "social" ? "bg-pink-100 text-pink-800" :
+    med === "direct" ? "bg-gray-100 text-gray-700" :
+    med === "referral" ? "bg-amber-100 text-amber-800" :
+    "bg-gray-100 text-gray-600";
+  const label = utmSrc && utmSrc !== src ? `${utmSrc}` : src;
+  const title = [
+    `source: ${src}`,
+    med ? `medium: ${med}` : null,
+    campaign ? `campaign: ${campaign}` : null,
+    row.first_order_raw_referrer ? `from: ${row.first_order_raw_referrer}` : null,
+  ].filter(Boolean).join("\n");
+  return (
+    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium ${color}`} title={title}>
+      {label}{campaign ? ` · ${campaign}` : ""}
+    </span>
+  );
 }
 
 function Pip({ ok, label, muted }: { ok: boolean; label: string; muted?: boolean }) {
@@ -78,6 +114,7 @@ export function SignupsPanel({ signups }: { signups: SignupRow[] }) {
           <thead className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
             <tr>
               <th className="px-3 py-2 text-left font-semibold">Customer</th>
+              <th className="px-3 py-2 text-left font-semibold" title="First-order traffic source (referrer or utm)">Source</th>
               <th className="px-3 py-2 text-center font-semibold" title="Welcome email sent">Welcome</th>
               <th className="px-3 py-2 text-center font-semibold" title="Account-ready email sent">Acct Ready</th>
               <th className="px-3 py-2 text-center font-semibold" title="Coupon issued (pending discount on account)">Coupon</th>
@@ -94,6 +131,7 @@ export function SignupsPanel({ signups }: { signups: SignupRow[] }) {
                   <div className="font-medium text-gray-900 truncate max-w-[200px]">{s.name || "—"}</div>
                   <Link href={`/staff/lifecycle/customer/${encodeURIComponent(s.email)}`} className="text-xs text-blue-700 hover:underline truncate max-w-[200px] block">{s.email}</Link>
                 </td>
+                <td className="px-3 py-2"><SourceChip row={s} /></td>
                 <td className="px-3 py-2 text-center"><Pip ok={s.welcome_email_sent} label="Welcome" /></td>
                 <td className="px-3 py-2 text-center"><Pip ok={s.account_ready_email_sent} label="Account ready" /></td>
                 <td className="px-3 py-2 text-center"><Pip ok={s.coupon_issued} label="Coupon issued" /></td>
