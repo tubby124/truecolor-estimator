@@ -1,5 +1,87 @@
 # Full SEO Audit - truecolorprinting.ca
 
+## 2026-06-08 Codebase Delta Audit (current)
+
+**Date:** 2026-06-08
+**Previous score:** 79/100 (2026-05-29 baseline)
+**Method:** Codebase-first delta audit, 3 parallel agents, no live crawl.
+**Operator context:** Live website orders are increasing (recent paid order TC-2026-0130 closed in 64 seconds signup-to-paid). Attribution capture fix shipped to main today (commit `4904317`) so future orders will record true upstream source (Google / Maps / ChatGPT / direct) instead of "internal".
+
+### SEO Health Score: 80 / 100 (+1 net from 2026-05-29)
+
+| Category | Weight | 2026-05-29 | 2026-06-08 | Δ | Weighted |
+|----------|--------|------------|------------|---|----------|
+| Technical SEO | 25% | 78 | 77 | −1 | 19.25 |
+| Content Quality | 25% | 79 | 80 | +1 | 20.00 |
+| On-Page SEO | 20% | 78 | 81 | +3 | 16.20 |
+| Schema / Structured Data | 10% | 70 | **78** | **+8** | 7.80 |
+| Performance (CWV) | 10% | 77 | 77 | 0 | 7.70 |
+| Images | 5% | 92 | 92 | 0 | 4.60 |
+| AI Search Readiness | 5% | 92 | 91 | −1 | 4.55 |
+| **TOTAL** | 100% | **79** | **80** | **+1 net** | **80.10** |
+
+**Headline:** The aggregateRating regression that bled −8 from Schema on 2026-05-29 is **fully restored** (commit `de75dcf` era), now pulling `RATING_VALUE` + `REVIEW_COUNT` from `src/lib/reviews` with Stop-hook Category G protection so it can't get stripped again. That recovery alone offsets two minor new findings. The 10-page recovery wave from 2026-06-04/05 holds clean — zero price drift, all titles/metadata within length caps except one root-level meta description.
+
+### RESOLVED since 2026-05-29
+
+| Item | Was | Now | Wave |
+|------|-----|-----|------|
+| **aggregateRating in layout.tsx** | **REMOVED (regression from `7ab5e48`)** | **RESTORED — single-source from `@/lib/reviews`, hook-guarded** | Schema |
+| 10 recovery-wave page metadata | Stale / off-spec | All 9 audited pages within length caps, no price drift, FAQ counts ≥8 (sticker = 15, wall-graphics = 12, graphic-design = 10) | On-Page / Content |
+| Service schema `url` field on IndustryPage | Missing | Present (conditional on canonicalSlug) | Schema |
+| Sitemap discipline | 56 pages on 2026-05-29 | 86 entries, all hardcoded lastmod, `/products/*` excluded with comment | Technical |
+| AI bot allowlist | Adequate | Comprehensive: GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, anthropic-ai, Google-Extended, Gemini-Web, Applebot-Extended, Bytespider, cohere-ai, meta-externalagent, Amazonbot, YouBot, Diffbot, CCBot | AI Search |
+| Image weight | poster-concert-music.jpg was over 500KB on 2026-04 audit | Zero files >500KB. 3 .jpg files in agribusiness/poster-printing 400-500KB band (not LCP) | Images |
+| Attribution capture | Recorded "internal" on 2/3 paid orders | Captures true upstream (landing_path + document.referrer in cookie, classified server-side, surfaced on `/staff/lifecycle` Signups panel) | Attribution / Backlog |
+
+### NEW / PENDING in this audit
+
+| # | Issue | File | Severity | Wave |
+|---|-------|------|----------|------|
+| **N1** | Root meta description = 172 chars (cap is 155) | `src/app/layout.tsx` (line 61–62) | MEDIUM | Wave A — root-level only, 1-line trim |
+| **N2** | WebSite schema missing `SearchAction` | `src/app/layout.tsx` (line 131–140) | LOW | Wave B — adds sitelinks search box eligibility |
+| **N3** | FAQPage schema absent on IndustryPage (FAQs render as `<details>` only) | `src/components/site/IndustryPage.tsx` | LOW | Wave B — note rich results restricted since Aug 2023, still helpful for knowledge graph |
+| **N4** | Product schema absent on IndustryPage | `src/components/site/IndustryPage.tsx` | LOW | Wave C — Product schema requires real Offer (price + availability); design pass needed |
+| **N5** | `graphic-design-saskatoon` is the weakest recovery-wave page: description-string only (no descriptionNode), no DesignDirectionGrid, **zero internal links** (seo-standards requires ≥2) | `src/app/graphic-design-saskatoon/page.tsx` | MEDIUM | Wave A — internal-link backfill, NOT a title change |
+| N6 | `wall-graphics-saskatoon` has descriptionNode but no DesignDirectionGrid (asymmetric with peers) | `src/app/wall-graphics-saskatoon/page.tsx` | LOW | Wave C |
+| N7 | `aluminum-signs-saskatoon` meta description = 137 chars (under 140 band, room to expand) | `src/app/aluminum-signs-saskatoon/page.tsx` | LOW | DEFER — page is in recovery cooldown until 2026-06-12 |
+| N8 | llms.txt missing 13 SEO landing pages from "Key Service Pages" block (aluminum-signs, sign-company, agriculture-signs, agribusiness-signs-saskatchewan, mothers-day-printing, poster-printing, graduation-banners, retail-signs, restaurant-signs, election-signs, event-banners, signs-yorkton-sk, business-cards-moose-jaw-sk) | `public/llms.txt` | LOW | Wave B — backfill, no SEO page edit |
+| N9 | HeroSlider fully `"use client"` — no server-rendered slide 0 for LCP | `src/components/home/HeroSlider.tsx` | MEDIUM | Performance backlog — stable, not regressed |
+| N10 | GTM uses `strategy="lazyOnload"` — GA4 fires only after first user interaction, may under-report bounce / immediate-exit traffic | `src/app/layout.tsx` (line 281–283) | LOW | Verify intent (perf wins vs analytics fidelity tradeoff). Cross-check against ga4-sync cron output |
+| N11 | 3 .jpg files remain in /images/industries/agribusiness/ and /images/industries/poster-printing/ (400–500KB, .webp conversion would save ~60%) | `public/images/industries/...` | LOW | Wave C |
+| N12 | 2 seasonal pages orphaned from footer: ramadan-eid-banners-saskatoon, st-patricks-day-printing-saskatoon | `src/components/site/SiteFooter.tsx` | INFO | Likely intentional (out-of-season). Confirm with owner. |
+
+### What's protected (DO NOT TOUCH until 2026-06-12)
+
+Per `.claude/rules/truecolor-seo-safety.md` and the emergency recovery addendum: hold all protected ranking pages until the next GSC checkpoint. That means no title/H1/slug/meta-keyword edits on:
+- business-cards-saskatoon
+- banner-printing-saskatoon
+- flyer-printing-saskatoon
+- coroplast-signs-saskatoon
+- sign-company-saskatoon
+- aluminum-signs-saskatoon
+- sticker-printing-saskatoon (FROZEN/DEFEND — strongest page, 780 impressions/28d)
+- vinyl-lettering-saskatoon
+- graphic-design-saskatoon (recovery)
+- wall-graphics-saskatoon (recovery)
+
+Wave-guard hook in `scripts/hooks/seo-wave-guard.mjs` will physically block any commit that violates the one-page-per-commit rule.
+
+### Top 3 actions for the next wave (Wave A — non-blocked items)
+
+These three are SAFE to ship before 2026-06-12 because none of them touch a protected ranking page's title, H1, slug, or schema-on-page combo:
+
+1. **Trim root meta description from 172 → ~155 chars** — `src/app/layout.tsx` (line 61–62). One-line edit. No ranking-page touch.
+2. **Backfill internal links on graphic-design-saskatoon** — add 2+ Link components to the description. The page currently has zero, violating seo-standards.md minimum. Body change only, no title/meta touch.
+3. **Backfill 13 missing landing pages into `public/llms.txt`** — pure additive to the AI search corpus. Lifts AI Search Readiness back to ≥92.
+
+### Files updated by this audit
+- `FULL-AUDIT-REPORT.md` (addendum — this section)
+- `SEO-REMAINING-WAVES.md` (Wave A queue refreshed)
+- `~/.claude/projects/-Users-owner-Downloads-TRUE-COLOR-PRICING-/memory/seo-sprints.md` (new entry)
+
+---
+
 ## 2026-06-05 Emergency Recovery Addendum
 
 This report's scored baseline remains the 2026-05-29 audit below. The current operational truth changed on 2026-06-04/2026-06-05 after the accelerated recovery batch.
