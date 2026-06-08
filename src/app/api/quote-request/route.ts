@@ -21,7 +21,7 @@ import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { getBrokerage } from "@/lib/data/brokerages";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
-import { classifyFromHeaders } from "@/lib/analytics/referrer";
+import { classifyReferrer } from "@/lib/analytics/referrer";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 import { mergeUtmAttribution } from "@/lib/analytics/utm";
@@ -263,7 +263,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Classify referrer + capture first-touch UTM from form/cookie.
-    const refClass = classifyFromHeaders(req.headers);
+    // Prefer the cookie's landing_referrer (true upstream — google, maps, chatgpt)
+    // over the POST request's Referer header which is always self-domain.
     const utm = mergeUtmAttribution(
       {
         utm_source: form.get("utm_source"),
@@ -274,6 +275,7 @@ export async function POST(req: NextRequest) {
       },
       req.headers.get("cookie"),
     );
+    const refClass = classifyReferrer(utm.landing_referrer || req.headers.get("referer"));
 
     // Save to DB before sending emails (non-fatal — email continues even if DB fails).
     // Capture the inserted row's id so portal submissions can show a short reference
@@ -293,7 +295,7 @@ export async function POST(req: NextRequest) {
           shipping_address: shippingAddress,
           referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
           referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
-          raw_referrer: (req.headers.get("referer") ?? "").slice(0, 500) || null,
+          raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,
           utm_source: utm.utm_source ?? null,
           utm_campaign: utm.utm_campaign ?? null,
         })

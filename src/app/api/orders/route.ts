@@ -24,7 +24,7 @@ import { sanitizeError } from "@/lib/errors/sanitize";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
-import { classifyFromHeaders } from "@/lib/analytics/referrer";
+import { classifyReferrer } from "@/lib/analytics/referrer";
 import { mergeUtmAttribution } from "@/lib/analytics/utm";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 
@@ -341,11 +341,16 @@ export async function POST(req: NextRequest) {
         .select("*", { count: "exact", head: true });
       const orderNumber = `TC-${orderYear}-${String((orderCount ?? 0) + 1).padStart(4, "0")}`;
 
-      const refClass = classifyFromHeaders(req.headers);
       const utm = mergeUtmAttribution(
         { utm_source, utm_campaign, utm_medium, utm_content, utm_term },
         req.headers.get("cookie"),
       );
+      // Prefer the cookie's first-touch landing_referrer (true upstream — e.g.
+      // google.com, maps.google.com, chatgpt.com) over the POST request's Referer
+      // header which is always self-domain (/checkout). Falls back to the request
+      // header only when the cookie is missing (older sessions pre-fix).
+      const firstTouchRef = utm.landing_referrer || req.headers.get("referer") || null;
+      const refClass = classifyReferrer(firstTouchRef);
 
       const { data, error } = await supabase
         .from("orders")
@@ -366,7 +371,7 @@ export async function POST(req: NextRequest) {
           utm_campaign: utm.utm_campaign ?? null,
           referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
           referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
-          raw_referrer: (req.headers.get("referer") ?? "").slice(0, 500) || null,
+          raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,
         })
         .select("id, order_number")
         .single();

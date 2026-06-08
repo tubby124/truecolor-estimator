@@ -116,7 +116,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   ] = await Promise.all([
     supabase
       .from("orders")
-      .select("id, order_number, status, payment_method, total, is_rush, wave_invoice_id, wave_invoice_number, wave_invoice_approved_at, wave_payment_recorded_at, proof_sent_at, created_at, notes, customers (name, email)")
+      .select("id, order_number, status, payment_method, total, is_rush, wave_invoice_id, wave_invoice_number, wave_invoice_approved_at, wave_payment_recorded_at, proof_sent_at, created_at, notes, customer_id, utm_source, utm_campaign, referrer_source, referrer_medium, raw_referrer, customers (name, email)")
       .gte("created_at", cutoff)
       .order("created_at", { ascending: false })
       .limit(200),
@@ -322,6 +322,13 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   });
 
   // ── derive signups (customers in last 7d + their email/order state) ──────
+  // Build first-order-per-customer map for source attribution.
+  // `orders` is already sorted DESC by created_at; iterate from newest to oldest
+  // so the LAST write wins (= earliest order).
+  const firstOrderByCustomer = new Map<string, (typeof orders)[number]>();
+  for (const o of orders) {
+    if (o.customer_id) firstOrderByCustomer.set(o.customer_id, o);
+  }
   const signups: SignupRow[] = customers.map((c) => {
     const createdAt = c.created_at ? new Date(c.created_at) : new Date();
     const ageHours = (now - createdAt.getTime()) / (1000 * 60 * 60);
@@ -331,6 +338,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     const accountReadySent = theirEmails.some((e) => /account is ready/i.test(e.subject ?? ""));
     const couponIssued = !!c.pending_discount_code;
     const couponRedeemed = redemptions.some((r) => r.customer_id === c.id);
+    const firstOrder = firstOrderByCustomer.get(c.id);
     return {
       id: c.id,
       email: c.email ?? "—",
@@ -343,6 +351,11 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       account_ready_email_sent: accountReadySent,
       coupon_issued: couponIssued,
       coupon_redeemed: couponRedeemed,
+      first_order_source: firstOrder?.referrer_source ?? null,
+      first_order_medium: firstOrder?.referrer_medium ?? null,
+      first_order_utm_source: firstOrder?.utm_source ?? null,
+      first_order_utm_campaign: firstOrder?.utm_campaign ?? null,
+      first_order_raw_referrer: firstOrder?.raw_referrer ?? null,
     };
   });
 
