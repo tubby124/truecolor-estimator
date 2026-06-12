@@ -1,9 +1,47 @@
 # SEO Remaining Waves — truecolorprinting.ca
 
-**Last updated:** 2026-06-05
+**Last updated:** 2026-06-08
 **Full audit:** `FULL-AUDIT-REPORT.md`
 **GSC baseline (2026-03-12):** BC #1 | banner #2 | flyer #3 | sign #4 | coroplast #5
 **GSC actual (2026-04-12):** See ranking slip section below — baseline is no longer accurate
+
+---
+
+## 2026-06-08 Audit Result — Score 79 → 80 (+1 net)
+
+**Operator signal:** Live orders increasing via the website (TC-2026-0130 closed in 64 seconds signup-to-paid, others paying within 45 min). Attribution-capture fix shipped to main today (commit `4904317`) so the next GSC + dashboard read will show true upstream source per signup.
+
+**Big resolved:** `aggregateRating` schema in `src/app/layout.tsx` — RESTORED. Critical regression from 2026-05-25 commit `7ab5e48` is fully fixed. Schema score 70 → 78 (+8).
+
+### Wave A — Safe-to-ship before 2026-06-12 (no protected-page touch)
+
+| # | Item | File | Effort | Wave |
+|---|------|------|--------|------|
+| A1 | Trim root meta description 172 → ≤155 chars | `src/app/layout.tsx` (61–62) | 1 line | Wave A |
+| A2 | Backfill internal links on graphic-design-saskatoon (zero → ≥2) — body only | `src/app/graphic-design-saskatoon/page.tsx` | small | Wave A |
+| A3 | Add 13 missing landing pages to `public/llms.txt` "Key Service Pages" block | `public/llms.txt` | additive | Wave A |
+
+### Wave B — Schema additions (after 2026-06-12 GSC read)
+
+| # | Item | File | Notes |
+|---|------|------|-------|
+| B1 | Add `SearchAction` to WebSite schema (sitelinks search box eligibility) | `src/app/layout.tsx` | Pure addition, low risk |
+| B2 | Add FAQPage JSON-LD on IndustryPage (FAQs already exist as `<details>`) | `src/components/site/IndustryPage.tsx` | Rich results restricted Aug 2023 but useful for knowledge graph + AI engines |
+
+### Wave C — Performance + polish
+
+| # | Item | File | Notes |
+|---|------|------|-------|
+| C1 | Convert 3 .jpg → .webp in /images/industries/agribusiness/ + /images/industries/poster-printing/ | `public/images/...` | ~60% size reduction, none currently >500KB |
+| C2 | Add DesignDirectionGrid to `wall-graphics-saskatoon` | `src/app/wall-graphics-saskatoon/page.tsx` | Body-only addition, no title/meta touch |
+| C3 | Audit HeroSlider for SSR slide 0 (LCP improvement) | `src/components/home/HeroSlider.tsx` | Currently full `"use client"` — slide 0 hydrates on client |
+| C4 | Verify GTM `lazyOnload` vs `afterInteractive` tradeoff against ga4-sync cron output | `src/app/layout.tsx` (281–283) | Decision, not auto-fix |
+
+### Deferred (waiting on GSC read 2026-06-12+)
+
+- Aluminum-signs meta description (137 chars, room to expand) — page in recovery cooldown
+- Any further protected-page touch — hard hook block until 5-7d cooldown expires
+- Decision on whether homepage needs a CTR/internal-link wave for "printing near me" / "print shop saskatoon"
 
 ---
 
