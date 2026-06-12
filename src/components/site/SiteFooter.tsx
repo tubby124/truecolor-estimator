@@ -75,6 +75,7 @@ export function SiteFooter() {
             <div className="grid grid-cols-2 gap-x-4 text-sm">
               <div className="space-y-2">
                 <Link href="/products" className="block hover:text-white transition-colors">Get a Price</Link>
+                <Link href="/printing-prices-saskatoon" className="block hover:text-white transition-colors">2026 Price Guide</Link>
                 <Link href="/sign-company-saskatoon" className="block hover:text-white transition-colors">Sign Company</Link>
                 <Link href="/coroplast-signs-saskatoon" className="block hover:text-white transition-colors">Coroplast Signs</Link>
                 <Link href="/banner-printing-saskatoon" className="block hover:text-white transition-colors">Vinyl Banners</Link>

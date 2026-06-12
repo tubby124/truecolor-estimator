@@ -169,7 +169,7 @@ Status: **COMPLETE** ✅ (8/8 done)
 ## Wave 2 — Content Quality
 
 Status: **COMPLETE** ✅ (8/8 done 2026-04-12)
-**Pending:** ~25 webp images still need to be generated via ChatGPT and dropped into `public/images/industries/` subfolders. DDG structure is live but images show broken until then.
+**Images: RESOLVED 2026-06-12** — disk audit found all 27 referenced DDG images exist in `public/images/industries/` (business-cards 5/5, banners 5/5, coroplast 6/6, flyers 5/5, sign-company 6/6). The "~25 missing" note was stale.
 
 | # | Item | File | Priority | Status |
 |---|------|------|----------|--------|
