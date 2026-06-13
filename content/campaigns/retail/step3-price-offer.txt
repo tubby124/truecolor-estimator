@@ -1,0 +1,20 @@
+Hi {{contact.FIRSTNAME | default : "there"}},
+
+Here's the offer I'd actually start a shop with, in plain numbers.
+
+A storefront starter set: one window decal from $25, plus a coroplast sidewalk sign from $25 to catch the people walking by. Add a stack of business cards -- 250 double-sided from $45 -- so something goes in every bag. That's a full front-of-store presence for not much.
+
+Design is $35 flat with a same-day proof, so you approve the look before we print. Turnaround is 1-3 business days. Need it sooner? Rush is +$40 flat, same-day, when the schedule allows.
+
+One thing worth saying: there's no per-item minimum here. The only floor is a $25 order-total minimum at checkout, so a single decal is a perfectly fine order.
+
+Tell me your shop name and what you're promoting and I'll send back a real quote, not a ballpark.
+
+Start a storefront order:
+https://truecolorprinting.ca/retail-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=retail-drip-2026-06
+
+-- Hasan
+
+Hasan Sharif
+True Color Display Printing, Saskatoon
+(306) 954-8688 - info@true-color.ca

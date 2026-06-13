@@ -1,0 +1,18 @@
+Hi {{contact.FIRSTNAME | default : "there"}},
+
+Quick thought from last week's email. Most retail windows are blank billboards. You're already paying for the glass and the foot traffic in front of it -- it just isn't selling anything.
+
+A window decal changes that. Put your sale, a "now open Sundays," or a new collection right at eye level where people are already looking. Decals start at $25, and if you want the see-through perforated film so daylight still gets in, that's an easy add.
+
+The nice part is you can swap them out. A spring promo in April, a clearance push in July, holiday in December -- each one is a small reprint, not a renovation. We design it for $35 flat and send you a same-day proof, so you see it before anything gets printed.
+
+If you want, send me a photo of your storefront and I'll mock up what one or two decals would look like on it.
+
+Window decal options:
+https://truecolorprinting.ca/retail-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=retail-drip-2026-06
+
+-- Hasan
+
+Hasan Sharif
+True Color Display Printing, Saskatoon
+(306) 954-8688 - info@true-color.ca

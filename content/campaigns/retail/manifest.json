@@ -1,0 +1,32 @@
+[
+  {
+    "step": 1,
+    "file": "step1-intro",
+    "subject": "Signage that stops shoppers in Saskatoon",
+    "wait_days": 0
+  },
+  {
+    "step": 2,
+    "file": "step2-blank-windows",
+    "subject": "Your shop windows are blank billboards",
+    "wait_days": 7
+  },
+  {
+    "step": 3,
+    "file": "step3-price-offer",
+    "subject": "A storefront starter set from $25",
+    "wait_days": 14
+  },
+  {
+    "step": 4,
+    "file": "step4-seasonal-restock",
+    "subject": "Time to restock your store signage?",
+    "wait_days": 30
+  },
+  {
+    "step": 5,
+    "file": "step5-signoff",
+    "subject": "Still here when your shop needs signs",
+    "wait_days": 45
+  }
+]

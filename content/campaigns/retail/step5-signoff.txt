@@ -1,0 +1,20 @@
+Hi {{contact.FIRSTNAME | default : "there"}},
+
+I'll stop filling your inbox after this one.
+
+The short version: if your shop ever needs a window decal, a sidewalk sign, a banner, or a card refresh, we're right here in Saskatoon and most jobs are ready in 1-3 business days. Decals and coroplast start at $25. Design is $35 flat with a same-day proof, and if a deadline sneaks up on you, the +$40 same-day rush is there.
+
+No pitch this time. Just keep my number somewhere -- the day before a sale, when you suddenly need signage, is a stressful time to go looking for a printer.
+
+And if you know another shop owner who's tired of their blank windows, I'd be grateful if you passed my name along.
+
+Thanks for reading these.
+
+Bookmark our retail signage page:
+https://truecolorprinting.ca/retail-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=retail-drip-2026-06
+
+-- Hasan
+
+Hasan Sharif
+True Color Display Printing, Saskatoon
+(306) 954-8688 - info@true-color.ca

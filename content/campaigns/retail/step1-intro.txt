@@ -1,0 +1,18 @@
+Hi {{contact.FIRSTNAME | default : "there"}},
+
+I'm Hasan, I run True Color Display Printing here in Saskatoon. We print the signage that gets people to stop walking past a storefront and actually come in.
+
+Most of what we make for shops starts at the window: window decals from $25, coroplast signs from $25 if you need something out on the sidewalk. We print everything on an in-house Roland UV printer, so a small order doesn't sit in a queue for two weeks -- most jobs are ready in 1-3 business days.
+
+If you've got a promo, a new arrival, or hours that changed and your window doesn't say so yet, that's exactly the kind of thing we turn around quickly.
+
+No catalog to wade through. Tell me what you're selling and I'll tell you what it costs.
+
+See retail signage and pricing:
+https://truecolorprinting.ca/retail-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=retail-drip-2026-06
+
+-- Hasan
+
+Hasan Sharif
+True Color Display Printing, Saskatoon
+(306) 954-8688 - info@true-color.ca

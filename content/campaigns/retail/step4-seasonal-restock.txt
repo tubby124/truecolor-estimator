@@ -1,0 +1,22 @@
+Hi {{contact.FIRSTNAME | default : "there"}},
+
+Seasons turn over fast in retail, and that's usually when the in-store signage starts looking tired -- last season's sale sign still taped to a shelf, an A-frame from a promo that ended weeks ago.
+
+Good time for a restock. A few pieces that earn their spot inside the store:
+
+- Shelf talkers and small foamboard displays from $45 to flag what's new or on sale
+- A coroplast A-frame from $25 to pull people off the sidewalk
+- A vinyl banner from $66 if you're running a bigger event or a window-wide sale
+
+Everything prints here in Saskatchewan on our Roland UV printer, so colours match across the set and a restock is ready in 1-3 business days. Design stays $35 flat with a same-day proof.
+
+Send me what's coming up -- a sale, a holiday, a new line -- and I'll suggest the two or three pieces worth printing.
+
+Refresh your in-store signage:
+https://truecolorprinting.ca/retail-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=retail-drip-2026-06
+
+-- Hasan
+
+Hasan Sharif
+True Color Display Printing, Saskatoon
+(306) 954-8688 - info@true-color.ca
