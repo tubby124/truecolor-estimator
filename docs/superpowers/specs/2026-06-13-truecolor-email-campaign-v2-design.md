@@ -58,20 +58,38 @@ via the Brevo HTML track. Agriculture was a 5-send n8n canary.
 
 ## 3. Architecture
 
-### 3.1 Send engine — Brevo native Automation
-A Brevo Automation workflow per niche list. Brevo owns:
-- step cadence + delays,
-- the 300/day sending throttle,
-- native unsubscribe handling.
+### 3.1 Send engine — app-driven daily send cron + Brevo campaign API
 
-Our app keeps the **existing Brevo webhook** (`/api/webhooks/brevo`) for
-open/click/unsub/bounce → Supabase. **No n8n, no VPS dependency** (zarabot is
-currently unreachable and n8n was never battle-tested for this).
+**Brevo plan is confirmed FREE: 300 emails/day shared across marketing +
+transactional** (verified via `GET /v3/account` on 2026-06-13). Free-tier
+marketing automation is too limited and is not API-drivable, so we do **not**
+build the drip on Brevo Automation. Instead, all drip logic lives in our app.
 
-> Pre-flight check: confirm the Brevo plan tier allows Automation workflows and
-> confirm the real daily send cap (300 implies Starter/free). If Automation is
-> not available on the current plan, fall back to scheduled HTML campaigns per
-> step (the Batch 1 method) — same engine, more manual.
+A daily cron (in `truecolor-estimator`) runs each morning in this order:
+1. **Reply-scan** (§3.3) → update `drip_status` suppression first.
+2. **Select ≤300 due leads:** `drip_status='queued'` AND next step is due
+   (cadence from `tc_email_templates.wait_days` vs `last_email_sent_at`) AND
+   email valid + not suppressed.
+3. **Send the due step** through Brevo's **marketing/campaign** channel
+   (`/v3/emailCampaigns` or campaign-to-list), NOT the transactional API.
+4. **Log + advance:** write `tc_email_sends`, bump `drip_step`, set
+   `next_email_at`, flip `drip_status` `queued→active`, `active→completed` on
+   the final step.
+
+Cadence + suppression live entirely in **our Supabase**, not in a Brevo feature
+we don't have. The 300/day cap is enforced by the batch size. We keep the
+**existing Brevo webhook** (`/api/webhooks/brevo`) for open/click/unsub/bounce →
+Supabase. **No n8n, no VPS dependency.**
+
+> **ToS guardrail (load-bearing):** cold bulk outreach MUST go through Brevo's
+> marketing/campaign channel. Sending cold mail via the transactional API risks
+> account suspension. Batch 1 already used the marketing channel (HTML
+> campaigns), so this stays on the proven, compliant path.
+
+> **Zero-code fallback:** if the campaign-send-via-API path proves awkward on
+> free tier, fall back to the Batch 1 method — our cron computes the daily due
+> cohort and syncs it into a Brevo list; Hasan (or a scheduled step) sends a
+> pre-built HTML campaign to that list. Same compliant channel, more manual.
 
 ### 3.2 Lead lifecycle — single source of truth = `drip_status`
 `campaigns_enrolled` was never populated and is **retired** as a dedup signal.
@@ -140,7 +158,8 @@ church (256) → hotel (242) → daycare (231) → agriculture remainder.
 
 ## 5. Verification / definition of done (per wave)
 
-- [ ] Brevo plan confirmed to support Automation + real daily cap known.
+- [x] Brevo plan confirmed FREE, 300/day shared cap (verified 2026-06-13).
+- [ ] Daily send cron sends via Brevo marketing/campaign API (never transactional).
 - [ ] Tracking backfill makes `tc_campaigns` reconcile with `tc_email_sends`.
 - [ ] Reply-scan dry-run correctly classifies a known remove + warm reply.
 - [ ] Webhook tags confirmed on every niche template (`brevo-html-blitz`).
@@ -151,8 +170,13 @@ church (256) → hotel (242) → daycare (231) → agriculture remainder.
 ---
 
 ## 6. Open items for the implementation plan
-- Decide the reply-scan host (cloud routine vs app cron).
-- Confirm Brevo Automation availability or fall back to scheduled HTML steps.
+- Host for the daily cron (app cron route in truecolor-estimator vs cloud
+  routine). The reply-scan + send loop should share the same host.
+- Confirm `/v3/emailCampaigns` send-now/schedule works cleanly on free tier;
+  if not, use the §3.1 zero-code fallback (sync due cohort into a list + send
+  a pre-built HTML campaign).
 - Migration: add `replied_warm` to the `drip_status` allowed values + any
   CHECK constraint; retire `campaigns_enrolled` from dedup logic.
 - Exact niche copy generation pipeline + review gate before send.
+- Daily send budget split: at 300/day shared, decide reserve for transactional
+  order/receipt mail vs the cold drip (e.g. cap drip at ~250/day).
