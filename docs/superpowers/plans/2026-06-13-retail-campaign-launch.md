@@ -252,40 +252,33 @@ git commit -m "feat(retail-campaign): tested eligible-cohort builder (dry-run de
 
 ---
 
-## Task 3: Mirror copy into Brevo + register the templates
+## Task 3: Register template metadata in `tc_email_templates`
 
-**Files:** none in repo — Brevo API + `tc_email_templates` rows.
+**Files:** none in repo — Supabase rows only.
 
-- [ ] **Step 1: Create 5 Brevo email templates from the source files**
+> **CORRECTION (2026-06-13):** Brevo `/smtp/templates` are *transactional*
+> templates; marketing **campaigns do not import them**. Phase-1 sending uses
+> scheduled **campaigns with inline HTML** (read from the repo files) — created
+> in Task 6 — and tracked by the `brevo-html-blitz` tag the webhook keys on. So
+> there is NO Brevo template-creation step. This task only records our own
+> metadata rows for the dashboard/record. `brevo_template_id` stays null.
 
-For each step, create a Brevo template tagged `brevo-html-blitz` (so the existing webhook tracks it). Per step (example step 1):
+- [ ] **Step 1: Register the 5 steps in `tc_email_templates`**
+
+Insert one row per step from `content/campaigns/retail/manifest.json`
+(niche_slug=`retail`, step, wait_days `[0,7,14,30,45]`, subject, cta_type=`url`,
+cta_url=the UTM CTA, sequence_version=`2026-06`, `brevo_template_id`=null):
 ```bash
-KEY=$(grep -E "^BREVO_API_KEY=" .env.local | cut -d= -f2-)
-curl -s -X POST "https://api.brevo.com/v3/smtp/templates" -H "api-key: $KEY" -H "content-type: application/json" -d "{
-  \"templateName\": \"retail-drip step1\",
-  \"subject\": \"<subject from step1>\",
-  \"sender\": { \"email\": \"info@true-color.ca\" },
-  \"htmlContent\": $(jq -Rs . < content/campaigns/retail/step1-intro.html),
-  \"tag\": \"brevo-html-blitz\",
-  \"isActive\": true
-}" | jq '{id}'
-```
-Record each returned template id.
-
-- [ ] **Step 2: Register the 5 steps in `tc_email_templates`**
-
-Insert one row per step (niche_slug=`retail`, the recorded `brevo_template_id`, step, wait_days `[0,7,14,30,45]`, subject, cta_type=`url`, cta_url=the UTM CTA, sequence_version=`2026-06`). Use the Supabase REST insert:
-```bash
-node -e 'const fs=require("fs");const e=Object.fromEntries(fs.readFileSync(".env.local","utf8").split("\n").filter(l=>l.includes("=")&&!l.startsWith("#")).map(l=>{const i=l.indexOf("=");return [l.slice(0,i).trim(),l.slice(i+1).trim().replace(/^["\x27]|["\x27]$/g,"")]}));const u=e.SUPABASE_URL,k=e.SUPABASE_SECRET_KEY||e.SUPABASE_SERVICE_KEY;const rows=[/* fill 5 objects: {niche_slug:"retail",step:1,wait_days:0,subject:"...",brevo_template_id:NNN,cta_type:"url",cta_url:"...",sequence_version:"2026-06"} */];fetch(`${u}/rest/v1/tc_email_templates`,{method:"POST",headers:{apikey:k,Authorization:`Bearer ${k}`,"content-type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(rows)}).then(r=>console.log("insert status",r.status))'
+node -e 'const fs=require("fs");const e=Object.fromEntries(fs.readFileSync(".env.local","utf8").split("\n").filter(l=>l.includes("=")&&!l.startsWith("#")).map(l=>{const i=l.indexOf("=");return [l.slice(0,i).trim(),l.slice(i+1).trim().replace(/^["\x27]|["\x27]$/g,"")]}));const u=e.SUPABASE_URL,k=e.SUPABASE_SECRET_KEY||e.SUPABASE_SERVICE_KEY;const cta="https://truecolorprinting.ca/retail-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=retail-drip-2026-06";const man=JSON.parse(fs.readFileSync("content/campaigns/retail/manifest.json","utf8"));const rows=man.map(m=>({niche_slug:"retail",step:m.step,wait_days:m.wait_days,subject:m.subject,cta_type:"url",cta_url:cta,sequence_version:"2026-06",brevo_template_id:null}));fetch(`${u}/rest/v1/tc_email_templates`,{method:"POST",headers:{apikey:k,Authorization:`Bearer ${k}`,"content-type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(rows)}).then(r=>console.log("insert status",r.status))'
 ```
 Expected: status 201.
 
-- [ ] **Step 3: Verify**
+- [ ] **Step 2: Verify**
 
 ```bash
-node -e '...same env loader...; fetch(`${u}/rest/v1/tc_email_templates?niche_slug=eq.retail&select=step,subject,brevo_template_id,wait_days&order=step`,{headers:{apikey:k,Authorization:`Bearer ${k}`}}).then(r=>r.json()).then(d=>console.log(d))'
+node -e 'const fs=require("fs");const e=Object.fromEntries(fs.readFileSync(".env.local","utf8").split("\n").filter(l=>l.includes("=")&&!l.startsWith("#")).map(l=>{const i=l.indexOf("=");return [l.slice(0,i).trim(),l.slice(i+1).trim().replace(/^["\x27]|["\x27]$/g,"")]}));const u=e.SUPABASE_URL,k=e.SUPABASE_SECRET_KEY||e.SUPABASE_SERVICE_KEY;fetch(`${u}/rest/v1/tc_email_templates?niche_slug=eq.retail&select=step,subject,wait_days&order=step`,{headers:{apikey:k,Authorization:`Bearer ${k}`}}).then(r=>r.json()).then(d=>console.log(d))'
 ```
-Expected: 5 rows, each with a real `brevo_template_id` and subject.
+Expected: 5 retail rows with subjects + wait_days.
 
 ---
 
@@ -348,9 +341,30 @@ Expected: `synced 251/251 into Brevo list 15` (the script refuses if >300). Re-c
 curl -s "https://api.brevo.com/v3/contacts/lists/15" -H "api-key: $KEY" | jq '.totalSubscribers'
 ```
 
-- [ ] **Step 2: Create + schedule the 5 campaigns**
+- [ ] **Step 2: Create + schedule the 5 campaigns (inline HTML)**
 
-In Brevo, create one campaign per step from its template → target list 15 → schedule on the cadence dates (step1 = day 0, step2 = +7, step3 = +14, step4 = +30, step5 = +45). Each carries the `brevo-html-blitz` tag. 251 < 300, so no chunking. Record each `campaignId`.
+Create one **email campaign per step** via `POST /v3/emailCampaigns` with the
+HTML read inline from the repo file (NOT a template reference), subject from
+`manifest.json`, `sender` = info@true-color.ca, `recipients.listIds=[15]`,
+`scheduledAt` on the cadence dates (step1=day0, step2=+7, +14, +30, +45), and
+`tag: "brevo-html-blitz"` so the webhook tracks it. 251 < 300 → no chunking.
+Example for step 1:
+```bash
+KEY=$(grep -E "^BREVO_API_KEY=" .env.local | cut -d= -f2-)
+HTML=$(jq -Rs . < content/campaigns/retail/step1-intro.html)
+curl -s -X POST "https://api.brevo.com/v3/emailCampaigns" -H "api-key: $KEY" -H "content-type: application/json" -d "{
+  \"name\": \"retail-drip step1 2026-06\",
+  \"subject\": \"Signage that stops shoppers in Saskatoon\",
+  \"sender\": { \"name\": \"Hasan — True Color\", \"email\": \"info@true-color.ca\" },
+  \"htmlContent\": $HTML,
+  \"recipients\": { \"listIds\": [15] },
+  \"scheduledAt\": \"2026-06-16T16:00:00.000Z\",
+  \"tag\": \"brevo-html-blitz\",
+  \"replyTo\": \"info@true-color.ca\"
+}" | jq '{id}'
+```
+Record each returned `campaignId`. Repeat for steps 2–5 with their files,
+subjects, and +7/+14/+30/+45 dates.
 
 - [ ] **Step 3: Register the wave in `tc_campaigns`**
 
