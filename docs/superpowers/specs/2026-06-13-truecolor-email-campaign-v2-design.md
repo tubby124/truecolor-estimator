@@ -58,74 +58,82 @@ via the Brevo HTML track. Agriculture was a 5-send n8n canary.
 
 ## 3. Architecture
 
-### 3.1 Send engine — app-driven daily send cron + Brevo campaign API
+### 3.1 Send engine — phased
 
 **Brevo plan is confirmed FREE: 300 emails/day shared across marketing +
 transactional** (verified via `GET /v3/account` on 2026-06-13). Free-tier
-marketing automation is too limited and is not API-drivable, so we do **not**
-build the drip on Brevo Automation. Instead, all drip logic lives in our app.
+automation is too limited / not API-drivable, so we never build the drip on
+Brevo Automation.
 
-A daily cron (in `truecolor-estimator`) runs each morning in this order:
-1. **Reply-scan** (§3.3) → update `drip_status` suppression first.
-2. **Select ≤300 due leads:** `drip_status='queued'` AND next step is due
-   (cadence from `tc_email_templates.wait_days` vs `last_email_sent_at`) AND
-   email valid + not suppressed.
-3. **Send the due step** through Brevo's **marketing/campaign** channel
-   (`/v3/emailCampaigns` or campaign-to-list), NOT the transactional API.
-4. **Log + advance:** write `tc_email_sends`, bump `drip_step`, set
-   `next_email_at`, flip `drip_status` `queued→active`, `active→completed` on
-   the final step.
+**Phase 1 (now) — Brevo's own scheduler, zero new send-code.**
+Build the retail drip as a small number of HTML campaigns in Brevo, each
+**pre-scheduled** for its send date to the retail list (split into ≤300-recipient
+chunks for the daily cap). Brevo fires them on schedule. This is the exact
+engine that produced Batch 1's 30% engagement, plus Brevo's free scheduler =
+"batch scheduled" with no custom code. Campaigns carry the `brevo-html-blitz`
+tag so the **existing webhook** (`/api/webhooks/brevo`) tracks opens/clicks/
+unsub, and the **existing reply-scan** (§3.3) keeps the list clean between steps.
 
-Cadence + suppression live entirely in **our Supabase**, not in a Brevo feature
-we don't have. The 300/day cap is enforced by the batch size. We keep the
-**existing Brevo webhook** (`/api/webhooks/brevo`) for open/click/unsub/bounce →
-Supabase. **No n8n, no VPS dependency.**
+**Phase 2 (after retail validates) — app-driven daily send cron.**
+Once we know fresh-niche copy converts and the manual pain points are concrete,
+build the daily send loop: reply-scan → select ≤300 due `queued` leads (cadence
+from `tc_email_templates.wait_days`) → send via Brevo's **marketing/campaign**
+channel (never transactional — ToS) → log `tc_email_sends` + advance
+`drip_step`. At that point re-evaluate the $9/mo Brevo Starter tier to lift the
+300/day cap. This is the long-term "smart system"; it is **deliberately
+deferred** so we don't automate before product-market fit on the copy.
 
-> **ToS guardrail (load-bearing):** cold bulk outreach MUST go through Brevo's
-> marketing/campaign channel. Sending cold mail via the transactional API risks
-> account suspension. Batch 1 already used the marketing channel (HTML
-> campaigns), so this stays on the proven, compliant path.
-
-> **Zero-code fallback:** if the campaign-send-via-API path proves awkward on
-> free tier, fall back to the Batch 1 method — our cron computes the daily due
-> cohort and syncs it into a Brevo list; Hasan (or a scheduled step) sends a
-> pre-built HTML campaign to that list. Same compliant channel, more manual.
+> **ToS guardrail (both phases):** cold bulk outreach goes through Brevo's
+> marketing/campaign channel only. Cold mail via the transactional API risks
+> account suspension.
 
 ### 3.2 Lead lifecycle — single source of truth = `drip_status`
 `campaigns_enrolled` was never populated and is **retired** as a dedup signal.
 
-| state | meaning | drip action |
-|---|---|---|
-| `queued` | eligible, not yet enrolled | can enroll |
-| `active` | in a Brevo workflow | sending |
-| `completed` | finished sequence, no reply | done; eligible for future seasonal |
-| `replied_warm` | replied with interest | **paused**; Hasan replies manually; re-drip in 90 days |
-| `unsubscribed` | unsub link OR "not interested/remove" reply | **permanent suppress** |
-| `bounced` | hard bounce | **suppress** |
+**EXISTING convention (do not invent new values)** — encoded in
+`src/lib/blitz/process-replies.ts`:
+
+| drip_status | suppression_reason | meaning | drip action |
+|---|---|---|---|
+| `queued` | — | eligible, not yet enrolled | can enroll |
+| `active` | — | currently in a sequence | sending |
+| `completed` | — | finished sequence, no reply | done; eligible for seasonal |
+| `paused` | `replied_warm` | replied interested → you reply by hand from info@; re-drip in 90d | **suppress** |
+| `unsubscribed` | `replied_decline` | said "no thanks" (no blacklist) | **suppress** |
+| `unsubscribed` | `replied_optout` / unsub-link | opt-out → Brevo blacklist | **permanent suppress** |
+| `bounced` | — | hard bounce | **suppress** |
 
 **Enrollment rule (enforced before every send/enroll):** only `queued` leads
-with a valid, non-suppressed email. Never `unsubscribed`, `bounced`, or
-`replied_warm`.
+with a valid, non-suppressed email — never `paused`/`unsubscribed`/`bounced`.
 
-### 3.3 Daily reply-catcher (automated)
-A scheduled job runs the `/tc-campaign-cleanup` logic each morning **before**
-sends:
-1. Scan `info@true-color.ca` inbox for replies (last N days).
-2. Classify **remove** vs **warm** (existing keyword dictionaries).
-3. **Remove** → blacklist in Brevo + `drip_status='unsubscribed'`.
-4. **Warm** → `drip_status='replied_warm'`, pull from the Brevo workflow, log.
-   Hasan replies to warm leads manually from his inbox (already his workflow —
-   warm replies land in info@ natively).
+### 3.3 Daily reply-catcher — ALREADY BUILT ✓
+This exists in production and matches the design. **No build needed — verify
+it's running and extend dictionaries if needed.**
+- Cron route: `src/app/api/cron/process-blitz-replies/route.ts`
+- Logic: `src/lib/blitz/process-replies.ts` (+ `classify-reply.ts`, `gmail-replies.ts`)
+- Schedule: `.github/workflows/cron-blitz-replies.yml`
+- Behaviour: scans `info@true-color.ca`, classifies reply/decline/optout, sets
+  `drip_status` + `suppression_reason` per §3.2, blacklists opt-outs in Brevo,
+  Telegram-alerts warm replies. Idempotent overlap; `?dryRun=1` supported.
 
-**Host:** cloud routine (`/schedule`) or an app cron route. **Not** Mac launchd
-(TCC-blocked from reading Downloads/Gmail context as of 2026-06-13). Decided in
-the implementation plan.
+### 3.4 Tracking — mostly already handled ✓
+The `/staff/social/blitz` dashboard (`getData()`) already pulls **live** Brevo
+campaign open/click stats directly from the Brevo API, so engagement is already
+visible and does NOT depend on the stale `tc_campaigns` counters. v2 only needs:
+- One `tc_campaigns` row per new wave (so the wave is named/tracked in the table).
+- Per-lead engagement continues via the existing Brevo webhook → `tc_leads`.
+- Document `drip_status` as the dedup source of truth (retire `campaigns_enrolled`).
 
-### 3.4 Tracking fix (built FIRST, before any new sends)
-- Backfill `tc_campaigns` aggregates (`total_sent`, `opens`, `clicks`,
-  `total_bounced`) from the real `tc_email_sends` + webhook data.
-- Wire the campaign counters so `/staff/social/blitz` shows true engagement.
-- Document `drip_status` as the dedup source of truth.
+> The "~3,830 sent / 0 opens" weirdness in `tc_campaigns` is cosmetic legacy
+> data; the dashboard routes around it. Optional cleanup, not a blocker.
+
+### 3.6 Pre-send gate (MANDATORY)
+Before any batch of Brevo campaigns is created or scheduled, run
+**`/true-color-campaign-presend-audit`** (checks images, CTA links, subject
+merge tags, pricing). This is a hard project gate. Email copy must also pass the
+brand-voice + content-format rules (subject <50 chars, plain-text fallback,
+UTM'd `truecolorprinting.ca` links — never a Railway/Vercel URL, real prices per
+the $25 order-minimum comms rules).
 
 ### 3.5 Content workstream
 Clone the proven sequence **structure** into per-niche copy:
