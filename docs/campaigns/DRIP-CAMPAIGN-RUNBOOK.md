@@ -122,9 +122,9 @@ AND `validation_status <> 'invalid'`.
 - **`totalSubscribers` on a list lags.** To get the real count use
   `GET /v3/contacts/lists/<id>/contacts` and read the `count` field.
 - **Dirty email data exists.** Some `tc_leads.email` values are scrape junk
-  (e.g. a Google Maps URL). `isEligible` only checks truthiness; Brevo rejects
-  the junk at contact-create (that's why synced < eligible). TODO: add an
-  email-format regex to `isEligible` so the cohort count is exact.
+  (e.g. a Google Maps URL). FIXED 2026-06-13: `isEligible` now runs
+  `isValidEmail()` (regex) so junk is excluded from the cohort upstream, not just
+  rejected by Brevo at send. New niches reusing the predicate inherit this.
 - **Cold marketing lands in Gmail Promotions, not Primary.** Expected. Don't
   chase Primary by stripping the unsubscribe/tracking links.
 - **Brevo prefixes test sends with "TEST - ".** Search that, not the real subject,

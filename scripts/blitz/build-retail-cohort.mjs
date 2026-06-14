@@ -4,11 +4,19 @@ import { pathToFileURL } from "node:url";
 const NICHE = "retail";
 const BREVO_LIST_ID = 15; // retail HTML-track list ("TC - Retail")
 
+// Practical email format check. Rejects scrape junk (e.g. a Google Maps URL in
+// the email field — real data: "//www.google.com/maps/@51.474499") that a bare
+// truthiness check would pass and Brevo would later reject at send time.
+const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+export function isValidEmail(email) {
+  return typeof email === "string" && EMAIL_RE.test(email.trim());
+}
+
 export function isEligible(lead) {
   return (
     Array.isArray(lead.industry_tags) &&
     lead.industry_tags.includes(NICHE) &&
-    !!lead.email &&
+    isValidEmail(lead.email) &&
     lead.drip_status === "queued" &&
     lead.suppression_reason == null &&
     lead.unsubscribed_at == null &&

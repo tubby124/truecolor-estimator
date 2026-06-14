@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isEligible } from "../build-retail-cohort.mjs";
+import { isEligible, isValidEmail } from "../build-retail-cohort.mjs";
 
 const base = {
   industry_tags: ["retail"], email: "a@b.com", drip_status: "queued",
@@ -24,5 +24,22 @@ describe("isEligible", () => {
   });
   it("rejects an invalid-email lead", () => {
     expect(isEligible({ ...base, validation_status: "invalid" })).toBe(false);
+  });
+  it("rejects scrape-junk in the email field (maps URL)", () => {
+    expect(isEligible({ ...base, email: "//www.google.com/maps/@51.474499" })).toBe(false);
+  });
+});
+
+describe("isValidEmail", () => {
+  it("accepts a normal address", () => {
+    expect(isValidEmail("shop@store.ca")).toBe(true);
+  });
+  it("rejects scrape junk with slashes / numeric TLD", () => {
+    expect(isValidEmail("//www.google.com/maps/@51.474499")).toBe(false);
+  });
+  it("rejects empty / null / spaces", () => {
+    expect(isValidEmail("")).toBe(false);
+    expect(isValidEmail(null)).toBe(false);
+    expect(isValidEmail("a b@c.com")).toBe(false);
   });
 });
