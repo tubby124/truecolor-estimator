@@ -8,6 +8,7 @@
 @.claude/rules/brand-voice.md
 @.claude/rules/content-pipeline.md
 @.claude/rules/content-formats.md
+@.claude/rules/truecolor-drip-campaigns.md
 @.claude/rules/payment-tax.md
 @.claude/rules/lifecycle-rollup-contract.md
 @~/.claude/rules/mcp-usage.md
