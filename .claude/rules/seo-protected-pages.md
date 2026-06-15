@@ -1,70 +1,74 @@
-# SEO Protected Pages — Rankings as of 2026-05-29
+# SEO Protected Pages — Rankings as of 2026-06-15
 
 > This file supplements ~/.claude/rules/truecolor-seo-safety.md with specific page rankings.
-> **Refresh cadence: every 28 days from GSC.**
-> Last refreshed: 2026-05-29 from `seo_gsc_snapshots` Supabase table (28-day window 2026-05-01 → 2026-05-28).
+> **Refresh cadence: every 28 days from GSC (weekly read is fine; full doc refresh ≥ every 28 days).**
+> Last refreshed: 2026-06-15 from `seo_gsc_snapshots` Supabase table (28-day window 2026-05-18 → 2026-06-12, 3,105 rows, full pagination — not the old 1,000-row PostgREST cap).
+> Prior refresh: 2026-05-29 (the post-crash baseline). Positions below are impression-weighted page-level rollups across ALL queries serving each page.
 
 These pages have confirmed rankings AS OF the refresh date above. Any edit requires:
 1. Price-only fixes (no content restructuring) on DEFEND pages
 2. NEVER change: meta title, H1, URL slug, title tag — on DEFEND pages still in top 10
 3. Meta descriptions: trim only if over 160 chars, preserve keywords
 
+## ✅ Headline: broad recovery confirmed (2026-06-15)
+
+The June 4–5 metadata-rewrite waves worked. Every decayed page improved vs the May 29 crash baseline, the homepage holds at 14.9 with 23 clicks, and **no page regressed**. This is the first refresh on data that fully covers the recovery waves (GSC OAuth token died June 5, was re-minted June 12 — data now flows daily again).
+
+| Page | May 29 | Jun 15 | Move |
+|------|-------:|-------:|------|
+| sticker-printing-saskatoon | 14.6 | **11.4** | +3.2 ▲ (now 2 clicks, was 0) |
+| business-cards-saskatoon | 22.1 | **19.6** | +2.5 ▲ (primary query reclaimed page 1 — see cannibalization) |
+| banner-printing-saskatoon | 33.2 | **23.6** | +9.6 ▲ |
+| flyer-printing-saskatoon | 40.6 | **37.5** | +3.1 ▲ |
+| coroplast-signs-saskatoon | 44.7 | **32.3** | +12.4 ▲ (now 2 clicks) |
+| aluminum-signs-saskatoon | 31.8 | **26.8** | +5.0 ▲ |
+| sign-company-saskatoon | noise (3 imp) | **24.5** (52 imp) | now measurable |
+| signs-yorkton-sk | 41.0 | **38.1** | +2.9 ▲ |
+| vinyl-lettering-saskatoon | 10.6 | **13.5** | −2.9 ▽ (mild slip, still pg1 edge) |
+
+Discipline note: do NOT react to the one mild slip (vinyl-lettering) — it is still page-1 edge and within normal post-wave volatility. Reacting to noise is how the May 25 crash started.
+
 ## ⚠ Decay rule
 
 If a page drops below position 10 organic AND below position 5 in local pack for 60+ days, it loses FROZEN status and is eligible for title/meta rewrite. Verify against the latest GSC export before deciding.
 
-## Protected pages (current — 2026-05-29)
+## ⚠ Conflicting-signal rule (added 2026-06-15 — learned this session)
 
-Methodology: impression-weighted average position for each (query, page) pair over the 28-day window, then a page-level rollup across all queries serving that page. "Page pos" is the weighted average across ALL queries serving the page; "primary query pos" is the doc-tracked keyword specifically.
+The analyzer can list the SAME page as both a page-2 "opportunity" AND a decay alert. When that happens, or when a page is **FROZEN + ranking page-1 + 0 clicks**, the problem is CTR/snippet or post-edit volatility — NOT missing content. **Do not pile on another FAQ/body edit.** Hold and diagnose. More copy does not fix a click-through problem at positions that already rank. This is the sticker-page situation right now (see below).
 
-| Page | Primary keyword | Primary query pos | Page pos (all queries) | 28d imp | Lock level | Notes |
-|------|-----------------|-------------------|------------------------|---------|------------|-------|
-| business-cards-saskatoon | business cards saskatoon | **27.0** (was #16 May 5; #1 March) | 22.1 | 56 | **DECAYED — eligible for rewrite** | Further decay since May 5. **Wave A target** (Phase 3 of recovery plan). Homepage / now serves position 8.7 for the same query — see "competing pages" below. |
-| banner-printing-saskatoon | print banner saskatoon | not in top queries this window | **33.2** | 67 | **DECAYED — eligible for rewrite** | Was "meta-desc-only" (11.7) on May 5. **Massive crash to pos 33.2.** Top serving query is "banner printing near me" at pos 51.8 (21 imp). Recovery plan Phase 7 (meta-only) is now insufficient — page needs full title rewrite. |
-| flyer-printing-saskatoon | flyer printing saskatoon | not in top queries this window | **40.6** | 445 | **DECAYED — eligible for rewrite** | Further decay (was 25 on May 5). High impressions (445 = real demand) but no clicks. **Wave B target** (Phase 4). |
-| sign-company-saskatoon | print store sign saskatoon | not tracked this window | 8.0 (only 3 imp / 2 days — NOISE) | 3 | **DECAYED — investigate first** | Page-level pos 8.0 looks improved BUT sample is 3 impressions — not actionable. Wave C (Phase 5) hub-rebuild plan still correct. |
-| coroplast-signs-saskatoon | coroplast signs saskatoon | not in top queries this window | **44.7** | 40 | **DECAYED — eligible for rewrite** | Page IS still indexed (40 imp / 17 days) — not de-indexed as feared. Serving for "sign company saskatoon" (pos 44.9), "saskatoon signs" (61.4). Lost specific "coroplast signs saskatoon" keyword. Phase 6 investigation will likely confirm canonical health, then standard rewrite. |
-| aluminum-signs-saskatoon | aluminum signs saskatoon | not in top queries this window | **31.8** | 32 | **DECAYED — eligible for rewrite** | Was 16.4 on May 5. Decayed further. Not on the recovery plan but should be added to a future wave after Phase 7. |
-| sticker-printing-saskatoon | sticker printing saskatoon | not in top queries this window | **14.6** | **780** | **DEFEND (PROMOTED)** | Strongest page in the protected list. 780 impressions, primary queries "custom die cut stickers near me" pos 4.6, "die cut stickers near me" pos 7.8, "die cut labels near me" pos 6.5. **Upgraded from "FAQ-price-fix" to DEFEND.** Do NOT touch title/H1. |
-| vinyl-lettering-saskatoon | vinyl lettering | not in top queries this window | **10.6** | 63 | **DEFEND (HOLD)** | Slight decay from 7.4 → 10.6 but still pg1 edge. Top query "decals saskatoon" at pos 9.0 (33 imp). Defend mode holds. |
-| agriculture-signs-saskatoon | agriculture signs saskatoon | not in top queries this window | 6.0 (only 2 imp — NOISE) | 2 | **DEFEND (LOW CONFIDENCE)** | Page-pos 6.0 ranking is real but only 2 impressions in 28 days. Hold defensively but flag that sample size doesn't support strong claims. |
-| signs-yorkton-sk | signs yorkton sk | not in top queries this window | **41.0** | 16 | **DECAYED — eligible for rewrite** | Was 9.7 on May 5. Lost top-10 in Yorkton market entirely. Top query now "custom signs near me" at pos 60.5. |
-| business-cards-moose-jaw-sk | business cards moose jaw | NO DATA in window | NO DATA | 0 | **INVESTIGATE — possibly de-indexed** | Zero impressions over 28 days. Either lost indexing or fell below the GSC display threshold. Confirm sitemap presence + run URL inspection in GSC before any change. |
+## Protected pages (current — 2026-06-15)
 
-## New top-10 candidates (NOT yet in DEFEND list, surface from 28-day survey)
+| Page | Page pos (all queries) | 28d imp | clk | Lock level | Notes |
+|------|------------------------|---------|-----|------------|-------|
+| sticker-printing-saskatoon | **11.4** | **780** | 2 | **DEFEND (HOLD — do not edit)** | Strongest page by far. BUT die-cut cluster slid 2–6 pos in last 14d (custom die cut labels 4.0→10.3, die cut labels 7.4→11.3) and CTR is ~0 despite page-1 positions on several queries. This is a **CTR-on-frozen-title problem + post-June-4 volatility**, not a content gap. Per conflicting-signal rule: HOLD. Do NOT run /paa-faq here reflexively. If the cluster stays sub-10 for 60+ days, the decay rule unlocks a proper title rewrite — that is the real fix. |
+| wall-graphics-saskatoon | **13.8** | 127 | 0 | **DEFEND candidate (editable — NOT frozen)** | Improved 16.4→9.8→holding low teens over recovery. "wall graphics near me" sits at 11.8 (page-2 edge), "wall printing near me" ~9.7. Clean single-query page-2 opportunity, body/FAQ only. **June 19 target via /paa-faq** (no title/H1 change). |
+| business-cards-saskatoon | **19.6** | 61 | 0 | **RECOVERING (was DECAYED)** | Primary query "business cards saskatoon" reclaimed page 1 (8.9) and the dedicated page now outranks the homepage for it — cannibalization fix from 831b91c CONFIRMED. Page-rollup still 19.6 (long-tail drag). Hold; let it settle. |
+| banner-printing-saskatoon | **23.6** | 96 | 0 | **RECOVERING (was DECAYED 33.2)** | Strong recovery. Still sub-10 target. No edit until it plateaus — observe. |
+| flyer-printing-saskatoon | **37.5** | 356 | 1 | **DECAYED — recovering slowly** | High impressions (356 = real demand) but still deep + ~0 clicks. Candidate for a later wave (body depth + intent), not next. |
+| graphic-design-saskatoon | **34.0** | 199 | 0 | **DECAYED — just edited (cooldown)** | Body internal-links added 2026-06-12 (419313c). High imp, 0 clicks. Under 7-day cooldown — DO NOT touch before ~2026-06-19. Watch for movement. |
+| coroplast-signs-saskatoon | **32.3** | 63 | 2 | **RECOVERING (was DECAYED 44.7)** | Big recovery + clicks returning. Observe. |
+| aluminum-signs-saskatoon | **26.8** | 45 | 0 | **RECOVERING (was DECAYED 31.8)** | Observe. |
+| sign-company-saskatoon | **24.5** | 52 | 0 | **DECAYED — now measurable** | Real sample now (was noise). Hub-rebuild plan still valid but not next. |
+| vinyl-lettering-saskatoon | **13.5** | 48 | 1 | **DEFEND (HOLD)** | Mild slip from 10.6, still page-1 edge. Hold — do not react. |
+| signs-yorkton-sk | **38.1** | 72 | 0 | **DECAYED — eligible for rewrite** | Recovering slightly. Low priority (small market). |
+| agriculture-signs-saskatoon | 2.0 (1 imp — NOISE) | 1 | 0 | **DEFEND (LOW CONFIDENCE)** | Sample too small to claim anything. Hold defensively. |
+| business-cards-moose-jaw-sk | NO DATA | 0 | 0 | **INVESTIGATE — possibly de-indexed** | Still zero impressions. Confirm sitemap presence + URL inspection in GSC before any change. |
 
-Note: 1000-row sample (PostgREST cap), so this is partial — re-run with pagination for full survey. Captured here as candidates:
+## New DEFEND candidates (high-impression pages NOT yet in the formal list — surface from full 28d survey)
 
-| Query | Page | Weighted pos | 28d imp | Note |
-|-------|------|-------------|---------|------|
-| color printing | / (homepage) | 2.8 | 6 | Low impressions; query is broad — may be junk |
-| print shops saskatoon | / (homepage) | 4.9 | 8 | Real intent + 1 click. Homepage is the destination — flag for "should we route to a sub-page?" |
-| printing shop near me | / (homepage) | 5.8 | 5 | |
-| tarpaulin printing | / (homepage) | 6.6 | 5 | Niche query — potential dedicated page candidate |
-| business cards saskatoon | / (homepage) | 8.7 | 9 | **COMPETING WITH /business-cards-saskatoon** — see "competing pages" below |
-| same day printing saskatoon | /foamboard-printing-saskatoon | 9.0 | 6 | Odd page-query mismatch — should be homepage or quote page |
-| printing saskatoon | / (homepage) | 9.5 | 18 | |
-| wall printing near me | /wall-graphics-saskatoon | 9.7 | 7 | NEW DEFEND candidate |
-| printing services near me | / (homepage) | 9.8 | 6 | |
-| retail signs saskatoon | /retail-signs-saskatoon | 10.3 | 6 | NEW DEFEND candidate |
+| Page | Page pos | 28d imp | clk | Note |
+|------|---------:|--------:|----:|------|
+| photo-poster-printing-saskatoon | **8.6** | 120 | 1 | **PAGE 1 + real demand.** Strong new DEFEND candidate. Promote to DEFEND next refresh; treat title as protected now. |
+| poster-printing-saskatoon | 17.2 | 122 | 3 | Page-2 + real clicks. **Possible cannibalization with photo-poster-printing** for "poster printing saskatoon" — investigate which URL should own it before any edit. |
+| foamboard-printing-saskatoon | 19.5 | 109 | 1 | Page-2, real demand. Future wave candidate. |
+| same-day-printing-saskatoon | 23.7 | 103 | 1 | Decayed-ish, real demand. Future candidate. |
+| retail-signs-saskatoon | 44.1 | 112 | 0 | High imp but deep — low near-term ROI. |
+| community-printing-saskatoon | 56.1 | 98 | 0 | Decay alert ("non profit printing services" 51.7→57). Not frozen, but pos 56 = too deep for a quick win. Low priority. |
 
 ## Competing pages (Google can't decide which URL ranks for a keyword)
 
-- **"business cards saskatoon"** is served by both / (pos 8.7, 9 imp) and /business-cards-saskatoon (pos 27.0, 5 imp). The homepage is outranking the dedicated landing page on the exact target keyword. This is a strong signal that the BC landing page has lost topical authority. Wave A (Phase 3 of recovery plan) title/meta rewrite is the correct response.
-
-## ⚠ Critical insight from 2026-05-29 refresh
-
-**The May 25 wave-rule-violating commit (7ab5e48) crashed 5 pages further than the May 5 refresh showed:**
-
-| Page | March 2026 | May 5 | May 29 | Total drop |
-|------|-----------|-------|--------|------------|
-| business-cards-saskatoon | #1 | #16 | #22.1 | -21 |
-| banner-printing-saskatoon | #2 | #11.7 | **#33.2** | -31 |
-| flyer-printing-saskatoon | #3 | #25 | #40.6 | -38 |
-| sign-company-saskatoon | #4 | #30 | (noise) | unknown |
-| coroplast-signs-saskatoon | #5 | (dropped from top pages) | #44.7 | unknown |
-
-**Banner is now WORSE than business-cards.** The recovery plan's Phase 7 ("Wave E: banner-printing-saskatoon meta-only fix") is no longer appropriate — banner needs the same DECAYED treatment as business-cards. Recommend re-sequencing Wave A and Wave E priorities at next planning checkpoint, but execute Wave A on business-cards as written first.
+- **"business cards saskatoon"** — RESOLVED. Dedicated /business-cards-saskatoon now outranks the homepage on the primary query (8.9 vs ~9). The 831b91c rewrite worked. Keep watching but no action.
+- **"poster printing saskatoon"** — NEW. Both /poster-printing-saskatoon (17.2) and /photo-poster-printing-saskatoon (8.6) serve poster queries. Decide the canonical owner before editing either. Do NOT edit both.
 
 ## What "DEFEND" means
 
@@ -82,6 +86,11 @@ Note: 1000-row sample (PostgREST cap), so this is partial — re-run with pagina
 - Title and meta rewrite is permitted but must follow Wave system (one page per commit, 5-7 day GSC observation between)
 - Body content restructure permitted in Wave 2 (separate commit from title change)
 
+## What "RECOVERING" means (added 2026-06-15)
+
+- Was DECAYED, now climbing toward top 10 on fresh data after a recovery-wave edit.
+- **Do NOT touch.** A page mid-recovery is settling — another edit resets the volatility clock and risks reversing the gain. Observe through at least one more weekly read before considering any change.
+
 ## Local pack baseline (last refreshed 2026-03-20 — STALE, refresh from Trustindex)
 
 | Keyword | Local Pack Rank (March 2026) |
@@ -96,12 +105,12 @@ Note: 1000-row sample (PostgREST cap), so this is partial — re-run with pagina
 
 ## Refresh process
 
-1. Query Supabase `seo_gsc_snapshots` for the last 28-day window
-2. Compute impression-weighted average position per page (across all queries) AND per (query, page) for tracked keywords
-3. Update positions, click counts, lock levels in the protected pages table
-4. Apply decay rule (60+ days below pos 10 = eligible for rewrite)
-5. Survey for new top-10 candidates not yet in the DEFEND list
-6. Append a refresh entry to `memory/seo-sprints.md`
+1. Query Supabase `seo_gsc_snapshots` for the last 28-day window — **paginate past 1,000 rows** (28d ≈ 3,000+ rows; the old single-page pull silently truncated the survey).
+2. Compute impression-weighted average position per page (across all queries) AND per (query, page) for tracked keywords.
+3. Update positions, click counts, lock levels, and the trend column in the protected pages table.
+4. Apply decay rule (60+ days below pos 10 = eligible for rewrite) AND the conflicting-signal rule (don't edit a page that's both an "opportunity" and a decay alert).
+5. Survey for new top-10 candidates not yet in the DEFEND list.
+6. Append a refresh entry to `memory/seo-sprints.md` and the vault recovery log.
 
 ## Files most relevant to SEO
 
