@@ -1,0 +1,18 @@
+Hi {{contact.FIRSTNAME | default : "there"}},
+
+If you order school banners or signs online, you know the drill: order today, wait three weeks, and hope the file was right -- because there's no proof and no one to call.
+
+I'm Hasan, I run True Color Display Printing here in Saskatoon, and we built the shop to fix exactly that. When a teacher drops an event on your desk with four days' notice, we can have a vinyl banner or a stack of coroplast signs ready in 1-3 business days. Need it faster? Same-day rush is +$40 flat if it's in before 10 AM. Everything prints in-house on our Roland UV printer, so nothing waits on an out-of-province courier -- you pick it up at 216 33rd St W.
+
+Real numbers to file away: vinyl banners from $66 for a 2x4' (grommets included), coroplast signs $8/sqft -- an 18x24" is $24. No per-item minimum; the only floor is a $25 order total.
+
+Next time something's due "yesterday," you'll have somewhere local to send it. Reply with what you need and I'll quote it the same day.
+
+See school signs and pricing:
+https://truecolorprinting.ca/school-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=school-drip-2026-08
+
+-- Hasan
+
+Hasan Sharif
+True Color Display Printing, Saskatoon
+(306) 954-8688 - info@true-color.ca

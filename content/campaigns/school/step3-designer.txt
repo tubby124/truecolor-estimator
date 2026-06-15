@@ -1,0 +1,18 @@
+Hi {{contact.FIRSTNAME | default : "there"}},
+
+Most school print starts the same way: someone opens Canva, fights with it for an hour, runs it through the office printer, and tapes a curling sheet of paper to the wall. It works -- but it quietly tells parents and kids the school didn't quite have time for them.
+
+You don't need a designer on payroll to do better. Bring us a logo and the words; our in-house designer builds the layout for $35 flat and sends a same-day proof, so you sign off before anything prints. Then it comes back as a real piece -- a foamboard display board ($45 for 18x24", $65 for 24x36") for the science fair or front hall, or a vinyl banner ($66 for a 2x4') that hangs straight and holds its colour all season.
+
+It's the difference between "we made do" and "the school showed up." Printed in-house on our Roland UV here in Saskatoon, ready in 1-3 business days, pickup at 216 33rd St W.
+
+Send me the next thing on your list and I'll mock it up.
+
+See display boards and banners:
+https://truecolorprinting.ca/school-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=school-drip-2026-08
+
+-- Hasan
+
+Hasan Sharif
+True Color Display Printing, Saskatoon
+(306) 954-8688 - info@true-color.ca

@@ -38,15 +38,27 @@ confirmations + receipts + review requests).
 
 | Date | 8 AM send | Recipients | Wave |
 |------|-----------|-----------|------|
-| Mon Jun 15 | Retail Day 0 | 204 | TC Wave 3 |
+| Mon Jun 15 | Retail Day 0 | 204 | TC Wave 3 (✓ sent — 33.5% open, 3% bounce) |
 | Mon Jun 22 | Retail Day 7 | 204 | TC Wave 3 |
 | Mon Jun 29 | Retail Day 14 | 204 | TC Wave 3 |
 | Wed Jul 15 | Retail Day 30 | 204 | TC Wave 3 |
 | Thu Jul 30 | Retail Day 45 | 204 | TC Wave 3 |
+| Tue Aug 11 | School Day 0 | 182 | TC Wave 4 (Brevo list 31, campaigns 128–132) |
+| Tue Aug 18 | School Day 7 | 182 | TC Wave 4 |
+| Tue Aug 25 | School Day 14 | 182 | TC Wave 4 |
+| Thu Sep 10 | School Day 30 | 182 | TC Wave 4 |
+| Fri Sep 25 | School Day 45 | 182 | TC Wave 4 |
 
-> **Parallel sends:** Retail owns the 5 dates above (each ~maxes the 250 ceiling).
-> Any parallel niche must send on the OTHER days. Before scheduling a new niche,
-> add its dates here and confirm no day exceeds 250 combined.
+> **Two scheduling rules, both proven here:**
+> 1. **Seasonal fit beats speed.** School was deliberately pushed to mid-August (not
+>    June) because school offices are empty all summer — cold mail into July dead-air
+>    wastes the wave. Match the niche's send window to when its buyers are at their
+>    desks (schools: mid-Aug back-to-school), even if that means waiting weeks.
+> 2. **Never stack two niches on one day.** Retail (Jun–Jul) and School (Aug–Sep) ran
+>    sequentially so no day exceeded the 250/day cold-drip ceiling — zero Brevo upgrade.
+>    If two niches must overlap in time, interleave on adjacent weekdays (never the
+>    same date). Before scheduling a new niche, add its dates here and confirm no day
+>    exceeds 250 combined.
 
 ---
 
@@ -86,9 +98,20 @@ AND `validation_status <> 'invalid'`.
 
 1. **Verify the reply-scan is green:** `gh run list --workflow=cron-blitz-replies.yml --limit 3`
 2. **Write the copy** (5 emails) to `content/campaigns/<niche>/step{1..5}-*.html` + `.txt`
-   and a `manifest.json` (`{step,file,subject,wait_days}`). Follow brand-voice +
-   content-format rules (subject <50, plain-text fallback, one UTM'd CTA to the
-   niche page, real prices per the $25-minimum comms rules, personal 1:1 voice).
+   and a `manifest.json` (`{step,file,subject,wait_days}`).
+   - **Research first (the proven uplift).** Dispatch the `researcher` agent for
+     deep, sourced, niche-specific buyer pain points (who actually places the order,
+     budget/approval cycles, seasonal triggers, vendor frustrations). Then load the
+     `marketingskills:cold-email` skill for the writing craft. **Each of the 5 emails
+     hits a DIFFERENT pain point** — do not let all 5 collapse onto one angle (the
+     first School draft was all "tournament deadline"; the rewrite spread across
+     speed, registration season, no-designer, approval/procurement, year-end budget).
+   - Pull real product names + prices from the niche's live landing page
+     (`src/app/<niche>-signs-saskatoon/page.tsx`) so the email matches the page.
+   - Follow brand-voice + content-format rules (subject <50, plain-text fallback,
+     one UTM'd CTA to the niche page, real prices per the $25-minimum comms rules,
+     personal 1:1 voice). **Never invent a product/price** — if the catalog has no
+     SKU for it (e.g. "booklets"), leave it out.
 3. **Run the pre-send gate:** `/true-color-campaign-presend-audit` (MANDATORY).
 4. **Self-test:** create a draft campaign, `sendTest` to an inbox you control,
    confirm render + deliverability (cold marketing lands in Promotions — normal).
@@ -137,8 +160,8 @@ AND `validation_status <> 'invalid'`.
 
 | File | Role |
 |---|---|
-| `scripts/blitz/launch-niche-wave.mjs` | The launcher (config block per niche) |
-| `scripts/blitz/build-retail-cohort.mjs` | `isEligible` predicate (tested) |
+| `scripts/blitz/launch-niche-wave.mjs` | The launcher (config block per niche). Has its OWN niche-generic `isEligible` (binds to `CFG.industryTag`) — FIXED 2026-06-15, was importing the retail-hardcoded one and matched 0 leads for any non-retail niche. Imports only `isValidEmail` now. |
+| `scripts/blitz/build-retail-cohort.mjs` | Exports `isValidEmail` (regex) + the retail-bound `isEligible` (retail-only; the launcher no longer uses it) |
 | `content/campaigns/<niche>/` | Source-of-truth copy + manifest |
 | `src/lib/blitz/process-replies.ts` | Reply classification + suppression |
 | `src/app/api/webhooks/brevo/route.ts` | Open/click/unsub tracking |
