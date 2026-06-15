@@ -7,9 +7,9 @@
  *   - fresh list per wave (zero overlap with prior sends)
  *   - 250/day cold-drip ceiling (50 reserved for transactional)
  *
- * Eligibility = build-retail-cohort.isEligible (queued, has email, not suppressed,
- * not unsubscribed, not invalid). NOTE: isEligible is retail-bound today; when you
- * launch a different niche, generalize the predicate (see DRIP-CAMPAIGN-RUNBOOK.md).
+ * Eligibility (queued, has email, not suppressed, not unsubscribed, not invalid)
+ * is niche-generic: the local isEligible() filters on CFG.industryTag, so this
+ * launcher works for ANY niche by swapping the CONFIG block (see DRIP-CAMPAIGN-RUNBOOK.md).
  *
  * Usage:
  *   node scripts/blitz/launch-niche-wave.mjs            # DRY-RUN (no writes)
@@ -20,24 +20,38 @@
  */
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { isEligible } from "./build-retail-cohort.mjs";
+import { isValidEmail } from "./build-retail-cohort.mjs";
 
 // ===================== WAVE CONFIG (swap per niche) =====================
 const CFG = {
-  niche: "retail",
-  industryTag: "retail",
-  waveName: "TC Wave 3 — Retail",
-  listName: "TC Wave 3 — Retail (2026-06)",
+  niche: "school",
+  industryTag: "school",
+  waveName: "TC Wave 4 — School",
+  listName: "TC Wave 4 — School (2026-06)",
   sender: { name: "Hasan — True Color", email: "hello@outreach.true-color.ca" },
   replyTo: "info@true-color.ca",
-  htmlDir: "content/campaigns/retail",
-  manifestPath: "content/campaigns/retail/manifest.json",
-  startDate: "2026-06-15", // Day 0 (a weekday)
+  htmlDir: "content/campaigns/school",
+  manifestPath: "content/campaigns/school/manifest.json",
+  startDate: "2026-06-16", // Day 0 (Tue) — avoids retail's Mon dates + Canada Day
   sendTime: "08:00:00",
   tzOffset: "-06:00", // Saskatoon, no DST
   dailyCap: 250,
 };
 // =======================================================================
+
+// Niche-generic eligibility — mirrors build-retail-cohort.isEligible but binds
+// to CFG.industryTag instead of a hardcoded niche, so any wave can use it.
+function isEligible(lead) {
+  return (
+    Array.isArray(lead.industry_tags) &&
+    lead.industry_tags.includes(CFG.industryTag) &&
+    isValidEmail(lead.email) &&
+    lead.drip_status === "queued" &&
+    lead.suppression_reason == null &&
+    lead.unsubscribed_at == null &&
+    lead.validation_status !== "invalid"
+  );
+}
 
 function loadEnv() {
   const e = {};
