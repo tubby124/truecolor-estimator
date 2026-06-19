@@ -2,6 +2,15 @@
 
 ---
 
+## SEO Phase 66 — Jun 19 Wave B: Sticker custom-FAQ + WebSite SearchAction (2026-06-19)
+
+- Files changed: `src/app/sticker-printing-saskatoon/page.tsx`, `src/app/sitemap.ts`, `src/app/layout.tsx`
+- What shipped: Appended 2 new FAQ entries to sticker-printing-saskatoon targeting "custom stickers near me" (cost comparison angle) and "custom labels near me" (same-day pickup angle). Sitemap lastmod updated to 2026-06-19. Added `potentialAction: SearchAction` to WebSite JSON-LD in layout.tsx for sitelinks search box eligibility (Wave B1).
+- What was deferred/flagged: FAQPage JSON-LD on IndustryPage (Wave B2) — deferred because IndustryPage renders all protected ranking pages; schema changes on protected pages require a separate wave with 7-day GSC observation gap. No title/H1/meta-description/schema changes on sticker page (DEFEND/FROZEN rules observed).
+- Next steps: Merge only after running /tc-seo-opportunities locally for fresh post-June-12 GSC data; confirm zero decay alerts on sticker-printing-saskatoon before merge. Refresh seo-protected-pages.md from fresh GSC data at merge time.
+
+---
+
 ## SEO Phase 64/65 — Emergency recovery checkpoint (2026-06-05)
 
 **Trigger:** Hasan asked to update all findings after the accelerated SEO recovery push.
