@@ -239,6 +239,14 @@ export default function StickerPrintingSaskatoonPage() {
           q: "Do complex sticker shapes cost more than circles or rectangles?",
           a: "Most logo outlines, circles, ovals, and rounded rectangles use the normal die-cut price grid: 100 4×4\" stickers for $160, 250 for $325, or 500 for $475. Very detailed edges, interior cutouts, or many designs on one sheet may need a quick file-prep review before we quote. If the cut path needs rebuilding, design setup is $35 flat with a same-day proof.",
         },
+        {
+          q: "How much do custom stickers near me cost compared to ordering online from Saskatoon?",
+          a: "Custom die-cut vinyl stickers at True Color in Saskatoon run 100 for $160, 250 for $325, and 500 for $475 on the standard 4×4\" size — in line with national online print services, but with no shipping fees, same-day pickup at 216 33rd St W, and a local in-house designer ($35 flat) who prepares your die-cut path and sends a proof before cutting begins. Small sticker runs start at 25 for $25 (2×2\" size). A $25 order-total minimum applies at checkout on the very smallest carts.",
+        },
+        {
+          q: "Can I get custom labels near me the same day in Saskatoon?",
+          a: "Yes — same-day custom label production is available for a +$40 flat rush fee when you order before 10 AM. Call (306) 954-8688 to confirm availability for your label quantity and size. Standard runs — 100 labels for $160 or 250 for $325 — are typically ready for pickup at 216 33rd St W, Saskatoon by 4–5 PM on rush orders. Standard turnaround without rush is 1–3 business days after artwork approval. Our in-house designer ($35 flat) can prepare your label artwork the same morning if you don't have a print-ready file.",
+        },
       ]}
     />
   );
