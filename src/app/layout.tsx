@@ -137,6 +137,14 @@ const websiteSchema = {
   description:
     "Instant online pricing for signs, banners, and print products in Saskatoon, SK. No quote forms — see your exact price in 30 seconds.",
   publisher: { "@id": "https://truecolorprinting.ca/#organization" },
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://truecolorprinting.ca/quote?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
 };
 
 const localBusinessSchema = {
