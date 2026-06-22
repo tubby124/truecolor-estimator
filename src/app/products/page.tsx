@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { PRODUCTS, PRODUCT_SLUGS } from "@/lib/data/products-content";
@@ -66,7 +66,44 @@ const SEO_ONLY_CARDS: SeoOnlyCard[] = [
   },
 ];
 
-export default function ProductsPage() {
+function normalizeSearch(value: string | undefined) {
+  return value?.trim().toLowerCase() ?? "";
+}
+
+function matchesProductSearch(product: (typeof PICKER_PRODUCTS)[number], query: string) {
+  const haystack = [
+    product.name,
+    product.tagline,
+    product.description,
+    product.fromPrice,
+    product.category,
+    ...product.whoUsesThis,
+    ...product.specs.flatMap((spec) => [spec.label, spec.value]),
+  ].join(" ").toLowerCase();
+
+  return haystack.includes(query);
+}
+
+function matchesSeoOnlySearch(card: SeoOnlyCard, query: string) {
+  return [card.name, card.fromPrice, card.href].join(" ").toLowerCase().includes(query);
+}
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string }>;
+}) {
+  const params = searchParams ? await searchParams : {};
+  const rawQuery = params.q?.trim() ?? "";
+  const query = normalizeSearch(rawQuery);
+  const pickerProducts = query
+    ? PICKER_PRODUCTS.filter((product) => matchesProductSearch(product, query))
+    : PICKER_PRODUCTS;
+  const seoOnlyCards = query
+    ? SEO_ONLY_CARDS.filter((card) => matchesSeoOnlySearch(card, query))
+    : SEO_ONLY_CARDS;
+  const hasResults = pickerProducts.length + seoOnlyCards.length > 0;
+
   return (
     <div className="min-h-screen bg-white">
       <SiteNav />
@@ -81,6 +118,48 @@ export default function ProductsPage() {
             Pick a product — see your exact price instantly. No forms. No callbacks.
           </p>
         </div>
+
+        <form
+          action="/products"
+          className="mb-8 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:flex-row"
+        >
+          <label htmlFor="product-search" className="sr-only">
+            Search printing products
+          </label>
+          <input
+            id="product-search"
+            name="q"
+            type="search"
+            defaultValue={rawQuery}
+            placeholder="Search signs, stickers, banners..."
+            className="min-h-[48px] flex-1 rounded-xl border border-gray-200 px-4 text-base text-[#1c1712] outline-none transition-colors placeholder:text-gray-400 focus:border-[#16C2F3]"
+          />
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#16C2F3] px-5 font-bold text-white transition-colors hover:bg-[#0fb0dd] sm:flex-none"
+            >
+              <Search size={18} aria-hidden="true" />
+              Search
+            </button>
+            {rawQuery && (
+              <Link
+                href="/products"
+                className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-gray-200 px-4 text-sm font-semibold text-gray-600 transition-colors hover:border-[#16C2F3] hover:text-[#16C2F3]"
+              >
+                Clear
+              </Link>
+            )}
+          </div>
+        </form>
+
+        {rawQuery && (
+          <p className="mb-6 text-sm text-gray-500">
+            {hasResults
+              ? `${pickerProducts.length + seoOnlyCards.length} result${pickerProducts.length + seoOnlyCards.length === 1 ? "" : "s"} for "${rawQuery}"`
+              : `No products found for "${rawQuery}"`}
+          </p>
+        )}
 
         <div className="mb-8 rounded-xl border border-[#16C2F3]/30 bg-[#eefaff] px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-6">
           <div>
@@ -102,7 +181,7 @@ export default function ProductsPage() {
 
         {/* Product picker grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-16">
-          {PICKER_PRODUCTS.map((product) => {
+          {pickerProducts.map((product) => {
             const img = PRODUCT_IMAGES[product.slug];
             return (
               <Link
@@ -176,42 +255,44 @@ export default function ProductsPage() {
         </div>
 
         {/* SEO-page-only products (labels + design services) — link to SEO landing pages */}
-        <div className="mb-12">
-          <h2 className="text-xl font-bold text-[#1c1712] mb-2 text-center">
-            Labels &amp; design services
-          </h2>
-          <p className="text-gray-500 text-sm mb-6 text-center">
-            Custom-quoted — get full pricing and specs on each landing page.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {SEO_ONLY_CARDS.map((card) => (
-              <Link
-                key={card.href}
-                href={card.href}
-                className="group relative flex flex-col border border-gray-100 rounded-2xl overflow-hidden hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
-              >
-                <div className="relative h-32 w-full bg-[#f8f4ef]">
-                  <Image
-                    src={card.image}
-                    alt={`${card.name} — True Color Display Printing Saskatoon`}
-                    fill
-                    className="object-cover"
-                    loading="lazy"
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-                  />
-                </div>
-                <div className="p-4">
-                  <p className="font-bold text-[#1c1712] text-sm leading-tight">
-                    {card.name}
-                  </p>
-                  <p className="text-xs font-semibold mt-1 text-[#16C2F3]">
-                    {card.fromPrice}
-                  </p>
-                </div>
-              </Link>
-            ))}
+        {seoOnlyCards.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-xl font-bold text-[#1c1712] mb-2 text-center">
+              Labels &amp; design services
+            </h2>
+            <p className="text-gray-500 text-sm mb-6 text-center">
+              Custom-quoted — get full pricing and specs on each landing page.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {seoOnlyCards.map((card) => (
+                <Link
+                  key={card.href}
+                  href={card.href}
+                  className="group relative flex flex-col border border-gray-100 rounded-2xl overflow-hidden hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
+                >
+                  <div className="relative h-32 w-full bg-[#f8f4ef]">
+                    <Image
+                      src={card.image}
+                      alt={`${card.name} — True Color Display Printing Saskatoon`}
+                      fill
+                      className="object-cover"
+                      loading="lazy"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                      {card.name}
+                    </p>
+                    <p className="text-xs font-semibold mt-1 text-[#16C2F3]">
+                      {card.fromPrice}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Not sure section */}
         <div className="bg-[#f4efe9] rounded-2xl p-8 text-center">

@@ -25,6 +25,27 @@
 
 ---
 
+## SEO Phase 67 — Valid WebSite SearchAction + Product Search (2026-06-22)
+
+### Source
+- `FULL-AUDIT-REPORT.md` and `SEO-REMAINING-WAVES.md` carried a pending WebSite `SearchAction` item.
+- Direct code check showed there was no public search endpoint, so adding `SearchAction` alone would have been fake structured data.
+
+### What shipped
+- Added server-rendered `/products?q=...` filtering across estimator products and SEO-only product/service cards.
+- Added WebSite `SearchAction` schema targeting `https://truecolorprinting.ca/products?q={search_term_string}`.
+- Updated `/products` sitemap lastmod to 2026-06-22.
+
+### Guardrails
+- Did not touch protected ranking pages, titles, H1s, meta descriptions, or product prices.
+- Did not add FAQPage schema; non-government/non-health FAQ rich results are restricted, so that item stays deferred unless there is a clear knowledge-graph reason.
+
+### Re-check
+- Validate that `/products?q=banner`, `/products?q=stickers`, and `/products?q=business cards` return sensible product results after deploy.
+- Watch GSC enhancement reports for WebSite structured data warnings after Google recrawls.
+
+---
+
 ## SEO Phase 64/65 — Emergency recovery checkpoint (2026-06-05)
 
 **Trigger:** Hasan asked to update all findings after the accelerated SEO recovery push.

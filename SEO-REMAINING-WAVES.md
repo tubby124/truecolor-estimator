@@ -25,7 +25,7 @@
 
 | # | Item | File | Notes |
 |---|------|------|-------|
-| B1 | Add `SearchAction` to WebSite schema (sitelinks search box eligibility) | `src/app/layout.tsx` | Pure addition, low risk |
+| B1 | Add `SearchAction` to WebSite schema (sitelinks search box eligibility) | `src/app/layout.tsx` + `/products?q=` | ✅ DONE 2026-06-22 — added real public product search first, then schema |
 | B2 | Add FAQPage JSON-LD on IndustryPage (FAQs already exist as `<details>`) | `src/components/site/IndustryPage.tsx` | Rich results restricted Aug 2023 but useful for knowledge graph + AI engines |
 
 ### Wave C — Performance + polish
