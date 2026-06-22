@@ -1,6 +1,6 @@
 # SEO Remaining Waves — truecolorprinting.ca
 
-**Last updated:** 2026-06-08
+**Last updated:** 2026-06-22
 **Full audit:** `FULL-AUDIT-REPORT.md`
 **GSC baseline (2026-03-12):** BC #1 | banner #2 | flyer #3 | sign #4 | coroplast #5
 **GSC actual (2026-04-12):** See ranking slip section below — baseline is no longer accurate
@@ -33,7 +33,7 @@
 | # | Item | File | Notes |
 |---|------|------|-------|
 | C1 | Convert 3 .jpg → .webp in /images/industries/agribusiness/ + /images/industries/poster-printing/ | `public/images/...` | ~60% size reduction, none currently >500KB |
-| C2 | Add DesignDirectionGrid to `wall-graphics-saskatoon` | `src/app/wall-graphics-saskatoon/page.tsx` | Body-only addition, no title/meta touch |
+| C2 | Add DesignDirectionGrid to `wall-graphics-saskatoon` | `src/app/wall-graphics-saskatoon/page.tsx` | ✅ DONE 2026-06-22 — body-only addition, no title/meta touch |
 | C3 | Audit HeroSlider for SSR slide 0 (LCP improvement) | `src/components/home/HeroSlider.tsx` | Currently full `"use client"` — slide 0 hydrates on client |
 | C4 | Verify GTM `lazyOnload` vs `afterInteractive` tradeoff against ga4-sync cron output | `src/app/layout.tsx` (281–283) | Decision, not auto-fix |
 

@@ -2,6 +2,29 @@
 
 ---
 
+## SEO Phase 66 — Wall Graphics Body-Only Design Grid (2026-06-22)
+
+### Source
+- Fresh GSC snapshot through 2026-06-19 showed overall search progress: 46 clicks / 6,233 impressions in the latest stable 28d window vs 27 clicks / 4,318 impressions in the prior 28d window.
+- `/wall-graphics-saskatoon` remains an editable DEFEND candidate, not frozen: 159 impressions, 0 clicks, avg position 13.9 in the latest stable 28d window.
+- `SEO-REMAINING-WAVES.md` Wave C2 already queued a body-only DesignDirectionGrid addition for this page.
+
+### What shipped
+- Added `DesignDirectionGrid` to `/wall-graphics-saskatoon` using existing product images only.
+- Kept metadata, title, H1, slug, schema, and pricing model unchanged.
+- Updated only the wall-graphics sitemap lastmod to 2026-06-22.
+- Marked Wave C2 complete in `SEO-REMAINING-WAVES.md`.
+
+### Guardrails
+- Did not touch `sticker-printing-saskatoon` despite opportunity-script alerts; it remains frozen/hold.
+- Did not change homepage title/meta while broad recovery is still settling.
+- GA4 remains deferred: GSC sync is healthy, but GA4 sync is failing due missing Analytics property permission.
+
+### Re-check
+- Watch `/wall-graphics-saskatoon` after the next 5-7 days of GSC data. Desired movement: page stays stable or improves toward top 10 for "wall graphics near me" / "wall printing near me" without CTR getting worse.
+
+---
+
 ## SEO Phase 64/65 — Emergency recovery checkpoint (2026-06-05)
 
 **Trigger:** Hasan asked to update all findings after the accelerated SEO recovery push.

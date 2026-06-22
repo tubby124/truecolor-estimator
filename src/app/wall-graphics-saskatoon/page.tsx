@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
+import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
   title: { absolute: "Wall Graphics & Wall Coverings Saskatoon | From $11/sqft" },
@@ -16,6 +17,63 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
+const designDirections = [
+  {
+    title: "Wall Graphic Design Directions",
+    subtitle:
+      "Removable vinyl from $11/sqft — office walls, retail features, clinic spaces, and branded interiors",
+    aspect: "4/3" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/products/product/vinyl-lettering-office-wall-800x600.webp",
+        alt: "Office wall graphic and vinyl lettering printed in Saskatoon — True Color Display Printing",
+        label: "Office Feature Wall",
+        caption: "Removable vinyl — from $11/sqft",
+      },
+      {
+        src: "/images/products/product/window-decal-dental-office-800x600.webp",
+        alt: "Clinic wall and window decal graphics printed in Saskatoon — True Color Display Printing",
+        label: "Clinic / Reception",
+        caption: "Brand graphics, hours, wayfinding",
+      },
+      {
+        src: "/images/products/product/window-decal-coffee-autumn-800x600.webp",
+        alt: "Retail wall and window graphics printed in Saskatoon — True Color Display Printing",
+        label: "Retail Promotion",
+        caption: "Seasonal removable displays",
+      },
+    ],
+  },
+  {
+    title: "Formats That Pair With Wall Graphics",
+    subtitle:
+      "Use wall vinyl for smooth painted surfaces, lettering for text, and rigid panels where anchors make sense",
+    aspect: "4/3" as const,
+    maxCols: 3 as const,
+    items: [
+      {
+        src: "/images/products/product/vinyl-lettering-shop-window-800x600.webp",
+        alt: "Vinyl lettering for shop windows and interior walls printed in Saskatoon — True Color Display Printing",
+        label: "Vinyl Lettering",
+        caption: "Text-only graphics — from $8.50/sqft",
+      },
+      {
+        src: "/images/products/product/window-decal-before-after-800x600.webp",
+        alt: "Full-colour printed decals for walls and windows in Saskatoon — True Color Display Printing",
+        label: "Printed Decals",
+        caption: "Full-colour logos and imagery",
+      },
+      {
+        src: "/images/products/product/acp-sign-brick-wall-800x600.webp",
+        alt: "Rigid ACP wall sign printed in Saskatoon — True Color Display Printing",
+        label: "Rigid Wall Panels",
+        caption: "Permanent lobby signs — from $13/sqft",
+      },
+    ],
+  },
+];
 
 export default function WallGraphicsSaskatoonPage() {
   return (
@@ -93,6 +151,7 @@ export default function WallGraphicsSaskatoonPage() {
             </Link>{" "}
             — including logos, photos, and gradients — we print those from $11/sqft as well.
           </p>
+          <DesignDirectionGrid sections={designDirections} />
           <p className="text-gray-600 leading-relaxed">
             Saskatoon businesses in the Midtown area, Broadway corridor, 8th Street commercial strip,
             and downtown core use True Color for wall graphics because we&apos;re local, fast, and do
