@@ -193,13 +193,17 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
   }
 
   // ── Orphan orders ─────────────────────────────────────────────────────────
-  // Urgent = customer-noted urgency (call/funeral/rush/urgent/asap) OR age > 12h.
-  // These get a red telegram within the hour. Non-urgent stay yellow.
+  // Urgent = rush order OR customer-noted urgency (call/funeral/rush/urgent/asap)
+  // OR age > 12h. These get a red telegram within the hour. Non-urgent stay yellow.
   // TC-2026-0115/0116 (Rodney Russell, funeral, 2026-05-27) was the trigger
   // for this escalation — sat unpaid with "call to confirm" notes and no push.
+  // is_rush added 2026-06-25 (TC-2026-0164, Keely Bitternose): a same-day rush
+  // order sat as a low-priority yellow because its notes ("pick up same day")
+  // didn't match URGENT_NOTES and it was <12h old. A rush slot the customer
+  // configured but never paid for is exactly what staff must chase fastest.
   const URGENT_NOTES = /\b(call|funeral|urgent|rush|asap|emergency)\b/i;
   const urgent = inputs.orphans.filter(
-    (o) => o.age_hours > 12 || (o.notes != null && URGENT_NOTES.test(o.notes))
+    (o) => o.is_rush || o.age_hours > 12 || (o.notes != null && URGENT_NOTES.test(o.notes))
   );
   if (urgent.length > 0) {
     reds.push({
