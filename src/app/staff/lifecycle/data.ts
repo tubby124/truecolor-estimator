@@ -286,6 +286,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       total: row.total,
       status: row.status,
       age_hours: row.age_hours,
+      is_rush: row.is_rush,
       payment_method: row.payment_method,
       pay_link_url: payLinkUrl,
       wave_invoice_number: order?.wave_invoice_number ?? null,
