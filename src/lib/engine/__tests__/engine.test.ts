@@ -127,6 +127,63 @@ describe("STEP 4 — sqft-tier pricing", () => {
   });
 });
 
+// ─── Per-piece price floor (min_piece_price) ─────────────────────────────────
+
+describe("Per-piece price floor — coroplast", () => {
+  it("SIGN 12×18 single (1.5 sqft) — floored to $20 (raw sqft would be $12)", () => {
+    const result = estimate({
+      category: "SIGN",
+      material_code: "MPHCC020",
+      width_in: 12,
+      height_in: 18,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sqft_calculated).toBeCloseTo(1.5, 2);
+    expect(result.sell_price).toBe(20);
+  });
+
+  it("SIGN 12×18 double (1.5 sqft) — floored to $30 (raw sqft would be $21)", () => {
+    const result = estimate({
+      category: "SIGN",
+      material_code: "MPHCC020",
+      width_in: 12,
+      height_in: 18,
+      sides: 2,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(30);
+  });
+
+  it("SIGN 12×18 single qty 3 — floor applies per piece ($20 × 3 = $60), no qty-2 cliff", () => {
+    const result = estimate({
+      category: "SIGN",
+      material_code: "MPHCC020",
+      width_in: 12,
+      height_in: 18,
+      sides: 1,
+      qty: 3,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(60);
+  });
+
+  it("SIGN 24×24 single (4 sqft) — above floor, unchanged at $32", () => {
+    const result = estimate({
+      category: "SIGN",
+      material_code: "MPHCC020",
+      width_in: 24,
+      height_in: 24,
+      sides: 1,
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(32); // 4 sqft × $8 = $32; floor $20 doesn't bite
+  });
+});
+
 // ─── STEP 4.5: Bulk qty discount ─────────────────────────────────────────────
 
 describe("STEP 4.5 — bulk qty discount", () => {

@@ -71,6 +71,7 @@ export function getPricingRules(): PricingRule[] {
       conflict_note: r[14] || "",
       source_ref: r[15] || "",
       is_lot_price: r[16]?.toUpperCase() === "TRUE",
+      min_piece_price: num(r[17]),
     }));
   return _pricingRules;
 }

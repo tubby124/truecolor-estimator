@@ -130,7 +130,7 @@ function materialsForCategory(category: Category): OptionControl["choices"] {
 /** Common size presets per sqft category — keeps the configurator copy-paste-able. */
 const SIZE_PRESETS_BY_CATEGORY: Partial<Record<Category, OptionControl["choices"]>> = {
   BANNER:    [{ value: "2x4",  label: "2′ × 4′" },  { value: "3x6", label: "3′ × 6′" }, { value: "4x8", label: "4′ × 8′" }],
-  SIGN:      [{ value: "18x24", label: '18" × 24"' }, { value: "24x36", label: '24" × 36"' }, { value: "48x96", label: "4′ × 8′" }],
+  SIGN:      [{ value: "12x18", label: '12" × 18"' }, { value: "18x24", label: '18" × 24"' }, { value: "24x36", label: '24" × 36"' }, { value: "48x96", label: "4′ × 8′" }],
   RIGID:     [{ value: "18x24", label: '18" × 24"' }, { value: "24x36", label: '24" × 36"' }, { value: "48x96", label: "4′ × 8′" }],
   FOAMBOARD: [{ value: "18x24", label: '18" × 24"' }, { value: "24x36", label: '24" × 36"' }],
   MAGNET:    [{ value: "12x18", label: '12" × 18"' }, { value: "12x24", label: '12" × 24"' }],

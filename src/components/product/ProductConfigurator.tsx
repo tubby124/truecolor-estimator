@@ -213,7 +213,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
     const delay = isCustom || isCustomQty || isCustomFlexSize ? 300 : 0;
     const timer = setTimeout(fetchPrice, delay);
     return () => clearTimeout(timer);
-  }, [fetchPrice, isCustom, isCustomQty, isCustomFlexSize]);
+    // Depend on the actual price inputs (sides, qty, dimensions, material, design)
+    // so a sides-only toggle refetches. Previously only `fetchPrice` + custom flags
+    // were listed, so single↔double never re-ran the estimate and the price stuck.
+  }, [fetchPrice, sides, effectiveQty, effectiveWidth, effectiveHeight, effectiveMaterialCode, designStatus, isCustom, isCustomQty, isCustomFlexSize]);
 
   // Bubble price data to parent
   // NOTE: price is already the engine's sell_price including all addons — do NOT add addonTotal again
