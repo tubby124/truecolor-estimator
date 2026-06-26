@@ -286,6 +286,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       total: row.total,
       status: row.status,
       age_hours: row.age_hours,
+      is_rush: row.is_rush,
       payment_method: row.payment_method,
       pay_link_url: payLinkUrl,
       wave_invoice_number: order?.wave_invoice_number ?? null,
@@ -1085,6 +1086,13 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     gscVsGa4DivergencePct = Math.round((diff / max) * 100);
   }
 
+  // Denominator for the Clover webhook-silence check (see buildRollup): how many
+  // card orders actually came in over the last 24h. Real flow + zero webhook
+  // events = the confirmation pipe is down, invisible to the failure count.
+  const cloverOrders24h = rows.filter(
+    (r) => r.payment_method === "clover_card" && r.age_hours <= 24,
+  ).length;
+
   // ── derive status rollup ─────────────────────────────────────────────────
   // Pure function — single source of truth shared with /api/cron/dashboard-alerts.
   // Adding a new silent-fail surface = ONE registration in buildRollup; both
@@ -1095,6 +1103,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     heartbeats,
     waveDrafts,
     orphans,
+    cloverOrders24h,
     reconcileDetail: latestByName.get("reconcile-payments")?.detail ?? null,
     seoProtectedPagesStaleDays: getSeoProtectedPagesStaleDays(),
     gscVsGa4DivergencePct,
