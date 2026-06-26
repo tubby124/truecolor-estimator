@@ -40,6 +40,15 @@ export interface RollupInputs {
   orphans: Orphan[];
   /** Latest reconcile-payments cron_runs.detail string (e.g. "3 issues, 1 recovered, 2 unverified"). */
   reconcileDetail: string | null;
+  /**
+   * Count of clover_card orders CREATED in the last 24h. Denominator for the
+   * Clover webhook-silence check: real order flow with zero webhook events =
+   * the confirmation pipe is down (auth-reject / unsubscribed), which failed_24h
+   * cannot see because a rejected webhook writes no row. Born from the
+   * 2026-06-04 Clover outage that ran silently for 21 days while staff
+   * hand-confirmed 28 orders.
+   */
+  cloverOrders24h: number;
   /** Days since `.claude/rules/seo-protected-pages.md` was last refreshed. */
   seoProtectedPagesStaleDays: number | null;
   /**
@@ -85,6 +94,23 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
         label: `${g.label} webhook: ${g.failed_24h} failed (24h)`,
       });
     }
+  }
+
+  // ── Webhook SILENCE — the failed_24h check above is blind to it ─────────────
+  // failed_24h counts ROWS in webhook_events. A webhook rejected at the secret
+  // check (401) or never delivered (Clover subscription removed / URL changed)
+  // writes NO row, so failed_24h stays 0 and the source reads healthy. The
+  // 2026-06-04 Clover outage hid here for 21 days: zero Clover webhooks reached
+  // the handler while 28 clover_card orders were confirmed by hand (staff:manual)
+  // and several stuck unpaid. Same shape as the gsc-sync silent outage above —
+  // detect via the order-volume denominator, not the (empty) failure count.
+  const cloverGroup = inputs.webhookGroups.find((g) => g.source === "clover");
+  if (cloverGroup && inputs.cloverOrders24h >= 2 && cloverGroup.total_24h === 0) {
+    reds.push({
+      key: "webhook:clover:silent",
+      panel: "panel-webhook-health",
+      label: `Clover webhook silent: ${inputs.cloverOrders24h} card order(s) in 24h, 0 webhooks — confirmations are manual or missing`,
+    });
   }
 
   // ── Reconcile unverified count from latest cron_runs.detail ────────────────
@@ -193,13 +219,17 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
   }
 
   // ── Orphan orders ─────────────────────────────────────────────────────────
-  // Urgent = customer-noted urgency (call/funeral/rush/urgent/asap) OR age > 12h.
-  // These get a red telegram within the hour. Non-urgent stay yellow.
+  // Urgent = rush order OR customer-noted urgency (call/funeral/rush/urgent/asap)
+  // OR age > 12h. These get a red telegram within the hour. Non-urgent stay yellow.
   // TC-2026-0115/0116 (Rodney Russell, funeral, 2026-05-27) was the trigger
   // for this escalation — sat unpaid with "call to confirm" notes and no push.
+  // is_rush added 2026-06-25 (TC-2026-0164, Keely Bitternose): a same-day rush
+  // order sat as a low-priority yellow because its notes ("pick up same day")
+  // didn't match URGENT_NOTES and it was <12h old. A rush slot the customer
+  // configured but never paid for is exactly what staff must chase fastest.
   const URGENT_NOTES = /\b(call|funeral|urgent|rush|asap|emergency)\b/i;
   const urgent = inputs.orphans.filter(
-    (o) => o.age_hours > 12 || (o.notes != null && URGENT_NOTES.test(o.notes))
+    (o) => o.is_rush || o.age_hours > 12 || (o.notes != null && URGENT_NOTES.test(o.notes))
   );
   if (urgent.length > 0) {
     reds.push({

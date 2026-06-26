@@ -23,6 +23,7 @@ export interface Orphan {
   total: number;
   status: string;
   age_hours: number;
+  is_rush: boolean; // rush orders escalate to urgent immediately (no 12h wait)
   payment_method: string;
   pay_link_url: string; // server-generated recovery URL (HMAC token)
   wave_invoice_number: string | null;
