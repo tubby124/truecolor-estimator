@@ -10,7 +10,7 @@
 
 ### 2026-05-19 → 2026-05-20 system change (read this first)
 
-The old **per-product min charge** model is GONE. Engine returns honest sqft × rate × qty for every product, every size, every quantity. Customers see real per-piece prices browsing the site.
+The old **per-product min charge** model is GONE. Engine returns honest sqft × rate × qty for every product, every size, every quantity — with ONE deliberate, scoped exception added 2026-06-26: **coroplast (SIGN) has a per-piece price floor** ($20 single / $30 double) via the new `min_piece_price` column, so very small coroplast signs (≈ under 2.5 sqft single / 2.1 sqft double) don't price below cost. This is an explicit per-category floor, NOT the dead global `min_charge`. Everything else still returns honest sqft × rate. Customers see real per-piece prices browsing the site.
 
 Replaced by a single **$25 order-total minimum** that fires only at customer cart checkout. Below $25 raw subtotal → transparent "Small order setup fee" tops up to $25. Above $25 → no surcharge. Staff `/staff` portal + manual-order route are NOT surcharged (concierge mode).
 
@@ -20,7 +20,7 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 
 | Product | Sqft Rate (T1) | Smallest size raw | What customer pays | Marketing "from $X" |
 |---------|---------------|-------------------|--------------------|---------------------|
-| Coroplast Signs | $8.00/sqft | 18×24" = $24 | $25 (cart min) | **"from $25"** or "from $8/sqft" |
+| Coroplast Signs | $8.00/sqft | 12×18" = $20 (floor) | $25 (cart min) | **"from $25"** or "from $8/sqft" |
 | ACP Aluminum | $13.00/sqft | 18×24" = $39 | $39 (above min) | **"from $39"** or "from $13/sqft" |
 | Vehicle Magnets | $24.00/sqft | 12×12" = $24 | $25 (cart min) | **"from $25"** or "from $24/sqft" |
 | Vinyl Lettering | $8.50/sqft | 6×18" = $6.38 | $25 (cart min) | **"from $25"** or "from $8.50/sqft" |
@@ -63,6 +63,8 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 
 **Important:** `min_charge` values remain in `data/tables/pricing_rules.v1.csv` as legacy reference columns only. They are not enforced by the engine. Customer checkout uses the single $25 order-total minimum described above.
 
+**Exception — coroplast per-piece floor (2026-06-26):** the separate `min_piece_price` column IS enforced by the engine, but only on rows where it is set. Currently coroplast only: **$20 single / $30 double**. It floors the per-piece price in the sqft-tier path (`price = max(sqft × rate, floor)`), before qty multiply, so small signs (≈ under 2.5 sqft single / 2.1 sqft double) can't price below cost — and it holds at every quantity (no qty-1-vs-qty-2 cliff). This is NOT the dead `min_charge`; it's a new, explicit, per-category column. Other categories: blank = no floor. Extending it to ACP/foamboard/magnets/decals is blocked until the "from $39 vs from $60" rule contradiction is reconciled — see `.claude/rules/truecolor-pricing-comms.md`.
+
 ### Coroplast Signs (SIGN · MPHCC020 · 4mm Corrugated)
 | Sqft Range | Price/sqft |
 |------------|-----------|
@@ -78,11 +80,13 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 Common sizes:
 | Size | Single | Double |
 |------|--------|--------|
+| 12×18" | $20† | $30† |
 | 18×24" | $24 | $42 |
 | 24×36" | $48 | $84 |
 | 4×8 ft | $232* | — |
 
 *Intentional boundary price — do NOT change.
+†Per-piece floor (`min_piece_price`). 12×18" is 1.5 sqft; raw sqft would be $12/$21 but floors to $20/$30 to cover small-job cost. The floor only affects coroplast signs under ~2.5 sqft (single) / ~2.1 sqft (double); larger sizes use the sqft rate unchanged.
 
 ---
 
