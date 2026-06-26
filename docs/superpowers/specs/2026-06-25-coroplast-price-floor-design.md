@@ -100,6 +100,15 @@ ACP, foamboard, magnets, decals, and banners almost certainly share the same sma
 `min_piece_price` is the reusable hook — fill each row in once that material's true floor is
 costed (material + setup + handling). This is a known, deliberate follow-up, not an oversight.
 
+**Hard prerequisite for the broader rollout:** the SEO/pricing rule layer currently contradicts
+itself on these exact categories — `truecolor-pricing-comms.md` (newer) says coroplast "from $25"
+and ACP "from $39" and forbids the old minimums, while `truecolor-pricing-safety.md` + the
+`post-edit-price-check.mjs` hook still enforce coroplast "from $30" / ACP "from $60". Reviving the
+old per-category minimums as floors would change published small-format anchors (e.g. 18×24 ACP
+$39 → $60) and force edits on protected, mid-recovery landing pages. Do NOT extend the floor to
+other categories until that contradiction is reconciled in a separate cleanup. Coroplast is safe
+to do alone because its floor ($20) sits below the $25 order minimum, so no published anchor moves.
+
 ## Files touched
 - `data/tables/pricing_rules.v1.csv` — new column + 6 coroplast values
 - `src/lib/data/types.ts` — `min_piece_price` field

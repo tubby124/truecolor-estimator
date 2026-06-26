@@ -190,8 +190,18 @@ export function estimate(req: EstimateRequest): EstimateResponse {
           basePricePerSqft = tierRule.price_per_sqft;
           basePrice = ceilCent(sqft * basePricePerSqft);
           tierLabel = tierRule.rule_id;
+          let sqftDesc = buildSqftDescription(category, req, sqft, basePricePerSqft);
+          // Per-piece price floor (min_piece_price): protects small wide-format jobs
+          // from pricing below cost. Applied per-piece, BEFORE STEP 6 multiplies by
+          // qty, only on rules where a floor is set (coroplast: $20 single / $30
+          // double). Distinct from the globally-disabled min_charge — this is an
+          // explicit, per-category floor. See .claude/rules/truecolor-pricing-comms.md.
+          if (tierRule.min_piece_price !== null && basePrice < tierRule.min_piece_price) {
+            basePrice = tierRule.min_piece_price;
+            sqftDesc += ` (min piece price $${tierRule.min_piece_price.toFixed(2)})`;
+          }
           lineItems.push({
-            description: buildSqftDescription(category, req, sqft, basePricePerSqft),
+            description: sqftDesc,
             qty: 1,
             unit_price: basePrice,
             line_total: basePrice,

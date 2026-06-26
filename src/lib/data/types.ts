@@ -64,6 +64,9 @@ export interface PricingRule {
   conflict_note: string;
   source_ref: string;
   is_lot_price: boolean;
+  // Per-piece price floor: smallest price a single piece can be at this tier,
+  // regardless of sqft. null = no floor. Distinct from the disabled min_charge.
+  min_piece_price: number | null;
 }
 
 // products.v1.csv row (fixed-size catalog products)
