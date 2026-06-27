@@ -29,7 +29,7 @@ import { recordAuditEvent } from "@/lib/audit/record";
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
 
-interface OrderItemInput {
+export interface OrderItemInput {
   kind?: "product" | "fee";  // default "product" — fee lines skip the spec block
   title?: string;            // optional invoice line headline (overrides display name)
   product: string;           // product category OR fee name (e.g. "Installation Fee")
@@ -43,6 +43,136 @@ interface OrderItemInput {
   details?: string;          // free-text notes (extras the chips don't cover)
   unitPrice?: number;        // for staff reference; amount is authoritative
   amount: number;            // line total in CAD
+  proofPath?: string;        // storage path returned by POST /api/upload
+  proofUrl?: string;         // public URL derived server-side from proofPath
+}
+
+interface MoneyBreakdown {
+  subtotalCents: number;
+  gstCents: number;
+  pstCents: number;
+  totalCents: number;
+}
+
+const MAX_OVERRIDE_TOTAL_CENTS = Math.round(99999 * 1.11 * 100);
+
+function moneyToCents(amount: number): number {
+  return Math.round(amount * 100);
+}
+
+function centsToMoney(cents: number): number {
+  return Math.round(cents) / 100;
+}
+
+export function computeBreakdownCents(items: OrderItemInput[]): MoneyBreakdown {
+  const subtotalCents = items.reduce((sum, item) => sum + moneyToCents(item.amount), 0);
+  const pstableSubtotalCents = items.reduce(
+    (sum, item) => sum + (item.kind === "fee" ? 0 : moneyToCents(item.amount)),
+    0
+  );
+  const gstCents = Math.round(subtotalCents * GST_RATE);
+  const pstCents = Math.round(pstableSubtotalCents * PST_RATE);
+  return {
+    subtotalCents,
+    gstCents,
+    pstCents,
+    totalCents: subtotalCents + gstCents + pstCents,
+  };
+}
+
+function findLastAmountForTargetTotal(
+  lastKind: "product" | "fee",
+  baseSubtotalCents: number,
+  basePstableSubtotalCents: number,
+  targetTotalCents: number
+): number | null {
+  const totalForLastAmount = (lastAmountCents: number) => {
+    const subtotalCents = baseSubtotalCents + lastAmountCents;
+    const pstableSubtotalCents = basePstableSubtotalCents + (lastKind === "fee" ? 0 : lastAmountCents);
+    return subtotalCents + Math.round(subtotalCents * GST_RATE) + Math.round(pstableSubtotalCents * PST_RATE);
+  };
+
+  let low = 0;
+  let high = Math.max(targetTotalCents, 1);
+  while (totalForLastAmount(high) < targetTotalCents && high < targetTotalCents * 2 + 1000) {
+    high *= 2;
+  }
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    const total = totalForLastAmount(mid);
+    if (total === targetTotalCents) return mid;
+    if (total < targetTotalCents) low = mid + 1;
+    else high = mid - 1;
+  }
+
+  const start = Math.max(0, low - 200);
+  const end = low + 200;
+  for (let cents = start; cents <= end; cents++) {
+    if (totalForLastAmount(cents) === targetTotalCents) return cents;
+  }
+  return null;
+}
+
+export function applyOverrideTotal(items: OrderItemInput[], overrideTotal?: number): {
+  items: OrderItemInput[];
+  breakdown: MoneyBreakdown;
+} {
+  const computedBreakdown = computeBreakdownCents(items);
+  if (overrideTotal === undefined || overrideTotal === null) {
+    return { items, breakdown: computedBreakdown };
+  }
+
+  const overrideTotalCents = moneyToCents(overrideTotal);
+  if (overrideTotalCents <= 0 || overrideTotalCents > MAX_OVERRIDE_TOTAL_CENTS) {
+    throw new Error("Override total must be greater than $0 and within the maximum allowed");
+  }
+  if (computedBreakdown.totalCents <= 0) {
+    throw new Error("Cannot edit total before line amounts are greater than $0");
+  }
+
+  const k = overrideTotalCents / computedBreakdown.totalCents;
+  const scaledItems = items.map((item) => ({
+    ...item,
+    amount: centsToMoney(Math.round(moneyToCents(item.amount) * k)),
+  }));
+
+  const lastIndex = scaledItems.length - 1;
+  const baseItems = scaledItems.slice(0, lastIndex);
+  const baseSubtotalCents = baseItems.reduce((sum, item) => sum + moneyToCents(item.amount), 0);
+  const basePstableSubtotalCents = baseItems.reduce(
+    (sum, item) => sum + (item.kind === "fee" ? 0 : moneyToCents(item.amount)),
+    0
+  );
+  const lastAmountCents = findLastAmountForTargetTotal(
+    scaledItems[lastIndex].kind ?? "product",
+    baseSubtotalCents,
+    basePstableSubtotalCents,
+    overrideTotalCents
+  );
+
+  if (lastAmountCents === null) {
+    throw new Error("Override total cannot be matched exactly with the current taxable line mix");
+  }
+
+  scaledItems[lastIndex] = {
+    ...scaledItems[lastIndex],
+    amount: centsToMoney(lastAmountCents),
+  };
+
+  const scaledBreakdown = computeBreakdownCents(scaledItems);
+  if (scaledBreakdown.totalCents !== overrideTotalCents) {
+    throw new Error("Override total scaling failed to reconcile exactly");
+  }
+
+  return { items: scaledItems, breakdown: scaledBreakdown };
+}
+
+function buildProofUrl(proofPath?: string): string | undefined {
+  const trimmed = proofPath?.trim();
+  if (!trimmed) return undefined;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
+  return `${supabaseUrl}/storage/v1/object/public/print-files/${trimmed.replace(/^\/+/, "")}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -60,6 +190,9 @@ export async function POST(req: NextRequest) {
       payment_method: "clover";
       quote_only?: boolean; // true = email frames as "Quote — pay to confirm or reply for changes"; false = "Payment Request"
       notes?: string;
+      customMessage?: string;
+      customSubject?: string;
+      overrideTotal?: number;
     };
 
     const { contact, payment_method, notes } = body;
@@ -100,6 +233,13 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `Amount for "${item.product}" exceeds maximum ($99,999)` }, { status: 400 });
       }
     }
+
+    items = items.map((item) => ({
+      ...item,
+      kind: item.kind ?? "product",
+      title: item.title?.trim() || undefined,
+      proofUrl: buildProofUrl(item.proofPath),
+    }));
 
     const supabase = createServiceClient();
 
@@ -164,13 +304,20 @@ export async function POST(req: NextRequest) {
     // ── 2. Calculate totals ──
     // PST exempts kind="fee" items (design, rush, installation) per CLAUDE.md / truecolor-pricing-safety.md.
     // GST applies to everything (CRA: services like design ARE GST-taxable in Canada).
-    const subtotal = Math.round(items.reduce((s, it) => s + it.amount, 0) * 100) / 100;
-    const pstableSubtotal = Math.round(
-      items.filter((it) => it.kind !== "fee").reduce((s, it) => s + it.amount, 0) * 100
-    ) / 100;
-    const gst = Math.round(subtotal * GST_RATE * 100) / 100;
-    const pst = Math.round(pstableSubtotal * PST_RATE * 100) / 100;
-    const total = Math.round((subtotal + gst + pst) * 100) / 100;
+    let scaled;
+    try {
+      scaled = applyOverrideTotal(items, body.overrideTotal);
+    } catch (scaleErr) {
+      return NextResponse.json(
+        { error: scaleErr instanceof Error ? scaleErr.message : "Invalid total override" },
+        { status: 400 }
+      );
+    }
+    items = scaled.items;
+    const subtotal = centsToMoney(scaled.breakdown.subtotalCents);
+    const gst = centsToMoney(scaled.breakdown.gstCents);
+    const pst = centsToMoney(scaled.breakdown.pstCents);
+    const total = centsToMoney(scaled.breakdown.totalCents);
 
     // Build combined description for payment links and emails
     const combinedDescription = items.length === 1
@@ -240,7 +387,8 @@ export async function POST(req: NextRequest) {
         design_status: "PRINT_READY",
         unit_price: Math.round(item.amount * 100) / 100,
         line_total: Math.round(item.amount * 100) / 100,
-      });
+        proof_url: item.proofUrl ?? null,
+      } as Record<string, unknown>);
       if (itemErr) {
         console.error(`[manual-order] order_items insert failed for order ${order.id}:`, itemErr.message);
       }
@@ -327,6 +475,7 @@ export async function POST(req: NextRequest) {
           unitPrice: item.unitPrice,
           amount: Math.round(item.amount * 100) / 100,
           albertBlock: formatItemAlbertBlock(item),
+          proofUrl: item.proofUrl,
         })),
         subtotal,
         gst,
@@ -336,6 +485,8 @@ export async function POST(req: NextRequest) {
         paymentMethod: payment_method,
         quoteOnly,
         notes: notes?.trim() || null,
+        customMessage: body.customMessage?.trim() || undefined,
+        subjectOverride: body.customSubject?.trim() || undefined,
         accountInfo,
       });
     } catch (emailErr) {
@@ -450,7 +601,7 @@ export function formatItemAlbertBlock(item: OrderItemInput): string {
   if (item.kind === "fee") {
     // Fee line: simple Name + Amount line. Albert phrases these as separate lines.
     const note = item.details?.trim() ? ` (${item.details.trim()})` : "";
-    return `${item.product}${note} : $ ${item.amount.toFixed(2)} plus tax`;
+    return `${item.title?.trim() || item.product}${note} : $ ${item.amount.toFixed(2)} plus tax`;
   }
 
   const lines: string[] = [];

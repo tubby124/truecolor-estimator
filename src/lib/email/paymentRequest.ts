@@ -31,6 +31,7 @@ export interface PaymentRequestItem {
   process?: string;
   unitPrice?: number;
   albertBlock?: string;  // pre-rendered multi-line block from the API route
+  proofUrl?: string;
 }
 
 export interface AccountInfo {
@@ -52,6 +53,8 @@ export interface PaymentRequestEmailParams {
    *  Set by /api/staff/manual-order when the staff toggles "Send quote only". */
   quoteOnly?: boolean;
   notes?: string | null;
+  customMessage?: string;
+  subjectOverride?: string;
   accountInfo?: AccountInfo | null;
   discount_code?: string;
   discount_amount?: number;
@@ -64,9 +67,10 @@ export async function sendPaymentRequestEmail(
 ): Promise<void> {
   const { orderNumber, contact, total, quoteOnly } = params;
 
-  const subject = quoteOnly
+  const defaultSubject = quoteOnly
     ? `Your Quote — $${total.toFixed(2)} CAD | True Color Display Printing`
     : `Payment Request — $${total.toFixed(2)} CAD | True Color Display Printing`;
+  const subject = params.subjectOverride?.trim() || defaultSubject;
 
   await sendEmail({
     to: contact.email,
@@ -94,6 +98,7 @@ export async function sendPaymentRequestEmail(
  */
 function buildItemRowHtml(item: PaymentRequestItem): string {
   const qtyPrefix = item.qty > 1 ? `${item.qty}x ` : "";
+  const proofHtml = buildProofHtml(item.proofUrl);
 
   // ── 1. FEE LINE — no spec block ──
   if (item.kind === "fee") {
@@ -101,6 +106,7 @@ function buildItemRowHtml(item: PaymentRequestItem): string {
     return `<tr style="background: #ffffff;">
       <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; border-bottom: 1px solid #f0ebe4; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
         <strong style="font-weight: 600;">${escHtml(item.product)}</strong>${note}
+        ${proofHtml}
       </td>
       <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
         $${item.amount.toFixed(2)}
@@ -144,6 +150,7 @@ function buildItemRowHtml(item: PaymentRequestItem): string {
         <div style="margin-top: 8px;">
           ${specRows.join("")}
         </div>
+        ${proofHtml}
       </td>
       <td style="padding: 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
         <strong style="font-weight: 700;">$${item.amount.toFixed(2)}</strong>
@@ -160,6 +167,7 @@ function buildItemRowHtml(item: PaymentRequestItem): string {
     <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; border-bottom: 1px solid #f0ebe4; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
       <strong style="font-weight: 600;">${escHtml(qtyPrefix)}${escHtml(item.product)}</strong>
       ${details}
+      ${proofHtml}
     </td>
     <td style="padding: 14px 16px; font-size: 14px; color: #1f2937; text-align: right; border-bottom: 1px solid #f0ebe4; white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
       $${item.amount.toFixed(2)}
@@ -167,10 +175,33 @@ function buildItemRowHtml(item: PaymentRequestItem): string {
   </tr>`;
 }
 
+function buildProofHtml(proofUrl?: string): string {
+  const trimmed = proofUrl?.trim();
+  if (!trimmed) return "";
+  const safeUrl = escHtml(trimmed);
+  const pathOnly = trimmed.split("?")[0] ?? trimmed;
+  const isImage = /\.(jpg|jpeg|png|webp)$/i.test(pathOnly);
+
+  if (isImage) {
+    return `<div style="margin-top:10px;">
+      <a href="${safeUrl}" style="display:inline-block;text-decoration:none;color:#0369a1;font-size:12px;font-weight:600;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        <img src="${safeUrl}" alt="Proof image" width="120" style="display:block;width:120px;max-width:120px;height:auto;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:5px;" />
+        View proof
+      </a>
+    </div>`;
+  }
+
+  return `<div style="margin-top:10px;">
+    <a href="${safeUrl}" style="display:inline-block;color:#0369a1;font-size:12px;font-weight:600;text-decoration:none;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+      View proof
+    </a>
+  </div>`;
+}
+
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, quoteOnly, notes, accountInfo, discount_code, discount_amount } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, quoteOnly, notes, customMessage, accountInfo, discount_code, discount_amount } = p;
 
   const heroTitle = quoteOnly ? "Your Quote" : "Payment Request";
   const methodNote = quoteOnly
@@ -238,6 +269,12 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
             <td style="background: #ffffff; padding: 24px 32px 32px;">
 
               <!-- Order summary table -->
+              ${customMessage?.trim() ? `<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+                <p style="margin:0;font-size:14px;color:#374151;line-height:1.6;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                  ${escHtml(customMessage.trim()).replace(/\n/g, "<br />")}
+                </p>
+              </div>` : ""}
+
               <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                 Order Summary
               </p>
@@ -378,7 +415,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, quoteOnly, accountInfo, discount_code, discount_amount } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, quoteOnly, customMessage, accountInfo, discount_code, discount_amount } = p;
 
   // Plain-text rendering uses Albert's pre-built block when available (kind="product"
   // with spec fields), and falls back to a 1-line representation otherwise.
@@ -387,13 +424,16 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     if (idx > 0) itemLines.push("");
     if (item.albertBlock && item.albertBlock.trim()) {
       itemLines.push(...item.albertBlock.split("\n").map((l) => `  ${l}`));
+      if (item.proofUrl?.trim()) itemLines.push(`  Proof: ${item.proofUrl.trim()}`);
     } else if (item.kind === "fee") {
       const note = item.details?.trim() ? ` (${item.details.trim()})` : "";
       itemLines.push(`  ${item.product}${note} : $ ${item.amount.toFixed(2)} plus tax`);
+      if (item.proofUrl?.trim()) itemLines.push(`  Proof: ${item.proofUrl.trim()}`);
     } else {
       const qty = item.qty > 1 ? `${item.qty}x ` : "";
       const details = item.details?.trim() ? ` — ${item.details.trim()}` : "";
       itemLines.push(`  ${qty}${item.product}${details}  $${item.amount.toFixed(2)}`);
+      if (item.proofUrl?.trim()) itemLines.push(`  Proof: ${item.proofUrl.trim()}`);
     }
   });
 
@@ -424,6 +464,8 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
       ? `Here's your quote from True Color Display Printing.`
       : `True Color Display Printing has sent you a payment request.`,
     "",
+    customMessage?.trim() ? customMessage.trim() : "",
+    customMessage?.trim() ? "" : "",
     quoteOnly ? `--- QUOTE SUMMARY ---` : `--- ORDER SUMMARY ---`,
     ...itemLines,
     p.notes ? `  Note: ${p.notes}` : "",

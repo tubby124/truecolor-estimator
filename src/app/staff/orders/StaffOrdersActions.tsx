@@ -171,6 +171,7 @@ interface OrderItem {
   id: string;
   kind: "product" | "fee";
   title: string;       // optional project title shown on invoice (e.g. "The Power of Branding")
+  lineDescription: string; // optional staff override for the line headline sent to customer
   product: string;     // for kind="product": category. for kind="fee": fee name (e.g. "Installation Fee")
   // ── Spec block fields (kind="product" only) ──
   material: string;    // "4mm Coroplast"
@@ -182,6 +183,8 @@ interface OrderItem {
   details: string;     // free-text extras (notes, special instructions)
   unitPrice: string;   // when present, amount auto-fills to qty * unitPrice
   amount: string;
+  proofPath: string;
+  proofName: string;
 }
 
 interface FormState {
@@ -193,6 +196,9 @@ interface FormState {
   payment_method: "clover";
   quote_only: boolean; // true = no payment link / Wave draft only
   notes: string;
+  customMessage: string;
+  customSubject: string;
+  overrideTotal: string;
 }
 
 function makeItem(): OrderItem {
@@ -200,6 +206,7 @@ function makeItem(): OrderItem {
     id: crypto.randomUUID(),
     kind: "product",
     title: "",
+    lineDescription: "",
     product: "",
     material: "",
     sides: "",
@@ -209,6 +216,8 @@ function makeItem(): OrderItem {
     details: "",
     unitPrice: "",
     amount: "",
+    proofPath: "",
+    proofName: "",
   };
 }
 
@@ -217,6 +226,7 @@ function makeFee(preset: { label: string; defaultAmount: number }): OrderItem {
     id: crypto.randomUUID(),
     kind: "fee",
     title: "",
+    lineDescription: "",
     product: preset.label,
     material: "",
     sides: "",
@@ -226,6 +236,8 @@ function makeFee(preset: { label: string; defaultAmount: number }): OrderItem {
     details: "",
     unitPrice: "",
     amount: preset.defaultAmount > 0 ? preset.defaultAmount.toFixed(2) : "",
+    proofPath: "",
+    proofName: "",
   };
 }
 
@@ -244,11 +256,149 @@ const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
   payment_method: "clover", quote_only: true, notes: "",
+  customMessage: "", customSubject: "", overrideTotal: "",
 };
 
 const MAX_ITEMS = 10;
+const MAX_OVERRIDE_TOTAL_CENTS = Math.round(99999 * 1.11 * 100);
 
 const inputClass = "w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow";
+
+interface MoneyPreviewItem {
+  kind: "product" | "fee";
+  amountCents: number;
+}
+
+interface MoneyBreakdown {
+  subtotalCents: number;
+  gstCents: number;
+  pstCents: number;
+  totalCents: number;
+}
+
+interface ScaledPreview {
+  itemAmountCents: number[];
+  breakdown: MoneyBreakdown;
+  error: string | null;
+}
+
+function parseMoneyCents(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed)) return null;
+  return Math.round(parsed * 100);
+}
+
+function formatCents(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+function computeBreakdownCents(items: MoneyPreviewItem[]): MoneyBreakdown {
+  const subtotalCents = items.reduce((sum, item) => sum + item.amountCents, 0);
+  const pstableSubtotalCents = items.reduce(
+    (sum, item) => sum + (item.kind === "fee" ? 0 : item.amountCents),
+    0
+  );
+  const gstCents = Math.round(subtotalCents * 0.05);
+  const pstCents = Math.round(pstableSubtotalCents * 0.06);
+  return {
+    subtotalCents,
+    gstCents,
+    pstCents,
+    totalCents: subtotalCents + gstCents + pstCents,
+  };
+}
+
+function findLastAmountForTargetTotal(
+  lastKind: "product" | "fee",
+  baseSubtotalCents: number,
+  basePstableSubtotalCents: number,
+  targetTotalCents: number
+): number | null {
+  const totalForLastAmount = (lastAmountCents: number) => {
+    const subtotalCents = baseSubtotalCents + lastAmountCents;
+    const pstableSubtotalCents = basePstableSubtotalCents + (lastKind === "fee" ? 0 : lastAmountCents);
+    return subtotalCents + Math.round(subtotalCents * 0.05) + Math.round(pstableSubtotalCents * 0.06);
+  };
+
+  let low = 0;
+  let high = Math.max(targetTotalCents, 1);
+  while (totalForLastAmount(high) < targetTotalCents && high < targetTotalCents * 2 + 1000) {
+    high *= 2;
+  }
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    const total = totalForLastAmount(mid);
+    if (total === targetTotalCents) return mid;
+    if (total < targetTotalCents) low = mid + 1;
+    else high = mid - 1;
+  }
+
+  const start = Math.max(0, low - 200);
+  const end = low + 200;
+  for (let cents = start; cents <= end; cents++) {
+    if (totalForLastAmount(cents) === targetTotalCents) return cents;
+  }
+  return null;
+}
+
+function scaleItemsForOverridePreview(
+  items: MoneyPreviewItem[],
+  overrideTotalCents: number | null
+): ScaledPreview {
+  const computedBreakdown = computeBreakdownCents(items);
+  if (!overrideTotalCents || overrideTotalCents <= 0) {
+    return {
+      itemAmountCents: items.map((item) => item.amountCents),
+      breakdown: computedBreakdown,
+      error: null,
+    };
+  }
+
+  if (computedBreakdown.totalCents <= 0) {
+    return {
+      itemAmountCents: items.map((item) => item.amountCents),
+      breakdown: computedBreakdown,
+      error: "Add line amounts before editing the total.",
+    };
+  }
+
+  const scaledItems = items.map((item) => ({
+    ...item,
+    amountCents: Math.round(item.amountCents * (overrideTotalCents / computedBreakdown.totalCents)),
+  }));
+
+  const lastIndex = scaledItems.length - 1;
+  const baseItems = scaledItems.slice(0, lastIndex);
+  const baseSubtotalCents = baseItems.reduce((sum, item) => sum + item.amountCents, 0);
+  const basePstableSubtotalCents = baseItems.reduce(
+    (sum, item) => sum + (item.kind === "fee" ? 0 : item.amountCents),
+    0
+  );
+  const lastAmountCents = findLastAmountForTargetTotal(
+    scaledItems[lastIndex].kind,
+    baseSubtotalCents,
+    basePstableSubtotalCents,
+    overrideTotalCents
+  );
+
+  if (lastAmountCents === null) {
+    return {
+      itemAmountCents: scaledItems.map((item) => item.amountCents),
+      breakdown: computeBreakdownCents(scaledItems),
+      error: "This total cannot be matched exactly with the current tax mix.",
+    };
+  }
+
+  scaledItems[lastIndex] = { ...scaledItems[lastIndex], amountCents: lastAmountCents };
+  return {
+    itemAmountCents: scaledItems.map((item) => item.amountCents),
+    breakdown: computeBreakdownCents(scaledItems),
+    error: null,
+  };
+}
 
 // ─── Component ──────────────────────────────────────────────────────────────────
 
@@ -258,6 +408,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ orderNumber: string; email: string; quoteOnly: boolean } | null>(null);
+  const [totalOverrideOpen, setTotalOverrideOpen] = useState(false);
+  const [proofUploadingIds, setProofUploadingIds] = useState<string[]>([]);
   const searchParams = useSearchParams();
   // Tracks which ?manual value we've already auto-opened on so we don't reset
   // the form every time useSearchParams returns a new reference (Next.js 16
@@ -277,6 +429,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
       setForm({ ...EMPTY_FORM, quote_only: manual !== "1" });
       setError(null);
       setSuccess(null);
+      setTotalOverrideOpen(false);
       setCustomerLookup({ status: "idle" });
       setModalOpen(true);
     } else if (!isManualOpen) {
@@ -393,26 +546,45 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   // PST exempts kind="fee" items (design/rush/installation) to match API + Wave invoice line item flags.
   // Modal preview ↔ manual-order API ↔ Wave invoice must agree — see payment-tax.md.
   const itemSubtotals = form.items.map((it) => {
-    const amt = parseFloat(it.amount);
-    return !isNaN(amt) && amt > 0 ? amt : 0;
+    const amountCents = parseMoneyCents(it.amount);
+    return amountCents && amountCents > 0 ? amountCents : 0;
   });
-  const subtotal = Math.round(itemSubtotals.reduce((s, a) => s + a, 0) * 100) / 100;
-  const pstableSubtotal = Math.round(
-    form.items.reduce((s, it, i) => s + (it.kind === "fee" ? 0 : itemSubtotals[i]), 0) * 100
-  ) / 100;
-  const gst = Math.round(subtotal * 0.05 * 100) / 100;
-  const pst = Math.round(pstableSubtotal * 0.06 * 100) / 100;
-  const total = Math.round((subtotal + gst + pst) * 100) / 100;
-  const hasValidAmount = subtotal > 0;
+  const moneyItems = form.items.map((it, i): MoneyPreviewItem => ({
+    kind: it.kind,
+    amountCents: itemSubtotals[i],
+  }));
+  const computedBreakdown = computeBreakdownCents(moneyItems);
+  const overrideTotalCents = parseMoneyCents(form.overrideTotal);
+  const overrideRequested = overrideTotalCents !== null && form.overrideTotal.trim() !== "";
+  const overrideValidationError =
+    overrideRequested && (!overrideTotalCents || overrideTotalCents <= 0)
+      ? "Edited total must be greater than $0."
+      : overrideRequested && overrideTotalCents > MAX_OVERRIDE_TOTAL_CENTS
+        ? "Edited total is above the maximum allowed."
+        : null;
+  const preview = scaleItemsForOverridePreview(
+    moneyItems,
+    overrideValidationError ? null : overrideTotalCents
+  );
+  const subtotal = preview.breakdown.subtotalCents / 100;
+  const gst = preview.breakdown.gstCents / 100;
+  const pst = preview.breakdown.pstCents / 100;
+  const total = preview.breakdown.totalCents / 100;
+  const hasValidAmount = preview.breakdown.subtotalCents > 0;
   const allItemsValid = form.items.every((it) => {
-    const amt = parseFloat(it.amount);
-    return it.product.trim() !== "" && !isNaN(amt) && amt > 0;
+    const amountCents = parseMoneyCents(it.amount);
+    return it.product.trim() !== "" && !!amountCents && amountCents > 0;
   });
+  const defaultSubject = form.quote_only
+    ? `Your Quote — $${total.toFixed(2)} CAD | True Color Display Printing`
+    : `Payment Request — $${total.toFixed(2)} CAD | True Color Display Printing`;
+  const canSubmit = hasValidAmount && allItemsValid && !overrideValidationError && !preview.error;
 
   function openModal() {
     setForm(EMPTY_FORM);
     setError(null);
     setSuccess(null);
+    setTotalOverrideOpen(false);
     setCustomerLookup({ status: "idle" });
     setModalOpen(true);
   }
@@ -501,6 +673,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         id: crypto.randomUUID(),
         kind: "product" as const,
         title: spec.title,
+        lineDescription: "",
         product,
         material: spec.material,
         sides: spec.sides,
@@ -510,6 +683,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         details: spec.details,
         unitPrice: unit > 0 ? unit.toFixed(2) : "",
         amount: String(oi.line_total),
+        proofPath: "",
+        proofName: "",
       };
     });
     setForm((prev) => ({ ...prev, items: reorderItems }));
@@ -523,6 +698,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     if (!form.name.trim()) { setError("Customer name is required"); return; }
     if (!form.email.trim()) { setError("Customer email is required"); return; }
     if (!allItemsValid) { setError("Each item needs a product and amount greater than $0"); return; }
+    if (overrideValidationError) { setError(overrideValidationError); return; }
+    if (preview.error) { setError(preview.error); return; }
 
     setLoading(true);
     setError(null);
@@ -540,7 +717,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
           },
           items: form.items.map((it) => ({
             kind: it.kind,
-            title: it.title.trim() || undefined,
+            title: it.lineDescription.trim() || it.title.trim() || undefined,
             product: it.product.trim(),
             material: it.material.trim() || undefined,
             sides: it.sides.trim() || undefined,
@@ -550,10 +727,14 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
             details: it.details.trim() || undefined,
             unitPrice: it.unitPrice.trim() ? parseFloat(it.unitPrice) : undefined,
             amount: parseFloat(it.amount),
+            proofPath: it.proofPath.trim() || undefined,
           })),
+          overrideTotal: overrideRequested && overrideTotalCents ? overrideTotalCents / 100 : undefined,
           payment_method: form.payment_method,
           quote_only: form.quote_only,
           notes: form.notes.trim() || undefined,
+          customMessage: form.customMessage.trim() || undefined,
+          customSubject: form.customSubject.trim() || undefined,
         }),
       });
 
@@ -575,6 +756,26 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
       setError("Network error — please check your connection and try again.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleProofUpload(itemId: string, file: File) {
+    setProofUploadingIds((prev) => (prev.includes(itemId) ? prev : [...prev, itemId]));
+    setError(null);
+    try {
+      const uploadForm = new FormData();
+      uploadForm.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: uploadForm });
+      const data = await res.json() as { path?: string; error?: string };
+      if (!res.ok || !data.path) {
+        throw new Error(data.error ?? "Proof upload failed");
+      }
+      patchItem(itemId, { proofPath: data.path, proofName: file.name });
+      showToast(`Proof attached: ${file.name}`, "success");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Proof upload failed");
+    } finally {
+      setProofUploadingIds((prev) => prev.filter((id) => id !== itemId));
     }
   }
 
@@ -742,7 +943,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                     <div className="flex gap-3 justify-center">
                       <button
                         type="button"
-                        onClick={() => { setForm({ ...EMPTY_FORM, items: [makeItem()] }); setSuccess(null); setError(null); }}
+                        onClick={() => { setForm({ ...EMPTY_FORM, items: [makeItem()] }); setTotalOverrideOpen(false); setSuccess(null); setError(null); }}
                         className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
                       >
                         Send Another
@@ -952,8 +1153,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                   {item.kind === "fee" ? "Fee" : `Item ${idx + 1}`}
-                                  {item.title && <span className="text-gray-500 font-semibold ml-1.5 normal-case tracking-normal">{item.title}</span>}
-                                  {!item.title && item.product && <span className="text-gray-300 font-normal ml-1.5 normal-case tracking-normal">{item.product}</span>}
+                                  {(item.lineDescription || item.title) && <span className="text-gray-500 font-semibold ml-1.5 normal-case tracking-normal">{item.lineDescription || item.title}</span>}
+                                  {!item.lineDescription && !item.title && item.product && <span className="text-gray-300 font-normal ml-1.5 normal-case tracking-normal">{item.product}</span>}
                                 </span>
                                 {form.items.length > 1 && (
                                   <button
@@ -965,6 +1166,20 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                     Remove
                                   </button>
                                 )}
+                              </div>
+
+                              <div>
+                                <label htmlFor={`pr-line-desc-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                  What this line says <span className="text-gray-300 font-normal">(optional)</span>
+                                </label>
+                                <input
+                                  id={`pr-line-desc-${item.id}`}
+                                  type="text"
+                                  value={item.lineDescription}
+                                  onChange={(e) => setItem(item.id, "lineDescription", e.target.value)}
+                                  placeholder={item.title ? item.title : 'e.g. "Front window decals"'}
+                                  className={inputClass}
+                                />
                               </div>
 
                               {item.kind === "fee" ? (
@@ -1020,20 +1235,6 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                 // ── PRODUCT LINE (with Albert-format spec block) ──
                                 <>
                                   {/* Title (optional, shows as invoice line headline) */}
-                                  <div>
-                                    <label htmlFor={`pr-title-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
-                                      Line Title <span className="text-gray-300 font-normal">(optional — shows on the invoice)</span>
-                                    </label>
-                                    <input
-                                      id={`pr-title-${item.id}`}
-                                      type="text"
-                                      value={item.title}
-                                      onChange={(e) => setItem(item.id, "title", e.target.value)}
-                                      placeholder='e.g. "The Power of Branding"'
-                                      className={inputClass}
-                                    />
-                                  </div>
-
                                   {/* Product combobox (typeahead + free-text) + Qty */}
                                   <div className="grid grid-cols-[1fr_80px] gap-2">
                                     <div className="relative">
@@ -1291,6 +1492,45 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                   </div>
                                 </>
                               )}
+
+                              <div className="rounded-lg border border-gray-200 bg-white px-3 py-2">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="text-[10px] font-semibold text-gray-500">Proof image</p>
+                                    <p className="text-[11px] text-gray-400 truncate">
+                                      {item.proofName ? item.proofName : "JPG, PNG, or PDF (optional)"}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {item.proofPath && (
+                                      <button
+                                        type="button"
+                                        onClick={() => patchItem(item.id, { proofPath: "", proofName: "" })}
+                                        className="text-[10px] font-semibold text-gray-400 hover:text-red-500"
+                                      >
+                                        Remove
+                                      </button>
+                                    )}
+                                    <input
+                                      id={`pr-proof-${item.id}`}
+                                      type="file"
+                                      accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                      className="hidden"
+                                      onChange={(e) => {
+                                        const file = e.currentTarget.files?.[0];
+                                        if (file) void handleProofUpload(item.id, file);
+                                        e.currentTarget.value = "";
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`pr-proof-${item.id}`}
+                                      className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-gray-200 text-[11px] font-semibold text-gray-600 hover:border-emerald-300 hover:text-emerald-700 cursor-pointer transition-colors"
+                                    >
+                                      {proofUploadingIds.includes(item.id) ? "Uploading..." : item.proofPath ? "Replace" : "Add proof image"}
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
                             </motion.div>
                           ))}
                         </AnimatePresence>
@@ -1335,7 +1575,51 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       </div>
 
                       {/* Totals row */}
-                      <div className="grid grid-cols-4 gap-3 mt-3">
+                      <div className="mt-3 rounded-xl border border-gray-200 bg-white p-3 space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-semibold text-gray-500">Computed total</p>
+                            <p className="text-sm font-bold text-gray-700 tabular-nums">
+                              {hasValidAmount ? formatCents(computedBreakdown.totalCents) : "—"}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setTotalOverrideOpen((v) => !v)}
+                            className="px-3 py-1.5 rounded-lg border border-gray-200 text-[11px] font-semibold text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors"
+                          >
+                            {totalOverrideOpen ? "Done editing" : "Edit total"}
+                          </button>
+                        </div>
+
+                        {totalOverrideOpen && (
+                          <div>
+                            <label htmlFor="pr-override-total" className="block text-[10px] font-semibold text-gray-500 mb-1">
+                              Final price customer pays
+                            </label>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">$</span>
+                              <input
+                                id="pr-override-total"
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                max={(MAX_OVERRIDE_TOTAL_CENTS / 100).toFixed(2)}
+                                value={form.overrideTotal}
+                                onChange={(e) => set("overrideTotal", e.target.value)}
+                                placeholder={hasValidAmount ? (computedBreakdown.totalCents / 100).toFixed(2) : "0.00"}
+                                className={`${inputClass} pl-7`}
+                              />
+                            </div>
+                            {(overrideValidationError || preview.error) && (
+                              <p className="mt-1.5 text-[11px] font-semibold text-red-600">
+                                {overrideValidationError ?? preview.error}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-4 gap-3">
                         <div>
                           <p className="text-[10px] font-semibold text-gray-500 mb-1">Subtotal</p>
                           <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
@@ -1360,6 +1644,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             {hasValidAmount ? `$${total.toFixed(2)}` : "—"}
                           </div>
                         </div>
+                        </div>
                       </div>
                     </div>
 
@@ -1376,6 +1661,36 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             : "Customer gets a branded invoice email with a Clover Pay Now button (e-Transfer to info@true-color.ca shown as fallback). Your books are updated automatically the moment Clover confirms payment."}
                         </p>
                       </div>
+                    </div>
+
+                    {/* Customer email copy */}
+                    <div>
+                      <label htmlFor="pr-subject" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                        Email subject <span className="text-gray-300 font-normal">(optional)</span>
+                      </label>
+                      <input
+                        id="pr-subject"
+                        type="text"
+                        value={form.customSubject || defaultSubject}
+                        onChange={(e) => set("customSubject", e.target.value)}
+                        maxLength={120}
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="pr-message" className="block text-xs font-semibold text-gray-600 mb-1.5">
+                        Message to customer <span className="text-gray-300 font-normal">(optional)</span>
+                      </label>
+                      <textarea
+                        id="pr-message"
+                        value={form.customMessage}
+                        onChange={(e) => set("customMessage", e.target.value)}
+                        placeholder="Add a short note above the line items..."
+                        maxLength={1200}
+                        rows={3}
+                        className={`${inputClass} resize-none`}
+                      />
                     </div>
 
                     {/* Notes */}
@@ -1411,7 +1726,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       </button>
                       <button
                         type="submit"
-                        disabled={loading || !hasValidAmount || !allItemsValid}
+                        disabled={loading || !canSubmit}
                         aria-busy={loading}
                         className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition-colors"
                       >
