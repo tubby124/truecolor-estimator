@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { QuoteRequest, ItemMeta } from "@/app/staff/quotes/page";
 
-type LineItem = { description: string; qty: string; unitPrice: string };
+type LineItem = { description: string; qty: string; unitPrice: string; exempt?: boolean };
 
 interface QuoteBuilderModalProps {
   quote: QuoteRequest;
@@ -188,6 +188,19 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                                 placeholder="e.g. Vinyl Banner 4×8ft"
                                 className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-amber-400"
                               />
+                              <label className="mt-1 flex items-center gap-1.5 text-[11px] text-gray-500 cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={!!li.exempt}
+                                  onChange={(e) => {
+                                    const next = [...lineItems];
+                                    next[idx] = { ...next[idx], exempt: e.target.checked };
+                                    setLineItems(next);
+                                  }}
+                                  className="h-3 w-3 rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                                />
+                                Fee — no PST (design, rush, install)
+                              </label>
                             </td>
                             <td className="px-2 py-1.5">
                               <input
@@ -250,11 +263,13 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
               {/* Subtotal / tax summary — rounded the same way the API computes it,
                   so the modal preview never drifts from what the customer email shows. */}
               {(() => {
-                const subtotal = Math.round(lineItems.reduce((sum, li) => {
-                  return sum + (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0);
-                }, 0) * 100) / 100;
+                const lineTotal = (li: LineItem) => (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0);
+                const subtotal = Math.round(lineItems.reduce((sum, li) => sum + lineTotal(li), 0) * 100) / 100;
+                const pstableSubtotal = Math.round(
+                  lineItems.reduce((sum, li) => sum + (li.exempt ? 0 : lineTotal(li)), 0) * 100
+                ) / 100;
                 const gst = Math.round(subtotal * 0.05 * 100) / 100;
-                const pst = Math.round(subtotal * 0.06 * 100) / 100;
+                const pst = Math.round(pstableSubtotal * 0.06 * 100) / 100;
                 const total = Math.round((subtotal + gst + pst) * 100) / 100;
                 return subtotal > 0 ? (
                   <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 space-y-1 text-sm">

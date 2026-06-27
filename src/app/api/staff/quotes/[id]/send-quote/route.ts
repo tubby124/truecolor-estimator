@@ -22,6 +22,7 @@ interface LineItem {
   description: string;
   qty: string;
   unitPrice: string;
+  exempt?: boolean;  // true = PST-exempt fee line (design, rush, installation) — GST still applies
 }
 
 interface Params {
@@ -35,18 +36,21 @@ function esc(s: string): string {
 // Subtotal + GST (5%) + PST (6%), rounded the same way the modal preview and
 // the email body compute it — so the Pay Now amount never drifts from the
 // total the customer sees in the quote.
-function computeQuoteTotals(lineItems: LineItem[]): {
+// PST exempts lines flagged exempt=true (design / rush / installation fees) per
+// truecolor-domain.md; GST applies to everything (services are GST-taxable in CA).
+export function computeQuoteTotals(lineItems: LineItem[]): {
   subtotal: number;
   gst: number;
   pst: number;
   grandTotal: number;
 } {
-  const subtotal = Math.round(lineItems.reduce(
-    (sum, li) => sum + (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0),
-    0
-  ) * 100) / 100;
+  const lineTotal = (li: LineItem) => (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0);
+  const subtotal = Math.round(lineItems.reduce((sum, li) => sum + lineTotal(li), 0) * 100) / 100;
+  const pstableSubtotal = Math.round(
+    lineItems.reduce((sum, li) => sum + (li.exempt ? 0 : lineTotal(li)), 0) * 100
+  ) / 100;
   const gst = Math.round(subtotal * 0.05 * 100) / 100;
-  const pst = Math.round(subtotal * 0.06 * 100) / 100;
+  const pst = Math.round(pstableSubtotal * 0.06 * 100) / 100;
   const grandTotal = Math.round((subtotal + gst + pst) * 100) / 100;
   return { subtotal, gst, pst, grandTotal };
 }
@@ -68,9 +72,10 @@ function buildQuoteHtml(opts: {
       const qty = parseFloat(li.qty) || 0;
       const unit = parseFloat(li.unitPrice) || 0;
       const total = qty * unit;
+      const exemptTag = li.exempt ? ` <span style="font-size:11px;color:#888;">(no PST)</span>` : "";
       return `
       <tr>
-        <td style="padding:10px 12px;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0f2f5;">${esc(li.description)}</td>
+        <td style="padding:10px 12px;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0f2f5;">${esc(li.description)}${exemptTag}</td>
         <td style="padding:10px 12px;font-size:14px;color:#555;text-align:center;border-bottom:1px solid #f0f2f5;">${qty}</td>
         <td style="padding:10px 12px;font-size:14px;color:#555;text-align:right;border-bottom:1px solid #f0f2f5;">$${unit.toFixed(2)}</td>
         <td style="padding:10px 12px;font-size:14px;font-weight:600;color:#1a1a2e;text-align:right;border-bottom:1px solid #f0f2f5;">$${total.toFixed(2)}</td>
@@ -184,7 +189,8 @@ function buildQuotePlainText(opts: {
     ...lineItems.map((li) => {
       const qty = parseFloat(li.qty) || 0;
       const unit = parseFloat(li.unitPrice) || 0;
-      return `${li.description} · Qty: ${qty} · $${unit.toFixed(2)}/unit = $${(qty * unit).toFixed(2)}`;
+      const exemptTag = li.exempt ? " (no PST)" : "";
+      return `${li.description}${exemptTag} · Qty: ${qty} · $${unit.toFixed(2)}/unit = $${(qty * unit).toFixed(2)}`;
     }),
     "",
     `Subtotal: $${subtotal.toFixed(2)}`,
