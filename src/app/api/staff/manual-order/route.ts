@@ -387,10 +387,30 @@ export async function POST(req: NextRequest) {
         design_status: "PRINT_READY",
         unit_price: Math.round(item.amount * 100) / 100,
         line_total: Math.round(item.amount * 100) / 100,
-        proof_url: item.proofUrl ?? null,
-      } as Record<string, unknown>);
+      });
       if (itemErr) {
         console.error(`[manual-order] order_items insert failed for order ${order.id}:`, itemErr.message);
+      }
+    }
+
+    // ── 4b. Persist any attached proofs on the order ──
+    // Reuses the existing proof system (orders.proof_storage_paths[]) instead of a
+    // per-line column — same store the /api/staff/orders/[id]/proof route + proof
+    // viewer read, so staff-attached quote proofs show up there too. The customer
+    // email already embeds each proof via item.proofUrl (built at request time).
+    const proofPaths = items
+      .map((it) => it.proofPath?.trim())
+      .filter((p): p is string => !!p);
+    if (proofPaths.length > 0) {
+      const { error: proofErr } = await supabase
+        .from("orders")
+        .update({
+          proof_storage_paths: proofPaths,
+          proof_storage_path: proofPaths[proofPaths.length - 1], // legacy field
+        } as Record<string, unknown>)
+        .eq("id", order.id);
+      if (proofErr) {
+        console.error(`[manual-order] proof_storage_paths update failed for order ${order.id}:`, proofErr.message);
       }
     }
 
