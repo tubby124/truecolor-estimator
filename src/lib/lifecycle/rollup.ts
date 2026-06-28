@@ -49,6 +49,13 @@ export interface RollupInputs {
    * hand-confirmed 28 orders.
    */
   cloverOrders24h: number;
+  /**
+   * Count of clover_card orders still in pending_payment that are 30+ min old
+   * AND have payment_reference set (customer opened Clover checkout). Card was
+   * likely declined or abandoned. Staff should verify whether an e-transfer
+   * landed or follow up with the customer.
+   */
+  stuckCloverAttempts: number;
   /** Days since `.claude/rules/seo-protected-pages.md` was last refreshed. */
   seoProtectedPagesStaleDays: number | null;
   /**
@@ -94,6 +101,18 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
         label: `${g.label} webhook: ${g.failed_24h} failed (24h)`,
       });
     }
+  }
+
+  // ── Stuck Clover checkout attempts ────────────────────────────────────────
+  // Card was declined or abandoned. Staff may need to confirm an e-transfer or
+  // follow up with the customer. Yellow (not red) because the customer might
+  // still be paying; escalate to red only if persistent across multiple ticks.
+  if (inputs.stuckCloverAttempts > 0) {
+    yellows.push({
+      key: "clover:stuck-attempts",
+      panel: "panel-webhook-health",
+      label: `${inputs.stuckCloverAttempts} card checkout unresolved — card may have been declined, verify or confirm e-transfer`,
+    });
   }
 
   // ── Webhook SILENCE — the failed_24h check above is blind to it ─────────────

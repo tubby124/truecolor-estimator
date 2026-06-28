@@ -1093,6 +1093,18 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     (r) => r.payment_method === "clover_card" && r.age_hours <= 24,
   ).length;
 
+  // Clover orders where the customer opened the checkout page (payment_reference
+  // set) but payment hasn't confirmed after 30 min — card was likely declined.
+  const cutoff30min = new Date(now - 30 * 60 * 1000).toISOString();
+  const { count: stuckCloverCount } = await supabase
+    .from("orders")
+    .select("*", { count: "exact", head: true })
+    .eq("payment_method", "clover_card")
+    .eq("status", "pending_payment")
+    .not("payment_reference", "is", null)
+    .lt("created_at", cutoff30min);
+  const stuckCloverAttempts = stuckCloverCount ?? 0;
+
   // ── derive status rollup ─────────────────────────────────────────────────
   // Pure function — single source of truth shared with /api/cron/dashboard-alerts.
   // Adding a new silent-fail surface = ONE registration in buildRollup; both
@@ -1104,6 +1116,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     waveDrafts,
     orphans,
     cloverOrders24h,
+    stuckCloverAttempts,
     reconcileDetail: latestByName.get("reconcile-payments")?.detail ?? null,
     seoProtectedPagesStaleDays: getSeoProtectedPagesStaleDays(),
     gscVsGa4DivergencePct,

@@ -670,14 +670,86 @@ export async function POST(req: NextRequest) {
         }
       }
     } else {
-      // PAYMENT event but not a captured/paid status (e.g. pending, voided)
-      await logWebhookEvent({
-        eventType: eventTypeStr,
-        resourceId: paymentId ?? null,
-        matchedOrderId: null,
-        ok: true,
-        detail: `PAYMENT status=${String(obj?.status ?? "unknown")} — no action taken`,
-      });
+      // PAYMENT event but not captured/paid — detect voided (declined) card payments
+      const objRecord = obj as Record<string, unknown> | undefined;
+      const isVoided = objRecord?.result === "VOIDED" || objRecord?.status === "voided";
+
+      if (isVoided) {
+        const voidReason = objRecord?.voidReason as string | undefined;
+        const voidReasonDetails = objRecord?.voidReasonDetails as Record<string, unknown> | undefined;
+        const voidDetail = voidReasonDetails?.descriptionEnum as string | undefined;
+
+        const VOID_LABELS: Record<string, string> = {
+          ECOMM_VALIDATE_POSTAL_CODE_MATCH: "Postal code didn't match",
+          ECOMM_VALIDATE_CVV_MATCH: "CVV didn't match",
+          REJECT: "Card rejected",
+          FRAUD: "Fraud prevention",
+        };
+        const voidLabel = voidDetail ? (VOID_LABELS[voidDetail] ?? voidDetail) : (voidReason ?? "declined");
+
+        const extRef = (objRecord?.externalReferenceId ?? objRecord?.external_reference_id) as string | undefined;
+        let matchedOrderId: string | null = null;
+        let orderNumber: string | null = null;
+        let orderTotal: number | null = null;
+        let custEmail: string | null = null;
+
+        if (extRef) {
+          const { data: voidedOrder } = await supabase
+            .from("orders")
+            .select("id, order_number, total, customers ( name, email )")
+            .eq("payment_reference", extRef)
+            .maybeSingle();
+
+          if (voidedOrder) {
+            matchedOrderId = voidedOrder.id;
+            orderNumber = voidedOrder.order_number;
+            orderTotal = Number(voidedOrder.total ?? 0);
+            const custRaw = Array.isArray(voidedOrder.customers) ? voidedOrder.customers[0] : voidedOrder.customers;
+            custEmail = (custRaw as { email?: string | null } | null)?.email ?? null;
+
+            void recordAuditEvent({
+              actor_type: "system",
+              actor_id: "clover-webhook",
+              event_type: "clover.payment_voided",
+              entity_type: "order",
+              entity_id: matchedOrderId ?? voidedOrder.id,
+              detail: {
+                order_number: orderNumber,
+                amount_cents: typeof obj?.amount === "number" ? obj.amount : Number(obj?.amount ?? 0),
+                void_reason: voidReason ?? null,
+                void_detail: voidDetail ?? null,
+                void_label: voidLabel,
+                payment_id: paymentId ?? null,
+              },
+            });
+          }
+        }
+
+        void sendTelegramNotification(
+          `⚠️ <b>Card declined</b>\n` +
+          (orderNumber ? `Order <b>${escapeTelegramHtml(orderNumber)}</b>` : `Ref: ${escapeTelegramHtml(extRef ?? "unknown")}`) +
+          (orderTotal !== null ? ` · $${orderTotal.toFixed(2)}` : "") + `\n` +
+          `Reason: ${escapeTelegramHtml(voidLabel)}\n` +
+          (custEmail ? `Customer: ${escapeTelegramHtml(custEmail)}\n` : "") +
+          `They may e-transfer instead — watch for it.`
+        ).catch(() => {});
+
+        await logWebhookEvent({
+          eventType: eventTypeStr,
+          resourceId: paymentId ?? null,
+          matchedOrderId,
+          ok: true,
+          detail: `PAYMENT voided: ${voidLabel}${orderNumber ? ` (order ${orderNumber})` : ""}`,
+        });
+      } else {
+        await logWebhookEvent({
+          eventType: eventTypeStr,
+          resourceId: paymentId ?? null,
+          matchedOrderId: null,
+          ok: true,
+          detail: `PAYMENT status=${String(obj?.status ?? "unknown")} — no action taken`,
+        });
+      }
     }
   } else {
     // Non-PAYMENT event (Clover may send others if extra subscriptions are added)

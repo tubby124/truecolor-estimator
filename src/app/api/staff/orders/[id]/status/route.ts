@@ -173,10 +173,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             });
           }
 
-          // ── Wave: approve invoice + record payment (eTransfer/manual only) ──
+          // ── Wave: approve invoice + record payment ──────────────────────────
           // Runs BEFORE the receipt email so the email's Wave PDF link only
-          // appears when the invoice is actually marked PAID. Skipped for
-          // clover_card — Clover webhook owns that path.
+          // appears when the invoice is actually marked PAID.
+          //
+          // Previously skipped for clover_card (assumed the Clover webhook would
+          // handle it). Fixed 2026-06-27: if the card was declined or the webhook
+          // failed, wave_payment_recorded_at stays null and Wave is never updated.
+          // Now we always run if wave_payment_recorded_at is null, using the right
+          // payment type based on what method is on the order.
           //
           // Split try/catch on approve vs record so a re-approval throw on an
           // already-approved invoice does NOT short-circuit recordWavePayment
@@ -184,59 +189,61 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           let wavePaid = Boolean(order.wave_payment_recorded_at);
           if (status === "payment_received" && order.wave_invoice_id) {
             const paymentMethod = (order as { payment_method?: string }).payment_method;
-            if (paymentMethod !== "clover_card") {
-              const orderTotal = Number(order.total ?? 0);
+            const orderTotal = Number(order.total ?? 0);
+            const wavePaymentType = paymentMethod === "clover_card" ? "CREDIT_CARD" : "BANK_TRANSFER";
+            const waveNote = paymentMethod === "clover_card"
+              ? `Card (staff confirm) — Order ${order.order_number}`
+              : `eTransfer — Order ${order.order_number}`;
 
-              if (!order.wave_invoice_approved_at) {
-                try {
-                  await approveWaveInvoice(order.wave_invoice_id);
-                  const { error: updErr } = await supabase.from("orders")
-                    .update({ wave_invoice_approved_at: new Date().toISOString() })
-                    .eq("id", id);
-                  if (updErr) console.error("[staff/orders/status] wave_invoice_approved_at save failed (non-fatal):", updErr.message);
-                } catch (approveErr) {
-                  const msg = approveErr instanceof Error ? approveErr.message : String(approveErr);
-                  console.error("[staff/orders/status] Wave invoice approve failed (non-fatal):", msg);
-                  void sendTelegramNotification(
-                    `⚠️ <b>Wave approve failed</b>\n` +
-                    `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${orderTotal.toFixed(2)}\n` +
-                    `Path: status → payment_received (eTransfer/manual)\n` +
-                    `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
-                    `Action: manually approve in Wave dashboard.`
-                  ).catch(() => {});
-                }
+            if (!order.wave_invoice_approved_at) {
+              try {
+                await approveWaveInvoice(order.wave_invoice_id);
+                const { error: updErr } = await supabase.from("orders")
+                  .update({ wave_invoice_approved_at: new Date().toISOString() })
+                  .eq("id", id);
+                if (updErr) console.error("[staff/orders/status] wave_invoice_approved_at save failed (non-fatal):", updErr.message);
+              } catch (approveErr) {
+                const msg = approveErr instanceof Error ? approveErr.message : String(approveErr);
+                console.error("[staff/orders/status] Wave invoice approve failed (non-fatal):", msg);
+                void sendTelegramNotification(
+                  `⚠️ <b>Wave approve failed</b>\n` +
+                  `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${orderTotal.toFixed(2)}\n` +
+                  `Path: status → payment_received\n` +
+                  `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+                  `Action: manually approve in Wave dashboard.`
+                ).catch(() => {});
               }
+            }
 
-              if (!wavePaid) {
-                try {
-                  const waveCustomerId = customer?.email
-                    ? await findCustomerByEmail(customer.email).catch(() => null)
-                    : null;
-                  await recordWavePayment(
-                    order.wave_invoice_id,
-                    orderTotal,
-                    "BANK_TRANSFER",
-                    `eTransfer — Order ${order.order_number}`,
-                    waveCustomerId ?? undefined,
-                    id,  // Supabase order UUID as externalId — prevents duplicate transactions
-                  );
-                  const { error: updErr } = await supabase.from("orders")
-                    .update({ wave_payment_recorded_at: new Date().toISOString() })
-                    .eq("id", id);
-                  if (updErr) console.error("[staff/orders/status] wave_payment_recorded_at save failed (non-fatal):", updErr.message);
-                  wavePaid = true;
-                  console.log(`[staff/orders/status] Wave payment recorded — eTransfer (${order.wave_invoice_id})`);
-                } catch (paymentErr) {
-                  const msg = paymentErr instanceof Error ? paymentErr.message : String(paymentErr);
-                  console.error("[staff/orders/status] Wave payment recording failed (non-fatal):", msg);
-                  void sendTelegramNotification(
-                    `🚨 <b>Wave payment NOT recorded</b>\n` +
-                    `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${orderTotal.toFixed(2)}\n` +
-                    `Path: status → payment_received (eTransfer/manual)\n` +
-                    `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
-                    `Action: record payment in Wave manually against this invoice.`
-                  ).catch(() => {});
-                }
+            if (!wavePaid) {
+              try {
+                const waveCustomerId = customer?.email
+                  ? await findCustomerByEmail(customer.email).catch(() => null)
+                  : null;
+                await recordWavePayment(
+                  order.wave_invoice_id,
+                  orderTotal,
+                  wavePaymentType,
+                  waveNote,
+                  waveCustomerId ?? undefined,
+                  id,  // Supabase order UUID as externalId — prevents duplicate transactions
+                );
+                const { error: updErr } = await supabase.from("orders")
+                  .update({ wave_payment_recorded_at: new Date().toISOString() })
+                  .eq("id", id);
+                if (updErr) console.error("[staff/orders/status] wave_payment_recorded_at save failed (non-fatal):", updErr.message);
+                wavePaid = true;
+                console.log(`[staff/orders/status] Wave payment recorded — ${paymentMethod ?? "unknown"} (${order.wave_invoice_id})`);
+              } catch (paymentErr) {
+                const msg = paymentErr instanceof Error ? paymentErr.message : String(paymentErr);
+                console.error("[staff/orders/status] Wave payment recording failed (non-fatal):", msg);
+                void sendTelegramNotification(
+                  `🚨 <b>Wave payment NOT recorded</b>\n` +
+                  `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${orderTotal.toFixed(2)}\n` +
+                  `Path: status → payment_received\n` +
+                  `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
+                  `Action: record payment in Wave manually against this invoice.`
+                ).catch(() => {});
               }
             }
           }

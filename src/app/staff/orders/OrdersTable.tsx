@@ -52,6 +52,7 @@ export interface Order {
   proof_storage_paths: string[] | null;
   proof_sent_at: string | null;
   file_storage_paths: string[] | null;
+  payment_reference: string | null;
   is_archived: boolean;
   archived_at: string | null;
   customers: Customer[] | Customer | null;

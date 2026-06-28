@@ -52,10 +52,6 @@ export async function POST(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    if (order.payment_method !== "etransfer") {
-      return NextResponse.json({ error: "Not an eTransfer order" }, { status: 400 });
-    }
-
     if (order.status !== "pending_payment") {
       return NextResponse.json(
         { error: `Order is already ${order.status} — cannot re-confirm` },
@@ -96,6 +92,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
         to: "payment_received",
         order_number: order.order_number,
         method: "etransfer",
+        original_payment_method: order.payment_method,
         amount: Number(order.total ?? 0),
       },
     });

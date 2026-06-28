@@ -121,6 +121,7 @@ async function fetchOrders() {
       proof_storage_paths,
       proof_sent_at,
       file_storage_paths,
+      payment_reference,
       customers ( name, email, company, phone ),
       order_items (
         id,

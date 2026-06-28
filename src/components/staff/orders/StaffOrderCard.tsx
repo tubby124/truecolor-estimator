@@ -246,6 +246,13 @@ export function StaffOrderCard({
                   W Unpaid
                 </span>
               )}
+              {order.payment_method === "clover_card" &&
+                order.status === "pending_payment" &&
+                order.payment_reference && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
+                  ⚠ Card checkout opened
+                </span>
+              )}
               {order.is_archived && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-500">
                   Archived
@@ -344,6 +351,18 @@ export function StaffOrderCard({
                     : NEXT_LABEL[order.status]}
                 </button>
               )
+            )}
+            {order.payment_method === "clover_card" &&
+              order.status === "pending_payment" &&
+              order.payment_reference &&
+              !etransferConfirmed && (
+              <button
+                onClick={() => setShowEtransferDialog(true)}
+                className="text-xs px-3 py-2 border border-orange-300 bg-orange-50 hover:bg-orange-100 rounded-lg text-orange-800 transition-colors font-medium"
+                title="Card checkout was opened but not confirmed — confirm if customer e-transferred instead"
+              >
+                Paid by eTransfer?
+              </button>
             )}
             {!order.is_archived && (
               order.status === "pending_payment" ||
