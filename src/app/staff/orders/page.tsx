@@ -142,5 +142,32 @@ async function fetchOrders() {
 
   if (error) throw new Error(error.message);
 
-  return data ?? [];
+  const orders = data ?? [];
+  if (orders.length === 0) return orders;
+
+  // Pull card-decline audit events from the last 30 days and annotate matching orders
+  const cutoff30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: voidEvents } = await supabase
+    .from("audit_events")
+    .select("entity_id, detail")
+    .eq("event_type", "clover.payment_voided")
+    .gte("created_at", cutoff30d);
+
+  if (voidEvents && voidEvents.length > 0) {
+    const voidLabelByOrderId = new Map<string, string>();
+    for (const ev of voidEvents) {
+      if (ev.entity_id && ev.detail && typeof ev.detail === "object") {
+        const label = (ev.detail as { void_label?: string }).void_label;
+        if (label && !voidLabelByOrderId.has(ev.entity_id)) {
+          voidLabelByOrderId.set(ev.entity_id, label);
+        }
+      }
+    }
+    return orders.map((o) => ({
+      ...o,
+      card_decline_label: voidLabelByOrderId.get(o.id) ?? undefined,
+    }));
+  }
+
+  return orders;
 }

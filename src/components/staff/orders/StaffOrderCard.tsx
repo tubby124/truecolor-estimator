@@ -250,7 +250,7 @@ export function StaffOrderCard({
                 order.status === "pending_payment" &&
                 order.payment_reference && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
-                  ⚠ Card checkout opened
+                  {order.card_decline_label ? `⚠ Card declined: ${order.card_decline_label}` : "⚠ Card checkout opened"}
                 </span>
               )}
               {order.is_archived && (

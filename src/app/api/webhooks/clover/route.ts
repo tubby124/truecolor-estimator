@@ -26,6 +26,7 @@ import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { summarizeOrderPayments, type OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
+import { sendEmail } from "@/lib/email/smtp";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -733,6 +734,35 @@ export async function POST(req: NextRequest) {
           (custEmail ? `Customer: ${escapeTelegramHtml(custEmail)}\n` : "") +
           `They may e-transfer instead — watch for it.`
         ).catch(() => {});
+
+        // Staff email — same info as Telegram but visible in the inbox alongside other order emails
+        void (async () => {
+          try {
+            const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
+            const orderLabel = orderNumber ?? extRef ?? "Unknown";
+            const amountLabel = orderTotal !== null ? `$${orderTotal.toFixed(2)}` : "Unknown amount";
+            await sendEmail({
+              to: staffEmail,
+              subject: `Card declined — ${orderLabel}`,
+              html: `
+                <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111">
+                  <h2 style="margin:0 0 16px;font-size:18px;color:#b91c1c">⚠ Card Declined</h2>
+                  <table style="width:100%;border-collapse:collapse;font-size:14px">
+                    <tr><td style="padding:6px 0;color:#666;width:130px">Order</td><td style="padding:6px 0;font-weight:600">${orderLabel}</td></tr>
+                    <tr><td style="padding:6px 0;color:#666">Amount</td><td style="padding:6px 0">${amountLabel}</td></tr>
+                    <tr><td style="padding:6px 0;color:#666">Reason</td><td style="padding:6px 0;color:#b91c1c;font-weight:600">${voidLabel}</td></tr>
+                    ${custEmail ? `<tr><td style="padding:6px 0;color:#666">Customer</td><td style="padding:6px 0">${custEmail}</td></tr>` : ""}
+                  </table>
+                  <p style="margin:16px 0 0;font-size:13px;color:#555">The customer may e-transfer instead — check the orders screen. If no payment arrives within the hour, consider following up.</p>
+                  <p style="margin:12px 0 0;font-size:12px;color:#999">This is an automated alert from True Color Printing · truecolorprinting.ca</p>
+                </div>
+              `,
+              text: `Card Declined — ${orderLabel}\n\nAmount: ${amountLabel}\nReason: ${voidLabel}${custEmail ? `\nCustomer: ${custEmail}` : ""}\n\nThe customer may e-transfer instead. Check the orders screen.`,
+            });
+          } catch (emailErr) {
+            console.error("[clover-webhook] staff card-decline email failed (non-fatal):", emailErr);
+          }
+        })();
 
         await logWebhookEvent({
           eventType: eventTypeStr,
