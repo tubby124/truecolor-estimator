@@ -8,7 +8,8 @@
  *
  * The three webhooks use THREE DIFFERENT auth schemes (verified against the
  * route handlers 2026-05-25):
- *   - Clover : shared-secret QUERY PARAM  ?k=<CLOVER_WEBHOOK_SECRET>   (Clover does not sign hosted-checkout bodies)
+ *   - Clover : Clover-Signature HMAC via CLOVER_SIGNING_SECRET, with legacy
+ *              shared-secret QUERY PARAM ?k=<CLOVER_WEBHOOK_SECRET> during transition
  *   - Wave   : HMAC-SHA256 header         x-wave-signature: sha256=<hex over raw body>
  *   - Brevo  : Bearer token               Authorization: Bearer <BREVO_WEBHOOK_SECRET>
  *
@@ -79,7 +80,7 @@ else if (/^https:\/\/truecolorprinting\.ca\/?$/.test(siteUrl)) add("NEXT_PUBLIC_
 else add("NEXT_PUBLIC_SITE_URL host", "WARN", `unexpected value: ${siteUrl}`);
 
 // Prod-only secrets: presence is only verifiable in Railway. Flag locally-missing as INFO.
-for (const k of ["CLOVER_WEBHOOK_SECRET", "WAVE_WEBHOOK_SECRET", "CRON_SECRET"]) {
+for (const k of ["CLOVER_WEBHOOK_SECRET", "CLOVER_SIGNING_SECRET", "WAVE_WEBHOOK_SECRET", "CRON_SECRET"]) {
   add(`${k} (local)`, get(k) ? "PASS" : "WARN", get(k) ? "set" : "not local (verify in Railway env)");
 }
 add("BREVO_WEBHOOK_SECRET (local)", get("BREVO_WEBHOOK_SECRET") ? "PASS" : "WARN", get("BREVO_WEBHOOK_SECRET") ? "set" : "not local (verify in Railway)");

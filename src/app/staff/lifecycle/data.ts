@@ -1093,17 +1093,41 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     (r) => r.payment_method === "clover_card" && r.age_hours <= 24,
   ).length;
 
-  // Clover orders where the customer opened the checkout page (payment_reference
-  // set) but payment hasn't confirmed after 30 min — card was likely declined.
+  // Clover checkout attempts opened from /pay/[token] but not followed by a
+  // captured/recovered attempt after 30 min — card was likely declined or abandoned.
   const cutoff30min = new Date(now - 30 * 60 * 1000).toISOString();
-  const { count: stuckCloverCount } = await supabase
+  const { data: openAttempts } = await supabase
+    .from("payment_attempts")
+    .select("order_id")
+    .eq("provider", "clover")
+    .eq("status", "checkout_opened")
+    .lt("created_at", cutoff30min)
+    .limit(200);
+
+  const openAttemptOrderIds = Array.from(new Set((openAttempts ?? [])
+    .map((r) => (r as { order_id?: string | null }).order_id)
+    .filter((id): id is string => Boolean(id))));
+
+  let stuckCloverAttempts = 0;
+  if (openAttemptOrderIds.length > 0) {
+    const { count } = await supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .in("id", openAttemptOrderIds)
+      .eq("payment_method", "clover_card")
+      .eq("status", "pending_payment");
+    stuckCloverAttempts = count ?? 0;
+  }
+
+  // Fallback for orders created before payment_attempts existed.
+  const { count: legacyStuckCloverCount } = await supabase
     .from("orders")
     .select("*", { count: "exact", head: true })
     .eq("payment_method", "clover_card")
     .eq("status", "pending_payment")
     .not("payment_reference", "is", null)
     .lt("created_at", cutoff30min);
-  const stuckCloverAttempts = stuckCloverCount ?? 0;
+  stuckCloverAttempts = Math.max(stuckCloverAttempts, legacyStuckCloverCount ?? 0);
 
   // ── derive status rollup ─────────────────────────────────────────────────
   // Pure function — single source of truth shared with /api/cron/dashboard-alerts.

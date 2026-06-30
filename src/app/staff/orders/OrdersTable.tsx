@@ -9,6 +9,7 @@ import {
   VALID_STATUSES,
 } from "@/lib/data/order-constants";
 import { StaffOrderCard } from "@/components/staff/orders/StaffOrderCard";
+import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -54,6 +55,7 @@ export interface Order {
   file_storage_paths: string[] | null;
   payment_reference: string | null;
   card_decline_label?: string;
+  latest_payment_attempt?: LatestPaymentAttempt | null;
   is_archived: boolean;
   archived_at: string | null;
   customers: Customer[] | Customer | null;

@@ -12,6 +12,7 @@ import {
 import { CustomerHistoryWidget } from "@/app/staff/orders/CustomerHistoryWidget";
 import type { Order } from "@/app/staff/orders/OrdersTable";
 import { RepriceModal } from "./RepriceModal";
+import { formatAttemptAge } from "@/lib/payments/attempts";
 
 const SUPABASE_STORAGE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
 
@@ -76,6 +77,7 @@ export function StaffOrderCard({
 
   const customer = Array.isArray(order.customers) ? order.customers[0] : order.customers;
   const nextStatus = NEXT_STATUS[order.status];
+  const latestAttempt = order.latest_payment_attempt;
 
   // Artwork files — prefer file_storage_paths[] array, fall back to first order_items path
   const artworkFiles: Array<{ url: string; label: string }> = [];
@@ -248,9 +250,17 @@ export function StaffOrderCard({
               )}
               {order.payment_method === "clover_card" &&
                 order.status === "pending_payment" &&
-                order.payment_reference && (
+                (latestAttempt || order.payment_reference) && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
-                  {order.card_decline_label ? `⚠ Card declined: ${order.card_decline_label}` : "⚠ Card checkout opened"}
+                  {latestAttempt?.status === "card_declined"
+                    ? `Card declined: ${latestAttempt.failure_label ?? order.card_decline_label ?? "Payment did not complete"}`
+                    : latestAttempt?.status === "abandoned"
+                    ? "Checkout abandoned"
+                    : latestAttempt?.status === "ambiguous"
+                    ? "Ambiguous Clover match"
+                    : order.card_decline_label
+                    ? `Card declined: ${order.card_decline_label}`
+                    : "Card checkout opened"}
                 </span>
               )}
               {order.is_archived && (
@@ -575,6 +585,43 @@ export function StaffOrderCard({
                       ? "Card — pending webhook"
                       : "Awaiting payment confirmation"}
                   </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Payment attempt evidence */}
+          {order.payment_method === "clover_card" && latestAttempt && (
+            <div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                Payment evidence
+              </p>
+              <div className={`rounded-lg border px-4 py-3 text-sm ${
+                latestAttempt.status === "payment_captured" || latestAttempt.status === "webhook_missing_recovered"
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : latestAttempt.status === "card_declined" || latestAttempt.status === "abandoned"
+                  ? "bg-orange-50 border-orange-200 text-orange-800"
+                  : "bg-blue-50 border-blue-200 text-blue-800"
+              }`}>
+                <p className="font-semibold">
+                  {latestAttempt.status === "checkout_opened" && `Checkout opened ${formatAttemptAge(latestAttempt.created_at)}`}
+                  {latestAttempt.status === "card_declined" && `Card declined ${formatAttemptAge(latestAttempt.created_at)}`}
+                  {latestAttempt.status === "payment_captured" && `Payment captured ${formatAttemptAge(latestAttempt.created_at)}`}
+                  {latestAttempt.status === "webhook_missing_recovered" && `Recovered from Clover ${formatAttemptAge(latestAttempt.created_at)}`}
+                  {latestAttempt.status === "abandoned" && `Checkout unresolved ${formatAttemptAge(latestAttempt.created_at)}`}
+                  {latestAttempt.status === "ambiguous" && `Ambiguous Clover match ${formatAttemptAge(latestAttempt.created_at)}`}
+                </p>
+                {(latestAttempt.failure_label || latestAttempt.customer_message) && (
+                  <p className="mt-1 text-xs opacity-90">
+                    {latestAttempt.failure_label ?? latestAttempt.customer_message}
+                  </p>
+                )}
+                {(latestAttempt.clover_payment_id || latestAttempt.clover_checkout_session_id) && (
+                  <p className="mt-2 text-[11px] font-mono opacity-70 break-all">
+                    {latestAttempt.clover_payment_id
+                      ? `payment ${latestAttempt.clover_payment_id}`
+                      : `checkout ${latestAttempt.clover_checkout_session_id}`}
+                  </p>
                 )}
               </div>
             </div>

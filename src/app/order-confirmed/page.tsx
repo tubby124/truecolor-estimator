@@ -7,6 +7,8 @@ import { AccountSignupCard } from "@/components/site/AccountSignupCard";
 import { PurchaseEvent } from "@/app/order-confirmed/PurchaseEvent";
 import { CloverPaymentWatcher } from "@/app/order-confirmed/CloverPaymentWatcher";
 import { REVIEW_COUNT } from "@/lib/reviews";
+import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
+import { encodePaymentToken } from "@/lib/payment/token";
 
 export const metadata: Metadata = {
   title: "Order Confirmed — True Color",
@@ -28,6 +30,7 @@ interface OrderSummary {
   receipt_token: string | null;
   customers?: { email: string; name: string; company: string | null } | Array<{ email: string; name: string; company: string | null }> | null;
   order_items?: Array<{ product_name: string; category?: string | null; qty: number; line_total: number | string }> | null;
+  latest_payment_attempt?: LatestPaymentAttempt | null;
 }
 
 export default async function OrderConfirmedPage({ searchParams }: Props) {
@@ -52,6 +55,14 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
 
       if (data) {
         orderSummary = data as OrderSummary;
+        const { data: latestAttempt } = await supabase
+          .from("payment_attempts")
+          .select("status, amount, failure_label, failure_detail, customer_message, clover_checkout_session_id, clover_payment_id, created_at")
+          .eq("order_id", oid)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        orderSummary.latest_payment_attempt = (latestAttempt as LatestPaymentAttempt | null) ?? null;
       }
     } catch {
       // Non-fatal — show generic confirmation
@@ -64,7 +75,21 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
   const isEtransfer = orderSummary?.payment_method === "etransfer";
   // For eTransfer orders, payment_reference holds the /pay/{token} card URL.
   // For clover_card orders, payment_reference is our Supabase order UUID (used for webhook matching).
-  const cardPayUrl = isEtransfer ? (orderSummary?.payment_reference ?? null) : null;
+  let cardPayUrl = isEtransfer ? (orderSummary?.payment_reference ?? null) : null;
+  if (!cardPayUrl && oid && orderSummary?.payment_method === "clover_card" && orderSummary.status === "pending_payment") {
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+      const token = encodePaymentToken(
+        Number(orderSummary.total),
+        `Order ${orderSummary.order_number}`,
+        customerEmail ?? undefined,
+        `${siteUrl}/order-confirmed?oid=${oid}`,
+      );
+      cardPayUrl = `/pay/${token}`;
+    } catch {
+      cardPayUrl = null;
+    }
+  }
 
   // Clover orders: payment is confirmed by the webhook, not this redirect.
   // Show a "processing" notice if the webhook hasn't fired yet.
@@ -152,8 +177,18 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-left mb-8">
             <p className="font-bold text-yellow-800 mb-1">Payment being verified</p>
             <p className="text-sm text-yellow-700 leading-relaxed">
-              Your card payment is being processed. You&apos;ll receive a confirmation email once it&apos;s verified — this usually takes under a minute. You do not need to do anything else.
+              {orderSummary?.latest_payment_attempt?.status === "card_declined"
+                ? orderSummary.latest_payment_attempt.customer_message ?? "Your card payment did not complete. Please try again or use e-Transfer."
+                : "Your card payment is being processed. You'll receive a confirmation email once it's verified — this usually takes under a minute. You do not need to do anything else."}
             </p>
+            {orderSummary?.latest_payment_attempt?.status === "card_declined" && cardPayUrl && (
+              <a
+                href={cardPayUrl}
+                className="inline-flex mt-4 items-center gap-2 rounded-lg bg-[#16C2F3] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#0fb0dd] transition-colors"
+              >
+                Try card again &rarr;
+              </a>
+            )}
           </div>
         )}
 

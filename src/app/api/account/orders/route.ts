@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { encodePaymentToken } from "@/lib/payment/token";
+import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
 
@@ -96,6 +97,29 @@ export async function GET(req: NextRequest) {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+  const orderIds = (orders ?? []).map((order) => order.id);
+  const latestAttemptByOrder = new Map<string, LatestPaymentAttempt>();
+
+  if (orderIds.length > 0) {
+    const { data: attempts, error: attemptsErr } = await admin
+      .from("payment_attempts")
+      .select("order_id, status, amount, failure_label, failure_detail, customer_message, clover_checkout_session_id, clover_payment_id, created_at")
+      .in("order_id", orderIds)
+      .order("created_at", { ascending: false });
+
+    if (attemptsErr) {
+      console.error("[account/orders] payment_attempts:", attemptsErr.message);
+    } else {
+      for (const attempt of attempts ?? []) {
+        const orderId = (attempt as { order_id?: string | null }).order_id;
+        if (orderId && !latestAttemptByOrder.has(orderId)) {
+          const { order_id: _orderId, ...safeAttempt } = attempt as LatestPaymentAttempt & { order_id: string };
+          void _orderId;
+          latestAttemptByOrder.set(orderId, safeAttempt);
+        }
+      }
+    }
+  }
 
   const ordersWithPayUrl = (orders ?? []).map((order) => {
     let pay_url: string | null = null;
@@ -112,7 +136,7 @@ export async function GET(req: NextRequest) {
         // Non-fatal — payment token secret may not be configured
       }
     }
-    return { ...order, pay_url };
+    return { ...order, pay_url, latest_payment_attempt: latestAttemptByOrder.get(order.id) ?? null };
   });
 
   return NextResponse.json({ orders: ordersWithPayUrl });

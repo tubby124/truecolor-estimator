@@ -36,6 +36,7 @@ import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, type WavePa
 import { recordCronRun } from "@/lib/cron/heartbeat";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
+import { recordPaymentAttempt } from "@/lib/payments/attempts";
 
 const WAVE_GQL = "https://gql.waveapps.com/graphql/public";
 const WAVE_BIZ = "QnVzaW5lc3M6MGZlYTg0NzQtYjQ2Ny00YTEyLWI1NTgtZWZhNGM3NGM3ZTNj";
@@ -176,6 +177,16 @@ async function recoverCloverCapture(
   if (ledgerErr && (ledgerErr as { code?: string }).code !== "23505") {
     throw new Error(`order_payments insert failed: ${ledgerErr.message}`);
   }
+
+  await recordPaymentAttempt(supabase, {
+    order_id: order.id,
+    status: "webhook_missing_recovered",
+    amount: amountDollars,
+    clover_order_id: payment.order?.id ?? null,
+    clover_payment_id: payment.id,
+    raw_event: payment,
+    customer_message: "Payment received. Thank you.",
+  });
 
   const { data: updated, error: updateErr } = await supabase
     .from("orders")
@@ -486,6 +497,23 @@ export async function GET(req: NextRequest) {
           const matchDetail = enrichedMatches.length === 0
             ? "no successful matching Clover payment found"
             : `ambiguous Clover payment match (${enrichedMatches.length} amount match${enrichedMatches.length === 1 ? "" : "es"})`;
+          await recordPaymentAttempt(supabase, {
+            order_id: order.id,
+            status: enrichedMatches.length === 0 ? "abandoned" : "ambiguous",
+            amount: Number(order.total ?? 0),
+            failure_code: enrichedMatches.length === 0 ? "no_matching_capture" : "ambiguous_match",
+            failure_label: enrichedMatches.length === 0 ? "Payment not completed" : "Ambiguous Clover match",
+            failure_detail: matchDetail,
+            raw_event: {
+              payment_reference: order.payment_reference,
+              matches: enrichedMatches.map((m) => ({
+                clover_payment_id: m.payment.id,
+                amount: m.payment.amount,
+                clover_order_id: m.payment.order?.id ?? null,
+                strong: m.strong,
+              })),
+            },
+          });
           issues.push({
             kind: "clover_stuck",
             order_number: order.order_number,

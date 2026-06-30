@@ -7,15 +7,15 @@
  * being redirected, the webhook still fires and the order gets confirmed.
  *
  * Setup: Register this URL in Clover Dashboard → Developer → App Market → Webhooks
- * URL: https://[your-domain]/api/webhooks/clover
+ * URL during transition: https://[your-domain]/api/webhooks/clover?k=<CLOVER_WEBHOOK_SECRET>
  * Events to subscribe: PAYMENT
  *
- * Auth: shared CLOVER_WEBHOOK_SECRET query param. Clover hosted-checkout
- * webhooks do not sign request bodies.
+ * Auth: Clover-Signature HMAC via CLOVER_SIGNING_SECRET, with legacy
+ * CLOVER_WEBHOOK_SECRET query param accepted during the transition.
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
@@ -28,6 +28,59 @@ import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { summarizeOrderPayments, type OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
 import { sendEmail } from "@/lib/email/smtp";
+import { DECLINE_LABELS, recordPaymentAttempt } from "@/lib/payments/attempts";
+
+function safeEqual(a: string, b: string): boolean {
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  return aBuf.length === bBuf.length && timingSafeEqual(aBuf, bBuf);
+}
+
+function parseCloverSignature(header: string): { timestamp: string; signature: string } | null {
+  const parts = header.split(",").map((part) => part.trim());
+  const timestamp = parts.find((part) => part.startsWith("t="))?.slice(2);
+  const signature =
+    parts.find((part) => part.startsWith("v1="))?.slice(3) ??
+    parts.find((part) => part.startsWith("s="))?.slice(2) ??
+    (parts.length === 1 && /^[0-9a-f]{64}$/i.test(parts[0]) ? parts[0] : undefined);
+  if (!timestamp || !signature) return null;
+  return { timestamp, signature };
+}
+
+function verifyCloverSignature(rawBody: string, header: string | null, secret: string | undefined): boolean {
+  if (!secret || !header) return false;
+  const parsed = parseCloverSignature(header);
+  if (!parsed) return false;
+  const expected = createHmac("sha256", secret)
+    .update(`${parsed.timestamp}.${rawBody}`)
+    .digest("hex");
+  return safeEqual(parsed.signature, expected);
+}
+
+function pickString(obj: Record<string, unknown> | undefined, keys: string[]): string | undefined {
+  for (const key of keys) {
+    const val = obj?.[key];
+    if (typeof val === "string" && val.trim()) return val;
+  }
+  return undefined;
+}
+
+function pickObject(obj: Record<string, unknown> | undefined, keys: string[]): Record<string, unknown> | undefined {
+  for (const key of keys) {
+    const val = obj?.[key];
+    if (val && typeof val === "object" && !Array.isArray(val)) return val as Record<string, unknown>;
+  }
+  return undefined;
+}
+
+function pickNumber(obj: Record<string, unknown> | undefined, keys: string[]): number {
+  for (const key of keys) {
+    const val = obj?.[key];
+    if (typeof val === "number") return val;
+    if (typeof val === "string" && val.trim() && !Number.isNaN(Number(val))) return Number(val);
+  }
+  return 0;
+}
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -37,28 +90,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not read body" }, { status: 400 });
   }
 
-  // Verify request via CLOVER_WEBHOOK_SECRET query param. Fail-CLOSED:
-  // if the env var is unset we reject every webhook (security rule
-  // .claude/rules/truecolor-security.md: "Webhook auth with `if (secret)`
-  // (fail-open) | BLOCK"). The old fail-open path let anyone forge a paid
-  // status by POSTing JSON to the public URL.
-  // Register the webhook in Clover Dashboard with URL:
-  //   https://truecolorprinting.ca/api/webhooks/clover?k=<CLOVER_WEBHOOK_SECRET>
-  // Clover does NOT sign hosted checkout webhook bodies — HMAC approach is not applicable.
+  // Verify request by Clover-Signature when present, while accepting the
+  // legacy ?k= query secret during Clover/Railway transition. Fail-CLOSED:
+  // if neither configured auth path validates, reject before parsing or writing.
   const webhookSecret = process.env.CLOVER_WEBHOOK_SECRET;
-  if (!webhookSecret) {
-    console.error("[clover-webhook] CLOVER_WEBHOOK_SECRET not configured — rejecting (fail-closed)");
-    return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
-  }
+  const signingSecret = process.env.CLOVER_SIGNING_SECRET;
   const provided = req.nextUrl.searchParams.get("k") ?? "";
-  const providedBuf = Buffer.from(provided);
-  const expectedBuf = Buffer.from(webhookSecret);
-  const valid =
-    providedBuf.length === expectedBuf.length &&
-    timingSafeEqual(providedBuf, expectedBuf);
-  if (!valid) {
-    console.warn("[clover-webhook] Invalid webhook secret — possible spoofing attempt");
-    return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
+  const queryValid = webhookSecret ? safeEqual(provided, webhookSecret) : false;
+  const signatureValid = verifyCloverSignature(
+    bodyText,
+    req.headers.get("clover-signature") ?? req.headers.get("Clover-Signature"),
+    signingSecret,
+  );
+
+  if (!queryValid && !signatureValid) {
+    if (!webhookSecret && !signingSecret) {
+      console.error("[clover-webhook] no Clover webhook auth secret configured — rejecting (fail-closed)");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
+    }
+    console.warn("[clover-webhook] invalid Clover webhook auth — possible spoofing attempt");
+    return NextResponse.json({ error: "Invalid webhook auth" }, { status: 401 });
+  }
+
+  if (signingSecret && !signatureValid) {
+    console.warn("[clover-webhook] Clover signature missing/invalid; accepted by legacy query secret");
   }
 
   let event: Record<string, unknown>;
@@ -83,12 +138,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  console.log("[clover-webhook] received event type:", event.type);
+  const normalizedEventType = pickString(event, ["type", "Type"]) ?? "unknown";
+  console.log("[clover-webhook] received event type:", normalizedEventType);
 
   // Supabase client + non-fatal webhook_events logger — shared across every
   // exit path below so the staff lifecycle dashboard sees every Clover hit.
   const supabase = createServiceClient();
-  const eventTypeStr = typeof event.type === "string" ? event.type : "unknown";
+  const eventTypeStr = normalizedEventType;
 
   async function logWebhookEvent(opts: {
     eventType: string;
@@ -113,50 +169,67 @@ export async function POST(req: NextRequest) {
 
   // Handle payment capture events
   // Clover sends type=PAYMENT with object.status=captured when card is charged
-  if (event.type === "PAYMENT") {
-    const obj = event.object as Record<string, unknown> | undefined;
-    const paymentId = (obj?.id ?? obj?.paymentId) as string | undefined;
-    if (obj?.status === "captured" || obj?.status === "paid") {
+  if (normalizedEventType === "PAYMENT") {
+    const obj = (event.object && typeof event.object === "object" ? event.object : event) as Record<string, unknown>;
+    const dataObj = pickObject(obj, ["data", "Data"]);
+    const paymentId = pickString(obj, ["id", "Id", "paymentId", "PaymentId"]);
+    const status = (pickString(obj, ["status", "Status"]) ?? "").toLowerCase();
+    if (status === "captured" || status === "paid" || status === "approved") {
       // Primary: externalReferenceId = our Supabase order UUID (set in createCloverCheckout)
       // Fallback: cloverOrderId = Clover's internal order ID (for backward compat)
-      const extRef = (obj.externalReferenceId ?? obj.external_reference_id) as string | undefined;
-      const cloverOrderId = (obj.orderId ?? obj.order_id) as string | undefined;
+      const extRef = pickString(obj, ["externalReferenceId", "external_reference_id", "ExternalReferenceId"]);
+      const cloverOrderId = pickString(obj, ["orderId", "order_id", "OrderId"]);
+      const checkoutSessionId = pickString(dataObj, ["checkoutSessionId", "checkout_session_id", "CheckoutSessionId"]) ??
+        pickString(obj, ["checkoutSessionId", "checkout_session_id", "CheckoutSessionId"]);
       const matchRef = extRef ?? cloverOrderId;
 
-      console.log(`[clover-webhook] matching by ${extRef ? "externalReferenceId" : "cloverOrderId"}: ${matchRef}`);
+      console.log(`[clover-webhook] matching by ${extRef ? "externalReferenceId" : cloverOrderId ? "cloverOrderId" : "checkoutSessionId"}: ${matchRef ?? checkoutSessionId ?? "missing"}`);
 
-      if (!matchRef) {
+      if (!matchRef && !checkoutSessionId) {
         await logWebhookEvent({
           eventType: eventTypeStr,
           resourceId: paymentId ?? null,
           matchedOrderId: null,
           ok: false,
-          detail: "PAYMENT captured but no externalReferenceId or orderId on payload",
+          detail: "PAYMENT captured but no externalReferenceId, orderId, or checkoutSessionId on payload",
         });
       }
 
-      if (matchRef) {
+      if (matchRef || checkoutSessionId) {
         try {
           // Verify the captured amount matches order.total BEFORE marking paid.
           // The previous version updated solely on payment_reference match, so a
           // partial capture (or a crafted event with amount=1¢) would still flip
           // the order to payment_received and trigger the receipt + Wave PAID
           // recording. Clover hosted-checkout puts amount in cents on event.object.
-          const reportedAmountCents = typeof obj.amount === "number"
-            ? obj.amount
-            : Number(obj.amount ?? 0);
+          const reportedAmountCents = pickNumber(obj, ["amount", "Amount"]);
 
-          const { data: pendingOrder, error: fetchErr } = await supabase
+          let attemptOrderId: string | null = null;
+          if (!matchRef && checkoutSessionId) {
+            const { data: attemptRow } = await supabase
+              .from("payment_attempts")
+              .select("order_id")
+              .eq("provider", "clover")
+              .eq("clover_checkout_session_id", checkoutSessionId)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            attemptOrderId = (attemptRow?.order_id as string | null | undefined) ?? null;
+          }
+
+          let pendingOrderQuery = supabase
             .from("orders")
-            .select("id, order_number, total, status, customer_id, customers ( name, email, company )")
-            .eq("payment_reference", matchRef)
-            .maybeSingle();
+            .select("id, order_number, total, status, customer_id, customers ( name, email, company )");
+          pendingOrderQuery = attemptOrderId
+            ? pendingOrderQuery.eq("id", attemptOrderId)
+            : pendingOrderQuery.eq("payment_reference", matchRef);
+          const { data: pendingOrder, error: fetchErr } = await pendingOrderQuery.maybeSingle();
 
           if (fetchErr) {
             console.error("[clover-webhook] order lookup failed:", fetchErr.message);
             await logWebhookEvent({
               eventType: eventTypeStr,
-              resourceId: paymentId ?? matchRef,
+              resourceId: paymentId ?? matchRef ?? null,
               matchedOrderId: null,
               ok: false,
               detail: `order lookup failed: ${fetchErr.message}`,
@@ -164,21 +237,39 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true });
           }
           if (!pendingOrder) {
-            console.warn(`[clover-webhook] no order found for payment_reference=${matchRef}`);
+            console.warn(`[clover-webhook] no order found for payment_reference/session=${matchRef ?? checkoutSessionId}`);
             await logWebhookEvent({
               eventType: eventTypeStr,
-              resourceId: paymentId ?? matchRef,
+              resourceId: paymentId ?? matchRef ?? checkoutSessionId ?? null,
               matchedOrderId: null,
               ok: false,
-              detail: `no order found for payment_reference=${matchRef}`,
+              detail: `no order found for payment_reference/session=${matchRef ?? checkoutSessionId}`,
+            });
+            await recordPaymentAttempt(supabase, {
+              status: "payment_captured",
+              amount: reportedAmountCents > 0 ? reportedAmountCents / 100 : null,
+              clover_checkout_session_id: checkoutSessionId ?? null,
+              clover_order_id: cloverOrderId ?? null,
+              clover_payment_id: paymentId ?? null,
+              raw_event: event,
+              customer_message: "Payment received, but the order could not be matched automatically.",
             });
             return NextResponse.json({ ok: true });
           }
+          await recordPaymentAttempt(supabase, {
+            order_id: pendingOrder.id,
+            status: "payment_captured",
+            amount: reportedAmountCents > 0 ? reportedAmountCents / 100 : Number(pendingOrder.total ?? 0),
+            clover_checkout_session_id: checkoutSessionId ?? null,
+            clover_order_id: cloverOrderId ?? null,
+            clover_payment_id: paymentId ?? null,
+            raw_event: event,
+          });
           if (pendingOrder.status !== "pending_payment") {
             console.log(`[clover-webhook] order ${pendingOrder.order_number} already in status=${pendingOrder.status} — idempotent ack`);
             await logWebhookEvent({
               eventType: eventTypeStr,
-              resourceId: paymentId ?? matchRef,
+              resourceId: paymentId ?? matchRef ?? null,
               matchedOrderId: pendingOrder.id,
               ok: true,
               detail: `order ${pendingOrder.order_number} already ${pendingOrder.status} — skipped`,
@@ -206,7 +297,7 @@ export async function POST(req: NextRequest) {
             ).catch(() => {});
             await logWebhookEvent({
               eventType: eventTypeStr,
-              resourceId: paymentId ?? matchRef,
+              resourceId: paymentId ?? matchRef ?? null,
               matchedOrderId: pendingOrder.id,
               ok: false,
               detail: `bad_amount: $${reportedDollars.toFixed(2)} (max $${(expectedCents / 100).toFixed(2)})`,
@@ -288,7 +379,7 @@ export async function POST(req: NextRequest) {
             ).catch(() => {});
             await logWebhookEvent({
               eventType: eventTypeStr,
-              resourceId: paymentId ?? matchRef,
+              resourceId: paymentId ?? matchRef ?? null,
               matchedOrderId: pendingOrder.id,
               ok: true,
               detail: `partial: $${reportedDollars.toFixed(2)} recorded; ledger=$${ledgerSummary.amountPaid.toFixed(2)}/$${orderTotalDollars.toFixed(2)}`,
@@ -348,7 +439,7 @@ export async function POST(req: NextRequest) {
             console.error("[clover-webhook] order update failed:", error.message);
             await logWebhookEvent({
               eventType: eventTypeStr,
-              resourceId: paymentId ?? matchRef,
+              resourceId: paymentId ?? matchRef ?? null,
               matchedOrderId: pendingOrder.id,
               ok: false,
               detail: `order update failed: ${error.message}`,
@@ -377,7 +468,7 @@ export async function POST(req: NextRequest) {
             );
             await logWebhookEvent({
               eventType: eventTypeStr,
-              resourceId: paymentId ?? matchRef,
+              resourceId: paymentId ?? matchRef ?? null,
               matchedOrderId: pendingOrder.id,
               ok: true,
               detail: count > 0
@@ -674,33 +765,46 @@ export async function POST(req: NextRequest) {
     } else {
       // PAYMENT event but not captured/paid — detect voided (declined) card payments
       const objRecord = obj as Record<string, unknown> | undefined;
-      const isVoided = objRecord?.result === "VOIDED" || objRecord?.status === "voided";
+      const result = (pickString(objRecord, ["result", "Result"]) ?? "").toUpperCase();
+      const eventStatus = (pickString(objRecord, ["status", "Status"]) ?? "").toLowerCase();
+      const isVoided = result === "VOIDED" || eventStatus === "voided" || eventStatus === "declined";
 
       if (isVoided) {
-        const voidReason = objRecord?.voidReason as string | undefined;
-        const voidReasonDetails = objRecord?.voidReasonDetails as Record<string, unknown> | undefined;
-        const voidDetail = voidReasonDetails?.descriptionEnum as string | undefined;
+        const voidReason = pickString(objRecord, ["voidReason", "VoidReason", "reason", "Reason"]);
+        const voidReasonDetails = pickObject(objRecord, ["voidReasonDetails", "VoidReasonDetails"]);
+        const voidDetail = pickString(voidReasonDetails, ["descriptionEnum", "description", "Description"]);
+        const dataObj = pickObject(objRecord, ["data", "Data"]);
+        const checkoutSessionId = pickString(dataObj, ["checkoutSessionId", "checkout_session_id", "CheckoutSessionId"]) ??
+          pickString(objRecord, ["checkoutSessionId", "checkout_session_id", "CheckoutSessionId"]);
+        const voidLabel = voidDetail ? (DECLINE_LABELS[voidDetail] ?? voidDetail) : (voidReason ? (DECLINE_LABELS[voidReason] ?? voidReason) : "Payment did not complete");
 
-        const VOID_LABELS: Record<string, string> = {
-          ECOMM_VALIDATE_POSTAL_CODE_MATCH: "Postal code didn't match",
-          ECOMM_VALIDATE_CVV_MATCH: "CVV didn't match",
-          REJECT: "Card rejected",
-          FRAUD: "Fraud prevention",
-        };
-        const voidLabel = voidDetail ? (VOID_LABELS[voidDetail] ?? voidDetail) : (voidReason ?? "declined");
-
-        const extRef = (objRecord?.externalReferenceId ?? objRecord?.external_reference_id) as string | undefined;
+        const extRef = pickString(objRecord, ["externalReferenceId", "external_reference_id", "ExternalReferenceId"]);
         let matchedOrderId: string | null = null;
         let orderNumber: string | null = null;
         let orderTotal: number | null = null;
         let custEmail: string | null = null;
 
-        if (extRef) {
-          const { data: voidedOrder } = await supabase
-            .from("orders")
-            .select("id, order_number, total, customers ( name, email )")
-            .eq("payment_reference", extRef)
+        let attemptOrderId: string | null = null;
+        if (!extRef && checkoutSessionId) {
+          const { data: attemptRow } = await supabase
+            .from("payment_attempts")
+            .select("order_id")
+            .eq("provider", "clover")
+            .eq("clover_checkout_session_id", checkoutSessionId)
+            .order("created_at", { ascending: false })
+            .limit(1)
             .maybeSingle();
+          attemptOrderId = (attemptRow?.order_id as string | null | undefined) ?? null;
+        }
+
+        if (extRef || attemptOrderId) {
+          let voidedOrderQuery = supabase
+            .from("orders")
+            .select("id, order_number, total, customers ( name, email )");
+          voidedOrderQuery = attemptOrderId
+            ? voidedOrderQuery.eq("id", attemptOrderId)
+            : voidedOrderQuery.eq("payment_reference", extRef);
+          const { data: voidedOrder } = await voidedOrderQuery.maybeSingle();
 
           if (voidedOrder) {
             matchedOrderId = voidedOrder.id;
@@ -726,6 +830,18 @@ export async function POST(req: NextRequest) {
             });
           }
         }
+
+        await recordPaymentAttempt(supabase, {
+          order_id: matchedOrderId,
+          status: "card_declined",
+          amount: orderTotal,
+          clover_checkout_session_id: checkoutSessionId ?? null,
+          clover_payment_id: paymentId ?? null,
+          failure_code: voidDetail ?? voidReason ?? eventStatus ?? null,
+          failure_label: voidLabel,
+          failure_detail: voidReason ?? null,
+          raw_event: event,
+        });
 
         void sendTelegramNotification(
           `⚠️ <b>Card declined</b>\n` +

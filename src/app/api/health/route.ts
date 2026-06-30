@@ -77,6 +77,14 @@ export async function GET() {
       note: process.env[key] ? undefined : "not set — webhook/cron rejects ALL requests (fail-closed outage)",
     });
   }
+  checks.push({
+    name: "CLOVER_SIGNING_SECRET",
+    ok: Boolean(process.env.CLOVER_SIGNING_SECRET),
+    severity: process.env.CLOVER_SIGNING_SECRET ? undefined : "warn",
+    note: process.env.CLOVER_SIGNING_SECRET
+      ? undefined
+      : "not set — legacy ?k= webhook secret still works, but first-class Clover signature verification is not active",
+  });
 
   // API keys — missing = that integration is dead.
   for (const key of ["WAVE_API_TOKEN", "CLOVER_ECOMM_PRIVATE_KEY", "CLOVER_MERCHANT_ID", "BREVO_API_KEY"]) {

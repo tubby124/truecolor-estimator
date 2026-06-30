@@ -5,6 +5,7 @@ import { parseAddons, formatDate } from "./helpers";
 import { SUPABASE_STORAGE_URL } from "./constants";
 import { StatusStepper } from "./StatusStepper";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
+import { formatAttemptAge } from "@/lib/payments/attempts";
 
 interface OrderCardProps {
   order: Order;
@@ -21,6 +22,7 @@ interface OrderCardProps {
 
 export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFile, uploadDone, uploadError, reorderedId, onReorder, onFileUpload, onReceiptClick }: OrderCardProps) {
   const isExpanded = expandedOrder === order.id;
+  const latestAttempt = order.latest_payment_attempt;
   const rushFee = order.is_rush
     ? Math.round((Number(order.total) - Number(order.subtotal) - Number(order.gst) - Number(order.pst ?? 0)) * 100) / 100
     : 0;
@@ -139,6 +141,28 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
             </span>
           </div>
         </div>
+
+        {/* eTransfer instructions — visible without expanding */}
+        {order.payment_method === "clover_card" &&
+          order.status === "pending_payment" &&
+          latestAttempt &&
+          ["card_declined", "abandoned"].includes(latestAttempt.status) && (
+            <div
+              className="mt-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="text-xs font-bold text-orange-800 mb-1.5">
+                {latestAttempt.status === "card_declined" ? "Card payment did not complete" : "Payment still pending"}
+              </p>
+              <p className="text-sm text-orange-900 leading-relaxed">
+                {latestAttempt.customer_message ??
+                  "Your card was not charged by this attempt. You can try again or pay by e-Transfer."}
+              </p>
+              <p className="text-xs text-orange-700 mt-1.5">
+                Last attempt: {formatAttemptAge(latestAttempt.created_at)}
+              </p>
+            </div>
+          )}
 
         {/* eTransfer instructions — visible without expanding */}
         {order.payment_method === "etransfer" &&

@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { OrdersTable } from "./OrdersTable";
 import { StaffOrdersActions } from "./StaffOrdersActions";
 import { LOGO_PATH } from "@/lib/config";
+import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 
 export const metadata: Metadata = {
   title: "Orders — True Color Staff",
@@ -142,8 +143,33 @@ async function fetchOrders() {
 
   if (error) throw new Error(error.message);
 
-  const orders = data ?? [];
+  let orders = data ?? [];
   if (orders.length === 0) return orders;
+
+  const latestAttemptByOrder = new Map<string, LatestPaymentAttempt>();
+  const orderIds = orders.map((o) => o.id);
+  const { data: attempts, error: attemptsErr } = await supabase
+    .from("payment_attempts")
+    .select("order_id, status, amount, failure_label, failure_detail, customer_message, clover_checkout_session_id, clover_payment_id, created_at")
+    .in("order_id", orderIds)
+    .order("created_at", { ascending: false });
+
+  if (attemptsErr) {
+    console.error("[staff/orders] payment_attempts:", attemptsErr.message);
+  } else {
+    for (const attempt of attempts ?? []) {
+      const orderId = (attempt as { order_id?: string | null }).order_id;
+      if (orderId && !latestAttemptByOrder.has(orderId)) {
+        const { order_id: _orderId, ...safeAttempt } = attempt as LatestPaymentAttempt & { order_id: string };
+        void _orderId;
+        latestAttemptByOrder.set(orderId, safeAttempt);
+      }
+    }
+    orders = orders.map((o) => ({
+      ...o,
+      latest_payment_attempt: latestAttemptByOrder.get(o.id) ?? null,
+    }));
+  }
 
   // Pull card-decline audit events from the last 30 days and annotate matching orders
   const cutoff30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
