@@ -21,6 +21,32 @@ Make payment state observable end to end:
 - The reconciliation harness is now clean on hard mismatches after backfilling the verified Clover payments.
 - The likely remaining setup issue is Clover's hosted-checkout webhook URL/config.
 
+## Current External Setup
+
+- Clover hosted-checkout webhook URL has been pasted in Clover.
+- `CLOVER_SIGNING_SECRET` has been saved in Railway for future first-class signature verification.
+- Current production webhook authentication still uses `CLOVER_WEBHOOK_SECRET` via the `?k=` query param.
+- Clover fallback redirect URLs should be set to `/payment/success`, `/payment/failed`, and `/payment/cancelled` after those pages are implemented. Until then, the existing per-checkout `redirectUrl` still routes real orders to `/order-confirmed?oid=...`.
+
+## Phase 0: Documentation And Repo Discovery
+
+Do this before writing implementation code.
+
+Read:
+
+- Clover hosted checkout webhook docs: payload shape, signing-secret verification format, event types, and decline/void payload fields.
+- Current payment creation flow: `src/lib/payment/clover.ts`, `src/app/pay/[token]/page.tsx`, `src/app/api/orders/route.ts`, `src/app/api/staff/manual-order/route.ts`.
+- Current webhook flow: `src/app/api/webhooks/clover/route.ts`.
+- Current reconciliation flow: `src/app/api/cron/reconcile-payments/route.ts`, `scripts/harness/reconcile-check.mjs`.
+- Current staff/account display surfaces: `src/components/staff/orders/StaffOrderCard.tsx`, `src/app/staff/orders/OrdersTable.tsx`, `src/components/account/OrderCard.tsx`, `src/app/order-confirmed/page.tsx`.
+- Current lifecycle/alert contract: `.claude/rules/lifecycle-rollup-contract.md`, `src/lib/lifecycle/rollup.ts`, `src/app/staff/lifecycle/data.ts`.
+
+Deliverable:
+
+- A short "allowed APIs and event shapes" note before coding.
+- A list of exact files to touch in each phase.
+- Confirmation that the plan still matches Clover's real docs.
+
 ## Phase 1: Clover Webhook Setup
 
 Confirm Clover hosted checkout webhook points to the production route.
@@ -47,6 +73,10 @@ Verification:
 - Confirm a new `webhook_events` row appears with `event_source=clover`.
 - Run `npm run harness:reconcile:7d`.
 - Confirm `/api/health` reports `CLOVER_WEBHOOK_SECRET` present.
+
+No-ship condition:
+
+- If Clover's Test URL does not produce any server-side evidence, stop and fix webhook delivery before building UI on top of it.
 
 ## Phase 2: Payment Attempts Ledger
 
@@ -167,6 +197,7 @@ Customer emails:
 - Payment failed / retry link.
 - Payment received receipt.
 - eTransfer instructions.
+- Checkout cancelled / resume payment.
 - Ready for pickup.
 - Review request.
 
@@ -178,6 +209,7 @@ Staff emails/alerts:
 - Payment captured.
 - Payment recovered.
 - Payment still pending after threshold.
+- Clover webhook/signature failure if events start failing authentication.
 
 ## Phase 7: Staff Payment Health Dashboard
 
@@ -191,6 +223,28 @@ Add a payment health panel:
 - Clover webhook last seen.
 - Reconcile last ran.
 - Payment-followup heartbeat.
+
+## Guardrails
+
+- Redirect pages must never mark orders paid.
+- Never expose raw Clover/Wave errors to customers; map them to safe labels.
+- Never log or commit `CLOVER_WEBHOOK_SECRET`, `CLOVER_SIGNING_SECRET`, card details, or raw tokens.
+- Never auto-refund double captures; alert staff with exact payment IDs and amounts.
+- Never move an order beyond `payment_received` unless payment truth is confirmed.
+- All silent-failure signals must be registered in `src/lib/lifecycle/rollup.ts` so `/staff/lifecycle` and Telegram agree.
+- Any manual override must write an audit event with actor, order number, payment method, amount, and reason.
+
+## Suggested Execution Order
+
+1. Verify Clover webhook delivery now that the URL is saved in Clover.
+2. Add signature verification using `CLOVER_SIGNING_SECRET` while keeping the current query-secret path during transition.
+3. Add `payment_attempts` migration, types, and write paths.
+4. Add customer redirect pages and order/account failure states.
+5. Add staff order-card evidence states and notifications.
+6. Expand reconciliation to write attempts for recovered/abandoned/ambiguous states.
+7. Add payment health dashboard rollup.
+8. Clean up email sequence.
+9. Run full verification and remove legacy query-secret dependency only after signature verification is proven.
 
 ## Final Verification
 
@@ -206,3 +260,24 @@ Add a payment health panel:
 - Run `npm exec tsc -- --noEmit`.
 - Run `npm test`.
 - Run `npm run harness:reconcile:7d`.
+
+## New-Chat Handoff Prompt
+
+```text
+/truecolor
+
+Task: Execute plans/payment-ops-control-tower.md end to end.
+
+Current state:
+- Clover hosted-checkout webhook URL has been pasted in Clover.
+- Railway has CLOVER_SIGNING_SECRET saved.
+- Current webhook still authenticates via CLOVER_WEBHOOK_SECRET query param.
+- Commit 2257237 added missed-Clover-payment recovery.
+- Plan commits: 73f7caf, bd4dfcf, and later updates.
+
+Start with Phase 0 documentation/repo discovery.
+Do not mutate payment status from redirect pages.
+Do not commit secrets.
+Verify Clover webhook delivery before building UI on top of it.
+Run typecheck, tests, and npm run harness:reconcile:7d before shipping.
+```
