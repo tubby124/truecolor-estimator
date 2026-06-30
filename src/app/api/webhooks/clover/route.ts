@@ -10,7 +10,8 @@
  * URL: https://[your-domain]/api/webhooks/clover
  * Events to subscribe: PAYMENT
  *
- * Auth: HMAC-SHA256 signature on request body using PAYMENT_TOKEN_SECRET
+ * Auth: shared CLOVER_WEBHOOK_SECRET query param. Clover hosted-checkout
+ * webhooks do not sign request bodies.
  */
 
 import { NextRequest, NextResponse } from "next/server";

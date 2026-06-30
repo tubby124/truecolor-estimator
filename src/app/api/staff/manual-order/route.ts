@@ -423,7 +423,12 @@ export async function POST(req: NextRequest) {
     // for changes. No more "no payment link until you approve" orphan state that
     // bit TC-2026-0113 (Damon Miller, 2026-05-26).
     try {
-      const token = encodePaymentToken(total, combinedDescription, contact.email.toLowerCase().trim(), redirectUrl);
+      const token = encodePaymentToken(
+        total,
+        `${order.order_number} — ${combinedDescription}`,
+        contact.email.toLowerCase().trim(),
+        redirectUrl
+      );
       paymentUrl = `${siteUrl}/pay/${token}`;
     } catch (tokenErr) {
       console.error("[manual-order] payment token encode:", tokenErr);

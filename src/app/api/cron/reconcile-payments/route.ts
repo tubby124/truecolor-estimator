@@ -14,8 +14,8 @@
  *      → "Wave invoice creation may have failed silently"
  *   2. Wave invoices that exist on Wave's side but no matching Supabase order
  *      → "orphan Wave invoice — unlinked"
- *   3. Clover-card orders > 24h old still at pending_payment
- *      → "Clover webhook may have missed the order — verify in Clover dashboard"
+ *   3. Clover-card orders still pending after checkout opened
+ *      → verify against Clover; auto-recover exact, unique successful captures
  *   4. Paid orders (paid_at set) with wave_invoice_id but wave_payment_recorded_at NULL
  *      → SELF-HEALING: auto-runs approve + recordWavePayment to fix the drift.
  *        For payment_method=wave (Wave already knows), just heals our timestamp.
@@ -34,9 +34,36 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, type WavePaymentMethod } from "@/lib/wave/invoice";
 import { recordCronRun } from "@/lib/cron/heartbeat";
+import { recordAuditEvent } from "@/lib/audit/record";
+import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 
 const WAVE_GQL = "https://gql.waveapps.com/graphql/public";
 const WAVE_BIZ = "QnVzaW5lc3M6MGZlYTg0NzQtYjQ2Ny00YTEyLWI1NTgtZWZhNGM3NGM3ZTNj";
+const CLOVER_BASE =
+  process.env.CLOVER_ENVIRONMENT === "sandbox"
+    ? "https://apisandbox.dev.clover.com"
+    : "https://api.clover.com";
+
+interface PendingCloverOrder {
+  id: string;
+  order_number: string;
+  total: number | string;
+  created_at: string;
+  payment_reference: string | null;
+  wave_invoice_id: string | null;
+  wave_invoice_approved_at: string | null;
+  customer_id: string | null;
+  customers?: { email?: string | null; name?: string | null; company?: string | null } | { email?: string | null; name?: string | null; company?: string | null }[] | null;
+}
+
+interface CloverPayment {
+  id: string;
+  amount?: number;
+  result?: string;
+  createdTime?: number;
+  clientCreatedTime?: number;
+  order?: { id?: string; total?: number; paymentState?: string; lineItems?: { elements?: { name?: string | null }[] } };
+}
 
 async function waveQuery<T>(query: string, variables: Record<string, unknown>): Promise<T> {
   const token = process.env.WAVE_API_TOKEN;
@@ -51,6 +78,172 @@ async function waveQuery<T>(query: string, variables: Record<string, unknown>): 
   const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
   if (json.errors?.length) throw new Error(`Wave: ${json.errors[0].message}`);
   return json.data as T;
+}
+
+async function cloverGet<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
+  const token = process.env.CLOVER_API_KEY;
+  const merchantId = process.env.CLOVER_MERCHANT_ID;
+  if (!token || !merchantId) throw new Error("CLOVER_API_KEY / CLOVER_MERCHANT_ID not configured");
+
+  const url = new URL(`${CLOVER_BASE}${path}`);
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, String(value));
+  }
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Clover API HTTP ${res.status}: ${text.slice(0, 240)}`);
+  }
+  return (await res.json()) as T;
+}
+
+function cents(amount: number | string): number {
+  return Math.round(Number(amount ?? 0) * 100);
+}
+
+function cloverPaymentTime(payment: CloverPayment): number {
+  return Number(payment.createdTime ?? payment.clientCreatedTime ?? 0);
+}
+
+async function fetchCloverPaymentsSince(afterMs: number): Promise<CloverPayment[]> {
+  const merchantId = process.env.CLOVER_MERCHANT_ID;
+  if (!merchantId) throw new Error("CLOVER_MERCHANT_ID not configured");
+
+  const data = await cloverGet<{ elements?: CloverPayment[] }>(
+    `/v3/merchants/${merchantId}/payments`,
+    {
+      limit: 200,
+      expand: "order,cardTransaction",
+      filter: `createdTime>=${afterMs}`,
+    }
+  );
+  return (data.elements ?? []).filter((p) => p.result === "SUCCESS" && Number(p.amount ?? 0) > 0);
+}
+
+async function fetchCloverOrderText(orderId: string | undefined): Promise<string> {
+  if (!orderId) return "";
+  const merchantId = process.env.CLOVER_MERCHANT_ID;
+  if (!merchantId) return "";
+
+  try {
+    const order = await cloverGet<Record<string, unknown>>(
+      `/v3/merchants/${merchantId}/orders/${orderId}`,
+      { expand: "lineItems,payments,customers" }
+    );
+    return JSON.stringify(order);
+  } catch (err) {
+    console.warn("[reconcile] Clover order detail fetch failed:", err instanceof Error ? err.message : err);
+    return "";
+  }
+}
+
+async function recoverCloverCapture(
+  supabase: ReturnType<typeof createServiceClient>,
+  order: PendingCloverOrder,
+  payment: CloverPayment,
+  matchReason: string
+): Promise<{ recovered: boolean; waveError?: string }> {
+  const paidAt = cloverPaymentTime(payment) > 0
+    ? new Date(cloverPaymentTime(payment)).toISOString()
+    : new Date().toISOString();
+  const amountDollars = Number(payment.amount ?? 0) / 100;
+  const customer = Array.isArray(order.customers) ? order.customers[0] : order.customers;
+
+  const ledgerRow = {
+    order_id: order.id,
+    amount: amountDollars,
+    currency: "CAD",
+    method: "clover",
+    status: "recorded",
+    payer_name: customer?.name ?? null,
+    payer_company: customer?.company ?? null,
+    payer_email: customer?.email ?? null,
+    external_reference: payment.id,
+    recorded_by: "reconcile-payments",
+    recorded_at: paidAt,
+    notes: `Auto-recovered from Clover payment ${payment.id} (${matchReason})`,
+    metadata: {
+      clover_payment_id: payment.id,
+      clover_order_id: payment.order?.id ?? null,
+      match_reason: matchReason,
+    },
+  };
+  const { error: ledgerErr } = await supabase.from("order_payments").insert(ledgerRow);
+  if (ledgerErr && (ledgerErr as { code?: string }).code !== "23505") {
+    throw new Error(`order_payments insert failed: ${ledgerErr.message}`);
+  }
+
+  const { data: updated, error: updateErr } = await supabase
+    .from("orders")
+    .update({ status: "payment_received", paid_at: paidAt })
+    .eq("id", order.id)
+    .eq("status", "pending_payment")
+    .select("id, order_number, customer_id, total");
+
+  if (updateErr) throw new Error(`order update failed: ${updateErr.message}`);
+  const transitioned = (updated?.length ?? 0) > 0;
+  if (!transitioned) return { recovered: false };
+
+  await incrementCustomerOrderStats(supabase, order.customer_id, Number(order.total)).catch((err) => {
+    console.error("[reconcile] customer stats increment failed (non-fatal):", err);
+  });
+  void recordAuditEvent({
+    actor_type: "system",
+    actor_id: "reconcile-payments",
+    event_type: "order.status_changed",
+    entity_type: "order",
+    entity_id: order.id,
+    detail: {
+      from: "pending_payment",
+      to: "payment_received",
+      order_number: order.order_number,
+      amount_cents: Number(payment.amount ?? 0),
+      clover_payment_id: payment.id,
+      clover_order_id: payment.order?.id ?? null,
+      match_reason: matchReason,
+    },
+  });
+
+  if (!order.wave_invoice_id) return { recovered: true };
+
+  try {
+    if (!order.wave_invoice_approved_at) {
+      try {
+        await approveWaveInvoice(order.wave_invoice_id);
+        await supabase.from("orders")
+          .update({ wave_invoice_approved_at: new Date().toISOString() })
+          .eq("id", order.id);
+      } catch (approveErr) {
+        const msg = approveErr instanceof Error ? approveErr.message : String(approveErr);
+        if (!/already|approved|not.+draft/i.test(msg)) throw approveErr;
+      }
+    }
+
+    const waveCustomerId = customer?.email
+      ? await findCustomerByEmail(customer.email).catch(() => null)
+      : null;
+    await recordWavePayment(
+      order.wave_invoice_id,
+      amountDollars,
+      "CREDIT_CARD",
+      `Clover card — Order ${order.order_number} (reconcile)`,
+      waveCustomerId ?? undefined,
+      payment.id
+    );
+    await supabase.from("orders")
+      .update({ wave_payment_recorded_at: new Date().toISOString() })
+      .eq("id", order.id);
+  } catch (waveErr) {
+    const waveError = waveErr instanceof Error ? waveErr.message : String(waveErr);
+    console.error(`[reconcile] Clover recovery marked paid but Wave failed for ${order.order_number}:`, waveError);
+    return { recovered: true, waveError };
+  }
+
+  return { recovered: true };
 }
 
 interface ReconcileIssue {
@@ -195,29 +388,124 @@ export async function GET(req: NextRequest) {
     console.error("[reconcile] Wave check 2 failed:", waveErr instanceof Error ? waveErr.message : waveErr);
   }
 
-  // ── Check 3: Clover-card orders > 24h old still pending_payment ──────────
-  const cutoff24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  let recoveredCount = 0;
+  let unverifiedCount = 0;
+
+  // ── Check 3: Clover-card orders still pending after checkout opened ──────
+  // Webhooks should flip these within seconds. If Clover webhooks are
+  // misconfigured or delayed, verify against Clover's payment ledger and
+  // recover exact, unique captures automatically.
+  const cutoff10minClover = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data: stuckClover, error: err3 } = await supabase
     .from("orders")
-    .select("order_number, total, created_at, payment_reference")
+    .select("id, order_number, total, created_at, payment_reference, wave_invoice_id, wave_invoice_approved_at, customer_id, customers ( email, name, company )")
     .eq("payment_method", "clover_card")
     .eq("status", "pending_payment")
-    .lt("created_at", cutoff24h)
+    .not("payment_reference", "is", null)
+    .lt("created_at", cutoff10minClover)
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(50);
 
   if (err3) {
     console.error("[reconcile] check 3 query failed:", err3.message);
   } else {
-    for (const o of stuckClover ?? []) {
-      const ageHours = Math.floor((Date.now() - new Date(o.created_at).getTime()) / 3600_000);
-      const ageDays = Math.floor(ageHours / 24);
-      issues.push({
-        kind: "clover_stuck",
-        order_number: o.order_number,
-        detail: `$${Number(o.total).toFixed(2)} · ${ageDays}d old · payment_reference=${o.payment_reference ?? "NULL"} · check Clover dashboard for matching payment`,
-        age_hours: ageHours,
-      });
+    const pendingClover = (stuckClover ?? []) as PendingCloverOrder[];
+    if (pendingClover.length > 0) {
+      try {
+        const earliestCreated = Math.min(...pendingClover.map((o) => new Date(o.created_at).getTime()));
+        const cloverPayments = await fetchCloverPaymentsSince(earliestCreated - 30 * 60 * 1000);
+        const orderTextByPayment = new Map<string, string>();
+        const usedPaymentIds = new Set<string>();
+
+        for (const order of pendingClover) {
+          const orderTotalCents = cents(order.total);
+          const orderCreatedMs = new Date(order.created_at).getTime();
+          const amountMatches = cloverPayments.filter((payment) => {
+            const paidMs = cloverPaymentTime(payment);
+            return (
+              !usedPaymentIds.has(payment.id) &&
+              Number(payment.amount ?? 0) === orderTotalCents &&
+              paidMs >= orderCreatedMs - 5 * 60 * 1000
+            );
+          });
+
+          const enrichedMatches: { payment: CloverPayment; text: string; strong: boolean }[] = [];
+          for (const payment of amountMatches) {
+            let text = JSON.stringify(payment);
+            if (payment.order?.id && !orderTextByPayment.has(payment.id)) {
+              orderTextByPayment.set(payment.id, await fetchCloverOrderText(payment.order.id));
+            }
+            text += orderTextByPayment.get(payment.id) ?? "";
+            const strong = text.includes(order.order_number) || text.includes(order.id);
+            enrichedMatches.push({ payment, text, strong });
+          }
+
+          const strongMatches = enrichedMatches.filter((m) => m.strong);
+          const sameAmountPendingCount = pendingClover.filter((candidate) => cents(candidate.total) === orderTotalCents).length;
+          const selected =
+            strongMatches.length === 1
+              ? { ...strongMatches[0], reason: "order_number_or_uuid" }
+              : enrichedMatches.length === 1 && sameAmountPendingCount === 1
+                ? { ...enrichedMatches[0], reason: "unique_amount_after_checkout" }
+                : null;
+
+          if (selected) {
+            try {
+              const result = await recoverCloverCapture(supabase, order, selected.payment, selected.reason);
+              if (result.recovered) {
+                recoveredCount++;
+                usedPaymentIds.add(selected.payment.id);
+                console.log(
+                  `[reconcile] check 3 recovered Clover capture → ${order.order_number} ` +
+                  `payment=${selected.payment.id} match=${selected.reason}`
+                );
+                if (result.waveError) {
+                  issues.push({
+                    kind: "wave_recovery_failed",
+                    order_number: order.order_number,
+                    detail: `$${Number(order.total).toFixed(2)} Clover payment recovered, but Wave recording failed: ${result.waveError.slice(0, 120)}`,
+                    age_hours: Math.floor((Date.now() - orderCreatedMs) / 3600_000),
+                  });
+                }
+                continue;
+              }
+            } catch (recoverErr) {
+              const msg = recoverErr instanceof Error ? recoverErr.message : String(recoverErr);
+              console.error(`[reconcile] check 3 Clover recovery failed for ${order.order_number}:`, msg);
+              issues.push({
+                kind: "clover_stuck",
+                order_number: order.order_number,
+                detail: `$${Number(order.total).toFixed(2)} · matching Clover payment found but auto-recovery failed: ${msg.slice(0, 120)}`,
+                age_hours: Math.floor((Date.now() - orderCreatedMs) / 3600_000),
+              });
+              continue;
+            }
+          }
+
+          const ageHours = Math.floor((Date.now() - orderCreatedMs) / 3600_000);
+          const matchDetail = enrichedMatches.length === 0
+            ? "no successful matching Clover payment found"
+            : `ambiguous Clover payment match (${enrichedMatches.length} amount match${enrichedMatches.length === 1 ? "" : "es"})`;
+          issues.push({
+            kind: "clover_stuck",
+            order_number: order.order_number,
+            detail: `$${Number(order.total).toFixed(2)} · ${ageHours}h old · payment_reference=${order.payment_reference ?? "NULL"} · ${matchDetail}`,
+            age_hours: ageHours,
+          });
+        }
+      } catch (cloverErr) {
+        const msg = cloverErr instanceof Error ? cloverErr.message : String(cloverErr);
+        console.error("[reconcile] check 3 Clover API verification failed:", msg);
+        for (const o of pendingClover) {
+          const ageHours = Math.floor((Date.now() - new Date(o.created_at).getTime()) / 3600_000);
+          issues.push({
+            kind: "clover_stuck",
+            order_number: o.order_number,
+            detail: `$${Number(o.total).toFixed(2)} · ${ageHours}h old · Clover verification failed: ${msg.slice(0, 120)}`,
+            age_hours: ageHours,
+          });
+        }
+      }
     }
   }
 
@@ -234,8 +522,6 @@ export async function GET(req: NextRequest) {
   // Tries to AUTO-RECOVER each one by calling approve + recordWavePayment.
   // Recovery successes are logged silently. Recovery failures fire a Telegram
   // alert with a manual action prompt — never silent on real bookkeeping drift.
-  let recoveredCount = 0;
-  let unverifiedCount = 0;
   const cutoff10min = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data: stuckPayments, error: err4 } = await supabase
     .from("orders")
@@ -517,7 +803,7 @@ export async function GET(req: NextRequest) {
       }
     }
     if (groupedByKind.clover_stuck?.length) {
-      lines.push(`\n<b>Clover stuck pending_payment ≥24h</b> (${groupedByKind.clover_stuck.length})`);
+      lines.push(`\n<b>Clover pending after checkout opened</b> (${groupedByKind.clover_stuck.length})`);
       for (const i of groupedByKind.clover_stuck.slice(0, 5)) {
         lines.push(`  • ${escapeTelegramHtml(i.order_number ?? "?")} — ${escapeTelegramHtml(i.detail)}`);
       }

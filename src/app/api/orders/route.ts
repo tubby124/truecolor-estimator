@@ -664,7 +664,7 @@ export async function POST(req: NextRequest) {
       const totalCents = Math.round(total * 100);
       const description =
         items.length === 1
-          ? items[0].product_name
+          ? `True Color Order ${order.order_number} — ${items[0].product_name}`
           : `True Color Order ${order.order_number} (${items.length} items)`;
 
       const siteUrl =

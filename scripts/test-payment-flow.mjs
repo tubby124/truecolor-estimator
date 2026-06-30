@@ -18,11 +18,10 @@
  *   NEXT_PUBLIC_SITE_URL        — e.g. http://localhost:3000
  *   NEXT_PUBLIC_SUPABASE_URL    — Supabase project URL
  *   SUPABASE_SECRET_KEY         — service role key
- *   PAYMENT_TOKEN_SECRET        — for HMAC-signing the fake webhook
+ *   CLOVER_WEBHOOK_SECRET       — shared query secret for the fake webhook
  */
 
 import { readFileSync } from "fs";
-import { createHmac } from "crypto";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -45,18 +44,18 @@ try {
 const SITE_URL     = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const SB_URL       = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
 const SB_KEY       = process.env.SUPABASE_SECRET_KEY;
-const TOKEN_SECRET = process.env.PAYMENT_TOKEN_SECRET;
+const CLOVER_WEBHOOK_SECRET = process.env.CLOVER_WEBHOOK_SECRET;
 
 // ── Pre-flight ────────────────────────────────────────────────────────────────
 console.log("── Payment Flow Smoke Test ──────────────────────────────────");
 console.log(`  Target : ${SITE_URL}`);
 console.log(`  Supa   : ${SB_URL}`);
 console.log(`  SB key : ${SB_KEY  ? SB_KEY.slice(0,12)+"…"  : "MISSING"}`);
-console.log(`  Secret : ${TOKEN_SECRET ? TOKEN_SECRET.slice(0,8)+"…" : "MISSING"}`);
+console.log(`  Clover webhook secret : ${CLOVER_WEBHOOK_SECRET ? CLOVER_WEBHOOK_SECRET.slice(0,8)+"…" : "MISSING"}`);
 console.log("─────────────────────────────────────────────────────────────\n");
 
-if (!SB_KEY)       { console.error("❌  SUPABASE_SECRET_KEY required"); process.exit(1); }
-if (!TOKEN_SECRET) { console.error("❌  PAYMENT_TOKEN_SECRET required"); process.exit(1); }
+if (!SB_KEY)                { console.error("❌  SUPABASE_SECRET_KEY required"); process.exit(1); }
+if (!CLOVER_WEBHOOK_SECRET) { console.error("❌  CLOVER_WEBHOOK_SECRET required"); process.exit(1); }
 
 // ── Supabase REST helpers ─────────────────────────────────────────────────────
 const SB_HEADERS = {
@@ -206,12 +205,11 @@ const webhookBody = JSON.stringify({
     amount: 4995,
   },
 });
-const sig = createHmac("sha256", TOKEN_SECRET).update(webhookBody).digest("base64");
 
 try {
-  const wRes = await fetch(`${SITE_URL}/api/webhooks/clover`, {
+  const wRes = await fetch(`${SITE_URL}/api/webhooks/clover?k=${encodeURIComponent(CLOVER_WEBHOOK_SECRET)}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-clover-signature": sig },
+    headers: { "Content-Type": "application/json" },
     body: webhookBody,
   });
   const wData = await wRes.json();
@@ -230,9 +228,9 @@ try {
 // ── Test 4: Duplicate webhook is idempotent ───────────────────────────────────
 console.log("\n── Test 4: Duplicate webhook is idempotent ──────────────────");
 try {
-  const wRes2 = await fetch(`${SITE_URL}/api/webhooks/clover`, {
+  const wRes2 = await fetch(`${SITE_URL}/api/webhooks/clover?k=${encodeURIComponent(CLOVER_WEBHOOK_SECRET)}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-clover-signature": sig },
+    headers: { "Content-Type": "application/json" },
     body: webhookBody,
   });
   ok("Duplicate webhook returns 200",  wRes2.status === 200, `got: ${wRes2.status}`);
