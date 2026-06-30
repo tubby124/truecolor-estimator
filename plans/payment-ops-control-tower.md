@@ -82,10 +82,30 @@ Show plain-language failure states anywhere the customer lands after a payment a
 
 Surfaces:
 
+- `/payment/success`
+- `/payment/failed`
+- `/payment/cancelled`
 - `/order-confirmed?oid=...`
 - `/account`
 - unpaid order card
 - retry payment page
+
+Clover dashboard fallback redirect URLs:
+
+```text
+Success URL: https://truecolorprinting.ca/payment/success
+Failure URL: https://truecolorprinting.ca/payment/failed
+Cancel URL:  https://truecolorprinting.ca/payment/cancelled
+```
+
+Important rule: these pages are customer-navigation surfaces only. They must never mark an order paid by themselves. Payment truth still comes from the Clover webhook, `order_payments`, and reconciliation.
+
+Page behavior:
+
+- `/payment/success`: reassure the customer that payment is being verified, then route them to `/order-confirmed?oid=...` when an order id is available. If no order id is available, show a neutral "we are verifying your payment" state and a link to contact True Color.
+- `/payment/failed`: explain that the card payment did not complete, show the latest decline reason if known, and offer "Try card again" plus "Pay by e-Transfer instead".
+- `/payment/cancelled`: explain that checkout was cancelled and the card was not charged by this attempt, then offer "Resume payment", "Pay by e-Transfer", and "Contact us".
+- All three pages should noindex, use the normal site shell, and avoid scary wording.
 
 Examples:
 
@@ -179,10 +199,10 @@ Add a payment health panel:
 - Simulate postal-code decline.
 - Simulate webhook missing but Clover payment exists.
 - Simulate opened checkout with no payment.
+- Confirm `/payment/success`, `/payment/failed`, and `/payment/cancelled` render useful customer actions without mutating order status.
 - Confirm staff badge and notification for each case.
 - Confirm customer retry/failure copy for each case.
 - Confirm Wave only marks paid when money is real.
 - Run `npm exec tsc -- --noEmit`.
 - Run `npm test`.
 - Run `npm run harness:reconcile:7d`.
-
