@@ -32,6 +32,7 @@ import type { WebhookEvent, WebhookSourceGroup } from "./WebhookHealthPanel";
 import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
 import { buildEmailVolumeSnapshot, type EmailVolumeSnapshot } from "./EmailVolumePanel";
 import type { StaffAction } from "./StaffActionsPanel";
+import type { PaymentHealthSnapshot } from "./PaymentHealthPanel";
 import { buildRollup, type StatusRollup } from "@/lib/lifecycle/rollup";
 import { readFileSync, existsSync, statSync } from "fs";
 import { join } from "path";
@@ -89,6 +90,7 @@ export interface LifecycleData {
   emailDeliveryHealth: EmailDeliveryHealth;
   emailVolume: EmailVolumeSnapshot;
   staffActions: StaffAction[];
+  paymentHealth: PaymentHealthSnapshot;
   rollup: StatusRollup;
   fetched_at: string;
 }
@@ -113,6 +115,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     auditRes,
     webhookEventsRes,
     emailDeliveryRes,
+    paymentAttemptsRes,
   ] = await Promise.all([
     supabase
       .from("orders")
@@ -184,6 +187,12 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       .select("id, sent_at, delivered_at, opened_at, bounced_at, to_address")
       .gte("sent_at", cutoff)
       .limit(5000),
+    supabase
+      .from("payment_attempts")
+      .select("id, status, amount, created_at, order_id, clover_payment_id")
+      .gte("created_at", cutoff)
+      .order("created_at", { ascending: false })
+      .limit(500),
   ]);
 
   const orders = ordersRes.data ?? [];
@@ -197,6 +206,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   const auditRaw = auditRes.data ?? [];
   const webhookEventsRaw = webhookEventsRes.data ?? [];
   const emailDeliveryRaw = emailDeliveryRes.data ?? [];
+  const paymentAttemptsRaw = paymentAttemptsRes.data ?? [];
 
   // ── derive lifecycle rows (existing logic, plus pay_link pip) ─────────────
   const customerEmails = new Set<string>();
@@ -1129,6 +1139,25 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     .lt("created_at", cutoff30min);
   stuckCloverAttempts = Math.max(stuckCloverAttempts, legacyStuckCloverCount ?? 0);
 
+  const attempts24h = paymentAttemptsRaw.filter(
+    (a) => now - new Date(a.created_at ?? 0).getTime() <= 24 * 60 * 60 * 1000,
+  );
+  const countAttempts = (status: string) => attempts24h.filter((a) => a.status === status).length;
+  const heartbeatByName = new Map(heartbeats.map((h) => [h.name, h]));
+  const paymentHealth: PaymentHealthSnapshot = {
+    open_checkouts_24h: countAttempts("checkout_opened"),
+    declines_24h: countAttempts("card_declined"),
+    captures_24h: countAttempts("payment_captured"),
+    recovered_24h: countAttempts("webhook_missing_recovered"),
+    abandoned_24h: countAttempts("abandoned"),
+    ambiguous_24h: countAttempts("ambiguous"),
+    pending_over_threshold: stuckCloverAttempts,
+    clover_webhook_last_seen_at: webhookGroups.find((g) => g.source === "clover")?.last_event_at ?? null,
+    reconcile_last_ran_at: heartbeatByName.get("reconcile-payments")?.last_ran_at ?? null,
+    payment_followup_last_ran_at: heartbeatByName.get("payment-followup")?.last_ran_at ?? null,
+    payment_followup_stale: heartbeatByName.get("payment-followup")?.stale ?? true,
+  };
+
   // ── derive status rollup ─────────────────────────────────────────────────
   // Pure function — single source of truth shared with /api/cron/dashboard-alerts.
   // Adding a new silent-fail surface = ONE registration in buildRollup; both
@@ -1170,6 +1199,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     emailDeliveryHealth,
     emailVolume,
     staffActions,
+    paymentHealth,
     rollup,
     fetched_at: new Date(now).toISOString(),
   };

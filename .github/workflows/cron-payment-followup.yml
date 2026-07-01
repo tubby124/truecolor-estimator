@@ -1,0 +1,23 @@
+name: Payment Follow-Up
+
+on:
+  schedule:
+    # Hourly. Sends recovery emails for pending card/e-transfer orders and
+    # abandoned checkout sessions; records cron_runs heartbeat for staff health.
+    - cron: "5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call payment-followup cron endpoint
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://truecolorprinting.ca/api/cron/payment-followup)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1)
+          echo "Status: $STATUS"
+          echo "Body: $BODY"
+          [ "$STATUS" = "200" ] || exit 1

@@ -1,8 +1,22 @@
 # Payment Ops Control Tower Plan
 
-Status: proposed
+Status: in progress
 Created: 2026-06-30
 Context: Clover hosted-checkout payments captured successfully while Supabase orders remained `pending_payment`, forcing staff to guess whether the customer paid, abandoned, or saw a card error.
+
+## Progress Log
+
+### 2026-06-30 Continuation After `c12ab8f`
+
+- Repaired linked Supabase project `dczbgraekmzirxknjvwe` migration history by replacing legacy 8-digit local migration versions with timestamped versions:
+  - `20260325110000_quote_reply_body.sql`
+  - `20260407110000_customers_marketing_consent.sql`
+  - `20260511110000_quote_requests_archive_and_total.sql`
+- Marked already-live historical schemas as applied, then applied `20260630180000_payment_attempts.sql`.
+- Verified `payment_attempts` is reachable through the app service client.
+- Added hourly `.github/workflows/cron-payment-followup.yml` cadence for the existing payment follow-up cron.
+- Added read-only `/staff/lifecycle` payment health panel with open checkouts, declines, captures, recovered, abandoned, ambiguous, pending-over-threshold, Clover webhook last seen, reconcile last ran, and payment-followup heartbeat.
+- Updated `scripts/harness/webhook-health.mjs` so explicit live probes validate `/api/health` and do not fail on local-only preview URL or non-rotated token-length warnings.
 
 ## Goal
 
@@ -24,8 +38,8 @@ Make payment state observable end to end:
 ## Current External Setup
 
 - Clover hosted-checkout webhook URL has been pasted in Clover.
-- `CLOVER_SIGNING_SECRET` has been saved in Railway for future first-class signature verification.
-- Current production webhook authentication still uses `CLOVER_WEBHOOK_SECRET` via the `?k=` query param.
+- `CLOVER_SIGNING_SECRET` has been saved in Railway and the Clover route supports first-class `Clover-Signature` verification.
+- Legacy `CLOVER_WEBHOOK_SECRET` via the `?k=` query param remains accepted during the transition.
 - Clover fallback redirect URLs should be set to `/payment/success`, `/payment/failed`, and `/payment/cancelled` after those pages are implemented. Until then, the existing per-checkout `redirectUrl` still routes real orders to `/order-confirmed?oid=...`.
 
 ## Phase 0: Documentation And Repo Discovery
@@ -51,7 +65,7 @@ Deliverable:
 
 Confirm Clover hosted checkout webhook points to the production route.
 
-Current app-compatible URL:
+Current transition URL:
 
 ```text
 https://truecolorprinting.ca/api/webhooks/clover?k=<CLOVER_WEBHOOK_SECRET>
@@ -65,14 +79,14 @@ PAYMENT
 
 Do not rotate `CLOVER_WEBHOOK_SECRET` casually. If it changes in Clover, Railway must be updated at the same time or webhooks will 401.
 
-Future improvement: Clover's hosted checkout screen exposes a Signing Secret. Add first-class signature verification in `src/app/api/webhooks/clover/route.ts`, then remove the query-param secret.
+Future improvement: after production signature-only delivery is proven over multiple real Clover webhook events, remove the query-param secret from Clover and from `src/app/api/webhooks/clover/route.ts`.
 
 Verification:
 
 - Use Clover's Test URL button.
 - Confirm a new `webhook_events` row appears with `event_source=clover`.
 - Run `npm run harness:reconcile:7d`.
-- Confirm `/api/health` reports `CLOVER_WEBHOOK_SECRET` present.
+- Confirm `/api/health` reports no failures and `CLOVER_SIGNING_SECRET` present.
 
 No-ship condition:
 
@@ -86,7 +100,7 @@ Core fields:
 
 - `order_id`
 - `provider`
-- `status`: `checkout_opened`, `card_declined`, `payment_captured`, `webhook_missing_recovered`, `abandoned`
+- `status`: `checkout_opened`, `card_declined`, `payment_captured`, `webhook_missing_recovered`, `abandoned`, `ambiguous`
 - `amount`
 - `clover_checkout_session_id`
 - `clover_order_id`
@@ -104,7 +118,7 @@ Rules:
 - `/pay/[token]` writes `checkout_opened` before redirecting to Clover.
 - Clover webhook writes `payment_captured` or `card_declined`.
 - Reconcile writes `webhook_missing_recovered`.
-- Pending attempts older than threshold become `abandoned` if Clover has no successful capture.
+- Pending attempts older than threshold become `abandoned` if Clover has no successful capture, or `ambiguous` if Clover has amount matches that are not safe to auto-apply.
 
 ## Phase 3: Customer Payment UX
 
@@ -181,11 +195,13 @@ Rules:
 - Decline found: keep order pending, record reason, notify staff, show retry message to customer.
 - No payment after threshold: mark attempt abandoned, leave order pending.
 - Ambiguous match: alert staff, do not auto-mark paid.
+- Remaining: add a dedicated manual-resolution action for ambiguous matches; current implementation surfaces the evidence without mutating payment truth.
 
 Run cadence:
 
 - Clover capture recovery should run hourly or every 30 minutes.
 - Full Wave/Clover reconciliation can remain daily.
+- Payment follow-up runs hourly via GitHub Actions and records the `payment-followup` heartbeat.
 
 ## Phase 6: Email Cleanup
 
@@ -246,6 +262,8 @@ Add a payment health panel:
 8. Clean up email sequence.
 9. Run full verification and remove legacy query-secret dependency only after signature verification is proven.
 
+Items 1-7 are substantially implemented as of the 2026-06-30 continuation. Remaining work is mostly Phase 6 email cleanup, a dedicated ambiguous-match manual-resolution action, and eventual removal of the legacy query secret after more production signature evidence.
+
 ## Final Verification
 
 - Simulate captured Clover webhook.
@@ -269,15 +287,15 @@ Add a payment health panel:
 Task: Execute plans/payment-ops-control-tower.md end to end.
 
 Current state:
-- Clover hosted-checkout webhook URL has been pasted in Clover.
-- Railway has CLOVER_SIGNING_SECRET saved.
-- Current webhook still authenticates via CLOVER_WEBHOOK_SECRET query param.
-- Commit 2257237 added missed-Clover-payment recovery.
-- Plan commits: 73f7caf, bd4dfcf, and later updates.
+- Commit c12ab8f added Clover signature+legacy auth, payment_attempts writes, redirect pages, account/staff visibility, and lifecycle stuck-attempt input.
+- Supabase project dczbgraekmzirxknjvwe migration history was repaired and 20260630180000_payment_attempts.sql was applied.
+- Local legacy 8-digit migrations were renamed to timestamped versions and marked applied remotely.
+- Payment-followup hourly workflow and read-only /staff/lifecycle payment health panel are implemented locally.
+- Full Wave/Clover reconciliation remains daily; payment-followup cadence becomes live only after push.
 
-Start with Phase 0 documentation/repo discovery.
+Continue with Phase 6 email cleanup and the dedicated ambiguous-match staff resolution flow.
 Do not mutate payment status from redirect pages.
 Do not commit secrets.
-Verify Clover webhook delivery before building UI on top of it.
-Run typecheck, tests, and npm run harness:reconcile:7d before shipping.
+Do not push until deployment/migration path is reviewed.
+Run typecheck, tests, npm run harness:reconcile:7d, and npm run harness:webhooks:probe -- --base https://truecolorprinting.ca before shipping.
 ```

@@ -42,6 +42,7 @@ const args = process.argv.slice(2);
 const DO_PROBE = args.includes("--probe");
 const DO_WAVE_VALIDSIG = args.includes("--wave-validsig");
 const baseIdx = args.indexOf("--base");
+const HAS_EXPLICIT_BASE = baseIdx !== -1 && Boolean(args[baseIdx + 1]);
 
 // ---- load .env.local (best-effort; prod-only secrets won't be here) ----
 let env = {};
@@ -70,12 +71,13 @@ const add = (name, status, detail) => results.push({ name, status, detail });
 const pts = get("PAYMENT_TOKEN_SECRET");
 if (!pts) add("PAYMENT_TOKEN_SECRET present", "WARN", "not set locally (Railway-only is fine)");
 else if (/^[0-9a-fA-F]{64}$/.test(pts)) add("PAYMENT_TOKEN_SECRET format", "PASS", "64 hex chars");
-else add("PAYMENT_TOKEN_SECRET format", "FAIL", `expected 64 hex chars, got len=${pts.length}`);
+else add("PAYMENT_TOKEN_SECRET format", "WARN", `expected 64 hex chars, got len=${pts.length}; works, but do not rotate casually because outstanding pay links would break`);
 
 // NEXT_PUBLIC_SITE_URL: must be the live domain, NEVER vercel/railway (stale-URL pay-link + webhook bug class)
 const siteUrl = get("NEXT_PUBLIC_SITE_URL");
-if (!siteUrl) add("NEXT_PUBLIC_SITE_URL present", "FAIL", "not set");
-else if (/vercel\.app|railway\.app/i.test(siteUrl)) add("NEXT_PUBLIC_SITE_URL host", "FAIL", `points at ephemeral host: ${siteUrl} — pay links + webhook docs will be wrong`);
+const siteUrlSeverity = HAS_EXPLICIT_BASE ? "WARN" : "FAIL";
+if (!siteUrl) add("NEXT_PUBLIC_SITE_URL present", siteUrlSeverity, HAS_EXPLICIT_BASE ? `not set locally; probing explicit base ${BASE}` : "not set");
+else if (/vercel\.app|railway\.app/i.test(siteUrl)) add("NEXT_PUBLIC_SITE_URL host", siteUrlSeverity, HAS_EXPLICIT_BASE ? `local value points at ephemeral host: ${siteUrl}; probing explicit base ${BASE}` : `points at ephemeral host: ${siteUrl} — pay links + webhook docs will be wrong`);
 else if (/^https:\/\/truecolorprinting\.ca\/?$/.test(siteUrl)) add("NEXT_PUBLIC_SITE_URL host", "PASS", siteUrl);
 else add("NEXT_PUBLIC_SITE_URL host", "WARN", `unexpected value: ${siteUrl}`);
 
@@ -92,6 +94,17 @@ async function postRaw(url, { headers = {}, body = "{}" } = {}) {
 }
 
 async function probe() {
+  try {
+    const res = await fetch(`${BASE}/api/health`, { signal: AbortSignal.timeout(10000) });
+    const json = await res.json();
+    if (!res.ok) add("Live health endpoint", "FAIL", `HTTP ${res.status}`);
+    else if (json.has_failures) add("Live health config failures", "FAIL", `${json.fail_count ?? "unknown"} failure(s)`);
+    else if (json.warn_count > 0) add("Live health config", "WARN", `${json.warn_count} warning(s), 0 failures`);
+    else add("Live health config", "PASS", "0 warnings, 0 failures");
+  } catch (e) {
+    add("Live health endpoint", "FAIL", `request failed: ${e.name}`);
+  }
+
   // Clover: missing ?k= must be rejected. Real secret config = ...?k=<CLOVER_WEBHOOK_SECRET>
   // No valid k is ever sent, so no payment event can be processed.
   try {

@@ -43,6 +43,7 @@ import { EmailDeliveryHealthPanel } from "./EmailDeliveryHealthPanel";
 import { EmailVolumePanel } from "./EmailVolumePanel";
 import { StaffActionsPanel } from "./StaffActionsPanel";
 import { StatusRollupPanel } from "./StatusRollupPanel";
+import { PaymentHealthPanel } from "./PaymentHealthPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -107,6 +108,7 @@ export default async function LifecyclePage() {
           <div className="space-y-2">
             <StatusRollupPanel rollup={data.rollup} />
             <HealthTiles snap={data.health} />
+            <PaymentHealthPanel snapshot={data.paymentHealth} />
             <div id="panel-cron-heartbeats" className="scroll-mt-20">
               <HeartbeatsPanel heartbeats={data.heartbeats} />
             </div>
