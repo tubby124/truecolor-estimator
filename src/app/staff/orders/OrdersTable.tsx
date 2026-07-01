@@ -185,6 +185,10 @@ export function OrdersTable({ initialOrders }: Props) {
   const [confirmingEtransferId, setConfirmingEtransferId] = useState<string | null>(null);
   const [confirmedEtransferIds, setConfirmedEtransferIds] = useState<Set<string>>(new Set());
 
+  // Confirm ambiguous Clover payment — keyed by order id
+  const [confirmingCloverId, setConfirmingCloverId] = useState<string | null>(null);
+  const [confirmedCloverIds, setConfirmedCloverIds] = useState<Set<string>>(new Set());
+
   // ── Archive ────────────────────────────────────────────────────────────────────
   const [archiveLoading, setArchiveLoading] = useState<Set<string>>(new Set());
   const { toasts, showToast, dismissToast } = useToast();
@@ -459,6 +463,41 @@ export function OrdersTable({ initialOrders }: Props) {
     }
   }
 
+  async function handleConfirmCloverPayment(
+    orderId: string,
+    orderNumber: string,
+    cloverPaymentId: string,
+    reason: string,
+  ) {
+    setConfirmingCloverId(orderId);
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/confirm-clover`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clover_payment_id: cloverPaymentId, reason }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Clover confirmation failed");
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId
+            ? { ...o, status: "payment_received" as (typeof VALID_STATUSES)[number] }
+            : o
+        )
+      );
+      setConfirmedCloverIds((prev) => new Set(prev).add(orderId));
+      showToast(`${orderNumber} — Clover payment confirmed, receipt sent`, "success");
+      setTimeout(
+        () => setConfirmedCloverIds((prev) => { const s = new Set(prev); s.delete(orderId); return s; }),
+        10000
+      );
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to confirm Clover payment", "error");
+    } finally {
+      setConfirmingCloverId(null);
+    }
+  }
+
   // ── Archive / Unarchive ────────────────────────────────────────────────────
 
   async function handleArchive(orderId: string, orderNumber: string, archive: boolean) {
@@ -639,6 +678,11 @@ export function OrdersTable({ initialOrders }: Props) {
                 confirmingEtransfer={confirmingEtransferId === order.id}
                 etransferConfirmed={confirmedEtransferIds.has(order.id)}
                 onConfirmEtransfer={() => handleConfirmEtransfer(order.id, order.order_number)}
+                confirmingClover={confirmingCloverId === order.id}
+                cloverConfirmed={confirmedCloverIds.has(order.id)}
+                onConfirmCloverPayment={(paymentId, reason) =>
+                  handleConfirmCloverPayment(order.id, order.order_number, paymentId, reason)
+                }
               />
             );
           })}

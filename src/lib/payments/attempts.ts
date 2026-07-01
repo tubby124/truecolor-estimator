@@ -29,6 +29,7 @@ export interface LatestPaymentAttempt {
   customer_message: string | null;
   clover_checkout_session_id: string | null;
   clover_payment_id: string | null;
+  raw_event?: unknown;
   created_at: string;
 }
 

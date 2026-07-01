@@ -150,7 +150,7 @@ async function fetchOrders() {
   const orderIds = orders.map((o) => o.id);
   const { data: attempts, error: attemptsErr } = await supabase
     .from("payment_attempts")
-    .select("order_id, status, amount, failure_label, failure_detail, customer_message, clover_checkout_session_id, clover_payment_id, created_at")
+    .select("order_id, status, amount, failure_label, failure_detail, customer_message, clover_checkout_session_id, clover_payment_id, raw_event, created_at")
     .in("order_id", orderIds)
     .order("created_at", { ascending: false });
 

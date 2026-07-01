@@ -17,6 +17,15 @@ Context: Clover hosted-checkout payments captured successfully while Supabase or
 - Added hourly `.github/workflows/cron-payment-followup.yml` cadence for the existing payment follow-up cron.
 - Added read-only `/staff/lifecycle` payment health panel with open checkouts, declines, captures, recovered, abandoned, ambiguous, pending-over-threshold, Clover webhook last seen, reconcile last ran, and payment-followup heartbeat.
 - Updated `scripts/harness/webhook-health.mjs` so explicit live probes validate `/api/health` and do not fail on local-only preview URL or non-rotated token-length warnings.
+- Added staff-only manual resolution for ambiguous Clover matches:
+  - Staff can paste/select a Clover payment ID from the order card evidence panel.
+  - The API verifies the payment directly with Clover before mutating the order.
+  - The route only applies to pending Clover-card orders, checks amount tolerance, prevents linking the same Clover payment to another order, writes `order_payments`, records a `payment_captured` attempt, writes an audit event, records Wave payment, sends the itemized receipt, and notifies Telegram.
+- Cleaned payment follow-up email copy so stale pending orders mirror payment truth:
+  - Declined cards receive failure/retry copy with the safe decline label.
+  - Opened or abandoned card checkouts receive resume-payment copy that says the unfinished attempt did not charge the card.
+  - eTransfer orders receive eTransfer reminder copy.
+  - Ambiguous Clover matches are withheld from customer retry emails to avoid accidental double payment and routed to staff instead.
 
 ## Goal
 
@@ -195,13 +204,13 @@ Rules:
 - Decline found: keep order pending, record reason, notify staff, show retry message to customer.
 - No payment after threshold: mark attempt abandoned, leave order pending.
 - Ambiguous match: alert staff, do not auto-mark paid.
-- Remaining: add a dedicated manual-resolution action for ambiguous matches; current implementation surfaces the evidence without mutating payment truth.
+- Dedicated manual-resolution action exists for ambiguous matches. It is staff-only, verifies the pasted Clover payment with Clover before marking paid, and writes the required audit/payment ledgers.
 
 Run cadence:
 
-- Clover capture recovery should run hourly or every 30 minutes.
-- Full Wave/Clover reconciliation can remain daily.
+- Full Wave/Clover reconciliation remains daily.
 - Payment follow-up runs hourly via GitHub Actions and records the `payment-followup` heartbeat.
+- Optional future hardening: split Clover-only capture recovery into its own lower-noise hourly cron before increasing the full reconciliation cadence.
 
 ## Phase 6: Email Cleanup
 
@@ -227,6 +236,12 @@ Staff emails/alerts:
 - Payment still pending after threshold.
 - Clover webhook/signature failure if events start failing authentication.
 
+Implemented cleanup:
+
+- Payment recovery cron now varies customer copy for card declined, card checkout abandoned/opened, eTransfer pending, and generic pending states.
+- Ambiguous Clover matches do not trigger customer retry emails.
+- Payment receipt remains the customer-facing confirmation for captured/manual payment_received states.
+
 ## Phase 7: Staff Payment Health Dashboard
 
 Add a payment health panel:
@@ -239,6 +254,8 @@ Add a payment health panel:
 - Clover webhook last seen.
 - Reconcile last ran.
 - Payment-followup heartbeat.
+
+Implemented in `/staff/lifecycle` with read-only metrics and lifecycle rollup integration.
 
 ## Guardrails
 
@@ -262,7 +279,7 @@ Add a payment health panel:
 8. Clean up email sequence.
 9. Run full verification and remove legacy query-secret dependency only after signature verification is proven.
 
-Items 1-7 are substantially implemented as of the 2026-06-30 continuation. Remaining work is mostly Phase 6 email cleanup, a dedicated ambiguous-match manual-resolution action, and eventual removal of the legacy query secret after more production signature evidence.
+Items 1-8 are substantially implemented as of the 2026-06-30 continuation. Remaining work is eventual removal of the legacy query secret after more production signature evidence, plus the optional lower-noise Clover-only hourly recovery cron if faster capture recovery is desired without making full reconciliation noisy.
 
 ## Final Verification
 
@@ -278,6 +295,7 @@ Items 1-7 are substantially implemented as of the 2026-06-30 continuation. Remai
 - Run `npm exec tsc -- --noEmit`.
 - Run `npm test`.
 - Run `npm run harness:reconcile:7d`.
+- Run `npm run harness:webhooks:probe -- --base https://truecolorprinting.ca`.
 
 ## New-Chat Handoff Prompt
 
@@ -288,12 +306,13 @@ Task: Execute plans/payment-ops-control-tower.md end to end.
 
 Current state:
 - Commit c12ab8f added Clover signature+legacy auth, payment_attempts writes, redirect pages, account/staff visibility, and lifecycle stuck-attempt input.
+- Commit 199770e repaired Supabase migration history, applied the payment_attempts migration, added the hourly payment-followup workflow, and added the /staff/lifecycle payment health panel.
 - Supabase project dczbgraekmzirxknjvwe migration history was repaired and 20260630180000_payment_attempts.sql was applied.
 - Local legacy 8-digit migrations were renamed to timestamped versions and marked applied remotely.
-- Payment-followup hourly workflow and read-only /staff/lifecycle payment health panel are implemented locally.
+- Staff ambiguous Clover resolution is implemented locally and verifies Clover before marking orders paid.
+- Payment-followup customer copy now mirrors the latest attempt and suppresses ambiguous retry emails.
 - Full Wave/Clover reconciliation remains daily; payment-followup cadence becomes live only after push.
 
-Continue with Phase 6 email cleanup and the dedicated ambiguous-match staff resolution flow.
 Do not mutate payment status from redirect pages.
 Do not commit secrets.
 Do not push until deployment/migration path is reviewed.

@@ -17,9 +17,59 @@ import { sendEmail } from "@/lib/email/smtp";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { escHtml } from "@/lib/email/components/escHtml";
 import { recordCronRun } from "@/lib/cron/heartbeat";
+import type { PaymentAttemptStatus } from "@/lib/payments/attempts";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 const FROM = "True Color Display Printing <hello@outreach.true-color.ca>";
+
+interface LatestAttemptLite {
+  order_id: string | null;
+  status: PaymentAttemptStatus;
+  failure_label: string | null;
+  customer_message: string | null;
+}
+
+function recoveryCopy(
+  orderNumber: string,
+  paymentMethod: string | null,
+  latestAttempt: LatestAttemptLite | null,
+) {
+  if (latestAttempt?.status === "card_declined") {
+    const reason = latestAttempt.failure_label ?? "Payment did not complete";
+    return {
+      subject: `Card payment did not complete — ${orderNumber}`,
+      headline: "Your card payment did not complete",
+      body: `${reason}. You can try the card payment again, or send an e-Transfer instead.`,
+      cta: "Try card again",
+      foot: "If you prefer e-Transfer, send it to info@true-color.ca and include your order number in the message.",
+    };
+  }
+  if (latestAttempt?.status === "abandoned" || latestAttempt?.status === "checkout_opened") {
+    return {
+      subject: `Finish payment for ${orderNumber}`,
+      headline: "Your checkout did not finish",
+      body: "Your order is saved, but payment has not been confirmed yet. Your card was not charged by the unfinished attempt.",
+      cta: "Resume card payment",
+      foot: "You can also pay by e-Transfer to info@true-color.ca. Please include your order number in the message.",
+    };
+  }
+  if (paymentMethod === "etransfer") {
+    return {
+      subject: `e-Transfer reminder — ${orderNumber}`,
+      headline: "Your order is waiting for e-Transfer",
+      body: "Your order is saved. Send an e-Transfer when you are ready and we will confirm receipt before production.",
+      cta: "Switch to card payment",
+      foot: "Send e-Transfer to info@true-color.ca and include your order number in the message.",
+    };
+  }
+  return {
+    subject: `Your True Color order ${orderNumber} is waiting`,
+    headline: "Your order is waiting",
+    body: "Your order is saved and waiting for payment.",
+    cta: "Complete payment",
+    foot: "Paying by card? Click the button above — it only takes 30 seconds. Prefer e-Transfer? Send it to info@true-color.ca.",
+  };
+}
 
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -54,10 +104,42 @@ export async function GET(req: NextRequest) {
     if (error) {
       console.error("[payment-followup] TC-10 query failed:", error.message);
     } else {
+      const orderIds = (staleOrders ?? []).map((o) => o.id).filter(Boolean);
+      const latestAttemptByOrder = new Map<string, LatestAttemptLite>();
+      if (orderIds.length > 0) {
+        const { data: attempts, error: attemptsErr } = await supabase
+          .from("payment_attempts")
+          .select("order_id, status, failure_label, customer_message, created_at")
+          .in("order_id", orderIds)
+          .order("created_at", { ascending: false });
+        if (attemptsErr) {
+          console.error("[payment-followup] payment_attempts query failed:", attemptsErr.message);
+        } else {
+          for (const attempt of attempts ?? []) {
+            const orderId = (attempt as LatestAttemptLite).order_id;
+            if (orderId && !latestAttemptByOrder.has(orderId)) {
+              latestAttemptByOrder.set(orderId, attempt as LatestAttemptLite);
+            }
+          }
+        }
+      }
+
       for (const order of staleOrders ?? []) {
         const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;
         const customer = customerRaw as { name: string; email: string } | null;
         if (!customer?.email) continue;
+        const latestAttempt = latestAttemptByOrder.get(order.id) ?? null;
+
+        // Ambiguous Clover matches may be real captured money. Do not ask the
+        // customer to retry and risk a double payment; route it to staff only.
+        if (latestAttempt?.status === "ambiguous") {
+          await supabase
+            .from("orders")
+            .update({ followup_sent_at: new Date().toISOString() })
+            .eq("id", order.id);
+          console.warn(`[payment-followup] skipped customer retry for ambiguous Clover match | ${order.order_number}`);
+          continue;
+        }
 
         const items = Array.isArray(order.order_items) ? order.order_items : [];
         const productList = (items as { product_name: string; qty: number }[])
@@ -83,6 +165,7 @@ export async function GET(req: NextRequest) {
 
         const firstName = customer.name.split(" ")[0] || customer.name;
         const total = Number(order.total).toFixed(2);
+        const copy = recoveryCopy(order.order_number, order.payment_method, latestAttempt);
 
         const html = `
 <!DOCTYPE html><html><head><meta charset="UTF-8"/></head>
@@ -92,15 +175,14 @@ export async function GET(req: NextRequest) {
       <p style="margin:0;font-size:13px;font-weight:700;color:#16C2F3;letter-spacing:.08em;text-transform:uppercase;">True Color Display Printing</p>
     </div>
     <div style="padding:32px;">
-      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#1c1712;">Your order is waiting, ${escHtml(firstName)}</h1>
+      <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#1c1712;">${escHtml(copy.headline)}, ${escHtml(firstName)}</h1>
       <p style="margin:0 0 20px;font-size:14px;color:#6b7280;">Order <strong>${escHtml(order.order_number)}</strong> · $${escHtml(total)} CAD</p>
+      <p style="margin:0 0 20px;font-size:14px;color:#374151;line-height:1.6;">${escHtml(copy.body)}</p>
       <p style="margin:0 0 8px;font-size:14px;color:#374151;"><strong>What you ordered:</strong></p>
       <p style="margin:0 0 24px;font-size:14px;color:#374151;">${escHtml(productList)}</p>
-      <a href="${escHtml(payUrl)}" style="display:inline-block;background:#16C2F3;color:#fff;font-weight:700;font-size:15px;padding:14px 28px;border-radius:8px;text-decoration:none;">Complete payment →</a>
+      <a href="${escHtml(payUrl)}" style="display:inline-block;background:#16C2F3;color:#fff;font-weight:700;font-size:15px;padding:14px 28px;border-radius:8px;text-decoration:none;">${escHtml(copy.cta)} →</a>
       <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;">
-        ${order.payment_method === "etransfer"
-          ? "Sending an eTransfer? Send to <strong>info@true-color.ca</strong> and include your order number in the message."
-          : "Paying by card? Click the button above — it only takes 30 seconds."}
+        ${escHtml(copy.foot)}
       </p>
     </div>
     <div style="padding:16px 32px;background:#f9fafb;border-top:1px solid #f0ebe4;font-size:11px;color:#9ca3af;">
@@ -109,13 +191,13 @@ export async function GET(req: NextRequest) {
   </div>
 </body></html>`;
 
-        const text = `Hi ${firstName},\n\nYour True Color order ${order.order_number} for ${productList} ($${total} CAD) is waiting for payment.\n\nComplete your order here:\n${payUrl}\n\n${order.payment_method === "etransfer" ? "Sending eTransfer? Send to info@true-color.ca with your order number." : ""}\n\nTrue Color Display Printing`;
+        const text = `Hi ${firstName},\n\n${copy.headline}.\n\n${copy.body}\n\nOrder ${order.order_number}: ${productList} ($${total} CAD)\n\n${copy.cta}:\n${payUrl}\n\n${copy.foot}\n\nTrue Color Display Printing`;
 
         try {
           await sendEmail({
             from: FROM,
             to: customer.email,
-            subject: `Your True Color order ${order.order_number} is waiting`,
+            subject: copy.subject,
             html,
             text,
           });

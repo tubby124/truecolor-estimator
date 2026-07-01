@@ -33,6 +33,9 @@ interface StaffOrderCardProps {
   confirmingEtransfer: boolean;
   etransferConfirmed: boolean;
   onConfirmEtransfer: () => void;
+  confirmingClover: boolean;
+  cloverConfirmed: boolean;
+  onConfirmCloverPayment: (paymentId: string, reason: string) => void;
 }
 
 export function StaffOrderCard({
@@ -52,6 +55,9 @@ export function StaffOrderCard({
   confirmingEtransfer,
   etransferConfirmed,
   onConfirmEtransfer,
+  confirmingClover,
+  cloverConfirmed,
+  onConfirmCloverPayment,
 }: StaffOrderCardProps) {
   const [overrideStatus, setOverrideStatus] = useState<string>(order.status);
   const [confirmingComplete, setConfirmingComplete] = useState(false);
@@ -74,10 +80,23 @@ export function StaffOrderCard({
   const [proofError, setProofError] = useState<string | null>(null);
   const [repriceOpen, setRepriceOpen] = useState(false);
   const [repriceResult, setRepriceResult] = useState<{ new_total: number; delta: number; mode: string; pay_link_url: string | null } | null>(null);
+  const [cloverPaymentId, setCloverPaymentId] = useState("");
+  const [cloverReason, setCloverReason] = useState("Verified in Clover dashboard");
+  const [cloverFormError, setCloverFormError] = useState<string | null>(null);
 
   const customer = Array.isArray(order.customers) ? order.customers[0] : order.customers;
   const nextStatus = NEXT_STATUS[order.status];
   const latestAttempt = order.latest_payment_attempt;
+  const ambiguousPaymentIds =
+    latestAttempt?.status === "ambiguous" &&
+    latestAttempt.raw_event &&
+    typeof latestAttempt.raw_event === "object" &&
+    !Array.isArray(latestAttempt.raw_event) &&
+    Array.isArray((latestAttempt.raw_event as { matches?: unknown }).matches)
+      ? ((latestAttempt.raw_event as { matches: Array<{ clover_payment_id?: string | null }> }).matches)
+          .map((m) => m.clover_payment_id)
+          .filter((id): id is string => Boolean(id))
+      : [];
 
   // Artwork files — prefer file_storage_paths[] array, fall back to first order_items path
   const artworkFiles: Array<{ url: string; label: string }> = [];
@@ -622,6 +641,78 @@ export function StaffOrderCard({
                       ? `payment ${latestAttempt.clover_payment_id}`
                       : `checkout ${latestAttempt.clover_checkout_session_id}`}
                   </p>
+                )}
+                {latestAttempt.status === "ambiguous" && order.status === "pending_payment" && (
+                  <div className="mt-3 rounded-lg border border-orange-200 bg-white/70 p-3">
+                    {ambiguousPaymentIds.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-orange-700">
+                          Candidate Clover payments
+                        </p>
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          {ambiguousPaymentIds.map((id) => (
+                            <button
+                              key={id}
+                              type="button"
+                              onClick={() => setCloverPaymentId(id)}
+                              className="min-h-[32px] rounded border border-orange-200 bg-orange-50 px-2 py-1 font-mono text-[11px] text-orange-800 hover:bg-orange-100"
+                              title="Use this Clover payment ID"
+                            >
+                              {id}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                      <label className="block">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-orange-700">
+                          Clover payment ID
+                        </span>
+                        <input
+                          value={cloverPaymentId}
+                          onChange={(e) => setCloverPaymentId(e.target.value)}
+                          className="mt-1 min-h-[44px] w-full rounded-lg border border-orange-200 bg-white px-3 text-xs font-mono text-gray-800 focus:border-orange-400 focus:outline-none"
+                          placeholder="e.g. GM293173T5D3T"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-orange-700">
+                          Staff reason
+                        </span>
+                        <input
+                          value={cloverReason}
+                          onChange={(e) => setCloverReason(e.target.value)}
+                          className="mt-1 min-h-[44px] w-full rounded-lg border border-orange-200 bg-white px-3 text-xs text-gray-800 focus:border-orange-400 focus:outline-none"
+                          placeholder="Verified amount/order in Clover"
+                        />
+                      </label>
+                    </div>
+                    {cloverFormError && (
+                      <p className="mt-2 text-xs font-medium text-red-700">{cloverFormError}</p>
+                    )}
+                    <button
+                      type="button"
+                      disabled={confirmingClover || cloverConfirmed}
+                      onClick={() => {
+                        const paymentId = cloverPaymentId.trim();
+                        const reason = cloverReason.trim();
+                        if (!paymentId) {
+                          setCloverFormError("Paste the Clover payment ID first.");
+                          return;
+                        }
+                        if (reason.length < 6) {
+                          setCloverFormError("Add a short reason for the audit log.");
+                          return;
+                        }
+                        setCloverFormError(null);
+                        onConfirmCloverPayment(paymentId, reason);
+                      }}
+                      className="mt-3 min-h-[44px] rounded-lg bg-orange-700 px-4 text-sm font-bold text-white hover:bg-orange-800 disabled:opacity-60"
+                    >
+                      {confirmingClover ? "Verifying…" : cloverConfirmed ? "Confirmed" : "Confirm Clover payment"}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
