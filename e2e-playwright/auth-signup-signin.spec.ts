@@ -117,13 +117,13 @@ base.describe("Auth — Sign Up / Sign In", () => {
     await baseExpect(page).toHaveURL(/\/staff\/orders/);
   });
 
-  // 6. Forgot password -> "Check your email" screen
+  // 6. Forgot password/sign-in-link page -> "Check your email" screen
   base("forgot password shows check-your-email screen", async ({ page }) => {
     await page.goto("/forgot-password");
     await page.waitForSelector("#fp-email");
 
     await page.locator("#fp-email").fill("someone@example.com");
-    await page.getByRole("button", { name: /Send reset link/i }).click();
+    await page.getByRole("button", { name: /Send sign-in link/i }).click();
 
     await baseExpect(page.getByText("Check your email")).toBeVisible({
       timeout: 10_000,

@@ -12,12 +12,17 @@
  * Note: `use` here is the Playwright fixture param, not React's use hook.
  */
 /* eslint-disable react-hooks/rules-of-hooks */
-import { test as base, expect, type Page, type BrowserContext } from "@playwright/test";
+import {
+  test as base,
+  expect,
+  type Page,
+  type BrowserContext,
+  type TestInfo,
+} from "@playwright/test";
 import {
   createTestUser,
   deleteTestUser,
   deleteTestOrders,
-  generateMagicLink,
 } from "./supabase-admin";
 
 export interface AuthFixtures {
@@ -25,38 +30,56 @@ export interface AuthFixtures {
   authenticatedPage: Page;
   /** The test user's email */
   testUserEmail: string;
+  /** Unique test user suffix for this Playwright test */
+  testUserSuffix: string;
+}
+
+function safeSuffix(testInfo: TestInfo): string {
+  const raw = [
+    "pw-fixture",
+    `w${testInfo.workerIndex}`,
+    `r${testInfo.retry}`,
+    ...testInfo.titlePath.slice(-3),
+  ].join("-");
+
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72);
 }
 
 export const test = base.extend<AuthFixtures>({
-  authenticatedPage: async ({ browser }, use) => {
-    // Create test user
-    await createTestUser("pw-fixture");
+  testUserSuffix: async ({}, use, testInfo) => {
+    await use(safeSuffix(testInfo));
+  },
 
-    // Get magic link
-    const magicLink = await generateMagicLink("pw-fixture");
+  authenticatedPage: async ({ browser, testUserSuffix }, use) => {
+    // Create test user
+    const testUser = await createTestUser(testUserSuffix);
 
     // Create a fresh context (isolated cookies)
     const context: BrowserContext = await browser.newContext();
     const page = await context.newPage();
 
-    // Navigate to magic link to authenticate
-    // The magic link redirects through /account/callback which sets the session
-    await page.goto(magicLink, { waitUntil: "networkidle" });
-
-    // Wait for redirect to /account (authenticated state)
-    await page.waitForURL("**/account", { timeout: 15_000 });
+    await page.goto("/account");
+    await page.locator("#pw-email").fill(testUser.email);
+    await page.locator("#pw-password").fill("TestPass123!");
+    await page.getByRole("button", { name: "Sign in \u2192", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Sign out", exact: true }))
+      .toBeVisible({ timeout: 15_000 });
 
     // Hand the authenticated page to the test
     await use(page);
 
     // Cleanup
     await context.close();
-    await deleteTestOrders("pw-fixture");
-    await deleteTestUser("pw-fixture");
+    await deleteTestOrders(testUserSuffix);
+    await deleteTestUser(testUserSuffix);
   },
 
-  testUserEmail: async ({}, use) => {
-    const testUser = await createTestUser("pw-fixture");
+  testUserEmail: async ({ testUserSuffix }, use) => {
+    const testUser = await createTestUser(testUserSuffix);
     await use(testUser.email);
   },
 });

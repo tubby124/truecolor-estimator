@@ -41,7 +41,11 @@ export default function CallbackPage() {
           // Code may already be consumed (PKCE race) — check if session exists anyway
           const { data: { session } } = await supabase.auth.getSession();
           if (session) {
-            window.location.replace(type === "signup" ? "/account?welcome=1" : "/account");
+            window.location.replace(
+              type === "recovery" ? "/account?reset=1" :
+              type === "signup" ? "/account?welcome=1" :
+              "/account"
+            );
             return;
           }
           setError("Link expired or already used — please request a new one.");
@@ -60,11 +64,11 @@ export default function CallbackPage() {
             }).catch(() => {});
           }
         }
-        if (type === "signup") {
-          window.location.replace("/account?welcome=1");
-        } else {
-          window.location.replace("/account");
-        }
+        window.location.replace(
+          type === "recovery" ? "/account?reset=1" :
+          type === "signup" ? "/account?welcome=1" :
+          "/account"
+        );
       });
       return;
     }

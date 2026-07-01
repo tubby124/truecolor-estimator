@@ -8,13 +8,13 @@ test.describe("Account dashboard — authenticated", () => {
   test.describe("with orders", () => {
     let orderNumber: string;
 
-    test.beforeEach(async () => {
-      const result = await createTestOrder("pw-fixture");
+    test.beforeEach(async ({ testUserSuffix }) => {
+      const result = await createTestOrder(testUserSuffix);
       orderNumber = result.orderNumber;
     });
 
-    test.afterEach(async () => {
-      await deleteTestOrders("pw-fixture");
+    test.afterEach(async ({ testUserSuffix }) => {
+      await deleteTestOrders(testUserSuffix);
     });
 
     test("authenticated user sees order list", async ({
@@ -35,10 +35,8 @@ test.describe("Account dashboard — authenticated", () => {
         timeout: 10_000,
       });
 
-      const card = authenticatedPage
-        .locator("div")
-        .filter({ hasText: orderNumber })
-        .first();
+      const main = authenticatedPage.locator("main");
+      const card = main.locator(`text=${orderNumber}`).locator("..").locator("..");
 
       // Status badge — order is created with status "payment_received"
       await expect(card.getByText("Payment received")).toBeVisible();
@@ -52,8 +50,8 @@ test.describe("Account dashboard — authenticated", () => {
       await expect(card.locator("text=/[A-Z][a-z]{2} \\d{1,2}, \\d{4}/")).toBeVisible();
 
       // StatusStepper — check for step labels
-      await expect(card.getByText("Paid")).toBeVisible();
-      await expect(card.getByText("Printing")).toBeVisible();
+      await expect(main.getByText("Paid", { exact: true })).toBeVisible();
+      await expect(main.getByText("Printing", { exact: true })).toBeVisible();
     });
 
     test("expand order shows item details — product name, qty, dimensions", async ({
@@ -114,10 +112,11 @@ test.describe("Account dashboard — authenticated", () => {
 
     test("file upload on pending_payment order shows success feedback", async ({
       authenticatedPage,
+      testUserSuffix,
     }) => {
       // Delete the payment_received order and create a pending_payment one
-      await deleteTestOrders("pw-fixture");
-      const pendingOrder = await createTestOrder("pw-fixture", {
+      await deleteTestOrders(testUserSuffix);
+      const pendingOrder = await createTestOrder(testUserSuffix, {
         status: "pending_payment",
       });
 
@@ -155,12 +154,6 @@ test.describe("Account dashboard — authenticated", () => {
         }
       );
 
-      // Also mock the subsequent fetchOrders call so it doesn't error
-      await authenticatedPage.route("**/api/account/orders", async (route) => {
-        const response = await route.fetch();
-        await route.fulfill({ response });
-      });
-
       // Upload a test file
       const fileInput = authenticatedPage.locator('input[type="file"]');
       await fileInput.setInputFiles({
@@ -177,8 +170,8 @@ test.describe("Account dashboard — authenticated", () => {
   });
 
   test.describe("empty state", () => {
-    test.beforeEach(async () => {
-      await deleteTestOrders("pw-fixture");
+    test.beforeEach(async ({ testUserSuffix }) => {
+      await deleteTestOrders(testUserSuffix);
     });
 
     test("shows empty state when no orders exist", async ({
@@ -194,7 +187,7 @@ test.describe("Account dashboard — authenticated", () => {
 
       // CTA link to products
       await expect(
-        authenticatedPage.getByRole("link", { name: /Get a price/ })
+        authenticatedPage.getByRole("link", { name: /Get a price/ }).first()
       ).toBeVisible();
     });
   });

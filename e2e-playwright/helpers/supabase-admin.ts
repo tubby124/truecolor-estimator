@@ -64,6 +64,20 @@ export interface TestUser {
   email: string;
 }
 
+async function findAuthUserByEmail(email: string) {
+  const admin = getAdminClient();
+  const target = email.toLowerCase();
+
+  for (let page = 1; page <= 20; page += 1) {
+    const { data } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    const existing = data?.users?.find((u) => u.email?.toLowerCase() === target);
+    if (existing) return existing;
+    if (!data?.users || data.users.length < 1000) break;
+  }
+
+  return null;
+}
+
 /**
  * Creates a test user with email_confirm: true so they're immediately verified.
  * Returns user ID + email. Idempotent — if user exists, returns existing.
@@ -83,11 +97,15 @@ export async function createTestUser(
   });
 
   if (error) {
-    // User already exists — look them up
-    if (error.message?.includes("already") || error.message?.includes("registered")) {
-      const { data: listData } = await admin.auth.admin.listUsers();
-      const existing = listData?.users?.find((u) => u.email === email);
-      if (existing) return { id: existing.id, email };
+    // User already exists, or a DB trigger surfaced Supabase's generic auth
+    // error under parallel E2E load. Look up by email before failing the test.
+    const existing = await findAuthUserByEmail(email);
+    if (existing) {
+      await admin.auth.admin.updateUserById(existing.id, {
+        password: "TestPass123!",
+        user_metadata: { name: "E2E Test User", ...metadata },
+      });
+      return { id: existing.id, email };
     }
     throw new Error(`createTestUser failed: ${error.message}`);
   }
@@ -102,8 +120,7 @@ export async function deleteTestUser(suffix = "default"): Promise<void> {
   const admin = getAdminClient();
   const email = testEmail(suffix);
 
-  const { data: listData } = await admin.auth.admin.listUsers();
-  const user = listData?.users?.find((u) => u.email === email);
+  const user = await findAuthUserByEmail(email);
   if (!user) return;
 
   await admin.auth.admin.deleteUser(user.id);
@@ -141,7 +158,7 @@ export async function generatePasswordResetLink(suffix = "default"): Promise<str
   const { data, error } = await admin.auth.admin.generateLink({
     type: "recovery",
     email,
-    options: { redirectTo: `${siteUrl}/account/callback` },
+    options: { redirectTo: `${siteUrl}/account/callback?type=recovery` },
   });
 
   if (error) throw new Error(`generatePasswordResetLink failed: ${error.message}`);
@@ -200,7 +217,7 @@ export async function createTestOrder(
   if (error || !order) throw new Error(`Failed to create test order: ${error?.message}`);
 
   // Add a test order item
-  await admin.from("order_items").insert({
+  const { error: itemError } = await admin.from("order_items").insert({
     order_id: order.id,
     product_name: "E2E Test Product",
     category: "coroplast-signs",
@@ -208,9 +225,11 @@ export async function createTestOrder(
     width_in: 24,
     height_in: 18,
     sides: 1,
+    unit_price: subtotal,
     line_total: subtotal,
-    design_status: "pending",
+    design_status: "PRINT_READY",
   });
+  if (itemError) throw new Error(`Failed to create test order item: ${itemError.message}`);
 
   return { orderId: order.id, orderNumber: order.order_number };
 }
