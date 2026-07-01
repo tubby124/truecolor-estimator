@@ -1,7 +1,7 @@
 /**
  * Smoke Tests — True Color Estimator
  *
- * HTTP-level integration tests against the live Vercel deployment.
+ * HTTP-level integration tests against the live Railway deployment.
  * Uses fetch (Node 18+ built-in) — no browser download needed.
  *
  * Run:  npm run test:smoke
@@ -12,21 +12,25 @@
 
 import { describe, it, expect } from "vitest";
 
-const BASE = "https://truecolor-estimator.vercel.app";
+const BASE = process.env.SMOKE_BASE_URL ?? "https://truecolorprinting.ca";
 
 // ─── Page loads ───────────────────────────────────────────────────────────────
 
 describe("Smoke 1 — all key pages return 200", () => {
   const pages = [
     "/",
-    "/products/coroplast-signs",
-    "/products/vinyl-banners",
-    "/products/vehicle-magnets",
-    "/products/business-cards",
-    "/products/foam-board-signs",
-    "/products/retractable-banners",
+    "/products",
+    "/coroplast-signs-saskatoon",
+    "/banner-printing-saskatoon",
+    "/vehicle-magnets-saskatoon",
+    "/business-cards-saskatoon",
+    "/foamboard-printing-saskatoon",
+    "/retractable-banners-saskatoon",
     "/cart",
     "/checkout",
+    "/payment/success",
+    "/payment/failed",
+    "/payment/cancelled",
     "/gallery",
     "/about",
     "/services",
@@ -196,6 +200,15 @@ describe("Smoke 4 — staff API auth guard (unauthenticated → 401)", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: "test" }),
+    });
+    expect(res.status).toBe(401);
+  }, 10_000);
+
+  it("POST /api/staff/orders/:id/confirm-clover without session → 401", async () => {
+    const res = await fetch(`${BASE}/api/staff/orders/fake-order-id/confirm-clover`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clover_payment_id: "probe", reason: "auth probe" }),
     });
     expect(res.status).toBe(401);
   }, 10_000);
