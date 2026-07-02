@@ -14,9 +14,9 @@ import { SameDayClock } from "@/components/home/SameDayClock";
 import { MobileStickyBar } from "@/components/home/MobileStickyBar";
 
 export const metadata: Metadata = {
-  title: { absolute: "True Color Display Printing | Saskatoon Signs, Banners & Cards" },
+  title: { absolute: "Saskatoon Print Shop | Signs, Banners & Cards | True Color" },
   description:
-    "Saskatoon print shop for signs, banners, cards, flyers, stickers, and same-day rush printing. Live prices, in-house design, pickup at 216 33rd St W.",
+    "Your local Saskatoon print shop for signs, banners, cards, flyers, and same-day rush printing. Live prices, in-house design, pickup at 216 33rd St W.",
   alternates: { canonical: "/" },
 };
 
