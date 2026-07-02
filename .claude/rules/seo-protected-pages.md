@@ -36,12 +36,22 @@ If a page drops below position 10 organic AND below position 5 in local pack for
 
 The analyzer can list the SAME page as both a page-2 "opportunity" AND a decay alert. When that happens, or when a page is **FROZEN + ranking page-1 + 0 clicks**, the problem is CTR/snippet or post-edit volatility — NOT missing content. **Do not pile on another FAQ/body edit.** Hold and diagnose. More copy does not fix a click-through problem at positions that already rank. This is the sticker-page situation right now (see below).
 
+## 🔄 Session update — 2026-07-02 (/tc-seo-opportunities 28d read, NOT a full re-baseline)
+
+This is a spot-check via the standard opportunities script, not the full-pagination manual pull used for the 2026-06-15 baseline above — treat as directional, next full refresh still due by 2026-07-13 (35-day cap on the 2026-06-15 baseline).
+
+- **Homepage EDITED today (commit `9455b75`, pushed to main):** title/meta rewrite targeting "print shop" (pos 8.9, 56 imp, 0% CTR) + "printing near me" (pos 11.5, 56 imp, 0% CTR) — homepage is NOT on the frozen list, this was the only clean non-conflicted opportunity this window. All existing ranking keywords (Saskatoon, Signs/Banners/Cards, brand, flyers, rush, address) verified preserved. **Re-check date: 2026-07-09.** Full detail in `memory/seo-sprints.md` Phase 100.
+- **sticker-printing-saskatoon: conflicting-signal trap CONFIRMED STILL ACTIVE.** Same 3 die-cut queries page-2 + decay + FROZEN + 0% CTR at page-1 positions. No change from 2026-06-15 status below — still HOLD. This has now been true for 17+ days; watch for the 60-day decay-rule unlock window.
+- **wall-graphics-saskatoon: STATUS FLIP.** "wall graphics near me" improved 11.8 → **6.1** since June 15 (now FIRMLY page-1, not page-2 edge) but still 0% CTR — this is now a CTR/snippet problem, not a content gap. **The June 19 `/paa-faq wall-graphics-saskatoon` plan referenced in Phase 99 is STALE and should NOT be run as originally planned.** Reclassify from "DEFEND candidate (editable)" to HOLD + diagnose, same bucket as sticker-printing-saskatoon, until a fresh full pull confirms the position and a title-rewrite (not FAQ) path is evaluated.
+- **flyer-printing-saskatoon: decay alert, 39.4 → 47.5** (118 imp) — diagnose-only next session, no edit yet.
+- **banner-printing-saskatoon:** 33.5 → 37.2 (20 imp) — RECOVERING, 3.7-pos slip on 20 imp is noise, left alone per existing rule.
+
 ## Protected pages (current — 2026-06-15)
 
 | Page | Page pos (all queries) | 28d imp | clk | Lock level | Notes |
 |------|------------------------|---------|-----|------------|-------|
 | sticker-printing-saskatoon | **11.4** | **780** | 2 | **DEFEND (HOLD — do not edit)** | Strongest page by far. BUT die-cut cluster slid 2–6 pos in last 14d (custom die cut labels 4.0→10.3, die cut labels 7.4→11.3) and CTR is ~0 despite page-1 positions on several queries. This is a **CTR-on-frozen-title problem + post-June-4 volatility**, not a content gap. Per conflicting-signal rule: HOLD. Do NOT run /paa-faq here reflexively. If the cluster stays sub-10 for 60+ days, the decay rule unlocks a proper title rewrite — that is the real fix. |
-| wall-graphics-saskatoon | **13.8** | 127 | 0 | **DEFEND candidate (editable — NOT frozen)** | Improved 16.4→9.8→holding low teens over recovery. "wall graphics near me" sits at 11.8 (page-2 edge), "wall printing near me" ~9.7. Clean single-query page-2 opportunity, body/FAQ only. **June 19 target via /paa-faq** (no title/H1 change). |
+| wall-graphics-saskatoon | **6.1** (was 13.8 → 11.8 → 6.1) | 127+ | 0 | **HOLD — conflicting signal (reclassified 2026-07-02)** | Continued improving past page-2 into firm page-1 (6.1) but STILL 0% CTR — this flipped from a content gap to a CTR/snippet problem. **The prior "June 19 /paa-faq" plan is CANCELLED — do not run it.** Same bucket as sticker-printing-saskatoon now: HOLD + diagnose, watch for decay-rule/CTR-fix path, do not add more body/FAQ content. |
 | business-cards-saskatoon | **19.6** | 61 | 0 | **RECOVERING (was DECAYED)** | Primary query "business cards saskatoon" reclaimed page 1 (8.9) and the dedicated page now outranks the homepage for it — cannibalization fix from 831b91c CONFIRMED. Page-rollup still 19.6 (long-tail drag). Hold; let it settle. |
 | banner-printing-saskatoon | **23.6** | 96 | 0 | **RECOVERING (was DECAYED 33.2)** | Strong recovery. Still sub-10 target. No edit until it plateaus — observe. |
 | flyer-printing-saskatoon | **37.5** | 356 | 1 | **DECAYED — recovering slowly** | High impressions (356 = real demand) but still deep + ~0 clicks. Candidate for a later wave (body depth + intent), not next. |
