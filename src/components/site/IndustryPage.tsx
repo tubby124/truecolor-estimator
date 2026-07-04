@@ -31,6 +31,25 @@ export interface IndustryProduct {
   slug: string;
 }
 
+/**
+ * Product/AggregateOffer JSON-LD input for a landing page's primary product.
+ * Every price here must trace to data/PRICING_QUICK_REFERENCE.md — never invented.
+ * Renders schema.org Product + AggregateOffer (Wave 4 of the SEO schema rollout —
+ * see .claude/rules/truecolor-seo-safety.md "Wave System").
+ */
+export interface IndustryProductOffer {
+  name: string;
+  description: string;
+  /** Lowest real price across the tiers referenced on this page (CAD) */
+  lowPrice: number;
+  /** Highest real price across the tiers referenced on this page (CAD) */
+  highPrice: number;
+  /** Number of distinct priced tiers referenced on this page */
+  offerCount: number;
+  /** Product image, relative or absolute — falls back to heroImage if omitted */
+  image?: string;
+}
+
 export interface IndustryPageProps {
   title: string;
   subtitle: string;
@@ -50,6 +69,8 @@ export interface IndustryPageProps {
   primaryProductSlug?: string;
   /** Cross-links to sibling city/region pages — renders "Also serving Saskatchewan" footer section */
   relatedCities?: { name: string; slug: string }[];
+  /** Optional Product/AggregateOffer schema for this page's primary product (Wave 4 rollout) */
+  productOffer?: IndustryProductOffer;
 }
 
 export function IndustryPage({
@@ -66,6 +87,7 @@ export function IndustryPage({
   canonicalSlug,
   primaryProductSlug,
   relatedCities,
+  productOffer,
 }: IndustryPageProps) {
   const BASE_URL = "https://truecolorprinting.ca";
 
@@ -108,6 +130,33 @@ export function IndustryPage({
   } : null;
 
   const ctaHref = primaryProductSlug ? `/products/${primaryProductSlug}` : "/products";
+
+  const productSchema = productOffer ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: productOffer.name,
+    description: productOffer.description,
+    image: `${BASE_URL}${productOffer.image ?? heroImage}`,
+    ...(canonicalSlug ? { url: `${BASE_URL}/${canonicalSlug}` } : {}),
+    brand: {
+      "@type": "Brand",
+      name: "True Color Display Printing",
+    },
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "CAD",
+      lowPrice: productOffer.lowPrice,
+      highPrice: productOffer.highPrice,
+      offerCount: productOffer.offerCount,
+      ...(canonicalSlug ? { url: `${BASE_URL}/${canonicalSlug}` } : {}),
+      availability: "https://schema.org/InStock",
+      seller: {
+        "@type": ["LocalBusiness", "PrintShop"],
+        "@id": `${BASE_URL}/#localbusiness`,
+        name: "True Color Display Printing",
+      },
+    },
+  } : null;
 
   return (
     <div className="min-h-screen bg-white">
