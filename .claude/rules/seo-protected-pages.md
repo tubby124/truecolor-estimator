@@ -46,6 +46,11 @@ This is a spot-check via the standard opportunities script, not the full-paginat
 - **flyer-printing-saskatoon: decay alert, 39.4 → 47.5** (118 imp) — **DIAGNOSED (read-only, see seo-sprints.md Phase 101).** No edits since June 4 (`46d6e32`); most likely post-recovery noise, not a regression. Page is otherwise SEO-standards-compliant. Secondary factor: June 4 metadata thinning dropped "Same-Day Rush" + price ladder from title/meta — queued as a Wave 1 (metadata-only) fix for the next eligible ship window, NOT actioned this session (would be a 2nd page edit). HOLD until 2026-07-13 full refresh confirms trend.
 - **banner-printing-saskatoon:** 33.5 → 37.2 (20 imp) — RECOVERING, 3.7-pos slip on 20 imp is noise, left alone per existing rule.
 
+### 🕐 Decay-rule unlock clocks (added 2026-07-04, Phase 102 — logging so these aren't lost)
+
+- **sticker-printing-saskatoon die-cut cluster:** conflicting-signal trap first flagged at the 2026-06-15 baseline (Phase 99), reconfirmed 2026-07-02 (Phase 100) as "17+ days active." Clock start ≈ **2026-06-15**. If the cluster (die cut labels, die cut stickers, custom die cut labels near me — all sub-10, ~0% CTR) is still sub-10 organic AND sub-5 local pack for 60 consecutive days, the decay-rule unlock date is **~2026-08-14**. Do not title-rewrite before that unless the SERP-rendering investigation (Phase 102 batch) independently proves the on-page title isn't what Google is showing.
+- **wall-graphics-saskatoon:** NOT on the same clock — this page is climbing (13.8→11.8→6.1), not decaying, so the 60-day sub-10 decay rule does not apply to it. It stays HOLD under the conflicting-signal rule (page-1 + 0% CTR) until the 2026-07-13 full refresh confirms the position and a schema/snippet fix (not title) path is evaluated.
+
 ## Protected pages (current — 2026-06-15)
 
 | Page | Page pos (all queries) | 28d imp | clk | Lock level | Notes |
