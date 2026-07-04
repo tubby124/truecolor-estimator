@@ -178,6 +178,14 @@ export default function StickerPrintingSaskatoonPage() {
         "Same-day turnaround for +$40 flat — order before 10 AM, pick up same day",
         "In-house designer $35 flat — bring a logo or a rough idea, we build the die-cut path",
       ]}
+      productOffer={{
+        name: "Custom Die-Cut Vinyl Stickers",
+        description:
+          "Full-colour die-cut vinyl stickers printed in-house on a Roland UV press in Saskatoon. Waterproof, scratch-resistant, custom shapes and sizes. Default size 4x4 inch.",
+        lowPrice: 25,
+        highPrice: 475,
+        offerCount: 4,
+      }}
       faqs={[
         {
           q: "Where can I get custom stickers near me in Saskatoon?",
