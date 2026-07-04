@@ -73,7 +73,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/vinyl-lettering-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/postcard-printing-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/photo-poster-printing-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE_URL}/poster-printing-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${BASE_URL}/poster-printing-saskatoon`, lastModified: new Date("2026-07-04"), changeFrequency: "monthly", priority: 0.9 },
     // /custom-magnets-saskatoon removed 2026-05-05 → 301 to /vehicle-magnets-saskatoon
     { url: `${BASE_URL}/gym-fitness-signs-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/salon-signs-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.8 },

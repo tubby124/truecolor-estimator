@@ -209,36 +209,36 @@ True Color's in-house Photoshop designer handles layout, resizing, colour correc
       ]}
       faqs={[
         {
-          q: "How much does poster printing cost in Saskatoon?",
-          a: "True Color Display Printing offers photo posters on Roland Photobase Matte 220gsm starting at $15 for 12×18\", $22 for 18×24\", $35 for 24×36\", and $65 for 36×48\". Foamboard-mounted displays start at $45 for 18×24\" and $65 for 24×36\". All prices are pre-tax. Design is $35 flat with a same-day proof, and same-day rush adds +$40 flat. Call (306) 954-8688 or visit 216 33rd St W, Saskatoon.",
+          q: "What's the difference between poster printing and foamboard or retractable banner stands?",
+          a: "A photo poster is loose Roland Photobase Matte 220gsm paper — flat, lightweight, ideal for framing, pinning, or taping to a wall. A foamboard display adds a rigid 5mm foam backing that stands on any easel without a frame, starting at $45 for 18×24\" and $65 for 24×36\" — self-supporting for tabletop or floor-stand use. A retractable banner stand is a freestanding pull-up display starting at $219 (33×79\" graphic included) that packs into a carry bag between events. For single or small-run photo prints, see our dedicated photo poster page. Call (306) 954-8688 to talk through which format fits your event.",
         },
         {
-          q: "Can I get same-day poster printing in Saskatoon?",
-          a: "Yes. True Color Display Printing offers same-day rush printing for a flat +$40 fee on orders placed before 10 AM. A 12×18\" photo poster starts at $15, an 18×24\" at $22, and a 24×36\" at $35 before the rush fee. Standard turnaround is 1–3 business days after artwork approval. Walk-ins welcome at 216 33rd St W, Saskatoon, or call (306) 954-8688 to confirm same-day capacity.",
+          q: "Do you offer foamboard and retractable displays for events and trade shows in Saskatoon?",
+          a: "Yes. True Color Display Printing produces foamboard displays (from $45), retractable banner stands (from $219 with graphic included, $299 deluxe), and vinyl banners (from $66 for 2×4ft) for Saskatoon trade shows, non-profit booths, and recurring branded events. All are printed in-house on the Roland UV with 1–3 business day turnaround and same-day rush for +$40 flat. Call (306) 954-8688 to plan your event order.",
         },
         {
-          q: "What poster sizes are available in Saskatoon?",
-          a: "True Color Display Printing prints photo posters in six sizes: 12×18\" ($15), 16×20\" ($18), 18×24\" ($22), 24×36\" ($35), 30×40\" ($48), and 36×48\" ($65). Foamboard-mounted displays are available at 18×24\" ($45) and 24×36\" ($65). Retractable banner stands are 33×79\" with the graphic included, starting at $219. Custom sizes are available — call (306) 954-8688 for a quote.",
+          q: "How do foamboard displays and retractable banner stands hold up for repeat events?",
+          a: "Foamboard displays (5mm rigid backing) are built for single-event or seasonal use — restaurant specials boards, retail promotions, and open house signage that gets swapped regularly. Retractable banner stands ($219 economy, $299 deluxe) are the better fit for non-profits, contractors, and businesses that exhibit at the same type of event repeatedly — the stand folds into a carry bag and the graphic stays print-sharp across multiple bookings.",
         },
         {
-          q: "What is the difference between a photo poster and a foamboard display?",
-          a: "A photo poster is printed on Roland Photobase Matte 220gsm paper — flat, lightweight, ideal for framing, pinning, or taping to a wall. Prices start at $15 for 12×18\" and $35 for 24×36\". A foamboard display adds a rigid 3/16\" foam backing that stands on any easel without a frame, making it self-supporting for tabletop or floor-stand use. Foamboard displays start at $45 for 18×24\" and $65 for 24×36\". Both are printed in-house at True Color Display Printing, 216 33rd St W, Saskatoon.",
+          q: "What poster and display sizes are available in Saskatoon?",
+          a: "Photo posters run 12×18\" ($15) through 36×48\" ($65) on Roland Photobase Matte 220gsm. Foamboard-mounted displays are available at 18×24\" ($45) and 24×36\" ($65). Retractable banner stands are 33×79\" with the graphic included, starting at $219. Custom sizes are available — call (306) 954-8688 for a quote.",
         },
         {
-          q: "What file format do I need for poster printing?",
+          q: "What file format do I need for poster or display printing?",
           a: "True Color Display Printing accepts PDF at 150 dpi minimum at print size, or high-resolution JPG/PNG at 300 dpi in CMYK colour mode. If your file is lower resolution or not print-ready, True Color's in-house Photoshop designer can prepare it for a flat $35 fee with a same-day proof. Call (306) 954-8688 to confirm file specs before sending artwork.",
         },
         {
-          q: "Do you offer poster printing for events and trade shows in Saskatoon?",
-          a: "Yes. True Color Display Printing produces event photo posters (from $15), foamboard displays (from $45), retractable banner stands (from $219 with graphic), and vinyl banners (from $66 for 2×4ft). All are printed in-house on the Roland UV in Saskatoon with 1–3 business day turnaround and same-day rush for +$40 flat. The in-house designer handles event artwork for $35 flat with a same-day proof. Call (306) 954-8688 to plan your event order.",
+          q: "Can I get event displays designed and printed at the same shop in Saskatoon?",
+          a: "Yes. True Color Display Printing has an in-house Photoshop designer who handles layout, resizing, colour correction, and new artwork for a flat $35 design fee with a same-day proof — across posters, foamboard, and retractable banner graphics. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors. Same-day rush is available for +$40 flat on orders placed before 10 AM. Call (306) 954-8688.",
         },
         {
-          q: "What is the cheapest way to print a large poster in Saskatoon?",
-          a: "A 24×36\" photo poster at True Color Display Printing costs $35 — printed in-house on Roland Photobase Matte 220gsm with no outsourcing markup. That is among the lowest prices in Saskatoon for large-format printing on quality 220gsm stock. If you have print-ready artwork, there is no design fee. Standard turnaround is 1–3 business days; same-day adds +$40 flat. Visit 216 33rd St W or call (306) 954-8688.",
+          q: "What's the best poster or display option for a fundraiser, gala, or non-profit event in Saskatoon?",
+          a: "Most Saskatoon non-profits mix formats: 18×24\" event posters ($22) for tables and entryways, a foamboard sign-in or sponsor board ($45) that stands without a frame, and a retractable banner stand ($219, graphic included) at the door or stage — all printed in-house so colour matches across the set. Same-day rush is +$40 flat if you're finalizing artwork close to the event date.",
         },
         {
-          q: "Can I get a poster designed and printed at the same shop in Saskatoon?",
-          a: "Yes. True Color Display Printing has an in-house Photoshop designer who handles layout, resizing, colour correction, and new artwork for a flat $35 design fee with a same-day proof. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors. Same-day rush is available for +$40 flat on orders placed before 10 AM. Call (306) 954-8688.",
+          q: "Can True Color print posters and displays for a Saskatoon trade show or vendor booth?",
+          a: "Yes — retractable banner stands (from $219, economy or $299 deluxe) are the most common trade-show format since they pack flat into a carry bag between shows, paired with a foamboard product or pricing display (from $45) on the table. Both are printed in-house on the Roland UV, so booth graphics stay colour-consistent from event to event. Call (306) 954-8688 to plan a booth package.",
         },
       ]}
     />
