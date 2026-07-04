@@ -267,10 +267,12 @@ Status: **NEW** — discovered 2026-04-12 from GSC data
 | Item | Notes |
 |------|-------|
 | GBP `REPLACE_WITH_GOOGLE_PLACE_ID` placeholder | `reviewRequest.ts:32` — hardcoded placeholder |
-| true-color.ca redirect chain | Hostinger fix pending — http → https still 3 hops |
-| Blog / Resources content | Neither True Color nor Minuteman has one — first-mover wins local print authority |
+| ~~true-color.ca redirect chain~~ | **RESOLVED (verified 2026-07-04).** `http://true-color.ca` → 1 hop to `https://truecolorprinting.ca`; `http://www.true-color.ca` → 2 hops. Hostinger fix already landed at some point after this note was written — corrected here so future sessions stop re-flagging it. |
+| Blog / Resources content | Neither True Color nor Minuteman has one — first-mover wins local print authority. Note (2026-07-04 competitor refresh): the March "Minuteman 7-H1" finding was likely a tool mis-read of styled hero `&lt;h2&gt;`s, not actual duplicate H1 tags — treat that specific old finding as unreliable. |
 | "Free local delivery" mention | Only add if True Color actually offers this |
 | DECAL bug: RMVN006 can't be selected | OptionsPanel issue |
+| **Category hub pages (architecture gap, flagged 2026-07-04)** | Site is a flat 2-tier structure — every breadcrumb is `Home → Page`, no `Home → Signs → Coroplast Signs` middle tier, no `/signs-saskatoon` or `/print-services` hub. Likely contributing to the 40-page orphan-link problem (Wave 3.4a) and to sitelinks not forming. See new "Wave 8 — Category Hub Pages" plan below. Architecture decision — needs owner approval before any page is built. |
+| **Google Merchant Center free listings (opportunity, flagged 2026-07-04)** | Now that Product/Offer schema shipped on sticker-printing-saskatoon (Wave 4), a Merchant Center feed using that same schema data could qualify for free Shopping-tab/product listings — zero ad spend. Prerequisite (schema) is done for 1 page; feed setup not started. Queue after Wave 4 rolls out to more pages. |
 
 ---
 
@@ -288,7 +290,7 @@ Status: **NEW** — discovered 2026-04-12 from GSC data
 | Wave 3.2 — Post-audit cleanup | 3 fix-up items | **COMPLETE** ✅ 2026-05-20 |
 | **Wave 3.3 — Trust drift cleanup** | stale minimum/pricing copy + guard rails | **COMPLETE** ✅ 2026-05-25 |
 | **Wave 3.4 — Internal linking + meta batch** | orphan links + priority meta trims | **PARTIAL** ✅ 2026-05-25 |
-| Wave 4 — Product Schema | 4 items | **ON HOLD** — wait for coroplast/flyer recovery signal |
+| Wave 4 — Product Schema | 4 items | **IN PROGRESS** — sticker-printing-saskatoon shipped 2026-07-04 (Product+AggregateOffer), 3 more ranking pages queued one commit at a time |
 | Wave 5 — Core Web Vitals | 3 items | 0/3 overdue since 2026-04-11 |
 | Wave 6 — Mobile/UX | 3 items | 0/3 overdue since 2026-04-18 |
 | Wave 7 — CTR Recovery | 6 items | PARTIAL — sticker FAQ/body, wall-graphics body/FAQ, and BC metadata shipped; homepage near-me hold until 2026-06-12 |
@@ -352,16 +354,43 @@ Status: **NEW** — discovered 2026-04-12 from GSC data
 |---|------|-------|----------|
 | 3.4a | Add discoverable internal links for sitemap-indexed orphan pages, prioritizing label/service pages and city/product pages | 40 pages | MEDIUM |
 | 3.4b | Trim non-protected meta descriptions over 155 chars; prioritize city pages, resources, window-perf, booklet, community/commercial/education hubs | 48 descriptions | MEDIUM |
-| 3.4c | Review 3 legacy retractable-banner redirects that currently land on noindex `/products/retractable-banners` | `next.config.ts` | MEDIUM |
+| 3.4c | ~~Review 3 legacy retractable-banner redirects that currently land on noindex `/products/retractable-banners`~~ | `next.config.ts` | **RESOLVED (verified 2026-07-04)** — all 3 legacy sources (`/product/retractable-banner`, `/product-category/standing-banner`, `/retractable-banner-standing-banners`) already point at the live, indexable `/retractable-banners-saskatoon`. No `/products/retractable-banners` route exists in the app tree. This item was already fixed; the doc just hadn't caught up. |
+
+---
+
+## Wave 8 — Category Hub Pages (PLANNED 2026-07-04, not started — owner approval required before build)
+
+**Trigger:** breadcrumb audit (2026-07-04) confirmed every landing page's schema path is flat — `Home → [Page]`, never `Home → Signs → Coroplast Signs`. There is no `/signs-saskatoon`, `/print-services`, or similar mid-tier hub. This is architecture, not a quick content fix, and it's the likely root of two other open items: the 40-page orphan-link problem (Wave 3.4a) and Google Sitelinks never forming (sitelinks are algorithmic and reward a clear, consistent site hierarchy — a flat structure gives Google less to work with, though there's no guarantee hubs alone produce sitelinks).
+
+**Why this is its own wave and not a quick edit:** building hub pages means new URLs (sitemap + nav + footer), a decision on which pages become "children" of which hub (re-pointing internal links across many existing pages), and a 3rd breadcrumb tier in `IndustryPage.tsx` (currently 2-level only) — that's a shared-component change touching every landing page's schema output at once. High blast radius, needs its own plan review before any code, same discipline as the May 25 incident this whole rule system exists to prevent.
+
+**Proposed hub structure (draft, for owner review — not final):**
+
+| Hub (new page) | Suggested children (existing pages, re-linked, NOT moved/merged) |
+|---|---|
+| `/signs-saskatoon` | coroplast-signs, aluminum-signs, retail-signs, restaurant-signs, healthcare-signs, church-banners, law-office-signs, construction-signs, agriculture-signs |
+| `/print-services-saskatoon` (or reuse `/printing-prices-saskatoon` as the de facto hub — it already has 16 internal links) | flyer-printing, business-cards, postcard-printing, brochure printing, sticker-printing |
+| `/displays-saskatoon` | poster-printing, photo-poster-printing, foamboard-printing, retractable-banners, wall-graphics, trade-show-displays |
+| `/vehicle-graphics-saskatoon` | vehicle-magnets, vehicle-decals, vinyl-lettering, window-decals, window-perf |
+
+**Proposed phased execution (NOT to be done in one commit):**
+1. **Phase 1 (plan lock):** owner picks final hub set + names; confirm none collide with existing indexed URLs.
+2. **Phase 2 (component change, isolated):** add optional 3rd breadcrumb tier to `IndustryPage.tsx` (`categoryLabel` + `categorySlug` props) — schema-only change, ship and observe alone before touching any page content, same rule as Wave 4 schema commits.
+3. **Phase 3 (one hub at a time):** build each hub page via `/truecolor-page` (400+ words, 8 FAQs, real internal links down to its children) — one hub per ship window, 5-7 day observation between, per the existing Wave System cadence. Do NOT touch any DEFEND/FROZEN child page's own title/H1 as part of this — hubs link down to children, children don't need to change.
+4. **Phase 4 (nav/footer):** add hub links to `SiteNav.tsx` mega-menu and `SiteFooter.tsx` once all 4 hubs are live and indexed — this is also when it starts addressing the Wave 3.4a orphan-page problem, since orphans get linked from their hub instead of needing individual nav entries.
+5. **Phase 5 (measure):** GSC check at +30 days for sitelinks/hierarchy signal — this is a slow-burn architecture bet, not a CTR-in-2-weeks wave; set expectations accordingly.
+
+**Explicitly not doing:** merging or deleting any existing page, renaming any existing URL, touching any DEFEND page's title/H1/slug as part of this wave.
 
 ---
 
 **Next session priority order:**
 1. **Wave 3.3 trust drift cleanup** — stale coroplast/flyer/ACP examples, then llms review count.
 2. **Wave 3.4 internal linking + meta batch** — connect orphan sitemap pages and trim long descriptions.
-3. **Wave 4 Product schema** — only after pricing drift is clean.
+3. **Wave 4 Product schema** — 1 of 4 shipped 2026-07-04 (sticker); continue one ranking page per ship window.
 4. **Wave 5 HeroSlider/CWV audit** — client island and bundle review.
 5. **Wave 7 content recovery** — flyer/coroplast visible content depth and banner internal link count.
+6. **Wave 8 category hub pages** — owner approval on hub set/names before any build starts (see plan above).
 
 ---
 

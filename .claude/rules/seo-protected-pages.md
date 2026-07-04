@@ -83,7 +83,11 @@ This is a spot-check via the standard opportunities script, not the full-paginat
 ## Competing pages (Google can't decide which URL ranks for a keyword)
 
 - **"business cards saskatoon"** — RESOLVED. Dedicated /business-cards-saskatoon now outranks the homepage on the primary query (8.9 vs ~9). The 831b91c rewrite worked. Keep watching but no action.
-- **"poster printing saskatoon"** — NEW. Both /poster-printing-saskatoon (17.2) and /photo-poster-printing-saskatoon (8.6) serve poster queries. Decide the canonical owner before editing either. Do NOT edit both.
+- **"poster printing saskatoon"** — RESOLVED 2026-07-04 (differentiation, not merge/kill — reverses the "consider killing photo-poster" option floated back on 2026-05-05 when it was the weak page at pos 44; ranking positions flipped since then, so that old option is obsolete). Decision: **let both pages stand, own different intent, cross-link once.**
+  - `/photo-poster-printing-saskatoon` (pos 8.6, winning, 1 click) = the photography/photo-print specialist — owns "photo poster", real-estate/event-photographer/office-art use cases. **NOT TOUCHED** this round — it's winning and is now a DEFEND candidate going forward (treat its title as protected).
+  - `/poster-printing-saskatoon` (pos 17.2, page-2, 3 clicks) = the broader event/display hub — re-pointed its FAQs/body away from duplicating the photo-poster price ladder and toward its actual differentiators (foamboard displays, retractable banner stands, trade-show/non-profit/gala event packages). Title/H1/slug untouched — this was a Wave 2 content-only edit. 8 FAQs maintained per seo-standards.md. Sitemap lastmod → 2026-07-04.
+  - Files changed: `src/app/poster-printing-saskatoon/page.tsx` (FAQ rewrite), `src/app/sitemap.ts` (lastmod). Commit + sprint-log entry same session.
+  - Re-check date: 2026-07-11 (7-day content-wave observation). Watch that `/poster-printing-saskatoon` doesn't lose its existing 3 clicks/28d as a regression signal.
 
 ## What "DEFEND" means
 
@@ -117,6 +121,13 @@ This is a spot-check via the standard opportunities script, not the full-paginat
 | business cards saskatoon | #3 |
 
 **TODO:** Refresh local pack rankings from Trustindex monthly. Title changes do NOT affect local pack — local pack is GBP-driven.
+
+**⚠ Flagged 2026-07-04 (Fable synthesis): this TODO has been sitting untouched for 3.5+ months while 100% of SEO effort went into organic.** For a local print shop, map-pack visibility is arguably worth more than organic position — GBP has independently carried real orders (stickers/decals per `Projects/true-color/SEO/seo-recovery-log.md` 2026-04-27 entry) even while organic rankings were decayed. This is a separate workstream from the organic wave system above — GBP posts/photos/Q&A changes don't compete for the same ranking-risk budget as page.tsx edits, so it can run in parallel without touching the deploy clock. Use the `/gmb-update` skill (already installed, generates GBP posts/product descriptions/image prompts) and refresh the local-pack table above from Trustindex. This is the single highest-priority item not yet scheduled into any wave.
+
+## Category hub pages + Merchant Center (planned, not started — see SEO-REMAINING-WAVES.md)
+
+- **Wave 8 — Category hub pages:** flagged 2026-07-04. Site is a flat 2-tier structure (every breadcrumb is `Home → Page`, no middle category tier), likely contributing to both the Wave 3.4a orphan-page problem and sitelinks never forming. Full phased plan (draft hub structure, 5-phase rollout, explicit "not doing" list) lives in `SEO-REMAINING-WAVES.md` under "Wave 8". Owner approval on the hub set required before any page gets built — this is an architecture change, not a quick edit.
+- **Google Merchant Center free listings:** now that Product/Offer schema shipped on sticker-printing-saskatoon (2026-07-04), a Merchant Center feed reusing that schema data could win free Shopping-tab listings with zero ad spend. Queue after Wave 4 schema rolls out to 2-3 more pages (a 1-page feed isn't worth setting up yet).
 
 ## Refresh process
 
