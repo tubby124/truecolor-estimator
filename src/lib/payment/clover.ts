@@ -13,9 +13,45 @@ const BASE_URL =
     ? "https://apisandbox.dev.clover.com/invoicingcheckoutservice"
     : "https://www.clover.com/invoicingcheckoutservice";
 
+// Clover rejects Hosted Checkout requests when a line item name is 127+
+// characters. Manual multi-item orders can produce long combined descriptions,
+// so keep the customer-facing payment session creatable while preserving the
+// order number/details in our own receipt/email/Wave records.
+export const CLOVER_LINE_ITEM_NAME_MAX = 126;
+
+export function normalizeCloverLineItemName(name: string): string {
+  const normalized = name.replace(/\s+/g, " ").trim() || "True Color order";
+  if (normalized.length <= CLOVER_LINE_ITEM_NAME_MAX) return normalized;
+
+  return `${normalized.slice(0, CLOVER_LINE_ITEM_NAME_MAX - 3).trimEnd()}...`;
+}
+
 export interface CloverCheckoutResult {
   checkoutUrl: string;
   sessionId: string;
+}
+
+export async function fetchCloverPaymentAmountCents(paymentId: string): Promise<number | null> {
+  const merchantId = process.env.CLOVER_MERCHANT_ID;
+  const accessToken = process.env.CLOVER_API_KEY ?? process.env.CLOVER_ECOMM_PRIVATE_KEY;
+  if (!merchantId || !accessToken) return null;
+
+  const res = await fetch(`https://api.clover.com/v3/merchants/${merchantId}/payments/${paymentId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Clover payment lookup API error ${res.status}: ${text}`);
+  }
+
+  const data = (await res.json()) as { amount?: unknown };
+  const amount = typeof data.amount === "number" ? data.amount : Number(data.amount ?? NaN);
+  return Number.isFinite(amount) ? amount : null;
 }
 
 export async function createCloverCheckout(
@@ -39,7 +75,7 @@ export async function createCloverCheckout(
     shoppingCart: {
       lineItems: [
         {
-          name: description,
+          name: normalizeCloverLineItemName(description),
           unitQty: 1,
           price: amountCents,
         },

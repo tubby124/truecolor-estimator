@@ -26,6 +26,7 @@ import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { fetchCloverPaymentAmountCents } from "@/lib/payment/clover";
 import { summarizeOrderPayments, type OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
 import { sendEmail } from "@/lib/email/smtp";
 import { DECLINE_LABELS, recordPaymentAttempt } from "@/lib/payments/attempts";
@@ -202,7 +203,24 @@ export async function POST(req: NextRequest) {
           // partial capture (or a crafted event with amount=1¢) would still flip
           // the order to payment_received and trigger the receipt + Wave PAID
           // recording. Clover hosted-checkout puts amount in cents on event.object.
-          const reportedAmountCents = pickNumber(obj, ["amount", "Amount"]);
+          let reportedAmountCents = pickNumber(obj, ["amount", "Amount"]);
+          // Clover hosted-checkout webhooks have arrived with status=captured but
+          // without amount on event.object, while the REST payment record has the
+          // correct captured amount. Don't reject good payments as $0.00; hydrate
+          // the amount by payment id before doing the safety comparison.
+          if ((!Number.isFinite(reportedAmountCents) || reportedAmountCents <= 0) && paymentId) {
+            try {
+              const hydratedAmount = await fetchCloverPaymentAmountCents(paymentId);
+              if (typeof hydratedAmount === "number" && hydratedAmount > 0) {
+                reportedAmountCents = hydratedAmount;
+              }
+            } catch (amountErr) {
+              console.error(
+                "[clover-webhook] payment amount lookup failed:",
+                amountErr instanceof Error ? amountErr.message : amountErr
+              );
+            }
+          }
 
           let attemptOrderId: string | null = null;
           if (!matchRef && checkoutSessionId) {
