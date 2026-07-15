@@ -28,7 +28,7 @@ const NUMERIC_ID_RE = /^\d{1,30}$/;
 const ENUM_VALUES = {
   matchtype: new Set(["e", "p", "b"]),
   device: new Set(["c", "m", "t"]),
-  network: new Set(["g", "s", "d", "x", "youtube", "ytv"]),
+  network: new Set(["g", "s", "d", "ytv", "vp", "gtv", "x", "e"]),
 } as const;
 
 export function sanitizeUtm(input: Record<string, unknown>): UtmAttribution {
@@ -98,4 +98,15 @@ export function mergeUtmAttribution(
   // Merge: explicit hints win for utm_* keys, cookie fills landing_path/landing_referrer
   // (those only ever come from the cookie set client-side on first visit).
   return { ...fromCookie, ...fromHints };
+}
+
+export function appendAttributionToFormData(
+  formData: { append(name: string, value: string): void },
+  attribution: UtmAttribution | null,
+): void {
+  if (!attribution) return;
+  for (const key of ATTRIBUTION_KEYS) {
+    const value = attribution[key];
+    if (value) formData.append(key, value);
+  }
 }

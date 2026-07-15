@@ -9,11 +9,21 @@ interface Props {
   orderNumber: string;
   total: number;
   paymentMethod: string;
+  customerEmail?: string;
+  marketingConsent: boolean;
   items?: Ga4Item[];
   tax?: number;
 }
 
-export function PurchaseEvent({ orderNumber, total, paymentMethod, items, tax }: Props) {
+export function PurchaseEvent({
+  orderNumber,
+  total,
+  paymentMethod,
+  customerEmail,
+  marketingConsent,
+  items,
+  tax,
+}: Props) {
   useEffect(() => {
     trackPurchase({
       transaction_id: orderNumber,
@@ -22,10 +32,15 @@ export function PurchaseEvent({ orderNumber, total, paymentMethod, items, tax }:
       items: items ?? [],
       tax: tax ?? 0,
     });
-    sendGoogleAdsPurchase({
+    void sendGoogleAdsPurchase({
       conversionLabel: process.env.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL,
       transactionId: orderNumber,
       value: total,
+      enhancedConversion: {
+        enabled: process.env.NEXT_PUBLIC_GOOGLE_ADS_ENHANCED_CONVERSIONS_ENABLED,
+        marketingConsent,
+        email: customerEmail,
+      },
     });
     // Meta Pixel: Purchase — eventID set to order_number for client+server CAPI dedup
     metaTrackPurchase({

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  appendAttributionToFormData,
   mergeUtmAttribution,
   parseStoredAttribution,
   parseUtmCookie,
@@ -174,5 +175,33 @@ describe("UTM attribution helpers", () => {
       keyword: "request keyword",
       landing_path: "/signs",
     });
+  });
+
+  it.each(["g", "s", "d", "ytv", "vp", "gtv", "x", "e"])("accepts official network value %s", (network) => {
+    expect(sanitizeUtm({ network })).toEqual({ network });
+  });
+
+  it("rejects non-output network aliases", () => {
+    expect(sanitizeUtm({ network: "youtube" })).toEqual({});
+  });
+
+  it("appends every sanitized attribution field to form data", () => {
+    const appended: Array<[string, string]> = [];
+    appendAttributionToFormData({
+      append: (key, value) => { appended.push([key, value]); },
+    }, {
+      utm_source: "google",
+      gclid: "click_123",
+      keyword: "yard signs",
+      campaignid: "42",
+      landing_path: "/ignored",
+    });
+
+    expect(appended).toEqual([
+      ["utm_source", "google"],
+      ["gclid", "click_123"],
+      ["keyword", "yard signs"],
+      ["campaignid", "42"],
+    ]);
   });
 });

@@ -7,6 +7,7 @@ import { AuthRedirect } from "@/components/site/AuthRedirect";
 import { UtmCapture } from "@/components/site/UtmCapture";
 import { MetaPixel } from "@/components/site/MetaPixel";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
+import { deriveGoogleAdsTagId } from "@/lib/analytics/google-ads";
 
 // Self-hosted Geist + Geist Mono variable WOFF2 files. Switched from
 // next/font/google because Railway builds were intermittently failing on
@@ -266,6 +267,10 @@ const founderSchema = {
   ],
 };
 
+const googleAdsTagId = deriveGoogleAdsTagId(
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL,
+);
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -289,7 +294,7 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
         <Script id="ga4-init" strategy="lazyOnload">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6HMQT7MNLL');`}
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6HMQT7MNLL');${googleAdsTagId ? `gtag('config','${googleAdsTagId}');` : ""}`}
         </Script>
         <MetaPixel />
         {/* Trustindex loader-cert.js removed — was injecting visible

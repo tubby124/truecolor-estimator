@@ -11,4 +11,6 @@ The first-touch fields are stored on both `quote_requests` and `orders`. A later
 
 Offline import remains blocked until the True Color Google Ads account and conversion action exist and their required identifiers are confirmed. Do not hardcode an Ads account ID or conversion label.
 
-Direct browser purchase conversion is disabled unless `NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL` contains a valid full destination such as `AW-123456789/example_label`. Enhanced Conversion email preparation is also disabled unless `NEXT_PUBLIC_GOOGLE_ADS_ENHANCED_CONVERSIONS_ENABLED` is exactly `true` and the customer has explicit marketing consent. The app prepares a normalized SHA-256 email only; it does not send Google Ads `user_data` until the account-specific official tag syntax is confirmed.
+Direct browser purchase conversion is disabled unless `NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL` contains a valid full destination such as `AW-123456789/example_label`. The matching `AW-...` Google tag destination is configured from that validated value; no account ID is hardcoded.
+
+Enhanced Conversions remain disabled unless `NEXT_PUBLIC_GOOGLE_ADS_ENHANCED_CONVERSIONS_ENABLED` is exactly `true`, the order customer has explicit marketing consent, and a valid email is present. When all gates pass, the browser normalizes and SHA-256 hashes the email with Web Crypto, supplies only the hash through Google tag `user_data`, and then sends the purchase conversion. The hash is never logged or stored.

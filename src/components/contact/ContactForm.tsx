@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { readUtmFromStorage } from "@/components/site/UtmCapture";
+import { appendAttributionToFormData } from "@/lib/analytics/utm";
 
 const PRODUCT_OPTIONS = [
   "Coroplast Signs",
@@ -57,6 +59,7 @@ export function ContactForm() {
         },
       ])
     );
+    appendAttributionToFormData(payload, readUtmFromStorage());
 
     try {
       const res = await fetch("/api/quote-request", { method: "POST", body: payload });

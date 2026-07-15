@@ -2,6 +2,11 @@ export interface GoogleAdsPurchaseInput {
   conversionLabel?: string;
   transactionId: string;
   value: number;
+  enhancedConversion?: {
+    enabled?: string;
+    marketingConsent: boolean;
+    email?: string;
+  };
 }
 
 export interface GoogleAdsPurchasePayload {
@@ -17,12 +22,14 @@ interface StorageLike {
 }
 
 interface SendDependencies {
-  storage?: StorageLike;
+  localStorage?: StorageLike;
+  sessionStorage?: StorageLike;
   gtag?: ((...args: unknown[]) => void) | undefined;
 }
 
 const CONVERSION_LABEL_RE = /^AW-\d+\/[A-Za-z0-9_-]+$/;
 const SENT_KEY_PREFIX = "tc_google_ads_purchase_sent:";
+const inFlightTransactions = new Set<string>();
 
 export function prepareGoogleAdsPurchase(input: GoogleAdsPurchaseInput): GoogleAdsPurchasePayload | null {
   const label = input.conversionLabel?.trim();
@@ -32,39 +39,74 @@ export function prepareGoogleAdsPurchase(input: GoogleAdsPurchaseInput): GoogleA
   return { send_to: label, transaction_id: transactionId, value: input.value, currency: "CAD" };
 }
 
-function browserStorage(): StorageLike | undefined {
-  if (typeof window === "undefined") return undefined;
-  try {
-    return window.sessionStorage;
-  } catch {
-    try {
-      return window.localStorage;
-    } catch {
-      return undefined;
-    }
-  }
+export function deriveGoogleAdsTagId(conversionLabel: string | undefined): string | null {
+  const label = conversionLabel?.trim();
+  if (!label || !CONVERSION_LABEL_RE.test(label)) return null;
+  return label.slice(0, label.indexOf("/"));
 }
 
-export function sendGoogleAdsPurchase(input: GoogleAdsPurchaseInput, dependencies: SendDependencies = {}): boolean {
+function browserStorages(): Pick<SendDependencies, "localStorage" | "sessionStorage"> {
+  if (typeof window === "undefined") return {};
+  let localStorage: StorageLike | undefined;
+  let sessionStorage: StorageLike | undefined;
+  try { localStorage = window.localStorage; } catch { /* unavailable */ }
+  try { sessionStorage = window.sessionStorage; } catch { /* unavailable */ }
+  return { localStorage, sessionStorage };
+}
+
+function selectDedupStorage(
+  localStorage: StorageLike | undefined,
+  sessionStorage: StorageLike | undefined,
+  key: string,
+): { storage?: StorageLike; sent: boolean } {
+  for (const storage of [localStorage, sessionStorage]) {
+    if (!storage) continue;
+    try {
+      return { storage, sent: storage.getItem(key) === "1" };
+    } catch {
+      // Try the next storage implementation.
+    }
+  }
+  return { sent: false };
+}
+
+export async function sendGoogleAdsPurchase(
+  input: GoogleAdsPurchaseInput,
+  dependencies: SendDependencies = {},
+): Promise<boolean> {
   const payload = prepareGoogleAdsPurchase(input);
   const gtag = dependencies.gtag ?? (typeof window !== "undefined" ? window.gtag : undefined);
   if (!payload || typeof gtag !== "function") return false;
 
-  const storage = dependencies.storage ?? browserStorage();
+  const browser = browserStorages();
+  const localStorage = dependencies.localStorage ?? browser.localStorage;
+  const sessionStorage = dependencies.sessionStorage ?? browser.sessionStorage;
   const sentKey = `${SENT_KEY_PREFIX}${payload.transaction_id}`;
-  try {
-    if (storage?.getItem(sentKey) === "1") return false;
-  } catch {
-    // Storage privacy settings must not block the conversion.
-  }
+  const dedup = selectDedupStorage(localStorage, sessionStorage, sentKey);
+  if (dedup.sent) return false;
+  if (inFlightTransactions.has(sentKey)) return false;
+  inFlightTransactions.add(sentKey);
 
-  gtag("event", "conversion", payload);
   try {
-    storage?.setItem(sentKey, "1");
-  } catch {
-    // The conversion was sent; storage dedup is best-effort.
+    if (input.enhancedConversion) {
+      const emailHash = await prepareEnhancedConversionEmail(input.enhancedConversion);
+      if (emailHash) {
+        gtag("set", "user_data", { sha256_email_address: emailHash });
+      }
+    }
+
+    gtag("event", "conversion", payload);
+    try {
+      dedup.storage?.setItem(sentKey, "1");
+    } catch {
+      if (dedup.storage === localStorage) {
+        try { sessionStorage?.setItem(sentKey, "1"); } catch { /* best-effort */ }
+      }
+    }
+    return true;
+  } finally {
+    inFlightTransactions.delete(sentKey);
   }
-  return true;
 }
 
 export async function prepareEnhancedConversionEmail(input: {

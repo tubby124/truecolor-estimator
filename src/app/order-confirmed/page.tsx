@@ -9,6 +9,7 @@ import { CloverPaymentWatcher } from "@/app/order-confirmed/CloverPaymentWatcher
 import { REVIEW_COUNT } from "@/lib/reviews";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 import { encodePaymentToken } from "@/lib/payment/token";
+import { shouldTrackConfirmedPurchase } from "@/lib/analytics/purchase-readiness";
 
 export const metadata: Metadata = {
   title: "Order Confirmed — True Color",
@@ -25,10 +26,11 @@ interface OrderSummary {
   gst: number | string | null;
   pst: number | string | null;
   status: string;
+  paid_at: string | null;
   payment_method: string;
   payment_reference: string | null;
   receipt_token: string | null;
-  customers?: { email: string; name: string; company: string | null } | Array<{ email: string; name: string; company: string | null }> | null;
+  customers?: { email: string; name: string; company: string | null; marketing_consent: boolean | null } | Array<{ email: string; name: string; company: string | null; marketing_consent: boolean | null }> | null;
   order_items?: Array<{ product_name: string; category?: string | null; qty: number; line_total: number | string }> | null;
   latest_payment_attempt?: LatestPaymentAttempt | null;
 }
@@ -49,7 +51,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       // success AND cancellation/timeout, so we can't trust the redirect alone.
       const { data } = await supabase
         .from("orders")
-        .select("order_number, total, gst, pst, payment_method, payment_reference, receipt_token, status, customers(email, name, company), order_items(product_name, category, qty, line_total)")
+        .select("order_number, total, gst, pst, payment_method, payment_reference, receipt_token, status, paid_at, customers(email, name, company, marketing_consent), order_items(product_name, category, qty, line_total)")
         .eq("id", oid)
         .single();
 
@@ -71,6 +73,9 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
 
   const customerRaw = orderSummary?.customers;
   const customerEmail = Array.isArray(customerRaw) ? customerRaw[0]?.email : customerRaw?.email;
+  const customerMarketingConsent = Array.isArray(customerRaw)
+    ? customerRaw[0]?.marketing_consent === true
+    : customerRaw?.marketing_consent === true;
 
   const isEtransfer = orderSummary?.payment_method === "etransfer";
   // For eTransfer orders, payment_reference holds the /pay/{token} card URL.
@@ -102,11 +107,13 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       <SiteNav />
 
       {/* GA4 purchase event — only fires when payment is confirmed (not while pending) */}
-      {oid && orderSummary && orderSummary.status !== "pending_payment" && (
+      {oid && orderSummary && shouldTrackConfirmedPurchase({ status: orderSummary.status, paidAt: orderSummary.paid_at }) && (
         <PurchaseEvent
           orderNumber={orderSummary.order_number}
           total={Number(orderSummary.total)}
           paymentMethod={orderSummary.payment_method}
+          customerEmail={customerEmail}
+          marketingConsent={customerMarketingConsent}
           tax={Number(orderSummary.gst ?? 0) + Number(orderSummary.pst ?? 0)}
           items={(orderSummary.order_items ?? []).map((i) => ({
             item_id: (i.product_name ?? "").slice(0, 100),
