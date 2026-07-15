@@ -62,6 +62,32 @@ export type Ga4Row = {
   conversions: number;
 };
 
+const PRIVATE_OR_NOINDEX_ROOTS = [
+  "/staff",
+  "/api",
+  "/pay",
+  "/cart",
+  "/checkout",
+  "/order-confirmed",
+  "/account",
+  "/payment",
+] as const;
+
+const PRIVATE_DESCENDANTS_ONLY = ["/quote", "/products"] as const;
+
+function isPathOrDescendant(path: string, root: string): boolean {
+  return path === root || path.startsWith(`${root}/`);
+}
+
+/** Keep the GA4 organic rollup comparable to GSC's public, indexable URLs. */
+export function isPublicOrganicPath(pagePath: string): boolean {
+  if (!pagePath.startsWith("/")) return false;
+  return (
+    !PRIVATE_OR_NOINDEX_ROOTS.some((root) => isPathOrDescendant(pagePath, root)) &&
+    !PRIVATE_DESCENDANTS_ONLY.some((root) => pagePath.startsWith(`${root}/`))
+  );
+}
+
 /**
  * Pull one row per pagePath for a date range, filtered to organic-search
  * sessions only. The GSC-vs-GA4 divergence signal compares GSC clicks to
@@ -82,11 +108,14 @@ export async function pullGa4OrganicRows(params: {
     property: `properties/${propertyId}`,
     requestBody: {
       dateRanges: [{ startDate: params.dateFrom, endDate: params.dateTo }],
-      dimensions: [{ name: "pagePath" }],
+      // Landing pages keep sessions unique and attribute key events to the
+      // organic entry page instead of a later checkout/confirmation page.
+      dimensions: [{ name: "landingPage" }],
       metrics: [
         { name: "sessions" },
         { name: "engagedSessions" },
-        { name: "conversions" },
+        // `conversions` was deprecated by GA4 in favour of `keyEvents`.
+        { name: "keyEvents" },
       ],
       dimensionFilter: {
         filter: {
@@ -103,7 +132,7 @@ export async function pullGa4OrganicRows(params: {
   const out: Ga4Row[] = [];
   for (const r of rows) {
     const pagePath = r.dimensionValues?.[0]?.value ?? "";
-    if (!pagePath) continue;
+    if (!isPublicOrganicPath(pagePath)) continue;
     const sessions = Number(r.metricValues?.[0]?.value ?? 0);
     const engaged = Number(r.metricValues?.[1]?.value ?? 0);
     const conversions = Number(r.metricValues?.[2]?.value ?? 0);

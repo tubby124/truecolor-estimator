@@ -40,6 +40,12 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const daysParam = parseInt(url.searchParams.get("days") ?? "7", 10);
   const lagParam = parseInt(url.searchParams.get("lag") ?? "2", 10);
+  if (!Number.isInteger(daysParam) || daysParam < 1 || daysParam > 31) {
+    return NextResponse.json({ error: "days must be an integer from 1 to 31" }, { status: 400 });
+  }
+  if (!Number.isInteger(lagParam) || lagParam < 0 || lagParam > 14) {
+    return NextResponse.json({ error: "lag must be an integer from 0 to 14" }, { status: 400 });
+  }
 
   const today = new Date();
   const dateTo = new Date(today);
@@ -56,7 +62,10 @@ export async function GET(req: NextRequest) {
   try {
     let totalRows = 0;
     let totalUpserts = 0;
+    const rowsByDay: Array<{ day: string; rows: Awaited<ReturnType<typeof pullGa4OrganicRows>> }> = [];
 
+    // Finish every GA4 read before replacing stored rows. An upstream failure
+    // therefore leaves the existing reporting window intact.
     for (
       let cursor = new Date(dateFrom);
       cursor <= dateTo;
@@ -65,6 +74,16 @@ export async function GET(req: NextRequest) {
       const day = ymd(cursor);
       const rows = await pullGa4OrganicRows({ dateFrom: day, dateTo: day });
       totalRows += rows.length;
+      rowsByDay.push({ day, rows });
+    }
+
+    for (const { day, rows } of rowsByDay) {
+      const { error: deleteError } = await supabase
+        .from("analytics_ga4_snapshots")
+        .delete()
+        .eq("snapshot_date", day)
+        .eq("source_medium", "organic");
+      if (deleteError) throw new Error(`Supabase daily replacement failed: ${deleteError.message}`);
 
       if (rows.length === 0) continue;
 

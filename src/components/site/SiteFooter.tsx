@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { REVIEW_COUNT } from "@/lib/reviews";
+import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 
 export function SiteFooter() {
   return (
@@ -35,7 +35,7 @@ export function SiteFooter() {
               Saskatoon&apos;s print shop for signs, banners, magnets, cards, and flyers.
               Transparent pricing. In-house designer. Local pickup.
             </p>
-            <p className="text-xs text-gray-500 mt-4">5.0 ★ on Google · {REVIEW_COUNT} reviews</p>
+            <p className="text-xs text-gray-500 mt-4">{RATING_VALUE} ★ on Google · {REVIEW_COUNT} reviews</p>
           </div>
 
           {/* Col 2: Contact + address */}

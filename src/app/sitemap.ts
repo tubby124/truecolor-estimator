@@ -11,7 +11,7 @@ const BASE_URL = "https://truecolorprinting.ca";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     // ── Core pages ───────────────────────────────────────────────────────────
-    { url: `${BASE_URL}/`, lastModified: new Date("2026-05-25"), changeFrequency: "weekly", priority: 1.0 },
+    { url: `${BASE_URL}/`, lastModified: new Date("2026-07-15"), changeFrequency: "weekly", priority: 1.0 },
     { url: `${BASE_URL}/products`, lastModified: new Date("2026-06-22"), changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/gallery`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/about`, lastModified: new Date("2026-05-02"), changeFrequency: "monthly", priority: 0.6 },

@@ -4,10 +4,8 @@
  * Update this number when new Google reviews come in.
  * Every trust badge, schema, and footer reference imports from here.
  *
- * The homepage ReviewsSection also extracts the live count from Trustindex
- * (see fetchWidgetHtml in ReviewsSection.tsx), but these constants are used
- * for schema.org structured data, trust strips, and client components that
- * can't do server-side fetches.
+ * Verify both values against the paid Trustindex source before updating.
+ * These constants feed schema.org structured data and every on-site badge.
  */
-export const REVIEW_COUNT = 29;
-export const RATING_VALUE = "5.0";
+export const REVIEW_COUNT = 43;
+export const RATING_VALUE = "4.9";

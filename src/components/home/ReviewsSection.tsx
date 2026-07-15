@@ -1,147 +1,68 @@
+import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
+
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
-// Google Maps place page — opens to the reviews tab
 const GOOGLE_ALL_REVIEWS_URL =
   "https://www.google.com/maps/place/?q=place_id:ChIJ96tVovr3BFMRkfoeVs16NAA";
 
-// ── Widget — 3-column grid (layout 16), used for both desktop and mobile ─────
-const WIDGET_URL =
-  "https://cdn.trustindex.io/widgets/c1/c1b158266dfc004a71264ccddfe/content.html";
-// data-layout-id="16", data-set-id="light-background", data-css-version="2"
-const WIDGET_CSS_URL =
-  "https://cdn.trustindex.io/assets/widget-presetted-css/v2/16-light-background.css";
-// On mobile (<768px): 1-column, show 3 reviews (image reviews first per Trustindex sort).
-// Layout 5 (slider) was dropped — it requires JS to set card heights at runtime;
-// without loader.js the ti-reviews-container-wrapper collapses to zero height.
-const MOBILE_RESPONSIVE_CSS = `
-@media (max-width:767px){
-  .ti-widget[data-layout-id='16'] .ti-col-3 .ti-review-item{flex:0 0 100%!important;max-width:100%!important}
-  .ti-widget[data-layout-id='16'] .ti-review-item:nth-child(n+4){display:none!important}
-  .ti-widget[data-layout-id='16'] .ti-load-more-reviews-container{display:none!important}
-  .ti-widget[data-layout-id='16'] .ti-reviews-container .ti-reviews-container-wrapper{margin-bottom:0!important}
-  .ti-widget[data-layout-id='16'] .ti-review-item .ti-review-image{display:none!important}
-  .ti-widget[data-layout-id='16'] .ti-review-item .ti-review-text-container{width:100%!important;max-width:100%!important}
-}`;
-
-
 function GoogleIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="w-5 h-5 shrink-0">
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" aria-hidden="true">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
     </svg>
   );
 }
 
-interface WidgetResult {
-  html: string;
-  reviewCount: number | null;
-}
-
-async function fetchWidgetHtml(
-  widgetUrl: string,
-  cssUrl: string,
-  extraCss = "",
-): Promise<WidgetResult | null> {
-  try {
-    const [widgetRes, cssRes] = await Promise.all([
-      fetch(widgetUrl, { next: { revalidate: 3600 } }),
-      fetch(cssUrl,    { next: { revalidate: 86400 } }), // CSS rarely changes
-    ]);
-    if (!widgetRes.ok) return null;
-
-    const [widgetHtml, css] = await Promise.all([
-      widgetRes.text(),
-      cssRes.ok ? cssRes.text() : Promise.resolve(""),
-    ]);
-
-    // Extract review count from the widget HTML e.g. ">29 reviews<"
-    const countMatch = widgetHtml.match(/>(\d+) reviews</i);
-    const reviewCount = countMatch ? parseInt(countMatch[1], 10) : null;
-
-    // Replace sprite divs with CSS initial avatars.
-    // Trustindex's sprite.jpg row order doesn't match the HTML display order
-    // (sprite is pure-recency, HTML groups image-reviews first), so sequential
-    // mapping produces wrong profile photos. Initial avatars are reliable and
-    // don't depend on any external sprite resource.
-    const names: string[] = [];
-    widgetHtml.replace(
-      /<div class="ti-name">\s*<a[^>]*>([^<]+)<\/a>/g,
-      (_, name: string) => { names.push(name.trim()); return _; },
-    );
-    let nameIdx = 0;
-    const widgetWithAvatars = widgetHtml.replace(
-      /(<div[^>]+class="[^"]*ti-profile-img-sprite[^"]*")[^>]*(>)<\/div>/g,
-      (_match, tag, close) => {
-        const name = names[nameIdx] || "?";
-        const initial = name.charAt(0).toUpperCase();
-        const hue = (initial.charCodeAt(0) * 137) % 360;
-        nameIdx++;
-        return `${tag} style="background:hsl(${hue},45%,55%);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px"${close}${initial}</div>`;
-      },
-    );
-
-    // Add alt attributes to any <img> tags missing them (SEO: Trustindex
-    // widget injects profile photos and logos without alt text).
-    const withAlts = widgetWithAvatars.replace(
-      /<img(?![^>]*\balt\b)([^>]*?)(\s*\/?>)/gi,
-      '<img alt="Google reviewer"$1$2'
-    );
-
-    // Inline base CSS first, then widget HTML, then our overrides last.
-    // Overrides must come AFTER the widget HTML because content.html embeds an
-    // inline <style class="scss-content"> at its end with !important rules —
-    // putting our CSS after ensures we win the cascade regardless of specificity.
-    const html = `<style>${css}</style>\n${withAlts}${extraCss ? `\n<style>${extraCss}</style>` : ""}`;
-    return { html, reviewCount };
-  } catch {
-    return null;
-  }
-}
-
-export async function ReviewsSection() {
-  const widget = await fetchWidgetHtml(
-    WIDGET_URL,
-    WIDGET_CSS_URL,
-    MOBILE_RESPONSIVE_CSS,
-  );
-
+export function ReviewsSection() {
   return (
-    <section className="bg-white border-b border-gray-100 pt-2 pb-16 sm:pb-8 overflow-x-hidden">
-      <div className="max-w-6xl mx-auto px-6">
-        {/* Reviews widget — 3-col grid on desktop, 1-col image reviews first on mobile */}
-        {widget && (
-          <div dangerouslySetInnerHTML={{ __html: widget.html }} />
-        )}
+    <section className="border-b border-gray-100 bg-white px-6 py-10">
+      <div className="mx-auto max-w-5xl">
+        <div className="flex flex-col items-center justify-between gap-6 rounded-2xl border border-gray-100 bg-gray-50 px-6 py-7 text-center shadow-sm sm:flex-row sm:text-left">
+          <div className="flex items-center gap-4">
+            <GoogleIcon />
+            <div>
+              <div className="flex items-center justify-center gap-2 sm:justify-start">
+                <span className="text-2xl font-black text-[#1c1712]">{RATING_VALUE}</span>
+                <span className="text-lg tracking-wider text-yellow-400" aria-label={`${RATING_VALUE} out of 5 stars`}>
+                  ★★★★★
+                </span>
+              </div>
+              <p className="text-sm font-medium text-gray-600">
+                {REVIEW_COUNT} Google reviews from local customers
+              </p>
+            </div>
+          </div>
 
-        {/* Mobile only — see all reviews link */}
-        <div className="md:hidden mt-4 text-center">
+          <div className="flex flex-wrap justify-center gap-3 sm:justify-end">
+            <a
+              href="/reviews-widget"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-[#1c1712] transition-colors hover:border-[#16C2F3]"
+            >
+              Open customer reviews
+            </a>
+            <a
+              href={GOOGLE_REVIEW_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg bg-[#16C2F3] px-4 py-2.5 text-sm font-semibold text-[#1c1712] transition-colors hover:bg-[#0fb0dd]"
+            >
+              Leave a review
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-3 text-center">
           <a
             href={GOOGLE_ALL_REVIEWS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
+            className="text-sm font-semibold text-blue-600 hover:underline"
           >
-            <GoogleIcon />
-            <span>
-              {widget?.reviewCount
-                ? `See all ${widget.reviewCount} reviews on Google`
-                : "See all reviews on Google"}
-            </span>
-          </a>
-        </div>
-
-        {/* Leave a review CTA */}
-        <div className="mt-5 text-center">
-          <a
-            href={GOOGLE_REVIEW_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#1c1712] transition-colors"
-          >
-            <GoogleIcon />
-            <span>Happy with your order? Leave us a review →</span>
+            See all {REVIEW_COUNT} reviews on Google →
           </a>
         </div>
       </div>

@@ -169,6 +169,7 @@ export function HeroSlider() {
               fill
               className="object-contain p-6 md:p-10"
               priority
+              fetchPriority="high"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
