@@ -26,6 +26,7 @@ import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { classifyReferrer } from "@/lib/analytics/referrer";
 import { mergeUtmAttribution } from "@/lib/analytics/utm";
+import { mapAttributionToDb } from "@/lib/analytics/attribution-db";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 
 export interface CreateOrderRequest {
@@ -49,6 +50,18 @@ export interface CreateOrderRequest {
   utm_medium?: string;
   utm_content?: string;
   utm_term?: string;
+  gclid?: string;
+  gbraid?: string;
+  wbraid?: string;
+  keyword?: string;
+  matchtype?: string;
+  device?: string;
+  loc_physical_ms?: string;
+  loc_interest_ms?: string;
+  adgroupid?: string;
+  creative?: string;
+  campaignid?: string;
+  network?: string;
 }
 
 const GST_RATE = 0.05;
@@ -124,7 +137,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode, marketing_consent, utm_source, utm_campaign, utm_medium, utm_content, utm_term } = body;
+    const {
+      items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths,
+      discount_code: rawDiscountCode, marketing_consent,
+      utm_source, utm_campaign, utm_medium, utm_content, utm_term,
+      gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
+      loc_interest_ms, adgroupid, creative, campaignid, network,
+    } = body;
 
     if (!rawItems?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -342,7 +361,11 @@ export async function POST(req: NextRequest) {
       const orderNumber = `TC-${orderYear}-${String((orderCount ?? 0) + 1).padStart(4, "0")}`;
 
       const utm = mergeUtmAttribution(
-        { utm_source, utm_campaign, utm_medium, utm_content, utm_term },
+        {
+          utm_source, utm_campaign, utm_medium, utm_content, utm_term,
+          gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
+          loc_interest_ms, adgroupid, creative, campaignid, network,
+        },
         req.headers.get("cookie"),
       );
       // Prefer the cookie's first-touch landing_referrer (true upstream — e.g.
@@ -367,8 +390,7 @@ export async function POST(req: NextRequest) {
           discount_amount: discount,
           payment_method,
           notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
-          utm_source: utm.utm_source ?? null,
-          utm_campaign: utm.utm_campaign ?? null,
+          ...mapAttributionToDb(utm),
           referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
           referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
           raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,

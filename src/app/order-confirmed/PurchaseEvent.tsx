@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { trackPurchase, type Ga4Item } from "@/lib/analytics";
 import { metaTrackPurchase } from "@/lib/analytics/metaPixel";
+import { sendGoogleAdsPurchase } from "@/lib/analytics/google-ads";
 
 interface Props {
   orderNumber: string;
@@ -20,6 +21,11 @@ export function PurchaseEvent({ orderNumber, total, paymentMethod, items, tax }:
       payment_method: paymentMethod,
       items: items ?? [],
       tax: tax ?? 0,
+    });
+    sendGoogleAdsPurchase({
+      conversionLabel: process.env.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL,
+      transactionId: orderNumber,
+      value: total,
     });
     // Meta Pixel: Purchase — eventID set to order_number for client+server CAPI dedup
     metaTrackPurchase({

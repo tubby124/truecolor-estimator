@@ -1,14 +1,26 @@
 "use client";
 
 import { useEffect } from "react";
-import { UTM_COOKIE_NAME, UTM_KEYS, UTM_TTL_DAYS } from "@/lib/analytics/utm";
+import {
+  ATTRIBUTION_KEYS,
+  parseStoredAttribution,
+  sanitizeUtm,
+  type UtmAttribution,
+  UTM_COOKIE_NAME,
+  UTM_TTL_DAYS,
+} from "@/lib/analytics/utm";
 
 const LS_KEY = "tc_utm_first_touch";
 
 function persistAttribution(payload: Record<string, string | number>) {
   const maxAge = UTM_TTL_DAYS * 24 * 60 * 60;
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${UTM_COOKIE_NAME}=${encodeURIComponent(JSON.stringify(payload))}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
+  const encoded = encodeURIComponent(JSON.stringify(payload));
+  // Keep below common 4 KB cookie limits. localStorage still retains the full,
+  // sanitized payload when an unusually long encoded referrer exceeds this bound.
+  if (encoded.length <= 3800) {
+    document.cookie = `${UTM_COOKIE_NAME}=${encoded}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
+  }
 
   try {
     window.localStorage.setItem(LS_KEY, JSON.stringify(payload));
@@ -23,10 +35,10 @@ export function UtmCapture() {
     const sp = new URLSearchParams(window.location.search);
 
     // 1. Collect any UTM params present on the URL.
-    const utm: Record<string, string> = {};
-    for (const k of UTM_KEYS) {
+    const attributionInput: Record<string, string> = {};
+    for (const k of ATTRIBUTION_KEYS) {
       const v = sp.get(k);
-      if (v) utm[k] = v;
+      if (v) attributionInput[k] = v;
     }
 
     // 2. Always capture landing path + true upstream referrer on first visit,
@@ -39,14 +51,14 @@ export function UtmCapture() {
 
     // 3. If a first-touch already exists and is still fresh, only refresh the cookie
     //    (don't overwrite — first-touch attribution wins).
-    let existing: Record<string, unknown> | null = null;
+    let existing: Record<string, string | number> | null = null;
     try {
       const raw = window.localStorage.getItem(LS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Record<string, unknown> & { captured_at?: number };
-        const ageMs = Date.now() - Number(parsed.captured_at ?? 0);
-        if (ageMs < UTM_TTL_DAYS * 24 * 60 * 60 * 1000) {
-          existing = parsed;
+        const sanitized = parseStoredAttribution(raw);
+        if (Object.keys(sanitized).length > 0) {
+          existing = { ...sanitized, captured_at: Number(parsed.captured_at) };
         }
       }
     } catch {
@@ -55,16 +67,14 @@ export function UtmCapture() {
 
     if (existing) {
       // Refresh cookie TTL with the existing payload — never overwrite first touch.
-      persistAttribution(existing as Record<string, string | number>);
+      persistAttribution(existing);
       return;
     }
 
     // 4. Fresh first-touch — write the cookie even if utm is empty.
     try {
       persistAttribution({
-        ...utm,
-        landing_path: landingPath,
-        landing_referrer: referrer,
+        ...sanitizeUtm({ ...attributionInput, landing_path: landingPath, landing_referrer: referrer }),
         captured_at: Date.now(),
       });
     } catch {
@@ -75,18 +85,12 @@ export function UtmCapture() {
   return null;
 }
 
-export function readUtmFromStorage(): Record<string, string> | null {
+export function readUtmFromStorage(): UtmAttribution | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(LS_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Record<string, string | number>;
-    const ageMs = Date.now() - Number(parsed.captured_at ?? 0);
-    if (ageMs > UTM_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
-    const out: Record<string, string> = {};
-    for (const k of UTM_KEYS) {
-      if (typeof parsed[k] === "string") out[k] = parsed[k] as string;
-    }
+    const out = parseStoredAttribution(raw);
     return Object.keys(out).length ? out : null;
   } catch {
     return null;

@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { trackBeginCheckout } from "@/lib/analytics";
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
+import { readUtmFromStorage } from "@/components/site/UtmCapture";
 
 const DEFAULT_GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -427,23 +428,7 @@ export default function CheckoutPage() {
         setUploadProgress("");
       }
 
-      // Pull first-touch UTM from localStorage (set by UtmCapture on landing)
-      const utm = (() => {
-        try {
-          const raw = window.localStorage.getItem("tc_utm_first_touch");
-          if (!raw) return {} as Record<string, string>;
-          const parsed = JSON.parse(raw) as Record<string, string | number>;
-          return {
-            utm_source: typeof parsed.utm_source === "string" ? parsed.utm_source : undefined,
-            utm_campaign: typeof parsed.utm_campaign === "string" ? parsed.utm_campaign : undefined,
-            utm_medium: typeof parsed.utm_medium === "string" ? parsed.utm_medium : undefined,
-            utm_content: typeof parsed.utm_content === "string" ? parsed.utm_content : undefined,
-            utm_term: typeof parsed.utm_term === "string" ? parsed.utm_term : undefined,
-          };
-        } catch {
-          return {} as Record<string, string | undefined>;
-        }
-      })();
+      const attribution = readUtmFromStorage() ?? {};
 
       const body: CreateOrderRequest = {
         items,
@@ -461,7 +446,7 @@ export default function CheckoutPage() {
         discount_code: appliedDiscount?.code,
         discount_amount: appliedDiscount?.amount,
         marketing_consent: marketingConsent,
-        ...utm,
+        ...attribution,
       };
       const res = await fetch("/api/orders", {
         method: "POST",

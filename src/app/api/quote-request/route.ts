@@ -24,7 +24,8 @@ import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { classifyReferrer } from "@/lib/analytics/referrer";
 import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
-import { mergeUtmAttribution } from "@/lib/analytics/utm";
+import { ATTRIBUTION_KEYS, mergeUtmAttribution } from "@/lib/analytics/utm";
+import { mapAttributionToDb } from "@/lib/analytics/attribution-db";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -266,13 +267,7 @@ export async function POST(req: NextRequest) {
     // Prefer the cookie's landing_referrer (true upstream — google, maps, chatgpt)
     // over the POST request's Referer header which is always self-domain.
     const utm = mergeUtmAttribution(
-      {
-        utm_source: form.get("utm_source"),
-        utm_medium: form.get("utm_medium"),
-        utm_campaign: form.get("utm_campaign"),
-        utm_content: form.get("utm_content"),
-        utm_term: form.get("utm_term"),
-      },
+      Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
       req.headers.get("cookie"),
     );
     const refClass = classifyReferrer(utm.landing_referrer || req.headers.get("referer"));
@@ -296,8 +291,7 @@ export async function POST(req: NextRequest) {
           referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
           referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
           raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,
-          utm_source: utm.utm_source ?? null,
-          utm_campaign: utm.utm_campaign ?? null,
+          ...mapAttributionToDb(utm),
         })
         .select("id")
         .single();
