@@ -5,7 +5,7 @@ import { PrintIcon } from "@/components/icons/PrintIcons";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 
 export const metadata: Metadata = {
-  title: "Choose a Print Product | True Color Display Printing",
+  title: "Choose a Print Product",
   description:
     "Choose a print product, see pricing, and order online from True Color Display Printing in Saskatoon.",
   robots: {
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
 };
 
-const PRODUCTS = [
+export const PAID_PRODUCTS = [
   {
     name: "Coroplast signs",
     slug: "coroplast-signs",
@@ -47,6 +47,8 @@ const PRODUCTS = [
   },
 ] as const;
 
+export const LICENSED_REVIEW_ROUTE = "/reviews-widget" as const;
+
 export default function WhyTrueColorPage() {
   return (
     <main id="main-content">
@@ -66,7 +68,7 @@ export default function WhyTrueColorPage() {
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-            {PRODUCTS.map((product) => (
+            {PAID_PRODUCTS.map((product) => (
               <Link
                 key={product.href}
                 href={product.href}
@@ -148,7 +150,7 @@ export default function WhyTrueColorPage() {
             </p>
           </div>
           <a
-            href="/reviews-widget"
+            href={LICENSED_REVIEW_ROUTE}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#1c1712] px-6 font-bold text-white transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3] focus-visible:ring-offset-2"

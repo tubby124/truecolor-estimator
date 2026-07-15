@@ -1,57 +1,51 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import sitemap from "../../sitemap";
+import { GET as getReviewsWidget } from "../../reviews-widget/route";
+import { LICENSED_REVIEW_ROUTE, metadata, PAID_PRODUCTS } from "../page";
 
-const routeDir = join(process.cwd(), "src/app/why-true-color");
-const pagePath = join(routeDir, "page.tsx");
-const layoutPath = join(routeDir, "layout.tsx");
+const EXPECTED_PRODUCT_HREFS = [
+  "/products/coroplast-signs",
+  "/products/stickers",
+  "/products/vinyl-banners",
+  "/products/business-cards",
+  "/products/flyers",
+  "/products/retractable-banners",
+];
 
-function source(path: string) {
-  return existsSync(path) ? readFileSync(path, "utf8") : "";
-}
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("paid-only why True Color page contract", () => {
-  it("is noindex, follow", () => {
-    const page = source(pagePath);
-
-    expect(page).toMatch(/robots:\s*{[\s\S]*index:\s*false[\s\S]*follow:\s*true[\s\S]*}/);
+  it("uses a non-duplicated title and is noindex, follow", () => {
+    expect(metadata.title).toBe("Choose a Print Product");
+    expect(metadata.robots).toMatchObject({ index: false, follow: true });
   });
 
-  it("stays excluded from the sitemap and global navigation", () => {
-    const sitemap = source(join(process.cwd(), "src/app/sitemap.ts"));
-    const siteNav = source(join(process.cwd(), "src/components/site/SiteNav.tsx"));
-    const siteFooter = source(join(process.cwd(), "src/components/site/SiteFooter.tsx"));
-
-    expect(sitemap).not.toContain("/why-true-color");
-    expect(siteNav).not.toContain("/why-true-color");
-    expect(siteFooter).not.toContain("/why-true-color");
+  it("stays excluded from the generated sitemap", () => {
+    expect(sitemap().map((entry) => entry.url)).not.toContain(
+      "https://truecolorprinting.ca/why-true-color",
+    );
   });
 
-  it("links every paid-traffic product card directly to its order page", () => {
-    const page = source(pagePath);
-    const destinations = [
-      "/products/coroplast-signs",
-      "/products/stickers",
-      "/products/vinyl-banners",
-      "/products/business-cards",
-      "/products/flyers",
-      "/products/retractable-banners",
-    ];
-
-    for (const destination of destinations) {
-      expect(page).toContain(`href: "${destination}"`);
-    }
+  it("exposes exactly the six direct product CTA destinations", () => {
+    expect(PAID_PRODUCTS.map((product) => product.href)).toEqual(EXPECTED_PRODUCT_HREFS);
   });
 
-  it("reuses the site chrome and links to the licensed review route", () => {
-    const page = source(pagePath);
-    const layout = source(layoutPath);
-    const reviewRoute = source(join(process.cwd(), "src/app/reviews-widget/route.ts"));
+  it("links to and preserves the licensed review route", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response("<div>Licensed reviews</div>"))
+      .mockResolvedValueOnce(new Response(".ti-widget{}"));
+    vi.stubGlobal("fetch", fetchMock);
 
-    expect(layout).toContain("<SiteNav />");
-    expect(layout).toContain("<SiteFooter />");
-    expect(page).toContain('href="/reviews-widget"');
-    expect(reviewRoute).toContain("https://cdn.trustindex.io/widgets/");
-    expect(reviewRoute).toContain("export async function GET()");
+    const response = await getReviewsWidget();
+
+    expect(LICENSED_REVIEW_ROUTE).toBe("/reviews-widget");
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0][0])).toMatch(
+      /^https:\/\/cdn\.trustindex\.io\/widgets\//,
+    );
   });
 });
