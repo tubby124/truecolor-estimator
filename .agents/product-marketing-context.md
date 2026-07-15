@@ -1,6 +1,6 @@
 # Product Marketing Context — True Color Display Printing Ltd.
 
-*Last updated: 2026-02-28*
+*Last updated: 2026-07-15*
 *Auto-loaded by: seo-audit, schema-markup, programmatic-seo, site-architecture, page-cro, content-strategy, copywriting, ai-seo, truecolor-seo*
 
 ---
@@ -252,9 +252,11 @@
 
 **Secondary CTA text:** "Order online — pick up same day" or "See exact pricing now"
 
-**Current metrics:** DNS cutover in progress (2026-02-28). New Railway site launched. GSC not yet set up. 0 tracked keyword rankings on new domain.
+**Current metrics (2026-07-15):** 7,037 GSC impressions and 41 clicks in the latest available 28-day window. Paid-order data confirms coroplast and stickers/labels are the commercial winners. GA4 organic snapshots are live but conversion measurement is being corrected; order-level attribution is the revenue source of truth.
 
-**90-day goal:** Rank in top 3 for: coroplast signs saskatoon, same day printing saskatoon, banner printing saskatoon. Build 6 SEO landing pages. Submit sitemap to GSC.
+**Current growth goal:** Protect the pages already producing orders, lift CTR on existing demand, improve Core Web Vitals, and make Google/Bing/ChatGPT/GBP attribution reliable.
+
+**Location-page policy:** No net-new city or location landing pages. The URL inventory is already beyond the 50-location hard gate. Growth comes from existing-page improvement, real customer proof/case studies, performance, and distribution—not more geo URLs.
 
 ---
 

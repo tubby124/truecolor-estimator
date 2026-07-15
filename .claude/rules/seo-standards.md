@@ -18,6 +18,12 @@ Priority: 0.95 tier-1 | 0.90 new local | 0.85 seasonal | 0.80 secondary
 Add to: sitemap.ts | SiteNav.tsx (correct megamenu or INDUSTRY_LINKS) | SiteFooter.tsx
 Skills: `/truecolor-page [keyword]` | `/paa-faq [keyword]`
 
+## Location Expansion Freeze — 2026-07-15
+- HARD STOP on all net-new city/location landing pages; owner explicitly chose no more location-page expansion.
+- The site is already beyond the SEO skill's 50-location-page gate (117 sitemap URLs; roughly 105 geo-keyword URLs).
+- Improve or consolidate existing pages only from GSC + conversion evidence. Never bulk-edit or bulk-prune.
+- Allowed growth formats: customer case studies, real project proof, non-location resources, performance, attribution, GBP, Bing, and AI citation work.
+
 ## Current Status
-Sitemap: 56 pages | GSC: ~30 queries indexed (launched Nov 2025, normal lag)
+Sitemap: 117 pages | GSC through 2026-07-12 | location expansion frozen
 Full sprint history: memory/seo-sprints.md

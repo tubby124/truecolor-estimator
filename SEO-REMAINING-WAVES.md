@@ -1,9 +1,19 @@
 # SEO Remaining Waves — truecolorprinting.ca
 
-**Last updated:** 2026-06-22
+**Last updated:** 2026-07-15
 **Full audit:** `FULL-AUDIT-REPORT.md`
 **GSC baseline (2026-03-12):** BC #1 | banner #2 | flyer #3 | sign #4 | coroplast #5
 **GSC actual (2026-04-12):** See ranking slip section below — baseline is no longer accurate
+
+## 2026-07-15 Strategy Reset — Revenue + CTR, No More Location Pages
+
+- **Owner directive:** no net-new city/location landing pages. The sitemap has 117 URLs and roughly 105 geo-keyword URLs, beyond the 50-page hard gate.
+- **Commercial winners:** coroplast (10 paid orders / ~$1,939 recent 28d) and stickers/labels (10 / ~$1,872). Protect both even where organic rollups look noisy.
+- **Channel mix matters:** recent coroplast orders attributed to Bing, ChatGPT, Google, and unknown/direct sources. Do not optimize from Google rankings alone.
+- **Primary leak:** GSC impressions +17%, average position improved, but CTR fell from 0.78% to 0.58% and clicks fell 13%.
+- **Implementation wave shipped (`f43db23`):** GA4 now uses organic landing pages + `keyEvents`, excludes private/noindex paths, and safely replaces daily snapshots. The render-heavy Trustindex homepage embed is now fast 4.9/43 proof with the paid widget preserved on demand.
+- **Next eligible SEO page:** trade-show-displays-saskatoon, only after this implementation wave has a clean 7-day observation window. One page, one signal, one commit.
+- **Do not schedule:** sticker FAQ/title, coroplast rewrite, wall-graphics title/FAQ, homepage metadata rewrite, or new geo URLs.
 
 ---
 
