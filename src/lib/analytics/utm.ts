@@ -95,9 +95,9 @@ export function mergeUtmAttribution(
 ): UtmAttribution {
   const fromHints = sanitizeUtm(hints);
   const fromCookie = parseUtmCookie(cookieHeader);
-  // Merge: explicit hints win for utm_* keys, cookie fills landing_path/landing_referrer
-  // (those only ever come from the cookie set client-side on first visit).
-  return { ...fromCookie, ...fromHints };
+  // Preserve fresh first-touch attribution; request hints only fill fields the
+  // cookie does not contain or act as the fallback when the cookie is unusable.
+  return { ...fromHints, ...fromCookie };
 }
 
 export function appendAttributionToFormData(

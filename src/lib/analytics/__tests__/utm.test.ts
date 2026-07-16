@@ -9,23 +9,66 @@ import {
 } from "../utm";
 
 describe("UTM attribution helpers", () => {
-  it("prefers explicit request hints over the first-touch cookie", () => {
+  it("prefers a fresh first-touch cookie over conflicting request hints", () => {
     const cookiePayload = encodeURIComponent(JSON.stringify({
       utm_source: "google_business",
       utm_medium: "gbp_product",
       utm_campaign: "stickers",
+      gclid: "cookie-click",
       captured_at: Date.now(),
     }));
 
     const result = mergeUtmAttribution(
-      { utm_source: "instagram", utm_medium: "social", utm_campaign: "sticker_post" },
+      {
+        utm_source: "instagram",
+        utm_medium: "social",
+        utm_campaign: "sticker_post",
+        gclid: "request-click",
+      },
       `${UTM_COOKIE_NAME}=${cookiePayload}`,
     );
 
     expect(result).toEqual({
-      utm_source: "instagram",
-      utm_medium: "social",
-      utm_campaign: "sticker_post",
+      utm_source: "google_business",
+      utm_medium: "gbp_product",
+      utm_campaign: "stickers",
+      gclid: "cookie-click",
+    });
+  });
+
+  it("uses request hints to fill fields missing from a fresh first-touch cookie", () => {
+    const cookiePayload = encodeURIComponent(JSON.stringify({
+      utm_source: "google",
+      gclid: "cookie-click",
+      captured_at: Date.now(),
+    }));
+
+    expect(mergeUtmAttribution(
+      { utm_medium: "cpc", gclid: "request-click", gbraid: "request-braid" },
+      `${UTM_COOKIE_NAME}=${cookiePayload}`,
+    )).toEqual({
+      utm_source: "google",
+      utm_medium: "cpc",
+      gclid: "cookie-click",
+      gbraid: "request-braid",
+    });
+  });
+
+  it.each([
+    ["absent", undefined],
+    ["invalid", `${UTM_COOKIE_NAME}=not-json`],
+    ["expired", `${UTM_COOKIE_NAME}=${encodeURIComponent(JSON.stringify({
+      utm_source: "cookie-source",
+      gclid: "cookie-click",
+      captured_at: Date.now() - 31 * 24 * 60 * 60 * 1000,
+    }))}`],
+  ])("uses request hints when the first-touch cookie is %s", (_condition, cookieHeader) => {
+    expect(mergeUtmAttribution(
+      { utm_source: "request-source", gclid: "request-click" },
+      cookieHeader,
+    )).toEqual({
+      utm_source: "request-source",
+      gclid: "request-click",
     });
   });
 
@@ -159,7 +202,7 @@ describe("UTM attribution helpers", () => {
     expect(parseStoredAttribution("not-json")).toEqual({});
   });
 
-  it("lets explicit paid hints override cookie values while retaining first-touch landing data", () => {
+  it("keeps first-touch paid values while retaining cookie landing data", () => {
     const cookiePayload = encodeURIComponent(JSON.stringify({
       gclid: "cookie-click",
       keyword: "cookie keyword",
@@ -171,8 +214,8 @@ describe("UTM attribution helpers", () => {
       { gclid: "request-click", keyword: "request keyword" },
       `${UTM_COOKIE_NAME}=${cookiePayload}`,
     )).toEqual({
-      gclid: "request-click",
-      keyword: "request keyword",
+      gclid: "cookie-click",
+      keyword: "cookie keyword",
       landing_path: "/signs",
     });
   });
