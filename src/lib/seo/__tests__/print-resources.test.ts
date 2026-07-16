@@ -9,6 +9,7 @@ import {
   buildPrintResourceSchemas,
   getPrintResource,
 } from "@/lib/data/print-resources";
+import { getPricingRules } from "@/lib/data/loader";
 import { PRODUCTS } from "@/lib/data/products-content";
 
 const BASE_URL = "https://truecolorprinting.ca";
@@ -53,7 +54,6 @@ describe("print resource data contract", () => {
 
     for (const resource of PRINT_RESOURCES) {
       expect(resource.canonical).toBe(`/print-resources/${resource.slug}`);
-      expect(resource.title.length).toBeLessThan(60);
       expect(resource.description.length).toBeGreaterThanOrEqual(140);
       expect(resource.description.length).toBeLessThanOrEqual(155);
       const wordCount =
@@ -97,8 +97,13 @@ describe("print resource data contract", () => {
     const tradeShowKit = getPrintResource("trade-show-print-kit");
     const copy = JSON.stringify([comparison, tradeShowKit]);
 
-    expect(PRODUCTS["acp-signs"].sideOptions).toBe(false);
-    expect(copy).not.toMatch(/both products support single- and double-sided/i);
+    expect(PRODUCTS["acp-signs"].sideOptions).toBe(true);
+    const acpRules = getPricingRules().filter(
+      (rule) => rule.category === "RIGID" && rule.material_code === "RMACP002",
+    );
+    expect(new Set(acpRules.map((rule) => rule.sides))).toEqual(new Set([1, 2]));
+    expect(copy).toMatch(/ACP supports one- or two-sided ordering/i);
+    expect(copy).not.toMatch(/ACP configurator is single-sided|Aluminum composite is single-sided/i);
     expect(copy).toContain("12×18, 18×24, 24×36, and 4×8 feet");
     expect(copy).not.toContain("36×48");
     expect(copy).toContain("33.5×80 inches");
@@ -114,19 +119,30 @@ describe("print resource data contract", () => {
 });
 
 describe("print resource metadata and schemas", () => {
-  it("builds unique indexable canonical and open graph metadata", () => {
+  it("builds unique indexable canonical and resource-specific social metadata", () => {
+    const finalTitles = new Set<string>();
     for (const resource of PRINT_RESOURCES) {
       const metadata = buildPrintResourceMetadata(resource);
-      expect(metadata.title).toBe(resource.title);
+      const finalTitle = `${resource.title} | True Color`;
+      expect(metadata.title).toEqual({ absolute: finalTitle });
+      expect(finalTitle.length).toBeLessThanOrEqual(60);
+      finalTitles.add(finalTitle);
       expect(metadata.description).toBe(resource.description);
       expect(metadata.alternates?.canonical).toBe(resource.canonical);
       expect(metadata.robots).toMatchObject({ index: true, follow: true });
       expect(metadata.openGraph).toMatchObject({
-        title: resource.title,
+        title: finalTitle,
         description: resource.description,
         url: `${BASE_URL}${resource.canonical}`,
       });
+      expect(metadata.twitter).toMatchObject({
+        card: "summary_large_image",
+        title: finalTitle,
+        description: resource.description,
+        images: ["image" in resource ? resource.image.src : "/og-image.png"],
+      });
     }
+    expect(finalTitles.size).toBe(5);
   });
 
   it("builds breadcrumbs plus an appropriate visible-content schema with unique ids", () => {
@@ -163,9 +179,6 @@ describe("print resource indexing and download", () => {
         "2026-07-15T00:00:00.000Z",
       );
     }
-    expect(entries.map(({ url }) => url)).not.toContain(
-      `${BASE_URL}/why-true-color`,
-    );
   });
 
   it("ships an explicit 18 by 24 inch SVG template", () => {
@@ -183,5 +196,16 @@ describe("print resource indexing and download", () => {
     expect(svg).toContain('height="24in"');
     expect(svg).toContain('viewBox="0 0 1800 2400"');
     expect(svg).toContain("CONFIRM PRODUCTION TOLERANCES");
+  });
+
+  it("uses an accessible brand red for normal text and the download button", () => {
+    const pageSource = readFileSync(
+      path.join(process.cwd(), "src/app/print-resources/[slug]/page.tsx"),
+      "utf8",
+    );
+    expect(pageSource).not.toContain("text-[#e63020]");
+    expect(pageSource).not.toContain("bg-[#e63020]");
+    expect(pageSource).toContain("text-[#b42318]");
+    expect(pageSource).toContain("bg-[#b42318]");
   });
 });

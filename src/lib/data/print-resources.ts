@@ -192,7 +192,7 @@ export const PRINT_RESOURCES = [
       {
         heading: "The short decision",
         paragraphs: [
-          "Choose coroplast when low weight, easy handling, ground-stake compatibility, or temporary and frequently moved signage matters most. Choose aluminum composite when the sign will be mounted as a more rigid panel and the application benefits from a solid surface and greater long-term durability. Both are active True Color products with full-colour printing. Coroplast supports one- or two-sided ordering in its configurator; the active ACP configurator is single-sided.",
+          "Choose coroplast when low weight, easy handling, ground-stake compatibility, or temporary and frequently moved signage matters most. Choose aluminum composite when the sign will be mounted as a more rigid panel and the application benefits from a solid surface and greater long-term durability. Both are active True Color products with full-colour printing. Coroplast and ACP support one- or two-sided ordering using their active pricing rules.",
           "That summary is a starting point, not a substitute for the use case. A small panel carried between events has different demands from a property sign fixed to posts. A construction notice attached to temporary hoarding has different demands from a permanent parking sign. Decide where the sign goes, how it is supported, how often it moves, and which faces must be read before selecting material.",
         ],
       },
@@ -208,7 +208,7 @@ export const PRINT_RESOURCES = [
         heading: "Print, sides, sizes, and shapes",
         paragraphs: [
           "Coroplast supports single- and double-sided ordering and lists 12×18, 18×24, 24×36, and 4×8 feet as standard presets, with custom sizing available. That range covers common yard, directional, event, and site-sign formats. The corrugated structure also makes flute direction relevant when a ground stake is part of the plan.",
-          "Aluminum composite is single-sided in the active configurator and lists 12×18, 18×24, 24×36, and 4×8 feet as standard presets, with custom sizing available. The ACP product notes that custom shapes require routing, while the custom-shape sign product describes an in-house plotter cut. Coroplast also appears in that custom-shape product, so both materials may be candidates for contoured work; the best choice still depends on the shape, handling, and mounting requirements.",
+          "ACP supports one- or two-sided ordering in the active configurator and lists 12×18, 18×24, 24×36, and 4×8 feet as standard presets, with custom sizing available. The ACP product notes that custom shapes require routing, while the custom-shape sign product describes an in-house plotter cut. Coroplast also appears in that custom-shape product, so both materials may be candidates for contoured work; the best choice still depends on the shape, handling, and mounting requirements.",
           "Both product pages describe full-colour direct UV printing. Avoid turning that shared capability into a claim that the finished pieces will look identical. Surface structure, edge appearance, rigidity, lighting, and viewing distance influence the result. If close-up finish is critical, ask to review the material choice with the artwork and intended placement in view.",
         ],
       },
@@ -393,13 +393,15 @@ export function getPrintResource(slug: string): PrintResource | undefined {
 
 export function buildPrintResourceMetadata(resource: PrintResource): Metadata {
   const url = `${BASE_URL}${resource.canonical}`;
+  const title = `${resource.title} | True Color`;
+  const image = resource.image?.src ?? "/og-image.png";
   return {
-    title: resource.title,
+    title: { absolute: title },
     description: resource.description,
     alternates: { canonical: resource.canonical },
     robots: { index: true, follow: true },
     openGraph: {
-      title: resource.title,
+      title,
       description: resource.description,
       url,
       type: "article",
@@ -414,6 +416,12 @@ export function buildPrintResourceMetadata(resource: PrintResource): Metadata {
             },
           ]
         : [{ url: "/og-image.png", width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: resource.description,
+      images: [image],
     },
   };
 }

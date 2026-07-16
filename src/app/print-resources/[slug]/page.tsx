@@ -17,7 +17,6 @@ interface PrintResourcePageProps {
 }
 
 export const dynamicParams = false;
-export const dynamic = "force-static";
 
 export function generateStaticParams() {
   return PRINT_RESOURCE_SLUGS.map((slug) => ({ slug }));
@@ -52,16 +51,16 @@ export default async function PrintResourcePage({ params }: PrintResourcePagePro
         <header className="border-b border-[#e5e5e5] bg-white">
           <div className="mx-auto max-w-6xl px-6 pb-14 pt-8 sm:pb-18 sm:pt-10">
             <nav aria-label="Breadcrumb" className="mb-10 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-              <Link href="/" className="transition-colors hover:text-[#e63020]">Home</Link>
+              <Link href="/" className="transition-colors hover:text-[#b42318]">Home</Link>
               <span aria-hidden="true">/</span>
-              <Link href="/resources" className="transition-colors hover:text-[#e63020]">Resources</Link>
+              <Link href="/resources" className="transition-colors hover:text-[#b42318]">Resources</Link>
               <span aria-hidden="true">/</span>
               <span aria-current="page" className="text-[#111111]">{resource.eyebrow}</span>
             </nav>
 
             <div className="grid items-end gap-10 lg:grid-cols-[minmax(0,1fr)_21rem]">
               <div>
-                <p className="mb-4 font-mono text-xs font-bold uppercase tracking-[0.22em] text-[#e63020]">
+                <p className="mb-4 font-mono text-xs font-bold uppercase tracking-[0.22em] text-[#b42318]">
                   {resource.eyebrow}
                 </p>
                 <h1 className="max-w-4xl text-4xl font-black leading-[1.02] tracking-[-0.04em] sm:text-6xl">
@@ -91,7 +90,7 @@ export default async function PrintResourcePage({ params }: PrintResourcePagePro
               <section className="mb-12 border border-[#111111] bg-[#fff7f5] p-6 sm:p-8">
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex gap-4">
-                    <FileCheck2 aria-hidden="true" className="mt-1 h-7 w-7 shrink-0 text-[#e63020]" />
+                    <FileCheck2 aria-hidden="true" className="mt-1 h-7 w-7 shrink-0 text-[#b42318]" />
                     <div>
                       <h2 className="text-xl font-black">18×24 SVG artwork file</h2>
                       <p className="mt-2 max-w-xl text-sm leading-6 text-gray-600">
@@ -99,7 +98,7 @@ export default async function PrintResourcePage({ params }: PrintResourcePagePro
                       </p>
                     </div>
                   </div>
-                  <a href={resource.download.href} download={resource.download.filename} aria-label={resource.download.label} className="inline-flex shrink-0 items-center justify-center gap-2 bg-[#e63020] px-5 py-3 text-sm font-black text-white transition-colors hover:bg-[#bd2519] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e63020]">
+                  <a href={resource.download.href} download={resource.download.filename} aria-label={resource.download.label} className="inline-flex shrink-0 items-center justify-center gap-2 bg-[#b42318] px-5 py-3 text-sm font-black text-white transition-colors hover:bg-[#8f1d14] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b42318]">
                     <Download aria-hidden="true" className="h-4 w-4" />
                     Download SVG
                   </a>
@@ -120,7 +119,7 @@ export default async function PrintResourcePage({ params }: PrintResourcePagePro
               {resource.sections.map((section, index) => (
                 <section key={section.heading} aria-labelledby={`section-${index}`}>
                   <div className="mb-5 flex items-start gap-4">
-                    <span aria-hidden="true" className="mt-1 font-mono text-xs font-bold text-[#e63020]">{String(index + 1).padStart(2, "0")}</span>
+                    <span aria-hidden="true" className="mt-1 font-mono text-xs font-bold text-[#b42318]">{String(index + 1).padStart(2, "0")}</span>
                     <h2 id={`section-${index}`} className="text-2xl font-black tracking-[-0.02em] sm:text-3xl">{section.heading}</h2>
                   </div>
                   <div className="space-y-5 border-l border-[#d6d6d6] pl-8 text-[1.04rem] leading-8 text-gray-700">
@@ -128,7 +127,7 @@ export default async function PrintResourcePage({ params }: PrintResourcePagePro
                     {section.bullets && (
                       <ul className="space-y-3" role="list">
                         {section.bullets.map((bullet) => (
-                          <li key={bullet} className="flex gap-3"><span aria-hidden="true" className="text-[#e63020]">—</span><span>{bullet}</span></li>
+                          <li key={bullet} className="flex gap-3"><span aria-hidden="true" className="text-[#b42318]">—</span><span>{bullet}</span></li>
                         ))}
                       </ul>
                     )}
@@ -143,7 +142,7 @@ export default async function PrintResourcePage({ params }: PrintResourcePagePro
             <div className="mt-4 divide-y divide-[#e5e5e5] border-y border-[#e5e5e5] bg-white">
               {resource.productLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="group block p-5 transition-colors hover:bg-[#fff1ef] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e63020]">
-                  <span className="flex items-start justify-between gap-3 font-bold leading-5 group-hover:text-[#e63020]">
+                  <span className="flex items-start justify-between gap-3 font-bold leading-5 group-hover:text-[#b42318]">
                     {link.label}<ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" />
                   </span>
                   <span className="mt-2 block text-sm leading-5 text-gray-500">{link.note}</span>
