@@ -6,6 +6,22 @@ import { validateConfig } from "../config-validator.mjs";
 import { buildArtifacts } from "../export-google-ads.mjs";
 
 const clone = () => structuredClone(paidSearchConfig);
+const parseCsv = (source) => {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === '"' && quoted && source[index + 1] === '"') { cell += '"'; index += 1; }
+    else if (char === '"') quoted = !quoted;
+    else if (char === "," && !quoted) { row.push(cell); cell = ""; }
+    else if (char === "\n" && !quoted) { row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += char;
+  }
+  const [headers, ...values] = rows.filter((item) => item.some(Boolean));
+  return { headers, rows: values.map((items) => Object.fromEntries(headers.map((header, index) => [header, items[index] ?? ""]))) };
+};
 
 test("canonical paid-search artifacts validate locally while account launch remains blocked", () => {
   const result = validateConfig(clone());
@@ -80,15 +96,53 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   const second = buildArtifacts(clone());
   assert.deepEqual(first, second);
   assert.deepEqual(Object.keys(first).sort(), [
-    "ad-groups.csv", "campaign-negatives.csv", "campaigns.csv", "keywords.csv", "responsive-search-ads.csv", "validation-summary.json",
+    "ad-groups.csv", "campaign-negatives.csv", "campaigns.csv", "keywords.csv", "locations.csv", "responsive-search-ads.csv", "validation-summary.json",
   ]);
   assert.match(first["campaigns.csv"], /GOOG_Search_TC_CoreProducts_2026/);
   assert.match(first["keywords.csv"], /\[coroplast signs saskatoon\]/);
-  assert.match(first["responsive-search-ads.csv"], /Ad type/);
   assert.match(first["responsive-search-ads.csv"], /Responsive search ad/);
   assert.doesNotMatch(first["campaign-negatives.csv"], /\n,/);
   assert.doesNotMatch(first["responsive-search-ads.csv"], /Qwik Signs Alternative/);
   assert.match(first["validation-summary.json"], /"apiStatus": "BLOCKED"/);
+});
+
+test("exports canonical Editor campaign, RSA, and location entities", () => {
+  const artifacts = buildArtifacts(clone());
+  const campaigns = parseCsv(artifacts["campaigns.csv"]);
+  assert.ok(campaigns.headers.includes("Networks"));
+  assert.ok(campaigns.rows.every((row) => row.Networks === "Google Search"));
+  for (const unsupported of ["Google Search", "Search partners", "Display Network", "Location option", "Location", "Location criterion ID"]) {
+    assert.ok(!campaigns.headers.includes(unsupported));
+  }
+  const ads = parseCsv(artifacts["responsive-search-ads.csv"]);
+  assert.ok(ads.headers.includes("Type"));
+  assert.ok(!ads.headers.includes("Ad type"));
+  assert.ok(ads.rows.every((row) => row.Type === "Responsive search ad"));
+  const locations = parseCsv(artifacts["locations.csv"]);
+  assert.deepEqual(locations.headers, ["Campaign", "Location", "Location ID"]);
+  assert.equal(locations.rows.length, 3);
+  assert.ok(locations.rows.every((row) => row["Location ID"] === "1002791"));
+});
+
+test("exports negatives with canonical scope types and never as positive keywords", () => {
+  const artifacts = buildArtifacts(clone());
+  const negatives = parseCsv(artifacts["campaign-negatives.csv"]);
+  assert.deepEqual(negatives.headers, ["Campaign", "Ad group", "Keyword", "Type"]);
+  assert.ok(negatives.rows.some((row) => row.Type === "Negative" && row["Ad group"]));
+  assert.ok(negatives.rows.some((row) => row.Type === "Campaign negative" && !row["Ad group"]));
+  assert.ok(negatives.rows.every((row) => !Object.hasOwn(row, "Status") && ["Negative", "Campaign negative"].includes(row.Type)));
+  const positives = parseCsv(artifacts["keywords.csv"]);
+  assert.deepEqual(positives.headers, ["Campaign", "Ad group", "Keyword", "Type", "Status", "Final URL"]);
+  assert.ok(positives.rows.every((row) => ["Exact", "Phrase"].includes(row.Type)));
+});
+
+test("generated readiness summary distinguishes importable entities from advanced-geo blockers", () => {
+  const summary = JSON.parse(buildArtifacts(clone())["validation-summary.json"]);
+  assert.equal(summary.editorSupportedEntitiesImportReady, true);
+  assert.equal(summary.presenceOnlyCsvConfigured, false);
+  assert.equal(summary.presenceOnlyStatus, "BLOCKED_MANUAL_OR_API_AND_PREVIEW_REQUIRED");
+  assert.equal(summary.accountPreviewRequired, true);
+  assert.equal(summary.generatorAutoRollsDates, false);
 });
 
 test("rejects removed or added Core ad groups", () => {
@@ -168,4 +222,46 @@ test("rejects an invented same-day guarantee", () => {
   const config = clone();
   config.campaigns[0].adGroups[0].rsa.headlines[0] = "Guaranteed Same Day";
   assert.equal(validateConfig(config).localStatus, "INVALID");
+});
+
+test("locks Core keyword and cross-negative contracts", () => {
+  for (const mutate of [
+    (c) => { c.campaigns[0].adGroups[0].keywords = c.campaigns[0].adGroups[0].keywords.filter((keyword) => keyword.matchType === "PHRASE"); },
+    (c) => { c.campaigns[0].adGroups[0].crossNegatives = []; },
+  ]) {
+    const config = clone();
+    mutate(config);
+    assert.equal(validateConfig(config).localStatus, "INVALID");
+  }
+});
+
+test("rejects language, tracking mapping, and naming contract violations", () => {
+  const mutations = [
+    (c) => { c.campaigns[0].language = "French"; },
+    (c) => { c.tracking.finalUrlSuffix = c.tracking.finalUrlSuffix.replace("device={device}", "device={keyword}"); },
+    (c) => { c.campaigns[0].adGroups[1].name = c.campaigns[0].adGroups[0].name; },
+    (c) => { c.campaigns[0].adGroups[0].name = " "; },
+  ];
+  for (const mutate of mutations) {
+    const config = clone();
+    mutate(config);
+    assert.equal(validateConfig(config).localStatus, "INVALID");
+  }
+});
+
+test("requires explicit date-change and advanced-geo preview controls", () => {
+  const canonical = clone();
+  assert.equal(canonical.pilot.generatorAutoRollsDates, false);
+  assert.equal(canonical.pilot.dateChangeRequiresApprovedContractChange, true);
+  assert.equal(canonical.launchControls.presenceOnlyManualOrApiRequired, true);
+  assert.equal(canonical.launchControls.editorPreviewRequired, true);
+  for (const mutate of [
+    (c) => { delete c.pilot.generatorAutoRollsDates; },
+    (c) => { delete c.launchControls.presenceOnlyManualOrApiRequired; },
+    (c) => { c.externalGates = c.externalGates.filter((gate) => gate.code !== "PRESENCE_ONLY_AND_EDITOR_PREVIEW"); },
+  ]) {
+    const config = clone();
+    mutate(config);
+    assert.equal(validateConfig(config).localStatus, "INVALID");
+  }
 });

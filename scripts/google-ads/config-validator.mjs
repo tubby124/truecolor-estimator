@@ -9,10 +9,7 @@ const REQUIRED_GATES = [
   "TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED", "CONVERSION_ACTION",
   "ENHANCED_CONSENT_DECISION", "CURRENT_KEYWORD_PLANNER_FORECAST", "BUDGET_APPROVAL",
   "DATES_AND_HARD_STOP", "MOBILE_QA", "ATTRIBUTABLE_TEST_ORDER", "LAUNCH_CONTROL_SIGNOFF",
-];
-const VALUE_TRACK_FIELDS = [
-  "keyword", "matchtype", "device", "loc_physical_ms", "loc_interest_ms", "adgroupid",
-  "creative", "campaignid", "network",
+  "PRESENCE_ONLY_AND_EDITOR_PREVIEW",
 ];
 const COMPETITOR_TERMS = ["qwik signs", "minuteman press", "24 hour signs", "anytime printing", "pgi printers", "staples", "vistaprint"];
 const ROUTES = {
@@ -25,6 +22,28 @@ const ROUTES = {
   "rush-same-day": "/same-day-printing-saskatoon",
   "generic-print-price": "/printing-prices-saskatoon",
   "generic-sign-shop": "/sign-company-saskatoon",
+};
+const CORE_TERMS = {
+  coroplast: ["coroplast signs saskatoon", "coroplast signs", "coroplast sign printing"],
+  "stickers-labels": ["custom stickers saskatoon", "sticker printing saskatoon", "custom labels saskatoon"],
+  "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners"],
+  "business-cards": ["business cards saskatoon", "business card printing saskatoon", "order business cards online"],
+  flyers: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online"],
+  "retractable-banners": ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon"],
+  "rush-same-day": ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon"],
+  "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon"],
+  "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon"],
+};
+const CORE_CROSS_NEGATIVES = {
+  coroplast: ["stickers", "labels", "vinyl banner", "business cards", "flyers", "retractable banner"],
+  "stickers-labels": ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner"],
+  "vinyl-banners": ["coroplast", "stickers", "labels", "business cards", "flyers", "retractable banner"],
+  "business-cards": ["coroplast", "stickers", "labels", "vinyl banner", "flyers", "retractable banner"],
+  flyers: ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "retractable banner"],
+  "retractable-banners": ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "flyers"],
+  "rush-same-day": ["business cards", "flyers", "stickers", "banners", "coroplast"],
+  "generic-print-price": ["same day", "rush", "sign shop", "sign company"],
+  "generic-sign-shop": ["same day", "rush", "printing prices", "print shop prices"],
 };
 const COMPETITOR_GROUPS = {
   "qwik-signs": ["qwik signs"],
@@ -53,6 +72,22 @@ const FORBIDDEN_CLAIM_PATTERNS = [
   /\b(?:same day|next day|24[ -]?hour|48[ -]?hour)\b.*\b(?:ready|turnaround|delivery|pickup)\b/i,
   /\b(?:ready|turnaround|delivery|pickup)\b.*\b(?:same day|next day|24[ -]?hour|48[ -]?hour)\b/i,
 ];
+const TRACKING_MAPPINGS = {
+  utm_source: "google",
+  utm_medium: "cpc",
+  utm_campaign: "{campaignid}",
+  utm_term: "{keyword}",
+  utm_content: "{creative}",
+  keyword: "{keyword}",
+  matchtype: "{matchtype}",
+  device: "{device}",
+  loc_physical_ms: "{loc_physical_ms}",
+  loc_interest_ms: "{loc_interest_ms}",
+  adgroupid: "{adgroupid}",
+  creative: "{creative}",
+  campaignid: "{campaignid}",
+  network: "{network}",
+};
 
 const daysInclusive = (start, end) => {
   const startMs = Date.parse(`${start}T00:00:00Z`);
@@ -87,6 +122,7 @@ export function validateConfig(config) {
   if (start !== "2026-07-20" || end !== "2026-08-18" || config.pilot?.inclusiveDays !== 30 || !config.pilot?.regenerateDatesIfGatesNotClearedByStart || !config.pilot?.hardStopRequired) {
     fail("Pilot dates and hard-stop controls do not match the approved fixed pilot");
   }
+  if (config.pilot?.generatorAutoRollsDates !== false || config.pilot?.dateChangeRequiresApprovedContractChange !== true) fail("Pilot date changes must require an approved config and validator contract change");
   if (config.currency !== "CAD") fail("Account currency must be CAD");
   if (config.maximum30DayCad !== 1500) fail("Total 30-day maximum must be CA$1,500");
   if (config.accountCustomerId !== null) fail("Customer ID must remain null until the True Color account is confirmed");
@@ -95,10 +131,9 @@ export function validateConfig(config) {
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
   const suffixParams = new URLSearchParams(config.tracking?.finalUrlSuffix ?? "");
-  if (suffixParams.get("utm_source") !== "google") fail("Final URL suffix must use utm_source=google");
-  if (suffixParams.get("utm_medium") !== "cpc") fail("Final URL suffix must use utm_medium=cpc");
-  for (const field of VALUE_TRACK_FIELDS) {
-    if (!config.tracking?.finalUrlSuffix?.includes(`${field}={`)) fail(`Final URL suffix missing ${field}`);
+  for (const [key, expectedValue] of Object.entries(TRACKING_MAPPINGS)) {
+    const values = suffixParams.getAll(key);
+    if (values.length !== 1 || values[0] !== expectedValue) fail(`Final URL suffix must map ${key}=${expectedValue} exactly once`);
   }
   const gates = new Map((config.externalGates ?? []).map((gate) => [gate.code, gate]));
   for (const gate of REQUIRED_GATES) {
@@ -120,6 +155,7 @@ export function validateConfig(config) {
     || controls.dailySearchTermReviewRequired !== true) {
     fail("Missing required Wilkie/Dubois launch-control declaration");
   }
+  if (controls?.presenceOnlyManualOrApiRequired !== true || controls?.editorPreviewRequired !== true) fail("Presence-only and Editor/account preview must remain mandatory manual/API launch controls");
 
   const accountNegatives = config.accountNegatives ?? [];
   if (!hasExactPhrasePairs(accountNegatives, REQUIRED_ACCOUNT_NEGATIVES)) fail("Account-wide negatives must equal the required starter waste allowlist with exact/phrase pairs");
@@ -130,12 +166,17 @@ export function validateConfig(config) {
 
   const campaigns = config.campaigns ?? [];
   if (campaigns.length !== Object.keys(EXPECTED).length) fail("Configuration must contain exactly the three approved campaigns");
+  const campaignNames = campaigns.map((campaign) => campaign.name);
+  if (campaignNames.some((name) => typeof name !== "string" || !name.trim()) || new Set(campaignNames).size !== campaignNames.length) fail("Campaign names must be unique and nonblank");
+  const adGroupNames = campaigns.flatMap((campaign) => (campaign.adGroups ?? []).map((group) => group.name));
+  if (adGroupNames.some((name) => typeof name !== "string" || !name.trim()) || new Set(adGroupNames).size !== adGroupNames.length) fail("Ad-group names must be unique and nonblank");
   if (campaigns.reduce((sum, campaign) => sum + (campaign.maximum30DayCad ?? 0), 0) !== config.maximum30DayCad) fail("Campaign maximums must reconcile to the total 30-day maximum");
   for (const [kind, expected] of Object.entries(EXPECTED)) {
     const campaign = campaigns.find((item) => item.kind === kind);
     if (!campaign) { fail(`Missing ${kind} campaign`); continue; }
     if (campaign.name !== expected.name || campaign.dailyBudgetCad !== expected.daily || campaign.maximum30DayCad !== expected.maximum) fail(`${kind} campaign budget or name mismatch`);
     if (campaign.status !== "PAUSED") fail(`${campaign.name} must be paused`);
+    if (campaign.language !== "English") fail(`${campaign.name} language must be English`);
     if (campaign.channel !== "SEARCH" || !campaign.networks?.googleSearch || campaign.networks?.searchPartners || campaign.networks?.display) fail(`${campaign.name} must be Google Search only`);
     if (campaign.geoTarget?.criterionId !== 1002791 || campaign.geoTarget?.presenceOnly !== true) fail(`${campaign.name} must target Saskatoon presence-only`);
     if (!campaign.adGroups?.length) fail(`${campaign.name} has no ad groups`);
@@ -152,8 +193,11 @@ export function validateConfig(config) {
       if (kind === "BRAND" && parsed.pathname !== "/") fail(`${group.name} must route to the homepage`);
       if (!group.keywords?.length) fail(`${group.name} must contain high-intent keywords`);
       for (const kw of group.keywords ?? []) if (!["EXACT", "PHRASE"].includes(kw.matchType)) fail(`${group.name} contains a non-exact/phrase keyword`);
+      if (kind === "CORE" && !hasExactPhrasePairs(group.keywords, CORE_TERMS[group.key] ?? [])) fail(`${group.name} Core keywords must match canonical exact/phrase pairs`);
       if (kind === "COMPETITOR" && !hasExactPhrasePairs(group.keywords, COMPETITOR_GROUPS[group.key] ?? [])) fail(`${group.name} competitor targets must match canonical exact/phrase pairs`);
       if (kind === "BRAND" && !hasExactPhrasePairs(group.keywords, BRAND_GROUPS[group.key] ?? [])) fail(`${group.name} brand variants must match canonical exact/phrase pairs`);
+      const expectedCrossNegatives = kind === "CORE" ? CORE_CROSS_NEGATIVES[group.key] ?? [] : [];
+      if (!sameSet(group.crossNegatives ?? [], expectedCrossNegatives)) fail(`${group.name} cross-negatives must match the canonical routing set`);
       const rsaKeys = Object.keys(group).filter((key) => /rsa|responsive.*ad/i.test(key));
       if (rsaKeys.length !== 1 || rsaKeys[0] !== "rsa" || !group.rsa || Array.isArray(group.rsa) || typeof group.rsa !== "object") fail(`${group.name} must contain exactly one RSA object`);
       const headlines = group.rsa?.headlines ?? [];

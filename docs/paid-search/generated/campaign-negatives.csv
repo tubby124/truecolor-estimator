@@ -1,128 +1,128 @@
-Campaign,Ad group,Keyword,Match type,Status
-GOOG_Search_TC_CoreProducts_2026,,qwik signs,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,minuteman press saskatoon,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,24 hour signs,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,anytime printing,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,pgi printers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,staples printing saskatoon,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,vistaprint saskatoon,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,stickers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,labels,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,vinyl banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,business cards,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,flyers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,retractable banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,coroplast,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,vinyl banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,business cards,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,flyers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,retractable banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,coroplast,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,stickers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,labels,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,business cards,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,flyers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,retractable banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Business Cards,coroplast,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Business Cards,stickers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Business Cards,labels,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Business Cards,vinyl banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Business Cards,flyers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Business Cards,retractable banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Flyers,coroplast,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Flyers,stickers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Flyers,labels,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Flyers,vinyl banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Flyers,business cards,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Flyers,retractable banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Retractable Banners,coroplast,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Retractable Banners,stickers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Retractable Banners,labels,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Retractable Banners,vinyl banner,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Retractable Banners,business cards,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Retractable Banners,flyers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,business cards,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,flyers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,stickers,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,banners,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,coroplast,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Generic Print Price,same day,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Generic Print Price,rush,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Generic Print Price,sign shop,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Generic Print Price,sign company,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,same day,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,rush,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,printing prices,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,print shop prices,Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[jobs],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""jobs""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[hiring],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""hiring""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[salary],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""salary""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[career],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""career""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[course],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""course""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[class],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""class""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[tutorial],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""tutorial""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[printer repair],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""printer repair""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[used printer],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""used printer""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[printer ink],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""printer ink""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[3d printing],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""3d printing""",Phrase,Enabled
-GOOG_Search_TC_CoreProducts_2026,,[home printer],Exact,Enabled
-GOOG_Search_TC_CoreProducts_2026,,"""home printer""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[jobs],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""jobs""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[hiring],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""hiring""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[salary],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""salary""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[career],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""career""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[course],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""course""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[class],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""class""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[tutorial],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""tutorial""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[printer repair],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""printer repair""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[used printer],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""used printer""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[printer ink],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""printer ink""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[3d printing],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""3d printing""",Phrase,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,[home printer],Exact,Enabled
-GOOG_Search_TC_CompetitorConquest_2026,,"""home printer""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[jobs],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""jobs""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[hiring],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""hiring""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[salary],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""salary""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[career],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""career""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[course],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""course""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[class],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""class""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[tutorial],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""tutorial""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[printer repair],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""printer repair""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[used printer],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""used printer""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[printer ink],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""printer ink""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[3d printing],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""3d printing""",Phrase,Enabled
-GOOG_Search_TC_BrandDefense_2026,,[home printer],Exact,Enabled
-GOOG_Search_TC_BrandDefense_2026,,"""home printer""",Phrase,Enabled
+Campaign,Ad group,Keyword,Type
+GOOG_Search_TC_CoreProducts_2026,,"""qwik signs""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""minuteman press saskatoon""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""24 hour signs""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""anytime printing""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""pgi printers""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""staples printing saskatoon""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""vistaprint saskatoon""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,"""stickers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,"""labels""",Negative
+GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,"""vinyl banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,"""business cards""",Negative
+GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,"""flyers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Coroplast Signs,"""retractable banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""coroplast""",Negative
+GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""vinyl banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""business cards""",Negative
+GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""flyers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""retractable banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""coroplast""",Negative
+GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""stickers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""labels""",Negative
+GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""business cards""",Negative
+GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""flyers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""retractable banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Business Cards,"""coroplast""",Negative
+GOOG_Search_TC_CoreProducts_2026,Business Cards,"""stickers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Business Cards,"""labels""",Negative
+GOOG_Search_TC_CoreProducts_2026,Business Cards,"""vinyl banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Business Cards,"""flyers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Business Cards,"""retractable banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Flyers,"""coroplast""",Negative
+GOOG_Search_TC_CoreProducts_2026,Flyers,"""stickers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Flyers,"""labels""",Negative
+GOOG_Search_TC_CoreProducts_2026,Flyers,"""vinyl banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Flyers,"""business cards""",Negative
+GOOG_Search_TC_CoreProducts_2026,Flyers,"""retractable banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Retractable Banners,"""coroplast""",Negative
+GOOG_Search_TC_CoreProducts_2026,Retractable Banners,"""stickers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Retractable Banners,"""labels""",Negative
+GOOG_Search_TC_CoreProducts_2026,Retractable Banners,"""vinyl banner""",Negative
+GOOG_Search_TC_CoreProducts_2026,Retractable Banners,"""business cards""",Negative
+GOOG_Search_TC_CoreProducts_2026,Retractable Banners,"""flyers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,"""business cards""",Negative
+GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,"""flyers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,"""stickers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,"""banners""",Negative
+GOOG_Search_TC_CoreProducts_2026,Rush and Same Day,"""coroplast""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""same day""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""rush""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""sign shop""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""sign company""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,"""same day""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,"""rush""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,"""printing prices""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,"""print shop prices""",Negative
+GOOG_Search_TC_CoreProducts_2026,,[jobs],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""jobs""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[hiring],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""hiring""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[salary],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""salary""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[career],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""career""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[course],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""course""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[class],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""class""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[tutorial],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""tutorial""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[printer repair],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""printer repair""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[used printer],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""used printer""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[printer ink],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""printer ink""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[3d printing],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""3d printing""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[home printer],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""home printer""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[jobs],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""jobs""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[hiring],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""hiring""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[salary],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""salary""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[career],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""career""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[course],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""course""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[class],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""class""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[tutorial],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""tutorial""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[printer repair],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""printer repair""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[used printer],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""used printer""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[printer ink],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""printer ink""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[3d printing],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""3d printing""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[home printer],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""home printer""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[jobs],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""jobs""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[hiring],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""hiring""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[salary],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""salary""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[career],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""career""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[course],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""course""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[class],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""class""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[tutorial],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""tutorial""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[printer repair],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""printer repair""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[used printer],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""used printer""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[printer ink],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""printer ink""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[3d printing],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""3d printing""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[home printer],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""home printer""",Campaign negative

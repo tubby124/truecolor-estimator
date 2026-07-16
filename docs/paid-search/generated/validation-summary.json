@@ -18,8 +18,14 @@
     "DATES_AND_HARD_STOP",
     "MOBILE_QA",
     "ATTRIBUTABLE_TEST_ORDER",
-    "LAUNCH_CONTROL_SIGNOFF"
+    "LAUNCH_CONTROL_SIGNOFF",
+    "PRESENCE_ONLY_AND_EDITOR_PREVIEW"
   ],
   "maximum30DayCad": 1500,
+  "editorSupportedEntitiesImportReady": true,
+  "presenceOnlyCsvConfigured": false,
+  "presenceOnlyStatus": "BLOCKED_MANUAL_OR_API_AND_PREVIEW_REQUIRED",
+  "accountPreviewRequired": true,
+  "generatorAutoRollsDates": false,
   "note": "Google Ads enforces daily budgets, not a true lifetime cap. The end date, hard stop, and monitoring are mandatory."
 }

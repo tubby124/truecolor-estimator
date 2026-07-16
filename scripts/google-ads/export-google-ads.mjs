@@ -23,19 +23,18 @@ export function buildArtifacts(config) {
     "Campaign type": "Search",
     Status: campaign.status,
     Budget: campaign.dailyBudgetCad,
-    "Budget type": "Daily",
     "Bid strategy type": "Maximize clicks",
-    "Max CPC bid limit": config.bidding.cpcCeilingCad,
+    "Maximum CPC bid limit": config.bidding.cpcCeilingCad,
     "Start date": config.pilot.startDate,
     "End date": config.pilot.endDate,
-    "Google Search": "Enabled",
-    "Search partners": "Disabled",
-    "Display Network": "Disabled",
-    Location: "Saskatoon, Saskatchewan, Canada",
-    "Location criterion ID": campaign.geoTarget.criterionId,
-    "Location option": "Presence: People in or regularly in targeted locations",
-    Language: campaign.language,
+    Networks: "Google Search",
+    Language: "en",
     "Final URL suffix": config.tracking.finalUrlSuffix,
+  }));
+  const locationRows = config.campaigns.map((campaign) => ({
+    Campaign: campaign.name,
+    Location: campaign.geoTarget.name,
+    "Location ID": campaign.geoTarget.criterionId,
   }));
   const adGroupRows = [];
   const keywordRows = [];
@@ -43,17 +42,17 @@ export function buildArtifacts(config) {
   const negativeRows = [];
   for (const campaign of config.campaigns) {
     for (const negative of campaign.campaignNegatives) {
-      negativeRows.push({ Campaign: campaign.name, "Ad group": "", Keyword: negative, "Match type": "Phrase", Status: "Enabled" });
+      negativeRows.push({ Campaign: campaign.name, "Ad group": "", Keyword: keywordText({ text: negative, matchType: "PHRASE" }), Type: "Campaign negative" });
     }
     for (const group of campaign.adGroups) {
       adGroupRows.push({ Campaign: campaign.name, "Ad group": group.name, Status: group.status });
       for (const item of group.keywords) {
-        keywordRows.push({ Campaign: campaign.name, "Ad group": group.name, Keyword: keywordText(item), "Match type": item.matchType === "EXACT" ? "Exact" : "Phrase", Status: "Paused", "Final URL": group.finalUrl });
+        keywordRows.push({ Campaign: campaign.name, "Ad group": group.name, Keyword: keywordText(item), Type: item.matchType === "EXACT" ? "Exact" : "Phrase", Status: "Paused", "Final URL": group.finalUrl });
       }
       for (const negative of group.crossNegatives) {
-        negativeRows.push({ Campaign: campaign.name, "Ad group": group.name, Keyword: negative, "Match type": "Phrase", Status: "Enabled" });
+        negativeRows.push({ Campaign: campaign.name, "Ad group": group.name, Keyword: keywordText({ text: negative, matchType: "PHRASE" }), Type: "Negative" });
       }
-      const row = { Campaign: campaign.name, "Ad group": group.name, "Ad type": "Responsive search ad", Status: "Paused", "Final URL": group.finalUrl };
+      const row = { Campaign: campaign.name, "Ad group": group.name, Type: "Responsive search ad", Status: "Paused", "Final URL": group.finalUrl };
       group.rsa.headlines.forEach((headline, index) => { row[`Headline ${index + 1}`] = headline; });
       group.rsa.descriptions.forEach((description, index) => { row[`Description ${index + 1}`] = description; });
       adRows.push(row);
@@ -61,23 +60,29 @@ export function buildArtifacts(config) {
   }
   for (const campaign of config.campaigns) {
     for (const negative of config.accountNegatives) {
-      negativeRows.push({ Campaign: campaign.name, "Ad group": "", Keyword: keywordText(negative), "Match type": negative.matchType === "EXACT" ? "Exact" : "Phrase", Status: "Enabled" });
+      negativeRows.push({ Campaign: campaign.name, "Ad group": "", Keyword: keywordText(negative), Type: "Campaign negative" });
     }
   }
-  const rsaHeaders = ["Campaign", "Ad group", "Ad type", "Status", "Final URL", ...Array.from({ length: 15 }, (_, index) => `Headline ${index + 1}`), ...Array.from({ length: 4 }, (_, index) => `Description ${index + 1}`)];
+  const rsaHeaders = ["Campaign", "Ad group", "Type", "Status", "Final URL", ...Array.from({ length: 15 }, (_, index) => `Headline ${index + 1}`), ...Array.from({ length: 4 }, (_, index) => `Description ${index + 1}`)];
   const summary = {
     artifactStatus: "BUILT",
     campaignsCreatedInAds: false,
     ...validation,
     maximum30DayCad: config.maximum30DayCad,
+    editorSupportedEntitiesImportReady: true,
+    presenceOnlyCsvConfigured: false,
+    presenceOnlyStatus: "BLOCKED_MANUAL_OR_API_AND_PREVIEW_REQUIRED",
+    accountPreviewRequired: true,
+    generatorAutoRollsDates: false,
     note: "Google Ads enforces daily budgets, not a true lifetime cap. The end date, hard stop, and monitoring are mandatory.",
   };
   return {
     "campaigns.csv": csv(Object.keys(campaignRows[0]), campaignRows),
+    "locations.csv": csv(["Campaign", "Location", "Location ID"], locationRows),
     "ad-groups.csv": csv(["Campaign", "Ad group", "Status"], adGroupRows),
-    "keywords.csv": csv(["Campaign", "Ad group", "Keyword", "Match type", "Status", "Final URL"], keywordRows),
+    "keywords.csv": csv(["Campaign", "Ad group", "Keyword", "Type", "Status", "Final URL"], keywordRows),
     "responsive-search-ads.csv": csv(rsaHeaders, adRows),
-    "campaign-negatives.csv": csv(["Campaign", "Ad group", "Keyword", "Match type", "Status"], negativeRows),
+    "campaign-negatives.csv": csv(["Campaign", "Ad group", "Keyword", "Type"], negativeRows),
     "validation-summary.json": `${JSON.stringify(summary, null, 2)}\n`,
   };
 }

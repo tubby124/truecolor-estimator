@@ -90,6 +90,8 @@ export const paidSearchConfig = {
     inclusiveDays: 30,
     regenerateDatesIfGatesNotClearedByStart: true,
     hardStopRequired: true,
+    generatorAutoRollsDates: false,
+    dateChangeRequiresApprovedContractChange: true,
   },
   maximum30DayCad: 1500,
   bidding: {
@@ -116,6 +118,8 @@ export const paidSearchConfig = {
     realAttributablePaidTestOrderRequired: true,
     hardEndRequired: true,
     dailySearchTermReviewRequired: true,
+    presenceOnlyManualOrApiRequired: true,
+    editorPreviewRequired: true,
   },
   externalGates: [
     { code: "TRUE_COLOR_CUSTOMER_ID", status: "BLOCKED", required: "True Color Google Ads customer ID and ownership" },
@@ -129,6 +133,7 @@ export const paidSearchConfig = {
     { code: "MOBILE_QA", status: "BLOCKED", required: "Mobile landing-page and conversion-flow QA" },
     { code: "ATTRIBUTABLE_TEST_ORDER", status: "BLOCKED", required: "Real attributable test order before launch" },
     { code: "LAUNCH_CONTROL_SIGNOFF", status: "BLOCKED", required: "Wilkie/Dubois launch controls reviewed and signed off" },
+    { code: "PRESENCE_ONLY_AND_EDITOR_PREVIEW", status: "BLOCKED", required: "Presence-only set manually/API and confirmed in Google Ads Editor/account preview" },
   ],
   accountNegatives: exactPhrase([
     "jobs", "hiring", "salary", "career", "course", "class", "tutorial", "printer repair",

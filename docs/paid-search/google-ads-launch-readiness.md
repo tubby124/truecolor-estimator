@@ -25,7 +25,9 @@ node scripts/google-ads/export-google-ads.mjs --check
 node --test scripts/google-ads/node-tests/paid-search-config.node.mjs
 ```
 
-The committed output includes campaigns, ad groups, exact/phrase keywords, responsive search ads, negative routing, and a machine-readable validation summary. Import only into the confirmed True Color account, inspect the Editor preview, and keep every campaign and ad group paused. Starter waste negatives are repeated campaign-by-campaign in `campaign-negatives.csv` so they can be imported without creating an unreviewed account-wide list. Competitor names are Core campaign routing negatives only—not account-wide negatives.
+The committed output uses supported Google Ads Editor entities for campaigns, ad groups, locations, exact/phrase keywords, responsive search ads, negative keywords, and a machine-readable validation summary. The schema follows Google's [Editor CSV column definitions](https://support.google.com/google-ads/editor/answer/57747?hl=en) and [location import guidance](https://support.google.com/google-ads/editor/answer/30573?hl=en). Those supported entities are import-ready only after the correct True Color account exists. Import only into that account, inspect every proposed change in Editor, and keep every campaign and ad group paused. Negative rows use Editor's `Negative` and `Campaign negative` types and never use an enabled status. Starter waste negatives are repeated campaign-by-campaign so they can be imported without creating an unreviewed account-wide list. Competitor names are Core campaign routing negatives only—not account-wide negatives.
+
+The CSVs do **not** set the advanced presence-only geo option. `locations.csv` adds Saskatoon criterion `1002791`; presence-only must be set manually in Editor or through the API and then verified in the account preview. The blocked `PRESENCE_ONLY_AND_EDITOR_PREVIEW` gate prevents launch until both checks are evidenced. Other account settings—including billing, auto-tagging, conversions, CPC ceiling, and advanced geo—remain manual/API blocked rather than being represented with unsupported CSV headers.
 
 ## Pilot controls
 
@@ -33,11 +35,11 @@ The committed output includes campaigns, ad groups, exact/phrase keywords, respo
 - `GOOG_Search_TC_CompetitorConquest_2026`: CA$7/day; 30-day planning maximum CA$210.
 - `GOOG_Search_TC_BrandDefense_2026`: no more than CA$3/day; 30-day planning maximum CA$90; remains blocked by `AUCTION_INSIGHTS_REQUIRED` even if other gates clear.
 - Total 30-day planning maximum: CA$1,500.
-- Fixed pilot window: July 20 through August 18, 2026, inclusive (30 days). If all external gates are not clear before July 20, regenerate and revalidate the dates before any import or launch.
+- Fixed pilot window: July 20 through August 18, 2026, inclusive (30 days). The exporter does not auto-roll dates. If gates are not clear before July 20, moving the pilot requires an explicit approved contract change to the dates in `campaign-config.mjs` and the matching validator constants, followed by regenerated artifacts and all checks. Editing only the CSVs is prohibited.
 - Google Ads enforces a daily budget, not a true lifetime cap. The end date, hard stop, and active monitoring are mandatory to keep the planning maximum meaningful.
 - Maximize Clicks is configured, but no CPC ceiling is invented. A current Keyword Planner forecast from the correct True Color account and an approved ceiling are required first.
 
-All campaigns are paused, Google Search only, Search Partners off, Display off, English, and presence-only for Saskatoon criterion `1002791`. Keywords are exact or phrase only. Do not add broad match to manufacture volume.
+All campaigns are paused, Google Search only, Search Partners off, Display off, English, and canonically require presence-only for Saskatoon criterion `1002791`. Keywords are exact or phrase only. The import cannot establish presence-only by itself; verify it manually/API before launch. Do not add broad match to manufacture volume.
 
 The final URL suffix captures UTM/ValueTrack values for `keyword`, `matchtype`, `device`, `loc_physical_ms`, `loc_interest_ms`, `adgroupid`, `creative`, `campaignid`, and `network`. Google auto-tagging and `gclid` capture must be enabled and verified in the confirmed account; do not manually place `gclid` in the URL template.
 
@@ -56,6 +58,7 @@ All of these remain blocking:
 9. Confirm current start/end dates, mandatory end date, monitoring owner, and hard-stop procedure.
 10. Complete mobile QA for every landing page, configurator, checkout, and conversion path.
 11. Place one real, attributable test order and verify the click ID and conversion evidence before launch.
+12. Set Saskatoon targeting to presence-only manually/API and verify the full Editor/account preview (`PRESENCE_ONLY_AND_EDITOR_PREVIEW`).
 
 ## Launch and monitoring rules
 
@@ -69,11 +72,11 @@ The canonical `launchControls` declaration and blocked `LAUNCH_CONTROL_SIGNOFF` 
 
 - [ ] Complete mobile post-click QA across each ad, landing page, configurator, checkout, and conversion path (`MOBILE_QA`).
 - [ ] Confirm all ads and routes use the single True Color domain, `truecolorprinting.ca`; no mixed-domain redirects.
-- [ ] Confirm Saskatoon criterion `1002791` uses city presence-only targeting, not presence-or-interest.
+- [ ] After importing `locations.csv`, manually/API set Saskatoon criterion `1002791` to city presence-only—not presence-or-interest—and verify it in the Editor/account preview (`PRESENCE_ONLY_AND_EDITOR_PREVIEW`).
 - [ ] Confirm Google Search only, Search Partners off, Display off, and exact/phrase keywords only.
 - [ ] Do not add broad match or broaden targeting to manufacture volume.
 - [ ] Complete a real attributable paid test order and reconcile its click ID, payment, and owned conversion (`ATTRIBUTABLE_TEST_ORDER`).
-- [ ] Confirm the 30-day end date and operational hard stop; regenerate dates if gates miss the planned start (`DATES_AND_HARD_STOP`).
+- [ ] Confirm the 30-day end date and operational hard stop. If gates miss the planned start, obtain an approved config-and-validator contract change before regenerating artifacts (`DATES_AND_HARD_STOP`).
 - [ ] Assign an owner for daily search-term review and waste-negative decisions throughout the pilot.
 
 Only the two sourced review-proof claims listed in `approvedClaims` may contain numbers in RSA copy. Currency, from-price, numeric turnaround, or cutoff claims are blocked unless a future source-backed claim is deliberately added to the canonical allowlist and validator.
