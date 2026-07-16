@@ -17,6 +17,7 @@ interface PrintResourcePageProps {
 }
 
 export const dynamicParams = false;
+export const dynamic = "force-static";
 
 export function generateStaticParams() {
   return PRINT_RESOURCE_SLUGS.map((slug) => ({ slug }));

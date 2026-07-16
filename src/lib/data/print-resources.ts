@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+export { PRINT_RESOURCE_SLUGS } from "@/lib/data/print-resource-slugs";
+
 const BASE_URL = "https://truecolorprinting.ca";
 
 export type PrintResourceType = "template" | "project" | "comparison" | "kit";
@@ -92,7 +94,7 @@ export const PRINT_RESOURCES = [
         heading: "Choose the matching order path",
         paragraphs: [
           "Use the coroplast sign configurator for a standard rectangular 18×24 panel. It exposes the supported size, side, quantity, and available finishing choices in one place, so the current order details come from the live product configuration rather than a copied claim on this guide.",
-          "Use the custom-shape sign path when the artwork depends on an outline rather than a rectangle. The source product describes custom-shape signs as CNC-cut rigid signage and lists coroplast among the material choices. Prepare the visible design and the intended contour as separate, unambiguous elements, then confirm the cut path before placing the order.",
+          "Use the custom-shape sign path when the artwork depends on an outline rather than a rectangle. The source product describes custom-shape signs as plotter-cut rigid signage and lists coroplast among the material choices. Prepare the visible design and the intended contour as separate, unambiguous elements, then confirm the cut path before placing the order.",
         ],
       },
     ],
@@ -139,7 +141,7 @@ export const PRINT_RESOURCES = [
       {
         heading: "Plan the contour and the printed face together",
         paragraphs: [
-          "Start with a clean silhouette that can be understood at the intended viewing distance. Avoid tiny exterior notches or fragile projections unless the shop confirms they suit the chosen material and final size. The repository supports coroplast as 4mm corrugated polypropylene and describes custom-shape signs as CNC-cut rigid signage. It does not publish a minimum corner radius or cut tolerance, so this article does not prescribe one. Ask for contour review when the shape depends on fine details.",
+          "Start with a clean silhouette that can be understood at the intended viewing distance. Avoid tiny exterior notches or fragile projections unless the shop confirms they suit the chosen material and final size. The repository supports coroplast as 4mm corrugated polypropylene and describes the active custom-shape product as plotter-cut rigid signage. It does not publish a minimum corner radius or cut tolerance, so this article does not prescribe one. Ask for contour review when the shape depends on fine details.",
           "Keep the cut contour distinct from printed artwork. A production file is easier to interpret when one vector path clearly describes the outer shape and the artwork sits beneath it. Do not use a soft shadow, photo edge, or coloured background as the only indication of where the cut should happen. If there are internal holes, slots, or separate pieces, call them out explicitly and confirm feasibility before treating them as approved production details.",
           "The visible project uses the broad upper area of the key shape for the main graphic and leaves the narrow shaft comparatively simple. That is a practical pattern: allocate detailed content to the largest stable area of the silhouette, then use narrow extensions to reinforce the object rather than carry essential copy.",
         ],
@@ -190,7 +192,7 @@ export const PRINT_RESOURCES = [
       {
         heading: "The short decision",
         paragraphs: [
-          "Choose coroplast when low weight, easy handling, ground-stake compatibility, or temporary and frequently moved signage matters most. Choose aluminum composite when the sign will be mounted as a more rigid panel and the application benefits from a solid surface and greater long-term durability. Both are active True Color products with full-colour printing and single- or double-sided options.",
+          "Choose coroplast when low weight, easy handling, ground-stake compatibility, or temporary and frequently moved signage matters most. Choose aluminum composite when the sign will be mounted as a more rigid panel and the application benefits from a solid surface and greater long-term durability. Both are active True Color products with full-colour printing. Coroplast supports one- or two-sided ordering in its configurator; the active ACP configurator is single-sided.",
           "That summary is a starting point, not a substitute for the use case. A small panel carried between events has different demands from a property sign fixed to posts. A construction notice attached to temporary hoarding has different demands from a permanent parking sign. Decide where the sign goes, how it is supported, how often it moves, and which faces must be read before selecting material.",
         ],
       },
@@ -206,7 +208,7 @@ export const PRINT_RESOURCES = [
         heading: "Print, sides, sizes, and shapes",
         paragraphs: [
           "Coroplast supports single- and double-sided ordering and lists 12×18, 18×24, 24×36, and 4×8 feet as standard presets, with custom sizing available. That range covers common yard, directional, event, and site-sign formats. The corrugated structure also makes flute direction relevant when a ground stake is part of the plan.",
-          "Aluminum composite supports single- and double-sided ordering and lists 12×18, 24×36, 36×48, and 4×8 feet as standard presets, with custom sizing available. The product data identifies CNC routing for custom shapes. Coroplast also appears in the custom-shape sign product, so both materials may be candidates for contoured work; the best choice still depends on the shape, handling, and mounting requirements.",
+          "Aluminum composite is single-sided in the active configurator and lists 12×18, 18×24, 24×36, and 4×8 feet as standard presets, with custom sizing available. The ACP product notes that custom shapes require routing, while the custom-shape sign product describes an in-house plotter cut. Coroplast also appears in that custom-shape product, so both materials may be candidates for contoured work; the best choice still depends on the shape, handling, and mounting requirements.",
           "Both product pages describe full-colour direct UV printing. Avoid turning that shared capability into a claim that the finished pieces will look identical. Surface structure, edge appearance, rigidity, lighting, and viewing distance influence the result. If close-up finish is critical, ask to review the material choice with the artwork and intended placement in view.",
         ],
       },
@@ -333,7 +335,7 @@ export const PRINT_RESOURCES = [
       {
         heading: "Build the display layer",
         paragraphs: [
-          "The active retractable-banner product includes the printed banner and stand, with Economy, Deluxe, and Premium stand choices represented in the product data. Its standard graphic size is listed as 33×79 inches. Design for a vertical reading path: identity near the top, core message through the centre, and secondary detail lower down. Keep essential information where it remains visible when people or furniture occupy the foreground.",
+          "The active retractable-banner product includes the printed banner and stand, with Economy, Deluxe, and Premium stand choices represented in the product data. Its standard graphic size is listed as 33.5×80 inches. Design for a vertical reading path: identity near the top, core message through the centre, and secondary detail lower down. Keep essential information where it remains visible when people or furniture occupy the foreground.",
           "The active vinyl-banner product uses 13oz scrim vinyl, includes hemmed edges as standard, and offers optional grommets. Preset and custom sizes are available through its configurator. Before ordering, confirm how the venue permits banners to be attached. A banner designed for grommets does not solve a venue rule that prohibits tying to walls, and a table-front banner needs dimensions based on the actual table rather than a generic booth assumption.",
           "Choose between the two by function rather than treating them as duplicates. The retractable stand is self-contained and vertical. The vinyl banner depends on a support or attachment method but can span a wider area. Some booths need one; others use both with distinct messages.",
         ],
@@ -384,10 +386,6 @@ export const PRINT_RESOURCES = [
     ],
   },
 ] as const satisfies readonly PrintResource[];
-
-export const PRINT_RESOURCE_SLUGS = PRINT_RESOURCES.map(
-  ({ slug }) => slug,
-) as readonly (typeof PRINT_RESOURCES)[number]["slug"][];
 
 export function getPrintResource(slug: string): PrintResource | undefined {
   return PRINT_RESOURCES.find((resource) => resource.slug === slug);

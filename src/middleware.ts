@@ -1,9 +1,31 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isPrintResourceSlug } from "@/lib/data/print-resource-slugs";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
 
+export function guardPrintResourcePath(pathname: string): NextResponse | null {
+  const prefix = "/print-resources/";
+  if (!pathname.startsWith(prefix)) return null;
+
+  const slug = pathname.slice(prefix.length);
+  if (isPrintResourceSlug(slug)) return null;
+
+  return new NextResponse("Not Found", {
+    status: 404,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "X-Robots-Tag": "noindex, nofollow",
+    },
+  });
+}
+
 export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  if (path.startsWith("/print-resources/")) {
+    return guardPrintResourcePath(path) ?? NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -36,8 +58,6 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession();
   const user = session?.user ?? null;
 
-  const path = request.nextUrl.pathname;
-
   // Owner visiting /account → redirect to staff dashboard
   if (path === "/account" && user?.email === (process.env.STAFF_EMAIL ?? "info@true-color.ca")) {
     const staffUrl = request.nextUrl.clone();
@@ -59,5 +79,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/staff/:path*", "/account"],
+  matcher: ["/staff/:path*", "/account", "/print-resources/:slug"],
 };

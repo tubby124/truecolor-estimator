@@ -24,6 +24,7 @@ describe("print resource data contract", () => {
   it("publishes exactly the five approved non-location resources", () => {
     expect(PRINT_RESOURCE_SLUGS).toEqual(EXPECTED_SLUGS);
     expect(PRINT_RESOURCES).toHaveLength(5);
+    expect(PRINT_RESOURCES.map(({ slug }) => slug)).toEqual(PRINT_RESOURCE_SLUGS);
     expect(PRINT_RESOURCES.map((resource) => resource.type)).toEqual([
       "template",
       "project",
@@ -74,6 +75,7 @@ describe("print resource data contract", () => {
       for (const productLink of resource.productLinks) {
         expect(productLink.href).toBe(`/products/${productLink.slug}`);
         expect(PRODUCTS[productLink.slug]).toBeDefined();
+        expect(PRODUCTS[productLink.slug].comingSoon).not.toBe(true);
         expect(productLink.label.toLowerCase()).not.toBe("learn more");
       }
     }
@@ -88,6 +90,26 @@ describe("print resource data contract", () => {
 
   it("returns undefined for unknown slugs", () => {
     expect(getPrintResource("not-a-real-resource")).toBeUndefined();
+  });
+
+  it("keeps material and stand specifications aligned to active products", () => {
+    const comparison = getPrintResource("coroplast-vs-aluminum-composite");
+    const tradeShowKit = getPrintResource("trade-show-print-kit");
+    const copy = JSON.stringify([comparison, tradeShowKit]);
+
+    expect(PRODUCTS["acp-signs"].sideOptions).toBe(false);
+    expect(copy).not.toMatch(/both products support single- and double-sided/i);
+    expect(copy).toContain("12×18, 18×24, 24×36, and 4×8 feet");
+    expect(copy).not.toContain("36×48");
+    expect(copy).toContain("33.5×80 inches");
+    expect(copy).not.toContain("33×79 inches");
+  });
+
+  it("does not misattribute CNC cutting to active product specifications", () => {
+    const copy = JSON.stringify(PRINT_RESOURCES);
+    expect(copy).toContain("printed, CNC-cut giveaway sign");
+    expect(copy).not.toMatch(/custom-shape signs as CNC-cut|CNC routing/i);
+    expect(copy).toContain("plotter-cut rigid signage");
   });
 });
 
@@ -129,6 +151,9 @@ describe("print resource metadata and schemas", () => {
 describe("print resource indexing and download", () => {
   it("includes all five resources exactly once with the fixed publish date", () => {
     const entries = sitemap();
+    expect(
+      entries.filter(({ url }) => url.includes("/print-resources/")).map(({ url }) => url),
+    ).toHaveLength(5);
     for (const slug of EXPECTED_SLUGS) {
       const matches = entries.filter(
         ({ url }) => url === `${BASE_URL}/print-resources/${slug}`,
@@ -151,6 +176,9 @@ describe("print resource indexing and download", () => {
     expect(existsSync(downloadPath)).toBe(true);
     const svg = readFileSync(downloadPath, "utf8");
     expect(svg).toMatch(/^<svg[\s\S]*<\/svg>\s*$/);
+    expect(svg).toContain('xmlns="http://www.w3.org/2000/svg"');
+    expect(svg).toMatch(/<desc(?:\s[^>]*)?>[\s\S]*<\/desc>/);
+    expect(svg).not.toContain("<description");
     expect(svg).toContain('width="18in"');
     expect(svg).toContain('height="24in"');
     expect(svg).toContain('viewBox="0 0 1800 2400"');
