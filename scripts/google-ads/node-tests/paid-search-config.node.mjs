@@ -157,3 +157,15 @@ test("requires the Wilkie and Dubois launch-control declaration", () => {
   delete config.launchControls;
   assert.equal(validateConfig(config).localStatus, "INVALID");
 });
+
+test("rejects a non-CAD account currency", () => {
+  const config = clone();
+  config.currency = "USD";
+  assert.equal(validateConfig(config).localStatus, "INVALID");
+});
+
+test("rejects an invented same-day guarantee", () => {
+  const config = clone();
+  config.campaigns[0].adGroups[0].rsa.headlines[0] = "Guaranteed Same Day";
+  assert.equal(validateConfig(config).localStatus, "INVALID");
+});

@@ -47,6 +47,12 @@ const APPROVED_CLAIMS = new Map([
   ["Rated 4.9 From 43 Reviews", "Known Google review proof: 4.9 rating from 43 reviews"],
   ["Work with a Saskatoon print shop rated 4.9 from 43 Google reviews.", "Known Google review proof: 4.9 rating from 43 reviews"],
 ]);
+const FORBIDDEN_CLAIM_PATTERNS = [
+  /\bguarante(?:e|ed)\b/i,
+  /\b(?:ready today|cut[ -]?off)\b/i,
+  /\b(?:same day|next day|24[ -]?hour|48[ -]?hour)\b.*\b(?:ready|turnaround|delivery|pickup)\b/i,
+  /\b(?:ready|turnaround|delivery|pickup)\b.*\b(?:same day|next day|24[ -]?hour|48[ -]?hour)\b/i,
+];
 
 const daysInclusive = (start, end) => {
   const startMs = Date.parse(`${start}T00:00:00Z`);
@@ -81,6 +87,7 @@ export function validateConfig(config) {
   if (start !== "2026-07-20" || end !== "2026-08-18" || config.pilot?.inclusiveDays !== 30 || !config.pilot?.regenerateDatesIfGatesNotClearedByStart || !config.pilot?.hardStopRequired) {
     fail("Pilot dates and hard-stop controls do not match the approved fixed pilot");
   }
+  if (config.currency !== "CAD") fail("Account currency must be CAD");
   if (config.maximum30DayCad !== 1500) fail("Total 30-day maximum must be CA$1,500");
   if (config.accountCustomerId !== null) fail("Customer ID must remain null until the True Color account is confirmed");
   if (config.bidding?.strategy !== "MAXIMIZE_CLICKS" || config.bidding?.cpcCeilingCad !== null || config.bidding?.cpcCeilingGate !== "CURRENT_KEYWORD_PLANNER_FORECAST") {
@@ -157,6 +164,7 @@ export function validateConfig(config) {
       for (const description of descriptions) if (description.length > 90) fail(`${group.name} description exceeds 90 characters`);
       for (const claim of [...headlines, ...descriptions]) {
         if (/\d|[$£€]|\b(?:cad|usd)\b/i.test(claim) && !APPROVED_CLAIMS.has(claim)) fail(`${group.name} contains an unapproved numeric, price, or turnaround claim: ${claim}`);
+        if (FORBIDDEN_CLAIM_PATTERNS.some((pattern) => pattern.test(claim)) && !APPROVED_CLAIMS.has(claim)) fail(`${group.name} contains an unapproved guarantee, turnaround, or cutoff claim: ${claim}`);
       }
       if (kind === "COMPETITOR") {
         const copy = stringValues([group.rsa, group.assets ?? []]).join(" ").toLowerCase().replaceAll(/[^a-z0-9]+/g, " ");
