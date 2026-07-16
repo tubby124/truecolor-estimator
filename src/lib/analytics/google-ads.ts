@@ -2,11 +2,6 @@ export interface GoogleAdsPurchaseInput {
   conversionLabel?: string;
   transactionId: string;
   value: number;
-  enhancedConversion?: {
-    enabled?: string;
-    marketingConsent: boolean;
-    email?: string;
-  };
 }
 
 export interface GoogleAdsPurchasePayload {
@@ -59,15 +54,25 @@ function selectDedupStorage(
   sessionStorage: StorageLike | undefined,
   key: string,
 ): { storage?: StorageLike; sent: boolean } {
-  for (const storage of [localStorage, sessionStorage]) {
-    if (!storage) continue;
+  let localReadable = false;
+  let sessionReadable = false;
+  let sent = false;
+  if (localStorage) {
     try {
-      return { storage, sent: storage.getItem(key) === "1" };
-    } catch {
-      // Try the next storage implementation.
-    }
+      localReadable = true;
+      sent = localStorage.getItem(key) === "1";
+    } catch { /* unavailable */ }
   }
-  return { sent: false };
+  if (sessionStorage) {
+    try {
+      sessionReadable = true;
+      sent = sessionStorage.getItem(key) === "1" || sent;
+    } catch { /* unavailable */ }
+  }
+  return {
+    storage: localReadable ? localStorage : sessionReadable ? sessionStorage : undefined,
+    sent,
+  };
 }
 
 export async function sendGoogleAdsPurchase(
@@ -88,13 +93,6 @@ export async function sendGoogleAdsPurchase(
   inFlightTransactions.add(sentKey);
 
   try {
-    if (input.enhancedConversion) {
-      const emailHash = await prepareEnhancedConversionEmail(input.enhancedConversion);
-      if (emailHash) {
-        gtag("set", "user_data", { sha256_email_address: emailHash });
-      }
-    }
-
     gtag("event", "conversion", payload);
     try {
       dedup.storage?.setItem(sentKey, "1");
@@ -109,13 +107,9 @@ export async function sendGoogleAdsPurchase(
   }
 }
 
-export async function prepareEnhancedConversionEmail(input: {
-  enabled?: string;
-  marketingConsent: boolean;
-  email?: string;
-}): Promise<string | null> {
-  if (input.enabled !== "true" || input.marketingConsent !== true || !input.email) return null;
-  const email = input.email.trim().toLowerCase();
+export async function prepareEnhancedConversionEmail(input: string | undefined): Promise<string | null> {
+  if (!input) return null;
+  const email = input.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
   if (!globalThis.crypto?.subtle) return null;
   const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));

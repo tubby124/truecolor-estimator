@@ -83,7 +83,7 @@ describe("Google Ads purchase conversion", () => {
     expect(gtag).toHaveBeenCalledTimes(1);
   });
 
-  it("deduplicates concurrent enhanced-conversion sends in the same browser", async () => {
+  it("deduplicates concurrent conversion sends in the same browser", async () => {
     const values = new Map<string, string>();
     const localStorage = {
       getItem: (key: string) => values.get(key) ?? null,
@@ -94,7 +94,6 @@ describe("Google Ads purchase conversion", () => {
       conversionLabel: "AW-123/label",
       transactionId: "TC-concurrent",
       value: 75,
-      enhancedConversion: { enabled: "true", marketingConsent: true, email: "a@example.com" },
     };
 
     await expect(Promise.all([
@@ -102,6 +101,32 @@ describe("Google Ads purchase conversion", () => {
       sendGoogleAdsPurchase(input, { localStorage, gtag }),
     ])).resolves.toEqual([true, false]);
     expect(gtag.mock.calls.filter((call) => call[1] === "conversion")).toHaveLength(1);
+  });
+
+  it("checks the session fallback when local storage is readable but unwritable", async () => {
+    const sessionValues = new Map<string, string>();
+    const readableUnwritableLocal = {
+      getItem: () => null,
+      setItem: () => { throw new Error("quota"); },
+    };
+    const sessionStorage = {
+      getItem: (key: string) => sessionValues.get(key) ?? null,
+      setItem: (key: string, value: string) => { sessionValues.set(key, value); },
+    };
+    const gtag = vi.fn();
+    const input = { conversionLabel: "AW-123/label", transactionId: "TC-fallback", value: 50 };
+
+    await expect(sendGoogleAdsPurchase(input, {
+      localStorage: readableUnwritableLocal,
+      sessionStorage,
+      gtag,
+    })).resolves.toBe(true);
+    await expect(sendGoogleAdsPurchase(input, {
+      localStorage: readableUnwritableLocal,
+      sessionStorage,
+      gtag,
+    })).resolves.toBe(false);
+    expect(gtag).toHaveBeenCalledTimes(1);
   });
 
   it("does not mark a transaction sent when gtag is unavailable", async () => {
@@ -113,9 +138,9 @@ describe("Google Ads purchase conversion", () => {
     expect(localStorage.setItem).not.toHaveBeenCalled();
   });
 
-  it("sets consent-gated hashed user data before the conversion", async () => {
+  it("never sends user_data from legacy email-marketing consent inputs", async () => {
     const gtag = vi.fn();
-    await sendGoogleAdsPurchase({
+    const legacyInput = {
       conversionLabel: "AW-123/label",
       transactionId: "TC-3",
       value: 75,
@@ -124,12 +149,15 @@ describe("Google Ads purchase conversion", () => {
         marketingConsent: true,
         email: " Customer@Example.com ",
       },
-    }, { localStorage: { getItem: () => null, setItem: vi.fn() }, gtag });
+    } as Parameters<typeof sendGoogleAdsPurchase>[0] & {
+      enhancedConversion: { enabled: string; marketingConsent: boolean; email: string };
+    };
+    await sendGoogleAdsPurchase(legacyInput, {
+      localStorage: { getItem: () => null, setItem: vi.fn() },
+      gtag,
+    });
 
     expect(gtag.mock.calls).toEqual([
-      ["set", "user_data", {
-        sha256_email_address: "e233d4a29013e9d87150c6237c6777bedf379ebf1acdc5d6126fec7e8bb74fb5",
-      }],
       ["event", "conversion", {
         send_to: "AW-123/label",
         transaction_id: "TC-3",
@@ -138,42 +166,15 @@ describe("Google Ads purchase conversion", () => {
       }],
     ]);
   });
-
-  it.each([
-    { enabled: undefined, marketingConsent: true, email: "a@example.com" },
-    { enabled: "false", marketingConsent: true, email: "a@example.com" },
-    { enabled: "TRUE", marketingConsent: true, email: "a@example.com" },
-    { enabled: "true", marketingConsent: false, email: "a@example.com" },
-    { enabled: "true", marketingConsent: true, email: undefined },
-  ])("sends no user_data when an enhanced-conversion gate is absent %#", async (enhancedConversion) => {
-    const gtag = vi.fn();
-    await sendGoogleAdsPurchase({
-      conversionLabel: "AW-123/label",
-      transactionId: "TC-no-user-data",
-      value: 75,
-      enhancedConversion,
-    }, { localStorage: { getItem: () => null, setItem: vi.fn() }, gtag });
-    expect(gtag.mock.calls.map((call) => call[1])).toEqual(["conversion"]);
-  });
 });
 
 describe("Enhanced Conversions preparation", () => {
-  it("normalizes and hashes email only with both feature flag and consent", async () => {
-    const result = await prepareEnhancedConversionEmail({
-      enabled: "true",
-      marketingConsent: true,
-      email: "  Customer@Example.COM ",
-    });
+  it("normalizes and hashes an email without dispatching it", async () => {
+    const result = await prepareEnhancedConversionEmail("  Customer@Example.COM ");
     expect(result).toBe("e233d4a29013e9d87150c6237c6777bedf379ebf1acdc5d6126fec7e8bb74fb5");
   });
 
-  it.each([
-    { enabled: undefined, marketingConsent: true, email: "a@example.com" },
-    { enabled: "false", marketingConsent: true, email: "a@example.com" },
-    { enabled: "TRUE", marketingConsent: true, email: "a@example.com" },
-    { enabled: "true", marketingConsent: false, email: "a@example.com" },
-    { enabled: "true", marketingConsent: true, email: "not-an-email" },
-  ])("does not prepare user data without every gate %#", async (input) => {
-    await expect(prepareEnhancedConversionEmail(input)).resolves.toBeNull();
+  it.each([undefined, "", "not-an-email"])("rejects invalid preparation input %#", async (email) => {
+    await expect(prepareEnhancedConversionEmail(email)).resolves.toBeNull();
   });
 });
