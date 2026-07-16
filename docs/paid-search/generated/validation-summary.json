@@ -17,7 +17,8 @@
     "BUDGET_APPROVAL",
     "DATES_AND_HARD_STOP",
     "MOBILE_QA",
-    "ATTRIBUTABLE_TEST_ORDER"
+    "ATTRIBUTABLE_TEST_ORDER",
+    "LAUNCH_CONTROL_SIGNOFF"
   ],
   "maximum30DayCad": 1500,
   "note": "Google Ads enforces daily budgets, not a true lifetime cap. The end date, hard stop, and monitoring are mandatory."

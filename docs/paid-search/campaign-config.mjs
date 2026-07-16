@@ -70,11 +70,11 @@ const campaignBase = {
 };
 
 const competitorTargets = [
-  ["qwik-signs", "Qwik Signs", ["qwik signs", "qwik signs saskatoon"]],
+  ["qwik-signs", "Qwik Signs", ["qwik signs"]],
   ["minuteman-press", "Minuteman Press", ["minuteman press saskatoon"]],
-  ["24-hour-signs", "24 Hour Signs", ["24 hour signs", "24 hour signs saskatoon"]],
-  ["anytime-printing", "Anytime Printing", ["anytime printing", "anytime printing saskatoon"]],
-  ["pgi-printers", "PGI Printers", ["pgi printers", "pgi printers saskatoon"]],
+  ["24-hour-signs", "24 Hour Signs", ["24 hour signs"]],
+  ["anytime-printing", "Anytime Printing", ["anytime printing"]],
+  ["pgi-printers", "PGI Printers", ["pgi printers"]],
   ["staples-printing", "Staples Printing", ["staples printing saskatoon"]],
   ["vistaprint", "Vistaprint", ["vistaprint saskatoon"]],
 ];
@@ -101,6 +101,22 @@ export const paidSearchConfig = {
     autoTaggingRequired: true,
     finalUrlSuffix: "utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_term={keyword}&utm_content={creative}&keyword={keyword}&matchtype={matchtype}&device={device}&loc_physical_ms={loc_physical_ms}&loc_interest_ms={loc_interest_ms}&adgroupid={adgroupid}&creative={creative}&campaignid={campaignid}&network={network}",
   },
+  approvedClaims: [
+    { text: "Rated 4.9 From 43 Reviews", source: "Known Google review proof: 4.9 rating from 43 reviews" },
+    { text: "Work with a Saskatoon print shop rated 4.9 from 43 Google reviews.", source: "Known Google review proof: 4.9 rating from 43 reviews" },
+  ],
+  launchControls: {
+    sourceLessons: ["WILKIE", "DUBOIS"],
+    mobilePostClickQaRequired: true,
+    oneDomainOnly: "truecolorprinting.ca",
+    cityPresenceOnlyCriterionId: 1002791,
+    searchOnly: true,
+    allowedMatchTypes: ["EXACT", "PHRASE"],
+    noBroadeningToManufactureVolume: true,
+    realAttributablePaidTestOrderRequired: true,
+    hardEndRequired: true,
+    dailySearchTermReviewRequired: true,
+  },
   externalGates: [
     { code: "TRUE_COLOR_CUSTOMER_ID", status: "BLOCKED", required: "True Color Google Ads customer ID and ownership" },
     { code: "BILLING_ACTIVE", status: "BLOCKED", required: "Billing configured and confirmed" },
@@ -112,6 +128,7 @@ export const paidSearchConfig = {
     { code: "DATES_AND_HARD_STOP", status: "BLOCKED", required: "Current dates, end date, monitoring, and hard stop confirmed" },
     { code: "MOBILE_QA", status: "BLOCKED", required: "Mobile landing-page and conversion-flow QA" },
     { code: "ATTRIBUTABLE_TEST_ORDER", status: "BLOCKED", required: "Real attributable test order before launch" },
+    { code: "LAUNCH_CONTROL_SIGNOFF", status: "BLOCKED", required: "Wilkie/Dubois launch controls reviewed and signed off" },
   ],
   accountNegatives: exactPhrase([
     "jobs", "hiring", "salary", "career", "course", "class", "tutorial", "printer repair",

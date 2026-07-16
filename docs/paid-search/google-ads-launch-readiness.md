@@ -62,3 +62,18 @@ All of these remain blocking:
 Before activation, re-run the validator, review the Google Ads Editor preview, confirm one-domain routing (`truecolorprinting.ca` only), and verify that product-intent ads land on the matching configurator. Competitor keywords may contain competitor/trademark terms, but competitor names must not appear in RSA copy, paths, or assets.
 
 During the pilot, review search terms daily, add only unambiguous waste negatives, check spend against the daily plan, verify conversion attribution, and maintain the fixed hard stop. Do not negative `near me`, `online`, `cheap`, or competitor terms account-wide. Any change to match types, networks, geotargeting, dates, budgets, bidding, URLs, tracking, or conversion setup requires regeneration and local validation before Editor/API review.
+
+## Wilkie/Dubois launch-control checklist
+
+The canonical `launchControls` declaration and blocked `LAUNCH_CONTROL_SIGNOFF` gate make these lessons machine-validated. Every box must be evidenced before sign-off:
+
+- [ ] Complete mobile post-click QA across each ad, landing page, configurator, checkout, and conversion path (`MOBILE_QA`).
+- [ ] Confirm all ads and routes use the single True Color domain, `truecolorprinting.ca`; no mixed-domain redirects.
+- [ ] Confirm Saskatoon criterion `1002791` uses city presence-only targeting, not presence-or-interest.
+- [ ] Confirm Google Search only, Search Partners off, Display off, and exact/phrase keywords only.
+- [ ] Do not add broad match or broaden targeting to manufacture volume.
+- [ ] Complete a real attributable paid test order and reconcile its click ID, payment, and owned conversion (`ATTRIBUTABLE_TEST_ORDER`).
+- [ ] Confirm the 30-day end date and operational hard stop; regenerate dates if gates miss the planned start (`DATES_AND_HARD_STOP`).
+- [ ] Assign an owner for daily search-term review and waste-negative decisions throughout the pilot.
+
+Only the two sourced review-proof claims listed in `approvedClaims` may contain numbers in RSA copy. Currency, from-price, numeric turnaround, or cutoff claims are blocked unless a future source-backed claim is deliberately added to the canonical allowlist and validator.
