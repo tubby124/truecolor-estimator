@@ -1,0 +1,24 @@
+{
+  "artifactStatus": "BUILT",
+  "campaignsCreatedInAds": false,
+  "localStatus": "VALIDATED",
+  "apiStatus": "BLOCKED",
+  "campaignsCreated": false,
+  "launched": false,
+  "spendCad": 0,
+  "errors": [],
+  "blockers": [
+    "TRUE_COLOR_CUSTOMER_ID",
+    "BILLING_ACTIVE",
+    "AUTO_TAGGING_ENABLED",
+    "CONVERSION_ACTION",
+    "ENHANCED_CONSENT_DECISION",
+    "CURRENT_KEYWORD_PLANNER_FORECAST",
+    "BUDGET_APPROVAL",
+    "DATES_AND_HARD_STOP",
+    "MOBILE_QA",
+    "ATTRIBUTABLE_TEST_ORDER"
+  ],
+  "maximum30DayCad": 1500,
+  "note": "Google Ads enforces daily budgets, not a true lifetime cap. The end date, hard stop, and monitoring are mandatory."
+}
