@@ -23,6 +23,7 @@ interface SendDependencies {
 }
 
 const CONVERSION_LABEL_RE = /^AW-\d+\/[A-Za-z0-9_-]+$/;
+const GA4_MEASUREMENT_ID = "G-6HMQT7MNLL";
 const SENT_KEY_PREFIX = "tc_google_ads_purchase_sent:";
 const inFlightTransactions = new Set<string>();
 
@@ -38,6 +39,12 @@ export function deriveGoogleAdsTagId(conversionLabel: string | undefined): strin
   const label = conversionLabel?.trim();
   if (!label || !CONVERSION_LABEL_RE.test(label)) return null;
   return label.slice(0, label.indexOf("/"));
+}
+
+export function buildGoogleTagBootstrapScript(conversionLabel: string | undefined): string {
+  const googleAdsTagId = deriveGoogleAdsTagId(conversionLabel);
+  const adsConfig = googleAdsTagId ? `window.gtag('config','${googleAdsTagId}');` : "";
+  return `window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};window.gtag('js',new Date());window.gtag('config','${GA4_MEASUREMENT_ID}');${adsConfig}`;
 }
 
 function browserStorages(): Pick<SendDependencies, "localStorage" | "sessionStorage"> {

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  buildGoogleTagBootstrapScript,
   deriveGoogleAdsTagId,
   prepareEnhancedConversionEmail,
   prepareGoogleAdsPurchase,
@@ -7,6 +8,46 @@ import {
 } from "../google-ads";
 
 describe("Google Ads purchase conversion", () => {
+  it("queues a purchase before the external Google tag library loads", async () => {
+    const fakeWindow: {
+      dataLayer?: IArguments[];
+      gtag?: (...args: unknown[]) => void;
+    } = {};
+    const script = buildGoogleTagBootstrapScript("AW-123456789/label");
+    Function("window", script)(fakeWindow);
+
+    expect(fakeWindow.gtag).toBeTypeOf("function");
+    const values = new Map<string, string>();
+    const localStorage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value); },
+    };
+    await expect(sendGoogleAdsPurchase({
+      conversionLabel: "AW-123456789/label",
+      transactionId: "TC-queued",
+      value: 99,
+    }, { localStorage, gtag: fakeWindow.gtag })).resolves.toBe(true);
+
+    const queued = (fakeWindow.dataLayer ?? []).map((args) => Array.from(args));
+    expect(queued).toContainEqual(["config", "G-6HMQT7MNLL"]);
+    expect(queued).toContainEqual(["config", "AW-123456789"]);
+    expect(queued).toContainEqual(["event", "conversion", {
+      send_to: "AW-123456789/label",
+      transaction_id: "TC-queued",
+      value: 99,
+      currency: "CAD",
+    }]);
+    expect(Array.from(values.values())).toEqual(["1"]);
+  });
+
+  it("does not queue an Ads config for an invalid destination", () => {
+    const fakeWindow: { dataLayer?: IArguments[] } = {};
+    Function("window", buildGoogleTagBootstrapScript("invalid"))(fakeWindow);
+    const queued = (fakeWindow.dataLayer ?? []).map((args) => Array.from(args));
+    expect(queued).toContainEqual(["config", "G-6HMQT7MNLL"]);
+    expect(queued.some((args) => args[0] === "config" && String(args[1]).startsWith("AW-"))).toBe(false);
+  });
+
   it("prepares a valid CAD conversion payload", () => {
     expect(prepareGoogleAdsPurchase({
       conversionLabel: "AW-123456789/AbCd_ef-12",
