@@ -19,6 +19,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/services`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/quote`, lastModified: new Date("2026-03-13"), changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/resources`, lastModified: new Date("2026-04-12"), changeFrequency: "monthly", priority: 0.6 },
+    // ── Human-reviewed non-location print resources — 2026-07-15 ───────────
+    { url: `${BASE_URL}/print-resources/coroplast-sign-template-18x24`, lastModified: new Date("2026-07-15"), changeFrequency: "yearly", priority: 0.75 },
+    { url: `${BASE_URL}/print-resources/die-cut-coroplast-project`, lastModified: new Date("2026-07-15"), changeFrequency: "yearly", priority: 0.75 },
+    { url: `${BASE_URL}/print-resources/coroplast-vs-aluminum-composite`, lastModified: new Date("2026-07-15"), changeFrequency: "yearly", priority: 0.75 },
+    { url: `${BASE_URL}/print-resources/construction-site-signage-kit`, lastModified: new Date("2026-07-15"), changeFrequency: "yearly", priority: 0.75 },
+    { url: `${BASE_URL}/print-resources/trade-show-print-kit`, lastModified: new Date("2026-07-15"), changeFrequency: "yearly", priority: 0.75 },
 
     // ── Tier 1 SEO landing pages ──────────────────────────────────────────────
     { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.95 },
