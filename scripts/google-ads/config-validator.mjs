@@ -125,7 +125,7 @@ export function validateConfig(config) {
   if (config.pilot?.generatorAutoRollsDates !== false || config.pilot?.dateChangeRequiresApprovedContractChange !== true) fail("Pilot date changes must require an approved config and validator contract change");
   if (config.currency !== "CAD") fail("Account currency must be CAD");
   if (config.maximum30DayCad !== 1500) fail("Total 30-day maximum must be CA$1,500");
-  if (config.accountCustomerId !== null) fail("Customer ID must remain null until the True Color account is confirmed");
+  if (config.accountCustomerId !== "1072816342") fail("Customer ID must match confirmed True Color child account 1072816342");
   if (config.bidding?.strategy !== "MAXIMIZE_CLICKS" || config.bidding?.cpcCeilingCad !== null || config.bidding?.cpcCeilingGate !== "CURRENT_KEYWORD_PLANNER_FORECAST") {
     fail("Bidding must use gated Maximize Clicks with a null CPC ceiling");
   }
@@ -136,7 +136,12 @@ export function validateConfig(config) {
     if (values.length !== 1 || values[0] !== expectedValue) fail(`Final URL suffix must map ${key}=${expectedValue} exactly once`);
   }
   const gates = new Map((config.externalGates ?? []).map((gate) => [gate.code, gate]));
-  for (const gate of REQUIRED_GATES) {
+  const accountGate = gates.get("TRUE_COLOR_CUSTOMER_ID");
+  if (accountGate?.status !== "VERIFIED"
+    || accountGate?.evidence !== "True Color Display Print child account 107-281-6342 under manager 112-540-2990") {
+    fail("True Color customer gate must contain the confirmed account and manager evidence");
+  }
+  for (const gate of REQUIRED_GATES.filter((code) => code !== "TRUE_COLOR_CUSTOMER_ID")) {
     if (gates.get(gate)?.status !== "BLOCKED") fail(`Missing blocked external gate: ${gate}`);
   }
   const claims = config.approvedClaims ?? [];

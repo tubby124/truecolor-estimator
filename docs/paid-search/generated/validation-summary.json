@@ -1,5 +1,6 @@
 {
   "artifactStatus": "BUILT",
+  "accountCustomerId": "1072816342",
   "campaignsCreatedInAds": false,
   "localStatus": "VALIDATED",
   "apiStatus": "BLOCKED",
@@ -8,7 +9,6 @@
   "spendCad": 0,
   "errors": [],
   "blockers": [
-    "TRUE_COLOR_CUSTOMER_ID",
     "BILLING_ACTIVE",
     "AUTO_TAGGING_ENABLED",
     "CONVERSION_ACTION",
@@ -23,6 +23,8 @@
   ],
   "maximum30DayCad": 1500,
   "editorSupportedEntitiesImportReady": true,
+  "editorImportTargetEncoded": false,
+  "targetAccountPreflightRequired": true,
   "presenceOnlyCsvConfigured": false,
   "presenceOnlyStatus": "BLOCKED_MANUAL_OR_API_AND_PREVIEW_REQUIRED",
   "accountPreviewRequired": true,

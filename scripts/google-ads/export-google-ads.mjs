@@ -66,10 +66,13 @@ export function buildArtifacts(config) {
   const rsaHeaders = ["Campaign", "Ad group", "Type", "Status", "Final URL", ...Array.from({ length: 15 }, (_, index) => `Headline ${index + 1}`), ...Array.from({ length: 4 }, (_, index) => `Description ${index + 1}`)];
   const summary = {
     artifactStatus: "BUILT",
+    accountCustomerId: config.accountCustomerId,
     campaignsCreatedInAds: false,
     ...validation,
     maximum30DayCad: config.maximum30DayCad,
     editorSupportedEntitiesImportReady: true,
+    editorImportTargetEncoded: false,
+    targetAccountPreflightRequired: true,
     presenceOnlyCsvConfigured: false,
     presenceOnlyStatus: "BLOCKED_MANUAL_OR_API_AND_PREVIEW_REQUIRED",
     accountPreviewRequired: true,
@@ -104,7 +107,7 @@ async function main() {
   await mkdir(OUTPUT_DIR, { recursive: true });
   await Promise.all(Object.entries(artifacts).map(([name, content]) => writeFile(path.join(OUTPUT_DIR, name), content)));
   console.log(`BUILT: ${Object.keys(artifacts).length} files in ${OUTPUT_DIR}`);
-  console.log("Local artifacts VALIDATED; Google Ads API/account creation BLOCKED; campaigns NOT CREATED; spend CA$0.");
+  console.log("Local artifacts VALIDATED for True Color account 107-281-6342; Google Ads API validation/import BLOCKED; campaigns NOT CREATED; spend CA$0.");
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {

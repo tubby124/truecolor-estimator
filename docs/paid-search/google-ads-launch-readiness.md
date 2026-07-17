@@ -11,7 +11,7 @@
 | Launched | **No** |
 | Spend | **CA$0** |
 
-The only Ads credentials currently available reach real-estate customer `220-053-8686` and MCC `112-540-2990`. They must not be used for True Color. There is no confirmed True Color customer ID, so the canonical configuration deliberately keeps `accountCustomerId` and the Maximize Clicks CPC ceiling `null`. No API mutation, validate-only request, account creation, deployment, campaign activation, or spend authorization was performed.
+The True Color child advertiser is confirmed as `107-281-6342` under MCC `112-540-2990`; the user-confirmed account name is **True Color Display Print** and Google Ads currently shows **Setup in progress**. The canonical source and validator require that customer ID and reject real-estate customer `220-053-8686`. Google Ads Editor CSVs do not encode an advertiser ID, so they cannot enforce the open import target: verify the active account is exactly `107-281-6342` before import and again in the account preview. The existing Google Ads OAuth refresh token returns `invalid_grant`, so API validate-only and import remain blocked pending reauthorization. No API mutation, campaign creation, deployment, campaign activation, or spend authorization was performed.
 
 ## Source and generated imports
 
@@ -25,7 +25,7 @@ node scripts/google-ads/export-google-ads.mjs --check
 node --test scripts/google-ads/node-tests/paid-search-config.node.mjs
 ```
 
-The committed output uses supported Google Ads Editor entities for campaigns, ad groups, locations, exact/phrase keywords, responsive search ads, negative keywords, and a machine-readable validation summary. The schema follows Google's [Editor CSV column definitions](https://support.google.com/google-ads/editor/answer/57747?hl=en) and [location import guidance](https://support.google.com/google-ads/editor/answer/30573?hl=en). Those supported entities are import-ready only after the correct True Color account exists. Import only into that account, inspect every proposed change in Editor, and keep every campaign and ad group paused. Negative rows use Editor's `Negative` and `Campaign negative` types and never use an enabled status. Starter waste negatives are repeated campaign-by-campaign so they can be imported without creating an unreviewed account-wide list. Competitor names are Core campaign routing negatives only—not account-wide negatives.
+The committed output uses supported Google Ads Editor entities for campaigns, ad groups, locations, exact/phrase keywords, responsive search ads, negative keywords, and a machine-readable validation summary. The schema follows Google's [Editor CSV column definitions](https://support.google.com/google-ads/editor/answer/57747?hl=en) and [location import guidance](https://support.google.com/google-ads/editor/answer/30573?hl=en). These supported entities are prepared for True Color customer `107-281-6342`, but the CSV format does not carry that target. Before import, verify the active Editor/API customer ID equals `1072816342`; after import, inspect every proposed change in that account's preview and keep every campaign and ad group paused. The validation summary records `editorImportTargetEncoded: false` and `targetAccountPreflightRequired: true` so downstream tooling cannot mistake source validation for account enforcement. Negative rows use Editor's `Negative` and `Campaign negative` types and never use an enabled status. Starter waste negatives are repeated campaign-by-campaign so they can be imported without creating an unreviewed account-wide list. Competitor names are Core campaign routing negatives only—not account-wide negatives.
 
 The CSVs do **not** set the advanced presence-only geo option. `locations.csv` adds Saskatoon criterion `1002791`; presence-only must be set manually in Editor or through the API and then verified in the account preview. The blocked `PRESENCE_ONLY_AND_EDITOR_PREVIEW` gate prevents launch until both checks are evidenced. Other account settings—including billing, auto-tagging, conversions, CPC ceiling, and advanced geo—remain manual/API blocked rather than being represented with unsupported CSV headers.
 
@@ -45,17 +45,17 @@ The final URL suffix captures UTM/ValueTrack values for `keyword`, `matchtype`, 
 
 ## External gates before API validation or creation
 
-All of these remain blocking:
+The advertiser identity gate is resolved: True Color customer `107-281-6342` is confirmed under manager `112-540-2990`. All remaining items are blocking:
 
-1. Confirm the True Color Google Ads customer ID, ownership, MCC relationship, and permission scope.
-2. Configure and verify billing in that account.
+1. Finish advertiser setup, confirm full permission scope, and configure and verify billing in customer `107-281-6342`. Any import/API runner must fail closed unless its active customer ID is exactly `1072816342`.
+2. Reauthorize the Google Ads OAuth connection for MCC `112-540-2990` with access to the True Color child.
 3. Enable and test auto-tagging.
-4. Create or identify the owned conversion action; confirm its real conversion label and ownership. Do not invent or copy a label.
+4. Create or identify the owned purchase conversion action; confirm its real full destination (`AW-.../label`) and ownership. Do not invent or copy a label.
 5. Make a purpose-specific enhanced-conversion consent decision. Current marketing consent is not sufficient for sending Ads measurement user data.
-6. Run a current Keyword Planner forecast in the correct account and approve a Maximize Clicks CPC ceiling.
+6. Run a current Keyword Planner forecast in the True Color account and approve a Maximize Clicks CPC ceiling.
 7. Review Auction Insights and explicitly justify the brand-defense campaign. Otherwise it stays paused and excluded from launch.
 8. Reconfirm the three daily budgets and CA$1,500 planning maximum.
-9. Confirm current start/end dates, mandatory end date, monitoring owner, and hard-stop procedure.
+9. Confirm current start/end dates, mandatory end date, monitoring owner, and hard-stop procedure. The July 20 start must be replaced through the config-and-validator contract if these gates are not cleared before launch.
 10. Complete mobile QA for every landing page, configurator, checkout, and conversion path.
 11. Place one real, attributable test order and verify the click ID and conversion evidence before launch.
 12. Set Saskatoon targeting to presence-only manually/API and verify the full Editor/account preview (`PRESENCE_ONLY_AND_EDITOR_PREVIEW`).

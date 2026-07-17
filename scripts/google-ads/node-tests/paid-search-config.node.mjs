@@ -32,6 +32,23 @@ test("canonical paid-search artifacts validate locally while account launch rema
   assert.deepEqual(result.errors, []);
 });
 
+test("locks the confirmed True Color child account while keeping launch gates blocked", () => {
+  assert.equal(paidSearchConfig.accountCustomerId, "1072816342");
+  const accountGate = paidSearchConfig.externalGates.find((gate) => gate.code === "TRUE_COLOR_CUSTOMER_ID");
+  assert.equal(accountGate?.status, "VERIFIED");
+  assert.equal(accountGate?.evidence, "True Color Display Print child account 107-281-6342 under manager 112-540-2990");
+
+  for (const mutate of [
+    (c) => { c.accountCustomerId = null; },
+    (c) => { c.accountCustomerId = "2200538686"; },
+    (c) => { c.externalGates.find((gate) => gate.code === "TRUE_COLOR_CUSTOMER_ID").status = "BLOCKED"; },
+  ]) {
+    const config = clone();
+    mutate(config);
+    assert.equal(validateConfig(config).localStatus, "INVALID");
+  }
+});
+
 test("rejects enabled campaigns and unsafe network, match, geo, budget, and date settings", () => {
   const mutations = [
     (c) => { c.campaigns[0].status = "ENABLED"; },
@@ -104,6 +121,7 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.doesNotMatch(first["campaign-negatives.csv"], /\n,/);
   assert.doesNotMatch(first["responsive-search-ads.csv"], /Qwik Signs Alternative/);
   assert.match(first["validation-summary.json"], /"apiStatus": "BLOCKED"/);
+  assert.match(first["validation-summary.json"], /"accountCustomerId": "1072816342"/);
 });
 
 test("exports canonical Editor campaign, RSA, and location entities", () => {
@@ -139,6 +157,8 @@ test("exports negatives with canonical scope types and never as positive keyword
 test("generated readiness summary distinguishes importable entities from advanced-geo blockers", () => {
   const summary = JSON.parse(buildArtifacts(clone())["validation-summary.json"]);
   assert.equal(summary.editorSupportedEntitiesImportReady, true);
+  assert.equal(summary.editorImportTargetEncoded, false);
+  assert.equal(summary.targetAccountPreflightRequired, true);
   assert.equal(summary.presenceOnlyCsvConfigured, false);
   assert.equal(summary.presenceOnlyStatus, "BLOCKED_MANUAL_OR_API_AND_PREVIEW_REQUIRED");
   assert.equal(summary.accountPreviewRequired, true);

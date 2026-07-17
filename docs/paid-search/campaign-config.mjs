@@ -83,7 +83,7 @@ export const paidSearchConfig = {
   schemaVersion: 1,
   generatedFor: "True Color Display Printing Ltd.",
   currency: "CAD",
-  accountCustomerId: null,
+  accountCustomerId: "1072816342",
   pilot: {
     startDate: "2026-07-20",
     endDate: "2026-08-18",
@@ -122,7 +122,12 @@ export const paidSearchConfig = {
     editorPreviewRequired: true,
   },
   externalGates: [
-    { code: "TRUE_COLOR_CUSTOMER_ID", status: "BLOCKED", required: "True Color Google Ads customer ID and ownership" },
+    {
+      code: "TRUE_COLOR_CUSTOMER_ID",
+      status: "VERIFIED",
+      required: "True Color Google Ads customer ID and ownership",
+      evidence: "True Color Display Print child account 107-281-6342 under manager 112-540-2990",
+    },
     { code: "BILLING_ACTIVE", status: "BLOCKED", required: "Billing configured and confirmed" },
     { code: "AUTO_TAGGING_ENABLED", status: "BLOCKED", required: "Auto-tagging enabled in the correct account" },
     { code: "CONVERSION_ACTION", status: "BLOCKED", required: "Owned conversion action and verified label" },
