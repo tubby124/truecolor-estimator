@@ -36,6 +36,35 @@ export function trackViewItem(params: {
   });
 }
 
+export function trackSelectItem(params: {
+  item_id: string;
+  item_name: string;
+  item_list_name: string;
+}) {
+  gtag("event", "select_item", {
+    item_list_name: params.item_list_name,
+    items: [{ item_id: params.item_id, item_name: params.item_name }],
+  });
+}
+
+export function trackViewItemList(params: {
+  item_list_name: string;
+  items: Array<{ item_id: string; item_name: string }>;
+}) {
+  gtag("event", "view_item_list", {
+    item_list_name: params.item_list_name,
+    items: params.items,
+  });
+}
+
+export function trackClickToCall(params: { placement: string }) {
+  gtag("event", "click_to_call", {
+    placement: params.placement,
+    page_path: "/why-true-color",
+    link_url: "tel:+13069548688",
+  });
+}
+
 export function trackAddToCart(params: {
   item_id: string;
   item_name: string;

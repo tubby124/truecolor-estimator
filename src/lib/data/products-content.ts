@@ -239,7 +239,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     tagline: "250 cards on 14pt gloss stock. $45.",
     description:
       "14pt gloss card stock is the benchmark for professional business cards in Canada — thick enough to feel substantial in hand, smooth enough for sharp full-colour printing on both sides. At True Color, business cards run on our Konica Minolta digital production press for precise colour matching and a consistent result across every card in the run. The standard 250-card run is $45 double-sided — front design plus a printed reverse, included in the same price since both faces run in one pass. The universal 3.5×2\" format fits every card holder, wallet slot, and Rolodex. Bring a design file (PDF, AI, or EPS preferred) and we'll prep it for print. No design yet? Our in-house designer creates business card layouts from scratch for $50, or updates your existing design for $35 — usually completed the same day. Quantities: 250, 500, or 1000 cards. The per-card cost drops meaningfully at 500 and 1000, so if you distribute them at networking events or on job sites, order up. Single-sided is also available for a leaner look. Business cards are ready for pickup at 216 33rd St W, Saskatoon in 1–3 business days, or next-day with same-day rush.",
-    fromPrice: "$25",
+    fromPrice: "$45",
     category: "BUSINESS_CARD",
     material_code: "PLACEHOLDER_14PT",
     heroImage: "/images/products/product/business-cards-800x600.webp",
@@ -288,10 +288,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
   "flyers": {
     slug: "flyers",
     name: "Flyers",
-    tagline: "Flyers from $25. Single or double-sided. Full or half letter. 80lb or 100lb gloss.",
+    tagline: "Flyers from $45. Single or double-sided. Full or half letter. 80lb or 100lb gloss.",
     description:
       "Printed on Pacesetter 80lb gloss text — a bright white, FSC-certified press sheet that produces sharp colour reproduction at an efficient price. The 80lb weight is standard for professional flyers and restaurant menus: stiff enough to hold its shape when handed out, light enough to keep postage manageable for direct mail. True Color runs flyers on our Konica Minolta digital production press with consistent colour from the first sheet to the last. 100 flyers is the minimum. Choose single-sided for basic handouts, menus, or event flyers where the back is blank — or double-sided when you need both faces printed (programs, real estate one-pagers, contractor service lists). Want a heavier feel? Select 100lb gloss — noticeably thicker in hand and a step up in perceived quality. Half-letter (8.5×5.5\") is available directly in the picker above and prints at the same quality as full letter. Common uses in Saskatoon: restaurant menus, event programs, open house handouts, election campaign materials, contractor service lists, and non-profit fundraiser sheets. Supply PDF or high-res PNG at 150+ DPI. No file? Our in-house designer handles layout from a rough concept — starts at $35. Pickup at 216 33rd St W, Saskatoon in 1–2 business days, or same-day rush for $40 flat.",
-    fromPrice: "$25",
+    fromPrice: "$45",
     category: "FLYER",
     material_code: "PLACEHOLDER_80LB",
     heroImage: "/images/products/product/flyers-stack-800x600.webp",

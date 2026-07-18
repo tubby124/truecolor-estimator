@@ -215,7 +215,7 @@ export function ProductPageClient({ product }: Props) {
               ${priceData.price.toFixed(2)}
             </p>
           ) : (
-            <p className="text-sm text-gray-400 leading-none">Configure above</p>
+            <p className="text-sm text-gray-400 leading-none">Choose options below</p>
           )}
         </div>
 

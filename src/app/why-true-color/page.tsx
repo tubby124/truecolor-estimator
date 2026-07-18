@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight, Clock3, MapPin, Phone, Star } from "lucide-react";
-import { PrintIcon } from "@/components/icons/PrintIcons";
+import Image from "next/image";
+import { ArrowRight, BadgeDollarSign, Clock3, MapPin, Phone, Star, UserRoundCheck } from "lucide-react";
+import { PaidPhoneLink, PaidProductLink, PaidProductListTracker } from "@/components/paid/PaidProductLink";
+import { getProduct } from "@/lib/data/products-content";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 
 export const metadata: Metadata = {
-  title: "Choose a Print Product",
+  title: "Compare Print Options & Order Online",
   description:
     "Choose a print product, see pricing, and order online from True Color Display Printing in Saskatoon.",
   robots: {
@@ -14,38 +15,22 @@ export const metadata: Metadata = {
   },
 };
 
-export const PAID_PRODUCTS = [
-  {
-    name: "Coroplast signs",
-    slug: "coroplast-signs",
-    href: "/products/coroplast-signs",
-  },
-  {
-    name: "Stickers",
-    slug: "stickers",
-    href: "/products/stickers",
-  },
-  {
-    name: "Vinyl banners",
-    slug: "vinyl-banners",
-    href: "/products/vinyl-banners",
-  },
-  {
-    name: "Business cards",
-    slug: "business-cards",
-    href: "/products/business-cards",
-  },
-  {
-    name: "Flyers",
-    slug: "flyers",
-    href: "/products/flyers",
-  },
-  {
-    name: "Retractable banners",
-    slug: "retractable-banners",
-    href: "/products/retractable-banners",
-  },
+const PAID_PRODUCT_SLUGS = [
+  "coroplast-signs", "stickers", "vinyl-banners", "business-cards", "flyers", "retractable-banners",
 ] as const;
+
+export const PAID_PRODUCTS = PAID_PRODUCT_SLUGS.map((slug) => {
+  const product = getProduct(slug);
+  if (!product) throw new Error(`Missing paid product: ${slug}`);
+  return {
+    name: product.name,
+    slug,
+    href: `/products/${slug}`,
+    fromPrice: product.fromPrice,
+    heroImage: product.heroImage,
+    tagline: product.tagline,
+  };
+});
 
 export const LICENSED_REVIEW_ROUTE = "/reviews-widget" as const;
 
@@ -59,33 +44,62 @@ export default function WhyTrueColorPage() {
               Start your order
             </p>
             <h1 className="text-3xl font-black leading-tight tracking-tight text-[#1c1712] sm:text-5xl">
-              Choose a product. See pricing. Order now.
+              Compare print options. See your price. Order online.
             </h1>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600 sm:text-lg">
-              Select what you need to open the product configurator, choose your options,
-              and see the price before ordering.
+              Choose what you need, configure the details, upload your artwork, and order
+              for Saskatoon pickup. Guest checkout is available—no account required.
             </p>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+          <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:grid-cols-4 sm:gap-0 sm:p-0">
+            <div className="flex items-center gap-2 p-2.5 sm:border-r sm:border-gray-100 sm:p-4">
+              <Star className="shrink-0 fill-yellow-400 text-yellow-400" size={19} aria-hidden="true" />
+              <span className="text-xs font-bold text-[#1c1712] sm:text-sm">{RATING_VALUE} from {REVIEW_COUNT} reviews</span>
+            </div>
+            <div className="flex items-center gap-2 p-2.5 sm:border-r sm:border-gray-100 sm:p-4">
+              <BadgeDollarSign className="shrink-0 text-[#e63020]" size={20} aria-hidden="true" />
+              <span className="text-xs font-bold text-[#1c1712] sm:text-sm">Pricing before checkout</span>
+            </div>
+            <div className="flex items-center gap-2 p-2.5 sm:border-r sm:border-gray-100 sm:p-4">
+              <UserRoundCheck className="shrink-0 text-[#e63020]" size={20} aria-hidden="true" />
+              <span className="text-xs font-bold text-[#1c1712] sm:text-sm">No account required</span>
+            </div>
+            <div className="flex items-center gap-2 p-2.5 sm:p-4">
+              <MapPin className="shrink-0 text-[#e63020]" size={20} aria-hidden="true" />
+              <span className="text-xs font-bold text-[#1c1712] sm:text-sm">Local Saskatoon pickup</span>
+            </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            <PaidProductListTracker products={PAID_PRODUCTS.map(({ slug, name }) => ({ slug, name }))} />
             {PAID_PRODUCTS.map((product) => (
-              <Link
+              <PaidProductLink
                 key={product.href}
                 href={product.href}
-                className="group flex min-h-36 flex-col justify-between rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-[#16C2F3] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3] focus-visible:ring-offset-2 sm:min-h-40 sm:p-5"
+                productSlug={product.slug}
+                productName={product.name}
+                className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#16C2F3] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3] focus-visible:ring-offset-2"
               >
-                <PrintIcon
-                  slug={product.slug}
-                  size={32}
-                  className="text-[#e63020]"
-                  aria-hidden={true}
-                />
-                <span>
-                  <span className="block font-bold leading-tight text-[#1c1712]">
+                <span className="relative block aspect-[4/3] overflow-hidden bg-gray-100">
+                  <Image
+                    src={product.heroImage}
+                    alt=""
+                    fill
+                    className="object-cover transition duration-300 group-hover:scale-[1.03]"
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                  />
+                </span>
+                <span className="block p-3.5 sm:p-4">
+                  <span className="block text-sm font-black leading-tight text-[#1c1712] sm:text-base">
                     {product.name}
                   </span>
-                  <span className="mt-2 flex items-center gap-1 text-sm font-semibold text-[#087c9d]">
-                    See pricing &amp; order
+                  <span className="mt-1 block text-sm font-bold text-[#e63020]">From {product.fromPrice}</span>
+                  <span className="mt-1.5 hidden text-xs leading-relaxed text-gray-500 sm:line-clamp-2 sm:block">
+                    {product.tagline}
+                  </span>
+                  <span className="mt-3 flex items-center gap-1 text-xs font-bold text-[#087c9d] sm:text-sm">
+                    Price &amp; order
                     <ArrowRight
                       size={15}
                       aria-hidden="true"
@@ -93,9 +107,17 @@ export default function WhyTrueColorPage() {
                     />
                   </span>
                 </span>
-              </Link>
+              </PaidProductLink>
             ))}
           </div>
+
+          <p className="mt-5 text-center text-sm text-gray-600">
+            Not sure which product fits?{" "}
+            <PaidPhoneLink placement="product_chooser_help" className="font-bold text-[#087c9d] underline-offset-4 hover:underline">
+              Call (306) 954-8688
+            </PaidPhoneLink>
+            {" "}and we&apos;ll help you choose.
+          </p>
         </div>
       </section>
 
@@ -173,13 +195,13 @@ export default function WhyTrueColorPage() {
               <MapPin size={18} aria-hidden="true" />
               216 33rd St W, Saskatoon, SK
             </a>
-            <a
-              href="tel:+13069548688"
+            <PaidPhoneLink
+              placement="local_contact_block"
               className="inline-flex items-center gap-2 hover:text-[#16C2F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3]"
             >
               <Phone size={18} aria-hidden="true" />
               (306) 954-8688
-            </a>
+            </PaidPhoneLink>
           </div>
         </div>
       </section>

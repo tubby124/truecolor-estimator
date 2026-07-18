@@ -11,6 +11,7 @@ const EXPECTED_PRODUCT_HREFS = [
   "/products/flyers",
   "/products/retractable-banners",
 ];
+const EXPECTED_FROM_PRICES = ["$25", "$25", "$66", "$45", "$45", "$219"];
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -18,7 +19,7 @@ afterEach(() => {
 
 describe("paid-only why True Color page contract", () => {
   it("uses a non-duplicated title and is noindex, follow", () => {
-    expect(metadata.title).toBe("Choose a Print Product");
+    expect(metadata.title).toBe("Compare Print Options & Order Online");
     expect(metadata.robots).toMatchObject({ index: false, follow: true });
   });
 
@@ -30,6 +31,8 @@ describe("paid-only why True Color page contract", () => {
 
   it("exposes exactly the six direct product CTA destinations", () => {
     expect(PAID_PRODUCTS.map((product) => product.href)).toEqual(EXPECTED_PRODUCT_HREFS);
+    expect(PAID_PRODUCTS.map((product) => product.fromPrice)).toEqual(EXPECTED_FROM_PRICES);
+    expect(PAID_PRODUCTS.every((product) => product.heroImage.startsWith("/images/"))).toBe(true);
   });
 
   it("links to and preserves the licensed review route", async () => {
