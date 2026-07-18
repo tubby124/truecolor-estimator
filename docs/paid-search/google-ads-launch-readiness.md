@@ -23,10 +23,14 @@ All account mutations passed Google Ads API v24 validate-only before creation. A
 - Core campaign `24048123058`: CA$40/day.
 - Competitor campaign `24048123061`: CA$7/day.
 - Brand campaign `24048123064`: CA$3/day.
-- Three Search-only campaigns, 17 paused ad groups, 76 exact/phrase positive keywords, 127 negative criteria, and 17 paused responsive search ads.
+- Three Search-only campaigns, 19 paused ad groups, 71 positive keywords, 189 negative criteria, and 19 paused responsive search ads.
+- Core product terms remain tightly themed exact/phrase. Competitor conquest is exact-only and now includes the verified local-overlap targets Ink House and Rayacom, alongside Qwik Signs, Minuteman Press, 24 Hour Signs, Anytime Printing, PGI, Staples, and VistaPrint.
+- Ten additional research/template/equipment themes are excluded as exact/phrase campaign negatives so paid budget stays on order intent. Protected commercial terms such as `near me`, `online`, and `cheap` are not blocked.
+- Six direct-product sitelinks, six callouts, and one structured snippet are linked to every campaign. Sitelinks route directly to the six canonical configurators.
 - Google Search on; Search Partners and Display off.
 - Saskatoon criterion `1002791`, English, and presence-only targeting on all three campaigns.
 - Core product ads route directly to matching configurators; competitor traffic routes to paid-only `/why-true-color`; brand traffic routes to the homepage.
+- Production currently returns HTTP 404 for `/why-true-color`; this is an explicit launch blocker until the held site release deploys it, confirms 200/noindex/mobile/product links, and Google policy review is rechecked.
 - Fixed account dates are July 20 through August 18, 2026. Every campaign and ad group remains paused.
 - RSA policy approval currently reports `UNKNOWN`, so policy review is not yet cleared.
 
@@ -47,7 +51,9 @@ The generated Editor CSVs do not encode an advertiser ID or the advanced presenc
 - Brand: CA$3/day; 30-day planning maximum CA$90; remains launch-blocked by `AUCTION_INSIGHTS_REQUIRED`.
 - Total 30-day planning maximum: CA$1,500.
 - Google Ads uses daily budgets, not a true lifetime cap. The end date, monitoring, and hard stop are mandatory.
-- Maximize Clicks is configured. A current True Color Keyword Planner forecast and approved CPC ceiling are required before activation.
+- Maximize Clicks is configured with forecast-backed ceilings staged while paused: Core CA$4.00, Competitor CA$2.50, Brand CA$1.50. The current exact-only Competitor forecast is about 1.89 clicks/day at CA$2.50 versus 2.16 at CA$4.00, so the lower ceiling preserves most modeled capture while limiting auction exposure.
+- Technical forecast/staging is verified; owner approval to use these exact ceilings at launch remains a separate blocked gate.
+- Launch Tier 1 contains the six direct-product ad groups plus exact-only competitor conquest. Rush, generic pricing, and generic sign-shop groups are Tier 2 and must remain paused during the first controlled conversion test. Brand remains held for Auction Insights.
 - The final URL suffix preserves UTM and ValueTrack fields for keyword, match type, device, location, ad group, creative, campaign, and network. Auto-tagging supplies the click ID.
 
 ## Remaining launch blockers
@@ -57,10 +63,10 @@ Campaign creation is complete, but activation is prohibited until all remaining 
 1. Confirm the CA$600 offer and exact qualifying terms inside **Billing → Promotions**. Only spend after redemption/eligibility is confirmed counts toward the offer.
 2. Set Railway `NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL` to the verified destination during the no-earlier-than-July-20 release; do not trigger an early deploy.
 3. Make a purpose-specific Enhanced Conversions consent/disclosure decision. Current promotional-email consent does not authorize sending Ads measurement customer data.
-4. Approve the forecast-backed CA$4.00 Maximize Clicks CPC ceiling documented in [keyword-planner-forecast-2026-07-17.md](keyword-planner-forecast-2026-07-17.md), then stage it in source and the paused campaigns.
-5. Obtain RSA policy approval. Keep any disapproved or unknown ads paused.
+4. Deploy `/why-true-color`, verify live HTTP 200/noindex/mobile/product links, and recheck competitor RSA policy review.
+5. Obtain RSA and manual-asset policy approval. Keep any disapproved, pending, or unknown assets paused behind the campaign state.
 6. Review Auction Insights and explicitly justify Brand Defense; otherwise keep Brand paused.
-7. Explicitly approve the CA$40/CA$7/CA$3 daily budgets, CA$1,500 planning maximum, August 18 end date, monitoring owner, and hard-stop procedure.
+7. Explicitly approve the staged CA$4.00/CA$2.50/CA$1.50 CPC ceilings and the CA$40/CA$7/CA$3 daily budgets, CA$1,500 planning maximum, August 18 end date, monitoring owner, and hard-stop procedure.
 8. Complete post-deploy mobile QA across every landing page, configurator, checkout, and conversion path.
 9. Place one real attributable paid test order and reconcile click ID, payment timestamp/value, database persistence, and Google Ads conversion evidence.
 10. Review the full live account preview and sign off the Wilkie/Dubois controls.
@@ -76,6 +82,11 @@ If these gates are not cleared before July 20, moving the pilot requires an expl
 - [x] Saskatoon presence-only set through the API.
 - [x] Product intent routes to matching configurators.
 - [x] Competitor terms excluded from RSA copy and routed to `/why-true-color`.
+- [x] Competitor targeting exact-only; Ink House and Rayacom added from current local-overlap research.
+- [x] Campaign-specific CPC ceilings staged from the correct-account forecast.
+- [x] Six direct-product sitelinks plus callout/snippet assets linked across campaigns.
+- [x] Conversion-first launch tiers keep generic/rush and Brand traffic out of the first controlled test.
+- [x] Checked-in launch manifest allows only Tier 1 product/conquest candidates, holds Tier 2 and Brand, and refuses activation while any gate remains blocked.
 - [x] All campaigns, ad groups, and ads created paused; spend CA$0.
 - [ ] Account preview, policy approval, attributable test order, budget/date approval, monitoring owner, and hard-stop signoff.
 

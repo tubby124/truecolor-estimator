@@ -14,6 +14,8 @@
     "test:payment": "node scripts/test-payment-flow.mjs",
     "gen-og": "node scripts/gen-og.mjs",
     "validate:pricing": "node scripts/validate-pricing.mjs",
+    "validate:google-ads": "node scripts/google-ads/live-verify-paused.mjs",
+    "validate:google-ads-launch": "node scripts/google-ads/validate-launch-candidate.mjs",
     "harness:webhooks": "node scripts/harness/webhook-health.mjs",
     "harness:webhooks:probe": "node scripts/harness/webhook-health.mjs --probe",
     "harness:reconcile": "node scripts/harness/reconcile-check.mjs",

@@ -28,10 +28,11 @@ const rsa = (product, specificHeadlines) => ({
 const keyword = (text, matchType) => ({ text, matchType });
 const exactPhrase = (terms) => terms.flatMap((term) => [keyword(term, "EXACT"), keyword(term, "PHRASE")]);
 
-const coreGroup = ({ key, name, product, finalUrl, terms, headlines, crossNegatives = [] }) => ({
+const coreGroup = ({ key, name, product, finalUrl, terms, headlines, crossNegatives = [], launchTier = "TIER_1_PRODUCT" }) => ({
   key,
   name,
   status: "PAUSED",
+  launchTier,
   finalUrl,
   keywords: exactPhrase(terms),
   crossNegatives,
@@ -72,6 +73,8 @@ const campaignBase = {
 const competitorTargets = [
   ["qwik-signs", "Qwik Signs", ["qwik signs"]],
   ["minuteman-press", "Minuteman Press", ["minuteman press saskatoon"]],
+  ["ink-house", "Ink House", ["ink house saskatoon"]],
+  ["rayacom", "Rayacom", ["rayacom saskatoon"]],
   ["24-hour-signs", "24 Hour Signs", ["24 hour signs"]],
   ["anytime-printing", "Anytime Printing", ["anytime printing"]],
   ["pgi-printers", "PGI Printers", ["pgi printers"]],
@@ -96,8 +99,31 @@ export const paidSearchConfig = {
   maximum30DayCad: 1500,
   bidding: {
     strategy: "MAXIMIZE_CLICKS",
-    cpcCeilingCad: null,
-    cpcCeilingGate: "CURRENT_KEYWORD_PLANNER_FORECAST",
+    cpcCeilingCadByCampaignKind: { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 },
+    forecastDate: "2026-07-17",
+    rationale: "Core needs CA$4.00 to preserve forecast capture; Competitor is near saturation at CA$2.50; Brand remains held at CA$1.50.",
+  },
+  adAssets: {
+    sitelinks: [
+      { text: "Coroplast Signs", description1: "See exact prices online", description2: "Configure and order locally", finalUrl: `${ROOT}/products/coroplast-signs` },
+      { text: "Custom Stickers", description1: "Choose size and quantity", description2: "Upload artwork with order", finalUrl: `${ROOT}/products/stickers` },
+      { text: "Vinyl Banners", description1: "Price vinyl banners online", description2: "Local Saskatoon pickup", finalUrl: `${ROOT}/products/vinyl-banners` },
+      { text: "Business Cards", description1: "Configure cards and price", description2: "Order printing online", finalUrl: `${ROOT}/products/business-cards` },
+      { text: "Custom Flyers", description1: "Select quantity and sides", description2: "See your price before order", finalUrl: `${ROOT}/products/flyers` },
+      { text: "Retractable Banners", description1: "Configure display printing", description2: "Upload artwork and order", finalUrl: `${ROOT}/products/retractable-banners` },
+    ],
+    callouts: [
+      "Exact Online Pricing",
+      "Local Saskatoon Pickup",
+      "Upload Artwork Online",
+      "Order Printing Online",
+      "Rush Options Available",
+      "4.9 From 43 Reviews",
+    ],
+    structuredSnippet: {
+      header: "Types",
+      values: ["Coroplast Signs", "Custom Stickers", "Vinyl Banners", "Business Cards", "Custom Flyers", "Retractable Banners"],
+    },
   },
   tracking: {
     autoTaggingRequired: true,
@@ -117,12 +143,14 @@ export const paidSearchConfig = {
       GOOG_Search_TC_CompetitorConquest_2026: "24048123061",
       GOOG_Search_TC_BrandDefense_2026: "24048123064",
     },
-    counts: { campaigns: 3, adGroups: 17, positiveKeywords: 76, negativeCriteria: 127, responsiveSearchAds: 17 },
+    counts: { campaigns: 3, adGroups: 19, positiveKeywords: 71, negativeCriteria: 189, responsiveSearchAds: 19, manualAssets: 13, campaignAssetLinks: 39 },
+    cpcCeilingCadByCampaignKind: { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 },
     policyApprovalStatus: "UNKNOWN",
     spendCad: 0,
   },
   approvedClaims: [
     { text: "Rated 4.9 From 43 Reviews", source: "Known Google review proof: 4.9 rating from 43 reviews" },
+    { text: "4.9 From 43 Reviews", source: "Known Google review proof: 4.9 rating from 43 reviews" },
     { text: "Work with a Saskatoon print shop rated 4.9 from 43 Google reviews.", source: "Known Google review proof: 4.9 rating from 43 reviews" },
   ],
   launchControls: {
@@ -151,10 +179,12 @@ export const paidSearchConfig = {
     { code: "CONVERSION_ACTION", status: "VERIFIED", required: "Owned conversion action and verified label", evidence: "Purchase - Website (True Color), action 7689029977, destination AW-18330693756/F1pQCNmStdIcEPzg4KRE" },
     { code: "PROMOTION_ELIGIBILITY", status: "BLOCKED", required: "CA$600 offer eligibility and exact terms confirmed in Billing → Promotions" },
     { code: "PURCHASE_TAG_DEPLOYED", status: "BLOCKED", required: "Verified purchase destination deployed to Railway and observed on the live site" },
+    { code: "COMPETITOR_LANDING_DEPLOYED", status: "BLOCKED", required: "Live /why-true-color returns 200, remains noindex, passes mobile QA, and has working product links" },
     { code: "RSA_POLICY_APPROVAL", status: "BLOCKED", required: "All launch-candidate RSAs approved by Google Ads policy review" },
     { code: "AUCTION_INSIGHTS_SIGNOFF", status: "BLOCKED", required: "Brand campaign justified by Auction Insights or kept paused" },
     { code: "ENHANCED_CONSENT_DECISION", status: "BLOCKED", required: "Purpose-specific enhanced-consent decision" },
-    { code: "CURRENT_KEYWORD_PLANNER_FORECAST", status: "BLOCKED", required: "Current forecast from the correct account and approved CPC ceiling", evidence: "2026-07-17 True Color forecast complete; CA$4.00 ceiling recommended and awaiting approval" },
+    { code: "CURRENT_KEYWORD_PLANNER_FORECAST", status: "VERIFIED", required: "Current forecast from the correct account and CPC ceilings staged while paused", evidence: "2026-07-17 True Color forecast; Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 staged paused" },
+    { code: "CPC_CEILING_LAUNCH_APPROVAL", status: "BLOCKED", required: "Owner approves the staged Core CA$4.00, Competitor CA$2.50, and Brand CA$1.50 ceilings for launch" },
     { code: "BUDGET_APPROVAL", status: "BLOCKED", required: "Pilot budgets approved" },
     { code: "DATES_AND_HARD_STOP", status: "BLOCKED", required: "Current dates, end date, monitoring, and hard stop confirmed" },
     { code: "MOBILE_QA", status: "BLOCKED", required: "Mobile landing-page and conversion-flow QA" },
@@ -164,7 +194,8 @@ export const paidSearchConfig = {
   ],
   accountNegatives: exactPhrase([
     "jobs", "hiring", "salary", "career", "course", "class", "tutorial", "printer repair",
-    "used printer", "printer ink", "3d printing", "home printer",
+    "used printer", "printer ink", "3d printing", "home printer", "free", "template", "diy",
+    "how to", "canva", "download", "printable", "machine", "equipment", "supplies",
   ]),
   campaigns: [
     {
@@ -224,6 +255,7 @@ export const paidSearchConfig = {
           terms: ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon"],
           headlines: ["Rush Printing Saskatoon", "Explore Same Day Printing", "Local Rush Print Options"],
           crossNegatives: ["business cards", "flyers", "stickers", "banners", "coroplast"],
+          launchTier: "TIER_2_EXPANSION",
         }),
         coreGroup({
           key: "generic-print-price", name: "Generic Print Price", product: "printing",
@@ -231,6 +263,7 @@ export const paidSearchConfig = {
           terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon"],
           headlines: ["Printing Prices Saskatoon", "See Printing Prices Online", "Configure Printing Online"],
           crossNegatives: ["same day", "rush", "sign shop", "sign company"],
+          launchTier: "TIER_2_EXPANSION",
         }),
         coreGroup({
           key: "generic-sign-shop", name: "Generic Sign Shop", product: "signs",
@@ -238,6 +271,7 @@ export const paidSearchConfig = {
           terms: ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon"],
           headlines: ["Saskatoon Sign Shop", "Custom Signs Saskatoon", "Explore Local Sign Options"],
           crossNegatives: ["same day", "rush", "printing prices", "print shop prices"],
+          launchTier: "TIER_2_EXPANSION",
         }),
       ],
     },
@@ -253,8 +287,9 @@ export const paidSearchConfig = {
         key,
         name: `Comparison - ${name}`,
         status: "PAUSED",
+        launchTier: "TIER_1_CONQUEST",
         finalUrl: `${ROOT}/why-true-color`,
-        keywords: exactPhrase(terms),
+        keywords: terms.map((term) => keyword(term, "EXACT")),
         crossNegatives: [],
         rsa: neutralCompetitorRsa,
       })),
@@ -271,6 +306,7 @@ export const paidSearchConfig = {
         key: "true-color-brand",
         name: "True Color Brand",
         status: "PAUSED",
+        launchTier: "HOLD_AUCTION_INSIGHTS",
         finalUrl: `${ROOT}/`,
         keywords: exactPhrase(["true color printing", "true colour printing", "true color saskatoon", "true color display printing"]),
         crossNegatives: [],

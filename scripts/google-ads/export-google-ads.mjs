@@ -24,7 +24,7 @@ export function buildArtifacts(config) {
     Status: campaign.status,
     Budget: campaign.dailyBudgetCad,
     "Bid strategy type": "Maximize clicks",
-    "Maximum CPC bid limit": config.bidding.cpcCeilingCad,
+    "Maximum CPC bid limit": config.bidding.cpcCeilingCadByCampaignKind[campaign.kind],
     "Start date": config.pilot.startDate,
     "End date": config.pilot.endDate,
     Networks: "Google Search",
@@ -67,8 +67,10 @@ export function buildArtifacts(config) {
   const summary = {
     artifactStatus: "BUILT",
     accountCustomerId: config.accountCustomerId,
-    campaignsCreatedInAds: validation.campaignsCreated,
     ...validation,
+    recordedLiveEvidence: config.liveGoogleAds,
+    manualAdAssetsConfigured: true,
+    conversionFirstLaunchTiersConfigured: true,
     maximum30DayCad: config.maximum30DayCad,
     editorSupportedEntitiesImportReady: true,
     editorImportTargetEncoded: false,
@@ -86,6 +88,19 @@ export function buildArtifacts(config) {
     "keywords.csv": csv(["Campaign", "Ad group", "Keyword", "Type", "Status", "Final URL"], keywordRows),
     "responsive-search-ads.csv": csv(rsaHeaders, adRows),
     "campaign-negatives.csv": csv(["Campaign", "Ad group", "Keyword", "Type"], negativeRows),
+    "launch-candidate-manifest.json": `${JSON.stringify({
+      accountCustomerId: config.accountCustomerId,
+      activationPermitted: false,
+      requiredFreshLiveVerification: true,
+      allowedLaunchTiers: ["TIER_1_PRODUCT", "TIER_1_CONQUEST"],
+      launchCandidates: config.campaigns.flatMap((campaign) => campaign.adGroups
+        .filter((group) => ["TIER_1_PRODUCT", "TIER_1_CONQUEST"].includes(group.launchTier))
+        .map((group) => ({ campaign: campaign.name, adGroup: group.name, tier: group.launchTier, requiredCurrentStatus: "PAUSED" }))),
+      heldGroups: config.campaigns.flatMap((campaign) => campaign.adGroups
+        .filter((group) => !["TIER_1_PRODUCT", "TIER_1_CONQUEST"].includes(group.launchTier))
+        .map((group) => ({ campaign: campaign.name, adGroup: group.name, tier: group.launchTier, requiredStatus: "PAUSED" }))),
+      blockers: validation.blockers,
+    }, null, 2)}\n`,
     "validation-summary.json": `${JSON.stringify(summary, null, 2)}\n`,
   };
 }
@@ -107,7 +122,7 @@ async function main() {
   await mkdir(OUTPUT_DIR, { recursive: true });
   await Promise.all(Object.entries(artifacts).map(([name, content]) => writeFile(path.join(OUTPUT_DIR, name), content)));
   console.log(`BUILT: ${Object.keys(artifacts).length} files in ${OUTPUT_DIR}`);
-  console.log("Local artifacts and live paused campaigns VALIDATED for True Color account 107-281-6342; campaigns NOT LAUNCHED; spend CA$0.");
+  console.log("Local artifacts VALIDATED for True Color account 107-281-6342; live account state is UNVERIFIED until the credential-gated live verifier runs.");
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {

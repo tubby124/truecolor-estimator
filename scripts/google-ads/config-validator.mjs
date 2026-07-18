@@ -7,8 +7,8 @@ const EXPECTED = {
 };
 const REQUIRED_GATES = [
   "TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED", "CONVERSION_ACTION",
-  "PROMOTION_ELIGIBILITY", "PURCHASE_TAG_DEPLOYED", "RSA_POLICY_APPROVAL", "AUCTION_INSIGHTS_SIGNOFF",
-  "ENHANCED_CONSENT_DECISION", "CURRENT_KEYWORD_PLANNER_FORECAST", "BUDGET_APPROVAL",
+  "PROMOTION_ELIGIBILITY", "PURCHASE_TAG_DEPLOYED", "COMPETITOR_LANDING_DEPLOYED", "RSA_POLICY_APPROVAL", "AUCTION_INSIGHTS_SIGNOFF",
+  "ENHANCED_CONSENT_DECISION", "CURRENT_KEYWORD_PLANNER_FORECAST", "CPC_CEILING_LAUNCH_APPROVAL", "BUDGET_APPROVAL",
   "DATES_AND_HARD_STOP", "MOBILE_QA", "ATTRIBUTABLE_TEST_ORDER", "LAUNCH_CONTROL_SIGNOFF",
   "PRESENCE_ONLY_AND_EDITOR_PREVIEW",
 ];
@@ -17,6 +17,7 @@ const VERIFIED_GATE_EVIDENCE = new Map([
   ["BILLING_ACTIVE", "Billing APPROVED in customer 1072816342; setup 8490021913"],
   ["AUTO_TAGGING_ENABLED", "Auto-tagging enabled in customer 1072816342"],
   ["CONVERSION_ACTION", "Purchase - Website (True Color), action 7689029977, destination AW-18330693756/F1pQCNmStdIcEPzg4KRE"],
+  ["CURRENT_KEYWORD_PLANNER_FORECAST", "2026-07-17 True Color forecast; Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 staged paused"],
 ]);
 const LIVE_GOOGLE_ADS = {
   apiVersion: "v24",
@@ -32,11 +33,12 @@ const LIVE_GOOGLE_ADS = {
     GOOG_Search_TC_CompetitorConquest_2026: "24048123061",
     GOOG_Search_TC_BrandDefense_2026: "24048123064",
   },
-  counts: { campaigns: 3, adGroups: 17, positiveKeywords: 76, negativeCriteria: 127, responsiveSearchAds: 17 },
+  counts: { campaigns: 3, adGroups: 19, positiveKeywords: 71, negativeCriteria: 189, responsiveSearchAds: 19, manualAssets: 13, campaignAssetLinks: 39 },
+  cpcCeilingCadByCampaignKind: { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 },
   policyApprovalStatus: "UNKNOWN",
   spendCad: 0,
 };
-const COMPETITOR_TERMS = ["qwik signs", "minuteman press", "24 hour signs", "anytime printing", "pgi printers", "staples", "vistaprint"];
+const COMPETITOR_TERMS = ["qwik signs", "minuteman press", "ink house", "rayacom", "24 hour signs", "anytime printing", "pgi printers", "staples", "vistaprint"];
 const ROUTES = {
   coroplast: "/products/coroplast-signs",
   "stickers-labels": "/products/stickers",
@@ -73,6 +75,8 @@ const CORE_CROSS_NEGATIVES = {
 const COMPETITOR_GROUPS = {
   "qwik-signs": ["qwik signs"],
   "minuteman-press": ["minuteman press saskatoon"],
+  "ink-house": ["ink house saskatoon"],
+  rayacom: ["rayacom saskatoon"],
   "24-hour-signs": ["24 hour signs"],
   "anytime-printing": ["anytime printing"],
   "pgi-printers": ["pgi printers"],
@@ -84,11 +88,13 @@ const BRAND_GROUPS = {
 };
 const REQUIRED_ACCOUNT_NEGATIVES = [
   "jobs", "hiring", "salary", "career", "course", "class", "tutorial", "printer repair",
-  "used printer", "printer ink", "3d printing", "home printer",
+  "used printer", "printer ink", "3d printing", "home printer", "free", "template", "diy",
+  "how to", "canva", "download", "printable", "machine", "equipment", "supplies",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 const APPROVED_CLAIMS = new Map([
   ["Rated 4.9 From 43 Reviews", "Known Google review proof: 4.9 rating from 43 reviews"],
+  ["4.9 From 43 Reviews", "Known Google review proof: 4.9 rating from 43 reviews"],
   ["Work with a Saskatoon print shop rated 4.9 from 43 Google reviews.", "Known Google review proof: 4.9 rating from 43 reviews"],
 ]);
 const FORBIDDEN_CLAIM_PATTERNS = [
@@ -113,6 +119,14 @@ const TRACKING_MAPPINGS = {
   campaignid: "{campaignid}",
   network: "{network}",
 };
+const REQUIRED_CALLOUTS = [
+  "Exact Online Pricing", "Local Saskatoon Pickup", "Upload Artwork Online",
+  "Order Printing Online", "Rush Options Available", "4.9 From 43 Reviews",
+];
+const REQUIRED_SITELINK_PATHS = [
+  "/products/coroplast-signs", "/products/stickers", "/products/vinyl-banners",
+  "/products/business-cards", "/products/flyers", "/products/retractable-banners",
+];
 
 const daysInclusive = (start, end) => {
   const startMs = Date.parse(`${start}T00:00:00Z`);
@@ -135,6 +149,8 @@ const hasExactPhrasePairs = (keywords, terms) => {
   if (keywords?.length !== terms.length * 2) return false;
   return terms.every((term) => ["EXACT", "PHRASE"].every((matchType) => keywords.some((keyword) => keyword.text === term && keyword.matchType === matchType)));
 };
+const hasExactOnly = (keywords, terms) => keywords?.length === terms.length
+  && terms.every((term) => keywords.some((keyword) => keyword.text === term && keyword.matchType === "EXACT"));
 
 export function validateConfig(config) {
   const errors = [];
@@ -151,8 +167,10 @@ export function validateConfig(config) {
   if (config.currency !== "CAD") fail("Account currency must be CAD");
   if (config.maximum30DayCad !== 1500) fail("Total 30-day maximum must be CA$1,500");
   if (config.accountCustomerId !== "1072816342") fail("Customer ID must match confirmed True Color child account 1072816342");
-  if (config.bidding?.strategy !== "MAXIMIZE_CLICKS" || config.bidding?.cpcCeilingCad !== null || config.bidding?.cpcCeilingGate !== "CURRENT_KEYWORD_PLANNER_FORECAST") {
-    fail("Bidding must use gated Maximize Clicks with a null CPC ceiling");
+  if (config.bidding?.strategy !== "MAXIMIZE_CLICKS"
+    || JSON.stringify(config.bidding?.cpcCeilingCadByCampaignKind) !== JSON.stringify({ CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 })
+    || config.bidding?.forecastDate !== "2026-07-17") {
+    fail("Bidding must use the forecast-backed campaign-specific Maximize Clicks ceilings");
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
   const suffixParams = new URLSearchParams(config.tracking?.finalUrlSuffix ?? "");
@@ -161,14 +179,38 @@ export function validateConfig(config) {
     if (values.length !== 1 || values[0] !== expectedValue) fail(`Final URL suffix must map ${key}=${expectedValue} exactly once`);
   }
   const gates = new Map((config.externalGates ?? []).map((gate) => [gate.code, gate]));
+  if (!sameSet([...gates.keys()], REQUIRED_GATES)) fail("External gates must match the canonical gate set exactly");
   for (const [code, evidence] of VERIFIED_GATE_EVIDENCE) {
     const gate = gates.get(code);
     if (gate?.status !== "VERIFIED" || gate?.evidence !== evidence) fail(`${code} must contain exact verified live-account evidence`);
   }
   for (const gate of REQUIRED_GATES.filter((code) => !VERIFIED_GATE_EVIDENCE.has(code))) {
-    if (gates.get(gate)?.status !== "BLOCKED") fail(`Missing blocked external gate: ${gate}`);
+    const value = gates.get(gate);
+    if (!value || !["BLOCKED", "VERIFIED"].includes(value.status)) fail(`External gate has an unsupported state: ${gate}`);
+    if (value?.status === "VERIFIED" && (typeof value.evidence !== "string" || value.evidence.trim().length < 10)) fail(`Verified external gate requires evidence: ${gate}`);
   }
-  if (JSON.stringify(config.liveGoogleAds) !== JSON.stringify(LIVE_GOOGLE_ADS)) fail("Live Google Ads evidence must match the verified paused account state exactly");
+  if (JSON.stringify(config.liveGoogleAds) !== JSON.stringify(LIVE_GOOGLE_ADS)) fail("Recorded live Google Ads snapshot must match the last verified paused state exactly");
+  const sitelinks = config.adAssets?.sitelinks ?? [];
+  const callouts = config.adAssets?.callouts ?? [];
+  const snippet = config.adAssets?.structuredSnippet;
+  if (sitelinks.length !== 6 || new Set(sitelinks.map((asset) => asset.text)).size !== 6) fail("Exactly six distinct direct-product sitelinks are required");
+  const sitelinkPaths = [];
+  for (const asset of sitelinks) {
+    let parsed;
+    try { parsed = new URL(asset.finalUrl); } catch { fail(`Invalid sitelink URL: ${asset.finalUrl}`); continue; }
+    if (parsed.protocol !== "https:" || parsed.hostname !== "truecolorprinting.ca" || !parsed.pathname.startsWith("/products/")) fail(`Sitelink must route directly to a True Color configurator: ${asset.text}`);
+    sitelinkPaths.push(parsed.pathname);
+    if (!asset.text || asset.text.length > 25 || !asset.description1 || asset.description1.length > 35 || !asset.description2 || asset.description2.length > 35) fail(`Sitelink text limits invalid: ${asset.text}`);
+  }
+  if (!sameSet(sitelinkPaths, REQUIRED_SITELINK_PATHS)) fail("Sitelinks must cover the six canonical direct configurators exactly");
+  if (!sameSet(callouts, REQUIRED_CALLOUTS) || callouts.some((callout) => !callout || callout.length > 25)) fail("Exactly the six canonical callouts within Google limits are required");
+  if (snippet?.header !== "Types" || !sameSet(snippet?.values ?? [], sitelinks.map((asset) => asset.text))) fail("Structured snippet must contain the six canonical product types");
+  const globalAssetCopy = stringValues(config.adAssets).join(" ").toLowerCase().replaceAll(/[^a-z0-9]+/g, " ");
+  for (const term of COMPETITOR_TERMS) if (globalAssetCopy.includes(term)) fail(`Global ad assets use competitor term: ${term}`);
+  for (const claim of [...callouts, ...sitelinks.flatMap((asset) => [asset.text, asset.description1, asset.description2]), ...(snippet?.values ?? [])]) {
+    if (/\d|[$£€]|\b(?:cad|usd)\b/i.test(claim) && !APPROVED_CLAIMS.has(claim)) fail(`Ad asset contains an unapproved numeric or price claim: ${claim}`);
+    if (FORBIDDEN_CLAIM_PATTERNS.some((pattern) => pattern.test(claim)) && !APPROVED_CLAIMS.has(claim)) fail(`Ad asset contains an unapproved guarantee, turnaround, or cutoff claim: ${claim}`);
+  }
   const claims = config.approvedClaims ?? [];
   if (claims.length !== APPROVED_CLAIMS.size || !claims.every((claim) => APPROVED_CLAIMS.get(claim.text) === claim.source)) fail("Approved factual claims must match sourced review proof exactly");
   const controls = config.launchControls;
@@ -215,6 +257,10 @@ export function validateConfig(config) {
     if (!sameSet(actualGroupKeys, Object.keys(expectedGroups))) fail(`${campaign.name} ad-group set must match the canonical structure exactly`);
     for (const group of campaign.adGroups ?? []) {
       if (group.status !== "PAUSED") fail(`${campaign.name}/${group.name} must be paused`);
+      const expectedLaunchTier = kind === "CORE"
+        ? (["rush-same-day", "generic-print-price", "generic-sign-shop"].includes(group.key) ? "TIER_2_EXPANSION" : "TIER_1_PRODUCT")
+        : kind === "COMPETITOR" ? "TIER_1_CONQUEST" : "HOLD_AUCTION_INSIGHTS";
+      if (group.launchTier !== expectedLaunchTier) fail(`${campaign.name}/${group.name} has the wrong conversion-first launch tier`);
       let parsed;
       try { parsed = new URL(group.finalUrl); } catch { fail(`${campaign.name}/${group.name} has invalid URL`); continue; }
       if (parsed.protocol !== "https:" || parsed.hostname !== "truecolorprinting.ca") fail(`${campaign.name}/${group.name} must use the one approved domain`);
@@ -224,7 +270,7 @@ export function validateConfig(config) {
       if (!group.keywords?.length) fail(`${group.name} must contain high-intent keywords`);
       for (const kw of group.keywords ?? []) if (!["EXACT", "PHRASE"].includes(kw.matchType)) fail(`${group.name} contains a non-exact/phrase keyword`);
       if (kind === "CORE" && !hasExactPhrasePairs(group.keywords, CORE_TERMS[group.key] ?? [])) fail(`${group.name} Core keywords must match canonical exact/phrase pairs`);
-      if (kind === "COMPETITOR" && !hasExactPhrasePairs(group.keywords, COMPETITOR_GROUPS[group.key] ?? [])) fail(`${group.name} competitor targets must match canonical exact/phrase pairs`);
+      if (kind === "COMPETITOR" && !hasExactOnly(group.keywords, COMPETITOR_GROUPS[group.key] ?? [])) fail(`${group.name} competitor targets must be canonical exact-only terms`);
       if (kind === "BRAND" && !hasExactPhrasePairs(group.keywords, BRAND_GROUPS[group.key] ?? [])) fail(`${group.name} brand variants must match canonical exact/phrase pairs`);
       const expectedCrossNegatives = kind === "CORE" ? CORE_CROSS_NEGATIVES[group.key] ?? [] : [];
       if (!sameSet(group.crossNegatives ?? [], expectedCrossNegatives)) fail(`${group.name} cross-negatives must match the canonical routing set`);
@@ -258,10 +304,10 @@ export function validateConfig(config) {
   const localStatus = errors.length ? "INVALID" : "VALIDATED";
   return {
     localStatus,
-    apiStatus: localStatus === "VALIDATED" ? "VALIDATED" : "UNVERIFIED",
-    campaignsCreated: localStatus === "VALIDATED",
-    launched: false,
-    spendCad: localStatus === "VALIDATED" ? 0 : null,
+    liveStatus: "LIVE_UNVERIFIED",
+    campaignsCreated: null,
+    launched: null,
+    spendCad: null,
     errors,
     blockers: (config.externalGates ?? []).filter((gate) => gate.status === "BLOCKED").map((gate) => gate.code),
   };

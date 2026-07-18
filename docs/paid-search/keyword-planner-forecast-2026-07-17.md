@@ -2,7 +2,7 @@
 
 ## Scope
 
-Read-only Google Ads API v24 forecast from True Color customer `107-281-6342`, not the real-estate advertiser. Inputs match the live paused build: Saskatoon `1002791`, English `1000`, Google Search, exact/phrase keywords, and July 20 through August 18, 2026.
+Read-only Google Ads API v24 forecast from True Color customer `107-281-6342`, not the real-estate advertiser. Inputs match the live paused build: Saskatoon `1002791`, English `1000`, Google Search, Core exact/phrase plus Competitor exact-only keywords, and July 20 through August 18, 2026.
 
 Google documents historical metrics as Keyword Planner-equivalent search volume, competition, and top-of-page bid ranges, and forecast metrics as estimates for clicks, cost, and average CPC. See [historical metrics](https://developers.google.com/google-ads/api/docs/keyword-planning/generate-historical-metrics) and [forecast metrics](https://developers.google.com/google-ads/api/docs/keyword-planning/generate-forecast-metrics).
 
@@ -42,6 +42,10 @@ These are estimates, not guarantees. Exact/phrase volume is forecast well below 
 
 ## Recommendation
 
-Use a global CA$4.00 Maximize Clicks CPC ceiling for the initial controlled pilot if Hasan approves it. The CA$2.50 ceiling materially suppresses forecast Core capture, while the CA$4.00 ceiling raises Competitor's forecast average CPC only to CA$1.36. Keep the CA$40/CA$7 campaign budgets and daily search-term monitoring as separate controls.
+Use campaign-specific Maximize Clicks ceilings: Core CA$4.00, Competitor CA$2.50, and Brand CA$1.50. The CA$2.50 ceiling materially suppresses forecast Core capture, but preserves about 88% of the exact-only Competitor click forecast versus CA$4.00 while capping exposure. Brand forecasts zero and remains held for Auction Insights. Keep the CA$40/CA$7/CA$3 budgets and daily search-term monitoring as separate controls.
 
-The forecast is complete, but `CURRENT_KEYWORD_PLANNER_FORECAST` remains blocked until the CA$4.00 ceiling is explicitly approved and staged in both the canonical config and paused live campaigns. No bid setting, status, budget, or spend changed during this read.
+The ceilings were validate-only checked, staged in the canonical config, applied to the paused live campaigns, and read back successfully on 2026-07-17. `CURRENT_KEYWORD_PLANNER_FORECAST` is verified. No campaign, ad group, keyword, or ad was enabled; budgets were unchanged and spend remained CA$0.
+
+## Competitor demand refinement
+
+Current official-site overlap research and True Color account metrics added exact-only `ink house saskatoon` (110 average monthly searches, low competition) and `rayacom saskatoon` (30, low competition). The current nine-term exact-only set forecasts about 1.89 clicks/day and CA$2.18/day cost at the CA$2.50 ceiling, compared with 2.16 clicks/day and CA$2.94/day at CA$4.00. Competitor trademarks remain keywords only and never appear in RSA text, paths, or assets.

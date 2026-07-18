@@ -1,20 +1,20 @@
 {
   "artifactStatus": "BUILT",
   "accountCustomerId": "1072816342",
-  "campaignsCreatedInAds": true,
   "localStatus": "VALIDATED",
-  "apiStatus": "VALIDATED",
-  "campaignsCreated": true,
-  "launched": false,
-  "spendCad": 0,
+  "liveStatus": "LIVE_UNVERIFIED",
+  "campaignsCreated": null,
+  "launched": null,
+  "spendCad": null,
   "errors": [],
   "blockers": [
     "PROMOTION_ELIGIBILITY",
     "PURCHASE_TAG_DEPLOYED",
+    "COMPETITOR_LANDING_DEPLOYED",
     "RSA_POLICY_APPROVAL",
     "AUCTION_INSIGHTS_SIGNOFF",
     "ENHANCED_CONSENT_DECISION",
-    "CURRENT_KEYWORD_PLANNER_FORECAST",
+    "CPC_CEILING_LAUNCH_APPROVAL",
     "BUDGET_APPROVAL",
     "DATES_AND_HARD_STOP",
     "MOBILE_QA",
@@ -22,6 +22,39 @@
     "LAUNCH_CONTROL_SIGNOFF",
     "PRESENCE_ONLY_AND_EDITOR_PREVIEW"
   ],
+  "recordedLiveEvidence": {
+    "apiVersion": "v24",
+    "status": "VALIDATED_PAUSED",
+    "validatedAt": "2026-07-17",
+    "managerCustomerId": "1125402990",
+    "managerLinkId": "6626494765",
+    "billingSetupId": "8490021913",
+    "purchaseConversionActionId": "7689029977",
+    "purchaseConversionDestination": "AW-18330693756/F1pQCNmStdIcEPzg4KRE",
+    "campaignIds": {
+      "GOOG_Search_TC_CoreProducts_2026": "24048123058",
+      "GOOG_Search_TC_CompetitorConquest_2026": "24048123061",
+      "GOOG_Search_TC_BrandDefense_2026": "24048123064"
+    },
+    "counts": {
+      "campaigns": 3,
+      "adGroups": 19,
+      "positiveKeywords": 71,
+      "negativeCriteria": 189,
+      "responsiveSearchAds": 19,
+      "manualAssets": 13,
+      "campaignAssetLinks": 39
+    },
+    "cpcCeilingCadByCampaignKind": {
+      "CORE": 4,
+      "COMPETITOR": 2.5,
+      "BRAND": 1.5
+    },
+    "policyApprovalStatus": "UNKNOWN",
+    "spendCad": 0
+  },
+  "manualAdAssetsConfigured": true,
+  "conversionFirstLaunchTiersConfigured": true,
   "maximum30DayCad": 1500,
   "editorSupportedEntitiesImportReady": true,
   "editorImportTargetEncoded": false,

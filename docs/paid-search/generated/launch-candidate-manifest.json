@@ -1,0 +1,142 @@
+{
+  "accountCustomerId": "1072816342",
+  "activationPermitted": false,
+  "requiredFreshLiveVerification": true,
+  "allowedLaunchTiers": [
+    "TIER_1_PRODUCT",
+    "TIER_1_CONQUEST"
+  ],
+  "launchCandidates": [
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Coroplast Signs",
+      "tier": "TIER_1_PRODUCT",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Stickers and Labels",
+      "tier": "TIER_1_PRODUCT",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Vinyl Banners",
+      "tier": "TIER_1_PRODUCT",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Business Cards",
+      "tier": "TIER_1_PRODUCT",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Flyers",
+      "tier": "TIER_1_PRODUCT",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Retractable Banners",
+      "tier": "TIER_1_PRODUCT",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Qwik Signs",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Minuteman Press",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Ink House",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Rayacom",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - 24 Hour Signs",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Anytime Printing",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - PGI Printers",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Staples Printing",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Vistaprint",
+      "tier": "TIER_1_CONQUEST",
+      "requiredCurrentStatus": "PAUSED"
+    }
+  ],
+  "heldGroups": [
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Rush and Same Day",
+      "tier": "TIER_2_EXPANSION",
+      "requiredStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Generic Print Price",
+      "tier": "TIER_2_EXPANSION",
+      "requiredStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Generic Sign Shop",
+      "tier": "TIER_2_EXPANSION",
+      "requiredStatus": "PAUSED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_BrandDefense_2026",
+      "adGroup": "True Color Brand",
+      "tier": "HOLD_AUCTION_INSIGHTS",
+      "requiredStatus": "PAUSED"
+    }
+  ],
+  "blockers": [
+    "PROMOTION_ELIGIBILITY",
+    "PURCHASE_TAG_DEPLOYED",
+    "COMPETITOR_LANDING_DEPLOYED",
+    "RSA_POLICY_APPROVAL",
+    "AUCTION_INSIGHTS_SIGNOFF",
+    "ENHANCED_CONSENT_DECISION",
+    "CPC_CEILING_LAUNCH_APPROVAL",
+    "BUDGET_APPROVAL",
+    "DATES_AND_HARD_STOP",
+    "MOBILE_QA",
+    "ATTRIBUTABLE_TEST_ORDER",
+    "LAUNCH_CONTROL_SIGNOFF",
+    "PRESENCE_ONLY_AND_EDITOR_PREVIEW"
+  ]
+}
