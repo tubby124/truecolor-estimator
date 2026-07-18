@@ -16,6 +16,7 @@
     "validate:pricing": "node scripts/validate-pricing.mjs",
     "validate:google-ads": "node scripts/google-ads/live-verify-paused.mjs",
     "validate:google-ads-launch": "node scripts/google-ads/validate-launch-candidate.mjs",
+    "monitor:google-ads-spend": "node scripts/google-ads/hard-stop-monitor.mjs",
     "harness:webhooks": "node scripts/harness/webhook-health.mjs",
     "harness:webhooks:probe": "node scripts/harness/webhook-health.mjs --probe",
     "harness:reconcile": "node scripts/harness/reconcile-check.mjs",
