@@ -23,29 +23,45 @@ const parseCsv = (source) => {
   return { headers, rows: values.map((items) => Object.fromEntries(headers.map((header, index) => [header, items[index] ?? ""]))) };
 };
 
-test("canonical paid-search artifacts validate locally while account launch remains blocked", () => {
+test("canonical paid-search artifacts and live paused account validate while launch remains blocked", () => {
   const result = validateConfig(clone());
   assert.equal(result.localStatus, "VALIDATED");
-  assert.equal(result.apiStatus, "BLOCKED");
+  assert.equal(result.apiStatus, "VALIDATED");
+  assert.equal(result.campaignsCreated, true);
   assert.equal(result.launched, false);
   assert.equal(result.spendCad, 0);
   assert.deepEqual(result.errors, []);
 });
 
-test("locks the confirmed True Color child account while keeping launch gates blocked", () => {
+test("locks the confirmed True Color child account and verified account-side gates", () => {
   assert.equal(paidSearchConfig.accountCustomerId, "1072816342");
   const accountGate = paidSearchConfig.externalGates.find((gate) => gate.code === "TRUE_COLOR_CUSTOMER_ID");
   assert.equal(accountGate?.status, "VERIFIED");
   assert.equal(accountGate?.evidence, "True Color Display Print child account 107-281-6342 under manager 112-540-2990");
+  assert.deepEqual(
+    paidSearchConfig.externalGates.filter((gate) => gate.status === "VERIFIED").map((gate) => gate.code),
+    ["TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED", "CONVERSION_ACTION"],
+  );
+  assert.deepEqual(
+    paidSearchConfig.externalGates.filter((gate) => gate.status === "BLOCKED").map((gate) => gate.code).slice(0, 4),
+    ["PROMOTION_ELIGIBILITY", "PURCHASE_TAG_DEPLOYED", "RSA_POLICY_APPROVAL", "AUCTION_INSIGHTS_SIGNOFF"],
+  );
 
   for (const mutate of [
     (c) => { c.accountCustomerId = null; },
     (c) => { c.accountCustomerId = "2200538686"; },
     (c) => { c.externalGates.find((gate) => gate.code === "TRUE_COLOR_CUSTOMER_ID").status = "BLOCKED"; },
+    (c) => { c.externalGates.find((gate) => gate.code === "CONVERSION_ACTION").evidence = "wrong"; },
+    (c) => { c.liveGoogleAds.campaignIds.GOOG_Search_TC_CoreProducts_2026 = "wrong"; },
+    (c) => { c.liveGoogleAds.status = "ENABLED"; },
   ]) {
     const config = clone();
     mutate(config);
-    assert.equal(validateConfig(config).localStatus, "INVALID");
+    const result = validateConfig(config);
+    assert.equal(result.localStatus, "INVALID");
+    assert.equal(result.apiStatus, "UNVERIFIED");
+    assert.equal(result.campaignsCreated, false);
+    assert.equal(result.spendCad, null);
   }
 });
 
@@ -120,7 +136,8 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.match(first["responsive-search-ads.csv"], /Responsive search ad/);
   assert.doesNotMatch(first["campaign-negatives.csv"], /\n,/);
   assert.doesNotMatch(first["responsive-search-ads.csv"], /Qwik Signs Alternative/);
-  assert.match(first["validation-summary.json"], /"apiStatus": "BLOCKED"/);
+  assert.match(first["validation-summary.json"], /"apiStatus": "VALIDATED"/);
+  assert.match(first["validation-summary.json"], /"campaignsCreatedInAds": true/);
   assert.match(first["validation-summary.json"], /"accountCustomerId": "1072816342"/);
 });
 
@@ -160,7 +177,7 @@ test("generated readiness summary distinguishes importable entities from advance
   assert.equal(summary.editorImportTargetEncoded, false);
   assert.equal(summary.targetAccountPreflightRequired, true);
   assert.equal(summary.presenceOnlyCsvConfigured, false);
-  assert.equal(summary.presenceOnlyStatus, "BLOCKED_MANUAL_OR_API_AND_PREVIEW_REQUIRED");
+  assert.equal(summary.presenceOnlyStatus, "API_VERIFIED_ACCOUNT_PREVIEW_REQUIRED");
   assert.equal(summary.accountPreviewRequired, true);
   assert.equal(summary.generatorAutoRollsDates, false);
 });

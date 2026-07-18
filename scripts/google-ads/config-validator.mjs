@@ -7,10 +7,35 @@ const EXPECTED = {
 };
 const REQUIRED_GATES = [
   "TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED", "CONVERSION_ACTION",
+  "PROMOTION_ELIGIBILITY", "PURCHASE_TAG_DEPLOYED", "RSA_POLICY_APPROVAL", "AUCTION_INSIGHTS_SIGNOFF",
   "ENHANCED_CONSENT_DECISION", "CURRENT_KEYWORD_PLANNER_FORECAST", "BUDGET_APPROVAL",
   "DATES_AND_HARD_STOP", "MOBILE_QA", "ATTRIBUTABLE_TEST_ORDER", "LAUNCH_CONTROL_SIGNOFF",
   "PRESENCE_ONLY_AND_EDITOR_PREVIEW",
 ];
+const VERIFIED_GATE_EVIDENCE = new Map([
+  ["TRUE_COLOR_CUSTOMER_ID", "True Color Display Print child account 107-281-6342 under manager 112-540-2990"],
+  ["BILLING_ACTIVE", "Billing APPROVED in customer 1072816342; setup 8490021913"],
+  ["AUTO_TAGGING_ENABLED", "Auto-tagging enabled in customer 1072816342"],
+  ["CONVERSION_ACTION", "Purchase - Website (True Color), action 7689029977, destination AW-18330693756/F1pQCNmStdIcEPzg4KRE"],
+]);
+const LIVE_GOOGLE_ADS = {
+  apiVersion: "v24",
+  status: "VALIDATED_PAUSED",
+  validatedAt: "2026-07-17",
+  managerCustomerId: "1125402990",
+  managerLinkId: "6626494765",
+  billingSetupId: "8490021913",
+  purchaseConversionActionId: "7689029977",
+  purchaseConversionDestination: "AW-18330693756/F1pQCNmStdIcEPzg4KRE",
+  campaignIds: {
+    GOOG_Search_TC_CoreProducts_2026: "24048123058",
+    GOOG_Search_TC_CompetitorConquest_2026: "24048123061",
+    GOOG_Search_TC_BrandDefense_2026: "24048123064",
+  },
+  counts: { campaigns: 3, adGroups: 17, positiveKeywords: 76, negativeCriteria: 127, responsiveSearchAds: 17 },
+  policyApprovalStatus: "UNKNOWN",
+  spendCad: 0,
+};
 const COMPETITOR_TERMS = ["qwik signs", "minuteman press", "24 hour signs", "anytime printing", "pgi printers", "staples", "vistaprint"];
 const ROUTES = {
   coroplast: "/products/coroplast-signs",
@@ -136,14 +161,14 @@ export function validateConfig(config) {
     if (values.length !== 1 || values[0] !== expectedValue) fail(`Final URL suffix must map ${key}=${expectedValue} exactly once`);
   }
   const gates = new Map((config.externalGates ?? []).map((gate) => [gate.code, gate]));
-  const accountGate = gates.get("TRUE_COLOR_CUSTOMER_ID");
-  if (accountGate?.status !== "VERIFIED"
-    || accountGate?.evidence !== "True Color Display Print child account 107-281-6342 under manager 112-540-2990") {
-    fail("True Color customer gate must contain the confirmed account and manager evidence");
+  for (const [code, evidence] of VERIFIED_GATE_EVIDENCE) {
+    const gate = gates.get(code);
+    if (gate?.status !== "VERIFIED" || gate?.evidence !== evidence) fail(`${code} must contain exact verified live-account evidence`);
   }
-  for (const gate of REQUIRED_GATES.filter((code) => code !== "TRUE_COLOR_CUSTOMER_ID")) {
+  for (const gate of REQUIRED_GATES.filter((code) => !VERIFIED_GATE_EVIDENCE.has(code))) {
     if (gates.get(gate)?.status !== "BLOCKED") fail(`Missing blocked external gate: ${gate}`);
   }
+  if (JSON.stringify(config.liveGoogleAds) !== JSON.stringify(LIVE_GOOGLE_ADS)) fail("Live Google Ads evidence must match the verified paused account state exactly");
   const claims = config.approvedClaims ?? [];
   if (claims.length !== APPROVED_CLAIMS.size || !claims.every((claim) => APPROVED_CLAIMS.get(claim.text) === claim.source)) fail("Approved factual claims must match sourced review proof exactly");
   const controls = config.launchControls;
@@ -230,12 +255,13 @@ export function validateConfig(config) {
   const brand = campaigns.find((item) => item.kind === "BRAND");
   if (!brand?.gates?.includes("AUCTION_INSIGHTS_REQUIRED")) fail("Brand campaign missing AUCTION_INSIGHTS_REQUIRED gate");
 
+  const localStatus = errors.length ? "INVALID" : "VALIDATED";
   return {
-    localStatus: errors.length ? "INVALID" : "VALIDATED",
-    apiStatus: "BLOCKED",
-    campaignsCreated: false,
+    localStatus,
+    apiStatus: localStatus === "VALIDATED" ? "VALIDATED" : "UNVERIFIED",
+    campaignsCreated: localStatus === "VALIDATED",
     launched: false,
-    spendCad: 0,
+    spendCad: localStatus === "VALIDATED" ? 0 : null,
     errors,
     blockers: (config.externalGates ?? []).filter((gate) => gate.status === "BLOCKED").map((gate) => gate.code),
   };
