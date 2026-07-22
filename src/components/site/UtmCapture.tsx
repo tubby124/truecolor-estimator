@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import {
   ATTRIBUTION_KEYS,
+  isPaidAttribution,
+  LATEST_PAID_COOKIE_NAME,
   parseStoredAttribution,
   sanitizeUtm,
   type UtmAttribution,
@@ -11,19 +13,24 @@ import {
 } from "@/lib/analytics/utm";
 
 const LS_KEY = "tc_utm_first_touch";
+const LATEST_PAID_LS_KEY = "tc_utm_latest_paid_touch";
 
-function persistAttribution(payload: Record<string, string | number>) {
+function persistAttribution(
+  payload: Record<string, string | number>,
+  cookieName = UTM_COOKIE_NAME,
+  storageKey = LS_KEY,
+) {
   const maxAge = UTM_TTL_DAYS * 24 * 60 * 60;
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   const encoded = encodeURIComponent(JSON.stringify(payload));
   // Keep below common 4 KB cookie limits. localStorage still retains the full,
   // sanitized payload when an unusually long encoded referrer exceeds this bound.
   if (encoded.length <= 3800) {
-    document.cookie = `${UTM_COOKIE_NAME}=${encoded}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
+    document.cookie = `${cookieName}=${encoded}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
   }
 
   try {
-    window.localStorage.setItem(LS_KEY, JSON.stringify(payload));
+    window.localStorage.setItem(storageKey, JSON.stringify(payload));
   } catch {
     // Cookie fallback above is enough for server-side attribution.
   }
@@ -48,6 +55,22 @@ export function UtmCapture() {
     //    we set here preserves the actual entry point for the whole session.
     const landingPath = window.location.pathname + window.location.search;
     const referrer = document.referrer ?? "";
+    const currentAttribution = sanitizeUtm({
+      ...attributionInput,
+      landing_path: landingPath,
+      landing_referrer: referrer,
+    });
+
+    // Latest paid touch is intentionally independent of first touch. A returning
+    // visitor's new paid click must not be suppressed by an older organic/direct
+    // arrival that still lives in first-touch storage.
+    if (isPaidAttribution(currentAttribution)) {
+      persistAttribution(
+        { ...currentAttribution, captured_at: Date.now() },
+        LATEST_PAID_COOKIE_NAME,
+        LATEST_PAID_LS_KEY,
+      );
+    }
 
     // 3. If a first-touch already exists and is still fresh, only refresh the cookie
     //    (don't overwrite — first-touch attribution wins).
@@ -74,7 +97,7 @@ export function UtmCapture() {
     // 4. Fresh first-touch — write the cookie even if utm is empty.
     try {
       persistAttribution({
-        ...sanitizeUtm({ ...attributionInput, landing_path: landingPath, landing_referrer: referrer }),
+        ...currentAttribution,
         captured_at: Date.now(),
       });
     } catch {

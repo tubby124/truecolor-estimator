@@ -90,7 +90,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // All orders route through Clover gateway. Wave invoice (if any) stays
     // DRAFT until webhook approves + records payment.
     const redirectUrl = `${siteUrl}/order-confirmed?oid=${id}`;
-    const payToken = encodePaymentToken(total, description, customer.email, redirectUrl);
+    const payToken = encodePaymentToken(total, description, customer.email, redirectUrl, { orderId: id });
     const paymentUrl = `${siteUrl}/pay/${payToken}`;
 
     // NOTE: do NOT update payment_reference here — it is set to the order UUID

@@ -352,6 +352,7 @@ export async function POST(req: NextRequest) {
           const { error: ledgerInsertErr } = await supabase
             .from("order_payments")
             .insert(ledgerInsert);
+          const ledgerAlreadyRecorded = (ledgerInsertErr as { code?: string } | null)?.code === "23505";
 
           // 23505 = unique_violation → already recorded for this Clover payment ID. Idempotent ack.
           if (ledgerInsertErr && (ledgerInsertErr as { code?: string }).code !== "23505") {
@@ -382,6 +383,16 @@ export async function POST(req: NextRequest) {
           // If ledger sum hasn't reached order total, leave the order pending.
           // Telegram alert tells staff a partial landed and what's left.
           if (!isFullyPaid) {
+            if (ledgerAlreadyRecorded) {
+              await logWebhookEvent({
+                eventType: eventTypeStr,
+                resourceId: paymentId ?? matchRef ?? null,
+                matchedOrderId: pendingOrder.id,
+                ok: true,
+                detail: `duplicate partial payment ${paymentId ?? "unknown"} already recorded; no Wave side effect repeated`,
+              });
+              return NextResponse.json({ ok: true });
+            }
             console.log(
               `[clover-webhook] partial payment recorded on ${pendingOrder.order_number}: ` +
               `$${ledgerSummary.amountPaid.toFixed(2)} of $${orderTotalDollars.toFixed(2)} ` +

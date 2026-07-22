@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, type KeyboardEvent } from "react";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { LineItem } from "@/lib/cart/cart";
 import { useToast, ToastContainer } from "@/components/ui";
@@ -61,7 +61,7 @@ export interface PriceData {
   loading: boolean;
   addonTotal: number;
   designFee: number;
-  rushFee: number; // PST-exempt portion of price (0 when not rushed)
+  rushFee: number; // rush portion bundled in the PST-taxable sell price (0 when not rushed)
   gst: number | null;
   pst: number | null;
   total: number | null;
@@ -119,6 +119,12 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [preMinSubtotal, setPreMinSubtotal] = useState<number | null>(null);
   const [rushFee, setRushFee] = useState<number>(0);
   const [gstRate, setGstRate] = useState<number>(0.05);
+  const priceRequestSequence = useRef(0);
+  const showToastRef = useRef(showToast);
+
+  useEffect(() => {
+    showToastRef.current = showToast;
+  }, [showToast]);
 
   const effectiveWidth = isCustomFlexSize ? parseFloat(customFlexW) || 0 : isCustom ? parseFloat(customW) || 0 : selectedSize.width_in;
   const effectiveHeight = isCustomFlexSize ? parseFloat(customFlexH) || 0 : isCustom ? parseFloat(customH) || 0 : selectedSize.height_in;
@@ -134,9 +140,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       ? selectedSize.material_code
       : product.material_code;
 
-  const fetchPrice = useCallback(async () => {
+  const fetchPrice = useCallback(async (requestId: number, signal: AbortSignal) => {
     if (!effectiveWidth || !effectiveHeight) return;
-    setLoading(true);
     // Build engine addon codes from active addonQtys (uses engineCode field from products-content.ts)
     const engineAddons = product.addons
       ? product.addons
@@ -147,6 +152,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       const res = await fetch("/api/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal,
         body: JSON.stringify({
           category: product.category,
           material_code: effectiveMaterialCode,
@@ -159,6 +165,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         }),
       });
       const data = await res.json();
+      if (signal.aborted || requestId !== priceRequestSequence.current) return;
       if (data.sell_price != null) {
         setPrice(data.sell_price);
         setLineItems(data.line_items ?? []);
@@ -191,13 +198,16 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         setGstRate(0.05);
       }
     } catch (err) {
-      showToast(sanitizeError(err), "error");
+      if (signal.aborted || requestId !== priceRequestSequence.current) return;
+      showToastRef.current(sanitizeError(err), "error");
     } finally {
-      setLoading(false);
+      if (!signal.aborted && requestId === priceRequestSequence.current) setLoading(false);
     }
   }, [
     product.category,
     product.addons,
+    product.material_code,
+    product.name,
     effectiveMaterialCode,
     effectiveWidth,
     effectiveHeight,
@@ -208,15 +218,56 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   ]);
 
   // Fire price fetch — debounced 300ms for custom inputs, immediate for presets
-  useEffect(() => {
-    if (!effectiveWidth || !effectiveHeight) return;
+  useLayoutEffect(() => {
+    const requestId = ++priceRequestSequence.current;
+    setPrice(null);
+    setLineItems([]);
+    setQtyDiscountApplied(false);
+    setQtyDiscountPct(null);
+    setPricePerUnit(null);
+    setMinChargeApplied(false);
+    setMinChargeValue(null);
+    setPreMinSubtotal(null);
+    setRushFee(0);
+    if (!effectiveWidth || !effectiveHeight) {
+      setLoading(false);
+      return;
+    }
+    // Invalidate the previous quote before the browser can paint a newly
+    // selected configuration. This prevents a fast Add to Cart click from
+    // pairing stale pricing with the new options.
+    setLoading(true);
+    const controller = new AbortController();
     const delay = isCustom || isCustomQty || isCustomFlexSize ? 300 : 0;
-    const timer = setTimeout(fetchPrice, delay);
-    return () => clearTimeout(timer);
+    const timer = setTimeout(() => void fetchPrice(requestId, controller.signal), delay);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
     // Depend on the actual price inputs (sides, qty, dimensions, material, design)
     // so a sides-only toggle refetches. Previously only `fetchPrice` + custom flags
     // were listed, so single↔double never re-ran the estimate and the price stuck.
   }, [fetchPrice, sides, effectiveQty, effectiveWidth, effectiveHeight, effectiveMaterialCode, designStatus, isCustom, isCustomQty, isCustomFlexSize]);
+
+  function handleQuantityRadioKeyDown(event: KeyboardEvent<HTMLButtonElement>, currentIndex: number) {
+    const optionCount = product.qtyPresets.length + 1;
+    let nextIndex: number | null = null;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (currentIndex + 1) % optionCount;
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") nextIndex = (currentIndex - 1 + optionCount) % optionCount;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = optionCount - 1;
+    if (nextIndex == null) return;
+    event.preventDefault();
+    if (nextIndex === product.qtyPresets.length) {
+      setCustomQty(String(qty));
+      setIsCustomQty(true);
+    } else {
+      setQty(product.qtyPresets[nextIndex]);
+      setIsCustomQty(false);
+    }
+    const group = event.currentTarget.closest('[role="radiogroup"]');
+    requestAnimationFrame(() => group?.querySelectorAll<HTMLElement>('[role="radio"]')[nextIndex]?.focus());
+  }
 
   // Bubble price data to parent
   // NOTE: price is already the engine's sell_price including all addons — do NOT add addonTotal again
@@ -470,7 +521,11 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
                   </span>
                 )}
                 <button
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={isSelected ? 0 : -1}
                   onClick={() => { setQty(q); setIsCustomQty(false); }}
+                  onKeyDown={(event) => handleQuantityRadioKeyDown(event, product.qtyPresets.indexOf(q))}
                   className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
                     isSelected && hasDiscount
                       ? "border-2 border-green-500 bg-green-50 text-green-800"
@@ -491,7 +546,11 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           })}
           <div className="flex flex-col items-center">
             <button
+              role="radio"
+              aria-checked={isCustomQty}
+              tabIndex={isCustomQty ? 0 : -1}
               onClick={() => { setCustomQty(String(qty)); setIsCustomQty(true); }}
+              onKeyDown={(event) => handleQuantityRadioKeyDown(event, product.qtyPresets.length)}
               className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors active:scale-[0.94] ${
                 isCustomQty
                   ? "bg-[#1c1712] text-white border-[#1c1712]"

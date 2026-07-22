@@ -1,8 +1,8 @@
 /**
  * src/lib/email/reviewRequest.ts
  *
- * Review request email — sent when an order is marked "complete" by staff.
- * Goal: gather Google reviews from satisfied customers.
+ * Neutral review request email — sent to every customer when an order is
+ * marked "complete" by staff.
  *
  * Sent from: PATCH /api/staff/orders/[id]/status when status === "complete"
  *
@@ -75,7 +75,7 @@ function buildReviewRequestEmailHtml({
   <title>How did your order ${escHtml(orderNumber)} turn out?</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-  ${preheader("A quick 30-second favour if you're happy with how it came out.")}
+  ${preheader("Tell us honestly how your completed order turned out.")}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
     style="background-color:#f4efe9;padding:32px 16px;">
     <tr><td align="center">
@@ -93,7 +93,7 @@ function buildReviewRequestEmailHtml({
               Your order is complete!
             </h1>
             <p style="margin:0 0 18px;font-size:14px;color:#6b7280;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              Hi ${escHtml(firstName)}, we hope everything turned out exactly the way you imagined.
+              Hi ${escHtml(firstName)}, we would appreciate your honest feedback about the finished order.
             </p>
             <div style="display:inline-block;background:#f4efe9;border-radius:8px;padding:8px 20px;border:1px solid #ddd5c8;">
               <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:block;margin-bottom:2px;">
@@ -113,11 +113,11 @@ function buildReviewRequestEmailHtml({
             <!-- Review ask -->
             <div style="background:#fffbea;border:1px solid #f5c842;border-radius:10px;padding:20px 24px;margin-bottom:24px;text-align:center;">
               <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#1c1712;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                Happy with the results?
+                How did your order turn out?
               </p>
               <p style="margin:0 0 20px;font-size:14px;color:#4a3728;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                A quick Google review helps other Saskatoon businesses find us &mdash; and it means the world to our small local team.
-                It only takes about 30 seconds.
+                Please share an honest Google review&mdash;what went well and what we could improve.
+                We send the same request to every customer, and there is no reward for leaving a review.
               </p>
               <!-- CTA Button -->
               <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
@@ -134,10 +134,10 @@ function buildReviewRequestEmailHtml({
 
             ${orderTrackingNudge()}
 
-            <!-- "Not happy?" block -->
+            <!-- Support block -->
             <div style="background:#fdf4f4;border:1px solid #f0bfbb;border-radius:8px;padding:14px 16px;margin-bottom:8px;">
               <p style="margin:0;font-size:13px;color:#7a1818;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;">
-                Not 100% happy? Please reply to this email or call us at
+                Need help with this order? Reply to this email or call us at
                 <a href="tel:+13069548688" style="color:#e52222;font-weight:600;text-decoration:none;">(306) 954-8688</a>
                 &mdash; we&rsquo;ll make it right.
               </p>
@@ -166,13 +166,13 @@ function buildReviewRequestEmailText({
 
   return `Hi ${firstName},
 
-Your order #${orderNumber} is now complete — we hope everything turned out exactly the way you imagined!
+Your order #${orderNumber} is now complete. We would appreciate your honest feedback about the finished order.
 
-If you're happy with the results, we'd love a quick Google review. It helps other Saskatoon businesses find us and means a lot to our small local team. It only takes about 30 seconds:
+Please share an honest Google review — what went well and what we could improve. We send the same request to every customer, and there is no reward for leaving a review:
 
 ${GOOGLE_REVIEW_URL}
 
-Not 100% happy? Reply to this email or call us at (306) 954-8688 — we'll make it right.
+Need help with this order? Reply to this email or call us at (306) 954-8688.
 ${orderTrackingNudgeText()}
 Thanks for supporting a local Saskatoon business,
 The True Color Team
@@ -185,4 +185,3 @@ True Color Display Printing
 This is a one-time courtesy email for order #${orderNumber}.
 `;
 }
-

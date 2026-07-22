@@ -3,9 +3,18 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Keep build tracing anchored to this checkout. Local worktrees otherwise
+  // inherit an unrelated parent lockfile and emit an unusable nested server.
+  outputFileTracingRoot: process.cwd(),
+  turbopack: {
+    root: process.cwd(),
+  },
 
   images: {
-    formats: ["image/avif", "image/webp"],
+    // AVIF cold-start encoding stalls large local proof images long enough to
+    // leave trust sections blank on mobile. WebP keeps the optimizer fast and
+    // the source library is already WebP-first.
+    formats: ["image/webp"],
   },
 
   // @resvg/resvg-js uses a NAPI native addon — keep it as an external server package
@@ -299,6 +308,22 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
     ];
+  },
+
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // Temporary method-preserving compatibility for the legacy n8n URL.
+        // There is deliberately no unauthenticated route handler under
+        // /api/staff; both URLs execute the secret-authenticated webhook.
+        {
+          source: "/api/staff/social/webhooks/n8n",
+          destination: "/api/webhooks/n8n",
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
   },
 
   async headers() {

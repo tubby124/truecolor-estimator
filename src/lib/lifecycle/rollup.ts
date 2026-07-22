@@ -32,6 +32,18 @@ export interface StatusRollup {
   yellows: RollupIssue[];
 }
 
+export interface MeasurementOutboxCounts {
+  dead: number;
+  staleProcessing: number;
+  overdueRetry: number;
+}
+
+export interface WaveProvisioningHealth {
+  staleCreating: number;
+  ambiguous: number;
+  failed: number;
+}
+
 export interface RollupInputs {
   bookkeepingRisks: BookkeepingRiskRow[];
   webhookGroups: WebhookSourceGroup[];
@@ -66,6 +78,15 @@ export interface RollupInputs {
    * ingestion pipes is silently broken, even if both heartbeats are green.
    */
   gscVsGa4DivergencePct: number | null;
+  /** Latest Google Ads monitor detail, retained for dashboard context. */
+  googleAdsMonitorDetail: string | null;
+  /** Durable conversion-delivery failure classes, split by outbox. */
+  measurementOutboxes: {
+    revenue: MeasurementOutboxCounts;
+    quote: MeasurementOutboxCounts;
+  };
+  /** Wave-before-Clover reservations that need intervention. */
+  waveProvisioning: WaveProvisioningHealth;
 }
 
 const SEV1_CATEGORIES = new Set(["no_wave_invoice", "half_recorded"]);
@@ -158,15 +179,28 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
   // ga4-sync joins the critical set as defense-in-depth — if it dies the same
   // way gsc-sync did (auth expiry, quota), we need to see RED before another
   // 16-day silent window. Both pipes are now on the same fail-loud contract.
-  const CRITICAL_EXTERNAL_CRONS = new Set(["gsc-sync", "ga4-sync"]);
+  const CRITICAL_EXTERNAL_CRONS = new Set([
+    "gsc-sync",
+    "ga4-sync",
+    "google-ads-monitor",
+    "google-ads-conversions",
+  ]);
+  const STRICT_THIRTY_MINUTE_CRONS = new Set([
+    "google-ads-monitor",
+    "google-ads-conversions",
+  ]);
   const CRITICAL_FAIL_THRESHOLD = 0.5;
 
   for (const h of inputs.heartbeats) {
-    if (h.hours_ago !== null && h.hours_ago > 2 * h.max_age_hours) {
+    const strictThirtyMinute = STRICT_THIRTY_MINUTE_CRONS.has(h.name);
+    const stale = h.hours_ago === null || h.hours_ago > (strictThirtyMinute ? h.max_age_hours : 2 * h.max_age_hours);
+    if (stale) {
+      const age = h.hours_ago === null ? "never ran" : `stale ${Math.round(h.hours_ago * 60)}m`;
+      const maxAge = h.max_age_hours === 0.5 ? "30m" : `${h.max_age_hours}h`;
       reds.push({
         key: `cron:${h.name}:stale`,
         panel: "panel-cron-heartbeats",
-        label: `${h.name} stale ${Math.round(h.hours_ago)}h (max ${h.max_age_hours}h)`,
+        label: `${h.name} ${age} (max ${maxAge})`,
       });
     } else if (
       CRITICAL_EXTERNAL_CRONS.has(h.name) &&
@@ -184,6 +218,42 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
         key: `cron:${h.name}:errors`,
         panel: "panel-cron-heartbeats",
         label: `${h.name}: ${Math.round(h.error_rate_24h * 100)}% error rate (24h)`,
+      });
+    }
+  }
+
+  // ── Paid-search measurement delivery ─────────────────────────────────────
+  for (const [kind, counts] of Object.entries(inputs.measurementOutboxes) as Array<
+    ["revenue" | "quote", MeasurementOutboxCounts]
+  >) {
+    const failures: Array<[keyof MeasurementOutboxCounts, string, string]> = [
+      ["dead", "dead", "dead"],
+      ["staleProcessing", "stale-processing", "stale processing"],
+      ["overdueRetry", "overdue-retry", "overdue retry"],
+    ];
+    for (const [field, key, label] of failures) {
+      if (counts[field] > 0) {
+        reds.push({
+          key: `measurement-outbox:${kind}:${key}`,
+          panel: "panel-cron-heartbeats",
+          label: `${kind} conversion outbox: ${counts[field]} ${label}`,
+        });
+      }
+    }
+  }
+
+  // ── Wave-before-Clover durable provisioning ──────────────────────────────
+  const waveFailures: Array<[keyof WaveProvisioningHealth, string, string]> = [
+    ["staleCreating", "stale-creating", "stale creating"],
+    ["ambiguous", "ambiguous", "ambiguous"],
+    ["failed", "failed", "failed"],
+  ];
+  for (const [field, key, label] of waveFailures) {
+    if (inputs.waveProvisioning[field] > 0) {
+      reds.push({
+        key: `wave-provisioning:${key}`,
+        panel: "panel-wave-drafts",
+        label: `Wave provisioning: ${inputs.waveProvisioning[field]} ${label}`,
       });
     }
   }

@@ -17,6 +17,7 @@
     "validate:google-ads": "node scripts/google-ads/live-verify-paused.mjs",
     "validate:google-ads-launch": "node scripts/google-ads/validate-launch-candidate.mjs",
     "monitor:google-ads-spend": "node scripts/google-ads/hard-stop-monitor.mjs",
+    "test:google-ads": "node --test scripts/google-ads/node-tests/*.node.mjs && node scripts/google-ads/export-google-ads.mjs --check",
     "harness:webhooks": "node scripts/harness/webhook-health.mjs",
     "harness:webhooks:probe": "node scripts/harness/webhook-health.mjs --probe",
     "harness:reconcile": "node scripts/harness/reconcile-check.mjs",
@@ -31,7 +32,7 @@
     "@marsidev/react-turnstile": "^1.4.2",
     "@react-pdf/renderer": "^4.4.0",
     "@resvg/resvg-js": "^2.6.2",
-    "@sentry/nextjs": "^10.54.0",
+    "@sentry/nextjs": "^10.67.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-virtual": "^3.13.22",
@@ -40,7 +41,7 @@
     "googleapis": "^171.4.0",
     "lucide-react": "^0.575.0",
     "motion": "^12.34.4",
-    "next": "16.1.6",
+    "next": "16.2.11",
     "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -54,11 +55,16 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "fast-uri": "4.1.1",
+    "postcss": "^8.5.20",
+    "sharp": "0.35.3"
   }
 }

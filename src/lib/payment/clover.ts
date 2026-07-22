@@ -1,8 +1,9 @@
 /**
  * Clover Hosted Checkout — creates a payment session and returns the checkout URL.
  *
- * Sessions expire 15 minutes after creation; our /pay/[token] gateway creates a
- * fresh session on every click so email links never expire.
+ * Sessions expire 15 minutes after creation. Direct order links create a fresh
+ * session per visit; quote links durably resume a known session and only create
+ * a replacement after the prior reservation has safely expired.
  *
  * Docs: https://docs.clover.com/dev/docs/hosted-checkout-api
  * Auth: Authorization: Bearer <CLOVER_ECOMM_PRIVATE_KEY>
@@ -29,6 +30,14 @@ export function normalizeCloverLineItemName(name: string): string {
 export interface CloverCheckoutResult {
   checkoutUrl: string;
   sessionId: string;
+  expiresAt: string;
+}
+
+export class CloverCheckoutError extends Error {
+  constructor(message: string, readonly outcome: "definite" | "ambiguous") {
+    super(message);
+    this.name = "CloverCheckoutError";
+  }
 }
 
 export async function fetchCloverPaymentAmountCents(paymentId: string): Promise<number | null> {
@@ -63,12 +72,12 @@ export async function createCloverCheckout(
 ): Promise<CloverCheckoutResult> {
   const privateKey = process.env.CLOVER_ECOMM_PRIVATE_KEY;
   if (!privateKey) {
-    throw new Error("CLOVER_ECOMM_PRIVATE_KEY not configured");
+    throw new CloverCheckoutError("CLOVER_ECOMM_PRIVATE_KEY not configured", "definite");
   }
 
   const merchantId = process.env.CLOVER_MERCHANT_ID;
   if (!merchantId) {
-    throw new Error("CLOVER_MERCHANT_ID not configured");
+    throw new CloverCheckoutError("CLOVER_MERCHANT_ID not configured", "definite");
   }
 
   const body: Record<string, unknown> = {
@@ -92,31 +101,45 @@ export async function createCloverCheckout(
   // Tag with our internal order UUID so Clover includes it in PAYMENT webhook events
   if (externalReferenceId) body.externalReferenceId = externalReferenceId;
 
-  const res = await fetch(`${BASE_URL}/v1/checkouts`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${privateKey}`,
-      "X-Clover-Merchant-Id": merchantId,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(15000),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}/v1/checkouts`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${privateKey}`,
+        "X-Clover-Merchant-Id": merchantId,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (error) {
+    throw new CloverCheckoutError(
+      error instanceof Error ? error.message : "Clover checkout request failed",
+      "ambiguous",
+    );
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`Clover checkout API error ${res.status}: ${text}`);
+    throw new CloverCheckoutError(
+      `Clover checkout API error ${res.status}: ${text}`,
+      res.status >= 500 ? "ambiguous" : "definite",
+    );
   }
 
-  const data = (await res.json()) as { href?: string; checkoutSessionId?: string };
+  const data = (await res.json()) as { href?: string; checkoutSessionId?: string; expirationTime?: number };
 
   if (!data.href) {
-    throw new Error("Clover checkout API returned no href");
+    throw new CloverCheckoutError("Clover checkout API returned no href", "ambiguous");
   }
 
   return {
     checkoutUrl: data.href,
     sessionId: data.checkoutSessionId ?? "",
+    expiresAt: new Date(
+      Number.isFinite(data.expirationTime) ? Number(data.expirationTime) : Date.now() + 15 * 60_000,
+    ).toISOString(),
   };
 }

@@ -13,7 +13,13 @@ export type UtmAttribution = Partial<Record<UtmKey | PaidAttributionKey, string>
 };
 
 export const UTM_COOKIE_NAME = "tc_utm_first_touch";
+export const LATEST_PAID_COOKIE_NAME = "tc_utm_latest_paid_touch";
 export const UTM_TTL_DAYS = 30;
+
+export interface PaidAttributionTouch {
+  attribution: UtmAttribution;
+  capturedAt: string;
+}
 
 function clean(value: unknown, maxLength = 100): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -71,6 +77,30 @@ export function parseStoredAttribution(raw: string | null | undefined): UtmAttri
   }
 }
 
+export function isPaidAttribution(attribution: UtmAttribution): boolean {
+  if (attribution.gclid || attribution.gbraid || attribution.wbraid) return true;
+  const medium = attribution.utm_medium?.trim().toLowerCase();
+  return medium === "cpc" || medium === "ppc" || medium === "paid" ||
+    medium === "paid_search" || medium === "search_ads";
+}
+
+export function parseStoredPaidAttributionTouch(
+  raw: string | null | undefined,
+): PaidAttributionTouch | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const capturedAtMs = Number(parsed.captured_at ?? 0);
+    const age = Date.now() - capturedAtMs;
+    if (!capturedAtMs || age < 0 || age > UTM_TTL_DAYS * 24 * 60 * 60 * 1000) return null;
+    const attribution = sanitizeUtm(parsed);
+    if (!isPaidAttribution(attribution)) return null;
+    return { attribution, capturedAt: new Date(capturedAtMs).toISOString() };
+  } catch {
+    return null;
+  }
+}
+
 export function parseUtmCookie(cookieHeader: string | null | undefined): UtmAttribution {
   if (!cookieHeader) return {};
 
@@ -89,6 +119,24 @@ export function parseUtmCookie(cookieHeader: string | null | undefined): UtmAttr
   }
 }
 
+export function parseLatestPaidAttributionCookie(
+  cookieHeader: string | null | undefined,
+): PaidAttributionTouch | null {
+  if (!cookieHeader) return null;
+  const cookie = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${LATEST_PAID_COOKIE_NAME}=`));
+  if (!cookie) return null;
+  try {
+    return parseStoredPaidAttributionTouch(
+      decodeURIComponent(cookie.slice(LATEST_PAID_COOKIE_NAME.length + 1)),
+    );
+  } catch {
+    return null;
+  }
+}
+
 export function mergeUtmAttribution(
   hints: Record<string, unknown>,
   cookieHeader: string | null | undefined,
@@ -98,6 +146,17 @@ export function mergeUtmAttribution(
   // Preserve fresh first-touch attribution; request hints only fill fields the
   // cookie does not contain or act as the fallback when the cookie is unusable.
   return { ...fromHints, ...fromCookie };
+}
+
+export function mergeLatestPaidAttribution(
+  hints: Record<string, unknown>,
+  cookieHeader: string | null | undefined,
+): PaidAttributionTouch | null {
+  const fromCookie = parseLatestPaidAttributionCookie(cookieHeader);
+  if (fromCookie) return fromCookie;
+  const fromHints = sanitizeUtm(hints);
+  if (!isPaidAttribution(fromHints)) return null;
+  return { attribution: fromHints, capturedAt: new Date().toISOString() };
 }
 
 export function appendAttributionToFormData(

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   appendAttributionToFormData,
+  LATEST_PAID_COOKIE_NAME,
+  mergeLatestPaidAttribution,
   mergeUtmAttribution,
   parseStoredAttribution,
   parseUtmCookie,
@@ -246,5 +248,40 @@ describe("UTM attribution helpers", () => {
       ["keyword", "yard signs"],
       ["campaignid", "42"],
     ]);
+  });
+
+  it("keeps a newer paid click separate from first-touch attribution", () => {
+    const first = encodeURIComponent(JSON.stringify({
+      utm_source: "google",
+      utm_medium: "organic",
+      captured_at: Date.now() - 10_000,
+    }));
+    const latestPaid = encodeURIComponent(JSON.stringify({
+      utm_source: "google",
+      utm_medium: "cpc",
+      gclid: "new-paid-click",
+      campaignid: "123",
+      captured_at: Date.now(),
+    }));
+    const cookies = `${UTM_COOKIE_NAME}=${first}; ${LATEST_PAID_COOKIE_NAME}=${latestPaid}`;
+
+    expect(mergeUtmAttribution({}, cookies)).toEqual({
+      utm_source: "google",
+      utm_medium: "organic",
+    });
+    expect(mergeLatestPaidAttribution({}, cookies)).toMatchObject({
+      attribution: {
+        utm_source: "google",
+        utm_medium: "cpc",
+        gclid: "new-paid-click",
+        campaignid: "123",
+      },
+    });
+  });
+
+  it("does not classify organic or arbitrary traffic as latest paid touch", () => {
+    expect(mergeLatestPaidAttribution({ utm_source: "google", utm_medium: "organic" }, null)).toBeNull();
+    expect(mergeLatestPaidAttribution({ utm_source: "newsletter", utm_medium: "email" }, null)).toBeNull();
+    expect(mergeLatestPaidAttribution({ gbraid: "paid-braid" }, null)?.attribution.gbraid).toBe("paid-braid");
   });
 });

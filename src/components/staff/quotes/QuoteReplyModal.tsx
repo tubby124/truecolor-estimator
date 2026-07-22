@@ -19,10 +19,6 @@ export function QuoteReplyModal({ quote, open, onClose, onSent }: QuoteReplyModa
   const [replyError, setReplyError] = useState<string | null>(null);
   const [replySent, setReplySent] = useState(false);
 
-  // Pay Now button — staff enters the total customer will pay (post-tax).
-  // Leave blank to skip the Pay Now button (info-only reply).
-  const [quoteTotalDollars, setQuoteTotalDollars] = useState<string>("");
-
   useEffect(() => {
     if (open && !replyBody) {
       setReplyBody(buildReplyBody(quote));
@@ -40,15 +36,6 @@ export function QuoteReplyModal({ quote, open, onClose, onSent }: QuoteReplyModa
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose, replySending]);
 
-  // Parse the dollar input into cents, or null if blank/invalid.
-  const quoteTotalCents = (() => {
-    const trimmed = quoteTotalDollars.trim();
-    if (!trimmed) return null;
-    const parsed = parseFloat(trimmed.replace(/[$,]/g, ""));
-    if (!Number.isFinite(parsed) || parsed <= 0) return null;
-    return Math.round(parsed * 100);
-  })();
-
   async function sendReply(body: string) {
     if (!body.trim()) return;
     setReplySending(true);
@@ -58,10 +45,8 @@ export function QuoteReplyModal({ quote, open, onClose, onSent }: QuoteReplyModa
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: quote.email,
           subject: replySubject,
           body,
-          ...(quoteTotalCents ? { quote_total_cents: quoteTotalCents } : {}),
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -74,7 +59,6 @@ export function QuoteReplyModal({ quote, open, onClose, onSent }: QuoteReplyModa
           onClose();
           setReplySent(false);
           setReplyBody("");
-          setQuoteTotalDollars("");
         }, 1200);
       }
     } catch (err) {
@@ -139,33 +123,6 @@ export function QuoteReplyModal({ quote, open, onClose, onSent }: QuoteReplyModa
                   readOnly
                   className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 bg-gray-50"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">
-                  Quote total (optional) — adds a Pay Now button to the email
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={quoteTotalDollars}
-                    onChange={(e) => setQuoteTotalDollars(e.target.value)}
-                    placeholder="135.00"
-                    className="w-full pl-7 pr-20 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:border-transparent"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">CAD total</span>
-                </div>
-                {quoteTotalCents && (
-                  <p className="mt-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1.5">
-                    ✓ Email will include a Pay Now button for{" "}
-                    <strong>${(quoteTotalCents / 100).toFixed(2)} CAD</strong> via Clover.
-                    Enter the TOTAL the customer pays (including GST + PST).
-                  </p>
-                )}
-                {!quoteTotalCents && quoteTotalDollars.trim() && (
-                  <p className="mt-1.5 text-xs text-red-700">Invalid amount — enter a positive dollar value or leave blank.</p>
-                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1">Message</label>

@@ -120,12 +120,41 @@ export function trackPurchase(params: {
   });
 }
 
+export function trackRevenueConversion(params: {
+  conversion_type: "purchase_online" | "quote_won";
+  transaction_id: string;
+  value: number;
+}) {
+  gtag("event", params.conversion_type, {
+    currency: "CAD",
+    transaction_id: params.transaction_id,
+    value: params.value,
+  });
+}
+
 export function trackGenerateLead(params: { value?: number; lead_source: string; form_id?: string }) {
   gtag("event", "generate_lead", {
     currency: "CAD",
     value: params.value ?? 0,
     lead_source: params.lead_source,
     form_id: params.form_id,
+  });
+}
+
+export function trackPaidLandingView() {
+  gtag("event", "view_paid_landing", {
+    page_path: "/why-true-color",
+  });
+}
+
+export function trackPaidEngagement(params: {
+  event_name: "directions_click" | "reviews_click";
+  placement: string;
+  link_url: string;
+}) {
+  gtag("event", params.event_name, {
+    placement: params.placement,
+    link_url: params.link_url,
   });
 }
 

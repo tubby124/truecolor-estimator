@@ -1,7 +1,6 @@
 import { pathToFileURL } from "node:url";
 import {
   gaqlDateRange,
-  HARD_STOP_CAMPAIGNS,
   HARD_STOP_CUSTOMER_ID,
   HARD_STOP_LOGIN_CUSTOMER_ID,
   HARD_STOP_PROFILES,
@@ -29,18 +28,43 @@ export async function runHardStopMonitor({ api, options, now = new Date() }) {
     timestampLocal,
     windowStartLocal: options.windowStart,
     windowEndLocal: options.windowEnd,
+    warningCad: profile.warningCad,
     thresholdCad: profile.thresholdCad,
     approvedCapCad: profile.approvedCapCad,
+    spendScope: profile.spendScope,
   };
 
-  let campaignsBefore;
   try {
     const account = await api.readAccount();
     validateAccount(account);
+  } catch (error) {
+    return {
+      ...base,
+      outcome: "ERROR",
+      action: "NONE",
+      accountVerified: false,
+      error: `True Color account identity could not be verified: ${safeMessage(error)}`,
+    };
+  }
+
+  const verifiedBase = { ...base, accountVerified: true };
+  let campaignsBefore;
+  try {
     campaignsBefore = await api.readCampaigns();
     validateCampaigns(campaignsBefore);
   } catch (error) {
-    return { ...base, outcome: "ERROR", action: "NONE", error: safeMessage(error) };
+    if (!options.execute) {
+      return { ...verifiedBase, outcome: "ERROR", action: "NONE", campaignsBefore, error: safeMessage(error) };
+    }
+    return failClosedPause({
+      api,
+      base: verifiedBase,
+      campaignsBefore,
+      cause: error,
+      decisionReason: "ACCOUNT_OR_CAMPAIGN_READ_FAILED",
+      errorPrefix: "Account identity or campaign state could not be verified",
+      forcePause: true,
+    });
   }
 
   const range = gaqlDateRange(options.windowStart, options.windowEnd);
@@ -53,14 +77,14 @@ export async function runHardStopMonitor({ api, options, now = new Date() }) {
   } catch (error) {
     if (!options.execute) {
       return {
-        ...base,
+        ...verifiedBase,
         outcome: "ERROR",
         action: "NONE",
         campaignsBefore,
         error: `Cumulative spend could not be verified: ${safeMessage(error)}`,
       };
     }
-    return failClosedPause({ api, base, campaignsBefore, cause: error });
+    return failClosedPause({ api, base: verifiedBase, campaignsBefore, cause: error });
   }
 
   const decision = stopDecision({
@@ -71,44 +95,63 @@ export async function runHardStopMonitor({ api, options, now = new Date() }) {
     windowEnd: options.windowEnd,
   });
   const common = {
-    ...base,
+    ...verifiedBase,
     spendCad: spend.cad,
     spendMicros: spend.micros.toString(),
     queryDateRange: range,
     decisionReason: decision.reason,
+    absoluteCapReached: decision.absoluteCapReached === true,
     campaignsBefore,
   };
 
-  if (!decision.shouldPause) return { ...common, ok: true, outcome: "BELOW_STOP", action: "NONE" };
+  if (!decision.shouldPause) {
+    return {
+      ...common,
+      ok: true,
+      outcome: decision.warning ? "WARNING" : "BELOW_STOP",
+      action: "NONE",
+    };
+  }
   if (!options.execute) return { ...common, ok: true, outcome: "STOP_REQUIRED", action: "WOULD_PAUSE" };
   return pauseAndVerify({ api, common, failClosed: false });
 }
 
-async function failClosedPause({ api, base, campaignsBefore, cause }) {
+async function failClosedPause({
+  api,
+  base,
+  campaignsBefore,
+  cause,
+  decisionReason = "SPEND_READ_FAILED",
+  errorPrefix = "Cumulative spend could not be verified",
+  forcePause = false,
+}) {
   const common = {
     ...base,
     outcome: "ERROR",
-    decisionReason: "SPEND_READ_FAILED",
+    decisionReason,
     campaignsBefore,
-    error: `Cumulative spend could not be verified: ${safeMessage(cause)}`,
+    error: `${errorPrefix}: ${safeMessage(cause)}`,
   };
-  return pauseAndVerify({ api, common, failClosed: true });
+  return pauseAndVerify({ api, common, failClosed: true, forcePause });
 }
 
-async function pauseAndVerify({ api, common, failClosed }) {
-  const enabled = common.campaignsBefore.filter((campaign) => campaign.status !== "PAUSED");
+async function pauseAndVerify({ api, common, failClosed, forcePause = false }) {
+  const enabled = (common.campaignsBefore ?? []).filter((campaign) => campaign.status === "ENABLED");
+  const pauseAttempted = forcePause || enabled.length > 0;
+  let pausedCampaigns = [];
   try {
-    if (enabled.length > 0) await api.pauseCampaigns(HARD_STOP_CAMPAIGNS);
+    if (pauseAttempted) pausedCampaigns = await api.pauseEnabledCampaigns();
     const campaignsAfter = await api.readCampaigns();
     validateCampaigns(campaignsAfter);
-    const unpaused = campaignsAfter.filter((campaign) => campaign.status !== "PAUSED");
+    const unpaused = campaignsAfter.filter((campaign) => campaign.status === "ENABLED");
     if (unpaused.length > 0) throw new Error(`Pause verification failed for ${unpaused.map((campaign) => campaign.id).join(",")}`);
     return {
       ...common,
       ok: !failClosed,
       outcome: failClosed ? "ERROR_FAIL_CLOSED_PAUSED" : "STOPPED",
-      action: enabled.length > 0 ? "PAUSED" : "ALREADY_PAUSED",
+      action: pausedCampaigns.length > 0 ? "PAUSED" : "ALREADY_PAUSED",
       pauseVerified: true,
+      pausedCampaigns,
       campaignsAfter,
     };
   } catch (error) {
@@ -116,7 +159,7 @@ async function pauseAndVerify({ api, common, failClosed }) {
       ...common,
       ok: false,
       outcome: "ERROR_PAUSE_UNVERIFIED",
-      action: enabled.length > 0 ? "PAUSE_ATTEMPTED" : "VERIFY_ATTEMPTED",
+      action: pauseAttempted ? "PAUSE_ATTEMPTED" : "VERIFY_ATTEMPTED",
       pauseVerified: false,
       error: `${common.error ? `${common.error}; ` : ""}Campaign pause could not be verified: ${safeMessage(error)}`,
     };
@@ -147,8 +190,10 @@ export function createGoogleAdsApi({ fetchImpl = fetch, env = process.env } = {}
     return response.json();
   };
   const search = async (query, operation) => (await post("googleAds:search", { query }, operation)).results ?? [];
-  const ids = HARD_STOP_CAMPAIGNS.map((campaign) => campaign.id).join(",");
-
+  const readAllCampaigns = async () => {
+    const rows = await search("SELECT campaign.id, campaign.name, campaign.status FROM campaign WHERE campaign.status != 'REMOVED'", "Google Ads campaign inventory read");
+    return rows.map((row) => ({ id: row.campaign.id, name: row.campaign.name, status: row.campaign.status }));
+  };
   return {
     async readAccount() {
       const rows = await search("SELECT customer.id, customer.currency_code, customer.time_zone FROM customer LIMIT 1", "Google Ads account read");
@@ -156,25 +201,26 @@ export function createGoogleAdsApi({ fetchImpl = fetch, env = process.env } = {}
       return { id: customer?.id, currencyCode: customer?.currencyCode, timeZone: customer?.timeZone };
     },
     async readCampaigns() {
-      const rows = await search(`SELECT campaign.id, campaign.name, campaign.status FROM campaign WHERE campaign.id IN (${ids})`, "Google Ads campaign read");
-      return rows.map((row) => ({ id: row.campaign.id, name: row.campaign.name, status: row.campaign.status }));
+      return readAllCampaigns();
     },
     async readSpend({ startDate, endDate }) {
-      const rows = await search(`SELECT campaign.id, campaign.name, segments.date, segments.hour, metrics.cost_micros FROM campaign WHERE campaign.id IN (${ids}) AND segments.date BETWEEN '${startDate}' AND '${endDate}'`, "Google Ads spend read");
+      const rows = await search(`SELECT customer.id, segments.date, segments.hour, metrics.cost_micros FROM customer WHERE segments.date BETWEEN '${startDate}' AND '${endDate}'`, "Google Ads account spend read");
       return rows.map((row) => ({
-        id: row.campaign.id,
-        name: row.campaign.name,
+        customerId: row.customer.id,
         date: row.segments?.date,
         hour: row.segments?.hour,
         costMicros: row.metrics?.costMicros ?? "0",
       }));
     },
-    async pauseCampaigns(campaigns) {
+    async pauseEnabledCampaigns() {
+      const campaigns = (await readAllCampaigns()).filter((campaign) => campaign.status === "ENABLED");
+      if (campaigns.length === 0) return [];
       const operations = campaigns.map((campaign) => ({
         update: { resourceName: `customers/${HARD_STOP_CUSTOMER_ID}/campaigns/${campaign.id}`, status: "PAUSED" },
         updateMask: "status",
       }));
       await post("campaigns:mutate", { operations, responseContentType: "MUTABLE_RESOURCE" }, "Google Ads campaign pause");
+      return campaigns;
     },
   };
 }

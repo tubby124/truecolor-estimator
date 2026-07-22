@@ -69,6 +69,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       .eq("id", id)
       .maybeSingle();
 
+    if (!current) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+    if (current.status === status) {
+      return NextResponse.json({ ok: true, status, alreadyApplied: true });
+    }
+
     if (current?.status === "pending_payment" && status !== "pending_payment" && status !== "payment_received") {
       return NextResponse.json(
         { error: `Mark payment received first. ${current.order_number} is still awaiting payment — confirm payment before moving to ${status}.` },
@@ -76,12 +83,39 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       );
     }
 
-    // Step 1: Update status (always succeeds — no optional columns)
-    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+    // Persist the status and its transition timestamp in one statement. Paid
+    // conversion/lifecycle triggers must never observe payment_received without
+    // paid_at because a second best-effort update failed.
+    const transition: Record<string, string> = { status };
+    if (status === "payment_received") transition.paid_at = new Date().toISOString();
+    if (status === "ready_for_pickup") transition.ready_at = new Date().toISOString();
+    if (status === "complete") transition.completed_at = new Date().toISOString();
+
+    let transitionQuery = supabase
+      .from("orders")
+      .update(transition)
+      .eq("id", id)
+      .eq("status", current.status);
+    if (status === "payment_received") transitionQuery = transitionQuery.is("paid_at", null);
+    const { data: changedOrder, error } = await transitionQuery.select("id").maybeSingle();
 
     if (error) {
       console.error("[staff/orders/status]", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    if (!changedOrder) {
+      const { data: latest } = await supabase
+        .from("orders")
+        .select("status")
+        .eq("id", id)
+        .maybeSingle();
+      if (latest?.status === status) {
+        return NextResponse.json({ ok: true, status, alreadyApplied: true });
+      }
+      return NextResponse.json(
+        { error: "Order status changed in another request. Refresh before trying again." },
+        { status: 409 },
+      );
     }
 
     // Audit event: staff manually moved status
@@ -98,20 +132,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         manual: true,
       },
     });
-
-    // Step 2: Update timestamp columns — non-fatal if columns don't exist yet in schema
-    const timestamps: Record<string, string> = {};
-    if (status === "payment_received") timestamps.paid_at = new Date().toISOString();
-    if (status === "ready_for_pickup") timestamps.ready_at = new Date().toISOString();
-    if (status === "complete") timestamps.completed_at = new Date().toISOString();
-
-    if (Object.keys(timestamps).length > 0) {
-      const { error: tsError } = await supabase.from("orders").update(timestamps).eq("id", id);
-      if (tsError) {
-        // Non-fatal — status already saved. Columns may not exist yet (run migration).
-        console.warn("[staff/orders/status] timestamp update failed (run DB migration):", tsError.message);
-      }
-    }
 
     // On transition INTO payment_received: bump customer lifetime stats.
     // Idempotency: only fires when guard above (current.status === "pending_payment")

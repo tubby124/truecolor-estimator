@@ -220,7 +220,7 @@ const localBusinessSchema = {
     "Window decals",
     "Vinyl lettering",
     "Foam board printing",
-    "Roland UV printing",
+    "Wide-format printing and contour cutting",
   ],
   hasOfferCatalog: {
     "@type": "OfferCatalog",
@@ -260,7 +260,7 @@ const founderSchema = {
   founderOf: { "@id": "https://truecolorprinting.ca/#organization" },
   knowsAbout: [
     "Large format printing",
-    "Roland UV printing",
+    "Wide-format printing and contour cutting",
     "Business card printing",
     "Vehicle magnets",
     "Coroplast signs",

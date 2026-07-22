@@ -76,7 +76,7 @@ Twenty of the latest 31 orders contained manual items and represented CA$5,342.3
 - A separate all-channel direct GA4 report for 2026-06-20 through 2026-07-17 found 17 purchases worth CA$3,157.95, all classified as `Unassigned`; the production database contained 31 paid orders worth CA$6,665.55.
 - GA4 is useful for landing engagement but is not currently a revenue source of truth.
 - Recent order attribution: 20 of 31 unknown/direct; only 10 known external-source orders; zero click-ID orders because paid campaigns have not launched.
-- The Ads purchase conversion and database click-ID fields are built, but the live purchase destination and a real attributable order still require deployment and verification.
+- Database click-ID fields and the durable conversion outbox are built. Revenue bidding requires distinct server-side `UPLOAD_CLICKS` actions for `purchase_online` and `quote_won`; their real account IDs and observed imports remain blocked. Browser events are GA4 diagnostics only and never deliver Google Ads revenue.
 - Current 30-day first-touch storage can suppress a newer paid click for a returning visitor. Preserve first touch and latest paid touch separately before using internal attribution to judge scale.
 
 ## Why budget is not the current growth constraint
@@ -119,11 +119,11 @@ The CA$600 promotion is financing, not profit. Exclude promotional credit when c
 
 ## Budget and bidding controls
 
-- Core: CA$40 average daily budget; CA$4.00 Maximize Clicks ceiling.
-- Competitor: CA$7 average daily budget; CA$2.50 ceiling.
-- Brand: CA$3 average daily budget and CA$1.50 ceiling, but held at launch.
-- Planning maximum: CA$1,500 over 30 days with a fixed end date and cumulative-spend hard stop.
-- Google may spend above the average daily budget on an individual day. With Core and Competitor enabled, the account must tolerate and monitor a theoretical CA$94 daily overdelivery spike.
+- Core: CA$8 average daily budget; CA$4.00 Maximize Clicks ceiling; CA$480 over the 60-day window.
+- Competitor: CA$2 average daily budget; CA$2.50 ceiling; CA$120 over the 60-day window.
+- Brand: staged at CA$3/day and CA$1.50 ceiling, but held at launch and excluded from the approved pilot spend.
+- Qualifying-spend target: CA$600 from July 20 through September 17, 2026. Warning: CA$500. Protective pause: CA$625. Absolute cap: CA$650.
+- Google may spend above the average daily budget on an individual day. Cumulative cost must therefore be enforced by the monitor rather than inferred from daily budgets.
 - Do not raise budgets unless the campaign is actually budget-limited.
 - Do not raise CPC ceilings unless search terms are qualified, paid economics are positive, and lost impression share shows rank—not budget—is restricting proven demand.
 
@@ -141,8 +141,14 @@ Only consider Target ROAS after the conversion-tracking level has at least 15 ti
 
 Primary bidding conversions:
 
-1. Paid website purchase with transaction ID, actual CAD value, and currency.
-2. Qualified custom quote or manual order only after it becomes paid and its original click ID/revenue are imported.
+1. `purchase_online`: paid website purchase uploaded server-side to its own primary `UPLOAD_CLICKS` action with transaction ID, actual pretax CAD value, and original click ID.
+2. `quote_won`: quote-linked order only after it becomes paid, uploaded server-side to a distinct primary `UPLOAD_CLICKS` action with its own transaction ID, actual pretax CAD value, and original click ID.
+
+Browser `purchase_online` and `quote_won` events are GA4 diagnostics only. The site must not send direct Google Ads browser conversions; the durable outbox is the sole Ads revenue path.
+
+Secondary, excluded from bidding:
+
+- a duration-qualified phone-call action with a live-read duration threshold and its own account action ID. Raw phone clicks are not qualified calls.
 
 Diagnostic-only actions:
 
@@ -152,6 +158,8 @@ Diagnostic-only actions:
 - add to cart;
 - checkout start;
 - phone click;
+- directions click;
+- reviews click;
 - quote submission before qualification/payment.
 
 Diagnostic actions must never be assigned the same optimization weight as paid revenue.
@@ -163,12 +171,13 @@ Diagnostic actions must never be assigned the same optimization weight as paid r
 All of these must be evidenced before the separately approved controlled-test activation:
 
 - production `/why-true-color` returns 200, remains noindex, and passes AdsBot/mobile/product-link QA;
-- purchase conversion destination is deployed and observed live;
+- distinct numeric `purchase_online` and `quote_won` `UPLOAD_CLICKS` action IDs are read from the owned account, configured, primary, included in conversions, and validated live;
+- a duration-qualified phone-call action and threshold are read back live as secondary and excluded from conversions/bidding;
 - Google Ads OAuth is reauthorized and the credential-gated paused-state verifier passes again;
 - RSA and manual assets are approved;
-- Saskatoon presence-only, Search-only networks, active customer, final URLs, suffix, budgets, CPC ceilings, and dates pass live preview;
+- Saskatoon +35 km presence-only, Search-only networks, active customer, final URLs, suffix, budgets, CPC ceilings, and dates pass live preview;
 - CA$600 promotion eligibility and exact qualifying terms are confirmed in Billing → Promotions;
-- CA$40/CA$7 budgets, CA$4.00/CA$2.50 ceilings, end date, CA$1,500 cumulative stop, monitoring owner, and pause procedure are explicitly approved;
+- CA$8/CA$2 launch budgets, held Brand state, CA$4.00/CA$2.50 ceilings, September 17 end date, CA$600 target, CA$650 cap, monitoring owner, and pause procedure are explicitly approved;
 - mobile landing, configurator, cart, checkout, payment, and confirmation paths pass;
 - Enhanced Conversions remains disabled unless purpose-specific customer-data consent/disclosure is approved;
 - Brand remains paused without Auction Insights justification.
@@ -183,22 +192,22 @@ A real ad-click order cannot be observed while every ad is inactive. After Gate 
 2. enable only one Tier 1 exact-product ad group, starting with Coroplast; keep every other campaign, ad group, phrase keyword, and Brand paused;
 3. never click the ad internally or ask staff to manufacture a click—wait for genuine eligible demand;
 4. stop at the first genuine paid order or at the time/spend cap, whichever occurs first;
-5. immediately re-pause and reconcile click ID → database → paid timestamp/value → Google Ads;
+5. immediately re-pause and reconcile click ID → database/outbox → paid timestamp/value → the correct distinct Google Ads action; both `purchase_online` and `quote_won` need their own observed proof before public activation;
 6. if no genuine paid order occurs, record the test as incomplete rather than weakening the attribution gate;
-7. authorize the wider Tier 1 pilot only after the attributable-order chain passes and the original approved launch budgets are restored through validate-only plus live readback.
+7. authorize the wider Tier 1 pilot only after both distinct attributable-revenue chains pass and the original approved launch budgets are restored through validate-only plus live readback.
 
 ### Cumulative-spend hard-stop mechanism
 
-The CA$1,500 planning maximum is not enforceable through an end date or a manual glance. Before any controlled or public activation, build and prove the following:
+The CA$650 absolute cap is not enforceable through an end date or a manual glance. Before any controlled or public activation, deploy and prove the following checked-in controls:
 
-- a credentialed API monitor polling Google Ads cumulative pilot cost at least every 15 minutes in `America/Regina`;
-- automatic pause at a protective CA$25 threshold during the CA$30 controlled test and automatic pause of every pilot campaign at CA$1,400 during the public pilot, leaving buffers below both approved maxima for reporting lag/overdelivery;
-- immediate Telegram/operator alert containing cost, campaign states, timestamp, and pause result;
-- fail-closed behavior when spend cannot be read or a pause cannot be confirmed;
-- a tested manual fallback owned by Hasan: check before 09:00, 13:00, and 17:00 local and pause at CA$1,350 if automation is unhealthy;
+- a credentialed API monitor polling exact-account cumulative cost across every campaign at least every 15 minutes in `America/Regina`, with any unexpected enabled campaign treated as unsafe;
+- automatic account-wide pause of every enabled campaign at a protective CA$25 threshold during the CA$30 controlled test; during the public pilot, warn at CA$500 and automatically pause every enabled campaign at CA$625, leaving a CA$25 buffer below the CA$650 absolute cap;
+- durable operator alert through the lifecycle rollup containing monitor state, spend, action, timestamp, and pause result;
+- after exact True Color account verification, fail-closed account-wide pause attempts when spend or campaign state cannot be verified; wrong/unreadable account identity never mutates, and authentication, mutation, or readback failure remains red;
+- a tested manual fallback owned by Hasan: if automation is unhealthy, inspect current cumulative spend immediately and keep every campaign paused until monitoring is healthy and the state is reconciled;
 - a paused-state simulation/fixture proving threshold detection, pause targeting, alerting, timezone, and idempotency before live use.
 
-Until that monitor exists and its proof is recorded, the cumulative hard-stop gate remains blocked.
+The authenticated cron route and 15-minute GitHub Actions schedule now exist in the repository. The hard-stop gate remains blocked until the scheduler is deployed with its secrets and evidence proves a successful heartbeat, warning/stop alert routing, stale-heartbeat detection, timezone handling, and verified pause readback.
 
 ### First 14 live days
 
@@ -207,7 +216,7 @@ Review daily:
 - spend, status, disapprovals, landing availability, conversion-tag diagnostics;
 - search terms, match type, physical location, network, and device;
 - click-ID and ValueTrack persistence;
-- purchase transaction ID, value, currency, payment state, and conversion lag;
+- purchase/quote-won conversion type, distinct action ID, transaction ID, value, currency, payment state, outbox state, and conversion lag;
 - mobile funnel drop-off;
 - cumulative spend against the hard stop.
 

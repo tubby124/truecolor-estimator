@@ -35,6 +35,8 @@ export function buildArtifacts(config) {
     Campaign: campaign.name,
     Location: campaign.geoTarget.name,
     "Location ID": campaign.geoTarget.criterionId,
+    Radius: campaign.geoTarget.radiusKm,
+    Unit: "km",
   }));
   const adGroupRows = [];
   const keywordRows = [];
@@ -71,7 +73,11 @@ export function buildArtifacts(config) {
     recordedLiveEvidence: config.liveGoogleAds,
     manualAdAssetsConfigured: true,
     conversionFirstLaunchTiersConfigured: true,
-    maximum30DayCad: config.maximum30DayCad,
+    targetQualifyingSpendCad: config.targetQualifyingSpendCad,
+    maximumPilotCad: config.maximumPilotCad,
+    spendControls: config.spendControls,
+    controlledTest: config.controlledTest,
+    conversionMeasurement: config.conversionMeasurement,
     editorSupportedEntitiesImportReady: true,
     editorImportTargetEncoded: false,
     targetAccountPreflightRequired: true,
@@ -83,7 +89,7 @@ export function buildArtifacts(config) {
   };
   return {
     "campaigns.csv": csv(Object.keys(campaignRows[0]), campaignRows),
-    "locations.csv": csv(["Campaign", "Location", "Location ID"], locationRows),
+    "locations.csv": csv(["Campaign", "Location", "Location ID", "Radius", "Unit"], locationRows),
     "ad-groups.csv": csv(["Campaign", "Ad group", "Status"], adGroupRows),
     "keywords.csv": csv(["Campaign", "Ad group", "Keyword", "Type", "Status", "Final URL"], keywordRows),
     "responsive-search-ads.csv": csv(rsaHeaders, adRows),
@@ -93,6 +99,9 @@ export function buildArtifacts(config) {
       activationPermitted: false,
       requiredFreshLiveVerification: true,
       allowedLaunchTiers: ["TIER_1_PRODUCT", "TIER_1_CONQUEST"],
+      controlledTest: config.controlledTest,
+      publicSpendControls: config.spendControls,
+      conversionMeasurement: config.conversionMeasurement,
       launchCandidates: config.campaigns.flatMap((campaign) => campaign.adGroups
         .filter((group) => ["TIER_1_PRODUCT", "TIER_1_CONQUEST"].includes(group.launchTier))
         .map((group) => ({ campaign: campaign.name, adGroup: group.name, tier: group.launchTier, requiredCurrentStatus: "PAUSED" }))),

@@ -42,7 +42,7 @@ These are estimates, not guarantees. Exact/phrase volume is forecast well below 
 
 ## Recommendation
 
-Use campaign-specific Maximize Clicks ceilings: Core CA$4.00, Competitor CA$2.50, and Brand CA$1.50. The CA$2.50 ceiling materially suppresses forecast Core capture, but preserves about 88% of the exact-only Competitor click forecast versus CA$4.00 while capping exposure. Brand forecasts zero and remains held for Auction Insights. Keep the CA$40/CA$7/CA$3 budgets and daily search-term monitoring as separate controls.
+Use campaign-specific Maximize Clicks ceilings: Core CA$4.00, Competitor CA$2.50, and Brand CA$1.50. The CA$2.50 ceiling materially suppresses forecast Core capture, but preserves about 88% of the exact-only Competitor click forecast versus CA$4.00 while capping exposure. Brand forecasts zero and remains held for Auction Insights. This July 17 forecast records the historical CA$40/CA$7/CA$3 paused build; the current canonical launch plan supersedes those budgets with CA$8 Core, CA$2 Competitor, and Brand held.
 
 The ceilings were validate-only checked, staged in the canonical config, applied to the paused live campaigns, and read back successfully on 2026-07-17. `CURRENT_KEYWORD_PLANNER_FORECAST` is verified. No campaign, ad group, keyword, or ad was enabled; budgets were unchanged and spend remained CA$0.
 

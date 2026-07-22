@@ -6,6 +6,74 @@
     "TIER_1_PRODUCT",
     "TIER_1_CONQUEST"
   ],
+  "controlledTest": {
+    "campaign": "GOOG_Search_TC_CoreProducts_2026",
+    "adGroupKey": "coroplast",
+    "dailyBudgetCad": 5,
+    "protectivePauseCad": 25,
+    "absoluteCapCad": 30,
+    "maximumWindowHours": 72
+  },
+  "publicSpendControls": {
+    "scope": "EXACT_ACCOUNT_TOTAL",
+    "warningCad": 500,
+    "protectivePauseCad": 625,
+    "absoluteCapCad": 650,
+    "monitorCadenceMinutes": 15
+  },
+  "conversionMeasurement": {
+    "revenueSource": "SERVER_UPLOAD_CLICKS",
+    "requiredUploadClickActions": {
+      "purchaseOnline": {
+        "eventName": "purchase_online",
+        "envVar": "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID",
+        "actionId": null,
+        "status": "UNCONFIGURED",
+        "requiredType": "UPLOAD_CLICKS",
+        "primaryForGoal": true,
+        "includedInConversions": true,
+        "currency": "CAD",
+        "dynamicValue": true
+      },
+      "quoteWon": {
+        "eventName": "quote_won",
+        "envVar": "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID",
+        "actionId": null,
+        "status": "UNCONFIGURED",
+        "requiredType": "UPLOAD_CLICKS",
+        "primaryForGoal": true,
+        "includedInConversions": true,
+        "currency": "CAD",
+        "dynamicValue": true
+      }
+    },
+    "qualifiedCallAction": {
+      "envVar": "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID",
+      "actionId": null,
+      "status": "UNCONFIGURED",
+      "allowedTypes": [
+        "AD_CALL",
+        "WEBSITE_CALL",
+        "UPLOAD_CALLS"
+      ],
+      "requiredCategory": "PHONE_CALL_LEAD",
+      "primaryForGoal": false,
+      "includedInConversions": false,
+      "minimumDurationSeconds": null
+    },
+    "diagnosticEvents": {
+      "channel": "GA4",
+      "eventNames": [
+        "purchase_online",
+        "quote_won",
+        "directions_click",
+        "reviews_click"
+      ],
+      "googleAdsDelivery": false,
+      "optimizationRole": "NONE",
+      "phoneClicksAreQualifiedCalls": false
+    }
+  },
   "launchCandidates": [
     {
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
@@ -125,17 +193,19 @@
     }
   ],
   "blockers": [
+    "PURCHASE_UPLOAD_CLICKS_ACTION",
+    "QUOTE_WON_UPLOAD_CLICKS_ACTION",
+    "PURCHASE_UPLOAD_CLICKS_OBSERVED",
+    "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
+    "QUALIFIED_CALL_ACTION",
     "PROMOTION_ELIGIBILITY",
-    "PURCHASE_TAG_DEPLOYED",
     "COMPETITOR_LANDING_DEPLOYED",
     "RSA_POLICY_APPROVAL",
     "AUCTION_INSIGHTS_SIGNOFF",
     "ENHANCED_CONSENT_DECISION",
     "CPC_CEILING_LAUNCH_APPROVAL",
-    "BUDGET_APPROVAL",
     "DATES_AND_HARD_STOP",
     "MOBILE_QA",
-    "ATTRIBUTABLE_TEST_ORDER",
     "LAUNCH_CONTROL_SIGNOFF",
     "PRESENCE_ONLY_AND_EDITOR_PREVIEW"
   ]

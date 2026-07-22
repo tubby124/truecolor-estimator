@@ -1,7 +1,5 @@
-import QRCode from "qrcode";
 import { buildQuoteEmailHtml, buildDiagramSvgXml, type QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { EstimateResponse } from "@/lib/engine/types";
-import { encodePaymentToken } from "@/lib/payment/token";
 import { sendEmail, type SendEmailAttachment } from "@/lib/email/smtp";
 import { requireStaffUser } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
@@ -231,6 +229,12 @@ export async function POST(req: Request) {
   try {
     const body: SendQuoteRequest = await req.json();
     const { to, customerName, note, proofImage, includePaymentLink } = body;
+    if (includePaymentLink) {
+      return Response.json(
+        { error: "Pay Now links require a saved quote or order. Send pricing here, then create the payment link from Staff Quotes." },
+        { status: 400 },
+      );
+    }
 
     // Validate email
     if (!to || !isValidEmail(to)) {
@@ -252,29 +256,8 @@ export async function POST(req: Request) {
       const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
       const bcc = process.env.SMTP_BCC ?? undefined;
 
-      // Combined total for payment token — shared helper honours rush_fee + gst_rate per item.
-      const { total: combinedTotal } = computeTaxForCart(items.map((it) => it.quoteData));
-
-      let paymentUrl: string | undefined;
-      let qrCodeBuffer: Buffer | undefined;
-      const QR_CID = "qrcode@truecolor";
-
-      if (includePaymentLink && process.env.PAYMENT_TOKEN_SECRET) {
-        const description = `True Color Display Printing — ${items.length}-Item Quote`;
-        const token = encodePaymentToken(combinedTotal, description, to);
-        paymentUrl = `${siteUrl}/pay/${token}`;
-        try {
-          qrCodeBuffer = await QRCode.toBuffer(paymentUrl, {
-            width: 260,
-            margin: 2,
-            color: { dark: "#111827", light: "#ffffff" },
-          });
-        } catch {
-          qrCodeBuffer = undefined;
-        }
-      }
-
-      const qrCodeCid = qrCodeBuffer ? QR_CID : undefined;
+      const paymentUrl: string | undefined = undefined;
+      const qrCodeCid: string | undefined = undefined;
       const html = buildMultiItemEmailHtml({ customerName, note, items, siteUrl, paymentUrl, qrCodeCid });
       const text = buildMultiItemPlainText({ customerName, note, items, paymentUrl });
 
@@ -283,11 +266,6 @@ export async function POST(req: Request) {
         ? `Your ${items.length}-Item Quote from True Color Display Printing — ${itemLabels}`
         : `Multi-Item Quote (${items.length} items) from True Color Display Printing`;
 
-      const attachments: SendEmailAttachment[] = [];
-      if (qrCodeBuffer) {
-        attachments.push({ name: "qrcode.png", content: qrCodeBuffer.toString("base64"), contentId: QR_CID });
-      }
-
       await sendEmail({
         from,
         to,
@@ -295,7 +273,6 @@ export async function POST(req: Request) {
         subject,
         html,
         text,
-        attachments: attachments.length > 0 ? attachments : undefined,
       });
 
       return Response.json({ success: true });
@@ -314,27 +291,7 @@ export async function POST(req: Request) {
     const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
     const bcc = process.env.SMTP_BCC ?? undefined;
 
-    // Generate payment link + QR code if requested and token secret is configured
-    let paymentUrl: string | undefined;
-    let qrCodeBuffer: Buffer | undefined;
-    const QR_CID = "qrcode@truecolor";
-    if (includePaymentLink && process.env.PAYMENT_TOKEN_SECRET) {
-      const { total: totalWithTax } = computeTax(quoteData);
-      const description = `True Color Display Printing — ${jobDetails.categoryLabel}`;
-      const token = encodePaymentToken(totalWithTax, description, to);
-      paymentUrl = `${siteUrl}/pay/${token}`;
-      try {
-        // Use toBuffer (not toDataURL) — data: URIs are stripped by Gmail and all major email clients
-        qrCodeBuffer = await QRCode.toBuffer(paymentUrl, {
-          width: 260,
-          margin: 2,
-          color: { dark: "#111827", light: "#ffffff" },
-        });
-      } catch {
-        // QR failure is non-fatal — email still sends with the text link
-        qrCodeBuffer = undefined;
-      }
-    }
+    const paymentUrl: string | undefined = undefined;
 
     const hasProofAttachment = !!(proofImage?.dataUrl);
 
@@ -351,7 +308,7 @@ export async function POST(req: Request) {
     }
 
     // Pass CID string to template so it renders as cid: src (works in all email clients)
-    const qrCodeCid = qrCodeBuffer ? QR_CID : undefined;
+    const qrCodeCid: string | undefined = undefined;
     const PROOF_CID = "proof@truecolor";
     const proofImageCid = hasProofAttachment ? PROOF_CID : undefined;
     const diagramCid = diagramBuffer ? DIAGRAM_CID : undefined;
@@ -373,11 +330,6 @@ export async function POST(req: Request) {
     // Spec diagram PNG — inline CID (renders the product diagram in email body)
     if (diagramBuffer) {
       attachments.push({ name: "diagram.png", content: diagramBuffer.toString("base64"), contentId: DIAGRAM_CID });
-    }
-
-    // QR code — inline CID (embedded in HTML payment block)
-    if (qrCodeBuffer) {
-      attachments.push({ name: "qrcode.png", content: qrCodeBuffer.toString("base64"), contentId: QR_CID });
     }
 
     await sendEmail({

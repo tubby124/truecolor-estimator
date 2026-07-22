@@ -10,6 +10,7 @@ import { REVIEW_COUNT } from "@/lib/reviews";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { shouldTrackConfirmedPurchase } from "@/lib/analytics/purchase-readiness";
+import { isRevenueConversionType, pretaxConversionValue, type RevenueConversionType } from "@/lib/analytics/conversions";
 
 export const metadata: Metadata = {
   title: "Order Confirmed — True Color",
@@ -33,6 +34,8 @@ interface OrderSummary {
   customers?: { email: string; name: string; company: string | null } | Array<{ email: string; name: string; company: string | null }> | null;
   order_items?: Array<{ product_name: string; category?: string | null; qty: number; line_total: number | string }> | null;
   latest_payment_attempt?: LatestPaymentAttempt | null;
+  conversion_type: RevenueConversionType | null;
+  conversion_key: string | null;
 }
 
 export default async function OrderConfirmedPage({ searchParams }: Props) {
@@ -51,7 +54,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       // success AND cancellation/timeout, so we can't trust the redirect alone.
       const { data } = await supabase
         .from("orders")
-        .select("order_number, total, gst, pst, payment_method, payment_reference, receipt_token, status, paid_at, customers(email, name, company), order_items(product_name, category, qty, line_total)")
+        .select("order_number, total, gst, pst, payment_method, payment_reference, receipt_token, status, paid_at, conversion_type, conversion_key, customers(email, name, company), order_items(product_name, category, qty, line_total)")
         .eq("id", oid)
         .single();
 
@@ -86,6 +89,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         `Order ${orderSummary.order_number}`,
         customerEmail ?? undefined,
         `${siteUrl}/order-confirmed?oid=${oid}`,
+        { orderId: oid },
       );
       cardPayUrl = `/pay/${token}`;
     } catch {
@@ -110,6 +114,13 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
           total={Number(orderSummary.total)}
           paymentMethod={orderSummary.payment_method}
           tax={Number(orderSummary.gst ?? 0) + Number(orderSummary.pst ?? 0)}
+          googleAdsValue={pretaxConversionValue({
+            total: Number(orderSummary.total),
+            gst: Number(orderSummary.gst ?? 0),
+            pst: Number(orderSummary.pst ?? 0),
+          })}
+          conversionType={isRevenueConversionType(orderSummary.conversion_type) ? orderSummary.conversion_type : null}
+          conversionKey={orderSummary.conversion_key}
           items={(orderSummary.order_items ?? []).map((i) => ({
             item_id: (i.product_name ?? "").slice(0, 100),
             item_name: i.product_name ?? "Unknown",

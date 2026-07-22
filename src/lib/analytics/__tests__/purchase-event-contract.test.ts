@@ -13,5 +13,13 @@ describe("PurchaseEvent Ads privacy contract", () => {
     expect(source).not.toContain("enhancedConversion");
     expect(source).not.toContain("marketingConsent");
     expect(source).not.toContain("customerEmail");
+    expect(source).not.toContain("sendGoogleAdsPurchase");
+    expect(source).not.toContain("NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL");
+    expect(source).not.toContain("NEXT_PUBLIC_GOOGLE_ADS_QUOTE_WON_CONVERSION_LABEL");
+    expect(source).toContain("durable server outbox");
+    expect(source).toContain("orderNumber");
+    expect(source.match(/metaTrackPurchase\(/g)).toHaveLength(1);
+    expect(source).toContain("eventId: orderNumber");
+    expect(source).not.toContain('window.fbq("track", "Purchase"');
   });
 });

@@ -125,9 +125,8 @@ export function printMultiQuote(items: CartItem[]): void {
 
   // Combined financials
   const combinedSubtotal = items.reduce((s, it) => s + (it.result.sell_price ?? 0), 0);
-  const combinedDesignFee = items.reduce((s, it) => s + (it.result.design_fee ?? 0), 0);
   const combinedGst = Math.round(combinedSubtotal * 0.05 * 100) / 100;
-  const combinedPst = Math.round((combinedSubtotal - combinedDesignFee) * 0.06 * 100) / 100;
+  const combinedPst = Math.round(combinedSubtotal * 0.06 * 100) / 100;
   const combinedTotal = Math.round((combinedSubtotal + combinedGst + combinedPst) * 100) / 100;
 
   // Build per-item sections

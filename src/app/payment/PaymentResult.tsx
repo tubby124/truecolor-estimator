@@ -95,6 +95,7 @@ export async function PaymentResult({ kind, searchParams }: PaymentResultProps) 
         `Order ${order.order_number}`,
         customerEmail ?? undefined,
         `${siteUrl}/order-confirmed?oid=${order.id}`,
+        { orderId: order.id },
       )}`;
     } catch {
       retryUrl = null;

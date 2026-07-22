@@ -24,7 +24,7 @@ export function EmailModal({ result, jobDetails, onClose, proofImage, cartItems 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
-  const [includePaymentLink, setIncludePaymentLink] = useState(true);
+  const includePaymentLink = false;
   const [sendState, setSendState] = useState<SendState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
@@ -233,21 +233,10 @@ export function EmailModal({ result, jobDetails, onClose, proofImage, cartItems 
               />
             </div>
 
-            {/* Payment link toggle */}
-            <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
-              <input
-                id="payment-link-toggle"
-                type="checkbox"
-                checked={includePaymentLink}
-                onChange={(e) => setIncludePaymentLink(e.target.checked)}
-                disabled={sendState === "sending"}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer"
-              />
-              <label htmlFor="payment-link-toggle" className="text-xs text-green-800 cursor-pointer leading-relaxed">
-                <span className="font-semibold">Include &ldquo;Pay Now&rdquo; button + QR code</span>
-                <br />
-                <span className="text-green-700">Customer can pay by card online — secure Clover checkout</span>
-              </label>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 text-xs leading-relaxed text-amber-900">
+              <span className="font-semibold">Need a Pay Now link?</span>
+              <br />
+              Save the request in Staff Quotes first. Payment links must be tied to a tracked quote or order.
             </div>
 
             {/* Error */}

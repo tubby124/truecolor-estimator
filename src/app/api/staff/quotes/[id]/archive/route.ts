@@ -28,16 +28,19 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     const supabase = createServiceClient();
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("quote_requests")
       .update({
         is_archived: body.archived,
         archived_at: body.archived ? new Date().toISOString() : null,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .select("id, lifecycle_status")
+      .maybeSingle();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error || !updated) {
+      console.error("[staff/quotes/archive] lifecycle update failed:", error?.message ?? "quote not found");
+      return NextResponse.json({ error: "Could not update quote lifecycle" }, { status: error ? 500 : 404 });
     }
 
     void recordAuditEvent({
@@ -49,7 +52,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       detail: { archived: body.archived },
     });
 
-    return NextResponse.json({ ok: true, archived: body.archived });
+    return NextResponse.json({ ok: true, archived: body.archived, lifecycle_status: updated.lifecycle_status });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Archive failed" },

@@ -5,7 +5,7 @@
  * Creates a deliberately-stuck Wave order matching the exact bug pattern that
  * left 27 production orders unpaid in Wave (TC-2026-0108 et al.):
  *   - real Supabase order row
- *   - real Wave invoice (small amount, ~$1.05)
+ *   - real Wave invoice (small amount, ~$1.11)
  *   - Wave invoice APPROVED (auto-approve at order creation, as production does)
  *   - paid_at set, status=payment_received
  *   - wave_payment_recorded_at LEFT NULL  ← the symptom
@@ -86,12 +86,13 @@ async function fetchWaveIds() {
   const taxes = data.business?.salesTaxes?.edges?.map((e) => e.node) ?? [];
   const products = data.business?.products?.edges?.map((e) => e.node) ?? [];
   const gst = taxes.find((t) => /gst/i.test(t.name) && Number(t.rate) === 0.05);
+  const pst = taxes.find((t) => /pst/i.test(t.name) && Number(t.rate) === 0.06);
   // Any active sold product works — we just need a valid productId reference.
   // Prefer "Sticker" since the test order item is a sticker.
   const product =
     products.find((p) => p.isSold && /^stickers?$/i.test(p.name)) ??
     products.find((p) => p.isSold);
-  return { gstId: gst?.id, productId: product?.id };
+  return { gstId: gst?.id, pstId: pst?.id, productId: product?.id };
 }
 
 async function createWaveCustomer(email, name) {
@@ -125,7 +126,7 @@ async function createWaveCustomer(email, name) {
   return data.customerCreate.customer.id;
 }
 
-async function createWaveInvoice(customerId, productId, gstId, orderNumber) {
+async function createWaveInvoice(customerId, productId, gstId, pstId, orderNumber) {
   const data = await waveQuery(
     `mutation($input: InvoiceCreateInput!) {
       invoiceCreate(input: $input) {
@@ -147,7 +148,7 @@ async function createWaveInvoice(customerId, productId, gstId, orderNumber) {
             description: "Test sticker — 1¢ verification line item",
             quantity: "1",
             unitPrice: "1.00",
-            taxes: gstId ? [{ salesTaxId: gstId }] : [],
+            taxes: [gstId, pstId].filter(Boolean).map((salesTaxId) => ({ salesTaxId })),
           },
         ],
       },
@@ -179,12 +180,16 @@ async function main() {
   console.log("🧪 Setting up stuck-Wave-order test scenario…\n");
 
   // 1. Resolve Wave reference IDs
-  const { gstId, productId } = await fetchWaveIds();
+  const { gstId, pstId, productId } = await fetchWaveIds();
   if (!productId) {
     console.error("No 'Print Services' product found in Wave. Aborting.");
     process.exit(1);
   }
-  console.log(`✓ Wave IDs resolved (productId, gstId)`);
+  if (!gstId || !pstId) {
+    console.error("GST/PST sales tax IDs are missing in Wave. Aborting.");
+    process.exit(1);
+  }
+  console.log(`✓ Wave IDs resolved (productId, gstId, pstId)`);
 
   // 2. Create or find test customer in Supabase
   const TEST_EMAIL = "hasan.sharif.realtor@gmail.com";
@@ -214,7 +219,7 @@ async function main() {
   const waveCustomerId = await createWaveCustomer(TEST_EMAIL, TEST_NAME);
   console.log(`✓ Wave customer: ${waveCustomerId.slice(0, 12)}…`);
 
-  const invoice = await createWaveInvoice(waveCustomerId, productId, gstId, orderNumber);
+  const invoice = await createWaveInvoice(waveCustomerId, productId, gstId, pstId, orderNumber);
   console.log(`✓ Wave invoice created: ${invoice.invoiceNumber ?? "(no number yet)"} — id ${invoice.id.slice(0, 24)}…`);
 
   await approveWaveInvoice(invoice.id);
@@ -233,8 +238,8 @@ async function main() {
       payment_reference: `test-stuck-${Date.now()}`,
       subtotal: 1.0,
       gst: 0.05,
-      pst: 0.0,
-      total: 1.05,
+      pst: 0.06,
+      total: 1.11,
       is_rush: false,
       paid_at: nowIso,
       wave_invoice_id: invoice.id,

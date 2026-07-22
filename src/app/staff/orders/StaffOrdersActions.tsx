@@ -296,12 +296,8 @@ function formatCents(cents: number): string {
 
 function computeBreakdownCents(items: MoneyPreviewItem[]): MoneyBreakdown {
   const subtotalCents = items.reduce((sum, item) => sum + item.amountCents, 0);
-  const pstableSubtotalCents = items.reduce(
-    (sum, item) => sum + (item.kind === "fee" ? 0 : item.amountCents),
-    0
-  );
   const gstCents = Math.round(subtotalCents * 0.05);
-  const pstCents = Math.round(pstableSubtotalCents * 0.06);
+  const pstCents = Math.round(subtotalCents * 0.06);
   return {
     subtotalCents,
     gstCents,
@@ -311,15 +307,12 @@ function computeBreakdownCents(items: MoneyPreviewItem[]): MoneyBreakdown {
 }
 
 function findLastAmountForTargetTotal(
-  lastKind: "product" | "fee",
   baseSubtotalCents: number,
-  basePstableSubtotalCents: number,
   targetTotalCents: number
 ): number | null {
   const totalForLastAmount = (lastAmountCents: number) => {
     const subtotalCents = baseSubtotalCents + lastAmountCents;
-    const pstableSubtotalCents = basePstableSubtotalCents + (lastKind === "fee" ? 0 : lastAmountCents);
-    return subtotalCents + Math.round(subtotalCents * 0.05) + Math.round(pstableSubtotalCents * 0.06);
+    return subtotalCents + Math.round(subtotalCents * 0.05) + Math.round(subtotalCents * 0.06);
   };
 
   let low = 0;
@@ -373,14 +366,8 @@ function scaleItemsForOverridePreview(
   const lastIndex = scaledItems.length - 1;
   const baseItems = scaledItems.slice(0, lastIndex);
   const baseSubtotalCents = baseItems.reduce((sum, item) => sum + item.amountCents, 0);
-  const basePstableSubtotalCents = baseItems.reduce(
-    (sum, item) => sum + (item.kind === "fee" ? 0 : item.amountCents),
-    0
-  );
   const lastAmountCents = findLastAmountForTargetTotal(
-    scaledItems[lastIndex].kind,
     baseSubtotalCents,
-    basePstableSubtotalCents,
     overrideTotalCents
   );
 
@@ -543,8 +530,9 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   }, []);
 
   // ── Derived totals ──
-  // PST exempts kind="fee" items (design/rush/installation) to match API + Wave invoice line item flags.
-  // Modal preview ↔ manual-order API ↔ Wave invoice must agree — see payment-tax.md.
+  // Saskatchewan PST-20 taxes the full charge when design/rush/installation
+  // services are bundled with a taxable printed-material sale. The modal,
+  // manual-order API, and Wave invoice must use the same base.
   const itemSubtotals = form.items.map((it) => {
     const amountCents = parseMoneyCents(it.amount);
     return amountCents && amountCents > 0 ? amountCents : 0;

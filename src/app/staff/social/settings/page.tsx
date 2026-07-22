@@ -63,7 +63,7 @@ export default async function SettingsPage() {
   const hasN8nSecret = !!process.env.N8N_WEBHOOK_SECRET;
   const hasSupabase = !!process.env.SUPABASE_SECRET_KEY;
 
-  const webhookUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca"}/api/staff/social/webhooks/n8n`;
+  const webhookUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca"}/api/webhooks/n8n`;
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">

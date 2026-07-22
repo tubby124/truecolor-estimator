@@ -156,7 +156,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const originalSubtotal = Number(order.subtotal);
     const newDiscountedSubtotal = Math.max(0, originalSubtotal - discountAmount);
     const newGst = Math.round((newDiscountedSubtotal + rush) * GST_RATE * 100) / 100;
-    const newPst = Math.round(newDiscountedSubtotal * PST_RATE * 100) / 100;
+    const newPst = Math.round((newDiscountedSubtotal + rush) * PST_RATE * 100) / 100;
     const newTotal = Math.round((newDiscountedSubtotal + rush + newGst + newPst) * 100) / 100;
 
     // 9. Update order row
@@ -231,7 +231,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           : `True Color Order ${order.order_number}`;
 
     const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
-    const payToken = encodePaymentToken(newTotal, description, customer.email, redirectUrl);
+    const payToken = encodePaymentToken(newTotal, description, customer.email, redirectUrl, { orderId: order.id });
     const paymentUrl = `${siteUrl}/pay/${payToken}`;
 
     // NOTE: do NOT update payment_reference — it is set to the order UUID by /pay/[token]

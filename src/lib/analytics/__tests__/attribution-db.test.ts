@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapAttributionToDb } from "../attribution-db";
+import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "../attribution-db";
 
 describe("mapAttributionToDb", () => {
   it("maps URL attribution names to nullable database columns", () => {
@@ -44,5 +44,17 @@ describe("mapAttributionToDb", () => {
 
   it("returns null for every absent database field", () => {
     expect(Object.values(mapAttributionToDb({})).every((value) => value === null)).toBe(true);
+  });
+
+  it("maps latest paid touch into separate prefixed columns", () => {
+    expect(mapLatestPaidAttributionToDb({
+      attribution: { utm_source: "google", utm_medium: "cpc", gclid: "paid-click" },
+      capturedAt: "2026-07-20T12:00:00.000Z",
+    })).toMatchObject({
+      latest_paid_utm_source: "google",
+      latest_paid_utm_medium: "cpc",
+      latest_paid_gclid: "paid-click",
+      latest_paid_touch_captured_at: "2026-07-20T12:00:00.000Z",
+    });
   });
 });

@@ -5,7 +5,7 @@ import { paidSearchConfig } from "../../../docs/paid-search/campaign-config.mjs"
 import { validateConfig } from "../config-validator.mjs";
 import { buildArtifacts } from "../export-google-ads.mjs";
 import { evaluateLaunchCandidate } from "../validate-launch-candidate.mjs";
-import { evaluatePausedLiveState } from "../live-verification-contract.mjs";
+import { evaluatePausedLiveState, liveVerificationStatus } from "../live-verification-contract.mjs";
 
 const clone = () => structuredClone(paidSearchConfig);
 const parseCsv = (source) => {
@@ -62,7 +62,10 @@ test("launch candidate transitions require evidence and can reach fresh-live pre
 });
 
 test("live verification contract rejects launch-critical drift and missing noindex", () => {
+  // Fixture-only IDs exercise the contract; they are not True Color account IDs.
   const live = {
+    account: { id: "1072816342", currencyCode: "CAD", timeZone: "America/Regina" },
+    spendScope: "EXACT_ACCOUNT_TOTAL",
     campaigns: paidSearchConfig.campaigns.map((campaign) => ({
       id: paidSearchConfig.liveGoogleAds.campaignIds[campaign.name],
       name: campaign.name,
@@ -71,32 +74,51 @@ test("live verification contract rejects launch-critical drift and missing noind
       dailyBudgetCad: campaign.dailyBudgetCad,
       cpcCeilingCad: paidSearchConfig.bidding.cpcCeilingCadByCampaignKind[campaign.kind],
       startDate: "2026-07-20",
-      endDate: "2026-08-18",
+      endDate: "2026-09-17",
       presence: "PRESENCE",
       networks: { targetGoogleSearch: true, targetSearchNetwork: false, targetContentNetwork: false, targetPartnerSearchNetwork: false },
       finalUrlSuffix: paidSearchConfig.tracking.finalUrlSuffix,
     })),
-    adGroups: 19, pausedAdGroups: 19, positiveKeywords: 71, negativeCriteria: 189,
+    allCampaigns: paidSearchConfig.campaigns.map((campaign) => ({
+      id: paidSearchConfig.liveGoogleAds.campaignIds[campaign.name],
+      name: campaign.name,
+      status: "PAUSED",
+    })),
+    adGroups: 19, pausedAdGroups: 19, positiveKeywords: 83, negativeCriteria: 189,
     competitorMatchTypes: ["EXACT"], responsiveSearchAds: 19, pausedResponsiveSearchAds: 19,
     rsaApprovalStatuses: ["APPROVED"], manualAssets: 13, assetApprovalStatuses: ["APPROVED"], campaignAssetLinks: 39,
-    locationTargets: 3, saskatoonLocationTargets: 3, languageTargets: 3, englishLanguageTargets: 3,
-    purchaseConversion: { id: "7689029977", status: "ENABLED", category: "PURCHASE", primaryForGoal: true, included: true, currency: "CAD", dynamicValue: true, destination: "AW-18330693756/F1pQCNmStdIcEPzg4KRE" },
+    locationTargets: 0, proximityTargets: 3, radius35KmTargets: 3, languageTargets: 3, englishLanguageTargets: 3,
+    revenueConversions: {
+      purchaseOnline: { eventName: "purchase_online", id: "9000000001", status: "ENABLED", type: "UPLOAD_CLICKS", category: "PURCHASE", primaryForGoal: true, included: true, currency: "CAD", dynamicValue: true },
+      quoteWon: { eventName: "quote_won", id: "9000000002", status: "ENABLED", type: "UPLOAD_CLICKS", category: "PURCHASE", primaryForGoal: true, included: true, currency: "CAD", dynamicValue: true },
+    },
+    qualifiedCallConversion: { id: "9000000003", status: "ENABLED", type: "AD_CALL", category: "PHONE_CALL_LEAD", primaryForGoal: false, included: false, minimumDurationSeconds: 60 },
+    conversionActionSelections: {
+      purchaseOnline: { envVar: "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID", id: "9000000001" },
+      quoteWon: { envVar: "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID", id: "9000000002" },
+      qualifiedCall: { envVar: "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID", id: "9000000003" },
+    },
     spendCadPilot: 0,
     endpointChecks: [{ url: "https://truecolorprinting.ca/why-true-color", status: 200, noindex: true }],
   };
   assert.deepEqual(evaluatePausedLiveState(live), { failures: [], launchBlockers: [] });
   const drifts = [
     (value) => { value.campaigns[0].id = "wrong"; },
-    (value) => { value.campaigns[0].dailyBudgetCad = 41; },
+    (value) => { value.account.id = "2200538686"; },
+    (value) => { value.spendScope = "PLANNED_CAMPAIGNS_ONLY"; },
+    (value) => { value.campaigns[0].dailyBudgetCad = 9; },
     (value) => { value.campaigns[0].startDate = "2026-07-21"; },
     (value) => { value.campaigns[0].networks.targetGoogleSearch = false; },
     (value) => { value.campaigns[0].finalUrlSuffix = value.campaigns[0].finalUrlSuffix.replace("utm_term={keyword}&", ""); },
-    (value) => { value.saskatoonLocationTargets = 2; },
+    (value) => { value.radius35KmTargets = 2; },
     (value) => { value.englishLanguageTargets = 2; },
-    (value) => { value.purchaseConversion.dynamicValue = false; },
-    (value) => { value.purchaseConversion.status = "REMOVED"; },
-    (value) => { value.purchaseConversion.category = "DEFAULT"; },
-    (value) => { value.purchaseConversion.currency = "USD"; },
+    (value) => { value.revenueConversions.purchaseOnline.dynamicValue = false; },
+    (value) => { value.revenueConversions.quoteWon.status = "REMOVED"; },
+    (value) => { value.revenueConversions.quoteWon.type = "WEBPAGE"; },
+    (value) => { value.revenueConversions.quoteWon.id = value.revenueConversions.purchaseOnline.id; },
+    (value) => { value.qualifiedCallConversion.minimumDurationSeconds = 0; },
+    (value) => { value.qualifiedCallConversion.included = true; },
+    (value) => { value.allCampaigns.push({ id: "99999999999", name: "Unexpected", status: "ENABLED" }); },
     (value) => { value.spendCadPilot = 1; },
   ];
   for (const mutate of drifts) {
@@ -104,9 +126,30 @@ test("live verification contract rejects launch-critical drift and missing noind
     mutate(value);
     assert.ok(evaluatePausedLiveState(value).failures.length > 0);
   }
+  const historicalPaused = structuredClone(live);
+  historicalPaused.allCampaigns.push({ id: "99999999999", name: "Historical Paused", status: "PAUSED" });
+  assert.deepEqual(evaluatePausedLiveState(historicalPaused), { failures: [], launchBlockers: [] });
   const indexed = structuredClone(live);
   indexed.endpointChecks[0].noindex = false;
   assert.deepEqual(evaluatePausedLiveState(indexed).launchBlockers, ["competitor landing is missing noindex"]);
+
+  const discoveryOnly = structuredClone(live);
+  discoveryOnly.conversionActionSelections.purchaseOnline.id = null;
+  discoveryOnly.conversionActionSelections.quoteWon.id = null;
+  discoveryOnly.conversionActionSelections.qualifiedCall.id = null;
+  discoveryOnly.revenueConversions.purchaseOnline = null;
+  discoveryOnly.revenueConversions.quoteWon = null;
+  discoveryOnly.qualifiedCallConversion = null;
+  const discoveryResult = evaluatePausedLiveState(discoveryOnly);
+  assert.deepEqual(discoveryResult.failures, []);
+  assert.deepEqual(discoveryResult.launchBlockers, [
+    "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID is missing; inspect the read-only conversionActionInventory and configure the owned-account action ID",
+    "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID is missing; inspect the read-only conversionActionInventory and configure the owned-account action ID",
+    "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID is missing; inspect the read-only conversionActionInventory and configure the owned-account action ID",
+  ]);
+  assert.equal(liveVerificationStatus(discoveryResult), "BLOCKED");
+  assert.equal(liveVerificationStatus({ failures: ["wrong account"], launchBlockers: discoveryResult.launchBlockers }), "UNSAFE");
+  assert.equal(liveVerificationStatus({ failures: [], launchBlockers: [] }), "VALIDATED_PAUSED");
 });
 
 test("locks the confirmed True Color child account and verified account-side gates", () => {
@@ -116,18 +159,18 @@ test("locks the confirmed True Color child account and verified account-side gat
   assert.equal(accountGate?.evidence, "True Color Display Print child account 107-281-6342 under manager 112-540-2990");
   assert.deepEqual(
     paidSearchConfig.externalGates.filter((gate) => gate.status === "VERIFIED").map((gate) => gate.code),
-    ["TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED", "CONVERSION_ACTION", "CURRENT_KEYWORD_PLANNER_FORECAST"],
+    ["TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED", "CURRENT_KEYWORD_PLANNER_FORECAST", "BUDGET_APPROVAL"],
   );
   assert.deepEqual(
     paidSearchConfig.externalGates.filter((gate) => gate.status === "BLOCKED").map((gate) => gate.code).slice(0, 4),
-    ["PROMOTION_ELIGIBILITY", "PURCHASE_TAG_DEPLOYED", "COMPETITOR_LANDING_DEPLOYED", "RSA_POLICY_APPROVAL"],
+    ["PURCHASE_UPLOAD_CLICKS_ACTION", "QUOTE_WON_UPLOAD_CLICKS_ACTION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED"],
   );
 
   for (const mutate of [
     (c) => { c.accountCustomerId = null; },
     (c) => { c.accountCustomerId = "2200538686"; },
     (c) => { c.externalGates.find((gate) => gate.code === "TRUE_COLOR_CUSTOMER_ID").status = "BLOCKED"; },
-    (c) => { c.externalGates.find((gate) => gate.code === "CONVERSION_ACTION").evidence = "wrong"; },
+    (c) => { c.externalGates.find((gate) => gate.code === "CURRENT_KEYWORD_PLANNER_FORECAST").evidence = "wrong"; },
     (c) => { c.liveGoogleAds.campaignIds.GOOG_Search_TC_CoreProducts_2026 = "wrong"; },
     (c) => { c.liveGoogleAds.status = "ENABLED"; },
   ]) {
@@ -146,10 +189,11 @@ test("rejects enabled campaigns and unsafe network, match, geo, budget, and date
     (c) => { c.campaigns[0].status = "ENABLED"; },
     (c) => { c.campaigns[0].networks.display = true; },
     (c) => { c.campaigns[0].geoTarget.presenceOnly = false; },
+    (c) => { c.campaigns[0].geoTarget.radiusKm = 50; },
     (c) => { c.campaigns[0].adGroups[0].keywords[0].matchType = "BROAD"; },
     (c) => { c.campaigns[0].adGroups[0].keywords = []; },
-    (c) => { c.campaigns[0].dailyBudgetCad = 41; },
-    (c) => { c.pilot.endDate = "2026-08-19"; },
+    (c) => { c.campaigns[0].dailyBudgetCad = 9; },
+    (c) => { c.pilot.endDate = "2026-09-18"; },
     (c) => { c.campaigns.push({ ...structuredClone(c.campaigns[0]), kind: "EXTRA", name: "Unexpected", status: "ENABLED" }); },
   ];
 
@@ -190,13 +234,33 @@ test("canonical routing and campaign caps are complete", () => {
   const competitors = paidSearchConfig.campaigns.find((c) => c.kind === "COMPETITOR");
   const brand = paidSearchConfig.campaigns.find((c) => c.kind === "BRAND");
 
-  assert.equal(core.dailyBudgetCad, 40);
-  assert.equal(core.maximum30DayCad, 1200);
-  assert.equal(competitors.dailyBudgetCad, 7);
-  assert.equal(competitors.maximum30DayCad, 210);
+  assert.equal(core.dailyBudgetCad, 8);
+  assert.equal(core.maximumPilotCad, 480);
+  assert.equal(competitors.dailyBudgetCad, 2);
+  assert.equal(competitors.maximumPilotCad, 120);
   assert.equal(brand.dailyBudgetCad, 3);
-  assert.equal(brand.maximum30DayCad, 90);
-  assert.equal(paidSearchConfig.maximum30DayCad, 1500);
+  assert.equal(brand.maximumPilotCad, 0);
+  assert.equal(paidSearchConfig.targetQualifyingSpendCad, 600);
+  assert.equal(paidSearchConfig.maximumPilotCad, 650);
+  assert.equal(paidSearchConfig.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
+  assert.deepEqual(
+    Object.values(paidSearchConfig.conversionMeasurement.requiredUploadClickActions).map((action) => [action.eventName, action.actionId, action.status]),
+    [["purchase_online", null, "UNCONFIGURED"], ["quote_won", null, "UNCONFIGURED"]],
+  );
+  assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.channel, "GA4");
+  assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.googleAdsDelivery, false);
+  assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.phoneClicksAreQualifiedCalls, false);
+  assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.actionId, null);
+  assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.includedInConversions, false);
+  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 500, protectivePauseCad: 625, absoluteCapCad: 650, monitorCadenceMinutes: 15 });
+  assert.deepEqual(paidSearchConfig.controlledTest, {
+    campaign: "GOOG_Search_TC_CoreProducts_2026",
+    adGroupKey: "coroplast",
+    dailyBudgetCad: 5,
+    protectivePauseCad: 25,
+    absoluteCapCad: 30,
+    maximumWindowHours: 72,
+  });
   assert.equal(competitors.adGroups.length, 9);
   assert.equal(competitors.adGroups.flatMap((group) => group.keywords).length, 9);
   assert.ok(competitors.adGroups.every((group) => group.keywords.every((keyword) => keyword.matchType === "EXACT")));
@@ -208,6 +272,10 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(core.adGroups.find((g) => g.key === "coroplast").finalUrl, "https://truecolorprinting.ca/products/coroplast-signs");
   assert.equal(core.adGroups.find((g) => g.key === "stickers-labels").finalUrl, "https://truecolorprinting.ca/products/stickers");
   assert.ok(core.campaignNegatives.some((n) => n.toLowerCase().includes("qwik signs")));
+  for (const term of ["die cut stickers near me", "custom die cut stickers near me", "custom stickers near me", "custom labels near me", "die cut labels near me", "custom die cut labels near me"]) {
+    assert.ok(core.adGroups.find((g) => g.key === "stickers-labels").keywords.some((keyword) => keyword.text === term && keyword.matchType === "EXACT"));
+    assert.ok(core.adGroups.find((g) => g.key === "stickers-labels").keywords.some((keyword) => keyword.text === term && keyword.matchType === "PHRASE"));
+  }
 });
 
 test("exports deterministic Google Ads Editor CSV artifacts", () => {
@@ -228,6 +296,10 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   const manifest = JSON.parse(first["launch-candidate-manifest.json"]);
   assert.equal(manifest.activationPermitted, false);
   assert.equal(manifest.requiredFreshLiveVerification, true);
+  assert.equal(manifest.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
+  assert.equal(manifest.conversionMeasurement.requiredUploadClickActions.quoteWon.actionId, null);
+  assert.ok(manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
+  assert.ok(manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
   assert.equal(manifest.launchCandidates.length, 15);
   assert.equal(manifest.heldGroups.length, 4);
   assert.ok(manifest.heldGroups.every((group) => ["TIER_2_EXPANSION", "HOLD_AUCTION_INSIGHTS"].includes(group.tier)));
@@ -246,9 +318,10 @@ test("exports canonical Editor campaign, RSA, and location entities", () => {
   assert.ok(!ads.headers.includes("Ad type"));
   assert.ok(ads.rows.every((row) => row.Type === "Responsive search ad"));
   const locations = parseCsv(artifacts["locations.csv"]);
-  assert.deepEqual(locations.headers, ["Campaign", "Location", "Location ID"]);
+  assert.deepEqual(locations.headers, ["Campaign", "Location", "Location ID", "Radius", "Unit"]);
   assert.equal(locations.rows.length, 3);
   assert.ok(locations.rows.every((row) => row["Location ID"] === "1002791"));
+  assert.ok(locations.rows.every((row) => row.Radius === "35" && row.Unit === "km"));
 });
 
 test("exports negatives with canonical scope types and never as positive keywords", () => {

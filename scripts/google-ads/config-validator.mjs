@@ -1,22 +1,23 @@
 import { pathToFileURL } from "node:url";
 
 const EXPECTED = {
-  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 40, maximum: 1200 },
-  COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 7, maximum: 210 },
-  BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 90 },
+  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 8, maximum: 480 },
+  COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 2, maximum: 120 },
+  BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 0 },
 };
 const REQUIRED_GATES = [
-  "TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED", "CONVERSION_ACTION",
-  "PROMOTION_ELIGIBILITY", "PURCHASE_TAG_DEPLOYED", "COMPETITOR_LANDING_DEPLOYED", "RSA_POLICY_APPROVAL", "AUCTION_INSIGHTS_SIGNOFF",
+  "TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED",
+  "PURCHASE_UPLOAD_CLICKS_ACTION", "QUOTE_WON_UPLOAD_CLICKS_ACTION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
+  "QUALIFIED_CALL_ACTION",
+  "PROMOTION_ELIGIBILITY", "COMPETITOR_LANDING_DEPLOYED", "RSA_POLICY_APPROVAL", "AUCTION_INSIGHTS_SIGNOFF",
   "ENHANCED_CONSENT_DECISION", "CURRENT_KEYWORD_PLANNER_FORECAST", "CPC_CEILING_LAUNCH_APPROVAL", "BUDGET_APPROVAL",
-  "DATES_AND_HARD_STOP", "MOBILE_QA", "ATTRIBUTABLE_TEST_ORDER", "LAUNCH_CONTROL_SIGNOFF",
+  "DATES_AND_HARD_STOP", "MOBILE_QA", "LAUNCH_CONTROL_SIGNOFF",
   "PRESENCE_ONLY_AND_EDITOR_PREVIEW",
 ];
 const VERIFIED_GATE_EVIDENCE = new Map([
   ["TRUE_COLOR_CUSTOMER_ID", "True Color Display Print child account 107-281-6342 under manager 112-540-2990"],
   ["BILLING_ACTIVE", "Billing APPROVED in customer 1072816342; setup 8490021913"],
   ["AUTO_TAGGING_ENABLED", "Auto-tagging enabled in customer 1072816342"],
-  ["CONVERSION_ACTION", "Purchase - Website (True Color), action 7689029977, destination AW-18330693756/F1pQCNmStdIcEPzg4KRE"],
   ["CURRENT_KEYWORD_PLANNER_FORECAST", "2026-07-17 True Color forecast; Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 staged paused"],
 ]);
 const LIVE_GOOGLE_ADS = {
@@ -26,8 +27,11 @@ const LIVE_GOOGLE_ADS = {
   managerCustomerId: "1125402990",
   managerLinkId: "6626494765",
   billingSetupId: "8490021913",
-  purchaseConversionActionId: "7689029977",
-  purchaseConversionDestination: "AW-18330693756/F1pQCNmStdIcEPzg4KRE",
+  historicalBrowserPurchaseConversion: {
+    actionId: "7689029977",
+    destination: "AW-18330693756/F1pQCNmStdIcEPzg4KRE",
+    revenueDelivery: false,
+  },
   campaignIds: {
     GOOG_Search_TC_CoreProducts_2026: "24048123058",
     GOOG_Search_TC_CompetitorConquest_2026: "24048123061",
@@ -37,6 +41,50 @@ const LIVE_GOOGLE_ADS = {
   cpcCeilingCadByCampaignKind: { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 },
   policyApprovalStatus: "UNKNOWN",
   spendCad: 0,
+};
+const CONVERSION_MEASUREMENT = {
+  revenueSource: "SERVER_UPLOAD_CLICKS",
+  requiredUploadClickActions: {
+    purchaseOnline: {
+      eventName: "purchase_online",
+      envVar: "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID",
+      actionId: null,
+      status: "UNCONFIGURED",
+      requiredType: "UPLOAD_CLICKS",
+      primaryForGoal: true,
+      includedInConversions: true,
+      currency: "CAD",
+      dynamicValue: true,
+    },
+    quoteWon: {
+      eventName: "quote_won",
+      envVar: "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID",
+      actionId: null,
+      status: "UNCONFIGURED",
+      requiredType: "UPLOAD_CLICKS",
+      primaryForGoal: true,
+      includedInConversions: true,
+      currency: "CAD",
+      dynamicValue: true,
+    },
+  },
+  qualifiedCallAction: {
+    envVar: "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID",
+    actionId: null,
+    status: "UNCONFIGURED",
+    allowedTypes: ["AD_CALL", "WEBSITE_CALL", "UPLOAD_CALLS"],
+    requiredCategory: "PHONE_CALL_LEAD",
+    primaryForGoal: false,
+    includedInConversions: false,
+    minimumDurationSeconds: null,
+  },
+  diagnosticEvents: {
+    channel: "GA4",
+    eventNames: ["purchase_online", "quote_won", "directions_click", "reviews_click"],
+    googleAdsDelivery: false,
+    optimizationRole: "NONE",
+    phoneClicksAreQualifiedCalls: false,
+  },
 };
 const COMPETITOR_TERMS = ["qwik signs", "minuteman press", "ink house", "rayacom", "24 hour signs", "anytime printing", "pgi printers", "staples", "vistaprint"];
 const ROUTES = {
@@ -52,7 +100,17 @@ const ROUTES = {
 };
 const CORE_TERMS = {
   coroplast: ["coroplast signs saskatoon", "coroplast signs", "coroplast sign printing"],
-  "stickers-labels": ["custom stickers saskatoon", "sticker printing saskatoon", "custom labels saskatoon"],
+  "stickers-labels": [
+    "custom stickers saskatoon",
+    "sticker printing saskatoon",
+    "custom labels saskatoon",
+    "die cut stickers near me",
+    "custom die cut stickers near me",
+    "custom stickers near me",
+    "custom labels near me",
+    "die cut labels near me",
+    "custom die cut labels near me",
+  ],
   "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners"],
   "business-cards": ["business cards saskatoon", "business card printing saskatoon", "order business cards online"],
   flyers: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online"],
@@ -157,15 +215,26 @@ export function validateConfig(config) {
   const fail = (message) => errors.push(message);
   const start = config.pilot?.startDate;
   const end = config.pilot?.endDate;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(start ?? "") || !/^\d{4}-\d{2}-\d{2}$/.test(end ?? "") || daysInclusive(start, end) !== 30) {
-    fail("Pilot must have valid ISO dates spanning exactly 30 inclusive days");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start ?? "") || !/^\d{4}-\d{2}-\d{2}$/.test(end ?? "") || daysInclusive(start, end) !== 60) {
+    fail("Pilot must have valid ISO dates spanning exactly 60 inclusive days");
   }
-  if (start !== "2026-07-20" || end !== "2026-08-18" || config.pilot?.inclusiveDays !== 30 || !config.pilot?.regenerateDatesIfGatesNotClearedByStart || !config.pilot?.hardStopRequired) {
+  if (start !== "2026-07-20" || end !== "2026-09-17" || config.pilot?.inclusiveDays !== 60 || !config.pilot?.regenerateDatesIfGatesNotClearedByStart || !config.pilot?.hardStopRequired) {
     fail("Pilot dates and hard-stop controls do not match the approved fixed pilot");
   }
   if (config.pilot?.generatorAutoRollsDates !== false || config.pilot?.dateChangeRequiresApprovedContractChange !== true) fail("Pilot date changes must require an approved config and validator contract change");
   if (config.currency !== "CAD") fail("Account currency must be CAD");
-  if (config.maximum30DayCad !== 1500) fail("Total 30-day maximum must be CA$1,500");
+  if (config.targetQualifyingSpendCad !== 600 || config.maximumPilotCad !== 650) fail("Pilot must target CA$600 qualifying spend with a CA$650 absolute cap");
+  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 500, protectivePauseCad: 625, absoluteCapCad: 650, monitorCadenceMinutes: 15 })) {
+    fail("Spend controls must use exact-account total cost, warn at CA$500, pause at CA$625, cap at CA$650, and run every 15 minutes");
+  }
+  if (JSON.stringify(config.controlledTest) !== JSON.stringify({
+    campaign: "GOOG_Search_TC_CoreProducts_2026",
+    adGroupKey: "coroplast",
+    dailyBudgetCad: 5,
+    protectivePauseCad: 25,
+    absoluteCapCad: 30,
+    maximumWindowHours: 72,
+  })) fail("Controlled test must be Coroplast at CA$5/day with CA$25/CA$30 protection and a 72-hour maximum window");
   if (config.accountCustomerId !== "1072816342") fail("Customer ID must match confirmed True Color child account 1072816342");
   if (config.bidding?.strategy !== "MAXIMIZE_CLICKS"
     || JSON.stringify(config.bidding?.cpcCeilingCadByCampaignKind) !== JSON.stringify({ CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 })
@@ -173,6 +242,9 @@ export function validateConfig(config) {
     fail("Bidding must use the forecast-backed campaign-specific Maximize Clicks ceilings");
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
+  if (JSON.stringify(config.conversionMeasurement) !== JSON.stringify(CONVERSION_MEASUREMENT)) {
+    fail("Revenue measurement must require distinct unconfigured purchase_online and quote_won UPLOAD_CLICKS actions with GA4-only browser diagnostics");
+  }
   const suffixParams = new URLSearchParams(config.tracking?.finalUrlSuffix ?? "");
   for (const [key, expectedValue] of Object.entries(TRACKING_MAPPINGS)) {
     const values = suffixParams.getAll(key);
@@ -219,10 +291,12 @@ export function validateConfig(config) {
     || controls.mobilePostClickQaRequired !== true
     || controls.oneDomainOnly !== "truecolorprinting.ca"
     || controls.cityPresenceOnlyCriterionId !== 1002791
+    || controls.radiusKm !== 35
     || controls.searchOnly !== true
     || !sameSet(controls.allowedMatchTypes ?? [], ["EXACT", "PHRASE"])
     || controls.noBroadeningToManufactureVolume !== true
-    || controls.realAttributablePaidTestOrderRequired !== true
+    || controls.realAttributablePurchaseOnlineRequired !== true
+    || controls.realAttributableQuoteWonRequired !== true
     || controls.hardEndRequired !== true
     || controls.dailySearchTermReviewRequired !== true) {
     fail("Missing required Wilkie/Dubois launch-control declaration");
@@ -242,15 +316,19 @@ export function validateConfig(config) {
   if (campaignNames.some((name) => typeof name !== "string" || !name.trim()) || new Set(campaignNames).size !== campaignNames.length) fail("Campaign names must be unique and nonblank");
   const adGroupNames = campaigns.flatMap((campaign) => (campaign.adGroups ?? []).map((group) => group.name));
   if (adGroupNames.some((name) => typeof name !== "string" || !name.trim()) || new Set(adGroupNames).size !== adGroupNames.length) fail("Ad-group names must be unique and nonblank");
-  if (campaigns.reduce((sum, campaign) => sum + (campaign.maximum30DayCad ?? 0), 0) !== config.maximum30DayCad) fail("Campaign maximums must reconcile to the total 30-day maximum");
+  if (campaigns.reduce((sum, campaign) => sum + (campaign.maximumPilotCad ?? 0), 0) !== config.targetQualifyingSpendCad) fail("Launch-campaign maximums must reconcile to the CA$600 qualifying-spend target");
+  const launchableDailyBudget = campaigns
+    .filter((campaign) => campaign.kind !== "BRAND")
+    .reduce((sum, campaign) => sum + (campaign.dailyBudgetCad ?? 0), 0);
+  if (launchableDailyBudget !== 10) fail("Launchable Core and Competitor budgets must total CA$10/day");
   for (const [kind, expected] of Object.entries(EXPECTED)) {
     const campaign = campaigns.find((item) => item.kind === kind);
     if (!campaign) { fail(`Missing ${kind} campaign`); continue; }
-    if (campaign.name !== expected.name || campaign.dailyBudgetCad !== expected.daily || campaign.maximum30DayCad !== expected.maximum) fail(`${kind} campaign budget or name mismatch`);
+    if (campaign.name !== expected.name || campaign.dailyBudgetCad !== expected.daily || campaign.maximumPilotCad !== expected.maximum) fail(`${kind} campaign budget or name mismatch`);
     if (campaign.status !== "PAUSED") fail(`${campaign.name} must be paused`);
     if (campaign.language !== "English") fail(`${campaign.name} language must be English`);
     if (campaign.channel !== "SEARCH" || !campaign.networks?.googleSearch || campaign.networks?.searchPartners || campaign.networks?.display) fail(`${campaign.name} must be Google Search only`);
-    if (campaign.geoTarget?.criterionId !== 1002791 || campaign.geoTarget?.presenceOnly !== true) fail(`${campaign.name} must target Saskatoon presence-only`);
+    if (campaign.geoTarget?.criterionId !== 1002791 || campaign.geoTarget?.radiusKm !== 35 || campaign.geoTarget?.presenceOnly !== true) fail(`${campaign.name} must target Saskatoon +35 km presence-only`);
     if (!campaign.adGroups?.length) fail(`${campaign.name} has no ad groups`);
     const expectedGroups = kind === "CORE" ? ROUTES : kind === "COMPETITOR" ? COMPETITOR_GROUPS : BRAND_GROUPS;
     const actualGroupKeys = (campaign.adGroups ?? []).map((group) => group.key);

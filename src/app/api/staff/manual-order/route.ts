@@ -16,7 +16,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
-import { createOrFindWaveCustomer, createWaveInvoice } from "@/lib/wave/invoice";
+import { provisionOrderWaveInvoice } from "@/lib/payment/quote-wave";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { sendPaymentRequestEmail, type AccountInfo } from "@/lib/email/paymentRequest";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
@@ -66,12 +66,8 @@ function centsToMoney(cents: number): number {
 
 export function computeBreakdownCents(items: OrderItemInput[]): MoneyBreakdown {
   const subtotalCents = items.reduce((sum, item) => sum + moneyToCents(item.amount), 0);
-  const pstableSubtotalCents = items.reduce(
-    (sum, item) => sum + (item.kind === "fee" ? 0 : moneyToCents(item.amount)),
-    0
-  );
   const gstCents = Math.round(subtotalCents * GST_RATE);
-  const pstCents = Math.round(pstableSubtotalCents * PST_RATE);
+  const pstCents = Math.round(subtotalCents * PST_RATE);
   return {
     subtotalCents,
     gstCents,
@@ -81,15 +77,12 @@ export function computeBreakdownCents(items: OrderItemInput[]): MoneyBreakdown {
 }
 
 function findLastAmountForTargetTotal(
-  lastKind: "product" | "fee",
   baseSubtotalCents: number,
-  basePstableSubtotalCents: number,
   targetTotalCents: number
 ): number | null {
   const totalForLastAmount = (lastAmountCents: number) => {
     const subtotalCents = baseSubtotalCents + lastAmountCents;
-    const pstableSubtotalCents = basePstableSubtotalCents + (lastKind === "fee" ? 0 : lastAmountCents);
-    return subtotalCents + Math.round(subtotalCents * GST_RATE) + Math.round(pstableSubtotalCents * PST_RATE);
+    return subtotalCents + Math.round(subtotalCents * GST_RATE) + Math.round(subtotalCents * PST_RATE);
   };
 
   let low = 0;
@@ -140,14 +133,8 @@ export function applyOverrideTotal(items: OrderItemInput[], overrideTotal?: numb
   const lastIndex = scaledItems.length - 1;
   const baseItems = scaledItems.slice(0, lastIndex);
   const baseSubtotalCents = baseItems.reduce((sum, item) => sum + moneyToCents(item.amount), 0);
-  const basePstableSubtotalCents = baseItems.reduce(
-    (sum, item) => sum + (item.kind === "fee" ? 0 : moneyToCents(item.amount)),
-    0
-  );
   const lastAmountCents = findLastAmountForTargetTotal(
-    scaledItems[lastIndex].kind ?? "product",
     baseSubtotalCents,
-    basePstableSubtotalCents,
     overrideTotalCents
   );
 
@@ -302,8 +289,8 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 2. Calculate totals ──
-    // PST exempts kind="fee" items (design, rush, installation) per CLAUDE.md / truecolor-pricing-safety.md.
-    // GST applies to everything (CRA: services like design ARE GST-taxable in Canada).
+    // Saskatchewan PST-20 taxes the full charge when services such as design,
+    // rush, or installation are part of a taxable printed-material sale.
     let scaled;
     try {
       scaled = applyOverrideTotal(items, body.overrideTotal);
@@ -427,7 +414,8 @@ export async function POST(req: NextRequest) {
         total,
         `${order.order_number} — ${combinedDescription}`,
         contact.email.toLowerCase().trim(),
-        redirectUrl
+        redirectUrl,
+        { orderId: order.id },
       );
       paymentUrl = `${siteUrl}/pay/${token}`;
     } catch (tokenErr) {
@@ -435,46 +423,41 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to generate payment link" }, { status: 500 });
     }
 
-    // Bookkeeping parity: every manual order/quote gets a Wave DRAFT invoice for
-    // the books. Customer pays through the Clover gateway (/pay/[token]); the
-    // Clover webhook approves + records the payment against this invoice on
-    // capture (it reads order.wave_invoice_id). Non-fatal: a Wave outage must
-    // not block the Clover payment link.
+    // Fail closed: every emailed Pay Now link must point to an order whose Wave
+    // invoice is already approved and durably linked under the reservation RPC.
     try {
-      const waveCustomerId = await createOrFindWaveCustomer(
-        contact.email.toLowerCase().trim(),
-        contact.name.trim()
-      );
       const waveLineItems = items.map((item) => ({
         description: formatItemAlbertBlock(item),
         unitPrice: Math.round(item.amount * 100) / 100,
         qty: 1,
         applyGst: true,
-        applyPst: item.kind !== "fee", // PST exempt for design/rush/installation fees
+        applyPst: true,
       }));
-      const inv = await createWaveInvoice(waveCustomerId, waveLineItems, {
+      const wave = await provisionOrderWaveInvoice(supabase, order.id, {
         orderNumber: order.order_number,
-        title: quoteOnly ? `QUOTE DRAFT — ${contact.name.trim()}` : undefined,
+        customerEmail: contact.email.toLowerCase().trim(),
+        customerName: contact.name.trim(),
+        waveItems: waveLineItems,
+        isRush: false,
       });
-      const { error: updErr } = await supabase
-        .from("orders")
-        .update({
-          wave_invoice_id: inv.invoiceId,
-          wave_invoice_number: inv.invoiceNumber,
-        } as Record<string, unknown>)
-        .eq("id", order.id);
-      if (updErr) console.error("[manual-order] wave_invoice_id/number save failed (non-fatal):", updErr.message);
-      console.log(`[manual-order] Wave draft created → order ${order.order_number} | wave_invoice_id ${inv.invoiceId} (DRAFT until paid)`);
+      if (wave.action !== "ready" || !wave.invoiceId) {
+        throw new Error("Wave invoice provisioning is still being verified");
+      }
+      console.log(`[manual-order] Wave invoice approved and linked → order ${order.order_number} | wave_invoice_id ${wave.invoiceId}`);
     } catch (waveErr) {
       const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
-      console.error("[manual-order] Wave invoice creation failed (non-fatal):", msg);
+      console.error("[manual-order] Wave invoice provisioning blocked payment link:", msg);
       void sendTelegramNotification(
-        `⚠️ <b>Wave draft NOT created</b>\n` +
+        `🚨 <b>Manual order payment blocked</b>\n` +
         `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
-        `Customer can still pay via Clover, but no Wave bookkeeping entry exists.\n` +
+        `No customer payment email was sent because Wave readiness is unresolved.\n` +
         `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
-        `Action: create the Wave invoice manually and link it via staff portal.`
+        `Action: reconcile the Wave reservation before resending payment.`
       ).catch(() => {});
+      return NextResponse.json(
+        { error: "Wave accounting setup could not be confirmed. No payment email was sent.", orderId: order.id },
+        { status: 503 },
+      );
     }
 
     // ── 6. Send payment request email to customer ──

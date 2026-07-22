@@ -9,17 +9,21 @@ export const HARD_STOP_CAMPAIGNS = Object.freeze([
 
 export const HARD_STOP_PROFILES = Object.freeze({
   "controlled-test": Object.freeze({
+    spendScope: "EXACT_ACCOUNT_TOTAL",
+    warningCad: 25,
     thresholdCad: 25,
     approvedCapCad: 30,
     requiresExplicitWindow: true,
     maximumWindowHours: 72,
   }),
   "public-pilot": Object.freeze({
-    thresholdCad: 1400,
-    approvedCapCad: 1500,
+    spendScope: "EXACT_ACCOUNT_TOTAL",
+    warningCad: 500,
+    thresholdCad: 625,
+    approvedCapCad: 650,
     requiresExplicitWindow: false,
     windowStart: "2026-07-20T00:00",
-    windowEnd: "2026-08-19T00:00",
+    windowEnd: "2026-09-18T00:00",
   }),
 });
 
@@ -92,30 +96,34 @@ export function validateAccount(account) {
 }
 
 export function validateCampaigns(campaigns) {
-  if (!Array.isArray(campaigns) || campaigns.length !== HARD_STOP_CAMPAIGNS.length) {
-    throw new Error("The complete three-campaign True Color allowlist was not returned");
+  if (!Array.isArray(campaigns)) {
+    throw new Error("The True Color account campaign inventory was not returned");
   }
   for (const expected of HARD_STOP_CAMPAIGNS) {
     const actual = campaigns.find((campaign) => String(campaign.id) === expected.id);
     if (!actual || actual.name !== expected.name) throw new Error(`Allowlisted campaign identity mismatch for ${expected.id}`);
   }
   const returnedIds = new Set(campaigns.map((campaign) => String(campaign.id)));
-  if (returnedIds.size !== HARD_STOP_CAMPAIGNS.length) throw new Error("Duplicate or unexpected campaign identities returned");
+  if (returnedIds.size !== campaigns.length) throw new Error("Duplicate campaign identities returned");
+  const allowedIds = new Set(HARD_STOP_CAMPAIGNS.map((campaign) => campaign.id));
+  const unexpectedEnabled = campaigns.filter((campaign) => campaign.status === "ENABLED" && !allowedIds.has(String(campaign.id)));
+  if (unexpectedEnabled.length > 0) {
+    throw new Error(`Unexpected enabled campaign(s): ${unexpectedEnabled.map((campaign) => `${campaign.id}:${campaign.name}`).join(",")}`);
+  }
 }
 
 export function sumSpendMicros(rows, { windowStart, windowEnd }) {
-  const allowedIds = new Set(HARD_STOP_CAMPAIGNS.map((campaign) => campaign.id));
   let micros = 0n;
   for (const row of rows ?? []) {
-    const id = String(row.id);
-    if (!allowedIds.has(id)) throw new Error(`Spend response included non-allowlisted campaign ${id}`);
+    const customerId = String(row.customerId ?? "");
+    if (customerId !== HARD_STOP_CUSTOMER_ID) throw new Error(`Spend response is not for the True Color account: ${customerId || "missing"}`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(row.date ?? "") || !Number.isInteger(row.hour) || row.hour < 0 || row.hour > 23) {
-      throw new Error(`Spend response omitted a valid Regina-local date/hour for campaign ${id}`);
+      throw new Error("Account spend response omitted a valid Regina-local date/hour");
     }
     const rowHour = `${row.date}T${String(row.hour).padStart(2, "0")}:00`;
     if (rowHour < windowStart || rowHour >= windowEnd) continue;
     const value = String(row.costMicros ?? "0");
-    if (!/^\d+$/.test(value)) throw new Error(`Invalid cost value for campaign ${id}`);
+    if (!/^\d+$/.test(value)) throw new Error("Invalid account cost value");
     micros += BigInt(value);
   }
   return { micros, cad: Number(micros) / 1_000_000 };
@@ -129,8 +137,14 @@ export function stopDecision({ profileName, spendCad, nowLocal, windowStart, win
   if (nowLocal >= `${windowEnd}:00`) {
     return { shouldPause: true, reason: "WINDOW_ENDED" };
   }
+  if (spendCad >= profile.approvedCapCad) {
+    return { shouldPause: true, absoluteCapReached: true, reason: "ABSOLUTE_CAP_REACHED" };
+  }
   if (spendCad >= profile.thresholdCad) {
-    return { shouldPause: true, reason: "SPEND_THRESHOLD_REACHED" };
+    return { shouldPause: true, absoluteCapReached: false, reason: "PROTECTIVE_PAUSE_THRESHOLD_REACHED" };
+  }
+  if (spendCad >= profile.warningCad) {
+    return { shouldPause: false, warning: true, reason: "SPEND_WARNING_REACHED" };
   }
   return { shouldPause: false, reason: "BELOW_THRESHOLD" };
 }
