@@ -75,7 +75,7 @@ async function logTelegramAttempt(opts: {
 export async function sendTelegramNotification(
   message: string,
   category: string | null = null,
-): Promise<void> {
+): Promise<boolean> {
   const token = process.env.TRUE_COLOR_TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TRUE_COLOR_TELEGRAM_CHAT_ID;
 
@@ -86,7 +86,7 @@ export async function sendTelegramNotification(
       error: "TRUE_COLOR_TELEGRAM_BOT_TOKEN or CHAT_ID missing",
       messagePreview: message,
     });
-    return;
+    return false;
   }
 
   try {
@@ -108,12 +108,13 @@ export async function sendTelegramNotification(
         chatId, category, ok: false, statusCode: res.status,
         error: `API ${res.status}`, messagePreview: message,
       });
-      return;
+      return false;
     }
     void logTelegramAttempt({
       chatId, category, ok: true, statusCode: res.status,
       error: null, messagePreview: message,
     });
+    return true;
   } catch (err) {
     // Intentionally NOT logging err.message — it can contain the request URL
     // (with bot token) on some Node fetch failures.
@@ -123,5 +124,6 @@ export async function sendTelegramNotification(
       chatId, category, ok: false, statusCode: null,
       error: name, messagePreview: message,
     });
+    return false;
   }
 }

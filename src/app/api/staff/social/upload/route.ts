@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
-import sharp from "sharp";
+import sharp, { type Sharp } from "sharp";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     // Determine output format
     const inputFormat = metadata.format;
 
-    let processed: sharp.Sharp;
+    let processed: Sharp;
     if (inputFormat === "png") {
       // Keep PNG — no lossy conversion
       processed = image.png();
