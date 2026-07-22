@@ -59,6 +59,8 @@ export function PaidProductLink({ href, productSlug, productName, className, chi
           item_id: productSlug,
           item_name: productName,
           item_list_name: "Paid competitor product chooser",
+          placement: "product_catalogue",
+          destination: href,
         });
         trackSelectProduct(productSlug, productName);
       }}

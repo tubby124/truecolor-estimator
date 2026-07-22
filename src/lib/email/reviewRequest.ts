@@ -19,9 +19,13 @@ import { productAnchor } from "./components/productAnchor";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ReviewRequestParams {
+  orderId: string;
+  customerId?: string;
   customerName: string;
   customerEmail: string;
   orderNumber: string;
+  /** ISO-8601 delivery time. Review requests are deferred after pickup. */
+  scheduledAt: string;
   /** Optional — used for product-anchored subject ("How did your business cards turn out?") */
   items?: Array<{ product_name: string; qty: number }>;
 }
@@ -52,10 +56,16 @@ export async function sendReviewRequestEmail(
     subject,
     html,
     text,
+    orderId: params.orderId,
+    customerId: params.customerId,
+    scheduledAt: params.scheduledAt,
+    idempotencyKey: `review-request/${params.orderId}`,
+    requireEmailLog: true,
+    tags: [{ name: "email_type", value: "review_request" }],
   });
 
   console.log(
-    `[reviewRequest] email sent → ${params.customerEmail} | order ${params.orderNumber}`
+    `[reviewRequest] email scheduled for ${params.scheduledAt} → ${params.customerEmail} | order ${params.orderNumber}`
   );
 }
 

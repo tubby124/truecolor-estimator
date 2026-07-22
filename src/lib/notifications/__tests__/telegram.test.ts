@@ -24,7 +24,7 @@ describe("sendTelegramNotification", () => {
   });
 
   it("posts to the Telegram API with the chat_id and message", async () => {
-    await sendTelegramNotification("hello");
+    await expect(sendTelegramNotification("hello")).resolves.toBe(true);
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(url).toBe("https://api.telegram.org/botfake-token/sendMessage");
@@ -36,20 +36,20 @@ describe("sendTelegramNotification", () => {
 
   it("does nothing if env vars are missing", async () => {
     process.env.TRUE_COLOR_TELEGRAM_BOT_TOKEN = "";
-    await sendTelegramNotification("hello");
+    await expect(sendTelegramNotification("hello")).resolves.toBe(false);
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it("swallows network errors silently", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("network down"));
-    await expect(sendTelegramNotification("hello")).resolves.toBeUndefined();
+    await expect(sendTelegramNotification("hello")).resolves.toBe(false);
   });
 
   it("swallows Telegram API 5xx errors silently", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
       new Response("server error", { status: 500 })
     );
-    await expect(sendTelegramNotification("hello")).resolves.toBeUndefined();
+    await expect(sendTelegramNotification("hello")).resolves.toBe(false);
   });
 
   it("does not include err.message in console.error on network failures", async () => {

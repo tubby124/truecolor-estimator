@@ -1,8 +1,9 @@
 /**
  * POST /api/webhooks/resend
  *
- * Resend Webhooks → updates email_log rows with delivery outcomes.
- * Captures: delivered / opened / clicked / bounced / complained / delivery_delayed.
+ * Resend Webhooks → updates email_log and order_messages delivery outcomes.
+ * Captures: sent / delivered / opened / clicked / bounced / complained /
+ * delivery_delayed / failed / suppressed.
  *
  * Auth: Svix HMAC-SHA256 (Resend's native signing mechanism).
  *   RESEND_WEBHOOK_SECRET = the whsec_... value from Resend dashboard.
@@ -16,6 +17,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 
+type ResendWebhookTags =
+  | Record<string, string>
+  | Array<{ name?: string; value?: string }>;
+
 interface ResendWebhookEvent {
   type: string;
   created_at?: string;
@@ -26,7 +31,16 @@ interface ResendWebhookEvent {
     subject?: string;
     bounce?: { type?: string; message?: string };
     click?: { link?: string };
+    failed?: { reason?: string };
+    suppressed?: { type?: string; message?: string };
+    tags?: ResendWebhookTags;
   };
+}
+
+interface EventUpdates {
+  emailLog: Record<string, unknown>;
+  orderMessage: Record<string, unknown>;
+  allowedStatuses?: string[];
 }
 
 function verifySvixSignature(
@@ -101,7 +115,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, skipped: "no email_id" });
   }
 
-  // Map event.type → email_log column + status
+  // Status transitions are guarded in the update query so an older webhook
+  // cannot overwrite a terminal state that arrived first.
   const supabase = createServiceClient();
   const at = event.created_at ?? new Date().toISOString();
   const detail =
@@ -109,31 +124,145 @@ export async function POST(req: NextRequest) {
       ? `${event.data?.bounce?.type ?? "bounce"}: ${(event.data?.bounce?.message ?? "").slice(0, 200)}`
       : event.type === "email.clicked"
       ? `clicked: ${(event.data?.click?.link ?? "").slice(0, 200)}`
+      : event.type === "email.failed"
+      ? `failed: ${(event.data?.failed?.reason ?? "unknown reason").slice(0, 200)}`
+      : event.type === "email.suppressed"
+      ? `${event.data?.suppressed?.type ?? "suppressed"}: ${(event.data?.suppressed?.message ?? "").slice(0, 200)}`
       : null;
 
-  const updates: Record<string, unknown> = { last_event_detail: detail ?? event.type };
-  let newStatus: string | null = null;
-  switch (event.type) {
-    case "email.delivered":         updates.delivered_at = at; newStatus = "delivered"; break;
-    case "email.opened":            updates.opened_at = at; break;
-    case "email.clicked":           updates.clicked_at = at; break;
-    case "email.bounced":           updates.bounced_at = at; newStatus = "bounced"; break;
-    case "email.complained":        updates.complained_at = at; newStatus = "complained"; break;
-    case "email.delivery_delayed":  updates.delivery_delayed_at = at; newStatus = "delivery_delayed"; break;
-    default:
-      return NextResponse.json({ ok: true, skipped: `unhandled type: ${event.type}` });
+  const updates = mapEventUpdates(event.type, at, detail ?? event.type);
+  if (!updates) {
+    return NextResponse.json({ ok: true, skipped: `unhandled type: ${event.type}` });
   }
-  if (newStatus) updates.status = newStatus;
 
-  const { error } = await supabase
+  let emailLogQuery = supabase
     .from("email_log")
-    .update(updates)
+    .update(updates.emailLog)
     .eq("provider_message_id", messageId);
+  const taggedOrderMessageId = getOrderMessageId(event.data?.tags);
+  let orderMessageQuery = supabase
+    .from("order_messages")
+    .update({
+      ...updates.orderMessage,
+      ...(taggedOrderMessageId ? { provider_message_id: messageId } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq(taggedOrderMessageId ? "id" : "provider_message_id", taggedOrderMessageId ?? messageId);
 
-  if (error) {
-    console.error("[resend-webhook] update failed:", error.message);
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  if (updates.allowedStatuses) {
+    emailLogQuery = emailLogQuery.in("status", updates.allowedStatuses);
+    orderMessageQuery = orderMessageQuery.in("status", updates.allowedStatuses);
+  }
+
+  const [{ error: emailLogError }, { error: orderMessageError }] = await Promise.all([
+    emailLogQuery,
+    orderMessageQuery,
+  ]);
+
+  if (emailLogError || orderMessageError) {
+    console.error(
+      "[resend-webhook] update failed:",
+      emailLogError?.message ?? orderMessageError?.message
+    );
+    return NextResponse.json(
+      { ok: false, error: "Failed to process webhook" },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ ok: true, type: event.type, messageId });
+}
+
+function getOrderMessageId(tags: ResendWebhookTags | undefined): string | undefined {
+  if (Array.isArray(tags)) {
+    return tags.find(
+      (tag) => tag.name === "order_message_id" && typeof tag.value === "string"
+    )?.value;
+  }
+  return tags?.order_message_id;
+}
+
+export function mapEventUpdates(
+  type: string,
+  at: string,
+  detail: string
+): EventUpdates | null {
+  const base = { last_event_detail: detail };
+
+  switch (type) {
+    case "email.sent":
+      return {
+        emailLog: { ...base, status: "sent" },
+        orderMessage: { ...base, status: "sent", sent_at: at },
+        allowedStatuses: ["sending", "pending_confirmation", "sent"],
+      };
+    case "email.delivered":
+      return {
+        emailLog: { ...base, status: "delivered", delivered_at: at },
+        orderMessage: { ...base, status: "delivered", delivered_at: at },
+        allowedStatuses: [
+          "sending",
+          "pending_confirmation",
+          "sent",
+          "delivery_delayed",
+          "delivered",
+        ],
+      };
+    case "email.opened":
+      return {
+        emailLog: { ...base, opened_at: at },
+        orderMessage: { ...base, opened_at: at },
+      };
+    case "email.clicked":
+      return {
+        emailLog: { ...base, clicked_at: at },
+        orderMessage: base,
+      };
+    case "email.bounced":
+      return {
+        emailLog: { ...base, status: "bounced", bounced_at: at },
+        orderMessage: { ...base, status: "bounced", bounced_at: at },
+        allowedStatuses: [
+          "sending",
+          "pending_confirmation",
+          "sent",
+          "delivery_delayed",
+          "bounced",
+        ],
+      };
+    case "email.complained":
+      return {
+        emailLog: { ...base, status: "complained", complained_at: at },
+        orderMessage: { ...base, status: "complained", complained_at: at },
+        allowedStatuses: [
+          "sending",
+          "pending_confirmation",
+          "sent",
+          "delivery_delayed",
+          "delivered",
+          "complained",
+        ],
+      };
+    case "email.delivery_delayed":
+      return {
+        emailLog: { ...base, status: "delivery_delayed", delivery_delayed_at: at },
+        orderMessage: { ...base, status: "delivery_delayed", delivery_delayed_at: at },
+        allowedStatuses: ["sending", "pending_confirmation", "sent", "delivery_delayed"],
+      };
+    case "email.failed":
+    case "email.suppressed":
+      return {
+        emailLog: { ...base, status: "failed" },
+        orderMessage: { ...base, status: "failed" },
+        allowedStatuses: [
+          "sending",
+          "pending_confirmation",
+          "sent",
+          "delivery_delayed",
+          "failed",
+        ],
+      };
+    default:
+      return null;
+  }
 }

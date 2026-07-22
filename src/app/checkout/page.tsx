@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { trackBeginCheckout } from "@/lib/analytics";
+import { trackArtworkUpload, trackBeginCheckout } from "@/lib/analytics";
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { readUtmFromStorage } from "@/components/site/UtmCapture";
@@ -448,6 +448,9 @@ export default function CheckoutPage() {
             `Artwork upload failed for ${Array.from(new Set(failedUploads)).join(", ") || "one or more files"}. No order or payment was started. Remove the file or try again.`,
           );
           return;
+        }
+        if (filePaths.length > 0) {
+          trackArtworkUpload({ file_count: filePaths.length, source: "checkout" });
         }
       }
 

@@ -16,8 +16,14 @@
  * even though it's narrower. We only read here; modify is the authorized grant.
  */
 
-import { google } from "googleapis";
-import { JWT } from "google-auth-library";
+import {
+  extractPlainText,
+  getGmailClient,
+  getHeader,
+  isAutoReply,
+  parseFrom,
+  stripQuotedHistory,
+} from "@/lib/email/gmailClient";
 
 export interface InboundReply {
   messageId: string;
@@ -29,86 +35,6 @@ export interface InboundReply {
   bodyText: string;
   /** Epoch ms of receipt. */
   internalDate: number;
-}
-
-const GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.modify"];
-
-function getGmailClient() {
-  const clientEmail = process.env.GMAIL_SA_CLIENT_EMAIL;
-  const privateKey = process.env.GMAIL_SA_PRIVATE_KEY?.replace(/\\n/g, "\n");
-  const subject = process.env.GMAIL_IMPERSONATE_EMAIL ?? "info@true-color.ca";
-
-  if (!clientEmail || !privateKey) {
-    throw new Error(
-      "Gmail service-account not configured (GMAIL_SA_CLIENT_EMAIL / GMAIL_SA_PRIVATE_KEY)"
-    );
-  }
-
-  const auth = new JWT({ email: clientEmail, key: privateKey, scopes: GMAIL_SCOPES, subject });
-  return google.gmail({ version: "v1", auth });
-}
-
-/** Pull the email address out of a "Name <email>" From header. */
-function parseFrom(header: string): { email: string; name: string } {
-  const match = header.match(/<([^>]+)>/);
-  const email = (match ? match[1] : header).trim().toLowerCase();
-  const name = match ? header.slice(0, match.index).replace(/"/g, "").trim() : "";
-  return { email, name };
-}
-
-/** Recursively find the first text/plain part and decode it. */
-function extractPlainText(payload: unknown): string {
-  const node = payload as {
-    mimeType?: string;
-    body?: { data?: string };
-    parts?: unknown[];
-  };
-  if (!node) return "";
-  if (node.mimeType === "text/plain" && node.body?.data) {
-    return Buffer.from(node.body.data, "base64url").toString("utf8");
-  }
-  for (const part of node.parts ?? []) {
-    const text = extractPlainText(part);
-    if (text) return text;
-  }
-  return "";
-}
-
-/**
- * Strip quoted history so the classifier only sees what the lead actually
- * wrote. Cuts at the first "On … wrote:" / "From:" / "-----Original" marker
- * and drops any leading ">" quote lines.
- */
-function stripQuotedHistory(raw: string): string {
-  const lines = raw.split(/\r?\n/);
-  const out: string[] = [];
-  const cutMarkers = [
-    /^On .+wrote:\s*$/i,
-    /^-{2,}\s*Original Message\s*-{2,}/i,
-    /^From:\s.+/i,
-    /^_{5,}\s*$/,
-  ];
-  for (const line of lines) {
-    if (cutMarkers.some((re) => re.test(line.trim()))) break;
-    if (line.trimStart().startsWith(">")) continue;
-    out.push(line);
-  }
-  return out.join("\n").trim();
-}
-
-/** RFC 3834 + common heuristics for vacation / auto-responder mail. */
-function isAutoReply(
-  autoSubmitted: string,
-  precedence: string,
-  xAutoreply: string,
-  subject: string
-): boolean {
-  if (autoSubmitted && autoSubmitted.toLowerCase() !== "no") return true;
-  if (["bulk", "auto_reply", "junk", "list"].includes(precedence.toLowerCase())) return true;
-  if (xAutoreply) return true;
-  return /out of (the )?office|automatic reply|auto-?reply|on vacation|away from (the )?office|currently away/i.test(
-    subject
-  );
 }
 
 /**
@@ -132,8 +58,7 @@ export async function listRecentReplies(hours: number): Promise<InboundReply[]> 
     if (!id) continue;
     const msg = await gmail.users.messages.get({ userId: "me", id, format: "full" });
     const headers = msg.data.payload?.headers ?? [];
-    const get = (name: string) =>
-      headers.find((h) => h.name?.toLowerCase() === name.toLowerCase())?.value ?? "";
+    const get = (name: string) => getHeader(headers, name);
 
     const { email, name } = parseFrom(get("From"));
     const internalDate = Number(msg.data.internalDate ?? 0);

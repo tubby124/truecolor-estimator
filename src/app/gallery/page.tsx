@@ -4,6 +4,8 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { GalleryGrid } from "./GalleryGrid";
 import { IndustryShowcase } from "./IndustryShowcase";
+import { BUSINESS_INFO } from "@/lib/business-info";
+import { PRODUCTS } from "@/lib/data/products-content";
 
 export const metadata: Metadata = {
   title: "Our Work | Print Shop Gallery Saskatoon",
@@ -62,6 +64,8 @@ const gallerySchema = {
 };
 
 export default function GalleryPage() {
+  const wideFormatEquipment = BUSINESS_INFO.equipment.wideFormat.display;
+
   return (
     <div className="min-h-screen bg-white">
       <script
@@ -80,14 +84,12 @@ export default function GalleryPage() {
           </p>
           <div className="prose prose-gray max-w-2xl text-sm text-gray-600 leading-relaxed space-y-2">
             <p>
-              Every job below was printed in-house at our Saskatoon shop on our
-              Roland UV wide-format printer — from{" "}
+              Every job below was printed in-house at our Saskatoon shop using our {wideFormatEquipment} and digital production press — from{" "}
               <Link href="/coroplast-signs-saskatoon" className="text-[#16C2F3] hover:underline">coroplast yard signs</Link>{" "}
-              starting at $8/sqft to full-vehicle vinyl wraps and{" "}
+              with live online pricing to{" "}
               <Link href="/banner-printing-saskatoon" className="text-[#16C2F3] hover:underline">13oz scrim vinyl banners</Link>{" "}
-              from $8.25/sqft. Our in-house designer handles layout and proofs
-              for a flat $35, same-day turnaround. Need it today? Same-day rush
-              is +$40 flat — order before 10 AM.
+              and other standard print products. Our in-house designer handles layout and proofs.
+              Need it today? {BUSINESS_INFO.sameDayRush.display}.
             </p>
             <p>
               Browse real client projects from Saskatoon businesses, then scroll
@@ -96,10 +98,9 @@ export default function GalleryPage() {
               <Link href="/agriculture-signs-saskatoon" className="text-[#16C2F3] hover:underline">agriculture</Link>, and{" "}
               <Link href="/agribusiness-signs-saskatchewan" className="text-[#16C2F3] hover:underline">agribusiness</Link>.
               Every product shown — {" "}
-              <Link href="/business-cards-saskatoon" className="text-[#16C2F3] hover:underline">business cards</Link> from $45,{" "}
-              <Link href="/retractable-banners-saskatoon" className="text-[#16C2F3] hover:underline">retractable banner stands</Link> from $219,{" "}
-              <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] hover:underline">vehicle magnets</Link> from $24/sqft — is
-              available for pickup or delivery across Saskatchewan.
+              <Link href="/business-cards-saskatoon" className="text-[#16C2F3] hover:underline">business cards</Link>,{" "}
+              <Link href="/retractable-banners-saskatoon" className="text-[#16C2F3] hover:underline">retractable banner stands</Link>, and{" "}
+              <Link href="/vehicle-magnets-saskatoon" className="text-[#16C2F3] hover:underline">vehicle magnets</Link> — links directly to current pricing and ordering.
             </p>
           </div>
         </div>
@@ -115,7 +116,7 @@ export default function GalleryPage() {
             </h2>
             <p className="text-gray-500 text-sm max-w-lg">
               Design mockups for Saskatchewan businesses — see what we can build
-              for your industry, printed in-house on our Roland UV.
+              for your industry, produced in-house with our {wideFormatEquipment}.
             </p>
           </div>
           <IndustryShowcase />
@@ -143,7 +144,7 @@ export default function GalleryPage() {
             {[
               {
                 q: "What products does True Color print in-house?",
-                a: "We print coroplast yard signs from $8/sqft, 13oz scrim vinyl banners from $8.25/sqft, ACP aluminum signs from $13/sqft, business cards from $45 for 250, flyers from $45 for 100, window decals from $11/sqft, vehicle magnets from $24/sqft, retractable banner stands from $219, foamboard displays from $10/sqft, stickers, postcards, brochures, and photo posters — all on our in-house Roland TrueVIS VG2 UV printer and Konica Minolta production press.",
+                a: `We print coroplast signs from ${PRODUCTS["coroplast-signs"].fromPrice}, vinyl banners from ${PRODUCTS["vinyl-banners"].fromPrice}, ACP signs from ${PRODUCTS["acp-signs"].fromPrice}, business cards from ${PRODUCTS["business-cards"].fromPrice}, flyers from ${PRODUCTS.flyers.fromPrice}, vehicle magnets from ${PRODUCTS["vehicle-magnets"].fromPrice}, and retractable banner stands from ${PRODUCTS["retractable-banners"].fromPrice}. Current configurator pricing is available through the product links above.`,
               },
               {
                 q: "Can I see samples before ordering?",
@@ -151,11 +152,11 @@ export default function GalleryPage() {
               },
               {
                 q: "How fast can I get my order?",
-                a: "Standard turnaround is 1\u20133 business days from artwork approval. Same-day rush production is available for +$40 flat on orders placed before 10 AM. Our in-house designer provides a same-day proof for $35 flat.",
+                a: `Standard turnaround is ${BUSINESS_INFO.turnaround.standardBusinessDays} from ${BUSINESS_INFO.turnaround.startsAfter}. Same-day rush is ${BUSINESS_INFO.sameDayRush.display}.`,
               },
               {
                 q: "Do you ship outside Saskatoon?",
-                a: "Yes \u2014 we ship across Saskatchewan. Customer pays shipping; we handle packing and coordination. Local pickup is free at 216 33rd St W, Saskatoon. We also offer installation service at $75 flat rate for most Saskatoon jobs.",
+                a: BUSINESS_INFO.fulfillment.display,
               },
               {
                 q: "What file format do I need for printing?",

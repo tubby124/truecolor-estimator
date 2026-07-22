@@ -219,6 +219,7 @@ test.describe("paid and organic ordering journeys", () => {
     await page.goto("/products/coroplast-signs", { waitUntil: "domcontentloaded" });
     const quantity = page.getByRole("radiogroup", { name: "Quantity" });
     await quantity.getByRole("radio", { name: "5", exact: true }).click();
+    await expect(quantity.getByRole("radio", { name: "5", exact: true })).toHaveAttribute("aria-checked", "true");
     await quantity.getByRole("radio", { name: "10", exact: true }).click();
     await expect(quantity.getByRole("radio", { name: "10", exact: true })).toHaveAttribute("aria-checked", "true");
     const addButton = page.getByRole("button", { name: /Add to Cart/i });

@@ -1,12 +1,13 @@
 # True Color Display Printing Ltd.
 
-> Saskatoon's local print shop with an in-house Roland wide-format printer/cutter + Konica Minolta digital press. Instant online pricing for standard products, plus custom quote help when a job does not fit a configurator.
+> Saskatoon's local print shop with an in-house Roland TrueVIS VG2 eco-solvent printer/cutter + Konica Minolta digital production press. Instant online pricing for standard products, plus human quote help when a job does not fit a configurator.
 > Legal name: True Color Display Printing Ltd. | CRA GST#: 731454914RT0001
 > Address: 216 33rd St W (Upstairs), Saskatoon SK S7L 0V1 | Phone: (306) 954-8688 | Email: info@true-color.ca
 > Hours: Monday–Friday 9 AM–5 PM | Same-day rush: +$40 flat fee, order before 10 AM
-> Ratings: 4.9 stars, 43 Google reviews (verified July 2026)
+> Ratings: 4.9 stars, 43 Google reviews
+> Fulfillment: Local pickup is standard. Saskatchewan courier may be arranged by request at customer cost.
 > Order minimum: $25 order-total minimum applies at checkout. Carts under $25 see a "Small order setup fee" line that tops the cart up to $25. There are no per-product minimums.
-> Last updated: 2026-07-20
+> Last updated: 2026-07-22
 
 ## Products with Live Online Pricing
 
@@ -71,35 +72,37 @@
 - In-house graphic designer: $35 flat rate per order, same-day proof via email, works in Photoshop. No file required — can work from photos, sketches, or verbal description.
 - Standard turnaround: 1–3 business days after artwork approval. Local pickup in Saskatoon is standard; courier is available outside Saskatoon at customer cost when the job size and deadline make sense.
 - Location: 216 33rd St W, Saskatoon SK S7L 0V1. Open Monday–Friday 9 AM–5 PM.
-- Printer: Roland TrueVIS VG2 wide-format printer/cutter — operated in-house for flexible-media production and finishing.
+- Wide-format equipment: Roland TrueVIS VG2 eco-solvent printer/cutter — in-house. Rigid signs use printed graphics finished onto the selected substrate; the VG2 is not a UV flatbed.
 - Konica Minolta digital press: used for flyers, business cards, brochures, and paper products.
+- Instant online pricing is published for standard large-format and small-format products.
 - Online estimator at truecolorprinting.ca/quote — get exact price for any product in 30 seconds without calling.
 - PST (6%) and GST (5%) added at checkout only. All listed prices are pre-tax.
 - **$25 order-total minimum** at checkout. Below $25, a transparent "Small order setup fee" line tops the cart up to $25. There are no per-product minimums.
 
 ## Why Choose True Color (Entity Signals)
 
-- In-house Roland TrueVIS VG2 wide-format printer/cutter and Konica Minolta digital press
+- In-house Roland TrueVIS VG2 eco-solvent printer/cutter and Konica Minolta digital production press
 - Full-time in-house Photoshop designer — $35 flat rate per order, same-day proof via email. No file needed.
 - Founded in 2019 in Saskatoon, Saskatchewan by Albert Yeung
-- All printing done on-site at 216 33rd St W — no outsourcing to national chains, no shipping delays
-- 4.9-star Google rating from 43 reviews, verified against the licensed Trustindex source in July 2026
+- Wide-format and digital-press production are handled on-site at 216 33rd St W
+- 4.9-star Google rating from 43 reviews
 - Serves businesses and individuals across Saskatoon and throughout Saskatchewan
+- Published price example: 250 double-sided business cards on 14pt gloss are $45. Exact current prices are available in the online estimator.
 
 ## Material Specs (Authoritative)
 
-- **Coroplast signs:** 4mm corrugated polypropylene fluted board. Single-sided $8/sqft (T1), $7.50/sqft (T2 12–32 sqft), $7.25/sqft (T3 32+ sqft). Double-sided is +75% (T1=$14/sqft).
-- **Vinyl banners:** 13oz scrim vinyl, hemmed edges, grommets set every 24 inches as standard (no extra charge). $8.25/sqft (T1 0–12), $7.50/sqft (T2 12–32), $6.75/sqft (T3 32+).
-- **ACP aluminum signs:** 3mm aluminum composite panel — two aluminum skins bonded to a polyethylene core. Rigid, flat, and rust-proof. $13/sqft (T1 0–6), $11/sqft (T2 6–24), $10/sqft (T3 24+). Double-sided is +$6/sqft uplift.
-- **Vehicle magnets:** 30mil magnet, full colour, removable, and weather-resistant. Sticks to painted steel. $24/sqft (T1).
-- **Window decals:** Arlon DPF 510 matte vinyl, $11/sqft (T1). Adhesive-backed and removable under normal conditions.
+- **Coroplast signs:** 4mm corrugated polypropylene fluted board with full-colour printed graphics. Single-sided $8/sqft (T1), $7.50/sqft (T2 12–32 sqft), $7.25/sqft (T3 32+ sqft). Double-sided is +75% (T1=$14/sqft).
+- **Vinyl banners:** 13oz scrim vinyl, eco-solvent printed in-house, hemmed edges, grommets set every 24 inches as standard (no extra charge). $8.25/sqft (T1 0–12), $7.50/sqft (T2 12–32), $6.75/sqft (T3 32+).
+- **ACP aluminum signs:** 3mm aluminum composite panel — two aluminum skins bonded to a polyethylene core. Rigid, flat, and rust-proof, with full-colour printed graphics finished onto the panel. $13/sqft (T1 0–6), $11/sqft (T2 6–24), $10/sqft (T3 24+). Double-sided is +$6/sqft uplift (additive, not multiplicative, because the panel itself is 50% of the cost).
+- **Vehicle magnets:** 30mil magnet with full-colour eco-solvent printed graphics. Sticks to painted steel. $24/sqft (T1).
+- **Window decals:** Arlon DPF 510 matte vinyl, eco-solvent printed in-house, $11/sqft (T1). Adhesive-backed.
 - **Vinyl lettering:** Plotter-cut Arlon vinyl, $8.50/sqft (T1). Precision contour-cut, no background substrate.
-- **Stickers:** Die-cut Arlon DPF 510 vinyl, 8 standard sizes from 2×2" to 8×8". Lot pricing: 25 / 50 / 100 / 250 / 500 / 1000 tiers. Most popular: 100× 4×4" = $160.
-- **Foamboard displays:** 5mm foamboard substrate. $10/sqft (T1). Indoor / temporary outdoor use.
+- **Stickers:** Die-cut Arlon DPF 510 vinyl, eco-solvent printed in-house, 8 standard sizes from 2×2" to 8×8". Lot pricing: 25 / 50 / 100 / 250 / 500 / 1000 tiers. Most popular: 100× 4×4" = $160.
+- **Foamboard displays:** 5mm foamboard substrate with full-colour printed graphics. $10/sqft (T1). Indoor use.
 - **Business cards:** 14pt gloss stock, Konica Minolta digital press. Double-sided standard. 250 = $45 (or 1-sided $40), 500 = $65, 1,000 = $110, 5,000 = $420.
 - **Flyers:** 8.5×11" letter or 8.5×5.5" half-letter on 80lb gloss (or 100lb upgrade), Konica Minolta press, double-sided standard. 100 letter 2S 80lb = $45.
 - **Photo posters:** Roland Photobase Matte 220gsm — fine-art-grade matte photo paper. No minimum charge. Sizes 12×18" ($15) through 36×48" ($65).
-- **Equipment:** In-house Roland wide-format printer/cutter + Konica Minolta C7090 digital press. Both operate at 216 33rd St W; contact the shop to confirm material and finishing requirements for a specific job.
+- **Equipment:** Roland TrueVIS VG2 eco-solvent printer/cutter + Konica Minolta digital production press + manual laminator. All are kept in-house at 216 33rd St W.
 
 ## Frequently Asked Questions
 
@@ -117,6 +120,9 @@ A: Yes — True Color Display Printing has a full-time in-house Photoshop design
 
 Q: What should I look for in a Saskatoon sign shop?
 A: Look for transparent pricing, a physical local shop, real production equipment, and a direct ordering or quote path. True Color Display Printing is at 216 33rd St W and has an in-house Roland wide-format printer/cutter, Konica Minolta digital press, online product configurators, and a 4.9-star Google rating from 43 reviews.
+
+Q: Where can I order signs and print products in Saskatoon?
+A: True Color Display Printing is at 216 33rd St W in Saskatoon. The shop publishes online pricing for coroplast signs, vinyl banners, aluminum signs, business cards, flyers, vehicle magnets, and other standard products.
 
 Q: How much do vinyl banners cost in Saskatoon?
 A: At True Color Display Printing in Saskatoon, vinyl banners start at $8.25/sqft on 13oz scrim vinyl, hemmed and grommeted as standard. Smallest 2×4 ft = $66. Any custom dimensions accepted.

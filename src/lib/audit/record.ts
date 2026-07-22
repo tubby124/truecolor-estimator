@@ -31,10 +31,10 @@ export interface AuditEventInput {
   user_agent?: string | null;
 }
 
-export async function recordAuditEvent(e: AuditEventInput): Promise<void> {
+export async function recordAuditEvent(e: AuditEventInput): Promise<boolean> {
   try {
     const supabase = createServiceClient();
-    await supabase.from("audit_events").insert({
+    const { error } = await supabase.from("audit_events").insert({
       actor_type: e.actor_type,
       actor_id: e.actor_id ?? null,
       event_type: e.event_type,
@@ -44,6 +44,8 @@ export async function recordAuditEvent(e: AuditEventInput): Promise<void> {
       ip: e.ip ?? null,
       user_agent: e.user_agent ?? null,
     });
+    if (error) throw error;
+    return true;
   } catch (err) {
     // Audit write failed — log and move on. The parent operation already
     // succeeded; the audit table is a secondary observability layer.
@@ -51,6 +53,7 @@ export async function recordAuditEvent(e: AuditEventInput): Promise<void> {
       `[audit] write failed for ${e.event_type}/${e.entity_id} (non-fatal):`,
       err instanceof Error ? err.message : err
     );
+    return false;
   }
 }
 

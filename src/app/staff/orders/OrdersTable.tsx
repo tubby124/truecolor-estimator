@@ -374,12 +374,24 @@ export function OrdersTable({ initialOrders }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        reviewRequestWarning?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Update failed");
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
-      showToast(`${orderNumber} → ${STATUS_LABELS[newStatus]}`, "success");
+      if (data.reviewRequestWarning) {
+        showToast(
+          `${orderNumber} completed. ${data.reviewRequestWarning}`,
+          "error",
+        );
+        setStatusError(`${orderNumber}: ${data.reviewRequestWarning}`);
+      } else {
+        showToast(`${orderNumber} → ${STATUS_LABELS[newStatus]}`, "success");
+      }
     } catch (err) {
       // Roll back optimistic UI to previous status
       if (prevStatus) {

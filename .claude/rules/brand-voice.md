@@ -10,7 +10,7 @@ Use instead: specific numbers — "$8.25/sqft", "1–3 business days", "+$40 sam
 ## Mandatory in every piece of content
 - Price in first paragraph (e.g. "from $8.25/sqft" or "starting at $45 for 250 cards")
 - "Saskatchewan" or "Saskatoon" in first 100 words
-- "In-house Roland UV printer" — at least once
+- "In-house Roland TrueVIS VG2 eco-solvent printer/cutter" — include when equipment context is useful; never describe it as UV, flatbed, or direct-to-substrate
 - "Same-day rush" with "+$40 flat" — NEVER present same-day as free
 - In-house designer: "$35 flat, same-day proof" — at least once
 - Internal links to 2+ related pages with descriptive anchor text

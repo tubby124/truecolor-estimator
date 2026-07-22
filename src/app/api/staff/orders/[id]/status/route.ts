@@ -11,7 +11,7 @@
  *   payment_received  → "Payment confirmed — your order is in the queue"
  *   in_production     → "We're printing your order now"
  *   ready_for_pickup  → "Your order is ready for pickup!"
- *   complete          → review request email ("How did your order turn out?")
+ *   complete          → review request email scheduled two hours later
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -33,6 +33,8 @@ const VALID_STATUSES = [
 ] as const;
 
 type OrderStatus = (typeof VALID_STATUSES)[number];
+
+const REVIEW_REQUEST_DELAY_MS = 2 * 60 * 60 * 1000;
 
 // Statuses that trigger a customer notification email
 const NOTIFY_STATUSES = new Set<OrderStatus>([
@@ -65,14 +67,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // a PAID receipt for money never collected.
     const { data: current } = await supabase
       .from("orders")
-      .select("status, order_number")
+      .select("status, order_number, completed_at")
       .eq("id", id)
       .maybeSingle();
 
     if (!current) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    if (current.status === status) {
+    const isRepeatComplete = current.status === "complete" && status === "complete";
+    if (current.status === status && !isRepeatComplete) {
       return NextResponse.json({ ok: true, status, alreadyApplied: true });
     }
 
@@ -83,56 +86,56 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       );
     }
 
-    // Persist the status and its transition timestamp in one statement. Paid
-    // conversion/lifecycle triggers must never observe payment_received without
-    // paid_at because a second best-effort update failed.
-    const transition: Record<string, string> = { status };
-    if (status === "payment_received") transition.paid_at = new Date().toISOString();
-    if (status === "ready_for_pickup") transition.ready_at = new Date().toISOString();
-    if (status === "complete") transition.completed_at = new Date().toISOString();
+    const statusUpdatedAt = new Date();
+    if (!isRepeatComplete) {
+      // Persist the status and its transition timestamp in one compare-and-swap.
+      // Conversion triggers must never observe payment_received without paid_at.
+      const transition: Record<string, string> = { status };
+      if (status === "payment_received") transition.paid_at = statusUpdatedAt.toISOString();
+      if (status === "ready_for_pickup") transition.ready_at = statusUpdatedAt.toISOString();
+      if (status === "complete") transition.completed_at = statusUpdatedAt.toISOString();
 
-    let transitionQuery = supabase
-      .from("orders")
-      .update(transition)
-      .eq("id", id)
-      .eq("status", current.status);
-    if (status === "payment_received") transitionQuery = transitionQuery.is("paid_at", null);
-    const { data: changedOrder, error } = await transitionQuery.select("id").maybeSingle();
-
-    if (error) {
-      console.error("[staff/orders/status]", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    if (!changedOrder) {
-      const { data: latest } = await supabase
+      let transitionQuery = supabase
         .from("orders")
-        .select("status")
+        .update(transition)
         .eq("id", id)
-        .maybeSingle();
-      if (latest?.status === status) {
-        return NextResponse.json({ ok: true, status, alreadyApplied: true });
+        .eq("status", current.status);
+      if (status === "payment_received") transitionQuery = transitionQuery.is("paid_at", null);
+      const { data: changedOrder, error } = await transitionQuery.select("id").maybeSingle();
+
+      if (error) {
+        console.error("[staff/orders/status]", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
       }
-      return NextResponse.json(
-        { error: "Order status changed in another request. Refresh before trying again." },
-        { status: 409 },
-      );
+      if (!changedOrder) {
+        const { data: latest } = await supabase
+          .from("orders")
+          .select("status")
+          .eq("id", id)
+          .maybeSingle();
+        if (latest?.status === status) {
+          return NextResponse.json({ ok: true, status, alreadyApplied: true });
+        }
+        return NextResponse.json(
+          { error: "Order status changed in another request. Refresh before trying again." },
+          { status: 409 },
+        );
+      }
+
+      void recordAuditEvent({
+        actor_type: "staff",
+        actor_id: staffCheck.email ?? "staff",
+        event_type: "order.status_changed",
+        entity_type: "order",
+        entity_id: id,
+        detail: {
+          from: current.status,
+          to: status,
+          order_number: current.order_number ?? null,
+          manual: true,
+        },
+      });
     }
-
-    // Audit event: staff manually moved status
-    void recordAuditEvent({
-      actor_type: "staff",
-      actor_id: staffCheck.email ?? "staff",
-      event_type: "order.status_changed",
-      entity_type: "order",
-      entity_id: id,
-      detail: {
-        from: current?.status ?? "unknown",
-        to: status,
-        order_number: current?.order_number ?? null,
-        manual: true,
-      },
-    });
-
     // On transition INTO payment_received: bump customer lifetime stats.
     // Idempotency: only fires when guard above (current.status === "pending_payment")
     // confirmed the transition is a real change. Webhook retries naturally skipped.
@@ -320,12 +323,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
-    // Review request + receipt fallback — fires when staff marks order "complete"
+    let reviewRequestWarning: string | undefined;
+
+    // Review request + receipt fallback — fires when staff marks order "complete".
+    // Repeating "complete" inside Resend's 24-hour idempotency window is a
+    // safe recovery path when the provider or durable email log was uncertain.
     if (status === "complete") {
       try {
         const { data: order } = await supabase
           .from("orders")
-          .select(`order_number, subtotal, gst, pst, total, is_rush, discount_code,
+          .select(`order_number, customer_id, subtotal, gst, pst, total, is_rush, discount_code,
                    discount_amount, payment_method, created_at, wave_invoice_id,
                    order_items ( product_name, qty, width_in, height_in, sides, line_total ),
                    customers ( name, email )`)
@@ -339,27 +346,75 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           const customer = customerRaw as { name: string; email: string } | null;
 
           if (customer?.email) {
-            // Review request — pass items for product-anchored subject.
-            // Receipt was already sent at payment_received (no duplicate at complete).
-            const reviewItems = Array.isArray(order.order_items) ? order.order_items : [];
-            await sendReviewRequestEmail({
-              customerName: customer.name,
-              customerEmail: customer.email,
-              orderNumber: order.order_number,
-              items: reviewItems.map((i) => ({
-                product_name: i.product_name,
-                qty: i.qty,
-              })),
-            });
+            // A deterministic provider idempotency key closes the concurrent-request
+            // race. The durable log check also prevents a second request if staff move
+            // an already-completed order backward and then complete it again later.
+            const { data: existingReview, error: existingReviewError } = await supabase
+              .from("email_log")
+              .select("id")
+              .eq("order_id", id)
+              .ilike("subject", "How did your % turn out?")
+              .limit(1)
+              .maybeSingle();
+
+            if (existingReviewError) {
+              reviewRequestWarning =
+                "Review request was not scheduled because the duplicate guard could not be verified.";
+              console.error(
+                "[staff/orders/status] review duplicate guard failed:",
+                existingReviewError.message
+              );
+            } else if (!existingReview) {
+              const completedAt =
+                current?.status === "complete"
+                  ? Date.parse(current.completed_at ?? "")
+                  : statusUpdatedAt.getTime();
+              const retryAgeMs = Date.now() - completedAt;
+              const missingCompletionTime = !Number.isFinite(completedAt);
+              const outsideSafeRetryWindow =
+                current?.status === "complete" &&
+                retryAgeMs >= 23 * 60 * 60 * 1000;
+
+              if (missingCompletionTime || outsideSafeRetryWindow) {
+                reviewRequestWarning =
+                  "Review request was not retried because the safe provider idempotency window has expired; verify it in Resend first.";
+                console.error(
+                  `[staff/orders/status] review retry requires manual verification — ${order.order_number}`
+                );
+              } else {
+              // Receipt was already sent at payment_received (no duplicate at complete).
+              const reviewItems = Array.isArray(order.order_items) ? order.order_items : [];
+              await sendReviewRequestEmail({
+                orderId: id,
+                customerId: order.customer_id ?? undefined,
+                customerName: customer.name,
+                customerEmail: customer.email,
+                orderNumber: order.order_number,
+                scheduledAt: new Date(completedAt + REVIEW_REQUEST_DELAY_MS).toISOString(),
+                items: reviewItems.map((i) => ({
+                  product_name: i.product_name,
+                  qty: i.qty,
+                })),
+              });
+              }
+            } else {
+              console.log(`[staff/orders/status] review request already exists — ${order.order_number}`);
+            }
           }
         }
       } catch (reviewEmailErr) {
         // Non-fatal — status already saved, review email failure should never block the response
         console.error("[staff/orders/status] review request email failed (non-fatal):", reviewEmailErr);
+        reviewRequestWarning =
+          "Order completed, but the review request needs a safe retry within 23 hours.";
       }
     }
 
-    return NextResponse.json({ ok: true, status });
+    return NextResponse.json({
+      ok: true,
+      status,
+      ...(reviewRequestWarning ? { reviewRequestWarning } : {}),
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update status";
     console.error("[staff/orders/status]", message);

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BUSINESS_INFO } from "@/lib/business-info";
 
 export function MobileStickyBar() {
   const [hidden, setHidden] = useState(false);
@@ -27,10 +28,10 @@ export function MobileStickyBar() {
         Get a Price →
       </Link>
       <a
-        href="tel:+13069548688"
+        href={BUSINESS_INFO.phone.href}
         className="border border-white/30 text-white text-sm font-medium px-4 py-3 rounded-md hover:border-white transition-colors whitespace-nowrap"
       >
-        (306) 954-8688
+        {BUSINESS_INFO.phone.display}
       </a>
     </div>
   );

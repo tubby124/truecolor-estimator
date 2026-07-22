@@ -12,6 +12,7 @@ import {
 import { CustomerHistoryWidget } from "@/app/staff/orders/CustomerHistoryWidget";
 import type { Order } from "@/app/staff/orders/OrdersTable";
 import { RepriceModal } from "./RepriceModal";
+import { OrderMessagesPanel } from "./OrderMessagesPanel";
 import { formatAttemptAge } from "@/lib/payments/attempts";
 
 const SUPABASE_STORAGE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
@@ -66,12 +67,6 @@ export function StaffOrderCard({
   const [savingNote, setSavingNote] = useState(false);
   const [savedNote, setSavedNote] = useState(false);
   const [noteError, setNoteError] = useState("");
-  const [replyOpen, setReplyOpen] = useState(false);
-  const [replySubject, setReplySubject] = useState("");
-  const [replyMessage, setReplyMessage] = useState("");
-  const [replySending, setReplySending] = useState(false);
-  const [replySent, setReplySent] = useState(false);
-  const [replyError, setReplyError] = useState<string | null>(null);
   const [proofOpen, setProofOpen] = useState(false);
   const [proofFiles, setProofFiles] = useState<File[]>([]);
   const [proofMessage, setProofMessage] = useState("");
@@ -151,39 +146,6 @@ export function StaffOrderCard({
       setNoteError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setSavingNote(false);
-    }
-  }
-
-  function toggleReply() {
-    if (replyOpen) {
-      setReplyOpen(false);
-      return;
-    }
-    setReplyOpen(true);
-    setReplySubject(`Re: True Color Order ${order.order_number}`);
-    setReplyMessage("");
-    setReplySending(false);
-    setReplySent(false);
-    setReplyError(null);
-  }
-
-  async function sendReply() {
-    if (!replySubject.trim() || !replyMessage.trim()) return;
-    setReplySending(true);
-    setReplyError(null);
-    try {
-      const res = await fetch(`/api/staff/orders/${order.id}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject: replySubject.trim(), message: replyMessage.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Send failed");
-      setReplySent(true);
-    } catch (err) {
-      setReplyError(err instanceof Error ? err.message : "Failed to send message");
-    } finally {
-      setReplySending(false);
     }
   }
 
@@ -882,83 +844,14 @@ export function StaffOrderCard({
             </div>
           )}
 
-          {/* Message customer */}
-          <div>
-            <button
-              onClick={() => toggleReply()}
-              className={`text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
-                replyOpen
-                  ? "border-gray-300 bg-white text-gray-500"
-                  : "border-[#16C2F3] text-[#16C2F3] hover:bg-[#16C2F3] hover:text-white"
-              }`}
-            >
-              {replyOpen ? "✕ Close message" : "✉ Message customer"}
-            </button>
-
-            {replyOpen && (
-              <div className="mt-4 bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <span className="font-semibold text-gray-400 text-xs uppercase tracking-widest">
-                    To:
-                  </span>
-                  <span className="font-medium text-gray-700">
-                    {customer?.name} &lt;{customer?.email}&gt;
-                  </span>
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    value={replySubject}
-                    onChange={(e) => setReplySubject(e.target.value)}
-                    disabled={replySent}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#16C2F3] transition-colors disabled:opacity-60"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">
-                    Message
-                  </label>
-                  <textarea
-                    value={replyMessage}
-                    onChange={(e) => setReplyMessage(e.target.value)}
-                    disabled={replySent}
-                    rows={6}
-                    placeholder={`Hi ${customer?.name ?? "there"},\n\nYour order is…`}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#16C2F3] transition-colors resize-none disabled:opacity-60 font-sans"
-                  />
-                </div>
-
-                {replyError && (
-                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                    {replyError}
-                  </p>
-                )}
-
-                {replySent ? (
-                  <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3 font-semibold">
-                    ✓ Message sent to {customer?.email}
-                  </p>
-                ) : (
-                  <button
-                    onClick={() => void sendReply()}
-                    disabled={
-                      replySending ||
-                      !replySubject.trim() ||
-                      !replyMessage.trim()
-                    }
-                    className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-[#0fb0dd] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {replySending ? "Sending…" : "Send message →"}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          {customer?.email && (
+            <OrderMessagesPanel
+              orderId={order.id}
+              orderNumber={order.order_number}
+              customerName={customer.name ?? "Customer"}
+              customerEmail={customer.email}
+            />
+          )}
 
           {/* Customer history */}
           <div className="pt-2 border-t border-gray-100">

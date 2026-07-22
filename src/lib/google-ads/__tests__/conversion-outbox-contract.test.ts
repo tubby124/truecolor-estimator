@@ -18,6 +18,7 @@ const lifecycleData = readFileSync(
 describe("Google Ads conversion outbox database contract", () => {
   it("enqueues only paid revenue classifications with pretax value", () => {
     expect(migration).toContain("NEW.paid_at IS NULL");
+    expect(migration).toContain("NEW.conversion_type IS NULL");
     expect(migration).toContain("NEW.conversion_type NOT IN ('purchase_online', 'quote_won')");
     expect(migration).toContain("COALESCE(NEW.total, 0) - COALESCE(NEW.gst, 0) - COALESCE(NEW.pst, 0)");
   });
