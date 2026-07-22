@@ -54,6 +54,7 @@ DECLARE
 BEGIN
   IF NEW.paid_at IS NULL
      OR NEW.status NOT IN ('payment_received', 'in_production', 'ready_for_pickup', 'complete')
+     OR NEW.conversion_type IS NULL
      OR NEW.conversion_type NOT IN ('purchase_online', 'quote_won') THEN
     RETURN NEW;
   END IF;
