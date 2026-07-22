@@ -21,6 +21,16 @@ export interface Ga4Item {
   quantity?: number;
 }
 
+export type AnalyticsPlacement =
+  | "hero"
+  | "homepage_product"
+  | "product_catalogue"
+  | "gallery"
+  | "product_page"
+  | "checkout"
+  | "navigation"
+  | "footer";
+
 // Standard ecommerce events
 
 export function trackViewItem(params: {
@@ -33,6 +43,25 @@ export function trackViewItem(params: {
     currency: "CAD",
     value: params.price ?? 0,
     items: [{ item_id: params.item_id, item_name: params.item_name, item_category: params.item_category, price: params.price ?? 0 }],
+  });
+}
+
+export function trackSelectItem(params: {
+  item_id: string;
+  item_name: string;
+  item_category?: string;
+  placement: AnalyticsPlacement;
+  destination: string;
+}) {
+  gtag("event", "select_item", {
+    item_list_name: params.placement,
+    placement: params.placement,
+    destination: params.destination,
+    items: [{
+      item_id: params.item_id,
+      item_name: params.item_name,
+      ...(params.item_category ? { item_category: params.item_category } : {}),
+    }],
   });
 }
 
@@ -117,4 +146,14 @@ export function trackPriceCalculated(params: {
 
 export function trackViewQuote() {
   gtag("event", "view_quote_page");
+}
+
+export function trackArtworkUpload(params: {
+  file_count: number;
+  source: "checkout" | "product_page";
+}) {
+  gtag("event", "artwork_upload", {
+    file_count: params.file_count,
+    source: params.source,
+  });
 }
