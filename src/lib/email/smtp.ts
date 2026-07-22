@@ -26,6 +26,11 @@ export interface SendEmailAttachment {
   contentId?: string; // optional CID for inline images
 }
 
+export interface SendEmailTag {
+  name: string;
+  value: string;
+}
+
 export interface SendEmailOptions {
   from?: string;
   to: string | string[];
@@ -36,6 +41,7 @@ export interface SendEmailOptions {
   text?: string;
   priority?: "high" | "normal" | "low";
   attachments?: SendEmailAttachment[];
+  tags?: SendEmailTag[];
   /**
    * Lifecycle linkage — when set, the email_log row is tagged with the order
    * and customer so /staff/lifecycle can show a real-time green pip without
@@ -44,6 +50,22 @@ export interface SendEmailOptions {
    */
   orderId?: string;
   customerId?: string;
+  /** Stable key for retrying one logical send without creating a duplicate. */
+  idempotencyKey?: string;
+}
+
+export interface SendEmailResult {
+  providerMessageId: string;
+}
+
+export class EmailSendError extends Error {
+  constructor(
+    message: string,
+    public readonly outcome: "rejected" | "unknown"
+  ) {
+    super(message);
+    this.name = "EmailSendError";
+  }
 }
 
 /** Strip name part from "Display Name <addr@example.com>" → "addr@example.com" */
@@ -56,7 +78,7 @@ function toEmailList(addr: string | string[]): string[] {
   return (Array.isArray(addr) ? addr : [addr]).map((a) => a.trim()).filter(Boolean);
 }
 
-export async function sendEmail(options: SendEmailOptions): Promise<void> {
+export async function sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     throw new Error(
@@ -131,6 +153,9 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
       return att;
     });
   }
+  if (options.tags?.length) {
+    body.tags = options.tags;
+  }
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -138,6 +163,9 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...(options.idempotencyKey
+        ? { "Idempotency-Key": options.idempotencyKey }
+        : {}),
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(15_000),
@@ -145,16 +173,25 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
-    throw new Error(`Resend API error ${res.status}: ${errText}`);
+    const outcome =
+      res.status === 408 || res.status === 429 || res.status >= 500
+        ? "unknown"
+        : "rejected";
+    throw new EmailSendError(`Resend API error ${res.status}: ${errText}`, outcome);
   }
 
-  // Capture provider message id so the Resend webhook can update this row later.
-  let providerMessageId: string | null = null;
+  // Capture the provider ID so callers can durably correlate webhook events.
+  let providerMessageId: string;
   try {
-    const json = await res.clone().json();
-    providerMessageId = json?.id ?? null;
+    const json = (await res.json()) as { id?: unknown };
+    if (typeof json.id !== "string" || !json.id) {
+      throw new Error("Resend response did not include a message id");
+    }
+    providerMessageId = json.id;
   } catch {
-    /* Resend always returns JSON on 2xx; ignore parse fail */
+    // The request may have reached Resend. A caller can safely retry only when
+    // it supplied the same idempotency key.
+    throw new EmailSendError("Resend returned an invalid success response", "unknown");
   }
 
   // Log to email_log (non-fatal — never block email delivery on a DB write)
@@ -167,21 +204,29 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
       email_type: options.subject,
       subject: options.subject,
       status: "sent",
-      ...(providerMessageId ? { provider_message_id: providerMessageId } : {}),
+      provider_message_id: providerMessageId,
       ...(options.orderId ? { order_id: options.orderId } : {}),
       ...(options.customerId ? { customer_id: options.customerId } : {}),
     }));
-    fetch(`${supabaseUrl}/rest/v1/email_log`, {
-      method: "POST",
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(rows),
-    }).catch((err) => {
+    try {
+      const logResponse = await fetch(`${supabaseUrl}/rest/v1/email_log`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify(rows),
+        signal: AbortSignal.timeout(5_000),
+      });
+      if (!logResponse.ok) {
+        console.error(`[smtp] email_log write failed (non-fatal): HTTP ${logResponse.status}`);
+      }
+    } catch (err) {
       console.error("[smtp] email_log write failed (non-fatal):", err instanceof Error ? err.message : err);
-    });
+    }
   }
+
+  return { providerMessageId };
 }

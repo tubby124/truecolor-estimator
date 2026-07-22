@@ -1,0 +1,33 @@
+name: Order Reply Sync
+
+on:
+  schedule:
+    # Hourly with a 72-hour overlap. Database uniqueness makes re-scans safe.
+    - cron: "35 * * * *"
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: "Dry run (mailbox/database reads only)"
+        type: boolean
+        default: true
+
+concurrency:
+  group: order-reply-sync
+  cancel-in-progress: false
+
+jobs:
+  sync-order-replies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync tokenized order replies from info@ Gmail
+        run: |
+          DRY=""
+          if [ "${{ github.event.inputs.dryRun }}" = "true" ]; then DRY="?dryRun=1"; fi
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://truecolorprinting.ca/api/cron/order-replies${DRY}")
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1)
+          echo "Status: $STATUS"
+          echo "Body: $BODY"
+          [ "$STATUS" = "200" ] || exit 1
