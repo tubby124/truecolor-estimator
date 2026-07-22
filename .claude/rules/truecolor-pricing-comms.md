@@ -26,7 +26,7 @@ The shop now enforces a **single $25 order-total minimum at checkout** via `src/
 | Foamboard | from $45 | $10/sqft (T1) | smallest realistic display > $25 |
 | Banners | from $66 | $8.25/sqft (T1) | 2×4ft = $66 (real) |
 | Business Cards | from $45 | lot price | 250 cards 14pt 2S = $45 (real) |
-| Vinyl Lettering | from $40 | $8.50/sqft (T1) | smallest set > $25 (real) |
+| Vinyl Lettering | from $25 | $8.50/sqft (T1) | small lettering jobs reach the $25 order floor |
 | Flyers | from $45 | lot price | 100 flyers 80lb 2S = $45 (real) |
 | Brochures | from $70 | lot price | tri-fold 100lb (real) |
 | Stickers | from $25 | lot price | 25 stickers ≈ $25 (real) |

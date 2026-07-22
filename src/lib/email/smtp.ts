@@ -52,6 +52,10 @@ export interface SendEmailOptions {
   customerId?: string;
   /** Stable key for retrying one logical send without creating a duplicate. */
   idempotencyKey?: string;
+  /** ISO-8601 delivery time for providers that support deferred sends. */
+  scheduledAt?: string;
+  /** Fail after provider acceptance if the durable email_log row cannot be written. */
+  requireEmailLog?: boolean;
 }
 
 export interface SendEmailResult {
@@ -119,6 +123,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   };
 
   if (options.text) body.text = options.text;
+  if (options.scheduledAt) body.scheduled_at = options.scheduledAt;
   if (effectiveBcc) body.bcc = effectiveBcc;
   if (effectiveReplyTo) body.reply_to = effectiveReplyTo;
 
@@ -197,12 +202,16 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   // Log to email_log (non-fatal — never block email delivery on a DB write)
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SECRET_KEY;
+  let emailLogWritten = false;
   if (supabaseUrl && supabaseKey) {
     const toList = toEmailList(options.to);
     const rows = toList.map((addr) => ({
       to_address: extractEmail(addr),
       email_type: options.subject,
       subject: options.subject,
+      // "sent" means Resend accepted the request. Keeping this initial state
+      // also lets the existing webhook state machine advance scheduled emails
+      // through delivered/bounced without requiring a schema or webhook change.
       status: "sent",
       provider_message_id: providerMessageId,
       ...(options.orderId ? { order_id: options.orderId } : {}),
@@ -222,10 +231,22 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
       });
       if (!logResponse.ok) {
         console.error(`[smtp] email_log write failed (non-fatal): HTTP ${logResponse.status}`);
+      } else {
+        emailLogWritten = true;
       }
     } catch (err) {
       console.error("[smtp] email_log write failed (non-fatal):", err instanceof Error ? err.message : err);
     }
+  }
+
+  if (options.requireEmailLog && !emailLogWritten) {
+    // The provider may already have accepted the request. Callers using a
+    // stable idempotency key can retry inside Resend's 24-hour window to
+    // recover the missing ledger row without scheduling a second email.
+    throw new EmailSendError(
+      "Resend accepted the email, but the required email_log write was not confirmed",
+      "unknown"
+    );
   }
 
   return { providerMessageId };

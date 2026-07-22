@@ -10,6 +10,7 @@
 // Cached at the edge for 1 hour to avoid hammering CSV reads.
 
 import { NextResponse } from "next/server";
+import { BUSINESS_INFO } from "@/lib/business-info";
 import { getProducts } from "@/lib/data/loader";
 
 export const revalidate = 3600;
@@ -79,7 +80,7 @@ export async function GET(): Promise<Response> {
       const link = `${SITE_URL}${path}`;
       const imagePath = CATEGORY_TO_IMAGE_PATH[p.category] ?? "/og-image.png";
       const imageLink = `${SITE_URL}${imagePath}`;
-      const desc = `${p.product_name}. Roland UV in-house print. From Saskatoon. Standard turnaround 1-3 business days. Same-day rush +$40.`;
+      const desc = `${p.product_name}. Printed in-house in Saskatoon. Standard turnaround ${BUSINESS_INFO.turnaround.standardBusinessDays}. Same-day rush +$${BUSINESS_INFO.sameDayRush.feeDollars}, order before ${BUSINESS_INFO.sameDayRush.cutoffHour} AM and call to confirm capacity.`;
       return `
     <item>
       <g:id>${escapeXml(p.product_id)}</g:id>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
+import { BUSINESS_INFO } from "@/lib/business-info";
 
 export function SiteFooter() {
   return (
@@ -35,7 +35,7 @@ export function SiteFooter() {
               Saskatoon&apos;s print shop for signs, banners, magnets, cards, and flyers.
               Transparent pricing. In-house designer. Local pickup.
             </p>
-            <p className="text-xs text-gray-500 mt-4">{RATING_VALUE} ★ on Google · {REVIEW_COUNT} reviews</p>
+            <p className="text-xs text-gray-500 mt-4">{BUSINESS_INFO.reviews.ratingValue} ★ on Google · {BUSINESS_INFO.reviews.reviewCount} reviews</p>
           </div>
 
           {/* Col 2: Contact + address */}
@@ -51,9 +51,9 @@ export function SiteFooter() {
                 216 33rd St W (upstairs)<br />
                 Saskatoon, SK S7L 0V1
               </a>
-              <p className="text-gray-400">Mon–Fri 9 AM – 5 PM</p>
-              <a href="tel:+13069548688" className="block hover:text-white transition-colors">
-                (306) 954-8688
+              <p className="text-gray-400">{BUSINESS_INFO.hours.display}</p>
+              <a href={BUSINESS_INFO.phone.href} className="block hover:text-white transition-colors">
+                {BUSINESS_INFO.phone.display}
               </a>
               <a
                 href="https://www.instagram.com/truecolorprint"
@@ -63,8 +63,8 @@ export function SiteFooter() {
               >
                 Instagram @truecolorprint
               </a>
-              <a href="mailto:info@true-color.ca" className="block hover:text-white transition-colors">
-                info@true-color.ca
+              <a href={`mailto:${BUSINESS_INFO.email}`} className="block hover:text-white transition-colors">
+                {BUSINESS_INFO.email}
               </a>
             </div>
           </div>

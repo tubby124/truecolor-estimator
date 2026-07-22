@@ -49,15 +49,19 @@ CI test guards it automatically.
 - NEVER write "contact for pricing" — always show a real number
 - Volume discounts = QTY-based only, never sqft-based
 
-## Known fromPrice Minimums (post-edit-price-check.mjs enforces these)
+## Current marketing anchors (post-edit-price-check.mjs enforces these)
 
-| Category | Min fromPrice | Wrong Value to Watch For |
-|----------|-------------|--------------------------|
+Marketing anchors include the $25 order-total checkout floor. Sqft rates remain
+valid when clearly labelled as rates; see `truecolor-pricing-comms.md`.
+
+| Category | Marketing fromPrice | Wrong Value to Watch For |
+|----------|---------------------|--------------------------|
 | Banners | from $66 | "from $45" |
-| ACP signs | from $60 | "from $39" |
-| Coroplast signs | from $30 | "from $24" |
-| Vehicle magnets | from $45 | "from $24/sqft" |
-| Window decals | $11/sqft | "$8/sqft" |
+| ACP signs | from $39 | "from $60" |
+| Coroplast signs | from $25 | "from $30" or "from $24" |
+| Vehicle magnets | from $25 | "from $45" |
+| Window decals | from $25 | "from $45" or "$8/sqft" |
+| Vinyl lettering | from $25 | "from $40" |
 
 ## Three Pricing Models
 

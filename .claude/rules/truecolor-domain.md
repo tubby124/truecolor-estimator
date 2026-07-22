@@ -4,7 +4,7 @@
 True Color Display Printing Ltd. | 216 33rd St W, Saskatoon SK S7L 0V1
 CRA GST#: 731454914RT0001
 Phone: (306) 954-8688 | Email: info@true-color.ca | Domain: https://truecolorprinting.ca
-Printer: Roland UV (in-house) | Designer: In-house Photoshop, $35 flat, same-day proof
+Wide-format: Roland TrueVIS VG2 eco-solvent printer/cutter (in-house) | Digital press: Konica Minolta | Finishing: manual laminator | Designer: In-house Photoshop, $35 flat, same-day proof
 Rush: +$40 flat, order before 10 AM | Standard turnaround: 1–3 business days
 
 ## Stack

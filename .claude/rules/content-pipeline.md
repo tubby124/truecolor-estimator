@@ -15,7 +15,7 @@ Pre-handoff checklist:
 - [ ] 400+ words across description + descriptionNode
 - [ ] Price in first paragraph
 - [ ] Saskatoon/Saskatchewan in first paragraph
-- [ ] Roland UV mentioned
+- [ ] Roland TrueVIS VG2 described accurately as an eco-solvent printer/cutter when equipment context is useful
 - [ ] Rush +$40 mentioned
 - [ ] Designer $35 mentioned
 - [ ] 2+ internal links

@@ -77,6 +77,64 @@ describe("sendEmail", () => {
     ]);
   });
 
+  it("surfaces an uncertain outcome when a required durable log write fails", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://supabase.test");
+    vi.stubEnv("SUPABASE_SERVICE_KEY", "service-key");
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: "resend-review" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      )
+      .mockResolvedValueOnce(new Response("no", { status: 500 }));
+
+    await expect(
+      sendEmail({
+        to: "customer@example.com",
+        subject: "How did your signs turn out?",
+        html: "<p>Hello</p>",
+        orderId: "order-1",
+        idempotencyKey: "review-request/order-1",
+        requireEmailLog: true,
+      })
+    ).rejects.toMatchObject({ outcome: "unknown" });
+  });
+
+  it("passes a future delivery time to Resend and durably logs the accepted request", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://supabase.test");
+    vi.stubEnv("SUPABASE_SERVICE_KEY", "service-key");
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: "resend-scheduled" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 201 }));
+
+    const scheduledAt = "2026-07-22T18:00:00.000Z";
+    await sendEmail({
+      to: "customer@example.com",
+      subject: "How did your signs turn out?",
+      html: "<p>Hello</p>",
+      orderId: "order-1",
+      scheduledAt,
+    });
+
+    const providerBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    expect(providerBody.scheduled_at).toBe(scheduledAt);
+
+    const loggedRows = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
+    expect(loggedRows).toEqual([
+      expect.objectContaining({
+        order_id: "order-1",
+        provider_message_id: "resend-scheduled",
+        status: "sent",
+      }),
+    ]);
+  });
+
   it("distinguishes definite provider rejection from ambiguous provider errors", async () => {
     fetchMock
       .mockResolvedValueOnce(new Response("invalid recipient", { status: 400 }))
