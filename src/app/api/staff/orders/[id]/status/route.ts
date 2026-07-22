@@ -11,7 +11,7 @@
  *   payment_received  → "Payment confirmed — your order is in the queue"
  *   in_production     → "We're printing your order now"
  *   ready_for_pickup  → "Your order is ready for pickup!"
- *   complete          → review request email ("How did your order turn out?")
+ *   complete          → review request email scheduled two hours later
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -33,6 +33,8 @@ const VALID_STATUSES = [
 ] as const;
 
 type OrderStatus = (typeof VALID_STATUSES)[number];
+
+const REVIEW_REQUEST_DELAY_MS = 2 * 60 * 60 * 1000;
 
 // Statuses that trigger a customer notification email
 const NOTIFY_STATUSES = new Set<OrderStatus>([
@@ -65,7 +67,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // a PAID receipt for money never collected.
     const { data: current } = await supabase
       .from("orders")
-      .select("status, order_number")
+      .select("status, order_number, completed_at")
       .eq("id", id)
       .maybeSingle();
 
@@ -75,6 +77,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         { status: 400 }
       );
     }
+
+    const statusUpdatedAt = new Date();
 
     // Step 1: Update status (always succeeds — no optional columns)
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
@@ -101,9 +105,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     // Step 2: Update timestamp columns — non-fatal if columns don't exist yet in schema
     const timestamps: Record<string, string> = {};
-    if (status === "payment_received") timestamps.paid_at = new Date().toISOString();
-    if (status === "ready_for_pickup") timestamps.ready_at = new Date().toISOString();
-    if (status === "complete") timestamps.completed_at = new Date().toISOString();
+    if (status === "payment_received") timestamps.paid_at = statusUpdatedAt.toISOString();
+    if (status === "ready_for_pickup") timestamps.ready_at = statusUpdatedAt.toISOString();
+    if (status === "complete" && current?.status !== "complete") {
+      timestamps.completed_at = statusUpdatedAt.toISOString();
+    }
 
     if (Object.keys(timestamps).length > 0) {
       const { error: tsError } = await supabase.from("orders").update(timestamps).eq("id", id);
@@ -300,12 +306,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
-    // Review request + receipt fallback — fires when staff marks order "complete"
+    let reviewRequestWarning: string | undefined;
+
+    // Review request + receipt fallback — fires when staff marks order "complete".
+    // Repeating "complete" inside Resend's 24-hour idempotency window is a
+    // safe recovery path when the provider or durable email log was uncertain.
     if (status === "complete") {
       try {
         const { data: order } = await supabase
           .from("orders")
-          .select(`order_number, subtotal, gst, pst, total, is_rush, discount_code,
+          .select(`order_number, customer_id, subtotal, gst, pst, total, is_rush, discount_code,
                    discount_amount, payment_method, created_at, wave_invoice_id,
                    order_items ( product_name, qty, width_in, height_in, sides, line_total ),
                    customers ( name, email )`)
@@ -319,27 +329,75 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           const customer = customerRaw as { name: string; email: string } | null;
 
           if (customer?.email) {
-            // Review request — pass items for product-anchored subject.
-            // Receipt was already sent at payment_received (no duplicate at complete).
-            const reviewItems = Array.isArray(order.order_items) ? order.order_items : [];
-            await sendReviewRequestEmail({
-              customerName: customer.name,
-              customerEmail: customer.email,
-              orderNumber: order.order_number,
-              items: reviewItems.map((i) => ({
-                product_name: i.product_name,
-                qty: i.qty,
-              })),
-            });
+            // A deterministic provider idempotency key closes the concurrent-request
+            // race. The durable log check also prevents a second request if staff move
+            // an already-completed order backward and then complete it again later.
+            const { data: existingReview, error: existingReviewError } = await supabase
+              .from("email_log")
+              .select("id")
+              .eq("order_id", id)
+              .ilike("subject", "How did your % turn out?")
+              .limit(1)
+              .maybeSingle();
+
+            if (existingReviewError) {
+              reviewRequestWarning =
+                "Review request was not scheduled because the duplicate guard could not be verified.";
+              console.error(
+                "[staff/orders/status] review duplicate guard failed:",
+                existingReviewError.message
+              );
+            } else if (!existingReview) {
+              const completedAt =
+                current?.status === "complete"
+                  ? Date.parse(current.completed_at ?? "")
+                  : statusUpdatedAt.getTime();
+              const retryAgeMs = Date.now() - completedAt;
+              const missingCompletionTime = !Number.isFinite(completedAt);
+              const outsideSafeRetryWindow =
+                current?.status === "complete" &&
+                retryAgeMs >= 23 * 60 * 60 * 1000;
+
+              if (missingCompletionTime || outsideSafeRetryWindow) {
+                reviewRequestWarning =
+                  "Review request was not retried because the safe provider idempotency window has expired; verify it in Resend first.";
+                console.error(
+                  `[staff/orders/status] review retry requires manual verification — ${order.order_number}`
+                );
+              } else {
+              // Receipt was already sent at payment_received (no duplicate at complete).
+              const reviewItems = Array.isArray(order.order_items) ? order.order_items : [];
+              await sendReviewRequestEmail({
+                orderId: id,
+                customerId: order.customer_id ?? undefined,
+                customerName: customer.name,
+                customerEmail: customer.email,
+                orderNumber: order.order_number,
+                scheduledAt: new Date(completedAt + REVIEW_REQUEST_DELAY_MS).toISOString(),
+                items: reviewItems.map((i) => ({
+                  product_name: i.product_name,
+                  qty: i.qty,
+                })),
+              });
+              }
+            } else {
+              console.log(`[staff/orders/status] review request already exists — ${order.order_number}`);
+            }
           }
         }
       } catch (reviewEmailErr) {
         // Non-fatal — status already saved, review email failure should never block the response
         console.error("[staff/orders/status] review request email failed (non-fatal):", reviewEmailErr);
+        reviewRequestWarning =
+          "Order completed, but the review request needs a safe retry within 23 hours.";
       }
     }
 
-    return NextResponse.json({ ok: true, status });
+    return NextResponse.json({
+      ok: true,
+      status,
+      ...(reviewRequestWarning ? { reviewRequestWarning } : {}),
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update status";
     console.error("[staff/orders/status]", message);
