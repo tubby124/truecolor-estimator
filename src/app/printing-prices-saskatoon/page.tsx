@@ -63,7 +63,7 @@ const FAQS = [
   },
   {
     q: "How much is same-day rush printing?",
-    a: "Same-day rush is a flat +$40 on any order — place it before 10 AM and call (306) 954-8688 to confirm capacity. Rush is PST-exempt, so you pay GST only on the rush fee.",
+    a: "Same-day rush is a flat +$40 on any order — place it before 10 AM and call (306) 954-8688 to confirm capacity. GST and Saskatchewan PST apply.",
   },
   {
     q: "How much does design work cost?",
@@ -71,7 +71,7 @@ const FAQS = [
   },
   {
     q: "Are taxes included in these prices?",
-    a: "All listed prices are pre-tax. GST (5%) and Saskatchewan PST (6%) are added at checkout only. PST is not charged on rush fees or design fees.",
+    a: "All listed prices are pre-tax. GST (5%) and Saskatchewan PST (6%) are added at checkout to the full charge, including design and rush services bundled with printed-material orders.",
   },
   {
     q: "Why is True Color cheaper than Staples or FedEx Office?",
@@ -252,8 +252,8 @@ export default function PrintingPricesSaskatoonPage() {
                 There are no per-product minimums.
               </li>
               <li>
-                <strong>Taxes.</strong> GST 5% + PST 6% are added at checkout only. Rush and design
-                fees are PST-exempt.
+                <strong>Taxes.</strong> GST 5% + PST 6% are added at checkout to the full charge,
+                including design and rush services bundled with printed-material orders.
               </li>
             </ul>
           </section>

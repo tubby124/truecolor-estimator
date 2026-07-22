@@ -366,7 +366,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       "/images/gallery/gallery-banner-habesha-convenience.webp",
     ],
     defaultSides: 1,
-    sideOptions: false,
+    sideOptions: true,
     sizePresets: [
       { label: "12×18\"", width_in: 12, height_in: 18 },
       { label: "18×24\"", width_in: 18, height_in: 24 },

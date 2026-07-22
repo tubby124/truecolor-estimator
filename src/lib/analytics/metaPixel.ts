@@ -48,8 +48,14 @@ export function metaTrackInitiateCheckout(p: { content_ids: string[]; value: num
   fbq("track", "InitiateCheckout", { content_type: "product", currency: "CAD", ...p });
 }
 
-export function metaTrackPurchase(p: { content_ids: string[]; value: number; currency?: string; contents?: MetaItem[]; num_items?: number }) {
-  fbq("track", "Purchase", { content_type: "product", currency: "CAD", ...p });
+export function metaTrackPurchase(p: { content_ids: string[]; value: number; currency?: string; contents?: MetaItem[]; num_items?: number; eventId?: string }) {
+  const { eventId, ...params } = p;
+  const payload = { content_type: "product", currency: "CAD", ...params };
+  if (eventId) {
+    fbq("track", "Purchase", payload, { eventID: eventId });
+  } else {
+    fbq("track", "Purchase", payload);
+  }
 }
 
 export function metaTrackLead(p: { content_name?: string; value?: number; currency?: string }) {

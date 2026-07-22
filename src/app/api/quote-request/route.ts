@@ -22,9 +22,9 @@ import { getBrokerage } from "@/lib/data/brokerages";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { classifyReferrer } from "@/lib/analytics/referrer";
-import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
-import { mergeUtmAttribution } from "@/lib/analytics/utm";
+import { ATTRIBUTION_KEYS, mergeLatestPaidAttribution, mergeUtmAttribution } from "@/lib/analytics/utm";
+import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytics/attribution-db";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     }
 
     const name = ((form.get("name") as string) ?? "").trim();
-    const email = ((form.get("email") as string) ?? "").trim();
+    const email = ((form.get("email") as string) ?? "").trim().toLowerCase();
     const phone = ((form.get("phone") as string) ?? "").trim() || undefined;
     const itemsRaw = (form.get("items") as string) ?? "[]";
     // Optional brokerage portal fields — present only when the form was
@@ -266,23 +266,22 @@ export async function POST(req: NextRequest) {
     // Prefer the cookie's landing_referrer (true upstream — google, maps, chatgpt)
     // over the POST request's Referer header which is always self-domain.
     const utm = mergeUtmAttribution(
-      {
-        utm_source: form.get("utm_source"),
-        utm_medium: form.get("utm_medium"),
-        utm_campaign: form.get("utm_campaign"),
-        utm_content: form.get("utm_content"),
-        utm_term: form.get("utm_term"),
-      },
+      Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
+      req.headers.get("cookie"),
+    );
+    const latestPaidTouch = mergeLatestPaidAttribution(
+      Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
       req.headers.get("cookie"),
     );
     const refClass = classifyReferrer(utm.landing_referrer || req.headers.get("referer"));
 
-    // Save to DB before sending emails (non-fatal — email continues even if DB fails).
+    // Save to DB before sending emails. The attributed quote row is the funnel
+    // source of truth, so a DB failure must not show a false success state.
     // Capture the inserted row's id so portal submissions can show a short reference
     // number on the success page (first 8 chars of the UUID, uppercased).
     let insertedId: string | null = null;
     try {
-      const { data: insertedRow } = await supabase
+      const { data: insertedRow, error: insertError } = await supabase
         .from("quote_requests")
         .insert({
           name,
@@ -296,37 +295,24 @@ export async function POST(req: NextRequest) {
           referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
           referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
           raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,
-          utm_source: utm.utm_source ?? null,
-          utm_campaign: utm.utm_campaign ?? null,
+          ...mapAttributionToDb(utm),
+          ...mapLatestPaidAttributionToDb(latestPaidTouch),
         })
         .select("id")
         .single();
+      if (insertError || !insertedRow?.id) {
+        throw new Error(insertError?.message ?? "Quote row was not returned");
+      }
       insertedId = (insertedRow?.id as string | undefined) ?? null;
     } catch (dbErr) {
       console.error("[quote-request] DB save failed:", dbErr);
+      return NextResponse.json(
+        { error: "We could not save your request. Please try again or call (306) 954-8688." },
+        { status: 503 },
+      );
     }
 
-    // GA4 generate_lead event (server-side MP) — fire-and-forget
-    // Estimated lead value: $200 (average quote→order conversion proxy; refine when we have data)
     if (insertedId) {
-      void sendMeasurementProtocolEvent({
-        event_name: "generate_lead",
-        client_id: deriveClientIdFromCustomer(email),
-        user_id: insertedId,
-        params: {
-          currency: "CAD",
-          value: 200,
-          lead_source: refClass.source,
-          lead_medium: refClass.medium,
-          form_id: "quote-request",
-          form_name: brokerageSlug ? `quote-portal-${brokerageSlug}` : "quote-multi-item",
-          item_count: items.length,
-          source: utm.utm_source ?? refClass.source,
-          medium: utm.utm_medium ?? refClass.medium,
-          campaign: utm.utm_campaign ?? undefined,
-        },
-      }).catch((err) => console.error("[quote-request] GA4 MP failed (non-fatal):", err));
-
       // Meta Conversions API — Lead event (server-side, deduped via event_id=quote-{insertedId})
       void sendMetaCapiEvent({
         event_name: "Lead",
@@ -339,8 +325,6 @@ export async function POST(req: NextRequest) {
           external_id: insertedId,
         },
         custom_data: {
-          currency: "CAD",
-          value: 200,
           content_name: brokerageSlug ? `Quote Portal — ${brokerageSlug}` : "Quote Request",
           lead_event_source: refClass.source,
           referrer_medium: refClass.medium,

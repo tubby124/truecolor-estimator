@@ -7,6 +7,7 @@ import { AuthRedirect } from "@/components/site/AuthRedirect";
 import { UtmCapture } from "@/components/site/UtmCapture";
 import { MetaPixel } from "@/components/site/MetaPixel";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
+import { buildGoogleTagBootstrapScript } from "@/lib/analytics/google-ads";
 
 // Self-hosted Geist + Geist Mono variable WOFF2 files. Switched from
 // next/font/google because Railway builds were intermittently failing on
@@ -219,7 +220,7 @@ const localBusinessSchema = {
     "Window decals",
     "Vinyl lettering",
     "Foam board printing",
-    "Roland UV printing",
+    "Wide-format printing and contour cutting",
   ],
   hasOfferCatalog: {
     "@type": "OfferCatalog",
@@ -259,12 +260,16 @@ const founderSchema = {
   founderOf: { "@id": "https://truecolorprinting.ca/#organization" },
   knowsAbout: [
     "Large format printing",
-    "Roland UV printing",
+    "Wide-format printing and contour cutting",
     "Business card printing",
     "Vehicle magnets",
     "Coroplast signs",
   ],
 };
+
+const googleTagBootstrapScript = buildGoogleTagBootstrapScript(
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL,
+);
 
 export default function RootLayout({
   children,
@@ -273,6 +278,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-CA">
+      <head>
+        <Script id="google-tag-bootstrap" strategy="beforeInteractive">
+          {googleTagBootstrapScript}
+        </Script>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <a
           href="#main-content"
@@ -286,11 +296,8 @@ export default function RootLayout({
         <BackToTop />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-6HMQT7MNLL"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
-        <Script id="ga4-init" strategy="lazyOnload">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6HMQT7MNLL');`}
-        </Script>
         <MetaPixel />
         {/* Trustindex loader-cert.js removed — was injecting visible
             "Trustmark widget validation failed" error text on every page.

@@ -13,6 +13,7 @@ import { trackViewItem, trackAddToCart } from "@/lib/analytics";
 import { metaTrackViewContent, metaTrackAddToCart } from "@/lib/analytics/metaPixel";
 import { SameDayClock } from "@/components/home/SameDayClock";
 import { flags } from "@/lib/flags";
+import { PaidCartConfirmation } from "@/components/paid/PaidCartConfirmation";
 
 // Friendly material labels shown in the customer proof
 const MATERIAL_LABELS: Record<string, string> = {
@@ -73,7 +74,13 @@ export function ProductPageClient({ product }: Props) {
   }, []);
 
   function handleAddToCart() {
-    if (priceData.price == null) return;
+    if (
+      priceData.price == null ||
+      priceData.loading ||
+      configData.widthIn <= 0 ||
+      configData.heightIn <= 0 ||
+      configData.qty <= 0
+    ) return;
 
     const designLabel =
       configData.designStatus !== "PRINT_READY"
@@ -129,7 +136,6 @@ export function ProductPageClient({ product }: Props) {
     });
 
     setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 3000);
     showToast(`${product.name} added to cart!`, "success");
   }
 
@@ -137,7 +143,7 @@ export function ProductPageClient({ product }: Props) {
 
   return (
     // pb-24 on mobile/tablet for sticky bar clearance; removed on lg+
-    <div className="pb-24 lg:pb-0">
+    <div className={addedToCart ? "pb-44 sm:pb-32" : "pb-24 lg:pb-0"}>
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       {/* ── 3-column grid ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_2fr_1.4fr] gap-8 items-start">
@@ -203,7 +209,7 @@ export function ProductPageClient({ product }: Props) {
       </div>
 
       {/* ── Mobile / tablet sticky bottom bar ────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
+      {!addedToCart && <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
         {/* Price summary */}
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 leading-none mb-0.5">Price (before tax)</p>
@@ -215,7 +221,7 @@ export function ProductPageClient({ product }: Props) {
               ${priceData.price.toFixed(2)}
             </p>
           ) : (
-            <p className="text-sm text-gray-400 leading-none">Configure above</p>
+            <p className="text-sm text-gray-400 leading-none">Choose options below</p>
           )}
         </div>
 
@@ -233,7 +239,9 @@ export function ProductPageClient({ product }: Props) {
         >
           {addedToCart ? "✓ Added" : "Add to Cart →"}
         </button>
-      </div>
+      </div>}
+
+      {addedToCart && <PaidCartConfirmation productName={product.name} />}
     </div>
   );
 }

@@ -32,7 +32,7 @@
 | Tax four-layer (API calc) | `src/app/api/staff/manual-order/route.ts` | price/tax | N |
 | Tax four-layer (email HTML + plain-text) | `src/lib/email/paymentRequest.ts`, `staffNotification.ts` | price/tax | N — assert all 4 match (2026-03-09 PST bug class) |
 
-**Domain A gap:** no contract test asserting `engine == /api/estimate == each configurator's input-mapping == marketing anchors`. Four configurators independently gather options (flyer width/height bug class). Tax four-layer match (modal == API == email HTML == email text, GST 5% + PST 6%, rush PST-exempt) not asserted.
+**Domain A gap:** no contract test asserting `engine == /api/estimate == each configurator's input-mapping == marketing anchors`. Four configurators independently gather options (flyer width/height bug class). Tax four-layer match (modal == API == email HTML == email text, GST 5% + PST 6% on the full printed-material charge, including bundled design and rush) is not asserted end to end.
 
 ---
 

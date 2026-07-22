@@ -4,12 +4,11 @@
  * Sends a branded HTML quote email to a customer, then marks the quote as replied_at.
  *
  * Body: {
- *   to: string
- *   customerName: string
  *   subject?: string
- *   lineItems: { description: string; qty: string; unitPrice: string }[]
+ *   lineItems: { description: string; qty: string; unitPrice: string; taxClass: string }[]
  *   note?: string
  * }
+ * Recipient identity is always loaded from the stored quote request.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -17,12 +16,13 @@ import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { encodePaymentToken } from "@/lib/payment/token";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { getQuoteTaxRates, markQuoteSent, setStructuredQuotePricing, type QuoteTaxRates } from "@/lib/payment/quote-order";
 
-interface LineItem {
+export interface LineItem {
   description: string;
   qty: string;
   unitPrice: string;
-  exempt?: boolean;  // true = PST-exempt fee line (design, rush, installation) — GST still applies
+  taxClass: "printed_good" | "design_service" | "rush_service" | "installation_service";
 }
 
 interface Params {
@@ -33,12 +33,13 @@ function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// Subtotal + GST (5%) + PST (6%), rounded the same way the modal preview and
+// Subtotal + configured GST/PST, rounded the same way the modal preview and
 // the email body compute it — so the Pay Now amount never drifts from the
 // total the customer sees in the quote.
-// PST exempts lines flagged exempt=true (design / rush / installation fees) per
-// truecolor-domain.md; GST applies to everything (services are GST-taxable in CA).
-export function computeQuoteTotals(lineItems: LineItem[]): {
+// Saskatchewan PST-20 applies PST to the full customer charge for taxable
+// printed material, including its design, rush, and installation service lines.
+// GST also applies to the full subtotal.
+export function computeQuoteTotals(lineItems: LineItem[], rates: QuoteTaxRates): {
   subtotal: number;
   gst: number;
   pst: number;
@@ -46,36 +47,33 @@ export function computeQuoteTotals(lineItems: LineItem[]): {
 } {
   const lineTotal = (li: LineItem) => (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0);
   const subtotal = Math.round(lineItems.reduce((sum, li) => sum + lineTotal(li), 0) * 100) / 100;
-  const pstableSubtotal = Math.round(
-    lineItems.reduce((sum, li) => sum + (li.exempt ? 0 : lineTotal(li)), 0) * 100
-  ) / 100;
-  const gst = Math.round(subtotal * 0.05 * 100) / 100;
-  const pst = Math.round(pstableSubtotal * 0.06 * 100) / 100;
+  const gst = Math.round(subtotal * rates.gstRate * 100) / 100;
+  const pst = Math.round(subtotal * rates.pstRate * 100) / 100;
   const grandTotal = Math.round((subtotal + gst + pst) * 100) / 100;
   return { subtotal, gst, pst, grandTotal };
 }
 
-function buildQuoteHtml(opts: {
+export function buildQuoteHtml(opts: {
   customerName: string;
   lineItems: LineItem[];
   note?: string;
   payUrl: string;
   payLabel: string;
+  rates: QuoteTaxRates;
 }): string {
-  const { customerName, lineItems, note, payUrl, payLabel } = opts;
+  const { customerName, lineItems, note, payUrl, payLabel, rates } = opts;
   const firstName = customerName.split(/[\s,]/)[0];
 
-  const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems);
+  const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems, rates);
 
   const rows = lineItems
     .map((li) => {
       const qty = parseFloat(li.qty) || 0;
       const unit = parseFloat(li.unitPrice) || 0;
       const total = qty * unit;
-      const exemptTag = li.exempt ? ` <span style="font-size:11px;color:#888;">(no PST)</span>` : "";
       return `
       <tr>
-        <td style="padding:10px 12px;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0f2f5;">${esc(li.description)}${exemptTag}</td>
+        <td style="padding:10px 12px;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0f2f5;">${esc(li.description)}</td>
         <td style="padding:10px 12px;font-size:14px;color:#555;text-align:center;border-bottom:1px solid #f0f2f5;">${qty}</td>
         <td style="padding:10px 12px;font-size:14px;color:#555;text-align:right;border-bottom:1px solid #f0f2f5;">$${unit.toFixed(2)}</td>
         <td style="padding:10px 12px;font-size:14px;font-weight:600;color:#1a1a2e;text-align:right;border-bottom:1px solid #f0f2f5;">$${total.toFixed(2)}</td>
@@ -95,6 +93,10 @@ function buildQuoteHtml(opts: {
     <div style="font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px;">Custom Quote · Saskatoon, SK</div>
     <h1 style="font-size:24px;font-weight:800;color:#ffffff;line-height:1.2;margin:0 0 6px;">Your Print Quote</h1>
     <p style="font-size:13px;color:rgba(255,255,255,0.6);margin:0;">Prepared for ${esc(customerName)}</p>
+    <div style="margin-top:18px;padding:14px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);border-radius:6px;">
+      <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.55);font-weight:700;margin-bottom:3px;">Quote subtotal · before tax</div>
+      <div style="font-size:24px;font-weight:800;color:#ffffff;">$${subtotal.toFixed(2)} CAD</div>
+    </div>
     <div style="margin-top:20px;display:flex;gap:28px;">
       <div>
         <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.4);font-weight:600;margin-bottom:2px;">Date</div>
@@ -132,16 +134,16 @@ function buildQuoteHtml(opts: {
     <!-- TOTALS -->
     <div style="background:#f8f9fa;border:1px solid #e9ecef;border-radius:6px;padding:16px 20px;margin-bottom:28px;">
       <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px;">
-        <span>Subtotal</span><span style="font-weight:600;color:#1a1a2e;">$${subtotal.toFixed(2)}</span>
+        <span style="font-weight:700;color:#1a1a2e;">Quote subtotal (before tax)</span><span style="font-weight:700;color:#1a1a2e;">$${subtotal.toFixed(2)}</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:#999;margin-bottom:4px;">
-        <span>GST (5%)</span><span>$${gst.toFixed(2)}</span>
+        <span>GST (${(rates.gstRate * 100).toFixed(2).replace(/\.00$/, "")}%)</span><span>$${gst.toFixed(2)}</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:#999;margin-bottom:12px;">
-        <span>PST (6%)</span><span>$${pst.toFixed(2)}</span>
+        <span>PST (${(rates.pstRate * 100).toFixed(2).replace(/\.00$/, "")}%)</span><span>$${pst.toFixed(2)}</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#1a1a2e;border-top:2px solid #dee2e6;padding-top:12px;">
-        <span>Total</span><span>$${grandTotal.toFixed(2)} CAD</span>
+        <span>Payment total (tax included)</span><span>$${grandTotal.toFixed(2)} CAD</span>
       </div>
     </div>
 
@@ -170,15 +172,16 @@ function buildQuoteHtml(opts: {
 </html>`;
 }
 
-function buildQuotePlainText(opts: {
+export function buildQuotePlainText(opts: {
   customerName: string;
   lineItems: LineItem[];
   note?: string;
   payUrl: string;
+  rates: QuoteTaxRates;
 }): string {
-  const { customerName, lineItems, note, payUrl } = opts;
+  const { customerName, lineItems, note, payUrl, rates } = opts;
   const firstName = customerName.split(/[\s,]/)[0];
-  const { subtotal, gst, pst, grandTotal: total } = computeQuoteTotals(lineItems);
+  const { subtotal, gst, pst, grandTotal: total } = computeQuoteTotals(lineItems, rates);
   const lines = [
     `Hi ${firstName},`,
     "",
@@ -189,14 +192,13 @@ function buildQuotePlainText(opts: {
     ...lineItems.map((li) => {
       const qty = parseFloat(li.qty) || 0;
       const unit = parseFloat(li.unitPrice) || 0;
-      const exemptTag = li.exempt ? " (no PST)" : "";
-      return `${li.description}${exemptTag} · Qty: ${qty} · $${unit.toFixed(2)}/unit = $${(qty * unit).toFixed(2)}`;
+      return `${li.description} · Qty: ${qty} · $${unit.toFixed(2)}/unit = $${(qty * unit).toFixed(2)}`;
     }),
     "",
-    `Subtotal: $${subtotal.toFixed(2)}`,
-    `GST (5%): $${gst.toFixed(2)}`,
-    `PST (6%): $${pst.toFixed(2)}`,
-    `Total: $${total.toFixed(2)} CAD`,
+    `QUOTE SUBTOTAL (BEFORE TAX): $${subtotal.toFixed(2)} CAD`,
+    `GST (${rates.gstRate * 100}%): $${gst.toFixed(2)}`,
+    `PST (${rates.pstRate * 100}%): $${pst.toFixed(2)}`,
+    `Payment total (tax included): $${total.toFixed(2)} CAD`,
     "",
     `Pay securely by credit card to confirm your order: ${payUrl}`,
     "(Link valid 30 days. Powered by Clover.)",
@@ -215,33 +217,56 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   try {
     const { id } = await params;
-    const { to, customerName, subject, lineItems, note } = (await req.json()) as {
-      to: string;
-      customerName: string;
+    const { subject, lineItems, note } = (await req.json()) as {
       subject?: string;
       lineItems: LineItem[];
       note?: string;
     };
 
-    if (!to || !customerName || !lineItems?.length) {
+    if (!lineItems?.length) {
       return NextResponse.json(
-        { error: "to, customerName, and lineItems are required" },
+        { error: "lineItems are required" },
         { status: 400 }
       );
     }
 
+    const supabase = createServiceClient();
+    const { data: storedQuote, error: quoteError } = await supabase
+      .from("quote_requests")
+      .select("email, name")
+      .eq("id", id)
+      .maybeSingle();
+    if (quoteError || !storedQuote?.email || !storedQuote?.name) {
+      return NextResponse.json({ error: quoteError ? "Could not load quote recipient" : "Quote not found" }, { status: quoteError ? 500 : 404 });
+    }
+    const to = storedQuote.email;
+    const customerName = storedQuote.name;
+
     const emailSubject =
       subject?.trim() || "Your Custom Print Quote — True Color Display Printing";
 
-    // Mint a Pay Now link for the tax-included grand total. Same HMAC gateway as
-    // order payments and the send-reply path: /pay/[token] re-creates a fresh
-    // Clover checkout on every click, so the 15-min Clover session expiry never
-    // matters. The decoded amount is HMAC-signed — the URL can't be tampered.
-    const { grandTotal } = computeQuoteTotals(lineItems);
+    // Mint a Pay Now link for the tax-included grand total. The signed quote
+    // revision is materialized only after customer POST; active Clover sessions
+    // are resumed and expired reservations can be safely replaced.
+    const rates = await getQuoteTaxRates(supabase);
+    const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems, rates);
     const totalCents = Math.round(grandTotal * 100);
     const shortId = id.slice(0, 8);
     const cloverDescription = `Quote #${shortId} — ${customerName}`.slice(0, 90);
-    const token = encodePaymentToken(grandTotal, cloverDescription, to);
+    const pricingRevision = await setStructuredQuotePricing(supabase, {
+      quoteId: id,
+      totalCents,
+      subtotalCents: Math.round(subtotal * 100),
+      gstCents: Math.round(gst * 100),
+      pstCents: Math.round(pst * 100),
+      description: cloverDescription,
+      lineItems,
+    });
+
+    const token = encodePaymentToken(grandTotal, cloverDescription, to, undefined, {
+      quoteId: id,
+      quoteRevision: pricingRevision.quoteRevision,
+    });
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca").replace(/\/$/, "");
     const payUrl = `${siteUrl}/pay/${encodeURIComponent(token)}`;
     const payLabel = grandTotal.toLocaleString("en-CA", {
@@ -253,23 +278,19 @@ export async function POST(req: NextRequest, { params }: Params) {
     await sendEmail({
       to,
       subject: emailSubject,
-      html: buildQuoteHtml({ customerName, lineItems, note, payUrl, payLabel }),
-      text: buildQuotePlainText({ customerName, lineItems, note, payUrl }),
+      html: buildQuoteHtml({ customerName, lineItems, note, payUrl, payLabel, rates }),
+      text: buildQuotePlainText({ customerName, lineItems, note, payUrl, rates }),
     });
 
-    const supabase = createServiceClient();
     const quoteSummary = lineItems
       .map((li) => `${li.description} × ${li.qty} @ $${parseFloat(li.unitPrice).toFixed(2)}`)
       .join(", ");
-    await supabase
-      .from("quote_requests")
-      .update({
-        replied_at: new Date().toISOString(),
-        reply_body: `[Price quote sent · Pay Now ${payLabel}] ${quoteSummary}`,
-        quote_total_cents: totalCents,
-        quote_total_description: cloverDescription,
-      } as Record<string, unknown>)
-      .eq("id", id);
+    await markQuoteSent(
+      supabase,
+      id,
+      `[Price quote sent · Pay Now ${payLabel}] ${quoteSummary}`,
+      true,
+    );
 
     console.log(`[staff/quotes/send-quote] sent branded quote to ${to} for quote ${id}`);
 
@@ -291,6 +312,17 @@ export async function POST(req: NextRequest, { params }: Params) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to send quote";
     console.error("[staff/quotes/send-quote]", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const immutable = /PAID_QUOTE_IMMUTABLE/.test(message);
+    const checkoutOpened = /QUOTE_CHECKOUT_ALREADY_OPENED/.test(message);
+    return NextResponse.json(
+      {
+        error: immutable
+          ? "Paid quotes cannot be repriced"
+          : checkoutOpened
+            ? "This quote already has an open checkout and cannot be repriced. Contact the customer before replacing it."
+            : message,
+      },
+      { status: immutable || checkoutOpened ? 409 : 500 },
+    );
   }
 }

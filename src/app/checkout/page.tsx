@@ -13,10 +13,20 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { trackArtworkUpload, trackBeginCheckout } from "@/lib/analytics";
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
+import { readUtmFromStorage } from "@/components/site/UtmCapture";
 
 const DEFAULT_GST_RATE = 0.05;
 const PST_RATE = 0.06;
 const RUSH_FEE = 40;
+const CHECKOUT_SUBMISSION_KEY = "tc_checkout_submission_id";
+
+function getOrCreateCheckoutSubmissionId(): string {
+  const existing = sessionStorage.getItem(CHECKOUT_SUBMISSION_KEY);
+  if (existing) return existing;
+  const submissionId = crypto.randomUUID();
+  sessionStorage.setItem(CHECKOUT_SUBMISSION_KEY, submissionId);
+  return submissionId;
+}
 
 // ── Sign dimension preview ──────────────────────────────────────────────────
 // Renders a proportional rectangle with dimension labels — shown in order summary
@@ -335,8 +345,9 @@ export default function CheckoutPage() {
   const smallOrderFee = orderMin.surcharge;
   const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
   const subtotal = itemsSubtotal; // line items subtotal (pre-discount, pre-setup-fee) for the "Subtotal" row
-  const rawPstBase = items.reduce((s, i) => s + (i.sell_price - (i.design_fee ?? 0)), 0);
-  const pstBase = Math.max(0, rawPstBase - discount + smallOrderFee);
+  // Saskatchewan PST-20 taxes the full customer charge for taxable printed
+  // material, including bundled design, rush, and setup charges.
+  const pstBase = Math.max(0, discountedSubtotal + rush);
   const gst = Math.round((discountedSubtotal + rush) * gstRate * 100) / 100;
   const pst = Math.round(pstBase * PST_RATE * 100) / 100;
   const total = discountedSubtotal + rush + gst + pst;
@@ -390,6 +401,11 @@ export default function CheckoutPage() {
       setError("Name and email are required.");
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setEmailError("Please enter a valid email address.");
+      setError("Enter a valid email address before continuing.");
+      return;
+    }
     if (createAccount) {
       if (!password || password.length < 8) {
         setError("Password must be at least 8 characters.");
@@ -405,6 +421,7 @@ export default function CheckoutPage() {
       // Upload artwork files one-by-one via server-side API (bypasses storage RLS)
       const filePaths: string[] = [];
       if (artworkFiles.length > 0) {
+        const failedUploads: string[] = [];
         setUploadedCount(0);
         for (let i = 0; i < artworkFiles.length; i++) {
           setUploadProgress(`Uploading file ${i + 1} of ${artworkFiles.length}…`);
@@ -414,41 +431,33 @@ export default function CheckoutPage() {
             const uploadRes = await fetch("/api/upload", { method: "POST", body: form });
             if (uploadRes.ok) {
               const { path } = (await uploadRes.json()) as { path: string };
+              if (!path) throw new Error("Upload completed without a saved file path");
               filePaths.push(path);
               setUploadedCount((n) => n + 1);
             } else {
-              const { error: uploadErr } = (await uploadRes.json()) as { error?: string };
-              console.warn("[checkout] upload failed:", uploadErr);
+              failedUploads.push(artworkFiles[i].name);
             }
           } catch (uploadErr) {
             console.warn("[checkout] file upload exception:", uploadErr);
+            failedUploads.push(artworkFiles[i].name);
           }
         }
         setUploadProgress("");
+        if (failedUploads.length > 0 || filePaths.length !== artworkFiles.length) {
+          setError(
+            `Artwork upload failed for ${Array.from(new Set(failedUploads)).join(", ") || "one or more files"}. No order or payment was started. Remove the file or try again.`,
+          );
+          return;
+        }
         if (filePaths.length > 0) {
           trackArtworkUpload({ file_count: filePaths.length, source: "checkout" });
         }
       }
 
-      // Pull first-touch UTM from localStorage (set by UtmCapture on landing)
-      const utm = (() => {
-        try {
-          const raw = window.localStorage.getItem("tc_utm_first_touch");
-          if (!raw) return {} as Record<string, string>;
-          const parsed = JSON.parse(raw) as Record<string, string | number>;
-          return {
-            utm_source: typeof parsed.utm_source === "string" ? parsed.utm_source : undefined,
-            utm_campaign: typeof parsed.utm_campaign === "string" ? parsed.utm_campaign : undefined,
-            utm_medium: typeof parsed.utm_medium === "string" ? parsed.utm_medium : undefined,
-            utm_content: typeof parsed.utm_content === "string" ? parsed.utm_content : undefined,
-            utm_term: typeof parsed.utm_term === "string" ? parsed.utm_term : undefined,
-          };
-        } catch {
-          return {} as Record<string, string | undefined>;
-        }
-      })();
+      const attribution = readUtmFromStorage() ?? {};
 
       const body: CreateOrderRequest = {
+        checkout_submission_id: getOrCreateCheckoutSubmissionId(),
         items,
         contact: {
           name,
@@ -464,7 +473,7 @@ export default function CheckoutPage() {
         discount_code: appliedDiscount?.code,
         discount_amount: appliedDiscount?.amount,
         marketing_consent: marketingConsent,
-        ...utm,
+        ...attribution,
       };
       const res = await fetch("/api/orders", {
         method: "POST",
@@ -514,7 +523,10 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      try { sessionStorage.removeItem("tc_checkout_form"); } catch { /* ignore */ }
+      try {
+        sessionStorage.removeItem("tc_checkout_form");
+        sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY);
+      } catch { /* ignore */ }
       if (payMethod === "clover_card" && data.checkoutUrl) {
         // Card: redirect to Clover hosted checkout (it bounces back to /order-confirmed?oid=...)
         window.location.href = data.checkoutUrl;
@@ -838,6 +850,7 @@ export default function CheckoutPage() {
               </p>
               {/* Hidden file input — triggered by clicking the drop zone */}
               <input
+                id="checkout-artwork-files"
                 ref={artworkInputRef}
                 type="file"
                 multiple
@@ -851,11 +864,23 @@ export default function CheckoutPage() {
                   if (valid.length > 0) setArtworkFiles((prev) => [...prev, ...valid]);
                   e.target.value = "";
                 }}
+                tabIndex={-1}
+                aria-hidden="true"
                 className="hidden"
               />
               <div
-                className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#16C2F3] transition-colors cursor-pointer"
+                role="button"
+                tabIndex={0}
+                aria-controls="checkout-artwork-files"
+                aria-label={artworkFiles.length > 0 ? "Add more artwork files" : "Choose artwork files"}
+                className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#16C2F3] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3] focus-visible:ring-offset-2"
                 onClick={() => artworkInputRef.current?.click()}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    artworkInputRef.current?.click();
+                  }
+                }}
                 onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-blue-400", "bg-blue-50"); }}
                 onDragLeave={(e) => { e.currentTarget.classList.remove("border-blue-400", "bg-blue-50"); }}
                 onDrop={(e) => {
@@ -869,33 +894,33 @@ export default function CheckoutPage() {
                   if (valid.length > 0) setArtworkFiles((prev) => [...prev, ...valid]);
                 }}
               >
-                {artworkFiles.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {artworkFiles.map((f, i) => (
-                      <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-1.5">
-                        <p className="font-medium text-[#1c1712] text-sm truncate max-w-[200px]">📎 {f.name}</p>
-                        <div className="flex items-center gap-2 shrink-0 ml-2">
-                          <p className="text-xs text-gray-400">{(f.size / 1024 / 1024).toFixed(1)} MB</p>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setArtworkFiles((prev) => prev.filter((_, idx) => idx !== i)); }}
-                            className="text-gray-400 hover:text-red-500 transition-colors text-sm font-bold leading-none"
-                            aria-label={`Remove ${f.name}`}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    <p className="text-xs text-[#16C2F3] mt-2">Click or drop to add more files</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-sm text-gray-500">Drop your files here or click to browse</p>
-                    <p className="text-xs text-gray-400 mt-1">PDF · EPS · AI · JPG · PNG — up to 50 MB each · Select multiple files at once</p>
-                  </div>
-                )}
+                <div>
+                  <p className="text-sm text-gray-500">
+                    {artworkFiles.length > 0 ? "Drop or choose more artwork files" : "Drop your files here or click to browse"}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">PDF · EPS · AI · JPG · PNG — up to 50 MB each · Select multiple files at once</p>
+                </div>
               </div>
+              {artworkFiles.length > 0 && (
+                <div className="mt-3 space-y-1.5" aria-label="Selected artwork files">
+                  {artworkFiles.map((f, i) => (
+                    <div key={`${f.name}-${i}`} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+                      <p className="max-w-[200px] truncate text-sm font-medium text-[#1c1712]">📎 {f.name}</p>
+                      <div className="ml-2 flex shrink-0 items-center gap-2">
+                        <p className="text-xs text-gray-400">{(f.size / 1024 / 1024).toFixed(1)} MB</p>
+                        <button
+                          type="button"
+                          onClick={() => setArtworkFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="min-h-8 min-w-8 rounded text-sm font-bold leading-none text-gray-500 transition-colors hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3]"
+                          aria-label={`Remove ${f.name}`}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <p className="text-xs text-gray-400 mt-2">
                 No file yet? Bring it on USB or email us after — our designer starts at $35.
               </p>

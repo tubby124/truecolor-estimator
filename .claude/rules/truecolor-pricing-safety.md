@@ -43,8 +43,8 @@ CI test guards it automatically.
 
 - All prices in CAD
 - GST = 5% — read from `config.v1.csv gst_rate` — NEVER hardcode 0.05
-- PST = `(sell_price - design_fee) * 0.06` — shown ONLY at checkout
-- Rush fee = PST-EXEMPT — never apply PST to rush line
+- PST = `sell_price * 0.06` for taxable printed-material orders — shown ONLY at checkout
+- Design and rush charges bundled into taxable printed-material orders are PST-taxable as part of the total customer charge. Source: Saskatchewan Finance PST-20, revised July 2024.
 - fromPrice on product/SEO pages = lowest real CSV price for that category
 - NEVER write "contact for pricing" — always show a real number
 - Volume discounts = QTY-based only, never sqft-based

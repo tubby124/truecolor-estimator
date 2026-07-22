@@ -33,7 +33,12 @@ import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
 import { buildEmailVolumeSnapshot, type EmailVolumeSnapshot } from "./EmailVolumePanel";
 import type { StaffAction } from "./StaffActionsPanel";
 import type { PaymentHealthSnapshot } from "./PaymentHealthPanel";
-import { buildRollup, type StatusRollup } from "@/lib/lifecycle/rollup";
+import {
+  buildRollup,
+  type MeasurementOutboxCounts,
+  type StatusRollup,
+  type WaveProvisioningHealth,
+} from "@/lib/lifecycle/rollup";
 import { readFileSync, existsSync, statSync } from "fs";
 import { join } from "path";
 
@@ -64,7 +69,53 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "ga4-sync",               maxAgeHours: 26 },  // daily — Phase 9d defense-in-depth alongside gsc-sync
   { name: "dashboard-alerts",       maxAgeHours: 2  },  // hourly Telegram push layer
   { name: "wave-poll",              maxAgeHours: 7  },  // every 6h — backfills Wave state changes the webhook missed
+  { name: "google-ads-monitor",     maxAgeHours: 0.5 }, // every 15m — spend warning + protective pause
+  { name: "google-ads-conversions", maxAgeHours: 0.5 }, // every 15m — revenue + quote measurement delivery
 ];
+
+interface MeasurementOutboxRow {
+  status: string | null;
+  next_attempt_at: string | null;
+  processing_started_at: string | null;
+}
+
+interface WaveProvisioningRow {
+  quote_wave_state: string | null;
+  quote_wave_reserved_at: string | null;
+}
+
+function summarizeWaveProvisioning(
+  rows: WaveProvisioningRow[],
+  staleCutoff: number,
+): WaveProvisioningHealth {
+  return {
+    staleCreating: rows.filter((row) =>
+      row.quote_wave_state === "creating" &&
+      (row.quote_wave_reserved_at === null || new Date(row.quote_wave_reserved_at).getTime() < staleCutoff)
+    ).length,
+    ambiguous: rows.filter((row) => row.quote_wave_state === "ambiguous").length,
+    failed: rows.filter((row) => row.quote_wave_state === "failed").length,
+  };
+}
+
+function summarizeMeasurementOutbox(
+  rows: MeasurementOutboxRow[],
+  staleCutoff: number,
+): MeasurementOutboxCounts {
+  return {
+    dead: rows.filter((row) => row.status === "dead").length,
+    staleProcessing: rows.filter((row) =>
+      row.status === "processing" &&
+      (row.processing_started_at === null ||
+        new Date(row.processing_started_at).getTime() < staleCutoff)
+    ).length,
+    overdueRetry: rows.filter((row) =>
+      row.status === "retry" &&
+      row.next_attempt_at !== null &&
+      new Date(row.next_attempt_at).getTime() < staleCutoff
+    ).length,
+  };
+}
 
 export interface LifecycleData {
   rows: LifecycleRow[];
@@ -282,7 +333,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     let payLinkUrl = "";
     try {
       const redirectUrl = `${siteUrl}/order-confirmed?oid=${row.id}`;
-      const token = encodePaymentToken(row.total, `Order ${row.order_number}`, row.customer_email || undefined, redirectUrl);
+      const token = encodePaymentToken(row.total, `Order ${row.order_number}`, row.customer_email || undefined, redirectUrl, { orderId: row.id });
       payLinkUrl = `${siteUrl}/pay/${token}`;
     } catch {
       payLinkUrl = "";
@@ -684,7 +735,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
 
   // ── derive Bookkeeping risks (audit-surfaced silent-fail surfaces) ───────
   const bookkeepingRisks: BookkeepingRiskRow[] = [];
-  const PAID_STATES = new Set(["paid", "in_production", "ready_for_pickup", "completed"]);
+  const PAID_STATES = new Set(["payment_received", "in_production", "ready_for_pickup", "complete"]);
   // We need ALL orders (not just 7d) to catch historical silent desyncs — we already
   // fetched paidWave for this purpose; pull the broader silent-fail conditions from it.
   for (const o of paidWave) {
@@ -1158,6 +1209,40 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     payment_followup_stale: heartbeatByName.get("payment-followup")?.stale ?? true,
   };
 
+  // A row is alertable after one full 15-minute delivery cadence has elapsed.
+  // Query both durable outboxes once and derive the three failure classes from
+  // the same snapshot so the lifecycle tile and shared Telegram rollup agree.
+  const measurementStaleCutoff = now - 15 * 60 * 1000;
+  const [revenueOutboxRes, quoteOutboxRes, waveProvisioningRes] = await Promise.all([
+    supabase
+      .from("google_ads_conversion_outbox")
+      .select("status, next_attempt_at, processing_started_at")
+      .in("status", ["dead", "processing", "retry"]),
+    supabase
+      .from("quote_measurement_event_outbox")
+      .select("status, next_attempt_at, processing_started_at")
+      .in("status", ["dead", "processing", "retry"]),
+    supabase
+      .from("orders")
+      .select("quote_wave_state, quote_wave_reserved_at")
+      .in("quote_wave_state", ["creating", "ambiguous", "failed"])
+      .limit(1000),
+  ]);
+  const measurementOutboxes = {
+    revenue: summarizeMeasurementOutbox(
+      (revenueOutboxRes.data ?? []) as MeasurementOutboxRow[],
+      measurementStaleCutoff,
+    ),
+    quote: summarizeMeasurementOutbox(
+      (quoteOutboxRes.data ?? []) as MeasurementOutboxRow[],
+      measurementStaleCutoff,
+    ),
+  };
+  const waveProvisioning = summarizeWaveProvisioning(
+    (waveProvisioningRes.data ?? []) as WaveProvisioningRow[],
+    measurementStaleCutoff,
+  );
+
   // ── derive status rollup ─────────────────────────────────────────────────
   // Pure function — single source of truth shared with /api/cron/dashboard-alerts.
   // Adding a new silent-fail surface = ONE registration in buildRollup; both
@@ -1173,6 +1258,9 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     reconcileDetail: latestByName.get("reconcile-payments")?.detail ?? null,
     seoProtectedPagesStaleDays: getSeoProtectedPagesStaleDays(),
     gscVsGa4DivergencePct,
+    googleAdsMonitorDetail: latestByName.get("google-ads-monitor")?.detail ?? null,
+    measurementOutboxes,
+    waveProvisioning,
   });
 
   return {

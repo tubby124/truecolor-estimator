@@ -103,7 +103,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
         const description = `Reprice delta for order ${order.order_number}`;
         const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
-        const token = encodePaymentToken(delta, description, customer.email.toLowerCase().trim(), redirectUrl);
+        const token = encodePaymentToken(delta, description, customer.email.toLowerCase().trim(), redirectUrl, { orderId: order.id });
         payLinkUrl = `${siteUrl}/pay/${token}`;
       } catch (tokenErr) {
         console.error("[reprice] token encode failed:", tokenErr);

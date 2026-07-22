@@ -71,15 +71,21 @@ vi.mock("@/lib/supabase/server", () => ({
             }),
           }),
         }),
-        update: (values: Record<string, unknown>) => ({
-          eq: async () => {
+        update: (values: Record<string, unknown>) => {
+          const chain = {
+            eq: () => chain,
+            is: () => chain,
+            select: () => chain,
+            maybeSingle: async () => {
             if (typeof values.status === "string") harness.currentStatus = values.status;
             if (typeof values.completed_at === "string") {
               harness.currentCompletedAt = values.completed_at;
             }
-            return { error: null };
-          },
-        }),
+              return { data: { id: ORDER_ID }, error: null };
+            },
+          };
+          return chain;
+        },
       };
     },
   }),

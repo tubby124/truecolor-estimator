@@ -130,6 +130,7 @@ export async function GET(req: NextRequest) {
           `Order ${order.order_number}`,
           user.email ?? undefined,
           `${siteUrl}/order-confirmed?oid=${order.id}`,
+          { orderId: order.id },
         );
         pay_url = `/pay/${token}`;
       } catch {

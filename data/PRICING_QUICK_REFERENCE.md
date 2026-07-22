@@ -51,9 +51,9 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 4. **Retired SKUs.** RIGID-ACP3-24X36-S frozen $66 intro retired 2026-05-20. ACP 24×36 is now $78 ($13 × 6 sqft) at every qty. Do not re-enable.
 5. **Banners "from $66" is correct** — smallest 2×4ft = $66, already above $25 cart min.
 6. **Foamboard "from $45" is correct for the standard 18×24 fixed SKU**. Custom smaller foamboard can price by sqft, but landing pages should anchor the common 18×24 at $45 unless the page explicitly says custom sqft pricing.
-7. **Rush +$40 flat** — always mention separately. PST-exempt.
-8. **Design $35 flat** — always mention separately. PST-exempt.
-9. **All prices are pre-tax.** GST 5% + PST 6% at checkout. PST formula = `(sell_price − design_fee − rush_fee) × 0.06`.
+7. **Rush +$40 flat** — always mention separately. GST and PST apply when bundled with a printed-material order.
+8. **Design $35 flat** — always mention separately. GST and PST apply when bundled with a printed-material order.
+9. **All prices are pre-tax.** GST 5% + PST 6% are added at checkout to the full printed-material charge, including bundled design and rush services.
 10. **Product reference cards** (`products` array on IndustryPage): use T1 sqft rates for wide-format. Wide-format T1: Coroplast $8/sqft, Banners $8.25/sqft, ACP $13/sqft, Foamboard $10/sqft, Window Decals $11/sqft, Vehicle Magnets $24/sqft.
 11. **FROZEN ranking page titles** (do NOT change H1/title/slug): coroplast-signs-saskatoon ("From $8/sqft"), banner-printing-saskatoon ("From $8.25/sqft"), sign-company-saskatoon, business-cards-saskatoon, flyer-printing-saskatoon, sticker-printing-saskatoon, aluminum-signs-saskatoon. Body copy + FAQ updates allowed per SEO wave system.
 

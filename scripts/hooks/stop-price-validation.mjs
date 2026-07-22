@@ -29,7 +29,6 @@ const WRONG_PATTERNS = [
   [/(\d+)\+\s*sqft.*(discount|off|save)/i, "Volume discounts must be QTY-based (5+ signs), not sqft-based"],
   [/\$2\.00.*grommet|grommet.*\$2\.00|\$3\.00.*grommet/i, "Grommets are $2.50/each"],
   [/\$30.*rush|\$50.*rush|rush.*\$30|rush.*\$50/i, "Rush is +$40 flat"],
-  [/PST\s*6%/i, "Saskatchewan has no PST on printing — GST 5% only"],
   [/vercel\.app/i, "Use truecolorprinting.ca, not vercel.app"],
 ];
 

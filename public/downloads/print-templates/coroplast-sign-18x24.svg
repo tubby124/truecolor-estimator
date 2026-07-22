@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18in" height="24in" viewBox="0 0 1800 2400" role="img" aria-labelledby="title description">
+  <title id="title">18 by 24 inch coroplast sign artwork template</title>
+  <desc id="description">Dimensionally explicit trim boundary and configurable reference guide. Confirm production tolerances before use.</desc>
+  <rect width="1800" height="2400" fill="#ffffff"/>
+  <rect x="4" y="4" width="1792" height="2392" fill="none" stroke="#e63020" stroke-width="8"/>
+  <rect x="100" y="100" width="1600" height="2200" fill="none" stroke="#147ea3" stroke-width="5" stroke-dasharray="30 20"/>
+  <g font-family="Arial, Helvetica, sans-serif" text-anchor="middle" fill="#111111">
+    <text x="900" y="1110" font-size="64" font-weight="700">18 × 24 INCH ARTBOARD</text>
+    <text x="900" y="1200" font-size="38">RED = FINAL SIZE / TRIM REFERENCE</text>
+    <text x="900" y="1270" font-size="38">BLUE DASH = CONFIGURABLE REFERENCE GUIDE</text>
+    <text x="900" y="1360" font-size="42" font-weight="700" fill="#e63020">CONFIRM PRODUCTION TOLERANCES</text>
+    <text x="900" y="1425" font-size="30">No bleed or safe-area tolerance is implied by this file.</text>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="34" fill="#111111">
+    <text x="36" y="70">18 in / 1800 units</text>
+    <text x="1764" y="2360" text-anchor="end">24 in / 2400 units</text>
+  </g>
+</svg>

@@ -176,7 +176,6 @@ export function CouponsClient() {
     });
   }
 
-  const reviewCode = codes.find((c) => c.code === "REVIEW10");
   const welcomeCode = codes.find((c) => c.code === "WELCOME10");
 
   return (
@@ -201,37 +200,6 @@ export function CouponsClient() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-10 space-y-8">
-
-        {/* Review Code Hero */}
-        {reviewCode && (
-          <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-6">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl font-bold font-mono text-amber-900 tracking-widest">{reviewCode.code}</span>
-                  <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                    {reviewCode.is_active ? "Active" : "Inactive"}
-                  </span>
-                </div>
-                <p className="text-sm text-amber-800 font-medium">
-                  ${Number(reviewCode.discount_amount).toFixed(2)} off — {reviewCode.description ?? "Google Review Reward"}
-                </p>
-                <p className="text-xs text-amber-600 mt-1">
-                  Used {reviewCode.redemption_count} time{reviewCode.redemption_count !== 1 ? "s" : ""} total · 1 use per account
-                </p>
-                <p className="text-xs text-amber-600 mt-2">
-                  Share this code verbally or in reply emails when a customer shows you their Google review.
-                </p>
-              </div>
-              <button
-                onClick={() => copyCode(reviewCode.code)}
-                className="bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors shrink-0"
-              >
-                {copiedCode === reviewCode.code ? "✓ Copied!" : "Copy Code"}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Welcome Code Hero */}
         {welcomeCode ? (
@@ -308,7 +276,6 @@ export function CouponsClient() {
                     onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   >
-                    <option value="review">Review</option>
                     <option value="vip">VIP</option>
                     <option value="custom">Custom</option>
                   </select>
@@ -417,11 +384,11 @@ export function CouponsClient() {
                         <div className="flex items-center gap-2">
                           <span className="font-bold font-mono text-[#1c1712] tracking-wider text-sm">{c.code}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            c.type === "review" ? "bg-amber-100 text-amber-700" :
+                            c.type === "review" ? "bg-gray-100 text-gray-600" :
                             c.type === "vip" ? "bg-purple-100 text-purple-700" :
                             "bg-gray-100 text-gray-600"
                           }`}>
-                            {c.type}
+                            {c.type === "review" ? "legacy review" : c.type}
                           </span>
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                             c.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500"
@@ -439,17 +406,24 @@ export function CouponsClient() {
                           {" · "}{c.per_account_limit === 1 ? "1 use per account" : `${c.per_account_limit} uses/account`}
                           {c.expires_at ? ` · expires ${new Date(c.expires_at).toLocaleDateString("en-CA")}` : ""}
                         </p>
+                        {c.type === "review" && (
+                          <p className="mt-1 text-xs font-medium text-amber-700">
+                            Honour previously promised redemptions; do not distribute this code.
+                          </p>
+                        )}
                       </div>
                     </div>
 
                     {/* Actions */}
                     <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={() => copyCode(c.code)}
-                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors"
-                      >
-                        {copiedCode === c.code ? "✓ Copied" : "Copy"}
-                      </button>
+                      {c.type !== "review" && (
+                        <button
+                          onClick={() => copyCode(c.code)}
+                          className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          {copiedCode === c.code ? "✓ Copied" : "Copy"}
+                        </button>
+                      )}
                       <button
                         onClick={() => void toggleActive(c.id, !c.is_active)}
                         className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${

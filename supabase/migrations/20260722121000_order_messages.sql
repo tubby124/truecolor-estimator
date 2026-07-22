@@ -3,7 +3,6 @@
 -- while crons and signed webhooks use createServiceClient().
 
 set lock_timeout = '5s';
-
 create table if not exists public.order_messages (
   id                       uuid primary key default gen_random_uuid(),
   order_id                 uuid not null references public.orders(id) on delete restrict,
@@ -66,30 +65,21 @@ create table if not exists public.order_messages (
     )
   )
 );
-
 create unique index if not exists order_messages_client_request_unique_idx
   on public.order_messages (client_request_id);
-
 create unique index if not exists order_messages_provider_message_unique_idx
   on public.order_messages (provider_message_id);
-
 create unique index if not exists order_messages_gmail_message_unique_idx
   on public.order_messages (gmail_mailbox, gmail_message_id);
-
 create index if not exists order_messages_order_created_idx
   on public.order_messages (order_id, created_at desc);
-
 create index if not exists order_messages_customer_created_idx
   on public.order_messages (customer_id, created_at desc);
-
 create index if not exists order_messages_status_created_idx
   on public.order_messages (status, created_at desc);
-
 comment on table public.order_messages is
   'Service-only ledger for outbound order emails, Resend delivery events, and inbound Gmail replies.';
-
 alter table public.order_messages enable row level security;
-
 -- Claim one post-ingestion stage at a time. A short lease prevents concurrent
 -- cron/manual runs from duplicating side effects while allowing recovery after
 -- a worker crash. Only the service role may call this RPC.
@@ -135,7 +125,6 @@ begin
   return claimed_id is not null;
 end;
 $$;
-
 revoke all on function public.claim_order_message_stage(uuid, text)
   from public, anon, authenticated;
 grant execute on function public.claim_order_message_stage(uuid, text)

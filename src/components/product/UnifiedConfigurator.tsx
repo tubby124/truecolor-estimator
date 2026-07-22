@@ -384,14 +384,31 @@ export function UnifiedConfigurator({
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Quantity</p>
         {cfg.qty_tiers && (
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-2 mb-3" role="radiogroup" aria-label="Quantity">
             {cfg.qty_tiers.map((tier) => {
               const active = requestedQty === tier;
               return (
                 <button
                   key={tier}
                   type="button"
+                  role="radio"
+                  aria-checked={active}
+                  tabIndex={active || (!cfg.qty_tiers?.includes(requestedQty) && tier === cfg.qty_tiers?.[0]) ? 0 : -1}
                   onClick={() => setQtyInput(String(tier))}
+                  onKeyDown={(event) => {
+                    const currentIndex = cfg.qty_tiers?.indexOf(tier) ?? 0;
+                    const optionCount = cfg.qty_tiers?.length ?? 0;
+                    let nextIndex: number | null = null;
+                    if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (currentIndex + 1) % optionCount;
+                    if (event.key === "ArrowLeft" || event.key === "ArrowUp") nextIndex = (currentIndex - 1 + optionCount) % optionCount;
+                    if (event.key === "Home") nextIndex = 0;
+                    if (event.key === "End") nextIndex = optionCount - 1;
+                    if (nextIndex == null || !cfg.qty_tiers) return;
+                    event.preventDefault();
+                    setQtyInput(String(cfg.qty_tiers[nextIndex]));
+                    const group = event.currentTarget.closest('[role="radiogroup"]');
+                    requestAnimationFrame(() => group?.querySelectorAll<HTMLElement>('[role="radio"]')[nextIndex]?.focus());
+                  }}
                   className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
                     active
                       ? "border-[var(--brand)] bg-[var(--brand)] text-white font-semibold"

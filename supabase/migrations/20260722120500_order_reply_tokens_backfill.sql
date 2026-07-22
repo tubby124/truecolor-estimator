@@ -3,7 +3,6 @@
 -- order, but normal inserts and non-key updates remain available.
 
 set lock_timeout = '5s';
-
 insert into public.order_reply_tokens (order_id)
 select id
 from public.orders

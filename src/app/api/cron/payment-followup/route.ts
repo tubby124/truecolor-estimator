@@ -155,6 +155,7 @@ export async function GET(req: NextRequest) {
             `True Color Order ${order.order_number}`,
             customer.email,
             redirectUrl,
+            { orderId: order.id },
           );
           payUrl = `${SITE_URL}/pay/${token}`;
         } catch {

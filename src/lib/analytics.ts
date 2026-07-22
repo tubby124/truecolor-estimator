@@ -52,9 +52,10 @@ export function trackSelectItem(params: {
   item_category?: string;
   placement: AnalyticsPlacement;
   destination: string;
+  item_list_name?: string;
 }) {
   gtag("event", "select_item", {
-    item_list_name: params.placement,
+    item_list_name: params.item_list_name ?? params.placement,
     placement: params.placement,
     destination: params.destination,
     items: [{
@@ -62,6 +63,24 @@ export function trackSelectItem(params: {
       item_name: params.item_name,
       ...(params.item_category ? { item_category: params.item_category } : {}),
     }],
+  });
+}
+
+export function trackViewItemList(params: {
+  item_list_name: string;
+  items: Array<{ item_id: string; item_name: string }>;
+}) {
+  gtag("event", "view_item_list", {
+    item_list_name: params.item_list_name,
+    items: params.items,
+  });
+}
+
+export function trackClickToCall(params: { placement: string }) {
+  gtag("event", "click_to_call", {
+    placement: params.placement,
+    page_path: "/why-true-color",
+    link_url: "tel:+13069548688",
   });
 }
 
@@ -120,12 +139,41 @@ export function trackPurchase(params: {
   });
 }
 
+export function trackRevenueConversion(params: {
+  conversion_type: "purchase_online" | "quote_won";
+  transaction_id: string;
+  value: number;
+}) {
+  gtag("event", params.conversion_type, {
+    currency: "CAD",
+    transaction_id: params.transaction_id,
+    value: params.value,
+  });
+}
+
 export function trackGenerateLead(params: { value?: number; lead_source: string; form_id?: string }) {
   gtag("event", "generate_lead", {
     currency: "CAD",
     value: params.value ?? 0,
     lead_source: params.lead_source,
     form_id: params.form_id,
+  });
+}
+
+export function trackPaidLandingView() {
+  gtag("event", "view_paid_landing", {
+    page_path: "/why-true-color",
+  });
+}
+
+export function trackPaidEngagement(params: {
+  event_name: "directions_click" | "reviews_click";
+  placement: string;
+  link_url: string;
+}) {
+  gtag("event", params.event_name, {
+    placement: params.placement,
+    link_url: params.link_url,
   });
 }
 

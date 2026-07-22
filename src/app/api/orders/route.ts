@@ -12,9 +12,18 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
-import { createOrFindWaveCustomer, createWaveInvoice, approveWaveInvoice } from "@/lib/wave/invoice";
-import { createCloverCheckout } from "@/lib/payment/clover";
+import { CloverCheckoutError, createCloverCheckout } from "@/lib/payment/clover";
+import {
+  completeOrderCheckout,
+  failOrderCheckout,
+  reserveOrderCheckout,
+} from "@/lib/payment/order-checkout";
+import {
+  provisionOrderWaveInvoice,
+  QuoteWaveProvisioningError,
+} from "@/lib/payment/quote-wave";
 import { encodePaymentToken } from "@/lib/payment/token";
 import type { CartItem } from "@/lib/cart/cart";
 import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
@@ -23,12 +32,13 @@ import { estimate } from "@/lib/engine";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
-import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { classifyReferrer } from "@/lib/analytics/referrer";
-import { mergeUtmAttribution } from "@/lib/analytics/utm";
+import { mergeLatestPaidAttribution, mergeUtmAttribution } from "@/lib/analytics/utm";
+import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytics/attribution-db";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 
 export interface CreateOrderRequest {
+  checkout_submission_id: string;
   items: CartItem[];
   contact: {
     name: string;
@@ -49,11 +59,24 @@ export interface CreateOrderRequest {
   utm_medium?: string;
   utm_content?: string;
   utm_term?: string;
+  gclid?: string;
+  gbraid?: string;
+  wbraid?: string;
+  keyword?: string;
+  matchtype?: string;
+  device?: string;
+  loc_physical_ms?: string;
+  loc_interest_ms?: string;
+  adgroupid?: string;
+  creative?: string;
+  campaignid?: string;
+  network?: string;
 }
 
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
 const RUSH_FEE = 40;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /**
  * Server-side price revalidation.
@@ -61,15 +84,15 @@ const RUSH_FEE = 40;
  * sell_price with the authoritative server price. Prevents price manipulation attacks
  * where a malicious user submits fake prices (e.g. sell_price: 0.01).
  *
- * If the engine can't price an item (BLOCKED/NEEDS_CLARIFICATION), the client price
- * is accepted with a warning logged — handles custom/unusual items gracefully.
+ * If the engine can't price an item, checkout is rejected. Custom/unusual work
+ * must use the quote flow; public client prices are never authoritative.
  *
  * NOTE: is_rush is intentionally NOT passed to the engine here. Rush is a flat $40
  * per-order fee applied at the order level (line 246), not per-item. Passing is_rush
  * to estimate() would add $40 to EACH item's sell_price, then the order-level rush
  * would add another $40, resulting in overcharging.
  */
-function revalidateItemPrices(items: CartItem[]): CartItem[] {
+export function revalidateItemPrices(items: CartItem[]): CartItem[] {
   return items.map((item) => {
     try {
       const result = estimate({
@@ -97,17 +120,11 @@ function revalidateItemPrices(items: CartItem[]): CartItem[] {
           );
         }
         return { ...item, sell_price: serverPrice, design_fee: result.design_fee ?? 0, line_items: result.line_items };
-      } else {
-        // Engine couldn't price this item — log and accept client price (manual order)
-        console.warn(
-          `[orders] price revalidation: engine returned ${result.status} for ${item.product_name} — accepting client price $${item.sell_price.toFixed(2)} (manual review recommended)`
-        );
-        return item;
       }
+      throw new Error(`Pricing engine returned ${result.status}`);
     } catch (err) {
-      // Engine threw — accept client price but log
       console.error(`[orders] price revalidation error for ${item.product_name}:`, err);
-      return item;
+      throw new Error(`Unable to price ${item.product_name}. Please request a custom quote.`);
     }
   });
 }
@@ -124,7 +141,17 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as CreateOrderRequest;
-    const { items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths, discount_code: rawDiscountCode, marketing_consent, utm_source, utm_campaign, utm_medium, utm_content, utm_term } = body;
+    const {
+      checkout_submission_id, items: rawItems, contact, is_rush, payment_method, notes, file_storage_paths,
+      discount_code: rawDiscountCode, marketing_consent,
+      utm_source, utm_campaign, utm_medium, utm_content, utm_term,
+      gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
+      loc_interest_ms, adgroupid, creative, campaignid, network,
+    } = body;
+
+    if (!UUID_RE.test(checkout_submission_id ?? "")) {
+      return NextResponse.json({ error: "A valid checkout submission ID is required" }, { status: 400 });
+    }
 
     if (!rawItems?.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -142,6 +169,9 @@ export async function POST(req: NextRequest) {
     if (contact.email.length > 254) {
       return NextResponse.json({ error: "Email address is too long" }, { status: 400 });
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
+      return NextResponse.json({ error: "A valid email address is required" }, { status: 400 });
+    }
     if ((contact.company ?? "").length > 100) {
       return NextResponse.json({ error: "Company name is too long (max 100 characters)" }, { status: 400 });
     }
@@ -153,7 +183,15 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Server-side price revalidation (prevents price manipulation attacks) ──
-    const items = revalidateItemPrices(rawItems);
+    let items: CartItem[];
+    try {
+      items = revalidateItemPrices(rawItems);
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "One or more items require a custom quote." },
+        { status: 400 },
+      );
+    }
 
     const supabase = createServiceClient();
 
@@ -263,7 +301,20 @@ export async function POST(req: NextRequest) {
     let validatedDiscountCode: string | null = null;
     let validatedDiscount = 0;
     let discountCodeId: string | null = null;
-    if (rawDiscountCode?.trim()) {
+    const { data: storedSubmission, error: storedSubmissionError } = await supabase
+      .from("orders")
+      .select("discount_code, discount_amount")
+      .eq("checkout_submission_id", checkout_submission_id)
+      .maybeSingle();
+    if (storedSubmissionError) {
+      return NextResponse.json({ error: "Could not verify the saved checkout attempt" }, { status: 500 });
+    }
+    if (storedSubmission) {
+      validatedDiscountCode = typeof storedSubmission.discount_code === "string"
+        ? storedSubmission.discount_code
+        : null;
+      validatedDiscount = Math.max(0, Number(storedSubmission.discount_amount ?? 0));
+    } else if (rawDiscountCode?.trim()) {
       try {
         const codeUpper = rawDiscountCode.trim().toUpperCase();
         const { data: dc } = await supabase
@@ -320,20 +371,61 @@ export async function POST(req: NextRequest) {
     const orderMin = computeOrderMinSurcharge(discountedItemsSubtotal + rush);
     const smallOrderFee = orderMin.surcharge;
     const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
-    // PST applies to printed goods only — design fees (PST-exempt) are subtracted from the PST base
-    const rawPstBase = items.reduce((s, i) => s + (i.sell_price - (i.design_fee ?? 0)), 0);
-    const pstBase = Math.max(0, rawPstBase - discount + smallOrderFee); // discount reduces PST-taxable base; setup fee adds to it
+    // Saskatchewan PST-20 taxes the full charge for taxable printed material,
+    // including design, production, rush, and setup charges.
+    const pstBase = Math.max(0, discountedSubtotal + rush);
     const gst = Math.round((discountedSubtotal + rush) * GST_RATE * 100) / 100;
     const pst = Math.round(pstBase * PST_RATE * 100) / 100;
     const total = discountedSubtotal + rush + gst + pst;
+    const checkoutRequestFingerprint = createHash("sha256")
+      .update(JSON.stringify({
+        customer: {
+          email: emailKey,
+          name: contact.name.trim(),
+          company: contact.company?.trim() || null,
+          phone: contact.phone?.trim() || null,
+          address: contact.address?.trim() || null,
+        },
+        payment_method,
+        is_rush,
+        notes: notes?.trim() || null,
+        discount_code: validatedDiscountCode,
+        discount_cents: Math.round(discount * 100),
+        items: items.map((item) => ({
+          category: item.category,
+          product_name: item.product_name,
+          qty: item.qty,
+          sell_price_cents: Math.round(item.sell_price * 100),
+          design_fee_cents: Math.round((item.design_fee ?? 0) * 100),
+          material_code: item.config.material_code ?? null,
+          width_in: item.config.width_in ?? null,
+          height_in: item.config.height_in ?? null,
+          sides: item.config.sides ?? 1,
+          addons: [...(item.config.addons ?? [])].sort(),
+          design_status: item.config.design_status ?? "PRINT_READY",
+        })),
+      }))
+      .digest("hex");
 
     // 3. Create order row — retry up to 3 times on order_number collision (Postgres code 23505)
     // count+1 approach: safe for a small shop; retry handles the rare concurrent-request edge case
     const orderYear = new Date().getFullYear();
-    type OrderRow = { id: string; order_number: string };
+    type OrderRow = {
+      id: string;
+      order_number: string;
+      customer_id: string;
+      status: string;
+      paid_at: string | null;
+      total: number;
+      payment_method: string;
+      conversion_type: string | null;
+      quote_request_id: string | null;
+      checkout_request_fingerprint: string | null;
+    };
     type OrderInsertError = { code?: string; message?: string; details?: string; hint?: string } | null;
     let order: OrderRow | null = null;
     let orderErr: OrderInsertError = null;
+    let resumedOrder = false;
 
     for (let attempt = 0; attempt < 3; attempt++) {
       const { count: orderCount } = await supabase
@@ -342,7 +434,19 @@ export async function POST(req: NextRequest) {
       const orderNumber = `TC-${orderYear}-${String((orderCount ?? 0) + 1).padStart(4, "0")}`;
 
       const utm = mergeUtmAttribution(
-        { utm_source, utm_campaign, utm_medium, utm_content, utm_term },
+        {
+          utm_source, utm_campaign, utm_medium, utm_content, utm_term,
+          gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
+          loc_interest_ms, adgroupid, creative, campaignid, network,
+        },
+        req.headers.get("cookie"),
+      );
+      const latestPaidTouch = mergeLatestPaidAttribution(
+        {
+          utm_source, utm_campaign, utm_medium, utm_content, utm_term,
+          gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
+          loc_interest_ms, adgroupid, creative, campaignid, network,
+        },
         req.headers.get("cookie"),
       );
       // Prefer the cookie's first-touch landing_referrer (true upstream — e.g.
@@ -366,20 +470,43 @@ export async function POST(req: NextRequest) {
           discount_code: validatedDiscountCode ?? undefined,
           discount_amount: discount,
           payment_method,
+          checkout_submission_id,
+          checkout_request_fingerprint: checkoutRequestFingerprint,
+          conversion_type: "purchase_online",
+          conversion_key: `purchase_online:${orderNumber}`,
           notes: notes?.trim() || (contact.company ? `Company: ${contact.company}` : null),
-          utm_source: utm.utm_source ?? null,
-          utm_campaign: utm.utm_campaign ?? null,
+          ...mapAttributionToDb(utm),
+          ...mapLatestPaidAttributionToDb(latestPaidTouch),
           referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
           referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
           raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,
         })
-        .select("id, order_number")
+        .select("id, order_number, customer_id, status, paid_at, total, payment_method, conversion_type, quote_request_id, checkout_request_fingerprint")
         .single();
 
       order = data as OrderRow | null;
       orderErr = error as OrderInsertError;
       if (!error || (error as { code?: string }).code !== "23505") break;
-      // 23505 = unique_violation — order_number collision; re-fetch count and retry
+
+      // A repeated browser submission reuses the one existing order. This
+      // lookup distinguishes the idempotency-key conflict from an unrelated
+      // order_number collision, which still retries with a fresh number.
+      const { data: existingAttempt, error: existingAttemptError } = await supabase
+        .from("orders")
+        .select("id, order_number, customer_id, status, paid_at, total, payment_method, conversion_type, quote_request_id, checkout_request_fingerprint")
+        .eq("checkout_submission_id", checkout_submission_id)
+        .maybeSingle();
+      if (existingAttemptError) {
+        orderErr = existingAttemptError as OrderInsertError;
+        break;
+      }
+      if (existingAttempt) {
+        order = existingAttempt as OrderRow;
+        orderErr = null;
+        resumedOrder = true;
+        break;
+      }
+      // Otherwise this was an order_number collision; re-fetch count and retry.
     }
 
     if (orderErr || !order) {
@@ -392,9 +519,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
     }
 
+    if (resumedOrder) {
+      const sameAttempt = order.customer_id === customer.id &&
+        order.checkout_request_fingerprint === checkoutRequestFingerprint &&
+        order.payment_method === payment_method &&
+        order.conversion_type === "purchase_online" && order.quote_request_id === null;
+      if (!sameAttempt) {
+        return NextResponse.json(
+          { error: "This checkout attempt no longer matches the saved order. No payment was started." },
+          { status: 409 },
+        );
+      }
+      if (order.paid_at !== null && ["payment_received", "in_production", "ready_for_pickup", "complete"].includes(order.status)) {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+        return NextResponse.json({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          checkoutUrl: `${siteUrl}/order-confirmed?oid=${order.id}`,
+          waveInvoiceId: null,
+        });
+      }
+      if (order.status !== "pending_payment" || order.paid_at !== null) {
+        return NextResponse.json(
+          { error: "This checkout attempt is no longer payable. No payment was started." },
+          { status: 409 },
+        );
+      }
+    }
+
     // Audit event: order created (non-fatal — see src/lib/audit/record.ts)
     const reqCtx = extractRequestContext(req);
-    void recordAuditEvent({
+    if (!resumedOrder) void recordAuditEvent({
       actor_type: "customer",
       actor_id: contact.email.toLowerCase().trim(),
       event_type: "order.created",
@@ -413,7 +568,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Increment customer lifetime stats (non-fatal)
-    void (async () => {
+    if (!resumedOrder) void (async () => {
       try {
         const { data: c } = await supabase
           .from("customers")
@@ -435,7 +590,7 @@ export async function POST(req: NextRequest) {
     })();
 
     // Clear staff-assigned pending discount once consumed (non-fatal). Must `await`.
-    if (validatedDiscountCode) {
+    if (!resumedOrder && validatedDiscountCode) {
       const { error: clearErr } = await supabase
         .from("customers")
         .update({ pending_discount_code: null } as Record<string, unknown>)
@@ -445,7 +600,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Record discount redemption (non-fatal — order is already saved)
-    if (discountCodeId && discount > 0) {
+    if (!resumedOrder && discountCodeId && discount > 0) {
       void supabase
         .from("discount_redemptions")
         .insert({
@@ -473,8 +628,9 @@ export async function POST(req: NextRequest) {
 
     // 4. Create order_items rows
     // line_items_json requires DB migration: ALTER TABLE order_items ADD COLUMN IF NOT EXISTS line_items_json JSONB;
-    const orderItems = items.map((item) => ({
+    const orderItems = items.map((item, index) => ({
       order_id: order.id,
+      checkout_line_key: `${checkout_submission_id}:${index}`,
       category: item.category,
       product_name: item.product_name,
       material_code: item.config.material_code ?? null,
@@ -500,6 +656,7 @@ export async function POST(req: NextRequest) {
     if (smallOrderFee > 0) {
       orderItems.push({
         order_id: order.id,
+        checkout_line_key: `${checkout_submission_id}:${orderItems.length}`,
         category: "SERVICE",
         product_name: SMALL_ORDER_FEE_LABEL,
         material_code: null,
@@ -515,151 +672,127 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
+    const { error: itemsErr } = await supabase
+      .from("order_items")
+      .upsert(orderItems, { onConflict: "checkout_line_key", ignoreDuplicates: true });
     if (itemsErr) {
-      console.error("[orders] order_items insert:", itemsErr);
-      // Non-fatal — order exists, continue
+      console.error("[orders] order_items upsert:", itemsErr);
+      return NextResponse.json(
+        { error: "Could not save the order items. No payment was started." },
+        { status: 500 },
+      );
     }
 
-    // 5. Create Wave invoice (DRAFT, silent)
+    const { data: persistedItems, error: persistedItemsError } = await supabase
+      .from("order_items")
+      .select("checkout_line_key, line_total")
+      .eq("order_id", order.id);
+    if (persistedItemsError) {
+      return NextResponse.json(
+        { error: "Could not verify the saved order items. No payment was started." },
+        { status: 500 },
+      );
+    }
+    const expectedKeys = new Set(orderItems.map((item) => item.checkout_line_key));
+    const persistedSubtotalCents = (persistedItems ?? []).reduce(
+      (sum, item) => sum + Math.round(Number(item.line_total) * 100),
+      0,
+    );
+    const expectedSubtotalCents = orderItems.reduce(
+      (sum, item) => sum + Math.round(Number(item.line_total) * 100),
+      0,
+    );
+    if (
+      persistedItems?.length !== orderItems.length ||
+      persistedSubtotalCents !== expectedSubtotalCents ||
+      persistedItems.some((item) => !expectedKeys.has(String(item.checkout_line_key)))
+    ) {
+      return NextResponse.json(
+        { error: "The saved order items no longer match this checkout attempt. No payment was started." },
+        { status: 409 },
+      );
+    }
+
+    // 5. Provision and approve Wave under a locked, fail-closed reservation.
+    // Clover is unreachable until the approved invoice is durably linked to
+    // this order. Any outcome after a Wave call begins is treated as ambiguous
+    // and requires staff reconciliation instead of an automatic retry.
+    const waveItems = items.flatMap((item) => {
+      const fee = item.design_fee ?? 0;
+      const productAmt = item.sell_price - fee;
+      const lines = [];
+      if (productAmt > 0) {
+        lines.push({ description: item.label, unitPrice: productAmt / item.qty, qty: item.qty, applyGst: true, applyPst: true });
+      }
+      if (fee > 0) {
+        lines.push({ description: "Design / Artwork Fee", unitPrice: fee, qty: 1, applyGst: true, applyPst: true });
+      }
+      if (productAmt <= 0 && fee <= 0) {
+        lines.push({ description: item.label, unitPrice: item.sell_price / item.qty, qty: item.qty, applyGst: true, applyPst: true });
+      }
+      return lines;
+    });
+
+    if (discount > 0) {
+      waveItems.push({
+        description: `Discount${validatedDiscountCode ? ` (${validatedDiscountCode})` : ""}`,
+        unitPrice: -discount,
+        qty: 1,
+        applyGst: true,
+        applyPst: true,
+      });
+    }
+    if (smallOrderFee > 0) {
+      waveItems.push({
+        description: SMALL_ORDER_FEE_LABEL,
+        unitPrice: smallOrderFee,
+        qty: 1,
+        applyGst: true,
+        applyPst: true,
+      });
+    }
+
     let waveInvoiceId: string | null = null;
     try {
-      const waveCustomerId = await createOrFindWaveCustomer(
-        contact.email.toLowerCase().trim(),
-        contact.name.trim()
+      const wave = await provisionOrderWaveInvoice(
+        supabase,
+        order.id,
+        resumedOrder ? undefined : {
+          orderNumber: order.order_number,
+          customerEmail: emailKey,
+          customerName: contact.name.trim(),
+          waveItems,
+          isRush: is_rush,
+        },
       );
-
-      // Split items with a design fee into two Wave lines:
-      //   1. Product/hardware portion (GST + PST)
-      //   2. Design fee portion (GST only — PST-exempt service)
-      const waveItems = items.flatMap((item) => {
-        const fee = item.design_fee ?? 0;
-        const productAmt = item.sell_price - fee;
-        const lines = [];
-        if (productAmt > 0) {
-          lines.push({ description: item.label, unitPrice: productAmt / item.qty, qty: item.qty, applyGst: true, applyPst: true });
-        }
-        if (fee > 0) {
-          lines.push({ description: "Design / Artwork Fee", unitPrice: fee, qty: 1, applyGst: true, applyPst: false });
-        }
-        if (productAmt <= 0 && fee <= 0) {
-          // Fallback: keep original item if amounts are zero
-          lines.push({ description: item.label, unitPrice: item.sell_price / item.qty, qty: item.qty, applyGst: true, applyPst: true });
-        }
-        return lines;
-      });
-
-      // Apply validated discount as a negative-amount Wave line. DB subtracts
-      // discount from the pre-tax base (line ~314) and from the PST base (~325);
-      // mirror that here so Wave invoice total = DB total. Without this, Wave
-      // sees the full pre-discount amount and the invoice stays $X.XX +
-      // tax-on-discount over-due forever even after the customer pays the
-      // correct discounted total via Clover (caused 3 zombies pre-2026-05-31).
-      if (discount > 0) {
-        waveItems.push({
-          description: `Discount${validatedDiscountCode ? ` (${validatedDiscountCode})` : ""}`,
-          unitPrice: -discount,
-          qty: 1,
-          applyGst: true,
-          applyPst: true,
-        });
+      if (wave.action !== "ready" || !wave.invoiceId) {
+        return NextResponse.json(
+          { error: "Order accounting setup is still being verified. No payment was started.", orderId: order.id },
+          { status: 409 },
+        );
       }
-
-      // Append the small-order setup fee as its own Wave line so the invoice
-      // explains the surcharge transparently to the customer.
-      if (smallOrderFee > 0) {
-        waveItems.push({
-          description: SMALL_ORDER_FEE_LABEL,
-          unitPrice: smallOrderFee,
-          qty: 1,
-          applyGst: true,
-          applyPst: true,
-        });
-      }
-
-      const inv = await createWaveInvoice(waveCustomerId, waveItems, {
-        isRush: is_rush,
-        orderNumber: order.order_number,
-      });
-
-      waveInvoiceId = inv.invoiceId;
-
-      // Save wave_invoice_id + wave_invoice_number back to order.
-      // CRITICAL: must `await` — `void supabase.update().eq()` does NOT fire the HTTP
-      // request (PostgrestFilterBuilder only executes on await/.then()). Bug found
-      // 2026-05-15 caused 30+ days of Wave orders to have NULL wave_invoice_id
-      // even though the Wave invoice was created successfully.
-      //
-      // wave_invoice_number was missing here until 2026-05-22 — staff "Wave #" badge
-      // was therefore blank on every customer-pays-online order. Manual-order route
-      // wrote both all along.
-      {
-        const { error: updErr } = await supabase
-          .from("orders")
-          .update({
-            wave_invoice_id: waveInvoiceId,
-            wave_invoice_number: inv.invoiceNumber,
-          } as Record<string, unknown>)
-          .eq("id", order.id);
-        if (updErr) console.error("[orders] wave_invoice_id/number save failed (non-fatal):", updErr.message);
-      }
-
-      // Auto-approve the invoice so it appears in Wave reports and can be sent as a receipt.
-      // Non-fatal — order and invoice still exist if this fails. But silent-fail is NOT
-      // ok: if approve fails, the invoice stays DRAFT and customers can't pay through
-      // the Wave-hosted link. Mirror the outer Wave-creation alert pattern so staff find
-      // out instantly (audit row + Telegram). TC-2026-0113 / TC-2026-0114 were stuck
-      // because this used to be a bare console.warn.
-      try {
-        await approveWaveInvoice(waveInvoiceId);
-        const { error: updErr } = await supabase
-          .from("orders")
-          .update({ wave_invoice_approved_at: new Date().toISOString() } as Record<string, unknown>)
-          .eq("id", order.id);
-        if (updErr) console.error("[orders] wave_invoice_approved_at save failed (non-fatal):", updErr.message);
-      } catch (approveErr) {
-        const approveMsg = approveErr instanceof Error ? approveErr.message : String(approveErr);
-        console.warn("[orders] Wave invoice auto-approve failed (non-fatal):", approveMsg);
-        void recordAuditEvent({
-          actor_type: "system",
-          actor_id: "api/orders",
-          event_type: "wave.approve_failed",
-          entity_type: "order",
-          entity_id: order.id,
-          detail: {
-            wave_invoice_id: waveInvoiceId,
-            wave_invoice_number: inv.invoiceNumber,
-            order_number: order.order_number,
-            error: approveMsg.slice(0, 500),
-            source: "/api/orders auto-approve",
-          },
-        });
-        void sendTelegramNotification(
-          `⚠️ <b>Wave invoice approve FAILED</b>\n` +
-          `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
-          `Wave invoice ${escapeTelegramHtml(inv.invoiceNumber ?? waveInvoiceId)} stays DRAFT — customer can't pay.\n` +
-          `Error: ${escapeTelegramHtml(approveMsg.slice(0, 200))}\n` +
-          `Action: open Wave → invoice → manually Approve. Then retry payment.`
-        ).catch(() => {});
-      }
+      waveInvoiceId = wave.invoiceId;
     } catch (waveErr) {
-      // Wave failure is non-fatal — order still exists, staff can create manually.
-      // But it MUST alert: silent Wave creation failures mean the customer pays
-      // (Clover gateway still works) and you have no Wave invoice on the books.
       const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
-      console.error("[orders] Wave invoice creation failed (non-fatal):", msg);
-      void sendTelegramNotification(
-        `🚨 <b>Wave invoice NOT created</b>\n` +
-        `Order <b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(total).toFixed(2)}\n` +
-        `Path: /api/orders (customer checkout)\n` +
-        `Customer can still pay via Clover, but no Wave bookkeeping entry exists.\n` +
-        `Error: ${escapeTelegramHtml(msg.slice(0, 200))}\n` +
-        `Action: create the Wave invoice manually and link it via staff portal.`
-      ).catch(() => {});
+      const ambiguous = waveErr instanceof QuoteWaveProvisioningError && waveErr.ambiguous;
+      console.error("[orders] Wave provisioning blocked checkout:", msg);
+      void recordAuditEvent({
+        actor_type: "system",
+        actor_id: "api/orders",
+        event_type: "wave.order_provision_failed",
+        entity_type: "order",
+        entity_id: order.id,
+        detail: { order_number: order.order_number, ambiguous, clover_called: false, error: msg.slice(0, 500) },
+      });
+      return NextResponse.json(
+        { error: "Order accounting setup could not be confirmed. No payment was started.", orderId: order.id },
+        { status: 503 },
+      );
     }
 
     // 6. Clover Hosted Checkout (card) or /pay/{token} fallback URL (eTransfer)
     let checkoutUrl: string | null = null;
+    let emailCheckoutUrl: string | null = null;
     if (payment_method === "clover_card") {
       const totalCents = Math.round(total * 100);
       const description =
@@ -672,29 +805,62 @@ export async function POST(req: NextRequest) {
         "https://truecolorprinting.ca";
       const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
 
-      // Pass order.id as externalReferenceId so Clover echoes it back in PAYMENT webhook events.
-      // This lets the webhook match the order even if the customer bypasses /pay/[token].
-      const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl, order.id);
-      checkoutUrl = clover.checkoutUrl;
-
-      // Pre-set payment_reference to order UUID so webhook can match before /pay/[token] is clicked.
-      // /pay/[token] will also set this — no conflict since the value is the same.
-      // CRITICAL: must `await` — bug found 2026-05-15.
-      {
-        const { error: updErr } = await supabase
-          .from("orders")
-          .update({ payment_reference: order.id } as Record<string, unknown>)
-          .eq("id", order.id);
-        if (updErr) console.error("[orders] payment_reference save (Clover) failed (non-fatal):", updErr.message);
+      const checkoutReservation = await reserveOrderCheckout(supabase, order.id);
+      if (checkoutReservation.action === "resume" && checkoutReservation.checkoutUrl) {
+        checkoutUrl = checkoutReservation.checkoutUrl;
+      } else if (checkoutReservation.action === "wait") {
+        return NextResponse.json(
+          { error: "Secure checkout is already being created or verified. No second session was started.", orderId: order.id },
+          { status: 409 },
+        );
+      } else {
+        if (!checkoutReservation.reservationId) {
+          return NextResponse.json(
+            { error: "Secure checkout could not be reserved. No payment was started.", orderId: order.id },
+            { status: 503 },
+          );
+        }
+        try {
+          const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl, order.id);
+          await completeOrderCheckout(supabase, {
+            orderId: order.id,
+            reservationId: checkoutReservation.reservationId,
+            checkoutUrl: clover.checkoutUrl,
+            sessionId: clover.sessionId,
+            expiresAt: clover.expiresAt,
+          });
+          checkoutUrl = clover.checkoutUrl;
+        } catch (cloverError) {
+          const ambiguous = !(cloverError instanceof CloverCheckoutError) || cloverError.outcome === "ambiguous";
+          await failOrderCheckout(supabase, {
+            orderId: order.id,
+            reservationId: checkoutReservation.reservationId,
+            ambiguous,
+            error: cloverError instanceof Error ? cloverError.message : "Unknown Clover checkout error",
+          }).catch((reservationError) => {
+            console.error("[orders] Clover reservation failure update failed:", reservationError);
+          });
+          return NextResponse.json(
+            {
+              error: ambiguous
+                ? "Secure checkout is being verified. No second session will be started."
+                : "Secure checkout could not be started. Please try again.",
+              orderId: order.id,
+            },
+            { status: ambiguous ? 409 : 503 },
+          );
+        }
       }
 
-      // Build a durable /pay/{token} URL for the email (30-day validity, creates fresh Clover session on each click)
-      // The raw checkoutUrl expires after 15 minutes and should not go in emails
+      // The durable email link resumes this reservation and creates a new
+      // session only after the prior one has definitely expired.
       try {
-        const payToken = encodePaymentToken(total, description, contact.email, redirectUrl);
-        checkoutUrl = `${siteUrl}/pay/${payToken}`;
+        const payToken = encodePaymentToken(total, description, contact.email, redirectUrl, {
+          orderId: order.id,
+        });
+        emailCheckoutUrl = `${siteUrl}/pay/${payToken}`;
       } catch {
-        // If token signing fails, keep the raw Clover URL as fallback
+        emailCheckoutUrl = checkoutUrl;
       }
     } else if (payment_method === "etransfer") {
       // Generate a /pay/{token} URL as an optional card payment fallback.
@@ -710,8 +876,11 @@ export async function POST(req: NextRequest) {
           items.length === 1
             ? items[0].product_name
             : `True Color Order ${order.order_number} (${items.length} items)`;
-        const payToken = encodePaymentToken(total, desc, contact.email, redirectUrl);
+        const payToken = encodePaymentToken(total, desc, contact.email, redirectUrl, {
+          orderId: order.id,
+        });
         checkoutUrl = `${siteUrl}/pay/${payToken}`;
+        emailCheckoutUrl = checkoutUrl;
         // Note: this is the eTransfer fallback path where payment_reference stores
         // the /pay/{token} URL (not the order.id). Used by /order-confirmed to
         // surface a "Pay by card instead" option. Must `await`.
@@ -726,28 +895,8 @@ export async function POST(req: NextRequest) {
     }
 
 
-    // 7. Check if customer has used REVIEW10 (for smart email promo — non-fatal)
-    let hasUsedReviewCode = false;
-    try {
-      const { data: reviewCodeRow } = await supabase
-        .from("discount_codes")
-        .select("id")
-        .eq("code", "REVIEW10")
-        .maybeSingle();
-      if (reviewCodeRow) {
-        const { count: reviewCount } = await supabase
-          .from("discount_redemptions")
-          .select("*", { count: "exact", head: true })
-          .eq("code_id", reviewCodeRow.id)
-          .eq("customer_id", customer.id);
-        hasUsedReviewCode = (reviewCount ?? 0) > 0;
-      }
-    } catch {
-      // Non-fatal — email still sends without smart promo
-    }
-
-    // 8. Send order confirmation email to customer (non-fatal)
-    try {
+    // 7. Send order confirmation email to customer (non-fatal)
+    if (!resumedOrder) try {
       await sendOrderConfirmationEmail({
         orderNumber: order.order_number,
         contact,
@@ -767,10 +916,9 @@ export async function POST(req: NextRequest) {
         total,
         discount_code: validatedDiscountCode ?? undefined,
         discount_amount: discount > 0 ? discount : undefined,
-        hasUsedReviewCode,
         is_rush,
         payment_method,
-        checkout_url: checkoutUrl ?? undefined,
+        checkout_url: emailCheckoutUrl ?? checkoutUrl ?? undefined,
         uploadedFileCount: file_storage_paths?.length ?? 0,
       });
     } catch (emailErr) {
@@ -781,7 +929,7 @@ export async function POST(req: NextRequest) {
     // Syncing at pending_payment caused drip emails to fire before payment was confirmed (TC-15).
 
     // 10. Send staff notification email (non-fatal)
-    try {
+    if (!resumedOrder) try {
       const siteUrlForEmail =
         process.env.NEXT_PUBLIC_SITE_URL ??
         "https://truecolorprinting.ca";

@@ -7,6 +7,8 @@ import type {
   BrokerageProductGroup,
   BrokerageProductOption,
 } from "@/lib/data/brokerages";
+import { readUtmFromStorage } from "@/components/site/UtmCapture";
+import { appendAttributionToFormData } from "@/lib/analytics/utm";
 
 // localStorage key per-brokerage so an agent who orders from two different
 // brokerage portals (rare but possible) doesn't bleed details across.
@@ -247,6 +249,7 @@ export function PortalOrderForm({
       form.append("items", JSON.stringify(items));
       form.append("brokerage_slug", brokerage.slug);
       form.append("shipping_address", shipForApi);
+      appendAttributionToFormData(form, readUtmFromStorage());
 
       const res = await fetch("/api/quote-request", { method: "POST", body: form });
       if (!res.ok) {

@@ -60,6 +60,12 @@ export async function POST(req: NextRequest) {
   if (!body.discount_amount || body.discount_amount <= 0) {
     return NextResponse.json({ error: "Discount amount must be greater than 0." }, { status: 400 });
   }
+  if (body.type === "review") {
+    return NextResponse.json(
+      { error: "Review-incentive discount codes are not permitted." },
+      { status: 400 },
+    );
+  }
 
   const code = body.code.trim().toUpperCase();
 

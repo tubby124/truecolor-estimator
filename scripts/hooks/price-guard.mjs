@@ -150,8 +150,8 @@ Engine flow: loader.ts (CSV parse) -> engine/index.ts (5-step calc)
   Step 5: lot price flag check (isLotPrice prevents qty multiplication)
   Step 6: no per-product minimum clamp; customer cart minimum lives in src/lib/pricing/order-min.ts
 
-Tax: GST(5%)+PST(6%) on checkout ONLY. PST formula: (sell_price - design_fee) * 0.06
-Rush fee is PST-exempt.
+Tax: GST(5%)+PST(6%) on checkout ONLY. For taxable printed-material sales,
+both taxes apply to the full customer charge, including bundled design and rush.
 
 Read /truecolor pricing [category] for detailed engine walkthrough.`,
 

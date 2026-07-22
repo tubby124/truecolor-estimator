@@ -9,6 +9,7 @@ import {
   PUBLISHED_GALLERY_PROJECTS,
   type GalleryProject,
 } from "@/lib/data/gallery-projects";
+import { PRODUCTS } from "@/lib/data/products-content";
 import { trackSelectItem } from "@/lib/analytics";
 
 type DisplayItem = Pick<
@@ -21,9 +22,15 @@ type DisplayItem = Pick<
   | "caption"
   | "alt"
   | "category"
+  | "productSlug"
   | "productHref"
   | "priceLabel"
 >;
+
+function catalogPriceLabel(productSlug: string, fallback = "See current price"): string {
+  const fromPrice = PRODUCTS[productSlug]?.fromPrice;
+  return fromPrice && fromPrice !== "Coming Soon" ? `from ${fromPrice}` : fallback;
+}
 
 const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
   {
@@ -34,7 +41,8 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Coroplast Signs",
     caption: "Coroplast Signs",
     alt: "Coroplast signs printed by True Color Display Printing in Saskatoon",
-    priceLabel: "from $8/sqft",
+    productSlug: "coroplast-signs",
+    priceLabel: catalogPriceLabel("coroplast-signs"),
     productHref: GALLERY_PRODUCT_HREFS["coroplast-signs"],
     category: "Signs",
   },
@@ -46,7 +54,8 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Job Site Signs",
     caption: "Job Site Signs",
     alt: "Job site signs printed by True Color Display Printing in Saskatoon",
-    priceLabel: "from $8/sqft",
+    productSlug: "coroplast-signs",
+    priceLabel: catalogPriceLabel("coroplast-signs"),
     productHref: GALLERY_PRODUCT_HREFS["coroplast-signs"],
     category: "Signs",
   },
@@ -58,7 +67,8 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Vinyl Banners",
     caption: "Vinyl Banners",
     alt: "Vinyl banner printing example from True Color Display Printing in Saskatoon",
-    priceLabel: "from $66",
+    productSlug: "vinyl-banners",
+    priceLabel: catalogPriceLabel("vinyl-banners"),
     productHref: GALLERY_PRODUCT_HREFS["vinyl-banners"],
     category: "Banners",
   },
@@ -70,7 +80,8 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Aluminum Composite Signs",
     caption: "Aluminum Composite Signs",
     alt: "Aluminum composite sign printed by True Color Display Printing in Saskatoon",
-    priceLabel: "from $13/sqft",
+    productSlug: "acp-signs",
+    priceLabel: catalogPriceLabel("acp-signs"),
     productHref: GALLERY_PRODUCT_HREFS["acp-signs"],
     category: "Signs",
   },
@@ -82,7 +93,8 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Vehicle Magnets",
     caption: "Vehicle Magnets",
     alt: "Vehicle magnet printing example from True Color Display Printing in Saskatoon",
-    priceLabel: "from $24/sqft",
+    productSlug: "vehicle-magnets",
+    priceLabel: catalogPriceLabel("vehicle-magnets"),
     productHref: GALLERY_PRODUCT_HREFS["vehicle-magnets"],
     category: "Magnets",
   },
@@ -94,7 +106,8 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Business Cards",
     caption: "Business Cards",
     alt: "Business cards printed by True Color Display Printing in Saskatoon",
-    priceLabel: "from $45",
+    productSlug: "business-cards",
+    priceLabel: catalogPriceLabel("business-cards"),
     productHref: GALLERY_PRODUCT_HREFS["business-cards"],
     category: "Cards & Print",
   },
@@ -106,7 +119,8 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Flyers",
     caption: "Flyers",
     alt: "Flyers printed by True Color Display Printing in Saskatoon",
-    priceLabel: "from $45",
+    productSlug: "flyers",
+    priceLabel: catalogPriceLabel("flyers"),
     productHref: GALLERY_PRODUCT_HREFS.flyers,
     category: "Cards & Print",
   },
@@ -118,7 +132,8 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Foamboard Displays",
     caption: "Foamboard Displays",
     alt: "Foamboard display printed by True Color Display Printing in Saskatoon",
-    priceLabel: "from $45",
+    productSlug: "foamboard-displays",
+    priceLabel: catalogPriceLabel("foamboard-displays"),
     productHref: GALLERY_PRODUCT_HREFS["foamboard-displays"],
     category: "Displays",
   },
@@ -130,13 +145,18 @@ const PRODUCT_SHOWCASE: readonly DisplayItem[] = [
     title: "Retractable Banner Stand",
     caption: "Retractable Banner Stand",
     alt: "Retractable banner stand from True Color Display Printing in Saskatoon",
-    priceLabel: "from $219",
+    productSlug: "retractable-banners",
+    priceLabel: catalogPriceLabel("retractable-banners"),
     productHref: GALLERY_PRODUCT_HREFS["retractable-banners"],
     category: "Displays",
   },
 ];
 
 function GalleryCard({ item, isLCP = false }: { item: DisplayItem; isLCP?: boolean }) {
+  const priceLabel = item.category === "Shop"
+    ? item.priceLabel
+    : catalogPriceLabel(item.productSlug, item.priceLabel);
+
   return (
     <figure className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
       <Link
@@ -167,7 +187,7 @@ function GalleryCard({ item, isLCP = false }: { item: DisplayItem; isLCP?: boole
         <figcaption className="p-4">
           <p className="text-sm font-bold leading-snug text-[#1c1712]">{item.caption}</p>
           <p className="mt-1 text-xs font-semibold text-[#0899c2]">
-            {item.priceLabel} — See price →
+            {priceLabel} — See price →
           </p>
         </figcaption>
       </Link>

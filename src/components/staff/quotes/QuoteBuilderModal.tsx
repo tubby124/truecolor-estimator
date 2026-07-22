@@ -4,7 +4,12 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { QuoteRequest, ItemMeta } from "@/app/staff/quotes/page";
 
-type LineItem = { description: string; qty: string; unitPrice: string; exempt?: boolean };
+type LineItem = {
+  description: string;
+  qty: string;
+  unitPrice: string;
+  taxClass: "printed_good" | "design_service" | "rush_service" | "installation_service";
+};
 
 interface QuoteBuilderModalProps {
   quote: QuoteRequest;
@@ -21,8 +26,9 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
       description: [item.product, item.dimensions, item.material].filter(Boolean).join(" — "),
       qty: String(item.qty || 1),
       unitPrice: "",
+      taxClass: "printed_good" as const,
     }));
-    return mapped.length > 0 ? mapped : [{ description: "", qty: "1", unitPrice: "" }];
+    return mapped.length > 0 ? mapped : [{ description: "", qty: "1", unitPrice: "", taxClass: "printed_good" }];
   };
 
   const [lineItems, setLineItems] = useState<LineItem[]>(itemsFromRequest);
@@ -33,6 +39,18 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
   const [quoteSending, setQuoteSending] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [quoteSent, setQuoteSent] = useState(false);
+  const [taxRates, setTaxRates] = useState<{ gstRate: number; pstRate: number } | null>(null);
+
+  useEffect(() => {
+    if (!open || taxRates) return;
+    void fetch("/api/staff/pricing/tax-rates")
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Tax configuration unavailable");
+        return response.json() as Promise<{ gstRate: number; pstRate: number }>;
+      })
+      .then(setTaxRates)
+      .catch((error) => setQuoteError(error instanceof Error ? error.message : "Tax configuration unavailable"));
+  }, [open, taxRates]);
 
   // Escape key closes the modal — standard OS behavior staff expect.
   useEffect(() => {
@@ -53,6 +71,10 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
       setQuoteError("Add at least one line item with a description and price.");
       return;
     }
+    if (!taxRates) {
+      setQuoteError("Tax configuration is still loading. Please try again.");
+      return;
+    }
     setQuoteSending(true);
     setQuoteError(null);
     try {
@@ -60,8 +82,6 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: quote.email,
-          customerName: quote.name,
           subject: quoteSubject,
           lineItems: items,
           note: quoteNote || undefined,
@@ -188,19 +208,20 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                                 placeholder="e.g. Vinyl Banner 4×8ft"
                                 className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:border-amber-400"
                               />
-                              <label className="mt-1 flex items-center gap-1.5 text-[11px] text-gray-500 cursor-pointer select-none">
-                                <input
-                                  type="checkbox"
-                                  checked={!!li.exempt}
-                                  onChange={(e) => {
-                                    const next = [...lineItems];
-                                    next[idx] = { ...next[idx], exempt: e.target.checked };
-                                    setLineItems(next);
-                                  }}
-                                  className="h-3 w-3 rounded border-gray-300 text-amber-500 focus:ring-amber-400"
-                                />
-                                Fee — no PST (design, rush, install)
-                              </label>
+                              <select
+                                value={li.taxClass}
+                                onChange={(e) => {
+                                  const next = [...lineItems];
+                                  next[idx] = { ...next[idx], taxClass: e.target.value as LineItem["taxClass"] };
+                                  setLineItems(next);
+                                }}
+                                className="mt-1 w-full rounded border border-gray-200 px-1 py-0.5 text-[11px] text-gray-600"
+                              >
+                                <option value="printed_good">Printed good — GST + PST</option>
+                                <option value="design_service">Design service — GST + PST</option>
+                                <option value="rush_service">Rush service — GST + PST</option>
+                                <option value="installation_service">Installation service — GST + PST</option>
+                              </select>
                             </td>
                             <td className="px-2 py-1.5">
                               <input
@@ -253,7 +274,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                   </table>
                 </div>
                 <button
-                  onClick={() => setLineItems([...lineItems, { description: "", qty: "1", unitPrice: "" }])}
+                  onClick={() => setLineItems([...lineItems, { description: "", qty: "1", unitPrice: "", taxClass: "printed_good" }])}
                   className="mt-2 text-xs font-semibold text-amber-600 hover:text-amber-800 transition-colors"
                 >
                   + Add line item
@@ -265,28 +286,26 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
               {(() => {
                 const lineTotal = (li: LineItem) => (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0);
                 const subtotal = Math.round(lineItems.reduce((sum, li) => sum + lineTotal(li), 0) * 100) / 100;
-                const pstableSubtotal = Math.round(
-                  lineItems.reduce((sum, li) => sum + (li.exempt ? 0 : lineTotal(li)), 0) * 100
-                ) / 100;
-                const gst = Math.round(subtotal * 0.05 * 100) / 100;
-                const pst = Math.round(pstableSubtotal * 0.06 * 100) / 100;
+                if (!taxRates) return <p className="text-xs text-gray-500">Loading tax configuration…</p>;
+                const gst = Math.round(subtotal * taxRates.gstRate * 100) / 100;
+                const pst = Math.round(subtotal * taxRates.pstRate * 100) / 100;
                 const total = Math.round((subtotal + gst + pst) * 100) / 100;
                 return subtotal > 0 ? (
                   <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 space-y-1 text-sm">
                     <div className="flex justify-between text-gray-600">
-                      <span>Subtotal</span>
+                      <span>Quote subtotal (before tax)</span>
                       <span className="font-semibold">${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-gray-500 text-xs">
-                      <span>GST (5%)</span>
+                      <span>GST ({taxRates.gstRate * 100}%)</span>
                       <span>${gst.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-gray-500 text-xs">
-                      <span>PST (6%)</span>
+                      <span>PST ({taxRates.pstRate * 100}%)</span>
                       <span>${pst.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-[#1a1a2e] border-t border-gray-200 pt-1 mt-1">
-                      <span>Total (with tax)</span>
+                      <span>Payment total (tax included)</span>
                       <span>${total.toFixed(2)}</span>
                     </div>
                     <p className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1.5 mt-2">
@@ -331,7 +350,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
               </button>
               <button
                 onClick={() => void sendQuote()}
-                disabled={quoteSending || quoteSent}
+                disabled={quoteSending || quoteSent || !taxRates}
                 className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-colors"
               >
                 {quoteSending ? (

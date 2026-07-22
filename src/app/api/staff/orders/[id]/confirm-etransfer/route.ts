@@ -68,14 +68,20 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
     // ── Update status ────────────────────────────────────────────────────────────
 
-    const { error: updateErr } = await supabase
+    const { data: transitioned, error: updateErr } = await supabase
       .from("orders")
       .update({ status: "payment_received", paid_at: new Date().toISOString() })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("status", "pending_payment")
+      .select("id")
+      .maybeSingle();
 
-    if (updateErr) {
-      console.error("[confirm-etransfer] status update failed:", updateErr.message);
-      return NextResponse.json({ error: updateErr.message }, { status: 500 });
+    if (updateErr || !transitioned) {
+      console.error("[confirm-etransfer] status update failed:", updateErr?.message ?? "already transitioned");
+      return NextResponse.json(
+        { error: updateErr?.message ?? "Order payment was already confirmed" },
+        { status: updateErr ? 500 : 409 },
+      );
     }
 
     console.log(`[confirm-etransfer] order ${order.order_number} → payment_received`);
