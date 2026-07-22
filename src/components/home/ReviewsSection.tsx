@@ -1,4 +1,7 @@
-import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { TRUSTINDEX_LOADER_URL } from "@/lib/trustindex";
 
 const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
 const GOOGLE_ALL_REVIEWS_URL =
@@ -16,33 +19,115 @@ function GoogleIcon() {
 }
 
 export function ReviewsSection() {
+  const widgetHostRef = useRef<HTMLDivElement>(null);
+  const [widgetStatus, setWidgetStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  useEffect(() => {
+    const widgetHost = widgetHostRef.current;
+    if (!widgetHost) return;
+
+    widgetHost.replaceChildren();
+    const loadTimeout = window.setTimeout(() => setWidgetStatus("error"), 12_000);
+    let activityInterval: number | undefined;
+    const stopActivityNudge = () => {
+      if (activityInterval !== undefined) window.clearInterval(activityInterval);
+      activityInterval = undefined;
+    };
+
+    // The widget is configured with Trustindex rich snippets enabled. The site
+    // already publishes canonical LocalBusiness schema, so mark the helper as
+    // handled to prevent duplicate Organization/Product schema injection.
+    const schemaGuard = document.createElement("script");
+    schemaGuard.type = "application/ld+json";
+    schemaGuard.dataset.trustindex = "1";
+    schemaGuard.text = JSON.stringify({ "@context": "https://schema.org", "@graph": [] });
+    widgetHost.appendChild(schemaGuard);
+
+    const observer = new MutationObserver(() => {
+      if (widgetHost.querySelector(".ti-widget")) {
+        window.clearTimeout(loadTimeout);
+        stopActivityNudge();
+        setWidgetStatus("ready");
+        observer.disconnect();
+      }
+    });
+    observer.observe(widgetHost, { childList: true, subtree: true });
+
+    // Trustindex replaces its script node and manages the resulting slider.
+    // Keeping that DOM inside this empty host avoids React reconciliation conflicts.
+    const script = document.createElement("script");
+    script.src = TRUSTINDEX_LOADER_URL;
+    script.async = true;
+    script.defer = true;
+    const handleLoadError = () => setWidgetStatus("error");
+    const handleScriptLoad = () => {
+      // Trustindex waits for viewport activity when the widget starts below the
+      // fold. Its HTML arrives after the loader itself, so nudge briefly until
+      // the placeholder is registered and an earlier user scroll cannot be lost.
+      const nudgeTrustindex = () => {
+        window.dispatchEvent(new Event("mousemove"));
+        window.dispatchEvent(new Event("scroll"));
+      };
+      nudgeTrustindex();
+      activityInterval = window.setInterval(nudgeTrustindex, 250);
+    };
+    script.addEventListener("error", handleLoadError, { once: true });
+    script.addEventListener("load", handleScriptLoad, { once: true });
+    widgetHost.appendChild(script);
+
+    return () => {
+      window.clearTimeout(loadTimeout);
+      stopActivityNudge();
+      observer.disconnect();
+      script.removeEventListener("error", handleLoadError);
+      script.removeEventListener("load", handleScriptLoad);
+
+      const trustindexWindow = window as Window & {
+        tiWidgetInstances?: Array<{ widget?: Element; destroy?: () => void }>;
+      };
+      const instances = trustindexWindow.tiWidgetInstances;
+      if (Array.isArray(instances)) {
+        const ownedInstances = instances.filter(
+          (instance) => instance.widget && widgetHost.contains(instance.widget),
+        );
+        for (const instance of ownedInstances) instance.destroy?.();
+        trustindexWindow.tiWidgetInstances = instances.filter(
+          (instance) => !ownedInstances.includes(instance),
+        );
+      }
+
+      widgetHost.replaceChildren();
+    };
+  }, []);
+
   return (
-    <section className="border-b border-gray-100 bg-white px-6 py-10">
-      <div className="mx-auto max-w-5xl">
-        <div className="flex flex-col items-center justify-between gap-6 rounded-2xl border border-gray-100 bg-gray-50 px-6 py-7 text-center shadow-sm sm:flex-row sm:text-left">
-          <div className="flex items-center gap-4">
-            <GoogleIcon />
-            <div>
-              <div className="flex items-center justify-center gap-2 sm:justify-start">
-                <span className="text-2xl font-black text-[#1c1712]">{RATING_VALUE}</span>
-                <span className="text-lg tracking-wider text-yellow-400" aria-label={`${RATING_VALUE} out of 5 stars`}>
-                  ★★★★★
-                </span>
-              </div>
-              <p className="text-sm font-medium text-gray-600">
-                {REVIEW_COUNT} Google reviews from local customers
-              </p>
+    <section
+      aria-labelledby="customer-reviews-heading"
+      className="border-b border-gray-100 bg-[#f8f6f2] px-6 py-14"
+    >
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+          <div className="max-w-2xl">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
+              <GoogleIcon />
+              Google reviews
             </div>
+            <h2 id="customer-reviews-heading" className="text-3xl font-black tracking-tight text-[#1c1712] md:text-4xl">
+              Local work. Real feedback.
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-gray-600">
+              Recent reviews from customers who trusted us with their signs, banners, and print projects.
+            </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-3 sm:justify-end">
+          <div className="flex flex-wrap gap-3">
             <a
-              href="/reviews-widget"
+              href={GOOGLE_ALL_REVIEWS_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-[#1c1712] transition-colors hover:border-[#16C2F3]"
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-[#1c1712] transition-colors hover:border-[#16C2F3] hover:text-[#087fa1]"
             >
-              Open customer reviews
+              See all on Google
             </a>
             <a
               href={GOOGLE_REVIEW_URL}
@@ -55,15 +140,46 @@ export function ReviewsSection() {
           </div>
         </div>
 
-        <div className="mt-3 text-center">
-          <a
-            href={GOOGLE_ALL_REVIEWS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-semibold text-blue-600 hover:underline"
-          >
-            See all {REVIEW_COUNT} reviews on Google →
-          </a>
+        <div className="relative min-h-72 overflow-hidden rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:p-5">
+          <div
+            ref={widgetHostRef}
+            aria-busy={widgetStatus === "loading"}
+            aria-label="Recent Google customer reviews"
+            className={widgetStatus === "ready" ? "" : "min-h-64"}
+          />
+
+          {widgetStatus === "loading" && (
+            <div className="absolute inset-5 grid animate-pulse grid-cols-1 gap-4 sm:grid-cols-3" aria-hidden="true">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="rounded-xl border border-gray-100 bg-gray-50 p-5">
+                  <div className="h-4 w-24 rounded bg-gray-200" />
+                  <div className="mt-5 h-3 w-full rounded bg-gray-200" />
+                  <div className="mt-3 h-3 w-5/6 rounded bg-gray-200" />
+                  <div className="mt-3 h-3 w-2/3 rounded bg-gray-200" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {widgetStatus === "error" && (
+            <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
+              <p className="text-sm text-gray-600">
+                Reviews could not load right now.{" "}
+                <a href={GOOGLE_ALL_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:underline">
+                  Read them on Google instead.
+                </a>
+              </p>
+            </div>
+          )}
+
+          <noscript>
+            <p className="p-6 text-center text-sm text-gray-600">
+              JavaScript is required for the review slider.{" "}
+              <a href={GOOGLE_ALL_REVIEWS_URL} className="font-semibold text-blue-600 underline">
+                Read our reviews on Google.
+              </a>
+            </p>
+          </noscript>
         </div>
       </div>
     </section>
