@@ -8,6 +8,7 @@ export const CONTROLLED_TEST = Object.freeze({
     id: "24048123058",
     name: "GOOG_Search_TC_CoreProducts_2026",
     resourceName: "customers/1072816342/campaigns/24048123058",
+    cpcBidCeilingMicros: "4000000",
   }),
   campaigns: Object.freeze([
     Object.freeze({
@@ -85,6 +86,7 @@ export const CONTROLLED_TEST = Object.freeze({
     cadenceMinutes: 15,
     maximumAgeMinutes: 20,
     maximumFutureSkewMinutes: 2,
+    requiredConsecutiveHeartbeats: 3,
     warningCad: 25,
     thresholdCad: 25,
     approvedCapCad: 30,
@@ -145,8 +147,75 @@ export function validateMonitorAttestation(attestation, { now = new Date() } = {
     || evidence.failClosedVerified !== true) {
     throw new Error("Monitor attestation is missing the exact scheduler, heartbeat, alert, pause, or fail-closed proof");
   }
-  const heartbeat = attestation.heartbeat;
-  if (!heartbeat || typeof heartbeat !== "object") throw new Error("Monitor attestation heartbeat is missing");
+  const promotion = attestation.promotion;
+  if (!promotion || typeof promotion !== "object"
+    || promotion.verified !== true
+    || promotion.source !== "GOOGLE_ADS_UI"
+    || promotion.status !== "ACTIVE"
+    || promotion.currency !== "CAD") {
+    throw new Error("Promotion proof must be an active CAD promotion freshly verified in GOOGLE_ADS_UI");
+  }
+  const requiredSpendCad = Number(promotion.requiredQualifyingSpendCad);
+  if (!Number.isFinite(requiredSpendCad) || requiredSpendCad < 550 || requiredSpendCad > 650) {
+    throw new Error("Promotion qualifying-spend requirement must be the verified amount around CA$600");
+  }
+  const promotionCheckedAt = parseFreshTimestamp(
+    promotion.checkedAtUtc,
+    now,
+    expected,
+    "Promotion proof",
+  );
+  const eligibilityStart = new Date(promotion.eligibilityWindowStartUtc);
+  const eligibilityEnd = new Date(promotion.eligibilityWindowEndUtc);
+  if (!Number.isFinite(eligibilityStart.getTime())
+    || !Number.isFinite(eligibilityEnd.getTime())
+    || eligibilityStart >= eligibilityEnd
+    || now < eligibilityStart
+    || now >= eligibilityEnd) {
+    throw new Error("Promotion eligibility window is invalid or not currently active");
+  }
+  const heartbeats = attestation.heartbeats;
+  if (!Array.isArray(heartbeats) || heartbeats.length !== expected.requiredConsecutiveHeartbeats) {
+    throw new Error(`Monitor attestation requires exactly ${expected.requiredConsecutiveHeartbeats} consecutive heartbeats`);
+  }
+  const validatedHeartbeats = heartbeats.map((heartbeat) => validateHeartbeatShape(heartbeat));
+  for (let index = 1; index < validatedHeartbeats.length; index += 1) {
+    const previous = validatedHeartbeats[index - 1];
+    const current = validatedHeartbeats[index];
+    const gapMs = current.timestamp.getTime() - previous.timestamp.getTime();
+    if (gapMs <= 0 || gapMs > expected.maximumAgeMinutes * 60_000) {
+      throw new Error(`Monitor heartbeat gap must be positive and no more than ${expected.maximumAgeMinutes} minutes`);
+    }
+    if (current.windowStartLocal !== previous.windowStartLocal
+      || current.windowEndLocal !== previous.windowEndLocal) {
+      throw new Error("Consecutive monitor heartbeats must use the same controlled-test window");
+    }
+  }
+  const heartbeat = heartbeats.at(-1);
+  const latest = validatedHeartbeats.at(-1);
+  parseFreshTimestamp(heartbeat.timestampUtc, now, expected, "Monitor heartbeat");
+  const nowLocal = localNow(now);
+  if (nowLocal < `${latest.windowStartLocal}:00` || nowLocal >= `${latest.windowEndLocal}:00`) {
+    throw new Error("Controlled-test monitor window is not active");
+  }
+  return {
+    heartbeatTimestampUtc: latest.timestamp.toISOString(),
+    heartbeatCount: validatedHeartbeats.length,
+    windowStartLocal: latest.windowStartLocal,
+    windowEndLocal: latest.windowEndLocal,
+    spendCad: latest.spendCad,
+    promotion: {
+      checkedAtUtc: promotionCheckedAt.toISOString(),
+      requiredQualifyingSpendCad: requiredSpendCad,
+      eligibilityWindowStartUtc: eligibilityStart.toISOString(),
+      eligibilityWindowEndUtc: eligibilityEnd.toISOString(),
+    },
+  };
+}
+
+function validateHeartbeatShape(heartbeat) {
+  if (!heartbeat || typeof heartbeat !== "object") throw new Error("Monitor heartbeat is missing");
+  const expected = CONTROLLED_TEST.monitor;
   const exactFields = {
     ok: true,
     customerId: CONTROLLED_TEST.customerId,
@@ -175,20 +244,9 @@ export function validateMonitorAttestation(attestation, { now = new Date() } = {
   ]);
   const timestamp = new Date(heartbeat.timestampUtc);
   if (!Number.isFinite(timestamp.getTime())) throw new Error("Monitor heartbeat timestampUtc is invalid");
-  const ageMs = now.getTime() - timestamp.getTime();
-  if (ageMs > expected.maximumAgeMinutes * 60_000) {
-    throw new Error(`Monitor heartbeat is older than ${expected.maximumAgeMinutes} minutes`);
-  }
-  if (ageMs < -expected.maximumFutureSkewMinutes * 60_000) {
-    throw new Error("Monitor heartbeat timestamp is unexpectedly in the future");
-  }
   const expectedLocal = localNow(timestamp);
   if (heartbeat.timestampLocal !== expectedLocal) {
     throw new Error(`Monitor heartbeat timestampLocal must equal ${expectedLocal}`);
-  }
-  const nowLocal = localNow(now);
-  if (nowLocal < `${parsedWindow.windowStart}:00` || nowLocal >= `${parsedWindow.windowEnd}:00`) {
-    throw new Error("Controlled-test monitor window is not active");
   }
   const campaigns = heartbeat.campaignsBefore;
   if (!Array.isArray(campaigns) || campaigns.length !== CONTROLLED_TEST.campaigns.length) {
@@ -201,11 +259,24 @@ export function validateMonitorAttestation(attestation, { now = new Date() } = {
     }
   }
   return {
-    heartbeatTimestampUtc: timestamp.toISOString(),
+    timestamp,
     windowStartLocal: parsedWindow.windowStart,
     windowEndLocal: parsedWindow.windowEnd,
     spendCad,
   };
+}
+
+function parseFreshTimestamp(value, now, expected, label) {
+  const timestamp = new Date(value);
+  if (!Number.isFinite(timestamp.getTime())) throw new Error(`${label} timestamp is invalid`);
+  const ageMs = now.getTime() - timestamp.getTime();
+  if (ageMs > expected.maximumAgeMinutes * 60_000) {
+    throw new Error(`${label} is older than ${expected.maximumAgeMinutes} minutes`);
+  }
+  if (ageMs < -expected.maximumFutureSkewMinutes * 60_000) {
+    throw new Error(`${label} timestamp is unexpectedly in the future`);
+  }
+  return timestamp;
 }
 
 export function validateControlledInventory(state, {
@@ -240,6 +311,9 @@ export function validateControlledInventory(state, {
   const core = campaigns.find((campaign) => campaign.resourceName === CONTROLLED_TEST.campaign.resourceName);
   if (core?.budgetResourceName !== CONTROLLED_TEST.budget.resourceName) {
     throw new Error("Core campaign is not attached to the exact controlled-test budget");
+  }
+  if (String(core?.cpcBidCeilingMicros ?? "") !== CONTROLLED_TEST.campaign.cpcBidCeilingMicros) {
+    throw new Error("Core campaign CPC ceiling must remain exactly CA$4");
   }
   const group = (state.adGroups ?? []).find((item) => item.resourceName === CONTROLLED_TEST.adGroup.resourceName);
   if (!group

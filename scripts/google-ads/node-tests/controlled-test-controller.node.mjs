@@ -11,7 +11,11 @@ import {
   validatePreflightState,
   validateRolledBackState,
 } from "../controlled-test-contract.mjs";
-import { runControlledTestController } from "../controlled-test-controller.mjs";
+import {
+  createCoroplastLandingProbe,
+  runControlledTestController,
+  validateLandingProbe,
+} from "../controlled-test-controller.mjs";
 
 const NOW = new Date("2026-07-23T19:30:00.000Z");
 
@@ -30,6 +34,7 @@ function makeState(stage = "paused") {
       budgetResourceName: campaign.id === CONTROLLED_TEST.campaign.id
         ? CONTROLLED_TEST.budget.resourceName
         : `customers/${CONTROLLED_TEST.customerId}/campaignBudgets/other-${campaign.id}`,
+      cpcBidCeilingMicros: campaign.id === CONTROLLED_TEST.campaign.id ? "4000000" : "2500000",
     })),
     budget: {
       ...CONTROLLED_TEST.budget,
@@ -103,6 +108,26 @@ function makeState(stage = "paused") {
 }
 
 function makeAttestation(overrides = {}) {
+  const heartbeat = (timestampUtc, timestampLocal) => ({
+    ok: true,
+    customerId: CONTROLLED_TEST.customerId,
+    profile: "controlled-test",
+    executionMode: "EXECUTE",
+    timeZone: CONTROLLED_TEST.timeZone,
+    accountVerified: true,
+    spendScope: "EXACT_ACCOUNT_TOTAL",
+    warningCad: 25,
+    thresholdCad: 25,
+    approvedCapCad: 30,
+    outcome: "BELOW_STOP",
+    action: "NONE",
+    spendCad: 0,
+    timestampUtc,
+    timestampLocal,
+    windowStartLocal: "2026-07-23T13:00",
+    windowEndLocal: "2026-07-26T13:00",
+    campaignsBefore: CONTROLLED_TEST.campaigns.map((campaign) => ({ ...campaign, status: "PAUSED" })),
+  });
   return {
     attestationVersion: 1,
     evidence: {
@@ -112,29 +137,30 @@ function makeAttestation(overrides = {}) {
       protectivePauseVerified: true,
       failClosedVerified: true,
     },
-    heartbeat: {
-      ok: true,
-      customerId: CONTROLLED_TEST.customerId,
-      profile: "controlled-test",
-      executionMode: "EXECUTE",
-      timeZone: CONTROLLED_TEST.timeZone,
-      accountVerified: true,
-      spendScope: "EXACT_ACCOUNT_TOTAL",
-      warningCad: 25,
-      thresholdCad: 25,
-      approvedCapCad: 30,
-      outcome: "BELOW_STOP",
-      action: "NONE",
-      spendCad: 0,
-      timestampUtc: "2026-07-23T19:20:00.000Z",
-      timestampLocal: "2026-07-23T13:20:00",
-      windowStartLocal: "2026-07-23T13:00",
-      windowEndLocal: "2026-07-26T13:00",
-      campaignsBefore: CONTROLLED_TEST.campaigns.map((campaign) => ({ ...campaign, status: "PAUSED" })),
+    promotion: {
+      verified: true,
+      source: "GOOGLE_ADS_UI",
+      status: "ACTIVE",
+      currency: "CAD",
+      requiredQualifyingSpendCad: 600,
+      checkedAtUtc: "2026-07-23T19:20:00.000Z",
+      eligibilityWindowStartUtc: "2026-07-20T06:00:00.000Z",
+      eligibilityWindowEndUtc: "2026-09-18T06:00:00.000Z",
     },
+    heartbeats: [
+      heartbeat("2026-07-23T18:50:00.000Z", "2026-07-23T12:50:00"),
+      heartbeat("2026-07-23T19:05:00.000Z", "2026-07-23T13:05:00"),
+      heartbeat("2026-07-23T19:20:00.000Z", "2026-07-23T13:20:00"),
+    ],
     ...overrides,
   };
 }
+
+const healthyLandingProbe = async (url) => ({
+  requestedUrl: url,
+  finalUrl: url,
+  status: 200,
+});
 
 function makeApi({ failAt = null, readFailureAt = null, initialStage = "paused" } = {}) {
   let state = structuredClone(makeState(initialStage));
@@ -218,18 +244,30 @@ test("mutation builders accept only exact True Color resources and CA$5/CA$8 bud
 test("monitor attestation is exact, fresh, in-window, and proves fail-closed monitoring", () => {
   assert.deepEqual(validateMonitorAttestation(makeAttestation(), { now: NOW }), {
     heartbeatTimestampUtc: "2026-07-23T19:20:00.000Z",
+    heartbeatCount: 3,
     windowStartLocal: "2026-07-23T13:00",
     windowEndLocal: "2026-07-26T13:00",
     spendCad: 0,
+    promotion: {
+      checkedAtUtc: "2026-07-23T19:20:00.000Z",
+      requiredQualifyingSpendCad: 600,
+      eligibilityWindowStartUtc: "2026-07-20T06:00:00.000Z",
+      eligibilityWindowEndUtc: "2026-09-18T06:00:00.000Z",
+    },
   });
   const cases = [
     { evidence: { ...makeAttestation().evidence, failClosedVerified: false } },
-    { heartbeat: { ...makeAttestation().heartbeat, executionMode: "DRY_RUN" } },
-    { heartbeat: { ...makeAttestation().heartbeat, customerId: "999" } },
-    { heartbeat: { ...makeAttestation().heartbeat, spendCad: 25 } },
-    { heartbeat: { ...makeAttestation().heartbeat, timestampUtc: "2026-07-23T19:00:00.000Z", timestampLocal: "2026-07-23T13:00:00" } },
-    { heartbeat: { ...makeAttestation().heartbeat, windowEndLocal: "2026-07-26T14:00" } },
-    { heartbeat: { ...makeAttestation().heartbeat, campaignsBefore: [] } },
+    { promotion: { ...makeAttestation().promotion, source: "API_ASSUMPTION" } },
+    { promotion: { ...makeAttestation().promotion, checkedAtUtc: "2026-07-23T19:00:00.000Z" } },
+    { promotion: { ...makeAttestation().promotion, requiredQualifyingSpendCad: 1000 } },
+    { promotion: { ...makeAttestation().promotion, eligibilityWindowEndUtc: "2026-07-23T19:00:00.000Z" } },
+    { heartbeats: makeAttestation().heartbeats.slice(1) },
+    { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, executionMode: "DRY_RUN" } : item) },
+    { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, customerId: "999" } : item) },
+    { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, spendCad: 25 } : item) },
+    { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, timestampUtc: "2026-07-23T19:00:00.000Z", timestampLocal: "2026-07-23T13:00:00" } : item) },
+    { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, windowEndLocal: "2026-07-26T14:00" } : item) },
+    { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, campaignsBefore: [] } : item) },
   ];
   for (const overrides of cases) {
     assert.throws(() => validateMonitorAttestation(makeAttestation(overrides), { now: NOW }));
@@ -257,6 +295,9 @@ test("state validators enforce exact resource identities and only the intended e
   const sharedBudget = makeState("paused");
   sharedBudget.budget.explicitlyShared = true;
   assert.throws(() => validatePreflightState(sharedBudget), /budget/);
+  const wrongCpc = makeState("paused");
+  wrongCpc.campaigns[0].cpcBidCeilingMicros = "5000000";
+  assert.throws(() => validatePreflightState(wrongCpc), /CPC ceiling/);
   const unexpectedEnabled = makeState("paused");
   unexpectedEnabled.campaigns[1].status = "ENABLED";
   assert.throws(() => validatePreflightState(unexpectedEnabled), /Every campaign/);
@@ -297,6 +338,7 @@ test("activation validates every batch, enables Core last, and passes strict rea
       "--monitor-attestation=/tmp/proof.json",
     ]),
     monitorAttestation: makeAttestation(),
+    landingProbe: healthyLandingProbe,
     now: NOW,
   });
   assert.equal(result.ok, true);
@@ -318,13 +360,17 @@ test("activation validates every batch, enables Core last, and passes strict rea
 
 test("invalid attestation refuses activation before any write", async () => {
   const api = makeApi();
-  const attestation = makeAttestation({
-    heartbeat: { ...makeAttestation().heartbeat, outcome: "WARNING", spendCad: 25 },
-  });
+  const attestation = makeAttestation();
+  attestation.heartbeats[2] = {
+    ...attestation.heartbeats[2],
+    outcome: "WARNING",
+    spendCad: 25,
+  };
   const result = await runControlledTestController({
     api,
     options: { mode: "activate", execute: true },
     monitorAttestation: attestation,
+    landingProbe: healthyLandingProbe,
     now: NOW,
   });
   assert.equal(result.outcome, "ACTIVATION_REFUSED");
@@ -337,6 +383,7 @@ test("any failure after the first write invokes full rollback and restores CA$8"
     api,
     options: { mode: "activate", execute: true },
     monitorAttestation: makeAttestation(),
+    landingProbe: healthyLandingProbe,
     now: NOW,
   });
   assert.equal(result.outcome, "ACTIVATION_FAILED_ROLLED_BACK");
@@ -351,6 +398,48 @@ test("any failure after the first write invokes full rollback and restores CA$8"
   ));
   assert.notEqual(firstRollbackCampaign, -1);
   assert.equal(api.calls[firstRollbackCampaign].resources.length, CONTROLLED_TEST.campaigns.length);
+});
+
+test("activation refuses a broken or redirected Coroplast URL before the first write", async () => {
+  for (const probe of [
+    async (url) => ({ requestedUrl: url, finalUrl: url, status: 503 }),
+    async (url) => ({ requestedUrl: url, finalUrl: "https://example.com/", status: 200 }),
+  ]) {
+    const api = makeApi();
+    const result = await runControlledTestController({
+      api,
+      options: { mode: "activate", execute: true },
+      monitorAttestation: makeAttestation(),
+      landingProbe: probe,
+      now: NOW,
+    });
+    assert.equal(result.outcome, "ACTIVATION_REFUSED");
+    assert.equal(api.calls.length, 0);
+  }
+  assert.equal(validateLandingProbe(await healthyLandingProbe(CONTROLLED_TEST.rsa.finalUrl)).status, 200);
+});
+
+test("the production landing probe uses GET, follows redirects, and returns only status evidence", async () => {
+  let request;
+  let cancelled = false;
+  const probe = createCoroplastLandingProbe({
+    fetchImpl: async (url, options) => {
+      request = { url, options };
+      return {
+        url,
+        status: 200,
+        body: { async cancel() { cancelled = true; } },
+      };
+    },
+  });
+  assert.deepEqual(await probe(CONTROLLED_TEST.rsa.finalUrl), {
+    requestedUrl: CONTROLLED_TEST.rsa.finalUrl,
+    finalUrl: CONTROLLED_TEST.rsa.finalUrl,
+    status: 200,
+  });
+  assert.equal(request.options.method, "GET");
+  assert.equal(request.options.redirect, "follow");
+  assert.equal(cancelled, true);
 });
 
 test("explicit rollback is account-wide, validated, idempotent, and strictly read back", async () => {

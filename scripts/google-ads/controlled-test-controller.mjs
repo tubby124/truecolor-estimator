@@ -18,6 +18,7 @@ export async function runControlledTestController({
   api,
   options,
   monitorAttestation,
+  landingProbe,
   now = new Date(),
 }) {
   const base = {
@@ -51,6 +52,7 @@ export async function runControlledTestController({
   try {
     const monitor = validateMonitorAttestation(monitorAttestation, { now });
     validatePreflightState(await api.readState());
+    const landing = validateLandingProbe(await landingProbe(CONTROLLED_TEST.rsa.finalUrl));
 
     activationStarted = true;
     await mutateValidated(api.setBudget, CONTROLLED_TEST.budget.controlledMicros);
@@ -71,6 +73,7 @@ export async function runControlledTestController({
       ok: true,
       outcome: "ACTIVATED",
       monitor,
+      landing,
       summary: stateSummary(state),
     };
   } catch (error) {
@@ -249,7 +252,7 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
           "account read",
         ),
         search(
-          "SELECT campaign.id, campaign.resource_name, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.campaign_budget, campaign_budget.id, campaign_budget.resource_name, campaign_budget.status, campaign_budget.amount_micros, campaign_budget.explicitly_shared, campaign_budget.reference_count FROM campaign WHERE campaign.status != 'REMOVED'",
+          "SELECT campaign.id, campaign.resource_name, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.campaign_budget, campaign.target_spend.cpc_bid_ceiling_micros, campaign_budget.id, campaign_budget.resource_name, campaign_budget.status, campaign_budget.amount_micros, campaign_budget.explicitly_shared, campaign_budget.reference_count FROM campaign WHERE campaign.status != 'REMOVED'",
           "campaign and budget read",
         ),
         search(
@@ -282,6 +285,7 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
           status: row.campaign.status,
           channel: row.campaign.advertisingChannelType,
           budgetResourceName: row.campaign.campaignBudget,
+          cpcBidCeilingMicros: row.campaign.targetSpend?.cpcBidCeilingMicros,
         })),
         budget: coreRow ? {
           id: coreRow.campaignBudget?.id,
@@ -362,6 +366,31 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
   };
 }
 
+export function createCoroplastLandingProbe({ fetchImpl = fetch } = {}) {
+  return async (url) => {
+    const response = await fetchImpl(url, {
+      method: "GET",
+      redirect: "follow",
+      headers: { "user-agent": "TrueColor-Controlled-Test-Preflight/1.0" },
+    });
+    await response.body?.cancel();
+    return {
+      requestedUrl: url,
+      finalUrl: response.url,
+      status: response.status,
+    };
+  };
+}
+
+export function validateLandingProbe(probe) {
+  if (probe?.requestedUrl !== CONTROLLED_TEST.rsa.finalUrl
+    || probe?.finalUrl !== CONTROLLED_TEST.rsa.finalUrl
+    || probe?.status !== 200) {
+    throw new Error("Coroplast activation URL did not return HTTP 200 without redirect drift");
+  }
+  return probe;
+}
+
 async function exchangeToken(fetchImpl, env) {
   const response = await fetchImpl("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -395,6 +424,7 @@ async function main() {
       api: createControlledTestGoogleAdsApi(),
       options,
       monitorAttestation,
+      landingProbe: createCoroplastLandingProbe(),
     });
   } catch (error) {
     result = {
