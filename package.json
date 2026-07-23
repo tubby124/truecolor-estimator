@@ -16,6 +16,8 @@
     "validate:pricing": "node scripts/validate-pricing.mjs",
     "validate:google-ads": "node scripts/google-ads/live-verify-paused.mjs",
     "validate:google-ads-launch": "node scripts/google-ads/validate-launch-candidate.mjs",
+    "build:google-ads-attestation": "node scripts/google-ads/build-controlled-test-attestation.mjs",
+    "drill:google-ads-monitor": "node scripts/google-ads/monitor-safety-drill.mjs",
     "monitor:google-ads-spend": "node scripts/google-ads/hard-stop-monitor.mjs",
     "test:google-ads": "node --test scripts/google-ads/node-tests/*.node.mjs && node scripts/google-ads/export-google-ads.mjs --check",
     "validate:gallery": "node scripts/validate-gallery.mjs",

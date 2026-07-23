@@ -12,11 +12,11 @@ jobs:
     steps:
       - name: Run allowlisted fail-closed monitor
         env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GOOGLE_ADS_MONITOR_BACKUP_SECRET: ${{ secrets.GOOGLE_ADS_MONITOR_BACKUP_SECRET }}
         run: |
           RESPONSE=$(curl --fail-with-body --silent --show-error \
             --request POST \
-            --header "Authorization: Bearer ${CRON_SECRET}" \
+            --header "Authorization: Bearer ${GOOGLE_ADS_MONITOR_BACKUP_SECRET}" \
             --write-out "\n%{http_code}" \
             https://truecolorprinting.ca/api/cron/google-ads-monitor)
           BODY=$(echo "$RESPONSE" | sed '$d')
