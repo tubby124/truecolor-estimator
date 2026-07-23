@@ -136,6 +136,27 @@ export function validateMonitorAttestation(attestation, {
   signingSecret,
 } = {}) {
   const expected = CONTROLLED_TEST.monitor;
+  validateAttestationEnvelope(attestation, signingSecret, expected);
+  validateMonitorEvidence(attestation.evidence, expected);
+  const promotion = validatePromotionProof(attestation.promotion, now, expected);
+  const latest = validateHeartbeatSequence(attestation.heartbeats, now, expected);
+  validateWindowContainment(latest, promotion);
+  return {
+    heartbeatTimestampUtc: latest.timestamp.toISOString(),
+    heartbeatCount: attestation.heartbeats.length,
+    windowStartLocal: latest.windowStartLocal,
+    windowEndLocal: latest.windowEndLocal,
+    spendCad: latest.spendCad,
+    promotion: {
+      checkedAtUtc: promotion.checkedAt.toISOString(),
+      requiredQualifyingSpendCad: promotion.requiredSpendCad,
+      eligibilityWindowStartUtc: promotion.eligibilityStart.toISOString(),
+      eligibilityWindowEndUtc: promotion.eligibilityEnd.toISOString(),
+    },
+  };
+}
+
+function validateAttestationEnvelope(attestation, signingSecret, expected) {
   if (!attestation || typeof attestation !== "object" || Array.isArray(attestation)) {
     throw new Error("Monitor attestation must be a JSON object");
   }
@@ -143,7 +164,9 @@ export function validateMonitorAttestation(attestation, {
   if (attestation.attestationVersion !== expected.attestationVersion) {
     throw new Error(`Monitor attestation version must be ${expected.attestationVersion}`);
   }
-  const evidence = attestation.evidence;
+}
+
+function validateMonitorEvidence(evidence, expected) {
   if (!evidence || typeof evidence !== "object"
     || evidence.schedulerCadenceMinutes !== expected.cadenceMinutes
     || evidence.heartbeatPersisted !== true
@@ -152,7 +175,9 @@ export function validateMonitorAttestation(attestation, {
     || evidence.failClosedVerified !== true) {
     throw new Error("Monitor attestation is missing the exact scheduler, heartbeat, alert, pause, or fail-closed proof");
   }
-  const promotion = attestation.promotion;
+}
+
+function validatePromotionProof(promotion, now, expected) {
   if (!promotion || typeof promotion !== "object"
     || promotion.verified !== true
     || promotion.source !== "GOOGLE_ADS_UI"
@@ -165,12 +190,7 @@ export function validateMonitorAttestation(attestation, {
   if (!Number.isFinite(requiredSpendCad) || requiredSpendCad < 550 || requiredSpendCad > 650) {
     throw new Error("Promotion qualifying-spend requirement must be the verified amount around CA$600");
   }
-  const promotionCheckedAt = parseFreshTimestamp(
-    promotion.checkedAtUtc,
-    now,
-    expected,
-    "Promotion proof",
-  );
+  const checkedAt = parseFreshTimestamp(promotion.checkedAtUtc, now, expected, "Promotion proof");
   const eligibilityStart = new Date(promotion.eligibilityWindowStartUtc);
   const eligibilityEnd = new Date(promotion.eligibilityWindowEndUtc);
   if (!Number.isFinite(eligibilityStart.getTime())
@@ -180,59 +200,65 @@ export function validateMonitorAttestation(attestation, {
     || now >= eligibilityEnd) {
     throw new Error("Promotion eligibility window is invalid or not currently active");
   }
-  const heartbeats = attestation.heartbeats;
+  return { checkedAt, requiredSpendCad, eligibilityStart, eligibilityEnd };
+}
+
+function validateHeartbeatSequence(heartbeats, now, expected) {
   if (!Array.isArray(heartbeats) || heartbeats.length !== expected.requiredConsecutiveHeartbeats) {
     throw new Error(`Monitor attestation requires exactly ${expected.requiredConsecutiveHeartbeats} consecutive heartbeats`);
   }
-  const validatedHeartbeats = heartbeats.map((heartbeat) => validateHeartbeatShape(heartbeat));
+  const validated = heartbeats.map((heartbeat) => validateHeartbeatShape(heartbeat));
   if (new Set(heartbeats.map((heartbeat) => heartbeat.auditRunId)).size !== heartbeats.length) {
     throw new Error("Monitor heartbeat audit run IDs must be distinct");
   }
-  for (let index = 1; index < validatedHeartbeats.length; index += 1) {
-    const previous = validatedHeartbeats[index - 1];
-    const current = validatedHeartbeats[index];
-    const gapMs = current.timestamp.getTime() - previous.timestamp.getTime();
-    if (gapMs <= 0 || gapMs > expected.maximumAgeMinutes * 60_000) {
-      throw new Error(`Monitor heartbeat gap must be positive and no more than ${expected.maximumAgeMinutes} minutes`);
-    }
-    if (current.windowStartLocal !== previous.windowStartLocal
-      || current.windowEndLocal !== previous.windowEndLocal) {
-      throw new Error("Consecutive monitor heartbeats must use the same controlled-test window");
-    }
-    if (current.spendMicros < previous.spendMicros) {
-      throw new Error("Controlled-test cumulative spend cannot decrease across heartbeats");
-    }
+  for (let index = 1; index < validated.length; index += 1) {
+    validateHeartbeatTransition(validated[index - 1], validated[index], expected);
   }
-  const heartbeat = heartbeats.at(-1);
-  const latest = validatedHeartbeats.at(-1);
-  parseFreshTimestamp(heartbeat.timestampUtc, now, expected, "Monitor heartbeat");
+  const latest = validated.at(-1);
+  parseFreshTimestamp(heartbeats.at(-1).timestampUtc, now, expected, "Monitor heartbeat");
   const nowLocal = localNow(now);
   if (nowLocal < `${latest.windowStartLocal}:00` || nowLocal >= `${latest.windowEndLocal}:00`) {
     throw new Error("Controlled-test monitor window is not active");
   }
+  return latest;
+}
+
+function validateHeartbeatTransition(previous, current, expected) {
+  const gapMs = current.timestamp.getTime() - previous.timestamp.getTime();
+  if (gapMs <= 0 || gapMs > expected.maximumAgeMinutes * 60_000) {
+    throw new Error(`Monitor heartbeat gap must be positive and no more than ${expected.maximumAgeMinutes} minutes`);
+  }
+  if (current.windowStartLocal !== previous.windowStartLocal
+    || current.windowEndLocal !== previous.windowEndLocal) {
+    throw new Error("Consecutive monitor heartbeats must use the same controlled-test window");
+  }
+  if (current.spendMicros < previous.spendMicros) {
+    throw new Error("Controlled-test cumulative spend cannot decrease across heartbeats");
+  }
+}
+
+function validateWindowContainment(latest, promotion) {
   const controlledStart = reginaLocalToDate(latest.windowStartLocal);
   const controlledEnd = reginaLocalToDate(latest.windowEndLocal);
-  if (controlledStart < eligibilityStart || controlledEnd > eligibilityEnd) {
+  if (controlledStart < promotion.eligibilityStart || controlledEnd > promotion.eligibilityEnd) {
     throw new Error("The full controlled-test window must be contained in the promotion eligibility window");
   }
-  return {
-    heartbeatTimestampUtc: latest.timestamp.toISOString(),
-    heartbeatCount: validatedHeartbeats.length,
-    windowStartLocal: latest.windowStartLocal,
-    windowEndLocal: latest.windowEndLocal,
-    spendCad: latest.spendCad,
-    promotion: {
-      checkedAtUtc: promotionCheckedAt.toISOString(),
-      requiredQualifyingSpendCad: requiredSpendCad,
-      eligibilityWindowStartUtc: eligibilityStart.toISOString(),
-      eligibilityWindowEndUtc: eligibilityEnd.toISOString(),
-    },
-  };
 }
 
 function validateHeartbeatShape(heartbeat) {
   if (!heartbeat || typeof heartbeat !== "object") throw new Error("Monitor heartbeat is missing");
   const expected = CONTROLLED_TEST.monitor;
+  validateExactHeartbeatFields(heartbeat, expected);
+  if (!validEvidenceId(heartbeat.auditRunId)) {
+    throw new Error("Monitor heartbeat must include a persisted audit run ID");
+  }
+  const spend = validateHeartbeatSpend(heartbeat, expected);
+  const timing = validateHeartbeatTiming(heartbeat);
+  validateHeartbeatCampaigns(heartbeat.campaignsBefore);
+  return { ...timing, ...spend };
+}
+
+function validateExactHeartbeatFields(heartbeat, expected) {
   const exactFields = {
     ok: true,
     customerId: CONTROLLED_TEST.customerId,
@@ -250,9 +276,9 @@ function validateHeartbeatShape(heartbeat) {
   for (const [field, value] of Object.entries(exactFields)) {
     if (heartbeat[field] !== value) throw new Error(`Monitor heartbeat ${field} must equal ${JSON.stringify(value)}`);
   }
-  if (!validEvidenceId(heartbeat.auditRunId)) {
-    throw new Error("Monitor heartbeat must include a persisted audit run ID");
-  }
+}
+
+function validateHeartbeatSpend(heartbeat, expected) {
   const spendCad = heartbeat.spendCad;
   if (typeof spendCad !== "number"
     || !Number.isFinite(spendCad)
@@ -267,6 +293,10 @@ function validateHeartbeatShape(heartbeat) {
   if (Math.abs(Number(spendMicros) / 1_000_000 - spendCad) > 0.0000001) {
     throw new Error("Monitor heartbeat spendCad and spendMicros are inconsistent");
   }
+  return { spendCad, spendMicros };
+}
+
+function validateHeartbeatTiming(heartbeat) {
   const parsedWindow = parseHardStopOptions([
     "--profile=controlled-test",
     `--window-start=${heartbeat.windowStartLocal}`,
@@ -282,7 +312,14 @@ function validateHeartbeatShape(heartbeat) {
     || heartbeat.timestampLocal >= `${parsedWindow.windowEnd}:00`) {
     throw new Error("Every monitor heartbeat must fall inside the controlled-test window");
   }
-  const campaigns = heartbeat.campaignsBefore;
+  return {
+    timestamp,
+    windowStartLocal: parsedWindow.windowStart,
+    windowEndLocal: parsedWindow.windowEnd,
+  };
+}
+
+function validateHeartbeatCampaigns(campaigns) {
   if (!Array.isArray(campaigns) || campaigns.length !== CONTROLLED_TEST.campaigns.length) {
     throw new Error("Monitor heartbeat must contain the exact three-campaign paused inventory");
   }
@@ -292,13 +329,6 @@ function validateHeartbeatShape(heartbeat) {
       throw new Error(`Monitor heartbeat campaign inventory mismatch for ${expectedCampaign.id}`);
     }
   }
-  return {
-    timestamp,
-    windowStartLocal: parsedWindow.windowStart,
-    windowEndLocal: parsedWindow.windowEnd,
-    spendCad,
-    spendMicros,
-  };
 }
 
 export function signMonitorAttestation(attestation, signingSecret) {
@@ -377,8 +407,13 @@ export function validateControlledInventory(state, {
   assertUniqueResources(state?.adGroups, "ad group");
   assertUniqueResources(state?.ads, "ad");
   assertUniqueResources(state?.keywords, "keyword");
+  const campaigns = validateCampaignInventory(state?.campaigns);
+  validateBudgetInventory(state?.budget, campaigns, allowedBudgetMicros);
+  validateCoroplastCreativeInventory(state);
+  return state;
+}
 
-  const campaigns = state.campaigns ?? [];
+function validateCampaignInventory(campaigns = []) {
   if (campaigns.length !== CONTROLLED_TEST.campaigns.length) {
     throw new Error("The account must contain exactly the three allowlisted non-removed campaigns");
   }
@@ -388,7 +423,10 @@ export function validateControlledInventory(state, {
       throw new Error(`Campaign identity or channel mismatch for ${expected.id}`);
     }
   }
-  const budget = state.budget;
+  return campaigns;
+}
+
+function validateBudgetInventory(budget, campaigns, allowedBudgetMicros) {
   if (!budget
     || budget.resourceName !== CONTROLLED_TEST.budget.resourceName
     || String(budget.id) !== CONTROLLED_TEST.budget.id
@@ -405,6 +443,9 @@ export function validateControlledInventory(state, {
   if (String(core?.cpcBidCeilingMicros ?? "") !== CONTROLLED_TEST.campaign.cpcBidCeilingMicros) {
     throw new Error("Core campaign CPC ceiling must remain exactly CA$4");
   }
+}
+
+function validateCoroplastCreativeInventory(state) {
   const group = (state.adGroups ?? []).find((item) => item.resourceName === CONTROLLED_TEST.adGroup.resourceName);
   if (!group
     || String(group.id) !== CONTROLLED_TEST.adGroup.id
@@ -424,7 +465,11 @@ export function validateControlledInventory(state, {
     || rsa.finalUrls[0] !== CONTROLLED_TEST.rsa.finalUrl) {
     throw new Error("Coroplast RSA identity, policy approval, or final URL is unsafe");
   }
-  const positiveGroupKeywords = (state.keywords ?? [])
+  validateCoroplastKeywords(state.keywords);
+}
+
+function validateCoroplastKeywords(keywords = []) {
+  const positiveGroupKeywords = keywords
     .filter((keyword) => keyword.adGroupResourceName === CONTROLLED_TEST.adGroup.resourceName && keyword.negative !== true);
   if (positiveGroupKeywords.length !== CONTROLLED_TEST.keywords.length) {
     throw new Error("Coroplast ad group must contain exactly the six allowlisted positive keywords");
@@ -438,7 +483,6 @@ export function validateControlledInventory(state, {
       throw new Error(`Coroplast keyword identity mismatch for ${expected.resourceName}`);
     }
   }
-  return state;
 }
 
 export function validatePreflightState(state) {

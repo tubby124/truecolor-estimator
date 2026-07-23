@@ -32,50 +32,55 @@ export async function runControlledTestController({
   };
   const invocationError = validateInvocation(options);
   if (invocationError) return { ...base, outcome: "INVALID_INVOCATION", error: invocationError };
-  if (options.mode === "preflight") {
-    try {
-      const state = validatePreflightState(await api.readState());
-      const monitor = monitorAttestation
-        ? validateMonitorAttestation(monitorAttestation, { now, signingSecret: attestationSecret })
-        : null;
-      return {
-        ...base,
-        ok: true,
-        outcome: "PREFLIGHT_PASSED",
-        monitor,
-        summary: stateSummary(state),
-      };
-    } catch (error) {
-      return { ...base, outcome: "PREFLIGHT_FAILED", error: safeMessage(error) };
-    }
-  }
-  if (options.mode === "rollback") {
-    return runRollback({ api, base });
-  }
+  if (options.mode === "preflight") return runPreflight({
+    api, base, monitorAttestation, attestationSecret, now,
+  });
+  if (options.mode === "rollback") return runRollback({ api, base });
+  return runActivation({
+    api, base, monitorAttestation, attestationSecret, landingProbe, now,
+  });
+}
 
-  let activationStarted = false;
+async function runPreflight({ api, base, monitorAttestation, attestationSecret, now }) {
   try {
-    const monitor = validateMonitorAttestation(monitorAttestation, {
+    const state = validatePreflightState(await api.readState());
+    const monitor = monitorAttestation
+      ? validateMonitorAttestation(monitorAttestation, { now, signingSecret: attestationSecret })
+      : null;
+    return {
+      ...base,
+      ok: true,
+      outcome: "PREFLIGHT_PASSED",
+      monitor,
+      summary: stateSummary(state),
+    };
+  } catch (error) {
+    return { ...base, outcome: "PREFLIGHT_FAILED", error: safeMessage(error) };
+  }
+}
+
+async function runActivation({
+  api,
+  base,
+  monitorAttestation,
+  attestationSecret,
+  landingProbe,
+  now,
+}) {
+  let monitor;
+  let landing;
+  try {
+    monitor = validateMonitorAttestation(monitorAttestation, {
       now,
       signingSecret: attestationSecret,
     });
     validatePreflightState(await api.readState());
-    const landing = validateLandingProbe(await landingProbe(CONTROLLED_TEST.rsa.finalUrl));
-
-    activationStarted = true;
-    await mutateValidated(api.setBudget, CONTROLLED_TEST.budget.controlledMicros);
-    validateBudgetStagedState(await api.readState());
-
-    await mutateValidated(
-      api.setKeywordStatuses,
-      CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName),
-      "ENABLED",
-    );
-    await mutateValidated(api.setAdStatuses, [CONTROLLED_TEST.rsa.resourceName], "ENABLED");
-    await mutateValidated(api.setAdGroupStatuses, [CONTROLLED_TEST.adGroup.resourceName], "ENABLED");
-    validateResourcesStagedState(await api.readState());
-    await mutateValidated(api.setCampaignStatuses, [CONTROLLED_TEST.campaign.resourceName], "ENABLED");
-
+    landing = validateLandingProbe(await landingProbe(CONTROLLED_TEST.rsa.finalUrl));
+  } catch (error) {
+    return { ...base, outcome: "ACTIVATION_REFUSED", error: safeMessage(error) };
+  }
+  try {
+    await applyActivationPhases(api);
     const state = validateActivatedState(await api.readState());
     return {
       ...base,
@@ -86,9 +91,6 @@ export async function runControlledTestController({
       summary: stateSummary(state),
     };
   } catch (error) {
-    if (!activationStarted) {
-      return { ...base, outcome: "ACTIVATION_REFUSED", error: safeMessage(error) };
-    }
     const rollback = await runRollback({ api, base: { ...base, mode: "rollback" } });
     return {
       ...base,
@@ -97,6 +99,20 @@ export async function runControlledTestController({
       rollback,
     };
   }
+}
+
+async function applyActivationPhases(api) {
+  await mutateValidated(api.setBudget, CONTROLLED_TEST.budget.controlledMicros);
+  validateBudgetStagedState(await api.readState());
+  await mutateValidated(
+    api.setKeywordStatuses,
+    CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName),
+    "ENABLED",
+  );
+  await mutateValidated(api.setAdStatuses, [CONTROLLED_TEST.rsa.resourceName], "ENABLED");
+  await mutateValidated(api.setAdGroupStatuses, [CONTROLLED_TEST.adGroup.resourceName], "ENABLED");
+  validateResourcesStagedState(await api.readState());
+  await mutateValidated(api.setCampaignStatuses, [CONTROLLED_TEST.campaign.resourceName], "ENABLED");
 }
 
 function validateInvocation(options) {
@@ -125,56 +141,69 @@ async function runRollback({ api, base }) {
       summary: null,
     };
   }
-  let campaigns = null;
-  try {
-    campaigns = await api.readCampaigns();
-  } catch (error) {
-    errors.push(`Rollback account-wide campaign inventory read failed: ${safeMessage(error)}`);
-  }
-
-  const campaignResources = campaigns
-    ?.filter((campaign) => campaign.status !== "REMOVED")
-    .map((campaign) => campaign.resourceName);
-  await rollbackBatch(errors, "account-wide campaign pause", async () => {
-    const resources = campaignResources?.length
-      ? campaignResources
-      : CONTROLLED_TEST.campaigns.map((campaign) => campaign.resourceName);
-    await mutateValidated(api.setCampaignStatuses, resources, "PAUSED");
-  });
-  let resourceState = null;
-  try {
-    resourceState = await api.readState();
-  } catch (error) {
-    errors.push(`Rollback account-wide resource inventory read failed: ${safeMessage(error)}`);
-  }
-  const keywordResources = resourceState?.keywords
-    ?.filter((keyword) => keyword.negative !== true)
-    .map((keyword) => keyword.resourceName)
-    ?? CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName);
-  const adResources = resourceState?.ads?.map((ad) => ad.resourceName)
-    ?? [CONTROLLED_TEST.rsa.resourceName];
-  const adGroupResources = resourceState?.adGroups?.map((adGroup) => adGroup.resourceName)
-    ?? [CONTROLLED_TEST.adGroup.resourceName];
+  const campaignResources = await readRollbackCampaigns(api, errors);
+  await rollbackBatch(errors, "account-wide campaign pause", () => mutateValidated(
+    api.setCampaignStatuses,
+    campaignResources,
+    "PAUSED",
+  ));
+  const targets = await readRollbackResourceTargets(api, errors);
   await rollbackBatch(errors, "keyword pause", () => mutateValidated(
     api.setKeywordStatuses,
-    keywordResources,
+    targets.keywordResources,
     "PAUSED",
   ));
   await rollbackBatch(errors, "RSA pause", () => mutateValidated(
     api.setAdStatuses,
-    adResources,
+    targets.adResources,
     "PAUSED",
   ));
   await rollbackBatch(errors, "ad-group pause", () => mutateValidated(
     api.setAdGroupStatuses,
-    adGroupResources,
+    targets.adGroupResources,
     "PAUSED",
   ));
   await rollbackBatch(errors, "budget restoration", () => mutateValidated(
     api.setBudget,
     CONTROLLED_TEST.budget.normalMicros,
   ));
+  return verifyRollbackReadback(api, base, errors);
+}
 
+async function readRollbackCampaigns(api, errors) {
+  try {
+    const campaigns = await api.readCampaigns();
+    const resources = campaigns
+      .filter((campaign) => campaign.status !== "REMOVED")
+      .map((campaign) => campaign.resourceName);
+    if (resources.length > 0) return resources;
+  } catch (error) {
+    errors.push(`Rollback account-wide campaign inventory read failed: ${safeMessage(error)}`);
+  }
+  return CONTROLLED_TEST.campaigns.map((campaign) => campaign.resourceName);
+}
+
+async function readRollbackResourceTargets(api, errors) {
+  try {
+    const state = await api.readState();
+    return {
+      keywordResources: state.keywords
+        .filter((keyword) => keyword.negative !== true)
+        .map((keyword) => keyword.resourceName),
+      adResources: state.ads.map((ad) => ad.resourceName),
+      adGroupResources: state.adGroups.map((adGroup) => adGroup.resourceName),
+    };
+  } catch (error) {
+    errors.push(`Rollback account-wide resource inventory read failed: ${safeMessage(error)}`);
+    return {
+      keywordResources: CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName),
+      adResources: [CONTROLLED_TEST.rsa.resourceName],
+      adGroupResources: [CONTROLLED_TEST.adGroup.resourceName],
+    };
+  }
+}
+
+async function verifyRollbackReadback(api, base, errors) {
   let state;
   try {
     state = validateRolledBackState(await api.readState());
@@ -318,80 +347,7 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
       }));
     },
     async readState() {
-      const [
-        account,
-        campaignRows,
-        adGroupRows,
-        adRows,
-        keywordRows,
-      ] = await Promise.all([
-        readAccount(),
-        search(
-          "SELECT campaign.id, campaign.resource_name, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.campaign_budget, campaign.target_spend.cpc_bid_ceiling_micros, campaign_budget.id, campaign_budget.resource_name, campaign_budget.status, campaign_budget.amount_micros, campaign_budget.explicitly_shared, campaign_budget.reference_count FROM campaign WHERE campaign.status != 'REMOVED'",
-          "campaign and budget read",
-        ),
-        search(
-          "SELECT campaign.resource_name, ad_group.id, ad_group.resource_name, ad_group.name, ad_group.status FROM ad_group WHERE ad_group.status != 'REMOVED'",
-          "ad-group read",
-        ),
-        search(
-          "SELECT ad_group.resource_name, ad_group_ad.resource_name, ad_group_ad.status, ad_group_ad.policy_summary.approval_status, ad_group_ad.policy_summary.review_status, ad_group_ad.ad.id, ad_group_ad.ad.type, ad_group_ad.ad.final_urls FROM ad_group_ad WHERE ad_group_ad.status != 'REMOVED'",
-          "ad read",
-        ),
-        search(
-          "SELECT ad_group.resource_name, ad_group_criterion.criterion_id, ad_group_criterion.resource_name, ad_group_criterion.status, ad_group_criterion.negative, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type FROM ad_group_criterion WHERE ad_group_criterion.type = 'KEYWORD' AND ad_group_criterion.status != 'REMOVED'",
-          "keyword read",
-        ),
-      ]);
-      const coreRow = campaignRows.find(
-        (row) => row.campaign?.resourceName === CONTROLLED_TEST.campaign.resourceName,
-      );
-      return {
-        account,
-        campaigns: campaignRows.map((row) => ({
-          id: row.campaign.id,
-          resourceName: row.campaign.resourceName,
-          name: row.campaign.name,
-          status: row.campaign.status,
-          channel: row.campaign.advertisingChannelType,
-          budgetResourceName: row.campaign.campaignBudget,
-          cpcBidCeilingMicros: row.campaign.targetSpend?.cpcBidCeilingMicros,
-        })),
-        budget: coreRow ? {
-          id: coreRow.campaignBudget?.id,
-          resourceName: coreRow.campaignBudget?.resourceName,
-          status: coreRow.campaignBudget?.status,
-          amountMicros: coreRow.campaignBudget?.amountMicros,
-          explicitlyShared: coreRow.campaignBudget?.explicitlyShared,
-          referenceCount: coreRow.campaignBudget?.referenceCount,
-        } : null,
-        adGroups: adGroupRows.map((row) => ({
-          id: row.adGroup.id,
-          resourceName: row.adGroup.resourceName,
-          name: row.adGroup.name,
-          status: row.adGroup.status,
-          campaignResourceName: row.campaign.resourceName,
-        })),
-        ads: adRows.map((row) => ({
-          id: row.adGroupAd.ad.id,
-          resourceName: row.adGroupAd.resourceName,
-          status: row.adGroupAd.status,
-          type: row.adGroupAd.ad.type,
-          finalUrls: row.adGroupAd.ad.finalUrls ?? [],
-          approvalStatus: row.adGroupAd.policySummary?.approvalStatus,
-          reviewStatus: row.adGroupAd.policySummary?.reviewStatus,
-          adGroupResourceName: row.adGroup.resourceName,
-        })),
-        keywords: keywordRows.map((row) => ({
-          criterionId: row.adGroupCriterion.criterionId,
-          resourceName: row.adGroupCriterion.resourceName,
-          status: row.adGroupCriterion.status,
-          negative: row.adGroupCriterion.negative === true,
-          text: row.adGroupCriterion.keyword?.text,
-          matchType: row.adGroupCriterion.keyword?.matchType,
-          adGroupResourceName: row.adGroup.resourceName,
-        })),
-      };
+      return readControlledState(search, readAccount);
     },
     setBudget(amountMicros, options) {
       return mutate(
@@ -435,6 +391,91 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
     },
   };
 }
+
+async function readControlledState(search, readAccount) {
+  const [account, campaignRows, adGroupRows, adRows, keywordRows] = await Promise.all([
+    readAccount(),
+    search(
+      "SELECT campaign.id, campaign.resource_name, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.campaign_budget, campaign.target_spend.cpc_bid_ceiling_micros, campaign_budget.id, campaign_budget.resource_name, campaign_budget.status, campaign_budget.amount_micros, campaign_budget.explicitly_shared, campaign_budget.reference_count FROM campaign WHERE campaign.status != 'REMOVED'",
+      "campaign and budget read",
+    ),
+    search(
+      "SELECT campaign.resource_name, ad_group.id, ad_group.resource_name, ad_group.name, ad_group.status FROM ad_group WHERE ad_group.status != 'REMOVED'",
+      "ad-group read",
+    ),
+    search(
+      "SELECT ad_group.resource_name, ad_group_ad.resource_name, ad_group_ad.status, ad_group_ad.policy_summary.approval_status, ad_group_ad.policy_summary.review_status, ad_group_ad.ad.id, ad_group_ad.ad.type, ad_group_ad.ad.final_urls FROM ad_group_ad WHERE ad_group_ad.status != 'REMOVED'",
+      "ad read",
+    ),
+    search(
+      "SELECT ad_group.resource_name, ad_group_criterion.criterion_id, ad_group_criterion.resource_name, ad_group_criterion.status, ad_group_criterion.negative, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type FROM ad_group_criterion WHERE ad_group_criterion.type = 'KEYWORD' AND ad_group_criterion.status != 'REMOVED'",
+      "keyword read",
+    ),
+  ]);
+  return mapControlledState({ account, campaignRows, adGroupRows, adRows, keywordRows });
+}
+
+function mapControlledState({ account, campaignRows, adGroupRows, adRows, keywordRows }) {
+  const coreRow = campaignRows.find(
+    (row) => row.campaign?.resourceName === CONTROLLED_TEST.campaign.resourceName,
+  );
+  return {
+    account,
+    campaigns: campaignRows.map(mapCampaignRow),
+    budget: coreRow ? mapBudgetRow(coreRow) : null,
+    adGroups: adGroupRows.map(mapAdGroupRow),
+    ads: adRows.map(mapAdRow),
+    keywords: keywordRows.map(mapKeywordRow),
+  };
+}
+
+const mapCampaignRow = (row) => ({
+  id: row.campaign.id,
+  resourceName: row.campaign.resourceName,
+  name: row.campaign.name,
+  status: row.campaign.status,
+  channel: row.campaign.advertisingChannelType,
+  budgetResourceName: row.campaign.campaignBudget,
+  cpcBidCeilingMicros: row.campaign.targetSpend?.cpcBidCeilingMicros,
+});
+
+const mapBudgetRow = (row) => ({
+  id: row.campaignBudget?.id,
+  resourceName: row.campaignBudget?.resourceName,
+  status: row.campaignBudget?.status,
+  amountMicros: row.campaignBudget?.amountMicros,
+  explicitlyShared: row.campaignBudget?.explicitlyShared,
+  referenceCount: row.campaignBudget?.referenceCount,
+});
+
+const mapAdGroupRow = (row) => ({
+  id: row.adGroup.id,
+  resourceName: row.adGroup.resourceName,
+  name: row.adGroup.name,
+  status: row.adGroup.status,
+  campaignResourceName: row.campaign.resourceName,
+});
+
+const mapAdRow = (row) => ({
+  id: row.adGroupAd.ad.id,
+  resourceName: row.adGroupAd.resourceName,
+  status: row.adGroupAd.status,
+  type: row.adGroupAd.ad.type,
+  finalUrls: row.adGroupAd.ad.finalUrls ?? [],
+  approvalStatus: row.adGroupAd.policySummary?.approvalStatus,
+  reviewStatus: row.adGroupAd.policySummary?.reviewStatus,
+  adGroupResourceName: row.adGroup.resourceName,
+});
+
+const mapKeywordRow = (row) => ({
+  criterionId: row.adGroupCriterion.criterionId,
+  resourceName: row.adGroupCriterion.resourceName,
+  status: row.adGroupCriterion.status,
+  negative: row.adGroupCriterion.negative === true,
+  text: row.adGroupCriterion.keyword?.text,
+  matchType: row.adGroupCriterion.keyword?.matchType,
+  adGroupResourceName: row.adGroup.resourceName,
+});
 
 export function createCoroplastLandingProbe({ fetchImpl = fetch } = {}) {
   return async (url) => {
