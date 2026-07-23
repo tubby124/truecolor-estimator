@@ -1,22 +1,43 @@
-# Offline paid-search conversion readiness
+# Paid-search revenue conversion readiness
 
-Future quote-to-paid and order conversion exports need one of the captured click IDs (`gclid`, `gbraid`, or `wbraid`) plus:
+True Color sends paid revenue through the Google Data Manager API. The previous Google Ads API `UploadClickConversions` path is prohibited for this developer token as of the June 2026 restriction and must not be restored.
 
-- the True Color quote or order reference;
-- the actual conversion timestamp and its timezone;
-- currency `CAD`;
-- actual paid revenue, not an estimate or unpaid order total.
+## Production contract
 
-The first-touch fields are stored on both `quote_requests` and `orders`. A later export must use the timestamp when payment was confirmed, preserve the timezone explicitly, and exclude unpaid/cancelled records.
+- Advertiser / operating account: `1072816342`
+- Login manager: `1125402990`
+- `purchase_online` destination: `7694360837`
+- `quote_won` destination: `7694360840`
+- Both destinations are enabled `UPLOAD_CLICKS`, primary, included in conversions, dynamic CAD, and `MANY_PER_CLICK`.
+- Historical browser purchase `7689029977` is secondary and excluded.
+- `qualified_call_60s` is secondary, excluded, and non-biddable.
 
-The True Color Google Ads advertiser `107-281-6342` is actively linked under MCC `112-540-2990`. A historical browser purchase action exists in the account, but the site no longer sends direct Google Ads browser conversions and that action is not a launch dependency.
+Each paid order supplies exactly one of `gclid`, `gbraid`, or `wbraid`, the stable order number as `transactionId`, the confirmed payment time as RFC 3339, currency `CAD`, and actual pretax revenue (`total - GST - PST`). `purchase_online` and `quote_won` are mutually exclusive classifications.
 
-Production revenue imports require two distinct primary actions: `purchase_online` via `GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID` and `quote_won` via `GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID`. Both IDs are intentionally blank until read from the owned account. Each action must be `UPLOAD_CLICKS`, enabled, primary, included in conversions, accept dynamic CAD values, and be proved with a real paid import. Never copy an ID from another advertiser or invent one to clear the gate.
+The Data Manager API uses a separate refresh token with the `https://www.googleapis.com/auth/datamanager` scope. It also requires `GOOGLE_DATA_MANAGER_PROJECT_ID` for the Google Cloud quota project. The Google Ads refresh token remains separate so spend monitoring cannot be interrupted by conversion-delivery credential changes.
 
-Run the credentialed paused-state verifier with the OAuth/API credentials even while these three action-ID variables are blank. Its `conversionActionInventory` output is the read-only source for selecting the owned-account IDs; blank IDs remain explicit launch blockers until configured and verified.
+## Asynchronous delivery
 
-Browser `purchase_online` and `quote_won` events remain available in GA4 for funnel diagnosis. They have no Google Ads label, optimization role, or revenue-delivery authority. This one-path design prevents confirmation-page reloads and late payment webhooks from creating duplicate Ads conversions.
+A successful `events:ingest` response only acknowledges submission and returns a Data Manager `requestId`. The outbox remains `submitted` until diagnostics confirm delivery:
 
-Qualified calls require a separate duration-qualified Google Ads action supplied through `GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID`. Its duration threshold must be approved and read back live, and the action must remain secondary and excluded from bidding. Raw phone clicks, directions clicks, and reviews clicks are GA4 diagnostics only.
+1. Ingest one order and one destination per request.
+2. Store the request ID and schedule the first diagnostics check after 30 minutes.
+3. Poll with 1.3× backoff capped at 60 minutes for at most 24 hours.
+4. Mark `sent` only when the exact True Color destination returns `SUCCESS` with one record, or when the only final error is `PROCESSING_ERROR_REASON_DUPLICATE_TRANSACTION_ID`.
+5. Keep processing requests submitted; surface all other failures for retry/dead-letter reconciliation.
 
-Enhanced Conversions are not dispatched. The checkout marketing checkbox covers promotional email only and is not purpose-specific consent for Google Ads measurement. Wiring `user_data` remains blocked until True Color approves an Ads-measurement disclosure and consent flow and the Google Ads account/conversion action is confirmed. A pure Web Crypto email-normalization/hash helper is retained for future implementation, but production purchase tracking sends no customer data.
+Local uniqueness on order ID and `(order_number, conversion_type)` plus Google `transactionId` deduplication protect crash/retry paths. A duplicate GCLID is not treated as delivered.
+
+## Launch gates
+
+The following must all pass before any campaign is enabled:
+
+- Data Manager API enabled in Google Cloud project `104043984345`.
+- Separate Data Manager OAuth token installed in Railway with Data Manager scope.
+- `GOOGLE_DATA_MANAGER_PROJECT_ID` installed in Railway.
+- Live `validateOnly: true` request accepted for both conversion destinations.
+- Additive outbox/diagnostics migration rehearsed, reviewed, and applied.
+- One genuine catalog purchase reaches final diagnostics `SUCCESS` and reconciles to Supabase.
+- One genuine quote-linked payment reaches final diagnostics `SUCCESS` as `quote_won`.
+
+Browser funnel events remain GA4 diagnostics only. No customer user data or hardcoded consent is sent to Data Manager; the integration relies solely on the captured Google click identifier.

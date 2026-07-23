@@ -85,19 +85,64 @@ test("live verification contract rejects launch-critical drift and missing noind
       status: "PAUSED",
     })),
     adGroups: 19, pausedAdGroups: 19, positiveKeywords: 83, negativeCriteria: 189,
+    nearMeKeywords: [
+      "die cut stickers near me",
+      "custom die cut stickers near me",
+      "custom stickers near me",
+      "custom labels near me",
+      "die cut labels near me",
+      "custom die cut labels near me",
+    ].flatMap((text) => ["EXACT", "PHRASE"].map((matchType) => ({
+      campaign: "GOOG_Search_TC_CoreProducts_2026",
+      adGroup: "Stickers and Labels",
+      text,
+      matchType,
+      status: "PAUSED",
+    }))),
     competitorMatchTypes: ["EXACT"], responsiveSearchAds: 19, pausedResponsiveSearchAds: 19,
     rsaApprovalStatuses: ["APPROVED"], manualAssets: 13, assetApprovalStatuses: ["APPROVED"], campaignAssetLinks: 39,
     locationTargets: 0, proximityTargets: 3, radius35KmTargets: 3, languageTargets: 3, englishLanguageTargets: 3,
+    positiveGeoCriteria: paidSearchConfig.campaigns.map((campaign) => ({
+      campaign: campaign.name,
+      type: "PROXIMITY",
+      radius: 35,
+      radiusUnits: "KILOMETERS",
+      latitudeInMicroDegrees: 52_129_728,
+      longitudeInMicroDegrees: -106_659_637,
+    })),
     revenueConversions: {
       purchaseOnline: { eventName: "purchase_online", id: "9000000001", status: "ENABLED", type: "UPLOAD_CLICKS", category: "PURCHASE", primaryForGoal: true, included: true, currency: "CAD", dynamicValue: true },
       quoteWon: { eventName: "quote_won", id: "9000000002", status: "ENABLED", type: "UPLOAD_CLICKS", category: "PURCHASE", primaryForGoal: true, included: true, currency: "CAD", dynamicValue: true },
     },
     qualifiedCallConversion: { id: "9000000003", status: "ENABLED", type: "AD_CALL", category: "PHONE_CALL_LEAD", primaryForGoal: false, included: false, minimumDurationSeconds: 60 },
+    historicalBrowserPurchaseConversion: { id: "7689029977", name: "Purchase - Website (True Color)", status: "ENABLED", type: "WEBPAGE", category: "PURCHASE", primaryForGoal: false, included: false },
     conversionActionSelections: {
       purchaseOnline: { envVar: "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID", id: "9000000001" },
       quoteWon: { envVar: "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID", id: "9000000002" },
       qualifiedCall: { envVar: "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID", id: "9000000003" },
     },
+    conversionActionInventory: [
+      { id: "9000000001", name: "purchase_online", included: true },
+      { id: "9000000002", name: "quote_won", included: true },
+      { id: "9000000003", name: "qualified_call_60s", included: false },
+      { id: "7689029977", name: "Purchase - Website (True Color)", included: false },
+      { id: "7688596965", name: "About Us", included: false },
+    ],
+    customerConversionGoals: [
+      { category: "PURCHASE", origin: "WEBSITE", biddable: true },
+      { category: "PHONE_CALL_LEAD", origin: "CALL_FROM_ADS", biddable: false },
+    ],
+    campaignConversionGoals: paidSearchConfig.campaigns.flatMap((campaign) => [
+      { campaign: campaign.name, category: "PURCHASE", origin: "WEBSITE", biddable: true },
+      { campaign: campaign.name, category: "PHONE_CALL_LEAD", origin: "CALL_FROM_ADS", biddable: false },
+    ]),
+    campaignGoalConfigs: paidSearchConfig.campaigns.map((campaign) => ({
+      campaign: campaign.name,
+      goalConfigLevel: "CUSTOMER",
+      customConversionGoal: null,
+    })),
+    customConversionGoals: [],
+    offlineUploaderVerification: { verified: true, method: "REAL_TRANSACTION_RECONCILED" },
     spendCadPilot: 0,
     endpointChecks: [{ url: "https://truecolorprinting.ca/why-true-color", status: 200, noindex: true }],
   };
@@ -114,13 +159,25 @@ test("live verification contract rejects launch-critical drift and missing noind
     (value) => { value.campaigns[0].networks.targetGoogleSearch = false; },
     (value) => { value.campaigns[0].finalUrlSuffix = value.campaigns[0].finalUrlSuffix.replace("utm_term={keyword}&", ""); },
     (value) => { value.radius35KmTargets = 2; },
+    (value) => { value.positiveGeoCriteria[0].latitudeInMicroDegrees += 1; },
+    (value) => { value.positiveGeoCriteria[0].type = "LOCATION"; },
     (value) => { value.englishLanguageTargets = 2; },
+    (value) => { value.nearMeKeywords[0].status = "ENABLED"; },
+    (value) => { value.nearMeKeywords.pop(); },
     (value) => { value.revenueConversions.purchaseOnline.dynamicValue = false; },
     (value) => { value.revenueConversions.quoteWon.status = "REMOVED"; },
     (value) => { value.revenueConversions.quoteWon.type = "WEBPAGE"; },
     (value) => { value.revenueConversions.quoteWon.id = value.revenueConversions.purchaseOnline.id; },
     (value) => { value.qualifiedCallConversion.minimumDurationSeconds = 0; },
     (value) => { value.qualifiedCallConversion.included = true; },
+    (value) => { value.conversionActionInventory.find((action) => action.id === "9000000003").included = true; },
+    (value) => { value.historicalBrowserPurchaseConversion.included = true; },
+    (value) => { value.customerConversionGoals.find((goal) => goal.category === "PHONE_CALL_LEAD").biddable = true; },
+    (value) => { value.customerConversionGoals.push({ category: "PAGE_VIEW", origin: "WEBSITE", biddable: true }); },
+    (value) => { value.campaignConversionGoals.find((goal) => goal.category === "PHONE_CALL_LEAD").biddable = true; },
+    (value) => { value.campaignConversionGoals.push({ campaign: "GOOG_Search_TC_CoreProducts_2026", category: "PAGE_VIEW", origin: "WEBSITE", biddable: true }); },
+    (value) => { value.campaignGoalConfigs[0].goalConfigLevel = "CAMPAIGN"; },
+    (value) => { value.customConversionGoals.push({ id: "unexpected" }); },
     (value) => { value.allCampaigns.push({ id: "99999999999", name: "Unexpected", status: "ENABLED" }); },
     (value) => { value.spendCadPilot = 1; },
   ];
@@ -135,6 +192,20 @@ test("live verification contract rejects launch-critical drift and missing noind
   const indexed = structuredClone(live);
   indexed.endpointChecks[0].noindex = false;
   assert.deepEqual(evaluatePausedLiveState(indexed).launchBlockers, ["competitor landing is missing noindex"]);
+
+  const uploaderUnverified = structuredClone(live);
+  uploaderUnverified.offlineUploaderVerification = { verified: false, method: null };
+  assert.deepEqual(evaluatePausedLiveState(uploaderUnverified).launchBlockers, [
+    "offline conversion uploader requires a reconciled real transaction before launch",
+  ]);
+  assert.equal(liveVerificationStatus(evaluatePausedLiveState(uploaderUnverified)), "BLOCKED");
+
+  const disapprovedRsa = structuredClone(live);
+  disapprovedRsa.rsaApprovalStatuses = ["APPROVED", "DISAPPROVED"];
+  assert.deepEqual(evaluatePausedLiveState(disapprovedRsa).launchBlockers, [
+    "one or more RSAs are not policy-approved",
+  ]);
+  assert.equal(liveVerificationStatus(evaluatePausedLiveState(disapprovedRsa)), "BLOCKED");
 
   const discoveryOnly = structuredClone(live);
   discoveryOnly.conversionActionSelections.purchaseOnline.id = null;
@@ -162,11 +233,22 @@ test("locks the confirmed True Color child account and verified account-side gat
   assert.equal(accountGate?.evidence, "True Color Display Print child account 107-281-6342 under manager 112-540-2990");
   assert.deepEqual(
     paidSearchConfig.externalGates.filter((gate) => gate.status === "VERIFIED").map((gate) => gate.code),
-    ["TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED", "CURRENT_KEYWORD_PLANNER_FORECAST", "BUDGET_APPROVAL"],
+    [
+      "TRUE_COLOR_CUSTOMER_ID",
+      "BILLING_ACTIVE",
+      "AUTO_TAGGING_ENABLED",
+      "PURCHASE_UPLOAD_CLICKS_ACTION",
+      "QUOTE_WON_UPLOAD_CLICKS_ACTION",
+      "CONVERSION_GOAL_GRAPH",
+      "QUALIFIED_CALL_ACTION",
+      "COMPETITOR_LANDING_DEPLOYED",
+      "CURRENT_KEYWORD_PLANNER_FORECAST",
+      "BUDGET_APPROVAL",
+    ],
   );
   assert.deepEqual(
     paidSearchConfig.externalGates.filter((gate) => gate.status === "BLOCKED").map((gate) => gate.code).slice(0, 4),
-    ["PURCHASE_UPLOAD_CLICKS_ACTION", "QUOTE_WON_UPLOAD_CLICKS_ACTION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED"],
+    ["OFFLINE_UPLOADER_MIGRATION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED", "PROMOTION_ELIGIBILITY"],
   );
 
   for (const mutate of [
@@ -176,6 +258,11 @@ test("locks the confirmed True Color child account and verified account-side gat
     (c) => { c.externalGates.find((gate) => gate.code === "CURRENT_KEYWORD_PLANNER_FORECAST").evidence = "wrong"; },
     (c) => { c.liveGoogleAds.campaignIds.GOOG_Search_TC_CoreProducts_2026 = "wrong"; },
     (c) => { c.liveGoogleAds.status = "ENABLED"; },
+    (c) => { c.liveGoogleAds.historicalBrowserPurchaseConversion.primaryForGoal = true; },
+    (c) => { c.liveGoogleAds.conversionGoalGraph.customerGoals.phoneCallLeadCallFromAds.biddable = true; },
+    (c) => { c.liveGoogleAds.conversionGoalGraph.biddingActionIds.push("7689029977"); },
+    (c) => { c.liveGoogleAds.geoTarget.center.latitude = 0; },
+    (c) => { c.conversionMeasurement.requiredUploadClickActions.purchaseOnline.actionId = "7689029977"; },
   ]) {
     const config = clone();
     mutate(config);
@@ -193,6 +280,7 @@ test("rejects enabled campaigns and unsafe network, match, geo, budget, and date
     (c) => { c.campaigns[0].networks.display = true; },
     (c) => { c.campaigns[0].geoTarget.presenceOnly = false; },
     (c) => { c.campaigns[0].geoTarget.radiusKm = 50; },
+    (c) => { c.campaigns[0].geoTarget.center.longitude = 0; },
     (c) => { c.campaigns[0].adGroups[0].keywords[0].matchType = "BROAD"; },
     (c) => { c.campaigns[0].adGroups[0].keywords = []; },
     (c) => { c.campaigns[0].dailyBudgetCad = 9; },
@@ -248,13 +336,20 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
   assert.deepEqual(
     Object.values(paidSearchConfig.conversionMeasurement.requiredUploadClickActions).map((action) => [action.eventName, action.actionId, action.status]),
-    [["purchase_online", null, "UNCONFIGURED"], ["quote_won", null, "UNCONFIGURED"]],
+    [["purchase_online", "7694360837", "VERIFIED_LIVE"], ["quote_won", "7694360840", "VERIFIED_LIVE"]],
   );
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.channel, "GA4");
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.googleAdsDelivery, false);
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.phoneClicksAreQualifiedCalls, false);
-  assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.actionId, null);
+  assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.actionId, "7694360843");
+  assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.minimumDurationSeconds, 60);
   assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.includedInConversions, false);
+  assert.deepEqual(paidSearchConfig.liveGoogleAds.conversionGoalGraph.biddingActionIds, ["7694360837", "7694360840"]);
+  assert.equal(paidSearchConfig.liveGoogleAds.conversionGoalGraph.customerGoals.purchaseWebsite.biddable, true);
+  assert.equal(paidSearchConfig.liveGoogleAds.conversionGoalGraph.customerGoals.pageViewWebsite.biddable, false);
+  assert.equal(paidSearchConfig.liveGoogleAds.conversionGoalGraph.customerGoals.phoneCallLeadCallFromAds.biddable, false);
+  assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.primaryForGoal, false);
+  assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.includedInConversions, false);
   assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 500, protectivePauseCad: 625, absoluteCapCad: 650, monitorCadenceMinutes: 15 });
   assert.deepEqual(paidSearchConfig.controlledTest, {
     campaign: "GOOG_Search_TC_CoreProducts_2026",
@@ -300,9 +395,20 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.equal(manifest.activationPermitted, false);
   assert.equal(manifest.requiredFreshLiveVerification, true);
   assert.equal(manifest.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
-  assert.equal(manifest.conversionMeasurement.requiredUploadClickActions.quoteWon.actionId, null);
-  assert.ok(manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
-  assert.ok(manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
+  assert.equal(manifest.conversionMeasurement.requiredUploadClickActions.quoteWon.actionId, "7694360840");
+  assert.equal(manifest.recordedLiveEvidence.validatedAt, "2026-07-23");
+  assert.equal(manifest.recordedLiveEvidence.counts.positiveKeywords, 83);
+  assert.deepEqual(manifest.recordedLiveEvidence.geoTarget.center, { latitude: 52.129728, longitude: -106.659637 });
+  assert.deepEqual(manifest.recordedLiveEvidence.conversionGoalGraph.biddingActionIds, ["7694360837", "7694360840"]);
+  assert.equal(manifest.recordedLiveEvidence.allCampaignsPaused, true);
+  assert.equal(manifest.recordedLiveEvidence.spendCad, 0);
+  assert.ok(manifest.blockers.includes("OFFLINE_UPLOADER_MIGRATION"));
+  assert.ok(manifest.blockers.includes("PURCHASE_UPLOAD_CLICKS_OBSERVED"));
+  assert.ok(manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_OBSERVED"));
+  assert.ok(manifest.blockers.includes("PROMOTION_ELIGIBILITY"));
+  assert.ok(manifest.blockers.includes("RSA_POLICY_APPROVAL"));
+  assert.ok(!manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
+  assert.ok(!manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
   assert.equal(manifest.launchCandidates.length, 15);
   assert.equal(manifest.heldGroups.length, 4);
   assert.ok(manifest.heldGroups.every((group) => ["TIER_2_EXPANSION", "HOLD_AUCTION_INSIGHTS"].includes(group.tier)));
@@ -341,16 +447,20 @@ test("exports negatives with canonical scope types and never as positive keyword
   assert.ok(positives.rows.filter((row) => row.Campaign === "GOOG_Search_TC_CompetitorConquest_2026").every((row) => row.Type === "Exact"));
 });
 
-test("generated readiness summary distinguishes importable entities from advanced-geo blockers", () => {
+test("generated readiness summary records the verified paused account while retaining launch gates", () => {
   const summary = JSON.parse(buildArtifacts(clone())["validation-summary.json"]);
   assert.equal(summary.editorSupportedEntitiesImportReady, true);
   assert.equal(summary.editorImportTargetEncoded, false);
   assert.equal(summary.targetAccountPreflightRequired, true);
   assert.equal(summary.presenceOnlyCsvConfigured, false);
-  assert.equal(summary.presenceOnlyStatus, "API_VERIFIED_ACCOUNT_PREVIEW_REQUIRED");
+  assert.equal(summary.presenceOnlyStatus, "API_VERIFIED_2026-07-23_ACCOUNT_PREVIEW_REQUIRED");
   assert.equal(summary.accountPreviewRequired, true);
   assert.equal(summary.generatorAutoRollsDates, false);
-  assert.deepEqual(summary.recordedLiveEvidence.counts, { campaigns: 3, adGroups: 19, positiveKeywords: 71, negativeCriteria: 189, responsiveSearchAds: 19, manualAssets: 13, campaignAssetLinks: 39 });
+  assert.deepEqual(summary.recordedLiveEvidence.counts, { campaigns: 3, adGroups: 19, positiveKeywords: 83, negativeCriteria: 189, responsiveSearchAds: 19, manualAssets: 13, campaignAssetLinks: 39 });
+  assert.deepEqual(summary.recordedLiveEvidence.geoTarget.center, { latitude: 52.129728, longitude: -106.659637 });
+  assert.equal(summary.recordedLiveEvidence.geoTarget.radiusKm, 35);
+  assert.equal(summary.recordedLiveEvidence.allCampaignsPaused, true);
+  assert.equal(summary.recordedLiveEvidence.spendCad, 0);
   assert.deepEqual(summary.recordedLiveEvidence.cpcCeilingCadByCampaignKind, { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 });
   assert.equal(summary.manualAdAssetsConfigured, true);
   assert.equal(summary.conversionFirstLaunchTiersConfigured, true);

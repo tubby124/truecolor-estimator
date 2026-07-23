@@ -4,6 +4,20 @@ const EXPECTED_CAMPAIGNS = {
   GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 1.5 },
 };
 const EXPECTED_SUFFIX = "utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_term={keyword}&utm_content={creative}&keyword={keyword}&matchtype={matchtype}&device={device}&loc_physical_ms={loc_physical_ms}&loc_interest_ms={loc_interest_ms}&adgroupid={adgroupid}&creative={creative}&campaignid={campaignid}&network={network}";
+const EXPECTED_GEO_POINT = {
+  latitudeInMicroDegrees: 52_129_728,
+  longitudeInMicroDegrees: -106_659_637,
+};
+const EXPECTED_NEAR_ME_TERMS = [
+  "die cut stickers near me",
+  "custom die cut stickers near me",
+  "custom stickers near me",
+  "custom labels near me",
+  "die cut labels near me",
+  "custom die cut labels near me",
+];
+const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
+const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
 const validRevenueAction = (action, eventName) => action
   && action.eventName === eventName
   && typeof action.id === "string"
@@ -57,9 +71,32 @@ export function evaluatePausedLiveState(live) {
   if (live.adGroups !== 19 || live.pausedAdGroups !== 19) failures.push("all 19 ad groups must remain paused");
   if (live.responsiveSearchAds !== 19 || live.pausedResponsiveSearchAds !== 19) failures.push("all 19 RSAs must remain paused");
   if (live.positiveKeywords !== 83 || live.negativeCriteria !== 189) failures.push("keyword counts changed");
+  const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
+    `${text}|EXACT`,
+    `${text}|PHRASE`,
+  ]));
+  const nearMeKeywords = live.nearMeKeywords ?? [];
+  const observedNearMeKeywords = new Set(nearMeKeywords.map((keyword) => `${keyword.text}|${keyword.matchType}`));
+  if (nearMeKeywords.length !== 12
+    || observedNearMeKeywords.size !== 12
+    || [...expectedNearMeKeywords].some((keyword) => !observedNearMeKeywords.has(keyword))
+    || nearMeKeywords.some((keyword) => keyword.campaign !== "GOOG_Search_TC_CoreProducts_2026"
+      || keyword.adGroup !== "Stickers and Labels"
+      || keyword.status !== "PAUSED")) failures.push("all 12 GSC-backed near-me keywords must remain present and paused");
   if (live.competitorMatchTypes?.length !== 1 || live.competitorMatchTypes[0] !== "EXACT") failures.push("competitor targeting is not exact-only");
   if (live.manualAssets !== 13 || live.campaignAssetLinks !== 39) failures.push("asset counts changed");
   if (live.locationTargets !== 0 || live.proximityTargets !== 3 || live.radius35KmTargets !== 3) failures.push("Saskatoon +35 km proximity criteria changed");
+  const positiveGeoCriteria = live.positiveGeoCriteria ?? [];
+  if (positiveGeoCriteria.length !== 3
+    || positiveGeoCriteria.some((criterion) => criterion.type !== "PROXIMITY"
+      || Number(criterion.radius) !== 35
+      || criterion.radiusUnits !== "KILOMETERS"
+      || Number(criterion.latitudeInMicroDegrees) !== EXPECTED_GEO_POINT.latitudeInMicroDegrees
+      || Number(criterion.longitudeInMicroDegrees) !== EXPECTED_GEO_POINT.longitudeInMicroDegrees)
+    || new Set(positiveGeoCriteria.map((criterion) => criterion.campaign)).size !== 3
+    || Object.keys(EXPECTED_CAMPAIGNS).some((campaign) => !positiveGeoCriteria.some((criterion) => criterion.campaign === campaign))) {
+    failures.push("positive geo criteria must be exactly one 35 km Saskatoon proximity per planned campaign");
+  }
   if (live.languageTargets !== 3 || live.englishLanguageTargets !== 3) failures.push("English language criteria changed");
   const expectedIds = new Set(Object.values(EXPECTED_CAMPAIGNS).map((campaign) => campaign.id));
   const allCampaigns = live.allCampaigns ?? [];
@@ -94,6 +131,63 @@ export function evaluatePausedLiveState(live) {
   if (hasPurchaseSelection && hasQuoteSelection && purchaseRevenue?.id === quoteWonRevenue?.id) failures.push("purchase_online and quote_won must use distinct UPLOAD_CLICKS actions");
   if (hasCallSelection && !validQualifiedCallAction(qualifiedCall)) failures.push("configured duration-qualified call conversion is missing from inventory, primary, or included in bidding");
   if (hasCallSelection && [purchaseRevenue?.id, quoteWonRevenue?.id].filter(Boolean).includes(qualifiedCall?.id)) failures.push("qualified calls must use a distinct secondary action");
+  const includedConversionActions = (live.conversionActionInventory ?? [])
+    .filter((action) => action.included === true);
+  const expectedIncludedConversionIds = new Set(
+    [purchaseRevenue?.id, quoteWonRevenue?.id].filter(Boolean),
+  );
+  if (hasPurchaseSelection && hasQuoteSelection
+    && (includedConversionActions.length !== 2
+      || includedConversionActions.some((action) => !expectedIncludedConversionIds.has(action.id)))) {
+    failures.push("purchase_online and quote_won must be the only included conversion actions");
+  }
+  const historicalBrowserPurchase = live.historicalBrowserPurchaseConversion;
+  if (!historicalBrowserPurchase
+    || historicalBrowserPurchase.id !== HISTORICAL_BROWSER_PURCHASE_ACTION_ID
+    || historicalBrowserPurchase.name !== "Purchase - Website (True Color)"
+    || historicalBrowserPurchase.status !== "ENABLED"
+    || historicalBrowserPurchase.type !== "WEBPAGE"
+    || historicalBrowserPurchase.category !== "PURCHASE"
+    || historicalBrowserPurchase.primaryForGoal !== false
+    || historicalBrowserPurchase.included !== false) {
+    failures.push("historical browser purchase action must remain secondary and excluded");
+  }
+  const customerCallGoals = (live.customerConversionGoals ?? [])
+    .filter((goal) => goal.category === "PHONE_CALL_LEAD" && goal.origin === "CALL_FROM_ADS");
+  if (customerCallGoals.length !== 1 || customerCallGoals[0].biddable !== false) {
+    failures.push("customer qualified-call goal must remain non-biddable");
+  }
+  const biddableCustomerGoals = (live.customerConversionGoals ?? [])
+    .filter((goal) => goal.biddable === true);
+  if (biddableCustomerGoals.length !== 1
+    || biddableCustomerGoals[0].category !== "PURCHASE"
+    || biddableCustomerGoals[0].origin !== "WEBSITE") {
+    failures.push("purchase website must be the only biddable customer conversion goal");
+  }
+  const campaignCallGoals = (live.campaignConversionGoals ?? [])
+    .filter((goal) => goal.category === "PHONE_CALL_LEAD" && goal.origin === "CALL_FROM_ADS");
+  if (campaignCallGoals.length !== 3
+    || campaignCallGoals.some((goal) => goal.biddable !== false)
+    || new Set(campaignCallGoals.map((goal) => goal.campaign)).size !== 3
+    || Object.keys(EXPECTED_CAMPAIGNS).some((campaign) => !campaignCallGoals.some((goal) => goal.campaign === campaign))) {
+    failures.push("every planned campaign qualified-call goal must remain non-biddable");
+  }
+  const biddableCampaignGoals = (live.campaignConversionGoals ?? [])
+    .filter((goal) => goal.biddable === true);
+  if (biddableCampaignGoals.length !== 3
+    || biddableCampaignGoals.some((goal) => goal.category !== "PURCHASE" || goal.origin !== "WEBSITE")
+    || new Set(biddableCampaignGoals.map((goal) => goal.campaign)).size !== 3
+    || Object.keys(EXPECTED_CAMPAIGNS).some((campaign) => !biddableCampaignGoals.some((goal) => goal.campaign === campaign))) {
+    failures.push("purchase website must be the only biddable goal for every planned campaign");
+  }
+  const campaignGoalConfigs = live.campaignGoalConfigs ?? [];
+  if (campaignGoalConfigs.length !== 3
+    || campaignGoalConfigs.some((config) => config.goalConfigLevel !== "CUSTOMER" || config.customConversionGoal)
+    || new Set(campaignGoalConfigs.map((config) => config.campaign)).size !== 3
+    || Object.keys(EXPECTED_CAMPAIGNS).some((campaign) => !campaignGoalConfigs.some((config) => config.campaign === campaign))
+    || (live.customConversionGoals ?? []).length !== 0) {
+    failures.push("planned campaigns must inherit customer goals without custom conversion goals");
+  }
 
   if (live.spendCadPilot !== 0) failures.push("nonzero pilot-period spend detected");
 
@@ -102,5 +196,9 @@ export function evaluatePausedLiveState(live) {
   else if (!competitorLanding.noindex) launchBlockers.push("competitor landing is missing noindex");
   if (live.rsaApprovalStatuses?.some((status) => status !== "APPROVED")) launchBlockers.push("one or more RSAs are not policy-approved");
   if (live.assetApprovalStatuses?.some((status) => status !== "APPROVED")) launchBlockers.push("one or more manual assets are not policy-approved");
+  if (live.offlineUploaderVerification?.verified !== true
+    || live.offlineUploaderVerification?.method !== OFFLINE_UPLOADER_CLEARANCE) {
+    launchBlockers.push("offline conversion uploader requires a reconciled real transaction before launch");
+  }
   return { failures, launchBlockers };
 }

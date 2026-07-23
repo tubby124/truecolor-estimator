@@ -7,7 +7,7 @@ const EXPECTED = {
 };
 const REQUIRED_GATES = [
   "TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED",
-  "PURCHASE_UPLOAD_CLICKS_ACTION", "QUOTE_WON_UPLOAD_CLICKS_ACTION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
+  "PURCHASE_UPLOAD_CLICKS_ACTION", "QUOTE_WON_UPLOAD_CLICKS_ACTION", "CONVERSION_GOAL_GRAPH", "OFFLINE_UPLOADER_MIGRATION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
   "QUALIFIED_CALL_ACTION",
   "PROMOTION_ELIGIBILITY", "COMPETITOR_LANDING_DEPLOYED", "RSA_POLICY_APPROVAL", "AUCTION_INSIGHTS_SIGNOFF",
   "ENHANCED_CONSENT_DECISION", "CURRENT_KEYWORD_PLANNER_FORECAST", "CPC_CEILING_LAUNCH_APPROVAL", "BUDGET_APPROVAL",
@@ -18,12 +18,17 @@ const VERIFIED_GATE_EVIDENCE = new Map([
   ["TRUE_COLOR_CUSTOMER_ID", "True Color Display Print child account 107-281-6342 under manager 112-540-2990"],
   ["BILLING_ACTIVE", "Billing APPROVED in customer 1072816342; setup 8490021913"],
   ["AUTO_TAGGING_ENABLED", "Auto-tagging enabled in customer 1072816342"],
+  ["PURCHASE_UPLOAD_CLICKS_ACTION", "Action 7694360837 purchase_online is enabled, primary, included, dynamic CAD, and owned by customer 1072816342"],
+  ["QUOTE_WON_UPLOAD_CLICKS_ACTION", "Action 7694360840 quote_won is enabled, primary, included, dynamic CAD, and owned by customer 1072816342"],
+  ["CONVERSION_GOAL_GRAPH", "2026-07-23 readback: customer purchase goal biddable with actions 7694360837 and 7694360840; page-view and call goals non-biddable; historical action 7689029977 secondary and excluded"],
+  ["QUALIFIED_CALL_ACTION", "Action 7694360843 qualified_call_60s is enabled with 60-second duration, secondary, excluded, and its customer goal is non-biddable"],
+  ["COMPETITOR_LANDING_DEPLOYED", "Live /why-true-color returned HTTP 200 with noindex and working paid-page product routes on 2026-07-23"],
   ["CURRENT_KEYWORD_PLANNER_FORECAST", "2026-07-17 True Color forecast; Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 staged paused"],
 ]);
 const LIVE_GOOGLE_ADS = {
   apiVersion: "v24",
   status: "VALIDATED_PAUSED",
-  validatedAt: "2026-07-17",
+  validatedAt: "2026-07-23",
   managerCustomerId: "1125402990",
   managerLinkId: "6626494765",
   billingSetupId: "8490021913",
@@ -31,15 +36,36 @@ const LIVE_GOOGLE_ADS = {
     actionId: "7689029977",
     destination: "AW-18330693756/F1pQCNmStdIcEPzg4KRE",
     revenueDelivery: false,
+    primaryForGoal: false,
+    includedInConversions: false,
   },
   campaignIds: {
     GOOG_Search_TC_CoreProducts_2026: "24048123058",
     GOOG_Search_TC_CompetitorConquest_2026: "24048123061",
     GOOG_Search_TC_BrandDefense_2026: "24048123064",
   },
-  counts: { campaigns: 3, adGroups: 19, positiveKeywords: 71, negativeCriteria: 189, responsiveSearchAds: 19, manualAssets: 13, campaignAssetLinks: 39 },
+  counts: { campaigns: 3, adGroups: 19, positiveKeywords: 83, negativeCriteria: 189, responsiveSearchAds: 19, manualAssets: 13, campaignAssetLinks: 39 },
+  geoTarget: {
+    kind: "PROXIMITY",
+    center: { latitude: 52.129728, longitude: -106.659637 },
+    radiusKm: 35,
+    positiveLocationCriteria: 0,
+    proximityCriteria: 3,
+    presence: "PRESENCE",
+  },
+  conversionGoalGraph: {
+    configLevel: "CUSTOMER",
+    customerGoals: {
+      purchaseWebsite: { biddable: true },
+      pageViewWebsite: { biddable: false },
+      phoneCallLeadCallFromAds: { biddable: false },
+    },
+    biddingActionIds: ["7694360837", "7694360840"],
+  },
   cpcCeilingCadByCampaignKind: { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 },
-  policyApprovalStatus: "UNKNOWN",
+  policyApprovalStatus: "COMPETITOR_RSA_APPEAL_REQUIRED",
+  disapprovedCompetitorResponsiveSearchAds: 9,
+  allCampaignsPaused: true,
   spendCad: 0,
 };
 const CONVERSION_MEASUREMENT = {
@@ -48,8 +74,8 @@ const CONVERSION_MEASUREMENT = {
     purchaseOnline: {
       eventName: "purchase_online",
       envVar: "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID",
-      actionId: null,
-      status: "UNCONFIGURED",
+      actionId: "7694360837",
+      status: "VERIFIED_LIVE",
       requiredType: "UPLOAD_CLICKS",
       primaryForGoal: true,
       includedInConversions: true,
@@ -59,8 +85,8 @@ const CONVERSION_MEASUREMENT = {
     quoteWon: {
       eventName: "quote_won",
       envVar: "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID",
-      actionId: null,
-      status: "UNCONFIGURED",
+      actionId: "7694360840",
+      status: "VERIFIED_LIVE",
       requiredType: "UPLOAD_CLICKS",
       primaryForGoal: true,
       includedInConversions: true,
@@ -70,13 +96,13 @@ const CONVERSION_MEASUREMENT = {
   },
   qualifiedCallAction: {
     envVar: "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID",
-    actionId: null,
-    status: "UNCONFIGURED",
+    actionId: "7694360843",
+    status: "VERIFIED_LIVE",
     allowedTypes: ["AD_CALL", "WEBSITE_CALL", "UPLOAD_CALLS"],
     requiredCategory: "PHONE_CALL_LEAD",
     primaryForGoal: false,
     includedInConversions: false,
-    minimumDurationSeconds: null,
+    minimumDurationSeconds: 60,
   },
   diagnosticEvents: {
     channel: "GA4",
@@ -243,7 +269,7 @@ export function validateConfig(config) {
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
   if (JSON.stringify(config.conversionMeasurement) !== JSON.stringify(CONVERSION_MEASUREMENT)) {
-    fail("Revenue measurement must require distinct unconfigured purchase_online and quote_won UPLOAD_CLICKS actions with GA4-only browser diagnostics");
+    fail("Revenue measurement must match the freshly verified purchase_online, quote_won, and qualified-call action contract");
   }
   const suffixParams = new URLSearchParams(config.tracking?.finalUrlSuffix ?? "");
   for (const [key, expectedValue] of Object.entries(TRACKING_MAPPINGS)) {
@@ -328,7 +354,11 @@ export function validateConfig(config) {
     if (campaign.status !== "PAUSED") fail(`${campaign.name} must be paused`);
     if (campaign.language !== "English") fail(`${campaign.name} language must be English`);
     if (campaign.channel !== "SEARCH" || !campaign.networks?.googleSearch || campaign.networks?.searchPartners || campaign.networks?.display) fail(`${campaign.name} must be Google Search only`);
-    if (campaign.geoTarget?.criterionId !== 1002791 || campaign.geoTarget?.radiusKm !== 35 || campaign.geoTarget?.presenceOnly !== true) fail(`${campaign.name} must target Saskatoon +35 km presence-only`);
+    if (campaign.geoTarget?.criterionId !== 1002791
+      || campaign.geoTarget?.center?.latitude !== 52.129728
+      || campaign.geoTarget?.center?.longitude !== -106.659637
+      || campaign.geoTarget?.radiusKm !== 35
+      || campaign.geoTarget?.presenceOnly !== true) fail(`${campaign.name} must target the verified Saskatoon center +35 km presence-only`);
     if (!campaign.adGroups?.length) fail(`${campaign.name} has no ad groups`);
     const expectedGroups = kind === "CORE" ? ROUTES : kind === "COMPETITOR" ? COMPETITOR_GROUPS : BRAND_GROUPS;
     const actualGroupKeys = (campaign.adGroups ?? []).map((group) => group.key);
