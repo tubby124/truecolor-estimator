@@ -7,8 +7,10 @@ import {
   parseControlledTestOptions,
   validateActivatedState,
   validateBudgetStagedState,
+  validateControlledAccount,
   validateMonitorAttestation,
   validatePreflightState,
+  validateResourcesStagedState,
   validateRolledBackState,
 } from "../controlled-test-contract.mjs";
 import {
@@ -162,7 +164,13 @@ const healthyLandingProbe = async (url) => ({
   status: 200,
 });
 
-function makeApi({ failAt = null, readFailureAt = null, initialStage = "paused" } = {}) {
+function makeApi({
+  failAt = null,
+  readFailureAt = null,
+  initialStage = "paused",
+  onRead = null,
+  account = null,
+} = {}) {
   let state = structuredClone(makeState(initialStage));
   let reads = 0;
   let failureConsumed = false;
@@ -189,11 +197,15 @@ function makeApi({ failAt = null, readFailureAt = null, initialStage = "paused" 
   return {
     calls,
     get state() { return state; },
+    async readAccount() {
+      return structuredClone(account ?? state.account);
+    },
     async readCampaigns() {
       return structuredClone(state.campaigns);
     },
     async readState() {
       reads += 1;
+      onRead?.({ reads, state });
       if (readFailureAt === reads) throw new Error("read failed");
       return structuredClone(state);
     },
@@ -280,6 +292,9 @@ test("state validators enforce exact resource identities and only the intended e
   const budgetStaged = makeState("paused");
   budgetStaged.budget.amountMicros = "5000000";
   assert.equal(validateBudgetStagedState(budgetStaged).budget.amountMicros, "5000000");
+  const resourcesStaged = makeState("active");
+  resourcesStaged.campaigns[0].status = "PAUSED";
+  assert.equal(validateResourcesStagedState(resourcesStaged).campaigns[0].status, "PAUSED");
   assert.equal(validateActivatedState(makeState("active")).budget.amountMicros, "5000000");
   assert.equal(validateRolledBackState(makeState("paused")).budget.amountMicros, "8000000");
 
@@ -306,6 +321,10 @@ test("state validators enforce exact resource identities and only the intended e
   enabledWhileBudgetStaged.budget.amountMicros = "5000000";
   enabledWhileBudgetStaged.campaigns[0].status = "ENABLED";
   assert.throws(() => validateBudgetStagedState(enabledWhileBudgetStaged), /Every campaign/);
+  assert.throws(
+    () => validateControlledAccount({ id: "999", currencyCode: "CAD", timeZone: CONTROLLED_TEST.timeZone }),
+    /exact True Color/,
+  );
 });
 
 test("preflight is read-only and reports unsafe state without any mutation", async () => {
@@ -401,6 +420,27 @@ test("any failure after the first write invokes full rollback and restores CA$8"
   assert.equal(api.calls[firstRollbackCampaign].resources.length, CONTROLLED_TEST.campaigns.length);
 });
 
+test("resource-stage drift triggers rollback before Core can be enabled", async () => {
+  const api = makeApi({
+    onRead({ reads, state }) {
+      if (reads === 3) state.adGroups[1].status = "ENABLED";
+    },
+  });
+  const result = await runControlledTestController({
+    api,
+    options: { mode: "activate", execute: true },
+    monitorAttestation: makeAttestation(),
+    landingProbe: healthyLandingProbe,
+    now: NOW,
+  });
+  assert.equal(result.outcome, "ACTIVATION_FAILED_ROLLED_BACK");
+  const coreEnable = api.calls.find(
+    (call) => call.kind === "campaign" && call.statusOrAmount === "ENABLED",
+  );
+  assert.equal(coreEnable, undefined);
+  assert.ok(api.state.campaigns.every((campaign) => campaign.status === "PAUSED"));
+});
+
 test("activation refuses a broken or redirected Coroplast URL before the first write", async () => {
   for (const probe of [
     async (url) => ({ requestedUrl: url, finalUrl: url, status: 503 }),
@@ -488,4 +528,19 @@ test("rollback continues remaining safety batches after one batch fails and repo
   assert.equal(api.state.adGroups[0].status, "PAUSED");
   assert.equal(api.state.ads[0].status, "PAUSED");
   assert.equal(api.state.budget.amountMicros, "8000000");
+});
+
+test("rollback refuses mutation when exact account identity cannot be verified", async () => {
+  const api = makeApi({
+    initialStage: "active",
+    account: { id: "999", currencyCode: "CAD", timeZone: CONTROLLED_TEST.timeZone },
+  });
+  const result = await runControlledTestController({
+    api,
+    options: { mode: "rollback", execute: true },
+    now: NOW,
+  });
+  assert.equal(result.outcome, "ROLLBACK_UNVERIFIED");
+  assert.match(result.errors[0], /account identity verification failed/);
+  assert.equal(api.calls.length, 0);
 });

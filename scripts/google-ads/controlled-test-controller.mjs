@@ -7,8 +7,10 @@ import {
   parseControlledTestOptions,
   validateActivatedState,
   validateBudgetStagedState,
+  validateControlledAccount,
   validateMonitorAttestation,
   validatePreflightState,
+  validateResourcesStagedState,
   validateRolledBackState,
 } from "./controlled-test-contract.mjs";
 
@@ -65,6 +67,7 @@ export async function runControlledTestController({
     );
     await mutateValidated(api.setAdStatuses, [CONTROLLED_TEST.rsa.resourceName], "ENABLED");
     await mutateValidated(api.setAdGroupStatuses, [CONTROLLED_TEST.adGroup.resourceName], "ENABLED");
+    validateResourcesStagedState(await api.readState());
     await mutateValidated(api.setCampaignStatuses, [CONTROLLED_TEST.campaign.resourceName], "ENABLED");
 
     const state = validateActivatedState(await api.readState());
@@ -92,6 +95,17 @@ export async function runControlledTestController({
 
 async function runRollback({ api, base }) {
   const errors = [];
+  try {
+    validateControlledAccount(await api.readAccount());
+  } catch (error) {
+    return {
+      ...base,
+      ok: false,
+      outcome: "ROLLBACK_UNVERIFIED",
+      errors: [`Rollback account identity verification failed: ${safeMessage(error)}`],
+      summary: null,
+    };
+  }
   let campaigns = null;
   try {
     campaigns = await api.readCampaigns();
@@ -108,19 +122,33 @@ async function runRollback({ api, base }) {
       : CONTROLLED_TEST.campaigns.map((campaign) => campaign.resourceName);
     await mutateValidated(api.setCampaignStatuses, resources, "PAUSED");
   });
+  let resourceState = null;
+  try {
+    resourceState = await api.readState();
+  } catch (error) {
+    errors.push(`Rollback account-wide resource inventory read failed: ${safeMessage(error)}`);
+  }
+  const keywordResources = resourceState?.keywords
+    ?.filter((keyword) => keyword.negative !== true)
+    .map((keyword) => keyword.resourceName)
+    ?? CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName);
+  const adResources = resourceState?.ads?.map((ad) => ad.resourceName)
+    ?? [CONTROLLED_TEST.rsa.resourceName];
+  const adGroupResources = resourceState?.adGroups?.map((adGroup) => adGroup.resourceName)
+    ?? [CONTROLLED_TEST.adGroup.resourceName];
   await rollbackBatch(errors, "keyword pause", () => mutateValidated(
     api.setKeywordStatuses,
-    CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName),
+    keywordResources,
     "PAUSED",
   ));
   await rollbackBatch(errors, "RSA pause", () => mutateValidated(
     api.setAdStatuses,
-    [CONTROLLED_TEST.rsa.resourceName],
+    adResources,
     "PAUSED",
   ));
   await rollbackBatch(errors, "ad-group pause", () => mutateValidated(
     api.setAdGroupStatuses,
-    [CONTROLLED_TEST.adGroup.resourceName],
+    adGroupResources,
     "PAUSED",
   ));
   await rollbackBatch(errors, "budget restoration", () => mutateValidated(
@@ -202,6 +230,7 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
         method: "POST",
         headers: await getHeaders(),
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(15_000),
       },
     );
     const responseBody = await response.json();
@@ -223,8 +252,21 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
       responseContentType: "MUTABLE_RESOURCE",
     }, `${operation}${validateOnly ? " validation" : ""}`);
   };
+  const readAccount = async () => {
+    const rows = await search(
+      "SELECT customer.id, customer.currency_code, customer.time_zone FROM customer LIMIT 1",
+      "account read",
+    );
+    const customer = rows[0]?.customer;
+    return {
+      id: customer?.id,
+      currencyCode: customer?.currencyCode,
+      timeZone: customer?.timeZone,
+    };
+  };
 
   return {
+    readAccount,
     async readCampaigns() {
       const rows = await search(
         "SELECT campaign.id, campaign.resource_name, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.campaign_budget FROM campaign WHERE campaign.status != 'REMOVED'",
@@ -241,16 +283,13 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
     },
     async readState() {
       const [
-        accountRows,
+        account,
         campaignRows,
         adGroupRows,
         adRows,
         keywordRows,
       ] = await Promise.all([
-        search(
-          "SELECT customer.id, customer.currency_code, customer.time_zone FROM customer LIMIT 1",
-          "account read",
-        ),
+        readAccount(),
         search(
           "SELECT campaign.id, campaign.resource_name, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.campaign_budget, campaign.target_spend.cpc_bid_ceiling_micros, campaign_budget.id, campaign_budget.resource_name, campaign_budget.status, campaign_budget.amount_micros, campaign_budget.explicitly_shared, campaign_budget.reference_count FROM campaign WHERE campaign.status != 'REMOVED'",
           "campaign and budget read",
@@ -268,16 +307,11 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
           "keyword read",
         ),
       ]);
-      const customer = accountRows[0]?.customer;
       const coreRow = campaignRows.find(
         (row) => row.campaign?.resourceName === CONTROLLED_TEST.campaign.resourceName,
       );
       return {
-        account: {
-          id: customer?.id,
-          currencyCode: customer?.currencyCode,
-          timeZone: customer?.timeZone,
-        },
+        account,
         campaigns: campaignRows.map((row) => ({
           id: row.campaign.id,
           resourceName: row.campaign.resourceName,
@@ -372,6 +406,7 @@ export function createCoroplastLandingProbe({ fetchImpl = fetch } = {}) {
       method: "GET",
       redirect: "follow",
       headers: { "user-agent": "TrueColor-Controlled-Test-Preflight/1.0" },
+      signal: AbortSignal.timeout(15_000),
     });
     await response.body?.cancel();
     return {
@@ -401,6 +436,7 @@ async function exchangeToken(fetchImpl, env) {
       refresh_token: env.GOOGLE_ADS_REFRESH_TOKEN,
       grant_type: "refresh_token",
     }),
+    signal: AbortSignal.timeout(15_000),
   });
   const body = await response.json();
   if (!response.ok || !body.access_token) {

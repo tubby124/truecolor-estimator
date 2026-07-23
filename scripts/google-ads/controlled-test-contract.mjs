@@ -286,7 +286,7 @@ function parseFreshTimestamp(value, now, expected, label) {
 export function validateControlledInventory(state, {
   allowedBudgetMicros = [CONTROLLED_TEST.budget.normalMicros],
 } = {}) {
-  validateAccount(state?.account);
+  validateControlledAccount(state?.account);
   assertUniqueResources(state?.campaigns, "campaign");
   assertUniqueResources(state?.adGroups, "ad group");
   assertUniqueResources(state?.ads, "ad");
@@ -373,6 +373,19 @@ export function validateBudgetStagedState(state) {
   return state;
 }
 
+export function validateResourcesStagedState(state) {
+  validateControlledInventory(state, { allowedBudgetMicros: [CONTROLLED_TEST.budget.controlledMicros] });
+  assertAllStatus(state.campaigns, "PAUSED", "campaign");
+  assertOnlyEnabled(state.adGroups, new Set([CONTROLLED_TEST.adGroup.resourceName]), "ad group");
+  assertOnlyEnabled(state.ads, new Set([CONTROLLED_TEST.rsa.resourceName]), "ad");
+  assertPositiveKeywords(
+    state.keywords,
+    new Set(CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName)),
+    "resource-stage",
+  );
+  return state;
+}
+
 export function validateActivatedState(state) {
   validateControlledInventory(state, { allowedBudgetMicros: [CONTROLLED_TEST.budget.controlledMicros] });
   assertOnlyEnabled(state.campaigns, new Set([CONTROLLED_TEST.campaign.resourceName]), "campaign");
@@ -420,7 +433,7 @@ export function buildBudgetOperations(amountMicros) {
   }];
 }
 
-function validateAccount(account) {
+export function validateControlledAccount(account) {
   if (String(account?.id ?? "") !== CONTROLLED_TEST.customerId
     || account?.currencyCode !== "CAD"
     || account?.timeZone !== CONTROLLED_TEST.timeZone) {
