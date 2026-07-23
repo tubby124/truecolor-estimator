@@ -6,6 +6,10 @@ const migration = readFileSync(
   path.join(process.cwd(), "supabase/migrations/20260720110000_google_ads_conversion_outbox.sql"),
   "utf8",
 );
+const diagnosticMigration = readFileSync(
+  path.join(process.cwd(), "supabase/migrations/20260723123000_google_data_manager_diagnostics.sql"),
+  "utf8",
+);
 const worker = readFileSync(
   path.join(process.cwd(), "src/app/api/cron/google-ads-conversions/route.ts"),
   "utf8",
@@ -35,8 +39,15 @@ describe("Google Ads conversion outbox database contract", () => {
     expect(migration).toContain("stable orderId");
   });
 
-  it("acknowledges sent only when exactly one processing row is returned", () => {
-    expect(worker).toContain('.eq("status", "processing")');
+  it("records accepted ingest as submitted rather than delivered", () => {
+    expect(worker).toContain('status: "submitted"');
+    expect(worker).toContain("data_manager_request_id: result.requestId");
+    expect(worker).not.toMatch(/uploadPaidConversion\(job\)[\s\S]{0,1200}status: "sent"/);
+  });
+
+  it("acknowledges sent only when exactly one unchanged submitted row is returned", () => {
+    expect(worker).toContain('.eq("status", "submitted")');
+    expect(worker).toContain('.eq("data_manager_request_id", job.data_manager_request_id)');
     expect(worker).toContain('.select("id")');
     expect(worker).toContain("updateError || !updated");
   });
@@ -48,7 +59,30 @@ describe("Google Ads conversion outbox database contract", () => {
 
   it("bounds both sequential claims within the five-minute worker deadline", () => {
     expect(worker).toContain("const CLAIM_LIMIT = 1");
-    expect(worker.match(/p_limit: CLAIM_LIMIT/g)).toHaveLength(2);
+    expect(worker.match(/p_limit: CLAIM_LIMIT/g)).toHaveLength(3);
+  });
+
+  it("claims due diagnostics with row locking and a crash lease", () => {
+    expect(diagnosticMigration).toContain("claim_google_ads_conversion_diagnostics");
+    expect(diagnosticMigration).toContain("status = 'submitted'");
+    expect(diagnosticMigration).toContain("next_diagnostic_at <= now()");
+    expect(diagnosticMigration).toContain("FOR UPDATE SKIP LOCKED");
+    expect(diagnosticMigration).toContain("next_diagnostic_at = now() + interval '15 minutes'");
+    expect(diagnosticMigration).toContain("diagnostic_claimed_at = now()");
+    expect(diagnosticMigration).not.toContain("diagnostics_checked_at = now()");
+  });
+
+  it("preserves the repaired enqueue trigger while adding asynchronous state", () => {
+    expect(diagnosticMigration).toContain("'submitted'");
+    expect(diagnosticMigration).not.toContain("CREATE OR REPLACE FUNCTION public.enqueue_paid_google_ads_conversion");
+    expect(diagnosticMigration).toContain("preserving the NULL conversion_type");
+  });
+
+  it("bounds regular index creation and documents the coordinated rollback", () => {
+    expect(diagnosticMigration).toContain("v_outbox_count > 10000");
+    expect(diagnosticMigration).toContain("CONCURRENTLY is unavailable");
+    expect(diagnosticMigration).toContain("WHERE status = 'submitted'");
+    expect(diagnosticMigration).toContain("stable order_number/transaction ID");
   });
 
   it("delegates alerts to the shared lifecycle rollup", () => {
@@ -56,6 +90,8 @@ describe("Google Ads conversion outbox database contract", () => {
     expect(lifecycleData).toContain('.from("google_ads_conversion_outbox")');
     expect(lifecycleData).toContain('.from("quote_measurement_event_outbox")');
     expect(lifecycleData).toContain("measurementOutboxes");
+    expect(lifecycleData).toContain('row.status === "submitted"');
+    expect(lifecycleData).toContain("row.next_diagnostic_at == null");
   });
 
   it("uses the actual paid order states for lifecycle bookkeeping visibility", () => {

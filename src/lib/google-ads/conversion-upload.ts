@@ -1,4 +1,4 @@
-const API_VERSION = "v24";
+const DATA_MANAGER_ENDPOINT = "https://datamanager.googleapis.com/v1/events:ingest";
 const TRUE_COLOR_CUSTOMER_ID = "1072816342";
 const TRUE_COLOR_LOGIN_CUSTOMER_ID = "1125402990";
 
@@ -16,56 +16,23 @@ export interface PaidConversionJob {
   attempt_count: number;
 }
 
-interface GoogleAdsEnv {
+interface GoogleDataManagerEnv {
   readonly [key: string]: string | undefined;
   GOOGLE_ADS_CLIENT_ID?: string;
   GOOGLE_ADS_CLIENT_SECRET?: string;
-  GOOGLE_ADS_REFRESH_TOKEN?: string;
-  GOOGLE_ADS_DEVELOPER_TOKEN?: string;
+  GOOGLE_DATA_MANAGER_REFRESH_TOKEN?: string;
   GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID?: string;
   GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID?: string;
+  GOOGLE_DATA_MANAGER_PROJECT_ID?: string;
 }
 
-const IDEMPOTENT_DUPLICATE_CODES = new Set([
-  "DUPLICATE_ORDER_ID",
-  "ORDER_ID_ALREADY_IN_USE",
-]);
-
-interface GoogleAdsPartialFailure {
-  code?: number;
-  message?: string;
-  details?: unknown[];
-}
-
-function collectEnumCodes(value: unknown, codes: Set<string>): void {
-  if (Array.isArray(value)) {
-    for (const item of value) collectEnumCodes(item, codes);
-    return;
-  }
-  if (!value || typeof value !== "object") return;
-
-  for (const nested of Object.values(value)) {
-    if (typeof nested === "string" && /^[A-Z][A-Z0-9_]+$/.test(nested)) {
-      codes.add(nested);
-    } else {
-      collectEnumCodes(nested, codes);
-    }
-  }
-}
-
-function partialFailureCodes(failure: GoogleAdsPartialFailure): string[] {
-  const codes = new Set<string>();
-  collectEnumCodes(failure, codes);
-  return [...codes];
-}
-
-function requireEnv(env: GoogleAdsEnv, name: keyof GoogleAdsEnv): string {
+function requireEnv(env: GoogleDataManagerEnv, name: keyof GoogleDataManagerEnv): string {
   const value = env[name]?.trim();
   if (!value) throw new Error(`${name} is required`);
   return value;
 }
 
-export function conversionActionId(type: PaidConversionType, env: GoogleAdsEnv = process.env): string {
+export function conversionActionId(type: PaidConversionType, env: GoogleDataManagerEnv = process.env): string {
   const name = type === "quote_won"
     ? "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID"
     : "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID";
@@ -74,97 +41,186 @@ export function conversionActionId(type: PaidConversionType, env: GoogleAdsEnv =
   return id;
 }
 
-export function formatGoogleAdsDateTime(iso: string): string {
-  const date = new Date(iso);
-  if (!Number.isFinite(date.getTime())) throw new Error("conversion_time is invalid");
-  // Saskatchewan stays at UTC-06:00 year-round.
-  const local = new Date(date.getTime() - 6 * 60 * 60 * 1000);
-  return `${local.toISOString().slice(0, 10)} ${local.toISOString().slice(11, 19)}-06:00`;
+export function dataManagerProjectId(env: GoogleDataManagerEnv = process.env): string {
+  const projectId = requireEnv(env, "GOOGLE_DATA_MANAGER_PROJECT_ID");
+  if (!/^\d+$/.test(projectId) && !/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/.test(projectId)) {
+    throw new Error("GOOGLE_DATA_MANAGER_PROJECT_ID must be a Google Cloud project ID or number");
+  }
+  return projectId;
 }
 
-export function buildClickConversion(job: PaidConversionJob, env: GoogleAdsEnv = process.env) {
+export function formatDataManagerTimestamp(iso: string): string {
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) throw new Error("conversion_time is invalid");
+  return date.toISOString();
+}
+
+export function buildDataManagerRequest(
+  job: PaidConversionJob,
+  env: GoogleDataManagerEnv = process.env,
+  validateOnly = false,
+) {
   const clickIds = [job.gclid, job.gbraid, job.wbraid].filter((value) => Boolean(value?.trim()));
   if (clickIds.length !== 1) throw new Error("exactly one Google click identifier is required");
   const value = Number(job.conversion_value);
   if (!Number.isFinite(value) || value <= 0) throw new Error("conversion_value must be positive");
-  const orderId = job.order_number.trim();
-  if (!orderId) throw new Error("order_number is required");
+  const transactionId = job.order_number.trim();
+  if (!transactionId) throw new Error("order_number is required");
 
   return {
-    conversionAction: `customers/${TRUE_COLOR_CUSTOMER_ID}/conversionActions/${conversionActionId(job.conversion_type, env)}`,
-    conversionDateTime: formatGoogleAdsDateTime(job.conversion_time),
-    conversionValue: Number(value.toFixed(2)),
-    currencyCode: "CAD",
-    orderId,
-    conversionEnvironment: "WEB",
-    ...(job.gclid ? { gclid: job.gclid } : {}),
-    ...(job.gbraid ? { gbraid: job.gbraid } : {}),
-    ...(job.wbraid ? { wbraid: job.wbraid } : {}),
+    destinations: [{
+      operatingAccount: { accountType: "GOOGLE_ADS", accountId: TRUE_COLOR_CUSTOMER_ID },
+      loginAccount: { accountType: "GOOGLE_ADS", accountId: TRUE_COLOR_LOGIN_CUSTOMER_ID },
+      productDestinationId: conversionActionId(job.conversion_type, env),
+    }],
+    events: [{
+      adIdentifiers: {
+        ...(job.gclid ? { gclid: job.gclid } : {}),
+        ...(job.gbraid ? { gbraid: job.gbraid } : {}),
+        ...(job.wbraid ? { wbraid: job.wbraid } : {}),
+      },
+      conversionValue: Number(value.toFixed(2)),
+      currency: "CAD",
+      eventTimestamp: formatDataManagerTimestamp(job.conversion_time),
+      transactionId,
+      eventSource: "WEB",
+    }],
+    ...(validateOnly ? { validateOnly: true } : {}),
   };
 }
 
-async function accessToken(fetchImpl: typeof fetch, env: GoogleAdsEnv): Promise<string> {
+async function accessToken(fetchImpl: typeof fetch, env: GoogleDataManagerEnv): Promise<string> {
   const response = await fetchImpl("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id: requireEnv(env, "GOOGLE_ADS_CLIENT_ID"),
       client_secret: requireEnv(env, "GOOGLE_ADS_CLIENT_SECRET"),
-      refresh_token: requireEnv(env, "GOOGLE_ADS_REFRESH_TOKEN"),
+      refresh_token: requireEnv(env, "GOOGLE_DATA_MANAGER_REFRESH_TOKEN"),
       grant_type: "refresh_token",
     }),
     signal: AbortSignal.timeout(15_000),
   });
   const body = await response.json() as { access_token?: string };
-  if (!response.ok || !body.access_token) throw new Error(`Google Ads OAuth exchange failed with HTTP ${response.status}`);
+  if (!response.ok || !body.access_token) throw new Error(`Google OAuth exchange failed with HTTP ${response.status}`);
   return body.access_token;
 }
 
 export async function uploadPaidConversion(
   job: PaidConversionJob,
-  options: { fetchImpl?: typeof fetch; env?: GoogleAdsEnv } = {},
-): Promise<{ jobId: string | null }> {
+  options: { fetchImpl?: typeof fetch; env?: GoogleDataManagerEnv; validateOnly?: boolean } = {},
+): Promise<{ requestId: string | null }> {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const env = options.env ?? process.env;
+  const token = await accessToken(fetchImpl, env);
+  const response = await fetchImpl(DATA_MANAGER_ENDPOINT, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${token}`,
+      "x-goog-user-project": dataManagerProjectId(env),
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(buildDataManagerRequest(job, env, options.validateOnly === true)),
+    signal: AbortSignal.timeout(20_000),
+  });
+  const body = await response.json().catch(() => ({})) as {
+    requestId?: string;
+    error?: { message?: string; status?: string; details?: unknown[] };
+  };
+  if (!response.ok) {
+    const detail = body.error?.message ?? body.error?.status ?? "unknown error";
+    throw new Error(`Google Data Manager conversion upload failed with HTTP ${response.status}: ${detail}`);
+  }
+  if (options.validateOnly === true) return { requestId: body.requestId ?? null };
+  if (!body.requestId) throw new Error("Google Data Manager rejected conversion: no request ID");
+  return { requestId: body.requestId };
+}
+
+interface DataManagerStatusResponse {
+  requestStatusPerDestination?: Array<{
+    destination?: {
+      operatingAccount?: { accountType?: string; accountId?: string };
+      productDestinationId?: string;
+    };
+    requestStatus?: string;
+    eventsIngestionStatus?: { recordCount?: string };
+    errorInfo?: { errorCounts?: Array<{ recordCount?: string; reason?: string }> };
+    warningInfo?: { warningCounts?: Array<{ recordCount?: string; reason?: string }> };
+  }>;
+  error?: { message?: string; status?: string };
+}
+
+export interface PaidConversionDiagnostics {
+  requestStatus: string;
+  recordCount: number;
+  warnings: string[];
+  errors: string[];
+  delivered: boolean;
+  processing: boolean;
+  duplicateTransactionOnly: boolean;
+}
+
+export function classifyPaidConversionDiagnostics(
+  body: DataManagerStatusResponse,
+  type: PaidConversionType,
+  env: GoogleDataManagerEnv = process.env,
+): PaidConversionDiagnostics {
+  const statuses = body.requestStatusPerDestination ?? [];
+  if (statuses.length !== 1) throw new Error(`Google Data Manager returned ${statuses.length} destination statuses; expected exactly one`);
+  const status = statuses[0];
+  if (status.destination?.operatingAccount?.accountType !== "GOOGLE_ADS"
+    || status.destination?.operatingAccount?.accountId !== TRUE_COLOR_CUSTOMER_ID
+    || status.destination?.productDestinationId !== conversionActionId(type, env)) {
+    throw new Error("Google Data Manager diagnostics destination does not match the True Color conversion action");
+  }
+  const requestStatus = status.requestStatus ?? "REQUEST_STATUS_UNKNOWN";
+  const recordCount = Number(status.eventsIngestionStatus?.recordCount ?? 0);
+  const errors = (status.errorInfo?.errorCounts ?? [])
+    .filter((item) => Number(item.recordCount ?? 0) > 0)
+    .map((item) => item.reason ?? "PROCESSING_ERROR_REASON_UNSPECIFIED");
+  const warnings = (status.warningInfo?.warningCounts ?? [])
+    .filter((item) => Number(item.recordCount ?? 0) > 0)
+    .map((item) => item.reason ?? "PROCESSING_WARNING_REASON_UNSPECIFIED");
+  const duplicateTransactionOnly = errors.length > 0
+    && errors.every((reason) => reason === "PROCESSING_ERROR_REASON_DUPLICATE_TRANSACTION_ID");
+  const delivered = (requestStatus === "SUCCESS" && recordCount === 1 && errors.length === 0)
+    || duplicateTransactionOnly;
+  return {
+    requestStatus,
+    recordCount,
+    warnings,
+    errors,
+    delivered,
+    processing: requestStatus === "PROCESSING",
+    duplicateTransactionOnly,
+  };
+}
+
+export async function retrievePaidConversionDiagnostics(
+  requestId: string,
+  type: PaidConversionType,
+  options: { fetchImpl?: typeof fetch; env?: GoogleDataManagerEnv } = {},
+): Promise<PaidConversionDiagnostics> {
+  const normalizedRequestId = requestId.trim();
+  if (!normalizedRequestId) throw new Error("Data Manager request ID is required");
   const fetchImpl = options.fetchImpl ?? fetch;
   const env = options.env ?? process.env;
   const token = await accessToken(fetchImpl, env);
   const response = await fetchImpl(
-    `https://googleads.googleapis.com/${API_VERSION}/customers/${TRUE_COLOR_CUSTOMER_ID}:uploadClickConversions`,
+    `https://datamanager.googleapis.com/v1/requestStatus:retrieve?requestId=${encodeURIComponent(normalizedRequestId)}`,
     {
-      method: "POST",
+      method: "GET",
       headers: {
         authorization: `Bearer ${token}`,
-        "developer-token": requireEnv(env, "GOOGLE_ADS_DEVELOPER_TOKEN"),
-        "login-customer-id": TRUE_COLOR_LOGIN_CUSTOMER_ID,
-        "content-type": "application/json",
+        "x-goog-user-project": dataManagerProjectId(env),
       },
-      body: JSON.stringify({ conversions: [buildClickConversion(job, env)], partialFailure: true }),
       signal: AbortSignal.timeout(20_000),
     },
   );
-  const body = await response.json().catch(() => ({})) as {
-    jobId?: string;
-    results?: unknown[];
-    partialFailureError?: GoogleAdsPartialFailure;
-    error?: { message?: string };
-  };
-  if (!response.ok) throw new Error(`Google Ads conversion upload failed with HTTP ${response.status}: ${body.error?.message ?? "unknown error"}`);
-  const partialFailure = body.partialFailureError;
-  const hasPartialFailure = Boolean(
-    partialFailure &&
-    (partialFailure.code !== undefined && partialFailure.code !== 0 ||
-      partialFailure.message ||
-      partialFailure.details?.length),
-  );
-  if (hasPartialFailure && partialFailure) {
-    const codes = partialFailureCodes(partialFailure);
-    if (codes.length > 0 && codes.every((code) => IDEMPOTENT_DUPLICATE_CODES.has(code))) {
-      return { jobId: body.jobId ?? null };
-    }
-    const detail = codes.length > 0 ? codes.join(", ") : partialFailure.message ?? "unknown partial failure";
-    throw new Error(`Google Ads rejected conversion: ${detail}`);
+  const body = await response.json().catch(() => ({})) as DataManagerStatusResponse;
+  if (!response.ok) {
+    const detail = body.error?.message ?? body.error?.status ?? "unknown error";
+    throw new Error(`Google Data Manager diagnostics failed with HTTP ${response.status}: ${detail}`);
   }
-  if (!body.results?.length) {
-    throw new Error("Google Ads rejected conversion: no accepted result");
-  }
-  return { jobId: body.jobId ?? null };
+  return classifyPaidConversionDiagnostics(body, type, env);
 }

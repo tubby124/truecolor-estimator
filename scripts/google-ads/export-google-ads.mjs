@@ -82,7 +82,7 @@ export function buildArtifacts(config) {
     editorImportTargetEncoded: false,
     targetAccountPreflightRequired: true,
     presenceOnlyCsvConfigured: false,
-    presenceOnlyStatus: "API_VERIFIED_ACCOUNT_PREVIEW_REQUIRED",
+    presenceOnlyStatus: "API_VERIFIED_2026-07-23_ACCOUNT_PREVIEW_REQUIRED",
     accountPreviewRequired: true,
     generatorAutoRollsDates: false,
     note: "Google Ads enforces daily budgets, not a true lifetime cap. The end date, hard stop, and monitoring are mandatory.",
@@ -102,6 +102,7 @@ export function buildArtifacts(config) {
       controlledTest: config.controlledTest,
       publicSpendControls: config.spendControls,
       conversionMeasurement: config.conversionMeasurement,
+      recordedLiveEvidence: config.liveGoogleAds,
       launchCandidates: config.campaigns.flatMap((campaign) => campaign.adGroups
         .filter((group) => ["TIER_1_PRODUCT", "TIER_1_CONQUEST"].includes(group.launchTier))
         .map((group) => ({ campaign: campaign.name, adGroup: group.name, tier: group.launchTier, requiredCurrentStatus: "PAUSED" }))),

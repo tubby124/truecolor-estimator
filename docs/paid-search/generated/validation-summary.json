@@ -8,13 +8,10 @@
   "spendCad": null,
   "errors": [],
   "blockers": [
-    "PURCHASE_UPLOAD_CLICKS_ACTION",
-    "QUOTE_WON_UPLOAD_CLICKS_ACTION",
+    "OFFLINE_UPLOADER_MIGRATION",
     "PURCHASE_UPLOAD_CLICKS_OBSERVED",
     "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
-    "QUALIFIED_CALL_ACTION",
     "PROMOTION_ELIGIBILITY",
-    "COMPETITOR_LANDING_DEPLOYED",
     "RSA_POLICY_APPROVAL",
     "AUCTION_INSIGHTS_SIGNOFF",
     "ENHANCED_CONSENT_DECISION",
@@ -27,14 +24,16 @@
   "recordedLiveEvidence": {
     "apiVersion": "v24",
     "status": "VALIDATED_PAUSED",
-    "validatedAt": "2026-07-17",
+    "validatedAt": "2026-07-23",
     "managerCustomerId": "1125402990",
     "managerLinkId": "6626494765",
     "billingSetupId": "8490021913",
     "historicalBrowserPurchaseConversion": {
       "actionId": "7689029977",
       "destination": "AW-18330693756/F1pQCNmStdIcEPzg4KRE",
-      "revenueDelivery": false
+      "revenueDelivery": false,
+      "primaryForGoal": false,
+      "includedInConversions": false
     },
     "campaignIds": {
       "GOOG_Search_TC_CoreProducts_2026": "24048123058",
@@ -44,18 +43,49 @@
     "counts": {
       "campaigns": 3,
       "adGroups": 19,
-      "positiveKeywords": 71,
+      "positiveKeywords": 83,
       "negativeCriteria": 189,
       "responsiveSearchAds": 19,
       "manualAssets": 13,
       "campaignAssetLinks": 39
+    },
+    "geoTarget": {
+      "kind": "PROXIMITY",
+      "center": {
+        "latitude": 52.129728,
+        "longitude": -106.659637
+      },
+      "radiusKm": 35,
+      "positiveLocationCriteria": 0,
+      "proximityCriteria": 3,
+      "presence": "PRESENCE"
+    },
+    "conversionGoalGraph": {
+      "configLevel": "CUSTOMER",
+      "customerGoals": {
+        "purchaseWebsite": {
+          "biddable": true
+        },
+        "pageViewWebsite": {
+          "biddable": false
+        },
+        "phoneCallLeadCallFromAds": {
+          "biddable": false
+        }
+      },
+      "biddingActionIds": [
+        "7694360837",
+        "7694360840"
+      ]
     },
     "cpcCeilingCadByCampaignKind": {
       "CORE": 4,
       "COMPETITOR": 2.5,
       "BRAND": 1.5
     },
-    "policyApprovalStatus": "UNKNOWN",
+    "policyApprovalStatus": "COMPETITOR_RSA_APPEAL_REQUIRED",
+    "disapprovedCompetitorResponsiveSearchAds": 9,
+    "allCampaignsPaused": true,
     "spendCad": 0
   },
   "manualAdAssetsConfigured": true,
@@ -83,8 +113,8 @@
       "purchaseOnline": {
         "eventName": "purchase_online",
         "envVar": "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID",
-        "actionId": null,
-        "status": "UNCONFIGURED",
+        "actionId": "7694360837",
+        "status": "VERIFIED_LIVE",
         "requiredType": "UPLOAD_CLICKS",
         "primaryForGoal": true,
         "includedInConversions": true,
@@ -94,8 +124,8 @@
       "quoteWon": {
         "eventName": "quote_won",
         "envVar": "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID",
-        "actionId": null,
-        "status": "UNCONFIGURED",
+        "actionId": "7694360840",
+        "status": "VERIFIED_LIVE",
         "requiredType": "UPLOAD_CLICKS",
         "primaryForGoal": true,
         "includedInConversions": true,
@@ -105,8 +135,8 @@
     },
     "qualifiedCallAction": {
       "envVar": "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID",
-      "actionId": null,
-      "status": "UNCONFIGURED",
+      "actionId": "7694360843",
+      "status": "VERIFIED_LIVE",
       "allowedTypes": [
         "AD_CALL",
         "WEBSITE_CALL",
@@ -115,7 +145,7 @@
       "requiredCategory": "PHONE_CALL_LEAD",
       "primaryForGoal": false,
       "includedInConversions": false,
-      "minimumDurationSeconds": null
+      "minimumDurationSeconds": 60
     },
     "diagnosticEvents": {
       "channel": "GA4",
@@ -134,7 +164,7 @@
   "editorImportTargetEncoded": false,
   "targetAccountPreflightRequired": true,
   "presenceOnlyCsvConfigured": false,
-  "presenceOnlyStatus": "API_VERIFIED_ACCOUNT_PREVIEW_REQUIRED",
+  "presenceOnlyStatus": "API_VERIFIED_2026-07-23_ACCOUNT_PREVIEW_REQUIRED",
   "accountPreviewRequired": true,
   "generatorAutoRollsDates": false,
   "note": "Google Ads enforces daily budgets, not a true lifetime cap. The end date, hard stop, and monitoring are mandatory."

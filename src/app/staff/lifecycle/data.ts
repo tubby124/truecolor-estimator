@@ -77,6 +77,8 @@ interface MeasurementOutboxRow {
   status: string | null;
   next_attempt_at: string | null;
   processing_started_at: string | null;
+  submitted_at?: string | null;
+  next_diagnostic_at?: string | null;
 }
 
 interface WaveProvisioningRow {
@@ -105,9 +107,21 @@ function summarizeMeasurementOutbox(
   return {
     dead: rows.filter((row) => row.status === "dead").length,
     staleProcessing: rows.filter((row) =>
-      row.status === "processing" &&
-      (row.processing_started_at === null ||
-        new Date(row.processing_started_at).getTime() < staleCutoff)
+      (
+        row.status === "processing" &&
+        (
+          row.processing_started_at === null ||
+          new Date(row.processing_started_at).getTime() < staleCutoff
+        )
+      ) ||
+      (
+        row.status === "submitted" &&
+        (
+          row.submitted_at == null ||
+          row.next_diagnostic_at == null ||
+          new Date(row.next_diagnostic_at).getTime() < staleCutoff
+        )
+      )
     ).length,
     overdueRetry: rows.filter((row) =>
       row.status === "retry" &&
@@ -1216,8 +1230,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   const [revenueOutboxRes, quoteOutboxRes, waveProvisioningRes] = await Promise.all([
     supabase
       .from("google_ads_conversion_outbox")
-      .select("status, next_attempt_at, processing_started_at")
-      .in("status", ["dead", "processing", "retry"]),
+      .select("status, next_attempt_at, processing_started_at, submitted_at, next_diagnostic_at")
+      .in("status", ["dead", "processing", "retry", "submitted"]),
     supabase
       .from("quote_measurement_event_outbox")
       .select("status, next_attempt_at, processing_started_at")
