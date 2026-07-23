@@ -310,12 +310,46 @@ const live = {
 };
 const { failures: safetyFailures, launchBlockers } = evaluatePausedLiveState(live);
 
+const status = liveVerificationStatus({ failures: safetyFailures, launchBlockers });
+const verifiedAt = new Date().toISOString();
+const controlledTestBlockers = launchBlockers.filter(
+  (blocker) => blocker !== "offline conversion uploader requires a reconciled real transaction before launch",
+);
+const activationClearance = safetyFailures.length === 0 && controlledTestBlockers.length === 0 ? {
+  evidenceId: `liveverify_${verifiedAt.replace(/\D/g, "").slice(0, 14)}`,
+  status: "VALIDATED_PAUSED",
+  checkedAtUtc: verifiedAt,
+  customerId: CUSTOMER_ID,
+  safetyFailures: [],
+  launchBlockers: controlledTestBlockers,
+  settings: {
+    campaignIds: ["24048123058", "24048123061", "24048123064"],
+    allCampaignsPaused: true,
+    searchOnly: true,
+    searchPartnersDisabled: true,
+    displayDisabled: true,
+    presenceOnlyRadiusKm: 35,
+    languageConstant: "languageConstants/1000",
+    startDate: "2026-07-20",
+    endDate: "2026-09-17",
+    finalUrlSuffix: campaignState[0]?.finalUrlSuffix,
+    purchaseOnlineActionId: purchaseActionId,
+    quoteWonActionId,
+    qualifiedCallActionId,
+    qualifiedCallAssetId: QUALIFIED_CALL_ASSET_ID,
+    revenueActionsPrimaryOnly: true,
+    qualifiedCallsSecondary: true,
+    allPolicyApproved: true,
+    unexpectedSpendCad: 0,
+  },
+} : null;
 const result = {
-  status: liveVerificationStatus({ failures: safetyFailures, launchBlockers }),
-  verifiedAt: new Date().toISOString(),
+  status,
+  verifiedAt,
   customerId: CUSTOMER_ID,
   safetyFailures,
   launchBlockers,
+  activationClearance,
   live,
 };
 console.log(JSON.stringify(result, null, 2));

@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildBudgetOperations,
   buildStatusOperations,
+  CONTROLLED_EXACT_KEYWORDS,
   CONTROLLED_TEST,
   parseControlledTestOptions,
   signMonitorAttestation,
@@ -86,7 +87,7 @@ function makeState(stage = "paused") {
     keywords: [
       ...CONTROLLED_TEST.keywords.map((keyword) => ({
         ...keyword,
-        status: enabled ? "ENABLED" : "PAUSED",
+        status: enabled && keyword.matchType === "EXACT" ? "ENABLED" : "PAUSED",
         negative: false,
         adGroupResourceName: CONTROLLED_TEST.adGroup.resourceName,
       })),
@@ -154,6 +155,34 @@ function makeAttestation(overrides = {}) {
       checkedAtUtc: "2026-07-23T19:20:00.000Z",
       eligibilityWindowStartUtc: "2026-07-20T06:00:00.000Z",
       eligibilityWindowEndUtc: "2026-09-18T06:00:00.000Z",
+    },
+    liveVerification: {
+      evidenceId: "live_verify_20260723",
+      status: "VALIDATED_PAUSED",
+      checkedAtUtc: "2026-07-23T19:20:00.000Z",
+      customerId: CONTROLLED_TEST.customerId,
+      safetyFailures: [],
+      launchBlockers: [],
+      settings: {
+        campaignIds: CONTROLLED_TEST.campaigns.map((campaign) => campaign.id),
+        allCampaignsPaused: true,
+        searchOnly: true,
+        searchPartnersDisabled: true,
+        displayDisabled: true,
+        presenceOnlyRadiusKm: 35,
+        languageConstant: "languageConstants/1000",
+        startDate: "2026-07-20",
+        endDate: "2026-09-17",
+        finalUrlSuffix: "utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_term={keyword}&utm_content={creative}&keyword={keyword}&matchtype={matchtype}&device={device}&loc_physical_ms={loc_physical_ms}&loc_interest_ms={loc_interest_ms}&adgroupid={adgroupid}&creative={creative}&campaignid={campaignid}&network={network}",
+        purchaseOnlineActionId: "7694360837",
+        quoteWonActionId: "7694360840",
+        qualifiedCallActionId: "7694360843",
+        qualifiedCallAssetId: "394889103183",
+        revenueActionsPrimaryOnly: true,
+        qualifiedCallsSecondary: true,
+        allPolicyApproved: true,
+        unexpectedSpendCad: 0,
+      },
     },
     heartbeats: [
       heartbeat("cronrun_001", "2026-07-23T19:00:00.000Z", "2026-07-23T13:00:00"),
@@ -344,6 +373,41 @@ test("monitor attestation is exact, signed, fresh, in-window, and proves fail-cl
   }
 });
 
+test("activation clearance is signed, fresh, exact-account, and launch-blocker free", async () => {
+  const cases = [
+    { liveVerification: undefined },
+    { liveVerification: { ...makeAttestation().liveVerification, customerId: "999" } },
+    { liveVerification: { ...makeAttestation().liveVerification, checkedAtUtc: "2026-07-23T19:00:00.000Z" } },
+    { liveVerification: { ...makeAttestation().liveVerification, launchBlockers: ["policy review"] } },
+    {
+      liveVerification: {
+        ...makeAttestation().liveVerification,
+        settings: { ...makeAttestation().liveVerification.settings, searchPartnersDisabled: false },
+      },
+    },
+    {
+      liveVerification: {
+        ...makeAttestation().liveVerification,
+        settings: { ...makeAttestation().liveVerification.settings, allPolicyApproved: false },
+      },
+    },
+  ];
+  for (const overrides of cases) {
+    const api = makeApi();
+    const result = await runControlledTestController({
+      api,
+      options: { mode: "activate", execute: true },
+      monitorAttestation: makeAttestation(overrides),
+      attestationSecret: ATTESTATION_SECRET,
+      landingProbe: healthyLandingProbe,
+      now: NOW,
+      clock: () => NOW,
+    });
+    assert.equal(result.outcome, "ACTIVATION_REFUSED");
+    assert.equal(api.calls.length, 0);
+  }
+});
+
 test("state validators enforce exact resource identities and only the intended enabled resources", () => {
   assert.equal(validatePreflightState(makeState("paused")).budget.amountMicros, "8000000");
   const budgetStaged = makeState("paused");
@@ -435,6 +499,16 @@ test("activation validates every batch, enables Core last, and passes strict rea
   );
   assert.equal(api.calls.at(-1).resources[0], CONTROLLED_TEST.campaign.resourceName);
   assert.equal(api.state.campaigns[0].status, "ENABLED");
+  const keywordEnable = api.calls.find(
+    (call) => call.kind === "keyword" && call.statusOrAmount === "ENABLED" && !call.validateOnly,
+  );
+  assert.deepEqual(
+    keywordEnable.resources,
+    CONTROLLED_EXACT_KEYWORDS.map((keyword) => keyword.resourceName),
+  );
+  assert.ok(api.state.keywords
+    .filter((keyword) => keyword.matchType === "PHRASE")
+    .every((keyword) => keyword.status === "PAUSED"));
 });
 
 test("invalid attestation refuses activation before any write", async () => {
@@ -720,6 +794,26 @@ test("rollback continues remaining safety batches after one batch fails and repo
   assert.equal(api.state.adGroups[0].status, "PAUSED");
   assert.equal(api.state.ads[0].status, "PAUSED");
   assert.equal(api.state.budget.amountMicros, "8000000");
+});
+
+test("rollback never restores CA$8 unless a fresh read proves every campaign is paused", async () => {
+  const api = makeApi({ initialStage: "active", failAt: "campaign:execute" });
+  const result = await runControlledTestController({
+    api,
+    options: { mode: "rollback", execute: true },
+    now: NOW,
+  });
+  assert.equal(result.outcome, "ROLLBACK_UNVERIFIED");
+  assert.ok(result.errors.some((error) => error.includes("campaign pause")));
+  assert.equal(api.state.campaigns[0].status, "ENABLED");
+  assert.equal(api.state.budget.amountMicros, "5000000");
+  assert.equal(
+    api.calls.some((call) => call.kind === "budget" && call.statusOrAmount === "8000000"),
+    false,
+  );
+  assert.ok(api.state.adGroups.every((group) => group.status === "PAUSED"));
+  assert.ok(api.state.ads.every((ad) => ad.status === "PAUSED"));
+  assert.ok(api.state.keywords.filter((keyword) => !keyword.negative).every((keyword) => keyword.status === "PAUSED"));
 });
 
 test("rollback refuses mutation when exact account identity cannot be verified", async () => {

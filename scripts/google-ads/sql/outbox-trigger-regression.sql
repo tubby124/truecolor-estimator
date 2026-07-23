@@ -36,13 +36,29 @@ CREATE TABLE public.orders (
 \ir ../../../supabase/migrations/20260720110000_google_ads_conversion_outbox.sql
 \ir ../../../supabase/migrations/20260722154500_google_ads_outbox_null_guard.sql
 \ir ../../../supabase/migrations/20260723123000_google_data_manager_diagnostics.sql
+\ir ../../../supabase/migrations/20260723204500_google_ads_outbox_function_acl.sql
 
 DO $regression$
 DECLARE
   v_legacy_id uuid;
   v_paid_id uuid;
   v_count bigint;
+  v_public_execute boolean;
 BEGIN
+  SELECT EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    CROSS JOIN LATERAL aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) acl
+    WHERE p.oid = 'public.enqueue_paid_google_ads_conversion()'::regprocedure
+      AND acl.grantee = 0
+      AND acl.privilege_type = 'EXECUTE'
+  ) INTO v_public_execute;
+  IF v_public_execute
+     OR has_function_privilege('anon', 'public.enqueue_paid_google_ads_conversion()', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'public.enqueue_paid_google_ads_conversion()', 'EXECUTE') THEN
+    RAISE EXCEPTION 'SECURITY DEFINER trigger function remains executable by an API role';
+  END IF;
+
   INSERT INTO public.orders (order_number, status, conversion_type, total, gst, pst)
   VALUES ('NULL-GUARD-LEGACY', 'pending_payment', NULL, 113.00, 5.00, 8.00)
   RETURNING id INTO v_legacy_id;

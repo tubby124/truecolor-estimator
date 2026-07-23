@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 import {
   buildBudgetOperations,
   buildStatusOperations,
+  CONTROLLED_EXACT_KEYWORDS,
   CONTROLLED_TEST,
   parseControlledTestOptions,
   validateActivationAttestation,
@@ -12,6 +13,7 @@ import {
   validateMonitorAttestation,
   validatePreflightState,
   validateResourcesStagedState,
+  validateRollbackContainmentState,
   validateRolledBackState,
 } from "./controlled-test-contract.mjs";
 
@@ -123,7 +125,7 @@ async function applyActivationPhases(api, {
   validateBudgetStagedState(await api.readState());
   await mutateValidated(
     api.setKeywordStatuses,
-    CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName),
+    CONTROLLED_EXACT_KEYWORDS.map((keyword) => keyword.resourceName),
     "ENABLED",
   );
   await mutateValidated(api.setAdStatuses, [CONTROLLED_TEST.rsa.resourceName], "ENABLED");
@@ -169,6 +171,7 @@ async function runRollback({ api, base }) {
     campaignResources,
     "PAUSED",
   ));
+  const campaignPauseVerified = await verifyAllCampaignsPaused(api, errors);
   const targets = await readRollbackResourceTargets(api, errors);
   await rollbackBatch(errors, "keyword pause", () => mutateValidated(
     api.setKeywordStatuses,
@@ -185,11 +188,29 @@ async function runRollback({ api, base }) {
     targets.adGroupResources,
     "PAUSED",
   ));
-  await rollbackBatch(errors, "budget restoration", () => mutateValidated(
+  const rollbackBudget = campaignPauseVerified
+    ? CONTROLLED_TEST.budget.normalMicros
+    : CONTROLLED_TEST.budget.controlledMicros;
+  await rollbackBatch(errors, campaignPauseVerified ? "budget restoration" : "budget containment", () => mutateValidated(
     api.setBudget,
-    CONTROLLED_TEST.budget.normalMicros,
+    rollbackBudget,
   ));
-  return verifyRollbackReadback(api, base, errors);
+  return verifyRollbackReadback(api, base, errors, { campaignPauseVerified });
+}
+
+async function verifyAllCampaignsPaused(api, errors) {
+  try {
+    const campaigns = await api.readCampaigns();
+    const active = campaigns.filter((campaign) => campaign.status !== "REMOVED" && campaign.status !== "PAUSED");
+    if (active.length > 0) {
+      errors.push(`Rollback campaign pause readback found active campaign(s): ${active.map((campaign) => campaign.resourceName).join(",")}`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    errors.push(`Rollback campaign pause readback failed: ${safeMessage(error)}`);
+    return false;
+  }
 }
 
 async function readRollbackCampaigns(api, errors) {
@@ -225,10 +246,13 @@ async function readRollbackResourceTargets(api, errors) {
   }
 }
 
-async function verifyRollbackReadback(api, base, errors) {
+async function verifyRollbackReadback(api, base, errors, { campaignPauseVerified }) {
   let state;
   try {
-    state = validateRolledBackState(await api.readState());
+    const readback = await api.readState();
+    state = campaignPauseVerified
+      ? validateRolledBackState(readback)
+      : validateRollbackContainmentState(readback);
   } catch (error) {
     errors.push(`Rollback readback failed: ${safeMessage(error)}`);
   }

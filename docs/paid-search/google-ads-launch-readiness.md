@@ -100,7 +100,7 @@ node scripts/google-ads/controlled-test-controller.mjs activate \
 node scripts/google-ads/controlled-test-controller.mjs rollback --execute
 ```
 
-The signed activation attestation must contain exactly three fresh execute-mode Railway heartbeats for the same active ≤72-hour Regina window, monotonic exact-account spend below CA$25, durable alert/pause/fail-closed evidence, and a fresh Google Ads UI promotion proof whose eligibility window contains the full test. No unsigned or hand-edited JSON authorizes activation.
+The signed activation attestation must contain exactly three fresh execute-mode Railway heartbeats for the same active ≤72-hour Regina window, monotonic exact-account spend below CA$25, durable alert/pause/fail-closed evidence, a fresh Google Ads UI promotion proof whose eligibility window contains the full test, and the fresh `activationClearance` emitted by `npm run validate:google-ads` after every controlled-test blocker is clear. That clearance binds the exact account, paused inventory, networks, radius/presence, English targeting, dates, tracking suffix, conversion actions, call linkage, policy state, and zero unexpected spend. The separately reported real-transaction reconciliation remains a public-launch gate because the controlled test exists to obtain that evidence; it does not create a circular controlled-test blocker. No unsigned or hand-edited JSON authorizes activation.
 
 ## Remaining launch blockers
 

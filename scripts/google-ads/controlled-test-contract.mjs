@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { localNow, parseHardStopOptions } from "./hard-stop-contract.mjs";
 
+const EXPECTED_FINAL_URL_SUFFIX = "utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_term={keyword}&utm_content={creative}&keyword={keyword}&matchtype={matchtype}&device={device}&loc_physical_ms={loc_physical_ms}&loc_interest_ms={loc_interest_ms}&adgroupid={adgroupid}&creative={creative}&campaignid={campaignid}&network={network}";
+
 export const CONTROLLED_TEST = Object.freeze({
   customerId: "1072816342",
   loginCustomerId: "1125402990",
@@ -94,6 +96,10 @@ export const CONTROLLED_TEST = Object.freeze({
   }),
 });
 
+export const CONTROLLED_EXACT_KEYWORDS = Object.freeze(
+  CONTROLLED_TEST.keywords.filter((keyword) => keyword.matchType === "EXACT"),
+);
+
 const RESOURCE_PREFIX = `customers/${CONTROLLED_TEST.customerId}/`;
 
 export function parseControlledTestOptions(argv) {
@@ -162,6 +168,7 @@ export function validateActivationAttestation(attestation, {
   minimumRemainingMinutes = 30,
 } = {}) {
   const monitor = validateMonitorAttestation(attestation, { now, signingSecret });
+  const liveVerification = validateLiveVerificationClearance(attestation.liveVerification, now);
   const windowEnd = reginaLocalToDate(monitor.windowEndLocal);
   const remainingWindowMinutes = (windowEnd.getTime() - now.getTime()) / 60_000;
   if (!Number.isFinite(minimumRemainingMinutes)
@@ -169,7 +176,55 @@ export function validateActivationAttestation(attestation, {
     || remainingWindowMinutes < minimumRemainingMinutes) {
     throw new Error(`Controlled-test window must have at least ${minimumRemainingMinutes} minutes remaining`);
   }
-  return { ...monitor, remainingWindowMinutes };
+  return { ...monitor, liveVerification, remainingWindowMinutes };
+}
+
+function validateLiveVerificationClearance(clearance, now) {
+  const expected = CONTROLLED_TEST.monitor;
+  if (!clearance || typeof clearance !== "object"
+    || clearance.status !== "VALIDATED_PAUSED"
+    || clearance.customerId !== CONTROLLED_TEST.customerId
+    || !validEvidenceId(clearance.evidenceId)
+    || !Array.isArray(clearance.safetyFailures)
+    || clearance.safetyFailures.length !== 0
+    || !Array.isArray(clearance.launchBlockers)
+    || clearance.launchBlockers.length !== 0) {
+    throw new Error("Activation requires a blocker-free VALIDATED_PAUSED live-account clearance");
+  }
+  const checkedAt = parseFreshTimestamp(
+    clearance.checkedAtUtc,
+    now,
+    expected,
+    "Live-account clearance",
+  );
+  const settings = clearance.settings;
+  const expectedCampaignIds = CONTROLLED_TEST.campaigns.map((campaign) => campaign.id);
+  if (!settings
+    || JSON.stringify(settings.campaignIds) !== JSON.stringify(expectedCampaignIds)
+    || settings.allCampaignsPaused !== true
+    || settings.searchOnly !== true
+    || settings.searchPartnersDisabled !== true
+    || settings.displayDisabled !== true
+    || settings.presenceOnlyRadiusKm !== 35
+    || settings.languageConstant !== "languageConstants/1000"
+    || settings.startDate !== "2026-07-20"
+    || settings.endDate !== "2026-09-17"
+    || settings.finalUrlSuffix !== EXPECTED_FINAL_URL_SUFFIX
+    || settings.purchaseOnlineActionId !== "7694360837"
+    || settings.quoteWonActionId !== "7694360840"
+    || settings.qualifiedCallActionId !== "7694360843"
+    || settings.qualifiedCallAssetId !== "394889103183"
+    || settings.revenueActionsPrimaryOnly !== true
+    || settings.qualifiedCallsSecondary !== true
+    || settings.allPolicyApproved !== true
+    || settings.unexpectedSpendCad !== 0) {
+    throw new Error("Live-account clearance does not prove the exact launch-critical settings");
+  }
+  return {
+    evidenceId: clearance.evidenceId,
+    checkedAtUtc: checkedAt.toISOString(),
+    status: clearance.status,
+  };
 }
 
 function validateAttestationEnvelope(attestation, signingSecret, expected) {
@@ -526,7 +581,7 @@ export function validateResourcesStagedState(state) {
   assertOnlyEnabled(state.ads, new Set([CONTROLLED_TEST.rsa.resourceName]), "ad");
   assertPositiveKeywords(
     state.keywords,
-    new Set(CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName)),
+    new Set(CONTROLLED_EXACT_KEYWORDS.map((keyword) => keyword.resourceName)),
     "resource-stage",
   );
   return state;
@@ -537,7 +592,11 @@ export function validateActivatedState(state) {
   assertOnlyEnabled(state.campaigns, new Set([CONTROLLED_TEST.campaign.resourceName]), "campaign");
   assertOnlyEnabled(state.adGroups, new Set([CONTROLLED_TEST.adGroup.resourceName]), "ad group");
   assertOnlyEnabled(state.ads, new Set([CONTROLLED_TEST.rsa.resourceName]), "ad");
-  assertPositiveKeywords(state.keywords, new Set(CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName)), "activation");
+  assertPositiveKeywords(
+    state.keywords,
+    new Set(CONTROLLED_EXACT_KEYWORDS.map((keyword) => keyword.resourceName)),
+    "activation",
+  );
   return state;
 }
 
@@ -547,6 +606,16 @@ export function validateRolledBackState(state) {
   assertAllStatus(state.adGroups, "PAUSED", "ad group");
   assertAllStatus(state.ads, "PAUSED", "ad");
   assertPositiveKeywords(state.keywords, new Set(), "rollback");
+  return state;
+}
+
+export function validateRollbackContainmentState(state) {
+  validateControlledInventory(state, {
+    allowedBudgetMicros: [CONTROLLED_TEST.budget.controlledMicros],
+  });
+  assertAllStatus(state.adGroups, "PAUSED", "ad group");
+  assertAllStatus(state.ads, "PAUSED", "ad");
+  assertPositiveKeywords(state.keywords, new Set(), "rollback containment");
   return state;
 }
 
