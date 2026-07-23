@@ -102,6 +102,9 @@ test("live verification contract rejects launch-critical drift and missing noind
     endpointChecks: [{ url: "https://truecolorprinting.ca/why-true-color", status: 200, noindex: true }],
   };
   assert.deepEqual(evaluatePausedLiveState(live), { failures: [], launchBlockers: [] });
+  const restEncoded = structuredClone(live);
+  restEncoded.qualifiedCallConversion.minimumDurationSeconds = "60";
+  assert.deepEqual(evaluatePausedLiveState(restEncoded), { failures: [], launchBlockers: [] });
   const drifts = [
     (value) => { value.campaigns[0].id = "wrong"; },
     (value) => { value.account.id = "2200538686"; },

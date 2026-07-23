@@ -16,16 +16,19 @@ const validRevenueAction = (action, eventName) => action
   && action.currency === "CAD"
   && action.dynamicValue === true;
 
-const validQualifiedCallAction = (action) => action
-  && typeof action.id === "string"
-  && /^\d+$/.test(action.id)
-  && action.status === "ENABLED"
-  && ["AD_CALL", "WEBSITE_CALL", "UPLOAD_CALLS"].includes(action.type)
-  && action.category === "PHONE_CALL_LEAD"
-  && action.primaryForGoal === false
-  && action.included === false
-  && Number.isInteger(action.minimumDurationSeconds)
-  && action.minimumDurationSeconds > 0;
+const validQualifiedCallAction = (action) => {
+  const minimumDurationSeconds = Number(action?.minimumDurationSeconds);
+  return action
+    && typeof action.id === "string"
+    && /^\d+$/.test(action.id)
+    && action.status === "ENABLED"
+    && ["AD_CALL", "WEBSITE_CALL", "UPLOAD_CALLS"].includes(action.type)
+    && action.category === "PHONE_CALL_LEAD"
+    && action.primaryForGoal === false
+    && action.included === false
+    && Number.isInteger(minimumDurationSeconds)
+    && minimumDurationSeconds > 0;
+};
 
 export function liveVerificationStatus({ failures, launchBlockers }) {
   if (failures.length > 0) return "UNSAFE";
