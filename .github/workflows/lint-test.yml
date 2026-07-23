@@ -3,10 +3,9 @@
 # Catches the `void supabase` bug class (commit 17c5f2a) at PR-review time
 # instead of letting it slip into production.
 #
-# If lint fails, the PR check goes red and Railway will still deploy on
-# push-to-main (we don't gate the deploy itself). Hasan is the sole engineer,
-# so this is informational/early-warning rather than blocking. Iterate to a
-# branch-protection rule once we have additional contributors.
+# Railway production has Wait for CI enabled. A failed push workflow is skipped
+# instead of being deployed, so this file is part of the production release
+# gate rather than an informational check.
 
 name: lint-test
 
@@ -18,6 +17,33 @@ on:
   workflow_dispatch:
 
 jobs:
+  postgres-outbox-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute Google Ads outbox trigger regression
+        env:
+          PGPASSWORD: postgres
+        run: >-
+          psql
+          --host 127.0.0.1
+          --username postgres
+          --dbname postgres
+          --file scripts/google-ads/sql/outbox-trigger-regression.sql
+
   lint-test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
