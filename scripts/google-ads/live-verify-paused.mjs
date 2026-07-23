@@ -15,6 +15,8 @@ const NEAR_ME_TERMS = new Set([
 ]);
 const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
 const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
+const QUALIFIED_CALL_ASSET_ID = "394889103183";
+const PROMOTION_CLEARANCE = "UI_CONFIRMED_ACTIVE";
 import { evaluatePausedLiveState, liveVerificationStatus } from "./live-verification-contract.mjs";
 
 const requiredApiEnv = [
@@ -55,6 +57,16 @@ const search = async (query) => {
   if (!response.ok) throw new Error(`Google Ads read failed: ${JSON.stringify(body)}`);
   return body.results ?? [];
 };
+const optionalSearch = async (query) => {
+  try {
+    return { rows: await search(query), error: null };
+  } catch (error) {
+    return {
+      rows: [],
+      error: error instanceof Error ? error.message : "Unknown Google Ads read error",
+    };
+  }
+};
 
 const names = CAMPAIGN_NAMES.map((name) => `'${name}'`).join(",");
 const [
@@ -72,14 +84,20 @@ const [
   campaignConversionGoals,
   campaignGoalConfigs,
   customConversionGoals,
+  callSettings,
+  callAssets,
+  customerCallLinks,
+  campaignCallLinks,
+  adGroupCallLinks,
   spend,
+  incentives,
 ] = await Promise.all([
   search("SELECT customer.id, customer.currency_code, customer.time_zone FROM customer LIMIT 1"),
   search(`SELECT campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.start_date_time, campaign.end_date_time, campaign.final_url_suffix, campaign.target_spend.cpc_bid_ceiling_micros, campaign.network_settings.target_google_search, campaign.network_settings.target_search_network, campaign.network_settings.target_content_network, campaign.network_settings.target_partner_search_network, campaign.geo_target_type_setting.positive_geo_target_type, campaign.campaign_budget, campaign_budget.amount_micros FROM campaign WHERE campaign.name IN (${names}) ORDER BY campaign.name`),
   search("SELECT campaign.id, campaign.name, campaign.status FROM campaign WHERE campaign.status != 'REMOVED'"),
   search(`SELECT campaign.name, ad_group.name, ad_group.status FROM ad_group WHERE campaign.name IN (${names}) AND ad_group.status != 'REMOVED'`),
   search(`SELECT campaign.name, ad_group.name, ad_group_criterion.status, ad_group_criterion.negative, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type FROM ad_group_criterion WHERE campaign.name IN (${names}) AND ad_group_criterion.type = 'KEYWORD'`),
-  search(`SELECT campaign.name, ad_group.name, ad_group_ad.status, ad_group_ad.policy_summary.approval_status, ad_group_ad.policy_summary.review_status, ad_group_ad.ad.final_urls FROM ad_group_ad WHERE campaign.name IN (${names}) AND ad_group_ad.status != 'REMOVED'`),
+  search(`SELECT campaign.name, ad_group.name, ad_group_ad.resource_name, ad_group_ad.status, ad_group_ad.policy_summary.approval_status, ad_group_ad.policy_summary.review_status, ad_group_ad.policy_summary.policy_topic_entries, ad_group_ad.ad.final_urls FROM ad_group_ad WHERE campaign.name IN (${names}) AND ad_group_ad.status != 'REMOVED'`),
   search(`SELECT campaign.name, campaign_criterion.type, campaign_criterion.negative, campaign_criterion.location.geo_target_constant, campaign_criterion.proximity.radius, campaign_criterion.proximity.radius_units, campaign_criterion.proximity.geo_point.latitude_in_micro_degrees, campaign_criterion.proximity.geo_point.longitude_in_micro_degrees, campaign_criterion.language.language_constant, campaign_criterion.keyword.text FROM campaign_criterion WHERE campaign.name IN (${names})`),
   search("SELECT asset.resource_name, asset.type, asset.policy_summary.approval_status, asset.policy_summary.review_status FROM asset WHERE asset.name LIKE 'TC PPC %'"),
   search("SELECT campaign.id, campaign_asset.asset, campaign_asset.status FROM campaign_asset WHERE campaign.id IN (24048123058,24048123061,24048123064) AND campaign_asset.status != 'REMOVED'"),
@@ -88,7 +106,13 @@ const [
   search(`SELECT campaign.name, campaign_conversion_goal.resource_name, campaign_conversion_goal.category, campaign_conversion_goal.origin, campaign_conversion_goal.biddable FROM campaign_conversion_goal WHERE campaign.name IN (${names})`),
   search(`SELECT campaign.name, conversion_goal_campaign_config.resource_name, conversion_goal_campaign_config.goal_config_level, conversion_goal_campaign_config.custom_conversion_goal FROM conversion_goal_campaign_config WHERE campaign.name IN (${names})`),
   search("SELECT custom_conversion_goal.id, custom_conversion_goal.resource_name, custom_conversion_goal.name, custom_conversion_goal.status, custom_conversion_goal.conversion_actions FROM custom_conversion_goal"),
+  search("SELECT customer.id, customer.call_reporting_setting.call_reporting_enabled, customer.call_reporting_setting.call_conversion_reporting_enabled FROM customer LIMIT 1"),
+  search("SELECT asset.id, asset.resource_name, asset.type, asset.call_asset.country_code, asset.call_asset.phone_number, asset.call_asset.call_conversion_action, asset.call_asset.call_conversion_reporting_state, asset.policy_summary.approval_status, asset.policy_summary.review_status FROM asset WHERE asset.type = 'CALL'"),
+  search("SELECT customer_asset.asset, customer_asset.status, customer_asset.field_type FROM customer_asset WHERE customer_asset.field_type = 'CALL'"),
+  search("SELECT campaign.id, campaign.name, campaign_asset.asset, campaign_asset.status, campaign_asset.field_type FROM campaign_asset WHERE campaign_asset.field_type = 'CALL'"),
+  search("SELECT campaign.id, campaign.name, ad_group.id, ad_group.name, ad_group_asset.asset, ad_group_asset.status, ad_group_asset.field_type FROM ad_group_asset WHERE ad_group_asset.field_type = 'CALL'"),
   search("SELECT customer.id, metrics.cost_micros FROM customer WHERE segments.date BETWEEN '2026-07-20' AND '2026-09-17'"),
+  optionalSearch("SELECT applied_incentive.incentive_state, applied_incentive.fulfillment_expiration_date_time, applied_incentive.currency_code, applied_incentive.reward_amount_micros, applied_incentive.required_min_spend_micros, applied_incentive.current_spend_towards_fulfillment_micros, applied_incentive.granted_amount_micros, applied_incentive.reward_balance_remaining_micros FROM applied_incentive"),
 ]);
 
 const endpointUrls = [
@@ -179,6 +203,10 @@ const positiveGeoCriteria = campaignCriteria
     longitudeInMicroDegrees: row.campaignCriterion.proximity?.geoPoint?.longitudeInMicroDegrees ?? null,
   }));
 const offlineUploaderVerification = process.env.GOOGLE_ADS_OFFLINE_UPLOADER_VERIFICATION?.trim() ?? null;
+const promotionVerification = process.env.GOOGLE_ADS_PROMOTION_VERIFICATION?.trim() ?? null;
+const selectedCallAsset = callAssets.find(
+  (row) => String(row.asset?.id ?? "") === QUALIFIED_CALL_ASSET_ID,
+)?.asset;
 const live = {
   account: {
     id: String(account?.id ?? ""),
@@ -236,6 +264,41 @@ const live = {
     customConversionGoal: row.conversionGoalCampaignConfig.customConversionGoal ?? null,
   })),
   customConversionGoals: customConversionGoals.map((row) => row.customConversionGoal),
+  callMeasurement: {
+    accountSettings: {
+      callReportingEnabled: callSettings[0]?.customer?.callReportingSetting?.callReportingEnabled === true,
+      callConversionReportingEnabled:
+        callSettings[0]?.customer?.callReportingSetting?.callConversionReportingEnabled === true,
+    },
+    asset: selectedCallAsset ? {
+      id: String(selectedCallAsset.id),
+      resourceName: selectedCallAsset.resourceName,
+      type: selectedCallAsset.type,
+      countryCode: selectedCallAsset.callAsset?.countryCode,
+      phoneNumber: selectedCallAsset.callAsset?.phoneNumber,
+      callConversionAction: selectedCallAsset.callAsset?.callConversionAction,
+      callConversionReportingState: selectedCallAsset.callAsset?.callConversionReportingState,
+      approvalStatus: selectedCallAsset.policySummary?.approvalStatus,
+      reviewStatus: selectedCallAsset.policySummary?.reviewStatus,
+    } : null,
+    customerLinks: customerCallLinks.map((row) => row.customerAsset),
+    campaignLinks: campaignCallLinks.map((row) => ({
+      campaign: row.campaign?.name,
+      ...row.campaignAsset,
+    })),
+    adGroupLinks: adGroupCallLinks.map((row) => ({
+      campaign: row.campaign?.name,
+      adGroup: row.adGroup?.name,
+      ...row.adGroupAsset,
+    })),
+  },
+  promotion: {
+    verified: promotionVerification === PROMOTION_CLEARANCE,
+    method: promotionVerification === PROMOTION_CLEARANCE ? PROMOTION_CLEARANCE : null,
+    apiAvailable: incentives.error === null,
+    apiError: incentives.error,
+    appliedIncentives: incentives.rows.map((row) => row.appliedIncentive),
+  },
   offlineUploaderVerification: {
     verified: offlineUploaderVerification === OFFLINE_UPLOADER_CLEARANCE,
     method: offlineUploaderVerification === OFFLINE_UPLOADER_CLEARANCE
@@ -247,12 +310,46 @@ const live = {
 };
 const { failures: safetyFailures, launchBlockers } = evaluatePausedLiveState(live);
 
+const status = liveVerificationStatus({ failures: safetyFailures, launchBlockers });
+const verifiedAt = new Date().toISOString();
+const controlledTestBlockers = launchBlockers.filter(
+  (blocker) => blocker !== "offline conversion uploader requires a reconciled real transaction before launch",
+);
+const activationClearance = safetyFailures.length === 0 && controlledTestBlockers.length === 0 ? {
+  evidenceId: `liveverify_${verifiedAt.replace(/\D/g, "").slice(0, 14)}`,
+  status: "VALIDATED_PAUSED",
+  checkedAtUtc: verifiedAt,
+  customerId: CUSTOMER_ID,
+  safetyFailures: [],
+  launchBlockers: controlledTestBlockers,
+  settings: {
+    campaignIds: ["24048123058", "24048123061", "24048123064"],
+    allCampaignsPaused: true,
+    searchOnly: true,
+    searchPartnersDisabled: true,
+    displayDisabled: true,
+    presenceOnlyRadiusKm: 35,
+    languageConstant: "languageConstants/1000",
+    startDate: "2026-07-20",
+    endDate: "2026-09-17",
+    finalUrlSuffix: campaignState[0]?.finalUrlSuffix,
+    purchaseOnlineActionId: purchaseActionId,
+    quoteWonActionId,
+    qualifiedCallActionId,
+    qualifiedCallAssetId: QUALIFIED_CALL_ASSET_ID,
+    revenueActionsPrimaryOnly: true,
+    qualifiedCallsSecondary: true,
+    allPolicyApproved: true,
+    unexpectedSpendCad: 0,
+  },
+} : null;
 const result = {
-  status: liveVerificationStatus({ failures: safetyFailures, launchBlockers }),
-  verifiedAt: new Date().toISOString(),
+  status,
+  verifiedAt,
   customerId: CUSTOMER_ID,
   safetyFailures,
   launchBlockers,
+  activationClearance,
   live,
 };
 console.log(JSON.stringify(result, null, 2));

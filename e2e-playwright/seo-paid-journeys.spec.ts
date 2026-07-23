@@ -217,6 +217,10 @@ test.describe("paid and organic ordering journeys", () => {
       }
     });
     await page.goto("/products/coroplast-signs", { waitUntil: "domcontentloaded" });
+    // Wait for hydration and the initial estimate before exercising the rapid
+    // quantity changes. A pre-hydration click can update the DOM without ever
+    // reaching React when this suite runs several product journeys in parallel.
+    await expect(page.getByRole("button", { name: /Add to Cart/i })).toBeEnabled();
     const quantity = page.getByRole("radiogroup", { name: "Quantity" });
     await quantity.getByRole("radio", { name: "5", exact: true }).click();
     await expect(quantity.getByRole("radio", { name: "5", exact: true })).toHaveAttribute("aria-checked", "true");
