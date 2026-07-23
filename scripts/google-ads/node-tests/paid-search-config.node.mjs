@@ -142,6 +142,37 @@ test("live verification contract rejects launch-critical drift and missing noind
       customConversionGoal: null,
     })),
     customConversionGoals: [],
+    callMeasurement: {
+      accountSettings: {
+        callReportingEnabled: true,
+        callConversionReportingEnabled: true,
+      },
+      asset: {
+        id: "394889103183",
+        resourceName: "customers/1072816342/assets/394889103183",
+        type: "CALL",
+        countryCode: "CA",
+        phoneNumber: "(306) 954-8688",
+        callConversionAction: "customers/1072816342/conversionActions/9000000003",
+        callConversionReportingState: "USE_RESOURCE_LEVEL_CALL_CONVERSION_ACTION",
+        approvalStatus: "APPROVED",
+        reviewStatus: "REVIEWED",
+      },
+      customerLinks: [{
+        asset: "customers/1072816342/assets/394889103183",
+        fieldType: "CALL",
+        status: "ENABLED",
+      }],
+      campaignLinks: [],
+      adGroupLinks: [],
+    },
+    promotion: {
+      verified: true,
+      method: "UI_CONFIRMED_ACTIVE",
+      apiAvailable: false,
+      apiError: "allowlist unavailable",
+      appliedIncentives: [],
+    },
     offlineUploaderVerification: { verified: true, method: "REAL_TRANSACTION_RECONCILED" },
     spendCadPilot: 0,
     endpointChecks: [{ url: "https://truecolorprinting.ca/why-true-color", status: 200, noindex: true }],
@@ -170,6 +201,10 @@ test("live verification contract rejects launch-critical drift and missing noind
     (value) => { value.revenueConversions.quoteWon.id = value.revenueConversions.purchaseOnline.id; },
     (value) => { value.qualifiedCallConversion.minimumDurationSeconds = 0; },
     (value) => { value.qualifiedCallConversion.included = true; },
+    (value) => { value.callMeasurement.accountSettings.callReportingEnabled = false; },
+    (value) => { value.callMeasurement.asset.callConversionAction = "customers/1072816342/conversionActions/179"; },
+    (value) => { value.callMeasurement.asset.callConversionReportingState = "USE_ACCOUNT_LEVEL_CALL_CONVERSION_ACTION"; },
+    (value) => { value.callMeasurement.customerLinks[0].status = "PAUSED"; },
     (value) => { value.conversionActionInventory.find((action) => action.id === "9000000003").included = true; },
     (value) => { value.historicalBrowserPurchaseConversion.included = true; },
     (value) => { value.customerConversionGoals.find((goal) => goal.category === "PHONE_CALL_LEAD").biddable = true; },
@@ -199,6 +234,27 @@ test("live verification contract rejects launch-critical drift and missing noind
     "offline conversion uploader requires a reconciled real transaction before launch",
   ]);
   assert.equal(liveVerificationStatus(evaluatePausedLiveState(uploaderUnverified)), "BLOCKED");
+
+  const promotionUnverified = structuredClone(live);
+  promotionUnverified.promotion = {
+    verified: false,
+    method: null,
+    apiAvailable: false,
+    apiError: "not allowlisted",
+    appliedIncentives: [],
+  };
+  assert.deepEqual(evaluatePausedLiveState(promotionUnverified).launchBlockers, [
+    "Google Ads promotion eligibility requires fresh Billing > Promotions UI confirmation",
+  ]);
+  assert.equal(liveVerificationStatus(evaluatePausedLiveState(promotionUnverified)), "BLOCKED");
+
+  const callAssetUnderReview = structuredClone(live);
+  callAssetUnderReview.callMeasurement.asset.approvalStatus = undefined;
+  callAssetUnderReview.callMeasurement.asset.reviewStatus = "REVIEW_IN_PROGRESS";
+  assert.deepEqual(evaluatePausedLiveState(callAssetUnderReview), {
+    failures: [],
+    launchBlockers: ["qualified call asset is awaiting Google policy approval"],
+  });
 
   const disapprovedRsa = structuredClone(live);
   disapprovedRsa.rsaApprovalStatuses = ["APPROVED", "DISAPPROVED"];

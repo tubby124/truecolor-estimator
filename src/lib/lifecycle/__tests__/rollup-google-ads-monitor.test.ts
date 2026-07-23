@@ -53,6 +53,53 @@ describe("Google Ads monitor heartbeat rollup", () => {
       label: expect.stringContaining("max 30m"),
     }));
   });
+
+  it("creates a stable red alert for a successful spend warning", () => {
+    const rollupInputs = inputs(heartbeat(0.1));
+    rollupInputs.googleAdsMonitorDetail =
+      "profile=public-pilot outcome=WARNING action=NONE spend=501.25 pause_verified=0 errors=0";
+
+    expect(buildRollup(rollupInputs).reds).toContainEqual(expect.objectContaining({
+      key: "google-ads-monitor:warning",
+      label: expect.stringContaining("CA$501.25"),
+    }));
+  });
+
+  it("creates a stable red alert when the protective pause is verified", () => {
+    const rollupInputs = inputs(heartbeat(0.1));
+    rollupInputs.googleAdsMonitorDetail =
+      "profile=controlled-test outcome=STOPPED action=PAUSED spend=25.00 pause_verified=1 errors=0";
+
+    expect(buildRollup(rollupInputs).reds).toContainEqual(expect.objectContaining({
+      key: "google-ads-monitor:protective-stop",
+      label: expect.stringContaining("verified"),
+    }));
+  });
+
+  it("never reports an unverified stop or monitor error as safe", () => {
+    const outcomes = [
+      "profile=controlled-test outcome=STOPPED action=PAUSE_ATTEMPTED spend=25.00 pause_verified=0 errors=1",
+      "profile=controlled-test outcome=ERROR_PAUSE_UNVERIFIED action=PAUSE_ATTEMPTED spend=unknown pause_verified=0 errors=1",
+      "profile=controlled-test outcome=STOP_REQUIRED action=WOULD_PAUSE spend=25.00 pause_verified=0 errors=0",
+    ];
+
+    for (const detail of outcomes) {
+      const rollupInputs = inputs(heartbeat(0.1));
+      rollupInputs.googleAdsMonitorDetail = detail;
+      expect(buildRollup(rollupInputs).reds).toContainEqual(expect.objectContaining({
+        key: "google-ads-monitor:unsafe",
+      }));
+    }
+  });
+
+  it("does not create a spend alert below the threshold", () => {
+    const rollupInputs = inputs(heartbeat(0.1));
+    rollupInputs.googleAdsMonitorDetail =
+      "profile=public-pilot outcome=BELOW_STOP action=NONE spend=0.00 pause_verified=0 errors=0";
+
+    expect(buildRollup(rollupInputs).reds.map((issue) => issue.key))
+      .not.toContain(expect.stringMatching(/^google-ads-monitor:/));
+  });
 });
 
 describe("Google Ads conversion delivery rollup", () => {

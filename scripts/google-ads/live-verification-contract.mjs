@@ -18,6 +18,8 @@ const EXPECTED_NEAR_ME_TERMS = [
 ];
 const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
 const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
+const QUALIFIED_CALL_ASSET_ID = "394889103183";
+const PROMOTION_CLEARANCE = "UI_CONFIRMED_ACTIVE";
 const validRevenueAction = (action, eventName) => action
   && action.eventName === eventName
   && typeof action.id === "string"
@@ -131,6 +133,40 @@ export function evaluatePausedLiveState(live) {
   if (hasPurchaseSelection && hasQuoteSelection && purchaseRevenue?.id === quoteWonRevenue?.id) failures.push("purchase_online and quote_won must use distinct UPLOAD_CLICKS actions");
   if (hasCallSelection && !validQualifiedCallAction(qualifiedCall)) failures.push("configured duration-qualified call conversion is missing from inventory, primary, or included in bidding");
   if (hasCallSelection && [purchaseRevenue?.id, quoteWonRevenue?.id].filter(Boolean).includes(qualifiedCall?.id)) failures.push("qualified calls must use a distinct secondary action");
+  if (hasCallSelection) {
+    const callMeasurement = live.callMeasurement;
+    const expectedCallAction =
+      `customers/1072816342/conversionActions/${qualifiedCall?.id}`;
+    const callAsset = callMeasurement?.asset;
+    const customerCallLinks = callMeasurement?.customerLinks ?? [];
+    if (callMeasurement?.accountSettings?.callReportingEnabled !== true
+      || callMeasurement?.accountSettings?.callConversionReportingEnabled !== true) {
+      failures.push("account call reporting and call-conversion reporting must both remain enabled");
+    }
+    if (!callAsset
+      || callAsset.id !== QUALIFIED_CALL_ASSET_ID
+      || callAsset.resourceName !== `customers/1072816342/assets/${QUALIFIED_CALL_ASSET_ID}`
+      || callAsset.type !== "CALL"
+      || callAsset.countryCode !== "CA"
+      || callAsset.phoneNumber !== "(306) 954-8688"
+      || callAsset.callConversionReportingState !== "USE_RESOURCE_LEVEL_CALL_CONVERSION_ACTION"
+      || callAsset.callConversionAction !== expectedCallAction) {
+      failures.push("True Color call asset is not wired to qualified_call_60s");
+    }
+    if (customerCallLinks.length !== 1
+      || customerCallLinks[0]?.asset !== `customers/1072816342/assets/${QUALIFIED_CALL_ASSET_ID}`
+      || customerCallLinks[0]?.fieldType !== "CALL"
+      || customerCallLinks[0]?.status !== "ENABLED"
+      || (callMeasurement?.campaignLinks ?? []).length !== 0
+      || (callMeasurement?.adGroupLinks ?? []).length !== 0) {
+      failures.push("qualified call asset link scope changed");
+    }
+    if (callAsset
+      && (callAsset.approvalStatus !== "APPROVED"
+        || callAsset.reviewStatus !== "REVIEWED")) {
+      launchBlockers.push("qualified call asset is awaiting Google policy approval");
+    }
+  }
   const includedConversionActions = (live.conversionActionInventory ?? [])
     .filter((action) => action.included === true);
   const expectedIncludedConversionIds = new Set(
@@ -199,6 +235,10 @@ export function evaluatePausedLiveState(live) {
   if (live.offlineUploaderVerification?.verified !== true
     || live.offlineUploaderVerification?.method !== OFFLINE_UPLOADER_CLEARANCE) {
     launchBlockers.push("offline conversion uploader requires a reconciled real transaction before launch");
+  }
+  if (live.promotion?.verified !== true
+    || live.promotion?.method !== PROMOTION_CLEARANCE) {
+    launchBlockers.push("Google Ads promotion eligibility requires fresh Billing > Promotions UI confirmation");
   }
   return { failures, launchBlockers };
 }

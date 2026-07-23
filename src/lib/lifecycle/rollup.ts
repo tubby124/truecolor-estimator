@@ -166,6 +166,46 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
     }
   }
 
+  // ── Google Ads spend monitor outcomes ────────────────────────────────────
+  // A healthy heartbeat only proves that the monitor executed. WARNING and
+  // STOPPED are successful monitor decisions, so they intentionally retain
+  // ok=true; interpret the structured detail here so the shared dashboard
+  // alert cron still sends Telegram evidence for spend warnings and stops.
+  if (inputs.googleAdsMonitorDetail) {
+    const detail = inputs.googleAdsMonitorDetail;
+    const field = (name: string): string | null =>
+      new RegExp(`(?:^|\\s)${name}=([^\\s]+)`).exec(detail)?.[1] ?? null;
+    const outcome = field("outcome");
+    const action = field("action");
+    const spend = field("spend");
+    const pauseVerified = field("pause_verified") === "1";
+    const spendLabel = spend && spend !== "unknown" ? ` at CA$${spend}` : "";
+
+    if (outcome === "WARNING") {
+      reds.push({
+        key: "google-ads-monitor:warning",
+        panel: "panel-cron-heartbeats",
+        label: `Google Ads spend warning${spendLabel} — CA$500 warning threshold reached`,
+      });
+    } else if (outcome === "STOPPED" && pauseVerified) {
+      reds.push({
+        key: "google-ads-monitor:protective-stop",
+        panel: "panel-cron-heartbeats",
+        label: `Google Ads protective stop verified${spendLabel} (${action ?? "paused"})`,
+      });
+    } else if (
+      outcome === "STOP_REQUIRED"
+      || outcome === "STOPPED"
+      || outcome?.startsWith("ERROR")
+    ) {
+      reds.push({
+        key: "google-ads-monitor:unsafe",
+        panel: "panel-cron-heartbeats",
+        label: `Google Ads monitor unsafe: outcome=${outcome ?? "unknown"} action=${action ?? "unknown"} pause_verified=${pauseVerified ? 1 : 0}${spendLabel}`,
+      });
+    }
+  }
+
   // ── Cron heartbeats: stale > 2× expected = red, persistent external-API
   //    failure = red, transient error rate > 0 = yellow ───────────────────────
   //
