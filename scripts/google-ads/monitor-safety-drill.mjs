@@ -176,8 +176,8 @@ export async function runMonitorSafetyDrill({
 }
 
 async function sendTelegram(message) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const token = process.env.TRUE_COLOR_TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TRUE_COLOR_TELEGRAM_CHAT_ID;
   if (!token || !chatId) throw new Error("Telegram drill credentials are required");
   const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: "POST",
