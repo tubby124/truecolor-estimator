@@ -148,8 +148,8 @@ function makeAttestation(overrides = {}) {
       eligibilityWindowEndUtc: "2026-09-18T06:00:00.000Z",
     },
     heartbeats: [
-      heartbeat("2026-07-23T18:50:00.000Z", "2026-07-23T12:50:00"),
-      heartbeat("2026-07-23T19:05:00.000Z", "2026-07-23T13:05:00"),
+      heartbeat("2026-07-23T19:00:00.000Z", "2026-07-23T13:00:00"),
+      heartbeat("2026-07-23T19:10:00.000Z", "2026-07-23T13:10:00"),
       heartbeat("2026-07-23T19:20:00.000Z", "2026-07-23T13:20:00"),
     ],
     ...overrides,
@@ -262,6 +262,7 @@ test("monitor attestation is exact, fresh, in-window, and proves fail-closed mon
     { promotion: { ...makeAttestation().promotion, requiredQualifyingSpendCad: 1000 } },
     { promotion: { ...makeAttestation().promotion, eligibilityWindowEndUtc: "2026-07-23T19:00:00.000Z" } },
     { heartbeats: makeAttestation().heartbeats.slice(1) },
+    { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 0 ? { ...item, timestampUtc: "2026-07-23T18:40:00.000Z", timestampLocal: "2026-07-23T12:40:00", windowStartLocal: "2026-07-23T12:00" } : { ...item, windowStartLocal: "2026-07-23T12:00" }) },
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, executionMode: "DRY_RUN" } : item) },
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, customerId: "999" } : item) },
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, spendCad: 25 } : item) },

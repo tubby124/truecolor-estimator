@@ -248,6 +248,10 @@ function validateHeartbeatShape(heartbeat) {
   if (heartbeat.timestampLocal !== expectedLocal) {
     throw new Error(`Monitor heartbeat timestampLocal must equal ${expectedLocal}`);
   }
+  if (heartbeat.timestampLocal < `${parsedWindow.windowStart}:00`
+    || heartbeat.timestampLocal >= `${parsedWindow.windowEnd}:00`) {
+    throw new Error("Every monitor heartbeat must fall inside the controlled-test window");
+  }
   const campaigns = heartbeat.campaignsBefore;
   if (!Array.isArray(campaigns) || campaigns.length !== CONTROLLED_TEST.campaigns.length) {
     throw new Error("Monitor heartbeat must contain the exact three-campaign paused inventory");
