@@ -45,7 +45,7 @@ export async function runControlledTestController({
     attestationSecret,
     landingProbe,
     now,
-    clock: clock ?? (() => now),
+    clock: clock ?? (() => new Date()),
   });
 }
 
@@ -379,23 +379,31 @@ function createAccountReader(search) {
 function createGoogleAdsAdapter({ search, mutate, readAccount }) {
   return {
     readAccount,
-    async readCampaigns() {
-      const rows = await search(
-        "SELECT campaign.id, campaign.resource_name, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.campaign_budget FROM campaign WHERE campaign.status != 'REMOVED'",
-        "account-wide campaign read",
-      );
-      return rows.map((row) => ({
-        id: row.campaign.id,
-        resourceName: row.campaign.resourceName,
-        name: row.campaign.name,
-        status: row.campaign.status,
-        channel: row.campaign.advertisingChannelType,
-        budgetResourceName: row.campaign.campaignBudget,
-      }));
-    },
-    async readState() {
-      return readControlledState(search, readAccount);
-    },
+    readCampaigns: createCampaignReader(search),
+    readState: () => readControlledState(search, readAccount),
+    ...createMutationMethods(mutate),
+  };
+}
+
+function createCampaignReader(search) {
+  return async () => {
+    const rows = await search(
+      "SELECT campaign.id, campaign.resource_name, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.campaign_budget FROM campaign WHERE campaign.status != 'REMOVED'",
+      "account-wide campaign read",
+    );
+    return rows.map((row) => ({
+      id: row.campaign.id,
+      resourceName: row.campaign.resourceName,
+      name: row.campaign.name,
+      status: row.campaign.status,
+      channel: row.campaign.advertisingChannelType,
+      budgetResourceName: row.campaign.campaignBudget,
+    }));
+  };
+}
+
+function createMutationMethods(mutate) {
+  return {
     setBudget(amountMicros, options) {
       return mutate(
         "campaignBudgets:mutate",

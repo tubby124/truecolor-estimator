@@ -418,6 +418,7 @@ test("activation validates every batch, enables Core last, and passes strict rea
     attestationSecret: ATTESTATION_SECRET,
     landingProbe: healthyLandingProbe,
     now: NOW,
+    clock: () => NOW,
   });
   assert.equal(result.ok, true);
   assert.equal(result.outcome, "ACTIVATED");
@@ -451,6 +452,7 @@ test("invalid attestation refuses activation before any write", async () => {
     attestationSecret: ATTESTATION_SECRET,
     landingProbe: healthyLandingProbe,
     now: NOW,
+    clock: () => NOW,
   });
   assert.equal(result.outcome, "ACTIVATION_REFUSED");
   assert.equal(api.calls.length, 0);
@@ -465,6 +467,7 @@ test("any failure after the first write invokes full rollback and restores CA$8"
     attestationSecret: ATTESTATION_SECRET,
     landingProbe: healthyLandingProbe,
     now: NOW,
+    clock: () => NOW,
   });
   assert.equal(result.outcome, "ACTIVATION_FAILED_ROLLED_BACK");
   assert.equal(result.rollback.outcome, "ROLLED_BACK");
@@ -493,6 +496,7 @@ test("resource-stage drift triggers rollback before Core can be enabled", async 
     attestationSecret: ATTESTATION_SECRET,
     landingProbe: healthyLandingProbe,
     now: NOW,
+    clock: () => NOW,
   });
   assert.equal(result.outcome, "ACTIVATION_FAILED_ROLLED_BACK");
   const coreEnable = api.calls.find(
@@ -527,6 +531,43 @@ test("fresh pre-campaign clock blocks activation when the remaining window buffe
   assert.ok(api.state.campaigns.every((campaign) => campaign.status === "PAUSED"));
 });
 
+test("omitted clock still uses real current time for the pre-campaign check", { concurrency: false }, async () => {
+  const RealDate = globalThis.Date;
+  globalThis.Date = class extends RealDate {
+    constructor(...args) {
+      super(...(args.length > 0 ? args : ["2026-07-23T19:31:00.000Z"]));
+    }
+
+    static now() {
+      return RealDate.parse("2026-07-23T19:31:00.000Z");
+    }
+  };
+  try {
+    const base = makeAttestation();
+    const heartbeats = base.heartbeats.map((heartbeat) => ({
+      ...heartbeat,
+      windowEndLocal: "2026-07-23T14:00",
+    }));
+    const api = makeApi();
+    const result = await runControlledTestController({
+      api,
+      options: { mode: "activate", execute: true },
+      monitorAttestation: makeAttestation({ heartbeats }),
+      attestationSecret: ATTESTATION_SECRET,
+      landingProbe: healthyLandingProbe,
+      now: NOW,
+    });
+    assert.equal(result.outcome, "ACTIVATION_FAILED_ROLLED_BACK");
+    assert.match(result.error, /at least 30 minutes remaining/);
+    assert.equal(
+      api.calls.some((call) => call.kind === "campaign" && call.statusOrAmount === "ENABLED"),
+      false,
+    );
+  } finally {
+    globalThis.Date = RealDate;
+  }
+});
+
 test("activation refuses a broken or redirected Coroplast URL before the first write", async () => {
   for (const probe of [
     async (url) => ({ requestedUrl: url, finalUrl: url, status: 503 }),
@@ -540,6 +581,7 @@ test("activation refuses a broken or redirected Coroplast URL before the first w
       attestationSecret: ATTESTATION_SECRET,
       landingProbe: probe,
       now: NOW,
+      clock: () => NOW,
     });
     assert.equal(result.outcome, "ACTIVATION_REFUSED");
     assert.equal(api.calls.length, 0);
