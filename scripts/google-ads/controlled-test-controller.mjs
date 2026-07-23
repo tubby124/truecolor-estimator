@@ -20,6 +20,7 @@ export async function runControlledTestController({
   api,
   options,
   monitorAttestation,
+  attestationSecret,
   landingProbe,
   now = new Date(),
 }) {
@@ -29,11 +30,13 @@ export async function runControlledTestController({
     executionMode: options.execute ? "EXECUTE" : "READ_ONLY",
     customerId: CONTROLLED_TEST.customerId,
   };
+  const invocationError = validateInvocation(options);
+  if (invocationError) return { ...base, outcome: "INVALID_INVOCATION", error: invocationError };
   if (options.mode === "preflight") {
     try {
       const state = validatePreflightState(await api.readState());
       const monitor = monitorAttestation
-        ? validateMonitorAttestation(monitorAttestation, { now })
+        ? validateMonitorAttestation(monitorAttestation, { now, signingSecret: attestationSecret })
         : null;
       return {
         ...base,
@@ -52,7 +55,10 @@ export async function runControlledTestController({
 
   let activationStarted = false;
   try {
-    const monitor = validateMonitorAttestation(monitorAttestation, { now });
+    const monitor = validateMonitorAttestation(monitorAttestation, {
+      now,
+      signingSecret: attestationSecret,
+    });
     validatePreflightState(await api.readState());
     const landing = validateLandingProbe(await landingProbe(CONTROLLED_TEST.rsa.finalUrl));
 
@@ -91,6 +97,19 @@ export async function runControlledTestController({
       rollback,
     };
   }
+}
+
+function validateInvocation(options) {
+  if (!options || !["preflight", "activate", "rollback"].includes(options.mode)) {
+    return "Mode must be exactly preflight, activate, or rollback";
+  }
+  if (options.mode === "preflight" && options.execute !== false) {
+    return "preflight must be read-only";
+  }
+  if (options.mode !== "preflight" && options.execute !== true) {
+    return `${options.mode} requires execute=true`;
+  }
+  return null;
 }
 
 async function runRollback({ api, base }) {
@@ -240,9 +259,26 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
     }
     return responseBody;
   };
-  const search = async (query, operation) => (
-    await post("googleAds:search", { query }, operation)
-  ).results ?? [];
+  const search = async (query, operation) => {
+    const results = [];
+    const seenTokens = new Set();
+    let pageToken;
+    for (let page = 0; page < 100; page += 1) {
+      const response = await post(
+        "googleAds:search",
+        { query, ...(pageToken ? { pageToken } : {}) },
+        operation,
+      );
+      results.push(...(response.results ?? []));
+      if (!response.nextPageToken) return results;
+      if (seenTokens.has(response.nextPageToken)) {
+        throw new Error(`${operation} returned a repeated page token`);
+      }
+      seenTokens.add(response.nextPageToken);
+      pageToken = response.nextPageToken;
+    }
+    throw new Error(`${operation} exceeded 100 result pages`);
+  };
   const mutate = async (path, operations, { validateOnly }, operation) => {
     if (!Array.isArray(operations) || operations.length === 0) throw new Error(`${operation} has no operations`);
     return post(path, {
@@ -460,6 +496,7 @@ async function main() {
       api: createControlledTestGoogleAdsApi(),
       options,
       monitorAttestation,
+      attestationSecret: process.env.GOOGLE_ADS_CONTROLLED_TEST_ATTESTATION_SECRET,
       landingProbe: createCoroplastLandingProbe(),
     });
   } catch (error) {

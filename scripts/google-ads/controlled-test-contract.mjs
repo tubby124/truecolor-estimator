@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { localNow, parseHardStopOptions } from "./hard-stop-contract.mjs";
 
 export const CONTROLLED_TEST = Object.freeze({
@@ -130,11 +131,15 @@ export function parseControlledTestOptions(argv) {
   return options;
 }
 
-export function validateMonitorAttestation(attestation, { now = new Date() } = {}) {
+export function validateMonitorAttestation(attestation, {
+  now = new Date(),
+  signingSecret,
+} = {}) {
   const expected = CONTROLLED_TEST.monitor;
   if (!attestation || typeof attestation !== "object" || Array.isArray(attestation)) {
     throw new Error("Monitor attestation must be a JSON object");
   }
+  verifyMonitorAttestationSignature(attestation, signingSecret);
   if (attestation.attestationVersion !== expected.attestationVersion) {
     throw new Error(`Monitor attestation version must be ${expected.attestationVersion}`);
   }
@@ -152,7 +157,8 @@ export function validateMonitorAttestation(attestation, { now = new Date() } = {
     || promotion.verified !== true
     || promotion.source !== "GOOGLE_ADS_UI"
     || promotion.status !== "ACTIVE"
-    || promotion.currency !== "CAD") {
+    || promotion.currency !== "CAD"
+    || !validEvidenceId(promotion.evidenceId)) {
     throw new Error("Promotion proof must be an active CAD promotion freshly verified in GOOGLE_ADS_UI");
   }
   const requiredSpendCad = Number(promotion.requiredQualifyingSpendCad);
@@ -179,6 +185,9 @@ export function validateMonitorAttestation(attestation, { now = new Date() } = {
     throw new Error(`Monitor attestation requires exactly ${expected.requiredConsecutiveHeartbeats} consecutive heartbeats`);
   }
   const validatedHeartbeats = heartbeats.map((heartbeat) => validateHeartbeatShape(heartbeat));
+  if (new Set(heartbeats.map((heartbeat) => heartbeat.auditRunId)).size !== heartbeats.length) {
+    throw new Error("Monitor heartbeat audit run IDs must be distinct");
+  }
   for (let index = 1; index < validatedHeartbeats.length; index += 1) {
     const previous = validatedHeartbeats[index - 1];
     const current = validatedHeartbeats[index];
@@ -190,6 +199,9 @@ export function validateMonitorAttestation(attestation, { now = new Date() } = {
       || current.windowEndLocal !== previous.windowEndLocal) {
       throw new Error("Consecutive monitor heartbeats must use the same controlled-test window");
     }
+    if (current.spendMicros < previous.spendMicros) {
+      throw new Error("Controlled-test cumulative spend cannot decrease across heartbeats");
+    }
   }
   const heartbeat = heartbeats.at(-1);
   const latest = validatedHeartbeats.at(-1);
@@ -197,6 +209,11 @@ export function validateMonitorAttestation(attestation, { now = new Date() } = {
   const nowLocal = localNow(now);
   if (nowLocal < `${latest.windowStartLocal}:00` || nowLocal >= `${latest.windowEndLocal}:00`) {
     throw new Error("Controlled-test monitor window is not active");
+  }
+  const controlledStart = reginaLocalToDate(latest.windowStartLocal);
+  const controlledEnd = reginaLocalToDate(latest.windowEndLocal);
+  if (controlledStart < eligibilityStart || controlledEnd > eligibilityEnd) {
+    throw new Error("The full controlled-test window must be contained in the promotion eligibility window");
   }
   return {
     heartbeatTimestampUtc: latest.timestamp.toISOString(),
@@ -233,9 +250,22 @@ function validateHeartbeatShape(heartbeat) {
   for (const [field, value] of Object.entries(exactFields)) {
     if (heartbeat[field] !== value) throw new Error(`Monitor heartbeat ${field} must equal ${JSON.stringify(value)}`);
   }
-  const spendCad = Number(heartbeat.spendCad);
-  if (!Number.isFinite(spendCad) || spendCad < 0 || spendCad >= expected.thresholdCad) {
+  if (!validEvidenceId(heartbeat.auditRunId)) {
+    throw new Error("Monitor heartbeat must include a persisted audit run ID");
+  }
+  const spendCad = heartbeat.spendCad;
+  if (typeof spendCad !== "number"
+    || !Number.isFinite(spendCad)
+    || spendCad < 0
+    || spendCad >= expected.thresholdCad) {
     throw new Error(`Monitor heartbeat spend must be between CA$0 and CA$${expected.thresholdCad - 0.01}`);
+  }
+  if (typeof heartbeat.spendMicros !== "string" || !/^\d+$/.test(heartbeat.spendMicros)) {
+    throw new Error("Monitor heartbeat spendMicros must be a decimal string");
+  }
+  const spendMicros = BigInt(heartbeat.spendMicros);
+  if (Math.abs(Number(spendMicros) / 1_000_000 - spendCad) > 0.0000001) {
+    throw new Error("Monitor heartbeat spendCad and spendMicros are inconsistent");
   }
   const parsedWindow = parseHardStopOptions([
     "--profile=controlled-test",
@@ -267,7 +297,63 @@ function validateHeartbeatShape(heartbeat) {
     windowStartLocal: parsedWindow.windowStart,
     windowEndLocal: parsedWindow.windowEnd,
     spendCad,
+    spendMicros,
   };
+}
+
+export function signMonitorAttestation(attestation, signingSecret) {
+  validateSigningSecret(signingSecret);
+  const unsigned = structuredClone(attestation);
+  delete unsigned.signature;
+  const digest = createHmac("sha256", signingSecret)
+    .update(canonicalJson(unsigned))
+    .digest("hex");
+  return { ...unsigned, signature: `sha256=${digest}` };
+}
+
+function verifyMonitorAttestationSignature(attestation, signingSecret) {
+  validateSigningSecret(signingSecret);
+  if (typeof attestation.signature !== "string" || !/^sha256=[a-f0-9]{64}$/.test(attestation.signature)) {
+    throw new Error("Monitor attestation signature is missing or invalid");
+  }
+  const expected = signMonitorAttestation(attestation, signingSecret).signature;
+  const actualBuffer = Buffer.from(attestation.signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (actualBuffer.length !== expectedBuffer.length || !timingSafeEqual(actualBuffer, expectedBuffer)) {
+    throw new Error("Monitor attestation signature verification failed");
+  }
+}
+
+function validateSigningSecret(signingSecret) {
+  if (typeof signingSecret !== "string" || signingSecret.length < 32) {
+    throw new Error("Controlled-test attestation signing secret must be at least 32 characters");
+  }
+}
+
+function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function validEvidenceId(value) {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(value);
+}
+
+function reginaLocalToDate(value) {
+  const [datePart, timePart] = value.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hour, minute] = timePart.split(":").map(Number);
+  let candidate = Date.UTC(year, month - 1, day, hour, minute);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const rendered = localNow(new Date(candidate)).slice(0, 16);
+    candidate += Date.parse(`${value}:00Z`) - Date.parse(`${rendered}:00Z`);
+  }
+  const result = new Date(candidate);
+  if (localNow(result).slice(0, 16) !== value) throw new Error(`Invalid ${CONTROLLED_TEST.timeZone} local time`);
+  return result;
 }
 
 function parseFreshTimestamp(value, now, expected, label) {

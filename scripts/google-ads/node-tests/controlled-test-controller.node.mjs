@@ -5,6 +5,7 @@ import {
   buildStatusOperations,
   CONTROLLED_TEST,
   parseControlledTestOptions,
+  signMonitorAttestation,
   validateActivatedState,
   validateBudgetStagedState,
   validateControlledAccount,
@@ -14,12 +15,14 @@ import {
   validateRolledBackState,
 } from "../controlled-test-contract.mjs";
 import {
+  createControlledTestGoogleAdsApi,
   createCoroplastLandingProbe,
   runControlledTestController,
   validateLandingProbe,
 } from "../controlled-test-controller.mjs";
 
 const NOW = new Date("2026-07-23T19:30:00.000Z");
+const ATTESTATION_SECRET = "test-only-controlled-attestation-secret-2026";
 
 function makeState(stage = "paused") {
   const enabled = stage === "active";
@@ -110,7 +113,8 @@ function makeState(stage = "paused") {
 }
 
 function makeAttestation(overrides = {}) {
-  const heartbeat = (timestampUtc, timestampLocal) => ({
+  const heartbeat = (auditRunId, timestampUtc, timestampLocal) => ({
+    auditRunId,
     ok: true,
     customerId: CONTROLLED_TEST.customerId,
     profile: "controlled-test",
@@ -124,13 +128,14 @@ function makeAttestation(overrides = {}) {
     outcome: "BELOW_STOP",
     action: "NONE",
     spendCad: 0,
+    spendMicros: "0",
     timestampUtc,
     timestampLocal,
     windowStartLocal: "2026-07-23T13:00",
     windowEndLocal: "2026-07-26T13:00",
     campaignsBefore: CONTROLLED_TEST.campaigns.map((campaign) => ({ ...campaign, status: "PAUSED" })),
   });
-  return {
+  const unsigned = {
     attestationVersion: 1,
     evidence: {
       schedulerCadenceMinutes: 15,
@@ -140,6 +145,7 @@ function makeAttestation(overrides = {}) {
       failClosedVerified: true,
     },
     promotion: {
+      evidenceId: "promo_ui_20260723",
       verified: true,
       source: "GOOGLE_ADS_UI",
       status: "ACTIVE",
@@ -150,12 +156,13 @@ function makeAttestation(overrides = {}) {
       eligibilityWindowEndUtc: "2026-09-18T06:00:00.000Z",
     },
     heartbeats: [
-      heartbeat("2026-07-23T19:00:00.000Z", "2026-07-23T13:00:00"),
-      heartbeat("2026-07-23T19:10:00.000Z", "2026-07-23T13:10:00"),
-      heartbeat("2026-07-23T19:20:00.000Z", "2026-07-23T13:20:00"),
+      heartbeat("cronrun_001", "2026-07-23T19:00:00.000Z", "2026-07-23T13:00:00"),
+      heartbeat("cronrun_002", "2026-07-23T19:10:00.000Z", "2026-07-23T13:10:00"),
+      heartbeat("cronrun_003", "2026-07-23T19:20:00.000Z", "2026-07-23T13:20:00"),
     ],
     ...overrides,
   };
+  return signMonitorAttestation(unsigned, ATTESTATION_SECRET);
 }
 
 const healthyLandingProbe = async (url) => ({
@@ -244,6 +251,27 @@ test("CLI defaults to read-only preflight and requires explicit execute for writ
   );
 });
 
+test("exported controller rejects direct-call write bypasses before touching the API", async () => {
+  for (const options of [
+    { mode: "rollback", execute: false },
+    { mode: "activate", execute: false },
+    { mode: "unexpected", execute: true },
+    { mode: "preflight", execute: true },
+  ]) {
+    const api = makeApi({ initialStage: "active" });
+    const result = await runControlledTestController({
+      api,
+      options,
+      monitorAttestation: makeAttestation(),
+      attestationSecret: ATTESTATION_SECRET,
+      landingProbe: healthyLandingProbe,
+      now: NOW,
+    });
+    assert.equal(result.outcome, "INVALID_INVOCATION");
+    assert.equal(api.calls.length, 0);
+  }
+});
+
 test("mutation builders accept only exact True Color resources and CA$5/CA$8 budgets", () => {
   assert.equal(buildStatusOperations([CONTROLLED_TEST.campaign.resourceName], "PAUSED")[0].updateMask, "status");
   assert.equal(buildBudgetOperations("5000000")[0].updateMask, "amountMicros");
@@ -253,8 +281,11 @@ test("mutation builders accept only exact True Color resources and CA$5/CA$8 bud
   assert.throws(() => buildBudgetOperations("6000000"), /exactly CA\$5 or CA\$8/);
 });
 
-test("monitor attestation is exact, fresh, in-window, and proves fail-closed monitoring", () => {
-  assert.deepEqual(validateMonitorAttestation(makeAttestation(), { now: NOW }), {
+test("monitor attestation is exact, signed, fresh, in-window, and proves fail-closed monitoring", () => {
+  assert.deepEqual(validateMonitorAttestation(makeAttestation(), {
+    now: NOW,
+    signingSecret: ATTESTATION_SECRET,
+  }), {
     heartbeatTimestampUtc: "2026-07-23T19:20:00.000Z",
     heartbeatCount: 3,
     windowStartLocal: "2026-07-23T13:00",
@@ -273,6 +304,7 @@ test("monitor attestation is exact, fresh, in-window, and proves fail-closed mon
     { promotion: { ...makeAttestation().promotion, checkedAtUtc: "2026-07-23T19:00:00.000Z" } },
     { promotion: { ...makeAttestation().promotion, requiredQualifyingSpendCad: 1000 } },
     { promotion: { ...makeAttestation().promotion, eligibilityWindowEndUtc: "2026-07-23T19:00:00.000Z" } },
+    { promotion: { ...makeAttestation().promotion, eligibilityWindowEndUtc: "2026-07-25T19:30:00.000Z" } },
     { heartbeats: makeAttestation().heartbeats.slice(1) },
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 0 ? { ...item, timestampUtc: "2026-07-23T18:40:00.000Z", timestampLocal: "2026-07-23T12:40:00", windowStartLocal: "2026-07-23T12:00" } : { ...item, windowStartLocal: "2026-07-23T12:00" }) },
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, executionMode: "DRY_RUN" } : item) },
@@ -283,7 +315,32 @@ test("monitor attestation is exact, fresh, in-window, and proves fail-closed mon
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, campaignsBefore: [] } : item) },
   ];
   for (const overrides of cases) {
-    assert.throws(() => validateMonitorAttestation(makeAttestation(overrides), { now: NOW }));
+    assert.throws(() => validateMonitorAttestation(makeAttestation(overrides), {
+      now: NOW,
+      signingSecret: ATTESTATION_SECRET,
+    }));
+  }
+  const tampered = makeAttestation();
+  tampered.promotion.requiredQualifyingSpendCad = 650;
+  assert.throws(
+    () => validateMonitorAttestation(tampered, { now: NOW, signingSecret: ATTESTATION_SECRET }),
+    /signature verification failed/,
+  );
+  const invalidSpendCases = [
+    [null, null, null],
+    ["0", "0", "0"],
+    [20, 10, 0],
+  ];
+  for (const spends of invalidSpendCases) {
+    const heartbeats = makeAttestation().heartbeats.map((item, index) => ({
+      ...item,
+      spendCad: spends[index],
+      spendMicros: typeof spends[index] === "number" ? String(spends[index] * 1_000_000) : "0",
+    }));
+    assert.throws(() => validateMonitorAttestation(
+      makeAttestation({ heartbeats }),
+      { now: NOW, signingSecret: ATTESTATION_SECRET },
+    ));
   }
 });
 
@@ -358,6 +415,7 @@ test("activation validates every batch, enables Core last, and passes strict rea
       "--monitor-attestation=/tmp/proof.json",
     ]),
     monitorAttestation: makeAttestation(),
+    attestationSecret: ATTESTATION_SECRET,
     landingProbe: healthyLandingProbe,
     now: NOW,
   });
@@ -390,6 +448,7 @@ test("invalid attestation refuses activation before any write", async () => {
     api,
     options: { mode: "activate", execute: true },
     monitorAttestation: attestation,
+    attestationSecret: ATTESTATION_SECRET,
     landingProbe: healthyLandingProbe,
     now: NOW,
   });
@@ -403,6 +462,7 @@ test("any failure after the first write invokes full rollback and restores CA$8"
     api,
     options: { mode: "activate", execute: true },
     monitorAttestation: makeAttestation(),
+    attestationSecret: ATTESTATION_SECRET,
     landingProbe: healthyLandingProbe,
     now: NOW,
   });
@@ -430,6 +490,7 @@ test("resource-stage drift triggers rollback before Core can be enabled", async 
     api,
     options: { mode: "activate", execute: true },
     monitorAttestation: makeAttestation(),
+    attestationSecret: ATTESTATION_SECRET,
     landingProbe: healthyLandingProbe,
     now: NOW,
   });
@@ -451,6 +512,7 @@ test("activation refuses a broken or redirected Coroplast URL before the first w
       api,
       options: { mode: "activate", execute: true },
       monitorAttestation: makeAttestation(),
+      attestationSecret: ATTESTATION_SECRET,
       landingProbe: probe,
       now: NOW,
     });
@@ -481,6 +543,69 @@ test("the production landing probe uses GET, follows redirects, and returns only
   assert.equal(request.options.method, "GET");
   assert.equal(request.options.redirect, "follow");
   assert.equal(cancelled, true);
+});
+
+test("Google Ads transport exhausts pagination and emits the live-validated budget mask", async () => {
+  const requests = [];
+  const response = (body) => ({
+    ok: true,
+    status: 200,
+    async json() { return body; },
+  });
+  const fetchImpl = async (url, options) => {
+    requests.push({ url: String(url), options, body: options.body instanceof URLSearchParams ? null : JSON.parse(options.body) });
+    if (String(url).includes("oauth2.googleapis.com")) return response({ access_token: "token" });
+    if (String(url).endsWith("/campaigns:mutate")) return response({});
+    if (String(url).endsWith("/campaignBudgets:mutate")) return response({});
+    const body = JSON.parse(options.body);
+    if (body.pageToken === "page-2") {
+      return response({
+        results: [{
+          campaign: {
+            id: "24048123061",
+            resourceName: CONTROLLED_TEST.campaigns[1].resourceName,
+            name: CONTROLLED_TEST.campaigns[1].name,
+            status: "PAUSED",
+            advertisingChannelType: "SEARCH",
+            campaignBudget: "customers/1072816342/campaignBudgets/2",
+          },
+        }],
+      });
+    }
+    return response({
+      results: [{
+        campaign: {
+          id: CONTROLLED_TEST.campaign.id,
+          resourceName: CONTROLLED_TEST.campaign.resourceName,
+          name: CONTROLLED_TEST.campaign.name,
+          status: "PAUSED",
+          advertisingChannelType: "SEARCH",
+          campaignBudget: CONTROLLED_TEST.budget.resourceName,
+        },
+      }],
+      nextPageToken: "page-2",
+    });
+  };
+  const api = createControlledTestGoogleAdsApi({
+    fetchImpl,
+    env: {
+      GOOGLE_ADS_CLIENT_ID: "id",
+      GOOGLE_ADS_CLIENT_SECRET: "secret",
+      GOOGLE_ADS_REFRESH_TOKEN: "refresh",
+      GOOGLE_ADS_DEVELOPER_TOKEN: "developer",
+    },
+  });
+  const campaigns = await api.readCampaigns();
+  assert.equal(campaigns.length, 2);
+  const searchBodies = requests.filter((request) => request.url.endsWith("/googleAds:search")).map((request) => request.body);
+  assert.deepEqual(searchBodies.map((body) => body.pageToken ?? null), [null, "page-2"]);
+
+  await api.setBudget(CONTROLLED_TEST.budget.controlledMicros, { validateOnly: true });
+  const budgetRequest = requests.find((request) => request.url.endsWith("/campaignBudgets:mutate"));
+  assert.equal(budgetRequest.body.validateOnly, true);
+  assert.equal(budgetRequest.body.partialFailure, false);
+  assert.equal(budgetRequest.body.operations[0].update.amountMicros, "5000000");
+  assert.equal(budgetRequest.body.operations[0].updateMask, "amountMicros");
 });
 
 test("explicit rollback is account-wide, validated, idempotent, and strictly read back", async () => {
