@@ -43,6 +43,15 @@ jobs:
           --username postgres
           --dbname postgres
           --file scripts/google-ads/sql/outbox-trigger-regression.sql
+      - name: Execute Google Ads monitor evidence ACL regression
+        env:
+          PGPASSWORD: postgres
+        run: >-
+          psql
+          --host 127.0.0.1
+          --username postgres
+          --dbname postgres
+          --file scripts/google-ads/sql/monitor-evidence-regression.sql
 
   lint-test:
     runs-on: ubuntu-latest

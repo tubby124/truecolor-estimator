@@ -1,7 +1,8 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { recordCronRun } from "@/lib/cron/heartbeat";
+import { authorizeGoogleAdsMonitorCaller } from "@/lib/google-ads/monitor-auth";
+import { persistGoogleAdsMonitorEvidence } from "@/lib/google-ads/monitor-evidence";
 import {
   createGoogleAdsApi,
   runHardStopMonitor,
@@ -9,14 +10,6 @@ import {
 import { parseHardStopOptions } from "../../../../../scripts/google-ads/hard-stop-contract.mjs";
 
 export const dynamic = "force-dynamic";
-
-function authorized(req: NextRequest, secret: string): boolean {
-  const provided = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  const expectedBytes = Buffer.from(secret);
-  const providedBytes = Buffer.from(provided);
-  return expectedBytes.length === providedBytes.length
-    && timingSafeEqual(expectedBytes, providedBytes);
-}
 
 function monitorOptions() {
   const profile = process.env.GOOGLE_ADS_MONITOR_PROFILE ?? "public-pilot";
@@ -33,23 +26,34 @@ function monitorOptions() {
 }
 
 export async function POST(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 503 });
+  let schedulerSource;
+  try {
+    schedulerSource = authorizeGoogleAdsMonitorCaller(
+      req.headers.get("authorization"),
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Google Ads monitor authentication is misconfigured" },
+      { status: 503 },
+    );
   }
-  if (!authorized(req, cronSecret)) {
+  if (!schedulerSource) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const result = await runHardStopMonitor({
+    const monitorResult = await runHardStopMonitor({
       api: createGoogleAdsApi(),
       options: monitorOptions(),
+    });
+    const result = await persistGoogleAdsMonitorEvidence(monitorResult, {
+      schedulerSource,
     });
     const spend = typeof result.spendCad === "number" ? result.spendCad.toFixed(2) : "unknown";
     const errors = result.ok ? 0 : 1;
     const detail = [
       `profile=${result.profile ?? "unknown"}`,
+      `source=${result.schedulerSource}`,
       `outcome=${result.outcome}`,
       `action=${result.action}`,
       `spend=${spend}`,

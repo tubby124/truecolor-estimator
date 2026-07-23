@@ -31,21 +31,33 @@ export interface AuditEventInput {
   user_agent?: string | null;
 }
 
-export async function recordAuditEvent(e: AuditEventInput): Promise<boolean> {
+export type AuditEventReceipt = {
+  id: string;
+  at: string;
+};
+
+export async function recordAuditEventWithReceipt(
+  e: AuditEventInput,
+): Promise<AuditEventReceipt | null> {
   try {
     const supabase = createServiceClient();
-    const { error } = await supabase.from("audit_events").insert({
-      actor_type: e.actor_type,
-      actor_id: e.actor_id ?? null,
-      event_type: e.event_type,
-      entity_type: e.entity_type,
-      entity_id: e.entity_id,
-      detail: e.detail ?? null,
-      ip: e.ip ?? null,
-      user_agent: e.user_agent ?? null,
-    });
+    const { data, error } = await supabase
+      .from("audit_events")
+      .insert({
+        actor_type: e.actor_type,
+        actor_id: e.actor_id ?? null,
+        event_type: e.event_type,
+        entity_type: e.entity_type,
+        entity_id: e.entity_id,
+        detail: e.detail ?? null,
+        ip: e.ip ?? null,
+        user_agent: e.user_agent ?? null,
+      })
+      .select("id, at")
+      .single();
     if (error) throw error;
-    return true;
+    if (!data?.id || !data.at) throw new Error("Audit insert returned no persistence receipt");
+    return { id: String(data.id), at: String(data.at) };
   } catch (err) {
     // Audit write failed — log and move on. The parent operation already
     // succeeded; the audit table is a secondary observability layer.
@@ -53,8 +65,12 @@ export async function recordAuditEvent(e: AuditEventInput): Promise<boolean> {
       `[audit] write failed for ${e.event_type}/${e.entity_id} (non-fatal):`,
       err instanceof Error ? err.message : err
     );
-    return false;
+    return null;
   }
+}
+
+export async function recordAuditEvent(e: AuditEventInput): Promise<boolean> {
+  return Boolean(await recordAuditEventWithReceipt(e));
 }
 
 /**
