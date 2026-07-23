@@ -274,7 +274,7 @@ test("exported controller rejects direct-call write bypasses before touching the
 
 test("mutation builders accept only exact True Color resources and CA$5/CA$8 budgets", () => {
   assert.equal(buildStatusOperations([CONTROLLED_TEST.campaign.resourceName], "PAUSED")[0].updateMask, "status");
-  assert.equal(buildBudgetOperations("5000000")[0].updateMask, "amountMicros");
+  assert.equal(buildBudgetOperations("5000000")[0].updateMask, "amount_micros");
   assert.equal(buildBudgetOperations("8000000")[0].update.amountMicros, "8000000");
   assert.throws(() => buildStatusOperations(["customers/999/campaigns/1"], "PAUSED"), /outside/);
   assert.throws(() => buildStatusOperations([CONTROLLED_TEST.campaign.resourceName], "REMOVED"), /Unsupported/);
@@ -605,7 +605,7 @@ test("Google Ads transport exhausts pagination and emits the live-validated budg
   assert.equal(budgetRequest.body.validateOnly, true);
   assert.equal(budgetRequest.body.partialFailure, false);
   assert.equal(budgetRequest.body.operations[0].update.amountMicros, "5000000");
-  assert.equal(budgetRequest.body.operations[0].updateMask, "amountMicros");
+  assert.equal(budgetRequest.body.operations[0].updateMask, "amount_micros");
 });
 
 test("explicit rollback is account-wide, validated, idempotent, and strictly read back", async () => {

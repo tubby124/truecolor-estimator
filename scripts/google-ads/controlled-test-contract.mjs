@@ -559,7 +559,7 @@ export function buildBudgetOperations(amountMicros) {
       resourceName: CONTROLLED_TEST.budget.resourceName,
       amountMicros: String(amountMicros),
     },
-    updateMask: "amountMicros",
+    updateMask: "amount_micros",
   }];
 }
 
