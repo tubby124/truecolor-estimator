@@ -156,6 +156,22 @@ export function validateMonitorAttestation(attestation, {
   };
 }
 
+export function validateActivationAttestation(attestation, {
+  now = new Date(),
+  signingSecret,
+  minimumRemainingMinutes = 30,
+} = {}) {
+  const monitor = validateMonitorAttestation(attestation, { now, signingSecret });
+  const windowEnd = reginaLocalToDate(monitor.windowEndLocal);
+  const remainingWindowMinutes = (windowEnd.getTime() - now.getTime()) / 60_000;
+  if (!Number.isFinite(minimumRemainingMinutes)
+    || minimumRemainingMinutes < 1
+    || remainingWindowMinutes < minimumRemainingMinutes) {
+    throw new Error(`Controlled-test window must have at least ${minimumRemainingMinutes} minutes remaining`);
+  }
+  return { ...monitor, remainingWindowMinutes };
+}
+
 function validateAttestationEnvelope(attestation, signingSecret, expected) {
   if (!attestation || typeof attestation !== "object" || Array.isArray(attestation)) {
     throw new Error("Monitor attestation must be a JSON object");

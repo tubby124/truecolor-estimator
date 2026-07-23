@@ -502,6 +502,31 @@ test("resource-stage drift triggers rollback before Core can be enabled", async 
   assert.ok(api.state.campaigns.every((campaign) => campaign.status === "PAUSED"));
 });
 
+test("fresh pre-campaign clock blocks activation when the remaining window buffer expires", async () => {
+  const api = makeApi();
+  const base = makeAttestation();
+  const heartbeats = base.heartbeats.map((heartbeat) => ({
+    ...heartbeat,
+    windowEndLocal: "2026-07-23T14:00",
+  }));
+  const result = await runControlledTestController({
+    api,
+    options: { mode: "activate", execute: true },
+    monitorAttestation: makeAttestation({ heartbeats }),
+    attestationSecret: ATTESTATION_SECRET,
+    landingProbe: healthyLandingProbe,
+    now: NOW,
+    clock: () => new Date("2026-07-23T19:31:00.000Z"),
+  });
+  assert.equal(result.outcome, "ACTIVATION_FAILED_ROLLED_BACK");
+  assert.match(result.error, /at least 30 minutes remaining/);
+  assert.equal(
+    api.calls.some((call) => call.kind === "campaign" && call.statusOrAmount === "ENABLED"),
+    false,
+  );
+  assert.ok(api.state.campaigns.every((campaign) => campaign.status === "PAUSED"));
+});
+
 test("activation refuses a broken or redirected Coroplast URL before the first write", async () => {
   for (const probe of [
     async (url) => ({ requestedUrl: url, finalUrl: url, status: 503 }),

@@ -5,6 +5,7 @@ import {
   buildStatusOperations,
   CONTROLLED_TEST,
   parseControlledTestOptions,
+  validateActivationAttestation,
   validateActivatedState,
   validateBudgetStagedState,
   validateControlledAccount,
@@ -23,6 +24,7 @@ export async function runControlledTestController({
   attestationSecret,
   landingProbe,
   now = new Date(),
+  clock,
 }) {
   const base = {
     ok: false,
@@ -37,7 +39,13 @@ export async function runControlledTestController({
   });
   if (options.mode === "rollback") return runRollback({ api, base });
   return runActivation({
-    api, base, monitorAttestation, attestationSecret, landingProbe, now,
+    api,
+    base,
+    monitorAttestation,
+    attestationSecret,
+    landingProbe,
+    now,
+    clock: clock ?? (() => now),
   });
 }
 
@@ -66,11 +74,12 @@ async function runActivation({
   attestationSecret,
   landingProbe,
   now,
+  clock,
 }) {
   let monitor;
   let landing;
   try {
-    monitor = validateMonitorAttestation(monitorAttestation, {
+    monitor = validateActivationAttestation(monitorAttestation, {
       now,
       signingSecret: attestationSecret,
     });
@@ -80,7 +89,11 @@ async function runActivation({
     return { ...base, outcome: "ACTIVATION_REFUSED", error: safeMessage(error) };
   }
   try {
-    await applyActivationPhases(api);
+    monitor = await applyActivationPhases(api, {
+      monitorAttestation,
+      attestationSecret,
+      clock,
+    });
     const state = validateActivatedState(await api.readState());
     return {
       ...base,
@@ -101,7 +114,11 @@ async function runActivation({
   }
 }
 
-async function applyActivationPhases(api) {
+async function applyActivationPhases(api, {
+  monitorAttestation,
+  attestationSecret,
+  clock,
+}) {
   await mutateValidated(api.setBudget, CONTROLLED_TEST.budget.controlledMicros);
   validateBudgetStagedState(await api.readState());
   await mutateValidated(
@@ -112,7 +129,12 @@ async function applyActivationPhases(api) {
   await mutateValidated(api.setAdStatuses, [CONTROLLED_TEST.rsa.resourceName], "ENABLED");
   await mutateValidated(api.setAdGroupStatuses, [CONTROLLED_TEST.adGroup.resourceName], "ENABLED");
   validateResourcesStagedState(await api.readState());
+  const monitor = validateActivationAttestation(monitorAttestation, {
+    now: clock(),
+    signingSecret: attestationSecret,
+  });
   await mutateValidated(api.setCampaignStatuses, [CONTROLLED_TEST.campaign.resourceName], "ENABLED");
+  return monitor;
 }
 
 function validateInvocation(options) {
@@ -253,30 +275,34 @@ function stateSummary(state) {
 }
 
 export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = process.env } = {}) {
-  const required = [
+  validateGoogleAdsEnvironment(env);
+  const post = createAuthenticatedPoster(fetchImpl, env);
+  const search = createPaginatedSearch(post);
+  const mutate = createMutator(post);
+  const readAccount = createAccountReader(search);
+  return createGoogleAdsAdapter({ search, mutate, readAccount });
+}
+
+function validateGoogleAdsEnvironment(env) {
+  for (const name of [
     "GOOGLE_ADS_CLIENT_ID",
     "GOOGLE_ADS_CLIENT_SECRET",
     "GOOGLE_ADS_REFRESH_TOKEN",
     "GOOGLE_ADS_DEVELOPER_TOKEN",
-  ];
-  for (const name of required) if (!env[name]) throw new Error(`${name} is required`);
+  ]) {
+    if (!env[name]) throw new Error(`${name} is required`);
+  }
+}
 
+function createAuthenticatedPoster(fetchImpl, env) {
   let headersPromise;
-  const getHeaders = async () => {
-    headersPromise ??= exchangeToken(fetchImpl, env).then((accessToken) => ({
-      authorization: `Bearer ${accessToken}`,
-      "developer-token": env.GOOGLE_ADS_DEVELOPER_TOKEN,
-      "login-customer-id": CONTROLLED_TEST.loginCustomerId,
-      "content-type": "application/json",
-    }));
-    return headersPromise;
-  };
-  const post = async (path, body, operation) => {
+  return async (path, body, operation) => {
+    headersPromise ??= createGoogleAdsHeaders(fetchImpl, env);
     const response = await fetchImpl(
       `https://googleads.googleapis.com/${API_VERSION}/customers/${CONTROLLED_TEST.customerId}/${path}`,
       {
         method: "POST",
-        headers: await getHeaders(),
+        headers: await headersPromise,
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(15_000),
       },
@@ -288,7 +314,20 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
     }
     return responseBody;
   };
-  const search = async (query, operation) => {
+}
+
+async function createGoogleAdsHeaders(fetchImpl, env) {
+  const accessToken = await exchangeToken(fetchImpl, env);
+  return {
+    authorization: `Bearer ${accessToken}`,
+    "developer-token": env.GOOGLE_ADS_DEVELOPER_TOKEN,
+    "login-customer-id": CONTROLLED_TEST.loginCustomerId,
+    "content-type": "application/json",
+  };
+}
+
+function createPaginatedSearch(post) {
+  return async (query, operation) => {
     const results = [];
     const seenTokens = new Set();
     let pageToken;
@@ -308,7 +347,10 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
     }
     throw new Error(`${operation} exceeded 100 result pages`);
   };
-  const mutate = async (path, operations, { validateOnly }, operation) => {
+}
+
+function createMutator(post) {
+  return async (path, operations, { validateOnly }, operation) => {
     if (!Array.isArray(operations) || operations.length === 0) throw new Error(`${operation} has no operations`);
     return post(path, {
       operations,
@@ -317,7 +359,10 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
       responseContentType: "MUTABLE_RESOURCE",
     }, `${operation}${validateOnly ? " validation" : ""}`);
   };
-  const readAccount = async () => {
+}
+
+function createAccountReader(search) {
+  return async () => {
     const rows = await search(
       "SELECT customer.id, customer.currency_code, customer.time_zone FROM customer LIMIT 1",
       "account read",
@@ -329,7 +374,9 @@ export function createControlledTestGoogleAdsApi({ fetchImpl = fetch, env = proc
       timeZone: customer?.timeZone,
     };
   };
+}
 
+function createGoogleAdsAdapter({ search, mutate, readAccount }) {
   return {
     readAccount,
     async readCampaigns() {
@@ -539,6 +586,7 @@ async function main() {
       monitorAttestation,
       attestationSecret: process.env.GOOGLE_ADS_CONTROLLED_TEST_ATTESTATION_SECRET,
       landingProbe: createCoroplastLandingProbe(),
+      clock: () => new Date(),
     });
   } catch (error) {
     result = {
