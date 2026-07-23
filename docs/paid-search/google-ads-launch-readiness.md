@@ -2,7 +2,7 @@
 
 Revenue baseline, campaign economics, operating cadence, and scale/stop rules are defined in [revenue-growth-operating-plan.md](revenue-growth-operating-plan.md). That plan is the commercial control layer; this file remains the technical launch checklist.
 
-**2026-07-23 disposition:** OAuth was reauthorized and the credential-gated readback passed against child customer `1072816342`. All campaigns remain paused and exact-account spend is CA$0. This snapshot records evidence; it is not activation permission.
+**2026-07-23 disposition:** OAuth was reauthorized and the credential-gated readback passed against child customer `1072816342` with no safety failures. All campaigns remain paused and exact-account spend is CA$0. The Railway-native 15-minute monitor is deployed, Railway Wait for CI is enabled, and the controlled Coroplast activation/rollback controller passes local and live validate-only checks. Policy, promotion, and real-revenue evidence still block activation.
 
 ## Current disposition
 
@@ -13,6 +13,8 @@ Revenue baseline, campaign economics, operating cadence, and scale/stop rules ar
 | Local validation | **VALIDATED** |
 | Google Ads API validate-only | **PASSED** |
 | Live account verification | **VALIDATED_PAUSED** |
+| Railway deployment guard | **WAIT FOR CI ENABLED** |
+| Railway monitor schedule | **DEPLOYED — CADENCE EVIDENCE IN PROGRESS** |
 | Launched | **No** |
 | Spend | **CA$0** |
 
@@ -20,7 +22,9 @@ True Color advertiser `107-281-6342` is actively linked under manager `112-540-2
 
 The owned account now has distinct enabled primary `UPLOAD_CLICKS` actions `7694360837` (`purchase_online`) and `7694360840` (`quote_won`). Duration-qualified call action `7694360843` remains secondary, excluded from conversions, and its customer goal is non-biddable. Historical browser purchase action `7689029977` is explicitly secondary and excluded. The customer goal graph bids only against the purchase goal containing the two server revenue actions; page views and calls are non-biddable.
 
-The action IDs are verified, but revenue delivery is not launch-ready. Google’s current offline-conversion path requires a supported uploader migration and one real paid reconciliation for each revenue action. The checked-in blocker `OFFLINE_UPLOADER_MIGRATION` prevents the existence of valid action IDs from being mistaken for a working end-to-end uploader.
+The action IDs and Data Manager uploader are configured, but revenue delivery is not launch-ready until one non-fabricated paid reconciliation proves each revenue action. The verifier deliberately blocks launch when valid action IDs exist without real transaction evidence.
+
+Account call reporting and call-conversion reporting are enabled. Call asset `394889103183` is wired at customer scope to secondary action `7694360843` (`qualified_call_60s`) with a 60-second threshold and no campaign/ad-group call-asset drift. That resource-level mutation triggered a Google policy re-review and remains a launch blocker until the live readback returns approved/reviewed.
 
 ## Last verified live paused build
 
@@ -35,6 +39,7 @@ All account mutations passed Google Ads API v24 validate-only before execution. 
 - Dates July 20 through September 17, 2026.
 - Exact-account spend CA$0 and no enabled campaign.
 - Nine competitor RSAs require one targeted `DESTINATION_NOT_WORKING` policy appeal after the landing-page repair; they remain paused.
+- Qualified-call asset `394889103183` is correctly wired but currently `REVIEW_IN_PROGRESS`.
 - Production `/why-true-color` returns HTTP 200 and remains noindex.
 
 The source of truth remains [campaign-config.mjs](campaign-config.mjs). Generate and validate deterministic backup/import artifacts with:
@@ -83,19 +88,31 @@ npm run monitor:google-ads-spend -- --profile=public-pilot --execute
 
 After exact account identity is verified, execute mode enumerates and pauses every enabled campaign in that account—not only the three planned IDs—and verifies that none remain enabled. Unexpected enabled campaigns trigger fail-closed protection. A wrong or unreadable account identity never authorizes mutation. If spend or campaign inventory cannot be verified after account verification, the monitor still attempts the account-wide enabled-campaign pause and exits nonzero even when pause readback succeeds. Authentication, mutation, or readback failure returns `ERROR_PAUSE_UNVERIFIED` and stays red. Dry-run never mutates. Do not treat process execution alone as success—automation must inspect both the exit code and JSON `outcome` / `pauseVerified` fields.
 
-The repository now includes an authenticated production cron route plus a GitHub Actions schedule that invokes it every 15 minutes in execute/fail-closed mode. Each attempt records a `google-ads-monitor` heartbeat; warning, stop, or failure states enter the lifecycle rollup so the existing deduplicated Telegram alert path can notify the operator. This is not production proof: deployment secrets, one successful heartbeat, one warning/stop fixture, and one stale-heartbeat alert must be verified before activation. Do not enable campaigns until the corresponding controlled-test or public-pilot approval is recorded.
+Railway service `google-ads-monitor-cron` now invokes the monitor, conversion uploader, and dashboard-alert routes on `*/15 * * * *`; the GitHub schedule remains a backup rather than the primary cadence guarantee. Each monitor attempt records a `google-ads-monitor` heartbeat. Warning, verified stop, and unsafe/unverified-stop outcomes become stable red lifecycle issues and flow through the existing deduplicated Telegram alert path. Activation still requires three distinct signed controlled-window heartbeats with no gap above 20 minutes plus warning, verified-pause, and fail-closed evidence.
+
+The controlled controller is read-only by default, validates the exact account/resource inventory, probes the production Coroplast URL, validates every mutation before execution, enables Core last, and rolls the full account back to the canonical paused/CA$8 state on any failure:
+
+```sh
+node scripts/google-ads/controlled-test-controller.mjs preflight
+node scripts/google-ads/controlled-test-controller.mjs activate \
+  --execute \
+  --monitor-attestation=/absolute/path/to/signed-attestation.json
+node scripts/google-ads/controlled-test-controller.mjs rollback --execute
+```
+
+The signed activation attestation must contain exactly three fresh execute-mode Railway heartbeats for the same active ≤72-hour Regina window, monotonic exact-account spend below CA$25, durable alert/pause/fail-closed evidence, and a fresh Google Ads UI promotion proof whose eligibility window contains the full test. No unsigned or hand-edited JSON authorizes activation.
 
 ## Remaining launch blockers
 
 Campaign creation is complete, but public-pilot activation is prohibited until all remaining gates are evidenced. The real attributable imports below are obtained only through the separately approved bounded controlled-test state defined in the commercial operating plan; they are not permission for an informal self-click or full pilot launch:
 
 1. Confirm the CA$600 offer and exact qualifying terms inside **Billing → Promotions**. Only spend after redemption/eligibility is confirmed counts toward the offer.
-2. Migrate the revenue uploader to Google’s supported production offline-conversion path and prove that it accepts a non-fabricated conversion from this developer token.
+2. Wait for qualified-call asset `394889103183` to return approved/reviewed after its correct resource-level conversion linkage.
 3. Submit one targeted policy appeal for the nine repaired competitor RSAs and wait for approval; do not use repeated appeals or enable them while disapproved.
-4. Observe one real attributable `purchase_online` import and one real attributable `quote_won` import, reconciling click ID, transaction ID, pretax CAD value, database/outbox state, and Google Ads evidence.
-5. Make a purpose-specific Enhanced Conversions consent/disclosure decision. Current promotional-email consent does not authorize sending Ads measurement customer data.
-6. Review Auction Insights and explicitly justify Brand Defense; otherwise keep Brand paused.
-7. Explicitly approve the staged CPC ceilings, held Brand state, monitoring owner, and hard-stop procedure.
+4. Collect three consecutive Railway controlled-window heartbeats plus warning, verified-stop, and fail-closed Telegram evidence.
+5. Observe one real attributable `purchase_online` import and one real attributable `quote_won` import, reconciling click ID, transaction ID, pretax CAD value, database/outbox state, and Google Ads evidence.
+6. Make a purpose-specific Enhanced Conversions consent/disclosure decision. Current promotional-email consent does not authorize sending Ads measurement customer data.
+7. Review Auction Insights and explicitly justify Brand Defense; otherwise keep Brand paused.
 8. Review the full live account preview and sign off the Wilkie/Dubois controls.
 
 If these gates are not cleared before July 20, moving the pilot requires an explicit approved change to both the config and validator contract. Do not enable campaigns simply because the configured start date arrives.
@@ -116,7 +133,11 @@ If these gates are not cleared before July 20, moving the pilot requires an expl
 - [x] Checked-in launch manifest allows only Tier 1 product/conquest candidates, holds Tier 2 and Brand, and refuses activation while any gate remains blocked.
 - [x] All campaigns, ad groups, and ads are paused; the July 23 readback found CA$0 exact-account spend.
 - [x] Distinct revenue actions and the secondary 60-second call action are owned-account verified; the historical browser purchase action is non-primary and excluded.
+- [x] Call reporting is enabled and the customer-scoped call asset is wired to `qualified_call_60s`; policy re-review remains pending.
 - [x] Customer purchase goal is biddable; page-view and call goals are non-biddable.
-- [ ] Offline uploader migration, promotion eligibility, targeted competitor RSA appeal, real `purchase_online`/`quote_won` reconciliations, and final launch signoff remain blocked.
+- [x] Railway Wait for CI and the executable PostgreSQL outbox-trigger regression protect production from the prior app/schema drift and NULL-trigger incident.
+- [x] A Railway-native `*/15` scheduler is deployed with the GitHub schedule retained as backup.
+- [x] The exact-resource controlled activation and account-wide rollback controller passes tests, live preflight, and live validate-only mutation checks without enabling spend.
+- [ ] Promotion UI proof, call/RSA policy approval, three controlled-window heartbeats, real `purchase_online`/`quote_won` reconciliations, and final launch signoff remain blocked.
 
 Only the two source-backed review claims in `approvedClaims` may contain numbers in RSA copy. Do not add price, cutoff, turnaround, or guarantee claims without current evidence and a validator change.

@@ -207,7 +207,7 @@ The CA$650 absolute cap is not enforceable through an end date or a manual glanc
 - a tested manual fallback owned by Hasan: if automation is unhealthy, inspect current cumulative spend immediately and keep every campaign paused until monitoring is healthy and the state is reconciled;
 - a paused-state simulation/fixture proving threshold detection, pause targeting, alerting, timezone, and idempotency before live use.
 
-The authenticated cron route and 15-minute GitHub Actions schedule now exist in the repository. The hard-stop gate remains blocked until the scheduler is deployed with its secrets and evidence proves a successful heartbeat, warning/stop alert routing, stale-heartbeat detection, timezone handling, and verified pause readback.
+The authenticated cron route is deployed behind the Railway-native `google-ads-monitor-cron` service on `*/15 * * * *`; the GitHub Actions schedule remains a backup. Railway Wait for CI is enabled so a failed main-branch check suite is skipped instead of deployed. The controlled activation controller requires exactly three signed in-window execute-mode heartbeats with no gap above 20 minutes, plus warning, verified-pause, and fail-closed evidence. The hard-stop gate remains blocked until that real cadence and Telegram evidence is collected.
 
 ### First 14 live days
 

@@ -328,6 +328,19 @@ const nextConfig: NextConfig = {
 
   async headers() {
     return [
+      // Keep Cloudflare Bot Management's deferred JavaScript Detection out of
+      // the paid landing response. The page and quote API retain the global
+      // security headers; no-transform only prevents edge HTML injection that
+      // delays LCP and can make AdsBot destination checks unstable.
+      {
+        source: "/why-true-color",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate, no-transform",
+          },
+        ],
+      },
       // ── Noindex: transactional + private pages ────────────────────────────
       ...[
         "/cart",
