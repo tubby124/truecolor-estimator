@@ -116,10 +116,14 @@ function makeState(stage = "paused") {
 function makeAttestation(overrides = {}) {
   const heartbeat = (auditRunId, timestampUtc, timestampLocal) => ({
     auditRunId,
+    databaseEventId: `00000000-0000-4000-8000-${auditRunId.slice(-3).padStart(12, "0")}`,
+    persistedAtUtc: new Date(new Date(timestampUtc).getTime() + 100).toISOString(),
     ok: true,
     customerId: CONTROLLED_TEST.customerId,
     profile: "controlled-test",
     executionMode: "EXECUTE",
+    schedulerSource: "RAILWAY",
+    activationEligible: true,
     timeZone: CONTROLLED_TEST.timeZone,
     accountVerified: true,
     spendScope: "EXACT_ACCOUNT_TOTAL",
@@ -144,6 +148,48 @@ function makeAttestation(overrides = {}) {
       warningAlertVerified: true,
       protectivePauseVerified: true,
       failClosedVerified: true,
+      proofs: {
+        warningAlert: {
+          eventType: "google_ads.monitor.drill.warning_alert_verified",
+          evidenceId: "drill_warning_20260723",
+          databaseEventId: "10000000-0000-4000-8000-000000000001",
+          checkedAtUtc: "2026-07-23T19:20:00.000Z",
+          persistedAtUtc: "2026-07-23T19:20:00.100Z",
+          source: "MONITOR_SAFETY_DRILL",
+          artifactDigest: `sha256:${"a".repeat(64)}`,
+          campaignIds: CONTROLLED_TEST.campaigns.map((campaign) => campaign.id).sort(),
+          outcome: "WARNING",
+          action: "NONE",
+          pauseVerified: false,
+          telegramMessageId: "42",
+        },
+        protectivePause: {
+          eventType: "google_ads.monitor.drill.protective_pause_verified",
+          evidenceId: "drill_pause_20260723",
+          databaseEventId: "10000000-0000-4000-8000-000000000002",
+          checkedAtUtc: "2026-07-23T19:20:00.000Z",
+          persistedAtUtc: "2026-07-23T19:20:00.100Z",
+          source: "MONITOR_SAFETY_DRILL",
+          artifactDigest: `sha256:${"b".repeat(64)}`,
+          campaignIds: CONTROLLED_TEST.campaigns.map((campaign) => campaign.id).sort(),
+          outcome: "STOPPED",
+          action: "PAUSED",
+          pauseVerified: true,
+        },
+        failClosed: {
+          eventType: "google_ads.monitor.drill.fail_closed_verified",
+          evidenceId: "drill_failclosed_20260723",
+          databaseEventId: "10000000-0000-4000-8000-000000000003",
+          checkedAtUtc: "2026-07-23T19:20:00.000Z",
+          persistedAtUtc: "2026-07-23T19:20:00.100Z",
+          source: "MONITOR_SAFETY_DRILL",
+          artifactDigest: `sha256:${"c".repeat(64)}`,
+          campaignIds: CONTROLLED_TEST.campaigns.map((campaign) => campaign.id).sort(),
+          outcome: "ERROR_FAIL_CLOSED_PAUSED",
+          action: "PAUSED",
+          pauseVerified: true,
+        },
+      },
     },
     promotion: {
       evidenceId: "promo_ui_20260723",
@@ -186,8 +232,8 @@ function makeAttestation(overrides = {}) {
     },
     heartbeats: [
       heartbeat("cronrun_001", "2026-07-23T19:00:00.000Z", "2026-07-23T13:00:00"),
-      heartbeat("cronrun_002", "2026-07-23T19:10:00.000Z", "2026-07-23T13:10:00"),
-      heartbeat("cronrun_003", "2026-07-23T19:20:00.000Z", "2026-07-23T13:20:00"),
+      heartbeat("cronrun_002", "2026-07-23T19:15:00.000Z", "2026-07-23T13:15:00"),
+      heartbeat("cronrun_003", "2026-07-23T19:30:00.000Z", "2026-07-23T13:30:00"),
     ],
     ...overrides,
   };
@@ -315,7 +361,7 @@ test("monitor attestation is exact, signed, fresh, in-window, and proves fail-cl
     now: NOW,
     signingSecret: ATTESTATION_SECRET,
   }), {
-    heartbeatTimestampUtc: "2026-07-23T19:20:00.000Z",
+    heartbeatTimestampUtc: "2026-07-23T19:30:00.000Z",
     heartbeatCount: 3,
     windowStartLocal: "2026-07-23T13:00",
     windowEndLocal: "2026-07-26T13:00",
@@ -329,6 +375,15 @@ test("monitor attestation is exact, signed, fresh, in-window, and proves fail-cl
   });
   const cases = [
     { evidence: { ...makeAttestation().evidence, failClosedVerified: false } },
+    {
+      evidence: {
+        ...makeAttestation().evidence,
+        proofs: {
+          ...makeAttestation().evidence.proofs,
+          warningAlert: undefined,
+        },
+      },
+    },
     { promotion: { ...makeAttestation().promotion, source: "API_ASSUMPTION" } },
     { promotion: { ...makeAttestation().promotion, checkedAtUtc: "2026-07-23T19:00:00.000Z" } },
     { promotion: { ...makeAttestation().promotion, requiredQualifyingSpendCad: 1000 } },
@@ -342,6 +397,22 @@ test("monitor attestation is exact, signed, fresh, in-window, and proves fail-cl
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, timestampUtc: "2026-07-23T19:00:00.000Z", timestampLocal: "2026-07-23T13:00:00" } : item) },
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, windowEndLocal: "2026-07-26T14:00" } : item) },
     { heartbeats: makeAttestation().heartbeats.map((item, index) => index === 2 ? { ...item, campaignsBefore: [] } : item) },
+    {
+      heartbeats: makeAttestation().heartbeats.map((item, index) => ({
+        ...item,
+        timestampUtc: `2026-07-23T19:00:${String(index * 10).padStart(2, "0")}.000Z`,
+        timestampLocal: `2026-07-23T13:00:${String(index * 10).padStart(2, "0")}`,
+        persistedAtUtc: `2026-07-23T19:00:${String(index * 10).padStart(2, "0")}.100Z`,
+      })),
+    },
+    {
+      heartbeats: makeAttestation().heartbeats.map((item, index) => ({
+        ...item,
+        timestampUtc: `2026-07-23T19:${String(index * 10).padStart(2, "0")}:00.000Z`,
+        timestampLocal: `2026-07-23T13:${String(index * 10).padStart(2, "0")}:00`,
+        persistedAtUtc: `2026-07-23T19:${String(index * 10).padStart(2, "0")}:00.100Z`,
+      })),
+    },
   ];
   for (const overrides of cases) {
     assert.throws(() => validateMonitorAttestation(makeAttestation(overrides), {

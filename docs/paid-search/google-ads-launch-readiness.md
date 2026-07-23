@@ -88,7 +88,24 @@ npm run monitor:google-ads-spend -- --profile=public-pilot --execute
 
 After exact account identity is verified, execute mode enumerates and pauses every enabled campaign in that account—not only the three planned IDs—and verifies that none remain enabled. Unexpected enabled campaigns trigger fail-closed protection. A wrong or unreadable account identity never authorizes mutation. If spend or campaign inventory cannot be verified after account verification, the monitor still attempts the account-wide enabled-campaign pause and exits nonzero even when pause readback succeeds. Authentication, mutation, or readback failure returns `ERROR_PAUSE_UNVERIFIED` and stays red. Dry-run never mutates. Do not treat process execution alone as success—automation must inspect both the exit code and JSON `outcome` / `pauseVerified` fields.
 
-Railway service `google-ads-monitor-cron` now invokes the monitor, conversion uploader, and dashboard-alert routes on `*/15 * * * *`; the GitHub schedule remains a backup rather than the primary cadence guarantee. Each monitor attempt records a `google-ads-monitor` heartbeat. Warning, verified stop, and unsafe/unverified-stop outcomes become stable red lifecycle issues and flow through the existing deduplicated Telegram alert path. Activation still requires three distinct signed controlled-window heartbeats with no gap above 20 minutes plus warning, verified-pause, and fail-closed evidence.
+Railway service `google-ads-monitor-cron` now invokes the monitor, conversion uploader, and dashboard-alert routes on `*/15 * * * *`; the GitHub schedule remains a backup rather than the primary cadence guarantee. Railway, GitHub backup, and manual calls use distinct bearer credentials, and the derived scheduler source is persisted rather than accepted from a caller-supplied label. Each monitor attempt records a compact `google-ads-monitor` heartbeat plus a sanitized, uniquely identified `google_ads.monitor.heartbeat` audit event containing the exact account, profile, execution mode, window, spend micros, campaign state, scheduler source, and pause verification. The audit table has RLS enabled, no API-role access, explicit service-role access, and a unique heartbeat ID index. Every execute profile fails closed with HTTP 503 if durable evidence cannot be written, so a successful scheduler run cannot exist without proof.
+
+Activation accepts only three persisted Railway heartbeats. Each adjacent gap must be 10–20 minutes, total coverage must be at least 25 minutes, database and application timestamps must be within 30 seconds, and all audit/database IDs must be distinct. Rapid Railway/GitHub duplicates and manual calls cannot satisfy cadence. Warning, verified stop, and unsafe/unverified-stop outcomes become stable red lifecycle issues and flow through the existing deduplicated Telegram alert path.
+
+Run the non-spend safety drill before building an attestation. It exercises the production warning, protective-pause, and fail-closed code against an exact-account in-memory adapter, sends a labeled Telegram drill message, and writes signed-input proof rows without mutating Google Ads:
+
+```sh
+npm run drill:google-ads-monitor -- --execute
+```
+
+The attestation builder queries those locked audit rows plus the latest Railway heartbeat rows, derives every monitor proof flag, signs the envelope, and validates it before writing a mode-0600 file:
+
+```sh
+npm run build:google-ads-attestation -- \
+  --promotion-proof=/absolute/path/to/promotion.json \
+  --live-verification=/absolute/path/to/live-verification.json \
+  --output=/absolute/path/to/controlled-test-attestation.json
+```
 
 The controlled controller is read-only by default, validates the exact account/resource inventory, probes the production Coroplast URL, validates every mutation before execution, enables Core last, and rolls the full account back to the canonical paused/CA$8 state on any failure:
 

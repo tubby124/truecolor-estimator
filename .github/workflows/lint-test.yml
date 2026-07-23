@@ -24,7 +24,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: ${{ github.run_id }}
         ports:
           - 5432:5432
         options: >-
@@ -36,13 +36,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: Execute Google Ads outbox trigger regression
         env:
-          PGPASSWORD: postgres
+          PGPASSWORD: ${{ github.run_id }}
         run: >-
           psql
           --host 127.0.0.1
           --username postgres
           --dbname postgres
           --file scripts/google-ads/sql/outbox-trigger-regression.sql
+      - name: Execute Google Ads monitor evidence ACL regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql
+          --host 127.0.0.1
+          --username postgres
+          --dbname postgres
+          --file scripts/google-ads/sql/monitor-evidence-regression.sql
 
   lint-test:
     runs-on: ubuntu-latest

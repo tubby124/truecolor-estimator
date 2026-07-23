@@ -87,8 +87,12 @@ export const CONTROLLED_TEST = Object.freeze({
   monitor: Object.freeze({
     attestationVersion: 1,
     cadenceMinutes: 15,
+    minimumGapMinutes: 10,
     maximumAgeMinutes: 20,
+    minimumCoverageMinutes: 25,
     maximumFutureSkewMinutes: 2,
+    maximumPersistenceSkewSeconds: 30,
+    maximumDrillAgeHours: 24,
     requiredConsecutiveHeartbeats: 3,
     warningCad: 25,
     thresholdCad: 25,
@@ -143,7 +147,7 @@ export function validateMonitorAttestation(attestation, {
 } = {}) {
   const expected = CONTROLLED_TEST.monitor;
   validateAttestationEnvelope(attestation, signingSecret, expected);
-  validateMonitorEvidence(attestation.evidence, expected);
+  validateMonitorEvidence(attestation.evidence, expected, now);
   const promotion = validatePromotionProof(attestation.promotion, now, expected);
   const latest = validateHeartbeatSequence(attestation.heartbeats, now, expected);
   validateWindowContainment(latest, promotion);
@@ -160,6 +164,17 @@ export function validateMonitorAttestation(attestation, {
       eligibilityWindowEndUtc: promotion.eligibilityEnd.toISOString(),
     },
   };
+}
+
+export function validateMonitorHeartbeatSequence(
+  heartbeats,
+  { now = new Date() } = {},
+) {
+  return validateHeartbeatSequence(
+    heartbeats,
+    now,
+    CONTROLLED_TEST.monitor,
+  );
 }
 
 export function validateActivationAttestation(attestation, {
@@ -237,7 +252,7 @@ function validateAttestationEnvelope(attestation, signingSecret, expected) {
   }
 }
 
-function validateMonitorEvidence(evidence, expected) {
+function validateMonitorEvidence(evidence, expected, now) {
   if (!evidence || typeof evidence !== "object"
     || evidence.schedulerCadenceMinutes !== expected.cadenceMinutes
     || evidence.heartbeatPersisted !== true
@@ -246,6 +261,69 @@ function validateMonitorEvidence(evidence, expected) {
     || evidence.failClosedVerified !== true) {
     throw new Error("Monitor attestation is missing the exact scheduler, heartbeat, alert, pause, or fail-closed proof");
   }
+  const requiredProofs = {
+    warningAlert: "google_ads.monitor.drill.warning_alert_verified",
+    protectivePause: "google_ads.monitor.drill.protective_pause_verified",
+    failClosed: "google_ads.monitor.drill.fail_closed_verified",
+  };
+  for (const [name, eventType] of Object.entries(requiredProofs)) {
+    validateDurableMonitorProof(evidence.proofs?.[name], eventType, now, expected);
+  }
+}
+
+function validateDurableMonitorProof(proof, eventType, now, expected) {
+  const expectedSummary = {
+    "google_ads.monitor.drill.warning_alert_verified": {
+      outcome: "WARNING",
+      action: "NONE",
+      pauseVerified: false,
+    },
+    "google_ads.monitor.drill.protective_pause_verified": {
+      outcome: "STOPPED",
+      action: "PAUSED",
+      pauseVerified: true,
+    },
+    "google_ads.monitor.drill.fail_closed_verified": {
+      outcome: "ERROR_FAIL_CLOSED_PAUSED",
+      action: "PAUSED",
+      pauseVerified: true,
+    },
+  }[eventType];
+  const expectedCampaignIds = CONTROLLED_TEST.campaigns
+    .map((campaign) => campaign.id)
+    .sort();
+  if (!proof
+    || proof.eventType !== eventType
+    || proof.source !== "MONITOR_SAFETY_DRILL"
+    || !validEvidenceId(proof.evidenceId)
+    || typeof proof.databaseEventId !== "string"
+    || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(proof.databaseEventId)
+    || typeof proof.artifactDigest !== "string"
+    || !/^sha256:[a-f0-9]{64}$/.test(proof.artifactDigest)
+    || JSON.stringify(proof.campaignIds) !== JSON.stringify(expectedCampaignIds)
+    || proof.outcome !== expectedSummary?.outcome
+    || proof.action !== expectedSummary?.action
+    || proof.pauseVerified !== expectedSummary?.pauseVerified
+    || (eventType === "google_ads.monitor.drill.warning_alert_verified"
+      && (typeof proof.telegramMessageId !== "string"
+        || proof.telegramMessageId.length === 0))) {
+    throw new Error(`Monitor safety proof ${nameFromEventType(eventType)} is invalid`);
+  }
+  const checkedAt = new Date(proof.checkedAtUtc);
+  const persistedAt = new Date(proof.persistedAtUtc);
+  const ageMs = now.getTime() - checkedAt.getTime();
+  if (!Number.isFinite(checkedAt.getTime())
+    || !Number.isFinite(persistedAt.getTime())
+    || Math.abs(persistedAt.getTime() - checkedAt.getTime())
+      > expected.maximumPersistenceSkewSeconds * 1_000
+    || ageMs > expected.maximumDrillAgeHours * 3_600_000
+    || ageMs < -expected.maximumFutureSkewMinutes * 60_000) {
+    throw new Error(`Monitor safety proof ${nameFromEventType(eventType)} is stale`);
+  }
+}
+
+function nameFromEventType(eventType) {
+  return eventType.split(".").at(-1);
 }
 
 function validatePromotionProof(promotion, now, expected) {
@@ -282,10 +360,19 @@ function validateHeartbeatSequence(heartbeats, now, expected) {
   if (new Set(heartbeats.map((heartbeat) => heartbeat.auditRunId)).size !== heartbeats.length) {
     throw new Error("Monitor heartbeat audit run IDs must be distinct");
   }
+  if (new Set(heartbeats.map((heartbeat) => heartbeat.databaseEventId)).size !== heartbeats.length) {
+    throw new Error("Monitor heartbeat database event IDs must be distinct");
+  }
   for (let index = 1; index < validated.length; index += 1) {
     validateHeartbeatTransition(validated[index - 1], validated[index], expected);
   }
   const latest = validated.at(-1);
+  const coverageMs = latest.timestamp.getTime() - validated[0].timestamp.getTime();
+  if (coverageMs < expected.minimumCoverageMinutes * 60_000) {
+    throw new Error(
+      `Monitor heartbeat coverage must be at least ${expected.minimumCoverageMinutes} minutes`,
+    );
+  }
   parseFreshTimestamp(heartbeats.at(-1).timestampUtc, now, expected, "Monitor heartbeat");
   const nowLocal = localNow(now);
   if (nowLocal < `${latest.windowStartLocal}:00` || nowLocal >= `${latest.windowEndLocal}:00`) {
@@ -296,8 +383,19 @@ function validateHeartbeatSequence(heartbeats, now, expected) {
 
 function validateHeartbeatTransition(previous, current, expected) {
   const gapMs = current.timestamp.getTime() - previous.timestamp.getTime();
-  if (gapMs <= 0 || gapMs > expected.maximumAgeMinutes * 60_000) {
-    throw new Error(`Monitor heartbeat gap must be positive and no more than ${expected.maximumAgeMinutes} minutes`);
+  const minimumGapMs = expected.minimumGapMinutes * 60_000;
+  const maximumGapMs = expected.maximumAgeMinutes * 60_000;
+  if (gapMs < minimumGapMs || gapMs > maximumGapMs) {
+    throw new Error(
+      `Monitor heartbeat gap must be between ${expected.minimumGapMinutes} and ${expected.maximumAgeMinutes} minutes`,
+    );
+  }
+  const persistenceGapMs = current.persistedAt.getTime()
+    - previous.persistedAt.getTime();
+  if (persistenceGapMs < minimumGapMs || persistenceGapMs > maximumGapMs) {
+    throw new Error(
+      `Persisted heartbeat gap must be between ${expected.minimumGapMinutes} and ${expected.maximumAgeMinutes} minutes`,
+    );
   }
   if (current.windowStartLocal !== previous.windowStartLocal
     || current.windowEndLocal !== previous.windowEndLocal) {
@@ -325,8 +423,9 @@ function validateHeartbeatShape(heartbeat) {
   }
   const spend = validateHeartbeatSpend(heartbeat, expected);
   const timing = validateHeartbeatTiming(heartbeat);
+  const persistence = validateHeartbeatPersistence(heartbeat, timing.timestamp, expected);
   validateHeartbeatCampaigns(heartbeat.campaignsBefore);
-  return { ...timing, ...spend };
+  return { ...timing, ...spend, ...persistence };
 }
 
 function validateExactHeartbeatFields(heartbeat, expected) {
@@ -335,6 +434,8 @@ function validateExactHeartbeatFields(heartbeat, expected) {
     customerId: CONTROLLED_TEST.customerId,
     profile: "controlled-test",
     executionMode: "EXECUTE",
+    schedulerSource: "RAILWAY",
+    activationEligible: true,
     timeZone: CONTROLLED_TEST.timeZone,
     accountVerified: true,
     spendScope: "EXACT_ACCOUNT_TOTAL",
@@ -347,6 +448,24 @@ function validateExactHeartbeatFields(heartbeat, expected) {
   for (const [field, value] of Object.entries(exactFields)) {
     if (heartbeat[field] !== value) throw new Error(`Monitor heartbeat ${field} must equal ${JSON.stringify(value)}`);
   }
+}
+
+function validateHeartbeatPersistence(heartbeat, timestamp, expected) {
+  if (typeof heartbeat.databaseEventId !== "string"
+    || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(heartbeat.databaseEventId)) {
+    throw new Error("Monitor heartbeat database event ID is invalid");
+  }
+  const persistedAt = new Date(heartbeat.persistedAtUtc);
+  if (!Number.isFinite(persistedAt.getTime())) {
+    throw new Error("Monitor heartbeat persistence timestamp is invalid");
+  }
+  const skewMs = Math.abs(persistedAt.getTime() - timestamp.getTime());
+  if (skewMs > expected.maximumPersistenceSkewSeconds * 1_000) {
+    throw new Error(
+      `Monitor heartbeat persistence skew exceeds ${expected.maximumPersistenceSkewSeconds} seconds`,
+    );
+  }
+  return { persistedAt };
 }
 
 function validateHeartbeatSpend(heartbeat, expected) {
