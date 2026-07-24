@@ -170,7 +170,6 @@ export default function WhyTrueColorPage() {
                     src={product.heroImage}
                     alt={`${product.name} available to order from True Color Display Printing`}
                     fill
-                    unoptimized
                     className="object-cover transition duration-300 group-hover:scale-[1.03]"
                     sizes="(max-width: 640px) 50vw, 33vw"
                   />

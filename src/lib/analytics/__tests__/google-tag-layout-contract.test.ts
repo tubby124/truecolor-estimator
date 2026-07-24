@@ -9,5 +9,6 @@ describe("root Google tag ordering", () => {
     expect(source).toContain("buildGoogleTagBootstrapScript");
     expect(source).toMatch(/googletagmanager\.com\/gtag\/js\?id=G-6HMQT7MNLL[\s\S]*strategy="afterInteractive"/);
     expect(source).not.toContain('id="ga4-init" strategy="lazyOnload"');
+    expect(source).toMatch(/const geistMono = localFont\([\s\S]*?preload: false/);
   });
 });

@@ -62,6 +62,7 @@ describe("paid-only why True Color page contract", () => {
     expect(source).toContain("/images/about/shop-exterior.webp");
     expect(source).toContain("/images/gallery/gallery-shop-roland-large-format.webp");
     expect(source).toContain("Request My Quote");
+    expect(source).not.toMatch(/src=\{product\.heroImage\}[\s\S]{0,180}unoptimized/);
   });
 
   it("prevents edge HTML injection on the paid route without making it cacheable", () => {
