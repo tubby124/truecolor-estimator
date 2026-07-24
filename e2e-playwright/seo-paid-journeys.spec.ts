@@ -142,6 +142,13 @@ test.describe("paid and organic ordering journeys", () => {
   }
 
   test("checkout blocks invalid email and failed selected artwork before order creation", async ({ page }) => {
+    await page.route("**/api/checkout-sessions", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ captured: true }),
+      });
+    });
     await page.goto("/");
     await page.evaluate(() => {
       sessionStorage.setItem("tc_cart", JSON.stringify([{
