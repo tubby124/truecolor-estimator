@@ -1,10 +1,10 @@
 # Revenue Growth Search Operating Plan
 
-**Evidence refreshed:** 2026-07-18
+**Evidence refreshed:** 2026-07-23
 
 **Ads account:** True Color Display Print `107-281-6342`
 
-**Current state:** Last live verification on 2026-07-17 found all Search campaigns paused at CA$0; the 2026-07-18 verifier run is blocked by an invalid OAuth refresh token, so current live state is unverified and launch remains prohibited
+**Current state:** The 2026-07-23 credential-gated verifier reached the exact True Color account with zero safety failures. Core, Competitor, and Brand remain paused at CA$0. The CA$600/CAD promotion and qualified-call asset are verified. Launch remains prohibited while nine competitor RSAs are in policy review and the genuine `purchase_online` and `quote_won` revenue reconciliations are missing.
 
 ## Objective and planning truth
 
@@ -76,7 +76,7 @@ Twenty of the latest 31 orders contained manual items and represented CA$5,342.3
 - A separate all-channel direct GA4 report for 2026-06-20 through 2026-07-17 found 17 purchases worth CA$3,157.95, all classified as `Unassigned`; the production database contained 31 paid orders worth CA$6,665.55.
 - GA4 is useful for landing engagement but is not currently a revenue source of truth.
 - Recent order attribution: 20 of 31 unknown/direct; only 10 known external-source orders; zero click-ID orders because paid campaigns have not launched.
-- Database click-ID fields and the durable conversion outbox are built. Revenue bidding requires distinct server-side `UPLOAD_CLICKS` actions for `purchase_online` and `quote_won`; their real account IDs and observed imports remain blocked. Browser events are GA4 diagnostics only and never deliver Google Ads revenue.
+- Database click-ID fields and the durable conversion outbox are built. Distinct server-side `UPLOAD_CLICKS` actions `7694360837` (`purchase_online`) and `7694360840` (`quote_won`) are configured, primary, included, and live-verified in the owned account. Genuine observed imports and database-to-Ads reconciliation remain blocked. Browser events are GA4 diagnostics only and never deliver Google Ads revenue.
 - Current 30-day first-touch storage can suppress a newer paid click for a returning visitor. Preserve first touch and latest paid touch separately before using internal attribution to judge scale.
 
 ## Why budget is not the current growth constraint
@@ -89,7 +89,7 @@ The correct-account Keyword Planner forecast at the staged ceilings estimates ap
 | Exact competitor conquest | 1.89 | CA$2.18 | CA$2.50 |
 | Combined | 2.61 | CA$4.30 | — |
 
-That is roughly 78 clicks and CA$129 over 30 days, not a guarantee. Producing 31 additional average orders from 78 clicks would require roughly a 40% paid click-to-order rate. Raising the CA$40 Core or CA$7 Competitor daily budgets cannot manufacture more local high-intent searches. Relevance, query coverage, conversion rate, custom-order attribution, repeat business, and eventually additional proven channels are the scale levers.
+That is roughly 78 clicks and CA$129 over 30 days, not a guarantee. Producing 31 additional average orders from 78 clicks would require roughly a 40% paid click-to-order rate. Raising the approved CA$8 Core or CA$2 Competitor daily budgets cannot manufacture more local high-intent searches. Relevance, query coverage, conversion rate, custom-order attribution, repeat business, and eventually additional proven channels are the scale levers.
 
 The CA$600 promotion is financing, not profit. Exclude promotional credit when calculating CPA and ROAS.
 
@@ -100,7 +100,7 @@ The CA$600 promotion is financing, not profit. Exclude promotional credit when c
 1. Core product groups remain exact/phrase and route to their exact configurators.
 2. Coroplast and stickers are the primary revenue cohorts in reporting.
 3. Vinyl banners, retractables, business cards, and flyers remain eligible because forecast volume is sparse, but their spend and paid revenue must be reviewed separately.
-4. Competitor conquest remains exact-only and separate. Brand-only competitor terms route to `/why-true-color`.
+4. Competitor conquest remains exact-only and separate. Brand-only competitor terms route to the exact tracked `/why-true-color?source=google-ads` destination.
 5. If the search-term report reveals a competitor plus an explicit product, create a dedicated exact keyword and route it directly to the matching configurator.
 
 ### Tier 2 — held expansion
@@ -168,19 +168,25 @@ Diagnostic actions must never be assigned the same optimization weight as paid r
 
 ### Gate 0 — no public pilot spend
 
-All of these must be evidenced before the separately approved controlled-test activation:
+Verified:
 
-- production `/why-true-color` returns 200, remains noindex, and passes AdsBot/mobile/product-link QA;
-- distinct numeric `purchase_online` and `quote_won` `UPLOAD_CLICKS` action IDs are read from the owned account, configured, primary, included in conversions, and validated live;
-- a duration-qualified phone-call action and threshold are read back live as secondary and excluded from conversions/bidding;
-- Google Ads OAuth is reauthorized and the credential-gated paused-state verifier passes again;
-- RSA and manual assets are approved;
-- Saskatoon +35 km presence-only, Search-only networks, active customer, final URLs, suffix, budgets, CPC ceilings, and dates pass live preview;
-- CA$600 promotion eligibility and exact qualifying terms are confirmed in Billing → Promotions;
-- CA$8/CA$2 launch budgets, held Brand state, CA$4.00/CA$2.50 ceilings, September 17 end date, CA$600 target, CA$650 cap, monitoring owner, and pause procedure are explicitly approved;
+- the exact tracked `/why-true-color?source=google-ads` destination returns 200 without redirect, remains noindex, and passes desktop/mobile AdsBot marker checks;
+- distinct numeric `purchase_online` and `quote_won` `UPLOAD_CLICKS` action IDs are configured, primary, included in conversions, and validated live in the owned account;
+- the duration-qualified phone-call action is approved/reviewed, secondary, and excluded from conversions/bidding;
+- OAuth and the credential-gated exact-account readback pass with zero safety failures;
+- manual assets are approved;
+- Saskatoon +35 km presence-only, Search-only networks, exact customer, final URLs, suffix, budgets, CPC ceilings, and dates pass live preview;
+- the CA$600/CAD promotion is API-confirmed as redeemed with CA$600 qualifying spend required and CA$0 accumulated;
+- the CA$8/CA$2 launch budgets, held Brand state, CA$4.00/CA$2.50 ceilings, September 17 end date, CA$600 target, CA$650 cap, monitoring owner, and pause procedure are locked in the repository contract;
 - mobile landing, configurator, cart, checkout, payment, and confirmation paths pass;
 - Enhanced Conversions remains disabled unless purpose-specific customer-data consent/disclosure is approved;
 - Brand remains paused without Auction Insights justification.
+
+Still required before activation:
+
+- all nine competitor RSAs must return approved/reviewed;
+- the controlled-window heartbeat and spend-safety evidence must be fresh for the activation window;
+- a genuine `purchase_online` and a genuine quote-to-payment `quote_won` must reconcile end to end.
 
 If the planned start date passes before these gates clear, regenerate the campaign dates through the repository contract. Never enable simply because a calendar date arrived.
 

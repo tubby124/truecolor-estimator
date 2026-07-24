@@ -394,7 +394,7 @@ export const paidSearchConfig = {
         name: `Comparison - ${name}`,
         status: "PAUSED",
         launchTier: "TIER_1_CONQUEST",
-        finalUrl: `${ROOT}/why-true-color`,
+        finalUrl: `${ROOT}/why-true-color?source=google-ads`,
         keywords: terms.map((term) => keyword(term, "EXACT")),
         crossNegatives: [],
         rsa: neutralCompetitorRsa,

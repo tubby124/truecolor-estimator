@@ -524,6 +524,7 @@ test("rejects URL, RSA, ValueTrack, bidding, and gate violations", () => {
   const mutations = [
     (c) => { c.campaigns[0].adGroups[0].finalUrl = "https://example.com/products/coroplast-signs"; },
     (c) => { c.campaigns[0].adGroups[0].finalUrl = "https://truecolorprinting.ca/products/stickers"; },
+    (c) => { c.campaigns[1].adGroups[0].finalUrl = "https://truecolorprinting.ca/why-true-color"; },
     (c) => { c.campaigns[1].adGroups[0].rsa.headlines[0] = "Qwik Signs Alternative"; },
     (c) => { c.campaigns[1].adGroups[0].rsa.path1 = "qwik-signs"; },
     (c) => { c.campaigns[0].adGroups[0].rsa.headlines = ["Too few headlines"]; },
@@ -586,6 +587,9 @@ test("canonical routing and campaign caps are complete", () => {
   });
   assert.equal(competitors.adGroups.length, 9);
   assert.equal(competitors.adGroups.flatMap((group) => group.keywords).length, 9);
+  assert.ok(competitors.adGroups.every((group) => (
+    group.finalUrl === "https://truecolorprinting.ca/why-true-color?source=google-ads"
+  )));
   assert.ok(competitors.adGroups.every((group) => group.keywords.every((keyword) => keyword.matchType === "EXACT")));
   assert.equal(competitors.adGroups.find((group) => group.key === "ink-house").keywords[0].text, "ink house saskatoon");
   assert.equal(competitors.adGroups.find((group) => group.key === "rayacom").keywords[0].text, "rayacom saskatoon");

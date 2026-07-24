@@ -373,7 +373,9 @@ export function validateConfig(config) {
       try { parsed = new URL(group.finalUrl); } catch { fail(`${campaign.name}/${group.name} has invalid URL`); continue; }
       if (parsed.protocol !== "https:" || parsed.hostname !== "truecolorprinting.ca") fail(`${campaign.name}/${group.name} must use the one approved domain`);
       if (kind === "CORE" && parsed.pathname !== ROUTES[group.key]) fail(`${group.key} has the wrong destination`);
-      if (kind === "COMPETITOR" && parsed.pathname !== "/why-true-color") fail(`${group.name} must route to /why-true-color`);
+      if (kind === "COMPETITOR" && parsed.href !== "https://truecolorprinting.ca/why-true-color?source=google-ads") {
+        fail(`${group.name} must route to the exact tracked /why-true-color Google Ads destination`);
+      }
       if (kind === "BRAND" && parsed.pathname !== "/") fail(`${group.name} must route to the homepage`);
       if (!group.keywords?.length) fail(`${group.name} must contain high-intent keywords`);
       for (const kw of group.keywords ?? []) if (!["EXACT", "PHRASE"].includes(kw.matchType)) fail(`${group.name} contains a non-exact/phrase keyword`);

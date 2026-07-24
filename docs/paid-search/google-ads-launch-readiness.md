@@ -2,7 +2,7 @@
 
 Revenue baseline, campaign economics, operating cadence, and scale/stop rules are defined in [revenue-growth-operating-plan.md](revenue-growth-operating-plan.md). That plan is the commercial control layer; this file remains the technical launch checklist.
 
-**2026-07-23 disposition:** OAuth was reauthorized and the credential-gated readback passed against child customer `1072816342` with no safety failures. All campaigns remain paused and exact-account spend is CA$0. The Railway-native 15-minute monitor is deployed, Railway Wait for CI is enabled, and the controlled Coroplast activation/rollback controller passes local and live validate-only checks. Policy, promotion, and real-revenue evidence still block activation.
+**2026-07-23 disposition:** A fresh credential-gated readback passed against child customer `1072816342` with no safety failures. All campaigns remain paused and exact-account spend is CA$0. The CA$600/CAD promotion is API-confirmed as redeemed with CA$600 qualifying spend required, CA$0 accumulated, and a September 16, 2026 UTC fulfillment expiry. The qualified-call asset is approved/reviewed. All nine exact competitor RSAs now use the exact tracked `/why-true-color?source=google-ads` destination and are in `REVIEW_IN_PROGRESS` after the guarded URL-only review request. The Railway-native 15-minute monitor is deployed, Railway Wait for CI is enabled, and the controlled Coroplast activation/rollback controller passes local and live validate-only checks. RSA policy approval and genuine `purchase_online`/`quote_won` reconciliation still block activation.
 
 ## Current disposition
 
@@ -12,9 +12,11 @@ Revenue baseline, campaign economics, operating cadence, and scale/stop rules ar
 | Campaigns in Google Ads | **CREATED — PAUSED** |
 | Local validation | **VALIDATED** |
 | Google Ads API validate-only | **PASSED** |
-| Live account verification | **VALIDATED_PAUSED** |
+| Live account verification | **BLOCKED — PAUSED, NO SAFETY FAILURES** |
 | Railway deployment guard | **WAIT FOR CI ENABLED** |
-| Railway monitor schedule | **DEPLOYED — CADENCE EVIDENCE IN PROGRESS** |
+| Railway monitor schedule | **DEPLOYED — CONTROLLED-WINDOW EVIDENCE REQUIRED AT ACTIVATION** |
+| CA$600 promotion | **API CONFIRMED — REDEEMED, CA$0/CA$600 QUALIFYING SPEND** |
+| Competitor RSA policy | **REVIEW_IN_PROGRESS — PAUSED** |
 | Launched | **No** |
 | Spend | **CA$0** |
 
@@ -24,7 +26,7 @@ The owned account now has distinct enabled primary `UPLOAD_CLICKS` actions `7694
 
 The action IDs and Data Manager uploader are configured, but revenue delivery is not launch-ready until one non-fabricated paid reconciliation proves each revenue action. The verifier deliberately blocks launch when valid action IDs exist without real transaction evidence.
 
-Account call reporting and call-conversion reporting are enabled. Call asset `394889103183` is wired at customer scope to secondary action `7694360843` (`qualified_call_60s`) with a 60-second threshold and no campaign/ad-group call-asset drift. That resource-level mutation triggered a Google policy re-review and remains a launch blocker until the live readback returns approved/reviewed.
+Account call reporting and call-conversion reporting are enabled. Call asset `394889103183` is wired at customer scope to secondary action `7694360843` (`qualified_call_60s`) with a 60-second threshold and no campaign/ad-group call-asset drift. The July 23 live readback returned `APPROVED` / `REVIEWED`.
 
 ## Last verified live paused build
 
@@ -38,9 +40,9 @@ All account mutations passed Google Ads API v24 validate-only before execution. 
 - Three presence-only proximity criteria centered at `52.129728,-106.659637`, each with a 35 km radius; no positive city-location criteria remain.
 - Dates July 20 through September 17, 2026.
 - Exact-account spend CA$0 and no enabled campaign.
-- Nine competitor RSAs require one targeted `DESTINATION_NOT_WORKING` policy appeal after the landing-page repair; they remain paused.
-- Qualified-call asset `394889103183` is correctly wired but currently `REVIEW_IN_PROGRESS`.
-- Production `/why-true-color` returns HTTP 200 and remains noindex.
+- Nine competitor RSAs use `https://truecolorprinting.ca/why-true-color?source=google-ads`; the guarded URL-only mutation completed once, its idempotent rerun returned `ALREADY_REQUESTED`, and all nine remain paused in `REVIEW_IN_PROGRESS`.
+- Qualified-call asset `394889103183` is correctly wired and returned `APPROVED` / `REVIEWED`.
+- Production `/why-true-color` and the exact tracked query URL return HTTP 200, remain noindex, and expose the paid-page marker without redirecting.
 
 The source of truth remains [campaign-config.mjs](campaign-config.mjs). Generate and validate deterministic backup/import artifacts with:
 
@@ -123,14 +125,12 @@ The signed activation attestation must contain exactly three fresh execute-mode 
 
 Campaign creation is complete, but public-pilot activation is prohibited until all remaining gates are evidenced. The real attributable imports below are obtained only through the separately approved bounded controlled-test state defined in the commercial operating plan; they are not permission for an informal self-click or full pilot launch:
 
-1. Confirm the CA$600 offer and exact qualifying terms inside **Billing → Promotions**. Only spend after redemption/eligibility is confirmed counts toward the offer.
-2. Wait for qualified-call asset `394889103183` to return approved/reviewed after its correct resource-level conversion linkage.
-3. Submit one targeted policy appeal for the nine repaired competitor RSAs and wait for approval; do not use repeated appeals or enable them while disapproved.
-4. Collect three consecutive Railway controlled-window heartbeats plus warning, verified-stop, and fail-closed Telegram evidence.
-5. Observe one real attributable `purchase_online` import and one real attributable `quote_won` import, reconciling click ID, transaction ID, pretax CAD value, database/outbox state, and Google Ads evidence.
-6. Make a purpose-specific Enhanced Conversions consent/disclosure decision. Current promotional-email consent does not authorize sending Ads measurement customer data.
-7. Review Auction Insights and explicitly justify Brand Defense; otherwise keep Brand paused.
-8. Review the full live account preview and sign off the Wilkie/Dubois controls.
+1. Wait for all nine competitor RSAs to return approved/reviewed. The exact URL-only review request is already complete; do not repeat it or enable ads while review is pending.
+2. Collect three consecutive Railway controlled-window heartbeats plus warning, verified-stop, and fail-closed Telegram evidence for the activation window.
+3. Observe one real attributable `purchase_online` import and one real attributable `quote_won` import, reconciling click ID, transaction ID, pretax CAD value, database/outbox state, and Google Ads evidence.
+4. Make a purpose-specific Enhanced Conversions consent/disclosure decision. Current promotional-email consent does not authorize sending Ads measurement customer data.
+5. Review Auction Insights and explicitly justify Brand Defense; otherwise keep Brand paused.
+6. Review the full live account preview and sign off the Wilkie/Dubois controls.
 
 If these gates are not cleared before July 20, moving the pilot requires an explicit approved change to both the config and validator contract. Do not enable campaigns simply because the configured start date arrives.
 
@@ -142,7 +142,7 @@ If these gates are not cleared before July 20, moving the pilot requires an expl
 - [x] Exact/phrase positive keywords only; no broad match.
 - [x] Saskatoon +35 km presence-only applied and read back at `52.129728,-106.659637`; no positive city criteria remain.
 - [x] Product intent routes to matching configurators.
-- [x] Competitor terms excluded from RSA copy and routed to `/why-true-color`.
+- [x] Competitor terms excluded from RSA copy and routed to the exact tracked `/why-true-color?source=google-ads` destination.
 - [x] Competitor targeting exact-only; Ink House and Rayacom added from current local-overlap research.
 - [x] Campaign-specific CPC ceilings staged from the correct-account forecast.
 - [x] Six direct-product sitelinks plus callout/snippet assets linked across campaigns.
@@ -155,6 +155,7 @@ If these gates are not cleared before July 20, moving the pilot requires an expl
 - [x] Railway Wait for CI and the executable PostgreSQL outbox-trigger regression protect production from the prior app/schema drift and NULL-trigger incident.
 - [x] A Railway-native `*/15` scheduler is deployed with the GitHub schedule retained as backup.
 - [x] The exact-resource controlled activation and account-wide rollback controller passes tests, live preflight, and live validate-only mutation checks without enabling spend.
-- [ ] Promotion UI proof, call/RSA policy approval, three controlled-window heartbeats, real `purchase_online`/`quote_won` reconciliations, and final launch signoff remain blocked.
+- [x] CA$600/CAD promotion confirmed from the direct-customer API and qualified-call asset approved/reviewed.
+- [ ] Competitor RSA policy approval, three controlled-window heartbeats, real `purchase_online`/`quote_won` reconciliations, and final launch signoff remain blocked.
 
 Only the two source-backed review claims in `approvedClaims` may contain numbers in RSA copy. Do not add price, cutoff, turnaround, or guarantee claims without current evidence and a validator change.
