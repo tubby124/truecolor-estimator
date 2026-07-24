@@ -1,5 +1,6 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
+import { evidenceDigest } from "./evidence-digest.mjs";
 import {
   HARD_STOP_CAMPAIGNS,
   parseHardStopOptions,
@@ -44,12 +45,6 @@ function createDrillApi({ spendMicros = "0", spendFailure = false } = {}) {
   };
 }
 
-function digest(value) {
-  return `sha256:${createHash("sha256")
-    .update(JSON.stringify(value))
-    .digest("hex")}`;
-}
-
 function proofEvent({ kind, eventType, result, checkedAtUtc, extra = {} }) {
   const evidenceId = `drill_${kind}_${randomUUID().replaceAll("-", "")}`;
   const summary = {
@@ -75,7 +70,7 @@ function proofEvent({ kind, eventType, result, checkedAtUtc, extra = {} }) {
       source: "MONITOR_SAFETY_DRILL",
       drillVersion: 1,
       checkedAtUtc,
-      artifactDigest: digest(summary),
+      artifactDigest: evidenceDigest(summary),
       summary,
     },
   };

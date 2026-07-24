@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import test from "node:test";
 import {
   buildControlledTestAttestation,
@@ -10,15 +9,26 @@ import {
   CONTROLLED_TEST,
   validateMonitorAttestation,
 } from "../controlled-test-contract.mjs";
+import { evidenceDigest } from "../evidence-digest.mjs";
 import { runMonitorSafetyDrill } from "../monitor-safety-drill.mjs";
 
 const NOW = new Date("2026-07-23T19:30:00.000Z");
 const SECRET = "test-only-controlled-attestation-secret-2026";
 
 function summaryDigest(summary) {
-  return `sha256:${createHash("sha256")
-    .update(JSON.stringify(summary))
-    .digest("hex")}`;
+  return evidenceDigest(summary);
+}
+
+function reorderObjectKeys(value) {
+  if (Array.isArray(value)) return value.map(reorderObjectKeys);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .reverse()
+        .map((key) => [key, reorderObjectKeys(value[key])]),
+    );
+  }
+  return value;
 }
 
 function heartbeatRow(index, minute, overrides = {}) {
@@ -218,6 +228,23 @@ test("durable proof flags cannot be derived without all three fresh rows", () =>
   assert.throws(
     () => deriveDurableMonitorProofs(proofRows.slice(0, 2), { now: NOW }),
     /missing or stale/,
+  );
+});
+
+test("durable proof digests survive PostgreSQL JSONB key reordering", () => {
+  const reorderedRows = proofRows.map((row) => ({
+    ...row,
+    detail: {
+      ...row.detail,
+      summary: reorderObjectKeys(row.detail.summary),
+    },
+  }));
+  assert.deepEqual(
+    reorderedRows.map((row) => evidenceDigest(row.detail.summary)),
+    proofRows.map((row) => row.detail.artifactDigest),
+  );
+  assert.doesNotThrow(
+    () => deriveDurableMonitorProofs(reorderedRows, { now: NOW }),
   );
 });
 

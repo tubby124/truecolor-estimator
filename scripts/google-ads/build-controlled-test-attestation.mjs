@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { evidenceDigest } from "./evidence-digest.mjs";
 import {
   CONTROLLED_TEST,
   signMonitorAttestation,
@@ -17,12 +17,6 @@ const PROOF_EVENTS = Object.freeze({
 const EXPECTED_CAMPAIGN_IDS = CONTROLLED_TEST.campaigns
   .map((campaign) => campaign.id)
   .sort();
-
-function proofDigest(summary) {
-  return `sha256:${createHash("sha256")
-    .update(JSON.stringify(summary))
-    .digest("hex")}`;
-}
 
 function validProofSummary(summary, expectedEventType) {
   if (!summary
@@ -119,7 +113,7 @@ function durableProofFromAuditRow(row, expectedEventType, now) {
     || detail.drillVersion !== 1
     || typeof detail.artifactDigest !== "string"
     || !/^sha256:[a-f0-9]{64}$/.test(detail.artifactDigest)
-    || detail.artifactDigest !== proofDigest(detail.summary)
+    || detail.artifactDigest !== evidenceDigest(detail.summary)
     || !validProofSummary(detail.summary, expectedEventType)
     || typeof row.id !== "string"
     || !Number.isFinite(checkedAt.getTime())
