@@ -1,4 +1,4 @@
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 import { PaidCtaLink } from "@/components/paid/PaidProductLink";
 
@@ -52,11 +52,9 @@ export function PaidReviewCards() {
         <div className="mt-7 grid gap-4 md:grid-cols-3">
           {VERIFIED_REVIEW_CARDS.map((review) => (
             <article key={review.name} className="flex min-h-52 flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <div className="flex gap-1 text-yellow-500" role="img" aria-label="5 out of 5 stars">
-                {Array.from({ length: 5 }, (_, index) => (
-                  <Star key={index} size={17} className="fill-current" aria-hidden="true" />
-                ))}
-              </div>
+              <span className="text-base tracking-[0.16em] text-yellow-500" role="img" aria-label="5 out of 5 stars">
+                ★★★★★
+              </span>
               <blockquote className="mt-4 flex-1 text-base font-semibold leading-relaxed text-[#1c1712]">
                 “{review.quote}”
               </blockquote>

@@ -35,6 +35,8 @@ describe("paid landing UX contracts", () => {
     }
     expect(html).toContain(`href="${LICENSED_REVIEW_ROUTE}"`);
     expect(html).toContain("Google reviews, verified by Trustindex");
+    expect(html.match(/aria-label="5 out of 5 stars"/g)).toHaveLength(3);
+    expect(html.match(/★★★★★/g)).toHaveLength(3);
   });
 
   it("keeps all three next-step actions visible after add to cart", () => {
