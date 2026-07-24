@@ -64,13 +64,12 @@ describe("paid-only why True Color page contract", () => {
     expect(source).toContain("Request My Quote");
   });
 
-  it("keeps the paid route private without disabling edge compression", () => {
+  it("prevents edge HTML injection on the paid route without making it cacheable", () => {
     const nextConfig = readFileSync(path.join(process.cwd(), "next.config.ts"), "utf8");
 
     expect(nextConfig).toContain('source: "/why-true-color"');
     expect(nextConfig).toContain(
-      "private, no-cache, no-store, max-age=0, must-revalidate",
+      "private, no-cache, no-store, max-age=0, must-revalidate, no-transform",
     );
-    expect(nextConfig).not.toContain("must-revalidate, no-transform");
   });
 });
