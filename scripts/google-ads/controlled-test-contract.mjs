@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { localNow, parseHardStopOptions } from "./hard-stop-contract.mjs";
+import { COMPETITOR_DESTINATION_BINDING } from "./live-verification-contract.mjs";
 
 const EXPECTED_FINAL_URL_SUFFIX = "utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_term={keyword}&utm_content={creative}&keyword={keyword}&matchtype={matchtype}&device={device}&loc_physical_ms={loc_physical_ms}&loc_interest_ms={loc_interest_ms}&adgroupid={adgroupid}&creative={creative}&campaignid={campaignid}&network={network}";
 
@@ -232,6 +233,9 @@ function validateLiveVerificationClearance(clearance, now) {
     || settings.revenueActionsPrimaryOnly !== true
     || settings.qualifiedCallsSecondary !== true
     || settings.allPolicyApproved !== true
+    || settings.competitorDestinationUrl !== COMPETITOR_DESTINATION_BINDING.finalUrl
+    || JSON.stringify(settings.competitorRsaAdGroupAdResources)
+      !== JSON.stringify(COMPETITOR_DESTINATION_BINDING.adGroupAdResources)
     || settings.unexpectedSpendCad !== 0) {
     throw new Error("Live-account clearance does not prove the exact launch-critical settings");
   }

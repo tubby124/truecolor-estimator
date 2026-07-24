@@ -1,3 +1,5 @@
+import { COMPETITOR_RSA_REVIEW } from "./request-competitor-rsa-review.mjs";
+
 const EXPECTED_CAMPAIGNS = {
   GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 8, ceiling: 4 },
   GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 2, ceiling: 2.5 },
@@ -19,7 +21,94 @@ const EXPECTED_NEAR_ME_TERMS = [
 const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
 const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
 const QUALIFIED_CALL_ASSET_ID = "394889103183";
-const PROMOTION_CLEARANCE = "UI_CONFIRMED_ACTIVE";
+const PROMOTION_CLEARANCES = new Set([
+  "UI_CONFIRMED_ACTIVE",
+  "API_APPLIED_INCENTIVE_REDEEMED",
+]);
+export const API_PROMOTION_CLEARANCE = "API_APPLIED_INCENTIVE_REDEEMED";
+export const COMPETITOR_DESTINATION_BINDING = Object.freeze({
+  finalUrl: COMPETITOR_RSA_REVIEW.proposedFinalUrl,
+  landingMarker: COMPETITOR_RSA_REVIEW.landingMarker,
+  adGroupAdResources: Object.freeze(
+    COMPETITOR_RSA_REVIEW.ads.map((ad) => ad.adGroupAdResourceName),
+  ),
+});
+
+export function withoutLoginCustomerHeader(headers) {
+  if (!headers || typeof headers !== "object" || Array.isArray(headers)) {
+    throw new Error("Google Ads headers must be an object");
+  }
+  const directHeaders = { ...headers };
+  delete directHeaders["login-customer-id"];
+  return directHeaders;
+}
+
+export function classifyAppliedIncentive(incentives, {
+  customerId,
+  now = new Date(),
+} = {}) {
+  if (!Array.isArray(incentives)) throw new Error("Applied incentives must be an array");
+  if (typeof customerId !== "string" || !/^\d+$/.test(customerId)) {
+    throw new Error("Applied incentive customer ID is invalid");
+  }
+  const nowMs = now instanceof Date ? now.getTime() : Number.NaN;
+  if (!Number.isFinite(nowMs)) throw new Error("Applied incentive verification time is invalid");
+
+  const verified = incentives.find((incentive) => {
+    const expiration = parseGoogleAdsUtcDateTime(incentive?.fulfillmentExpirationDateTime);
+    return incentive?.incentiveState === "REDEEMED"
+      && incentive.resourceName?.startsWith(`customers/${customerId}/appliedIncentives/`)
+      && incentive.currencyCode === "CAD"
+      && Number(incentive.rewardAmountMicros) === 600_000_000
+      && Number(incentive.requiredMinSpendMicros) === 600_000_000
+      && Number.isFinite(expiration)
+      && expiration > nowMs;
+  });
+
+  return {
+    verified: Boolean(verified),
+    method: verified ? API_PROMOTION_CLEARANCE : null,
+    appliedIncentives: incentives.map((incentive) => ({
+      incentiveState: incentive?.incentiveState ?? null,
+      fulfillmentExpirationDateTime: incentive?.fulfillmentExpirationDateTime ?? null,
+      currencyCode: incentive?.currencyCode ?? null,
+      rewardAmountMicros: incentive?.rewardAmountMicros ?? null,
+      requiredMinSpendMicros: incentive?.requiredMinSpendMicros ?? null,
+      currentSpendTowardsFulfillmentMicros: incentive?.currentSpendTowardsFulfillmentMicros ?? null,
+    })),
+  };
+}
+
+export function exactAccountSpendCad(spendRows, { customerId } = {}) {
+  if (!Array.isArray(spendRows) || spendRows.length !== 1) {
+    throw new Error("Exactly one account-wide spend row is required");
+  }
+  if (typeof customerId !== "string" || !/^\d+$/.test(customerId)) {
+    throw new Error("Spend customer ID is invalid");
+  }
+  const [row] = spendRows;
+  if (String(row?.customer?.id ?? "") !== customerId) {
+    throw new Error("Spend row belongs to the wrong Google Ads customer");
+  }
+  const micros = row?.metrics?.costMicros;
+  if (typeof micros !== "string" || !/^\d+$/.test(micros)) {
+    throw new Error("Account spend micros must be a non-negative integer string");
+  }
+  const parsed = BigInt(micros);
+  if (parsed > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error("Account spend micros exceed the exact numeric range");
+  }
+  return Number(parsed) / 1_000_000;
+}
+
+function parseGoogleAdsUtcDateTime(value) {
+  if (typeof value !== "string" || value.trim() === "") return Number.NaN;
+  const normalized = value.trim().replace(" ", "T");
+  const timestamp = /(?:Z|[+-]\d{2}:\d{2})$/i.test(normalized)
+    ? normalized
+    : `${normalized}Z`;
+  return new Date(timestamp).getTime();
+}
 const validRevenueAction = (action, eventName) => action
   && action.eventName === eventName
   && typeof action.id === "string"
@@ -52,6 +141,54 @@ export function liveVerificationStatus({ failures, launchBlockers }) {
   return "VALIDATED_PAUSED";
 }
 
+export function validateCompetitorDestinationInventory(
+  inventory,
+  accountWideAssociations = inventory,
+) {
+  if (!Array.isArray(inventory)
+    || inventory.length !== COMPETITOR_RSA_REVIEW.ads.length) {
+    throw new Error("Competitor destination inventory must contain the exact nine ads");
+  }
+  if (!Array.isArray(accountWideAssociations)
+    || accountWideAssociations.length < inventory.length) {
+    throw new Error("Account-wide ad association inventory is incomplete");
+  }
+  const validated = COMPETITOR_RSA_REVIEW.ads.map((expected) => {
+    const accountWideMatches = accountWideAssociations.filter(
+      (ad) => String(ad?.adId ?? "") === expected.adId
+        || ad?.adResourceName === expected.adResourceName,
+    );
+    if (accountWideMatches.length !== 1
+      || accountWideMatches[0]?.adGroupAdResourceName !== expected.adGroupAdResourceName) {
+      throw new Error(`Competitor target is shared outside its allowlisted association: ${expected.adGroupName}`);
+    }
+    const matches = inventory.filter((ad) => ad?.adGroupAdResourceName === expected.adGroupAdResourceName
+      || String(ad?.adId ?? "") === expected.adId
+      || ad?.adResourceName === expected.adResourceName);
+    if (matches.length !== 1) {
+      throw new Error(`Competitor destination identity is missing, duplicated, or shared: ${expected.adGroupName}`);
+    }
+    const [ad] = matches;
+    if (String(ad.campaignId ?? "") !== COMPETITOR_RSA_REVIEW.campaign.id
+      || ad.campaignResourceName !== COMPETITOR_RSA_REVIEW.campaign.resourceName
+      || ad.campaignName !== COMPETITOR_RSA_REVIEW.campaign.name
+      || String(ad.adGroupId ?? "") !== expected.adGroupId
+      || ad.adGroupResourceName !== expected.adGroupResourceName
+      || ad.adGroupName !== expected.adGroupName
+      || ad.adGroupAdResourceName !== expected.adGroupAdResourceName
+      || String(ad.adId ?? "") !== expected.adId
+      || ad.adResourceName !== expected.adResourceName
+      || ad.status !== "PAUSED"
+      || !Array.isArray(ad.finalUrls)
+      || ad.finalUrls.length !== 1
+      || ad.finalUrls[0] !== COMPETITOR_DESTINATION_BINDING.finalUrl) {
+      throw new Error(`Competitor destination drifted: ${expected.adGroupName}`);
+    }
+    return ad;
+  });
+  return validated;
+}
+
 export function evaluatePausedLiveState(live) {
   const failures = [];
   const launchBlockers = [];
@@ -72,6 +209,14 @@ export function evaluatePausedLiveState(live) {
   }
   if (live.adGroups !== 19 || live.pausedAdGroups !== 19) failures.push("all 19 ad groups must remain paused");
   if (live.responsiveSearchAds !== 19 || live.pausedResponsiveSearchAds !== 19) failures.push("all 19 RSAs must remain paused");
+  try {
+    validateCompetitorDestinationInventory(
+      live.competitorRsaDestinations,
+      live.accountWideAdAssociations,
+    );
+  } catch {
+    failures.push("competitor RSA destinations must match the exact nine-ad tracked-URL allowlist");
+  }
   if (live.positiveKeywords !== 83 || live.negativeCriteria !== 189) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
@@ -227,9 +372,20 @@ export function evaluatePausedLiveState(live) {
 
   if (live.spendCadPilot !== 0) failures.push("nonzero pilot-period spend detected");
 
-  const competitorLanding = live.endpointChecks?.find((check) => check.url.endsWith("/why-true-color"));
-  if (competitorLanding?.status !== 200) launchBlockers.push(`competitor landing is HTTP ${competitorLanding?.status ?? "unknown"}`);
-  else if (!competitorLanding.noindex) launchBlockers.push("competitor landing is missing noindex");
+  const competitorLanding = live.endpointChecks?.find(
+    (check) => check.requestedUrl === COMPETITOR_DESTINATION_BINDING.finalUrl,
+  );
+  if (competitorLanding?.finalUrl !== COMPETITOR_DESTINATION_BINDING.finalUrl) {
+    launchBlockers.push("competitor landing redirected or resolved outside the exact tracked URL");
+  } else if (competitorLanding.status !== 200) {
+    launchBlockers.push(`competitor landing is HTTP ${competitorLanding.status ?? "unknown"}`);
+  } else if (!String(competitorLanding.contentType ?? "").toLowerCase().startsWith("text/html")) {
+    launchBlockers.push("competitor landing did not return HTML");
+  } else if (competitorLanding.markerFound !== true) {
+    launchBlockers.push("competitor landing is missing the paid-page marker");
+  } else if (!competitorLanding.noindex) {
+    launchBlockers.push("competitor landing is missing noindex");
+  }
   if (live.rsaApprovalStatuses?.some((status) => status !== "APPROVED")) launchBlockers.push("one or more RSAs are not policy-approved");
   if (live.assetApprovalStatuses?.some((status) => status !== "APPROVED")) launchBlockers.push("one or more manual assets are not policy-approved");
   if (live.offlineUploaderVerification?.verified !== true
@@ -237,8 +393,8 @@ export function evaluatePausedLiveState(live) {
     launchBlockers.push("offline conversion uploader requires a reconciled real transaction before launch");
   }
   if (live.promotion?.verified !== true
-    || live.promotion?.method !== PROMOTION_CLEARANCE) {
-    launchBlockers.push("Google Ads promotion eligibility requires fresh Billing > Promotions UI confirmation");
+    || !PROMOTION_CLEARANCES.has(live.promotion?.method)) {
+    launchBlockers.push("Google Ads promotion eligibility requires fresh UI or applied-incentive API confirmation");
   }
   return { failures, launchBlockers };
 }

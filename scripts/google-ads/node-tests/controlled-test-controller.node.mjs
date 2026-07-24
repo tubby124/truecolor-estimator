@@ -21,6 +21,7 @@ import {
   runControlledTestController,
   validateLandingProbe,
 } from "../controlled-test-controller.mjs";
+import { COMPETITOR_DESTINATION_BINDING } from "../live-verification-contract.mjs";
 
 const NOW = new Date("2026-07-23T19:30:00.000Z");
 const ATTESTATION_SECRET = "test-only-controlled-attestation-secret-2026";
@@ -227,6 +228,8 @@ function makeAttestation(overrides = {}) {
         revenueActionsPrimaryOnly: true,
         qualifiedCallsSecondary: true,
         allPolicyApproved: true,
+        competitorDestinationUrl: COMPETITOR_DESTINATION_BINDING.finalUrl,
+        competitorRsaAdGroupAdResources: COMPETITOR_DESTINATION_BINDING.adGroupAdResources,
         unexpectedSpendCad: 0,
       },
     },
@@ -460,6 +463,25 @@ test("activation clearance is signed, fresh, exact-account, and launch-blocker f
       liveVerification: {
         ...makeAttestation().liveVerification,
         settings: { ...makeAttestation().liveVerification.settings, allPolicyApproved: false },
+      },
+    },
+    {
+      liveVerification: {
+        ...makeAttestation().liveVerification,
+        settings: {
+          ...makeAttestation().liveVerification.settings,
+          competitorDestinationUrl: "https://truecolorprinting.ca/why-true-color",
+        },
+      },
+    },
+    {
+      liveVerification: {
+        ...makeAttestation().liveVerification,
+        settings: {
+          ...makeAttestation().liveVerification.settings,
+          competitorRsaAdGroupAdResources:
+            makeAttestation().liveVerification.settings.competitorRsaAdGroupAdResources.slice(0, 8),
+        },
       },
     },
   ];

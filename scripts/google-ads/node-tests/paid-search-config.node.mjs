@@ -5,7 +5,15 @@ import { paidSearchConfig } from "../../../docs/paid-search/campaign-config.mjs"
 import { validateConfig } from "../config-validator.mjs";
 import { buildArtifacts } from "../export-google-ads.mjs";
 import { evaluateLaunchCandidate } from "../validate-launch-candidate.mjs";
-import { evaluatePausedLiveState, liveVerificationStatus } from "../live-verification-contract.mjs";
+import {
+  classifyAppliedIncentive,
+  COMPETITOR_DESTINATION_BINDING,
+  exactAccountSpendCad,
+  evaluatePausedLiveState,
+  liveVerificationStatus,
+  withoutLoginCustomerHeader,
+} from "../live-verification-contract.mjs";
+import { COMPETITOR_RSA_REVIEW } from "../request-competitor-rsa-review.mjs";
 
 const clone = () => structuredClone(paidSearchConfig);
 const parseCsv = (source) => {
@@ -100,6 +108,32 @@ test("live verification contract rejects launch-critical drift and missing noind
       status: "PAUSED",
     }))),
     competitorMatchTypes: ["EXACT"], responsiveSearchAds: 19, pausedResponsiveSearchAds: 19,
+    competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
+      campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
+      campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
+      campaignName: COMPETITOR_RSA_REVIEW.campaign.name,
+      adGroupId: ad.adGroupId,
+      adGroupResourceName: ad.adGroupResourceName,
+      adGroupName: ad.adGroupName,
+      adGroupAdResourceName: ad.adGroupAdResourceName,
+      status: "PAUSED",
+      adId: ad.adId,
+      adResourceName: ad.adResourceName,
+      finalUrls: [COMPETITOR_DESTINATION_BINDING.finalUrl],
+    })),
+    accountWideAdAssociations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
+      campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
+      campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
+      campaignName: COMPETITOR_RSA_REVIEW.campaign.name,
+      adGroupId: ad.adGroupId,
+      adGroupResourceName: ad.adGroupResourceName,
+      adGroupName: ad.adGroupName,
+      adGroupAdResourceName: ad.adGroupAdResourceName,
+      status: "PAUSED",
+      adId: ad.adId,
+      adResourceName: ad.adResourceName,
+      finalUrls: [COMPETITOR_DESTINATION_BINDING.finalUrl],
+    })),
     rsaApprovalStatuses: ["APPROVED"], manualAssets: 13, assetApprovalStatuses: ["APPROVED"], campaignAssetLinks: 39,
     locationTargets: 0, proximityTargets: 3, radius35KmTargets: 3, languageTargets: 3, englishLanguageTargets: 3,
     positiveGeoCriteria: paidSearchConfig.campaigns.map((campaign) => ({
@@ -175,7 +209,14 @@ test("live verification contract rejects launch-critical drift and missing noind
     },
     offlineUploaderVerification: { verified: true, method: "REAL_TRANSACTION_RECONCILED" },
     spendCadPilot: 0,
-    endpointChecks: [{ url: "https://truecolorprinting.ca/why-true-color", status: 200, noindex: true }],
+    endpointChecks: [{
+      requestedUrl: COMPETITOR_DESTINATION_BINDING.finalUrl,
+      finalUrl: COMPETITOR_DESTINATION_BINDING.finalUrl,
+      status: 200,
+      contentType: "text/html; charset=utf-8",
+      markerFound: true,
+      noindex: true,
+    }],
   };
   assert.deepEqual(evaluatePausedLiveState(live), { failures: [], launchBlockers: [] });
   const restEncoded = structuredClone(live);
@@ -215,6 +256,26 @@ test("live verification contract rejects launch-critical drift and missing noind
     (value) => { value.customConversionGoals.push({ id: "unexpected" }); },
     (value) => { value.allCampaigns.push({ id: "99999999999", name: "Unexpected", status: "ENABLED" }); },
     (value) => { value.spendCadPilot = 1; },
+    (value) => { value.competitorRsaDestinations[0].finalUrls = [COMPETITOR_RSA_REVIEW.oldFinalUrl]; },
+    (value) => { value.competitorRsaDestinations[0].finalUrls = ["https://example.com/"]; },
+    (value) => { value.competitorRsaDestinations.pop(); },
+    (value) => {
+      value.competitorRsaDestinations[1].adId = value.competitorRsaDestinations[0].adId;
+    },
+    (value) => {
+      const target = value.accountWideAdAssociations[0];
+      value.accountWideAdAssociations.push({
+        ...structuredClone(target),
+        campaignId: "99999999999",
+        campaignResourceName: "customers/1072816342/campaigns/99999999999",
+        campaignName: "Historical Paused",
+        adGroupId: "99999999998",
+        adGroupResourceName: "customers/1072816342/adGroups/99999999998",
+        adGroupName: "Historical",
+        adGroupAdResourceName:
+          `customers/1072816342/adGroupAds/99999999998~${target.adId}`,
+      });
+    },
   ];
   for (const mutate of drifts) {
     const value = structuredClone(live);
@@ -227,6 +288,27 @@ test("live verification contract rejects launch-critical drift and missing noind
   const indexed = structuredClone(live);
   indexed.endpointChecks[0].noindex = false;
   assert.deepEqual(evaluatePausedLiveState(indexed).launchBlockers, ["competitor landing is missing noindex"]);
+  const brokenTrackedDestination = structuredClone(live);
+  brokenTrackedDestination.endpointChecks[0].status = 503;
+  assert.deepEqual(evaluatePausedLiveState(brokenTrackedDestination).launchBlockers, [
+    "competitor landing is HTTP 503",
+  ]);
+  const redirectedTrackedDestination = structuredClone(live);
+  redirectedTrackedDestination.endpointChecks[0].finalUrl =
+    "https://truecolorprinting.ca/why-true-color";
+  assert.deepEqual(evaluatePausedLiveState(redirectedTrackedDestination).launchBlockers, [
+    "competitor landing redirected or resolved outside the exact tracked URL",
+  ]);
+  const nonHtmlTrackedDestination = structuredClone(live);
+  nonHtmlTrackedDestination.endpointChecks[0].contentType = "application/json";
+  assert.deepEqual(evaluatePausedLiveState(nonHtmlTrackedDestination).launchBlockers, [
+    "competitor landing did not return HTML",
+  ]);
+  const missingMarkerTrackedDestination = structuredClone(live);
+  missingMarkerTrackedDestination.endpointChecks[0].markerFound = false;
+  assert.deepEqual(evaluatePausedLiveState(missingMarkerTrackedDestination).launchBlockers, [
+    "competitor landing is missing the paid-page marker",
+  ]);
 
   const uploaderUnverified = structuredClone(live);
   uploaderUnverified.offlineUploaderVerification = { verified: false, method: null };
@@ -244,9 +326,13 @@ test("live verification contract rejects launch-critical drift and missing noind
     appliedIncentives: [],
   };
   assert.deepEqual(evaluatePausedLiveState(promotionUnverified).launchBlockers, [
-    "Google Ads promotion eligibility requires fresh Billing > Promotions UI confirmation",
+    "Google Ads promotion eligibility requires fresh UI or applied-incentive API confirmation",
   ]);
   assert.equal(liveVerificationStatus(evaluatePausedLiveState(promotionUnverified)), "BLOCKED");
+
+  const apiPromotionVerified = structuredClone(live);
+  apiPromotionVerified.promotion.method = "API_APPLIED_INCENTIVE_REDEEMED";
+  assert.deepEqual(evaluatePausedLiveState(apiPromotionVerified), { failures: [], launchBlockers: [] });
 
   const callAssetUnderReview = structuredClone(live);
   callAssetUnderReview.callMeasurement.asset.approvalStatus = undefined;
@@ -280,6 +366,89 @@ test("live verification contract rejects launch-critical drift and missing noind
   assert.equal(liveVerificationStatus(discoveryResult), "BLOCKED");
   assert.equal(liveVerificationStatus({ failures: ["wrong account"], launchBlockers: discoveryResult.launchBlockers }), "UNSAFE");
   assert.equal(liveVerificationStatus({ failures: [], launchBlockers: [] }), "VALIDATED_PAUSED");
+});
+
+test("applied incentive API evidence is exact, fresh, redacted, and direct-customer scoped", () => {
+  const now = new Date("2026-07-24T05:00:00.000Z");
+  const valid = {
+    resourceName: "customers/1072816342/appliedIncentives/secret-coupon-code",
+    incentiveState: "REDEEMED",
+    fulfillmentExpirationDateTime: "2026-09-16 04:56:52.408",
+    currencyCode: "CAD",
+    rewardAmountMicros: "600000000",
+    requiredMinSpendMicros: "600000000",
+    currentSpendTowardsFulfillmentMicros: "0",
+  };
+  const evidence = classifyAppliedIncentive([valid], { customerId: "1072816342", now });
+  assert.equal(evidence.verified, true);
+  assert.equal(evidence.method, "API_APPLIED_INCENTIVE_REDEEMED");
+  assert.equal(evidence.appliedIncentives.length, 1);
+  assert.equal("resourceName" in evidence.appliedIncentives[0], false);
+  assert.equal(JSON.stringify(evidence).includes("secret-coupon-code"), false);
+
+  const invalidMutations = [
+    (item) => { item.resourceName = "customers/999/appliedIncentives/code"; },
+    (item) => { item.incentiveState = "EXPIRED"; },
+    (item) => { item.fulfillmentExpirationDateTime = "2026-07-24 04:59:59"; },
+    (item) => { item.fulfillmentExpirationDateTime = "not-a-date"; },
+    (item) => { item.currencyCode = "USD"; },
+    (item) => { item.rewardAmountMicros = "599999999"; },
+    (item) => { item.requiredMinSpendMicros = "650000000"; },
+  ];
+  for (const mutate of invalidMutations) {
+    const item = structuredClone(valid);
+    mutate(item);
+    const rejected = classifyAppliedIncentive([item], { customerId: "1072816342", now });
+    assert.equal(rejected.verified, false);
+    assert.equal(rejected.method, null);
+  }
+  assert.throws(() => classifyAppliedIncentive(null, { customerId: "1072816342", now }));
+  assert.throws(() => classifyAppliedIncentive([], { customerId: "wrong", now }));
+  assert.throws(() => classifyAppliedIncentive([], {
+    customerId: "1072816342",
+    now: new Date("invalid"),
+  }));
+
+  const managerHeaders = {
+    authorization: "Bearer redacted",
+    "developer-token": "redacted",
+    "login-customer-id": "1125402990",
+    "content-type": "application/json",
+  };
+  assert.deepEqual(withoutLoginCustomerHeader(managerHeaders), {
+    authorization: "Bearer redacted",
+    "developer-token": "redacted",
+    "content-type": "application/json",
+  });
+  assert.equal(managerHeaders["login-customer-id"], "1125402990");
+});
+
+test("live account spend evidence requires exactly one exact-customer canonical row", () => {
+  const valid = [{
+    customer: { id: "1072816342" },
+    metrics: { costMicros: "0" },
+  }];
+  assert.equal(exactAccountSpendCad(valid, { customerId: "1072816342" }), 0);
+  assert.equal(exactAccountSpendCad([{
+    customer: { id: "1072816342" },
+    metrics: { costMicros: "1250000" },
+  }], { customerId: "1072816342" }), 1.25);
+  for (const rows of [
+    [],
+    [...valid, ...valid],
+    [{ customer: { id: "999" }, metrics: { costMicros: "0" } }],
+    [{ customer: { id: "1072816342" }, metrics: {} }],
+    [{ customer: { id: "1072816342" }, metrics: { costMicros: null } }],
+    [{ customer: { id: "1072816342" }, metrics: { costMicros: "-1" } }],
+    [{ customer: { id: "1072816342" }, metrics: { costMicros: "NaN" } }],
+    [{
+      customer: { id: "1072816342" },
+      metrics: { costMicros: (BigInt(Number.MAX_SAFE_INTEGER) + 1n).toString() },
+    }],
+  ]) {
+    assert.throws(() => exactAccountSpendCad(rows, { customerId: "1072816342" }));
+  }
+  assert.throws(() => exactAccountSpendCad(valid, { customerId: "wrong" }));
 });
 
 test("locks the confirmed True Color child account and verified account-side gates", () => {

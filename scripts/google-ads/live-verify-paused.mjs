@@ -16,8 +16,14 @@ const NEAR_ME_TERMS = new Set([
 const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
 const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
 const QUALIFIED_CALL_ASSET_ID = "394889103183";
-const PROMOTION_CLEARANCE = "UI_CONFIRMED_ACTIVE";
-import { evaluatePausedLiveState, liveVerificationStatus } from "./live-verification-contract.mjs";
+import {
+  classifyAppliedIncentive,
+  COMPETITOR_DESTINATION_BINDING,
+  exactAccountSpendCad,
+  evaluatePausedLiveState,
+  liveVerificationStatus,
+  withoutLoginCustomerHeader,
+} from "./live-verification-contract.mjs";
 
 const requiredApiEnv = [
   "GOOGLE_ADS_CLIENT_ID", "GOOGLE_ADS_CLIENT_SECRET", "GOOGLE_ADS_REFRESH_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN",
@@ -47,19 +53,21 @@ const headers = {
   "login-customer-id": LOGIN_CUSTOMER_ID,
   "content-type": "application/json",
 };
-const search = async (query) => {
+const searchWithHeaders = async (query, requestHeaders) => {
   const response = await fetch(`https://googleads.googleapis.com/v24/customers/${CUSTOMER_ID}/googleAds:search`, {
     method: "POST",
-    headers,
+    headers: requestHeaders,
     body: JSON.stringify({ query }),
   });
   const body = await response.json();
   if (!response.ok) throw new Error(`Google Ads read failed: ${JSON.stringify(body)}`);
   return body.results ?? [];
 };
-const optionalSearch = async (query) => {
+const search = (query) => searchWithHeaders(query, headers);
+const directCustomerHeaders = withoutLoginCustomerHeader(headers);
+const optionalSearch = async (query, requestHeaders = headers) => {
   try {
-    return { rows: await search(query), error: null };
+    return { rows: await searchWithHeaders(query, requestHeaders), error: null };
   } catch (error) {
     return {
       rows: [],
@@ -97,7 +105,7 @@ const [
   search("SELECT campaign.id, campaign.name, campaign.status FROM campaign WHERE campaign.status != 'REMOVED'"),
   search(`SELECT campaign.name, ad_group.name, ad_group.status FROM ad_group WHERE campaign.name IN (${names}) AND ad_group.status != 'REMOVED'`),
   search(`SELECT campaign.name, ad_group.name, ad_group_criterion.status, ad_group_criterion.negative, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type FROM ad_group_criterion WHERE campaign.name IN (${names}) AND ad_group_criterion.type = 'KEYWORD'`),
-  search(`SELECT campaign.name, ad_group.name, ad_group_ad.resource_name, ad_group_ad.status, ad_group_ad.policy_summary.approval_status, ad_group_ad.policy_summary.review_status, ad_group_ad.policy_summary.policy_topic_entries, ad_group_ad.ad.final_urls FROM ad_group_ad WHERE campaign.name IN (${names}) AND ad_group_ad.status != 'REMOVED'`),
+  search("SELECT campaign.id, campaign.resource_name, campaign.name, ad_group.id, ad_group.resource_name, ad_group.name, ad_group_ad.resource_name, ad_group_ad.status, ad_group_ad.policy_summary.approval_status, ad_group_ad.policy_summary.review_status, ad_group_ad.policy_summary.policy_topic_entries, ad_group_ad.ad.id, ad_group_ad.ad.resource_name, ad_group_ad.ad.final_urls FROM ad_group_ad WHERE ad_group_ad.status != 'REMOVED'"),
   search(`SELECT campaign.name, campaign_criterion.type, campaign_criterion.negative, campaign_criterion.location.geo_target_constant, campaign_criterion.proximity.radius, campaign_criterion.proximity.radius_units, campaign_criterion.proximity.geo_point.latitude_in_micro_degrees, campaign_criterion.proximity.geo_point.longitude_in_micro_degrees, campaign_criterion.language.language_constant, campaign_criterion.keyword.text FROM campaign_criterion WHERE campaign.name IN (${names})`),
   search("SELECT asset.resource_name, asset.type, asset.policy_summary.approval_status, asset.policy_summary.review_status FROM asset WHERE asset.name LIKE 'TC PPC %'"),
   search("SELECT campaign.id, campaign_asset.asset, campaign_asset.status FROM campaign_asset WHERE campaign.id IN (24048123058,24048123061,24048123064) AND campaign_asset.status != 'REMOVED'"),
@@ -112,7 +120,10 @@ const [
   search("SELECT campaign.id, campaign.name, campaign_asset.asset, campaign_asset.status, campaign_asset.field_type FROM campaign_asset WHERE campaign_asset.field_type = 'CALL'"),
   search("SELECT campaign.id, campaign.name, ad_group.id, ad_group.name, ad_group_asset.asset, ad_group_asset.status, ad_group_asset.field_type FROM ad_group_asset WHERE ad_group_asset.field_type = 'CALL'"),
   search("SELECT customer.id, metrics.cost_micros FROM customer WHERE segments.date BETWEEN '2026-07-20' AND '2026-09-17'"),
-  optionalSearch("SELECT applied_incentive.incentive_state, applied_incentive.fulfillment_expiration_date_time, applied_incentive.currency_code, applied_incentive.reward_amount_micros, applied_incentive.required_min_spend_micros, applied_incentive.current_spend_towards_fulfillment_micros, applied_incentive.granted_amount_micros, applied_incentive.reward_balance_remaining_micros FROM applied_incentive"),
+  optionalSearch(
+    "SELECT applied_incentive.resource_name, applied_incentive.incentive_state, applied_incentive.fulfillment_expiration_date_time, applied_incentive.currency_code, applied_incentive.reward_amount_micros, applied_incentive.required_min_spend_micros, applied_incentive.current_spend_towards_fulfillment_micros FROM applied_incentive",
+    directCustomerHeaders,
+  ),
 ]);
 
 const endpointUrls = [
@@ -123,17 +134,42 @@ const endpointUrls = [
   "https://truecolorprinting.ca/products/flyers",
   "https://truecolorprinting.ca/products/retractable-banners",
   "https://truecolorprinting.ca/why-true-color",
+  COMPETITOR_DESTINATION_BINDING.finalUrl,
 ];
 const endpointChecks = await Promise.all(endpointUrls.map(async (url) => {
-  const response = await fetch(url, { redirect: "follow" });
+  const response = await fetch(url, { redirect: "manual" });
   const robots = response.headers.get("x-robots-tag");
+  const contentType = response.headers.get("content-type");
   const html = await response.text();
   const metaNoindex = /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)
     || /<meta[^>]+content=["'][^"']*noindex[^"']*["'][^>]+name=["']robots["']/i.test(html);
-  return { url, status: response.status, robots, noindex: robots?.toLowerCase().includes("noindex") === true || metaNoindex };
+  return {
+    requestedUrl: url,
+    finalUrl: response.url,
+    status: response.status,
+    contentType,
+    markerFound: html.includes(COMPETITOR_DESTINATION_BINDING.landingMarker),
+    robots,
+    noindex: robots?.toLowerCase().includes("noindex") === true || metaNoindex,
+  };
 }));
 
 const positiveKeywords = keywords.filter((row) => !row.adGroupCriterion.negative);
+const plannedAds = ads.filter((row) => CAMPAIGN_NAMES.includes(row.campaign.name));
+const normalizeAdAssociation = (row) => ({
+  campaignId: String(row.campaign.id ?? ""),
+  campaignResourceName: row.campaign.resourceName,
+  campaignName: row.campaign.name,
+  adGroupId: String(row.adGroup.id ?? ""),
+  adGroupResourceName: row.adGroup.resourceName,
+  adGroupName: row.adGroup.name,
+  adGroupAdResourceName: row.adGroupAd.resourceName,
+  status: row.adGroupAd.status,
+  adId: String(row.adGroupAd.ad?.id ?? ""),
+  adResourceName: row.adGroupAd.ad?.resourceName,
+  finalUrls: row.adGroupAd.ad?.finalUrls ?? [],
+});
+const accountWideAdAssociations = ads.map(normalizeAdAssociation);
 const nearMeKeywords = positiveKeywords
   .filter((row) => NEAR_ME_TERMS.has(row.adGroupCriterion.keyword.text.toLowerCase()))
   .map((row) => ({
@@ -203,7 +239,11 @@ const positiveGeoCriteria = campaignCriteria
     longitudeInMicroDegrees: row.campaignCriterion.proximity?.geoPoint?.longitudeInMicroDegrees ?? null,
   }));
 const offlineUploaderVerification = process.env.GOOGLE_ADS_OFFLINE_UPLOADER_VERIFICATION?.trim() ?? null;
-const promotionVerification = process.env.GOOGLE_ADS_PROMOTION_VERIFICATION?.trim() ?? null;
+const promotionEvidence = classifyAppliedIncentive(
+  incentives.rows.map((row) => row.appliedIncentive),
+  { customerId: CUSTOMER_ID },
+);
+const spendCadPilot = exactAccountSpendCad(spend, { customerId: CUSTOMER_ID });
 const selectedCallAsset = callAssets.find(
   (row) => String(row.asset?.id ?? "") === QUALIFIED_CALL_ASSET_ID,
 )?.asset;
@@ -222,10 +262,30 @@ const live = {
   nearMeKeywords,
   negativeCriteria: negativeCount,
   competitorMatchTypes,
-  responsiveSearchAds: ads.length,
-  pausedResponsiveSearchAds: ads.filter((row) => row.adGroupAd.status === "PAUSED").length,
-  rsaApprovalStatuses: [...new Set(ads.map((row) => row.adGroupAd.policySummary?.approvalStatus ?? "UNKNOWN"))],
-  rsaReviewStatuses: [...new Set(ads.map((row) => row.adGroupAd.policySummary?.reviewStatus ?? "UNKNOWN"))],
+  responsiveSearchAds: plannedAds.length,
+  pausedResponsiveSearchAds: plannedAds.filter((row) => row.adGroupAd.status === "PAUSED").length,
+  rsaApprovalStatuses: [...new Set(plannedAds.map((row) => row.adGroupAd.policySummary?.approvalStatus ?? "UNKNOWN"))],
+  rsaReviewStatuses: [...new Set(plannedAds.map((row) => row.adGroupAd.policySummary?.reviewStatus ?? "UNKNOWN"))],
+  accountWideAdAssociations,
+  competitorRsaDestinations: plannedAds
+    .filter((row) => row.campaign.name === "GOOG_Search_TC_CompetitorConquest_2026")
+    .map(normalizeAdAssociation),
+  rsaPolicyIssues: plannedAds
+    .filter((row) => row.adGroupAd.policySummary?.approvalStatus !== "APPROVED")
+    .map((row) => ({
+      campaign: row.campaign.name,
+      adGroup: row.adGroup.name,
+      adGroupAdResourceName: row.adGroupAd.resourceName,
+      adId: String(row.adGroupAd.ad?.id ?? ""),
+      status: row.adGroupAd.status,
+      approvalStatus: row.adGroupAd.policySummary?.approvalStatus ?? "UNKNOWN",
+      reviewStatus: row.adGroupAd.policySummary?.reviewStatus ?? "UNKNOWN",
+      topics: (row.adGroupAd.policySummary?.policyTopicEntries ?? []).map((entry) => ({
+        topic: entry.topic,
+        type: entry.type,
+      })),
+      finalUrls: row.adGroupAd.ad?.finalUrls ?? [],
+    })),
   manualAssets: assets.length,
   assetApprovalStatuses: [...new Set(assets.map((row) => row.asset.policySummary?.approvalStatus ?? "UNKNOWN"))],
   campaignAssetLinks: assetLinks.length,
@@ -293,11 +353,9 @@ const live = {
     })),
   },
   promotion: {
-    verified: promotionVerification === PROMOTION_CLEARANCE,
-    method: promotionVerification === PROMOTION_CLEARANCE ? PROMOTION_CLEARANCE : null,
+    ...promotionEvidence,
     apiAvailable: incentives.error === null,
     apiError: incentives.error,
-    appliedIncentives: incentives.rows.map((row) => row.appliedIncentive),
   },
   offlineUploaderVerification: {
     verified: offlineUploaderVerification === OFFLINE_UPLOADER_CLEARANCE,
@@ -305,7 +363,7 @@ const live = {
       ? OFFLINE_UPLOADER_CLEARANCE
       : null,
   },
-  spendCadPilot: spend.reduce((sum, row) => sum + Number(row.metrics?.costMicros ?? 0), 0) / 1_000_000,
+  spendCadPilot,
   endpointChecks,
 };
 const { failures: safetyFailures, launchBlockers } = evaluatePausedLiveState(live);
@@ -340,6 +398,8 @@ const activationClearance = safetyFailures.length === 0 && controlledTestBlocker
     revenueActionsPrimaryOnly: true,
     qualifiedCallsSecondary: true,
     allPolicyApproved: true,
+    competitorDestinationUrl: COMPETITOR_DESTINATION_BINDING.finalUrl,
+    competitorRsaAdGroupAdResources: COMPETITOR_DESTINATION_BINDING.adGroupAdResources,
     unexpectedSpendCad: 0,
   },
 } : null;
