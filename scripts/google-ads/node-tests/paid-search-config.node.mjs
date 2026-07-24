@@ -8,9 +8,11 @@ import { evaluateLaunchCandidate } from "../validate-launch-candidate.mjs";
 import {
   classifyAppliedIncentive,
   COMPETITOR_DESTINATION_BINDING,
+  controlledTestLaunchBlockers,
   exactAccountSpendCad,
   evaluatePausedLiveState,
   liveVerificationStatus,
+  OFFLINE_UPLOADER_LAUNCH_BLOCKER,
   withoutLoginCustomerHeader,
 } from "../live-verification-contract.mjs";
 import { COMPETITOR_RSA_REVIEW } from "../request-competitor-rsa-review.mjs";
@@ -313,9 +315,13 @@ test("live verification contract rejects launch-critical drift and missing noind
   const uploaderUnverified = structuredClone(live);
   uploaderUnverified.offlineUploaderVerification = { verified: false, method: null };
   assert.deepEqual(evaluatePausedLiveState(uploaderUnverified).launchBlockers, [
-    "offline conversion uploader requires a reconciled real transaction before launch",
+    OFFLINE_UPLOADER_LAUNCH_BLOCKER,
   ]);
   assert.equal(liveVerificationStatus(evaluatePausedLiveState(uploaderUnverified)), "BLOCKED");
+  assert.deepEqual(
+    controlledTestLaunchBlockers(evaluatePausedLiveState(uploaderUnverified).launchBlockers),
+    [],
+  );
 
   const promotionUnverified = structuredClone(live);
   promotionUnverified.promotion = {
@@ -347,6 +353,10 @@ test("live verification contract rejects launch-critical drift and missing noind
   assert.deepEqual(evaluatePausedLiveState(disapprovedRsa).launchBlockers, [
     "one or more RSAs are not policy-approved",
   ]);
+  assert.deepEqual(
+    controlledTestLaunchBlockers(evaluatePausedLiveState(disapprovedRsa).launchBlockers),
+    ["one or more RSAs are not policy-approved"],
+  );
   assert.equal(liveVerificationStatus(evaluatePausedLiveState(disapprovedRsa)), "BLOCKED");
 
   const discoveryOnly = structuredClone(live);

@@ -19,7 +19,9 @@ const EXPECTED_NEAR_ME_TERMS = [
   "custom die cut labels near me",
 ];
 const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
-const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
+export const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
+export const OFFLINE_UPLOADER_LAUNCH_BLOCKER =
+  "offline conversion uploader requires a reconciled real transaction before launch";
 const QUALIFIED_CALL_ASSET_ID = "394889103183";
 const PROMOTION_CLEARANCES = new Set([
   "UI_CONFIRMED_ACTIVE",
@@ -139,6 +141,15 @@ export function liveVerificationStatus({ failures, launchBlockers }) {
   if (failures.length > 0) return "UNSAFE";
   if (launchBlockers.length > 0) return "BLOCKED";
   return "VALIDATED_PAUSED";
+}
+
+export function controlledTestLaunchBlockers(launchBlockers) {
+  if (!Array.isArray(launchBlockers)) {
+    throw new Error("Controlled-test launch blockers must be an array");
+  }
+  return launchBlockers.filter(
+    (blocker) => blocker !== OFFLINE_UPLOADER_LAUNCH_BLOCKER,
+  );
 }
 
 export function validateCompetitorDestinationInventory(
@@ -390,7 +401,7 @@ export function evaluatePausedLiveState(live) {
   if (live.assetApprovalStatuses?.some((status) => status !== "APPROVED")) launchBlockers.push("one or more manual assets are not policy-approved");
   if (live.offlineUploaderVerification?.verified !== true
     || live.offlineUploaderVerification?.method !== OFFLINE_UPLOADER_CLEARANCE) {
-    launchBlockers.push("offline conversion uploader requires a reconciled real transaction before launch");
+    launchBlockers.push(OFFLINE_UPLOADER_LAUNCH_BLOCKER);
   }
   if (live.promotion?.verified !== true
     || !PROMOTION_CLEARANCES.has(live.promotion?.method)) {

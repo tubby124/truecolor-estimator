@@ -14,14 +14,15 @@ const NEAR_ME_TERMS = new Set([
   "custom die cut labels near me",
 ]);
 const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
-const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
 const QUALIFIED_CALL_ASSET_ID = "394889103183";
 import {
   classifyAppliedIncentive,
   COMPETITOR_DESTINATION_BINDING,
+  controlledTestLaunchBlockers,
   exactAccountSpendCad,
   evaluatePausedLiveState,
   liveVerificationStatus,
+  OFFLINE_UPLOADER_CLEARANCE,
   withoutLoginCustomerHeader,
 } from "./live-verification-contract.mjs";
 
@@ -370,9 +371,7 @@ const { failures: safetyFailures, launchBlockers } = evaluatePausedLiveState(liv
 
 const status = liveVerificationStatus({ failures: safetyFailures, launchBlockers });
 const verifiedAt = new Date().toISOString();
-const controlledTestBlockers = launchBlockers.filter(
-  (blocker) => blocker !== "offline conversion uploader requires a reconciled real transaction before launch",
-);
+const controlledTestBlockers = controlledTestLaunchBlockers(launchBlockers);
 const activationClearance = safetyFailures.length === 0 && controlledTestBlockers.length === 0 ? {
   evidenceId: `liveverify_${verifiedAt.replace(/\D/g, "").slice(0, 14)}`,
   status: "VALIDATED_PAUSED",
