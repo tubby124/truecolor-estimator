@@ -147,4 +147,76 @@ describe("sendEmail", () => {
       sendEmail({ to: "customer@example.com", subject: "Retry", html: "<p>Retry</p>" })
     ).rejects.toMatchObject({ outcome: "unknown" });
   });
+
+  it("treats concurrent idempotent requests as an unknown, retryable outcome", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          name: "concurrent_idempotent_requests",
+          message: "Another request is still processing",
+        }),
+        { status: 409, headers: { "Content-Type": "application/json" } }
+      )
+    );
+
+    await expect(
+      sendEmail({
+        to: "customer@example.com",
+        subject: "Retry",
+        html: "<p>Retry</p>",
+        idempotencyKey: "order-message/request-123",
+      })
+    ).rejects.toMatchObject({
+      message: "Resend API error 409",
+      outcome: "unknown",
+    });
+  });
+
+  it("treats an invalid idempotent request as a terminal rejection", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          name: "invalid_idempotent_request",
+          message: "The idempotency key was reused with a different payload",
+        }),
+        { status: 409, headers: { "Content-Type": "application/json" } }
+      )
+    );
+
+    await expect(
+      sendEmail({
+        to: "customer@example.com",
+        subject: "Reject",
+        html: "<p>Reject</p>",
+        idempotencyKey: "order-message/request-123",
+      })
+    ).rejects.toMatchObject({
+      message: "Resend API error 409",
+      outcome: "rejected",
+    });
+  });
+
+  it.each([
+    [
+      "an unknown provider error",
+      JSON.stringify({
+        name: "unexpected_conflict",
+        message: "Provider-only conflict detail",
+      }),
+    ],
+    ["a malformed provider body", "Provider-only malformed conflict detail"],
+  ])("fails safely for 409 with %s", async (_case, responseBody) => {
+    fetchMock.mockResolvedValueOnce(new Response(responseBody, { status: 409 }));
+
+    await expect(
+      sendEmail({
+        to: "customer@example.com",
+        subject: "Unknown",
+        html: "<p>Unknown</p>",
+      })
+    ).rejects.toMatchObject({
+      message: "Resend API error 409",
+      outcome: "unknown",
+    });
+  });
 });

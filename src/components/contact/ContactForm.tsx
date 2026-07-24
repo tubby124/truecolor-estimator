@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { readUtmFromStorage } from "@/components/site/UtmCapture";
 import { appendAttributionToFormData } from "@/lib/analytics/utm";
+import {
+  clearQuoteSubmission,
+  getOrCreateQuoteSubmission,
+} from "@/lib/quote-request-client";
 
 const PRODUCT_OPTIONS = [
   "Coroplast Signs",
@@ -23,17 +28,31 @@ const inputCls =
   "w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-gray-900 text-sm placeholder-gray-400 " +
   "focus:outline-none focus:ring-2 focus:ring-[#16C2F3]/60 focus:border-[#16C2F3] transition-colors";
 
-const labelCls = "block text-gray-700 text-xs font-semibold uppercase tracking-wider mb-1.5";
+const labelCls =
+  "block text-gray-700 text-xs font-semibold uppercase tracking-wider mb-1.5";
 
 export function ContactForm() {
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
+    "idle",
+  );
   const [errorMsg, setErrorMsg] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileSiteKey =
+    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("sending");
     setErrorMsg("");
+    if (turnstileSiteKey && !turnstileToken) {
+      setErrorMsg(
+        "Security verification is still loading. Please wait a moment.",
+      );
+      setStatus("error");
+      return;
+    }
 
     const fd = new FormData(e.currentTarget);
     const name = (fd.get("name") as string).trim();
@@ -57,23 +76,36 @@ export function ContactForm() {
           sides: "1",
           notes: message,
         },
-      ])
+      ]),
     );
     appendAttributionToFormData(payload, readUtmFromStorage());
+    const { submissionKey } = getOrCreateQuoteSubmission(
+      "contact-quote",
+      payload,
+    );
+    payload.append("submission_key", submissionKey);
+    if (turnstileToken) payload.append("cf-turnstile-response", turnstileToken);
 
     try {
-      const res = await fetch("/api/quote-request", { method: "POST", body: payload });
+      const res = await fetch("/api/quote-request", {
+        method: "POST",
+        body: payload,
+      });
       const data = (await res.json()) as { sent?: boolean; error?: string };
       if (!res.ok || !data.sent) {
         setErrorMsg(data.error ?? "Something went wrong. Please try again.");
         setStatus("error");
       } else {
+        clearQuoteSubmission("contact-quote", submissionKey);
         setStatus("sent");
         formRef.current?.reset();
       }
     } catch {
       setErrorMsg("Network error. Please try again.");
       setStatus("error");
+    } finally {
+      setTurnstileToken("");
+      turnstileRef.current?.reset();
     }
   }
 
@@ -81,13 +113,25 @@ export function ContactForm() {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
         <div className="w-14 h-14 rounded-full bg-[#16C2F3]/15 flex items-center justify-center">
-          <svg className="w-7 h-7 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          <svg
+            className="w-7 h-7 text-[#16C2F3]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4.5 12.75l6 6 9-13.5"
+            />
           </svg>
         </div>
         <p className="text-[#1c1712] font-semibold text-lg">Message sent!</p>
         <p className="text-gray-500 text-sm max-w-xs">
-          We&rsquo;ll reply to your email within 1 business day. Check your inbox for a confirmation.
+          Check your inbox for confirmation. The shop will follow up with next
+          steps.
         </p>
         {/* min-h-[44px] satisfies WCAG 2.5.5 touch target size */}
         <button
@@ -101,11 +145,19 @@ export function ContactForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" noValidate>
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      noValidate
+    >
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="contact-name" className={labelCls}>
-            Your Name <span className="text-[#16C2F3]" aria-hidden="true">*</span>
+            Your Name{" "}
+            <span className="text-[#16C2F3]" aria-hidden="true">
+              *
+            </span>
             <span className="sr-only">(required)</span>
           </label>
           <input
@@ -121,7 +173,10 @@ export function ContactForm() {
         </div>
         <div>
           <label htmlFor="contact-email" className={labelCls}>
-            Email <span className="text-[#16C2F3]" aria-hidden="true">*</span>
+            Email{" "}
+            <span className="text-[#16C2F3]" aria-hidden="true">
+              *
+            </span>
             <span className="sr-only">(required)</span>
           </label>
           <input
@@ -139,7 +194,10 @@ export function ContactForm() {
 
       <div>
         <label htmlFor="contact-phone" className={labelCls}>
-          Phone <span className="text-gray-400 font-normal normal-case tracking-normal">(optional)</span>
+          Phone{" "}
+          <span className="text-gray-400 font-normal normal-case tracking-normal">
+            (optional)
+          </span>
         </label>
         <input
           id="contact-phone"
@@ -163,7 +221,9 @@ export function ContactForm() {
         >
           <option value="">Select a product...</option>
           {PRODUCT_OPTIONS.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
           ))}
         </select>
       </div>
@@ -183,12 +243,35 @@ export function ContactForm() {
       </div>
 
       {status === "error" && (
-        <p role="alert" className="text-red-500 text-sm">{errorMsg}</p>
+        <p role="alert" className="text-red-500 text-sm">
+          {errorMsg}
+        </p>
+      )}
+
+      {turnstileSiteKey && (
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={turnstileSiteKey}
+          onSuccess={(token) => {
+            setTurnstileToken(token);
+            setErrorMsg("");
+          }}
+          onExpire={() => setTurnstileToken("")}
+          onError={() => {
+            setTurnstileToken("");
+            setErrorMsg(
+              "Security verification could not load. Please refresh or call us.",
+            );
+          }}
+          options={{ size: "invisible" }}
+        />
       )}
 
       <button
         type="submit"
-        disabled={status === "sending"}
+        disabled={
+          status === "sending" || Boolean(turnstileSiteKey && !turnstileToken)
+        }
         className="w-full min-h-[48px] bg-[#16C2F3] text-white font-bold py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:ring-offset-2 focus:ring-offset-white"
       >
         {status === "sending" ? "Sending…" : "Send Message"}

@@ -20,6 +20,8 @@ describe("PurchaseEvent Ads privacy contract", () => {
     expect(source).toContain("orderNumber");
     expect(source.match(/metaTrackPurchase\(/g)).toHaveLength(1);
     expect(source).toContain("eventId: orderNumber");
+    expect(source).toContain("claimClientEvent");
+    expect(source).toContain("purchaseEventStorageKey(orderNumber)");
     expect(source).not.toContain('window.fbq("track", "Purchase"');
   });
 });

@@ -4,12 +4,16 @@ import { useState, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { readUtmFromStorage } from "@/components/site/UtmCapture";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
+import {
+  clearQuoteSubmission,
+  getOrCreateQuoteSubmission,
+} from "@/lib/quote-request-client";
 
 interface QuoteItem {
   id: string;
@@ -46,8 +50,10 @@ function QuoteForm() {
   const productParam = searchParams.get("product") ?? "";
   const defaultProduct =
     (PRODUCT_OPTIONS.find(
-      (p) => p.toLowerCase().replace(/[^a-z0-9]+/g, "-") === productParam
-    ) ?? productParam) || PRODUCT_OPTIONS[0];
+      (p) => p.toLowerCase().replace(/[^a-z0-9]+/g, "-") === productParam,
+    ) ??
+      productParam) ||
+    PRODUCT_OPTIONS[0];
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -60,6 +66,9 @@ function QuoteForm() {
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
   const fileRefs = useRef<Map<string, HTMLInputElement>>(new Map());
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
+  const turnstileSiteKey =
+    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
 
   function addItem() {
     if (items.length >= 5) return;
@@ -79,10 +88,10 @@ function QuoteForm() {
   function updateItem(
     id: string,
     field: keyof Omit<QuoteItem, "id" | "file">,
-    value: string
+    value: string,
   ) {
     setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, [field]: value } : i))
+      prev.map((i) => (i.id === id ? { ...i, [field]: value } : i)),
     );
     if (itemErrors[id]) {
       setItemErrors((prev) => {
@@ -94,9 +103,7 @@ function QuoteForm() {
   }
 
   function updateItemFile(id: string, file: File | null) {
-    setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, file } : i))
-    );
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, file } : i)));
   }
 
   async function handleSubmit() {
@@ -124,6 +131,12 @@ function QuoteForm() {
     }
 
     if (hasErrors) return;
+    if (turnstileSiteKey && !turnstileToken) {
+      setContactError(
+        "Security verification is still loading. Please wait a moment.",
+      );
+      return;
+    }
 
     setLoading(true);
     try {
@@ -141,12 +154,17 @@ function QuoteForm() {
             dimensions,
             sides,
             notes,
-          }))
-        )
+          })),
+        ),
       );
       items.forEach((item, i) => {
         if (item.file) fd.append(`file_${i}`, item.file);
       });
+      const { submissionKey } = getOrCreateQuoteSubmission(
+        "multi-item-quote",
+        fd,
+      );
+      fd.append("submission_key", submissionKey);
       if (turnstileToken) fd.append("cf-turnstile-response", turnstileToken);
 
       const utm = readUtmFromStorage();
@@ -162,13 +180,16 @@ function QuoteForm() {
       });
       const data = (await res.json()) as { sent?: boolean; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to send");
+      clearQuoteSubmission("multi-item-quote", submissionKey);
       setSent(true);
     } catch (err) {
       setContactError(
-        err instanceof Error ? err.message : "Something went wrong."
+        err instanceof Error ? err.message : "Something went wrong.",
       );
     } finally {
       setLoading(false);
+      setTurnstileToken("");
+      turnstileRef.current?.reset();
     }
   }
 
@@ -208,8 +229,8 @@ function QuoteForm() {
                 : "Quote request sent!"}
             </h1>
             <p className="text-gray-500 text-lg mb-8">
-              We&apos;ll reply to <strong>{email}</strong> within 1 business
-              day. Check your inbox for a confirmation.
+              The shop will follow up with <strong>{email}</strong>. Check your
+              inbox for a confirmation.
             </p>
             <Link
               href="/products"
@@ -237,7 +258,7 @@ function QuoteForm() {
             Get a quote
           </h1>
           <p className="text-gray-500 text-base">
-            Tell us what you need — we&apos;ll reply within 1 business day.
+            Tell us what you need and the shop will follow up with next steps.
           </p>
         </div>
 
@@ -365,9 +386,7 @@ function QuoteForm() {
                         if (el) fileRefs.current.set(item.id, el);
                         else fileRefs.current.delete(item.id);
                       }}
-                      onFileClick={() =>
-                        fileRefs.current.get(item.id)?.click()
-                      }
+                      onFileClick={() => fileRefs.current.get(item.id)?.click()}
                     />
                   </motion.div>
                 ))}
@@ -431,10 +450,21 @@ function QuoteForm() {
           </div>
 
           {/* ── Cloudflare Turnstile (invisible bot check) ── */}
-          {process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY && (
+          {turnstileSiteKey && (
             <Turnstile
-              siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
-              onSuccess={setTurnstileToken}
+              ref={turnstileRef}
+              siteKey={turnstileSiteKey}
+              onSuccess={(token) => {
+                setTurnstileToken(token);
+                setContactError("");
+              }}
+              onExpire={() => setTurnstileToken("")}
+              onError={() => {
+                setTurnstileToken("");
+                setContactError(
+                  "Security verification could not load. Please refresh or call us.",
+                );
+              }}
               options={{ size: "invisible" }}
             />
           )}
@@ -443,7 +473,7 @@ function QuoteForm() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || Boolean(turnstileSiteKey && !turnstileToken)}
             className="w-full bg-[#16C2F3] hover:bg-[#0fb0dd] disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl transition-colors cursor-pointer min-h-[56px] flex items-center justify-center gap-3 shadow-sm"
           >
             {loading ? (
@@ -499,7 +529,7 @@ interface ItemCardProps {
   onUpdate: (
     id: string,
     field: keyof Omit<QuoteItem, "id" | "file">,
-    value: string
+    value: string,
   ) => void;
   onUpdateFile: (id: string, file: File | null) => void;
   onRequestRemove: () => void;
@@ -665,9 +695,7 @@ function ItemCard({
               id={`dimensions-${item.id}`}
               type="text"
               value={item.dimensions}
-              onChange={(e) =>
-                onUpdate(item.id, "dimensions", e.target.value)
-              }
+              onChange={(e) => onUpdate(item.id, "dimensions", e.target.value)}
               className={INPUT_CLS}
               placeholder='e.g. 24"×36", 8.5"×11"'
             />
@@ -730,9 +758,7 @@ function ItemCard({
             ref={fileRef}
             type="file"
             accept=".pdf,.ai,.eps,.jpg,.jpeg,.png,.webp"
-            onChange={(e) =>
-              onUpdateFile(item.id, e.target.files?.[0] ?? null)
-            }
+            onChange={(e) => onUpdateFile(item.id, e.target.files?.[0] ?? null)}
             className="hidden"
             aria-label={`Upload file for item ${index + 1}`}
           />

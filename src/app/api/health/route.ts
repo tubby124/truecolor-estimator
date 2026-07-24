@@ -4,11 +4,12 @@
  * Public health check — verifies env var SHAPES (not values), no secrets returned.
  * Used as Railway health check endpoint AND by harness to validate prod config.
  *
- * Returns 200 with ok:true even on config warnings so Railway doesn't restart the
- * container. Issues are surfaced in the response body for harness consumption.
+ * Returns 200 when every hard requirement is present. Warnings remain healthy,
+ * but a hard config failure returns 503 so Railway rejects the broken deployment.
  */
 
 import { NextResponse } from "next/server";
+import { getQuoteTurnstileConfig } from "@/lib/quote-request-guard";
 
 type Severity = "fail" | "warn";
 
@@ -69,7 +70,13 @@ export async function GET() {
   );
 
   // Webhook + cron secrets — missing = fail-closed = silently drops ALL events.
-  for (const key of ["CLOVER_WEBHOOK_SECRET", "WAVE_WEBHOOK_SECRET", "BREVO_WEBHOOK_SECRET", "CRON_SECRET"]) {
+  for (const key of [
+    "CLOVER_WEBHOOK_SECRET",
+    "WAVE_WEBHOOK_SECRET",
+    "BREVO_WEBHOOK_SECRET",
+    "RESEND_WEBHOOK_SECRET",
+    "CRON_SECRET",
+  ]) {
     checks.push({
       name: key,
       ok: Boolean(process.env[key]),
@@ -87,7 +94,13 @@ export async function GET() {
   });
 
   // API keys — missing = that integration is dead.
-  for (const key of ["WAVE_API_TOKEN", "CLOVER_ECOMM_PRIVATE_KEY", "CLOVER_MERCHANT_ID", "BREVO_API_KEY"]) {
+  for (const key of [
+    "WAVE_API_TOKEN",
+    "CLOVER_ECOMM_PRIVATE_KEY",
+    "CLOVER_MERCHANT_ID",
+    "BREVO_API_KEY",
+    "RESEND_API_KEY",
+  ]) {
     checks.push({
       name: key,
       ok: Boolean(process.env[key]),
@@ -106,6 +119,17 @@ export async function GET() {
     });
   }
 
+  const turnstile = getQuoteTurnstileConfig(
+    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY,
+    process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
+  );
+  checks.push({
+    name: "CLOUDFLARE_TURNSTILE_KEY_PAIR",
+    ok: turnstile.valid,
+    severity: turnstile.valid ? undefined : "fail",
+    note: turnstile.issue ?? undefined,
+  });
+
   // Telegram — fail-quiet by design, so missing is only a WARN (alerts go silent).
   for (const key of ["TRUE_COLOR_TELEGRAM_BOT_TOKEN", "TRUE_COLOR_TELEGRAM_CHAT_ID"]) {
     checks.push({
@@ -120,14 +144,16 @@ export async function GET() {
   const fails = issues.filter((c) => c.severity === "fail");
   const warns = issues.filter((c) => c.severity === "warn");
 
+  const healthy = fails.length === 0;
+
   return NextResponse.json({
-    ok: true, // always 200 so Railway health check passes
+    ok: healthy,
     config_clean: issues.length === 0,
-    has_failures: fails.length > 0,
+    has_failures: !healthy,
     checks_total: checks.length,
     fail_count: fails.length,
     warn_count: warns.length,
     issues: issues.length > 0 ? issues : undefined,
-    checks: checks,
-  });
+    checks,
+  }, { status: healthy ? 200 : 503 });
 }

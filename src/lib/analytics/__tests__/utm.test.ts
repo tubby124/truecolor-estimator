@@ -52,7 +52,22 @@ describe("UTM attribution helpers", () => {
       utm_source: "google",
       utm_medium: "cpc",
       gclid: "cookie-click",
-      gbraid: "request-braid",
+    });
+  });
+
+  it("never mixes a later click-ID type into an existing first touch", () => {
+    const cookiePayload = encodeURIComponent(JSON.stringify({
+      utm_source: "google",
+      utm_medium: "organic",
+      captured_at: Date.now(),
+    }));
+
+    expect(mergeUtmAttribution(
+      { utm_medium: "cpc", gbraid: "later-paid-braid" },
+      `${UTM_COOKIE_NAME}=${cookiePayload}`,
+    )).toEqual({
+      utm_source: "google",
+      utm_medium: "organic",
     });
   });
 
@@ -146,8 +161,6 @@ describe("UTM attribution helpers", () => {
       network: "g",
     })).toEqual({
       gclid: "abc_DEF-123",
-      gbraid: "GBraid.123",
-      wbraid: "WBraid~456",
       keyword: "coroplast signs",
       matchtype: "e",
       device: "m",
@@ -157,6 +170,12 @@ describe("UTM attribution helpers", () => {
       creative: "456",
       campaignid: "123",
       network: "g",
+    });
+  });
+
+  it("retains only one click identifier using the upload priority", () => {
+    expect(sanitizeUtm({ gbraid: "GBraid.123", wbraid: "WBraid~456" })).toEqual({
+      gbraid: "GBraid.123",
     });
   });
 

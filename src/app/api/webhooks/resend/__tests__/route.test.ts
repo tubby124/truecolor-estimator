@@ -8,6 +8,8 @@ const harness = vi.hoisted(() => ({
     order_messages: { status: "sent" } as Record<string, unknown>,
   },
   eqCalls: [] as Array<{ table: string; column: string; value: string }>,
+  rpcCalls: [] as Array<{ name: string; args: Record<string, unknown> }>,
+  rpcErrors: {} as Record<string, string>,
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -35,6 +37,15 @@ vi.mock("@/lib/supabase/server", () => ({
         return builder;
       },
     }),
+    rpc: async (name: string, args: Record<string, unknown>) => {
+      harness.rpcCalls.push({ name, args });
+      return {
+        data: null,
+        error: harness.rpcErrors[name]
+          ? { message: harness.rpcErrors[name] }
+          : null,
+      };
+    },
   }),
 }));
 
@@ -67,6 +78,8 @@ describe("Resend webhook order message tracking", () => {
     harness.states.email_log = { status: "sent" };
     harness.states.order_messages = { status: "sent" };
     harness.eqCalls = [];
+    harness.rpcCalls = [];
+    harness.rpcErrors = {};
   });
 
   afterEach(() => {
@@ -161,5 +174,184 @@ describe("Resend webhook order message tracking", () => {
     );
 
     expect(harness.states.order_messages.status).toBe("failed");
+  });
+
+  it("completes a payable quote delivery from array tags and replays idempotently", async () => {
+    const event = {
+      type: "email.sent",
+      created_at: "2026-07-22T12:00:00.000Z",
+      data: {
+        email_id: "provider-quote-1",
+        tags: [{ name: "quote_send_id", value: "delivery-quote-1" }],
+      },
+    };
+
+    const first = await POST(signedRequest(event, "evt-quote-1"));
+    const replay = await POST(signedRequest(event, "evt-quote-1-replay"));
+
+    expect(first.status).toBe(200);
+    expect(replay.status).toBe(200);
+    expect(harness.rpcCalls).toEqual([
+      {
+        name: "complete_structured_quote_send",
+        args: {
+          p_delivery_id: "delivery-quote-1",
+          p_provider_message_id: "provider-quote-1",
+        },
+      },
+      {
+        name: "complete_structured_quote_send",
+        args: {
+          p_delivery_id: "delivery-quote-1",
+          p_provider_message_id: "provider-quote-1",
+        },
+      },
+    ]);
+  });
+
+  it("completes an initial quote notification from object tags", async () => {
+    const response = await POST(
+      signedRequest(
+        {
+          type: "email.delivered",
+          created_at: "2026-07-22T12:01:00.000Z",
+          data: {
+            email_id: "provider-request-1",
+            tags: { quote_request_delivery_id: "delivery-request-1" },
+          },
+        },
+        "evt-request-1",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(harness.rpcCalls).toEqual([
+      {
+        name: "complete_quote_request_delivery",
+        args: {
+          p_delivery_id: "delivery-request-1",
+          p_provider_message_id: "provider-request-1",
+        },
+      },
+    ]);
+  });
+
+  it("records terminal quote delivery failures with sanitized provider detail", async () => {
+    const response = await POST(
+      signedRequest(
+        {
+          type: "email.bounced",
+          created_at: "2026-07-22T12:02:00.000Z",
+          data: {
+            email_id: "provider-quote-failed",
+            tags: [{ name: "quote_send_id", value: "delivery-quote-failed" }],
+            bounce: {
+              type: "hard",
+              message: "mailbox\nrejected\u0000 by provider",
+            },
+          },
+        },
+        "evt-quote-failed",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(harness.rpcCalls).toEqual([
+      {
+        name: "record_structured_quote_send_failure",
+        args: {
+          p_delivery_id: "delivery-quote-failed",
+          p_outcome: "rejected",
+          p_error: "hard: mailbox rejected by provider",
+        },
+      },
+    ]);
+  });
+
+  it.each(["email.complained", "email.failed", "email.suppressed"])(
+    "records %s as a terminal initial-quote delivery failure",
+    async (type) => {
+      const response = await POST(
+        signedRequest(
+          {
+            type,
+            created_at: "2026-07-22T12:03:00.000Z",
+            data: {
+              email_id: `provider-${type}`,
+              tags: {
+                quote_request_delivery_id: `delivery-${type}`,
+              },
+              failed: { reason: "provider rejected recipient" },
+              suppressed: { type: "blocked", message: "provider blocked recipient" },
+            },
+          },
+          `evt-${type}`,
+        ),
+      );
+
+      expect(response.status).toBe(200);
+      expect(harness.rpcCalls).toEqual([
+        {
+          name: "record_quote_request_delivery_failure",
+          args: {
+            p_delivery_id: `delivery-${type}`,
+            p_outcome: "rejected",
+            p_error:
+              type === "email.failed"
+                ? "failed: provider rejected recipient"
+                : type === "email.suppressed"
+                  ? "blocked: provider blocked recipient"
+                  : "email.complained",
+          },
+        },
+      ]);
+      harness.rpcCalls = [];
+    },
+  );
+
+  it("returns 500 so Resend retries when durable quote reconciliation fails", async () => {
+    harness.rpcErrors.complete_quote_request_delivery = "database unavailable";
+
+    const response = await POST(
+      signedRequest(
+        {
+          type: "email.sent",
+          created_at: "2026-07-22T12:04:00.000Z",
+          data: {
+            email_id: "provider-retry",
+            tags: { quote_request_delivery_id: "delivery-retry" },
+          },
+        },
+        "evt-retry",
+      ),
+    );
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({
+      ok: false,
+      error: "Failed to reconcile quote delivery",
+    });
+    expect(harness.states.email_log.status).toBe("sent");
+    expect(harness.states.order_messages.status).toBe("sent");
+  });
+
+  it("rejects an invalid signature before any database write or RPC", async () => {
+    const request = signedRequest(
+      {
+        type: "email.sent",
+        data: {
+          email_id: "provider-forged",
+          tags: { quote_send_id: "delivery-forged" },
+        },
+      },
+      "evt-forged",
+    );
+    request.headers.set("svix-signature", "v1,Zm9yZ2Vk");
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(401);
+    expect(harness.eqCalls).toHaveLength(0);
+    expect(harness.rpcCalls).toHaveLength(0);
   });
 });

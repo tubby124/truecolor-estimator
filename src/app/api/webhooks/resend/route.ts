@@ -43,6 +43,20 @@ interface EventUpdates {
   allowedStatuses?: string[];
 }
 
+type ServiceClient = ReturnType<typeof createServiceClient>;
+
+const QUOTE_DELIVERY_COMPLETION_EVENTS = new Set([
+  "email.sent",
+  "email.delivered",
+]);
+
+const QUOTE_DELIVERY_FAILURE_EVENTS = new Set([
+  "email.bounced",
+  "email.complained",
+  "email.failed",
+  "email.suppressed",
+]);
+
 function verifySvixSignature(
   body: string,
   svixId: string,
@@ -170,16 +184,110 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const quoteDeliveryError = await reconcileTaggedQuoteDelivery(
+    supabase,
+    event,
+    messageId,
+    detail ?? event.type,
+  );
+  if (quoteDeliveryError) {
+    console.error("[resend-webhook] quote delivery reconciliation failed:", quoteDeliveryError);
+    return NextResponse.json(
+      { ok: false, error: "Failed to reconcile quote delivery" },
+      { status: 500 },
+    );
+  }
+
   return NextResponse.json({ ok: true, type: event.type, messageId });
 }
 
-function getOrderMessageId(tags: ResendWebhookTags | undefined): string | undefined {
+function getTagValue(
+  tags: ResendWebhookTags | undefined,
+  name: string,
+): string | undefined {
   if (Array.isArray(tags)) {
     return tags.find(
-      (tag) => tag.name === "order_message_id" && typeof tag.value === "string"
-    )?.value;
+      (tag) => tag.name === name && typeof tag.value === "string" && tag.value.trim(),
+    )?.value?.trim();
   }
-  return tags?.order_message_id;
+  const value = tags?.[name];
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function getOrderMessageId(tags: ResendWebhookTags | undefined): string | undefined {
+  return getTagValue(tags, "order_message_id");
+}
+
+function sanitizeDeliveryError(detail: string): string {
+  return (
+    detail
+      .replace(/[\u0000-\u001f\u007f]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 500) || "Email delivery failed"
+  );
+}
+
+async function reconcileTaggedQuoteDelivery(
+  supabase: ServiceClient,
+  event: ResendWebhookEvent,
+  messageId: string,
+  detail: string,
+): Promise<string | null> {
+  const tags = event.data?.tags;
+  const structuredQuoteDeliveryId = getTagValue(tags, "quote_send_id");
+  const quoteRequestDeliveryId = getTagValue(tags, "quote_request_delivery_id");
+  if (!structuredQuoteDeliveryId && !quoteRequestDeliveryId) return null;
+
+  const isCompletion = QUOTE_DELIVERY_COMPLETION_EVENTS.has(event.type);
+  const isFailure = QUOTE_DELIVERY_FAILURE_EVENTS.has(event.type);
+  if (!isCompletion && !isFailure) return null;
+
+  const failureDetail = sanitizeDeliveryError(detail);
+  const reconciliations: Array<PromiseLike<{ error: { message: string } | null }>> = [];
+
+  if (structuredQuoteDeliveryId) {
+    reconciliations.push(
+      supabase.rpc(
+        isCompletion
+          ? "complete_structured_quote_send"
+          : "record_structured_quote_send_failure",
+        isCompletion
+          ? {
+              p_delivery_id: structuredQuoteDeliveryId,
+              p_provider_message_id: messageId,
+            }
+          : {
+              p_delivery_id: structuredQuoteDeliveryId,
+              p_outcome: "rejected",
+              p_error: failureDetail,
+            },
+      ),
+    );
+  }
+
+  if (quoteRequestDeliveryId) {
+    reconciliations.push(
+      supabase.rpc(
+        isCompletion
+          ? "complete_quote_request_delivery"
+          : "record_quote_request_delivery_failure",
+        isCompletion
+          ? {
+              p_delivery_id: quoteRequestDeliveryId,
+              p_provider_message_id: messageId,
+            }
+          : {
+              p_delivery_id: quoteRequestDeliveryId,
+              p_outcome: "rejected",
+              p_error: failureDetail,
+            },
+      ),
+    );
+  }
+
+  const results = await Promise.all(reconciliations);
+  return results.find((result) => result.error)?.error?.message ?? null;
 }
 
 export function mapEventUpdates(

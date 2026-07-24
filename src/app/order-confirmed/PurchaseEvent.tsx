@@ -7,6 +7,10 @@ import {
   conversionTransactionId,
   type RevenueConversionType,
 } from "@/lib/analytics/conversions";
+import {
+  claimClientEvent,
+  purchaseEventStorageKey,
+} from "@/lib/analytics/client-event-dedupe";
 
 interface Props {
   orderNumber: string;
@@ -30,6 +34,13 @@ export function PurchaseEvent({
   conversionKey,
 }: Props) {
   useEffect(() => {
+    if (!claimClientEvent(
+      window.localStorage,
+      purchaseEventStorageKey(orderNumber),
+      orderNumber,
+    )) {
+      return;
+    }
     trackPurchase({
       transaction_id: orderNumber,
       value: total,

@@ -44,6 +44,7 @@ import { EmailVolumePanel } from "./EmailVolumePanel";
 import { StaffActionsPanel } from "./StaffActionsPanel";
 import { StatusRollupPanel } from "./StatusRollupPanel";
 import { PaymentHealthPanel } from "./PaymentHealthPanel";
+import { QuoteDeliveryRiskPanel } from "./QuoteDeliveryRiskPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -133,6 +134,12 @@ export default async function LifecyclePage() {
             </div>
             <CartAbandonPanel rows={data.cartAbandons} />
             <FailedEmailsPanel rows={data.failedEmails} />
+            <div id="panel-quote-deliveries" className="scroll-mt-20">
+              <QuoteDeliveryRiskPanel
+                rows={data.quoteDeliveryRisks}
+                health={data.quoteDeliveryHealth}
+              />
+            </div>
             <LifecycleTable rows={data.rows} />
             <StaffActionsPanel actions={data.staffActions} />
             <ActivityFeedPanel events={data.activity} />

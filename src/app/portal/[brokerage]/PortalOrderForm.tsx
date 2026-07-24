@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import type {
   Brokerage,
   BrokerageProductGroup,
@@ -9,6 +10,10 @@ import type {
 } from "@/lib/data/brokerages";
 import { readUtmFromStorage } from "@/components/site/UtmCapture";
 import { appendAttributionToFormData } from "@/lib/analytics/utm";
+import {
+  clearQuoteSubmission,
+  getOrCreateQuoteSubmission,
+} from "@/lib/quote-request-client";
 
 // localStorage key per-brokerage so an agent who orders from two different
 // brokerage portals (rare but possible) doesn't bleed details across.
@@ -37,7 +42,11 @@ const INPUT_CLS =
 const LABEL_CLS =
   "block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide";
 
-function priceFor(product: BrokerageProductOption, line: LineItem | null, qty: number): number {
+function priceFor(
+  product: BrokerageProductOption,
+  line: LineItem | null,
+  qty: number,
+): number {
   // Material-priced products (toppers): one price per material, no bulk tiers
   if (product.materialOptions && product.materialOptions.length > 0) {
     const sel =
@@ -105,6 +114,10 @@ export function PortalOrderForm({
   const [submittedLines, setSubmittedLines] = useState<LineItem[]>([]);
   const [submittedSubtotal, setSubmittedSubtotal] = useState(0);
   const [submittedTotal, setSubmittedTotal] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
+  const turnstileSiteKey =
+    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
 
   // ─── Returning-agent UX ──────────────────────────────────────────────
   // Pre-fill name/email/phone/shipping from the last successful submission on
@@ -175,7 +188,8 @@ export function PortalOrderForm({
   const orderMinimum = brokerage.orderMinimum ?? 0;
   // Only apply the minimum once the agent has actually picked something — empty
   // cart should read $0, not the floor.
-  const orderTotal = selectedLines.length === 0 ? 0 : Math.max(subtotal, orderMinimum);
+  const orderTotal =
+    selectedLines.length === 0 ? 0 : Math.max(subtotal, orderMinimum);
   const minimumApplied = subtotal > 0 && subtotal < orderMinimum;
   const minimumGap = minimumApplied ? orderMinimum - subtotal : 0;
 
@@ -198,13 +212,19 @@ export function PortalOrderForm({
       setError("Pick at least one item.");
       return;
     }
+    if (turnstileSiteKey && !turnstileToken) {
+      setError("Security verification is still loading. Please wait a moment.");
+      return;
+    }
 
     setSubmitting(true);
     try {
       const items = selectedLines.map((line) => {
         const product = productIndex.get(line.productId)!;
         const unit = priceFor(product, line, line.qty);
-        const matSel = product.materialOptions?.find((m) => m.id === line.materialId);
+        const matSel = product.materialOptions?.find(
+          (m) => m.id === line.materialId,
+        );
         const materialLabel = matSel ? matSel.label : product.tcCategory;
         const noteParts = [
           `Portal: ${brokerage.name}`,
@@ -250,8 +270,17 @@ export function PortalOrderForm({
       form.append("brokerage_slug", brokerage.slug);
       form.append("shipping_address", shipForApi);
       appendAttributionToFormData(form, readUtmFromStorage());
+      const { submissionKey } = getOrCreateQuoteSubmission(
+        `brokerage-portal:${brokerage.slug}`,
+        form,
+      );
+      form.append("submission_key", submissionKey);
+      if (turnstileToken) form.append("cf-turnstile-response", turnstileToken);
 
-      const res = await fetch("/api/quote-request", { method: "POST", body: form });
+      const res = await fetch("/api/quote-request", {
+        method: "POST",
+        body: form,
+      });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(data.error ?? "Submission failed");
@@ -268,7 +297,10 @@ export function PortalOrderForm({
           phone: agentPhone,
           shippingAddress,
         };
-        window.localStorage.setItem(profileKey(brokerage.slug), JSON.stringify(profile));
+        window.localStorage.setItem(
+          profileKey(brokerage.slug),
+          JSON.stringify(profile),
+        );
       } catch {
         // Silent — storage failure shouldn't block the success state.
       }
@@ -278,11 +310,14 @@ export function PortalOrderForm({
       setSubmittedSubtotal(subtotal);
       setSubmittedTotal(orderTotal);
       setSubmittedRef(result.ref ?? null);
+      clearQuoteSubmission(`brokerage-portal:${brokerage.slug}`, submissionKey);
       setSent(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submission failed");
     } finally {
       setSubmitting(false);
+      setTurnstileToken("");
+      turnstileRef.current?.reset();
     }
   }
 
@@ -314,7 +349,8 @@ export function PortalOrderForm({
           </p>
           {submittedRef ? (
             <p className="text-sm text-gray-500 font-mono">
-              Reference <span className="font-bold text-[#1c1712]">#{submittedRef}</span>
+              Reference{" "}
+              <span className="font-bold text-[#1c1712]">#{submittedRef}</span>
             </p>
           ) : null}
         </div>
@@ -329,7 +365,9 @@ export function PortalOrderForm({
                 const product = productIndex.get(line.productId);
                 if (!product) return null;
                 const unit = priceFor(product, line, line.qty);
-                const matSel = product.materialOptions?.find((m) => m.id === line.materialId);
+                const matSel = product.materialOptions?.find(
+                  (m) => m.id === line.materialId,
+                );
                 return (
                   <li
                     key={line.productId}
@@ -341,7 +379,9 @@ export function PortalOrderForm({
                       </p>
                       <p className="text-xs text-gray-500">
                         Qty {line.qty}
-                        {matSel ? ` · ${matSel.label.replace(/ — \$\d+/, "")}` : ""}
+                        {matSel
+                          ? ` · ${matSel.label.replace(/ — \$\d+/, "")}`
+                          : ""}
                         {product.sidesPicker
                           ? ` · ${line.sides === "2" ? "Double-sided" : "Single-sided"}`
                           : ""}
@@ -358,7 +398,9 @@ export function PortalOrderForm({
               <>
                 <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200 text-sm">
                   <span className="text-gray-600">Items subtotal</span>
-                  <span className="tabular-nums text-gray-700">{fmt(submittedSubtotal)}</span>
+                  <span className="tabular-nums text-gray-700">
+                    {fmt(submittedSubtotal)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between pt-1 text-sm">
                   <span className="text-gray-600">Order minimum bump</span>
@@ -367,7 +409,9 @@ export function PortalOrderForm({
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-2 mt-1 border-t border-gray-200">
-                  <span className="font-semibold text-gray-700">Indicative total</span>
+                  <span className="font-semibold text-gray-700">
+                    Indicative total
+                  </span>
                   <span className="text-lg font-bold tabular-nums text-[#1c1712]">
                     {fmt(submittedTotal)}
                   </span>
@@ -375,23 +419,27 @@ export function PortalOrderForm({
               </>
             ) : (
               <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
-                <span className="font-semibold text-gray-700">Indicative total</span>
+                <span className="font-semibold text-gray-700">
+                  Indicative total
+                </span>
                 <span className="text-lg font-bold tabular-nums text-[#1c1712]">
                   {fmt(submittedTotal || submittedSubtotal)}
                 </span>
               </div>
             )}
             <p className="text-xs text-gray-400 mt-2">
-              Taxes + shipping confirmed on the final invoice after proof approval.
+              Taxes + shipping confirmed on the final invoice after proof
+              approval.
             </p>
           </div>
         ) : null}
 
         <div className="px-6 sm:px-8 py-5">
           <p className="text-sm text-gray-700 mb-3">
-            We&apos;ll send a proof to <span className="font-semibold">{agentEmail}</span> within
-            1 business day. Once you approve it, we&apos;ll send a Clover payment link straight
-            to your inbox.
+            We&apos;ll send a proof to{" "}
+            <span className="font-semibold">{agentEmail}</span>. Once you
+            approve it, we&apos;ll send a Clover payment link straight to your
+            inbox.
           </p>
           <p className="text-xs text-gray-500">
             Delivery:{" "}
@@ -400,7 +448,9 @@ export function PortalOrderForm({
                 ? "Pickup at True Color, Saskatoon"
                 : "Ship via Canada Post"}
             </span>
-            {deliveryMode === "ship" && shippingAddress ? ` · ${shippingAddress}` : ""}
+            {deliveryMode === "ship" && shippingAddress
+              ? ` · ${shippingAddress}`
+              : ""}
           </p>
           {submittedRef ? (
             <p className="text-xs text-gray-400 mt-3">
@@ -422,7 +472,10 @@ export function PortalOrderForm({
           {recognized ? (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-600">
-                Welcome back, <span className="font-semibold text-[#1c1712]">{recognized}</span>
+                Welcome back,{" "}
+                <span className="font-semibold text-[#1c1712]">
+                  {recognized}
+                </span>
               </span>
               <button
                 type="button"
@@ -436,7 +489,9 @@ export function PortalOrderForm({
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="agentName" className={LABEL_CLS}>Your full name</label>
+            <label htmlFor="agentName" className={LABEL_CLS}>
+              Your full name
+            </label>
             <input
               id="agentName"
               type="text"
@@ -448,7 +503,9 @@ export function PortalOrderForm({
             />
           </div>
           <div>
-            <label htmlFor="agentEmail" className={LABEL_CLS}>Your email</label>
+            <label htmlFor="agentEmail" className={LABEL_CLS}>
+              Your email
+            </label>
             <input
               id="agentEmail"
               type="email"
@@ -460,7 +517,9 @@ export function PortalOrderForm({
             />
           </div>
           <div>
-            <label htmlFor="agentPhone" className={LABEL_CLS}>Phone</label>
+            <label htmlFor="agentPhone" className={LABEL_CLS}>
+              Phone
+            </label>
             <input
               id="agentPhone"
               type="tel"
@@ -470,7 +529,9 @@ export function PortalOrderForm({
               className={INPUT_CLS}
               required
             />
-            <p className="text-xs text-gray-500 mt-1.5">Courier needs this for delivery.</p>
+            <p className="text-xs text-gray-500 mt-1.5">
+              Courier needs this for delivery.
+            </p>
           </div>
 
           {/* Delivery mode picker — pickup hides the shipping address field */}
@@ -479,9 +540,13 @@ export function PortalOrderForm({
             <div className="grid sm:grid-cols-2 gap-2 mt-1.5">
               <label
                 className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                  deliveryMode === "ship" ? "border-2" : "border-gray-200 hover:bg-gray-50"
+                  deliveryMode === "ship"
+                    ? "border-2"
+                    : "border-gray-200 hover:bg-gray-50"
                 }`}
-                style={deliveryMode === "ship" ? { borderColor: accent } : undefined}
+                style={
+                  deliveryMode === "ship" ? { borderColor: accent } : undefined
+                }
               >
                 <input
                   type="radio"
@@ -502,9 +567,15 @@ export function PortalOrderForm({
               </label>
               <label
                 className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                  deliveryMode === "pickup" ? "border-2" : "border-gray-200 hover:bg-gray-50"
+                  deliveryMode === "pickup"
+                    ? "border-2"
+                    : "border-gray-200 hover:bg-gray-50"
                 }`}
-                style={deliveryMode === "pickup" ? { borderColor: accent } : undefined}
+                style={
+                  deliveryMode === "pickup"
+                    ? { borderColor: accent }
+                    : undefined
+                }
               >
                 <input
                   type="radio"
@@ -569,18 +640,23 @@ export function PortalOrderForm({
             onToggle={toggleProduct}
             onUpdate={updateLine}
           />
-        )
+        ),
       )}
 
       {/* Summary + submit */}
-      <section className="bg-white border-2 rounded-2xl p-5 sm:p-7 shadow-lg" style={{ borderColor: accent }}>
+      <section
+        className="bg-white border-2 rounded-2xl p-5 sm:p-7 shadow-lg"
+        style={{ borderColor: accent }}
+      >
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-gray-600">
             {selectedLines.length === 0
               ? "Nothing selected yet"
               : `${selectedLines.length} item${selectedLines.length === 1 ? "" : "s"} selected`}
           </p>
-          <p className="text-2xl font-bold tabular-nums text-[#1c1712]">{fmt(orderTotal)}</p>
+          <p className="text-2xl font-bold tabular-nums text-[#1c1712]">
+            {fmt(orderTotal)}
+          </p>
         </div>
 
         {minimumApplied ? (
@@ -590,16 +666,18 @@ export function PortalOrderForm({
             </p>
             <p className="text-amber-800">
               Your items add to {fmt(subtotal)}. Add{" "}
-              <span className="font-semibold">{fmt(minimumGap)}</span> more (a couple toppers,
-              or one more directional) and you&apos;ll get more for the same price.
+              <span className="font-semibold">{fmt(minimumGap)}</span> more (a
+              couple toppers, or one more directional) and you&apos;ll get more
+              for the same price.
             </p>
           </div>
         ) : null}
 
         <p className="text-xs text-gray-500 mb-4">
-          Indicative total — per-piece pricing covers material, cutting & packing. The{" "}
-          {fmt(orderMinimum)} order minimum covers our one-time design proof + press setup.
-          Tax + shipping confirmed on your final invoice after proof approval.
+          Indicative total — per-piece pricing covers material, cutting &
+          packing. The {fmt(orderMinimum)} order minimum covers our one-time
+          design proof + press setup. Tax + shipping confirmed on your final
+          invoice after proof approval.
         </p>
 
         {error ? (
@@ -611,10 +689,29 @@ export function PortalOrderForm({
           </p>
         ) : null}
 
+        {turnstileSiteKey && (
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={turnstileSiteKey}
+            onSuccess={(token) => {
+              setTurnstileToken(token);
+              setError(null);
+            }}
+            onExpire={() => setTurnstileToken("")}
+            onError={() => {
+              setTurnstileToken("");
+              setError(
+                "Security verification could not load. Please refresh or call us.",
+              );
+            }}
+            options={{ size: "invisible" }}
+          />
+        )}
+
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={submitting || Boolean(turnstileSiteKey && !turnstileToken)}
           className="w-full text-white font-bold py-3.5 px-6 rounded-xl text-base transition-opacity disabled:opacity-50"
           style={{ backgroundColor: accent }}
         >
@@ -622,7 +719,7 @@ export function PortalOrderForm({
         </button>
 
         <p className="text-xs text-gray-500 text-center mt-3">
-          We&apos;ll reply within 1 business day. No payment until you approve the proof.
+          No payment until you approve the proof.
         </p>
       </section>
     </div>
@@ -673,11 +770,21 @@ function ProductList({
                 <span
                   aria-hidden
                   className={`mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded border-2 flex-shrink-0 ${selected ? "" : "border-gray-300"}`}
-                  style={selected ? { backgroundColor: accent, borderColor: accent } : undefined}
+                  style={
+                    selected
+                      ? { backgroundColor: accent, borderColor: accent }
+                      : undefined
+                  }
                 >
                   {selected ? (
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M2 6L5 9L10 3"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   ) : null}
                 </span>
@@ -685,7 +792,9 @@ function ProductList({
                 {product.imageSrc ? (
                   <div
                     className={`bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 ${
-                      product.imageOrientation === "portrait" ? "w-16 h-20" : "w-24 h-16"
+                      product.imageOrientation === "portrait"
+                        ? "w-16 h-20"
+                        : "w-24 h-16"
                     }`}
                   >
                     <Image
@@ -700,9 +809,13 @@ function ProductList({
                 ) : null}
 
                 <span className="flex-1 min-w-0">
-                  <span className="block font-semibold text-[#1c1712]">{product.label}</span>
+                  <span className="block font-semibold text-[#1c1712]">
+                    {product.label}
+                  </span>
                   {product.blurb ? (
-                    <span className="block text-sm text-gray-500 mt-0.5">{product.blurb}</span>
+                    <span className="block text-sm text-gray-500 mt-0.5">
+                      {product.blurb}
+                    </span>
                   ) : null}
                   <span className="block text-sm text-gray-700 mt-1.5">
                     {product.sidesPicker && product.sidesUplift ? (
@@ -710,7 +823,9 @@ function ProductList({
                         {fmt(product.unitPrice ?? 0)}{" "}
                         <span className="text-gray-500">single-sided</span>
                         {" · "}
-                        {fmt((product.unitPrice ?? 0) + product.sidesUplift)}{" "}
+                        {fmt(
+                          (product.unitPrice ?? 0) + product.sidesUplift,
+                        )}{" "}
                         <span className="text-gray-500">double-sided</span>
                         {product.bulkTiers && product.bulkTiers.length > 0 ? (
                           <span className="text-gray-500">
@@ -732,10 +847,14 @@ function ProductList({
                         <span className="text-gray-500">each</span>
                         {product.bulkTiers && product.bulkTiers.length > 0 ? (
                           <>
-                            {" "}·{" "}
+                            {" "}
+                            ·{" "}
                             <span className="text-gray-500">
                               {product.bulkTiers
-                                .map((tier) => `${fmt(tier.unitPrice)} at ${tier.minQty}+`)
+                                .map(
+                                  (tier) =>
+                                    `${fmt(tier.unitPrice)} at ${tier.minQty}+`,
+                                )
                                 .join(" · ")}
                             </span>
                           </>
@@ -749,47 +868,85 @@ function ProductList({
               {selected && line ? (
                 <div className="border-t border-gray-100 px-4 py-4 grid sm:grid-cols-3 gap-3 bg-gray-50">
                   <div>
-                    <label htmlFor={`qty-${product.id}`} className={LABEL_CLS}>Quantity</label>
+                    <label htmlFor={`qty-${product.id}`} className={LABEL_CLS}>
+                      Quantity
+                    </label>
                     <select
                       id={`qty-${product.id}`}
                       value={line.qty}
-                      onChange={(e) => onUpdate(product.id, { qty: Number(e.target.value) })}
+                      onChange={(e) =>
+                        onUpdate(product.id, { qty: Number(e.target.value) })
+                      }
                       className={INPUT_CLS}
                     >
                       {product.qtyOptions.map((q) => (
-                        <option key={q} value={q}>{q}</option>
+                        <option key={q} value={q}>
+                          {q}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   {product.sidesPicker ? (
                     <div>
-                      <label htmlFor={`sides-${product.id}`} className={LABEL_CLS}>Sides</label>
+                      <label
+                        htmlFor={`sides-${product.id}`}
+                        className={LABEL_CLS}
+                      >
+                        Sides
+                      </label>
                       <select
                         id={`sides-${product.id}`}
                         value={line.sides}
-                        onChange={(e) => onUpdate(product.id, { sides: e.target.value as "1" | "2" })}
+                        onChange={(e) =>
+                          onUpdate(product.id, {
+                            sides: e.target.value as "1" | "2",
+                          })
+                        }
                         className={INPUT_CLS}
                       >
                         <option value="1">
                           Single-sided{" "}
-                          {fmt(priceFor(product, { ...line, sides: "1" }, line.qty))}
+                          {fmt(
+                            priceFor(
+                              product,
+                              { ...line, sides: "1" },
+                              line.qty,
+                            ),
+                          )}
                         </option>
                         <option value="2">
                           Double-sided{" "}
-                          {fmt(priceFor(product, { ...line, sides: "2" }, line.qty))}
+                          {fmt(
+                            priceFor(
+                              product,
+                              { ...line, sides: "2" },
+                              line.qty,
+                            ),
+                          )}
                         </option>
                       </select>
                     </div>
                   ) : null}
 
-                  <div className={product.sidesPicker ? "sm:col-span-3" : "sm:col-span-2"}>
-                    <label htmlFor={`notes-${product.id}`} className={LABEL_CLS}>Notes (optional)</label>
+                  <div
+                    className={
+                      product.sidesPicker ? "sm:col-span-3" : "sm:col-span-2"
+                    }
+                  >
+                    <label
+                      htmlFor={`notes-${product.id}`}
+                      className={LABEL_CLS}
+                    >
+                      Notes (optional)
+                    </label>
                     <input
                       id={`notes-${product.id}`}
                       type="text"
                       value={line.notes}
-                      onChange={(e) => onUpdate(product.id, { notes: e.target.value })}
+                      onChange={(e) =>
+                        onUpdate(product.id, { notes: e.target.value })
+                      }
                       placeholder="e.g. agent photo updated, rush needed"
                       className={INPUT_CLS}
                     />
@@ -863,7 +1020,9 @@ function TopperGrid({
                       className="max-w-full max-h-full object-contain"
                     />
                   ) : (
-                    <span className="text-xs text-gray-400">{product.label}</span>
+                    <span className="text-xs text-gray-400">
+                      {product.label}
+                    </span>
                   )}
                 </div>
                 <div className="px-3 py-2 flex items-center justify-between gap-2">
@@ -873,11 +1032,26 @@ function TopperGrid({
                   <span
                     aria-hidden
                     className={`inline-flex items-center justify-center w-4 h-4 rounded border-2 flex-shrink-0 ${selected ? "" : "border-gray-300"}`}
-                    style={selected ? { backgroundColor: accent, borderColor: accent } : undefined}
+                    style={
+                      selected
+                        ? { backgroundColor: accent, borderColor: accent }
+                        : undefined
+                    }
                   >
                     {selected ? (
-                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                      >
+                        <path
+                          d="M2 6L5 9L10 3"
+                          stroke="white"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     ) : null}
                   </span>
@@ -886,31 +1060,47 @@ function TopperGrid({
 
               {selected && line ? (
                 <div className="border-t border-gray-100 px-3 py-3 bg-gray-50 space-y-2">
-                  {product.materialOptions && product.materialOptions.length > 0 ? (
+                  {product.materialOptions &&
+                  product.materialOptions.length > 0 ? (
                     <div>
-                      <label htmlFor={`mat-${product.id}`} className={LABEL_CLS}>Material</label>
+                      <label
+                        htmlFor={`mat-${product.id}`}
+                        className={LABEL_CLS}
+                      >
+                        Material
+                      </label>
                       <select
                         id={`mat-${product.id}`}
                         value={line.materialId}
-                        onChange={(e) => onUpdate(product.id, { materialId: e.target.value })}
+                        onChange={(e) =>
+                          onUpdate(product.id, { materialId: e.target.value })
+                        }
                         className={INPUT_CLS}
                       >
                         {product.materialOptions.map((m) => (
-                          <option key={m.id} value={m.id}>{m.label}</option>
+                          <option key={m.id} value={m.id}>
+                            {m.label}
+                          </option>
                         ))}
                       </select>
                     </div>
                   ) : null}
                   <div>
-                    <label htmlFor={`qty-${product.id}`} className={LABEL_CLS}>Quantity</label>
+                    <label htmlFor={`qty-${product.id}`} className={LABEL_CLS}>
+                      Quantity
+                    </label>
                     <select
                       id={`qty-${product.id}`}
                       value={line.qty}
-                      onChange={(e) => onUpdate(product.id, { qty: Number(e.target.value) })}
+                      onChange={(e) =>
+                        onUpdate(product.id, { qty: Number(e.target.value) })
+                      }
                       className={INPUT_CLS}
                     >
                       {product.qtyOptions.map((q) => (
-                        <option key={q} value={q}>{q}</option>
+                        <option key={q} value={q}>
+                          {q}
+                        </option>
                       ))}
                     </select>
                   </div>

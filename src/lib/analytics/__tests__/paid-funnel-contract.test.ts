@@ -24,5 +24,9 @@ describe("paid funnel event ownership", () => {
     const analytics = source("src/lib/analytics.ts");
     expect(analytics).toContain('gtag("event", "add_to_cart"');
     expect(analytics).toContain('gtag("event", "begin_checkout"');
+    const checkout = source("src/app/checkout/page.tsx");
+    expect(checkout).toContain("cart.length > 0");
+    expect(checkout).toContain("BEGIN_CHECKOUT_EVENT_KEY");
+    expect(checkout).toContain("checkoutEventFingerprint(cart)");
   });
 });

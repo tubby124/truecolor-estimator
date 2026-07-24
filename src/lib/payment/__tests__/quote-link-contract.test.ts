@@ -10,8 +10,11 @@ describe("quote payment linkage contract", () => {
   it("puts quote id inside the structured quote's signed Pay Now token", () => {
     const route = source("src/app/api/staff/quotes/[id]/send-quote/route.ts");
     expect(route).toContain("quoteId: id");
-    expect(route).toContain("quoteRevision: pricingRevision.quoteRevision");
-    expect(route).toContain("setStructuredQuotePricing");
+    expect(route).toContain("quoteRevision: Number(delivery.quote_revision)");
+    expect(route).toContain('"prepare_structured_quote_send"');
+    expect(route.indexOf('"prepare_structured_quote_send"')).toBeLessThan(
+      route.indexOf("await sendEmail("),
+    );
   });
 
   it("keeps quote GET side-effect-free and requires an explicit POST", () => {

@@ -60,7 +60,12 @@ test.describe("Cart order-minimum surcharge", () => {
     await expect(subtotalRow).toContainText("$25.00");
 
     // Nudge tells customer how to skip the fee
-    await expect(page.getByText(/Add\s+\$24\.56\s+more product to skip this setup fee/)).toBeVisible();
+    const orderSummary = page
+      .getByText("Small order setup fee")
+      .locator("xpath=../..");
+    await expect(orderSummary).toContainText(
+      "Add $24.56 more product to skip this setup fee",
+    );
   });
 
   test("$24.99 cart adds tiny $0.01 surcharge to reach exactly $25", async ({ page }) => {

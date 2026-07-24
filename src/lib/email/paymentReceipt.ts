@@ -43,6 +43,8 @@ export interface SendPaymentReceiptParams {
   receiptToken?: string | null;
   /** Optional Wave invoice public URL (PAID stamp + Wave's branded layout — for B2B) */
   waveInvoiceUrl?: string | null;
+  /** Stable provider key for crash-safe automated delivery retries. */
+  idempotencyKey?: string;
 }
 
 // ─── Public entry point ───────────────────────────────────────────────────────
@@ -62,6 +64,7 @@ export async function sendPaymentReceipt(
     subject,
     html,
     text,
+    idempotencyKey: params.idempotencyKey,
   });
 
   console.log(

@@ -15,10 +15,19 @@ const inputs = (heartbeat: RollupInputs["heartbeats"][number]): RollupInputs => 
   gscVsGa4DivergencePct: null,
   googleAdsMonitorDetail: null,
   measurementOutboxes: {
-    revenue: { dead: 0, staleProcessing: 0, overdueRetry: 0 },
-    quote: { dead: 0, staleProcessing: 0, overdueRetry: 0 },
+    revenue: { queryFailed: 0, dead: 0, staleProcessing: 0, overdueRetry: 0 },
+    quote: { queryFailed: 0, dead: 0, staleProcessing: 0, overdueRetry: 0 },
   },
+  wavePaymentEffects: { queryFailed: 0, dead: 0, staleProcessing: 0, overdueRetry: 0 },
   waveProvisioning: { staleCreating: 0, ambiguous: 0, failed: 0 },
+  quoteDeliveries: {
+    publicStale: 0,
+    publicFailedUnresolved: 0,
+    pricedStale: 0,
+    pricedFailedUnresolved: 0,
+    publicQueryError: 0,
+    pricedQueryError: 0,
+  },
 });
 
 const heartbeat = (
@@ -126,16 +135,18 @@ describe("Google Ads conversion delivery rollup", () => {
   it("surfaces every revenue and quote outbox failure class with stable keys", () => {
     const rollupInputs = inputs(heartbeat(0.1, "google-ads-conversions"));
     rollupInputs.measurementOutboxes = {
-      revenue: { dead: 1, staleProcessing: 2, overdueRetry: 3 },
-      quote: { dead: 4, staleProcessing: 5, overdueRetry: 6 },
+      revenue: { queryFailed: 1, dead: 1, staleProcessing: 2, overdueRetry: 3 },
+      quote: { queryFailed: 1, dead: 4, staleProcessing: 5, overdueRetry: 6 },
     };
 
     const keys = buildRollup(rollupInputs).reds.map((issue) => issue.key);
     expect(keys).toEqual(expect.arrayContaining([
       "measurement-outbox:revenue:dead",
+      "measurement-outbox:revenue:query-failed",
       "measurement-outbox:revenue:stale-processing",
       "measurement-outbox:revenue:overdue-retry",
       "measurement-outbox:quote:dead",
+      "measurement-outbox:quote:query-failed",
       "measurement-outbox:quote:stale-processing",
       "measurement-outbox:quote:overdue-retry",
     ]));
@@ -152,5 +163,49 @@ describe("Wave-before-Clover provisioning rollup", () => {
       "wave-provisioning:ambiguous",
       "wave-provisioning:failed",
     ]));
+  });
+});
+
+describe("Wave paid-order effect delivery rollup", () => {
+  it("keeps every durable failure state visible after later healthy cron runs", () => {
+    const rollupInputs = inputs(heartbeat(0.1, "wave-payment-effects"));
+    rollupInputs.wavePaymentEffects = {
+      queryFailed: 1,
+      dead: 1,
+      staleProcessing: 2,
+      overdueRetry: 3,
+    };
+
+    expect(buildRollup(rollupInputs).reds.map((issue) => issue.key)).toEqual(expect.arrayContaining([
+      "wave-payment-effects:dead",
+      "wave-payment-effects:query-failed",
+      "wave-payment-effects:stale-processing",
+      "wave-payment-effects:overdue-retry",
+    ]));
+  });
+});
+
+describe("Quote email delivery reconciliation rollup", () => {
+  it("surfaces every persistent public and priced-quote delivery failure", () => {
+    const rollupInputs = inputs(heartbeat(0.1));
+    rollupInputs.quoteDeliveries = {
+      publicStale: 1,
+      publicFailedUnresolved: 2,
+      pricedStale: 3,
+      pricedFailedUnresolved: 4,
+      publicQueryError: 1,
+      pricedQueryError: 1,
+    };
+
+    expect(buildRollup(rollupInputs).reds.map((issue) => issue.key)).toEqual(
+      expect.arrayContaining([
+        "quote-delivery:public-stale",
+        "quote-delivery:public-failed",
+        "quote-delivery:priced-stale",
+        "quote-delivery:priced-failed",
+        "quote-delivery:public-query-error",
+        "quote-delivery:priced-query-error",
+      ]),
+    );
   });
 });

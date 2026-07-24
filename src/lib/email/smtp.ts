@@ -82,6 +82,39 @@ function toEmailList(addr: string | string[]): string[] {
   return (Array.isArray(addr) ? addr : [addr]).map((a) => a.trim()).filter(Boolean);
 }
 
+function parseProviderErrorName(errorBody: string): string | undefined {
+  try {
+    const parsed: unknown = JSON.parse(errorBody);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return undefined;
+    }
+
+    const name = (parsed as { name?: unknown }).name;
+    return typeof name === "string" && name ? name : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function classifyProviderFailure(
+  status: number,
+  providerErrorName: string | undefined
+): EmailSendError["outcome"] {
+  if (status === 408 || status === 429 || status >= 500) {
+    return "unknown";
+  }
+
+  if (status === 409) {
+    // A concurrent idempotent request can still be accepted by Resend. Only
+    // the invalid-key variant proves that this request was rejected.
+    return providerErrorName === "invalid_idempotent_request"
+      ? "rejected"
+      : "unknown";
+  }
+
+  return "rejected";
+}
+
 export async function sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -178,11 +211,15 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
-    const outcome =
-      res.status === 408 || res.status === 429 || res.status >= 500
-        ? "unknown"
-        : "rejected";
-    throw new EmailSendError(`Resend API error ${res.status}: ${errText}`, outcome);
+    const providerErrorName = parseProviderErrorName(errText);
+    const outcome = classifyProviderFailure(res.status, providerErrorName);
+    const safeErrorName =
+      providerErrorName === "concurrent_idempotent_requests" ||
+      providerErrorName === "invalid_idempotent_request"
+        ? providerErrorName
+        : "unknown";
+    console.error(`[smtp] Resend API error: HTTP ${res.status} (${safeErrorName})`);
+    throw new EmailSendError(`Resend API error ${res.status}`, outcome);
   }
 
   // Capture the provider ID so callers can durably correlate webhook events.

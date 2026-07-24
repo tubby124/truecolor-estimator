@@ -1,33 +1,39 @@
 /**
  * POST /api/webhooks/wave
  *
- * Receives Wave Accounting webhook events. Used to detect when a customer
- * pays a Wave invoice via Wave Payments ("Pay Now" link) and sync the
- * payment status back to our Supabase order.
- *
- * Setup (one-time):
- *   1. Wave Dashboard → Settings → Integrations → Webhooks
- *   2. Add URL: https://truecolor-estimator.vercel.app/api/webhooks/wave
- *   3. Select event: invoice_paid
- *   4. Copy the signing secret → add as WAVE_WEBHOOK_SECRET in Vercel env vars
- *
- * Auth: HMAC-SHA256 signature on raw request body using WAVE_WEBHOOK_SECRET.
- *       Wave sends the signature in the "X-Wave-Signature" header as
- *       "sha256=<hex_digest>".
- *
- * Event shape (Wave invoice_paid):
- *   {
- *     data: {
- *       resourceType: "invoice",
- *       resource: { id: "<wave_invoice_id>", status: "paid", ... }
- *     }
- *   }
+ * Receives signed Wave invoice-paid events. Payment truth, the accounting
+ * ledger, and all downstream work are committed together by
+ * accept_wave_paid_invoice. External effects are processed from the durable
+ * queue here for low latency and by the cron worker for crash recovery.
  */
 
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "crypto";
+import { processWavePaymentEffects } from "@/lib/payment/wave-payment-effects";
 import { createServiceClient } from "@/lib/supabase/server";
-import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+
+interface WavePaymentAcceptance {
+  outcome:
+    | "transitioned"
+    | "already_processed"
+    | "not_found"
+    | "not_wave_order"
+    | "legacy_already_paid"
+    | "not_payable";
+  order_id: string | null;
+  order_number: string | null;
+  payment_transitioned: boolean;
+  effects_pending: number;
+}
+
+function safeSignatureEqual(signature: string, expected: string): boolean {
+  const signatureBytes = Buffer.from(signature);
+  const expectedBytes = Buffer.from(expected);
+  return (
+    signatureBytes.length === expectedBytes.length &&
+    timingSafeEqual(signatureBytes, expectedBytes)
+  );
+}
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -37,22 +43,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not read body" }, { status: 400 });
   }
 
-  // Verify HMAC-SHA256 signature from Wave — fail-closed (require secret to be configured)
   const webhookSecret = process.env.WAVE_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.error("[wave-webhook] WAVE_WEBHOOK_SECRET not configured — rejecting all webhook calls");
-    return NextResponse.json({ error: "Webhook not configured" }, { status: 401 });
+    console.error("[wave-webhook] WAVE_WEBHOOK_SECRET not configured");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
   }
 
   const signature = req.headers.get("x-wave-signature") ?? "";
   const expected =
     "sha256=" +
     createHmac("sha256", webhookSecret).update(bodyText).digest("hex");
-
-  const sigBuf = Buffer.from(signature);
-  const expectedBuf = Buffer.from(expected);
-  if (!signature || sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) {
-    console.warn("[wave-webhook] Invalid or missing signature — possible spoofing attempt");
+  if (!signature || !safeSignatureEqual(signature, expected)) {
+    console.warn("[wave-webhook] Invalid or missing signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -65,11 +67,9 @@ export async function POST(req: NextRequest) {
 
   const eventData = event.data as Record<string, unknown> | undefined;
   const resource = eventData?.resource as Record<string, unknown> | undefined;
-
   const supabase = createServiceClient();
 
-  // Helper — log every event to webhook_events (non-fatal: never break the webhook)
-  async function logWebhookEvent(opts: {
+  async function logWebhookEvent(options: {
     eventType: string;
     resourceId: string | null;
     matchedOrderId: string | null;
@@ -79,174 +79,106 @@ export async function POST(req: NextRequest) {
     try {
       await supabase.from("webhook_events").insert({
         event_source: "wave",
-        event_type: opts.eventType,
-        resource_id: opts.resourceId,
-        matched_order_id: opts.matchedOrderId,
-        ok: opts.ok,
-        detail: opts.detail,
+        event_type: options.eventType,
+        resource_id: options.resourceId,
+        matched_order_id: options.matchedOrderId,
+        ok: options.ok,
+        detail: options.detail,
       });
-    } catch (err) {
-      console.error("[wave-webhook] webhook_events log failed (non-fatal):", err);
+    } catch (error) {
+      console.error("[wave-webhook] webhook_events log failed (non-fatal):", error);
     }
   }
 
-  // Only handle invoice.paid events
   if (
-    eventData?.resourceType === "invoice" &&
-    resource?.status === "paid" &&
-    resource?.id
+    eventData?.resourceType !== "invoice" ||
+    resource?.status !== "paid" ||
+    typeof resource.id !== "string" ||
+    !resource.id
   ) {
-    const waveInvoiceId = resource.id as string;
-    console.log("[wave-webhook] invoice paid event →", waveInvoiceId);
-
-    try {
-      // Look up the order by wave_invoice_id
-      const { data: order, error } = await supabase
-        .from("orders")
-        .select("id, order_number, customer_id, total, is_rush, status")
-        .eq("wave_invoice_id", waveInvoiceId)
-        .single();
-
-      if (error || !order) {
-        console.warn("[wave-webhook] No order found for wave_invoice_id:", waveInvoiceId);
-        await logWebhookEvent({
-          eventType: "invoice.paid",
-          resourceId: waveInvoiceId,
-          matchedOrderId: null,
-          ok: false,
-          detail: "no order found for wave_invoice_id",
-        });
-      } else if (order.status !== "pending_payment") {
-        console.log(
-          `[wave-webhook] Order ${order.order_number} already past pending_payment (status: ${order.status}) — skipping`
-        );
-        await logWebhookEvent({
-          eventType: "invoice.paid",
-          resourceId: waveInvoiceId,
-          matchedOrderId: order.id,
-          ok: true,
-          detail: `order ${order.order_number} already ${order.status} — skipped`,
-        });
-      } else {
-        // Advance order to payment_received
-        const { error: updateErr } = await supabase
-          .from("orders")
-          .update({ status: "payment_received", paid_at: new Date().toISOString() })
-          .eq("id", order.id);
-
-        if (updateErr) {
-          console.error("[wave-webhook] order update failed:", updateErr.message);
-          await logWebhookEvent({
-            eventType: "invoice.paid",
-            resourceId: waveInvoiceId,
-            matchedOrderId: order.id,
-            ok: false,
-            detail: `order update failed: ${updateErr.message}`,
-          });
-        } else {
-          console.log(`[wave-webhook] order ${order.order_number} → payment_received`);
-          await logWebhookEvent({
-            eventType: "invoice.paid",
-            resourceId: waveInvoiceId,
-            matchedOrderId: order.id,
-            ok: true,
-            detail: `order ${order.order_number} → payment_received`,
-          });
-
-          // Send payment confirmed email (non-fatal)
-          try {
-            const { data: customer } = await supabase
-              .from("customers")
-              .select("email, name")
-              .eq("id", order.customer_id)
-              .single();
-
-            if (customer?.email) {
-              // Fetch full order with items — used for the itemized receipt.
-              // Note: cut the bare "payment confirmed" status email — receipt
-              // below has everything that one had + line items + GST# + PDF.
-              // Customer-facing emails per order: 9 → 4 (2026-05-14).
-              const { data: fullOrder } = await supabase
-                .from("orders")
-                .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, receipt_token, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
-                .eq("id", order.id)
-                .single();
-              const receiptItems = fullOrder && Array.isArray(fullOrder.order_items) ? fullOrder.order_items : [];
-
-              // Itemized receipt (non-fatal)
-              try {
-                if (fullOrder) {
-                  await sendPaymentReceipt({
-                    orderNumber: order.order_number,
-                    customerName: customer.name,
-                    customerEmail: customer.email,
-                    createdAt: fullOrder.created_at,
-                    items: receiptItems.map((i) => ({
-                      product_name: i.product_name,
-                      qty: i.qty,
-                      width_in: i.width_in,
-                      height_in: i.height_in,
-                      sides: i.sides,
-                      line_total: Number(i.line_total),
-                    })),
-                    subtotal: Number(fullOrder.subtotal),
-                    gst: Number(fullOrder.gst),
-                    pst: Number(fullOrder.pst ?? 0),
-                    total: Number(fullOrder.total),
-                    isRush: Boolean(fullOrder.is_rush),
-                    discountCode: fullOrder.discount_code ?? null,
-                    discountAmount: fullOrder.discount_amount ? Number(fullOrder.discount_amount) : null,
-                    paymentMethod: "wave",
-                    oid: order.id,
-                    receiptToken: fullOrder.receipt_token ?? null,
-                  });
-                  console.log(`[wave-webhook] receipt sent → ${customer.email}`);
-                }
-              } catch (receiptErr) {
-                console.error("[wave-webhook] receipt failed (non-fatal):", receiptErr);
-              }
-            }
-
-            if (customer?.email) {
-              try {
-                await fetch("https://api.brevo.com/v3/contacts", {
-                  method: "POST",
-                  headers: {
-                    "api-key": process.env.BREVO_API_KEY!,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    email: customer.email,
-                    attributes: { LAST_PAYMENT_DATE: new Date().toISOString().slice(0, 10) },
-                    updateEnabled: true,
-                  }),
-                });
-              } catch (brevoErr) {
-                console.error("[wave-webhook] Brevo LAST_PAYMENT_DATE update failed (non-fatal):", brevoErr);
-              }
-            }
-          } catch (emailErr) {
-            console.error("[wave-webhook] payment email failed (non-fatal):", emailErr);
-          }
-        }
-      }
-    } catch (err) {
-      console.error("[wave-webhook] unexpected error:", err);
-    }
-  } else {
     const eventType = eventData?.resourceType
       ? `${eventData.resourceType}.${resource?.status ?? "unknown"}`
       : "unknown";
-    console.log("[wave-webhook] unhandled event — resourceType:", eventData?.resourceType, "status:", resource?.status);
     await logWebhookEvent({
       eventType,
-      resourceId: (resource?.id as string | null) ?? null,
+      resourceId: typeof resource?.id === "string" ? resource.id : null,
       matchedOrderId: null,
       ok: true,
       detail: "unhandled event type — no action taken",
     });
+    return NextResponse.json({ ok: true, skipped: eventType });
   }
 
-  // Always return 200 — Wave retries on non-200
-  return NextResponse.json({ ok: true });
+  const waveInvoiceId = resource.id;
+  const { data, error } = await supabase.rpc("accept_wave_paid_invoice", {
+    p_wave_invoice_id: waveInvoiceId,
+  });
+  if (error) {
+    console.error("[wave-webhook] atomic payment acceptance failed:", error.message);
+    await logWebhookEvent({
+      eventType: "invoice.paid",
+      resourceId: waveInvoiceId,
+      matchedOrderId: null,
+      ok: false,
+      detail: "atomic payment acceptance failed",
+    });
+    // The transition, ledger, and work rows share one transaction. A non-200
+    // safely asks Wave to retry because no partial payment state committed.
+    return NextResponse.json(
+      { ok: false, error: "Payment acceptance failed" },
+      { status: 503 },
+    );
+  }
+
+  const acceptance = (Array.isArray(data) ? data[0] : data) as
+    | WavePaymentAcceptance
+    | null;
+  if (!acceptance?.outcome) {
+    console.error("[wave-webhook] atomic payment acceptance returned no result");
+    return NextResponse.json(
+      { ok: false, error: "Payment acceptance returned no result" },
+      { status: 503 },
+    );
+  }
+
+  const accepted =
+    acceptance.outcome === "transitioned" ||
+    acceptance.outcome === "already_processed";
+  await logWebhookEvent({
+    eventType: "invoice.paid",
+    resourceId: waveInvoiceId,
+    matchedOrderId: acceptance.order_id,
+    ok: acceptance.outcome !== "not_found",
+    detail: accepted
+      ? `order ${acceptance.order_number ?? acceptance.order_id} ${acceptance.outcome}; durable effects=${acceptance.effects_pending}`
+      : `invoice payment skipped: ${acceptance.outcome}`,
+  });
+
+  if (accepted && acceptance.order_id && acceptance.effects_pending > 0) {
+    try {
+      const effects = await processWavePaymentEffects({
+        supabase,
+        orderId: acceptance.order_id,
+        maxJobs: 3,
+      });
+      console.log(
+        `[wave-webhook] durable effects order=${acceptance.order_number ?? acceptance.order_id} ` +
+          `claimed=${effects.claimed} sent=${effects.sent} retry=${effects.retried} dead=${effects.dead}`,
+      );
+    } catch (workerError) {
+      // The queue is already committed. The scheduled worker will reclaim
+      // unacknowledged processing rows after the lease or retry due time.
+      console.error(
+        "[wave-webhook] immediate effect processing failed; work remains durable:",
+        workerError,
+      );
+    }
+  }
+
+  return NextResponse.json({
+    ok: true,
+    outcome: acceptance.outcome,
+    orderId: acceptance.order_id,
+    effectsPending: acceptance.effects_pending,
+  });
 }

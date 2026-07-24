@@ -11,6 +11,11 @@ import { sanitizeError } from "@/lib/errors/sanitize";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { trackArtworkUpload, trackBeginCheckout } from "@/lib/analytics";
+import {
+  BEGIN_CHECKOUT_EVENT_KEY,
+  checkoutEventFingerprint,
+  claimClientEvent,
+} from "@/lib/analytics/client-event-dedupe";
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { readUtmFromStorage } from "@/components/site/UtmCapture";
@@ -184,23 +189,30 @@ export default function CheckoutPage() {
     const cart = getCart();
     setItems(cart);
     setMounted(true);
-    // GA4: begin_checkout
-    const cartTotal = cart.reduce((sum, item) => sum + item.sell_price, 0);
-    const ga4Items = cart.map((c) => ({
-      item_id: c.product_slug,
-      item_name: c.product_name,
-      item_category: c.category,
-      price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price,
-      quantity: c.qty,
-    }));
-    trackBeginCheckout({ value: cartTotal, item_count: cart.length, items: ga4Items });
-    // Meta Pixel: InitiateCheckout
-    metaTrackInitiateCheckout({
-      content_ids: cart.map((c) => c.product_slug),
-      value: cartTotal,
-      num_items: cart.length,
-      contents: cart.map((c) => ({ id: c.product_slug, quantity: c.qty, item_price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price })),
-    });
+    if (
+      cart.length > 0 &&
+      claimClientEvent(
+        sessionStorage,
+        BEGIN_CHECKOUT_EVENT_KEY,
+        checkoutEventFingerprint(cart),
+      )
+    ) {
+      const cartTotal = cart.reduce((sum, item) => sum + item.sell_price, 0);
+      const ga4Items = cart.map((c) => ({
+        item_id: c.product_slug,
+        item_name: c.product_name,
+        item_category: c.category,
+        price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price,
+        quantity: c.qty,
+      }));
+      trackBeginCheckout({ value: cartTotal, item_count: cart.length, items: ga4Items });
+      metaTrackInitiateCheckout({
+        content_ids: cart.map((c) => c.product_slug),
+        value: cartTotal,
+        num_items: cart.length,
+        contents: cart.map((c) => ({ id: c.product_slug, quantity: c.qty, item_price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price })),
+      });
+    }
 
     // Check if user is already logged in — pre-fill their saved profile
     const supabase = createClient();
@@ -526,6 +538,7 @@ export default function CheckoutPage() {
       try {
         sessionStorage.removeItem("tc_checkout_form");
         sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY);
+        sessionStorage.removeItem(BEGIN_CHECKOUT_EVENT_KEY);
       } catch { /* ignore */ }
       if (payMethod === "clover_card" && data.checkoutUrl) {
         // Card: redirect to Clover hosted checkout (it bounces back to /order-confirmed?oid=...)

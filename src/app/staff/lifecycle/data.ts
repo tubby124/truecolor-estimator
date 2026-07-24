@@ -33,9 +33,11 @@ import type { EmailDeliveryHealth } from "./EmailDeliveryHealthPanel";
 import { buildEmailVolumeSnapshot, type EmailVolumeSnapshot } from "./EmailVolumePanel";
 import type { StaffAction } from "./StaffActionsPanel";
 import type { PaymentHealthSnapshot } from "./PaymentHealthPanel";
+import type { QuoteDeliveryRiskRow } from "./QuoteDeliveryRiskPanel";
 import {
   buildRollup,
   type MeasurementOutboxCounts,
+  type QuoteDeliveryHealth,
   type StatusRollup,
   type WaveProvisioningHealth,
 } from "@/lib/lifecycle/rollup";
@@ -69,6 +71,7 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "ga4-sync",               maxAgeHours: 26 },  // daily — Phase 9d defense-in-depth alongside gsc-sync
   { name: "dashboard-alerts",       maxAgeHours: 2  },  // hourly Telegram push layer
   { name: "wave-poll",              maxAgeHours: 7  },  // every 6h — backfills Wave state changes the webhook missed
+  { name: "wave-payment-effects",   maxAgeHours: 0.5 }, // every 5m — crash recovery for Wave receipts/analytics/CRM
   { name: "google-ads-monitor",     maxAgeHours: 0.5 }, // every 15m — spend warning + protective pause
   { name: "google-ads-conversions", maxAgeHours: 0.5 }, // every 15m — revenue + quote measurement delivery
 ];
@@ -84,6 +87,81 @@ interface MeasurementOutboxRow {
 interface WaveProvisioningRow {
   quote_wave_state: string | null;
   quote_wave_reserved_at: string | null;
+}
+
+interface PublicQuoteDeliveryRow {
+  id: string;
+  quote_id: string;
+  channel: string;
+  status: string | null;
+  first_attempt_at: string | null;
+  resolution: string | null;
+  resolved_at: string | null;
+  last_error: string | null;
+  created_at: string;
+}
+
+interface PricedQuoteDeliveryRow {
+  id: string;
+  quote_id: string;
+  status: string | null;
+  created_at: string | null;
+  provider_window_started_at: string | null;
+  pay_url: string | null;
+  resolution: string | null;
+  resolved_at: string | null;
+  last_error: string | null;
+}
+
+function summarizeQuoteDeliveryHealth(
+  publicRows: PublicQuoteDeliveryRow[],
+  pricedRows: PricedQuoteDeliveryRow[],
+  now: number,
+): QuoteDeliveryHealth {
+  const providerCutoff = now - 23 * 60 * 60 * 1000;
+  const preparedCutoff = now - 15 * 60 * 1000;
+  const isBefore = (value: string | null, cutoff: number) =>
+    value === null || new Date(value).getTime() < cutoff;
+
+  return {
+    publicStale: publicRows.filter((row) =>
+      ["sending", "pending_confirmation"].includes(row.status ?? "") &&
+      isBefore(row.first_attempt_at, providerCutoff)
+    ).length,
+    publicFailedUnresolved: publicRows.filter((row) =>
+      (
+        row.status === "delivery_failed" ||
+        (
+          row.status === "failed" &&
+          row.resolution !== "manual_confirmed_not_sent"
+        )
+      )
+    ).length,
+    pricedStale: pricedRows.filter((row) =>
+      (
+        row.status === "prepared" &&
+        row.pay_url === null &&
+        isBefore(row.created_at, preparedCutoff)
+      ) ||
+      (
+        ["sending", "pending_confirmation"].includes(row.status ?? "") &&
+        isBefore(row.provider_window_started_at, providerCutoff)
+      )
+    ).length,
+    pricedFailedUnresolved: pricedRows.filter((row) =>
+      (
+        row.status === "delivery_failed" ||
+        (
+          row.status === "failed" &&
+          !["manual_confirmed_not_sent", "expired_unarmed"].includes(
+            row.resolution ?? "",
+          )
+        )
+      )
+    ).length,
+    publicQueryError: 0,
+    pricedQueryError: 0,
+  };
 }
 
 function summarizeWaveProvisioning(
@@ -105,6 +183,7 @@ function summarizeMeasurementOutbox(
   staleCutoff: number,
 ): MeasurementOutboxCounts {
   return {
+    queryFailed: 0,
     dead: rows.filter((row) => row.status === "dead").length,
     staleProcessing: rows.filter((row) =>
       (
@@ -156,6 +235,8 @@ export interface LifecycleData {
   emailVolume: EmailVolumeSnapshot;
   staffActions: StaffAction[];
   paymentHealth: PaymentHealthSnapshot;
+  quoteDeliveryRisks: QuoteDeliveryRiskRow[];
+  quoteDeliveryHealth: QuoteDeliveryHealth;
   rollup: StatusRollup;
   fetched_at: string;
 }
@@ -1227,7 +1308,14 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   // Query both durable outboxes once and derive the three failure classes from
   // the same snapshot so the lifecycle tile and shared Telegram rollup agree.
   const measurementStaleCutoff = now - 15 * 60 * 1000;
-  const [revenueOutboxRes, quoteOutboxRes, waveProvisioningRes] = await Promise.all([
+  const [
+    revenueOutboxRes,
+    quoteOutboxRes,
+    wavePaymentEffectsRes,
+    waveProvisioningRes,
+    publicQuoteDeliveriesRes,
+    pricedQuoteDeliveriesRes,
+  ] = await Promise.all([
     supabase
       .from("google_ads_conversion_outbox")
       .select("status, next_attempt_at, processing_started_at, submitted_at, next_diagnostic_at")
@@ -1237,24 +1325,136 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       .select("status, next_attempt_at, processing_started_at")
       .in("status", ["dead", "processing", "retry"]),
     supabase
+      .from("wave_payment_effect_outbox")
+      .select("status, next_attempt_at, processing_started_at")
+      .in("status", ["dead", "processing", "retry"]),
+    supabase
       .from("orders")
       .select("quote_wave_state, quote_wave_reserved_at")
       .in("quote_wave_state", ["creating", "ambiguous", "failed"])
       .limit(1000),
+    supabase
+      .from("quote_request_deliveries")
+      .select("id, quote_id, channel, status, first_attempt_at, resolution, resolved_at, last_error, created_at")
+      .in("status", ["sending", "pending_confirmation", "failed", "delivery_failed"])
+      .limit(1000),
+    supabase
+      .from("quote_send_deliveries")
+      .select("id, quote_id, status, created_at, provider_window_started_at, pay_url, resolution, resolved_at, last_error")
+      .in("status", ["prepared", "sending", "pending_confirmation", "failed", "delivery_failed"])
+      .limit(1000),
   ]);
   const measurementOutboxes = {
-    revenue: summarizeMeasurementOutbox(
-      (revenueOutboxRes.data ?? []) as MeasurementOutboxRow[],
-      measurementStaleCutoff,
-    ),
-    quote: summarizeMeasurementOutbox(
-      (quoteOutboxRes.data ?? []) as MeasurementOutboxRow[],
-      measurementStaleCutoff,
-    ),
+    revenue: {
+      ...summarizeMeasurementOutbox(
+        (revenueOutboxRes.data ?? []) as MeasurementOutboxRow[],
+        measurementStaleCutoff,
+      ),
+      queryFailed: revenueOutboxRes.error ? 1 : 0,
+    },
+    quote: {
+      ...summarizeMeasurementOutbox(
+        (quoteOutboxRes.data ?? []) as MeasurementOutboxRow[],
+        measurementStaleCutoff,
+      ),
+      queryFailed: quoteOutboxRes.error ? 1 : 0,
+    },
   };
   const waveProvisioning = summarizeWaveProvisioning(
     (waveProvisioningRes.data ?? []) as WaveProvisioningRow[],
     measurementStaleCutoff,
+  );
+  const wavePaymentEffects = {
+    ...summarizeMeasurementOutbox(
+      (wavePaymentEffectsRes.data ?? []) as MeasurementOutboxRow[],
+      measurementStaleCutoff,
+    ),
+    queryFailed: wavePaymentEffectsRes.error ? 1 : 0,
+  };
+  const quoteDeliveries = summarizeQuoteDeliveryHealth(
+    (publicQuoteDeliveriesRes.data ?? []) as PublicQuoteDeliveryRow[],
+    (pricedQuoteDeliveriesRes.data ?? []) as PricedQuoteDeliveryRow[],
+    now,
+  );
+  quoteDeliveries.publicQueryError = publicQuoteDeliveriesRes.error ? 1 : 0;
+  quoteDeliveries.pricedQueryError = pricedQuoteDeliveriesRes.error ? 1 : 0;
+  const publicQuoteDeliveryRows =
+    (publicQuoteDeliveriesRes.data ?? []) as PublicQuoteDeliveryRow[];
+  const pricedQuoteDeliveryRows =
+    (pricedQuoteDeliveriesRes.data ?? []) as PricedQuoteDeliveryRow[];
+  const providerCutoff = now - 23 * 60 * 60 * 1000;
+  const preparedCutoff = now - 15 * 60 * 1000;
+  const publicRisks: QuoteDeliveryRiskRow[] = publicQuoteDeliveryRows
+    .filter((row) =>
+      (
+        ["sending", "pending_confirmation"].includes(row.status ?? "") &&
+        (
+          row.first_attempt_at === null ||
+          new Date(row.first_attempt_at).getTime() < providerCutoff
+        )
+      ) ||
+      row.status === "delivery_failed" ||
+      (
+        row.status === "failed" &&
+        row.resolution !== "manual_confirmed_not_sent"
+      )
+    )
+    .map((row) => ({
+      ledger: "request",
+      quote_id: row.quote_id,
+      delivery_id: row.id,
+      channel: row.channel,
+      status: row.status ?? "unknown",
+      resolution: row.resolution,
+      last_error: row.last_error,
+      stale:
+        row.first_attempt_at === null ||
+        new Date(row.first_attempt_at).getTime() < providerCutoff,
+      created_at: row.created_at,
+    }));
+  const pricedRisks: QuoteDeliveryRiskRow[] = pricedQuoteDeliveryRows
+    .filter((row) =>
+      (
+        row.status === "prepared" &&
+        row.pay_url === null &&
+        (
+          row.created_at === null ||
+          new Date(row.created_at).getTime() < preparedCutoff
+        )
+      ) ||
+      (
+        ["sending", "pending_confirmation"].includes(row.status ?? "") &&
+        (
+          row.provider_window_started_at === null ||
+          new Date(row.provider_window_started_at).getTime() < providerCutoff
+        )
+      ) ||
+      row.status === "delivery_failed" ||
+      (
+        row.status === "failed" &&
+        !["manual_confirmed_not_sent", "expired_unarmed"].includes(
+          row.resolution ?? "",
+        )
+      )
+    )
+    .map((row) => ({
+      ledger: "priced",
+      quote_id: row.quote_id,
+      delivery_id: row.id,
+      channel: "customer",
+      status: row.status ?? "unknown",
+      resolution: row.resolution,
+      last_error: row.last_error,
+      stale:
+        row.status === "prepared"
+          ? row.created_at === null ||
+            new Date(row.created_at).getTime() < preparedCutoff
+          : row.provider_window_started_at === null ||
+            new Date(row.provider_window_started_at).getTime() < providerCutoff,
+      created_at: row.created_at ?? new Date(now).toISOString(),
+    }));
+  const quoteDeliveryRisks = [...publicRisks, ...pricedRisks].sort(
+    (a, b) => b.created_at.localeCompare(a.created_at),
   );
 
   // ── derive status rollup ─────────────────────────────────────────────────
@@ -1274,7 +1474,9 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     gscVsGa4DivergencePct,
     googleAdsMonitorDetail: latestByName.get("google-ads-monitor")?.detail ?? null,
     measurementOutboxes,
+    wavePaymentEffects,
     waveProvisioning,
+    quoteDeliveries,
   });
 
   return {
@@ -1302,6 +1504,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     emailVolume,
     staffActions,
     paymentHealth,
+    quoteDeliveryRisks,
+    quoteDeliveryHealth: quoteDeliveries,
     rollup,
     fetched_at: new Date(now).toISOString(),
   };

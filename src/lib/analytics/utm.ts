@@ -45,7 +45,10 @@ export function sanitizeUtm(input: Record<string, unknown>): UtmAttribution {
   }
   for (const key of ["gclid", "gbraid", "wbraid"] as const) {
     const value = clean(input[key], 200);
-    if (value && CLICK_ID_RE.test(value)) out[key] = value;
+    if (value && CLICK_ID_RE.test(value)) {
+      out[key] = value;
+      break;
+    }
   }
   const keyword = clean(input.keyword, 150);
   if (keyword) out.keyword = keyword;
@@ -145,7 +148,13 @@ export function mergeUtmAttribution(
   const fromCookie = parseUtmCookie(cookieHeader);
   // Preserve fresh first-touch attribution; request hints only fill fields the
   // cookie does not contain or act as the fallback when the cookie is unusable.
-  return { ...fromHints, ...fromCookie };
+  const merged: Record<string, unknown> = { ...fromHints, ...fromCookie };
+  if (Object.keys(fromCookie).length > 0) {
+    for (const key of ["gclid", "gbraid", "wbraid"] as const) {
+      if (!fromCookie[key]) delete merged[key];
+    }
+  }
+  return sanitizeUtm(merged);
 }
 
 export function mergeLatestPaidAttribution(

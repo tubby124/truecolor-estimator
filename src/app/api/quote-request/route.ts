@@ -16,15 +16,29 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/email/smtp";
+import { EmailSendError, sendEmail } from "@/lib/email/smtp";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { getBrokerage } from "@/lib/data/brokerages";
-import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
+import {
+  sendTelegramNotification,
+  escapeTelegramHtml,
+} from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { classifyReferrer } from "@/lib/analytics/referrer";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
-import { ATTRIBUTION_KEYS, mergeLatestPaidAttribution, mergeUtmAttribution } from "@/lib/analytics/utm";
-import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytics/attribution-db";
+import {
+  ATTRIBUTION_KEYS,
+  mergeLatestPaidAttribution,
+  mergeUtmAttribution,
+} from "@/lib/analytics/utm";
+import {
+  mapAttributionToDb,
+  mapLatestPaidAttributionToDb,
+} from "@/lib/analytics/attribution-db";
+import {
+  getQuoteTurnstileConfig,
+  parseQuoteSubmissionKey,
+} from "@/lib/quote-request-guard";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -56,39 +70,173 @@ function esc(str: string): string {
     .replace(/'/g, "&#x27;");
 }
 
+function quoteSuccess(id: string, duplicate = false) {
+  const ref = id.replace(/-/g, "").slice(0, 8).toUpperCase();
+  return NextResponse.json({ sent: true, ref, duplicate });
+}
+
+interface QuoteRequestDelivery {
+  delivery_id: string;
+  delivery_status:
+    | "prepared"
+    | "sending"
+    | "pending_confirmation"
+    | "sent"
+    | "failed"
+    | "delivery_failed";
+  provider_message_id: string | null;
+  first_attempt_at: string | null;
+}
+
+async function deliverRequiredQuoteEmail(params: {
+  supabase: ReturnType<typeof createServiceClient>;
+  quoteId: string;
+  channel: "staff" | "customer";
+  email: Parameters<typeof sendEmail>[0];
+}): Promise<{ delivered: boolean; detail?: string }> {
+  const { data, error } = await params.supabase.rpc(
+    "claim_quote_request_delivery",
+    {
+      p_quote_id: params.quoteId,
+      p_channel: params.channel,
+    },
+  );
+  if (error) {
+    console.error(
+      `[quote-request] ${params.channel} delivery claim failed:`,
+      error.message,
+    );
+    return { delivered: false, detail: `${params.channel}: delivery claim failed` };
+  }
+
+  const delivery = (Array.isArray(data) ? data[0] : data) as
+    | QuoteRequestDelivery
+    | null;
+  if (!delivery?.delivery_id) {
+    return { delivered: false, detail: `${params.channel}: delivery claim missing` };
+  }
+  if (delivery.delivery_status === "sent" && delivery.provider_message_id) {
+    return { delivered: true };
+  }
+  if (delivery.delivery_status !== "sending") {
+    return {
+      delivered: false,
+      detail: `${params.channel}: awaiting provider reconciliation`,
+    };
+  }
+
+  try {
+    const result = await sendEmail({
+      ...params.email,
+      idempotencyKey: `quote-request/${delivery.delivery_id}`,
+      tags: [
+        ...(params.email.tags ?? []),
+        {
+          name: "quote_request_delivery_id",
+          value: delivery.delivery_id,
+        },
+      ],
+    });
+    const { error: completeError } = await params.supabase.rpc(
+      "complete_quote_request_delivery",
+      {
+        p_delivery_id: delivery.delivery_id,
+        p_provider_message_id: result.providerMessageId,
+      },
+    );
+    if (completeError) throw new Error(completeError.message);
+    return { delivered: true };
+  } catch (deliveryError) {
+    const rawMessage =
+      deliveryError instanceof Error ? deliveryError.message : "Unknown delivery error";
+    console.error(
+      `[quote-request] ${params.channel} email delivery incomplete:`,
+      rawMessage,
+    );
+    const outcome =
+      deliveryError instanceof EmailSendError ? deliveryError.outcome : "unknown";
+    const { error: failureError } = await params.supabase.rpc(
+      "record_quote_request_delivery_failure",
+      {
+        p_delivery_id: delivery.delivery_id,
+        p_outcome: outcome,
+        p_error: "Email delivery was not confirmed",
+      },
+    );
+    if (failureError) {
+      console.error(
+        `[quote-request] ${params.channel} delivery failure state was not saved:`,
+        failureError.message,
+      );
+    }
+    return { delivered: false, detail: `${params.channel}: delivery incomplete` };
+  }
+}
+
 export async function POST(req: NextRequest) {
   // Rate limit: 3 quote requests per IP per minute
   const ip = getClientIp(req);
   if (!rateLimit(`quote:${ip}`, 3, 60_000)) {
     return NextResponse.json(
       { error: "Too many requests. Please wait a moment and try again." },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
   try {
     const form = await req.formData();
 
-    // Cloudflare Turnstile validation (when secret key is configured)
+    const submissionKey = parseQuoteSubmissionKey(form.get("submission_key"));
+    if (!submissionKey) {
+      return NextResponse.json(
+        { error: "This quote form expired. Please refresh and try again." },
+        { status: 400 },
+      );
+    }
+
+    // Cloudflare Turnstile validation. A half-configured deployment must fail
+    // visibly instead of accepting a form the API will always reject.
+    const turnstileConfig = getQuoteTurnstileConfig(
+      process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY,
+      process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
+    );
+    if (!turnstileConfig.valid) {
+      console.error("[quote-request] Turnstile key pair is misconfigured");
+      return NextResponse.json(
+        {
+          error:
+            "Quote security is temporarily unavailable. Please call (306) 954-8688.",
+        },
+        { status: 503 },
+      );
+    }
+
     const turnstileSecret = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
-    if (turnstileSecret) {
-      const turnstileToken = (form.get("cf-turnstile-response") as string) ?? "";
+    if (turnstileConfig.configured && turnstileSecret) {
+      const turnstileToken =
+        (form.get("cf-turnstile-response") as string) ?? "";
       if (!turnstileToken) {
         return NextResponse.json(
           { error: "Bot check failed. Please refresh and try again." },
-          { status: 400 }
+          { status: 400 },
         );
       }
-      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret: turnstileSecret, response: turnstileToken }),
-      });
+      const verifyRes = await fetch(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            secret: turnstileSecret,
+            response: turnstileToken,
+          }),
+        },
+      );
       const verifyData = (await verifyRes.json()) as { success: boolean };
       if (!verifyData.success) {
         return NextResponse.json(
           { error: "Bot check failed. Please refresh and try again." },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -99,11 +247,15 @@ export async function POST(req: NextRequest) {
     const itemsRaw = (form.get("items") as string) ?? "[]";
     // Optional brokerage portal fields — present only when the form was
     // submitted from /portal/[brokerage].
-    const brokerageSlugRaw = ((form.get("brokerage_slug") as string) ?? "").trim();
+    const brokerageSlugRaw = (
+      (form.get("brokerage_slug") as string) ?? ""
+    ).trim();
     const brokerageSlug = /^[a-z0-9-]{1,64}$/.test(brokerageSlugRaw)
       ? brokerageSlugRaw
       : null;
-    const shippingAddressRaw = ((form.get("shipping_address") as string) ?? "").trim();
+    const shippingAddressRaw = (
+      (form.get("shipping_address") as string) ?? ""
+    ).trim();
     const shippingAddress =
       shippingAddressRaw.length > 0 && shippingAddressRaw.length <= 300
         ? shippingAddressRaw
@@ -113,25 +265,25 @@ export async function POST(req: NextRequest) {
     if (!name || !email) {
       return NextResponse.json(
         { error: "Name and email are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (name.length > 100) {
       return NextResponse.json(
         { error: "Name is too long (max 100 characters)" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (email.length > 254) {
       return NextResponse.json(
         { error: "Email address is too long" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if ((phone ?? "").length > 20) {
       return NextResponse.json(
         { error: "Phone number is too long" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -140,19 +292,22 @@ export async function POST(req: NextRequest) {
     try {
       items = JSON.parse(itemsRaw) as ItemMeta[];
     } catch {
-      return NextResponse.json({ error: "Invalid items data" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid items data" },
+        { status: 400 },
+      );
     }
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: "At least one item is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (items.length > 5) {
       return NextResponse.json(
         { error: "Maximum 5 items per request" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -162,13 +317,13 @@ export async function POST(req: NextRequest) {
       if (!item.qty?.trim()) {
         return NextResponse.json(
           { error: `Item ${i + 1}: quantity is required` },
-          { status: 400 }
+          { status: 400 },
         );
       }
       if (item.qty.length > 20) {
         return NextResponse.json(
           { error: `Item ${i + 1}: quantity value is too long` },
-          { status: 400 }
+          { status: 400 },
         );
       }
       if ((item.material ?? "").length > 200) {
@@ -176,89 +331,133 @@ export async function POST(req: NextRequest) {
           {
             error: `Item ${i + 1}: material description is too long (max 200 characters)`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
       if ((item.dimensions ?? "").length > 100) {
         return NextResponse.json(
           { error: `Item ${i + 1}: dimensions field is too long` },
-          { status: 400 }
+          { status: 400 },
         );
       }
       if ((item.notes ?? "").length > 500) {
         return NextResponse.json(
           { error: `Item ${i + 1}: notes are too long (max 500 characters)` },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
-    // Upload files per item (non-fatal per item — we continue even if one upload fails)
-    const fileLinks: Array<string | null> = [];
     const supabase = createServiceClient();
+    const { data: existingQuote, error: existingQuoteError } = await supabase
+      .from("quote_requests")
+      .select("id, file_links")
+      .eq("submission_key", submissionKey)
+      .maybeSingle();
+    if (existingQuoteError) {
+      console.error(
+        "[quote-request] idempotency lookup failed:",
+        existingQuoteError.message,
+      );
+      return NextResponse.json(
+        {
+          error:
+            "We could not verify your request. Please try again or call (306) 954-8688.",
+        },
+        { status: 503 },
+      );
+    }
+    let insertedId = (existingQuote?.id as string | undefined) ?? null;
+    let isDuplicate = Boolean(insertedId);
+    let fileLinks: Array<string | null> = Array.isArray(
+      existingQuote?.file_links,
+    )
+      ? existingQuote.file_links.filter(
+          (value): value is string | null =>
+            typeof value === "string" || value === null,
+        )
+      : [];
 
-    for (let i = 0; i < items.length; i++) {
-      const file = form.get(`file_${i}`) as File | null;
+    if (!insertedId) {
+      // File locations are derived from the idempotency key. A lost response,
+      // database retry, or concurrent request therefore reuses one object
+      // instead of leaking a second upload.
+      for (let i = 0; i < items.length; i++) {
+        const file = form.get(`file_${i}`) as File | null;
 
-      if (!file || file.size === 0) {
-        fileLinks.push(null);
-        continue;
-      }
-
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          {
-            error: `Item ${i + 1}: file too large — max 4 MB (received ${(
-              file.size /
-              1024 /
-              1024
-            ).toFixed(1)} MB)`,
-          },
-          { status: 400 }
-        );
-      }
-
-      const isAllowedMime = ALLOWED_MIME_TYPES.includes(file.type);
-      const isAllowedExt = ALLOWED_EXTENSIONS.test(file.name);
-      if (!isAllowedMime && !isAllowedExt) {
-        return NextResponse.json(
-          {
-            error: `Item ${
-              i + 1
-            }: file type not allowed — use PDF, AI, EPS, JPG, PNG, or WebP`,
-          },
-          { status: 400 }
-        );
-      }
-
-      try {
-        const uuid = crypto.randomUUID();
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const path = `quote-requests/${uuid}/${safeName}`;
-        const bytes = await file.arrayBuffer();
-
-        const { error: uploadError } = await supabase.storage
-          .from("print-files")
-          .upload(path, bytes, {
-            contentType: file.type || "application/octet-stream",
-            upsert: false,
-          });
-
-        if (uploadError) {
-          console.error(
-            `[quote-request] item ${i} upload failed:`,
-            uploadError.message
-          );
+        if (!file || file.size === 0) {
           fileLinks.push(null);
-        } else {
-          const { data: signed } = await supabase.storage
+          continue;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+          return NextResponse.json(
+            {
+              error: `Item ${i + 1}: file too large — max 4 MB (received ${(
+                file.size /
+                1024 /
+                1024
+              ).toFixed(1)} MB)`,
+            },
+            { status: 400 },
+          );
+        }
+
+        const isAllowedMime = ALLOWED_MIME_TYPES.includes(file.type);
+        const isAllowedExt = ALLOWED_EXTENSIONS.test(file.name);
+        if (!isAllowedMime && !isAllowedExt) {
+          return NextResponse.json(
+            {
+              error: `Item ${
+                i + 1
+              }: file type not allowed — use PDF, AI, EPS, JPG, PNG, or WebP`,
+            },
+            { status: 400 },
+          );
+        }
+
+        try {
+          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const path = `quote-requests/${submissionKey}/item-${i}-${safeName}`;
+          const bytes = await file.arrayBuffer();
+
+          const { error: uploadError } = await supabase.storage
+            .from("print-files")
+            .upload(path, bytes, {
+              contentType: file.type || "application/octet-stream",
+              upsert: false,
+            });
+          const uploadAlreadyExists = Boolean(
+            uploadError &&
+            (/already exists|duplicate/i.test(uploadError.message) ||
+              String(
+                (uploadError as { statusCode?: string | number }).statusCode,
+              ) === "409"),
+          );
+
+          if (uploadError && !uploadAlreadyExists) {
+            console.error(
+              `[quote-request] item ${i} upload failed:`,
+              uploadError.message,
+            );
+            fileLinks.push(null);
+            continue;
+          }
+
+          const { data: signed, error: signedError } = await supabase.storage
             .from("print-files")
             .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
+          if (signedError) {
+            console.error(
+              `[quote-request] item ${i} signed URL failed:`,
+              signedError.message,
+            );
+          }
           fileLinks.push(signed?.signedUrl ?? null);
+        } catch (storageErr) {
+          console.error(`[quote-request] item ${i} storage error:`, storageErr);
+          fileLinks.push(null);
         }
-      } catch (storageErr) {
-        console.error(`[quote-request] item ${i} storage error:`, storageErr);
-        fileLinks.push(null);
       }
     }
 
@@ -273,46 +472,90 @@ export async function POST(req: NextRequest) {
       Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
       req.headers.get("cookie"),
     );
-    const refClass = classifyReferrer(utm.landing_referrer || req.headers.get("referer"));
+    const refClass = classifyReferrer(
+      utm.landing_referrer || req.headers.get("referer"),
+    );
 
     // Save to DB before sending emails. The attributed quote row is the funnel
     // source of truth, so a DB failure must not show a false success state.
     // Capture the inserted row's id so portal submissions can show a short reference
     // number on the success page (first 8 chars of the UUID, uppercased).
-    let insertedId: string | null = null;
     try {
-      const { data: insertedRow, error: insertError } = await supabase
-        .from("quote_requests")
-        .insert({
-          name,
-          email,
-          phone: phone ?? null,
-          items,
-          file_links: fileLinks.filter(Boolean),
-          raw_ip: ip ?? null,
-          brokerage_slug: brokerageSlug,
-          shipping_address: shippingAddress,
-          referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
-          referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
-          raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,
-          ...mapAttributionToDb(utm),
-          ...mapLatestPaidAttributionToDb(latestPaidTouch),
-        })
-        .select("id")
-        .single();
-      if (insertError || !insertedRow?.id) {
-        throw new Error(insertError?.message ?? "Quote row was not returned");
+      if (insertedId) {
+        // The quote row is already durable. Continue below so any email whose
+        // acceptance timestamp is still missing can be retried safely.
+      } else {
+        const { data: insertedRow, error: insertError } = await supabase
+          .from("quote_requests")
+          .insert({
+            name,
+            email,
+            phone: phone ?? null,
+            items,
+            file_links: fileLinks,
+            raw_ip: ip ?? null,
+            brokerage_slug: brokerageSlug,
+            shipping_address: shippingAddress,
+            submission_key: submissionKey,
+            referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
+            referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
+            raw_referrer:
+              (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(
+                0,
+                500,
+              ) || null,
+            ...mapAttributionToDb(utm),
+            ...mapLatestPaidAttributionToDb(latestPaidTouch),
+          })
+          .select("id, file_links")
+          .single();
+        if (insertError?.code === "23505") {
+          const { data: racedQuote, error: racedQuoteError } = await supabase
+            .from("quote_requests")
+            .select("id, file_links")
+            .eq("submission_key", submissionKey)
+            .single();
+          if (!racedQuoteError && racedQuote?.id) {
+            insertedId = racedQuote.id as string;
+            isDuplicate = true;
+            fileLinks = Array.isArray(racedQuote.file_links)
+              ? racedQuote.file_links.filter(
+                  (value): value is string | null =>
+                    typeof value === "string" || value === null,
+                )
+              : fileLinks;
+          } else {
+            throw new Error(racedQuoteError?.message ?? insertError.message);
+          }
+        }
+        if (!insertedId && (insertError || !insertedRow?.id)) {
+          throw new Error(insertError?.message ?? "Quote row was not returned");
+        }
+        if (!insertedId && insertedRow?.id) {
+          insertedId = insertedRow.id as string;
+        }
       }
-      insertedId = (insertedRow?.id as string | undefined) ?? null;
     } catch (dbErr) {
       console.error("[quote-request] DB save failed:", dbErr);
       return NextResponse.json(
-        { error: "We could not save your request. Please try again or call (306) 954-8688." },
+        {
+          error:
+            "We could not save your request. Please try again or call (306) 954-8688.",
+        },
+        { status: 503 },
+      );
+    }
+    if (!insertedId) {
+      return NextResponse.json(
+        {
+          error:
+            "We could not save your request. Please try again or call (306) 954-8688.",
+        },
         { status: 503 },
       );
     }
 
-    if (insertedId) {
+    if (!isDuplicate) {
       // Meta Conversions API — Lead event (server-side, deduped via event_id=quote-{insertedId})
       void sendMetaCapiEvent({
         event_name: "Lead",
@@ -325,19 +568,24 @@ export async function POST(req: NextRequest) {
           external_id: insertedId,
         },
         custom_data: {
-          content_name: brokerageSlug ? `Quote Portal — ${brokerageSlug}` : "Quote Request",
+          content_name: brokerageSlug
+            ? `Quote Portal — ${brokerageSlug}`
+            : "Quote Request",
           lead_event_source: refClass.source,
           referrer_medium: refClass.medium,
         },
-      }).catch((err) => console.error("[quote-request] Meta CAPI failed (non-fatal):", err));
+      }).catch((err) =>
+        console.error("[quote-request] Meta CAPI failed (non-fatal):", err),
+      );
     }
 
     // Side-channel notifications — fire-and-forget. Failures must never break the response.
     // User-derived values (name, email) are HTML-escaped because Telegram uses parse_mode=HTML.
-    if (insertedId) {
-      const summary = Array.isArray(items) && items.length > 0
-        ? `${items.length} item${items.length === 1 ? "" : "s"}`
-        : "quote";
+    if (!isDuplicate) {
+      const summary =
+        Array.isArray(items) && items.length > 0
+          ? `${items.length} item${items.length === 1 ? "" : "s"}`
+          : "quote";
       const refShort = insertedId.slice(0, 8).toUpperCase();
       const safeName = escapeTelegramHtml(name);
       const safeEmail = escapeTelegramHtml(email);
@@ -349,47 +597,39 @@ export async function POST(req: NextRequest) {
       }).catch(() => {});
       void sendTelegramNotification(
         `📋 <b>New quote request</b> (${refShort})\n` +
-        `<b>${safeName}</b> · ${safeEmail}\n` +
-        `${summary}`
+          `<b>${safeName}</b> · ${safeEmail}\n` +
+          `${summary}`,
       ).catch(() => {});
     }
 
-    // Upsert customer record — create if new, skip if already exists
-    try {
-      await supabase
-        .from("customers")
-        .upsert(
-          { email, name, phone: phone ?? null },
-          { onConflict: "email", ignoreDuplicates: true }
-        );
-    } catch (customerErr) {
-      console.error("[quote-request] customer upsert failed:", customerErr);
-    }
-
-    // Auto-create Supabase auth account for new customers (non-fatal).
-    // Two-step pattern: createUser first (reliable), then generateLink.
-    // See: supabase/supabase#22521
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
-    let accountMagicLink: string | null = null;
-    try {
-      const { error: createErr } = await supabase.auth.admin.createUser({
-        email,
-        email_confirm: true,
-        user_metadata: { name },
-      });
-
-      if (!createErr) {
-        const { data: linkData } = await supabase.auth.admin.generateLink({
-          type: "magiclink",
-          email,
-          options: { redirectTo: `${siteUrl}/account/callback` },
-        });
-        accountMagicLink = linkData?.properties?.action_link ?? null;
-        console.log(`[quote-request] new auth account created → ${email}`);
+    if (!isDuplicate) {
+      // Upsert customer record — create if new, skip if already exists.
+      try {
+        await supabase
+          .from("customers")
+          .upsert(
+            { email, name, phone: phone ?? null },
+            { onConflict: "email", ignoreDuplicates: true },
+          );
+      } catch (customerErr) {
+        console.error("[quote-request] customer upsert failed:", customerErr);
       }
-      // If user already exists, skip silently — they already have login access
-    } catch (authErr) {
-      console.error("[quote-request] auth account (non-fatal):", authErr instanceof Error ? authErr.message : authErr);
+
+      // Auto-create Supabase auth account for new customers (non-fatal).
+      try {
+        const { error: createErr } = await supabase.auth.admin.createUser({
+          email,
+          email_confirm: true,
+          user_metadata: { name },
+        });
+        if (!createErr)
+          console.log(`[quote-request] new auth account created → ${email}`);
+      } catch (authErr) {
+        console.error(
+          "[quote-request] auth account (non-fatal):",
+          authErr instanceof Error ? authErr.message : authErr,
+        );
+      }
     }
 
     // Staff notification uses outreach sender to avoid Brevo loop-detection block
@@ -398,7 +638,8 @@ export async function POST(req: NextRequest) {
       process.env.QUOTE_FROM_EMAIL ??
       "True Color Display Printing <hello@outreach.true-color.ca>";
     const from =
-      process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
+      process.env.SMTP_FROM ??
+      "True Color Display Printing <info@true-color.ca>";
     const isMulti = items.length > 1;
 
     // Brokerage portal orders get a distinct subject + extra context block in
@@ -456,10 +697,10 @@ export async function POST(req: NextRequest) {
             <tr style="${rowStyle}">
               <td style="${labelStyle}">Material / Stock</td>
               <td style="${valueStyle}">${
-          item.material
-            ? esc(item.material)
-            : "<em style='color:#9ca3af'>Not specified</em>"
-        }</td>
+                item.material
+                  ? esc(item.material)
+                  : "<em style='color:#9ca3af'>Not specified</em>"
+              }</td>
             </tr>
             ${
               item.dimensions
@@ -543,14 +784,23 @@ export async function POST(req: NextRequest) {
       process.env.STAFF_EMAIL_CC,
       process.env.STAFF_EMAIL_BCC,
     ].filter(Boolean) as string[];
+    const deliveryErrors: string[] = [];
 
-    await sendEmail({
-      from: staffFrom,
-      to: staffRecipients,
-      replyTo: email,
-      subject,
-      html: staffHtml,
+    const staffDelivery = await deliverRequiredQuoteEmail({
+      supabase,
+      quoteId: insertedId,
+      channel: "staff",
+      email: {
+          from: staffFrom,
+          to: staffRecipients,
+          replyTo: email,
+          subject,
+          html: staffHtml,
+      },
     });
+    if (!staffDelivery.delivered) {
+      deliveryErrors.push(staffDelivery.detail ?? "staff: delivery incomplete");
+    }
 
     // Customer confirmation — summarize submitted items so they can verify their request
     const itemCountText =
@@ -565,7 +815,9 @@ export async function POST(req: NextRequest) {
           item.qty ? `Qty: ${esc(item.qty)}` : null,
           item.material ? `Material: ${esc(item.material)}` : null,
           item.dimensions ? `Size: ${esc(item.dimensions)}` : null,
-          item.sides ? `Sides: ${item.sides === "2" ? "Double-sided" : "Single-sided"}` : null,
+          item.sides
+            ? `Sides: ${item.sides === "2" ? "Double-sided" : "Single-sided"}`
+            : null,
           item.notes ? `Notes: ${esc(item.notes)}` : null,
         ]
           .filter(Boolean)
@@ -580,11 +832,15 @@ export async function POST(req: NextRequest) {
       })
       .join("");
 
-    await sendEmail({
-      from,
-      to: email,
-      subject: "Got your quote request — True Color Display Printing",
-      html: `
+    const customerDelivery = await deliverRequiredQuoteEmail({
+      supabase,
+      quoteId: insertedId,
+      channel: "customer",
+      email: {
+          from,
+          to: email,
+          subject: "Got your quote request — True Color Display Printing",
+          html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #1c1712; padding: 20px 30px;">
             <p style="color: #16C2F3; font-size: 18px; font-weight: bold; margin: 0;">
@@ -594,7 +850,7 @@ export async function POST(req: NextRequest) {
           <div style="padding: 24px 30px; background: #fff;">
             <p style="font-size: 16px; color: #1c1712;">Hi ${esc(name)},</p>
             <p style="color: #444;">
-              Got it! We received ${itemCountText} and will get back to you within 1 business day.
+              Got it! We received ${itemCountText}. The shop will follow up with next steps.
             </p>
 
             <p style="font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 8px;">
@@ -610,21 +866,6 @@ export async function POST(req: NextRequest) {
               or visit us at 216 33rd St W, Saskatoon.
             </p>
 
-            ${accountMagicLink ? `
-            <div style="background: #f0fbff; border: 1px solid #bae6fd; border-radius: 8px; padding: 18px 20px; margin-top: 20px;">
-              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #0c4a6e;">
-                Your True Color account is ready
-              </p>
-              <p style="margin: 0 0 12px; font-size: 13px; color: #374151; line-height: 1.6;">
-                We created a free account so you can track this quote, check on future orders, reorder past jobs, and get quoted faster — all in one place.
-              </p>
-              <a href="${accountMagicLink}" style="display: inline-block; background: #16C2F3; color: #ffffff; font-size: 13px; font-weight: 700; text-decoration: none; padding: 10px 24px; border-radius: 6px; margin-bottom: 10px;">
-                View my account →
-              </a>
-              <p style="margin: 0; font-size: 11px; color: #9ca3af;">
-                Link valid for 1 hour · Set a permanent password from your account page
-              </p>
-            </div>` : `
             <div style="background: #f4efe9; border-radius: 8px; padding: 14px 16px; margin-top: 20px;">
               <p style="color: #1c1712; font-size: 13px; font-weight: 700; margin: 0 0 4px;">
                 Track your orders online
@@ -634,7 +875,7 @@ export async function POST(req: NextRequest) {
                 <a href="https://truecolorprinting.ca/account" style="color: #16C2F3;">truecolorprinting.ca/account</a>
                 to view this quote, reorder past jobs, and get quoted faster.
               </p>
-            </div>`}
+            </div>
 
             <p style="color: #444; margin-top: 16px;">— The True Color Team</p>
           </div>
@@ -642,13 +883,36 @@ export async function POST(req: NextRequest) {
             truecolorprinting.ca · 216 33rd St W, Saskatoon · (306) 954-8688
           </div>
         </div>
-      `,
+        `,
+      },
     });
+    if (!customerDelivery.delivered) {
+      deliveryErrors.push(
+        customerDelivery.detail ?? "customer: delivery incomplete",
+      );
+    }
 
-    // Short reference for the portal success page: first 8 chars of the UUID
-    // uppercased (e.g. AB345C8E). Falls back to null for legacy non-DB paths.
-    const ref = insertedId ? insertedId.replace(/-/g, "").slice(0, 8).toUpperCase() : null;
-    return NextResponse.json({ sent: true, ref });
+    if (deliveryErrors.length > 0) {
+      await supabase
+        .from("quote_requests")
+        .update({
+          notification_last_error: deliveryErrors.join(" | ").slice(0, 1000),
+        })
+        .eq("id", insertedId);
+      return NextResponse.json(
+        {
+          error:
+            "Your quote was saved, but its confirmation is still being delivered. Please try again with this form.",
+        },
+        { status: 503 },
+      );
+    }
+
+    await supabase
+      .from("quote_requests")
+      .update({ notification_last_error: null })
+      .eq("id", insertedId);
+    return quoteSuccess(insertedId, isDuplicate);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to send";
     console.error("[quote-request]", message);

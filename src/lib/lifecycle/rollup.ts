@@ -33,6 +33,7 @@ export interface StatusRollup {
 }
 
 export interface MeasurementOutboxCounts {
+  queryFailed: number;
   dead: number;
   staleProcessing: number;
   overdueRetry: number;
@@ -42,6 +43,15 @@ export interface WaveProvisioningHealth {
   staleCreating: number;
   ambiguous: number;
   failed: number;
+}
+
+export interface QuoteDeliveryHealth {
+  publicStale: number;
+  publicFailedUnresolved: number;
+  pricedStale: number;
+  pricedFailedUnresolved: number;
+  publicQueryError: number;
+  pricedQueryError: number;
 }
 
 export interface RollupInputs {
@@ -85,8 +95,12 @@ export interface RollupInputs {
     revenue: MeasurementOutboxCounts;
     quote: MeasurementOutboxCounts;
   };
+  /** Durable receipt/GA4/Brevo work created by a paid Wave transition. */
+  wavePaymentEffects: MeasurementOutboxCounts;
   /** Wave-before-Clover reservations that need intervention. */
   waveProvisioning: WaveProvisioningHealth;
+  /** Public confirmations and payable quotes awaiting provider reconciliation. */
+  quoteDeliveries: QuoteDeliveryHealth;
 }
 
 const SEV1_CATEGORIES = new Set(["no_wave_invoice", "half_recorded"]);
@@ -222,10 +236,12 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
   const CRITICAL_EXTERNAL_CRONS = new Set([
     "gsc-sync",
     "ga4-sync",
+    "wave-payment-effects",
     "google-ads-monitor",
     "google-ads-conversions",
   ]);
   const STRICT_THIRTY_MINUTE_CRONS = new Set([
+    "wave-payment-effects",
     "google-ads-monitor",
     "google-ads-conversions",
   ]);
@@ -267,6 +283,7 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
     ["revenue" | "quote", MeasurementOutboxCounts]
   >) {
     const failures: Array<[keyof MeasurementOutboxCounts, string, string]> = [
+      ["queryFailed", "query-failed", "query failed"],
       ["dead", "dead", "dead"],
       ["staleProcessing", "stale-processing", "stale processing"],
       ["overdueRetry", "overdue-retry", "overdue retry"],
@@ -282,6 +299,26 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
     }
   }
 
+  // ── Wave paid-order effects ──────────────────────────────────────────────
+  // The heartbeat proves the worker ran; these durable state checks catch a
+  // dead or abandoned row that would otherwise disappear after a later empty,
+  // successful run and remain invisible to both dashboard and Telegram.
+  const waveEffectFailures: Array<[keyof MeasurementOutboxCounts, string, string]> = [
+    ["queryFailed", "query-failed", "query failed"],
+    ["dead", "dead", "dead"],
+    ["staleProcessing", "stale-processing", "stale processing"],
+    ["overdueRetry", "overdue-retry", "overdue retry"],
+  ];
+  for (const [field, key, label] of waveEffectFailures) {
+    if (inputs.wavePaymentEffects[field] > 0) {
+      reds.push({
+        key: `wave-payment-effects:${key}`,
+        panel: "panel-cron-heartbeats",
+        label: `Wave payment effects: ${inputs.wavePaymentEffects[field]} ${label}`,
+      });
+    }
+  }
+
   // ── Wave-before-Clover durable provisioning ──────────────────────────────
   const waveFailures: Array<[keyof WaveProvisioningHealth, string, string]> = [
     ["staleCreating", "stale-creating", "stale creating"],
@@ -294,6 +331,30 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
         key: `wave-provisioning:${key}`,
         panel: "panel-wave-drafts",
         label: `Wave provisioning: ${inputs.waveProvisioning[field]} ${label}`,
+      });
+    }
+  }
+
+  // ── Quote email provider reconciliation ──────────────────────────────────
+  // These rows survive request failures and later healthy traffic. Surface
+  // them in the shared rollup so both the dashboard and Telegram alert cron
+  // tell staff to use the authenticated reconciliation endpoint.
+  const quoteDeliveryFailures: Array<
+    [keyof QuoteDeliveryHealth, string, string]
+  > = [
+    ["publicStale", "public-stale", "public quote email(s) awaiting provider confirmation"],
+    ["publicFailedUnresolved", "public-failed", "public quote email failure(s) unresolved"],
+    ["pricedStale", "priced-stale", "priced quote email(s) awaiting provider confirmation"],
+    ["pricedFailedUnresolved", "priced-failed", "priced quote email failure(s) unresolved"],
+    ["publicQueryError", "public-query-error", "public quote delivery ledger query failure(s)"],
+    ["pricedQueryError", "priced-query-error", "priced quote delivery ledger query failure(s)"],
+  ];
+  for (const [field, key, label] of quoteDeliveryFailures) {
+    if (inputs.quoteDeliveries[field] > 0) {
+      reds.push({
+        key: `quote-delivery:${key}`,
+        panel: "panel-quote-deliveries",
+        label: `${inputs.quoteDeliveries[field]} ${label}`,
       });
     }
   }

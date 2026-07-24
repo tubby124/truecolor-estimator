@@ -73,11 +73,16 @@ describe("paid landing UX contracts", () => {
     input.set("product", "Vinyl Banners");
     input.set("details", "A custom banner size");
 
-    const payload = buildPaidQuotePayload(input, "turnstile-token");
+    const payload = buildPaidQuotePayload(
+      input,
+      "turnstile-token",
+      "a4e8c7e4-bc97-4f4f-9c05-04e3d5b85b42",
+    );
     const items = JSON.parse(String(payload.get("items"))) as Array<Record<string, string>>;
     expect(payload.get("name")).toBe("Test Buyer");
     expect(payload.get("email")).toBe("buyer@example.com");
     expect(payload.get("cf-turnstile-response")).toBe("turnstile-token");
+    expect(payload.get("submission_key")).toBe("a4e8c7e4-bc97-4f4f-9c05-04e3d5b85b42");
     expect(items).toEqual([expect.objectContaining({
       product: "Vinyl Banners",
       qty: "To be confirmed",
