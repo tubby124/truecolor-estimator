@@ -13,6 +13,7 @@ describe("sendTelegramNotification", () => {
       NEXT_PUBLIC_SUPABASE_URL: "",
       SUPABASE_SECRET_KEY: "",
       SUPABASE_SERVICE_KEY: "",
+      TRUE_COLOR_TELEGRAM_ALERT_MODE: "all",
     };
     vi.spyOn(global, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), { status: 200 })
@@ -38,6 +39,21 @@ describe("sendTelegramNotification", () => {
     process.env.TRUE_COLOR_TELEGRAM_BOT_TOKEN = "";
     await expect(sendTelegramNotification("hello")).resolves.toBe(false);
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("suppresses non-payment notifications by default", async () => {
+    process.env.TRUE_COLOR_TELEGRAM_ALERT_MODE = "";
+    await sendTelegramNotification("📋 <b>New quote request</b>\nTest");
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("still sends order-paid notifications in payments-only mode", async () => {
+    process.env.TRUE_COLOR_TELEGRAM_ALERT_MODE = "";
+    await sendTelegramNotification("💰 <b>Order paid</b>\n<b>TC-2026-0001</b> · $12.34");
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const [, init] = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+    const body = JSON.parse((init as RequestInit).body as string);
+    expect(body.text).toContain("Order paid");
   });
 
   it("swallows network errors silently", async () => {

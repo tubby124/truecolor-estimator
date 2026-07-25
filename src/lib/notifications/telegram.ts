@@ -72,12 +72,40 @@ async function logTelegramAttempt(opts: {
   }
 }
 
+function telegramPaymentOnlyMode(): boolean {
+  // Default to the low-noise ops mode Hasan asked for: only notify when money lands.
+  // Set TRUE_COLOR_TELEGRAM_ALERT_MODE=all to restore diagnostic/dashboard pushes.
+  return (process.env.TRUE_COLOR_TELEGRAM_ALERT_MODE ?? "payments_only") !== "all";
+}
+
+function isPaymentReceivedMessage(message: string, category: string | null): boolean {
+  const normalized = message.trim();
+  return (
+    normalized.startsWith("💰 <b>Order paid</b>") ||
+    normalized.startsWith("💸 <b>Partial payment received</b>") ||
+    category === "payment:received" ||
+    category === "payment:partial_received"
+  );
+}
+
 export async function sendTelegramNotification(
   message: string,
   category: string | null = null,
 ): Promise<boolean> {
   const token = process.env.TRUE_COLOR_TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TRUE_COLOR_TELEGRAM_CHAT_ID;
+
+  if (telegramPaymentOnlyMode() && !isPaymentReceivedMessage(message, category)) {
+    void logTelegramAttempt({
+      chatId: chatId ?? null,
+      category: category ? `suppressed:${category}` : "suppressed:non_payment",
+      ok: true,
+      statusCode: 204,
+      error: null,
+      messagePreview: message,
+    });
+    return;
+  }
 
   if (!token || !chatId) {
     console.warn("[telegram] env vars missing — skipping notification");
