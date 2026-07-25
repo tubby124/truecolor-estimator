@@ -41,15 +41,27 @@ describe("sendTelegramNotification", () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it("suppresses non-payment notifications by default", async () => {
+  it("suppresses ops-noise notifications by default", async () => {
     process.env.TRUE_COLOR_TELEGRAM_ALERT_MODE = "";
-    await sendTelegramNotification("📋 <b>New quote request</b>\nTest");
+    await expect(sendTelegramNotification("🚨 <b>JUST BROKE</b>\nDashboard health noise")).resolves.toBe(false);
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("still sends new quote notifications in low-noise mode", async () => {
+    process.env.TRUE_COLOR_TELEGRAM_ALERT_MODE = "";
+    await expect(sendTelegramNotification("📋 <b>New quote request</b>\nTest")).resolves.toBe(true);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("still sends new account notifications in low-noise mode", async () => {
+    process.env.TRUE_COLOR_TELEGRAM_ALERT_MODE = "";
+    await expect(sendTelegramNotification("📋 <b>New account</b>\nTest Person · test@example.com", "signup:account_created")).resolves.toBe(true);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
   it("still sends order-paid notifications in payments-only mode", async () => {
     process.env.TRUE_COLOR_TELEGRAM_ALERT_MODE = "";
-    await sendTelegramNotification("💰 <b>Order paid</b>\n<b>TC-2026-0001</b> · $12.34");
+    await expect(sendTelegramNotification("💰 <b>Order paid</b>\n<b>TC-2026-0001</b> · $12.34")).resolves.toBe(true);
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [, init] = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
     const body = JSON.parse((init as RequestInit).body as string);
