@@ -1,0 +1,20 @@
+name: Aging Orders Digest
+
+on:
+  schedule:
+    # Daily at 15:00 UTC (09:00 Saskatchewan, which stays on CST year-round).
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call aging-orders cron endpoint
+        run: |
+          STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://truecolorprinting.ca/api/cron/aging-orders)
+          echo "Response: $STATUS"
+          [ "$STATUS" = "200" ] || exit 1

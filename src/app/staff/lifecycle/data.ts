@@ -62,10 +62,10 @@ const STUCK_PENDING_PAYMENT_HOURS = 24;
 // so they're intentionally excluded from this list (no expected cadence).
 const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "payment-followup",       maxAgeHours: 2  },  // hourly
-  { name: "stale-quotes",           maxAgeHours: 2  },  // hourly
+  { name: "stale-quotes",           maxAgeHours: 26 },  // daily 14:00 UTC
   { name: "daily-payment-digest",   maxAgeHours: 26 },  // daily 13:00 UTC
   { name: "reconcile-payments",     maxAgeHours: 26 },  // daily 15:00 UTC
-  { name: "aging-orders",           maxAgeHours: 26 },  // daily 09:00 MT
+  { name: "aging-orders",           maxAgeHours: 26 },  // daily 09:00 Saskatchewan
   { name: "keepalive",              maxAgeHours: 26 },  // daily 12:00 UTC
   { name: "gsc-sync",               maxAgeHours: 26 },  // daily
   { name: "ga4-sync",               maxAgeHours: 26 },  // daily — Phase 9d defense-in-depth alongside gsc-sync

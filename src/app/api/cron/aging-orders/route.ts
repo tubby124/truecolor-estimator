@@ -20,6 +20,15 @@ import { recordCronRun } from "@/lib/cron/heartbeat";
 const FROM = "True Color Display Printing <hello@outreach.true-color.ca>";
 const DIGEST_TO = "info@true-color.ca";
 
+async function requiredQueryFailed(query: "stale-pending" | "stale-production") {
+  console.error(`[aging-orders] required ${query} query failed`);
+  await recordCronRun("aging-orders", false, `required_query_failed=${query}`);
+  return NextResponse.json(
+    { ok: false, error: "Aging orders query failed" },
+    { status: 503 },
+  );
+}
+
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
@@ -33,33 +42,37 @@ export async function GET(req: NextRequest) {
 
   // Query 1: pending_payment > 24h old, follow-up already sent (still unpaid)
   const cutoff24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { data: stalePending, error: err1 } = await supabase
-    .from("orders")
-    .select("id, order_number, total, created_at, customers ( name, email )")
-    .eq("status", "pending_payment")
-    .lt("created_at", cutoff24h)
-    .not("followup_sent_at", "is", null)
-    .order("created_at", { ascending: true });
-
-  if (err1) {
-    console.error("[aging-orders] stalePending query failed:", err1.message);
+  let stalePendingResult;
+  try {
+    stalePendingResult = await supabase
+      .from("orders")
+      .select("id, order_number, total, created_at, customers ( name, email )")
+      .eq("status", "pending_payment")
+      .lt("created_at", cutoff24h)
+      .not("followup_sent_at", "is", null)
+      .order("created_at", { ascending: true });
+  } catch {
+    return requiredQueryFailed("stale-pending");
   }
+  if (stalePendingResult.error) return requiredQueryFailed("stale-pending");
 
   // Query 2: in_production > 5 days old
   const cutoff5d = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: staleProduction, error: err2 } = await supabase
-    .from("orders")
-    .select("id, order_number, total, created_at, customers ( name, email )")
-    .eq("status", "in_production")
-    .lt("created_at", cutoff5d)
-    .order("created_at", { ascending: true });
-
-  if (err2) {
-    console.error("[aging-orders] staleProduction query failed:", err2.message);
+  let staleProductionResult;
+  try {
+    staleProductionResult = await supabase
+      .from("orders")
+      .select("id, order_number, total, created_at, customers ( name, email )")
+      .eq("status", "in_production")
+      .lt("created_at", cutoff5d)
+      .order("created_at", { ascending: true });
+  } catch {
+    return requiredQueryFailed("stale-production");
   }
+  if (staleProductionResult.error) return requiredQueryFailed("stale-production");
 
-  const pending = stalePending ?? [];
-  const production = staleProduction ?? [];
+  const pending = stalePendingResult.data ?? [];
+  const production = staleProductionResult.data ?? [];
 
   if (pending.length === 0 && production.length === 0) {
     console.log("[aging-orders] no aging orders — digest skipped");

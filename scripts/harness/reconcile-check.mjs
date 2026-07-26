@@ -406,41 +406,44 @@ async function main() {
     "payment-followup": { maxHours: 4, hard: false }, // hourly reminder emails, not payment settlement
   };
 
-  const { data: cronRows, error: cronErr } = await sb
-    .from("cron_runs")
-    .select("cron_name, ran_at, ok")
-    .order("ran_at", { ascending: false })
-    .limit(200);
+  // Query each monitored cron independently so high-frequency heartbeat rows
+  // cannot crowd daily jobs out of a shared result limit.
+  const cronChecks = await Promise.all(
+    Object.entries(CRON_WINDOWS).map(async ([name, cfg]) => {
+      const { data, error } = await sb
+        .from("cron_runs")
+        .select("cron_name, ran_at, ok")
+        .eq("cron_name", name)
+        .order("ran_at", { ascending: false })
+        .limit(1);
+      return { name, cfg, last: data?.[0] ?? null, error };
+    })
+  );
 
-  if (cronErr) {
-    // Table likely not created yet (migration pending). Not a recon failure —
-    // just note it so the harness is honest about coverage.
-    console.log(`  ℹ️  cron_runs table not readable (${cronErr.message.slice(0, 60)}).`);
-    console.log(`     Apply migration 20260525123000_cron_runs_heartbeat.sql to enable heartbeat checks.`);
-  } else {
-    const latestByName = {};
-    for (const row of cronRows ?? []) {
-      if (!latestByName[row.cron_name]) latestByName[row.cron_name] = row;
+  for (const { name, cfg, last, error } of cronChecks) {
+    const { maxHours, hard } = cfg;
+    if (error) {
+      const msg = `Cron '${name}' heartbeat could not be read: ${error.message.slice(0, 60)}`;
+      console.log(`${hard ? "  ❌" : "  ⚠ "} ${msg}`);
+      if (hard) issues.push(msg);
+      else warnings.push(msg);
+      continue;
     }
-    for (const [name, cfg] of Object.entries(CRON_WINDOWS)) {
-      const { maxHours, hard } = cfg;
-      const last = latestByName[name];
-      if (!last) {
-        console.log(`  ⚠  ${name}: no run ever recorded (expected within ${maxHours}h)`);
-        const msg = `Cron '${name}' has never recorded a heartbeat — verify it is scheduled + running`;
-        if (hard) issues.push(msg);
-        else warnings.push(msg);
-        continue;
-      }
-      const ageHours = (Date.now() - new Date(last.ran_at).getTime()) / 3600_000;
-      if (ageHours > maxHours) {
-        console.log(`${hard ? "  ❌" : "  ⚠ "} ${name}: last ran ${ageHours.toFixed(1)}h ago (window ${maxHours}h) — SILENT DEATH`);
-        const msg = `Cron '${name}' last ran ${ageHours.toFixed(1)}h ago, exceeds ${maxHours}h window`;
-        if (hard) issues.push(msg);
-        else warnings.push(msg);
-      } else {
-        console.log(`  ✅ ${name}: last ran ${ageHours.toFixed(1)}h ago (within ${maxHours}h)`);
-      }
+    if (!last) {
+      console.log(`  ⚠  ${name}: no run ever recorded (expected within ${maxHours}h)`);
+      const msg = `Cron '${name}' has never recorded a heartbeat — verify it is scheduled + running`;
+      if (hard) issues.push(msg);
+      else warnings.push(msg);
+      continue;
+    }
+    const ageHours = (Date.now() - new Date(last.ran_at).getTime()) / 3600_000;
+    if (ageHours > maxHours) {
+      console.log(`${hard ? "  ❌" : "  ⚠ "} ${name}: last ran ${ageHours.toFixed(1)}h ago (window ${maxHours}h) — SILENT DEATH`);
+      const msg = `Cron '${name}' last ran ${ageHours.toFixed(1)}h ago, exceeds ${maxHours}h window`;
+      if (hard) issues.push(msg);
+      else warnings.push(msg);
+    } else {
+      console.log(`  ✅ ${name}: last ran ${ageHours.toFixed(1)}h ago (within ${maxHours}h)`);
     }
   }
 
