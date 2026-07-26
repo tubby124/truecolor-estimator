@@ -1,0 +1,31 @@
+name: Google Ads Performance Sync
+
+on:
+  schedule:
+    # Daily at 14:30 UTC. The sync reads a completed Regina report window, so it
+    # deliberately runs well after the previous Saskatchewan day has closed.
+    - cron: "30 14 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Run read-only Google Ads performance sync
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$CRON_SECRET"
+          RESPONSE=$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            --write-out "\n%{http_code}" \
+            https://truecolorprinting.ca/api/cron/google-ads-performance)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1)
+          echo "Status: $STATUS"
+          echo "Body: $BODY"
+          # 200 = synced or idempotent replay. 409 = an identical sync is already
+          # running, which is a healthy concurrency guard rather than a failure.
+          [ "$STATUS" = "200" ] || [ "$STATUS" = "409" ]

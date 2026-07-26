@@ -74,6 +74,7 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "wave-payment-effects",   maxAgeHours: 0.5 }, // every 5m — crash recovery for Wave receipts/analytics/CRM
   { name: "google-ads-monitor",     maxAgeHours: 0.5 }, // every 15m — spend warning + protective pause
   { name: "google-ads-conversions", maxAgeHours: 0.5 }, // every 15m — revenue + quote measurement delivery
+  { name: "google-ads-performance",  maxAgeHours: 26 },  // daily 14:30 UTC — read-only search-term + spend review feed
 ];
 
 interface MeasurementOutboxRow {

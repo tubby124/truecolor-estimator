@@ -404,6 +404,9 @@ async function main() {
     "reconcile-payments": { maxHours: 36, hard: true }, // daily 9 AM MT
     "daily-payment-digest": { maxHours: 36, hard: true }, // daily 13:00 UTC
     "payment-followup": { maxHours: 4, hard: false }, // hourly reminder emails, not payment settlement
+    // Read-only paid-search measurement feed. Soft: a stale sync costs review
+    // visibility, not money, and it has no authority to change Google Ads.
+    "google-ads-performance": { maxHours: 26, hard: false }, // daily 14:30 UTC
   };
 
   // Query each monitored cron independently so high-frequency heartbeat rows
