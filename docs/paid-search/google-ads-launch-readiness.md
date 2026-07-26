@@ -124,6 +124,51 @@ The signed activation attestation must contain exactly three fresh execute-mode 
 
 The July 24 production drill exposed and fixed a fail-closed evidence bug before activation: PostgreSQL JSONB reorders object keys, while the original SHA-256 proof digest used insertion-order-sensitive JSON serialization. The producer and verifier now share a canonical recursive key-order digest, with a regression that reorders every object key. The full Google Ads suite passes 81/81, independent security review found no high/medium issues, and fresh production proof rows survive the real Supabase round trip. Existing pre-fix drill digests remain invalid by design.
 
+## Measurement feedback loop — deployed and proven (2026-07-26)
+
+The read-only performance feedback loop is live in production. This closes the last
+reviewer NO-SHIP items, which were operational evidence gates rather than code defects.
+It adds measurement only; it has no authority to mutate Google Ads and does not move any
+launch gate below.
+
+Deployed evidence, all captured while every campaign remained PAUSED at CA$0 spend:
+
+- Migration `20260725183000_paid_search_feedback_loop.sql` applied to `dczbgraekmzirxknjvwe`
+  and present in the remote ledger.
+- Grant surface verified by role. The raw staging tables `google_ads_daily_metrics` and
+  `google_ads_optimization_proposals` return 403 even to the service role (INSERT/UPDATE
+  only, no SELECT); the only read path is the published views. Failed, partial, stale, and
+  abandoned rows therefore cannot become published data by construction, not merely by
+  query logic. Anon is 401 on every object.
+- Two-call idempotency proof against the deployed route: call 1 returned
+  `idempotent:false`, call 2 returned `idempotent:true`, and a third call from the
+  scheduled GitHub workflow also returned `idempotent:true`. After all three calls the
+  database holds exactly one `succeeded` receipt, key
+  `google-ads-performance-v1:1072816342:2026-06-26:2026-07-25`, with
+  `verified_currency_code=CAD` and `verified_time_zone=America/Regina` persisted.
+- Published views remain empty with no duplicate rows. Zero metric rows across the full
+  30-day window is the current CA$0 spend evidence.
+- Persisted attestation confirms all three canonical campaigns PAUSED, conversion tracking
+  owned by `customers/1072816342` as `CONVERSION_TRACKING_MANAGED_BY_SELF` with tracking ID
+  `18330693756` and no cross-account ID, `purchase_online` and `quote_won` primary and
+  included, `qualified_call_60s` secondary and excluded, the legacy `About Us` page-view
+  action excluded, and PAGE_VIEW plus CALL_FROM_ADS goals non-biddable.
+- Scheduled daily at 14:30 UTC via `.github/workflows/cron-google-ads-performance.yml`,
+  registered in the lifecycle heartbeat panel and the reconcile harness at a 26h window.
+  `npm run harness:reconcile` reports it green.
+
+Observation for a future review, not a blocker: conversion action `7689029977`
+"Purchase - Website (True Color)" is a second PURCHASE-category action on the account. It is
+currently `primaryForGoal=false` and `includeInConversionsMetric=false`, so it does not
+contribute to the biddable PURCHASE goal. If it is ever re-included it would double-count
+against `purchase_online`. Leave it excluded.
+
+Also closed this session: Wave payment-effect recovery moved to the Railway `*/15` cron
+service as its primary source. The GitHub workflow previously declared `*/5`, a cadence
+GitHub does not deliver, so the crash-recovery gap could run for hours unobserved; it is now
+a truthful `*/15` backup. Verified by a live tick in which all four Railway-driven endpoints
+recorded fresh heartbeats, including the Google Ads spend monitor.
+
 ## Remaining launch blockers
 
 Campaign creation is complete, but public-pilot activation is prohibited until all remaining gates are evidenced. The real attributable imports below are obtained only through the separately approved bounded controlled-test state defined in the commercial operating plan; they are not permission for an informal self-click or full pilot launch:
