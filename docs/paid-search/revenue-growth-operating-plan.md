@@ -4,7 +4,7 @@
 
 **Ads account:** True Color Display Print `107-281-6342`
 
-**Current state:** The 2026-07-23 credential-gated verifier reached the exact True Color account with zero safety failures. Core, Competitor, and Brand remain paused at CA$0. The CA$600/CAD promotion and qualified-call asset are verified. Launch remains prohibited while nine competitor RSAs are in policy review and the genuine `purchase_online` and `quote_won` revenue reconciliations are missing.
+**Current state:** The 2026-07-25 credential-gated verifier reached the exact True Color account with zero safety failures. Core, Competitor, and Brand remain paused at CA$0. The CA$600/CAD promotion and qualified-call asset are verified. All 19 RSAs, including all nine Competitor RSAs, are approved/reviewed with no policy topics. Launch remains prohibited until the owner supplies the exact post-August controlled-test date and genuine `purchase_online` and `quote_won` revenue reconciliations are obtained.
 
 ## Objective and planning truth
 

@@ -77,7 +77,7 @@
   "recordedLiveEvidence": {
     "apiVersion": "v24",
     "status": "VALIDATED_PAUSED",
-    "validatedAt": "2026-07-23",
+    "validatedAt": "2026-07-25",
     "managerCustomerId": "1125402990",
     "managerLinkId": "6626494765",
     "billingSetupId": "8490021913",
@@ -136,8 +136,8 @@
       "COMPETITOR": 2.5,
       "BRAND": 1.5
     },
-    "policyApprovalStatus": "COMPETITOR_RSA_APPEAL_REQUIRED",
-    "disapprovedCompetitorResponsiveSearchAds": 9,
+    "policyApprovalStatus": "ALL_RSAS_APPROVED_REVIEWED",
+    "disapprovedCompetitorResponsiveSearchAds": 0,
     "allCampaignsPaused": true,
     "spendCad": 0
   },
@@ -260,11 +260,8 @@
     }
   ],
   "blockers": [
-    "OFFLINE_UPLOADER_MIGRATION",
     "PURCHASE_UPLOAD_CLICKS_OBSERVED",
     "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
-    "PROMOTION_ELIGIBILITY",
-    "RSA_POLICY_APPROVAL",
     "AUCTION_INSIGHTS_SIGNOFF",
     "ENHANCED_CONSENT_DECISION",
     "CPC_CEILING_LAUNCH_APPROVAL",

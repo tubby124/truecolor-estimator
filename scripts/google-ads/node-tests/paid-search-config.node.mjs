@@ -475,15 +475,18 @@ test("locks the confirmed True Color child account and verified account-side gat
       "PURCHASE_UPLOAD_CLICKS_ACTION",
       "QUOTE_WON_UPLOAD_CLICKS_ACTION",
       "CONVERSION_GOAL_GRAPH",
+      "OFFLINE_UPLOADER_MIGRATION",
       "QUALIFIED_CALL_ACTION",
+      "PROMOTION_ELIGIBILITY",
       "COMPETITOR_LANDING_DEPLOYED",
+      "RSA_POLICY_APPROVAL",
       "CURRENT_KEYWORD_PLANNER_FORECAST",
       "BUDGET_APPROVAL",
     ],
   );
   assert.deepEqual(
     paidSearchConfig.externalGates.filter((gate) => gate.status === "BLOCKED").map((gate) => gate.code).slice(0, 4),
-    ["OFFLINE_UPLOADER_MIGRATION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED", "PROMOTION_ELIGIBILITY"],
+    ["PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED", "AUCTION_INSIGHTS_SIGNOFF", "ENHANCED_CONSENT_DECISION"],
   );
 
   for (const mutate of [
@@ -635,17 +638,17 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.equal(manifest.requiredFreshLiveVerification, true);
   assert.equal(manifest.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
   assert.equal(manifest.conversionMeasurement.requiredUploadClickActions.quoteWon.actionId, "7694360840");
-  assert.equal(manifest.recordedLiveEvidence.validatedAt, "2026-07-23");
+  assert.equal(manifest.recordedLiveEvidence.validatedAt, "2026-07-25");
   assert.equal(manifest.recordedLiveEvidence.counts.positiveKeywords, 83);
   assert.deepEqual(manifest.recordedLiveEvidence.geoTarget.center, { latitude: 52.129728, longitude: -106.659637 });
   assert.deepEqual(manifest.recordedLiveEvidence.conversionGoalGraph.biddingActionIds, ["7694360837", "7694360840"]);
   assert.equal(manifest.recordedLiveEvidence.allCampaignsPaused, true);
   assert.equal(manifest.recordedLiveEvidence.spendCad, 0);
-  assert.ok(manifest.blockers.includes("OFFLINE_UPLOADER_MIGRATION"));
+  assert.ok(!manifest.blockers.includes("OFFLINE_UPLOADER_MIGRATION"));
   assert.ok(manifest.blockers.includes("PURCHASE_UPLOAD_CLICKS_OBSERVED"));
   assert.ok(manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_OBSERVED"));
-  assert.ok(manifest.blockers.includes("PROMOTION_ELIGIBILITY"));
-  assert.ok(manifest.blockers.includes("RSA_POLICY_APPROVAL"));
+  assert.ok(!manifest.blockers.includes("PROMOTION_ELIGIBILITY"));
+  assert.ok(!manifest.blockers.includes("RSA_POLICY_APPROVAL"));
   assert.ok(!manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
   assert.ok(!manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
   assert.equal(manifest.launchCandidates.length, 15);
