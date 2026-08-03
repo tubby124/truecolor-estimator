@@ -545,6 +545,7 @@ test("locks the confirmed True Color child account and verified account-side gat
       "CURRENT_KEYWORD_PLANNER_FORECAST",
       "CPC_CEILING_LAUNCH_APPROVAL",
       "BUDGET_APPROVAL",
+      "DATES_AND_HARD_STOP",
       "MOBILE_QA",
     ],
   );
@@ -553,7 +554,6 @@ test("locks the confirmed True Color child account and verified account-side gat
     [
       "PURCHASE_UPLOAD_CLICKS_OBSERVED",
       "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
-      "DATES_AND_HARD_STOP",
       "LAUNCH_CONTROL_SIGNOFF",
       "PRESENCE_ONLY_AND_EDITOR_PREVIEW",
     ],
