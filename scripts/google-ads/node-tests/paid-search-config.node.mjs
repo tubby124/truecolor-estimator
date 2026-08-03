@@ -10,7 +10,9 @@ import {
   COMPETITOR_DESTINATION_BINDING,
   controlledTestLaunchBlockers,
   exactAccountSpendCad,
+  evaluateLaunchedLiveState,
   evaluatePausedLiveState,
+  LAUNCHED_EXPECTED_CAMPAIGNS,
   liveVerificationStatus,
   OFFLINE_UPLOADER_LAUNCH_BLOCKER,
   withoutLoginCustomerHeader,
@@ -71,9 +73,8 @@ test("launch candidate transitions require evidence and can reach fresh-live pre
   assert.equal(ready.held.length, 4);
 });
 
-test("live verification contract rejects launch-critical drift and missing noindex", () => {
-  // Fixture-only IDs exercise the contract; they are not True Color account IDs.
-  const live = {
+// Fixture-only conversion IDs exercise the contract; they are not True Color account IDs.
+const makePausedLiveState = () => ({
     account: { id: "1072816342", currencyCode: "CAD", timeZone: "America/Regina" },
     spendScope: "EXACT_ACCOUNT_TOTAL",
     campaigns: paidSearchConfig.campaigns.map((campaign) => ({
@@ -219,7 +220,33 @@ test("live verification contract rejects launch-critical drift and missing noind
       markerFound: true,
       noindex: true,
     }],
-  };
+});
+
+const makeLaunchedLiveState = () => {
+  const live = makePausedLiveState();
+  live.campaigns = live.campaigns.map((campaign) => ({
+    ...campaign,
+    status: "ENABLED",
+    dailyBudgetCad: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name].budget,
+    cpcCeilingCad: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name].ceiling,
+  }));
+  live.allCampaigns = live.allCampaigns.map((campaign) => ({
+    ...campaign,
+    status: "ENABLED",
+  }));
+  live.pausedAdGroups = 0;
+  live.enabledAdGroups = 19;
+  live.pausedResponsiveSearchAds = 0;
+  live.enabledResponsiveSearchAds = 19;
+  live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
+  live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "ENABLED" }));
+  live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "ENABLED" }));
+  live.spendCadPilot = 12.5;
+  return live;
+};
+
+test("live verification contract rejects launch-critical drift and missing noindex", () => {
+  const live = makePausedLiveState();
   assert.deepEqual(evaluatePausedLiveState(live), { failures: [], launchBlockers: [] });
   const restEncoded = structuredClone(live);
   restEncoded.qualifiedCallConversion.minimumDurationSeconds = "60";
@@ -376,6 +403,35 @@ test("live verification contract rejects launch-critical drift and missing noind
   assert.equal(liveVerificationStatus(discoveryResult), "BLOCKED");
   assert.equal(liveVerificationStatus({ failures: ["wrong account"], launchBlockers: discoveryResult.launchBlockers }), "UNSAFE");
   assert.equal(liveVerificationStatus({ failures: [], launchBlockers: [] }), "VALIDATED_PAUSED");
+});
+
+test("launched live verification enforces the exact Stage 1 state", () => {
+  assert.deepEqual(LAUNCHED_EXPECTED_CAMPAIGNS, {
+    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 14, ceiling: 6, status: "ENABLED" },
+    GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 4, status: "ENABLED" },
+    GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 2.5, status: "ENABLED" },
+  });
+
+  const launched = makeLaunchedLiveState();
+  const launchedResult = evaluateLaunchedLiveState(launched);
+  assert.deepEqual(launchedResult, { failures: [], launchBlockers: [] });
+  assert.equal(liveVerificationStatus({ ...launchedResult, mode: "launched" }), "VALIDATED_LAUNCHED");
+
+  const stillPaused = makeLaunchedLiveState();
+  stillPaused.campaigns[0].status = "PAUSED";
+  stillPaused.allCampaigns[0].status = "PAUSED";
+  assert.ok(evaluateLaunchedLiveState(stillPaused).failures.length > 0);
+
+  const wrongBudget = makeLaunchedLiveState();
+  wrongBudget.campaigns[0].dailyBudgetCad = 13;
+  assert.ok(evaluateLaunchedLiveState(wrongBudget).failures.length > 0);
+
+  const unexpectedFourth = makeLaunchedLiveState();
+  unexpectedFourth.allCampaigns.push({ id: "99999999999", name: "Historical Paused", status: "PAUSED" });
+  assert.ok(evaluateLaunchedLiveState(unexpectedFourth).failures.length > 0);
+
+  assert.deepEqual(evaluatePausedLiveState(makePausedLiveState()), { failures: [], launchBlockers: [] });
+  assert.throws(() => liveVerificationStatus({ failures: [], launchBlockers: [], mode: "unknown" }));
 });
 
 test("applied incentive API evidence is exact, fresh, redacted, and direct-customer scoped", () => {

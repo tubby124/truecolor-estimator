@@ -18,12 +18,12 @@ export const HARD_STOP_PROFILES = Object.freeze({
   }),
   "public-pilot": Object.freeze({
     spendScope: "EXACT_ACCOUNT_TOTAL",
-    warningCad: 500,
-    thresholdCad: 625,
-    approvedCapCad: 650,
+    warningCad: 1000,
+    thresholdCad: 1250,
+    approvedCapCad: 1300,
     requiresExplicitWindow: false,
     windowStart: "2026-07-20T00:00",
-    windowEnd: "2026-09-18T00:00",
+    windowEnd: "2026-12-31T00:00",
   }),
 });
 
