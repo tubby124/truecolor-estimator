@@ -93,6 +93,8 @@ That is roughly 78 clicks and CA$129 over 30 days, not a guarantee. Producing 31
 
 The CA$600 promotion is financing, not profit. Exclude promotional credit when calculating CPA and ROAS.
 
+**2026-08-03 amendment — the constraint is understood and the spend target is being pursued anyway.** Everything above remains true: budget does not manufacture local high-intent demand, and the forecast at conservative settings is ~CA$4.30/day. The owner nonetheless approved chasing the CA$600 promotion (expires 2026-09-16; CA$600 cash unlocks CA$600 credit — 50% off the search-term and conversion data the account needs) with a CA$13.33/day pace requirement. Budgets were raised to Core CA$14 / Competitor CA$4 / Brand CA$3 (live) with ceilings CA$6.00/CA$4.00/CA$2.50, and a checkpoint-gated escalation ladder (broad match on product groups → Search Partners → 100 km radius) is expected to be needed. Realistic odds of reaching CA$600 by Sep 16: roughly 40%; a miss still yields a working paid channel and real data. This supersedes the conservative controlled-test-first sequencing: the public launch proceeds while both revenue-upload gates are proven by the zero-spend synthetic-gclid pipeline test plus the first genuine paid order, and it accepts a maximum runaway exposure of CA$1,300 (up from CA$650), enforced by the runtime hard-stop monitor.
+
 ## Campaign architecture
 
 ### Tier 1 — controlled demand capture
@@ -119,10 +121,10 @@ The CA$600 promotion is financing, not profit. Exclude promotional credit when c
 
 ## Budget and bidding controls
 
-- Core: CA$8 average daily budget; CA$4.00 Maximize Clicks ceiling; CA$480 over the 60-day window.
-- Competitor: CA$2 average daily budget; CA$2.50 ceiling; CA$120 over the 60-day window.
-- Brand: staged at CA$3/day and CA$1.50 ceiling, but held at launch and excluded from the approved pilot spend.
-- Qualifying-spend target: CA$600 from July 20 through September 17, 2026. Warning: CA$500. Protective pause: CA$625. Absolute cap: CA$650.
+- Core: CA$14 average daily budget; CA$6.00 Maximize Clicks ceiling; CA$644 over the 46-day window (updated 2026-08-03).
+- Competitor: CA$4 average daily budget; CA$4.00 ceiling; CA$184 over the 46-day window.
+- Brand: CA$3/day and CA$2.50 ceiling, live at launch (2026-08-03 owner decision; Auction Insights sign-off remains an open documentation gate).
+- Qualifying-spend target: CA$600 from August 3 through September 17, 2026 (promo expires September 16). Warning: CA$1000. Protective pause: CA$1250. Absolute cap: CA$1300. Monitor window runs to December 31, 2026 to allow the promotional credit to be spent.
 - Google may spend above the average daily budget on an individual day. Cumulative cost must therefore be enforced by the monitor rather than inferred from daily budgets.
 - Do not raise budgets unless the campaign is actually budget-limited.
 - Do not raise CPC ceilings unless search terms are qualified, paid economics are positive, and lost impression share shows rank—not budget—is restricting proven demand.
@@ -177,7 +179,7 @@ Verified:
 - manual assets are approved;
 - Saskatoon +35 km presence-only, Search-only networks, exact customer, final URLs, suffix, budgets, CPC ceilings, and dates pass live preview;
 - the CA$600/CAD promotion is API-confirmed as redeemed with CA$600 qualifying spend required and CA$0 accumulated;
-- the CA$8/CA$2 launch budgets, held Brand state, CA$4.00/CA$2.50 ceilings, September 17 end date, CA$600 target, CA$650 cap, monitoring owner, and pause procedure are locked in the repository contract;
+- the CA$14/CA$4/CA$3 launch budgets, live Brand state, CA$6.00/CA$4.00/CA$2.50 ceilings, September 17 end date, CA$600 qualifying target, CA$1300 cap, monitoring owner, and pause procedure are locked in the repository contract (2026-08-03 promo-chase values);
 - mobile landing, configurator, cart, checkout, payment, and confirmation paths pass;
 - Enhanced Conversions remains disabled unless purpose-specific customer-data consent/disclosure is approved;
 - Brand remains paused without Auction Insights justification.
@@ -204,10 +206,10 @@ A real ad-click order cannot be observed while every ad is inactive. After Gate 
 
 ### Cumulative-spend hard-stop mechanism
 
-The CA$650 absolute cap is not enforceable through an end date or a manual glance. Before any controlled or public activation, deploy and prove the following checked-in controls:
+The CA$1300 absolute cap is not enforceable through an end date or a manual glance. Before any controlled or public activation, deploy and prove the following checked-in controls:
 
 - a credentialed API monitor polling exact-account cumulative cost across every campaign at least every 15 minutes in `America/Regina`, with any unexpected enabled campaign treated as unsafe;
-- automatic account-wide pause of every enabled campaign at a protective CA$25 threshold during the CA$30 controlled test; during the public pilot, warn at CA$500 and automatically pause every enabled campaign at CA$625, leaving a CA$25 buffer below the CA$650 absolute cap;
+- automatic account-wide pause of every enabled campaign at a protective CA$25 threshold during the CA$30 controlled test; during the public pilot, warn at CA$1000 and automatically pause every enabled campaign at CA$1250, leaving a CA$50 buffer below the CA$1300 absolute cap (raised 2026-08-03 from 500/625/650 so the earned promotional credit can be spent without the monitor stranding it);
 - durable operator alert through the lifecycle rollup containing monitor state, spend, action, timestamp, and pause result;
 - after exact True Color account verification, fail-closed account-wide pause attempts when spend or campaign state cannot be verified; wrong/unreadable account identity never mutates, and authentication, mutation, or readback failure remains red;
 - a tested manual fallback owned by Hasan: if automation is unhealthy, inspect current cumulative spend immediately and keep every campaign paused until monitoring is healthy and the state is reconciled;

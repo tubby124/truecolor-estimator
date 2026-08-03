@@ -199,7 +199,7 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
       reds.push({
         key: "google-ads-monitor:warning",
         panel: "panel-cron-heartbeats",
-        label: `Google Ads spend warning${spendLabel} — CA$500 warning threshold reached`,
+        label: `Google Ads spend warning${spendLabel} — CA$1000 warning threshold reached`,
       });
     } else if (outcome === "STOPPED" && pauseVerified) {
       reds.push({

@@ -2,6 +2,8 @@
 
 Revenue baseline, campaign economics, operating cadence, and scale/stop rules are defined in [revenue-growth-operating-plan.md](revenue-growth-operating-plan.md). That plan is the commercial control layer; this file remains the technical launch checklist.
 
+**2026-08-03 disposition — promo-chase launch approved.** The owner approved a deliberate departure from the conservative pilot below to chase the redeemed CA$600 promotion before it expires 2026-09-16: spending CA$600 cash unlocks CA$600 credit. The repository contract was updated through the approved-change process (not bypassed): pilot re-dated 2026-08-03 → 2026-09-17 (46 inclusive days); budgets Core CA$14 / Competitor CA$4 / Brand CA$3 per day with **Brand live at launch** (superseding the "keep Brand paused" default while `AUCTION_INSIGHTS_SIGNOFF` remains an open documentation gate); Maximize Clicks ceilings CA$6.00 / CA$4.00 / CA$2.50, deliberately above the 2026-07-17 forecast; all nine Core ad groups released (`rush-same-day`, `generic-print-price`, `generic-sign-shop` promoted to Tier 1). The runtime hard-stop profile now warns at **CA$1000**, protectively pauses at **CA$1250**, and absolutely caps at **CA$1300**, with the monitor window extended to 2026-12-31 so the promotional credit can be spent after the promo window closes. **This raises maximum runaway exposure from CA$650 to CA$1,300 — that is the accepted cost of the decision.** Launch is manual (Google Ads UI enable-only; campaign start/end dates stay 2026-07-20 / 2026-09-17 until the credit lands). Post-launch drift detection runs via `npm run validate:google-ads:launched`; the paused mode remains intact for rollback. Escalation ladder on missed Monday pacing checkpoints (target CA$13.33/day): Stage 2 broad match on product groups only → Stage 3 Search Partners → Stage 4 radius 100 km. Performance Max and Shopping stay out. Kill criteria: unexpected enabled campaigns, two missed monitor heartbeats, conversion tracking unproven by a real transaction within 7 days, or under CA$300 cumulative by Aug 31 with Stage 4 exhausted.
+
 **2026-07-25 disposition:** A fresh credential-gated v24 readback passed against child customer `1072816342` with no safety failures. All campaigns, ad groups, and ads remain paused and exact-account spend is CA$0. All 19 RSAs—including all nine Competitor RSAs—now return `APPROVED` / `REVIEWED` with no policy topics, and Policy Manager independently reports no policy issues after refresh. No appeal is required. The CA$600/CAD promotion is accepted as confirmed by the owner and remains API-visible as redeemed. The qualified-call asset is approved/reviewed. The Railway-native 15-minute monitor is producing valid CA$0 heartbeats, and the July 25 non-spend drill freshly verified the CA$500 warning, CA$625 protective pause, fail-closed path, Telegram delivery, and durable Supabase evidence without touching live campaigns. The controlled Coroplast activation/rollback controller and all 81 Google Ads contract tests pass. Campaign activation remains prohibited until a post-August launch date is supplied and genuine `purchase_online`/`quote_won` revenue reconciliation is obtained through the bounded controlled test.
 
 ## Current disposition
@@ -55,16 +57,15 @@ node --test scripts/google-ads/node-tests/paid-search-config.node.mjs
 
 The generated Editor CSVs do not encode an advertiser ID or the advanced presence-only setting. They do carry the +35 km radius for operator review, but the API request and readback must prove both the radius and presence-only behavior before launch. Do not hand-edit generated artifacts.
 
-## Pilot controls
+## Pilot controls (updated 2026-08-03 for the promo chase)
 
-- Core: CA$8/day; 60-day planning maximum CA$480.
-- Competitor: CA$2/day; 60-day planning maximum CA$120.
-- Brand: held at launch; its staged CA$3/day budget is not part of the approved pilot spend.
-- Target qualifying spend: CA$600. Absolute pilot cap: CA$650.
+- Core: CA$14/day; 46-day planning maximum CA$644.
+- Competitor: CA$4/day; 46-day planning maximum CA$184.
+- Brand: CA$3/day, live at launch; 46-day planning maximum CA$138. Its ad group keeps the `HOLD_AUCTION_INSIGHTS` tier label as a taxonomy marker (18 launch candidates / 1 held), but it serves.
+- Target qualifying spend: CA$600 (Google's promo requirement, pre-tax). Planned allocation CA$21/day × 46 days = CA$966. Absolute cap: CA$1300 (runtime-enforced).
 - Google Ads uses daily budgets, not a true lifetime cap. The end date, monitoring, and hard stop are mandatory.
-- Maximize Clicks is configured with forecast-backed ceilings staged while paused: Core CA$4.00, Competitor CA$2.50, Brand CA$1.50. The current exact-only Competitor forecast is about 1.89 clicks/day at CA$2.50 versus 2.16 at CA$4.00, so the lower ceiling preserves most modeled capture while limiting auction exposure.
-- Technical forecast/staging is verified; owner approval to use these exact ceilings at launch remains a separate blocked gate.
-- Launch Tier 1 contains the six direct-product ad groups plus exact-only competitor conquest. Rush, generic pricing, and generic sign-shop groups are Tier 2 and must remain paused during the first controlled conversion test. Brand remains held for Auction Insights.
+- Maximize Clicks ceilings: Core CA$6.00, Competitor CA$4.00, Brand CA$2.50 — deliberately above the 2026-07-17 forecast-optimal values, because the promo chase optimizes for qualifying spend and data volume, not minimum CPC. Forecast delivery at the old settings was ~CA$4.30/day against a CA$13.33/day pace requirement; underdelivery, not overspend, is the primary risk, and the monitor caps the downside.
+- All nine Core ad groups (Tier 1, including the three former Tier 2 expansion groups) plus exact-only competitor conquest launch together. Competitor stays exact-only permanently.
 - The final URL suffix preserves UTM and ValueTrack fields for keyword, match type, device, location, ad group, creative, campaign, and network. Auto-tagging supplies the click ID.
 
 ### Cumulative-spend hard stop
@@ -81,7 +82,7 @@ npm run monitor:google-ads-spend -- \
   --window-end=2026-07-23T08:00
 ```
 
-The controlled-test window is mandatory, interpreted in `America/Regina`, restricted to whole-hour boundaries, and cannot exceed 72 hours. Hour-segmented Google Ads cost is filtered to `window-start` inclusive and `window-end` exclusive. Its protective threshold is CA$25 against the separately approved CA$30 cap. The fixed public-pilot window is July 20 through September 17 local: CA$500 emits an operator warning, CA$625 triggers the protective pause, and CA$650 is the absolute cap. At or above a pause threshold—or after the selected window ends—the dry-run result is `STOP_REQUIRED` / `WOULD_PAUSE`.
+The controlled-test window is mandatory, interpreted in `America/Regina`, restricted to whole-hour boundaries, and cannot exceed 72 hours. Hour-segmented Google Ads cost is filtered to `window-start` inclusive and `window-end` exclusive. Its protective threshold is CA$25 against the separately approved CA$30 cap. The fixed public-pilot window is July 20, 2026 through December 31, 2026 local (extended 2026-08-03 so the promotional credit can be spent after the promo qualification window closes): CA$1000 emits an operator warning, CA$1250 triggers the protective pause, and CA$1300 is the absolute cap. At or above a pause threshold—or after the selected window ends—the dry-run result is `STOP_REQUIRED` / `WOULD_PAUSE`.
 
 Only the explicit `--execute` flag authorizes a pause:
 

@@ -31,7 +31,7 @@ const exactPhrase = (terms) => terms.flatMap((term) => [keyword(term, "EXACT"), 
 const coreGroup = ({ key, name, product, finalUrl, terms, headlines, crossNegatives = [], launchTier = "TIER_1_PRODUCT" }) => ({
   key,
   name,
-  status: "PAUSED",
+  status: "ENABLED",
   launchTier,
   finalUrl,
   keywords: exactPhrase(terms),
@@ -63,7 +63,7 @@ const neutralCompetitorRsa = {
 };
 
 const campaignBase = {
-  status: "PAUSED",
+  status: "ENABLED",
   channel: "SEARCH",
   networks: { googleSearch: true, searchPartners: false, display: false },
   geoTarget: {
@@ -94,21 +94,21 @@ export const paidSearchConfig = {
   currency: "CAD",
   accountCustomerId: "1072816342",
   pilot: {
-    startDate: "2026-07-20",
+    startDate: "2026-08-03",
     endDate: "2026-09-17",
-    inclusiveDays: 60,
+    inclusiveDays: 46,
     regenerateDatesIfGatesNotClearedByStart: true,
     hardStopRequired: true,
     generatorAutoRollsDates: false,
     dateChangeRequiresApprovedContractChange: true,
   },
-  maximumPilotCad: 650,
+  maximumPilotCad: 1300,
   targetQualifyingSpendCad: 600,
   spendControls: {
     scope: "EXACT_ACCOUNT_TOTAL",
-    warningCad: 500,
-    protectivePauseCad: 625,
-    absoluteCapCad: 650,
+    warningCad: 1000,
+    protectivePauseCad: 1250,
+    absoluteCapCad: 1300,
     monitorCadenceMinutes: 15,
   },
   controlledTest: {
@@ -121,9 +121,9 @@ export const paidSearchConfig = {
   },
   bidding: {
     strategy: "MAXIMIZE_CLICKS",
-    cpcCeilingCadByCampaignKind: { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 },
+    cpcCeilingCadByCampaignKind: { CORE: 6, COMPETITOR: 4, BRAND: 2.5 },
     forecastDate: "2026-07-17",
-    rationale: "Core needs CA$4.00 to preserve forecast capture; Competitor is near saturation at CA$2.50; Brand remains held at CA$1.50.",
+    rationale: "Promo-chase ceilings approved above the 2026-07-17 forecast: Core CA$6.00 to buy delivery beyond forecast capture; Competitor CA$4.00 on exact-only terms; Brand CA$2.50 now live rather than held.",
   },
   adAssets: {
     sitelinks: [
@@ -195,6 +195,9 @@ export const paidSearchConfig = {
       phoneClicksAreQualifiedCalls: false,
     },
   },
+  // Last OBSERVED live account state, not the target state above. The account is still paused on the
+  // pre-promo-chase budgets and ceilings until the owner performs the manual launch, so this block
+  // deliberately diverges from pilot/bidding/campaign target values and must not be "corrected" to match them.
   liveGoogleAds: {
     apiVersion: "v24",
     status: "VALIDATED_PAUSED",
@@ -280,10 +283,10 @@ export const paidSearchConfig = {
     { code: "RSA_POLICY_APPROVAL", status: "VERIFIED", required: "All launch-candidate RSAs approved by Google Ads policy review", evidence: "2026-07-25 v24 readback: all 19 RSAs, including all nine Competitor RSAs, APPROVED / REVIEWED with no policy topics" },
     { code: "AUCTION_INSIGHTS_SIGNOFF", status: "BLOCKED", required: "Brand campaign justified by Auction Insights or kept paused" },
     { code: "ENHANCED_CONSENT_DECISION", status: "BLOCKED", required: "Purpose-specific enhanced-consent decision" },
-    { code: "CURRENT_KEYWORD_PLANNER_FORECAST", status: "VERIFIED", required: "Current forecast from the correct account and CPC ceilings staged while paused", evidence: "2026-07-17 True Color forecast; Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 staged paused" },
-    { code: "CPC_CEILING_LAUNCH_APPROVAL", status: "BLOCKED", required: "Owner approves the staged Core CA$4.00, Competitor CA$2.50, and Brand CA$1.50 ceilings for launch" },
-    { code: "BUDGET_APPROVAL", status: "VERIFIED", required: "Pilot budgets approved", evidence: "Core CA$8/day, Competitor CA$2/day, Brand held; controlled Coroplast test CA$5/day" },
-    { code: "DATES_AND_HARD_STOP", status: "BLOCKED", required: "60-day pilot dates, 15-minute scheduler heartbeat, CA$500 warning, CA$625 protective pause, and CA$650 absolute cap confirmed live" },
+    { code: "CURRENT_KEYWORD_PLANNER_FORECAST", status: "VERIFIED", required: "Current forecast from the correct account and CPC ceilings staged while paused", evidence: "2026-07-17 True Color forecast read from customer 1072816342; promo-chase ceilings Core CA$6.00, Competitor CA$4.00, Brand CA$2.50 staged above that forecast while paused" },
+    { code: "CPC_CEILING_LAUNCH_APPROVAL", status: "BLOCKED", required: "Owner approves the staged Core CA$6.00, Competitor CA$4.00, and Brand CA$2.50 ceilings for launch" },
+    { code: "BUDGET_APPROVAL", status: "VERIFIED", required: "Pilot budgets approved", evidence: "Core CA$14/day, Competitor CA$4/day, Brand CA$3/day live at launch; controlled Coroplast test CA$5/day" },
+    { code: "DATES_AND_HARD_STOP", status: "BLOCKED", required: "46-day pilot dates 2026-08-03 to 2026-09-17, 15-minute scheduler heartbeat, CA$1000 warning, CA$1250 protective pause, and CA$1300 absolute cap confirmed live" },
     { code: "MOBILE_QA", status: "BLOCKED", required: "Mobile landing-page and conversion-flow QA" },
     { code: "LAUNCH_CONTROL_SIGNOFF", status: "BLOCKED", required: "Wilkie/Dubois launch controls reviewed and signed off" },
     { code: "PRESENCE_ONLY_AND_EDITOR_PREVIEW", status: "BLOCKED", required: "Presence-only set manually/API and confirmed in Google Ads Editor/account preview" },
@@ -298,8 +301,8 @@ export const paidSearchConfig = {
       ...campaignBase,
       kind: "CORE",
       name: "GOOG_Search_TC_CoreProducts_2026",
-      dailyBudgetCad: 8,
-      maximumPilotCad: 480,
+      dailyBudgetCad: 14,
+      maximumPilotCad: 644,
       campaignNegatives: competitorTargets.flatMap(([, , terms]) => terms),
       gates: [],
       adGroups: [
@@ -361,7 +364,6 @@ export const paidSearchConfig = {
           terms: ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon"],
           headlines: ["Rush Printing Saskatoon", "Explore Same Day Printing", "Local Rush Print Options"],
           crossNegatives: ["business cards", "flyers", "stickers", "banners", "coroplast"],
-          launchTier: "TIER_2_EXPANSION",
         }),
         coreGroup({
           key: "generic-print-price", name: "Generic Print Price", product: "printing",
@@ -369,7 +371,6 @@ export const paidSearchConfig = {
           terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon"],
           headlines: ["Printing Prices Saskatoon", "See Printing Prices Online", "Configure Printing Online"],
           crossNegatives: ["same day", "rush", "sign shop", "sign company"],
-          launchTier: "TIER_2_EXPANSION",
         }),
         coreGroup({
           key: "generic-sign-shop", name: "Generic Sign Shop", product: "signs",
@@ -377,7 +378,6 @@ export const paidSearchConfig = {
           terms: ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon"],
           headlines: ["Saskatoon Sign Shop", "Custom Signs Saskatoon", "Explore Local Sign Options"],
           crossNegatives: ["same day", "rush", "printing prices", "print shop prices"],
-          launchTier: "TIER_2_EXPANSION",
         }),
       ],
     },
@@ -385,14 +385,14 @@ export const paidSearchConfig = {
       ...campaignBase,
       kind: "COMPETITOR",
       name: "GOOG_Search_TC_CompetitorConquest_2026",
-      dailyBudgetCad: 2,
-      maximumPilotCad: 120,
+      dailyBudgetCad: 4,
+      maximumPilotCad: 184,
       campaignNegatives: [],
       gates: [],
       adGroups: competitorTargets.map(([key, name, terms]) => ({
         key,
         name: `Comparison - ${name}`,
-        status: "PAUSED",
+        status: "ENABLED",
         launchTier: "TIER_1_CONQUEST",
         finalUrl: `${ROOT}/why-true-color?source=google-ads`,
         keywords: terms.map((term) => keyword(term, "EXACT")),
@@ -405,13 +405,13 @@ export const paidSearchConfig = {
       kind: "BRAND",
       name: "GOOG_Search_TC_BrandDefense_2026",
       dailyBudgetCad: 3,
-      maximumPilotCad: 0,
+      maximumPilotCad: 138,
       campaignNegatives: [],
       gates: ["AUCTION_INSIGHTS_REQUIRED"],
       adGroups: [{
         key: "true-color-brand",
         name: "True Color Brand",
-        status: "PAUSED",
+        status: "ENABLED",
         launchTier: "HOLD_AUCTION_INSIGHTS",
         finalUrl: `${ROOT}/`,
         keywords: exactPhrase(["true color printing", "true colour printing", "true color saskatoon", "true color display printing"]),

@@ -88,12 +88,12 @@
   "manualAdAssetsConfigured": true,
   "conversionFirstLaunchTiersConfigured": true,
   "targetQualifyingSpendCad": 600,
-  "maximumPilotCad": 650,
+  "maximumPilotCad": 1300,
   "spendControls": {
     "scope": "EXACT_ACCOUNT_TOTAL",
-    "warningCad": 500,
-    "protectivePauseCad": 625,
-    "absoluteCapCad": 650,
+    "warningCad": 1000,
+    "protectivePauseCad": 1250,
+    "absoluteCapCad": 1300,
     "monitorCadenceMinutes": 15
   },
   "controlledTest": {

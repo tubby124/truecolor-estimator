@@ -49,12 +49,12 @@ export function buildArtifacts(config) {
     for (const group of campaign.adGroups) {
       adGroupRows.push({ Campaign: campaign.name, "Ad group": group.name, Status: group.status });
       for (const item of group.keywords) {
-        keywordRows.push({ Campaign: campaign.name, "Ad group": group.name, Keyword: keywordText(item), Type: item.matchType === "EXACT" ? "Exact" : "Phrase", Status: "Paused", "Final URL": group.finalUrl });
+        keywordRows.push({ Campaign: campaign.name, "Ad group": group.name, Keyword: keywordText(item), Type: item.matchType === "EXACT" ? "Exact" : "Phrase", Status: group.status, "Final URL": group.finalUrl });
       }
       for (const negative of group.crossNegatives) {
         negativeRows.push({ Campaign: campaign.name, "Ad group": group.name, Keyword: keywordText({ text: negative, matchType: "PHRASE" }), Type: "Negative" });
       }
-      const row = { Campaign: campaign.name, "Ad group": group.name, Type: "Responsive search ad", Status: "Paused", "Final URL": group.finalUrl };
+      const row = { Campaign: campaign.name, "Ad group": group.name, Type: "Responsive search ad", Status: group.status, "Final URL": group.finalUrl };
       group.rsa.headlines.forEach((headline, index) => { row[`Headline ${index + 1}`] = headline; });
       group.rsa.descriptions.forEach((description, index) => { row[`Description ${index + 1}`] = description; });
       adRows.push(row);
@@ -105,10 +105,10 @@ export function buildArtifacts(config) {
       recordedLiveEvidence: config.liveGoogleAds,
       launchCandidates: config.campaigns.flatMap((campaign) => campaign.adGroups
         .filter((group) => ["TIER_1_PRODUCT", "TIER_1_CONQUEST"].includes(group.launchTier))
-        .map((group) => ({ campaign: campaign.name, adGroup: group.name, tier: group.launchTier, requiredCurrentStatus: "PAUSED" }))),
+        .map((group) => ({ campaign: campaign.name, adGroup: group.name, tier: group.launchTier, targetStatus: group.status }))),
       heldGroups: config.campaigns.flatMap((campaign) => campaign.adGroups
         .filter((group) => !["TIER_1_PRODUCT", "TIER_1_CONQUEST"].includes(group.launchTier))
-        .map((group) => ({ campaign: campaign.name, adGroup: group.name, tier: group.launchTier, requiredStatus: "PAUSED" }))),
+        .map((group) => ({ campaign: campaign.name, adGroup: group.name, tier: group.launchTier, targetStatus: group.status }))),
       blockers: validation.blockers,
     }, null, 2)}\n`,
     "validation-summary.json": `${JSON.stringify(summary, null, 2)}\n`,
