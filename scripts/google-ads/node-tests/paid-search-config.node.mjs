@@ -4,15 +4,19 @@ import test from "node:test";
 import { paidSearchConfig } from "../../../docs/paid-search/campaign-config.mjs";
 import { validateConfig } from "../config-validator.mjs";
 import { buildArtifacts } from "../export-google-ads.mjs";
+import { HARD_STOP_PROFILES } from "../hard-stop-contract.mjs";
 import { evaluateLaunchCandidate } from "../validate-launch-candidate.mjs";
 import {
   classifyAppliedIncentive,
   COMPETITOR_DESTINATION_BINDING,
   controlledTestLaunchBlockers,
   exactAccountSpendCad,
+  evaluateLaunchedLiveState,
   evaluatePausedLiveState,
+  LAUNCHED_EXPECTED_CAMPAIGNS,
   liveVerificationStatus,
   OFFLINE_UPLOADER_LAUNCH_BLOCKER,
+  PAUSED_EXPECTED_CAMPAIGNS,
   withoutLoginCustomerHeader,
 } from "../live-verification-contract.mjs";
 import { COMPETITOR_RSA_REVIEW } from "../request-competitor-rsa-review.mjs";
@@ -67,13 +71,13 @@ test("launch candidate transitions require evidence and can reach fresh-live pre
   assert.equal(ready.status, "READY_FOR_FRESH_LIVE_PREFLIGHT");
   assert.equal(ready.activationPermitted, false);
   assert.equal(ready.blockers.length, 0);
-  assert.equal(ready.candidates.length, 15);
-  assert.equal(ready.held.length, 4);
+  assert.equal(ready.candidates.length, 18);
+  assert.equal(ready.held.length, 1);
+  assert.deepEqual(ready.held.map((group) => group.tier), ["HOLD_AUCTION_INSIGHTS"]);
 });
 
-test("live verification contract rejects launch-critical drift and missing noindex", () => {
-  // Fixture-only IDs exercise the contract; they are not True Color account IDs.
-  const live = {
+// Fixture-only conversion IDs exercise the contract; they are not True Color account IDs.
+const makePausedLiveState = () => ({
     account: { id: "1072816342", currencyCode: "CAD", timeZone: "America/Regina" },
     spendScope: "EXACT_ACCOUNT_TOTAL",
     campaigns: paidSearchConfig.campaigns.map((campaign) => ({
@@ -81,8 +85,9 @@ test("live verification contract rejects launch-critical drift and missing noind
       name: campaign.name,
       status: "PAUSED",
       channel: "SEARCH",
-      dailyBudgetCad: campaign.dailyBudgetCad,
-      cpcCeilingCad: paidSearchConfig.bidding.cpcCeilingCadByCampaignKind[campaign.kind],
+      // Observed pre-launch account state, deliberately NOT the config target budgets/ceilings.
+      dailyBudgetCad: PAUSED_EXPECTED_CAMPAIGNS[campaign.name].budget,
+      cpcCeilingCad: PAUSED_EXPECTED_CAMPAIGNS[campaign.name].ceiling,
       startDate: "2026-07-20",
       endDate: "2026-09-17",
       presence: "PRESENCE",
@@ -219,7 +224,33 @@ test("live verification contract rejects launch-critical drift and missing noind
       markerFound: true,
       noindex: true,
     }],
-  };
+});
+
+const makeLaunchedLiveState = () => {
+  const live = makePausedLiveState();
+  live.campaigns = live.campaigns.map((campaign) => ({
+    ...campaign,
+    status: "ENABLED",
+    dailyBudgetCad: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name].budget,
+    cpcCeilingCad: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name].ceiling,
+  }));
+  live.allCampaigns = live.allCampaigns.map((campaign) => ({
+    ...campaign,
+    status: "ENABLED",
+  }));
+  live.pausedAdGroups = 0;
+  live.enabledAdGroups = 19;
+  live.pausedResponsiveSearchAds = 0;
+  live.enabledResponsiveSearchAds = 19;
+  live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
+  live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "ENABLED" }));
+  live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "ENABLED" }));
+  live.spendCadPilot = 12.5;
+  return live;
+};
+
+test("live verification contract rejects launch-critical drift and missing noindex", () => {
+  const live = makePausedLiveState();
   assert.deepEqual(evaluatePausedLiveState(live), { failures: [], launchBlockers: [] });
   const restEncoded = structuredClone(live);
   restEncoded.qualifiedCallConversion.minimumDurationSeconds = "60";
@@ -378,6 +409,35 @@ test("live verification contract rejects launch-critical drift and missing noind
   assert.equal(liveVerificationStatus({ failures: [], launchBlockers: [] }), "VALIDATED_PAUSED");
 });
 
+test("launched live verification enforces the exact Stage 1 state", () => {
+  assert.deepEqual(LAUNCHED_EXPECTED_CAMPAIGNS, {
+    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 14, ceiling: 6, status: "ENABLED" },
+    GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 4, status: "ENABLED" },
+    GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 2.5, status: "ENABLED" },
+  });
+
+  const launched = makeLaunchedLiveState();
+  const launchedResult = evaluateLaunchedLiveState(launched);
+  assert.deepEqual(launchedResult, { failures: [], launchBlockers: [] });
+  assert.equal(liveVerificationStatus({ ...launchedResult, mode: "launched" }), "VALIDATED_LAUNCHED");
+
+  const stillPaused = makeLaunchedLiveState();
+  stillPaused.campaigns[0].status = "PAUSED";
+  stillPaused.allCampaigns[0].status = "PAUSED";
+  assert.ok(evaluateLaunchedLiveState(stillPaused).failures.length > 0);
+
+  const wrongBudget = makeLaunchedLiveState();
+  wrongBudget.campaigns[0].dailyBudgetCad = 13;
+  assert.ok(evaluateLaunchedLiveState(wrongBudget).failures.length > 0);
+
+  const unexpectedFourth = makeLaunchedLiveState();
+  unexpectedFourth.allCampaigns.push({ id: "99999999999", name: "Historical Paused", status: "PAUSED" });
+  assert.ok(evaluateLaunchedLiveState(unexpectedFourth).failures.length > 0);
+
+  assert.deepEqual(evaluatePausedLiveState(makePausedLiveState()), { failures: [], launchBlockers: [] });
+  assert.throws(() => liveVerificationStatus({ failures: [], launchBlockers: [], mode: "unknown" }));
+});
+
 test("applied incentive API evidence is exact, fresh, redacted, and direct-customer scoped", () => {
   const now = new Date("2026-07-24T05:00:00.000Z");
   const valid = {
@@ -512,17 +572,27 @@ test("locks the confirmed True Color child account and verified account-side gat
   }
 });
 
-test("rejects enabled campaigns and unsafe network, match, geo, budget, and date settings", () => {
+test("rejects off-target statuses and unsafe network, match, geo, budget, and date settings", () => {
   const mutations = [
-    (c) => { c.campaigns[0].status = "ENABLED"; },
+    (c) => { c.campaigns[0].status = "PAUSED"; },
+    (c) => { c.campaigns[0].status = "REMOVED"; },
+    (c) => { c.campaigns[2].adGroups[0].status = "PAUSED"; },
     (c) => { c.campaigns[0].networks.display = true; },
     (c) => { c.campaigns[0].geoTarget.presenceOnly = false; },
     (c) => { c.campaigns[0].geoTarget.radiusKm = 50; },
     (c) => { c.campaigns[0].geoTarget.center.longitude = 0; },
     (c) => { c.campaigns[0].adGroups[0].keywords[0].matchType = "BROAD"; },
     (c) => { c.campaigns[0].adGroups[0].keywords = []; },
-    (c) => { c.campaigns[0].dailyBudgetCad = 9; },
+    (c) => { c.campaigns[0].dailyBudgetCad = 15; c.campaigns[0].maximumPilotCad = 15 * 46; },
+    (c) => { c.campaigns[1].dailyBudgetCad = 3; c.campaigns[1].maximumPilotCad = 3 * 46; },
+    (c) => { c.campaigns[0].maximumPilotCad = 645; },
+    (c) => { c.campaigns[0].maximumPilotCad = 1300; c.campaigns[0].dailyBudgetCad = 1300 / 46; },
+    (c) => { c.maximumPilotCad = 900; },
+    (c) => { c.pilot.startDate = "2026-08-04"; },
     (c) => { c.pilot.endDate = "2026-09-18"; },
+    (c) => { c.pilot.inclusiveDays = 60; },
+    (c) => { c.spendControls.protectivePauseCad = 625; },
+    (c) => { c.spendControls.absoluteCapCad = 1500; },
     (c) => { c.campaigns.push({ ...structuredClone(c.campaigns[0]), kind: "EXTRA", name: "Unexpected", status: "ENABLED" }); },
   ];
 
@@ -543,8 +613,11 @@ test("rejects URL, RSA, ValueTrack, bidding, and gate violations", () => {
     (c) => { c.campaigns[0].adGroups[0].rsa.headlines = ["Too few headlines"]; },
     (c) => { c.campaigns[0].adGroups[0].rsa.descriptions[0] = "x".repeat(91); },
     (c) => { c.tracking.finalUrlSuffix = c.tracking.finalUrlSuffix.replace("keyword={keyword}&", ""); },
-    (c) => { c.bidding.cpcCeilingCadByCampaignKind.CORE = 6; },
+    (c) => { c.bidding.cpcCeilingCadByCampaignKind.CORE = 7; },
+    (c) => { c.bidding.cpcCeilingCadByCampaignKind.BRAND = 1.5; },
     (c) => { c.campaigns[0].adGroups[0].launchTier = "TIER_2_EXPANSION"; },
+    (c) => { c.campaigns[0].adGroups.find((g) => g.key === "rush-same-day").launchTier = "TIER_2_EXPANSION"; },
+    (c) => { c.campaigns[2].adGroups[0].launchTier = "TIER_1_PRODUCT"; },
     (c) => { c.adAssets.callouts = []; },
     (c) => { c.adAssets.sitelinks[0].finalUrl = "https://truecolorprinting.ca/about"; },
     (c) => { c.adAssets.callouts[0] = "Better Than Qwik Signs"; },
@@ -564,14 +637,27 @@ test("canonical routing and campaign caps are complete", () => {
   const competitors = paidSearchConfig.campaigns.find((c) => c.kind === "COMPETITOR");
   const brand = paidSearchConfig.campaigns.find((c) => c.kind === "BRAND");
 
-  assert.equal(core.dailyBudgetCad, 8);
-  assert.equal(core.maximumPilotCad, 480);
-  assert.equal(competitors.dailyBudgetCad, 2);
-  assert.equal(competitors.maximumPilotCad, 120);
+  assert.equal(paidSearchConfig.pilot.startDate, "2026-08-03");
+  assert.equal(paidSearchConfig.pilot.endDate, "2026-09-17");
+  assert.equal(paidSearchConfig.pilot.inclusiveDays, 46);
+  assert.equal(core.dailyBudgetCad, 14);
+  assert.equal(core.maximumPilotCad, 644);
+  assert.equal(competitors.dailyBudgetCad, 4);
+  assert.equal(competitors.maximumPilotCad, 184);
   assert.equal(brand.dailyBudgetCad, 3);
-  assert.equal(brand.maximumPilotCad, 0);
+  assert.equal(brand.maximumPilotCad, 138);
   assert.equal(paidSearchConfig.targetQualifyingSpendCad, 600);
-  assert.equal(paidSearchConfig.maximumPilotCad, 650);
+  assert.equal(paidSearchConfig.maximumPilotCad, 1300);
+  const plannedMaximumCad = paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.maximumPilotCad, 0);
+  assert.equal(plannedMaximumCad, 966);
+  assert.ok(plannedMaximumCad <= paidSearchConfig.maximumPilotCad);
+  assert.ok(plannedMaximumCad >= paidSearchConfig.targetQualifyingSpendCad);
+  for (const campaign of paidSearchConfig.campaigns) {
+    assert.equal(campaign.maximumPilotCad, campaign.dailyBudgetCad * paidSearchConfig.pilot.inclusiveDays);
+    assert.equal(campaign.status, "ENABLED");
+    assert.ok(campaign.adGroups.every((group) => group.status === "ENABLED"));
+  }
+  assert.equal(paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0), 21);
   assert.equal(paidSearchConfig.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
   assert.deepEqual(
     Object.values(paidSearchConfig.conversionMeasurement.requiredUploadClickActions).map((action) => [action.eventName, action.actionId, action.status]),
@@ -589,7 +675,13 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.liveGoogleAds.conversionGoalGraph.customerGoals.phoneCallLeadCallFromAds.biddable, false);
   assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.primaryForGoal, false);
   assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.includedInConversions, false);
-  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 500, protectivePauseCad: 625, absoluteCapCad: 650, monitorCadenceMinutes: 15 });
+  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 1000, protectivePauseCad: 1250, absoluteCapCad: 1300, monitorCadenceMinutes: 15 });
+  assert.equal(paidSearchConfig.spendControls.absoluteCapCad, paidSearchConfig.maximumPilotCad);
+  assert.deepEqual(
+    [HARD_STOP_PROFILES["public-pilot"].warningCad, HARD_STOP_PROFILES["public-pilot"].thresholdCad, HARD_STOP_PROFILES["public-pilot"].approvedCapCad],
+    [paidSearchConfig.spendControls.warningCad, paidSearchConfig.spendControls.protectivePauseCad, paidSearchConfig.spendControls.absoluteCapCad],
+  );
+  assert.equal(HARD_STOP_PROFILES["public-pilot"].spendScope, paidSearchConfig.spendControls.scope);
   assert.deepEqual(paidSearchConfig.controlledTest, {
     campaign: "GOOG_Search_TC_CoreProducts_2026",
     adGroupKey: "coroplast",
@@ -606,7 +698,7 @@ test("canonical routing and campaign caps are complete", () => {
   assert.ok(competitors.adGroups.every((group) => group.keywords.every((keyword) => keyword.matchType === "EXACT")));
   assert.equal(competitors.adGroups.find((group) => group.key === "ink-house").keywords[0].text, "ink house saskatoon");
   assert.equal(competitors.adGroups.find((group) => group.key === "rayacom").keywords[0].text, "rayacom saskatoon");
-  assert.deepEqual(paidSearchConfig.bidding.cpcCeilingCadByCampaignKind, { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 });
+  assert.deepEqual(paidSearchConfig.bidding.cpcCeilingCadByCampaignKind, { CORE: 6, COMPETITOR: 4, BRAND: 2.5 });
   assert.equal(paidSearchConfig.adAssets.sitelinks.length, 6);
   assert.equal(paidSearchConfig.adAssets.callouts.length, 6);
   assert.equal(core.adGroups.find((g) => g.key === "coroplast").finalUrl, "https://truecolorprinting.ca/products/coroplast-signs");
@@ -651,9 +743,11 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.ok(!manifest.blockers.includes("RSA_POLICY_APPROVAL"));
   assert.ok(!manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
   assert.ok(!manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
-  assert.equal(manifest.launchCandidates.length, 15);
-  assert.equal(manifest.heldGroups.length, 4);
-  assert.ok(manifest.heldGroups.every((group) => ["TIER_2_EXPANSION", "HOLD_AUCTION_INSIGHTS"].includes(group.tier)));
+  assert.equal(manifest.launchCandidates.length, 18);
+  assert.equal(manifest.heldGroups.length, 1);
+  assert.ok(manifest.heldGroups.every((group) => group.tier === "HOLD_AUCTION_INSIGHTS"));
+  assert.ok(manifest.launchCandidates.every((group) => group.targetStatus === "ENABLED"));
+  assert.ok(manifest.heldGroups.every((group) => group.targetStatus === "ENABLED"));
 });
 
 test("exports canonical Editor campaign, RSA, and location entities", () => {
@@ -664,10 +758,18 @@ test("exports canonical Editor campaign, RSA, and location entities", () => {
   for (const unsupported of ["Google Search", "Search partners", "Display Network", "Location option", "Location", "Location criterion ID"]) {
     assert.ok(!campaigns.headers.includes(unsupported));
   }
+  assert.ok(campaigns.rows.every((row) => row.Status === "ENABLED"));
+  assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026").Budget, "14");
+  assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026")["Maximum CPC bid limit"], "6");
+  assert.ok(campaigns.rows.every((row) => row["Start date"] === "2026-08-03" && row["End date"] === "2026-09-17"));
+  const adGroups = parseCsv(artifacts["ad-groups.csv"]);
+  assert.ok(adGroups.rows.every((row) => row.Status === "ENABLED"));
+  assert.ok(parseCsv(artifacts["keywords.csv"]).rows.every((row) => row.Status === "ENABLED"));
   const ads = parseCsv(artifacts["responsive-search-ads.csv"]);
   assert.ok(ads.headers.includes("Type"));
   assert.ok(!ads.headers.includes("Ad type"));
   assert.ok(ads.rows.every((row) => row.Type === "Responsive search ad"));
+  assert.ok(ads.rows.every((row) => row.Status === "ENABLED"));
   const locations = parseCsv(artifacts["locations.csv"]);
   assert.deepEqual(locations.headers, ["Campaign", "Location", "Location ID", "Radius", "Unit"]);
   assert.equal(locations.rows.length, 3);

@@ -1,10 +1,14 @@
 import { pathToFileURL } from "node:url";
 
 const EXPECTED = {
-  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 8, maximum: 480 },
-  COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 2, maximum: 120 },
-  BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 0 },
+  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 14, maximum: 644 },
+  COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 4, maximum: 184 },
+  BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 138 },
 };
+const PILOT_START_DATE = "2026-08-03";
+const PILOT_END_DATE = "2026-09-17";
+const PILOT_INCLUSIVE_DAYS = 46;
+const LAUNCHABLE_DAILY_BUDGET_CAD = 21;
 const REQUIRED_GATES = [
   "TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED",
   "PURCHASE_UPLOAD_CLICKS_ACTION", "QUOTE_WON_UPLOAD_CLICKS_ACTION", "CONVERSION_GOAL_GRAPH", "OFFLINE_UPLOADER_MIGRATION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
@@ -26,8 +30,11 @@ const VERIFIED_GATE_EVIDENCE = new Map([
   ["PROMOTION_ELIGIBILITY", "Owner-confirmed and 2026-07-25 direct-customer API readback: CAD 600 reward, CAD 600 qualifying spend, REDEEMED, fulfillment expiry 2026-09-16 UTC"],
   ["COMPETITOR_LANDING_DEPLOYED", "Live /why-true-color returned HTTP 200 with noindex and working paid-page product routes on 2026-07-23"],
   ["RSA_POLICY_APPROVAL", "2026-07-25 v24 readback: all 19 RSAs, including all nine Competitor RSAs, APPROVED / REVIEWED with no policy topics"],
-  ["CURRENT_KEYWORD_PLANNER_FORECAST", "2026-07-17 True Color forecast; Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 staged paused"],
+  ["CURRENT_KEYWORD_PLANNER_FORECAST", "2026-07-17 True Color forecast read from customer 1072816342; promo-chase ceilings Core CA$6.00, Competitor CA$4.00, Brand CA$2.50 staged above that forecast while paused"],
 ]);
+// Last OBSERVED live account state. The account remains paused on the pre-promo-chase budgets and
+// ceilings until the owner performs the manual launch, so this snapshot is intentionally decoupled
+// from the target budgets, ceilings, dates, and statuses asserted elsewhere in this file.
 const LIVE_GOOGLE_ADS = {
   apiVersion: "v24",
   status: "VALIDATED_PAUSED",
@@ -244,17 +251,17 @@ export function validateConfig(config) {
   const fail = (message) => errors.push(message);
   const start = config.pilot?.startDate;
   const end = config.pilot?.endDate;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(start ?? "") || !/^\d{4}-\d{2}-\d{2}$/.test(end ?? "") || daysInclusive(start, end) !== 60) {
-    fail("Pilot must have valid ISO dates spanning exactly 60 inclusive days");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start ?? "") || !/^\d{4}-\d{2}-\d{2}$/.test(end ?? "") || daysInclusive(start, end) !== PILOT_INCLUSIVE_DAYS) {
+    fail(`Pilot must have valid ISO dates spanning exactly ${PILOT_INCLUSIVE_DAYS} inclusive days`);
   }
-  if (start !== "2026-07-20" || end !== "2026-09-17" || config.pilot?.inclusiveDays !== 60 || !config.pilot?.regenerateDatesIfGatesNotClearedByStart || !config.pilot?.hardStopRequired) {
+  if (start !== PILOT_START_DATE || end !== PILOT_END_DATE || config.pilot?.inclusiveDays !== PILOT_INCLUSIVE_DAYS || !config.pilot?.regenerateDatesIfGatesNotClearedByStart || !config.pilot?.hardStopRequired) {
     fail("Pilot dates and hard-stop controls do not match the approved fixed pilot");
   }
   if (config.pilot?.generatorAutoRollsDates !== false || config.pilot?.dateChangeRequiresApprovedContractChange !== true) fail("Pilot date changes must require an approved config and validator contract change");
   if (config.currency !== "CAD") fail("Account currency must be CAD");
-  if (config.targetQualifyingSpendCad !== 600 || config.maximumPilotCad !== 650) fail("Pilot must target CA$600 qualifying spend with a CA$650 absolute cap");
-  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 500, protectivePauseCad: 625, absoluteCapCad: 650, monitorCadenceMinutes: 15 })) {
-    fail("Spend controls must use exact-account total cost, warn at CA$500, pause at CA$625, cap at CA$650, and run every 15 minutes");
+  if (config.targetQualifyingSpendCad !== 600 || config.maximumPilotCad !== 1300) fail("Pilot must target CA$600 qualifying spend with a CA$1300 absolute cap");
+  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 1000, protectivePauseCad: 1250, absoluteCapCad: 1300, monitorCadenceMinutes: 15 })) {
+    fail("Spend controls must use exact-account total cost, warn at CA$1000, pause at CA$1250, cap at CA$1300, and run every 15 minutes");
   }
   if (JSON.stringify(config.controlledTest) !== JSON.stringify({
     campaign: "GOOG_Search_TC_CoreProducts_2026",
@@ -266,9 +273,9 @@ export function validateConfig(config) {
   })) fail("Controlled test must be Coroplast at CA$5/day with CA$25/CA$30 protection and a 72-hour maximum window");
   if (config.accountCustomerId !== "1072816342") fail("Customer ID must match confirmed True Color child account 1072816342");
   if (config.bidding?.strategy !== "MAXIMIZE_CLICKS"
-    || JSON.stringify(config.bidding?.cpcCeilingCadByCampaignKind) !== JSON.stringify({ CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 })
+    || JSON.stringify(config.bidding?.cpcCeilingCadByCampaignKind) !== JSON.stringify({ CORE: 6, COMPETITOR: 4, BRAND: 2.5 })
     || config.bidding?.forecastDate !== "2026-07-17") {
-    fail("Bidding must use the forecast-backed campaign-specific Maximize Clicks ceilings");
+    fail("Bidding must use the approved promo-chase campaign-specific Maximize Clicks ceilings");
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
   if (JSON.stringify(config.conversionMeasurement) !== JSON.stringify(CONVERSION_MEASUREMENT)) {
@@ -345,16 +352,21 @@ export function validateConfig(config) {
   if (campaignNames.some((name) => typeof name !== "string" || !name.trim()) || new Set(campaignNames).size !== campaignNames.length) fail("Campaign names must be unique and nonblank");
   const adGroupNames = campaigns.flatMap((campaign) => (campaign.adGroups ?? []).map((group) => group.name));
   if (adGroupNames.some((name) => typeof name !== "string" || !name.trim()) || new Set(adGroupNames).size !== adGroupNames.length) fail("Ad-group names must be unique and nonblank");
-  if (campaigns.reduce((sum, campaign) => sum + (campaign.maximumPilotCad ?? 0), 0) !== config.targetQualifyingSpendCad) fail("Launch-campaign maximums must reconcile to the CA$600 qualifying-spend target");
-  const launchableDailyBudget = campaigns
-    .filter((campaign) => campaign.kind !== "BRAND")
-    .reduce((sum, campaign) => sum + (campaign.dailyBudgetCad ?? 0), 0);
-  if (launchableDailyBudget !== 10) fail("Launchable Core and Competitor budgets must total CA$10/day");
+  for (const campaign of campaigns) {
+    if ((campaign.maximumPilotCad ?? 0) !== (campaign.dailyBudgetCad ?? 0) * PILOT_INCLUSIVE_DAYS) {
+      fail(`${campaign.name} planning maximum must equal its daily budget across all ${PILOT_INCLUSIVE_DAYS} pilot days`);
+    }
+  }
+  const plannedMaximumCad = campaigns.reduce((sum, campaign) => sum + (campaign.maximumPilotCad ?? 0), 0);
+  if (plannedMaximumCad > config.maximumPilotCad) fail("Planned campaign maximums must stay within the approved CA$1300 absolute cap");
+  if (plannedMaximumCad < config.targetQualifyingSpendCad) fail("Planned campaign maximums must be able to reach the CA$600 qualifying-spend target");
+  const launchableDailyBudget = campaigns.reduce((sum, campaign) => sum + (campaign.dailyBudgetCad ?? 0), 0);
+  if (launchableDailyBudget !== LAUNCHABLE_DAILY_BUDGET_CAD) fail(`Launchable Core, Competitor, and Brand budgets must total CA$${LAUNCHABLE_DAILY_BUDGET_CAD}/day`);
   for (const [kind, expected] of Object.entries(EXPECTED)) {
     const campaign = campaigns.find((item) => item.kind === kind);
     if (!campaign) { fail(`Missing ${kind} campaign`); continue; }
     if (campaign.name !== expected.name || campaign.dailyBudgetCad !== expected.daily || campaign.maximumPilotCad !== expected.maximum) fail(`${kind} campaign budget or name mismatch`);
-    if (campaign.status !== "PAUSED") fail(`${campaign.name} must be paused`);
+    if (campaign.status !== "ENABLED") fail(`${campaign.name} must record the approved launch target status ENABLED`);
     if (campaign.language !== "English") fail(`${campaign.name} language must be English`);
     if (campaign.channel !== "SEARCH" || !campaign.networks?.googleSearch || campaign.networks?.searchPartners || campaign.networks?.display) fail(`${campaign.name} must be Google Search only`);
     if (campaign.geoTarget?.criterionId !== 1002791
@@ -367,9 +379,9 @@ export function validateConfig(config) {
     const actualGroupKeys = (campaign.adGroups ?? []).map((group) => group.key);
     if (!sameSet(actualGroupKeys, Object.keys(expectedGroups))) fail(`${campaign.name} ad-group set must match the canonical structure exactly`);
     for (const group of campaign.adGroups ?? []) {
-      if (group.status !== "PAUSED") fail(`${campaign.name}/${group.name} must be paused`);
+      if (group.status !== "ENABLED") fail(`${campaign.name}/${group.name} must record the approved launch target status ENABLED`);
       const expectedLaunchTier = kind === "CORE"
-        ? (["rush-same-day", "generic-print-price", "generic-sign-shop"].includes(group.key) ? "TIER_2_EXPANSION" : "TIER_1_PRODUCT")
+        ? "TIER_1_PRODUCT"
         : kind === "COMPETITOR" ? "TIER_1_CONQUEST" : "HOLD_AUCTION_INSIGHTS";
       if (group.launchTier !== expectedLaunchTier) fail(`${campaign.name}/${group.name} has the wrong conversion-first launch tier`);
       let parsed;

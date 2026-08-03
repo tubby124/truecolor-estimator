@@ -20,11 +20,19 @@ import {
   COMPETITOR_DESTINATION_BINDING,
   controlledTestLaunchBlockers,
   exactAccountSpendCad,
+  evaluateLaunchedLiveState,
   evaluatePausedLiveState,
   liveVerificationStatus,
   OFFLINE_UPLOADER_CLEARANCE,
   withoutLoginCustomerHeader,
 } from "./live-verification-contract.mjs";
+
+const cliArgs = process.argv.slice(2);
+if (cliArgs.length > 1
+  || cliArgs.some((arg) => arg !== "--mode=paused" && arg !== "--mode=launched")) {
+  throw new Error("Usage: node scripts/google-ads/live-verify-paused.mjs [--mode=paused|--mode=launched]");
+}
+const mode = cliArgs[0] === "--mode=launched" ? "launched" : "paused";
 
 const requiredApiEnv = [
   "GOOGLE_ADS_CLIENT_ID", "GOOGLE_ADS_CLIENT_SECRET", "GOOGLE_ADS_REFRESH_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN",
@@ -259,12 +267,18 @@ const live = {
   allCampaigns: allCampaignState,
   adGroups: groups.length,
   pausedAdGroups: groups.filter((row) => row.adGroup.status === "PAUSED").length,
+  ...(mode === "launched" ? {
+    enabledAdGroups: groups.filter((row) => row.adGroup.status === "ENABLED").length,
+  } : {}),
   positiveKeywords: positiveKeywords.length,
   nearMeKeywords,
   negativeCriteria: negativeCount,
   competitorMatchTypes,
   responsiveSearchAds: plannedAds.length,
   pausedResponsiveSearchAds: plannedAds.filter((row) => row.adGroupAd.status === "PAUSED").length,
+  ...(mode === "launched" ? {
+    enabledResponsiveSearchAds: plannedAds.filter((row) => row.adGroupAd.status === "ENABLED").length,
+  } : {}),
   rsaApprovalStatuses: [...new Set(plannedAds.map((row) => row.adGroupAd.policySummary?.approvalStatus ?? "UNKNOWN"))],
   rsaReviewStatuses: [...new Set(plannedAds.map((row) => row.adGroupAd.policySummary?.reviewStatus ?? "UNKNOWN"))],
   accountWideAdAssociations,
@@ -367,21 +381,23 @@ const live = {
   spendCadPilot,
   endpointChecks,
 };
-const { failures: safetyFailures, launchBlockers } = evaluatePausedLiveState(live);
+const { failures: safetyFailures, launchBlockers } = mode === "paused"
+  ? evaluatePausedLiveState(live)
+  : evaluateLaunchedLiveState(live);
 
-const status = liveVerificationStatus({ failures: safetyFailures, launchBlockers });
+const status = liveVerificationStatus({ failures: safetyFailures, launchBlockers, mode });
 const verifiedAt = new Date().toISOString();
 const controlledTestBlockers = controlledTestLaunchBlockers(launchBlockers);
 const activationClearance = safetyFailures.length === 0 && controlledTestBlockers.length === 0 ? {
   evidenceId: `liveverify_${verifiedAt.replace(/\D/g, "").slice(0, 14)}`,
-  status: "VALIDATED_PAUSED",
+  status: mode === "paused" ? "VALIDATED_PAUSED" : "VALIDATED_LAUNCHED",
   checkedAtUtc: verifiedAt,
   customerId: CUSTOMER_ID,
   safetyFailures: [],
   launchBlockers: controlledTestBlockers,
   settings: {
     campaignIds: ["24048123058", "24048123061", "24048123064"],
-    allCampaignsPaused: true,
+    ...(mode === "paused" ? { allCampaignsPaused: true } : { allCampaignsEnabled: true }),
     searchOnly: true,
     searchPartnersDisabled: true,
     displayDisabled: true,
@@ -399,7 +415,7 @@ const activationClearance = safetyFailures.length === 0 && controlledTestBlocker
     allPolicyApproved: true,
     competitorDestinationUrl: COMPETITOR_DESTINATION_BINDING.finalUrl,
     competitorRsaAdGroupAdResources: COMPETITOR_DESTINATION_BINDING.adGroupAdResources,
-    unexpectedSpendCad: 0,
+    ...(mode === "paused" ? { unexpectedSpendCad: 0 } : { accountSpendCad: spendCadPilot }),
   },
 } : null;
 const result = {

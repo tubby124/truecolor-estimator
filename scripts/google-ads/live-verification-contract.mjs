@@ -1,10 +1,15 @@
 import { COMPETITOR_RSA_REVIEW } from "./request-competitor-rsa-review.mjs";
 
-const EXPECTED_CAMPAIGNS = {
-  GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 8, ceiling: 4 },
-  GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 2, ceiling: 2.5 },
-  GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 1.5 },
-};
+export const PAUSED_EXPECTED_CAMPAIGNS = Object.freeze({
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 8, ceiling: 4, status: "PAUSED" }),
+  GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 2, ceiling: 2.5, status: "PAUSED" }),
+  GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" }),
+});
+export const LAUNCHED_EXPECTED_CAMPAIGNS = Object.freeze({
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 14, ceiling: 6, status: "ENABLED" }),
+  GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 4, status: "ENABLED" }),
+  GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 2.5, status: "ENABLED" }),
+});
 const EXPECTED_SUFFIX = "utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_term={keyword}&utm_content={creative}&keyword={keyword}&matchtype={matchtype}&device={device}&loc_physical_ms={loc_physical_ms}&loc_interest_ms={loc_interest_ms}&adgroupid={adgroupid}&creative={creative}&campaignid={campaignid}&network={network}";
 const EXPECTED_GEO_POINT = {
   latitudeInMicroDegrees: 52_129_728,
@@ -137,10 +142,11 @@ const validQualifiedCallAction = (action) => {
     && minimumDurationSeconds > 0;
 };
 
-export function liveVerificationStatus({ failures, launchBlockers }) {
+export function liveVerificationStatus({ failures, launchBlockers, mode = "paused" }) {
+  if (mode !== "paused" && mode !== "launched") throw new Error(`Unsupported live verification mode: ${mode}`);
   if (failures.length > 0) return "UNSAFE";
   if (launchBlockers.length > 0) return "BLOCKED";
-  return "VALIDATED_PAUSED";
+  return mode === "paused" ? "VALIDATED_PAUSED" : "VALIDATED_LAUNCHED";
 }
 
 export function controlledTestLaunchBlockers(launchBlockers) {
@@ -155,6 +161,7 @@ export function controlledTestLaunchBlockers(launchBlockers) {
 export function validateCompetitorDestinationInventory(
   inventory,
   accountWideAssociations = inventory,
+  { expectedStatus = "PAUSED" } = {},
 ) {
   if (!Array.isArray(inventory)
     || inventory.length !== COMPETITOR_RSA_REVIEW.ads.length) {
@@ -189,7 +196,7 @@ export function validateCompetitorDestinationInventory(
       || ad.adGroupAdResourceName !== expected.adGroupAdResourceName
       || String(ad.adId ?? "") !== expected.adId
       || ad.adResourceName !== expected.adResourceName
-      || ad.status !== "PAUSED"
+      || ad.status !== expectedStatus
       || !Array.isArray(ad.finalUrls)
       || ad.finalUrls.length !== 1
       || ad.finalUrls[0] !== COMPETITOR_DESTINATION_BINDING.finalUrl) {
@@ -200,7 +207,20 @@ export function validateCompetitorDestinationInventory(
   return validated;
 }
 
-export function evaluatePausedLiveState(live) {
+function evaluateLiveState(live, {
+  mode,
+  expectedCampaigns,
+  expectedPausedAdGroups,
+  expectedPausedResponsiveSearchAds,
+  expectedEnabledAdGroups,
+  expectedEnabledResponsiveSearchAds,
+  campaignStateFailure,
+  adGroupStateFailure,
+  rsaStateFailure,
+  nearMeStateFailure,
+  requireExactCampaignInventory,
+  requireZeroSpend,
+}) {
   const failures = [];
   const launchBlockers = [];
   if (String(live.account?.id ?? "") !== "1072816342"
@@ -209,21 +229,27 @@ export function evaluatePausedLiveState(live) {
   if (live.spendScope !== "EXACT_ACCOUNT_TOTAL") failures.push("live spend verification is not exact-account-wide");
   const campaigns = live.campaigns ?? [];
   if (campaigns.length !== 3) failures.push("exactly three campaigns are required");
-  for (const [name, expected] of Object.entries(EXPECTED_CAMPAIGNS)) {
+  for (const [name, expected] of Object.entries(expectedCampaigns)) {
     const campaign = campaigns.find((item) => item.name === name);
     if (!campaign || campaign.id !== expected.id) failures.push(`${name} identity changed`);
-    if (!campaign || campaign.status !== "PAUSED" || campaign.channel !== "SEARCH") failures.push(`${name} is not paused Search`);
+    if (!campaign || campaign.status !== expected.status || campaign.channel !== "SEARCH") failures.push(`${name} ${campaignStateFailure}`);
     if (!campaign || campaign.dailyBudgetCad !== expected.budget || campaign.cpcCeilingCad !== expected.ceiling) failures.push(`${name} budget or CPC ceiling changed`);
     if (!campaign || campaign.startDate !== "2026-07-20" || campaign.endDate !== "2026-09-17") failures.push(`${name} pilot dates changed`);
     if (!campaign || campaign.presence !== "PRESENCE" || !campaign.networks?.targetGoogleSearch || campaign.networks?.targetSearchNetwork || campaign.networks?.targetContentNetwork || campaign.networks?.targetPartnerSearchNetwork) failures.push(`${name} network or presence setting changed`);
     if (campaign?.finalUrlSuffix !== EXPECTED_SUFFIX) failures.push(`${name} final URL suffix changed`);
   }
-  if (live.adGroups !== 19 || live.pausedAdGroups !== 19) failures.push("all 19 ad groups must remain paused");
-  if (live.responsiveSearchAds !== 19 || live.pausedResponsiveSearchAds !== 19) failures.push("all 19 RSAs must remain paused");
+  if (live.adGroups !== 19
+    || live.pausedAdGroups !== expectedPausedAdGroups
+    || (expectedEnabledAdGroups !== null && live.enabledAdGroups !== expectedEnabledAdGroups)) failures.push(adGroupStateFailure);
+  if (live.responsiveSearchAds !== 19
+    || live.pausedResponsiveSearchAds !== expectedPausedResponsiveSearchAds
+    || (expectedEnabledResponsiveSearchAds !== null
+      && live.enabledResponsiveSearchAds !== expectedEnabledResponsiveSearchAds)) failures.push(rsaStateFailure);
   try {
     validateCompetitorDestinationInventory(
       live.competitorRsaDestinations,
       live.accountWideAdAssociations,
+      { expectedStatus: mode === "paused" ? "PAUSED" : "ENABLED" },
     );
   } catch {
     failures.push("competitor RSA destinations must match the exact nine-ad tracked-URL allowlist");
@@ -240,7 +266,7 @@ export function evaluatePausedLiveState(live) {
     || [...expectedNearMeKeywords].some((keyword) => !observedNearMeKeywords.has(keyword))
     || nearMeKeywords.some((keyword) => keyword.campaign !== "GOOG_Search_TC_CoreProducts_2026"
       || keyword.adGroup !== "Stickers and Labels"
-      || keyword.status !== "PAUSED")) failures.push("all 12 GSC-backed near-me keywords must remain present and paused");
+      || keyword.status !== (mode === "paused" ? "PAUSED" : "ENABLED"))) failures.push(nearMeStateFailure);
   if (live.competitorMatchTypes?.length !== 1 || live.competitorMatchTypes[0] !== "EXACT") failures.push("competitor targeting is not exact-only");
   if (live.manualAssets !== 13 || live.campaignAssetLinks !== 39) failures.push("asset counts changed");
   if (live.locationTargets !== 0 || live.proximityTargets !== 3 || live.radius35KmTargets !== 3) failures.push("Saskatoon +35 km proximity criteria changed");
@@ -252,15 +278,22 @@ export function evaluatePausedLiveState(live) {
       || Number(criterion.latitudeInMicroDegrees) !== EXPECTED_GEO_POINT.latitudeInMicroDegrees
       || Number(criterion.longitudeInMicroDegrees) !== EXPECTED_GEO_POINT.longitudeInMicroDegrees)
     || new Set(positiveGeoCriteria.map((criterion) => criterion.campaign)).size !== 3
-    || Object.keys(EXPECTED_CAMPAIGNS).some((campaign) => !positiveGeoCriteria.some((criterion) => criterion.campaign === campaign))) {
+    || Object.keys(expectedCampaigns).some((campaign) => !positiveGeoCriteria.some((criterion) => criterion.campaign === campaign))) {
     failures.push("positive geo criteria must be exactly one 35 km Saskatoon proximity per planned campaign");
   }
   if (live.languageTargets !== 3 || live.englishLanguageTargets !== 3) failures.push("English language criteria changed");
-  const expectedIds = new Set(Object.values(EXPECTED_CAMPAIGNS).map((campaign) => campaign.id));
+  const expectedIds = new Set(Object.values(expectedCampaigns).map((campaign) => campaign.id));
   const allCampaigns = live.allCampaigns ?? [];
-  if ([...expectedIds].some((id) => !allCampaigns.some((campaign) => String(campaign.id) === id))) failures.push("full account campaign inventory did not contain every planned campaign");
-  const unexpectedEnabled = allCampaigns.filter((campaign) => campaign.status === "ENABLED" && !expectedIds.has(String(campaign.id)));
-  if (unexpectedEnabled.length > 0) failures.push(`unexpected enabled campaign(s): ${unexpectedEnabled.map((campaign) => `${campaign.id}:${campaign.name}`).join(",")}`);
+  if (requireExactCampaignInventory) {
+    if (allCampaigns.length !== 3
+      || Object.entries(expectedCampaigns).some(([name, expected]) => !allCampaigns.some((campaign) => String(campaign.id) === expected.id
+        && campaign.name === name
+        && campaign.status === expected.status))) failures.push("full account campaign inventory must contain exactly the three enabled Stage 1 campaigns");
+  } else {
+    if ([...expectedIds].some((id) => !allCampaigns.some((campaign) => String(campaign.id) === id))) failures.push("full account campaign inventory did not contain every planned campaign");
+    const unexpectedEnabled = allCampaigns.filter((campaign) => campaign.status === "ENABLED" && !expectedIds.has(String(campaign.id)));
+    if (unexpectedEnabled.length > 0) failures.push(`unexpected enabled campaign(s): ${unexpectedEnabled.map((campaign) => `${campaign.id}:${campaign.name}`).join(",")}`);
+  }
   const purchaseRevenue = live.revenueConversions?.purchaseOnline;
   const quoteWonRevenue = live.revenueConversions?.quoteWon;
   const qualifiedCall = live.qualifiedCallConversion;
@@ -361,7 +394,7 @@ export function evaluatePausedLiveState(live) {
   if (campaignCallGoals.length !== 3
     || campaignCallGoals.some((goal) => goal.biddable !== false)
     || new Set(campaignCallGoals.map((goal) => goal.campaign)).size !== 3
-    || Object.keys(EXPECTED_CAMPAIGNS).some((campaign) => !campaignCallGoals.some((goal) => goal.campaign === campaign))) {
+    || Object.keys(expectedCampaigns).some((campaign) => !campaignCallGoals.some((goal) => goal.campaign === campaign))) {
     failures.push("every planned campaign qualified-call goal must remain non-biddable");
   }
   const biddableCampaignGoals = (live.campaignConversionGoals ?? [])
@@ -369,19 +402,19 @@ export function evaluatePausedLiveState(live) {
   if (biddableCampaignGoals.length !== 3
     || biddableCampaignGoals.some((goal) => goal.category !== "PURCHASE" || goal.origin !== "WEBSITE")
     || new Set(biddableCampaignGoals.map((goal) => goal.campaign)).size !== 3
-    || Object.keys(EXPECTED_CAMPAIGNS).some((campaign) => !biddableCampaignGoals.some((goal) => goal.campaign === campaign))) {
+    || Object.keys(expectedCampaigns).some((campaign) => !biddableCampaignGoals.some((goal) => goal.campaign === campaign))) {
     failures.push("purchase website must be the only biddable goal for every planned campaign");
   }
   const campaignGoalConfigs = live.campaignGoalConfigs ?? [];
   if (campaignGoalConfigs.length !== 3
     || campaignGoalConfigs.some((config) => config.goalConfigLevel !== "CUSTOMER" || config.customConversionGoal)
     || new Set(campaignGoalConfigs.map((config) => config.campaign)).size !== 3
-    || Object.keys(EXPECTED_CAMPAIGNS).some((campaign) => !campaignGoalConfigs.some((config) => config.campaign === campaign))
+    || Object.keys(expectedCampaigns).some((campaign) => !campaignGoalConfigs.some((config) => config.campaign === campaign))
     || (live.customConversionGoals ?? []).length !== 0) {
     failures.push("planned campaigns must inherit customer goals without custom conversion goals");
   }
 
-  if (live.spendCadPilot !== 0) failures.push("nonzero pilot-period spend detected");
+  if (requireZeroSpend && live.spendCadPilot !== 0) failures.push("nonzero pilot-period spend detected");
 
   const competitorLanding = live.endpointChecks?.find(
     (check) => check.requestedUrl === COMPETITOR_DESTINATION_BINDING.finalUrl,
@@ -408,4 +441,38 @@ export function evaluatePausedLiveState(live) {
     launchBlockers.push("Google Ads promotion eligibility requires fresh UI or applied-incentive API confirmation");
   }
   return { failures, launchBlockers };
+}
+
+export function evaluatePausedLiveState(live) {
+  return evaluateLiveState(live, {
+    mode: "paused",
+    expectedCampaigns: PAUSED_EXPECTED_CAMPAIGNS,
+    expectedPausedAdGroups: 19,
+    expectedPausedResponsiveSearchAds: 19,
+    expectedEnabledAdGroups: null,
+    expectedEnabledResponsiveSearchAds: null,
+    campaignStateFailure: "is not paused Search",
+    adGroupStateFailure: "all 19 ad groups must remain paused",
+    rsaStateFailure: "all 19 RSAs must remain paused",
+    nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and paused",
+    requireExactCampaignInventory: false,
+    requireZeroSpend: true,
+  });
+}
+
+export function evaluateLaunchedLiveState(live) {
+  return evaluateLiveState(live, {
+    mode: "launched",
+    expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
+    expectedPausedAdGroups: 0,
+    expectedPausedResponsiveSearchAds: 0,
+    expectedEnabledAdGroups: 19,
+    expectedEnabledResponsiveSearchAds: 19,
+    campaignStateFailure: "is not enabled Search",
+    adGroupStateFailure: "all 19 ad groups must be enabled",
+    rsaStateFailure: "all 19 RSAs must be enabled",
+    nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
+    requireExactCampaignInventory: true,
+    requireZeroSpend: false,
+  });
 }
