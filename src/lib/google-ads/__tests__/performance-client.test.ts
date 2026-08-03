@@ -29,6 +29,9 @@ const metrics = {
   impressions: "40",
   conversions: 1.5,
   conversionsValue: 92.05,
+  searchImpressionShare: 0.42,
+  searchRankLostImpressionShare: 0.34,
+  searchBudgetLostImpressionShare: 0.24,
 };
 
 const accountInventory = {
@@ -225,6 +228,9 @@ describe("read-only Google Ads performance client", () => {
       impressions: "40",
       conversions: 1.5,
       conversionValue: 92.05,
+      searchImpressionShare: 0.42,
+      searchRankLostImpressionShare: 0.34,
+      searchBudgetLostImpressionShare: 0.24,
     });
     expect(result.inventory).toEqual({
       customerId: "1072816342",
@@ -351,10 +357,11 @@ describe("read-only Google Ads performance client", () => {
   });
 
   it("contains only read-only GAQL and never requests raw click identifiers", () => {
-    const queries = Object.values(buildGoogleAdsPerformanceQueries({
+    const querySet = buildGoogleAdsPerformanceQueries({
       startDate: "2026-07-01",
       endDate: "2026-07-02",
-    }));
+    });
+    const queries = Object.values(querySet);
 
     for (const query of queries) {
       expect(query).toMatch(/^SELECT /);
@@ -363,6 +370,14 @@ describe("read-only Google Ads performance client", () => {
     }
     expect(queries.join(" ")).toContain("metrics.cost_micros");
     expect(queries.join(" ")).toContain("metrics.conversions_value");
+    expect(querySet.campaigns).toContain("metrics.search_impression_share");
+    expect(querySet.campaigns).toContain("metrics.search_rank_lost_impression_share");
+    expect(querySet.campaigns).toContain("metrics.search_budget_lost_impression_share");
+    for (const query of [querySet.adGroups, querySet.keywords, querySet.searchTerms]) {
+      expect(query).not.toContain("metrics.search_impression_share");
+      expect(query).not.toContain("metrics.search_rank_lost_impression_share");
+      expect(query).not.toContain("metrics.search_budget_lost_impression_share");
+    }
     for (const query of queries) {
       expect(query).toContain("campaign.id IN (24048123058, 24048123061, 24048123064)");
     }

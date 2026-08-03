@@ -23,6 +23,9 @@ const campaign = {
   impressions: "9007199254740993999",
   conversions: 1.5,
   conversionValue: 92.05,
+  searchImpressionShare: 0.42,
+  searchRankLostImpressionShare: 0.34,
+  searchBudgetLostImpressionShare: 0.24,
 };
 
 const adGroup = {
@@ -111,6 +114,9 @@ describe("Google Ads performance feedback helpers", () => {
       cost_micros: "9007199254740993123",
       bidding_conversions: 1.5,
       bidding_conversion_value_cad: 92.05,
+      search_impression_share: 0.42,
+      search_rank_lost_impression_share: 0.34,
+      search_budget_lost_impression_share: 0.24,
       currency_code: "CAD",
     });
     expect(new Set(records.map((record) => record.entity_key)).size).toBe(4);
@@ -123,6 +129,9 @@ describe("Google Ads performance feedback helpers", () => {
     expect(records[3]).toMatchObject({
       entity_type: "search_term",
       search_term: "coroplast signs saskatoon",
+      search_impression_share: null,
+      search_rank_lost_impression_share: null,
+      search_budget_lost_impression_share: null,
     });
     for (const record of records) {
       expect(record.entity_key).toMatch(/^[a-f0-9]{64}$/);

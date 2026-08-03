@@ -28,6 +28,7 @@ const inputs = (heartbeat: RollupInputs["heartbeats"][number]): RollupInputs => 
     publicQueryError: 0,
     pricedQueryError: 0,
   },
+  paidSearchWeekly: { rows: [], queryFailed: false },
 });
 
 const heartbeat = (
@@ -101,13 +102,45 @@ describe("Google Ads monitor heartbeat rollup", () => {
     }
   });
 
-  it("does not create a spend alert below the threshold", () => {
+  it("does not create a spend alert below the threshold and registers weekly review signals", () => {
     const rollupInputs = inputs(heartbeat(0.1));
     rollupInputs.googleAdsMonitorDetail =
       "profile=public-pilot outcome=BELOW_STOP action=NONE spend=0.00 pause_verified=0 errors=0";
 
     expect(buildRollup(rollupInputs).reds.map((issue) => issue.key))
       .not.toContain(expect.stringMatching(/^google-ads-monitor:/));
+
+    rollupInputs.paidSearchWeekly.queryFailed = true;
+    expect(buildRollup(rollupInputs).reds).toContainEqual(expect.objectContaining({
+      key: "paid-search:weekly-view-read-failed",
+      panel: "panel-paid-search-weekly",
+    }));
+
+    rollupInputs.paidSearchWeekly = {
+      queryFailed: false,
+      rows: [{
+        week_start: "2026-08-03",
+        week_end: "2026-08-09",
+        campaign_id: "24048123058",
+        campaign_name: "GOOG_Search_TC_CoreProducts_2026",
+        weekly_spend_cad: 42,
+        actual_daily_spend_cad: 6,
+        pilot_actual_daily_spend_cad: 10,
+        target_daily_pace_cad: 13.33,
+        impressions: 100,
+        clicks: 20,
+        bidding_conversions: 1,
+        bidding_conversion_value_cad: 75,
+        search_impression_share: 0.4,
+        search_rank_lost_impression_share: 0.4,
+        search_budget_lost_impression_share: 0,
+        recommended_action: "raise CPC ceiling, auctions lost on price",
+      }],
+    };
+    expect(buildRollup(rollupInputs).yellows).toContainEqual(expect.objectContaining({
+      key: "paid-search:weekly:24048123058",
+      panel: "panel-paid-search-weekly",
+    }));
   });
 });
 

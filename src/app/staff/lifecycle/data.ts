@@ -34,6 +34,11 @@ import { buildEmailVolumeSnapshot, type EmailVolumeSnapshot } from "./EmailVolum
 import type { StaffAction } from "./StaffActionsPanel";
 import type { PaymentHealthSnapshot } from "./PaymentHealthPanel";
 import type { QuoteDeliveryRiskRow } from "./QuoteDeliveryRiskPanel";
+import type {
+  PaidSearchRecommendedAction,
+  PaidSearchWeeklyDecisionRow,
+  PaidSearchWeeklySnapshot,
+} from "./PaidSearchWeeklyPanel";
 import {
   buildRollup,
   type MeasurementOutboxCounts,
@@ -238,6 +243,7 @@ export interface LifecycleData {
   paymentHealth: PaymentHealthSnapshot;
   quoteDeliveryRisks: QuoteDeliveryRiskRow[];
   quoteDeliveryHealth: QuoteDeliveryHealth;
+  paidSearchWeekly: PaidSearchWeeklySnapshot;
   rollup: StatusRollup;
   fetched_at: string;
 }
@@ -1316,6 +1322,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     waveProvisioningRes,
     publicQuoteDeliveriesRes,
     pricedQuoteDeliveriesRes,
+    paidSearchWeeklyRes,
   ] = await Promise.all([
     supabase
       .from("google_ads_conversion_outbox")
@@ -1344,6 +1351,12 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
       .select("id, quote_id, status, created_at, provider_window_started_at, pay_url, resolution, resolved_at, last_error")
       .in("status", ["prepared", "sending", "pending_confirmation", "failed", "delivery_failed"])
       .limit(1000),
+    supabase
+      .from("google_ads_published_weekly_campaign_performance")
+      .select("week_start,week_end,campaign_id,campaign_name,weekly_spend_cad,actual_daily_spend_cad,pilot_actual_daily_spend_cad,target_daily_pace_cad,impressions,clicks,bidding_conversions,bidding_conversion_value_cad,search_impression_share,search_rank_lost_impression_share,search_budget_lost_impression_share,recommended_action")
+      .order("week_start", { ascending: false })
+      .order("campaign_id", { ascending: true })
+      .limit(12),
   ]);
   const measurementOutboxes = {
     revenue: {
@@ -1377,6 +1390,50 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     (pricedQuoteDeliveriesRes.data ?? []) as PricedQuoteDeliveryRow[],
     now,
   );
+  const paidSearchActions = new Set<PaidSearchRecommendedAction>([
+    "raise CPC ceiling, auctions lost on price",
+    "raise daily budget, budget-limited",
+    "thin market; bids cannot fix; reach change requires an approved contract change",
+    "insufficient auction data; hold current contract",
+    "hold current contract; weekly evidence does not support a change",
+  ]);
+  const paidSearchRows = (paidSearchWeeklyRes.data ?? []).map((row) => ({
+    week_start: String(row.week_start),
+    week_end: String(row.week_end),
+    campaign_id: String(row.campaign_id),
+    campaign_name: String(row.campaign_name),
+    weekly_spend_cad: Number(row.weekly_spend_cad),
+    actual_daily_spend_cad: Number(row.actual_daily_spend_cad),
+    pilot_actual_daily_spend_cad: Number(row.pilot_actual_daily_spend_cad),
+    target_daily_pace_cad: Number(row.target_daily_pace_cad),
+    impressions: Number(row.impressions),
+    clicks: Number(row.clicks),
+    bidding_conversions: Number(row.bidding_conversions),
+    bidding_conversion_value_cad: Number(row.bidding_conversion_value_cad),
+    search_impression_share: row.search_impression_share === null
+      ? null
+      : Number(row.search_impression_share),
+    search_rank_lost_impression_share:
+      row.search_rank_lost_impression_share === null
+        ? null
+        : Number(row.search_rank_lost_impression_share),
+    search_budget_lost_impression_share:
+      row.search_budget_lost_impression_share === null
+        ? null
+        : Number(row.search_budget_lost_impression_share),
+    recommended_action: paidSearchActions.has(
+      row.recommended_action as PaidSearchRecommendedAction,
+    )
+      ? row.recommended_action as PaidSearchRecommendedAction
+      : "insufficient auction data; hold current contract",
+  })) satisfies PaidSearchWeeklyDecisionRow[];
+  const latestPaidSearchWeek = paidSearchRows[0]?.week_start;
+  const paidSearchWeekly: PaidSearchWeeklySnapshot = {
+    rows: latestPaidSearchWeek
+      ? paidSearchRows.filter((row) => row.week_start === latestPaidSearchWeek)
+      : [],
+    queryFailed: Boolean(paidSearchWeeklyRes.error),
+  };
   quoteDeliveries.publicQueryError = publicQuoteDeliveriesRes.error ? 1 : 0;
   quoteDeliveries.pricedQueryError = pricedQuoteDeliveriesRes.error ? 1 : 0;
   const publicQuoteDeliveryRows =
@@ -1478,6 +1535,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     wavePaymentEffects,
     waveProvisioning,
     quoteDeliveries,
+    paidSearchWeekly,
   });
 
   return {
@@ -1507,6 +1565,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     paymentHealth,
     quoteDeliveryRisks,
     quoteDeliveryHealth: quoteDeliveries,
+    paidSearchWeekly,
     rollup,
     fetched_at: new Date(now).toISOString(),
   };

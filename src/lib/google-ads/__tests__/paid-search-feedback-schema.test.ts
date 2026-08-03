@@ -9,6 +9,13 @@ const migration = readFileSync(
   ),
   "utf8",
 );
+const weeklyMigration = readFileSync(
+  path.join(
+    process.cwd(),
+    "supabase/migrations/20260803210000_paid_search_weekly_decision_surface.sql",
+  ),
+  "utf8",
+);
 
 describe("paid-search feedback schema contract", () => {
   it("stages each reporting grain under an exact run attempt and account", () => {
@@ -86,6 +93,18 @@ describe("paid-search feedback schema contract", () => {
     )).toHaveLength(2);
     expect(migration).toContain(
       "'service_role',\n    'public.google_ads_daily_metrics',\n    'SELECT'",
+    );
+    expect(weeklyMigration).toContain(
+      "CREATE OR REPLACE VIEW public.google_ads_published_weekly_campaign_performance",
+    );
+    expect(weeklyMigration).toContain(
+      "GRANT SELECT ON TABLE public.google_ads_published_weekly_campaign_performance",
+    );
+    expect(weeklyMigration).toContain(
+      "GRANT EXECUTE ON FUNCTION public.google_ads_published_weekly_campaign_rows()",
+    );
+    expect(weeklyMigration).toContain(
+      "has_table_privilege(\n       'service_role',\n       'public.google_ads_daily_metrics',\n       'SELECT'",
     );
   });
 
@@ -166,5 +185,18 @@ describe("paid-search feedback schema contract", () => {
     );
     expect(migration).toContain("cart activity is not a bidding conversion");
     expect(migration).toContain("submitted quotes are not bidding conversions");
+    expect(weeklyMigration).toContain("search_impression_share numeric(8,6)");
+    expect(weeklyMigration).toContain("search_rank_lost_impression_share numeric(8,6)");
+    expect(weeklyMigration).toContain("search_budget_lost_impression_share numeric(8,6)");
+    expect(weeklyMigration).toContain(
+      "THEN 'raise CPC ceiling, auctions lost on price'",
+    );
+    expect(weeklyMigration).toContain(
+      "THEN 'raise daily budget, budget-limited'",
+    );
+    expect(weeklyMigration).toContain(
+      "THEN 'thin market; bids cannot fix; reach change requires an approved contract change'",
+    );
+    expect(weeklyMigration).not.toMatch(/\b(?:CREATE TRIGGER|LANGUAGE plpgsql)\b/i);
   });
 });

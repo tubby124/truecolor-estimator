@@ -51,14 +51,22 @@ export interface GoogleAdsDailyMetrics {
   conversionValue: number;
 }
 
-export interface GoogleAdsDailyCampaignPerformance extends GoogleAdsDailyMetrics {
+interface GoogleAdsDailyCampaignIdentity {
   date: string;
   campaignId: string;
   campaignName: string;
   campaignStatus: string;
 }
 
-export interface GoogleAdsDailyAdGroupPerformance extends GoogleAdsDailyCampaignPerformance {
+export interface GoogleAdsDailyCampaignPerformance
+  extends GoogleAdsDailyMetrics, GoogleAdsDailyCampaignIdentity {
+  searchImpressionShare: number | null;
+  searchRankLostImpressionShare: number | null;
+  searchBudgetLostImpressionShare: number | null;
+}
+
+export interface GoogleAdsDailyAdGroupPerformance
+  extends GoogleAdsDailyMetrics, GoogleAdsDailyCampaignIdentity {
   adGroupId: string;
   adGroupName: string;
   adGroupStatus: string;
@@ -169,6 +177,9 @@ interface GoogleAdsRow {
     impressions?: string;
     conversions?: number | string;
     conversionsValue?: number | string;
+    searchImpressionShare?: number | string;
+    searchRankLostImpressionShare?: number | string;
+    searchBudgetLostImpressionShare?: number | string;
   };
 }
 
@@ -244,6 +255,13 @@ function performanceFields(prefix: string): string {
     "metrics.impressions",
     "metrics.conversions",
     "metrics.conversions_value",
+    ...(prefix === "campaign"
+      ? [
+          "metrics.search_impression_share",
+          "metrics.search_rank_lost_impression_share",
+          "metrics.search_budget_lost_impression_share",
+        ]
+      : []),
   ].join(", ");
 }
 
@@ -343,6 +361,15 @@ function decimalMetric(value: unknown, field: string): number {
   return normalized;
 }
 
+function nullableShareMetric(value: unknown, field: string): number | null {
+  if (value === undefined || value === null) return null;
+  const normalized = Number(value);
+  if (!Number.isFinite(normalized) || normalized < 0 || normalized > 1) {
+    throw new Error(`Google Ads response has invalid ${field}`);
+  }
+  return normalized;
+}
+
 function mapMetrics(row: GoogleAdsRow): GoogleAdsDailyMetrics {
   return {
     costMicros: integerMetric(row.metrics?.costMicros, "metrics.cost_micros"),
@@ -353,13 +380,12 @@ function mapMetrics(row: GoogleAdsRow): GoogleAdsDailyMetrics {
   };
 }
 
-function mapCampaign(row: GoogleAdsRow): GoogleAdsDailyCampaignPerformance {
-  const mapped = {
+function mapCampaignIdentity(row: GoogleAdsRow): GoogleAdsDailyCampaignIdentity {
+  const mapped: GoogleAdsDailyCampaignIdentity = {
     date: requiredString(row.segments?.date, "segments.date"),
     campaignId: requiredString(row.campaign?.id, "campaign.id"),
     campaignName: requiredString(row.campaign?.name, "campaign.name"),
     campaignStatus: requiredString(row.campaign?.status, "campaign.status"),
-    ...mapMetrics(row),
   };
   const expected = TRUE_COLOR_GOOGLE_ADS_CAMPAIGNS.find(({ id }) => id === mapped.campaignId);
   if (!expected || mapped.campaignName !== expected.name) {
@@ -371,9 +397,29 @@ function mapCampaign(row: GoogleAdsRow): GoogleAdsDailyCampaignPerformance {
   return mapped;
 }
 
+function mapCampaign(row: GoogleAdsRow): GoogleAdsDailyCampaignPerformance {
+  return {
+    ...mapCampaignIdentity(row),
+    ...mapMetrics(row),
+    searchImpressionShare: nullableShareMetric(
+      row.metrics?.searchImpressionShare,
+      "metrics.search_impression_share",
+    ),
+    searchRankLostImpressionShare: nullableShareMetric(
+      row.metrics?.searchRankLostImpressionShare,
+      "metrics.search_rank_lost_impression_share",
+    ),
+    searchBudgetLostImpressionShare: nullableShareMetric(
+      row.metrics?.searchBudgetLostImpressionShare,
+      "metrics.search_budget_lost_impression_share",
+    ),
+  };
+}
+
 function mapAdGroup(row: GoogleAdsRow): GoogleAdsDailyAdGroupPerformance {
   return {
-    ...mapCampaign(row),
+    ...mapCampaignIdentity(row),
+    ...mapMetrics(row),
     adGroupId: requiredString(row.adGroup?.id, "ad_group.id"),
     adGroupName: requiredString(row.adGroup?.name, "ad_group.name"),
     adGroupStatus: requiredString(row.adGroup?.status, "ad_group.status"),

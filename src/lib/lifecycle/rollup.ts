@@ -17,6 +17,7 @@ import type { WebhookSourceGroup } from "@/app/staff/lifecycle/WebhookHealthPane
 import type { Heartbeat } from "@/app/staff/lifecycle/HeartbeatsPanel";
 import type { WaveDraftRow } from "@/app/staff/lifecycle/WaveDraftPanel";
 import type { Orphan } from "@/app/staff/lifecycle/OrphanPanel";
+import type { PaidSearchWeeklySnapshot } from "@/app/staff/lifecycle/PaidSearchWeeklyPanel";
 
 export interface RollupIssue {
   /** Stable key — used by Telegram dedup AND dashboard anchor href. */
@@ -101,6 +102,8 @@ export interface RollupInputs {
   waveProvisioning: WaveProvisioningHealth;
   /** Public confirmations and payable quotes awaiting provider reconciliation. */
   quoteDeliveries: QuoteDeliveryHealth;
+  /** Latest published weekly Google Search review surface. */
+  paidSearchWeekly: PaidSearchWeeklySnapshot;
 }
 
 const SEV1_CATEGORIES = new Set(["no_wave_invoice", "half_recorded"]);
@@ -216,6 +219,38 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
         key: "google-ads-monitor:unsafe",
         panel: "panel-cron-heartbeats",
         label: `Google Ads monitor unsafe: outcome=${outcome ?? "unknown"} action=${action ?? "unknown"} pause_verified=${pauseVerified ? 1 : 0}${spendLabel}`,
+      });
+    }
+  }
+
+  // ── Weekly paid-search decisions ─────────────────────────────────────────
+  // Review recommendations stay yellow (dashboard only). A failed published
+  // view read is red because it makes the Monday decision surface silently
+  // unavailable even if the upstream performance heartbeat remains healthy.
+  if (inputs.paidSearchWeekly.queryFailed) {
+    reds.push({
+      key: "paid-search:weekly-view-read-failed",
+      panel: "panel-paid-search-weekly",
+      label: "Paid-search weekly decision view could not be read",
+    });
+  } else if (inputs.paidSearchWeekly.rows.length === 0) {
+    yellows.push({
+      key: "paid-search:weekly-data-missing",
+      panel: "panel-paid-search-weekly",
+      label: "Paid-search weekly decision data not published yet",
+    });
+  } else {
+    for (const row of inputs.paidSearchWeekly.rows) {
+      if (row.recommended_action.startsWith("hold current contract")) continue;
+      const campaign = row.campaign_id === "24048123058"
+        ? "Core"
+        : row.campaign_id === "24048123061"
+          ? "Competitor"
+          : row.campaign_id;
+      yellows.push({
+        key: `paid-search:weekly:${row.campaign_id}`,
+        panel: "panel-paid-search-weekly",
+        label: `Paid search ${campaign}: ${row.recommended_action}`,
       });
     }
   }

@@ -5,10 +5,12 @@ export const PAUSED_EXPECTED_CAMPAIGNS = Object.freeze({
   GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 2, ceiling: 2.5, status: "PAUSED" }),
   GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" }),
 });
+// Stage 1 launch = Core + Competitor enabled, Brand held paused (2026-08-03 PM owner decision).
+// Brand contributes the single paused ad group and RSA in the launched counts below.
 export const LAUNCHED_EXPECTED_CAMPAIGNS = Object.freeze({
-  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 14, ceiling: 6, status: "ENABLED" }),
-  GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 4, status: "ENABLED" }),
-  GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 2.5, status: "ENABLED" }),
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 14, ceiling: 4, status: "ENABLED" }),
+  GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 2.5, status: "ENABLED" }),
+  GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" }),
 });
 const EXPECTED_SUFFIX = "utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_term={keyword}&utm_content={creative}&keyword={keyword}&matchtype={matchtype}&device={device}&loc_physical_ms={loc_physical_ms}&loc_interest_ms={loc_interest_ms}&adgroupid={adgroupid}&creative={creative}&campaignid={campaignid}&network={network}";
 const EXPECTED_GEO_POINT = {
@@ -464,13 +466,13 @@ export function evaluateLaunchedLiveState(live) {
   return evaluateLiveState(live, {
     mode: "launched",
     expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
-    expectedPausedAdGroups: 0,
-    expectedPausedResponsiveSearchAds: 0,
-    expectedEnabledAdGroups: 19,
-    expectedEnabledResponsiveSearchAds: 19,
-    campaignStateFailure: "is not enabled Search",
-    adGroupStateFailure: "all 19 ad groups must be enabled",
-    rsaStateFailure: "all 19 RSAs must be enabled",
+    expectedPausedAdGroups: 1,
+    expectedPausedResponsiveSearchAds: 1,
+    expectedEnabledAdGroups: 18,
+    expectedEnabledResponsiveSearchAds: 18,
+    campaignStateFailure: "is not in its approved Stage 1 launch state",
+    adGroupStateFailure: "18 ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "18 RSAs must be enabled and the held Brand RSA paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     requireExactCampaignInventory: true,
     requireZeroSpend: false,

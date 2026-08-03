@@ -230,18 +230,19 @@ const makeLaunchedLiveState = () => {
   const live = makePausedLiveState();
   live.campaigns = live.campaigns.map((campaign) => ({
     ...campaign,
-    status: "ENABLED",
+    status: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name].status,
     dailyBudgetCad: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name].budget,
     cpcCeilingCad: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name].ceiling,
   }));
   live.allCampaigns = live.allCampaigns.map((campaign) => ({
     ...campaign,
-    status: "ENABLED",
+    status: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name]?.status ?? campaign.status,
   }));
-  live.pausedAdGroups = 0;
-  live.enabledAdGroups = 19;
-  live.pausedResponsiveSearchAds = 0;
-  live.enabledResponsiveSearchAds = 19;
+  // Stage 1 holds Brand paused, so its single ad group and RSA stay paused.
+  live.pausedAdGroups = 1;
+  live.enabledAdGroups = 18;
+  live.pausedResponsiveSearchAds = 1;
+  live.enabledResponsiveSearchAds = 18;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "ENABLED" }));
   live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "ENABLED" }));
@@ -411,9 +412,9 @@ test("live verification contract rejects launch-critical drift and missing noind
 
 test("launched live verification enforces the exact Stage 1 state", () => {
   assert.deepEqual(LAUNCHED_EXPECTED_CAMPAIGNS, {
-    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 14, ceiling: 6, status: "ENABLED" },
-    GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 4, status: "ENABLED" },
-    GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 2.5, status: "ENABLED" },
+    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 14, ceiling: 4, status: "ENABLED" },
+    GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 2.5, status: "ENABLED" },
+    GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" },
   });
 
   const launched = makeLaunchedLiveState();
@@ -421,10 +422,30 @@ test("launched live verification enforces the exact Stage 1 state", () => {
   assert.deepEqual(launchedResult, { failures: [], launchBlockers: [] });
   assert.equal(liveVerificationStatus({ ...launchedResult, mode: "launched" }), "VALIDATED_LAUNCHED");
 
+  const coreName = "GOOG_Search_TC_CoreProducts_2026";
+  const brandName = "GOOG_Search_TC_BrandDefense_2026";
+
   const stillPaused = makeLaunchedLiveState();
-  stillPaused.campaigns[0].status = "PAUSED";
-  stillPaused.allCampaigns[0].status = "PAUSED";
+  stillPaused.campaigns.find((c) => c.name === coreName).status = "PAUSED";
+  stillPaused.allCampaigns.find((c) => c.name === coreName).status = "PAUSED";
   assert.ok(evaluateLaunchedLiveState(stillPaused).failures.length > 0);
+
+  // Brand must stay held; an enabled Brand is drift, not a launch.
+  const brandLive = makeLaunchedLiveState();
+  brandLive.campaigns.find((c) => c.name === brandName).status = "ENABLED";
+  brandLive.allCampaigns.find((c) => c.name === brandName).status = "ENABLED";
+  assert.ok(evaluateLaunchedLiveState(brandLive).failures.length > 0);
+
+  // Enabling the held Brand ad group or RSA is also drift.
+  const brandGroupLive = makeLaunchedLiveState();
+  brandGroupLive.pausedAdGroups = 0;
+  brandGroupLive.enabledAdGroups = 19;
+  assert.ok(evaluateLaunchedLiveState(brandGroupLive).failures.length > 0);
+
+  const brandRsaLive = makeLaunchedLiveState();
+  brandRsaLive.pausedResponsiveSearchAds = 0;
+  brandRsaLive.enabledResponsiveSearchAds = 19;
+  assert.ok(evaluateLaunchedLiveState(brandRsaLive).failures.length > 0);
 
   const wrongBudget = makeLaunchedLiveState();
   wrongBudget.campaigns[0].dailyBudgetCad = 13;

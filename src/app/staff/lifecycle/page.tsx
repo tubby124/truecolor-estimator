@@ -45,6 +45,7 @@ import { StaffActionsPanel } from "./StaffActionsPanel";
 import { StatusRollupPanel } from "./StatusRollupPanel";
 import { PaymentHealthPanel } from "./PaymentHealthPanel";
 import { QuoteDeliveryRiskPanel } from "./QuoteDeliveryRiskPanel";
+import { PaidSearchWeeklyPanel } from "./PaidSearchWeeklyPanel";
 
 export const metadata: Metadata = {
   title: "Lifecycle — True Color Staff",
@@ -110,6 +111,9 @@ export default async function LifecyclePage() {
             <StatusRollupPanel rollup={data.rollup} />
             <HealthTiles snap={data.health} />
             <PaymentHealthPanel snapshot={data.paymentHealth} />
+            <div id="panel-paid-search-weekly" className="scroll-mt-20">
+              <PaidSearchWeeklyPanel snapshot={data.paidSearchWeekly} />
+            </div>
             <div id="panel-cron-heartbeats" className="scroll-mt-20">
               <HeartbeatsPanel heartbeats={data.heartbeats} />
             </div>

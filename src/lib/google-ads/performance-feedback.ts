@@ -39,6 +39,9 @@ export interface GoogleAdsDailyMetricRecord {
   cost_micros: string;
   bidding_conversions: number;
   bidding_conversion_value_cad: number;
+  search_impression_share: number | null;
+  search_rank_lost_impression_share: number | null;
+  search_budget_lost_impression_share: number | null;
   paid_orders: 0;
   pretax_revenue_cad: 0;
   observed_page_views: 0;
@@ -142,6 +145,17 @@ function requireFiniteMetric(value: number, field: string): number {
   return value;
 }
 
+function requireNullableShareMetric(
+  value: number | null | undefined,
+  field: string,
+): number | null {
+  if (value === undefined || value === null) return null;
+  if (!Number.isFinite(value) || value < 0 || value > 1) {
+    throw new Error(`${field} must be a finite share from 0 to 1`);
+  }
+  return value;
+}
+
 function sourceIdentity(identity: MetricIdentity): string[] {
   return [
     "google-ads-feedback-v1",
@@ -169,8 +183,12 @@ function baseMetricRecord(
     impressions: string;
     conversions: number;
     conversionValue: number;
+    searchImpressionShare?: number | null;
+    searchRankLostImpressionShare?: number | null;
+    searchBudgetLostImpressionShare?: number | null;
   },
 ): GoogleAdsDailyMetricRecord {
+  const campaignRow = identity.entityType === "campaign";
   return {
     sync_run_id: syncRunId,
     google_ads_customer_id: TRUE_COLOR_GOOGLE_ADS_CUSTOMER_ID,
@@ -194,6 +212,21 @@ function baseMetricRecord(
       row.conversionValue,
       "conversion_value",
     ),
+    search_impression_share: campaignRow
+      ? requireNullableShareMetric(row.searchImpressionShare, "search_impression_share")
+      : null,
+    search_rank_lost_impression_share: campaignRow
+      ? requireNullableShareMetric(
+          row.searchRankLostImpressionShare,
+          "search_rank_lost_impression_share",
+        )
+      : null,
+    search_budget_lost_impression_share: campaignRow
+      ? requireNullableShareMetric(
+          row.searchBudgetLostImpressionShare,
+          "search_budget_lost_impression_share",
+        )
+      : null,
     paid_orders: 0,
     pretax_revenue_cad: 0,
     observed_page_views: 0,
