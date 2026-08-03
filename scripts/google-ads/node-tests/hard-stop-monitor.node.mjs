@@ -60,7 +60,7 @@ function createApi({
 }
 
 test("defaults to read-only below the public-pilot warning", async () => {
-  const api = createApi({ spendMicros: "499999999" });
+  const api = createApi({ spendMicros: "999999999" });
   const result = await runHardStopMonitor({ api, options: PUBLIC_OPTIONS, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.executionMode, "DRY_RUN");
@@ -70,28 +70,28 @@ test("defaults to read-only below the public-pilot warning", async () => {
 });
 
 test("reports the public warning without mutating below the protective threshold", async () => {
-  const api = createApi({ spendMicros: "500000000" });
+  const api = createApi({ spendMicros: "1000000000" });
   const result = await runHardStopMonitor({ api, options: PUBLIC_OPTIONS, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.outcome, "WARNING");
   assert.equal(result.action, "NONE");
-  assert.equal(result.warningCad, 500);
+  assert.equal(result.warningCad, 1000);
   assert.equal(api.pauseCalls, 0);
 });
 
 test("dry-run reports a pause at the protective threshold without mutating", async () => {
-  const api = createApi({ spendMicros: "625000000" });
+  const api = createApi({ spendMicros: "1250000000" });
   const result = await runHardStopMonitor({ api, options: PUBLIC_OPTIONS, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.outcome, "STOP_REQUIRED");
   assert.equal(result.action, "WOULD_PAUSE");
-  assert.equal(result.thresholdCad, 625);
-  assert.equal(result.approvedCapCad, 650);
+  assert.equal(result.thresholdCad, 1250);
+  assert.equal(result.approvedCapCad, 1300);
   assert.equal(api.pauseCalls, 0);
 });
 
 test("explicit execute pauses every allowlisted campaign above threshold and verifies readback", async () => {
-  const api = createApi({ spendMicros: "640000000" });
+  const api = createApi({ spendMicros: "1280000000" });
   const result = await runHardStopMonitor({ api, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.outcome, "STOPPED");
@@ -102,8 +102,8 @@ test("explicit execute pauses every allowlisted campaign above threshold and ver
   assert.deepEqual(api.pauseTargets.map((campaign) => campaign.id).sort(), HARD_STOP_CAMPAIGNS.map((campaign) => campaign.id).sort());
 });
 
-test("public monitor automatically pauses at CA$625 and distinguishes the CA$650 absolute cap", async () => {
-  const protective = createApi({ spendMicros: "625000000" });
+test("public monitor automatically pauses at CA$1250 and distinguishes the CA$1300 absolute cap", async () => {
+  const protective = createApi({ spendMicros: "1250000000" });
   const protectiveResult = await runHardStopMonitor({ api: protective, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
   assert.equal(protectiveResult.outcome, "STOPPED");
   assert.equal(protectiveResult.decisionReason, "PROTECTIVE_PAUSE_THRESHOLD_REACHED");
@@ -111,12 +111,38 @@ test("public monitor automatically pauses at CA$625 and distinguishes the CA$650
   assert.equal(protectiveResult.spendScope, "EXACT_ACCOUNT_TOTAL");
   assert.equal(protective.pauseCalls, 1);
 
-  const capped = createApi({ spendMicros: "650000000" });
+  const capped = createApi({ spendMicros: "1300000000" });
   const cappedResult = await runHardStopMonitor({ api: capped, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
   assert.equal(cappedResult.outcome, "STOPPED");
   assert.equal(cappedResult.decisionReason, "ABSOLUTE_CAP_REACHED");
   assert.equal(cappedResult.absoluteCapReached, true);
-  assert.equal(cappedResult.approvedCapCad, 650);
+  assert.equal(cappedResult.approvedCapCad, 1300);
+});
+
+test("the approved public window stays open through 2026-12-30 and stops once it ends", async () => {
+  const insideWindow = createApi({ spendMicros: "0" });
+  const insideResult = await runHardStopMonitor({
+    api: insideWindow,
+    options: PUBLIC_OPTIONS,
+    now: new Date("2026-12-30T18:00:00.000Z"),
+  });
+  assert.equal(insideResult.windowEndLocal, "2026-12-31T00:00");
+  assert.equal(insideResult.timestampLocal, "2026-12-30T12:00:00");
+  assert.equal(insideResult.outcome, "BELOW_STOP");
+  assert.equal(insideResult.action, "NONE");
+  assert.equal(insideWindow.pauseCalls, 0);
+
+  const afterWindow = createApi({ spendMicros: "0" });
+  const endedResult = await runHardStopMonitor({
+    api: afterWindow,
+    options: { ...PUBLIC_OPTIONS, execute: true },
+    now: new Date("2026-12-31T06:00:00.000Z"),
+  });
+  assert.equal(endedResult.timestampLocal, "2026-12-31T00:00:00");
+  assert.equal(endedResult.decisionReason, "WINDOW_ENDED");
+  assert.equal(endedResult.outcome, "STOPPED");
+  assert.equal(endedResult.pauseVerified, true);
+  assert.equal(afterWindow.pauseCalls, 1);
 });
 
 test("controlled-test profile enforces a 72-hour Regina-local window and CA$25 threshold", async () => {
@@ -197,7 +223,7 @@ test("execute mode fail-closes on account identity or campaign validation failur
 test("unexpected enabled campaign spend is account-wide and every enabled campaign is paused", async () => {
   const api = createApi({
     campaigns: [...ACTIVE_CAMPAIGNS, UNEXPECTED_CAMPAIGN],
-    spendRows: [{ customerId: ACCOUNT.id, date: "2026-07-21", hour: 12, costMicros: "625000000" }],
+    spendRows: [{ customerId: ACCOUNT.id, date: "2026-07-21", hour: 12, costMicros: "1250000000" }],
   });
   const result = await runHardStopMonitor({ api, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
   assert.equal(result.outcome, "ERROR_FAIL_CLOSED_PAUSED");
@@ -211,7 +237,7 @@ test("unexpected enabled campaign spend is account-wide and every enabled campai
 });
 
 test("pausing is idempotent when all campaigns are already paused", async () => {
-  const api = createApi({ campaigns: PAUSED_CAMPAIGNS, spendMicros: "650000000" });
+  const api = createApi({ campaigns: PAUSED_CAMPAIGNS, spendMicros: "1300000000" });
   const result = await runHardStopMonitor({ api, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.action, "ALREADY_PAUSED");
@@ -241,8 +267,8 @@ test("dry-run spend errors fail loudly without mutation", async () => {
 
 test("pause API and pause readback failures are loud and never reported as stopped", async () => {
   for (const api of [
-    createApi({ spendMicros: "650000000", pauseError: new Error("mutation denied") }),
-    createApi({ spendMicros: "650000000", stayEnabledAfterPause: true }),
+    createApi({ spendMicros: "1300000000", pauseError: new Error("mutation denied") }),
+    createApi({ spendMicros: "1300000000", stayEnabledAfterPause: true }),
   ]) {
     const result = await runHardStopMonitor({ api, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
     assert.equal(result.ok, false);
@@ -269,19 +295,19 @@ test("wrong or unreadable account identity never mutates; verified-account campa
 
 test("spend aggregation is exact-account-wide and rejects a different customer", () => {
   const spend = sumSpendMicros([
-    { customerId: ACCOUNT.id, date: "2026-07-21", hour: 12, costMicros: "400000000" },
-    { customerId: ACCOUNT.id, date: "2026-07-21", hour: 13, costMicros: "250000000" },
-  ], { windowStart: "2026-07-20T00:00", windowEnd: "2026-09-18T00:00" });
-  assert.equal(spend.cad, 650);
+    { customerId: ACCOUNT.id, date: "2026-07-21", hour: 12, costMicros: "800000000" },
+    { customerId: ACCOUNT.id, date: "2026-11-30", hour: 13, costMicros: "500000000" },
+  ], { windowStart: "2026-07-20T00:00", windowEnd: "2026-12-31T00:00" });
+  assert.equal(spend.cad, 1300);
   assert.throws(() => sumSpendMicros([
     { customerId: "2200538686", date: "2026-07-21", hour: 12, costMicros: "1" },
-  ], { windowStart: "2026-07-20T00:00", windowEnd: "2026-09-18T00:00" }), /not for the True Color account/);
+  ], { windowStart: "2026-07-20T00:00", windowEnd: "2026-12-31T00:00" }), /not for the True Color account/);
 });
 
 test("the approved public window uses inclusive Regina calendar dates in GAQL", () => {
-  assert.deepEqual(gaqlDateRange("2026-07-20T00:00", "2026-09-18T00:00"), {
+  assert.deepEqual(gaqlDateRange("2026-07-20T00:00", "2026-12-31T00:00"), {
     startDate: "2026-07-20",
-    endDate: "2026-09-17",
+    endDate: "2026-12-30",
   });
   assert.equal(localNow(new Date("2026-07-20T06:00:00.000Z")), "2026-07-20T00:00:00");
 });

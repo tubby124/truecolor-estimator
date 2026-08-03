@@ -15,6 +15,7 @@
     "gen-og": "node scripts/gen-og.mjs",
     "validate:pricing": "node scripts/validate-pricing.mjs",
     "validate:google-ads": "node scripts/google-ads/live-verify-paused.mjs",
+    "validate:google-ads:launched": "node scripts/google-ads/live-verify-paused.mjs --mode=launched",
     "validate:google-ads-launch": "node scripts/google-ads/validate-launch-candidate.mjs",
     "build:google-ads-attestation": "node scripts/google-ads/build-controlled-test-attestation.mjs",
     "drill:google-ads-monitor": "node scripts/google-ads/monitor-safety-drill.mjs",

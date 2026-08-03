@@ -16,9 +16,9 @@
   },
   "publicSpendControls": {
     "scope": "EXACT_ACCOUNT_TOTAL",
-    "warningCad": 500,
-    "protectivePauseCad": 625,
-    "absoluteCapCad": 650,
+    "warningCad": 1000,
+    "protectivePauseCad": 1250,
+    "absoluteCapCad": 1300,
     "monitorCadenceMinutes": 15
   },
   "conversionMeasurement": {
@@ -146,117 +146,117 @@
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
       "adGroup": "Coroplast Signs",
       "tier": "TIER_1_PRODUCT",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
       "adGroup": "Stickers and Labels",
       "tier": "TIER_1_PRODUCT",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
       "adGroup": "Vinyl Banners",
       "tier": "TIER_1_PRODUCT",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
       "adGroup": "Business Cards",
       "tier": "TIER_1_PRODUCT",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
       "adGroup": "Flyers",
       "tier": "TIER_1_PRODUCT",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
       "adGroup": "Retractable Banners",
       "tier": "TIER_1_PRODUCT",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Rush and Same Day",
+      "tier": "TIER_1_PRODUCT",
+      "targetStatus": "ENABLED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Generic Print Price",
+      "tier": "TIER_1_PRODUCT",
+      "targetStatus": "ENABLED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Generic Sign Shop",
+      "tier": "TIER_1_PRODUCT",
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Qwik Signs",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Minuteman Press",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Ink House",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Rayacom",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - 24 Hour Signs",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Anytime Printing",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - PGI Printers",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Staples Printing",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Vistaprint",
       "tier": "TIER_1_CONQUEST",
-      "requiredCurrentStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     }
   ],
   "heldGroups": [
     {
-      "campaign": "GOOG_Search_TC_CoreProducts_2026",
-      "adGroup": "Rush and Same Day",
-      "tier": "TIER_2_EXPANSION",
-      "requiredStatus": "PAUSED"
-    },
-    {
-      "campaign": "GOOG_Search_TC_CoreProducts_2026",
-      "adGroup": "Generic Print Price",
-      "tier": "TIER_2_EXPANSION",
-      "requiredStatus": "PAUSED"
-    },
-    {
-      "campaign": "GOOG_Search_TC_CoreProducts_2026",
-      "adGroup": "Generic Sign Shop",
-      "tier": "TIER_2_EXPANSION",
-      "requiredStatus": "PAUSED"
-    },
-    {
       "campaign": "GOOG_Search_TC_BrandDefense_2026",
       "adGroup": "True Color Brand",
       "tier": "HOLD_AUCTION_INSIGHTS",
-      "requiredStatus": "PAUSED"
+      "targetStatus": "ENABLED"
     }
   ],
   "blockers": [
