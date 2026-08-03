@@ -74,11 +74,11 @@ GOOG_Search_TC_CompetitorConquest_2026,Comparison - Anytime Printing,[anytime pr
 GOOG_Search_TC_CompetitorConquest_2026,Comparison - PGI Printers,[pgi printers],Exact,ENABLED,https://truecolorprinting.ca/why-true-color?source=google-ads
 GOOG_Search_TC_CompetitorConquest_2026,Comparison - Staples Printing,[staples printing saskatoon],Exact,ENABLED,https://truecolorprinting.ca/why-true-color?source=google-ads
 GOOG_Search_TC_CompetitorConquest_2026,Comparison - Vistaprint,[vistaprint saskatoon],Exact,ENABLED,https://truecolorprinting.ca/why-true-color?source=google-ads
-GOOG_Search_TC_BrandDefense_2026,True Color Brand,[true color printing],Exact,ENABLED,https://truecolorprinting.ca/
-GOOG_Search_TC_BrandDefense_2026,True Color Brand,"""true color printing""",Phrase,ENABLED,https://truecolorprinting.ca/
-GOOG_Search_TC_BrandDefense_2026,True Color Brand,[true colour printing],Exact,ENABLED,https://truecolorprinting.ca/
-GOOG_Search_TC_BrandDefense_2026,True Color Brand,"""true colour printing""",Phrase,ENABLED,https://truecolorprinting.ca/
-GOOG_Search_TC_BrandDefense_2026,True Color Brand,[true color saskatoon],Exact,ENABLED,https://truecolorprinting.ca/
-GOOG_Search_TC_BrandDefense_2026,True Color Brand,"""true color saskatoon""",Phrase,ENABLED,https://truecolorprinting.ca/
-GOOG_Search_TC_BrandDefense_2026,True Color Brand,[true color display printing],Exact,ENABLED,https://truecolorprinting.ca/
-GOOG_Search_TC_BrandDefense_2026,True Color Brand,"""true color display printing""",Phrase,ENABLED,https://truecolorprinting.ca/
+GOOG_Search_TC_BrandDefense_2026,True Color Brand,[true color printing],Exact,PAUSED,https://truecolorprinting.ca/
+GOOG_Search_TC_BrandDefense_2026,True Color Brand,"""true color printing""",Phrase,PAUSED,https://truecolorprinting.ca/
+GOOG_Search_TC_BrandDefense_2026,True Color Brand,[true colour printing],Exact,PAUSED,https://truecolorprinting.ca/
+GOOG_Search_TC_BrandDefense_2026,True Color Brand,"""true colour printing""",Phrase,PAUSED,https://truecolorprinting.ca/
+GOOG_Search_TC_BrandDefense_2026,True Color Brand,[true color saskatoon],Exact,PAUSED,https://truecolorprinting.ca/
+GOOG_Search_TC_BrandDefense_2026,True Color Brand,"""true color saskatoon""",Phrase,PAUSED,https://truecolorprinting.ca/
+GOOG_Search_TC_BrandDefense_2026,True Color Brand,[true color display printing],Exact,PAUSED,https://truecolorprinting.ca/
+GOOG_Search_TC_BrandDefense_2026,True Color Brand,"""true color display printing""",Phrase,PAUSED,https://truecolorprinting.ca/

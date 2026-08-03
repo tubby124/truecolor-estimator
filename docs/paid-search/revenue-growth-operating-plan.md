@@ -93,7 +93,16 @@ That is roughly 78 clicks and CA$129 over 30 days, not a guarantee. Producing 31
 
 The CA$600 promotion is financing, not profit. Exclude promotional credit when calculating CPA and ROAS.
 
-**2026-08-03 amendment — the constraint is understood and the spend target is being pursued anyway.** Everything above remains true: budget does not manufacture local high-intent demand, and the forecast at conservative settings is ~CA$4.30/day. The owner nonetheless approved chasing the CA$600 promotion (expires 2026-09-16; CA$600 cash unlocks CA$600 credit — 50% off the search-term and conversion data the account needs) with a CA$13.33/day pace requirement. Budgets were raised to Core CA$14 / Competitor CA$4 / Brand CA$3 (live) with ceilings CA$6.00/CA$4.00/CA$2.50, and a checkpoint-gated escalation ladder (broad match on product groups → Search Partners → 100 km radius) is expected to be needed. Realistic odds of reaching CA$600 by Sep 16: roughly 40%; a miss still yields a working paid channel and real data. This supersedes the conservative controlled-test-first sequencing: the public launch proceeds while both revenue-upload gates are proven by the zero-spend synthetic-gclid pipeline test plus the first genuine paid order, and it accepts a maximum runaway exposure of CA$1,300 (up from CA$650), enforced by the runtime hard-stop monitor.
+**2026-08-03 amendment — pursue the promotion, but only at efficient prices.** Everything above remains true: budget does not manufacture local high-intent demand, and forecast delivery at forecast-optimal ceilings is ~CA$4.30/day against the CA$13.33/day pace the promotion requires. The owner's directive is explicit: chase the CA$600 promotion (expires 2026-09-16; CA$600 cash unlocks CA$600 credit) **without overshooting CPCs to manufacture spend**. Budgets are raised to Core CA$14 / Competitor CA$4 while ceilings stay at the forecast-optimal Core CA$4.00 / Competitor CA$2.50, and Brand stays PAUSED at CA$0 approved spend.
+
+The two levers must not be confused. **Daily budget is permission to spend; the CPC ceiling is the price paid per click.** Under Maximize Clicks, Google buys the cheapest clicks it can find within budget, so raising budget while holding the ceiling captures all available cheap inventory and cannot inflate average CPC. Raising the ceiling buys only marginal auctions that were previously priced out — it is the last lever, not the first.
+
+Consequently the honest odds of reaching CA$600 by 2026-09-16 are **below the 40% the morning plan assumed**, because the primary constraint is market size, not bid level, and the approved response no longer includes paying up. The first two to three weeks are therefore a declared **measurement phase**, not a pacing race. The decision rule at each Monday checkpoint is diagnostic, not reflexive:
+
+- **Search lost IS (rank) high** → auctions exist and are being lost on price. A ceiling increase is justified and is the correct lever.
+- **Search lost IS (budget) near zero and spend still low** → the market is thin. No bid increase will fix it; only reach (query coverage, match type, geography) would, and every one of those is currently forbidden by the launch controls in `config-validator.mjs` and requires an approved contract change first.
+
+A missed promotion still leaves a working paid channel, a real search-term corpus, and proven conversion plumbing for roughly the spend actually incurred. The maximum runaway exposure of CA$1,300 remains a runtime-enforced ceiling, not a target.
 
 ## Campaign architecture
 
@@ -121,9 +130,9 @@ The CA$600 promotion is financing, not profit. Exclude promotional credit when c
 
 ## Budget and bidding controls
 
-- Core: CA$14 average daily budget; CA$6.00 Maximize Clicks ceiling; CA$644 over the 46-day window (updated 2026-08-03).
-- Competitor: CA$4 average daily budget; CA$4.00 ceiling; CA$184 over the 46-day window.
-- Brand: CA$3/day and CA$2.50 ceiling, live at launch (2026-08-03 owner decision; Auction Insights sign-off remains an open documentation gate).
+- Core: CA$14 average daily budget; CA$4.00 Maximize Clicks ceiling; CA$644 over the 46-day window (updated 2026-08-03 PM).
+- Competitor: CA$4 average daily budget; CA$2.50 ceiling; CA$184 over the 46-day window.
+- Brand: CA$3/day and CA$1.50 ceiling staged, but **PAUSED** and excluded from approved pilot spend (2026-08-03 PM owner decision; satisfies `AUCTION_INSIGHTS_SIGNOFF` via its "or kept paused" branch).
 - Qualifying-spend target: CA$600 from August 3 through September 17, 2026 (promo expires September 16). Warning: CA$1000. Protective pause: CA$1250. Absolute cap: CA$1300. Monitor window runs to December 31, 2026 to allow the promotional credit to be spent.
 - Google may spend above the average daily budget on an individual day. Cumulative cost must therefore be enforced by the monitor rather than inferred from daily budgets.
 - Do not raise budgets unless the campaign is actually budget-limited.
@@ -179,7 +188,7 @@ Verified:
 - manual assets are approved;
 - Saskatoon +35 km presence-only, Search-only networks, exact customer, final URLs, suffix, budgets, CPC ceilings, and dates pass live preview;
 - the CA$600/CAD promotion is API-confirmed as redeemed with CA$600 qualifying spend required and CA$0 accumulated;
-- the CA$14/CA$4/CA$3 launch budgets, live Brand state, CA$6.00/CA$4.00/CA$2.50 ceilings, September 17 end date, CA$600 qualifying target, CA$1300 cap, monitoring owner, and pause procedure are locked in the repository contract (2026-08-03 promo-chase values);
+- the CA$14/CA$4 launch budgets, paused Brand state, CA$4.00/CA$2.50/CA$1.50 ceilings, September 17 end date, CA$600 qualifying target, CA$1300 runaway cap, monitoring owner, and pause procedure are locked in the repository contract (2026-08-03 PM efficiency-first values);
 - mobile landing, configurator, cart, checkout, payment, and confirmation paths pass;
 - Enhanced Conversions remains disabled unless purpose-specific customer-data consent/disclosure is approved;
 - Brand remains paused without Auction Insights justification.

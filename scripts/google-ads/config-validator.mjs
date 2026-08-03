@@ -1,9 +1,10 @@
 import { pathToFileURL } from "node:url";
 
+// A PAUSED campaign keeps its staged daily budget but contributes CA$0 to approved pilot spend.
 const EXPECTED = {
-  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 14, maximum: 644 },
-  COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 4, maximum: 184 },
-  BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 138 },
+  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 14, maximum: 644, status: "ENABLED" },
+  COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 4, maximum: 184, status: "ENABLED" },
+  BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 0, status: "PAUSED" },
 };
 const PILOT_START_DATE = "2026-08-03";
 const PILOT_END_DATE = "2026-09-17";
@@ -30,7 +31,7 @@ const VERIFIED_GATE_EVIDENCE = new Map([
   ["PROMOTION_ELIGIBILITY", "Owner-confirmed and 2026-07-25 direct-customer API readback: CAD 600 reward, CAD 600 qualifying spend, REDEEMED, fulfillment expiry 2026-09-16 UTC"],
   ["COMPETITOR_LANDING_DEPLOYED", "Live /why-true-color returned HTTP 200 with noindex and working paid-page product routes on 2026-07-23"],
   ["RSA_POLICY_APPROVAL", "2026-07-25 v24 readback: all 19 RSAs, including all nine Competitor RSAs, APPROVED / REVIEWED with no policy topics"],
-  ["CURRENT_KEYWORD_PLANNER_FORECAST", "2026-07-17 True Color forecast read from customer 1072816342; promo-chase ceilings Core CA$6.00, Competitor CA$4.00, Brand CA$2.50 staged above that forecast while paused"],
+  ["CURRENT_KEYWORD_PLANNER_FORECAST", "2026-07-17 True Color forecast read from customer 1072816342; forecast-optimal ceilings Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 staged while paused"],
 ]);
 // Last OBSERVED live account state. The account remains paused on the pre-promo-chase budgets and
 // ceilings until the owner performs the manual launch, so this snapshot is intentionally decoupled
@@ -273,9 +274,9 @@ export function validateConfig(config) {
   })) fail("Controlled test must be Coroplast at CA$5/day with CA$25/CA$30 protection and a 72-hour maximum window");
   if (config.accountCustomerId !== "1072816342") fail("Customer ID must match confirmed True Color child account 1072816342");
   if (config.bidding?.strategy !== "MAXIMIZE_CLICKS"
-    || JSON.stringify(config.bidding?.cpcCeilingCadByCampaignKind) !== JSON.stringify({ CORE: 6, COMPETITOR: 4, BRAND: 2.5 })
+    || JSON.stringify(config.bidding?.cpcCeilingCadByCampaignKind) !== JSON.stringify({ CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 })
     || config.bidding?.forecastDate !== "2026-07-17") {
-    fail("Bidding must use the approved promo-chase campaign-specific Maximize Clicks ceilings");
+    fail("Bidding must use the approved forecast-optimal campaign-specific Maximize Clicks ceilings");
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
   if (JSON.stringify(config.conversionMeasurement) !== JSON.stringify(CONVERSION_MEASUREMENT)) {
@@ -353,6 +354,12 @@ export function validateConfig(config) {
   const adGroupNames = campaigns.flatMap((campaign) => (campaign.adGroups ?? []).map((group) => group.name));
   if (adGroupNames.some((name) => typeof name !== "string" || !name.trim()) || new Set(adGroupNames).size !== adGroupNames.length) fail("Ad-group names must be unique and nonblank");
   for (const campaign of campaigns) {
+    if (campaign.status === "PAUSED") {
+      if ((campaign.maximumPilotCad ?? 0) !== 0) {
+        fail(`${campaign.name} is paused and must contribute CA$0 to the approved pilot maximum`);
+      }
+      continue;
+    }
     if ((campaign.maximumPilotCad ?? 0) !== (campaign.dailyBudgetCad ?? 0) * PILOT_INCLUSIVE_DAYS) {
       fail(`${campaign.name} planning maximum must equal its daily budget across all ${PILOT_INCLUSIVE_DAYS} pilot days`);
     }
@@ -366,7 +373,7 @@ export function validateConfig(config) {
     const campaign = campaigns.find((item) => item.kind === kind);
     if (!campaign) { fail(`Missing ${kind} campaign`); continue; }
     if (campaign.name !== expected.name || campaign.dailyBudgetCad !== expected.daily || campaign.maximumPilotCad !== expected.maximum) fail(`${kind} campaign budget or name mismatch`);
-    if (campaign.status !== "ENABLED") fail(`${campaign.name} must record the approved launch target status ENABLED`);
+    if (campaign.status !== expected.status) fail(`${campaign.name} must record the approved launch target status ${expected.status}`);
     if (campaign.language !== "English") fail(`${campaign.name} language must be English`);
     if (campaign.channel !== "SEARCH" || !campaign.networks?.googleSearch || campaign.networks?.searchPartners || campaign.networks?.display) fail(`${campaign.name} must be Google Search only`);
     if (campaign.geoTarget?.criterionId !== 1002791
@@ -379,7 +386,7 @@ export function validateConfig(config) {
     const actualGroupKeys = (campaign.adGroups ?? []).map((group) => group.key);
     if (!sameSet(actualGroupKeys, Object.keys(expectedGroups))) fail(`${campaign.name} ad-group set must match the canonical structure exactly`);
     for (const group of campaign.adGroups ?? []) {
-      if (group.status !== "ENABLED") fail(`${campaign.name}/${group.name} must record the approved launch target status ENABLED`);
+      if (group.status !== expected.status) fail(`${campaign.name}/${group.name} must record the approved launch target status ${expected.status}`);
       const expectedLaunchTier = kind === "CORE"
         ? "TIER_1_PRODUCT"
         : kind === "COMPETITOR" ? "TIER_1_CONQUEST" : "HOLD_AUCTION_INSIGHTS";
