@@ -2,6 +2,29 @@
 
 ---
 
+
+---
+
+## SEO Phase 68 - Homepage CTR Diagnostic Brief (2026-08-05)
+
+### Source
+- Hasan noticed True Color order flow slowing and asked for Search Console / analytics context.
+- Live Supabase checks showed GSC sync healthy through `2026-08-01` data, while direct local GSC OAuth in `/root/.secrets` returned `invalid_grant`.
+- Homepage 7-day comparison: `2026-07-19 to 2026-07-25` = 8 clicks / 294 impressions / avg pos 16.2; `2026-07-26 to 2026-08-01` = 6 clicks / 293 impressions / avg pos 23.8.
+- Query-level concern: homepage is shown for `printing near me`, `print shop saskatoon`, `printing saskatoon`, `print shop near me`, `custom printing saskatoon`, and `banner printing saskatoon` with several position 4-10 zero-click rows.
+
+### What shipped
+- Added `docs/seo/homepage-ctr-brief-2026-08-05.md` as a diagnostic handoff for Claude Code.
+- No production SEO page, title, H1, meta description, schema, sitemap, pricing, or route code changed.
+
+### Guardrails
+- This is intentionally a review brief, not authorization to edit the protected homepage.
+- Any homepage metadata/body/schema change still requires the established True Color SEO workflow, fresh 28-day GSC rollup, protected-page rule check, and human-approved preview.
+- The immediate revenue leak may be quote follow-up: 23 quote requests in the last 30d, 20 marked replied, 0 marked won/converted, with many rows only saying `Marked as replied (replied outside system)`.
+
+### Next trigger
+- Claude Code should read `docs/seo/homepage-ctr-brief-2026-08-05.md`, pull fresh GSC data, and propose a conservative plan before any homepage edit.
+
 ## SEO Phase 66 — Wall Graphics Body-Only Design Grid (2026-06-22)
 
 ### Source
