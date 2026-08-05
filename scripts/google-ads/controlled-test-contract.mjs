@@ -35,7 +35,7 @@ export const CONTROLLED_TEST = Object.freeze({
     id: "15721292390",
     resourceName: "customers/1072816342/campaignBudgets/15721292390",
     controlledMicros: "5000000",
-    normalMicros: "8000000",
+    normalMicros: "14000000",
   }),
   adGroup: Object.freeze({
     id: "197192347366",
@@ -101,11 +101,129 @@ export const CONTROLLED_TEST = Object.freeze({
   }),
 });
 
+export const CONTROLLED_TEST_CHILD_INVENTORY = Object.freeze({
+  core: Object.freeze({
+    campaignResourceName: CONTROLLED_TEST.campaigns[0].resourceName,
+    adGroups: Object.freeze([
+      "197192347366", "197192347406", "197192347566", "197192347606",
+      "197192347646", "197192347806", "197192347846", "197192347886",
+      "197192348046",
+    ]),
+    ads: Object.freeze([
+      "197192347366~817302599484", "197192347406~817302599487",
+      "197192347566~817302599490", "197192347606~817302599493",
+      "197192347646~817302599496", "197192347806~817302599499",
+      "197192347846~817302599502", "197192347886~817302599505",
+      "197192348046~817302599508",
+    ]),
+    keywords: Object.freeze([
+      "197192347366~1966278005669", "197192347366~2478886532359",
+      "197192347366~24802921", "197192347366~304715118377",
+      "197192347366~42733951", "197192347366~5534459212",
+      "197192347406~1011941702152", "197192347406~141728616773",
+      "197192347406~2266186949436", "197192347406~2461475734070",
+      "197192347406~2466608740999", "197192347406~2496831341901",
+      "197192347406~295822457680", "197192347406~356559067827",
+      "197192347406~389345194690", "197192347406~432673268772",
+      "197192347406~433475846584", "197192347406~559099819816",
+      "197192347406~781723652372", "197192347406~785498518943",
+      "197192347406~842007302561", "197192347406~895806287920",
+      "197192347406~895806309080", "197192347406~925248057779",
+      "197192347566~104072963", "197192347566~273606313",
+      "197192347566~314960243478", "197192347566~327043097754",
+      "197192347566~448421815167", "197192347566~717341500314",
+      "197192347606~170757649", "197192347606~18604532802",
+      "197192347606~19414777002", "197192347606~19740841",
+      "197192347606~377110642553", "197192347606~402652938629",
+      "197192347646~2478886531599", "197192347646~2496831420861",
+      "197192347646~2496831422301", "197192347646~2867430683",
+      "197192347646~2867435843", "197192347646~657059912085",
+      "197192347806~1508502985", "197192347806~1508506945",
+      "197192347806~2496831422381", "197192347806~2496831422541",
+      "197192347806~2547945592487", "197192347806~2547945592687",
+      "197192347846~1039761579072", "197192347846~2450686716171",
+      "197192347846~2547945592727", "197192347846~2547945592767",
+      "197192347846~2547945592967", "197192347846~2547945593007",
+      "197192347886~2547945593167", "197192347886~2547945593447",
+      "197192347886~2547945593487", "197192347886~2558568022557",
+      "197192347886~671331988936", "197192347886~749236726755",
+      "197192348046~375419631823", "197192348046~375807688058",
+      "197192348046~402277464360", "197192348046~448421813007",
+      "197192348046~587973782341", "197192348046~650252964128",
+    ]),
+  }),
+  competitor: Object.freeze({
+    campaignResourceName: CONTROLLED_TEST.campaigns[1].resourceName,
+    adGroups: Object.freeze([
+      "197192348086", "197192348126", "197192348286", "197192348326",
+      "197192348366", "197192348526", "197192348566", "198530955037",
+      "198530955077",
+    ]),
+    ads: Object.freeze([
+      "197192348086~817302599511", "197192348126~817302599514",
+      "197192348286~817302599517", "197192348326~817302599640",
+      "197192348366~817302599643", "197192348526~817302599646",
+      "197192348566~817302599649", "198530955037~817412449904",
+      "198530955077~817412449907",
+    ]),
+    keywords: Object.freeze([
+      "197192348086~470996252602", "197192348126~840632027013",
+      "197192348286~6339459803", "197192348326~2244004998470",
+      "197192348366~404354878945", "197192348526~1018947981832",
+      "197192348566~37389828976", "198530955037~371001826271",
+      "198530955077~851100709364",
+    ]),
+  }),
+  brand: Object.freeze({
+    campaignResourceName: CONTROLLED_TEST.campaigns[2].resourceName,
+    adGroups: Object.freeze(["197192348606"]),
+    ads: Object.freeze(["197192348606~817302599652"]),
+    keywords: Object.freeze([
+      "197192348606~2448907668628", "197192348606~2547945593647",
+      "197192348606~2547945593687", "197192348606~2547945593727",
+      "197192348606~2547945593887", "197192348606~333664944146",
+      "197192348606~335995780276", "197192348606~498393269454",
+    ]),
+  }),
+});
+
 export const CONTROLLED_EXACT_KEYWORDS = Object.freeze(
   CONTROLLED_TEST.keywords.filter((keyword) => keyword.matchType === "EXACT"),
 );
 
+export const CONTROLLED_PHRASE_KEYWORDS = Object.freeze(
+  CONTROLLED_TEST.keywords.filter((keyword) => keyword.matchType === "PHRASE"),
+);
+
 const RESOURCE_PREFIX = `customers/${CONTROLLED_TEST.customerId}/`;
+const CHILD_RESOURCE_PREFIXES = Object.freeze({
+  adGroups: `${RESOURCE_PREFIX}adGroups/`,
+  ads: `${RESOURCE_PREFIX}adGroupAds/`,
+  keywords: `${RESOURCE_PREFIX}adGroupCriteria/`,
+});
+
+const childResourceNames = (type, scopes = Object.keys(CONTROLLED_TEST_CHILD_INVENTORY)) =>
+  scopes.flatMap((scope) => CONTROLLED_TEST_CHILD_INVENTORY[scope][type]
+    .map((id) => `${CHILD_RESOURCE_PREFIXES[type]}${id}`));
+
+const EXPECTED_CHILD_RESOURCE_NAMES = Object.freeze({
+  adGroups: new Set(childResourceNames("adGroups")),
+  ads: new Set(childResourceNames("ads")),
+  keywords: new Set(childResourceNames("keywords")),
+});
+
+const STAGED_CHILD_RESOURCE_NAMES = Object.freeze({
+  adGroups: new Set(childResourceNames("adGroups", ["core", "competitor"])),
+  ads: new Set(childResourceNames("ads", ["core", "competitor"])),
+  keywords: new Set(childResourceNames("keywords", ["core", "competitor"])),
+});
+
+const CONTROLLED_ENABLE_RESOURCES = new Set([
+  CONTROLLED_TEST.campaign.resourceName,
+  ...STAGED_CHILD_RESOURCE_NAMES.adGroups,
+  ...STAGED_CHILD_RESOURCE_NAMES.ads,
+  ...STAGED_CHILD_RESOURCE_NAMES.keywords,
+]);
 
 export function parseControlledTestOptions(argv) {
   const options = {
@@ -604,7 +722,53 @@ export function validateControlledInventory(state, {
   const campaigns = validateCampaignInventory(state?.campaigns);
   validateBudgetInventory(state?.budget, campaigns, allowedBudgetMicros);
   validateCoroplastCreativeInventory(state);
+  validateExactChildInventory(state);
   return state;
+}
+
+function validateExactChildInventory(state) {
+  const collections = {
+    adGroups: state?.adGroups ?? [],
+    ads: state?.ads ?? [],
+    keywords: (state?.keywords ?? []).filter((keyword) => keyword.negative !== true),
+  };
+  for (const [type, items] of Object.entries(collections)) {
+    const actual = new Set(items.map((item) => item.resourceName));
+    const expected = EXPECTED_CHILD_RESOURCE_NAMES[type];
+    const missing = [...expected].filter((resourceName) => !actual.has(resourceName));
+    const unexpected = [...actual].filter((resourceName) => !expected.has(resourceName));
+    if (missing.length > 0 || unexpected.length > 0) {
+      throw new Error(
+        `Exact ${type} inventory mismatch; missing=${missing.join(",") || "none"}; unexpected=${unexpected.join(",") || "none"}`,
+      );
+    }
+  }
+
+  const adGroupsByResource = new Map(
+    collections.adGroups.map((group) => [group.resourceName, group]),
+  );
+  for (const inventory of Object.values(CONTROLLED_TEST_CHILD_INVENTORY)) {
+    for (const groupId of inventory.adGroups) {
+      const groupResource = `${CHILD_RESOURCE_PREFIXES.adGroups}${groupId}`;
+      if (adGroupsByResource.get(groupResource)?.campaignResourceName !== inventory.campaignResourceName) {
+        throw new Error(`Ad group is bound to the wrong campaign: ${groupResource}`);
+      }
+    }
+  }
+  for (const [type, items] of Object.entries({
+    ads: collections.ads,
+    keywords: collections.keywords,
+  })) {
+    for (const item of items) {
+      const compositeId = item.resourceName.slice(CHILD_RESOURCE_PREFIXES[type].length);
+      const [groupId] = compositeId.split("~");
+      const expectedGroupResource = `${CHILD_RESOURCE_PREFIXES.adGroups}${groupId}`;
+      if (item.adGroupResourceName !== expectedGroupResource
+        || !adGroupsByResource.has(expectedGroupResource)) {
+        throw new Error(`Resource is bound to the wrong ad group: ${item.resourceName}`);
+      }
+    }
+  }
 }
 
 function validateCampaignInventory(campaigns = []) {
@@ -682,53 +846,35 @@ function validateCoroplastKeywords(keywords = []) {
 export function validatePreflightState(state) {
   validateControlledInventory(state);
   assertAllStatus(state.campaigns, "PAUSED", "campaign");
-  assertAllStatus(state.adGroups, "PAUSED", "ad group");
-  assertAllStatus(state.ads, "PAUSED", "ad");
-  assertPositiveKeywords(state.keywords, new Set(), "preflight");
+  assertStagedChildStatuses(state, "preflight");
   return state;
 }
 
 export function validateBudgetStagedState(state) {
   validateControlledInventory(state, { allowedBudgetMicros: [CONTROLLED_TEST.budget.controlledMicros] });
   assertAllStatus(state.campaigns, "PAUSED", "campaign");
-  assertAllStatus(state.adGroups, "PAUSED", "ad group");
-  assertAllStatus(state.ads, "PAUSED", "ad");
-  assertPositiveKeywords(state.keywords, new Set(), "budget-stage");
+  assertStagedChildStatuses(state, "budget-stage");
   return state;
 }
 
 export function validateResourcesStagedState(state) {
   validateControlledInventory(state, { allowedBudgetMicros: [CONTROLLED_TEST.budget.controlledMicros] });
   assertAllStatus(state.campaigns, "PAUSED", "campaign");
-  assertOnlyEnabled(state.adGroups, new Set([CONTROLLED_TEST.adGroup.resourceName]), "ad group");
-  assertOnlyEnabled(state.ads, new Set([CONTROLLED_TEST.rsa.resourceName]), "ad");
-  assertPositiveKeywords(
-    state.keywords,
-    new Set(CONTROLLED_EXACT_KEYWORDS.map((keyword) => keyword.resourceName)),
-    "resource-stage",
-  );
+  assertControlledTestChildStatuses(state, "resource-stage");
   return state;
 }
 
 export function validateActivatedState(state) {
   validateControlledInventory(state, { allowedBudgetMicros: [CONTROLLED_TEST.budget.controlledMicros] });
   assertOnlyEnabled(state.campaigns, new Set([CONTROLLED_TEST.campaign.resourceName]), "campaign");
-  assertOnlyEnabled(state.adGroups, new Set([CONTROLLED_TEST.adGroup.resourceName]), "ad group");
-  assertOnlyEnabled(state.ads, new Set([CONTROLLED_TEST.rsa.resourceName]), "ad");
-  assertPositiveKeywords(
-    state.keywords,
-    new Set(CONTROLLED_EXACT_KEYWORDS.map((keyword) => keyword.resourceName)),
-    "activation",
-  );
+  assertControlledTestChildStatuses(state, "activation");
   return state;
 }
 
 export function validateRolledBackState(state) {
   validateControlledInventory(state);
   assertAllStatus(state.campaigns, "PAUSED", "campaign");
-  assertAllStatus(state.adGroups, "PAUSED", "ad group");
-  assertAllStatus(state.ads, "PAUSED", "ad");
-  assertPositiveKeywords(state.keywords, new Set(), "rollback");
+  assertStagedChildStatuses(state, "rollback");
   return state;
 }
 
@@ -751,6 +897,9 @@ export function buildStatusOperations(resourceNames, status) {
     if (typeof resourceName !== "string" || !resourceName.startsWith(RESOURCE_PREFIX)) {
       throw new Error("Mutation resource is outside the True Color account");
     }
+    if (status === "ENABLED" && !CONTROLLED_ENABLE_RESOURCES.has(resourceName)) {
+      throw new Error(`Enable mutation resource is outside the exact controlled-test allowlist: ${resourceName}`);
+    }
   }
   return unique.map((resourceName) => ({
     update: { resourceName, status },
@@ -760,7 +909,7 @@ export function buildStatusOperations(resourceNames, status) {
 
 export function buildBudgetOperations(amountMicros) {
   if (![CONTROLLED_TEST.budget.controlledMicros, CONTROLLED_TEST.budget.normalMicros].includes(String(amountMicros))) {
-    throw new Error("Budget mutation must be exactly CA$5 or CA$8");
+    throw new Error("Budget mutation must be exactly CA$5 or CA$14");
   }
   return [{
     update: {
@@ -807,4 +956,43 @@ function assertOnlyEnabled(items, enabledResources, label) {
 function assertPositiveKeywords(keywords, enabledResources, stage) {
   const positive = (keywords ?? []).filter((keyword) => keyword.negative !== true);
   assertOnlyEnabled(positive, enabledResources, `${stage} positive keyword`);
+}
+
+export function stagedChildResourceTargets(state) {
+  validateControlledInventory(state, {
+    allowedBudgetMicros: [
+      CONTROLLED_TEST.budget.normalMicros,
+      CONTROLLED_TEST.budget.controlledMicros,
+    ],
+  });
+  return {
+    adGroupResources: [...STAGED_CHILD_RESOURCE_NAMES.adGroups],
+    adResources: [...STAGED_CHILD_RESOURCE_NAMES.ads],
+    keywordResources: [...STAGED_CHILD_RESOURCE_NAMES.keywords],
+  };
+}
+
+function assertStagedChildStatuses(state, stage) {
+  const targets = stagedChildResourceTargets(state);
+  assertOnlyEnabled(state.adGroups, new Set(targets.adGroupResources), `${stage} ad group`);
+  assertOnlyEnabled(state.ads, new Set(targets.adResources), `${stage} ad`);
+  assertPositiveKeywords(state.keywords, new Set(targets.keywordResources), stage);
+}
+
+function assertControlledTestChildStatuses(state, stage) {
+  const enabledAdGroups = new Set([
+    CONTROLLED_TEST.adGroup.resourceName,
+    ...childResourceNames("adGroups", ["competitor"]),
+  ]);
+  const enabledAds = new Set(childResourceNames("ads", ["core", "competitor"]));
+  const controlledPhraseResources = new Set(
+    CONTROLLED_PHRASE_KEYWORDS.map((keyword) => keyword.resourceName),
+  );
+  const enabledKeywords = new Set(
+    childResourceNames("keywords", ["core", "competitor"])
+      .filter((resourceName) => !controlledPhraseResources.has(resourceName)),
+  );
+  assertOnlyEnabled(state.adGroups, enabledAdGroups, `${stage} ad group`);
+  assertOnlyEnabled(state.ads, enabledAds, `${stage} ad`);
+  assertPositiveKeywords(state.keywords, enabledKeywords, stage);
 }
