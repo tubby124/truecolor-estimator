@@ -140,13 +140,15 @@ const ROUTES = {
   "rush-same-day": "/same-day-printing-saskatoon",
   "generic-print-price": "/printing-prices-saskatoon",
   "generic-sign-shop": "/sign-company-saskatoon",
+  "large-format": "/large-format-printing-saskatoon",
 };
 const CORE_TERMS = {
-  coroplast: ["coroplast signs saskatoon", "coroplast signs", "coroplast sign printing"],
+  coroplast: ["coroplast signs saskatoon", "coroplast signs", "coroplast sign printing", "coroplast printing"],
   "stickers-labels": [
     "custom stickers saskatoon",
     "sticker printing saskatoon",
     "custom labels saskatoon",
+    "sticker printing",
     "die cut stickers near me",
     "custom die cut stickers near me",
     "custom stickers near me",
@@ -154,13 +156,14 @@ const CORE_TERMS = {
     "die cut labels near me",
     "custom die cut labels near me",
   ],
-  "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners"],
-  "business-cards": ["business cards saskatoon", "business card printing saskatoon", "order business cards online"],
-  flyers: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online"],
-  "retractable-banners": ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon"],
-  "rush-same-day": ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon"],
-  "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon"],
-  "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon"],
+  "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing"],
+  "business-cards": ["business cards saskatoon", "business card printing saskatoon", "order business cards online", "business card printing"],
+  flyers: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online", "flyer printing", "flyers printing"],
+  "retractable-banners": ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing"],
+  "rush-same-day": ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon", "same day printing"],
+  "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon"],
+  "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs"],
+  "large-format": ["large format printing", "large format printing saskatoon", "large format signs"],
 };
 const CORE_CROSS_NEGATIVES = {
   coroplast: ["stickers", "labels", "vinyl banner", "business cards", "flyers", "retractable banner"],
@@ -172,6 +175,7 @@ const CORE_CROSS_NEGATIVES = {
   "rush-same-day": ["business cards", "flyers", "stickers", "banners", "coroplast"],
   "generic-print-price": ["same day", "rush", "sign shop", "sign company"],
   "generic-sign-shop": ["same day", "rush", "printing prices", "print shop prices"],
+  "large-format": ["stickers", "labels", "business cards", "flyers"],
 };
 const COMPETITOR_GROUPS = {
   "qwik-signs": ["qwik signs"],
@@ -191,6 +195,8 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   "jobs", "hiring", "salary", "career", "course", "class", "tutorial", "printer repair",
   "used printer", "printer ink", "3d printing", "home printer", "free", "template", "diy",
   "how to", "canva", "download", "printable", "machine", "equipment", "supplies",
+  "screen printing", "photocopy", "document printing", "print outs",
+  "label maker", "label printers",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 const APPROVED_CLAIMS = new Map([

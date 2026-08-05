@@ -297,6 +297,12 @@ export const paidSearchConfig = {
     "jobs", "hiring", "salary", "career", "course", "class", "tutorial", "printer repair",
     "used printer", "printer ink", "3d printing", "home printer", "free", "template", "diy",
     "how to", "canva", "download", "printable", "machine", "equipment", "supplies",
+    // 2026-08-05: proven waste from the GSC survey. "screen printing" drew 95 impressions and
+    // True Color does not offer it (eco-solvent Roland + digital press only). The rest are
+    // copy-shop or buy-a-device intent. "logo design" and "resume" were deliberately NOT added:
+    // in-house design is a real CA$35 service and resume printing is a real print job.
+    "screen printing", "photocopy", "document printing", "print outs",
+    "label maker", "label printers",
   ]),
   campaigns: [
     {
@@ -311,7 +317,7 @@ export const paidSearchConfig = {
         coreGroup({
           key: "coroplast", name: "Coroplast Signs", product: "coroplast signs",
           finalUrl: `${ROOT}/products/coroplast-signs`,
-          terms: ["coroplast signs saskatoon", "coroplast signs", "coroplast sign printing"],
+          terms: ["coroplast signs saskatoon", "coroplast signs", "coroplast sign printing", "coroplast printing"],
           headlines: ["Order Coroplast Signs", "Coroplast Signs Saskatoon", "Price Coroplast Signs"],
           crossNegatives: ["stickers", "labels", "vinyl banner", "business cards", "flyers", "retractable banner"],
         }),
@@ -322,6 +328,7 @@ export const paidSearchConfig = {
             "custom stickers saskatoon",
             "sticker printing saskatoon",
             "custom labels saskatoon",
+            "sticker printing",
             "die cut stickers near me",
             "custom die cut stickers near me",
             "custom stickers near me",
@@ -335,51 +342,62 @@ export const paidSearchConfig = {
         coreGroup({
           key: "vinyl-banners", name: "Vinyl Banners", product: "vinyl banners",
           finalUrl: `${ROOT}/products/vinyl-banners`,
-          terms: ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners"],
+          terms: ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing"],
           headlines: ["Order Vinyl Banners", "Vinyl Banners Saskatoon", "Price Custom Banners"],
           crossNegatives: ["coroplast", "stickers", "labels", "business cards", "flyers", "retractable banner"],
         }),
         coreGroup({
           key: "business-cards", name: "Business Cards", product: "business cards",
           finalUrl: `${ROOT}/products/business-cards`,
-          terms: ["business cards saskatoon", "business card printing saskatoon", "order business cards online"],
+          terms: ["business cards saskatoon", "business card printing saskatoon", "order business cards online", "business card printing"],
           headlines: ["Order Business Cards", "Business Cards Saskatoon", "Price Business Cards"],
           crossNegatives: ["coroplast", "stickers", "labels", "vinyl banner", "flyers", "retractable banner"],
         }),
         coreGroup({
           key: "flyers", name: "Flyers", product: "flyers",
           finalUrl: `${ROOT}/products/flyers`,
-          terms: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online"],
+          terms: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online", "flyer printing", "flyers printing"],
           headlines: ["Order Custom Flyers", "Flyer Printing Saskatoon", "Price Flyers Online"],
           crossNegatives: ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "retractable banner"],
         }),
         coreGroup({
           key: "retractable-banners", name: "Retractable Banners", product: "retractable banners",
           finalUrl: `${ROOT}/products/retractable-banners`,
-          terms: ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon"],
+          terms: ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing"],
           headlines: ["Order Retractable Banners", "Retractable Banner Print", "Pull Up Banners Saskatoon"],
           crossNegatives: ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "flyers"],
         }),
         coreGroup({
           key: "rush-same-day", name: "Rush and Same Day", product: "rush printing",
           finalUrl: `${ROOT}/same-day-printing-saskatoon`,
-          terms: ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon"],
+          terms: ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon", "same day printing"],
           headlines: ["Rush Printing Saskatoon", "Explore Same Day Printing", "Local Rush Print Options"],
           crossNegatives: ["business cards", "flyers", "stickers", "banners", "coroplast"],
         }),
         coreGroup({
           key: "generic-print-price", name: "Generic Print Price", product: "printing",
           finalUrl: `${ROOT}/printing-prices-saskatoon`,
-          terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon"],
+          terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon"],
           headlines: ["Printing Prices Saskatoon", "See Printing Prices Online", "Configure Printing Online"],
           crossNegatives: ["same day", "rush", "sign shop", "sign company"],
         }),
         coreGroup({
           key: "generic-sign-shop", name: "Generic Sign Shop", product: "signs",
           finalUrl: `${ROOT}/sign-company-saskatoon`,
-          terms: ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon"],
+          terms: ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs"],
           headlines: ["Saskatoon Sign Shop", "Custom Signs Saskatoon", "Explore Local Sign Options"],
           crossNegatives: ["same day", "rush", "printing prices", "print shop prices"],
+        }),
+        // Only Core group routed to an SEO landing page rather than a /products configurator.
+        // Deliberate: "large format printing" spans banners/coroplast/ACP so no single
+        // configurator matches, and the SEO page carries the keyword in its H1. Doubles as the
+        // SEO-page-vs-configurator conversion experiment.
+        coreGroup({
+          key: "large-format", name: "Large Format Printing", product: "large format printing",
+          finalUrl: `${ROOT}/large-format-printing-saskatoon`,
+          terms: ["large format printing", "large format printing saskatoon", "large format signs"],
+          headlines: ["Large Format Printing", "Large Format Saskatoon", "Price Large Format Print"],
+          crossNegatives: ["stickers", "labels", "business cards", "flyers"],
         }),
       ],
     },

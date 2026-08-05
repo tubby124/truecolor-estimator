@@ -197,6 +197,12 @@
       "targetStatus": "ENABLED"
     },
     {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Large Format Printing",
+      "tier": "TIER_1_PRODUCT",
+      "targetStatus": "ENABLED"
+    },
+    {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Qwik Signs",
       "tier": "TIER_1_CONQUEST",

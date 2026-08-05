@@ -56,6 +56,10 @@ GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,"""same day""",Negative
 GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,"""rush""",Negative
 GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,"""printing prices""",Negative
 GOOG_Search_TC_CoreProducts_2026,Generic Sign Shop,"""print shop prices""",Negative
+GOOG_Search_TC_CoreProducts_2026,Large Format Printing,"""stickers""",Negative
+GOOG_Search_TC_CoreProducts_2026,Large Format Printing,"""labels""",Negative
+GOOG_Search_TC_CoreProducts_2026,Large Format Printing,"""business cards""",Negative
+GOOG_Search_TC_CoreProducts_2026,Large Format Printing,"""flyers""",Negative
 GOOG_Search_TC_CoreProducts_2026,,[jobs],Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,"""jobs""",Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,[hiring],Campaign negative
@@ -100,6 +104,18 @@ GOOG_Search_TC_CoreProducts_2026,,[equipment],Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,"""equipment""",Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,[supplies],Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,"""supplies""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[screen printing],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""screen printing""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[photocopy],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""photocopy""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[document printing],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""document printing""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[print outs],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""print outs""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[label maker],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""label maker""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[label printers],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""label printers""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[jobs],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""jobs""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[hiring],Campaign negative
@@ -144,6 +160,18 @@ GOOG_Search_TC_CompetitorConquest_2026,,[equipment],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""equipment""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[supplies],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""supplies""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[screen printing],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""screen printing""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[photocopy],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""photocopy""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[document printing],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""document printing""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[print outs],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""print outs""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[label maker],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""label maker""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[label printers],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""label printers""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[jobs],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""jobs""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[hiring],Campaign negative
@@ -188,3 +216,15 @@ GOOG_Search_TC_BrandDefense_2026,,[equipment],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""equipment""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[supplies],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""supplies""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[screen printing],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""screen printing""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[photocopy],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""photocopy""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[document printing],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""document printing""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[print outs],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""print outs""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[label maker],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""label maker""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[label printers],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""label printers""",Campaign negative

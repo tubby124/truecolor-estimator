@@ -240,10 +240,10 @@ function evaluateLiveState(live, {
     if (!campaign || campaign.presence !== "PRESENCE" || !campaign.networks?.targetGoogleSearch || campaign.networks?.targetSearchNetwork || campaign.networks?.targetContentNetwork || campaign.networks?.targetPartnerSearchNetwork) failures.push(`${name} network or presence setting changed`);
     if (campaign?.finalUrlSuffix !== EXPECTED_SUFFIX) failures.push(`${name} final URL suffix changed`);
   }
-  if (live.adGroups !== 19
+  if (live.adGroups !== 20
     || live.pausedAdGroups !== expectedPausedAdGroups
     || (expectedEnabledAdGroups !== null && live.enabledAdGroups !== expectedEnabledAdGroups)) failures.push(adGroupStateFailure);
-  if (live.responsiveSearchAds !== 19
+  if (live.responsiveSearchAds !== 20
     || live.pausedResponsiveSearchAds !== expectedPausedResponsiveSearchAds
     || (expectedEnabledResponsiveSearchAds !== null
       && live.enabledResponsiveSearchAds !== expectedEnabledResponsiveSearchAds)) failures.push(rsaStateFailure);
@@ -256,7 +256,9 @@ function evaluateLiveState(live, {
   } catch {
     failures.push("competitor RSA destinations must match the exact nine-ad tracked-URL allowlist");
   }
-  if (live.positiveKeywords !== 83 || live.negativeCriteria !== 189) failures.push("keyword counts changed");
+  // 2026-08-05 Phase 1 keyword expansion: 83 -> 121 positive, 189 -> 229 negative criteria.
+  // Reports drift until the Google Ads Editor import lands, which is the intended signal.
+  if (live.positiveKeywords !== 121 || live.negativeCriteria !== 229) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,
@@ -453,8 +455,8 @@ export function evaluatePausedLiveState(live) {
     expectedEnabledAdGroups: null,
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
-    adGroupStateFailure: "18 staged ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "18 staged RSAs must be enabled and the held Brand RSA paused",
+    adGroupStateFailure: "19 staged ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "19 staged RSAs must be enabled and the held Brand RSA paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: false,
@@ -467,11 +469,11 @@ export function evaluateLaunchedLiveState(live) {
     expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
     expectedPausedAdGroups: 1,
     expectedPausedResponsiveSearchAds: 1,
-    expectedEnabledAdGroups: 18,
-    expectedEnabledResponsiveSearchAds: 18,
+    expectedEnabledAdGroups: 19,
+    expectedEnabledResponsiveSearchAds: 19,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
-    adGroupStateFailure: "18 ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "18 RSAs must be enabled and the held Brand RSA paused",
+    adGroupStateFailure: "19 ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "19 RSAs must be enabled and the held Brand RSA paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: true,

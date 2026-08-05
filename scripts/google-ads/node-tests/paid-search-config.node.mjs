@@ -71,7 +71,7 @@ test("launch candidate transitions require evidence and can reach fresh-live pre
   assert.equal(ready.status, "READY_FOR_FRESH_LIVE_PREFLIGHT");
   assert.equal(ready.activationPermitted, false);
   assert.equal(ready.blockers.length, 0);
-  assert.equal(ready.candidates.length, 18);
+  assert.equal(ready.candidates.length, 19);
   assert.equal(ready.held.length, 1);
   assert.deepEqual(ready.held.map((group) => group.tier), ["HOLD_AUCTION_INSIGHTS"]);
 });
@@ -99,7 +99,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 19, pausedAdGroups: 1, enabledAdGroups: 18, positiveKeywords: 83, negativeCriteria: 189,
+    adGroups: 20, pausedAdGroups: 1, enabledAdGroups: 19, positiveKeywords: 121, negativeCriteria: 229,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",
@@ -114,7 +114,7 @@ const makePausedLiveState = () => ({
       matchType,
       status: "ENABLED",
     }))),
-    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 19, pausedResponsiveSearchAds: 1, enabledResponsiveSearchAds: 18,
+    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 20, pausedResponsiveSearchAds: 1, enabledResponsiveSearchAds: 19,
     competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
       campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
       campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
@@ -240,9 +240,9 @@ const makeLaunchedLiveState = () => {
   }));
   // Stage 1 holds Brand paused, so its single ad group and RSA stay paused.
   live.pausedAdGroups = 1;
-  live.enabledAdGroups = 18;
+  live.enabledAdGroups = 19;
   live.pausedResponsiveSearchAds = 1;
-  live.enabledResponsiveSearchAds = 18;
+  live.enabledResponsiveSearchAds = 19;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "ENABLED" }));
   live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "ENABLED" }));
@@ -439,12 +439,12 @@ test("launched live verification enforces the exact Stage 1 state", () => {
   // Enabling the held Brand ad group or RSA is also drift.
   const brandGroupLive = makeLaunchedLiveState();
   brandGroupLive.pausedAdGroups = 0;
-  brandGroupLive.enabledAdGroups = 19;
+  brandGroupLive.enabledAdGroups = 20;
   assert.ok(evaluateLaunchedLiveState(brandGroupLive).failures.length > 0);
 
   const brandRsaLive = makeLaunchedLiveState();
   brandRsaLive.pausedResponsiveSearchAds = 0;
-  brandRsaLive.enabledResponsiveSearchAds = 19;
+  brandRsaLive.enabledResponsiveSearchAds = 20;
   assert.ok(evaluateLaunchedLiveState(brandRsaLive).failures.length > 0);
 
   const wrongBudget = makeLaunchedLiveState();
@@ -790,7 +790,7 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.ok(!manifest.blockers.includes("RSA_POLICY_APPROVAL"));
   assert.ok(!manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
   assert.ok(!manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
-  assert.equal(manifest.launchCandidates.length, 18);
+  assert.equal(manifest.launchCandidates.length, 19);
   assert.equal(manifest.heldGroups.length, 1);
   assert.ok(manifest.heldGroups.every((group) => group.tier === "HOLD_AUCTION_INSIGHTS"));
   assert.ok(manifest.launchCandidates.every((group) => group.targetStatus === "ENABLED"));
