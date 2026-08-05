@@ -141,6 +141,11 @@ describe("Google Ads monitor heartbeat rollup", () => {
       key: "paid-search:weekly:24048123058",
       panel: "panel-paid-search-weekly",
     }));
+    expect(buildRollup(rollupInputs).reds).toContainEqual(expect.objectContaining({
+      key: "paid-search:weekly-campaign-missing",
+      panel: "panel-paid-search-weekly",
+      label: expect.stringContaining("24048123061"),
+    }));
   });
 });
 

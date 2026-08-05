@@ -1,8 +1,8 @@
 import { COMPETITOR_RSA_REVIEW } from "./request-competitor-rsa-review.mjs";
 
 export const PAUSED_EXPECTED_CAMPAIGNS = Object.freeze({
-  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 8, ceiling: 4, status: "PAUSED" }),
-  GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 2, ceiling: 2.5, status: "PAUSED" }),
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 14, ceiling: 4, status: "PAUSED" }),
+  GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 2.5, status: "PAUSED" }),
   GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" }),
 });
 // Stage 1 launch = Core + Competitor enabled, Brand held paused (2026-08-03 PM owner decision).
@@ -210,7 +210,6 @@ export function validateCompetitorDestinationInventory(
 }
 
 function evaluateLiveState(live, {
-  mode,
   expectedCampaigns,
   expectedPausedAdGroups,
   expectedPausedResponsiveSearchAds,
@@ -220,6 +219,7 @@ function evaluateLiveState(live, {
   adGroupStateFailure,
   rsaStateFailure,
   nearMeStateFailure,
+  expectedNonBrandChildStatus,
   requireExactCampaignInventory,
   requireZeroSpend,
 }) {
@@ -251,7 +251,7 @@ function evaluateLiveState(live, {
     validateCompetitorDestinationInventory(
       live.competitorRsaDestinations,
       live.accountWideAdAssociations,
-      { expectedStatus: mode === "paused" ? "PAUSED" : "ENABLED" },
+      { expectedStatus: expectedNonBrandChildStatus },
     );
   } catch {
     failures.push("competitor RSA destinations must match the exact nine-ad tracked-URL allowlist");
@@ -268,7 +268,7 @@ function evaluateLiveState(live, {
     || [...expectedNearMeKeywords].some((keyword) => !observedNearMeKeywords.has(keyword))
     || nearMeKeywords.some((keyword) => keyword.campaign !== "GOOG_Search_TC_CoreProducts_2026"
       || keyword.adGroup !== "Stickers and Labels"
-      || keyword.status !== (mode === "paused" ? "PAUSED" : "ENABLED"))) failures.push(nearMeStateFailure);
+      || keyword.status !== expectedNonBrandChildStatus)) failures.push(nearMeStateFailure);
   if (live.competitorMatchTypes?.length !== 1 || live.competitorMatchTypes[0] !== "EXACT") failures.push("competitor targeting is not exact-only");
   if (live.manualAssets !== 13 || live.campaignAssetLinks !== 39) failures.push("asset counts changed");
   if (live.locationTargets !== 0 || live.proximityTargets !== 3 || live.radius35KmTargets !== 3) failures.push("Saskatoon +35 km proximity criteria changed");
@@ -447,16 +447,16 @@ function evaluateLiveState(live, {
 
 export function evaluatePausedLiveState(live) {
   return evaluateLiveState(live, {
-    mode: "paused",
     expectedCampaigns: PAUSED_EXPECTED_CAMPAIGNS,
-    expectedPausedAdGroups: 19,
-    expectedPausedResponsiveSearchAds: 19,
+    expectedPausedAdGroups: 1,
+    expectedPausedResponsiveSearchAds: 1,
     expectedEnabledAdGroups: null,
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
-    adGroupStateFailure: "all 19 ad groups must remain paused",
-    rsaStateFailure: "all 19 RSAs must remain paused",
-    nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and paused",
+    adGroupStateFailure: "18 staged ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "18 staged RSAs must be enabled and the held Brand RSA paused",
+    nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
+    expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: false,
     requireZeroSpend: true,
   });
@@ -464,7 +464,6 @@ export function evaluatePausedLiveState(live) {
 
 export function evaluateLaunchedLiveState(live) {
   return evaluateLiveState(live, {
-    mode: "launched",
     expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
     expectedPausedAdGroups: 1,
     expectedPausedResponsiveSearchAds: 1,
@@ -474,6 +473,7 @@ export function evaluateLaunchedLiveState(live) {
     adGroupStateFailure: "18 ad groups must be enabled and the held Brand ad group paused",
     rsaStateFailure: "18 RSAs must be enabled and the held Brand RSA paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
+    expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: true,
     requireZeroSpend: false,
   });

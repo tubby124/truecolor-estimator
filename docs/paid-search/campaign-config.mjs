@@ -102,13 +102,15 @@ export const paidSearchConfig = {
     generatorAutoRollsDates: false,
     dateChangeRequiresApprovedContractChange: true,
   },
-  maximumPilotCad: 1300,
+  // Owner's absolute maximum. Equal to the qualifying-spend target on purpose: the account
+  // reaches CA$600, qualifies for the promotion, and the runtime monitor pauses on that tick.
+  maximumPilotCad: 600,
   targetQualifyingSpendCad: 600,
   spendControls: {
     scope: "EXACT_ACCOUNT_TOTAL",
-    warningCad: 1000,
-    protectivePauseCad: 1250,
-    absoluteCapCad: 1300,
+    warningCad: 450,
+    protectivePauseCad: 600,
+    absoluteCapCad: 600,
     monitorCadenceMinutes: 15,
   },
   controlledTest: {
