@@ -104,6 +104,12 @@ export interface RollupInputs {
   quoteDeliveries: QuoteDeliveryHealth;
   /** Latest published weekly Google Search review surface. */
   paidSearchWeekly: PaidSearchWeeklySnapshot;
+  /**
+   * True when the OLDEST monitor heartbeat inside the last 48h already showed at least one
+   * ENABLED campaign — i.e. ads have been on for a full 48h. Guards the no-delivery alarm
+   * against firing on launch day, when zero rows are expected rather than broken.
+   */
+  googleAdsEnabledFor48h: boolean;
 }
 
 const SEV1_CATEGORIES = new Set(["no_wave_invoice", "half_recorded"]);
@@ -234,11 +240,23 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
       label: "Paid-search weekly decision view could not be read",
     });
   } else if (inputs.paidSearchWeekly.rows.length === 0) {
-    yellows.push({
-      key: "paid-search:weekly-data-missing",
-      panel: "panel-paid-search-weekly",
-      label: "Paid-search weekly decision data not published yet",
-    });
+    // The hard-stop monitor alarms on OVERSPEND. With a forecast of ~CA$4.30/day against
+    // CA$18/day of budget, the realistic failure is the opposite — ads serving nothing — and
+    // that was previously silent. Enabled for 48h with no published delivery data means the
+    // daily performance cron has run at least twice and found nothing: red, not yellow.
+    if (inputs.googleAdsEnabledFor48h) {
+      reds.push({
+        key: "paid-search:no-delivery",
+        panel: "panel-paid-search-weekly",
+        label: "Google Ads enabled 48h+ with zero delivery — check ad approval, bids, and that the Editor import landed",
+      });
+    } else {
+      yellows.push({
+        key: "paid-search:weekly-data-missing",
+        panel: "panel-paid-search-weekly",
+        label: "Paid-search weekly decision data not published yet",
+      });
+    }
   } else {
     const requiredCampaignIds = new Set(["24048123058", "24048123061"]);
     const publishedCampaignIds = new Set(
