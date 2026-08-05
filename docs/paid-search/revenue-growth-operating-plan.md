@@ -102,7 +102,7 @@ Consequently the honest odds of reaching CA$600 by 2026-09-16 are **below the 40
 - **Search lost IS (rank) high** → auctions exist and are being lost on price. A ceiling increase is justified and is the correct lever.
 - **Search lost IS (budget) near zero and spend still low** → the market is thin. No bid increase will fix it; only reach (query coverage, match type, geography) would, and every one of those is currently forbidden by the launch controls in `config-validator.mjs` and requires an approved contract change first.
 
-A missed promotion still leaves a working paid channel, a real search-term corpus, and proven conversion plumbing for roughly the spend actually incurred. The maximum runaway exposure of CA$1,300 remains a runtime-enforced ceiling, not a target.
+A missed promotion still leaves a working paid channel, a real search-term corpus, and proven conversion plumbing for roughly the spend actually incurred. The runtime-enforced ceiling is CA$600 — the owner's absolute maximum, lowered from CA$1,300 on 2026-08-05. It coincides with the qualifying-spend target, so the account qualifies and stops on the same monitor tick.
 
 ## Campaign architecture
 
@@ -133,7 +133,8 @@ A missed promotion still leaves a working paid channel, a real search-term corpu
 - Core: CA$14 average daily budget; CA$4.00 Maximize Clicks ceiling; CA$644 over the 46-day window (updated 2026-08-03 PM).
 - Competitor: CA$4 average daily budget; CA$2.50 ceiling; CA$184 over the 46-day window.
 - Brand: CA$3/day and CA$1.50 ceiling staged, but **PAUSED** and excluded from approved pilot spend (2026-08-03 PM owner decision; satisfies `AUCTION_INSIGHTS_SIGNOFF` via its "or kept paused" branch).
-- Qualifying-spend target: CA$600 from August 3 through September 17, 2026 (promo expires September 16). Warning: CA$1000. Protective pause: CA$1250. Absolute cap: CA$1300. Monitor window runs to December 31, 2026 to allow the promotional credit to be spent.
+- Qualifying-spend target: CA$600 from August 3 through September 17, 2026 (promo expires September 16). Warning: CA$450. Protective pause: CA$600. Absolute cap: CA$600 (2026-08-05 owner ceiling). Monitor window runs to December 31, 2026.
+- **Spending the earned promotional credit requires a separate, deliberate raise of this ceiling AFTER the credit is confirmed applied.** Google reports credit-funded clicks in `metrics.cost_micros` exactly like cash, so the monitor cannot tell them apart. Do not pre-emptively raise the cap to accommodate credit that has not been earned.
 - Google may spend above the average daily budget on an individual day. Cumulative cost must therefore be enforced by the monitor rather than inferred from daily budgets.
 - Do not raise budgets unless the campaign is actually budget-limited.
 - Do not raise CPC ceilings unless search terms are qualified, paid economics are positive, and lost impression share shows rank—not budget—is restricting proven demand.
@@ -188,7 +189,7 @@ Verified:
 - manual assets are approved;
 - Saskatoon +35 km presence-only, Search-only networks, exact customer, final URLs, suffix, budgets, CPC ceilings, and dates pass live preview;
 - the CA$600/CAD promotion is API-confirmed as redeemed with CA$600 qualifying spend required and CA$0 accumulated;
-- the CA$14/CA$4 launch budgets, paused Brand state, CA$4.00/CA$2.50/CA$1.50 ceilings, September 17 end date, CA$600 qualifying target, CA$1300 runaway cap, monitoring owner, and pause procedure are locked in the repository contract (2026-08-03 PM efficiency-first values);
+- the CA$14/CA$4 launch budgets, paused Brand state, CA$4.00/CA$2.50/CA$1.50 ceilings, September 17 end date, CA$600 qualifying target, CA$600 absolute ceiling, monitoring owner, and pause procedure are locked in the repository contract (2026-08-05 values);
 - mobile landing, configurator, cart, checkout, payment, and confirmation paths pass;
 - Enhanced Conversions remains disabled unless purpose-specific customer-data consent/disclosure is approved;
 - Brand remains paused without Auction Insights justification.
@@ -215,10 +216,10 @@ A real ad-click order cannot be observed while every ad is inactive. After Gate 
 
 ### Cumulative-spend hard-stop mechanism
 
-The CA$1300 absolute cap is not enforceable through an end date or a manual glance. Before any controlled or public activation, deploy and prove the following checked-in controls:
+The CA$600 absolute cap is not enforceable through an end date or a manual glance. Before any controlled or public activation, deploy and prove the following checked-in controls:
 
 - a credentialed API monitor polling exact-account cumulative cost across every campaign at least every 15 minutes in `America/Regina`, with any unexpected enabled campaign treated as unsafe;
-- automatic account-wide pause of every enabled campaign at a protective CA$25 threshold during the CA$30 controlled test; during the public pilot, warn at CA$1000 and automatically pause every enabled campaign at CA$1250, leaving a CA$50 buffer below the CA$1300 absolute cap (raised 2026-08-03 from 500/625/650 so the earned promotional credit can be spent without the monitor stranding it);
+- automatic account-wide pause of every enabled campaign at a protective CA$25 threshold during the CA$30 controlled test; during the public pilot, warn at CA$450 and automatically pause every enabled campaign at CA$600 (2026-08-05: lowered from 1000/1250/1300 on the owner directive that CA$600 is the absolute maximum). The protective tier and the absolute cap deliberately coincide, because the owner ceiling and the promotion's qualifying threshold are the same number;
 - durable operator alert through the lifecycle rollup containing monitor state, spend, action, timestamp, and pause result;
 - after exact True Color account verification, fail-closed account-wide pause attempts when spend or campaign state cannot be verified; wrong/unreadable account identity never mutates, and authentication, mutation, or readback failure remains red;
 - a tested manual fallback owned by Hasan: if automation is unhealthy, inspect current cumulative spend immediately and keep every campaign paused until monitoring is healthy and the state is reconciled;

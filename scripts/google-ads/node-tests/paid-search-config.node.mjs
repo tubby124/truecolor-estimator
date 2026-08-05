@@ -85,7 +85,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
       channel: "SEARCH",
-      // Observed pre-launch account state, deliberately NOT the config target budgets/ceilings.
+      // Approved paused staging uses launch budgets while campaigns remain off.
       dailyBudgetCad: PAUSED_EXPECTED_CAMPAIGNS[campaign.name].budget,
       cpcCeilingCad: PAUSED_EXPECTED_CAMPAIGNS[campaign.name].ceiling,
       startDate: "2026-07-20",
@@ -99,7 +99,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 19, pausedAdGroups: 19, positiveKeywords: 83, negativeCriteria: 189,
+    adGroups: 19, pausedAdGroups: 1, enabledAdGroups: 18, positiveKeywords: 83, negativeCriteria: 189,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",
@@ -112,9 +112,9 @@ const makePausedLiveState = () => ({
       adGroup: "Stickers and Labels",
       text,
       matchType,
-      status: "PAUSED",
+      status: "ENABLED",
     }))),
-    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 19, pausedResponsiveSearchAds: 19,
+    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 19, pausedResponsiveSearchAds: 1, enabledResponsiveSearchAds: 18,
     competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
       campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
       campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
@@ -123,7 +123,7 @@ const makePausedLiveState = () => ({
       adGroupResourceName: ad.adGroupResourceName,
       adGroupName: ad.adGroupName,
       adGroupAdResourceName: ad.adGroupAdResourceName,
-      status: "PAUSED",
+      status: "ENABLED",
       adId: ad.adId,
       adResourceName: ad.adResourceName,
       finalUrls: [COMPETITOR_DESTINATION_BINDING.finalUrl],
@@ -136,7 +136,7 @@ const makePausedLiveState = () => ({
       adGroupResourceName: ad.adGroupResourceName,
       adGroupName: ad.adGroupName,
       adGroupAdResourceName: ad.adGroupAdResourceName,
-      status: "PAUSED",
+      status: "ENABLED",
       adId: ad.adId,
       adResourceName: ad.adResourceName,
       finalUrls: [COMPETITOR_DESTINATION_BINDING.finalUrl],
@@ -268,7 +268,7 @@ test("live verification contract rejects launch-critical drift and missing noind
     (value) => { value.positiveGeoCriteria[0].latitudeInMicroDegrees += 1; },
     (value) => { value.positiveGeoCriteria[0].type = "LOCATION"; },
     (value) => { value.englishLanguageTargets = 2; },
-    (value) => { value.nearMeKeywords[0].status = "ENABLED"; },
+    (value) => { value.nearMeKeywords[0].status = "PAUSED"; },
     (value) => { value.nearMeKeywords.pop(); },
     (value) => { value.revenueConversions.purchaseOnline.dynamicValue = false; },
     (value) => { value.revenueConversions.quoteWon.status = "REMOVED"; },
@@ -619,13 +619,13 @@ test("rejects off-target statuses and unsafe network, match, geo, budget, and da
     (c) => { c.campaigns[0].dailyBudgetCad = 15; c.campaigns[0].maximumPilotCad = 15 * 46; },
     (c) => { c.campaigns[1].dailyBudgetCad = 3; c.campaigns[1].maximumPilotCad = 3 * 46; },
     (c) => { c.campaigns[0].maximumPilotCad = 645; },
-    (c) => { c.campaigns[0].maximumPilotCad = 1300; c.campaigns[0].dailyBudgetCad = 1300 / 46; },
-    (c) => { c.maximumPilotCad = 900; },
+    (c) => { c.campaigns[0].maximumPilotCad = 600; c.campaigns[0].dailyBudgetCad = 600 / 46; },
+    (c) => { c.maximumPilotCad = 1300; },
     (c) => { c.pilot.startDate = "2026-08-04"; },
     (c) => { c.pilot.endDate = "2026-09-18"; },
     (c) => { c.pilot.inclusiveDays = 60; },
-    (c) => { c.spendControls.protectivePauseCad = 625; },
-    (c) => { c.spendControls.absoluteCapCad = 1500; },
+    (c) => { c.spendControls.protectivePauseCad = 1250; },
+    (c) => { c.spendControls.absoluteCapCad = 1300; },
     (c) => { c.campaigns.push({ ...structuredClone(c.campaigns[0]), kind: "EXTRA", name: "Unexpected", status: "ENABLED" }); },
   ];
 
@@ -680,11 +680,20 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(brand.dailyBudgetCad, 3);
   assert.equal(brand.maximumPilotCad, 0);
   assert.equal(paidSearchConfig.targetQualifyingSpendCad, 600);
-  assert.equal(paidSearchConfig.maximumPilotCad, 1300);
+  assert.equal(paidSearchConfig.maximumPilotCad, 600);
   const plannedMaximumCad = paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.maximumPilotCad, 0);
   assert.equal(plannedMaximumCad, 828);
-  assert.ok(plannedMaximumCad <= paidSearchConfig.maximumPilotCad);
+  // Budget capacity intentionally EXCEEDS the CA$600 runtime ceiling: daily budgets are
+  // permission to capture cheap clicks on good days, and the 15-minute hard-stop monitor is
+  // the binding constraint on total spend. Capacity must still be able to reach the target.
+  assert.ok(plannedMaximumCad > paidSearchConfig.maximumPilotCad);
   assert.ok(plannedMaximumCad >= paidSearchConfig.targetQualifyingSpendCad);
+  // Blast-radius bound if the monitor ever stops: enabled daily budget caps the burn rate.
+  const enabledDailyBudget = paidSearchConfig.campaigns
+    .filter((campaign) => campaign.status === "ENABLED")
+    .reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0);
+  assert.equal(enabledDailyBudget, 18);
+  assert.ok(enabledDailyBudget <= 25);
   for (const campaign of paidSearchConfig.campaigns) {
     const expectedStatus = campaign.kind === "BRAND" ? "PAUSED" : "ENABLED";
     assert.equal(campaign.status, expectedStatus);
@@ -713,7 +722,7 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.liveGoogleAds.conversionGoalGraph.customerGoals.phoneCallLeadCallFromAds.biddable, false);
   assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.primaryForGoal, false);
   assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.includedInConversions, false);
-  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 1000, protectivePauseCad: 1250, absoluteCapCad: 1300, monitorCadenceMinutes: 15 });
+  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 600, absoluteCapCad: 600, monitorCadenceMinutes: 15 });
   assert.equal(paidSearchConfig.spendControls.absoluteCapCad, paidSearchConfig.maximumPilotCad);
   assert.deepEqual(
     [HARD_STOP_PROFILES["public-pilot"].warningCad, HARD_STOP_PROFILES["public-pilot"].thresholdCad, HARD_STOP_PROFILES["public-pilot"].approvedCapCad],

@@ -60,7 +60,7 @@ function createApi({
 }
 
 test("defaults to read-only below the public-pilot warning", async () => {
-  const api = createApi({ spendMicros: "999999999" });
+  const api = createApi({ spendMicros: "449999999" });
   const result = await runHardStopMonitor({ api, options: PUBLIC_OPTIONS, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.executionMode, "DRY_RUN");
@@ -70,28 +70,36 @@ test("defaults to read-only below the public-pilot warning", async () => {
 });
 
 test("reports the public warning without mutating below the protective threshold", async () => {
-  const api = createApi({ spendMicros: "1000000000" });
+  const api = createApi({ spendMicros: "450000000" });
   const result = await runHardStopMonitor({ api, options: PUBLIC_OPTIONS, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.outcome, "WARNING");
   assert.equal(result.action, "NONE");
-  assert.equal(result.warningCad, 1000);
+  assert.equal(result.warningCad, 450);
   assert.equal(api.pauseCalls, 0);
 });
 
-test("dry-run reports a pause at the protective threshold without mutating", async () => {
-  const api = createApi({ spendMicros: "1250000000" });
+test("one cent under the CA$600 owner ceiling still does not pause", async () => {
+  const api = createApi({ spendMicros: "599990000" });
+  const result = await runHardStopMonitor({ api, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
+  assert.equal(result.outcome, "WARNING");
+  assert.equal(result.action, "NONE");
+  assert.equal(api.pauseCalls, 0);
+});
+
+test("dry-run reports a pause exactly at the CA$600 ceiling without mutating", async () => {
+  const api = createApi({ spendMicros: "600000000" });
   const result = await runHardStopMonitor({ api, options: PUBLIC_OPTIONS, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.outcome, "STOP_REQUIRED");
   assert.equal(result.action, "WOULD_PAUSE");
-  assert.equal(result.thresholdCad, 1250);
-  assert.equal(result.approvedCapCad, 1300);
+  assert.equal(result.thresholdCad, 600);
+  assert.equal(result.approvedCapCad, 600);
   assert.equal(api.pauseCalls, 0);
 });
 
 test("explicit execute pauses every allowlisted campaign above threshold and verifies readback", async () => {
-  const api = createApi({ spendMicros: "1280000000" });
+  const api = createApi({ spendMicros: "620000000" });
   const result = await runHardStopMonitor({ api, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
   assert.equal(result.ok, true);
   assert.equal(result.outcome, "STOPPED");
@@ -102,21 +110,44 @@ test("explicit execute pauses every allowlisted campaign above threshold and ver
   assert.deepEqual(api.pauseTargets.map((campaign) => campaign.id).sort(), HARD_STOP_CAMPAIGNS.map((campaign) => campaign.id).sort());
 });
 
-test("public monitor automatically pauses at CA$1250 and distinguishes the CA$1300 absolute cap", async () => {
-  const protective = createApi({ spendMicros: "1250000000" });
-  const protectiveResult = await runHardStopMonitor({ api: protective, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
-  assert.equal(protectiveResult.outcome, "STOPPED");
-  assert.equal(protectiveResult.decisionReason, "PROTECTIVE_PAUSE_THRESHOLD_REACHED");
-  assert.equal(protectiveResult.absoluteCapReached, false);
-  assert.equal(protectiveResult.spendScope, "EXACT_ACCOUNT_TOTAL");
-  assert.equal(protective.pauseCalls, 1);
-
-  const capped = createApi({ spendMicros: "1300000000" });
+// The public pilot deliberately collapses the protective-pause tier onto the absolute cap:
+// the owner ceiling and the promotion's qualifying threshold are the same CA$600 number, so
+// there is no room for a separate soft tier. Reaching CA$600 therefore reports
+// ABSOLUTE_CAP_REACHED, never PROTECTIVE_PAUSE_THRESHOLD_REACHED.
+test("public monitor pauses at the CA$600 ceiling and reports it as the absolute cap", async () => {
+  const capped = createApi({ spendMicros: "600000000" });
   const cappedResult = await runHardStopMonitor({ api: capped, options: { ...PUBLIC_OPTIONS, execute: true }, now: PUBLIC_NOW });
   assert.equal(cappedResult.outcome, "STOPPED");
   assert.equal(cappedResult.decisionReason, "ABSOLUTE_CAP_REACHED");
   assert.equal(cappedResult.absoluteCapReached, true);
-  assert.equal(cappedResult.approvedCapCad, 1300);
+  assert.equal(cappedResult.approvedCapCad, 600);
+  assert.equal(cappedResult.spendScope, "EXACT_ACCOUNT_TOTAL");
+  assert.equal(capped.pauseCalls, 1);
+});
+
+// The controlled-test profile keeps a distinct soft tier (CA$25 protective vs CA$30 cap),
+// so the two decision reasons must both remain reachable somewhere in the contract.
+test("controlled-test profile still distinguishes the protective pause from the absolute cap", async () => {
+  const controlledOptions = {
+    profile: "controlled-test",
+    execute: true,
+    windowStart: "2026-07-23T16:00",
+    windowEnd: "2026-07-26T16:00",
+  };
+  const now = new Date("2026-07-24T18:00:00.000Z");
+
+  // The row must fall inside the controlled-test window or spend filters out to zero.
+  const inWindow = (costMicros) => [{ customerId: ACCOUNT.id, date: "2026-07-24", hour: 12, costMicros }];
+
+  const protective = createApi({ spendRows: inWindow("25000000") });
+  const protectiveResult = await runHardStopMonitor({ api: protective, options: controlledOptions, now });
+  assert.equal(protectiveResult.decisionReason, "PROTECTIVE_PAUSE_THRESHOLD_REACHED");
+  assert.equal(protectiveResult.absoluteCapReached, false);
+
+  const capped = createApi({ spendRows: inWindow("30000000") });
+  const cappedResult = await runHardStopMonitor({ api: capped, options: controlledOptions, now });
+  assert.equal(cappedResult.decisionReason, "ABSOLUTE_CAP_REACHED");
+  assert.equal(cappedResult.absoluteCapReached, true);
 });
 
 test("the approved public window stays open through 2026-12-30 and stops once it ends", async () => {

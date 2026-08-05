@@ -202,7 +202,7 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
       reds.push({
         key: "google-ads-monitor:warning",
         panel: "panel-cron-heartbeats",
-        label: `Google Ads spend warning${spendLabel} — CA$1000 warning threshold reached`,
+        label: `Google Ads spend warning${spendLabel} — CA$450 warning threshold reached`,
       });
     } else if (outcome === "STOPPED" && pauseVerified) {
       reds.push({
@@ -240,6 +240,19 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
       label: "Paid-search weekly decision data not published yet",
     });
   } else {
+    const requiredCampaignIds = new Set(["24048123058", "24048123061"]);
+    const publishedCampaignIds = new Set(
+      inputs.paidSearchWeekly.rows.map((row) => row.campaign_id),
+    );
+    const missingCampaigns = [...requiredCampaignIds]
+      .filter((campaignId) => !publishedCampaignIds.has(campaignId));
+    if (missingCampaigns.length > 0) {
+      reds.push({
+        key: "paid-search:weekly-campaign-missing",
+        panel: "panel-paid-search-weekly",
+        label: `Paid-search weekly data missing campaign(s): ${missingCampaigns.join(", ")}`,
+      });
+    }
     for (const row of inputs.paidSearchWeekly.rows) {
       if (row.recommended_action.startsWith("hold current contract")) continue;
       const campaign = row.campaign_id === "24048123058"

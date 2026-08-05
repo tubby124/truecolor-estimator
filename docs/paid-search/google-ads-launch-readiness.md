@@ -4,6 +4,8 @@ Revenue baseline, campaign economics, operating cadence, and scale/stop rules ar
 
 **2026-08-03 PM revision — efficiency-first, and it supersedes the morning bid plan below.** The owner rejected bidding above forecast. The objective is the most clicks and conversions per dollar, reaching CA$600 of qualifying spend without overshooting CPCs to manufacture it. Changes from the morning plan: CPC ceilings return to the forecast-optimal **Core CA$4.00 / Competitor CA$2.50 / Brand CA$1.50**; **Brand Defense returns to PAUSED** (True Color already holds organic #1 on its own brand terms, there is no Auction Insights evidence of a competitor bidding on them, and brand clicks would contaminate the non-brand conversion data this pilot exists to collect); Enhanced Conversions stays OFF. Daily budgets stay raised at Core CA$14 / Competitor CA$4 — budget is permission to spend, not a bid, so a high budget paired with a low ceiling captures every cheap click available without ever overpaying for one. Weeks 1–2 are an explicit measurement phase; bid and reach changes are driven by Search lost IS (rank) versus (budget), not by pacing anxiety.
 
+**2026-08-03 23:50Z staged-state verification:** a fresh Railway-backed v24 readback confirmed the exact child advertiser, CAD/Regina identity, Core CA$14 / Competitor CA$4 / Brand CA$3 budgets, all three campaigns paused, 18 non-Brand ad groups and RSAs staged enabled, and the Brand group/RSA paused. The reconciled controlled-test preflight passes read-only against that live inventory. Public launch remains blocked by the intentionally outstanding real-transaction uploader proof; the bounded Coroplast test is allowed to generate that proof only after fresh monitor/promotion attestation.
+
 **Escalation-ladder conflict — flagged, not resolved.** The morning plan's Stage 2–4 ladder (broad match → Search Partners → 100 km radius) is currently **forbidden by this repository's own launch controls**. `scripts/google-ads/config-validator.mjs` fails unless `noBroadeningToManufactureVolume === true`, `searchOnly === true`, `radiusKm === 35`, and match types are exactly `EXACT`/`PHRASE`. Every rung of that ladder therefore requires an explicit approved contract change, not a dashboard toggle. Treat the ladder as an unapproved proposal until that change is made.
 
 **2026-08-03 AM disposition — promo-chase launch approved (bid and Brand values superseded above).** The owner approved a deliberate departure from the conservative pilot below to chase the redeemed CA$600 promotion before it expires 2026-09-16: spending CA$600 cash unlocks CA$600 credit. The repository contract was updated through the approved-change process (not bypassed): pilot re-dated 2026-08-03 → 2026-09-17 (46 inclusive days); budgets Core CA$14 / Competitor CA$4 / Brand CA$3 per day with **Brand live at launch** (superseding the "keep Brand paused" default while `AUCTION_INSIGHTS_SIGNOFF` remains an open documentation gate); Maximize Clicks ceilings CA$6.00 / CA$4.00 / CA$2.50, deliberately above the 2026-07-17 forecast; all nine Core ad groups released (`rush-same-day`, `generic-print-price`, `generic-sign-shop` promoted to Tier 1). The runtime hard-stop profile now warns at **CA$1000**, protectively pauses at **CA$1250**, and absolutely caps at **CA$1300**, with the monitor window extended to 2026-12-31 so the promotional credit can be spent after the promo window closes. **This raises maximum runaway exposure from CA$650 to CA$1,300 — that is the accepted cost of the decision.** Launch is manual (Google Ads UI enable-only; campaign start/end dates stay 2026-07-20 / 2026-09-17 until the credit lands). Post-launch drift detection runs via `npm run validate:google-ads:launched`; the paused mode remains intact for rollback. Escalation ladder on missed Monday pacing checkpoints (target CA$13.33/day): Stage 2 broad match on product groups only → Stage 3 Search Partners → Stage 4 radius 100 km. Performance Max and Shopping stay out. Kill criteria: unexpected enabled campaigns, two missed monitor heartbeats, conversion tracking unproven by a real transaction within 7 days, or under CA$300 cumulative by Aug 31 with Stage 4 exhausted.
@@ -18,11 +20,11 @@ Revenue baseline, campaign economics, operating cadence, and scale/stop rules ar
 | Campaigns in Google Ads | **CREATED — PAUSED** |
 | Local validation | **VALIDATED** |
 | Google Ads API validate-only | **PASSED** |
-| Live account verification | **VALIDATED PAUSED — NO SAFETY FAILURES** |
+| Live account verification | **PAUSED/STAGED — NO SAFETY FAILURES; REAL-TRANSACTION PROOF OUTSTANDING** |
 | Railway deployment guard | **WAIT FOR CI ENABLED** |
 | Railway monitor schedule | **DEPLOYED — CONTROLLED-WINDOW EVIDENCE REQUIRED AT ACTIVATION** |
 | CA$600 promotion | **API CONFIRMED — REDEEMED, CA$0/CA$600 QUALIFYING SPEND** |
-| Competitor RSA policy | **9/9 APPROVED / REVIEWED — PAUSED** |
+| Competitor RSA policy | **9/9 APPROVED / REVIEWED — STAGED ENABLED UNDER PAUSED CAMPAIGN** |
 | Launched | **No** |
 | Spend | **CA$0** |
 
@@ -36,17 +38,17 @@ Account call reporting and call-conversion reporting are enabled. Call asset `39
 
 ## Last verified live paused build
 
-All account mutations passed Google Ads API v24 validate-only before execution. The July 25 credential-gated readback confirmed:
+The August 3 credential-gated readback confirmed:
 
-- Core campaign `24048123058`: CA$8/day, paused.
-- Competitor campaign `24048123061`: CA$2/day, paused.
+- Core campaign `24048123058`: CA$14/day, paused.
+- Competitor campaign `24048123061`: CA$4/day, paused.
 - Brand campaign `24048123064`: CA$3/day, held and paused.
-- Three Search-only campaigns, 19 paused ad groups, 83 positive exact/phrase keywords, 189 negative criteria, and 19 paused responsive search ads.
+- Three Search-only campaigns; 18 non-Brand ad groups and RSAs staged enabled beneath paused campaigns; the Brand ad group and RSA paused; 83 positive exact/phrase keywords and 189 negative criteria.
 - Google Search on; Search Partners and Display off.
 - Three presence-only proximity criteria centered at `52.129728,-106.659637`, each with a 35 km radius; no positive city-location criteria remain.
 - Dates July 20 through September 17, 2026.
 - Exact-account spend CA$0 and no enabled campaign.
-- Nine competitor RSAs use `https://truecolorprinting.ca/why-true-color?source=google-ads`; all nine remain paused and now return `APPROVED` / `REVIEWED` with no policy topics.
+- Nine competitor RSAs use `https://truecolorprinting.ca/why-true-color?source=google-ads`; all nine are staged enabled beneath the paused Competitor campaign and return `APPROVED` / `REVIEWED` with no policy topics.
 - Qualified-call asset `394889103183` is correctly wired and returned `APPROVED` / `REVIEWED`.
 - Production `/why-true-color` and the exact tracked query URL return HTTP 200, remain noindex, and expose the paid-page marker without redirecting.
 - The fully expanded tracking URL has no tracking-template or AI Max rewrite and returns HTTP 200 for desktop/mobile AdsBot user agents. Policy Manager reports no current issues.
@@ -66,7 +68,7 @@ The generated Editor CSVs do not encode an advertiser ID or the advanced presenc
 - Core: CA$14/day; 46-day planning maximum CA$644.
 - Competitor: CA$4/day; 46-day planning maximum CA$184.
 - Brand: CA$3/day staged but **PAUSED**; excluded from approved pilot spend (planning maximum CA$0). Keeps the `HOLD_AUCTION_INSIGHTS` tier label.
-- Target qualifying spend: CA$600 (Google's promo requirement, pre-tax). Absolute cap: CA$1300 (runtime-enforced) — a runaway ceiling, not a spend target.
+- Target qualifying spend: CA$600 (Google's promo requirement, pre-tax). Absolute cap: **CA$600** (runtime-enforced, 2026-08-05 owner ceiling). Target and ceiling are the same number on purpose: the account reaches CA$600, qualifies for the promotion, and the monitor pauses on that tick.
 - Google Ads uses daily budgets, not a true lifetime cap. The end date, monitoring, and hard stop are mandatory.
 - Maximize Clicks ceilings: Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 — the 2026-07-17 forecast-optimal values. **Budget and bid are different levers.** The daily budget is permission to spend; the ceiling is the maximum price paid for a single click. Maximize Clicks always buys the cheapest available clicks first, so a raised budget with an unraised ceiling captures all cheap inventory without inflating average CPC. Raising the ceiling only buys marginal auctions that were previously priced out — do it only when Search lost IS (rank) proves auctions are being lost to rank rather than to a thin market.
 - All nine Core ad groups (Tier 1, including the three former Tier 2 expansion groups) plus exact-only competitor conquest launch together. Competitor stays exact-only permanently.
@@ -86,7 +88,7 @@ npm run monitor:google-ads-spend -- \
   --window-end=2026-07-23T08:00
 ```
 
-The controlled-test window is mandatory, interpreted in `America/Regina`, restricted to whole-hour boundaries, and cannot exceed 72 hours. Hour-segmented Google Ads cost is filtered to `window-start` inclusive and `window-end` exclusive. Its protective threshold is CA$25 against the separately approved CA$30 cap. The fixed public-pilot window is July 20, 2026 through December 31, 2026 local (extended 2026-08-03 so the promotional credit can be spent after the promo qualification window closes): CA$1000 emits an operator warning, CA$1250 triggers the protective pause, and CA$1300 is the absolute cap. At or above a pause threshold—or after the selected window ends—the dry-run result is `STOP_REQUIRED` / `WOULD_PAUSE`.
+The controlled-test window is mandatory, interpreted in `America/Regina`, restricted to whole-hour boundaries, and cannot exceed 72 hours. Hour-segmented Google Ads cost is filtered to `window-start` inclusive and `window-end` exclusive. Its protective threshold is CA$25 against the separately approved CA$30 cap. The fixed public-pilot window is July 20, 2026 through December 31, 2026 local: CA$450 emits an operator warning and CA$600 is both the protective pause and the absolute cap (2026-08-05 owner ceiling, lowered from 1000/1250/1300). At or above a pause threshold—or after the selected window ends—the dry-run result is `STOP_REQUIRED` / `WOULD_PAUSE`.
 
 Only the explicit `--execute` flag authorizes a pause:
 
@@ -115,7 +117,7 @@ npm run build:google-ads-attestation -- \
   --output=/absolute/path/to/controlled-test-attestation.json
 ```
 
-The controlled controller is read-only by default, validates the exact account/resource inventory, probes the production Coroplast URL, validates every mutation before execution, enables Core last, and rolls the full account back to the canonical paused/CA$8 state on any failure:
+The controlled controller is read-only by default, validates the exact account/resource inventory, probes the production Coroplast URL, validates every mutation before execution, enables Core last, and rolls the full account back to the canonical paused/CA$14 staged state on any failure. Activation changes only Core's budget, the three Coroplast phrase keywords, the eight non-Coroplast Core ad groups, and finally Core's campaign status; Competitor and Brand are never enabled by the controlled test:
 
 ```sh
 node scripts/google-ads/controlled-test-controller.mjs preflight
@@ -140,6 +142,12 @@ Deployed evidence, all captured while every campaign remained PAUSED at CA$0 spe
 
 - Migration `20260725183000_paid_search_feedback_loop.sql` applied to `dczbgraekmzirxknjvwe`
   and present in the remote ledger.
+- Weekly migrations `20260803210000_paid_search_weekly_decision_surface.sql`,
+  `20260803235500_paid_search_weekly_observed_day_pacing.sql`, and its additive
+  correction `20260804001500_paid_search_weekly_elapsed_day_pacing.sql` are applied.
+  The service-role-only weekly view reads successfully, partial weeks divide by
+  completed calendar days through the latest successful sync (including zero-traffic
+  days), and the lifecycle rollup flags a missing Core or Competitor row.
 - Grant surface verified by role. The raw staging tables `google_ads_daily_metrics` and
   `google_ads_optimization_proposals` return 403 even to the service role (INSERT/UPDATE
   only, no SELECT); the only read path is the published views. Failed, partial, stale, and

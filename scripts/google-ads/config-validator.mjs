@@ -10,6 +10,12 @@ const PILOT_START_DATE = "2026-08-03";
 const PILOT_END_DATE = "2026-09-17";
 const PILOT_INCLUSIVE_DAYS = 46;
 const LAUNCHABLE_DAILY_BUDGET_CAD = 21;
+// Enabled-only daily burn ceiling. At CA$18/day an unmonitored account needs 33 days to reach
+// the CA$600 ceiling, which is far longer than any plausible monitor outage goes unnoticed.
+const MAX_UNMONITORED_DAILY_BURN_CAD = 25;
+const launchableDailyBudgetCad = (campaigns) => campaigns
+  .filter((campaign) => campaign.status === "ENABLED")
+  .reduce((sum, campaign) => sum + (campaign.dailyBudgetCad ?? 0), 0);
 const REQUIRED_GATES = [
   "TRUE_COLOR_CUSTOMER_ID", "BILLING_ACTIVE", "AUTO_TAGGING_ENABLED",
   "PURCHASE_UPLOAD_CLICKS_ACTION", "QUOTE_WON_UPLOAD_CLICKS_ACTION", "CONVERSION_GOAL_GRAPH", "OFFLINE_UPLOADER_MIGRATION", "PURCHASE_UPLOAD_CLICKS_OBSERVED", "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
@@ -260,9 +266,9 @@ export function validateConfig(config) {
   }
   if (config.pilot?.generatorAutoRollsDates !== false || config.pilot?.dateChangeRequiresApprovedContractChange !== true) fail("Pilot date changes must require an approved config and validator contract change");
   if (config.currency !== "CAD") fail("Account currency must be CAD");
-  if (config.targetQualifyingSpendCad !== 600 || config.maximumPilotCad !== 1300) fail("Pilot must target CA$600 qualifying spend with a CA$1300 absolute cap");
-  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 1000, protectivePauseCad: 1250, absoluteCapCad: 1300, monitorCadenceMinutes: 15 })) {
-    fail("Spend controls must use exact-account total cost, warn at CA$1000, pause at CA$1250, cap at CA$1300, and run every 15 minutes");
+  if (config.targetQualifyingSpendCad !== 600 || config.maximumPilotCad !== 600) fail("Pilot must target CA$600 qualifying spend with a CA$600 absolute cap");
+  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 600, absoluteCapCad: 600, monitorCadenceMinutes: 15 })) {
+    fail("Spend controls must use exact-account total cost, warn at CA$450, pause at CA$600, cap at CA$600, and run every 15 minutes");
   }
   if (JSON.stringify(config.controlledTest) !== JSON.stringify({
     campaign: "GOOG_Search_TC_CoreProducts_2026",
@@ -365,8 +371,17 @@ export function validateConfig(config) {
     }
   }
   const plannedMaximumCad = campaigns.reduce((sum, campaign) => sum + (campaign.maximumPilotCad ?? 0), 0);
-  if (plannedMaximumCad > config.maximumPilotCad) fail("Planned campaign maximums must stay within the approved CA$1300 absolute cap");
+  // Budget CAPACITY (CA$828 over 46 days) deliberately exceeds the CA$600 runtime ceiling.
+  // Daily budgets are permission to capture cheap clicks on good days; the 15-minute hard-stop
+  // monitor is the binding constraint on total spend, not the budget arithmetic. Capacity must
+  // still be able to REACH the qualifying target, or the promotion is unreachable by construction.
   if (plannedMaximumCad < config.targetQualifyingSpendCad) fail("Planned campaign maximums must be able to reach the CA$600 qualifying-spend target");
+  // Bound the blast radius if the monitor ever stops running: total enabled daily budget caps
+  // how fast an unmonitored account can burn. This replaces the old capacity-vs-cap assertion,
+  // which became meaningless once the runtime ceiling dropped to the qualifying target itself.
+  if (launchableDailyBudgetCad(campaigns) > MAX_UNMONITORED_DAILY_BURN_CAD) {
+    fail(`Total enabled daily budget must stay within CA$${MAX_UNMONITORED_DAILY_BURN_CAD}/day so a monitor outage cannot burn the CA$600 ceiling in under a week`);
+  }
   const launchableDailyBudget = campaigns.reduce((sum, campaign) => sum + (campaign.dailyBudgetCad ?? 0), 0);
   if (launchableDailyBudget !== LAUNCHABLE_DAILY_BUDGET_CAD) fail(`Launchable Core, Competitor, and Brand budgets must total CA$${LAUNCHABLE_DAILY_BUDGET_CAD}/day`);
   for (const [kind, expected] of Object.entries(EXPECTED)) {
