@@ -384,3 +384,58 @@ DesignDirectionGrid live on 6 secondary pages but MISSING on all 5 ranking pages
 - Fewer stale-price trust leaks on the flyer page.
 - Stronger internal routing for poster searchers landing on the generic product picker.
 - Wall graphics page should regain relevance for wall-covering and large-wall-graphic query variants.
+
+---
+
+## Quote Conversion Attribution — 2026-08-05 (not an SEO edit; no page.tsx touched)
+
+### Why this is in the SEO log
+A 2026-08-05 diagnostic brief (`docs/seo/homepage-ctr-brief-2026-08-05.md`) read the quote funnel as
+"23 quotes in 30 days, 0 won/converted — chase quotes before SEO." That conclusion was wrong. The
+conversions existed; nothing was attributing them. Recording it here so the next funnel read does not
+repeat the misdiagnosis and trigger unnecessary protected-page edits.
+
+### Root cause (verified against production, all-time)
+| Check | Result |
+|---|---:|
+| `orders` with `quote_request_id` set | 0 |
+| quotes with `quote_total_cents` set | 0 |
+| quotes with `quote_line_items` set | 0 |
+| quotes with `won_at` / `converted_at` set | 0 |
+| quotes with `quoted_at` set | 45 |
+
+The structured Pay Now path (`send-quote` -> `/pay/<token>` -> `materialize_quote_order`) has never
+been used in production. Staff reply from Gmail (`info@true-color.ca`) or via `send-reply`
+(`has_pay_now: false`); customers then order through normal checkout or in store. The
+`orders_sync_quote_lifecycle_on_payment` trigger joins on `orders.quote_request_id`, so it never
+matched. Measurement gap, not a sales leak.
+
+### What shipped
+- `supabase/migrations/20260805120000_quote_email_attribution.sql` — `attribute_quote_conversions()`
+  RPC matching paid orders to quotes by normalized email inside a 60-day window. Adds
+  `attribution_method` (`pay_now` | `email_match`) and `attributed_at`. Writes only to
+  `quote_requests`; never to `orders`, so the Pay Now invariants and the Google Ads conversion outbox
+  trigger (ON `public.orders`) are untouched.
+- `supabase/migrations/20260805130000_quote_conversion_report_view.sql` — `quote_conversion_report`
+  view separating `was_replied` / `was_priced` / `did_convert`.
+- `scripts/backfill-quote-attribution.mjs` — dry-run-by-default backfill.
+- `src/app/api/cron/quote-attribution/route.ts` + `.github/workflows/cron-quote-attribution.yml` —
+  hourly, `CRON_SECRET` auth.
+
+### Result
+Backfill attributed **14 quotes / $2,977.03** all-time, of which **7 quotes / $926.30** fall in the
+2026-07-06 -> 2026-08-05 window that previously reported zero.
+
+### Rules going forward
+- **All quote funnel reporting queries `quote_conversion_report`, never `quote_requests.lifecycle_status`.**
+  `lifecycle_status = 'quoted'` means a reply was marked sent, NOT that a price was quoted — all 45
+  historical `quoted_at` rows have `quote_total_cents = NULL`.
+- The matcher is greedy (one order per quote per pass); the script and cron loop to convergence.
+- To reverse: `UPDATE quote_requests SET converted_order_id = NULL, won_at = NULL, converted_at = NULL,
+  checkout_started_at = NULL, attribution_method = NULL, attributed_at = NULL, lifecycle_status = 'quoted'
+  WHERE attribution_method = 'email_match';`
+
+### Not done (deliberately)
+- No homepage or SEO page edits. Commit `9455b75` (2026-07-02) already rewrote the homepage title
+  targeting `print shop` / `printing near me`; both still show 0% CTR a month later, so metadata is
+  not the lever. The 7d sample in the brief (8 -> 6 clicks) is below noise.
