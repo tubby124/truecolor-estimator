@@ -3,7 +3,7 @@ import { pathToFileURL } from "node:url";
 import {
   buildBudgetOperations,
   buildStatusOperations,
-  CONTROLLED_EXACT_KEYWORDS,
+  CONTROLLED_PHRASE_KEYWORDS,
   CONTROLLED_TEST,
   parseControlledTestOptions,
   validateActivationAttestation,
@@ -15,6 +15,7 @@ import {
   validateResourcesStagedState,
   validateRollbackContainmentState,
   validateRolledBackState,
+  stagedChildResourceTargets,
 } from "./controlled-test-contract.mjs";
 
 const API_VERSION = "v24";
@@ -122,14 +123,20 @@ async function applyActivationPhases(api, {
   clock,
 }) {
   await mutateValidated(api.setBudget, CONTROLLED_TEST.budget.controlledMicros);
-  validateBudgetStagedState(await api.readState());
+  const budgetStaged = validateBudgetStagedState(await api.readState());
   await mutateValidated(
     api.setKeywordStatuses,
-    CONTROLLED_EXACT_KEYWORDS.map((keyword) => keyword.resourceName),
-    "ENABLED",
+    CONTROLLED_PHRASE_KEYWORDS.map((keyword) => keyword.resourceName),
+    "PAUSED",
   );
-  await mutateValidated(api.setAdStatuses, [CONTROLLED_TEST.rsa.resourceName], "ENABLED");
-  await mutateValidated(api.setAdGroupStatuses, [CONTROLLED_TEST.adGroup.resourceName], "ENABLED");
+  await mutateValidated(
+    api.setAdGroupStatuses,
+    budgetStaged.adGroups
+      .filter((group) => group.campaignResourceName === CONTROLLED_TEST.campaign.resourceName
+        && group.resourceName !== CONTROLLED_TEST.adGroup.resourceName)
+      .map((group) => group.resourceName),
+    "PAUSED",
+  );
   validateResourcesStagedState(await api.readState());
   const monitor = validateActivationAttestation(monitorAttestation, {
     now: clock(),
@@ -188,14 +195,35 @@ async function runRollback({ api, base }) {
     targets.adGroupResources,
     "PAUSED",
   ));
-  const rollbackBudget = campaignPauseVerified
-    ? CONTROLLED_TEST.budget.normalMicros
-    : CONTROLLED_TEST.budget.controlledMicros;
-  await rollbackBatch(errors, campaignPauseVerified ? "budget restoration" : "budget containment", () => mutateValidated(
-    api.setBudget,
-    rollbackBudget,
-  ));
-  return verifyRollbackReadback(api, base, errors, { campaignPauseVerified });
+  let stagedRestored = false;
+  if (campaignPauseVerified && targets.restoreSafe && errors.length === 0) {
+    await rollbackBatch(errors, "budget restoration", () => mutateValidated(
+      api.setBudget,
+      CONTROLLED_TEST.budget.normalMicros,
+    ));
+    if (errors.length === 0) {
+      await rollbackBatch(errors, "staged ad-group restoration", () => mutateValidated(
+        api.setAdGroupStatuses,
+        targets.stagedAdGroupResources,
+        "ENABLED",
+      ));
+      await rollbackBatch(errors, "staged RSA restoration", () => mutateValidated(
+        api.setAdStatuses,
+        targets.stagedAdResources,
+        "ENABLED",
+      ));
+      await rollbackBatch(errors, "staged keyword restoration", () => mutateValidated(
+        api.setKeywordStatuses,
+        targets.stagedKeywordResources,
+        "ENABLED",
+      ));
+      stagedRestored = errors.length === 0;
+    }
+  }
+  return verifyRollbackReadback(api, base, errors, {
+    campaignPauseVerified,
+    stagedRestored,
+  });
 }
 
 async function verifyAllCampaignsPaused(api, errors) {
@@ -229,28 +257,56 @@ async function readRollbackCampaigns(api, errors) {
 async function readRollbackResourceTargets(api, errors) {
   try {
     const state = await api.readState();
-    return {
+    const containmentTargets = {
       keywordResources: state.keywords
         .filter((keyword) => keyword.negative !== true)
         .map((keyword) => keyword.resourceName),
       adResources: state.ads.map((ad) => ad.resourceName),
       adGroupResources: state.adGroups.map((adGroup) => adGroup.resourceName),
     };
+    try {
+      const staged = stagedChildResourceTargets(state);
+      return {
+        ...containmentTargets,
+        stagedKeywordResources: staged.keywordResources,
+        stagedAdResources: staged.adResources,
+        stagedAdGroupResources: staged.adGroupResources,
+        restoreSafe: true,
+      };
+    } catch (error) {
+      errors.push(`Rollback staged restoration blocked: ${safeMessage(error)}`);
+      return {
+        ...containmentTargets,
+        stagedKeywordResources: [],
+        stagedAdResources: [],
+        stagedAdGroupResources: [],
+        restoreSafe: false,
+      };
+    }
   } catch (error) {
     errors.push(`Rollback account-wide resource inventory read failed: ${safeMessage(error)}`);
     return {
       keywordResources: CONTROLLED_TEST.keywords.map((keyword) => keyword.resourceName),
       adResources: [CONTROLLED_TEST.rsa.resourceName],
       adGroupResources: [CONTROLLED_TEST.adGroup.resourceName],
+      stagedKeywordResources: [],
+      stagedAdResources: [],
+      stagedAdGroupResources: [],
+      restoreSafe: false,
     };
   }
 }
 
-async function verifyRollbackReadback(api, base, errors, { campaignPauseVerified }) {
+async function verifyRollbackReadback(
+  api,
+  base,
+  errors,
+  { campaignPauseVerified, stagedRestored },
+) {
   let state;
   try {
     const readback = await api.readState();
-    state = campaignPauseVerified
+    state = campaignPauseVerified && stagedRestored
       ? validateRolledBackState(readback)
       : validateRollbackContainmentState(readback);
   } catch (error) {

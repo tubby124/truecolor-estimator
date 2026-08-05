@@ -3,8 +3,9 @@ import test from "node:test";
 import {
   buildBudgetOperations,
   buildStatusOperations,
-  CONTROLLED_EXACT_KEYWORDS,
+  CONTROLLED_PHRASE_KEYWORDS,
   CONTROLLED_TEST,
+  CONTROLLED_TEST_CHILD_INVENTORY,
   parseControlledTestOptions,
   signMonitorAttestation,
   validateActivatedState,
@@ -27,7 +28,18 @@ const NOW = new Date("2026-07-23T19:30:00.000Z");
 const ATTESTATION_SECRET = "test-only-controlled-attestation-secret-2026";
 
 function makeState(stage = "paused") {
-  const enabled = stage === "active";
+  const active = stage === "active";
+  const prefix = `customers/${CONTROLLED_TEST.customerId}`;
+  const scopes = Object.entries(CONTROLLED_TEST_CHILD_INVENTORY);
+  const controlledKeywords = new Map(
+    CONTROLLED_TEST.keywords.map((keyword) => [keyword.resourceName, keyword]),
+  );
+  const groupResource = (groupId) => `${prefix}/adGroups/${groupId}`;
+  const groupStatus = (scope, groupId) => {
+    if (scope === "brand") return "PAUSED";
+    if (active && scope === "core" && groupId !== CONTROLLED_TEST.adGroup.id) return "PAUSED";
+    return "ENABLED";
+  };
   return {
     account: {
       id: CONTROLLED_TEST.customerId,
@@ -36,71 +48,64 @@ function makeState(stage = "paused") {
     },
     campaigns: CONTROLLED_TEST.campaigns.map((campaign) => ({
       ...campaign,
-      status: enabled && campaign.id === CONTROLLED_TEST.campaign.id ? "ENABLED" : "PAUSED",
+      status: active && campaign.id === CONTROLLED_TEST.campaign.id ? "ENABLED" : "PAUSED",
       channel: "SEARCH",
       budgetResourceName: campaign.id === CONTROLLED_TEST.campaign.id
         ? CONTROLLED_TEST.budget.resourceName
         : `customers/${CONTROLLED_TEST.customerId}/campaignBudgets/other-${campaign.id}`,
-      cpcBidCeilingMicros: campaign.id === CONTROLLED_TEST.campaign.id ? "4000000" : "2500000",
+      cpcBidCeilingMicros: campaign.id === CONTROLLED_TEST.campaign.id
+        ? "4000000"
+        : campaign.id === CONTROLLED_TEST.campaigns[1].id ? "2500000" : "1500000",
     })),
     budget: {
       ...CONTROLLED_TEST.budget,
       status: "ENABLED",
-      amountMicros: enabled ? CONTROLLED_TEST.budget.controlledMicros : CONTROLLED_TEST.budget.normalMicros,
+      amountMicros: active ? CONTROLLED_TEST.budget.controlledMicros : CONTROLLED_TEST.budget.normalMicros,
       explicitlyShared: false,
       referenceCount: "1",
     },
-    adGroups: [
-      {
-        ...CONTROLLED_TEST.adGroup,
-        status: enabled ? "ENABLED" : "PAUSED",
-        campaignResourceName: CONTROLLED_TEST.campaign.resourceName,
-      },
-      {
-        id: "other-group",
-        resourceName: `customers/${CONTROLLED_TEST.customerId}/adGroups/other-group`,
-        name: "Other group",
-        status: "PAUSED",
-        campaignResourceName: CONTROLLED_TEST.campaign.resourceName,
-      },
-    ],
-    ads: [
-      {
-        ...CONTROLLED_TEST.rsa,
-        status: enabled ? "ENABLED" : "PAUSED",
+    adGroups: scopes.flatMap(([scope, inventory]) => inventory.adGroups.map((id) => ({
+      id,
+      resourceName: groupResource(id),
+      name: id === CONTROLLED_TEST.adGroup.id ? CONTROLLED_TEST.adGroup.name : `${scope} group ${id}`,
+      status: groupStatus(scope, id),
+      campaignResourceName: inventory.campaignResourceName,
+    }))),
+    ads: scopes.flatMap(([scope, inventory]) => inventory.ads.map((compositeId) => {
+      const [groupId, id] = compositeId.split("~");
+      const isControlled = compositeId === `${CONTROLLED_TEST.adGroup.id}~${CONTROLLED_TEST.rsa.id}`;
+      return {
+        id,
+        resourceName: `${prefix}/adGroupAds/${compositeId}`,
+        status: scope === "brand" ? "PAUSED" : "ENABLED",
         type: "RESPONSIVE_SEARCH_AD",
         approvalStatus: "APPROVED",
         reviewStatus: "REVIEWED",
-        finalUrls: [CONTROLLED_TEST.rsa.finalUrl],
-        adGroupResourceName: CONTROLLED_TEST.adGroup.resourceName,
-      },
-      {
-        id: "other-ad",
-        resourceName: `customers/${CONTROLLED_TEST.customerId}/adGroupAds/other-group~other-ad`,
-        status: "PAUSED",
-        type: "RESPONSIVE_SEARCH_AD",
-        approvalStatus: "APPROVED",
-        reviewStatus: "REVIEWED",
-        finalUrls: ["https://truecolorprinting.ca/products/stickers"],
-        adGroupResourceName: `customers/${CONTROLLED_TEST.customerId}/adGroups/other-group`,
-      },
-    ],
+        finalUrls: [isControlled
+          ? CONTROLLED_TEST.rsa.finalUrl
+          : scope === "competitor"
+            ? COMPETITOR_DESTINATION_BINDING.finalUrl
+            : "https://truecolorprinting.ca/"],
+        adGroupResourceName: groupResource(groupId),
+      };
+    })),
     keywords: [
-      ...CONTROLLED_TEST.keywords.map((keyword) => ({
-        ...keyword,
-        status: enabled && keyword.matchType === "EXACT" ? "ENABLED" : "PAUSED",
-        negative: false,
-        adGroupResourceName: CONTROLLED_TEST.adGroup.resourceName,
+      ...scopes.flatMap(([scope, inventory]) => inventory.keywords.map((compositeId) => {
+        const [groupId, criterionId] = compositeId.split("~");
+        const resourceName = `${prefix}/adGroupCriteria/${compositeId}`;
+        const controlled = controlledKeywords.get(resourceName);
+        return {
+          criterionId,
+          resourceName,
+          status: scope === "brand"
+            ? "PAUSED"
+            : active && controlled?.matchType === "PHRASE" ? "PAUSED" : "ENABLED",
+          negative: false,
+          text: controlled?.text ?? `${scope} keyword ${criterionId}`,
+          matchType: controlled?.matchType ?? "EXACT",
+          adGroupResourceName: groupResource(groupId),
+        };
       })),
-      {
-        criterionId: "other-keyword",
-        resourceName: `customers/${CONTROLLED_TEST.customerId}/adGroupCriteria/other-group~other-keyword`,
-        status: "PAUSED",
-        negative: false,
-        text: "stickers",
-        matchType: "EXACT",
-        adGroupResourceName: `customers/${CONTROLLED_TEST.customerId}/adGroups/other-group`,
-      },
       {
         criterionId: "negative",
         resourceName: `customers/${CONTROLLED_TEST.customerId}/adGroupCriteria/197192347366~negative`,
@@ -350,13 +355,19 @@ test("exported controller rejects direct-call write bypasses before touching the
   }
 });
 
-test("mutation builders accept only exact True Color resources and CA$5/CA$8 budgets", () => {
+test("mutation builders accept only exact True Color resources and CA$5/CA$14 budgets", () => {
   assert.equal(buildStatusOperations([CONTROLLED_TEST.campaign.resourceName], "PAUSED")[0].updateMask, "status");
   assert.equal(buildBudgetOperations("5000000")[0].updateMask, "amount_micros");
-  assert.equal(buildBudgetOperations("8000000")[0].update.amountMicros, "8000000");
+  assert.equal(buildBudgetOperations("14000000")[0].update.amountMicros, "14000000");
   assert.throws(() => buildStatusOperations(["customers/999/campaigns/1"], "PAUSED"), /outside/);
+  const unexpectedSameAccount = `customers/${CONTROLLED_TEST.customerId}/adGroups/999999999999`;
+  assert.equal(buildStatusOperations([unexpectedSameAccount], "PAUSED")[0].update.status, "PAUSED");
+  assert.throws(
+    () => buildStatusOperations([unexpectedSameAccount], "ENABLED"),
+    /exact controlled-test allowlist/,
+  );
   assert.throws(() => buildStatusOperations([CONTROLLED_TEST.campaign.resourceName], "REMOVED"), /Unsupported/);
-  assert.throws(() => buildBudgetOperations("6000000"), /exactly CA\$5 or CA\$8/);
+  assert.throws(() => buildBudgetOperations("6000000"), /exactly CA\$5 or CA\$14/);
 });
 
 test("monitor attestation is exact, signed, fresh, in-window, and proves fail-closed monitoring", () => {
@@ -502,7 +513,7 @@ test("activation clearance is signed, fresh, exact-account, and launch-blocker f
 });
 
 test("state validators enforce exact resource identities and only the intended enabled resources", () => {
-  assert.equal(validatePreflightState(makeState("paused")).budget.amountMicros, "8000000");
+  assert.equal(validatePreflightState(makeState("paused")).budget.amountMicros, "14000000");
   const budgetStaged = makeState("paused");
   budgetStaged.budget.amountMicros = "5000000";
   assert.equal(validateBudgetStagedState(budgetStaged).budget.amountMicros, "5000000");
@@ -510,7 +521,7 @@ test("state validators enforce exact resource identities and only the intended e
   resourcesStaged.campaigns[0].status = "PAUSED";
   assert.equal(validateResourcesStagedState(resourcesStaged).campaigns[0].status, "PAUSED");
   assert.equal(validateActivatedState(makeState("active")).budget.amountMicros, "5000000");
-  assert.equal(validateRolledBackState(makeState("paused")).budget.amountMicros, "8000000");
+  assert.equal(validateRolledBackState(makeState("paused")).budget.amountMicros, "14000000");
 
   const wrongUrl = makeState("paused");
   wrongUrl.ads[0].finalUrls = ["https://truecolorprinting.ca/why-true-color"];
@@ -535,6 +546,22 @@ test("state validators enforce exact resource identities and only the intended e
   enabledWhileBudgetStaged.budget.amountMicros = "5000000";
   enabledWhileBudgetStaged.campaigns[0].status = "ENABLED";
   assert.throws(() => validateBudgetStagedState(enabledWhileBudgetStaged), /Every campaign/);
+  const pausedStagedChild = makeState("paused");
+  pausedStagedChild.adGroups[1].status = "PAUSED";
+  assert.throws(() => validatePreflightState(pausedStagedChild), /status mismatch/);
+  const enabledBrandChild = makeState("paused");
+  enabledBrandChild.adGroups.at(-1).status = "ENABLED";
+  assert.throws(() => validatePreflightState(enabledBrandChild), /status mismatch/);
+  const unexpectedChild = makeState("paused");
+  unexpectedChild.adGroups.push({
+    ...unexpectedChild.adGroups[0],
+    id: "999999999999",
+    resourceName: `customers/${CONTROLLED_TEST.customerId}/adGroups/999999999999`,
+  });
+  assert.throws(() => validatePreflightState(unexpectedChild), /Exact adGroups inventory mismatch/);
+  const orphanedAd = makeState("paused");
+  orphanedAd.ads[2].adGroupResourceName = "customers/1072816342/adGroups/missing";
+  assert.throws(() => validatePreflightState(orphanedAd), /wrong ad group/);
   assert.throws(
     () => validateControlledAccount({ id: "999", currencyCode: "CAD", timeZone: CONTROLLED_TEST.timeZone }),
     /exact True Color/,
@@ -549,7 +576,7 @@ test("preflight is read-only and reports unsafe state without any mutation", asy
     now: NOW,
   });
   assert.equal(pass.outcome, "PREFLIGHT_PASSED");
-  assert.equal(pass.summary.budgetCad, 8);
+  assert.equal(pass.summary.budgetCad, 14);
   assert.equal(api.calls.length, 0);
 
   api.state.ads[0].approvalStatus = "DISAPPROVED";
@@ -585,19 +612,18 @@ test("activation validates every batch, enables Core last, and passes strict rea
     [
       "budget:validate", "budget:execute",
       "keyword:validate", "keyword:execute",
-      "ad:validate", "ad:execute",
       "group:validate", "group:execute",
       "campaign:validate", "campaign:execute",
     ],
   );
   assert.equal(api.calls.at(-1).resources[0], CONTROLLED_TEST.campaign.resourceName);
   assert.equal(api.state.campaigns[0].status, "ENABLED");
-  const keywordEnable = api.calls.find(
-    (call) => call.kind === "keyword" && call.statusOrAmount === "ENABLED" && !call.validateOnly,
+  const keywordPause = api.calls.find(
+    (call) => call.kind === "keyword" && call.statusOrAmount === "PAUSED" && !call.validateOnly,
   );
   assert.deepEqual(
-    keywordEnable.resources,
-    CONTROLLED_EXACT_KEYWORDS.map((keyword) => keyword.resourceName),
+    keywordPause.resources,
+    CONTROLLED_PHRASE_KEYWORDS.map((keyword) => keyword.resourceName),
   );
   assert.ok(api.state.keywords
     .filter((keyword) => keyword.matchType === "PHRASE")
@@ -625,8 +651,8 @@ test("invalid attestation refuses activation before any write", async () => {
   assert.equal(api.calls.length, 0);
 });
 
-test("any failure after the first write invokes full rollback and restores CA$8", async () => {
-  const api = makeApi({ failAt: "ad:execute" });
+test("any failure after the first write invokes full rollback and restores staged CA$14", async () => {
+  const api = makeApi({ failAt: "group:execute" });
   const result = await runControlledTestController({
     api,
     options: { mode: "activate", execute: true },
@@ -638,11 +664,9 @@ test("any failure after the first write invokes full rollback and restores CA$8"
   });
   assert.equal(result.outcome, "ACTIVATION_FAILED_ROLLED_BACK");
   assert.equal(result.rollback.outcome, "ROLLED_BACK");
-  assert.equal(api.state.budget.amountMicros, "8000000");
+  assert.equal(api.state.budget.amountMicros, "14000000");
   assert.ok(api.state.campaigns.every((campaign) => campaign.status === "PAUSED"));
-  assert.ok(api.state.adGroups.every((group) => group.status === "PAUSED"));
-  assert.ok(api.state.ads.every((ad) => ad.status === "PAUSED"));
-  assert.ok(api.state.keywords.filter((keyword) => !keyword.negative).every((keyword) => keyword.status === "PAUSED"));
+  assert.doesNotThrow(() => validatePreflightState(api.state));
   const firstRollbackCampaign = api.calls.findIndex((call, index) => (
     index > 0 && call.kind === "campaign" && call.statusOrAmount === "PAUSED"
   ));
@@ -860,7 +884,7 @@ test("explicit rollback is account-wide, validated, idempotent, and strictly rea
   assert.equal(result.ok, false);
   assert.equal(result.outcome, "ROLLBACK_UNVERIFIED");
   assert.ok(api.state.campaigns.every((campaign) => campaign.status === "PAUSED"));
-  assert.equal(api.state.budget.amountMicros, "8000000");
+  assert.equal(api.state.budget.amountMicros, "5000000");
   const accountPause = api.calls.find((call) => call.kind === "campaign" && call.validateOnly);
   assert.equal(accountPause.resources.length, 4);
 
@@ -886,10 +910,35 @@ test("rollback continues remaining safety batches after one batch fails and repo
   assert.equal(api.state.campaigns[0].status, "PAUSED");
   assert.equal(api.state.adGroups[0].status, "PAUSED");
   assert.equal(api.state.ads[0].status, "PAUSED");
-  assert.equal(api.state.budget.amountMicros, "8000000");
+  assert.equal(api.state.budget.amountMicros, "5000000");
 });
 
-test("rollback never restores CA$8 unless a fresh read proves every campaign is paused", async () => {
+test("rollback pauses unexpected same-account children but never restores or enables them", async () => {
+  const api = makeApi({ initialStage: "active" });
+  const unexpectedResource = `customers/${CONTROLLED_TEST.customerId}/adGroups/999999999999`;
+  api.state.adGroups.push({
+    id: "999999999999",
+    resourceName: unexpectedResource,
+    name: "Unexpected Core group",
+    status: "ENABLED",
+    campaignResourceName: CONTROLLED_TEST.campaign.resourceName,
+  });
+  const result = await runControlledTestController({
+    api,
+    options: { mode: "rollback", execute: true },
+    now: NOW,
+  });
+  assert.equal(result.outcome, "ROLLBACK_UNVERIFIED");
+  assert.ok(result.errors.some((error) => error.includes("staged restoration blocked")));
+  assert.equal(api.state.adGroups.find((group) => group.resourceName === unexpectedResource).status, "PAUSED");
+  assert.equal(api.state.budget.amountMicros, CONTROLLED_TEST.budget.controlledMicros);
+  assert.equal(
+    api.calls.some((call) => call.statusOrAmount === "ENABLED"),
+    false,
+  );
+});
+
+test("rollback never restores CA$14 unless a fresh read proves every campaign is paused", async () => {
   const api = makeApi({ initialStage: "active", failAt: "campaign:execute" });
   const result = await runControlledTestController({
     api,
@@ -901,7 +950,7 @@ test("rollback never restores CA$8 unless a fresh read proves every campaign is 
   assert.equal(api.state.campaigns[0].status, "ENABLED");
   assert.equal(api.state.budget.amountMicros, "5000000");
   assert.equal(
-    api.calls.some((call) => call.kind === "budget" && call.statusOrAmount === "8000000"),
+    api.calls.some((call) => call.kind === "budget" && call.statusOrAmount === "14000000"),
     false,
   );
   assert.ok(api.state.adGroups.every((group) => group.status === "PAUSED"));

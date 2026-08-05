@@ -16,6 +16,20 @@ const weeklyMigration = readFileSync(
   ),
   "utf8",
 );
+const weeklyPacingMigration = readFileSync(
+  path.join(
+    process.cwd(),
+    "supabase/migrations/20260803235500_paid_search_weekly_observed_day_pacing.sql",
+  ),
+  "utf8",
+);
+const weeklyElapsedPacingMigration = readFileSync(
+  path.join(
+    process.cwd(),
+    "supabase/migrations/20260804001500_paid_search_weekly_elapsed_day_pacing.sql",
+  ),
+  "utf8",
+);
 
 describe("paid-search feedback schema contract", () => {
   it("stages each reporting grain under an exact run attempt and account", () => {
@@ -198,5 +212,35 @@ describe("paid-search feedback schema contract", () => {
       "THEN 'thin market; bids cannot fix; reach change requires an approved contract change'",
     );
     expect(weeklyMigration).not.toMatch(/\b(?:CREATE TRIGGER|LANGUAGE plpgsql)\b/i);
+    expect(weeklyPacingMigration).toContain(
+      "count(DISTINCT metric.metric_date) AS observed_days",
+    );
+    expect(weeklyPacingMigration).toContain(
+      "weekly_spend_cad / campaign_observed_days",
+    );
+    expect(weeklyPacingMigration).toContain(
+      "pilot_weekly_spend_cad / pilot_observed_days",
+    );
+    expect(weeklyPacingMigration).not.toMatch(
+      /\b(?:CREATE TRIGGER|INSERT INTO|UPDATE public|DELETE FROM)\b/i,
+    );
+    expect(weeklyElapsedPacingMigration).toContain(
+      "FROM public.google_ads_metric_sync_runs AS sync_run",
+    );
+    expect(weeklyElapsedPacingMigration).toContain(
+      "max(sync_run.date_to) AS completed_through",
+    );
+    expect(weeklyElapsedPacingMigration).toContain(
+      "weekly_spend_cad / completed_calendar_days",
+    );
+    expect(weeklyElapsedPacingMigration).toContain(
+      "pilot_weekly_spend_cad / completed_calendar_days",
+    );
+    expect(weeklyElapsedPacingMigration).not.toContain(
+      "count(DISTINCT metric.metric_date)",
+    );
+    expect(weeklyElapsedPacingMigration).not.toMatch(
+      /\b(?:CREATE TRIGGER|INSERT INTO|UPDATE public|DELETE FROM)\b/i,
+    );
   });
 });
