@@ -14,6 +14,7 @@ const inputs = (heartbeat: RollupInputs["heartbeats"][number]): RollupInputs => 
   seoProtectedPagesStaleDays: null,
   gscVsGa4DivergencePct: null,
   googleAdsMonitorDetail: null,
+  googleAdsEnabledFor48h: false,
   measurementOutboxes: {
     revenue: { queryFailed: 0, dead: 0, staleProcessing: 0, overdueRetry: 0 },
     quote: { queryFailed: 0, dead: 0, staleProcessing: 0, overdueRetry: 0 },
@@ -245,5 +246,25 @@ describe("Quote email delivery reconciliation rollup", () => {
         "quote-delivery:priced-query-error",
       ]),
     );
+  });
+});
+
+describe("paid-search zero-delivery alarm", () => {
+  const withDelivery = (enabledFor48h: boolean): RollupInputs => ({
+    ...inputs({ name: "google-ads-monitor", hours_ago: 0.1, error_rate_24h: 0, detail: null } as RollupInputs["heartbeats"][number]),
+    googleAdsEnabledFor48h: enabledFor48h,
+    paidSearchWeekly: { queryFailed: false, rows: [] },
+  });
+
+  it("stays yellow on launch day, when zero rows are expected", () => {
+    const rollup = buildRollup(withDelivery(false));
+    expect(rollup.reds.some((i) => i.key === "paid-search:no-delivery")).toBe(false);
+    expect(rollup.yellows.some((i) => i.key === "paid-search:weekly-data-missing")).toBe(true);
+  });
+
+  it("goes red once ads have been enabled 48h with no delivery data", () => {
+    const rollup = buildRollup(withDelivery(true));
+    expect(rollup.reds.some((i) => i.key === "paid-search:no-delivery")).toBe(true);
+    expect(rollup.yellows.some((i) => i.key === "paid-search:weekly-data-missing")).toBe(false);
   });
 });

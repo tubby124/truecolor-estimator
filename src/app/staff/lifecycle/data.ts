@@ -1519,6 +1519,22 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   // Pure function — single source of truth shared with /api/cron/dashboard-alerts.
   // Adding a new silent-fail surface = ONE registration in buildRollup; both
   // the dashboard tile AND the Telegram alert layer pick it up automatically.
+  // Oldest heartbeat inside the last 48h. If ads were already ENABLED then, they have been on
+  // for a full 48h and a zero-delivery window is actionable rather than expected.
+  const enabledWindowStart = new Date(now - 48 * 60 * 60 * 1000).toISOString();
+  const { data: oldestMonitorHeartbeat } = await supabase
+    .from("audit_events")
+    .select("at, detail")
+    .eq("event_type", "google_ads.monitor.heartbeat")
+    .gte("at", enabledWindowStart)
+    .order("at", { ascending: true })
+    .limit(1);
+  const googleAdsEnabledFor48h = (() => {
+    const detail = (oldestMonitorHeartbeat?.[0]?.detail ?? {}) as Record<string, unknown>;
+    const campaigns = Array.isArray(detail.campaignsBefore) ? detail.campaignsBefore : [];
+    return campaigns.some((c) => (c as { status?: string }).status === "ENABLED");
+  })();
+
   const rollup: StatusRollup = buildRollup({
     bookkeepingRisks,
     webhookGroups,
@@ -1531,6 +1547,7 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     seoProtectedPagesStaleDays: getSeoProtectedPagesStaleDays(),
     gscVsGa4DivergencePct,
     googleAdsMonitorDetail: latestByName.get("google-ads-monitor")?.detail ?? null,
+    googleAdsEnabledFor48h,
     measurementOutboxes,
     wavePaymentEffects,
     waveProvisioning,
