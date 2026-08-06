@@ -54,10 +54,14 @@ export function buildArtifacts(config) {
       for (const negative of group.crossNegatives) {
         negativeRows.push({ Campaign: campaign.name, "Ad group": group.name, Keyword: keywordText({ text: negative, matchType: "PHRASE" }), Type: "Negative" });
       }
-      const row = { Campaign: campaign.name, "Ad group": group.name, Type: "Responsive search ad", Status: group.status, "Final URL": group.finalUrl };
-      group.rsa.headlines.forEach((headline, index) => { row[`Headline ${index + 1}`] = headline; });
-      group.rsa.descriptions.forEach((description, index) => { row[`Description ${index + 1}`] = description; });
-      adRows.push(row);
+      // Both variants export. `rsa` (legacy variant A) is optional — ad groups created after
+      // 2026-08-06 ship variant B alone, so this must not assume `rsa` exists.
+      for (const ad of [group.rsa, group.rsaVariantB].filter(Boolean)) {
+        const row = { Campaign: campaign.name, "Ad group": group.name, Type: "Responsive search ad", Status: group.status, "Final URL": group.finalUrl };
+        ad.headlines.forEach((headline, index) => { row[`Headline ${index + 1}`] = headline; });
+        ad.descriptions.forEach((description, index) => { row[`Description ${index + 1}`] = description; });
+        adRows.push(row);
+      }
     }
   }
   for (const campaign of config.campaigns) {
