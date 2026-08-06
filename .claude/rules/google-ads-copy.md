@@ -27,13 +27,22 @@ so it does not get cargo-culted or "simplified" back into the trap it came from.
 **Inputs required:** the keyword's search intent; the product's from-price from
 `data/PRICING_QUICK_REFERENCE.md`; the destination URL.
 
+**`rsaVariantB` is MANDATORY on every ad group.** A config without it fails validation. This is
+the structural guarantee that a new ad group cannot ship vague, number-free copy — the standard
+does not depend on anyone remembering it.
+
 **Structure — 15 headlines, 4 descriptions:**
 
 | Layer | Count | Job |
 |---|---|---|
 | Price / product | 4–5 | Carry the number and name the exact thing |
 | Problem / outcome | 3–4 | What the customer gets, in their words |
-| Shared proof / local | **max 5** | Reviews, rush, design, pickup |
+| Shared proof / local | **max 5 (Core only)** | Reviews, rush, design, pickup |
+
+The shared-headline cap binds on **Core only**. Core groups answer genuinely different queries,
+so shared copy there collapses Ad Relevance. The nine Competitor groups target one offer on one
+landing page and may not name the competitor, so they deliberately share one payload — there is
+nothing legitimate left to differentiate on. Clear ≠ unique.
 
 **Steps:**
 1. Write 4–5 price/product headlines. At least one MUST carry a from-price.

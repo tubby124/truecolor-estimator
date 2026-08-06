@@ -165,9 +165,13 @@ export function validateCompetitorDestinationInventory(
   accountWideAssociations = inventory,
   { expectedStatus = "PAUSED" } = {},
 ) {
+  // The nine allowlisted variant-A ads are pinned by resource name and must each still be
+  // present and undrifted. Since 2026-08-06 each competitor group also carries a variant-B ad,
+  // so the inventory is a superset — every EXTRA competitor ad is checked below against the same
+  // tracked destination. Widening the count alone would have left the new ads unvalidated.
   if (!Array.isArray(inventory)
-    || inventory.length !== COMPETITOR_RSA_REVIEW.ads.length) {
-    throw new Error("Competitor destination inventory must contain the exact nine ads");
+    || inventory.length < COMPETITOR_RSA_REVIEW.ads.length) {
+    throw new Error("Competitor destination inventory must contain at least the nine allowlisted ads");
   }
   if (!Array.isArray(accountWideAssociations)
     || accountWideAssociations.length < inventory.length) {
@@ -206,13 +210,29 @@ export function validateCompetitorDestinationInventory(
     }
     return ad;
   });
+
+  // Every competitor ad OUTSIDE the pinned allowlist (the variant-B additions) must still sit in
+  // the competitor campaign, carry the exact tracked destination, and match the expected status.
+  // Without this, a second ad in a conquest group could point anywhere at all.
+  const allowlisted = new Set(COMPETITOR_RSA_REVIEW.ads.map((expected) => expected.adGroupAdResourceName));
+  for (const ad of inventory) {
+    if (allowlisted.has(ad?.adGroupAdResourceName)) continue;
+    if (String(ad?.campaignId ?? "") !== COMPETITOR_RSA_REVIEW.campaign.id
+      || ad?.status !== expectedStatus
+      || !Array.isArray(ad?.finalUrls)
+      || ad.finalUrls.length !== 1
+      || ad.finalUrls[0] !== COMPETITOR_DESTINATION_BINDING.finalUrl) {
+      throw new Error(`Additional competitor ad drifted from the tracked destination: ${ad?.adGroupName ?? ad?.adGroupAdResourceName ?? "unknown"}`);
+    }
+  }
   return validated;
 }
 
-// 20 ad groups x variant A, plus variant B on the 10 Core groups. Independently asserted here
-// rather than imported from the contract on purpose: the checker must be able to disagree with
-// the config, or it stops being a check.
-const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 30;
+// 20 ad groups x variant A + variant B = 40. Variant B is mandatory on every group, so this
+// count moves only when the ad-group inventory does. Independently asserted here rather than
+// imported from the contract on purpose: the checker must be able to disagree with the config,
+// or it stops being a check.
+const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 40;
 
 function evaluateLiveState(live, {
   expectedCampaigns,
@@ -459,12 +479,12 @@ export function evaluatePausedLiveState(live) {
   return evaluateLiveState(live, {
     expectedCampaigns: PAUSED_EXPECTED_CAMPAIGNS,
     expectedPausedAdGroups: 1,
-    expectedPausedResponsiveSearchAds: 1,
+    expectedPausedResponsiveSearchAds: 2,
     expectedEnabledAdGroups: null,
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
     adGroupStateFailure: "19 staged ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "29 staged RSAs must be enabled (19 variant A + 10 variant B) and the held Brand RSA paused",
+    rsaStateFailure: "38 staged RSAs must be enabled (19 groups x A+B) and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: false,
@@ -476,12 +496,12 @@ export function evaluateLaunchedLiveState(live) {
   return evaluateLiveState(live, {
     expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
     expectedPausedAdGroups: 1,
-    expectedPausedResponsiveSearchAds: 1,
+    expectedPausedResponsiveSearchAds: 2,
     expectedEnabledAdGroups: 19,
-    expectedEnabledResponsiveSearchAds: 29,
+    expectedEnabledResponsiveSearchAds: 38,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
     adGroupStateFailure: "19 ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "29 RSAs must be enabled (19 variant A + 10 variant B) and the held Brand RSA paused",
+    rsaStateFailure: "38 RSAs must be enabled (19 groups x A+B) and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: true,

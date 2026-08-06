@@ -114,7 +114,7 @@ const makePausedLiveState = () => ({
       matchType,
       status: "ENABLED",
     }))),
-    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 30, pausedResponsiveSearchAds: 1, enabledResponsiveSearchAds: 29,
+    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 40, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 38,
     competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
       campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
       campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
@@ -241,8 +241,8 @@ const makeLaunchedLiveState = () => {
   // Stage 1 holds Brand paused, so its single ad group and RSA stay paused.
   live.pausedAdGroups = 1;
   live.enabledAdGroups = 19;
-  live.pausedResponsiveSearchAds = 1;
-  live.enabledResponsiveSearchAds = 29;
+  live.pausedResponsiveSearchAds = 2;
+  live.enabledResponsiveSearchAds = 38;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "ENABLED" }));
   live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "ENABLED" }));
@@ -444,7 +444,7 @@ test("launched live verification enforces the exact Stage 1 state", () => {
 
   const brandRsaLive = makeLaunchedLiveState();
   brandRsaLive.pausedResponsiveSearchAds = 0;
-  brandRsaLive.enabledResponsiveSearchAds = 30;
+  brandRsaLive.enabledResponsiveSearchAds = 40;
   assert.ok(evaluateLaunchedLiveState(brandRsaLive).failures.length > 0);
 
   const wrongBudget = makeLaunchedLiveState();
@@ -977,6 +977,27 @@ test("variant B may not reuse more than five headlines across ad groups", () => 
   // Copy six of the first group's headlines into the second: exceeds the shared cap that keeps
   // Ad Relevance from collapsing the way variant A's 10 shared headlines did.
   for (let index = 0; index < 6; index += 1) second.rsaVariantB.headlines[index] = first.rsaVariantB.headlines[index];
+  assert.equal(validateConfig(config).localStatus, "INVALID");
+});
+
+test("every ad group must have an rsaVariantB — including Competitor and Brand", () => {
+  // The structural guarantee that a new ad group can never ship vague, number-free copy.
+  for (const campaignIndex of [0, 1, 2]) {
+    const config = clone();
+    delete config.campaigns[campaignIndex].adGroups[0].rsaVariantB;
+    assert.equal(validateConfig(config).localStatus, "INVALID");
+  }
+});
+
+test("Competitor variant B may share one payload but still may not name a competitor", () => {
+  const config = clone();
+  const competitor = config.campaigns.find((campaign) => campaign.kind === "COMPETITOR");
+  // Nine groups deliberately share one payload — the shared-headline cap is Core-only.
+  assert.equal(validateConfig(config).localStatus, "VALIDATED");
+  competitor.adGroups[0].rsaVariantB = {
+    ...competitor.adGroups[0].rsaVariantB,
+    headlines: ["Beat Vistaprint Prices", ...competitor.adGroups[0].rsaVariantB.headlines.slice(1)],
+  };
   assert.equal(validateConfig(config).localStatus, "INVALID");
 });
 

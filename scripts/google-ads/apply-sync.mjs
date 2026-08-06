@@ -256,7 +256,10 @@ if (plan.newAds.length > 0) {
   const operations = plan.newAds.map(({ group, ad }) => ({
     create: {
       adGroup: groupResources.get(group.name),
-      status: "ENABLED",
+      // Inherit the ad group's status instead of forcing ENABLED. A new ad in the held Brand
+      // group must be created PAUSED — otherwise creating copy would quietly flip a deliberately
+      // held ad group into a partially-enabled state the launched verifier would then reject.
+      status: group.status === "PAUSED" ? "PAUSED" : "ENABLED",
       ad: {
         finalUrls: [group.finalUrl],
         responsiveSearchAd: {

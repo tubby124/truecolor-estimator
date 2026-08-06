@@ -60,3 +60,45 @@ the expansion cadence, and a seeded known-traps table.
   bottleneck is post-click (landing page CTA framing, or the unproven conversion upload), not copy.
 - CA$600 is not reachable at current delivery — projection is ~CA$282. This change does not fix
   that and was never going to.
+
+---
+
+## 2026-08-06 (second pass) — variant B extended to ALL 20 ad groups; variant B now mandatory
+
+**What shipped:**
+- `rsaVariantB` added to the 9 Competitor groups and the Brand group. **Account is now 40 ads:**
+  19 enabled APPROVED (variant A) + 19 enabled in review (variant B) + 1 paused APPROVED and
+  1 paused in review (both Brand).
+- **`rsaVariantB` is now MANDATORY on every ad group.** A config without it fails validation, so
+  a new ad group can never ship vague, number-free copy — the standard no longer depends on
+  anyone remembering it.
+- Competitor groups deliberately share ONE variant-B payload; the shared-headline cap is now
+  Core-only. Nine SKAGs targeting one offer on one landing page, forbidden from naming the
+  competitor, have nothing legitimate left to differentiate on. What changed is that every line
+  now carries a real number and answers "why switch" instead of "compare us".
+- Brand variant B exists but serves nothing today (campaign paused). It is pre-positioned because
+  unpausing Brand is the cheapest lever toward CA$600 — if that call gets made, the copy is
+  already price-anchored.
+- `apply-sync` now creates ads with the **ad group's** status instead of hardcoded ENABLED, so
+  the Brand ad was correctly created PAUSED rather than silently half-enabling a held group.
+
+**Two bugs the tests caught that review did not:**
+1. The competitor-name ban checked only `group.rsa`, never `group.rsaVariantB` — a competitor
+   name could have shipped in variant-B copy. Found by writing a test that tried it.
+2. `validateCompetitorDestinationInventory` pinned exactly nine ads by resource name, so adding
+   a tenth per group turned the live verifier **UNSAFE**. Fixed by treating the allowlist as a
+   subset and validating every additional competitor ad against the same tracked destination —
+   widening the count alone would have left the new ads unchecked. This is the third time this
+   project has hit "change a contract, change its verifier in the same pass".
+
+**Hypothesis:** Same as the first pass. Competitor delivery is currently zero, so this is
+groundwork, not an expected performance change.
+
+**Metric + date:** No competitor read is meaningful until that campaign gets impressions — it has
+had zero since launch, which is a bid problem, not a copy problem. Do not judge competitor copy
+on zero data.
+
+**Outcome:** _pending._
+
+**Promoted to rule:** yes — variant B mandatory, and the Core-only scope of the shared-headline
+cap, are both documented in `.claude/rules/google-ads-copy.md`.

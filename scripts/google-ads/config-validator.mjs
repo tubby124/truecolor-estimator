@@ -485,7 +485,12 @@ export function validateConfig(config) {
       if (!rsaKeys.every((key) => key === "rsa" || key === "rsaVariantB") || !isRsaObject(group.rsa)) {
         fail(`${group.name} must contain an "rsa" object and, at most, an "rsaVariantB" object`);
       }
-      if ("rsaVariantB" in group && !isRsaObject(group.rsaVariantB)) fail(`${group.name} rsaVariantB must be an RSA object`);
+      // Variant B is MANDATORY on every ad group. This is the structural guarantee that a new
+      // ad group can never ship with vague, number-free copy: no variant B, no valid config,
+      // no import. Optional would mean the standard applies only when someone remembers it.
+      if (!isRsaObject(group.rsaVariantB)) {
+        fail(`${group.name} must have an rsaVariantB — every ad group ships price-anchored copy, no exceptions`);
+      }
 
       const variants = [
         { label: "rsa", ad: group.rsa, strict: false },
@@ -512,13 +517,21 @@ export function validateConfig(config) {
         if (!variantHeadlines.some((headline) => hasPriceClaim(headline))) {
           fail(`${group.name}/rsaVariantB must carry at least one headline with a sourced price — an ad with no number is the problem this contract exists to prevent`);
         }
-        const sharedCount = variantHeadlines.filter((headline) => variantBHeadlineUseCount.get(headline) > 1).length;
-        if (sharedCount > MAX_SHARED_HEADLINES_PER_GROUP) {
-          fail(`${group.name}/rsaVariantB reuses ${sharedCount} headlines from other ad groups (max ${MAX_SHARED_HEADLINES_PER_GROUP}) — shared generic copy is what collapses Ad Relevance and raises CPC`);
+        // The shared-headline cap only binds on CORE. Core ad groups answer genuinely different
+        // queries, so shared copy there is what collapses Ad Relevance. The nine Competitor
+        // groups target one offer on one page and are forbidden from naming the competitor, so
+        // they have nothing legitimate to differentiate on and deliberately share one payload.
+        if (kind === "CORE") {
+          const sharedCount = variantHeadlines.filter((headline) => variantBHeadlineUseCount.get(headline) > 1).length;
+          if (sharedCount > MAX_SHARED_HEADLINES_PER_GROUP) {
+            fail(`${group.name}/rsaVariantB reuses ${sharedCount} headlines from other ad groups (max ${MAX_SHARED_HEADLINES_PER_GROUP}) — shared generic copy is what collapses Ad Relevance and raises CPC`);
+          }
         }
       }
       if (kind === "COMPETITOR") {
-        const copy = stringValues([group.rsa, group.assets ?? []]).join(" ").toLowerCase().replaceAll(/[^a-z0-9]+/g, " ");
+        // Must cover BOTH variants. Checking only `group.rsa` would have let a competitor name
+        // ship in variant-B copy — caught by test, not by review.
+        const copy = stringValues([group.rsa, group.rsaVariantB ?? {}, group.assets ?? []]).join(" ").toLowerCase().replaceAll(/[^a-z0-9]+/g, " ");
         for (const term of COMPETITOR_TERMS) if (copy.includes(term)) fail(`${group.name} uses competitor term in ad copy: ${term}`);
       }
     }

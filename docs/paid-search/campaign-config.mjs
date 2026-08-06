@@ -75,6 +75,51 @@ const coreGroup = ({ key, name, product, finalUrl, terms, headlines, variantB, p
   ...(variantB ? { rsaVariantB: rsaVariantB(variantB, priceLine) } : {}),
 });
 
+// Competitor variant B. All nine conquest groups share ONE payload, unlike Core.
+// That is not laziness: the nine groups target one offer on one landing page, and naming the
+// competitor in copy is forbidden (validator strips COMPETITOR_TERMS from ad text), so there is
+// nothing legitimate left to differentiate on. What DOES change vs variant A is that every line
+// now carries a real number, and the pitch answers "why switch" instead of "compare us".
+const competitorVariantB = {
+  headlines: [
+    "Signs From $25 In Saskatoon",
+    "250 Cards $45, 100 Flyers $45",
+    "Banners From $66, 2x4ft",
+    "See Every Price Online",
+    "No Quote, No Waiting",
+    "Local Shop, Not Mail Order",
+    "Printed Here, Picked Up Here",
+    "Compare Saskatoon Print Shops",
+    "Stickers From $25",
+    "Aluminum Signs $39",
+    ...sharedProofHeadlines,
+  ],
+  descriptions: [
+    "Compare before you order: signs from $25, cards $45, banners from $66.",
+    ...variantDescriptions("").slice(1),
+  ],
+};
+
+const brandVariantB = {
+  headlines: [
+    "True Color Printing",
+    "Signs From $25 Saskatoon",
+    "250 Business Cards $45 Here",
+    "Banners From $66 In Store",
+    "Order Direct From True Color",
+    "216 33rd St W Saskatoon",
+    "True Color Display Printing",
+    "Your Local Print Shop",
+    "Stickers, Signs, Banners",
+    "Design $35, Rush +$40",
+    ...sharedProofHeadlines,
+  ],
+  descriptions: [
+    "True Color Display Printing, 216 33rd St W Saskatoon. Signs from $25.",
+    ...variantDescriptions("").slice(1),
+  ],
+};
+
 const neutralCompetitorRsa = {
   headlines: [
     "Compare Saskatoon Printing",
@@ -586,6 +631,7 @@ export const paidSearchConfig = {
         keywords: terms.map((term) => keyword(term, "EXACT")),
         crossNegatives: [],
         rsa: neutralCompetitorRsa,
+        rsaVariantB: competitorVariantB,
       })),
     },
     {
@@ -606,6 +652,10 @@ export const paidSearchConfig = {
         keywords: exactPhrase(["true color printing", "true colour printing", "true color saskatoon", "true color display printing"]),
         crossNegatives: [],
         rsa: rsa("printing", ["True Color Printing", "True Color Saskatoon", "True Color Print Shop"]),
+        // Brand is PAUSED, so this serves nothing today. It exists so that if Brand is ever
+        // unpaused — currently the cheapest lever toward the CA$600 qualifying target — the copy
+        // is already price-anchored instead of the vague legacy set.
+        rsaVariantB: brandVariantB,
       }],
     },
   ],
