@@ -51,25 +51,46 @@ export const PAID_PRODUCTS = PAID_PRODUCT_SLUGS.map((slug) => {
 
 const REAL_WORK = [
   {
-    src: "/images/gallery/gallery-coroplast-remax-openhouse.webp",
-    alt: "Finished RE/MAX coroplast open house signs printed by True Color",
-    label: "Real customer signs",
+    src: "/images/gallery/gallery-coroplast-aw-bogo-promo.webp",
+    alt: "A&W restaurant promo sign on coroplast printed by True Color",
+    label: "A&W promo sign",
     slug: "coroplast-signs",
     productName: "Coroplast Signs",
   },
   {
-    src: "/images/gallery/gallery-business-cards-bd-deep-cleaning.webp",
-    alt: "Finished full-colour business cards printed for a True Color customer",
-    label: "Real customer cards",
+    src: "/images/gallery/gallery-business-cards-exp-premium-black.webp",
+    alt: "Premium black eXp Realty business cards printed by True Color",
+    label: "eXp Realty premium cards",
     slug: "business-cards",
     productName: "Business Cards",
   },
   {
-    src: "/images/gallery/gallery-banner-colorful-nails-spa.webp",
-    alt: "Finished full-colour vinyl banner printed for a True Color customer",
-    label: "Real customer banner",
+    src: "/images/gallery/gallery-banner-bbq-junction.webp",
+    alt: "BBQ Junction wide vinyl banner printed by True Color",
+    label: "BBQ Junction banner",
     slug: "vinyl-banners",
     productName: "Vinyl Banners",
+  },
+  {
+    src: "/images/gallery/gallery-retractable-sisters-kitchen.webp",
+    alt: "Sister's Kitchen catering retractable banner printed by True Color",
+    label: "Sister's Kitchen retractable",
+    slug: "retractable-banners",
+    productName: "Retractable Banners",
+  },
+  {
+    src: "/images/gallery/gallery-acp-coop-humboldt-platinum.webp",
+    alt: "Co-op Humboldt sponsor ACP sign printed by True Color",
+    label: "Co-op sponsor panel",
+    slug: "acp-signs",
+    productName: "ACP Signs",
+  },
+  {
+    src: "/images/gallery/gallery-stickers-crime-stoppers.webp",
+    alt: "Saskatoon Crime Stoppers decals printed by True Color",
+    label: "Crime Stoppers decals",
+    slug: "stickers",
+    productName: "Stickers",
   },
 ] as const;
 
