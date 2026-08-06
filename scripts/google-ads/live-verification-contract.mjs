@@ -232,7 +232,9 @@ export function validateCompetitorDestinationInventory(
 // count moves only when the ad-group inventory does. Independently asserted here rather than
 // imported from the contract on purpose: the checker must be able to disagree with the config,
 // or it stops being a check.
-const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 44;
+// 2026-08-06 boat split: 44 -> 45. The new Boat Registration Decals Core group ships
+// variant B only (no legacy variant A to preserve), so the inventory grows by exactly one ad.
+const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 45;
 
 function evaluateLiveState(live, {
   expectedCampaigns,
@@ -265,7 +267,9 @@ function evaluateLiveState(live, {
     if (!campaign || campaign.presence !== "PRESENCE" || !campaign.networks?.targetGoogleSearch || campaign.networks?.targetSearchNetwork || campaign.networks?.targetContentNetwork || campaign.networks?.targetPartnerSearchNetwork) failures.push(`${name} network or presence setting changed`);
     if (campaign?.finalUrlSuffix !== EXPECTED_SUFFIX) failures.push(`${name} final URL suffix changed`);
   }
-  if (live.adGroups !== 24
+  // 2026-08-06 boat split: 24 -> 25 ad groups. Boat terms moved out of Decals onto their own
+  // group so they can point at /boat-registration-numbers (one destination per ad group).
+  if (live.adGroups !== 25
     || live.pausedAdGroups !== expectedPausedAdGroups
     || (expectedEnabledAdGroups !== null && live.enabledAdGroups !== expectedEnabledAdGroups)) failures.push(adGroupStateFailure);
   // 2026-08-06 variant-B copy rollout: 20 -> 30 RSAs. Ten Core ad groups gain a second,
@@ -291,7 +295,20 @@ function evaluateLiveState(live, {
   // 2026-08-06 second harvest: +1 Core group (Decals -> /products/window-decals) and +3
   // Competitor groups (Print Baron, Mister Print, Labels Made Easy) plus "vista print".
   // 143 -> 159 positive, 253 -> 262 negative, 20 -> 24 ad groups, 40 -> 44 ads.
-  if (live.positiveKeywords !== 159 || live.negativeCriteria !== 262) failures.push("keyword counts changed");
+  // 2026-08-06 boat split: positives UNCHANGED at 159 — the new Boat group's 2 terms x
+  // EXACT+PHRASE (+4) exactly offset the same 2 terms leaving Decals (-4). Negatives
+  // 262 -> 269: the Boat group's 6 cross-negatives, plus "boat" added to Decals.
+  //
+  // ⚠ TWO STEPS, NOT ONE. apply-sync is create-only by design (see gaql-read.mjs — mutation
+  // authority is split three ways and none of them deletes). It will ADD the 4 Boat keywords
+  // but will NOT REMOVE the same 4 from Decals, which are live today. Between apply-sync and
+  // the manual removal the account sits at 163 positives and the same query can serve from two
+  // ad groups with different destinations. Verified live 2026-08-06:
+  //   [EXACT|PHRASE] "custom boat decals"  -> Decals
+  //   [EXACT|PHRASE] "boat decals near me" -> Decals
+  // Remove those four in the Google Ads UI right after apply-sync. Until then this line
+  // reporting drift is correct and expected — it is the removal reminder.
+  if (live.positiveKeywords !== 159 || live.negativeCriteria !== 269) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,
@@ -488,8 +505,8 @@ export function evaluatePausedLiveState(live) {
     expectedEnabledAdGroups: null,
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
-    adGroupStateFailure: "23 staged ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "42 staged RSAs must be enabled and both held Brand RSAs paused",
+    adGroupStateFailure: "24 staged ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "43 staged RSAs must be enabled and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: false,
@@ -502,11 +519,12 @@ export function evaluateLaunchedLiveState(live) {
     expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
     expectedPausedAdGroups: 1,
     expectedPausedResponsiveSearchAds: 2,
-    expectedEnabledAdGroups: 23,
-    expectedEnabledResponsiveSearchAds: 42,
+    // 2026-08-06 boat split: +1 enabled Core ad group and its variant-B RSA.
+    expectedEnabledAdGroups: 24,
+    expectedEnabledResponsiveSearchAds: 43,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
-    adGroupStateFailure: "23 ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "42 RSAs must be enabled and both held Brand RSAs paused",
+    adGroupStateFailure: "24 ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "43 RSAs must be enabled and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: true,

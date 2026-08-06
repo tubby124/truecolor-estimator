@@ -152,6 +152,11 @@ const ROUTES = {
   "generic-sign-shop": "/sign-company-saskatoon",
   decals: "/products/window-decals",
   "large-format": "/large-format-printing-saskatoon",
+  // Second Core group routed to an SEO landing page rather than a /products configurator
+  // (after large-format). Deliberate: the boat queries are compliance questions — how big,
+  // where on the hull, what colour — and the landing page answers them with the configurator
+  // one click away. /products/* is noindex by header, so it is the worse ad destination.
+  boat: "/boat-registration-numbers",
 };
 const CORE_TERMS = {
   coroplast: ["coroplast signs saskatoon", "coroplast signs", "coroplast sign printing", "coroplast printing"],
@@ -179,7 +184,10 @@ const CORE_TERMS = {
   "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon", "saskatoon print shops", "saskatoon printing", "printing in saskatoon", "printers saskatoon"],
   "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs", "signage saskatoon"],
   "large-format": ["large format printing", "large format printing saskatoon", "large format signs"],
-  decals: ["decals saskatoon", "clear window decals for business", "custom boat decals", "boat decals near me", "window decals saskatoon", "custom decals"],
+  decals: ["decals saskatoon", "clear window decals for business", "window decals saskatoon", "custom decals"],
+  // 2026-08-06: boat terms split out of `decals` — one destination per ad group, and these
+  // two proven queries now land on /boat-registration-numbers.
+  boat: ["custom boat decals", "boat decals near me"],
 };
 const CORE_CROSS_NEGATIVES = {
   coroplast: ["stickers", "labels", "vinyl banner", "business cards", "flyers", "retractable banner"],
@@ -192,7 +200,8 @@ const CORE_CROSS_NEGATIVES = {
   "generic-print-price": ["same day", "rush", "sign shop", "sign company"],
   "generic-sign-shop": ["same day", "rush", "printing prices", "print shop prices"],
   "large-format": ["stickers", "labels", "business cards", "flyers"],
-  decals: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner"],
+  decals: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat"],
+  boat: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "window decals"],
 };
 const COMPETITOR_GROUPS = {
   "qwik-signs": ["qwik signs"],
