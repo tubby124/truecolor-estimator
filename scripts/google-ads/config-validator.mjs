@@ -139,7 +139,7 @@ const CONVERSION_MEASUREMENT = {
     phoneClicksAreQualifiedCalls: false,
   },
 };
-const COMPETITOR_TERMS = ["qwik signs", "minuteman press", "ink house", "rayacom", "24 hour signs", "anytime printing", "pgi printers", "staples", "vistaprint"];
+const COMPETITOR_TERMS = ["qwik signs", "minuteman press", "ink house", "rayacom", "24 hour signs", "anytime printing", "pgi printers", "staples", "vistaprint", "vista print", "print baron", "mister print", "labels made easy"];
 const ROUTES = {
   coroplast: "/products/coroplast-signs",
   "stickers-labels": "/products/stickers",
@@ -150,6 +150,7 @@ const ROUTES = {
   "rush-same-day": "/same-day-printing-saskatoon",
   "generic-print-price": "/printing-prices-saskatoon",
   "generic-sign-shop": "/sign-company-saskatoon",
+  decals: "/products/window-decals",
   "large-format": "/large-format-printing-saskatoon",
 };
 const CORE_TERMS = {
@@ -178,6 +179,7 @@ const CORE_TERMS = {
   "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon", "saskatoon print shops", "saskatoon printing", "printing in saskatoon", "printers saskatoon"],
   "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs", "signage saskatoon"],
   "large-format": ["large format printing", "large format printing saskatoon", "large format signs"],
+  decals: ["decals saskatoon", "clear window decals for business", "custom boat decals", "boat decals near me", "window decals saskatoon", "custom decals"],
 };
 const CORE_CROSS_NEGATIVES = {
   coroplast: ["stickers", "labels", "vinyl banner", "business cards", "flyers", "retractable banner"],
@@ -190,6 +192,7 @@ const CORE_CROSS_NEGATIVES = {
   "generic-print-price": ["same day", "rush", "sign shop", "sign company"],
   "generic-sign-shop": ["same day", "rush", "printing prices", "print shop prices"],
   "large-format": ["stickers", "labels", "business cards", "flyers"],
+  decals: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner"],
 };
 const COMPETITOR_GROUPS = {
   "qwik-signs": ["qwik signs"],
@@ -200,7 +203,10 @@ const COMPETITOR_GROUPS = {
   "anytime-printing": ["anytime printing"],
   "pgi-printers": ["pgi printers"],
   "staples-printing": ["staples printing saskatoon"],
-  vistaprint: ["vistaprint saskatoon"],
+  vistaprint: ["vistaprint saskatoon", "vista print"],
+  "print-baron": ["print baron saskatoon"],
+  "mister-print": ["mister print saskatoon"],
+  "labels-made-easy": ["labels made easy"],
 };
 const BRAND_GROUPS = {
   "true-color-brand": ["true color printing", "true colour printing", "true color saskatoon", "true color display printing"],
@@ -487,9 +493,13 @@ export function validateConfig(config) {
       // optional "rsaVariantB" (price-anchored). Anything else is an unreviewed ad payload.
       const rsaKeys = Object.keys(group).filter((key) => /rsa|responsive.*ad/i.test(key));
       const isRsaObject = (value) => Boolean(value) && !Array.isArray(value) && typeof value === "object";
-      if (!rsaKeys.every((key) => key === "rsa" || key === "rsaVariantB") || !isRsaObject(group.rsa)) {
-        fail(`${group.name} must contain an "rsa" object and, at most, an "rsaVariantB" object`);
+      if (!rsaKeys.every((key) => key === "rsa" || key === "rsaVariantB")) {
+        fail(`${group.name} may only contain "rsa" and "rsaVariantB" ad payloads`);
       }
+      // `rsa` (variant A) is OPTIONAL. It exists only where a legacy policy-approved ad is
+      // already serving and must stay byte-identical. Ad groups created from here on ship
+      // variant B alone — there is no reason to invent a vague ad for a group that never had one.
+      if ("rsa" in group && !isRsaObject(group.rsa)) fail(`${group.name} rsa must be an RSA object when present`);
       // Variant B is MANDATORY on every ad group. This is the structural guarantee that a new
       // ad group can never ship with vague, number-free copy: no variant B, no valid config,
       // no import. Optional would mean the standard applies only when someone remembers it.
@@ -498,7 +508,7 @@ export function validateConfig(config) {
       }
 
       const variants = [
-        { label: "rsa", ad: group.rsa, strict: false },
+        ...(group.rsa ? [{ label: "rsa", ad: group.rsa, strict: false }] : []),
         ...(group.rsaVariantB ? [{ label: "rsaVariantB", ad: group.rsaVariantB, strict: true }] : []),
       ];
       for (const { label, ad, strict } of variants) {

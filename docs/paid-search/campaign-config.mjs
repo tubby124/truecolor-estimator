@@ -63,6 +63,8 @@ const rsaVariantB = (specificHeadlines, priceLine) => ({
 const keyword = (text, matchType) => ({ text, matchType });
 const exactPhrase = (terms) => terms.flatMap((term) => [keyword(term, "EXACT"), keyword(term, "PHRASE")]);
 
+// `headlines` builds the legacy variant-A ad and is omitted for ad groups created after
+// 2026-08-06 — those ship variant B alone rather than inventing a vague ad to sit beside it.
 const coreGroup = ({ key, name, product, finalUrl, terms, headlines, variantB, priceLine, crossNegatives = [], launchTier = "TIER_1_PRODUCT" }) => ({
   key,
   name,
@@ -71,7 +73,7 @@ const coreGroup = ({ key, name, product, finalUrl, terms, headlines, variantB, p
   finalUrl,
   keywords: exactPhrase(terms),
   crossNegatives,
-  rsa: rsa(product, headlines),
+  ...(headlines ? { rsa: rsa(product, headlines) } : {}),
   ...(variantB ? { rsaVariantB: rsaVariantB(variantB, priceLine) } : {}),
 });
 
@@ -166,8 +168,22 @@ const competitorTargets = [
   ["anytime-printing", "Anytime Printing", ["anytime printing"]],
   ["pgi-printers", "PGI Printers", ["pgi printers"]],
   ["staples-printing", "Staples Printing", ["staples printing saskatoon"]],
-  ["vistaprint", "Vistaprint", ["vistaprint saskatoon"]],
+  // "vista print" (spaced) was leaking into Core because the "vistaprint" negative never
+  // matched it. Adding it here both captures the conquest query and, because Core's campaign
+  // negatives are derived from this list, stops the leak in the same edit.
+  ["vistaprint", "Vistaprint", ["vistaprint saskatoon", "vista print"]],
+  // 2026-08-06 harvest: Saskatoon competitors that were showing on Core with no routing
+  // negative. Ship variant B only — there is no legacy approved ad for these groups.
+  ["print-baron", "Print Baron", ["print baron saskatoon"]],
+  ["mister-print", "Mister Print", ["mister print saskatoon"]],
+  ["labels-made-easy", "Labels Made Easy", ["labels made easy"]],
 ];
+// Competitor groups that predate 2026-08-06 carry a legacy policy-approved variant-A ad that
+// must stay byte-identical. New groups ship variant B alone.
+const LEGACY_COMPETITOR_KEYS = new Set([
+  "qwik-signs", "minuteman-press", "ink-house", "rayacom", "24-hour-signs",
+  "anytime-printing", "pgi-printers", "staples-printing", "vistaprint",
+]);
 
 export const paidSearchConfig = {
   schemaVersion: 1,
@@ -598,6 +614,31 @@ export const paidSearchConfig = {
           priceLine: "Custom signs from $25, aluminum from $39. See your exact price online.",
           crossNegatives: ["same day", "rush", "printing prices", "print shop prices"],
         }),
+        // 2026-08-06: created from the first search-term harvest, not from planner estimates.
+        // "clear window decals for business", "decals saskatoon", "custom boat decals", and
+        // "boat decals near me" all served with no matching ad group, so the queries were being
+        // absorbed by looser groups. Routed straight to the /products configurator so the click
+        // lands on something orderable, not a brochure page. Ships variant B only — there is no
+        // legacy approved ad here to preserve.
+        coreGroup({
+          key: "decals", name: "Decals", product: "decals",
+          finalUrl: `${ROOT}/products/window-decals`,
+          terms: ["decals saskatoon", "clear window decals for business", "custom boat decals", "boat decals near me", "window decals saskatoon", "custom decals"],
+          variantB: [
+            "Custom Decals From $25",
+            "Window Decals $11/sqft",
+            "Clear & Frosted Window Vinyl",
+            "Boat & Vehicle Decals",
+            "Storefront Window Decals",
+            "Decals Saskatoon",
+            "Cut To Any Shape",
+            "Business Hours & Logo Decals",
+            "Indoor & Outdoor Vinyl",
+            "Custom Window Graphics",
+          ],
+          priceLine: "Custom decals from $25, window vinyl $11/sqft. See your price online.",
+          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner"],
+        }),
         // Only Core group routed to an SEO landing page rather than a /products configurator.
         // Deliberate: "large format printing" spans banners/coroplast/ACP so no single
         // configurator matches, and the SEO page carries the keyword in its H1. Doubles as the
@@ -640,7 +681,7 @@ export const paidSearchConfig = {
         finalUrl: `${ROOT}/why-true-color?source=google-ads`,
         keywords: terms.map((term) => keyword(term, "EXACT")),
         crossNegatives: [],
-        rsa: neutralCompetitorRsa,
+        ...(LEGACY_COMPETITOR_KEYS.has(key) ? { rsa: neutralCompetitorRsa } : {}),
         rsaVariantB: competitorVariantB,
       })),
     },
