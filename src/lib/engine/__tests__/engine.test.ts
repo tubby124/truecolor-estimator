@@ -343,10 +343,13 @@ describe("STEP 7 — design fee", () => {
     expect(result.sell_price! - base.sell_price!).toBe(50);
   });
 
-  it("LOGO_RECREATION — adds $75", () => {
+  // Owner-approved 2026-08-06: dropped 75 -> 50 so the engine matches the price
+  // advertised on /products. Note this makes LOGO_RECREATION and FULL_DESIGN the
+  // same $50 — intentional, not a copy/paste error.
+  it("LOGO_RECREATION — adds $50", () => {
     const base = estimate({ ...baseRequest, design_status: "PRINT_READY" });
     const result = estimate({ ...baseRequest, design_status: "LOGO_RECREATION" });
-    expect(result.sell_price! - base.sell_price!).toBe(75);
+    expect(result.sell_price! - base.sell_price!).toBe(50);
   });
 });
 
