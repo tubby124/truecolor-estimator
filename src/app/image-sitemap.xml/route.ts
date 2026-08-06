@@ -1092,6 +1092,26 @@ const PAGES = [
       },
     ],
   },
+  {
+    loc: `${BASE}/printing-prices-saskatoon`,
+    images: [
+      { loc: `${GAL}/gallery-coroplast-aw-bogo-promo.webp`, title: "Coroplast promo sign Saskatoon from $8/sqft — A&W", caption: "A&W promo sign on coroplast — real job matched to published Saskatoon printing prices" },
+      { loc: `${GAL}/gallery-banner-bbq-junction.webp`, title: "Vinyl banner Saskatoon from $66 — BBQ Junction", caption: "BBQ Junction wide vinyl banner — real job matched to published Saskatoon printing prices" },
+      { loc: `${GAL}/gallery-business-cards-exp-premium-black.webp`, title: "Business cards Saskatoon 250 from $45 — eXp Realty", caption: "Premium black eXp Realty business cards — real job at published Saskatoon prices" },
+      { loc: `${GAL}/gallery-flyer-madina-spice.webp`, title: "Flyer printing Saskatoon 100 from $45 — Madina Spice", caption: "Madina Spice grocery flyers — real job at published Saskatoon prices" },
+      { loc: `${GAL}/gallery-retractable-express-photography.webp`, title: "Retractable banner Saskatoon from $219 — Express Photography", caption: "Express Photography retractable banner — real job at published Saskatoon prices" },
+      { loc: `${GAL}/gallery-acp-coop-humboldt-platinum.webp`, title: "ACP aluminum sign Saskatoon from $13/sqft — Co-op", caption: "Co-op Humboldt ACP sponsor sign — real job at published Saskatoon prices" },
+    ],
+  },
+  {
+    loc: `${BASE}/large-format-printing-saskatoon`,
+    images: [
+      { loc: `${GAL}/gallery-install-saap-building-sign.webp`, title: "Large format building sign install Saskatchewan — boom lift", caption: "On-site building sign installation by True Color — large format printing Saskatoon" },
+      { loc: `${GAL}/gallery-banner-windshield-hub-building.webp`, title: "Large format building banner Saskatoon — Windshield Hub", caption: "Exterior building banner printed and mounted in Saskatoon — large format printing" },
+      { loc: `${GAL}/gallery-acp-car-city-installed.webp`, title: "Large format dealership sign installed Saskatoon — Car City Auto", caption: "Car City Auto sign installed on brick storefront — large format printing Saskatoon" },
+      { loc: `${GAL}/gallery-vinyl-lettering-prairie-timber.webp`, title: "Large format cut lettering Saskatoon — Prairie Timber Homes", caption: "Large-format cut lettering produced in-house — True Color Saskatoon" },
+    ],
+  },
 
   // ══════════════════════════════════════════════════════════════════════════
   // SEASONAL PAGES
