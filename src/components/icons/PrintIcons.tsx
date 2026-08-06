@@ -40,6 +40,12 @@ export const SLUG_ICON_MAP: Record<string, LucideIcon> = {
   "brochures": BookOpen,
   "postcards": Mail,
   "stickers": Tag,
+  // Label family — same vinyl as stickers, so they share the Tag icon.
+  "product-labels": Tag,
+  "cosmetic-labels": Tag,
+  "freezer-labels": Tag,
+  "candle-jar-labels": Tag,
+  "roll-labels": Tag,
   "magnet-calendars": CalendarDays,
   "rack-cards": FileText,
   "door-hangers": FileText,

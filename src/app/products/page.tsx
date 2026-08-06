@@ -18,43 +18,19 @@ export const metadata: Metadata = {
 // Product categories for the picker
 const PICKER_PRODUCTS = PRODUCT_SLUGS.map((slug) => PRODUCTS[slug]).filter(Boolean);
 
-// SEO-page-only products — no /products/[slug] estimator yet, custom quoting only.
+// Design services — genuinely not printed products, so they have no estimator.
 // These cards link out to the corresponding /[slug]-saskatoon SEO landing page.
+//
+// The five label cards that used to live here (freezer / product / cosmetic /
+// candle & jar / roll) moved into the main grid on 2026-08-06 as real orderable
+// products. They are the same vinyl as `stickers` and now price through the live
+// sticker engine. See the LABEL FAMILY block in src/lib/data/products-content.ts
+// for why their old "from $5.50/sqft" anchor was wrong and must not come back.
 type SeoOnlyCard = { name: string; fromPrice: string; href: string; image: string };
 const SEO_ONLY_CARDS: SeoOnlyCard[] = [
   {
-    name: "Freezer Labels",
-    fromPrice: "from $5.50/sqft",
-    href: "/freezer-labels-saskatoon",
-    image: "/images/products/heroes/freezer-labels-hero-1200x500.webp",
-  },
-  {
-    name: "Product Labels",
-    fromPrice: "from $5.50/sqft",
-    href: "/product-labels-saskatoon",
-    image: "/images/products/heroes/product-labels-hero-1200x500.webp",
-  },
-  {
-    name: "Cosmetic Labels",
-    fromPrice: "from $5.50/sqft",
-    href: "/cosmetic-labels-saskatoon",
-    image: "/images/products/heroes/cosmetic-labels-hero-1200x500.webp",
-  },
-  {
-    name: "Candle & Jar Labels",
-    fromPrice: "from $5.50/sqft",
-    href: "/candle-jar-labels-saskatoon",
-    image: "/images/products/heroes/candle-jar-labels-hero-1200x500.webp",
-  },
-  {
-    name: "Roll Labels",
-    fromPrice: "custom-quoted",
-    href: "/roll-labels-saskatoon",
-    image: "/images/products/heroes/roll-labels-hero-1200x500.webp",
-  },
-  {
     name: "Image Upscale",
-    fromPrice: "from $8/sqft",
+    fromPrice: "from $15",
     href: "/image-upscale-saskatoon",
     image: "/images/products/heroes/image-upscale-hero-1200x500.webp",
   },
@@ -254,14 +230,14 @@ export default async function ProductsPage({
           })}
         </div>
 
-        {/* SEO-page-only products (labels + design services) — link to SEO landing pages */}
+        {/* Design services — not printed products, so no estimator. Link to SEO landing pages. */}
         {seoOnlyCards.length > 0 && (
           <div className="mb-12">
             <h2 className="text-xl font-bold text-[#1c1712] mb-2 text-center">
-              Labels &amp; design services
+              Design services
             </h2>
             <p className="text-gray-500 text-sm mb-6 text-center">
-              Custom-quoted — get full pricing and specs on each landing page.
+              Artwork work, not printing — full details and pricing on each page.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {seoOnlyCards.map((card) => (

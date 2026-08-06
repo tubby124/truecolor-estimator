@@ -9,6 +9,19 @@ export interface SizePreset {
   material_code?: string;
 }
 
+/**
+ * A hull colour the customer can preview their decal against. Contrast between
+ * the vinyl and the hull is a legal requirement under Canada Shipping Act s.204,
+ * not a style preference — previewing the real combination is what lets someone
+ * catch a non-compliant choice before the vinyl is on the boat.
+ */
+export interface HullOption {
+  label: string;
+  hex: string;
+  /** Render with a brushed-metal sheen rather than a flat fill (bare aluminum). */
+  sheen?: boolean;
+}
+
 /** A selectable vinyl colour shown as a swatch in the configurator. */
 export interface ColorOption {
   label: string;
@@ -82,7 +95,14 @@ export interface ProductContent {
   /** Free-text spec fields folded into the cart label (e.g. boat licence number). */
   customTextFields?: CustomTextField[];
   /** Show a live decal preview rendering the customer's text in the chosen colour. */
-  livePreview?: { hullLabel: string; fontClass?: string };
+  livePreview?: {
+    hullLabel: string;
+    fontClass?: string;
+    /** Backdrop colours to preview against. Omit for a neutral light/dark stage. */
+    hulls?: HullOption[];
+    /** Label for the backdrop picker, e.g. "Your hull colour". */
+    hullPickerLabel?: string;
+  };
 }
 
 export const PRODUCTS: Record<string, ProductContent> = {
@@ -810,7 +830,20 @@ export const PRODUCTS: Record<string, ProductContent> = {
         appliesToMaterial: ["PLACEHOLDER_BOATNUM_NAME"],
       },
     ],
-    livePreview: { hullLabel: "Preview on your hull" },
+    livePreview: {
+      hullLabel: "Preview on your hull",
+      hullPickerLabel: "Your hull colour",
+      hulls: [
+        { label: "Bare aluminum", hex: "#A8ADB2", sheen: true },
+        { label: "White", hex: "#F2F3F4" },
+        { label: "Light grey", hex: "#C4C9CE" },
+        { label: "Tan", hex: "#C9B896" },
+        { label: "Red", hex: "#8E2020" },
+        { label: "Dark green", hex: "#1D3A2C" },
+        { label: "Navy", hex: "#1B2A44" },
+        { label: "Black", hex: "#14161A" },
+      ],
+    },
     specs: [
       { label: "Price", value: "3\" $39 · 3.5\" $45 · 4\" $52 · 6\" $65 per pair · boat name decal $18" },
       { label: "Material", value: "3 mil vinyl — die-cut characters, no printed background" },
@@ -1001,6 +1034,358 @@ export const PRODUCTS: Record<string, ProductContent> = {
         "Removable adhesive — peels cleanly without residue",
         "Die-cut square edges — no white border or carrier sheet",
         "Works on glass, packaging, smooth walls, vehicles, and laptops",
+      ],
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // LABEL FAMILY — added 2026-08-06.
+  //
+  // These five are the SAME physical product as "stickers": Arlon DPF 510
+  // 3.2 mil adhesive vinyl, printed on the Roland TrueVIS VG2, die-cut, gloss
+  // laminated. They exist as separate slugs because customers shop by the JOB
+  // ("I need cosmetic labels"), not by the substrate — and previously these
+  // four sat on /products as SEO-only cards with no configurator, so nobody
+  // could actually order one.
+  //
+  // Every entry uses category STICKER + ARLPMF7008 so the live sticker-model-v2
+  // engine prices them identically to /products/stickers. No new pricing rules,
+  // no new material rows, no invented numbers. Verified against the live
+  // /api/estimate on 2026-08-06: every size below returns $25 at qty 25 (the
+  // order-total floor), so `fromPrice: "$25"` is honest for all five.
+  //
+  // They replace the "from $5.50/sqft" claim that used to appear on these cards
+  // and on 18 SEO pages. That figure was the LARGE-FORMAT sqft rate applied to
+  // small labels by mistake — below even the wholesale rate given to a former
+  // trade account, and 2-7x under what the engine itself charges for the same
+  // job. Do not reintroduce a per-sqft anchor for labels: small-label cost is
+  // setup- and cut-dominated, so sqft cannot express it.
+  // ---------------------------------------------------------------------------
+
+  "product-labels": {
+    slug: "product-labels",
+    name: "Product Labels",
+    tagline: "Custom product labels on waterproof vinyl. Minimum 25.",
+    description:
+      "Custom product labels printed in Saskatoon on Arlon DPF 510 adhesive vinyl — 3.2 mil, the same film behind our window decals — then die-cut and gloss laminated. 25 labels start at $25. Roland TrueVIS VG2 eco-solvent inks resist scuffing, moisture, and fading, so a label still reads cleanly after a season on a shelf or in a cooler. Built for Saskatchewan food producers, ag suppliers, breweries, and makers who need short runs without a minimum of 1,000. Price drops sharply with volume — the same label runs a fraction of the per-unit cost at 500 than at 25. Supply a PDF or high-res PNG at 150+ DPI; in-house design is $35 flat with a same-day proof. Pickup at 216 33rd St W, Saskatoon, or same-day rush for +$40 flat when ordered before 10 AM.",
+    fromPrice: "$25",
+    category: "STICKER",
+    material_code: "ARLPMF7008",
+    heroImage: "/images/products/product/product-labels-product-800x600.webp",
+    galleryImages: [
+      "/images/products/product/product-labels-variety-pack-800x600.webp",
+      "/images/products/product/product-labels-application-800x600.webp",
+      "/images/gallery/gallery-sticker-stonecraft-packaging.webp",
+      "/images/gallery/gallery-stickers-dyck-farms.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "1×3\"", width_in: 1, height_in: 3, material_code: "ARLPMF7008" },
+      { label: "2×2\"", width_in: 2, height_in: 2, material_code: "PLACEHOLDER_STICKER_2X2" },
+      { label: "2×3\"", width_in: 2, height_in: 3, material_code: "PLACEHOLDER_STICKER_2X3" },
+      { label: "3×3\"", width_in: 3, height_in: 3, material_code: "PLACEHOLDER_STICKER_3X3" },
+      { label: "3×4\"", width_in: 3, height_in: 4, material_code: "ARLPMF7008" },
+      { label: "4×4\"", width_in: 4, height_in: 4, material_code: "ARLPMF7008" },
+    ],
+    qtyPresets: [25, 50, 100, 250, 500, 1000],
+    lotPriced: true,
+    specs: [
+      { label: "Material", value: "Arlon DPF 510 adhesive vinyl — 3.2 mil" },
+      { label: "Print", value: "Full-colour eco-solvent, UV-resistant" },
+      { label: "Finish", value: "Gloss lamination — standard" },
+      { label: "Cut", value: "Die-cut to size, no carrier sheet" },
+      { label: "Minimum qty", value: "25 labels" },
+      { label: "Turnaround", value: "1–3 business days after artwork approval" },
+    ],
+    whoUsesThis: ["Food & Bev", "Retail", "Agriculture", "Makers"],
+    faqs: [
+      {
+        q: "How much do product labels cost?",
+        a: "25 labels start at $25. Per-unit cost falls steeply with quantity — the same artwork costs far less each at 250 or 500 than at 25. Configure your size and quantity above to see the exact price before you order; there is no quote form.",
+      },
+      {
+        q: "Are they waterproof?",
+        a: "Yes. The vinyl and eco-solvent inks handle moisture, condensation, and refrigeration. For deep-freeze storage see our freezer labels, which use the same film with adhesive guidance for sub-zero application.",
+      },
+      {
+        q: "Can I get a custom size or shape?",
+        a: "Six sizes price instantly above. Any other rectangle can be entered as a custom size. Circles, ovals, and die-cut brand shapes are available — call (306) 954-8688 and we will price the cut path.",
+      },
+      {
+        q: "What file should I send?",
+        a: "PDF or high-res PNG at 150+ DPI, with bleed if your artwork runs to the edge. No print-ready file? Our in-house designer is $35 flat and returns a same-day proof on briefs in before 10 AM.",
+      },
+    ],
+    relatedSlugs: ["stickers", "cosmetic-labels", "freezer-labels"],
+    materialInfo: {
+      headline: "Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated",
+      bullets: [
+        "Waterproof — handles condensation, cooler storage, and handling",
+        "Eco-solvent inks printed in-house on the Roland TrueVIS VG2",
+        "Die-cut to your size with clean edges",
+        "Sticks to glass, PET, HDPE, coated card, and metal tins",
+      ],
+    },
+  },
+
+  "cosmetic-labels": {
+    slug: "cosmetic-labels",
+    name: "Cosmetic Labels",
+    tagline: "Waterproof skincare and cosmetic labels. Minimum 25.",
+    description:
+      "Cosmetic and skincare labels printed in Saskatoon on Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated, die-cut to size. 25 labels start at $25. The film and Roland TrueVIS VG2 eco-solvent inks survive bathroom humidity, wet hands, and oil or lotion contact without the ink lifting or the edges curling — the usual failure mode for paper labels on a shower shelf. Sized for dropper bottles, jars, tubes, tins, and soap bars, and built for Saskatchewan soap makers, bath and body brands, and small-batch skincare producers who need 25 labels rather than 1,000. Supply a PDF or high-res PNG at 150+ DPI; in-house design is $35 flat with a same-day proof. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$25",
+    category: "STICKER",
+    material_code: "ARLPMF7008",
+    heroImage: "/images/products/product/cosmetic-labels-product-800x600.webp",
+    galleryImages: [
+      "/images/products/product/cosmetic-labels-bottle-detail-800x600.webp",
+      "/images/products/product/cosmetic-labels-soap-bar-800x600.webp",
+      "/images/gallery/gallery-sticker-stonecraft-packaging.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "1.5×2\"", width_in: 1.5, height_in: 2, material_code: "ARLPMF7008" },
+      { label: "2×2\"", width_in: 2, height_in: 2, material_code: "PLACEHOLDER_STICKER_2X2" },
+      { label: "2×3\"", width_in: 2, height_in: 3, material_code: "PLACEHOLDER_STICKER_2X3" },
+      { label: "2.5×3.5\"", width_in: 2.5, height_in: 3.5, material_code: "ARLPMF7008" },
+      { label: "3×3\"", width_in: 3, height_in: 3, material_code: "PLACEHOLDER_STICKER_3X3" },
+    ],
+    qtyPresets: [25, 50, 100, 250, 500, 1000],
+    lotPriced: true,
+    specs: [
+      { label: "Material", value: "Arlon DPF 510 adhesive vinyl — 3.2 mil" },
+      { label: "Print", value: "Full-colour eco-solvent, UV-resistant" },
+      { label: "Finish", value: "Gloss lamination — resists oils and moisture" },
+      { label: "Cut", value: "Die-cut to size, no carrier sheet" },
+      { label: "Minimum qty", value: "25 labels" },
+      { label: "Turnaround", value: "1–3 business days after artwork approval" },
+    ],
+    whoUsesThis: ["Skincare", "Soap Makers", "Retail", "Makers"],
+    faqs: [
+      {
+        q: "How much do cosmetic labels cost?",
+        a: "25 labels start at $25. Configure size and quantity above for the exact price — the per-label cost drops steeply as quantity rises, and nothing is hidden behind a quote form.",
+      },
+      {
+        q: "Will they survive a wet bathroom?",
+        a: "Yes. Vinyl film plus gloss lamination handles steam, splashes, and wet hands. Paper labels swell and lift in the same conditions; these do not.",
+      },
+      {
+        q: "Do they hold up against lotion and essential oils?",
+        a: "The laminate resists oil and lotion contact. For products with heavy essential-oil content we recommend a test batch of 25 first — call (306) 954-8688 and we will talk through the film choice.",
+      },
+      {
+        q: "Can you do a small first run?",
+        a: "25 is the minimum, which is the point — you can test a label design on one product batch before committing to 500. Reorders of the same artwork carry no new setup charge.",
+      },
+    ],
+    relatedSlugs: ["candle-jar-labels", "product-labels", "stickers"],
+    materialInfo: {
+      headline: "Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated",
+      bullets: [
+        "Waterproof — built for bathroom humidity and wet hands",
+        "Resists oils, lotions, and product spills",
+        "Conforms to curved bottles, jars, and tubes",
+        "Eco-solvent inks printed in-house on the Roland TrueVIS VG2",
+      ],
+    },
+  },
+
+  "freezer-labels": {
+    slug: "freezer-labels",
+    name: "Freezer Labels",
+    tagline: "Cold-resistant labels for frozen and refrigerated goods. Minimum 25.",
+    description:
+      "Freezer labels printed in Saskatoon on Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated, die-cut to size. 25 labels start at $25. Vinyl stays flexible where paper goes brittle, so the label does not crack, lift at the corners, or turn to mush when frost forms and thaws. Roland TrueVIS VG2 eco-solvent inks stay legible through condensation and repeated freezer-to-counter cycles. Used by Saskatchewan meat processors, bakeries, meal-prep businesses, and produce packers. Apply to a clean, dry surface at room temperature before freezing — adhesive grabs far better warm than cold. Supply a PDF or high-res PNG at 150+ DPI; in-house design is $35 flat. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$25",
+    category: "STICKER",
+    material_code: "ARLPMF7008",
+    heroImage: "/images/products/product/freezer-labels-product-800x600.webp",
+    galleryImages: [
+      "/images/products/product/freezer-labels-frozen-stack-800x600.webp",
+      "/images/products/product/freezer-labels-application-800x600.webp",
+      "/images/gallery/gallery-stickers-dyck-farms.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "2×2\"", width_in: 2, height_in: 2, material_code: "PLACEHOLDER_STICKER_2X2" },
+      { label: "2×3\"", width_in: 2, height_in: 3, material_code: "PLACEHOLDER_STICKER_2X3" },
+      { label: "3×3\"", width_in: 3, height_in: 3, material_code: "PLACEHOLDER_STICKER_3X3" },
+      { label: "3×4\"", width_in: 3, height_in: 4, material_code: "ARLPMF7008" },
+      { label: "4×4\"", width_in: 4, height_in: 4, material_code: "ARLPMF7008" },
+      { label: "4×6\"", width_in: 4, height_in: 6, material_code: "PLACEHOLDER_STICKER_4X6" },
+    ],
+    qtyPresets: [25, 50, 100, 250, 500, 1000],
+    lotPriced: true,
+    specs: [
+      { label: "Material", value: "Arlon DPF 510 adhesive vinyl — 3.2 mil" },
+      { label: "Print", value: "Full-colour eco-solvent, UV-resistant" },
+      { label: "Finish", value: "Gloss lamination — moisture barrier" },
+      { label: "Cut", value: "Die-cut to size, no carrier sheet" },
+      { label: "Minimum qty", value: "25 labels" },
+      { label: "Application", value: "Apply at room temperature to a clean, dry surface" },
+    ],
+    whoUsesThis: ["Food & Bev", "Butchers", "Bakeries", "Meal Prep"],
+    faqs: [
+      {
+        q: "How much do freezer labels cost?",
+        a: "25 labels start at $25, and the per-label cost falls steeply with quantity. Configure size and quantity above to see your exact price before ordering.",
+      },
+      {
+        q: "Will the label stay stuck in a freezer?",
+        a: "Yes, provided you apply it at room temperature to a clean, dry surface and let it set before freezing. Adhesive does not bond well when applied to an already-frozen or damp container — that is the usual cause of labels falling off, not the label itself.",
+      },
+      {
+        q: "Does the ink smear when it thaws?",
+        a: "No. Eco-solvent ink under gloss lamination stays legible through repeated freeze and thaw cycles and through the condensation that forms on the way out of the freezer.",
+      },
+      {
+        q: "Can I put these directly on food?",
+        a: "They are for packaging surfaces — containers, bags, trays, and boxes — not for direct contact with unwrapped food.",
+      },
+    ],
+    relatedSlugs: ["product-labels", "stickers", "cosmetic-labels"],
+    materialInfo: {
+      headline: "Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated",
+      bullets: [
+        "Stays flexible at freezer temperatures — paper cracks, vinyl does not",
+        "Gloss laminate blocks condensation from reaching the ink",
+        "Legible through repeated freeze and thaw cycles",
+        "Apply warm, before freezing, for the strongest bond",
+      ],
+    },
+  },
+
+  "candle-jar-labels": {
+    slug: "candle-jar-labels",
+    name: "Candle & Jar Labels",
+    tagline: "Labels for candle tins, jars, and glass vessels. Minimum 25.",
+    description:
+      "Candle and jar labels printed in Saskatoon on Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated, die-cut to size. 25 labels start at $25. The film conforms to curved glass and tin without wrinkling at the edges, and Roland TrueVIS VG2 eco-solvent inks hold their colour next to a burning wick where paper labels yellow. Sized for standard candle tins, mason jars, amber glass, and apothecary vessels. Built for Saskatchewan candle makers, preserve and jam producers, and market vendors who need short runs. A warning or ingredient label on the base can be ordered as a second size in the same order. Supply a PDF or high-res PNG at 150+ DPI; in-house design is $35 flat. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$25",
+    category: "STICKER",
+    material_code: "ARLPMF7008",
+    heroImage: "/images/products/product/candle-jar-labels-product-800x600.webp",
+    galleryImages: [
+      "/images/products/product/candle-jar-labels-detail-800x600.webp",
+      "/images/gallery/gallery-sticker-stonecraft-packaging.webp",
+      "/images/gallery/gallery-stickers-rock-water-brewing.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "1.5×2\"", width_in: 1.5, height_in: 2, material_code: "ARLPMF7008" },
+      { label: "2×2\"", width_in: 2, height_in: 2, material_code: "PLACEHOLDER_STICKER_2X2" },
+      { label: "2×3\"", width_in: 2, height_in: 3, material_code: "PLACEHOLDER_STICKER_2X3" },
+      { label: "3×3\"", width_in: 3, height_in: 3, material_code: "PLACEHOLDER_STICKER_3X3" },
+      { label: "3×4\"", width_in: 3, height_in: 4, material_code: "ARLPMF7008" },
+    ],
+    qtyPresets: [25, 50, 100, 250, 500, 1000],
+    lotPriced: true,
+    specs: [
+      { label: "Material", value: "Arlon DPF 510 adhesive vinyl — 3.2 mil" },
+      { label: "Print", value: "Full-colour eco-solvent, UV-resistant" },
+      { label: "Finish", value: "Gloss lamination — standard" },
+      { label: "Cut", value: "Die-cut to size, no carrier sheet" },
+      { label: "Minimum qty", value: "25 labels" },
+      { label: "Surfaces", value: "Glass, tin, ceramic, and coated card" },
+    ],
+    whoUsesThis: ["Candle Makers", "Preserves", "Retail", "Markets"],
+    faqs: [
+      {
+        q: "How much do candle and jar labels cost?",
+        a: "25 labels start at $25. Configure size and quantity above for the exact price — no quote form, no callback.",
+      },
+      {
+        q: "Will the label wrinkle on a curved jar?",
+        a: "At these sizes the vinyl conforms to standard candle tins, mason jars, and amber glass without wrinkling. Very small-diameter vessels are the exception — keep the label under about a third of the circumference, or call (306) 954-8688 and we will size it with you.",
+      },
+      {
+        q: "Can it handle heat from the candle?",
+        a: "Yes for the outside of a tin or jar in normal use — the vinyl and laminate tolerate the warmth of a burning candle far better than paper, which yellows and browns. These are not rated for direct flame or oven contact.",
+      },
+      {
+        q: "Can I order a base warning label at the same time?",
+        a: "Yes. Add the main label as one line, then configure the smaller warning or ingredient label as a second line in the same order. Both print together and ship together.",
+      },
+    ],
+    relatedSlugs: ["cosmetic-labels", "product-labels", "stickers"],
+    materialInfo: {
+      headline: "Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated",
+      bullets: [
+        "Conforms to curved glass and tin without edge wrinkle",
+        "Holds colour next to a burning wick — paper yellows",
+        "Wipes clean of wax residue and fingerprints",
+        "Eco-solvent inks printed in-house on the Roland TrueVIS VG2",
+      ],
+    },
+  },
+
+  "roll-labels": {
+    slug: "roll-labels",
+    name: "Roll Labels",
+    tagline: "Bulk label runs on waterproof vinyl. Minimum 25.",
+    description:
+      "Bulk label runs printed in Saskatoon on Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated, die-cut to size. 25 labels start at $25, and the per-label cost drops steeply as the run grows, which is what makes a 500 or 1,000 run worth doing in one go. Roland TrueVIS VG2 eco-solvent inks are waterproof and UV-resistant, so the same artwork works across product, freezer, and jar applications. Labels are supplied die-cut on sheets as standard. If you need them wound on a roll for an applicator machine, call (306) 954-8688 before ordering so we can confirm core size, wind direction, and whether your run suits roll fulfilment. Supply a PDF or high-res PNG at 150+ DPI; in-house design is $35 flat. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$25",
+    category: "STICKER",
+    material_code: "ARLPMF7008",
+    heroImage: "/images/products/product/roll-labels-product-800x600.webp",
+    galleryImages: [
+      "/images/products/product/roll-labels-bulk-stack-800x600.webp",
+      "/images/products/product/roll-labels-application-800x600.webp",
+      "/images/gallery/gallery-stickers-dyck-farms.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [
+      { label: "1×3\"", width_in: 1, height_in: 3, material_code: "ARLPMF7008" },
+      { label: "2×2\"", width_in: 2, height_in: 2, material_code: "PLACEHOLDER_STICKER_2X2" },
+      { label: "2×3\"", width_in: 2, height_in: 3, material_code: "PLACEHOLDER_STICKER_2X3" },
+      { label: "3×3\"", width_in: 3, height_in: 3, material_code: "PLACEHOLDER_STICKER_3X3" },
+      { label: "4×4\"", width_in: 4, height_in: 4, material_code: "ARLPMF7008" },
+    ],
+    qtyPresets: [100, 250, 500, 1000],
+    lotPriced: true,
+    specs: [
+      { label: "Material", value: "Arlon DPF 510 adhesive vinyl — 3.2 mil" },
+      { label: "Print", value: "Full-colour eco-solvent, UV-resistant" },
+      { label: "Finish", value: "Gloss lamination — standard" },
+      { label: "Supplied", value: "Die-cut on sheets — roll winding by request" },
+      { label: "Minimum qty", value: "25 labels (100+ priced above)" },
+      { label: "Turnaround", value: "1–3 business days after artwork approval" },
+    ],
+    whoUsesThis: ["Food & Bev", "Retail", "Agriculture", "Makers"],
+    faqs: [
+      {
+        q: "How much do bulk label runs cost?",
+        a: "Pricing starts at $25 for 25 labels, and the per-label cost falls sharply with volume — a 1,000 run costs a small fraction per label of a 25 run. Configure size and quantity above for the exact price.",
+      },
+      {
+        q: "Do they come on an actual roll?",
+        a: "Standard fulfilment is die-cut on sheets. Roll winding for applicator machines is available on request — call (306) 954-8688 before ordering so we can confirm core size, wind direction, and that your run suits it.",
+      },
+      {
+        q: "Is there a setup charge on reorders?",
+        a: "No. Reordering the same artwork at the same size carries no new setup charge — order the quantity you need and the price follows the same ladder.",
+      },
+      {
+        q: "Can one run cover several products?",
+        a: "Yes, if the labels are the same size. Add each artwork as its own line in the same order and they print together. Different sizes price as separate lines.",
+      },
+    ],
+    relatedSlugs: ["product-labels", "stickers", "freezer-labels"],
+    materialInfo: {
+      headline: "Arlon DPF 510 adhesive vinyl — 3.2 mil, gloss laminated",
+      bullets: [
+        "Per-label cost drops steeply with run size",
+        "Waterproof and UV-resistant — one film across product, freezer, and jar use",
+        "Die-cut on sheets as standard; roll winding by request",
+        "No setup charge on reorders of the same artwork",
       ],
     },
   },
