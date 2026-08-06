@@ -19,12 +19,12 @@ const GALLERY_PHOTOS = [
     alt: "Van vinyl branding for Ayotte Plumbing, printed by True Color Saskatoon",
   },
   {
-    src: "/images/gallery/gallery-business-cards-bd-deep-cleaning.webp",
-    alt: "Business cards printed for BD Deep Cleaning, Saskatoon",
+    src: "/images/gallery/gallery-business-cards-exp-premium-black.webp",
+    alt: "Premium black eXp Realty business cards printed by True Color, Saskatoon",
   },
   {
-    src: "/images/gallery/gallery-retractable-two-men-truck.webp",
-    alt: "Retractable banner stand for Two Men and a Truck, Saskatoon",
+    src: "/images/gallery/gallery-coroplast-aw-bogo-promo.webp",
+    alt: "A&W restaurant promo sign on coroplast printed by True Color, Saskatoon",
   },
 ];
 
