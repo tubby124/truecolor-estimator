@@ -269,7 +269,7 @@ export function UnifiedConfigurator({
                   onClick={() => setStickerMaterial(mat.value)}
                   className={`px-3 py-2 text-sm rounded-xl border transition-all text-left ${
                     selected
-                      ? "border-[var(--brand)] bg-[var(--brand)] text-white font-semibold"
+                      ? "border-[#1c1712] bg-[#1c1712] text-white font-semibold"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
                   }`}
                 >
@@ -302,7 +302,7 @@ export function UnifiedConfigurator({
                   onClick={() => setStickerShape(sh.value)}
                   className={`px-3 py-2 text-sm rounded-xl border transition-all text-left ${
                     selected
-                      ? "border-[var(--brand)] bg-[var(--brand)] text-white font-semibold"
+                      ? "border-[#1c1712] bg-[#1c1712] text-white font-semibold"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
                   }`}
                 >
@@ -333,7 +333,7 @@ export function UnifiedConfigurator({
                   onClick={() => setSelectedSize(choice)}
                   className={`px-3 py-2 text-sm rounded-xl border transition-all ${
                     selected
-                      ? "border-[var(--brand)] bg-[var(--brand)] text-white font-semibold"
+                      ? "border-[#1c1712] bg-[#1c1712] text-white font-semibold"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
                   }`}
                 >
@@ -411,7 +411,7 @@ export function UnifiedConfigurator({
                   }}
                   className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
                     active
-                      ? "border-[var(--brand)] bg-[var(--brand)] text-white font-semibold"
+                      ? "border-[#1c1712] bg-[#1c1712] text-white font-semibold"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
                   }`}
                 >

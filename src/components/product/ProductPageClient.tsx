@@ -146,7 +146,8 @@ export function ProductPageClient({ product }: Props) {
     <div className={addedToCart ? "pb-44 sm:pb-32" : "pb-24 lg:pb-0"}>
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       {/* ── 3-column grid ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_2fr_1.4fr] gap-8 items-start">
+      {/* minmax(0,…) so a wide thumbnail rail can't blow the columns past the viewport (grid min-content blowout) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,2fr)_minmax(0,1.4fr)] gap-8 items-start">
 
         {/* Col 1 — Gallery (heroImage always first; deduped if already in galleryImages) */}
         <ProductGallery

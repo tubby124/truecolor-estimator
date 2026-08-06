@@ -55,12 +55,22 @@ interface VinylTier {
 // Calibrated against Albert's small-bulk reference quotes. Stickers above
 // 2 sqft per piece switch to WIDE-FORMAT mode (see below) — Albert prices
 // large wall surfaces by sqft regardless of qty tier.
+//
+// 2026-08-06 recalibration: the original fit crammed the small-sticker size
+// effect into rate_per_sqft for the 50–99 and 100–249 tiers (22 and 14 $/sqft,
+// fit against tiny 3–4" reference quotes). That extrapolated brutally for
+// larger stickers — a 4×4" went $25 @ qty 25 → $122 @ qty 50. The floor now
+// carries small-sticker pricing (as Albert's actual quotes behave) and the
+// catalog rate stays continuous at $8/sqft through the mid tiers, so per-unit
+// price never spikes upward when the customer orders MORE.
+// Known remaining cliff (pre-existing, out of scope): 499→500 total drops
+// because rate steps 8→4 — flag for the next /pricing-review.
 const VINYL_TIERS: VinylTier[] = [
   { qty_max: 1,        label: "qty_1",        per_unit_floor: 25.00, rate_per_sqft: 9  },
   { qty_max: 9,        label: "qty_2_9",      per_unit_floor: 25.00, rate_per_sqft: 18 },
-  { qty_max: 49,       label: "qty_10_49",    per_unit_floor: 0.75,  rate_per_sqft: 8  },
-  { qty_max: 99,       label: "qty_50_99",    per_unit_floor: 0.90,  rate_per_sqft: 22 },
-  { qty_max: 249,      label: "qty_100_249",  per_unit_floor: 0.45,  rate_per_sqft: 14 },
+  { qty_max: 49,       label: "qty_10_49",    per_unit_floor: 1.00,  rate_per_sqft: 8  },
+  { qty_max: 99,       label: "qty_50_99",    per_unit_floor: 1.00,  rate_per_sqft: 8  },
+  { qty_max: 249,      label: "qty_100_249",  per_unit_floor: 0.55,  rate_per_sqft: 8  },
   { qty_max: 499,      label: "qty_250_499",  per_unit_floor: 0.35,  rate_per_sqft: 8  },
   { qty_max: 999,      label: "qty_500_999",  per_unit_floor: 0.20,  rate_per_sqft: 4  },
   { qty_max: Infinity, label: "qty_1000_plus",per_unit_floor: 0.15,  rate_per_sqft: 3  },
