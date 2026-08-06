@@ -42,6 +42,35 @@ const WRONG_PATTERNS = [
   ],
 ];
 
+// ALWAYS_WRONG — checked BEFORE the exception list and never skipped by it.
+//
+// These are claims that have no source anywhere in data/tables/*.csv. A normal
+// WRONG_PATTERNS entry can be silenced by an EXCEPTION_PATTERNS match on the same
+// line (e.g. a `fromPrice` prop), which is right for rates that are real but
+// context-dependent. It is wrong for numbers that simply do not exist — those
+// must never ship regardless of what else is on the line.
+//
+// Added 2026-08-06 after labels were found advertised at "$5.50/sqft" across 18
+// pages with NO label pricing in any CSV. The figure was the large-format sqft
+// rate misapplied to small labels — below even the wholesale rate given to a
+// former trade account, and 2-7x under what the engine itself charges. Labels
+// are priced per-unit through the sticker engine; sqft cannot express small-label
+// cost because it is setup- and cut-dominated.
+const ALWAYS_WRONG = [
+  [
+    /\$5\.50\s*\/\s*sqft/i,
+    "Labels are NOT sqft-priced. There is no LABEL category in any CSV. Use the per-unit sticker ladder — 'from $25' for 25. See the LABEL FAMILY note in src/lib/data/products-content.ts",
+  ],
+  [
+    /\$(5\.00|4\.30|3\.20)\s*\/\s*sqft/i,
+    "Fabricated label sqft tier. These rates exist in no CSV — they were invented alongside the $5.50 claim. Labels price per-unit via the sticker engine",
+  ],
+  [
+    /Roland\s+UV|UV\s+flatbed|flatbed\s+printer/i,
+    "Wrong equipment. True Color runs a Roland TrueVIS VG2 ECO-SOLVENT printer/cutter — not a UV or flatbed machine. Per .claude/rules/brand-voice.md this must never be described as UV or flatbed. ('UV-resistant' describing ink durability is fine.)",
+  ],
+];
+
 // If a line matches any of these, skip wrong-pattern checks on that line.
 // Covers: product reference card sqft rates (fromPrice prop) and FAQ explanations.
 const EXCEPTION_PATTERNS = [
@@ -94,6 +123,18 @@ for (let i = 0; i < lines.length; i++) {
 
   // Skip blank lines and code comments
   if (!line.trim() || /^\s*(\/\/|\/\*|\*|<!--)/.test(line)) continue;
+
+  // Unsourced claims are checked FIRST and are not silenceable by an exception.
+  // A number that exists in no CSV has no legitimate context.
+  let hardFail = false;
+  for (const [pattern, message] of ALWAYS_WRONG) {
+    if (pattern.test(line)) {
+      errors.push(`Line ${i + 1}: ${message}\n  → ${line.trim()}`);
+      hardFail = true;
+      break;
+    }
+  }
+  if (hardFail) continue;
 
   // Skip lines in an exception context
   if (EXCEPTION_PATTERNS.some((p) => p.test(line))) continue;
