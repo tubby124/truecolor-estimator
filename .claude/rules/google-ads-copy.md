@@ -10,6 +10,7 @@ so it does not get cargo-culted or "simplified" back into the trap it came from.
 
 | Trap | The lesson |
 |---|---|
+| `sync-plan` was blind to extension assets AND campaign negatives | **A diff tool that cannot see a class of object reports "in sync" forever.** Callouts and sitelinks were rewritten with prices and stayed vague live for hours while every check said clean. When you add a field to the contract, add it to the diff in the same pass. |
 | The validator banned **all** numbers, not unsourced ones | A guard aimed slightly wrong is worse than no guard. It silently enforced vague copy for months while looking like diligence. Fixed 2026-08-06 with the sourced-fact registry. |
 | `brand-voice.md` mandated "+$40 rush"; the ad validator forbade it | When two rule files govern one artifact, reconcile them or one loses silently. Check for a conflicting rule before adding a new constraint. |
 | RSA and keyword counts are hardcoded in the live verifier | **Change a contract → change its verifier in the same pass.** This project has already shipped a launch check that failed for the wrong reason. |
@@ -133,4 +134,5 @@ When you reprice: re-check every fact in the registry, then bump `VERIFIED_ON`.
 | `scripts/google-ads/mine-search-terms.mjs` | Read-only waste mining → negative candidates. |
 | `scripts/google-ads/pacing-report.mjs` | Spend, projection to the promo deadline, lost-IS diagnosis. |
 | `scripts/google-ads/verify-destinations.mjs` | Every ad destination must return 200. |
+| `scripts/google-ads/apply-assets.mjs` | Fourth mutation authority, assets only: creates callouts/sitelinks and unlinks stale ones. Never deletes an asset, so every removal is reversible. |
 | `docs/paid-search/COPY-LEARNING-LOG.md` | Append-only; outcomes written back. |

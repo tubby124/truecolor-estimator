@@ -77,6 +77,42 @@ for (const row of await search(
   "ads",
 )) liveAds.set(row.adGroup.name, (liveAds.get(row.adGroup.name) ?? 0) + 1);
 
+// Ad-group destinations, so a slug retired out from under a live ad group is visible here and
+// not only in the separate destination check.
+const liveGroupUrls = new Map();
+for (const row of await search(
+  "SELECT ad_group.name, ad_group_ad.ad.final_urls FROM ad_group_ad WHERE ad_group_ad.status != 'REMOVED'",
+  "ad final urls",
+)) for (const url of row.adGroupAd?.ad?.finalUrls ?? []) {
+  if (!liveGroupUrls.has(row.adGroup.name)) liveGroupUrls.set(row.adGroup.name, new Set());
+  liveGroupUrls.get(row.adGroup.name).add(url);
+}
+
+// Extension assets. These were previously INVISIBLE to this diff: the contract's callouts and
+// sitelink descriptions could be rewritten and this tool would still report "in sync" while the
+// account served entirely different text on every impression. apply-sync has no asset authority,
+// so these are reported for a human to action, never auto-created.
+// Read through campaign_asset, not the asset table. An asset that exists but is linked to no
+// campaign serves nothing — reporting it as drift is noise, and noise is how a warning list
+// gets ignored.
+const liveCallouts = new Set();
+const liveSitelinks = new Map();
+for (const row of await search(
+  `SELECT asset.type, asset.callout_asset.callout_text, asset.sitelink_asset.link_text,
+          asset.sitelink_asset.description1, asset.sitelink_asset.description2
+   FROM campaign_asset
+   WHERE campaign_asset.status != 'REMOVED' AND asset.type IN ('CALLOUT','SITELINK')`,
+  "linked assets",
+)) {
+  if (row.asset?.type === "CALLOUT") liveCallouts.add(row.asset.calloutAsset?.calloutText ?? "");
+  if (row.asset?.type === "SITELINK") {
+    liveSitelinks.set(row.asset.sitelinkAsset?.linkText ?? "", {
+      description1: row.asset.sitelinkAsset?.description1 ?? null,
+      description2: row.asset.sitelinkAsset?.description2 ?? null,
+    });
+  }
+}
+
 // ── contract state ───────────────────────────────────────────────────────────
 const MATCH = { EXACT: "EXACT", PHRASE: "PHRASE" };
 const newGroups = [];
@@ -142,5 +178,47 @@ console.log(`=== LIVE BUT NOT IN CONTRACT (${extraGroups.length}) ===`);
 if (extraGroups.length === 0) console.log("  (none)");
 for (const name of extraGroups) console.log(`  ? ${name} — review manually; this tool never proposes deletions`);
 
+// ── drift this tool can SEE but apply-sync cannot FIX ────────────────────────
+// apply-sync is create-only and holds no authority over assets, ad content, or destinations.
+// Reporting these separately is deliberate: silence used to read as "in sync" when it only
+// meant "not looked at".
+const driftWarnings = [];
+
+for (const campaign of paidSearchConfig.campaigns) {
+  for (const group of campaign.adGroups) {
+    const urls = liveGroupUrls.get(group.name);
+    if (urls && !urls.has(group.finalUrl)) {
+      driftWarnings.push(`ad group "${group.name}" serves ${[...urls].join(", ")} but the contract says ${group.finalUrl}`);
+    }
+  }
+}
+
+const contractCallouts = paidSearchConfig.adAssets?.callouts ?? [];
+for (const callout of contractCallouts) {
+  if (!liveCallouts.has(callout)) driftWarnings.push(`callout "${callout}" is in the contract but NOT live`);
+}
+for (const callout of liveCallouts) {
+  if (!contractCallouts.includes(callout)) driftWarnings.push(`callout "${callout}" is live but NOT in the contract`);
+}
+
+for (const sitelink of paidSearchConfig.adAssets?.sitelinks ?? []) {
+  const live = liveSitelinks.get(sitelink.text);
+  if (!live) { driftWarnings.push(`sitelink "${sitelink.text}" is in the contract but NOT live`); continue; }
+  if (live.description1 !== sitelink.description1 || live.description2 !== sitelink.description2) {
+    driftWarnings.push(`sitelink "${sitelink.text}" description drift — live: "${live.description1} / ${live.description2}" vs contract: "${sitelink.description1} / ${sitelink.description2}"`);
+  }
+}
+
+console.log(`\n=== ASSET / DESTINATION DRIFT — apply-sync CANNOT fix these (${driftWarnings.length}) ===`);
+if (driftWarnings.length === 0) {
+  console.log("  (none)");
+} else {
+  for (const warning of driftWarnings) console.log(`  ! ${warning}`);
+  console.log("\n  Extension-asset drift is fixed by:  railway run node scripts/google-ads/apply-assets.mjs");
+  console.log("  Destination drift is NOT auto-fixable — correct the contract or the ad group by hand.");
+  console.log("  A clean SUMMARY below does NOT mean these are resolved.");
+}
+
 console.log(`\nSUMMARY: ${newGroups.length} ad groups, ${newAds.length} RSAs, ${newKeywords.length} keywords, ${newNegatives.length} negatives to create.`);
+if (driftWarnings.length) console.log(`WARNING: ${driftWarnings.length} asset/destination drift item(s) above are NOT covered by that summary.`);
 console.log("This tool is READ-ONLY. Nothing was changed.");

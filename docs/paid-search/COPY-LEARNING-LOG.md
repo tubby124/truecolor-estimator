@@ -187,3 +187,41 @@ print / labels made easy stop appearing in Core's search terms?
 **Outcome:** _pending._
 
 **Promoted to rule:** yes — `rsa` optional / `rsaVariantB` mandatory is in the rule file.
+
+---
+
+## 2026-08-06 (fifth pass) — the blind-spot audit, and the assets that were never live
+
+**The finding that matters:** the previous entry flagged that a diff tool blind to one class of
+object reports "in sync" forever, and asked whether anything else had the same hole. It did, and
+it was worse than the negatives case.
+
+**The sitelinks and callouts rewritten earlier that day were never live.** `apply-sync` has no
+asset authority and `sync-plan` never queried assets at all, so the account kept serving
+"Exact Online Pricing", "Rush Options Available", and "Configure and order locally" on every
+impression while every check reported clean. The copy work was real in the repo and cosmetic in
+the account.
+
+**What shipped:**
+- `sync-plan` now reports **asset and destination drift** it cannot fix, in its own clearly
+  separated section, with an explicit warning that a clean SUMMARY does not cover it. Silence
+  used to read as "in sync" when it only meant "not looked at".
+- It reads through `campaign_asset`, not `asset` — an asset linked to no campaign serves nothing,
+  and reporting it as drift is noise. Noise is how a warning list gets ignored.
+- New `scripts/google-ads/apply-assets.mjs` — the **fourth and final mutation authority**, scoped
+  strictly to extension assets. Creates assets, links them, and unlinks stale ones. It never
+  deletes an asset, only the link, so every removal is reversible by re-linking.
+- Applied: 11 assets created, 33 links added, 33 stale links removed. Drift 16 → 0. Every
+  serving callout and sitelink now carries a real price.
+- Also now detected: ad-group destination drift, so a slug retired out from under a live ad group
+  shows up in the diff rather than only in the separate destination check.
+
+**Outcome:** confirmed live — 6 sitelinks and 6 callouts serving, all price-anchored, readback
+clean, launched verifier zero safety failures.
+
+**Promoted to rule:** yes — the blind-spot lesson is now the first row of the known-traps table.
+
+**Still not covered by any diff, recorded honestly:** live ad *content* is compared by count, not
+by text. If someone edited an RSA's headlines in the Google Ads UI, nothing here would notice.
+Lower risk than the asset gap (ads are not hand-edited in this workflow) but it is the same class
+of hole and remains open.
