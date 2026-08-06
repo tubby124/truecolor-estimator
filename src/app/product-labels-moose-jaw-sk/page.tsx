@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Product Labels Moose Jaw | From $5.50/sqft | True Color" },
+  title: { absolute: "Product Labels Moose Jaw | From $25 | True Color" },
   description:
-    "Retail product labels for Moose Jaw artisan food, brewery, distillery, farmers market. From $5.50/sqft. Printed in Saskatoon, shipped to Moose Jaw.",
+    "Retail product labels for Moose Jaw artisan food, brewery, distillery, farmers market. From $25. Printed in Saskatoon, shipped to Moose Jaw.",
   alternates: { canonical: "/product-labels-moose-jaw-sk" },
   openGraph: {
     title: "Product Labels Moose Jaw SK | True Color Display Printing",
     description:
-      "Full-colour retail product labels. Gloss, matte, soft-touch. From $5.50/sqft. Printed in Saskatoon, shipped to Moose Jaw.",
+      "Full-colour retail product labels. Gloss, matte, soft-touch. From $25. Printed in Saskatoon, shipped to Moose Jaw.",
     url: "https://truecolorprinting.ca/product-labels-moose-jaw-sk",
     images: [{ url: "/images/products/og/product-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -21,13 +21,13 @@ export default function ProductLabelsMooseJawPage() {
   return (
     <IndustryPage
       canonicalSlug="product-labels-moose-jaw-sk"
-      primaryProductSlug="stickers"
+      primaryProductSlug="product-labels"
       title="Product Labels — Moose Jaw SK"
-      subtitle="Retail product labels for Moose Jaw artisan food, beverage, craft brands. From $5.50/sqft."
+      subtitle="Retail product labels for Moose Jaw artisan food, beverage, craft brands. From $25."
       heroImage="/images/products/heroes/product-labels-hero-1200x500.webp"
       heroAlt="Retail product labels printed for Moose Jaw SK artisan brands by True Color Display Printing"
       description={
-        "Custom retail product labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $5.50/sqft on 3mil vinyl — gloss, matte, or soft-touch finish. Built for Moose Jaw craft brewers, distilleries, farmers market vendors, ranches selling direct-to-consumer beef and lamb, and small artisan brands. Contour-cut to any shape, no die fee. Same Roland UV print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier 1–2 days to Moose Jaw."
+        "Custom retail product labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on 3mil vinyl — gloss, matte, or soft-touch finish. Built for Moose Jaw craft brewers, distilleries, farmers market vendors, ranches selling direct-to-consumer beef and lamb, and small artisan brands. Contour-cut to any shape, no die fee. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier 1–2 days to Moose Jaw."
       }
       descriptionNode={
         <>
@@ -35,7 +35,7 @@ export default function ProductLabelsMooseJawPage() {
             True Color Display Printing prints custom retail product labels at our Saskatoon
             shop and ships to Moose Jaw 240 km south. Stock options: 3mil vinyl in gloss,
             matte, or soft-touch — plus waterproof BOPP for beverage and bath products.
-            Pricing from <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full pricing
+            Pricing starts at <strong>$25 for 25 labels</strong> — a 3×4&quot; label is $67 for 100 and $165 for 500. Full pricing
             and material spec on our{" "}
             <Link href="/product-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               product labels Saskatoon page
@@ -63,8 +63,8 @@ export default function ProductLabelsMooseJawPage() {
         </>
       }
       products={[
-        { name: "Product Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
+        { name: "Product Labels", from: "from $25 / 25", slug: "product-labels" },
+        { name: "Stickers", from: "from $25 / 25", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
@@ -73,7 +73,7 @@ export default function ProductLabelsMooseJawPage() {
       whyPoints={[
         "Gloss, matte, or soft-touch 3mil vinyl + waterproof BOPP option",
         "Contour cutting included — rectangle, oval, circle, custom die",
-        "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4)",
+        "25 labels from $25 — a 3×4\" label is $67 for 100, $165 for 500",
         "$25 order-total minimum — works for small first-run batches",
         "UV-cured ink survives bottle moisture and ice-bath beverage chilling",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
@@ -87,11 +87,11 @@ export default function ProductLabelsMooseJawPage() {
         },
         {
           q: "How much do product labels cost shipped to Moose Jaw?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" label at quantity 500 runs about $300. Moose Jaw courier cost is customer's.",
+          a: "25 labels start at $25. A 3×4\" label is $67 for 100, $167.50 for 250, and $165 for 500 — about $0.33 each at that run. Configure your exact size and quantity on the product page to see the price before ordering. Moose Jaw courier cost is customer's.",
         },
         {
           q: "Do you print beverage labels for Moose Jaw breweries and distilleries?",
-          a: "Yes — beverage labels are a core product. Waterproof BOPP vinyl is the standard for bottles that get ice-bathed at retail. Roland UV ink doesn't smudge or peel from condensation. Contour cutting included for neck labels, wrap-around bodies, and back-of-bottle nutritional panels.",
+          a: "Yes — beverage labels are a core product. Waterproof BOPP vinyl is the standard for bottles that get ice-bathed at retail. Roland TrueVIS VG2 eco-solvent ink doesn't smudge or peel from condensation. Contour cutting included for neck labels, wrap-around bodies, and back-of-bottle nutritional panels.",
         },
         {
           q: "Can you do a small first run for a Moose Jaw startup brand?",
