@@ -12,14 +12,14 @@ import {
 
 // A PAUSED campaign keeps its staged daily budget but contributes CA$0 to approved pilot spend.
 const EXPECTED = {
-  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 14, maximum: 644, status: "ENABLED" },
+  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 18, maximum: 828, status: "ENABLED" },
   COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 4, maximum: 184, status: "ENABLED" },
   BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 0, status: "PAUSED" },
 };
 const PILOT_START_DATE = "2026-08-03";
 const PILOT_END_DATE = "2026-09-17";
 const PILOT_INCLUSIVE_DAYS = 46;
-const LAUNCHABLE_DAILY_BUDGET_CAD = 21;
+const LAUNCHABLE_DAILY_BUDGET_CAD = 25;
 // Enabled-only daily burn ceiling. At CA$18/day an unmonitored account needs 33 days to reach
 // the CA$600 ceiling, which is far longer than any plausible monitor outage goes unnoticed.
 const MAX_UNMONITORED_DAILY_BURN_CAD = 25;
