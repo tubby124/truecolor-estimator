@@ -78,6 +78,12 @@ export default function LargeFormatPrintingSaskatoonPage() {
           </p>
         </>
       }
+      galleryImages={[
+        { src: "/images/gallery/gallery-install-saap-building-sign.webp", alt: "Building sign installation with boom lift by True Color in Saskatchewan" },
+        { src: "/images/gallery/gallery-banner-windshield-hub-building.webp", alt: "Windshield Hub exterior building banner installed in Saskatoon" },
+        { src: "/images/gallery/gallery-acp-car-city-installed.webp", alt: "Car City Auto sign installed on brick building in Saskatoon" },
+        { src: "/images/gallery/gallery-vinyl-lettering-prairie-timber.webp", alt: "Prairie Timber Homes large cut vinyl lettering printed in Saskatoon" },
+      ]}
       products={[
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },

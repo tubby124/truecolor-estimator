@@ -50,7 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/booklet-printing-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.9 },
 
     // ── Service & hub SEO pages — sprint (2026-03-03) ────────────────────────
-    { url: `${BASE_URL}/large-format-printing-saskatoon`, lastModified: new Date("2026-03-03"), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${BASE_URL}/large-format-printing-saskatoon`, lastModified: new Date("2026-08-06"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/trade-show-displays-saskatoon`, lastModified: new Date("2026-03-03"), changeFrequency: "monthly", priority: 0.9 },
     // /event-signs-saskatoon removed 2026-05-05 → 301 to /banner-printing-saskatoon (cannibalization consolidation)
 
