@@ -539,6 +539,15 @@ function computeCost(
 // ─── Wave Line Name ───────────────────────────────────────────────────────────
 
 function buildWaveName(category: string, req: EstimateRequest, sqft: number | null): string {
+  // Service SKUs have no dimensions and no material, so the standard
+  // "CATEGORY – MATERIAL – SIZE – SIDES" shape degrades to something like
+  // "DESIGN – SVC-DESIGN-BASIC – CUSTOM – Single" on a customer-facing Wave
+  // invoice line. Use the service's own name from services.v1.csv instead.
+  if (req.material_code?.startsWith("SVC-")) {
+    const svc = getServices().find((s) => s.service_id === req.material_code);
+    if (svc) return svc.service_name;
+  }
+
   const catLabel = categoryLabel(category);
   const matLabel = materialLabel(req.material_code);
   const sizeLabel = sqft
