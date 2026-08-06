@@ -24,6 +24,10 @@ export interface CartItem {
     material_code?: string;
     design_status?: string;
     addons?: string[];
+    /** Selected vinyl colour label, for products offering colour choice. */
+    color?: string;
+    /** Customer-typed spec values (e.g. boat licence number). Also folded into `label`. */
+    custom_text?: Record<string, string>;
   };
   sell_price: number; // pre-tax total (all units) — engine sell_price, includes addons
   gst_rate: number; // e.g. 0.05 — stored at add-to-cart time so display never hardcodes
