@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Cosmetic Labels Prince Albert SK | From $5.50/sqft | True Color" },
+  title: { absolute: "Cosmetic Labels Prince Albert SK | From $25 | True Color" },
   description:
-    "Waterproof cosmetic and skincare labels for Prince Albert beauty brands and natural-product makers. BOPP vinyl from $5.50/sqft. Courier to PA.",
+    "Waterproof cosmetic and skincare labels for Prince Albert beauty brands and natural-product makers. BOPP vinyl from $25 for 25. Courier to PA.",
   alternates: { canonical: "/cosmetic-labels-prince-albert-sk" },
   openGraph: {
     title: "Cosmetic Labels Prince Albert SK | True Color Display Printing",
     description:
-      "Waterproof BOPP vinyl cosmetic labels. Survives bathroom moisture. From $5.50/sqft. Printed in Saskatoon, couriered to Prince Albert.",
+      "Waterproof BOPP vinyl cosmetic labels. Survives bathroom moisture. From $25. Printed in Saskatoon, couriered to Prince Albert.",
     url: "https://truecolorprinting.ca/cosmetic-labels-prince-albert-sk",
     images: [{ url: "/images/products/og/cosmetic-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -21,13 +21,13 @@ export default function CosmeticLabelsPrinceAlbertPage() {
   return (
     <IndustryPage
       canonicalSlug="cosmetic-labels-prince-albert-sk"
-      primaryProductSlug="stickers"
+      primaryProductSlug="cosmetic-labels"
       title="Cosmetic Labels — Prince Albert SK"
-      subtitle="Waterproof skincare and cosmetic labels for PA natural-product brands. From $5.50/sqft."
+      subtitle="Waterproof skincare and cosmetic labels for PA natural-product brands. From $25."
       heroImage="/images/products/heroes/cosmetic-labels-hero-1200x500.webp"
       heroAlt="Waterproof cosmetic and skincare labels printed for Prince Albert SK beauty brands by True Color Display Printing"
       description={
-        "Custom cosmetic and skincare labels printed in Saskatoon, couriered to Prince Albert 140 km north. From $5.50/sqft on waterproof BOPP vinyl — survives bathroom humidity and product spills without smudging. Built for Prince Albert natural-product makers, indigenous-craft skincare brands, handmade soap and balm crafters, and small farmers market beauty vendors. Saskatoon-to-PA courier is one of our fastest lanes — same-day to next-day for most carriers."
+        "Custom cosmetic and skincare labels printed in Saskatoon, couriered to Prince Albert 140 km north. From $25 on waterproof BOPP vinyl — survives bathroom humidity and product spills without smudging. Built for Prince Albert natural-product makers, indigenous-craft skincare brands, handmade soap and balm crafters, and small farmers market beauty vendors. Saskatoon-to-PA courier is one of our fastest lanes — same-day to next-day for most carriers."
       }
       descriptionNode={
         <>
@@ -36,7 +36,7 @@ export default function CosmeticLabelsPrinceAlbertPage() {
             shop and couriers to Prince Albert 140 km north. Standard cosmetic stock is{" "}
             <strong>waterproof BOPP vinyl</strong> — survives bathroom humidity, product
             spills on the bottle, and the moisture cycle that happens with any hand soap or
-            lotion. Pricing from <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full
+            lotion. Pricing starts at <strong>$25 for 25 labels</strong> — a 2.5×3.5&quot; label is $55 for 100 and $122.50 for 250. Full
             spec on our{" "}
             <Link href="/cosmetic-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               cosmetic labels Saskatoon page
@@ -63,17 +63,17 @@ export default function CosmeticLabelsPrinceAlbertPage() {
         </>
       }
       products={[
-        { name: "Cosmetic Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Product Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
+        { name: "Cosmetic Labels", from: "from $25 / 25", slug: "cosmetic-labels" },
+        { name: "Product Labels", from: "from $25 / 25", slug: "product-labels" },
+        { name: "Stickers", from: "from $25 / 25", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
         "Waterproof BOPP vinyl — survives bathroom humidity and product spills",
-        "Roland UV ink cures to a solid film — no smudging or peeling",
-        "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4)",
+        "Roland TrueVIS VG2 eco-solvent ink cures to a solid film — no smudging or peeling",
+        "25 labels from $25 — a 2.5×3.5\" label is $55 for 100, $122.50 for 250",
         "$25 order-total minimum — perfect for indigenous-craft and indie test batches",
         "Contour cutting included — rectangle, oval, circle, custom die",
         "1–3 business day print + 1 business day courier to Prince Albert",
@@ -87,7 +87,7 @@ export default function CosmeticLabelsPrinceAlbertPage() {
         },
         {
           q: "How much do cosmetic labels cost shipped to Prince Albert?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" oval at quantity 250 runs about $200.",
+          a: "25 labels start at $25. A 2.5×3.5\" cosmetic label is $55 for 100 and $122.50 for 250; a 3×4\" is $67 for 100 and $167.50 for 250. Configure your exact size and quantity on the product page to see the price before ordering.",
         },
         {
           q: "Do you print labels for indigenous-craft and natural-product brands in PA?",
@@ -95,7 +95,7 @@ export default function CosmeticLabelsPrinceAlbertPage() {
         },
         {
           q: "Will the label survive bathroom moisture?",
-          a: "Yes — waterproof BOPP vinyl. The face material doesn't absorb moisture. Roland UV ink cures to a solid film so it doesn't bead, smudge, or peel even when soap or lotion contacts the bottle.",
+          a: "Yes — waterproof BOPP vinyl. The face material doesn't absorb moisture. Roland TrueVIS VG2 eco-solvent ink cures to a solid film so it doesn't bead, smudge, or peel even when soap or lotion contacts the bottle.",
         },
         {
           q: "What's the turnaround for PA cosmetic label orders?",
