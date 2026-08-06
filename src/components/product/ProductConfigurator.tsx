@@ -43,6 +43,28 @@ const MOST_POPULAR_QTY: Record<string, number> = {
   "boat-registration-numbers": 1, // one boat = one pair; DECAL's default of 2 is wrong here
 };
 
+/**
+ * WCAG relative-luminance contrast ratio between two hex colours (1:1 – 21:1).
+ * Used to tell a boater whether their vinyl colour will actually read against
+ * their hull. Contrast is a legal requirement under Canada Shipping Act s.204,
+ * so this is a compliance check surfaced as a design aid, not decoration.
+ */
+function contrastRatio(hexA: string, hexB: string): number {
+  const luminance = (hex: string) => {
+    const n = parseInt(hex.replace("#", ""), 16);
+    return [16, 8, 0]
+      .map((shift) => ((n >> shift) & 255) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+      .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+  };
+  const [a, b] = [luminance(hexA), luminance(hexB)];
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+// Below this the number stops reading from another boat. 3:1 is the WCAG bar for
+// large text, which is the closest standard analogue to 3-inch characters at range.
+const HULL_CONTRAST_MIN = 3;
+
 const DESIGN_FEES: Record<string, number> = {
   PRINT_READY: 0,
   MINOR_EDIT: 35,
@@ -123,6 +145,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [selectedColor, setSelectedColor] = useState(product.colorOptions?.[0]);
   const [customText, setCustomText] = useState<Record<string, string>>({});
   const [touchedText, setTouchedText] = useState<Record<string, boolean>>({});
+  const [selectedHull, setSelectedHull] = useState(product.livePreview?.hulls?.[0]);
   const [qtyDiscountPct, setQtyDiscountPct] = useState<number | null>(null);
   const [qtyDiscountApplied, setQtyDiscountApplied] = useState(false);
   const [pricePerUnit, setPricePerUnit] = useState<number | null>(null);
@@ -657,41 +680,82 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
             const text = (raw || previewField?.placeholder || "").toUpperCase();
             const swatch = selectedColor?.hex ?? "#111111";
             const isPlaceholder = !raw;
-            // Dark stage for light films, light stage for dark films — mirrors the
-            // contrast rule the customer is legally required to satisfy.
-            const lightFilm = ["#FFFFFF", "#B4B8BC", "#F2C200", "#C9A227"].includes(swatch.toUpperCase());
+            const hulls = product.livePreview.hulls;
+            const hull = selectedHull ?? hulls?.[0];
+            const hullHex = hull?.hex ?? "#DCE2E8";
+            const ratio = contrastRatio(swatch, hullHex);
+            const lowContrast = ratio < HULL_CONTRAST_MIN;
+            const stage = hull?.sheen
+              // Brushed-metal bands so bare aluminum doesn't read as flat grey.
+              ? `linear-gradient(100deg, ${hullHex} 0%, #C6CBD0 18%, ${hullHex} 34%, #9BA1A7 55%, ${hullHex} 72%, #CDD2D7 88%, ${hullHex} 100%)`
+              : `linear-gradient(160deg, ${hullHex} 0%, ${hullHex}E6 100%)`;
             return (
               <div>
+                {hulls && hulls.length > 0 && (
+                  <>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2" id="hull-label">
+                      {product.livePreview.hullPickerLabel ?? "Backdrop"}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-3" role="radiogroup" aria-labelledby="hull-label">
+                      {hulls.map((h) => {
+                        const active = hull?.label === h.label;
+                        return (
+                          <button
+                            key={h.label}
+                            type="button"
+                            role="radio"
+                            aria-checked={active}
+                            aria-label={h.label}
+                            title={h.label}
+                            onClick={() => setSelectedHull(h)}
+                            className={`w-9 h-9 rounded-lg border-2 transition-transform active:scale-90 ${
+                              active ? "border-[#1c1712] scale-110" : "border-gray-200 hover:border-[#16C2F3]"
+                            }`}
+                            style={{
+                              background: h.sheen
+                                ? `linear-gradient(120deg,${h.hex} 0%,#D3D8DD 45%,${h.hex} 100%)`
+                                : h.hex,
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
                   {product.livePreview.hullLabel}
                 </p>
-                <div
-                  className={`rounded-xl border overflow-hidden ${lightFilm ? "border-gray-700" : "border-gray-200"}`}
-                  style={{
-                    background: lightFilm
-                      ? "linear-gradient(160deg,#2c3742 0%,#1b232b 100%)"
-                      : "linear-gradient(160deg,#e9edf1 0%,#cdd5dc 100%)",
-                  }}
-                >
-                  <div className="px-4 py-7 flex items-center justify-center min-h-[92px]">
+                <div className="rounded-xl border border-gray-300 overflow-hidden" style={{ background: stage }}>
+                  <div className="px-4 py-8 flex items-center justify-center min-h-[104px]">
                     <span
                       className="font-extrabold tracking-[0.12em] leading-none text-center break-all"
                       style={{
                         color: swatch,
                         fontSize: "clamp(1.35rem, 6.5vw, 2.4rem)",
-                        opacity: isPlaceholder ? 0.35 : 1,
-                        textShadow: swatch.toUpperCase() === "#FFFFFF" ? "0 1px 2px rgba(0,0,0,0.35)" : undefined,
+                        opacity: isPlaceholder ? 0.4 : 1,
                       }}
                     >
                       {text}
                     </span>
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-gray-500">
-                  {isPlaceholder
-                    ? "Type your number above to see it here."
-                    : `${selectedColor?.label ?? "Black"} vinyl · ${selectedSize.height_in}″ characters · cut exactly as shown.`}
-                </p>
+                {lowContrast && !isPlaceholder ? (
+                  <p role="status" className="mt-2 flex gap-2 text-xs leading-relaxed text-[#b42318]">
+                    <span aria-hidden>⚠</span>
+                    <span>
+                      <strong>{selectedColor?.label}</strong> barely stands out against a{" "}
+                      {hull?.label.toLowerCase()} hull. Transport Canada requires a colour that
+                      contrasts with the hull — pick a lighter or darker vinyl so the number reads
+                      from another boat.
+                    </span>
+                  </p>
+                ) : (
+                  <p className="mt-2 text-xs text-gray-500">
+                    {isPlaceholder
+                      ? "Type your number above to see it on your hull."
+                      : `${selectedColor?.label ?? "Black"} vinyl on a ${hull?.label.toLowerCase() ?? "light"} hull · ${selectedSize.height_in}″ characters · cut exactly as shown.`}
+                  </p>
+                )}
               </div>
             );
           })()}

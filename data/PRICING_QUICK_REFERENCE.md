@@ -1,5 +1,5 @@
 # True Color Display Printing — Pricing Quick Reference
-**Updated:** 2026-05-20 | **Source of truth:** `data/tables/` CSVs
+**Updated:** 2026-08-06 | **Source of truth:** `data/tables/` CSVs
 **How to update prices:** Edit the CSVs only — no code changes needed. Then `git push main` → live in ~2 min.
 
 ---
@@ -36,6 +36,7 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 | Business Cards | from $45 | 250 qty 2-sided 14pt gloss (1S = $40). 2S is the standard product. |
 | Flyers | from $45 | 100 qty full-letter 2-sided 80lb. Secondary: $25 (100 half-letter 1S). |
 | Stickers | from $25 | 25 qty 2×2" |
+| Boat Registration Numbers | from $39 | Per PAIR (both sides of the bow), 3" block characters. Ladder: 3" $39 · 3.5" $45 · 4" $52 · 6" $65. Boat name decal $18 each. Qty scales per boat. Rules `PR-BOATNUM-*`. |
 | Postcards | from $35 | 50 qty 3×4" |
 | Brochures | from $70 | 100 qty tri-fold |
 | Photo Posters | from $15 | 12×18" |
