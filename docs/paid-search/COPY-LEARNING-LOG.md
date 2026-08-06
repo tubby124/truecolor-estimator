@@ -225,3 +225,32 @@ clean, launched verifier zero safety failures.
 by text. If someone edited an RSA's headlines in the Google Ads UI, nothing here would notice.
 Lower risk than the asset gap (ads are not hand-edited in this workflow) but it is the same class
 of hole and remains open.
+
+---
+
+## 2026-08-06 EOD — first real read, and two corrections
+
+**Outcome (partial, writing back as promised):**
+
+| | Aug 5 | Aug 6 |
+|---|---:|---:|
+| Core spend | CA$6.89 | CA$13.72 |
+
+Delivery roughly doubled day over day. 13 clicks / 124 impressions / CA$20.62 across 2 delivering
+days. Competitor still zero. Too early to attribute the lift to copy versus the 11 new keywords —
+both landed the same day, and that confounding was avoidable if they had shipped a day apart.
+**Lesson for the next cadence: change one thing per day when the sample is this small.**
+
+**Correction 1 — the burn rate was wrong.** `pacing-report.mjs` divided spend by days since
+PILOT_START (Aug 3) while campaigns went live Aug 5, so two zero-spend days halved the apparent
+rate. Real burn CA$10.31/day, not CA$5.15. Projection CA$443, not CA$232. Fixed to measure over
+delivering days and to print per-day spend so a trend is visible instead of buried in an average.
+
+**Correction 2 — the diagnosis flipped.** Every earlier note called this a thin market where no
+lever helps. The live data says **budget-limited**: 32.1% of impression share lost to budget, and
+Aug 6 spent CA$13.72 against a CA$14/day budget. Raising the daily budget is now the
+evidence-justified lever, and it is the first one the data has ever supported.
+
+**Promoted to rule:** the "thin market, no bid fixes it" line in `google-ads-copy.md` now has to
+be read against live lost-IS, not assumed. An average computed over the wrong denominator will
+happily confirm whatever you already believed.
