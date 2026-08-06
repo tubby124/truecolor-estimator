@@ -124,9 +124,17 @@ function computePlan(live) {
       const liveGroup = live.groups.get(group.name);
       if (!liveGroup) {
         newGroups.push({ campaign: campaign.name, group });
-        newAds.push({ campaign: campaign.name, group });
-      } else if (!live.adsByGroup.has(group.name)) {
-        newAds.push({ campaign: campaign.name, group });
+      }
+      // Count-based so a second RSA (variant B) can be created beside the live, policy-approved
+      // variant A. Still CREATE-ONLY: an ad already live is never updated or removed, and once
+      // the shortfall is filled this returns empty, so the post-apply re-diff lands at zero.
+      const plannedAds = [
+        { label: "rsa", ad: group.rsa },
+        ...(group.rsaVariantB ? [{ label: "rsaVariantB", ad: group.rsaVariantB }] : []),
+      ];
+      const liveAdCount = live.adsByGroup.get(group.name) ?? 0;
+      for (const planned of plannedAds.slice(liveAdCount)) {
+        newAds.push({ campaign: campaign.name, group, label: planned.label, ad: planned.ad });
       }
       for (const kw of group.keywords) {
         if (!live.positives.has(`${group.name}||${kw.text}||${kw.matchType}`)) {
@@ -174,7 +182,7 @@ const total = plan.newGroups.length + plan.newAds.length + plan.newKeywords.leng
 
 console.log(`\nPLAN: ${plan.newGroups.length} ad groups, ${plan.newAds.length} RSAs, ${plan.newKeywords.length} keywords, ${plan.newGroupNegatives.length} ad-group negatives, ${plan.newCampaignNegatives.length} campaign negatives`);
 for (const g of plan.newGroups) console.log(`  + ad group "${g.group.name}" [${g.group.status}] -> ${g.group.finalUrl} (${g.campaign})`);
-for (const a of plan.newAds) console.log(`  + RSA in "${a.group.name}" (${a.group.rsa.headlines.length} headlines, ${a.group.rsa.descriptions.length} descriptions)`);
+for (const a of plan.newAds) console.log(`  + RSA [${a.label}] in "${a.group.name}" (${a.ad.headlines.length} headlines, ${a.ad.descriptions.length} descriptions)`);
 for (const k of plan.newKeywords) console.log(`  + [${k.matchType}] ${k.text}   (${k.group})`);
 for (const n of plan.newGroupNegatives) console.log(`  + neg [PHRASE] ${n.text}   (group: ${n.group})`);
 for (const n of plan.newCampaignNegatives) console.log(`  + neg [${n.matchType}] ${n.text}   (campaign: ${n.campaign})`);
@@ -245,15 +253,15 @@ if (plan.newCampaignNegatives.length > 0) {
 }
 
 if (plan.newAds.length > 0) {
-  const operations = plan.newAds.map(({ group }) => ({
+  const operations = plan.newAds.map(({ group, ad }) => ({
     create: {
       adGroup: groupResources.get(group.name),
       status: "ENABLED",
       ad: {
         finalUrls: [group.finalUrl],
         responsiveSearchAd: {
-          headlines: group.rsa.headlines.map((text) => ({ text })),
-          descriptions: group.rsa.descriptions.map((text) => ({ text })),
+          headlines: ad.headlines.map((text) => ({ text })),
+          descriptions: ad.descriptions.map((text) => ({ text })),
         },
       },
     },

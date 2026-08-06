@@ -35,6 +35,7 @@ const absPath = filePath.startsWith("/") ? filePath : join(cwd, filePath);
 // --- Classify edit type ---
 function classifyEdit(fp) {
   // Order matters — more specific patterns first
+  if (/docs\/paid-search\/(campaign-config|approved-claims)\.mjs$/.test(fp)) return "GOOGLE_ADS_COPY";
   if (/src\/lib\/data\/products-content\.ts$/.test(fp)) return "PRODUCT_CONTENT";
   if (/src\/lib\/data\/gbp-products\.json$/.test(fp)) return "GBP_CONTENT";
   if (/src\/lib\/email\//.test(fp)) return "EMAIL_TEMPLATE";
@@ -104,6 +105,26 @@ fromPrice reference:
 ${KEY_PRICES}
 
 Required skill gates: /web-design-ux before shipping | /e2e-test before push`,
+
+  GOOGLE_ADS_COPY: `RULE GATE: Read .claude/rules/google-ads-copy.md before editing paid-search copy.
+
+Every number in an ad must resolve to a sourced fact in docs/paid-search/approved-claims.mjs.
+The validator rejects any digit that does not. If a fact is missing, add it WITH ITS SOURCE —
+never add a token just to make a headline pass; change the headline instead.
+
+Copy standard (enforced by config-validator.mjs):
+  15 headlines = 10 group-specific + max 5 shared. More sharing collapses Ad Relevance.
+  Variant B MUST carry at least one sourced price headline.
+  NEVER a headline that describes the website UI ("Configure Your Order", "Upload Your Artwork").
+  NEVER "guarantee" / superlatives. Turnaround claims need an attached price or condition.
+  The legacy "rsa" (variant A) is LIVE and policy-APPROVED — do not edit it. Only "rsaVariantB".
+
+Adding keywords? Run: node scripts/google-ads/expand-keywords.mjs --group <key> --terms "..."
+It prints the FOUR files that must change, including the hardcoded counts in
+live-verification-contract.mjs. Missing one makes the live verifier report false drift.
+
+Before apply: config-validator.mjs = VALIDATED | npm run test:google-ads | npm run verify:google-ads-destinations
+After shipping: append an entry to docs/paid-search/COPY-LEARNING-LOG.md.`,
 
   GBP_CONTENT: `SKILL GATE: Use /gmb-update [niche] for GBP content changes.
 

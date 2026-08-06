@@ -114,7 +114,7 @@ const makePausedLiveState = () => ({
       matchType,
       status: "ENABLED",
     }))),
-    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 20, pausedResponsiveSearchAds: 1, enabledResponsiveSearchAds: 19,
+    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 30, pausedResponsiveSearchAds: 1, enabledResponsiveSearchAds: 29,
     competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
       campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
       campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
@@ -242,7 +242,7 @@ const makeLaunchedLiveState = () => {
   live.pausedAdGroups = 1;
   live.enabledAdGroups = 19;
   live.pausedResponsiveSearchAds = 1;
-  live.enabledResponsiveSearchAds = 19;
+  live.enabledResponsiveSearchAds = 29;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "ENABLED" }));
   live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "ENABLED" }));
@@ -444,7 +444,7 @@ test("launched live verification enforces the exact Stage 1 state", () => {
 
   const brandRsaLive = makeLaunchedLiveState();
   brandRsaLive.pausedResponsiveSearchAds = 0;
-  brandRsaLive.enabledResponsiveSearchAds = 20;
+  brandRsaLive.enabledResponsiveSearchAds = 30;
   assert.ok(evaluateLaunchedLiveState(brandRsaLive).failures.length > 0);
 
   const wrongBudget = makeLaunchedLiveState();
@@ -900,15 +900,90 @@ test("rejects protected and competitor terms in account-wide negatives", () => {
   }
 });
 
-test("rejects invented factual claims and a second RSA payload", () => {
+test("rejects invented factual claims and an unapproved RSA key", () => {
   for (const mutate of [
     (c) => { c.campaigns[0].adGroups[0].rsa.headlines[0] = "Coroplast From $1"; },
+    // "rsa" and "rsaVariantB" are the only sanctioned ad payloads; anything else is unreviewed.
     (c) => { c.campaigns[0].adGroups[0].rsa2 = structuredClone(c.campaigns[0].adGroups[0].rsa); },
   ]) {
     const config = clone();
     mutate(config);
     assert.equal(validateConfig(config).localStatus, "INVALID");
   }
+});
+
+// ── sourced-fact claim registry ─────────────────────────────────────────────
+// These lock in the 2026-08-06 fix: the contract used to ban every digit from ad copy, which
+// silently forced vague ads for months. The rule is now "numbers must be SOURCED", so these
+// tests must keep both halves honest — invented numbers still fail, real ones now pass.
+
+test("accepts sourced price claims in variant-B copy", () => {
+  const config = clone();
+  const group = config.campaigns[0].adGroups[0];
+  group.rsaVariantB.headlines[0] = "Coroplast Signs From $25";
+  assert.equal(validateConfig(config).localStatus, "VALIDATED");
+});
+
+test("rejects an unsourced number anywhere in variant-B copy", () => {
+  for (const mutate of [
+    (c) => { c.campaigns[0].adGroups[0].rsaVariantB.headlines[0] = "Coroplast Signs From $19"; },
+    (c) => { c.campaigns[0].adGroups[0].rsaVariantB.descriptions[0] = "Coroplast signs from $17 today."; },
+    (c) => { c.adAssets.callouts[0] = "Signs From $12"; },
+  ]) {
+    const config = clone();
+    mutate(config);
+    assert.equal(validateConfig(config).localStatus, "INVALID");
+  }
+});
+
+test("guarantees stay banned even when the rest of the claim is sourced", () => {
+  const config = clone();
+  config.campaigns[0].adGroups[0].rsaVariantB.headlines[0] = "Guaranteed Signs From $25";
+  assert.equal(validateConfig(config).localStatus, "INVALID");
+});
+
+test("turnaround claims require an attached price or condition", () => {
+  const bare = clone();
+  bare.campaigns[0].adGroups[0].rsaVariantB.headlines[0] = "Same Day Printing";
+  assert.equal(validateConfig(bare).localStatus, "INVALID");
+
+  const qualified = clone();
+  qualified.campaigns[0].adGroups[0].rsaVariantB.headlines[0] = "Same Day Printing +$40";
+  assert.equal(validateConfig(qualified).localStatus, "VALIDATED");
+});
+
+test("legacy variant-A wording stays exempt but the exemption never reaches variant B", () => {
+  // Variant A ships "Rush Options Available" and is live + policy-approved, so it must validate.
+  assert.equal(validateConfig(clone()).localStatus, "VALIDATED");
+  const leaked = clone();
+  leaked.campaigns[0].adGroups[0].rsaVariantB.headlines[0] = "Rush Options Available";
+  assert.equal(validateConfig(leaked).localStatus, "INVALID");
+});
+
+// ── relevance floor for new copy ────────────────────────────────────────────
+
+test("variant B must carry at least one sourced price headline", () => {
+  const config = clone();
+  const group = config.campaigns[0].adGroups[0];
+  group.rsaVariantB.headlines = group.rsaVariantB.headlines
+    .map((headline) => (/\$/.test(headline) ? headline.replaceAll(/\s*(?:From\s*)?\+?\$[\d.]+(?:\/sqft)?/g, "") : headline))
+    .map((headline, index) => (headline.trim() || `Filler Headline ${"I".repeat(index + 1)}`));
+  assert.equal(validateConfig(config).localStatus, "INVALID");
+});
+
+test("variant B may not reuse more than five headlines across ad groups", () => {
+  const config = clone();
+  const [first, second] = config.campaigns[0].adGroups;
+  // Copy six of the first group's headlines into the second: exceeds the shared cap that keeps
+  // Ad Relevance from collapsing the way variant A's 10 shared headlines did.
+  for (let index = 0; index < 6; index += 1) second.rsaVariantB.headlines[index] = first.rsaVariantB.headlines[index];
+  assert.equal(validateConfig(config).localStatus, "INVALID");
+});
+
+test("approvedClaims must stay the derived registry export", () => {
+  const config = clone();
+  config.approvedClaims = [...config.approvedClaims, { text: "$1", source: "made up" }];
+  assert.equal(validateConfig(config).localStatus, "INVALID");
 });
 
 test("rejects broken UTM source or medium", () => {

@@ -209,6 +209,11 @@ export function validateCompetitorDestinationInventory(
   return validated;
 }
 
+// 20 ad groups x variant A, plus variant B on the 10 Core groups. Independently asserted here
+// rather than imported from the contract on purpose: the checker must be able to disagree with
+// the config, or it stops being a check.
+const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 30;
+
 function evaluateLiveState(live, {
   expectedCampaigns,
   expectedPausedAdGroups,
@@ -243,7 +248,10 @@ function evaluateLiveState(live, {
   if (live.adGroups !== 20
     || live.pausedAdGroups !== expectedPausedAdGroups
     || (expectedEnabledAdGroups !== null && live.enabledAdGroups !== expectedEnabledAdGroups)) failures.push(adGroupStateFailure);
-  if (live.responsiveSearchAds !== 20
+  // 2026-08-06 variant-B copy rollout: 20 -> 30 RSAs. Ten Core ad groups gain a second,
+  // price-anchored RSA beside the live policy-approved variant A. Reports drift until
+  // apply-sync lands, which is the intended import-completion signal, not a fault.
+  if (live.responsiveSearchAds !== EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS
     || live.pausedResponsiveSearchAds !== expectedPausedResponsiveSearchAds
     || (expectedEnabledResponsiveSearchAds !== null
       && live.enabledResponsiveSearchAds !== expectedEnabledResponsiveSearchAds)) failures.push(rsaStateFailure);
@@ -456,7 +464,7 @@ export function evaluatePausedLiveState(live) {
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
     adGroupStateFailure: "19 staged ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "19 staged RSAs must be enabled and the held Brand RSA paused",
+    rsaStateFailure: "29 staged RSAs must be enabled (19 variant A + 10 variant B) and the held Brand RSA paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: false,
@@ -470,10 +478,10 @@ export function evaluateLaunchedLiveState(live) {
     expectedPausedAdGroups: 1,
     expectedPausedResponsiveSearchAds: 1,
     expectedEnabledAdGroups: 19,
-    expectedEnabledResponsiveSearchAds: 19,
+    expectedEnabledResponsiveSearchAds: 29,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
     adGroupStateFailure: "19 ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "19 RSAs must be enabled and the held Brand RSA paused",
+    rsaStateFailure: "29 RSAs must be enabled (19 variant A + 10 variant B) and the held Brand RSA paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: true,

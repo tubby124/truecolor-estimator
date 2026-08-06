@@ -88,9 +88,15 @@ for (const campaign of paidSearchConfig.campaigns) {
     const live = liveGroups.get(group.name);
     if (!live) {
       newGroups.push({ campaign: campaign.name, name: group.name, status: group.status, finalUrl: group.finalUrl });
-      newAds.push({ group: group.name, headlines: group.rsa.headlines.length, descriptions: group.rsa.descriptions.length });
-    } else if (!liveAds.has(group.name)) {
-      newAds.push({ group: group.name, headlines: group.rsa.headlines.length, descriptions: group.rsa.descriptions.length });
+    }
+    // Count-based, not presence-based. The old check only planned an RSA when an ad group had
+    // ZERO live ads, so a second variant could never be created and copy edits produced no diff
+    // at all. Comparing counts lets variant B be added beside the live, policy-approved variant
+    // A — and stays idempotent, so the post-apply re-diff returns zero.
+    const plannedAds = [group.rsa, group.rsaVariantB].filter(Boolean);
+    const liveAdCount = liveAds.get(group.name) ?? 0;
+    for (const ad of plannedAds.slice(liveAdCount)) {
+      newAds.push({ group: group.name, headlines: ad.headlines.length, descriptions: ad.descriptions.length });
     }
     for (const kw of group.keywords) {
       const key = `${group.name}||${kw.text}||${MATCH[kw.matchType]}`;

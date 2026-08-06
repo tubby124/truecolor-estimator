@@ -6,6 +6,7 @@
 @.claude/rules/seo-standards.md
 @.claude/rules/seo-protected-pages.md
 @.claude/rules/brand-voice.md
+@.claude/rules/google-ads-copy.md
 @.claude/rules/content-pipeline.md
 @.claude/rules/content-formats.md
 @.claude/rules/truecolor-drip-campaigns.md
@@ -22,6 +23,7 @@
 - /ecommerce-ux         → before any checkout/order/email feature ships
 - /e2e-test             → before every production push to Railway
 - /truecolor-page       → before any new SEO landing page
+- google-ads-copy rule  → before ANY edit to docs/paid-search/campaign-config.mjs, any new ad group, or any keyword expansion. Every number in an ad must resolve to a sourced fact in docs/paid-search/approved-claims.mjs; `node scripts/google-ads/config-validator.mjs` must return VALIDATED.
 - /tc-seo-opportunities → before editing ANY existing SEO page.tsx (loads fresh 28-day GSC rollup, confirms protected status, surfaces the right next-action — paa-faq, title rewrite, internal-link build, or no-touch). Enforced by hooks: blocks edits when `.claude/rules/seo-protected-pages.md` is >35 days stale.
 
 ## SEO Sprint Log — NON-NEGOTIABLE RULE
