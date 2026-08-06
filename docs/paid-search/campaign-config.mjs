@@ -627,7 +627,10 @@ export const paidSearchConfig = {
         coreGroup({
           key: "decals", name: "Decals", product: "decals",
           finalUrl: `${ROOT}/products/window-decals`,
-          terms: ["decals saskatoon", "clear window decals for business", "custom boat decals", "boat decals near me", "window decals saskatoon", "custom decals"],
+          // 2026-08-06: "custom boat decals" and "boat decals near me" MOVED OUT to the new
+          // `boat` group. An ad group can only carry one destination, and those two queries
+          // deserve /boat-registration-numbers, not the generic window-decal configurator.
+          terms: ["decals saskatoon", "clear window decals for business", "window decals saskatoon", "custom decals"],
           variantB: [
             "Custom Decals From $25",
             "Window Decals $11/sqft",
@@ -641,7 +644,35 @@ export const paidSearchConfig = {
             "Custom Window Graphics",
           ],
           priceLine: "Custom decals from $25, window vinyl $11/sqft. See your price online.",
-          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner"],
+          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat"],
+        }),
+        // 2026-08-06: split out of the Decals group the day /boat-registration-numbers went
+        // live. "custom boat decals" and "boat decals near me" are proven search-term-harvest
+        // queries, not planner guesses — they were already serving, just landing on the generic
+        // window-decal configurator. No new speculative terms were added: expansion rules say
+        // terms come from mined search terms or GSC evidence only.
+        //
+        // Destination is the SEO landing page rather than /products/*, because /products/* is
+        // noindex by header and the landing page carries the compliance answer the query is
+        // actually asking (how big, where, what colour) with the configurator one click away.
+        coreGroup({
+          key: "boat", name: "Boat Registration Decals", product: "boat registration decals",
+          finalUrl: `${ROOT}/boat-registration-numbers`,
+          terms: ["custom boat decals", "boat decals near me"],
+          variantB: [
+            "Boat Decals From $39 A Pair",
+            "SK Boat Registration Numbers",
+            "Boat Licence Numbers $39",
+            "3-Inch Legal Block Letters",
+            "Boat Name Decals $18",
+            "Meets Transport Canada Rules",
+            "Both Sides Of The Bow",
+            "Sticks To Aluminum Hulls",
+            "Nine Colours, No Upcharge",
+            "Preview Your Number Online",
+          ],
+          priceLine: "Boat registration decals from $39 a pair. 3-inch block letters, both sides of the bow.",
+          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "window decals"],
         }),
         // Only Core group routed to an SEO landing page rather than a /products configurator.
         // Deliberate: "large format printing" spans banners/coroplast/ACP so no single

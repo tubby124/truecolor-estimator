@@ -28,7 +28,7 @@
  * and FAILS if pricing is newer. Rationale: the moment ads carry real prices, a CSV repricing
  * silently makes every live ad false. That is a trust problem, not a style problem.
  */
-export const VERIFIED_ON = "2026-05-20";
+export const VERIFIED_ON = "2026-08-06";
 
 export const PRICING_SOURCE_FILE = "data/PRICING_QUICK_REFERENCE.md";
 
@@ -56,7 +56,10 @@ export const SOURCED_FACTS = {
   "$66": { kind: "price", meaning: "vinyl banner 2x4ft", source: "PRICING_QUICK_REFERENCE.md — banners from $66" },
   "$65": { kind: "price", meaning: "500 business cards, 2-sided", source: ".claude/rules/truecolor-pricing-comms.md" },
   "$45": { kind: "price", meaning: "250 business cards 2S / 100 flyers 2S", source: "PRICING_QUICK_REFERENCE.md — lot-priced table" },
-  "$39": { kind: "price", meaning: "ACP aluminum sign, 18x24", source: "PRICING_QUICK_REFERENCE.md — ACP from $39" },
+  // One token, two genuine products at the same price. Both are sourced; the meaning
+  // records both so nobody later assumes a boat ad inherited the ACP provenance.
+  "$39": { kind: "price", meaning: "ACP aluminum sign 18x24; ALSO boat registration decal pair, 3in", source: "PRICING_QUICK_REFERENCE.md — ACP from $39; Boat Registration Numbers from $39/pair (pricing_rules.v1.csv PR-BOATNUM-3IN)" },
+  "$18": { kind: "price", meaning: "boat name decal, single", source: "pricing_rules.v1.csv — PR-BOATNUM-NAME $18.00/unit; PRICING_QUICK_REFERENCE.md lot-priced table" },
   "$35": { kind: "price", meaning: "in-house design fee, flat, same-day proof", source: ".claude/rules/truecolor-domain.md — design $35 flat" },
   "$25": { kind: "price", meaning: "order-total minimum at checkout; coroplast/sticker/sign from-price", source: "PRICING_QUICK_REFERENCE.md — $25 order-total minimum" },
 
@@ -78,6 +81,8 @@ export const SOURCED_FACTS = {
   "14pt": { kind: "spec", meaning: "business card stock", source: "PRICING_QUICK_REFERENCE.md — 250 qty 2-sided 14pt gloss" },
   "80lb": { kind: "spec", meaning: "flyer gloss text stock", source: "PRICING_QUICK_REFERENCE.md — 100 qty full-letter 2-sided 80lb" },
   "4mm": { kind: "spec", meaning: "coroplast corrugated thickness", source: ".claude/rules/truecolor-domain.md — 4mm coroplast" },
+  "3-inch": { kind: "spec", meaning: "boat licence character height — the Transport Canada legal minimum (7.5 cm)", source: "Canada Shipping Act, 2001 s.204 — block characters not less than 75mm; products-content.ts boat-registration-numbers specs" },
+  "7.5 cm": { kind: "spec", meaning: "boat licence character height, metric form of the same minimum", source: "Canada Shipping Act, 2001 s.204 — not less than 75mm" },
 
   // ── proof ─────────────────────────────────────────────────────────────────
   "4.9": { kind: "proof", meaning: "Google review rating", source: "Known Google review proof: 4.9 from 43 reviews" },
