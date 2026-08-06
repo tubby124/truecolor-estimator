@@ -4,7 +4,8 @@ export { PRINT_RESOURCE_SLUGS } from "@/lib/data/print-resource-slugs";
 
 const BASE_URL = "https://truecolorprinting.ca";
 
-export type PrintResourceType = "template" | "project" | "comparison" | "kit";
+// "guide" falls through to the Article schema branch, same as project/comparison.
+export type PrintResourceType = "template" | "project" | "comparison" | "kit" | "guide";
 
 export interface PrintResourceSection {
   readonly heading: string;
@@ -14,7 +15,12 @@ export interface PrintResourceSection {
 
 export interface PrintResourceProductLink {
   readonly slug: string;
-  readonly href: `/products/${string}`;
+  /**
+   * Internal destination. Usually a `/products/*` configurator, but a guide may
+   * also point at its indexable landing page — `/products/*` is noindex by header,
+   * so a resource that only linked there would pass no internal link equity.
+   */
+  readonly href: `/${string}`;
   readonly label: string;
   readonly note: string;
 }
@@ -27,7 +33,8 @@ export interface PrintResource {
   readonly description: string;
   readonly intro: string;
   readonly canonical: `/print-resources/${string}`;
-  readonly updated: "2026-07-15";
+  /** ISO date this resource was created or last meaningfully revised (YYYY-MM-DD). */
+  readonly updated: `${number}-${number}-${number}`;
   readonly image?: {
     readonly src: string;
     readonly alt: string;
