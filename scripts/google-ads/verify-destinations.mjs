@@ -30,14 +30,22 @@ for (const sitelink of paidSearchConfig.adAssets?.sitelinks ?? []) {
   add(sitelink.finalUrl, `sitelink "${sitelink.text}"`);
 }
 
+// Soft-404 markers. /products/[slug] renders a "Product Not Found" page with HTTP 200 for any
+// unknown slug, so a status-only check happily passes a dead destination. Found 2026-08-06 when
+// a not-yet-deployed boat-decals page returned 200 while showing "Product Not Found" — pointing
+// ads there would have paid for every click to land on nothing.
+const SOFT_404_TITLE = /<title>[^<]*not found[^<]*<\/title>/i;
+
 async function probe(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    // GET, not HEAD: Next.js route handlers and middleware can answer HEAD differently, and we
-    // care about what a real click gets.
+    // GET, not HEAD: Next.js route handlers and middleware can answer HEAD differently, we care
+    // about what a real click gets, and we need the body to catch soft-404s.
     const response = await fetch(url, { redirect: "follow", signal: controller.signal });
-    return { status: response.status, finalUrl: response.url };
+    const body = response.status === 200 ? await response.text() : "";
+    const softNotFound = SOFT_404_TITLE.test(body);
+    return { status: response.status, finalUrl: response.url, softNotFound };
   } catch (error) {
     return { status: 0, error: error.name === "AbortError" ? `timeout after ${TIMEOUT_MS}ms` : error.message };
   } finally {
@@ -50,9 +58,9 @@ console.log(`Checking ${targets.size} ad destinations...\n`);
 const failures = [];
 const redirects = [];
 for (const [url, labels] of targets) {
-  const { status, finalUrl, error } = await probe(url);
-  const ok = status === 200;
-  if (!ok) failures.push({ url, status, error, labels: [...labels] });
+  const { status, finalUrl, error, softNotFound } = await probe(url);
+  const ok = status === 200 && !softNotFound;
+  if (!ok) failures.push({ url, status, error: error ?? (softNotFound ? "HTTP 200 but the page renders \"Not Found\" — soft 404" : undefined), labels: [...labels] });
   // A redirect still serves the customer, but paid traffic landing on a redirect chain wastes
   // the click's first paint and usually means the contract is pointing at a stale slug.
   else if (finalUrl && finalUrl.split("?")[0] !== url.split("?")[0]) redirects.push({ url, finalUrl });
