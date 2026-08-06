@@ -1531,3 +1531,53 @@ describe("is_lot_price default behavior", () => {
     expect(qty3.sell_price!).toBeGreaterThan(qty1.sell_price!);
   });
 });
+
+// ─── Boat registration number decals (2026-08-06) ─────────────────────────────
+// Priced as STEP 4a price_per_unit rules with is_lot_price=FALSE so qty scales
+// per boat. If these rows ever move into products.v1.csv, STEP 3 sets isFixedSize
+// and qty stops multiplying — a customer with two boats would pay for one.
+// Prices trace to real orders: TC-2026-0076 ($40/pair), TC-2026-0281 ($36/pair +
+// $18 name decal), Elian quote 2025-07-21 ($35/pair). Owner set $39.
+
+describe("BOAT registration number decals", () => {
+  const pair = {
+    category: "DECAL" as const,
+    material_code: "PLACEHOLDER_BOATNUM_3IN",
+    width_in: 18,
+    height_in: 3,
+    sides: 1 as const,
+  };
+
+  it("one pair (one boat, both sides of bow) = $39", () => {
+    expect(estimate({ ...pair, qty: 1 }).sell_price).toBe(39);
+  });
+
+  it("qty scales per boat — 2 boats = $78, not $39", () => {
+    expect(estimate({ ...pair, qty: 2 }).sell_price).toBe(78);
+  });
+
+  it("boat name decal = $18", () => {
+    const r = estimate({
+      category: "DECAL",
+      material_code: "PLACEHOLDER_BOATNUM_NAME",
+      width_in: 18,
+      height_in: 3.5,
+      sides: 1,
+      qty: 1,
+    });
+    expect(r.sell_price).toBe(18);
+  });
+
+  it("does not disturb the existing DECAL sqft tiers", () => {
+    const windowDecal = estimate({
+      category: "DECAL",
+      material_code: "ARLPMF7008",
+      width_in: 24,
+      height_in: 36,
+      sides: 1,
+      qty: 1,
+    });
+    expect(windowDecal.sell_price).toBeGreaterThan(0);
+    expect(windowDecal.rules_fired).not.toContain("PR-BOATNUM-3IN");
+  });
+});

@@ -74,6 +74,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/school-signs-saskatoon`, lastModified: new Date("2026-03-05"), changeFrequency: "monthly", priority: 0.85 },
     // /trade-contractor-signs-saskatoon removed 2026-05-05 → 301 to /construction-signs-saskatoon
 
+    // ── Compliance / non-location product page (2026-08-06) ──────────────────
+    // Not a city page — this is a product+regulation page, so it sits outside the
+    // 2026-07-15 location-expansion freeze. Geo signal comes from body + schema.
+    { url: `${BASE_URL}/boat-registration-numbers`, lastModified: new Date("2026-08-06"), changeFrequency: "monthly", priority: 0.85 },
+
     // ── Product + Industry pages — Sprint B (2026-03-05) ─────────────────────
     { url: `${BASE_URL}/foamboard-printing-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/vinyl-lettering-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.8 },
