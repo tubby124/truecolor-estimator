@@ -769,6 +769,327 @@ const PAGES = [
         title: "Rack cards Axis Health Center Saskatoon",
         caption: "Rack cards for Axis Health Center — True Color Display Printing, Saskatoon SK",
       },
+      // 2026-08-06 proof-of-work wave (batches 1+2)
+      {
+        loc: `${GAL}/gallery-coroplast-aw-bogo-promo.webp`,
+        title: "Promo Sign — A&W Restaurant — printed by True Color Saskatoon",
+        caption: "Full-colour coroplast promo sign printed for an A&W restaurant campaign.",
+      },
+      {
+        loc: `${GAL}/gallery-retractable-sisters-kitchen.webp`,
+        title: "Retractable Banner — Sister's Kitchen — printed by True Color Saskatoon",
+        caption: "Food catering retractable banner with full photo collage, printed and assembled in-house.",
+      },
+      {
+        loc: `${GAL}/gallery-stickers-crime-stoppers.webp`,
+        title: "Decals — Saskatoon Crime Stoppers — printed by True Color Saskatoon",
+        caption: "Printed and cut decal sets for Saskatoon Crime Stoppers alongside service-dog notice stickers.",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-telemiracle-shield.webp`,
+        title: "Custom-Shape Sign — TeleMiracle 50 — printed by True Color Saskatoon",
+        caption: "Contour-cut TeleMiracle 50 Kinsmen Kinettes shield, printed and cut on the in-house Roland.",
+      },
+      {
+        loc: `${GAL}/gallery-window-decal-hutch-barber-storefront.webp`,
+        title: "Storefront Windows — Hutch Barber — printed by True Color Saskatoon",
+        caption: "Perforated and cut window graphics installed across the Hutch Barber storefront on Idylwyld Drive.",
+      },
+      {
+        loc: `${GAL}/gallery-flyer-madina-spice.webp`,
+        title: "Grocery Flyers — Madina Spice — printed by True Color Saskatoon",
+        caption: "Full-colour weekly grocery flyers printed in volume for Madina Spice.",
+      },
+      {
+        loc: `${GAL}/gallery-magnet-calendar-ramadan-prayers.webp`,
+        title: "Prayer Calendars — First Choice — printed by True Color Saskatoon",
+        caption: "Ramadan prayer and iqama time calendar magnets printed for First Choice.",
+      },
+      {
+        loc: `${GAL}/gallery-magnet-calendar-hague-trucking.webp`,
+        title: "Wall Calendars — Trucking Company — printed by True Color Saskatoon",
+        caption: "Custom photo wall calendars for a Hague, SK trucking company — fleet photos and full-year layout.",
+      },
+      {
+        loc: `${GAL}/gallery-photo-poster-kevin-appl.webp`,
+        title: "Framed Poster — Kevin Appl, REAL — printed by True Color Saskatoon",
+        caption: "Client-appreciation photo poster printed for realtor Kevin Appl.",
+      },
+      {
+        loc: `${GAL}/gallery-flyers-event-show-run.webp`,
+        title: "Event Show Flyers — Studio Run — printed by True Color Saskatoon",
+        caption: "Vibrant event show flyers fresh off the digital press — colour that pops straight off the stack.",
+      },
+      {
+        loc: `${GAL}/gallery-banner-dee-bee-shoppe.webp`,
+        title: "Vinyl Banner — Dee Bee Shoppe — printed by True Color Saskatoon",
+        caption: "Cotton candy vendor banner printed on 13oz scrim vinyl for the Dee Bee Shoppe.",
+      },
+      {
+        loc: `${GAL}/gallery-acp-coop-humboldt-platinum.webp`,
+        title: "ACP Panel — Co-op Humboldt — printed by True Color Saskatoon",
+        caption: "Platinum sponsor recognition panel printed on aluminum composite for Co-op Humboldt.",
+      },
+      {
+        loc: `${GAL}/gallery-acp-car-city-auto.webp`,
+        title: "Dealership Sign — Car City Auto — printed by True Color Saskatoon",
+        caption: "Appointment-only dealership sign printed in full colour on rigid panel for Car City Auto.",
+      },
+      {
+        loc: `${GAL}/gallery-acp-pet-planet-parking.webp`,
+        title: "Parking Sign — Pet Planet — printed by True Color Saskatoon",
+        caption: "Customer parking directional sign printed for Pet Planet — clean layout, tow-notice fine print.",
+      },
+      {
+        loc: `${GAL}/gallery-window-graphics-axis-health.webp`,
+        title: "Storefront Graphics — Axis Health — printed by True Color Saskatoon",
+        caption: "Service-menu window graphics installed across the Axis Health Centre storefront.",
+      },
+      {
+        loc: `${GAL}/gallery-vinyl-lettering-nova-auto-centre.webp`,
+        title: "Wall Lettering — Nova Auto Centre — printed by True Color Saskatoon",
+        caption: "Large interior wall lettering cut and installed for the Nova Auto Centre showroom.",
+      },
+      {
+        loc: `${GAL}/gallery-install-saap-building-sign.webp`,
+        title: "Building Sign Install — SAAP — printed by True Color Saskatoon",
+        caption: "On-site building sign installation with boom lift — print, produce, and install handled end to end.",
+      },
+      {
+        loc: `${GAL}/gallery-banner-windshield-hub-building.webp`,
+        title: "Building Banner — Windshield Hub — printed by True Color Saskatoon",
+        caption: "Exterior building banner printed and mounted for Windshield Hub's Saskatoon location.",
+      },
+      {
+        loc: `${GAL}/gallery-banner-bbq-junction.webp`,
+        title: "Long-Format Banner — BBQ Junction — printed by True Color Saskatoon",
+        caption: "Extra-wide restaurant banner printed edge to edge for BBQ Junction.",
+      },
+      {
+        loc: `${GAL}/gallery-retractable-express-photography.webp`,
+        title: "Retractable — Express Photography — printed by True Color Saskatoon",
+        caption: "Black-and-gold retractable banner printed for Express Photography — premium studio look.",
+      },
+      {
+        loc: `${GAL}/gallery-booklets-ten31-property.webp`,
+        title: "Coil Booklets — Ten31 Property — printed by True Color Saskatoon",
+        caption: "Coil-bound business tracker booklets printed and bound in-house for Ten31 Property.",
+      },
+      {
+        loc: `${GAL}/gallery-vehicle-decal-xray-roofing.webp`,
+        title: "Truck Decals — X-Ray Roofing — printed by True Color Saskatoon",
+        caption: "Cut vinyl truck decals applied to the X-Ray Roofing work truck — number readable across a job site.",
+      },
+      {
+        loc: `${GAL}/gallery-stickers-rock-water-brewing.webp`,
+        title: "Sticker Sheets — Rock Water — printed by True Color Saskatoon",
+        caption: "Die-cut logo sticker sheets printed and kiss-cut for Rock Water Brewing.",
+      },
+      {
+        loc: `${GAL}/gallery-custom-shape-drywall-starburst.webp`,
+        title: "Retail Starbursts — Die-Cut — printed by True Color Saskatoon",
+        caption: "Die-cut starburst shelf signs for a retail drywall promo — contour cut to shape in-house.",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-exp-open-house.webp`,
+        title: "Open House Sign — eXp Realty — printed by True Color Saskatoon",
+        caption: "Directional open house sign printed on coroplast for an eXp Realty team.",
+      },
+      {
+        loc: `${GAL}/gallery-flyers-wiens-campaign.webp`,
+        title: "Campaign Flyers — Ward Seven — printed by True Color Saskatoon",
+        caption: "Municipal campaign flyers printed in volume stacks for a Saskatoon ward candidate.",
+      },
+      {
+        loc: `${GAL}/gallery-business-cards-exp-premium-black.webp`,
+        title: "Premium Cards — eXp Realty — printed by True Color Saskatoon",
+        caption: "Premium black business cards with photo panel and QR code for an eXp Realty agent.",
+      },
+      {
+        loc: `${GAL}/gallery-poster-roxy-super8-event.webp`,
+        title: "Event Poster — Roxy Theatre — printed by True Color Saskatoon",
+        caption: "Illustrated event posters printed for the One Take Super 8 screening at the Roxy Theatre.",
+      },
+      {
+        loc: `${GAL}/gallery-aframe-cafe-sidewalk-sign.webp`,
+        title: "A-Frame Sidewalk Sign — Café — printed by True Color Saskatoon",
+        caption: "Sidewalk A-frame insert printed for a café promo — coroplast insert sized for a standard frame.",
+      },
+      {
+        loc: `${GAL}/gallery-custom-shape-sasknation.webp`,
+        title: "Custom-Shape Sign — SaskNation — printed by True Color Saskatoon",
+        caption: "Contour-cut SaskNation arrow sign printed and cut in-house.",
+      },
+      {
+        loc: `${GAL}/gallery-foamboard-branding-panels.webp`,
+        title: "Rigid Display Panels — Branding Set — printed by True Color Saskatoon",
+        caption: "Dark-theme rigid display panels printed as a coordinated branding set with QR codes.",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-bid-on-me-auction.webp`,
+        title: "Auction Signs — Bid On Me — printed by True Color Saskatoon",
+        caption: "QR-coded equipment auction signs printed on coroplast for a consignment sale.",
+      },
+      {
+        loc: `${GAL}/gallery-banner-strength-nation-champions.webp`,
+        title: "Team Banner — Strength Nation — printed by True Color Saskatoon",
+        caption: "U11 hockey champions banner coming off the Roland wide-format printer.",
+      },
+      {
+        loc: `${GAL}/gallery-postcards-zaks-home-hardware.webp`,
+        title: "Promo Cards — Zak's Home Hardware — printed by True Color Saskatoon",
+        caption: "Engraving promo cards printed in volume for Zak's Home Hardware.",
+      },
+      {
+        loc: `${GAL}/gallery-stickers-scott-lake-lodge.webp`,
+        title: "Decals — Scott Lake Lodge — printed by True Color Saskatoon",
+        caption: "Large die-cut logo decals printed for Scott Lake Lodge in the Northwest Territories.",
+      },
+      {
+        loc: `${GAL}/gallery-retractable-dee-bee-shoppe.webp`,
+        title: "Retractable — Dee Bee Shoppe — printed by True Color Saskatoon",
+        caption: "Cotton candy vendor retractable banner printed and assembled for the Dee Bee Shoppe.",
+      },
+      {
+        loc: `${GAL}/gallery-business-cards-allied-infrastructure.webp`,
+        title: "Business Cards — Allied Infrastructure — printed by True Color Saskatoon",
+        caption: "Clean corporate business cards printed for Allied Infrastructure.",
+      },
+      {
+        loc: `${GAL}/gallery-window-graphics-logistics-storefront.webp`,
+        title: "Window Graphics — Logistics Office — printed by True Color Saskatoon",
+        caption: "Full storefront window graphics installed for a Saskatoon logistics and finance office.",
+      },
+      {
+        loc: `${GAL}/gallery-window-lettering-cowry-storefront.webp`,
+        title: "Storefront Sale Lettering — Cowry — printed by True Color Saskatoon",
+        caption: "Multi-window sale lettering installed across the Cowry Kitchen & Bathroom Cabinets storefront.",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-mint-dental-sponsor.webp`,
+        title: "Sponsor Sign — Mint Dental Centre — printed by True Color Saskatoon",
+        caption: "Gold-tier sponsor recognition sign printed for Mint Dental Centre.",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-borna-development-site.webp`,
+        title: "Site Sign — Borna Development — printed by True Color Saskatoon",
+        caption: "For-sale development site sign printed for Borna Development Inc.",
+      },
+      {
+        loc: `${GAL}/gallery-window-decal-namaste-door.webp`,
+        title: "Door Decal — Namaste — printed by True Color Saskatoon",
+        caption: "Etched-style welcome decal installed on a glass entry door.",
+      },
+      {
+        loc: `${GAL}/gallery-vinyl-lettering-prairie-timber.webp`,
+        title: "Cut Lettering — Prairie Timber Homes — printed by True Color Saskatoon",
+        caption: "Large-format cut lettering produced for Prairie Timber Homes.",
+      },
+      {
+        loc: `${GAL}/gallery-poster-paved-arts-concoction.webp`,
+        title: "Event Poster — PAVED Arts — printed by True Color Saskatoon",
+        caption: "Concert poster printed for the PAVED Arts Concoction event.",
+      },
+      {
+        loc: `${GAL}/gallery-banner-baydo-golf-tour.webp`,
+        title: "Event Banner — Baydo Golf Tour — printed by True Color Saskatoon",
+        caption: "Golf tour event banner printed for Baydo Express Business Travel.",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-k-realty-for-sale.webp`,
+        title: "For Sale Sign — K Realty — printed by True Color Saskatoon",
+        caption: "Realtor for-sale sign with photo panel printed on coroplast for K Realty.",
+      },
+      {
+        loc: `${GAL}/gallery-brochure-saddle-stitched-booklet.webp`,
+        title: "Saddle-Stitched Booklet — printed by True Color Saskatoon",
+        caption: "Multi-page saddle-stitched booklet printed and finished in-house.",
+      },
+      {
+        loc: `${GAL}/gallery-foamboard-chatime-drink-poster.webp`,
+        title: "Drink Poster — Chatime — printed by True Color Saskatoon",
+        caption: "Menu promo board printed for a Chatime iced americano campaign.",
+      },
+      {
+        loc: `${GAL}/gallery-signs-service-dogs-batch.webp`,
+        title: "Facility Signs — Batch Order — printed by True Color Saskatoon",
+        caption: "Service-dogs-welcome facility signs printed as a repeat batch order.",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-kids-fest-bouncy-castle.webp`,
+        title: "Event Sign — October Kids Fest — printed by True Color Saskatoon",
+        caption: "Colourful bouncy castle event sign printed for a kids fest.",
+      },
+      {
+        loc: `${GAL}/gallery-vehicle-decal-radio-cabs.webp`,
+        title: "Door Decals — Saskatoon Radio Cabs — printed by True Color Saskatoon",
+        caption: "Oval door decals printed and cut for the Saskatoon Radio Cabs fleet.",
+      },
+      {
+        loc: `${GAL}/gallery-coroplast-exp-land-for-sale.webp`,
+        title: "Development Sign — Land For Sale — printed by True Color Saskatoon",
+        caption: "Multi-lot land-for-sale development sign with floor plans and pricing detail.",
+      },
+      {
+        loc: `${GAL}/gallery-vinyl-lettering-wedding-gold.webp`,
+        title: "Wedding Lettering — Gold Script — printed by True Color Saskatoon",
+        caption: "Gold script wedding lettering cut for a ceremony backdrop.",
+      },
+      {
+        loc: `${GAL}/gallery-rack-card-bengali-realtors.webp`,
+        title: "Rack Cards — Realtor Team — printed by True Color Saskatoon",
+        caption: "Tall-format rack cards printed for a Calgary realtor team's seminar campaign.",
+      },
+      {
+        loc: `${GAL}/gallery-sticker-tc-zebra-die-cut.webp`,
+        title: "Die-Cut Sticker — Shop Mascot — printed by True Color Saskatoon",
+        caption: "Our own die-cut zebra shop sticker — full-colour print with contour cut.",
+      },
+      {
+        loc: `${GAL}/gallery-poster-morris-minor-art.webp`,
+        title: "Art Print — Morris Minor — printed by True Color Saskatoon",
+        caption: "Vintage Morris Minor art reproduction printed on the wide-format press.",
+      },
+      {
+        loc: `${GAL}/gallery-business-cards-fade-city.webp`,
+        title: "Business Cards — Fade City — printed by True Color Saskatoon",
+        caption: "Bold photo business cards printed for the Fade City barber studio.",
+      },
+      {
+        loc: `${GAL}/gallery-vehicle-decal-hyundai-stripes.webp`,
+        title: "Accent Stripes — Hyundai N — printed by True Color Saskatoon",
+        caption: "Red accent rocker stripes cut and installed on a Hyundai N sport model.",
+      },
+      {
+        loc: `${GAL}/gallery-acp-car-city-installed.webp`,
+        title: "Installed Sign — Car City Auto — printed by True Color Saskatoon",
+        caption: "Car City Auto dealership sign mounted and lit on the brick storefront.",
+      },
+      {
+        loc: `${GAL}/gallery-window-decal-jae-kim-photography.webp`,
+        title: "Door Decal — Jae Kim Photography — printed by True Color Saskatoon",
+        caption: "Gold logo door decal installed for the Jae Kim Photography studio entrance.",
+      },
+      {
+        loc: `${GAL}/gallery-postcards-wedding-stationery.webp`,
+        title: "Wedding Stationery Suite — printed by True Color Saskatoon",
+        caption: "Ceremony cards, signage inserts, and welcome stationery printed as a wedding suite.",
+      },
+      {
+        loc: `${GAL}/gallery-shop-storefront-lightbox.webp`,
+        title: "Our Shop — 216 33rd St W — printed by True Color Saskatoon",
+        caption: "The True Color storefront and lightbox sign at 216 33rd St W, Saskatoon.",
+      },
+      {
+        loc: `${GAL}/gallery-flyers-grand-opening-stacks.webp`,
+        title: "Grand Opening Flyers — Volume Run — printed by True Color Saskatoon",
+        caption: "Grand-opening flyer stacks cut and boxed for an auto glass shop launch.",
+      },
+      {
+        loc: `${GAL}/gallery-sticker-stonecraft-packaging.webp`,
+        title: "Packaging Label — Stonecraft — printed by True Color Saskatoon",
+        caption: "Brand label printed and applied to product packaging for a stone veneer company.",
+      },
     ],
   },
 

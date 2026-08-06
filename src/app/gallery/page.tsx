@@ -6,6 +6,7 @@ import { GalleryGrid } from "./GalleryGrid";
 import { IndustryShowcase } from "./IndustryShowcase";
 import { BUSINESS_INFO } from "@/lib/business-info";
 import { PRODUCTS } from "@/lib/data/products-content";
+import { PUBLISHED_GALLERY_PROJECTS } from "@/lib/data/gallery-projects";
 
 export const metadata: Metadata = {
   title: "Our Work | Print Shop Gallery Saskatoon",
@@ -29,7 +30,7 @@ const gallerySchema = {
   description:
     "Photo gallery of real print jobs and industry design mockups from True Color Display Printing in Saskatoon — coroplast signs, vinyl banners, vehicle magnets, business cards, and large format prints.",
   url: "https://truecolorprinting.ca/gallery",
-  numberOfItems: 45,
+  numberOfItems: PUBLISHED_GALLERY_PROJECTS.length,
   provider: {
     "@type": "LocalBusiness",
     name: "True Color Display Printing",
@@ -45,7 +46,7 @@ const gallerySchema = {
   },
   mainEntity: {
     "@type": "ItemList",
-    numberOfItems: 45,
+    numberOfItems: 12,
     itemListElement: [
       { "@type": "ListItem", position: 1, url: "https://truecolorprinting.ca/coroplast-signs-saskatoon", name: "Coroplast Yard Signs" },
       { "@type": "ListItem", position: 2, url: "https://truecolorprinting.ca/banner-printing-saskatoon", name: "Vinyl Banners" },

@@ -48,6 +48,11 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MPHCC020",
     heroImage: "/images/products/product/coroplast-yard-sign-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-coroplast-aw-bogo-promo.webp",
+      "/images/gallery/gallery-coroplast-exp-open-house.webp",
+      "/images/gallery/gallery-coroplast-k-realty-for-sale.webp",
+      "/images/gallery/gallery-coroplast-bid-on-me-auction.webp",
+      "/images/gallery/gallery-coroplast-exp-land-for-sale.webp",
       "/images/gallery/gallery-coroplast-diecut-sasknation-key.webp",
       "/images/gallery/gallery-coroplast-nextgen-dashcam-giveaway.webp",
       "/images/products/product/coroplast-job-site-800x600.webp",
@@ -124,6 +129,11 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RMBF004",
     heroImage: "/images/products/product/banner-vinyl-colorful-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-banner-bbq-junction.webp",
+      "/images/gallery/gallery-banner-windshield-hub-building.webp",
+      "/images/gallery/gallery-banner-dee-bee-shoppe.webp",
+      "/images/gallery/gallery-banner-baydo-golf-tour.webp",
+      "/images/gallery/gallery-banner-strength-nation-champions.webp",
       "/images/products/product/banner-13oz-1200x400.webp",
       "/images/gallery/gallery-banner-colorful-nails-spa.webp",
       "/images/gallery/gallery-banner-hello-warman-petshop.webp",
@@ -192,6 +202,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MAG302437550M",
     heroImage: "/images/products/product/vehicle-magnets-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-vehicle-decal-xray-roofing.webp",
+      "/images/gallery/gallery-vehicle-decal-radio-cabs.webp",
+      "/images/gallery/gallery-vehicle-decal-hyundai-stripes.webp",
       "/images/products/product/magnet-truck-construction-800x600.webp",
       "/images/gallery/gallery-vehicle-decal-windshield-masters.webp",
     ],
@@ -244,6 +257,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "PLACEHOLDER_14PT",
     heroImage: "/images/products/product/business-cards-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-business-cards-exp-premium-black.webp",
+      "/images/gallery/gallery-business-cards-fade-city.webp",
+      "/images/gallery/gallery-business-cards-allied-infrastructure.webp",
       "/images/products/product/business-cards-800x600.webp",
       "/images/gallery/gallery-business-cards-nofal-barber.webp",
       "/images/gallery/gallery-business-cards-lilians-hair.webp",
@@ -296,6 +312,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "PLACEHOLDER_80LB",
     heroImage: "/images/products/product/flyers-stack-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-flyer-madina-spice.webp",
+      "/images/gallery/gallery-flyers-wiens-campaign.webp",
+      "/images/gallery/gallery-flyers-grand-opening-stacks.webp",
+      "/images/gallery/gallery-flyers-event-show-run.webp",
       "/images/products/product/flyers-stack-800x600.webp",
       "/images/gallery/gallery-flyer-nissen-ramen.webp",
       "/images/gallery/gallery-flyer-sprayright-agri.webp",
@@ -358,6 +378,11 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RMACP002",
     heroImage: "/images/products/product/acp-sign-princess-liquidation-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-acp-coop-humboldt-platinum.webp",
+      "/images/gallery/gallery-acp-car-city-installed.webp",
+      "/images/gallery/gallery-acp-pet-planet-parking.webp",
+      "/images/gallery/gallery-install-saap-building-sign.webp",
+      "/images/gallery/gallery-signs-service-dogs-batch.webp",
       "/images/gallery/gallery-acp-pet-planet-customer-parking.webp",
       "/images/products/product/acp-sign-brick-wall-800x600.webp",
       "/images/products/product/acp-aluminum-sign-800x600.webp",
@@ -424,6 +449,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "GENERIC_FOAM",
     heroImage: "/images/products/product/foamboard-display-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-foamboard-branding-panels.webp",
+      "/images/gallery/gallery-foamboard-chatime-drink-poster.webp",
       "/images/products/product/foamboard-display-800x600.webp",
     ],
     defaultSides: 1,
@@ -470,6 +497,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/window-decal-before-after-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-window-decal-hutch-barber-storefront.webp",
+      "/images/gallery/gallery-window-graphics-axis-health.webp",
+      "/images/gallery/gallery-window-decal-jae-kim-photography.webp",
       "/images/products/product/window-decal-restaurant-pizza-800x600.webp",
       "/images/products/product/window-decal-barbershop-800x600.webp",
       "/images/products/product/window-decal-dental-office-800x600.webp",
@@ -615,6 +645,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/vinyl-lettering-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-vinyl-lettering-nova-auto-centre.webp",
+      "/images/gallery/gallery-vinyl-lettering-prairie-timber.webp",
+      "/images/gallery/gallery-vinyl-lettering-wedding-gold.webp",
       "/images/products/product/vinyl-lettering-800x600.webp",
       "/images/products/product/vinyl-lettering-shop-window-800x600.webp",
       "/images/products/product/vinyl-lettering-office-wall-800x600.webp",
@@ -686,6 +719,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RBS33507875S",
     heroImage: "/images/products/product/retractable-stand-600x900.webp",
     galleryImages: [
+      "/images/gallery/gallery-retractable-sisters-kitchen.webp",
+      "/images/gallery/gallery-retractable-express-photography.webp",
+      "/images/gallery/gallery-retractable-dee-bee-shoppe.webp",
       "/images/products/product/retractable-stand-600x900.webp",
       "/images/gallery/gallery-retractable-banner-financial-office.webp",
       "/images/gallery/gallery-retractable-banner-client-office.webp",
@@ -743,6 +779,11 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/stickers-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-stickers-crime-stoppers.webp",
+      "/images/gallery/gallery-stickers-rock-water-brewing.webp",
+      "/images/gallery/gallery-stickers-scott-lake-lodge.webp",
+      "/images/gallery/gallery-sticker-tc-zebra-die-cut.webp",
+      "/images/gallery/gallery-sticker-stonecraft-packaging.webp",
       "/images/products/product/stickers-800x600.webp",
       "/images/products/product/sticker-diecut-truecolor-logo-800x600.webp",
       "/images/products/product/sticker-custom-sheet-800x600.webp",
@@ -818,6 +859,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "PLACEHOLDER_14PT",
     heroImage: "/images/products/product/postcards-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-postcards-zaks-home-hardware.webp",
+      "/images/gallery/gallery-postcards-wedding-stationery.webp",
       "/images/products/product/postcards-800x600.webp",
       "/images/products/product/postcard-realtor-justlisted-800x600.webp",
       "/images/products/product/postcard-restaurant-promo-800x600.webp",
@@ -873,6 +916,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "PLACEHOLDER_100LB",
     heroImage: "/images/products/product/brochures-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-brochure-saddle-stitched-booklet.webp",
       "/images/products/product/brochures-800x600.webp",
       "/images/products/product/brochure-trifold-open-800x600.webp",
       "/images/products/product/brochure-flat-trifold-800x600.webp",
@@ -928,6 +972,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "PLACEHOLDER_100LB_RACK",
     heroImage: "/images/products/product/brochure-flat-trifold-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-rack-card-bengali-realtors.webp",
       "/images/products/product/brochure-flat-trifold-800x600.webp",
     ],
     defaultSides: 2,
@@ -1017,6 +1062,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "RMPS002",
     heroImage: "/images/products/product/photo-posters-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-photo-poster-kevin-appl.webp",
+      "/images/gallery/gallery-poster-roxy-super8-event.webp",
+      "/images/gallery/gallery-poster-paved-arts-concoction.webp",
+      "/images/gallery/gallery-poster-morris-minor-art.webp",
       "/images/products/product/poster-framed-gallery-wall-800x600.webp",
       "/images/products/product/poster-landscape-framed-800x600.webp",
       "/images/products/product/poster-sports-team-800x600.webp",
@@ -1075,6 +1124,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MAG302437550M",
     heroImage: "/images/products/product/magnet-calendars-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-magnet-calendar-ramadan-prayers.webp",
+      "/images/gallery/gallery-magnet-calendar-hague-trucking.webp",
       "/images/products/product/magnet-calendars-800x600.webp",
       "/images/products/product/magnet-calendar-fridge-800x600.webp",
       "/images/products/product/magnet-calendar-filing-cabinet-800x600.webp",
@@ -1147,6 +1198,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     category: "BOOKLET",
     heroImage: "/images/products/product/coil-bound-booklet-hero-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-booklets-ten31-property.webp",
       "/images/products/product/coil-bound-booklet-hero-800x600.webp",
       "/images/products/product/coil-booklet-stack-professional-800x600.webp",
       "/images/products/product/coil-booklet-open-spread-800x600.webp",
@@ -1227,6 +1279,9 @@ export const PRODUCTS: Record<string, ProductContent> = {
     material_code: "MPHCC020",
     heroImage: "/images/products/product/coroplast-diecut-sasknation-key-800x600.webp",
     galleryImages: [
+      "/images/gallery/gallery-coroplast-telemiracle-shield.webp",
+      "/images/gallery/gallery-custom-shape-sasknation.webp",
+      "/images/gallery/gallery-custom-shape-drywall-starburst.webp",
       "/images/gallery/gallery-coroplast-diecut-sasknation-key.webp",
       "/images/gallery/gallery-coroplast-realtor-keyshape.webp",
       "/images/products/product/coroplast-yard-sign-800x600.webp",

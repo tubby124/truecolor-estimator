@@ -62,13 +62,16 @@ export function ProductGallery({ images, productName }: Props) {
         </div>
       )}
 
-      {/* Thumbnails (only if more than 1 image) */}
+      {/* Thumbnails (only if more than 1 image) — horizontal scroll so long galleries never overflow the column */}
       {images.length > 1 && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1" role="listbox" aria-label={`${productName} photo gallery`}>
           {images.map((src, i) => (
             <button
               key={src}
               onClick={() => setActive(i)}
+              aria-label={`View ${productName} photo ${i + 1} of ${images.length}`}
+              aria-selected={i === active}
+              role="option"
               className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors shrink-0 ${
                 i === active
                   ? "border-[#16C2F3]"
