@@ -102,3 +102,42 @@ on zero data.
 
 **Promoted to rule:** yes — variant B mandatory, and the Core-only scope of the shared-headline
 cap, are both documented in `.claude/rules/google-ads-copy.md`.
+
+---
+
+## 2026-08-06 (third pass) — first search-term harvest
+
+**What shipped:** 11 mined keywords into existing groups, 4 waste negatives. 121→143 positive,
+229→253 negative. Full detail in commit `62548d2`.
+
+**Hypothesis:** Real served queries beat planner guesses. Adding exact/phrase coverage for terms
+Google already matched loosely should improve relevance and capture the impressions currently
+leaking.
+
+**Metric + date:** Re-run `mine-search-terms.mjs` next cycle. Watch whether the 4 negatives
+actually stop the apparel/photo-lab impressions, and whether the 11 new terms pick up clicks.
+
+**Outcome:** _pending._
+
+**Promoted to rule:** no rule change — this is the cadence working as designed.
+
+### Not acted on, deliberately — evidence recorded for the next pass
+
+- **Decals have real demand and no ad group.** "clear window decals for business" (2 imp),
+  "custom boat decals", "boat decals near me", "decals saskatoon" — 5 impressions across 4
+  queries, and both `/products/window-decals` and `/window-decals-saskatoon` already exist.
+  **This is the strongest Phase 2 ad-group candidate.** Not built now because the documented
+  Phase 2 evidence gate is T+14d and we are at T+1d; 5 impressions is not yet a decision.
+- **Competitor names leaking into Core.** "print baron saskatoon" (3 imp), "labels made easy"
+  (2), "mister print saskatoon", "vista print banner" — all Saskatoon competitors NOT in the
+  nine-competitor list, so Core has no routing negative for them. Note "vista print banner"
+  slipped past the `vistaprint saskatoon` negative because of the space. Fixing this properly
+  means extending COMPETITOR_GROUPS, which also creates conquest keywords — a structural change,
+  not a quick negative. Low urgency: CA$0.00 spend so far.
+- **Left alone on purpose:** "photo printing saskatoon" (photo posters are a real product from
+  $15), "business cards canada" (national intent but a genuine BC query), "24 hour flyer
+  printing" (rush intent; does not collide with the `24 hour signs` competitor negative).
+
+**Resolved:** the earlier worry that delivery was concentrating on `/printing-prices-saskatoon`
+was a viewport artifact of the screenshot. The 5 clicks are spread across four ad groups —
+stickers, sign shop, generic price, and stickers again. Not a routing problem.
