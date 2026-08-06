@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+
+const PRICED_WORK = [
+  { src: "/images/gallery/gallery-coroplast-aw-bogo-promo.webp", alt: "A&W promo sign on coroplast printed in Saskatoon", label: "Coroplast promo sign", price: "from $8/sqft", href: "/coroplast-signs-saskatoon" },
+  { src: "/images/gallery/gallery-banner-bbq-junction.webp", alt: "BBQ Junction wide vinyl banner printed in Saskatoon", label: "Vinyl banner", price: "from $66", href: "/banner-printing-saskatoon" },
+  { src: "/images/gallery/gallery-business-cards-exp-premium-black.webp", alt: "Premium black eXp Realty business cards printed in Saskatoon", label: "250 business cards", price: "from $45", href: "/business-cards-saskatoon" },
+  { src: "/images/gallery/gallery-flyer-madina-spice.webp", alt: "Madina Spice grocery flyers printed in Saskatoon", label: "100 flyers", price: "from $45", href: "/flyer-printing-saskatoon" },
+  { src: "/images/gallery/gallery-retractable-express-photography.webp", alt: "Express Photography retractable banner printed in Saskatoon", label: "Retractable banner", price: "from $219", href: "/retractable-banners-saskatoon" },
+  { src: "/images/gallery/gallery-acp-coop-humboldt-platinum.webp", alt: "Co-op Humboldt ACP sponsor sign printed in Saskatoon", label: "ACP aluminum sign", price: "from $13/sqft", href: "/aluminum-signs-saskatoon" },
+] as const;
 
 export const metadata: Metadata = {
   title: { absolute: "Printing Prices Saskatoon | 2026 Cost Guide | True Color" },
@@ -256,6 +266,26 @@ export default function PrintingPricesSaskatoonPage() {
                 including design and rush services bundled with printed-material orders.
               </li>
             </ul>
+          </section>
+
+          <section className="mb-14">
+            <h2 className="text-2xl font-bold text-[#1c1712] mb-3">What These Prices Actually Buy</h2>
+            <p className="text-gray-600 leading-relaxed mb-6 max-w-2xl">
+              Real jobs, real clients, printed in-house at 216 33rd St W — matched to the rates above.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {PRICED_WORK.map((item) => (
+                <Link key={item.src} href={item.href} className="group block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:border-[#16C2F3]">
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image src={item.src} alt={item.alt} fill loading="lazy" className="object-cover transition group-hover:scale-[1.02]" sizes="(max-width: 768px) 50vw, 33vw" />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 px-4 py-3 text-sm">
+                    <span className="font-semibold text-[#1c1712]">{item.label}</span>
+                    <span className="font-mono text-[#16C2F3]">{item.price}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </section>
 
           <section className="mb-14">
