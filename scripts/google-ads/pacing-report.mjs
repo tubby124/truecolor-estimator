@@ -64,7 +64,22 @@ for (const row of campaignRows) {
 }
 
 // ── projection ───────────────────────────────────────────────────────────────
-const elapsedDays = Math.max(1, daysBetween(PILOT_START, today) + 1);
+// Burn must be measured over days that actually DELIVERED, not days since the pilot start
+// date. Campaigns were enabled 2026-08-05, two days after PILOT_START, so dividing by elapsed
+// days halved the apparent burn rate and made the projection look far worse than reality.
+const dailyRows = await search(
+  `SELECT segments.date, metrics.cost_micros FROM campaign
+   WHERE segments.date BETWEEN '${PILOT_START}' AND '${today}'`,
+  "daily spend",
+);
+const spendByDate = new Map();
+for (const row of dailyRows) {
+  const date = row.segments?.date;
+  if (!date) continue;
+  spendByDate.set(date, (spendByDate.get(date) ?? 0) + microsToCad(row.metrics?.costMicros));
+}
+const deliveringDays = [...spendByDate.values()].filter((amount) => amount > 0).length;
+const elapsedDays = Math.max(1, deliveringDays || daysBetween(PILOT_START, today) + 1);
 const daysLeft = daysBetween(today, PROMO_DEADLINE);
 const burnPerDay = totalSpend / elapsedDays;
 const projected = totalSpend + burnPerDay * Math.max(0, daysLeft);
@@ -75,7 +90,11 @@ const enabledDailyBudget = (paidSearchConfig.campaigns ?? [])
   .reduce((sum, campaign) => sum + (campaign.dailyBudgetCad ?? 0), 0);
 
 console.log(`\n── PACING vs ${cad(TARGET_CAD)} qualifying spend ──`);
-console.log(`spend to date        ${cad(totalSpend)}   over ${elapsedDays} day(s)`);
+console.log(`spend to date        ${cad(totalSpend)}   over ${elapsedDays} delivering day(s)`);
+if (deliveringDays) {
+  const dates = [...spendByDate.entries()].filter(([, amount]) => amount > 0).sort();
+  console.log(`daily                ${dates.map(([date, amount]) => `${date.slice(5)} ${cad(amount)}`).join("  ")}`);
+}
 console.log(`current burn         ${cad(burnPerDay)}/day   (${totalClicks} clicks, ${totalImpressions} impressions)`);
 console.log(`days to deadline     ${daysLeft}`);
 console.log(`projected at ${PROMO_DEADLINE}  ${cad(projected)}`);
