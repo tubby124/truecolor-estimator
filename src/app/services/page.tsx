@@ -120,7 +120,7 @@ export default function ServicesPage() {
             details={[
               "Logo tweak / minor edits \u2014 $20\u2013$35",
               "Print layout (flyer, banner, card) \u2014 $35\u2013$50",
-              "Original logo design from scratch \u2014 $50\u2013$75",
+              "Original logo design or vectorization \u2014 $50",
             ]}
             detailsNote="Same-day proof included. Revisions until you sign off."
             cta="Design services"
