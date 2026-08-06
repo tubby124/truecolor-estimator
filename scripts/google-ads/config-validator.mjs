@@ -1,4 +1,14 @@
-import { pathToFileURL } from "node:url";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+  SOURCED_FACTS,
+  VERIFIED_ON,
+  PRICING_SOURCE_FILE,
+  claimFailureReason,
+  hasPriceClaim,
+  approvedClaims as SOURCED_APPROVED_CLAIMS,
+} from "../../docs/paid-search/approved-claims.mjs";
 
 // A PAUSED campaign keeps its staged daily budget but contributes CA$0 to approved pilot spend.
 const EXPECTED = {
@@ -199,17 +209,37 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   "label maker", "label printers",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
-const APPROVED_CLAIMS = new Map([
-  ["Rated 4.9 From 43 Reviews", "Known Google review proof: 4.9 rating from 43 reviews"],
-  ["4.9 From 43 Reviews", "Known Google review proof: 4.9 rating from 43 reviews"],
-  ["Work with a Saskatoon print shop rated 4.9 from 43 Google reviews.", "Known Google review proof: 4.9 rating from 43 reviews"],
-]);
-const FORBIDDEN_CLAIM_PATTERNS = [
-  /\bguarante(?:e|ed)\b/i,
-  /\b(?:ready today|cut[ -]?off)\b/i,
-  /\b(?:same day|next day|24[ -]?hour|48[ -]?hour)\b.*\b(?:ready|turnaround|delivery|pickup)\b/i,
-  /\b(?:ready|turnaround|delivery|pickup)\b.*\b(?:same day|next day|24[ -]?hour|48[ -]?hour)\b/i,
-];
+// Claim validation moved to docs/paid-search/approved-claims.mjs (2026-08-06).
+//
+// The old rule banned EVERY digit unless the exact string sat on a 3-entry allowlist. It was
+// meant to stop unsourced claims and instead stopped all claims — the ads could not state a
+// price, a turnaround, or a quantity, which put this contract in direct conflict with
+// .claude/rules/brand-voice.md. The registry keeps the guard and fixes the aim: every numeric
+// token must resolve to a fact with a named source, guarantees are permanently banned, and
+// turnaround wording requires an attached price or condition.
+//
+// LEGACY EXEMPTION: variant-A RSAs are live and policy-APPROVED, must stay byte-identical, and
+// were written under the old ban — so their vague rush wording is checked without the
+// condition-qualifier rule. New copy gets no such exemption. Retire with variant A.
+const LEGACY_CLAIM_OPTS = { requireConditionQualifier: false };
+const STRICT_CLAIM_OPTS = { requireConditionQualifier: true };
+const MAX_SHARED_HEADLINES_PER_GROUP = 5;
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(HERE, "..", "..");
+
+/**
+ * The moment ads carry real prices, a CSV repricing silently makes every live ad false.
+ * Fail validation when the pricing source is newer than the date the facts were last checked.
+ */
+const pricingSourceUpdatedOn = () => {
+  try {
+    const text = readFileSync(path.join(REPO_ROOT, PRICING_SOURCE_FILE), "utf8");
+    return text.match(/\*\*Updated:\*\*\s*(\d{4}-\d{2}-\d{2})/)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+};
 const TRACKING_MAPPINGS = {
   utm_source: "google",
   utm_medium: "cpc",
@@ -227,8 +257,8 @@ const TRACKING_MAPPINGS = {
   network: "{network}",
 };
 const REQUIRED_CALLOUTS = [
-  "Exact Online Pricing", "Local Saskatoon Pickup", "Upload Artwork Online",
-  "Order Printing Online", "Rush Options Available", "4.9 From 43 Reviews",
+  "Coroplast Signs From $25", "Banners From $66", "250 Cards $45",
+  "Same-Day Rush +$40 Flat", "Design $35 Flat", "4.9 From 43 Reviews",
 ];
 const REQUIRED_SITELINK_PATHS = [
   "/products/coroplast-signs", "/products/stickers", "/products/vinyl-banners",
@@ -329,11 +359,20 @@ export function validateConfig(config) {
   const globalAssetCopy = stringValues(config.adAssets).join(" ").toLowerCase().replaceAll(/[^a-z0-9]+/g, " ");
   for (const term of COMPETITOR_TERMS) if (globalAssetCopy.includes(term)) fail(`Global ad assets use competitor term: ${term}`);
   for (const claim of [...callouts, ...sitelinks.flatMap((asset) => [asset.text, asset.description1, asset.description2]), ...(snippet?.values ?? [])]) {
-    if (/\d|[$£€]|\b(?:cad|usd)\b/i.test(claim) && !APPROVED_CLAIMS.has(claim)) fail(`Ad asset contains an unapproved numeric or price claim: ${claim}`);
-    if (FORBIDDEN_CLAIM_PATTERNS.some((pattern) => pattern.test(claim)) && !APPROVED_CLAIMS.has(claim)) fail(`Ad asset contains an unapproved guarantee, turnaround, or cutoff claim: ${claim}`);
+    const reason = claimFailureReason(claim, STRICT_CLAIM_OPTS);
+    if (reason) fail(`Ad asset ${reason}`);
   }
   const claims = config.approvedClaims ?? [];
-  if (claims.length !== APPROVED_CLAIMS.size || !claims.every((claim) => APPROVED_CLAIMS.get(claim.text) === claim.source)) fail("Approved factual claims must match sourced review proof exactly");
+  if (claims.length !== SOURCED_APPROVED_CLAIMS.length
+    || !claims.every((claim, index) => claim.text === SOURCED_APPROVED_CLAIMS[index].text && claim.source === SOURCED_APPROVED_CLAIMS[index].source)) {
+    fail("approvedClaims must be the derived export from docs/paid-search/approved-claims.mjs — do not hand-edit it");
+  }
+  const pricingUpdatedOn = pricingSourceUpdatedOn();
+  if (!pricingUpdatedOn) {
+    fail(`Could not read the "**Updated:**" header from ${PRICING_SOURCE_FILE} — the ad price-staleness gate cannot run`);
+  } else if (pricingUpdatedOn > VERIFIED_ON) {
+    fail(`${PRICING_SOURCE_FILE} was updated ${pricingUpdatedOn} but ad price facts were last verified ${VERIFIED_ON}. Re-check every price in docs/paid-search/approved-claims.mjs against the pricing source, then bump VERIFIED_ON. Live ads quoting a stale price is a trust problem, not a style one.`);
+  }
   const controls = config.launchControls;
   if (!controls
     || !sameSet(controls.sourceLessons ?? [], ["WILKIE", "DUBOIS"])
@@ -360,6 +399,18 @@ export function validateConfig(config) {
   }
 
   const campaigns = config.campaigns ?? [];
+  // How many ad groups reuse each variant-B headline. Feeds the shared-headline cap below:
+  // variant A shares 10 of 15 headlines across every group, so most RSA rotations served
+  // generic-on-generic copy. That degrades Ad Relevance, which raises CPC against a fixed
+  // CA$600 ceiling. New copy is capped so the same collapse cannot happen again.
+  const variantBHeadlineUseCount = new Map();
+  for (const campaign of campaigns) {
+    for (const group of campaign.adGroups ?? []) {
+      for (const headline of new Set(group.rsaVariantB?.headlines ?? [])) {
+        variantBHeadlineUseCount.set(headline, (variantBHeadlineUseCount.get(headline) ?? 0) + 1);
+      }
+    }
+  }
   if (campaigns.length !== Object.keys(EXPECTED).length) fail("Configuration must contain exactly the three approved campaigns");
   const campaignNames = campaigns.map((campaign) => campaign.name);
   if (campaignNames.some((name) => typeof name !== "string" || !name.trim()) || new Set(campaignNames).size !== campaignNames.length) fail("Campaign names must be unique and nonblank");
@@ -427,17 +478,44 @@ export function validateConfig(config) {
       if (kind === "BRAND" && !hasExactPhrasePairs(group.keywords, BRAND_GROUPS[group.key] ?? [])) fail(`${group.name} brand variants must match canonical exact/phrase pairs`);
       const expectedCrossNegatives = kind === "CORE" ? CORE_CROSS_NEGATIVES[group.key] ?? [] : [];
       if (!sameSet(group.crossNegatives ?? [], expectedCrossNegatives)) fail(`${group.name} cross-negatives must match the canonical routing set`);
+      // Exactly the two approved RSA keys: "rsa" (variant A, live/approved, legacy copy) and
+      // optional "rsaVariantB" (price-anchored). Anything else is an unreviewed ad payload.
       const rsaKeys = Object.keys(group).filter((key) => /rsa|responsive.*ad/i.test(key));
-      if (rsaKeys.length !== 1 || rsaKeys[0] !== "rsa" || !group.rsa || Array.isArray(group.rsa) || typeof group.rsa !== "object") fail(`${group.name} must contain exactly one RSA object`);
-      const headlines = group.rsa?.headlines ?? [];
-      const descriptions = group.rsa?.descriptions ?? [];
-      if (headlines.length < 12 || headlines.length > 15 || new Set(headlines).size !== headlines.length) fail(`${group.name} must have 12-15 distinct headlines`);
-      if (descriptions.length !== 4 || new Set(descriptions).size !== descriptions.length) fail(`${group.name} must have four distinct descriptions`);
-      for (const headline of headlines) if (headline.length > 30) fail(`${group.name} headline exceeds 30 characters: ${headline}`);
-      for (const description of descriptions) if (description.length > 90) fail(`${group.name} description exceeds 90 characters`);
-      for (const claim of [...headlines, ...descriptions]) {
-        if (/\d|[$£€]|\b(?:cad|usd)\b/i.test(claim) && !APPROVED_CLAIMS.has(claim)) fail(`${group.name} contains an unapproved numeric, price, or turnaround claim: ${claim}`);
-        if (FORBIDDEN_CLAIM_PATTERNS.some((pattern) => pattern.test(claim)) && !APPROVED_CLAIMS.has(claim)) fail(`${group.name} contains an unapproved guarantee, turnaround, or cutoff claim: ${claim}`);
+      const isRsaObject = (value) => Boolean(value) && !Array.isArray(value) && typeof value === "object";
+      if (!rsaKeys.every((key) => key === "rsa" || key === "rsaVariantB") || !isRsaObject(group.rsa)) {
+        fail(`${group.name} must contain an "rsa" object and, at most, an "rsaVariantB" object`);
+      }
+      if ("rsaVariantB" in group && !isRsaObject(group.rsaVariantB)) fail(`${group.name} rsaVariantB must be an RSA object`);
+
+      const variants = [
+        { label: "rsa", ad: group.rsa, strict: false },
+        ...(group.rsaVariantB ? [{ label: "rsaVariantB", ad: group.rsaVariantB, strict: true }] : []),
+      ];
+      for (const { label, ad, strict } of variants) {
+        const headlines = ad?.headlines ?? [];
+        const descriptions = ad?.descriptions ?? [];
+        const where = `${group.name}/${label}`;
+        if (headlines.length < 12 || headlines.length > 15 || new Set(headlines).size !== headlines.length) fail(`${where} must have 12-15 distinct headlines`);
+        if (descriptions.length !== 4 || new Set(descriptions).size !== descriptions.length) fail(`${where} must have four distinct descriptions`);
+        for (const headline of headlines) if (headline.length > 30) fail(`${where} headline exceeds 30 characters: ${headline}`);
+        for (const description of descriptions) if (description.length > 90) fail(`${where} description exceeds 90 characters: ${description}`);
+        for (const claim of [...headlines, ...descriptions]) {
+          const reason = claimFailureReason(claim, strict ? STRICT_CLAIM_OPTS : LEGACY_CLAIM_OPTS);
+          if (reason) fail(`${where} ${reason}`);
+        }
+      }
+
+      // Relevance floor for new copy. These two assertions are the mechanical form of "the ad
+      // must speak to the customer" — vague copy cannot satisfy either one.
+      if (group.rsaVariantB) {
+        const variantHeadlines = group.rsaVariantB.headlines ?? [];
+        if (!variantHeadlines.some((headline) => hasPriceClaim(headline))) {
+          fail(`${group.name}/rsaVariantB must carry at least one headline with a sourced price — an ad with no number is the problem this contract exists to prevent`);
+        }
+        const sharedCount = variantHeadlines.filter((headline) => variantBHeadlineUseCount.get(headline) > 1).length;
+        if (sharedCount > MAX_SHARED_HEADLINES_PER_GROUP) {
+          fail(`${group.name}/rsaVariantB reuses ${sharedCount} headlines from other ad groups (max ${MAX_SHARED_HEADLINES_PER_GROUP}) — shared generic copy is what collapses Ad Relevance and raises CPC`);
+        }
       }
       if (kind === "COMPETITOR") {
         const copy = stringValues([group.rsa, group.assets ?? []]).join(" ").toLowerCase().replaceAll(/[^a-z0-9]+/g, " ");

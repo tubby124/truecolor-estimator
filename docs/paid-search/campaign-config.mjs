@@ -1,5 +1,13 @@
+import { approvedClaims as sourcedApprovedClaims } from "./approved-claims.mjs";
+
 const ROOT = "https://truecolorprinting.ca";
 
+// ─── VARIANT A (legacy, LIVE, policy-APPROVED — DO NOT EDIT) ─────────────────
+// Written under the old contract, which banned every number from ad copy. Kept byte-identical
+// because these 20 RSAs are serving right now; they are the control arm against variant B.
+// Their weaknesses are known and deliberate: 10 of 15 headlines are shared across every ad
+// group (collapsing Ad Relevance), and every line describes the website's checkout UI rather
+// than anything a customer wants. Retire only after variant B is APPROVED and has data.
 const sharedHeadlines = [
   "Order Printing Online",
   "Exact Prices Online",
@@ -25,10 +33,37 @@ const rsa = (product, specificHeadlines) => ({
   descriptions: descriptions(product),
 });
 
+// ─── VARIANT B (new) ─────────────────────────────────────────────────────────
+// Every number below resolves against docs/paid-search/approved-claims.mjs. The validator
+// rejects any digit that does not. Structure is 10 group-specific + 5 shared headlines, so
+// query-to-ad relevance survives rotation instead of collapsing into generic-on-generic.
+//
+// Rule: a headline sells the OUTCOME (the sign, the price, the deadline). It never describes
+// the website's UI. "Configure Your Order" is not a reason anyone clicks an ad.
+const sharedProofHeadlines = [
+  "Rated 4.9 From 43 Reviews",
+  "Same-Day Rush +$40 Flat",
+  "In-House Design $35 Flat",
+  "Pick Up in Saskatoon",
+  "Printed In-House Locally",
+];
+
+const variantDescriptions = (priceLine) => [
+  priceLine,
+  "Standard orders ready in 1-3 business days. Same-day rush +$40 flat.",
+  "Pick up at 216 33rd St W in Saskatoon. Upload your artwork with the order.",
+  "In-house designer, $35 flat, same-day proof. Rated 4.9 from 43 reviews.",
+];
+
+const rsaVariantB = (specificHeadlines, priceLine) => ({
+  headlines: [...specificHeadlines, ...sharedProofHeadlines],
+  descriptions: variantDescriptions(priceLine),
+});
+
 const keyword = (text, matchType) => ({ text, matchType });
 const exactPhrase = (terms) => terms.flatMap((term) => [keyword(term, "EXACT"), keyword(term, "PHRASE")]);
 
-const coreGroup = ({ key, name, product, finalUrl, terms, headlines, crossNegatives = [], launchTier = "TIER_1_PRODUCT" }) => ({
+const coreGroup = ({ key, name, product, finalUrl, terms, headlines, variantB, priceLine, crossNegatives = [], launchTier = "TIER_1_PRODUCT" }) => ({
   key,
   name,
   status: "ENABLED",
@@ -37,6 +72,7 @@ const coreGroup = ({ key, name, product, finalUrl, terms, headlines, crossNegati
   keywords: exactPhrase(terms),
   crossNegatives,
   rsa: rsa(product, headlines),
+  ...(variantB ? { rsaVariantB: rsaVariantB(variantB, priceLine) } : {}),
 });
 
 const neutralCompetitorRsa = {
@@ -128,20 +164,23 @@ export const paidSearchConfig = {
     rationale: "Owner directive 2026-08-03 PM: buy the cheapest clicks the market offers; do not pre-pay for delivery. Ceilings return to the forecast-optimal Core CA$4.00 / Competitor CA$2.50 / Brand CA$1.50 while daily budgets stay raised. Budget is permission to spend; the ceiling is the price per click. Weeks 1-2 are a measurement phase — raise ceilings only if Search lost IS (rank) proves auctions are lost to rank rather than to a thin market.",
   },
   adAssets: {
+    // Sitelinks and callouts render on EVERY impression across all 20 ad groups — more surface
+    // than any single RSA. They carried the same vague, number-free copy as variant A; every
+    // line below now states a sourced price or spec.
     sitelinks: [
-      { text: "Coroplast Signs", description1: "See exact prices online", description2: "Configure and order locally", finalUrl: `${ROOT}/products/coroplast-signs` },
-      { text: "Custom Stickers", description1: "Choose size and quantity", description2: "Upload artwork with order", finalUrl: `${ROOT}/products/stickers` },
-      { text: "Vinyl Banners", description1: "Price vinyl banners online", description2: "Local Saskatoon pickup", finalUrl: `${ROOT}/products/vinyl-banners` },
-      { text: "Business Cards", description1: "Configure cards and price", description2: "Order printing online", finalUrl: `${ROOT}/products/business-cards` },
-      { text: "Custom Flyers", description1: "Select quantity and sides", description2: "See your price before order", finalUrl: `${ROOT}/products/flyers` },
-      { text: "Retractable Banners", description1: "Configure display printing", description2: "Upload artwork and order", finalUrl: `${ROOT}/products/retractable-banners` },
+      { text: "Coroplast Signs", description1: "Coroplast signs from $25", description2: "4mm, single or double sided", finalUrl: `${ROOT}/products/coroplast-signs` },
+      { text: "Custom Stickers", description1: "25 stickers from $25", description2: "Die-cut to any shape", finalUrl: `${ROOT}/products/stickers` },
+      { text: "Vinyl Banners", description1: "2x4ft vinyl banner $66", description2: "13oz scrim, grommets included", finalUrl: `${ROOT}/products/vinyl-banners` },
+      { text: "Business Cards", description1: "250 cards $45, 500 for $65", description2: "14pt gloss, double sided", finalUrl: `${ROOT}/products/business-cards` },
+      { text: "Custom Flyers", description1: "100 flyers from $45", description2: "80lb gloss, double sided", finalUrl: `${ROOT}/products/flyers` },
+      { text: "Retractable Banners", description1: "Stand and print from $219", description2: "Portable trade show display", finalUrl: `${ROOT}/products/retractable-banners` },
     ],
     callouts: [
-      "Exact Online Pricing",
-      "Local Saskatoon Pickup",
-      "Upload Artwork Online",
-      "Order Printing Online",
-      "Rush Options Available",
+      "Coroplast Signs From $25",
+      "Banners From $66",
+      "250 Cards $45",
+      "Same-Day Rush +$40 Flat",
+      "Design $35 Flat",
       "4.9 From 43 Reviews",
     ],
     structuredSnippet: {
@@ -243,11 +282,10 @@ export const paidSearchConfig = {
     allCampaignsPaused: true,
     spendCad: 0,
   },
-  approvedClaims: [
-    { text: "Rated 4.9 From 43 Reviews", source: "Known Google review proof: 4.9 rating from 43 reviews" },
-    { text: "4.9 From 43 Reviews", source: "Known Google review proof: 4.9 rating from 43 reviews" },
-    { text: "Work with a Saskatoon print shop rated 4.9 from 43 Google reviews.", source: "Known Google review proof: 4.9 rating from 43 reviews" },
-  ],
+  // Derived from docs/paid-search/approved-claims.mjs — never hand-edit. Every entry is a
+  // numeric fact with a named source; the validator rejects any number in ad copy that does
+  // not resolve to one of these.
+  approvedClaims: sourcedApprovedClaims,
   launchControls: {
     sourceLessons: ["WILKIE", "DUBOIS"],
     mobilePostClickQaRequired: true,
@@ -319,6 +357,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/products/coroplast-signs`,
           terms: ["coroplast signs saskatoon", "coroplast signs", "coroplast sign printing", "coroplast printing"],
           headlines: ["Order Coroplast Signs", "Coroplast Signs Saskatoon", "Price Coroplast Signs"],
+          variantB: [
+            "Coroplast Signs From $25",
+            "4mm Coroplast, $8/sqft",
+            "Yard & Job Site Signs",
+            "Real Estate Signs",
+            "Election & Event Signs",
+            "Coroplast Signs Saskatoon",
+            "Custom Coroplast Printing",
+            "Single or Double Sided",
+            "Weatherproof Yard Signs",
+            "H-Stakes Available",
+          ],
+          priceLine: "Coroplast signs from $25. See your exact price online before you order.",
           crossNegatives: ["stickers", "labels", "vinyl banner", "business cards", "flyers", "retractable banner"],
         }),
         coreGroup({
@@ -337,6 +388,19 @@ export const paidSearchConfig = {
             "custom die cut labels near me",
           ],
           headlines: ["Order Custom Stickers", "Stickers Printed Locally", "Custom Labels Saskatoon"],
+          variantB: [
+            "Custom Stickers From $25",
+            "25 Stickers From $25",
+            "Die-Cut to Any Shape",
+            "Product & Jar Labels",
+            "Waterproof Vinyl Stickers",
+            "Custom Labels Saskatoon",
+            "Sticker Printing Saskatoon",
+            "Logo & Brand Stickers",
+            "Any Size, Any Shape",
+            "Small Runs Welcome",
+          ],
+          priceLine: "Custom stickers from $25 for 25. See your exact price online before ordering.",
           crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner"],
         }),
         coreGroup({
@@ -344,6 +408,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/products/vinyl-banners`,
           terms: ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing"],
           headlines: ["Order Vinyl Banners", "Vinyl Banners Saskatoon", "Price Custom Banners"],
+          variantB: [
+            "Vinyl Banners From $66",
+            "2x4ft Vinyl Banner $66",
+            "13oz Scrim Vinyl",
+            "Grommets Included",
+            "Grand Opening Banners",
+            "Trade Show Banners",
+            "Banner Printing $8.25/sqft",
+            "Outdoor Vinyl Banners",
+            "Custom Size Banners",
+            "Banner Printing Saskatoon",
+          ],
+          priceLine: "Vinyl banners from $66 for 2x4ft. See your exact price online before ordering.",
           crossNegatives: ["coroplast", "stickers", "labels", "business cards", "flyers", "retractable banner"],
         }),
         coreGroup({
@@ -351,6 +428,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/products/business-cards`,
           terms: ["business cards saskatoon", "business card printing saskatoon", "order business cards online", "business card printing"],
           headlines: ["Order Business Cards", "Business Cards Saskatoon", "Price Business Cards"],
+          variantB: [
+            "250 Business Cards $45",
+            "500 Cards $65, 1000 $110",
+            "14pt Gloss, Double Sided",
+            "Business Cards From $45",
+            "Business Cards Saskatoon",
+            "Matte or Gloss Finish",
+            "Card Printing Saskatoon",
+            "Realtor & Trade Cards",
+            "Double Sided Included",
+            "Order Business Cards",
+          ],
+          priceLine: "250 double-sided business cards for $45 on 14pt gloss. Price it online now.",
           crossNegatives: ["coroplast", "stickers", "labels", "vinyl banner", "flyers", "retractable banner"],
         }),
         coreGroup({
@@ -358,6 +448,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/products/flyers`,
           terms: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online", "flyer printing", "flyers printing"],
           headlines: ["Order Custom Flyers", "Flyer Printing Saskatoon", "Price Flyers Online"],
+          variantB: [
+            "100 Flyers From $45",
+            "Full Letter, Double Sided",
+            "80lb Gloss Text",
+            "Flyer Printing From $45",
+            "Menus, Handbills, Inserts",
+            "Flyer Printing Saskatoon",
+            "Custom Flyers Saskatoon",
+            "Promo & Event Flyers",
+            "Bulk Flyer Printing",
+            "Half or Full Letter",
+          ],
+          priceLine: "100 double-sided flyers from $45 on 80lb gloss. Price it online now.",
           crossNegatives: ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "retractable banner"],
         }),
         coreGroup({
@@ -365,6 +468,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/products/retractable-banners`,
           terms: ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing"],
           headlines: ["Order Retractable Banners", "Retractable Banner Print", "Pull Up Banners Saskatoon"],
+          variantB: [
+            "Retractable Banners $219",
+            "Stand & Print Included",
+            "Trade Show Displays",
+            "Pull Up Banner From $219",
+            "Ready For Your Next Show",
+            "Retractable Banner Stands",
+            "Portable Display Banners",
+            "Conference & Expo Banners",
+            "Reusable Banner Stand",
+            "Banner Stands Saskatoon",
+          ],
+          priceLine: "Retractable banners from $219 with the stand and print included.",
           crossNegatives: ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "flyers"],
         }),
         coreGroup({
@@ -372,6 +488,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/same-day-printing-saskatoon`,
           terms: ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon", "same day printing"],
           headlines: ["Rush Printing Saskatoon", "Explore Same Day Printing", "Local Rush Print Options"],
+          variantB: [
+            "Need It Today? Rush +$40",
+            "Order Before 10 AM Today",
+            "Rush Printing Saskatoon +$40",
+            "Standard: 1-3 Business Days",
+            "Rush Signs & Banners +$40",
+            "Rush Flyers & Cards +$40",
+            "Urgent Print Jobs +$40",
+            "Last Minute Printing +$40",
+            "Local Rush Print +$40",
+            "Rush Printing From $25",
+          ],
+          priceLine: "Same-day rush is +$40 flat when you order before 10 AM. Price it online now.",
           crossNegatives: ["business cards", "flyers", "stickers", "banners", "coroplast"],
         }),
         coreGroup({
@@ -379,6 +508,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/printing-prices-saskatoon`,
           terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon"],
           headlines: ["Printing Prices Saskatoon", "See Printing Prices Online", "Configure Printing Online"],
+          variantB: [
+            "Signs From $25, Cards $45",
+            "Printing Prices Saskatoon",
+            "Banners From $66",
+            "Flyers From $45",
+            "See Exact Prices Online",
+            "No Quote Needed",
+            "Real Prices, Not Estimates",
+            "Price It Yourself Online",
+            "Print Shop Saskatoon",
+            "Printing Services Saskatoon",
+          ],
+          priceLine: "Signs from $25, 250 cards $45, banners from $66. Every price is online.",
           crossNegatives: ["same day", "rush", "sign shop", "sign company"],
         }),
         coreGroup({
@@ -386,6 +528,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/sign-company-saskatoon`,
           terms: ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs"],
           headlines: ["Saskatoon Sign Shop", "Custom Signs Saskatoon", "Explore Local Sign Options"],
+          variantB: [
+            "Custom Signs From $25",
+            "Aluminum Signs From $39",
+            "Saskatoon Sign Shop",
+            "Coroplast, Aluminum, Vinyl",
+            "Sign Company Saskatoon",
+            "Signs Printed In-House",
+            "Storefront & Yard Signs",
+            "Custom Signs Saskatoon",
+            "Business & Safety Signs",
+            "Local Saskatoon Signs",
+          ],
+          priceLine: "Custom signs from $25, aluminum from $39. See your exact price online.",
           crossNegatives: ["same day", "rush", "printing prices", "print shop prices"],
         }),
         // Only Core group routed to an SEO landing page rather than a /products configurator.
@@ -397,6 +552,19 @@ export const paidSearchConfig = {
           finalUrl: `${ROOT}/large-format-printing-saskatoon`,
           terms: ["large format printing", "large format printing saskatoon", "large format signs"],
           headlines: ["Large Format Printing", "Large Format Saskatoon", "Price Large Format Print"],
+          variantB: [
+            "Large Format From $8.25/sqft",
+            "Up To 4x8ft Panels",
+            "Banners, Coroplast, ACP",
+            "Large Format Printing",
+            "Roland Eco-Solvent Print",
+            "Large Format Saskatoon",
+            "Wide Format Printing",
+            "Big Signs & Displays",
+            "Trade Show & Event Print",
+            "Large Signs Saskatoon",
+          ],
+          priceLine: "Large format from $8.25/sqft, panels up to 4x8ft. Price it online now.",
           crossNegatives: ["stickers", "labels", "business cards", "flyers"],
         }),
       ],

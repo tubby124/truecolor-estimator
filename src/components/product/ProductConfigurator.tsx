@@ -23,6 +23,8 @@ const BULK_HINTS: Record<string, Record<number, string>> = {
   BROCHURE:       { 250: "save 40%+", 500: "save 44%+" },                                  // verified tri-fold + half-fold
   BUSINESS_CARD:  { 500: "save 25%+", 1000: "save 35%+" }, // Spicer-verified 2026-02-24
   FLYER:          { 500: "save 30%+", 1000: "save 40%+" },                                 // covers 80lb AND 100lb paper
+  // Slug-keyed override — no bulk break on boat numbers; each boat is its own pair.
+  "boat-registration-numbers": {},
 };
 
 const MOST_POPULAR_QTY: Record<string, number> = {
@@ -38,6 +40,7 @@ const MOST_POPULAR_QTY: Record<string, number> = {
   BROCHURE:        250,
   BUSINESS_CARD:   500,
   FLYER:           500,
+  "boat-registration-numbers": 1, // one boat = one pair; DECAL's default of 2 is wrong here
 };
 
 const DESIGN_FEES: Record<string, number> = {
@@ -509,8 +512,11 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="qty-label">Quantity</p>
         <div className="flex flex-wrap gap-3 pt-4" role="radiogroup" aria-labelledby="qty-label">
           {product.qtyPresets.map((q) => {
-            const hint = BULK_HINTS[product.category]?.[q];
-            const isMostPopular = MOST_POPULAR_QTY[product.category] === q;
+            // Slug key wins over category key, so products that share a category
+            // but not a typical order size can override it (e.g. boat registration
+            // numbers sit in DECAL, but one boat — not two — is the common order).
+            const hint = (BULK_HINTS[product.slug] ?? BULK_HINTS[product.category])?.[q];
+            const isMostPopular = (MOST_POPULAR_QTY[product.slug] ?? MOST_POPULAR_QTY[product.category]) === q;
             const isSelected = !isCustomQty && qty === q;
             const hasDiscount = !!hint;
             return (
