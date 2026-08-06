@@ -99,7 +99,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 20, pausedAdGroups: 1, enabledAdGroups: 19, positiveKeywords: 121, negativeCriteria: 229,
+    adGroups: 20, pausedAdGroups: 1, enabledAdGroups: 19, positiveKeywords: 143, negativeCriteria: 253,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",

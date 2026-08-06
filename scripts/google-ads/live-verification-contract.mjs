@@ -285,8 +285,10 @@ function evaluateLiveState(live, {
     failures.push("competitor RSA destinations must match the exact nine-ad tracked-URL allowlist");
   }
   // 2026-08-05 Phase 1 keyword expansion: 83 -> 121 positive, 189 -> 229 negative criteria.
-  // Reports drift until the Google Ads Editor import lands, which is the intended signal.
-  if (live.positiveKeywords !== 121 || live.negativeCriteria !== 229) failures.push("keyword counts changed");
+  // 2026-08-06 first search-term harvest: 121 -> 143 positive (11 mined terms x EXACT+PHRASE),
+  // 229 -> 253 negative (t shirt / tshirt / london drugs / photo lab x EXACT+PHRASE x 3 campaigns).
+  // Reports drift until apply-sync lands, which is the intended import-completion signal.
+  if (live.positiveKeywords !== 143 || live.negativeCriteria !== 253) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,

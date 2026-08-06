@@ -386,6 +386,11 @@ export const paidSearchConfig = {
     // in-house design is a real CA$35 service and resume printing is a real print job.
     "screen printing", "photocopy", "document printing", "print outs",
     "label maker", "label printers",
+    // 2026-08-06 search-term mining (first real harvest, 41 terms / CA$8.05 / 14 days).
+    // Apparel: True Color has no garment capability (eco-solvent Roland + digital press).
+    // "london drugs" + "photo lab": retail photo-developing intent, drew 9 impressions.
+    // "photo printing" deliberately NOT negated — photo posters are a real product from $15.
+    "t shirt", "tshirt", "london drugs", "photo lab",
   ]),
   campaigns: [
     {
@@ -431,6 +436,11 @@ export const paidSearchConfig = {
             "custom labels near me",
             "die cut labels near me",
             "custom die cut labels near me",
+            // 2026-08-06 mined: real queries that served but had no matching keyword.
+            "custom sticker lettering",
+            "custom labels",
+            "vinyl sticker maker",
+            "sticker makers",
           ],
           headlines: ["Order Custom Stickers", "Stickers Printed Locally", "Custom Labels Saskatoon"],
           variantB: [
@@ -451,7 +461,7 @@ export const paidSearchConfig = {
         coreGroup({
           key: "vinyl-banners", name: "Vinyl Banners", product: "vinyl banners",
           finalUrl: `${ROOT}/products/vinyl-banners`,
-          terms: ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing"],
+          terms: ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing", "banner with grommets"],
           headlines: ["Order Vinyl Banners", "Vinyl Banners Saskatoon", "Price Custom Banners"],
           variantB: [
             "Vinyl Banners From $66",
@@ -511,7 +521,7 @@ export const paidSearchConfig = {
         coreGroup({
           key: "retractable-banners", name: "Retractable Banners", product: "retractable banners",
           finalUrl: `${ROOT}/products/retractable-banners`,
-          terms: ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing"],
+          terms: ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing", "retractable banner"],
           headlines: ["Order Retractable Banners", "Retractable Banner Print", "Pull Up Banners Saskatoon"],
           variantB: [
             "Retractable Banners $219",
@@ -551,7 +561,7 @@ export const paidSearchConfig = {
         coreGroup({
           key: "generic-print-price", name: "Generic Print Price", product: "printing",
           finalUrl: `${ROOT}/printing-prices-saskatoon`,
-          terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon"],
+          terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon", "saskatoon print shops", "saskatoon printing", "printing in saskatoon", "printers saskatoon"],
           headlines: ["Printing Prices Saskatoon", "See Printing Prices Online", "Configure Printing Online"],
           variantB: [
             "Signs From $25, Cards $45",
@@ -571,7 +581,7 @@ export const paidSearchConfig = {
         coreGroup({
           key: "generic-sign-shop", name: "Generic Sign Shop", product: "signs",
           finalUrl: `${ROOT}/sign-company-saskatoon`,
-          terms: ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs"],
+          terms: ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs", "signage saskatoon"],
           headlines: ["Saskatoon Sign Shop", "Custom Signs Saskatoon", "Explore Local Sign Options"],
           variantB: [
             "Custom Signs From $25",

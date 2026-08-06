@@ -165,14 +165,18 @@ const CORE_TERMS = {
     "custom labels near me",
     "die cut labels near me",
     "custom die cut labels near me",
+    "custom sticker lettering",
+    "custom labels",
+    "vinyl sticker maker",
+    "sticker makers",
   ],
-  "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing"],
+  "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing", "banner with grommets"],
   "business-cards": ["business cards saskatoon", "business card printing saskatoon", "order business cards online", "business card printing"],
   flyers: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online", "flyer printing", "flyers printing"],
-  "retractable-banners": ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing"],
+  "retractable-banners": ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing", "retractable banner"],
   "rush-same-day": ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon", "same day printing"],
-  "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon"],
-  "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs"],
+  "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon", "saskatoon print shops", "saskatoon printing", "printing in saskatoon", "printers saskatoon"],
+  "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs", "signage saskatoon"],
   "large-format": ["large format printing", "large format printing saskatoon", "large format signs"],
 };
 const CORE_CROSS_NEGATIVES = {
@@ -207,6 +211,7 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   "how to", "canva", "download", "printable", "machine", "equipment", "supplies",
   "screen printing", "photocopy", "document printing", "print outs",
   "label maker", "label printers",
+  "t shirt", "tshirt", "london drugs", "photo lab",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 // Claim validation moved to docs/paid-search/approved-claims.mjs (2026-08-06).
