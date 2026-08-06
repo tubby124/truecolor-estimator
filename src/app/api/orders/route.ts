@@ -29,6 +29,7 @@ import type { CartItem } from "@/lib/cart/cart";
 import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
 import { estimate } from "@/lib/engine";
+import { getConfigNum } from "@/lib/data/loader";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
@@ -75,7 +76,10 @@ export interface CreateOrderRequest {
 
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
-const RUSH_FEE = 40;
+// Rush fee is read from config.v1.csv at the call site (see below) rather than
+// hardcoded here. This was the 4th independent copy of the rush fee (engine STEP 8,
+// sticker-v2-bridge, services.v1.csv, here) and the one most likely to be missed on a
+// repricing, since it lives outside src/lib/engine.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /**
@@ -359,7 +363,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Calculate totals
     const itemsSubtotal = items.reduce((s, i) => s + i.sell_price, 0);
-    const rush = is_rush ? RUSH_FEE : 0;
+    const rush = is_rush ? getConfigNum("rush_fee_flat") : 0;
     // Discount reduces pre-tax base (legally correct — reduces taxable amount)
     const discount = Math.min(validatedDiscount, itemsSubtotal + rush); // cap: total can't go negative
     const discountedItemsSubtotal = itemsSubtotal - discount;

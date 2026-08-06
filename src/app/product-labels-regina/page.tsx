@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Product Labels Regina SK | From $5.50/sqft | True Color" },
+  title: { absolute: "Product Labels Regina SK | From $25 | True Color" },
   description:
-    "Retail product labels for Regina artisan food, beverage, packaged goods. From $5.50/sqft. Gloss, matte, soft-touch. Printed in Saskatoon, shipped to Regina.",
+    "Retail product labels for Regina artisan food, beverage, packaged goods. From $25. Gloss, matte, soft-touch. Printed in Saskatoon, shipped to Regina.",
   alternates: { canonical: "/product-labels-regina" },
   openGraph: {
     title: "Product Labels Regina SK | True Color Display Printing",
     description:
-      "Full-colour retail product labels. Gloss, matte, or soft-touch. From $5.50/sqft. Printed in Saskatoon, shipped to Regina.",
+      "Full-colour retail product labels. Gloss, matte, or soft-touch. From $25. Printed in Saskatoon, shipped to Regina.",
     url: "https://truecolorprinting.ca/product-labels-regina",
     images: [{ url: "/images/products/og/product-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -21,13 +21,13 @@ export default function ProductLabelsReginaPage() {
   return (
     <IndustryPage
       canonicalSlug="product-labels-regina"
-      primaryProductSlug="stickers"
+      primaryProductSlug="product-labels"
       title="Product Labels — Regina SK"
-      subtitle="Retail product labels for Regina food, beverage, packaged-goods brands. From $5.50/sqft."
+      subtitle="Retail product labels for Regina food, beverage, packaged-goods brands. From $25."
       heroImage="/images/products/heroes/product-labels-hero-1200x500.webp"
       heroAlt="Retail product labels printed for Regina SK artisan brands by True Color Display Printing"
       description={
-        "Custom retail product labels printed in Saskatoon, shipped to Regina 260 km south. From $5.50/sqft on 3mil vinyl — gloss, matte, or soft-touch finish. Built for Regina artisan food brands, craft beverages, packaged goods, soap and candle makers, and any SaskMade product going on a retail shelf. Contour-cut to any shape, no die fee. Same Roland UV print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier adds 1–2 days."
+        "Custom retail product labels printed in Saskatoon, shipped to Regina 260 km south. From $25 on 3mil vinyl — gloss, matte, or soft-touch finish. Built for Regina artisan food brands, craft beverages, packaged goods, soap and candle makers, and any SaskMade product going on a retail shelf. Contour-cut to any shape, no die fee. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier adds 1–2 days."
       }
       descriptionNode={
         <>
@@ -35,7 +35,7 @@ export default function ProductLabelsReginaPage() {
             True Color Display Printing prints custom retail product labels at our Saskatoon
             shop and ships to Regina businesses 260 km south. Stock options include 3mil
             white vinyl in gloss, matte, or soft-touch finish. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full pricing tiers and
+            <strong>$25 for 25 labels</strong> — a 3×4&quot; label is $67 for 100 and $165 for 500. Full pricing and
             material spec on our{" "}
             <Link href="/product-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               product labels Saskatoon page
@@ -66,8 +66,8 @@ export default function ProductLabelsReginaPage() {
         </>
       }
       products={[
-        { name: "Product Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
+        { name: "Product Labels", from: "from $25 / 25", slug: "product-labels" },
+        { name: "Stickers", from: "from $25 / 25", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
         { name: "Postcards", from: "100 for $45", slug: "postcards" },

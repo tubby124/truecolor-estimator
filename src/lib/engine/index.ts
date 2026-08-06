@@ -5,6 +5,7 @@ import { getPricingRules, getProducts, getMaterials, getServices, getConfigNum, 
 import type { EstimateRequest, EstimateResponse, LineItem, CostBreakdown } from "./types";
 import { flags } from "@/lib/flags";
 import { runStickerV2 } from "./sticker-v2-bridge";
+import { computeDesignFee } from "./design-fee";
 
 const PRICING_VERSION = "v1_2026-02-19";
 
@@ -313,8 +314,11 @@ export function estimate(req: EstimateRequest): EstimateResponse {
 
   // H-Stake — 1 stake per sign, multiply by qty
   if (addons.includes("H_STAKE")) {
-    const hstakeSvc = services.find((s) => s.service_id === "SVC-HSTAKE");
-    const hstakePrice = hstakeSvc?.default_price ?? getConfigNum("hstake_price_per_unit");
+    // config.v1.csv is the single source of truth for fees the engine adds inside
+    // another product's quote. services.v1.csv is descriptive metadata only (name,
+    // applies_to, taxability) — this was the one place its default_price could win,
+    // which meant the same fee had two authorities that could silently disagree.
+    const hstakePrice = getConfigNum("hstake_price_per_unit");
     const hstakeTotal = hstakePrice * qty;
     addonTotal += hstakeTotal;
     rulesFired.push("PR-ADDON-HSTAKE");
@@ -356,18 +360,11 @@ export function estimate(req: EstimateRequest): EstimateResponse {
   }
 
   // ── STEP 7: Design fee ────────────────────────────────────────────────────
-  let designFee = 0;
-  let designRuleId: string | null = null;
-  if (designStatus === "MINOR_EDIT") {
-    designFee = getConfigNum("design_minor_edit_fee");
-    designRuleId = "PR-DESIGN-BASIC";
-  } else if (designStatus === "FULL_DESIGN") {
-    designFee = getConfigNum("design_full_design_fee");
-    designRuleId = "PR-DESIGN-FULL";
-  } else if (designStatus === "LOGO_RECREATION") {
-    designFee = getConfigNum("design_logo_recreation_fee");
-    designRuleId = "PR-DESIGN-LOGO";
-  } else if (designStatus === "UNKNOWN") {
+  // Shared with the STICKER V2 bridge — see src/lib/engine/design-fee.ts.
+  const design = computeDesignFee(designStatus);
+  const designFee = design.fee;
+  const designRuleId = design.ruleId;
+  if (design.isUnknown) {
     clarifications.push("Design status unknown — please confirm if files are print-ready.");
   }
   if (designFee > 0 && designRuleId) {
@@ -539,6 +536,15 @@ function computeCost(
 // ─── Wave Line Name ───────────────────────────────────────────────────────────
 
 function buildWaveName(category: string, req: EstimateRequest, sqft: number | null): string {
+  // Service SKUs have no dimensions and no material, so the standard
+  // "CATEGORY – MATERIAL – SIZE – SIDES" shape degrades to something like
+  // "DESIGN – SVC-DESIGN-BASIC – CUSTOM – Single" on a customer-facing Wave
+  // invoice line. Use the service's own name from services.v1.csv instead.
+  if (req.material_code?.startsWith("SVC-")) {
+    const svc = getServices().find((s) => s.service_id === req.material_code);
+    if (svc) return svc.service_name;
+  }
+
   const catLabel = categoryLabel(category);
   const matLabel = materialLabel(req.material_code);
   const sizeLabel = sqft

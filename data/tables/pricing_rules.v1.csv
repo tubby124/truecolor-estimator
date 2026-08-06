@@ -81,12 +81,12 @@ PR-PC-5X7-1000,v1_2026-03-11,2026-03-11,POSTCARD,PLACEHOLDER_14PT_5X7,,,,1000,10
 PR-DISP-ECO,v1_2026-02-19,2026-02-19,DISPLAY,RBS33507875S,,,,1,,,219.00,,round_up_0.01,,NEW WAVE PRODUCTS.csv:row51,FALSE
 PR-DISP-DLX,v1_2026-02-19,2026-02-19,DISPLAY,RBS33507900PSB,,,,1,,,299.00,,round_up_0.01,,NEW WAVE PRODUCTS.csv:row52,FALSE
 PR-DISP-PREM,v1_2026-02-19,2026-02-19,DISPLAY,RBS33507900PREM,,,,1,,,349.00,,round_up_0.01,,NEW WAVE PRODUCTS.csv:row53,FALSE
-PR-SVC-INSTALL,v1_2026-02-19,2026-02-19,SERVICE,,,,,,,75.00,,75.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row112,
-PR-SVC-DESIGN-BASIC,v1_2026-02-19,2026-02-19,DESIGN,,,,,,,35.00,,35.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row115,
-PR-SVC-DESIGN-FULL,v1_2026-02-19,2026-02-19,DESIGN,,,,,,,50.00,,50.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row116,
-PR-SVC-DESIGN-LOGO,v1_2026-02-19,2026-02-19,DESIGN,,,,,,,75.00,,75.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row117,
-PR-ADDON-GROMMET,v1_2026-03-12,2026-03-12,ADDON,RMGR002,,,,,,2.50,,0,round_up_0.01,,NEW WAVE PRODUCTS.csv:row215 + estimatorRules.csv:row4 + services.v1.csv sync,
-PR-ADDON-RUSH,v1_2026-02-19,2026-02-19,ADDON,,,,,,,40.00,,40.00,round_up_0.01,,estimatorRules.csv:row5,
+PR-SVC-INSTALL,v1_2026-08-06,2026-08-06,SERVICE,SVC-INSTALL,,,,,,,75.00,75.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row112 + 2026-08-06 moved flat price to price_per_unit so Step 4a can match it,FALSE
+PR-SVC-DESIGN-BASIC,v1_2026-08-06,2026-08-06,DESIGN,SVC-DESIGN-BASIC,,,,,,,35.00,35.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row115 + 2026-08-06 moved flat price to price_per_unit; material_code added to disambiguate the three DESIGN rules,FALSE
+PR-SVC-DESIGN-FULL,v1_2026-08-06,2026-08-06,DESIGN,SVC-DESIGN-FULL,,,,,,,50.00,50.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row116 + 2026-08-06 moved flat price to price_per_unit; material_code added to disambiguate the three DESIGN rules,FALSE
+PR-SVC-DESIGN-LOGO,v1_2026-08-06,2026-08-06,DESIGN,SVC-DESIGN-LOGO,,,,,,,50.00,50.00,round_up_0.01,,NEW WAVE PRODUCTS.csv:row117 + 2026-08-06 synced 75.00 -> 50.00 to match config.v1.csv design_logo_recreation_fee and services.v1.csv SVC-DESIGN-LOGO; row was stale and unreachable until the column fix,FALSE
+PR-ADDON-GROMMET,v1_2026-08-06,2026-08-06,ADDON,RMGR002,,,,,,,2.50,0,round_up_0.01,,NEW WAVE PRODUCTS.csv:row215 + estimatorRules.csv:row4 + services.v1.csv sync + 2026-08-06 moved flat price to price_per_unit,FALSE
+PR-ADDON-RUSH,v1_2026-08-06,2026-08-06,ADDON,SVC-RUSH,,,,,,,40.00,40.00,round_up_0.01,,estimatorRules.csv:row5 + 2026-08-06 moved flat price to price_per_unit,FALSE
 PR-FALLBACK-ALL,v1_2026-02-19,2026-02-19,ALL,,,0,,,,6.50,,25.00,round_up_0.01,CONFLICT-04: fallback only when no category rule matches,estimatorRules.csv:row2,
 PR-FLYER-80H-50,v1_2026-03-11,2026-03-11,FLYER,PLACEHOLDER_80LB_HALF,,,,50,50,,28.00,,round_up_0.01,,half-size-50,TRUE
 PR-FLYER-80H-100,v1_2026-02-19,2026-02-19,FLYER,PLACEHOLDER_80LB_HALF,,,,100,100,,35.00,,round_up_0.01,,half-size-2026,TRUE
