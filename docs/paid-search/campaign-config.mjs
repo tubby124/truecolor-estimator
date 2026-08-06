@@ -413,8 +413,12 @@ export const paidSearchConfig = {
       ...campaignBase,
       kind: "CORE",
       name: "GOOG_Search_TC_CoreProducts_2026",
-      dailyBudgetCad: 14,
-      maximumPilotCad: 644,
+      // 2026-08-06: raised 14 -> 18. Evidence, not pacing anxiety: Aug 6 spent CA$13.72 against
+      // the CA$14 budget and Core lost 32.1% of impression share to budget. Enabled daily total
+      // becomes CA$22, still inside the CA$25 unmonitored-burn bound. The CA$600 hard stop is
+      // unchanged and remains the binding constraint on total spend.
+      dailyBudgetCad: 18,
+      maximumPilotCad: 828,
       campaignNegatives: competitorTargets.flatMap(([, , terms]) => terms),
       gates: [],
       adGroups: [

@@ -412,7 +412,7 @@ test("live verification contract rejects launch-critical drift and missing noind
 
 test("launched live verification enforces the exact Stage 1 state", () => {
   assert.deepEqual(LAUNCHED_EXPECTED_CAMPAIGNS, {
-    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 14, ceiling: 4, status: "ENABLED" },
+    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 18, ceiling: 4, status: "ENABLED" },
     GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 2.5, status: "ENABLED" },
     GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" },
   });
@@ -673,8 +673,8 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.pilot.startDate, "2026-08-03");
   assert.equal(paidSearchConfig.pilot.endDate, "2026-09-17");
   assert.equal(paidSearchConfig.pilot.inclusiveDays, 46);
-  assert.equal(core.dailyBudgetCad, 14);
-  assert.equal(core.maximumPilotCad, 644);
+  assert.equal(core.dailyBudgetCad, 18);
+  assert.equal(core.maximumPilotCad, 828);
   assert.equal(competitors.dailyBudgetCad, 4);
   assert.equal(competitors.maximumPilotCad, 184);
   assert.equal(brand.dailyBudgetCad, 3);
@@ -682,7 +682,7 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.targetQualifyingSpendCad, 600);
   assert.equal(paidSearchConfig.maximumPilotCad, 600);
   const plannedMaximumCad = paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.maximumPilotCad, 0);
-  assert.equal(plannedMaximumCad, 828);
+  assert.equal(plannedMaximumCad, 1012);
   // Budget capacity intentionally EXCEEDS the CA$600 runtime ceiling: daily budgets are
   // permission to capture cheap clicks on good days, and the 15-minute hard-stop monitor is
   // the binding constraint on total spend. Capacity must still be able to reach the target.
@@ -692,7 +692,7 @@ test("canonical routing and campaign caps are complete", () => {
   const enabledDailyBudget = paidSearchConfig.campaigns
     .filter((campaign) => campaign.status === "ENABLED")
     .reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0);
-  assert.equal(enabledDailyBudget, 18);
+  assert.equal(enabledDailyBudget, 22);
   assert.ok(enabledDailyBudget <= 25);
   for (const campaign of paidSearchConfig.campaigns) {
     const expectedStatus = campaign.kind === "BRAND" ? "PAUSED" : "ENABLED";
@@ -704,7 +704,7 @@ test("canonical routing and campaign caps are complete", () => {
       expectedStatus === "PAUSED" ? 0 : campaign.dailyBudgetCad * paidSearchConfig.pilot.inclusiveDays,
     );
   }
-  assert.equal(paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0), 21);
+  assert.equal(paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0), 25);
   assert.equal(paidSearchConfig.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
   assert.deepEqual(
     Object.values(paidSearchConfig.conversionMeasurement.requiredUploadClickActions).map((action) => [action.eventName, action.actionId, action.status]),
@@ -807,7 +807,7 @@ test("exports canonical Editor campaign, RSA, and location entities", () => {
   }
   const expectedCampaignStatus = (name) => name === "GOOG_Search_TC_BrandDefense_2026" ? "PAUSED" : "ENABLED";
   assert.ok(campaigns.rows.every((row) => row.Status === expectedCampaignStatus(row.Campaign)));
-  assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026").Budget, "14");
+  assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026").Budget, "18");
   assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026")["Maximum CPC bid limit"], "4");
   assert.ok(campaigns.rows.every((row) => row["Start date"] === "2026-08-03" && row["End date"] === "2026-09-17"));
   const adGroups = parseCsv(artifacts["ad-groups.csv"]);

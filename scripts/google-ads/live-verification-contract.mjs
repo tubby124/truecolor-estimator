@@ -1,14 +1,14 @@
 import { COMPETITOR_RSA_REVIEW } from "./request-competitor-rsa-review.mjs";
 
 export const PAUSED_EXPECTED_CAMPAIGNS = Object.freeze({
-  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 14, ceiling: 4, status: "PAUSED" }),
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 18, ceiling: 4, status: "PAUSED" }),
   GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 2.5, status: "PAUSED" }),
   GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" }),
 });
 // Stage 1 launch = Core + Competitor enabled, Brand held paused (2026-08-03 PM owner decision).
 // Brand contributes the single paused ad group and RSA in the launched counts below.
 export const LAUNCHED_EXPECTED_CAMPAIGNS = Object.freeze({
-  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 14, ceiling: 4, status: "ENABLED" }),
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 18, ceiling: 4, status: "ENABLED" }),
   GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 2.5, status: "ENABLED" }),
   GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" }),
 });
