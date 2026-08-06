@@ -5,6 +5,7 @@ export const PRODUCT_OPTIONS = [
   "Vehicle Decals (Die-Cut Vinyl + Install)",
   "Vehicle Magnets",
   "Window Decals / Vinyl",
+  "Boat Registration Numbers / Boat Lettering",
   "Aluminum Composite Signs",
   "Foamboard Displays",
   "Retractable Banners",
