@@ -23,6 +23,8 @@ const BULK_HINTS: Record<string, Record<number, string>> = {
   BROCHURE:       { 250: "save 40%+", 500: "save 44%+" },                                  // verified tri-fold + half-fold
   BUSINESS_CARD:  { 500: "save 25%+", 1000: "save 35%+" }, // Spicer-verified 2026-02-24
   FLYER:          { 500: "save 30%+", 1000: "save 40%+" },                                 // covers 80lb AND 100lb paper
+  // Slug-keyed override — no bulk break on boat numbers; each boat is its own pair.
+  "boat-registration-numbers": {},
 };
 
 const MOST_POPULAR_QTY: Record<string, number> = {
@@ -38,6 +40,7 @@ const MOST_POPULAR_QTY: Record<string, number> = {
   BROCHURE:        250,
   BUSINESS_CARD:   500,
   FLYER:           500,
+  "boat-registration-numbers": 1, // one boat = one pair; DECAL's default of 2 is wrong here
 };
 
 const DESIGN_FEES: Record<string, number> = {
@@ -84,6 +87,12 @@ export interface ConfigData {
   materialCode: string;
   sizeLabel: string;
   sidesLabel: string;
+  /** Selected vinyl colour label, when the product offers colour choice. */
+  color?: string;
+  /** Customer-entered spec values, keyed by CustomTextField.key. */
+  customText?: Record<string, string>;
+  /** False when a required custom text field is empty or fails its pattern. */
+  customTextValid?: boolean;
 }
 
 interface Props {
@@ -111,6 +120,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [designStatus, setDesignStatus] = useState<string>("PRINT_READY");
   const [addonQtys, setAddonQtys] = useState<Record<string, number>>({});
   const [selectedTier, setSelectedTier] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(product.colorOptions?.[0]);
+  const [customText, setCustomText] = useState<Record<string, string>>({});
+  const [touchedText, setTouchedText] = useState<Record<string, boolean>>({});
   const [qtyDiscountPct, setQtyDiscountPct] = useState<number | null>(null);
   const [qtyDiscountApplied, setQtyDiscountApplied] = useState(false);
   const [pricePerUnit, setPricePerUnit] = useState<number | null>(null);
@@ -295,6 +307,34 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
     });
   }, [price, loading, addonTotal, designStatus, rushFee, gstRate, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, preMinSubtotal, lineItems]);
 
+  // Only the fields relevant to the selected size are shown — and only those are
+  // validated. A hidden field must never block Add to Cart.
+  const activeTextFields = (product.customTextFields ?? []).filter(
+    (f) => !f.appliesToMaterial || f.appliesToMaterial.includes(effectiveMaterialCode ?? "")
+  );
+
+  // Validate custom text fields — a required field must be non-empty and, when a
+  // pattern is declared, match it. Drives both the inline error and the parent's
+  // Add-to-Cart gate, so a boat decal can never be ordered without its number.
+  const textFieldError = useCallback((field: NonNullable<ProductContent["customTextFields"]>[number]) => {
+    const value = (customText[field.key] ?? "").trim();
+    if (!value) return field.required ? "Required" : null;
+    if (field.pattern && !new RegExp(field.pattern).test(value)) {
+      return field.patternHint ?? "Check this value";
+    }
+    return null;
+  }, [customText]);
+
+  const customTextValid = activeTextFields.every((f) => !textFieldError(f));
+
+  // Only report values for fields actually in play, so a stale boat name from a
+  // previous size selection can't leak into the cart label.
+  const activeCustomText = Object.fromEntries(
+    activeTextFields
+      .map((f) => [f.key, (customText[f.key] ?? "").trim()])
+      .filter(([, v]) => v)
+  ) as Record<string, string>;
+
   // Bubble config to parent (for proof + cart)
   useEffect(() => {
     onConfigChange?.({
@@ -307,9 +347,12 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       materialCode: effectiveMaterialCode ?? "",
       sizeLabel: isCustomFlexSize ? `${customFlexW}″×${customFlexH}″` : isCustom ? `${customW}″×${customH}″` : selectedSize.label,
       sidesLabel: product.category === "BOOKLET" ? "~80 pages" : sides === 1 ? "Single-sided" : "Double-sided",
+      color: selectedColor?.label,
+      customText: activeCustomText,
+      customTextValid,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveWidth, effectiveHeight, effectiveQty, sides, addonQtys, designStatus, selectedTier, isCustom, customW, customH, selectedSize.label]);
+  }, [effectiveWidth, effectiveHeight, effectiveQty, sides, addonQtys, designStatus, selectedTier, isCustom, customW, customH, selectedSize.label, selectedColor, customText, customTextValid, effectiveMaterialCode]);
 
   return (
     <div className="space-y-6">
@@ -504,13 +547,151 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         </div>
       )}
 
+      {/* Vinyl colour — spec only, never affects price */}
+      {product.colorOptions && product.colorOptions.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="colour-label">
+            Colour <span className="normal-case tracking-normal text-gray-300 font-normal">· all the same price</span>
+          </p>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="colour-label">
+            {product.colorOptions.map((c) => {
+              const active = selectedColor?.label === c.label;
+              return (
+                <button
+                  key={c.label}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  aria-label={c.note ? `${c.label} — ${c.note}` : c.label}
+                  onClick={() => setSelectedColor(c)}
+                  className={`flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border text-sm font-medium transition-colors active:scale-[0.94] ${
+                    active
+                      ? "bg-[#1c1712] text-white border-[#1c1712]"
+                      : "bg-white text-[#1c1712] border-gray-200 hover:border-[#16C2F3]"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className="w-5 h-5 rounded-full border border-black/20 shrink-0"
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
+          {selectedColor?.note && (
+            <p className="mt-2 text-xs text-gray-500">{selectedColor.note}.</p>
+          )}
+        </div>
+      )}
+
+      {/* Customer-supplied spec text (e.g. boat licence number) */}
+      {activeTextFields.length > 0 && (
+        <div className="space-y-4">
+          {activeTextFields.map((field) => {
+            const error = textFieldError(field);
+            const showError = touchedText[field.key] && error;
+            return (
+              <div key={field.key}>
+                <label
+                  htmlFor={`ctf-${field.key}`}
+                  className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 block"
+                >
+                  {field.label}
+                  {field.required && <span className="text-[#e63020] ml-1" aria-hidden>*</span>}
+                </label>
+                <input
+                  id={`ctf-${field.key}`}
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  maxLength={field.maxLength}
+                  required={field.required}
+                  aria-required={field.required}
+                  aria-invalid={showError ? true : undefined}
+                  aria-describedby={showError ? `ctf-${field.key}-err` : field.help ? `ctf-${field.key}-help` : undefined}
+                  value={customText[field.key] ?? ""}
+                  onChange={(e) => setCustomText((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                  onBlur={() => setTouchedText((prev) => ({ ...prev, [field.key]: true }))}
+                  placeholder={field.placeholder}
+                  className={`w-full border rounded-lg px-3 py-2.5 text-base font-mono tracking-wide uppercase placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:text-gray-300 focus:outline-none transition-colors ${
+                    showError
+                      ? "border-[#e63020] focus:border-[#e63020]"
+                      : "border-gray-200 focus:border-[#16C2F3]"
+                  }`}
+                />
+                {showError ? (
+                  <p id={`ctf-${field.key}-err`} role="alert" className="mt-1.5 text-xs text-[#e63020]">
+                    {error}
+                  </p>
+                ) : field.help ? (
+                  <p id={`ctf-${field.key}-help`} className="mt-1.5 text-xs text-gray-500">
+                    {field.help}
+                  </p>
+                ) : null}
+              </div>
+            );
+          })}
+
+          {/* Live decal preview — what they typed, in the colour and height they picked */}
+          {product.livePreview && (() => {
+            const previewField = activeTextFields.find((f) => f.preview);
+            const raw = previewField ? (customText[previewField.key] ?? "").trim() : "";
+            const text = (raw || previewField?.placeholder || "").toUpperCase();
+            const swatch = selectedColor?.hex ?? "#111111";
+            const isPlaceholder = !raw;
+            // Dark stage for light films, light stage for dark films — mirrors the
+            // contrast rule the customer is legally required to satisfy.
+            const lightFilm = ["#FFFFFF", "#B4B8BC", "#F2C200", "#C9A227"].includes(swatch.toUpperCase());
+            return (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
+                  {product.livePreview.hullLabel}
+                </p>
+                <div
+                  className={`rounded-xl border overflow-hidden ${lightFilm ? "border-gray-700" : "border-gray-200"}`}
+                  style={{
+                    background: lightFilm
+                      ? "linear-gradient(160deg,#2c3742 0%,#1b232b 100%)"
+                      : "linear-gradient(160deg,#e9edf1 0%,#cdd5dc 100%)",
+                  }}
+                >
+                  <div className="px-4 py-7 flex items-center justify-center min-h-[92px]">
+                    <span
+                      className="font-extrabold tracking-[0.12em] leading-none text-center break-all"
+                      style={{
+                        color: swatch,
+                        fontSize: "clamp(1.35rem, 6.5vw, 2.4rem)",
+                        opacity: isPlaceholder ? 0.35 : 1,
+                        textShadow: swatch.toUpperCase() === "#FFFFFF" ? "0 1px 2px rgba(0,0,0,0.35)" : undefined,
+                      }}
+                    >
+                      {text}
+                    </span>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  {isPlaceholder
+                    ? "Type your number above to see it here."
+                    : `${selectedColor?.label ?? "Black"} vinyl · ${selectedSize.height_in}″ characters · cut exactly as shown.`}
+                </p>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
       {/* Quantity */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="qty-label">Quantity</p>
         <div className="flex flex-wrap gap-3 pt-4" role="radiogroup" aria-labelledby="qty-label">
           {product.qtyPresets.map((q) => {
-            const hint = BULK_HINTS[product.category]?.[q];
-            const isMostPopular = MOST_POPULAR_QTY[product.category] === q;
+            // Slug key wins over category key, so products that share a category
+            // but not a typical order size can override it (e.g. boat registration
+            // numbers sit in DECAL, but one boat — not two — is the common order).
+            const hint = (BULK_HINTS[product.slug] ?? BULK_HINTS[product.category])?.[q];
+            const isMostPopular = (MOST_POPULAR_QTY[product.slug] ?? MOST_POPULAR_QTY[product.category]) === q;
             const isSelected = !isCustomQty && qty === q;
             const hasDiscount = !!hint;
             return (
