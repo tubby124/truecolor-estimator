@@ -9,6 +9,6 @@ SVC-HSTAKE,H-Stake (Yard Stake),ADDON,per_unit,2.50,2.50,SIGN,PR-ADDON-HSTAKE,TR
 SVC-STAND-ECO,Retractable Banner Stand – Economy,HARDWARE,per_unit,219.00,219.00,DISPLAY,PR-DISP-ECO,TRUE,FALSE,TRUE,Included in economy retractable banner package price,NEW WAVE PRODUCTS.csv:row51,v1_2026-02-19
 SVC-STAND-DLX,Retractable Banner Stand – Deluxe,HARDWARE,per_unit,299.00,299.00,DISPLAY,PR-DISP-DLX,TRUE,FALSE,TRUE,Included in deluxe retractable banner package price,NEW WAVE PRODUCTS.csv:row52,v1_2026-02-19
 SVC-STAND-PREM,Retractable Banner Stand – Premium,HARDWARE,per_unit,349.00,349.00,DISPLAY,PR-DISP-PREM,TRUE,FALSE,TRUE,Included in premium retractable banner package price,NEW WAVE PRODUCTS.csv:row53,v1_2026-02-19
-SVC-LAM-GLOSS,Gloss Lamination (add-on),FINISHING,per_sqft,0,0,BANNER;RIGID;SIGN,,,TRUE,FALSE,TRUE,Included in base price for most categories; only charged separately if explicitly add-on,estimatorRules.csv,v1_2026-02-19
+SVC-LAM-GLOSS,Gloss Lamination (add-on),FINISHING,per_sqft,0,0,BANNER;RIGID;SIGN,,TRUE,FALSE,TRUE,Included in base price for most categories; only charged separately if explicitly add-on,estimatorRules.csv,v1_2026-02-19
 SVC-DESIGN-NONE,No Design Fee (Print Ready),DESIGN,flat,0,0,ALL,PR-SVC-DESIGN-BASIC,TRUE,FALSE,TRUE,Customer provides print-ready files — no design charge,estimatorRules.csv,v1_2026-02-19
 SVC-16PT-UPG,16pt Card Stock Upgrade,ADDON,flat,10.00,10.00,BUSINESS_CARD,PR-BC-16PT-UPG,TRUE,FALSE,FALSE,DISCONTINUED 2026-02-20: 16pt upgrade removed — 14pt is only stock option,NEW WAVE PRODUCTS.csv:row131,v1_2026-02-19
