@@ -4,6 +4,7 @@ export const PRINT_RESOURCE_SLUGS = [
   "coroplast-vs-aluminum-composite",
   "construction-site-signage-kit",
   "trade-show-print-kit",
+  "saskatchewan-boat-registration-number-rules",
 ] as const;
 
 const PRINT_RESOURCE_SLUG_SET: ReadonlySet<string> = new Set(

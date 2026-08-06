@@ -31,6 +31,7 @@ const PRODUCT_CATEGORIES = [
       { label: "Window Decals", href: "/window-decals-saskatoon" },
       { label: "Perforated Window Vinyl", href: "/window-perf-saskatoon" },
       { label: "Wall Graphics", href: "/wall-graphics-saskatoon" },
+      { label: "Boat Registration Numbers", href: "/boat-registration-numbers" },
     ],
   },
   {
