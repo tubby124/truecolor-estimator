@@ -16,6 +16,19 @@ interface PrintResourcePageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Render the resource's own `updated` date rather than a hardcoded one, so a
+// newly added resource doesn't display a stale date next to a correct dateTime.
+// Parsed as UTC parts to avoid the date shifting a day in a negative timezone.
+function formatUpdated(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -149,8 +162,23 @@ export default async function PrintResourcePage({ params }: PrintResourcePagePro
                 </Link>
               ))}
             </div>
+            {resource.relatedLinks && resource.relatedLinks.length > 0 && (
+              <>
+                <p className="mt-8 font-mono text-xs font-bold uppercase tracking-[0.18em] text-gray-500">Read next</p>
+                <div className="mt-4 divide-y divide-[#e5e5e5] border-y border-[#e5e5e5] bg-white">
+                  {resource.relatedLinks.map((link) => (
+                    <Link key={link.href} href={link.href} className="group block p-5 transition-colors hover:bg-[#fff1ef] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e63020]">
+                      <span className="flex items-start justify-between gap-3 font-bold leading-5 group-hover:text-[#b42318]">
+                        {link.label}<ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" />
+                      </span>
+                      <span className="mt-2 block text-sm leading-5 text-gray-500">{link.note}</span>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
             <p className="mt-5 text-xs leading-5 text-gray-500">
-              Updated <time dateTime={resource.updated}>July 15, 2026</time>. Exact price comes from the selected live configuration.
+              Updated <time dateTime={resource.updated}>{formatUpdated(resource.updated)}</time>. Exact price comes from the selected live configuration.
             </p>
           </aside>
         </div>

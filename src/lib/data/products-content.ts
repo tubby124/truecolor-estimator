@@ -9,6 +9,49 @@ export interface SizePreset {
   material_code?: string;
 }
 
+/** A selectable vinyl colour shown as a swatch in the configurator. */
+export interface ColorOption {
+  label: string;
+  /** Swatch fill. Must be the actual film colour — customers pick contrast from this. */
+  hex: string;
+  /** Optional guidance, e.g. which hull colours it reads against. */
+  note?: string;
+}
+
+/**
+ * A free-text field the customer fills in at configure time (e.g. a boat licence
+ * number). The value is folded into the cart item label, so it travels through
+ * checkout → order line → staff notification → Wave invoice with no extra plumbing.
+ */
+export interface CustomTextField {
+  key: string;
+  label: string;
+  placeholder: string;
+  required?: boolean;
+  maxLength?: number;
+  /** RegExp source string, validated client-side and surfaced via patternHint. */
+  pattern?: string;
+  patternHint?: string;
+  help?: string;
+  /** Render this field's value in the live decal preview. */
+  preview?: boolean;
+  /**
+   * Only show this field when the selected size preset uses one of these material
+   * codes. Omit to always show. Lets one product ask for a licence number when the
+   * customer is buying the number pair, and a boat name when they're buying the
+   * name decal — without pretending one order can be both.
+   */
+  appliesToMaterial?: string[];
+  /**
+   * "compact" strips all whitespace and uppercases before preview, cart label and
+   * production. Use for codes that are a single unbroken string on the artwork —
+   * a Pleasure Craft Licence number is written closed up ("SK1234567"), never with
+   * a space after the prefix, and every set True Color has cut followed that. Leave
+   * unset for free text like a boat name, where internal spaces are meaningful.
+   */
+  transform?: "compact";
+}
+
 export interface ProductContent {
   slug: string;
   name: string;
@@ -34,6 +77,12 @@ export interface ProductContent {
   tierPresets?: { label: string; material_code: string; price: number }[];
   lotPriced?: boolean; // true = fixed lot tiers only; hides Custom qty button, shows "call for more"
   comingSoon?: boolean; // true = show Coming Soon badge, no price, no configurator
+  /** Vinyl colour swatches. Colour is spec, not price — never changes the quote. */
+  colorOptions?: ColorOption[];
+  /** Free-text spec fields folded into the cart label (e.g. boat licence number). */
+  customTextFields?: CustomTextField[];
+  /** Show a live decal preview rendering the customer's text in the chosen colour. */
+  livePreview?: { hullLabel: string; fontClass?: string };
 }
 
 export const PRODUCTS: Record<string, ProductContent> = {
@@ -679,6 +728,141 @@ export const PRODUCTS: Record<string, ProductContent> = {
         "Applies to glass, painted surfaces, metal, and more",
         "UV-resistant — 3–5 year indoor lifespan; 2–3 years outdoors",
         "Transfer tape included — positioned and ready to apply",
+      ],
+    },
+  },
+
+  // Boat registration numbers — added 2026-08-06.
+  // Uses the DECAL category with dedicated material codes (same pattern as
+  // window-decals vs window-perf) rather than a new category. Priced by the
+  // STEP 4a price_per_unit rules PR-BOATNUM-3IN / PR-BOATNUM-NAME, which have
+  // is_lot_price=FALSE so qty multiplies per boat. lotPriced:true here is a UI
+  // flag only — it hides the custom-size input, which would otherwise price any
+  // dimensions at $39 because the rule has no sqft bounds.
+  "boat-registration-numbers": {
+    slug: "boat-registration-numbers",
+    name: "Boat Registration Number Decals",
+    tagline: "SK licence numbers cut to Transport Canada spec. $39 a pair.",
+    description:
+      "Boat registration number decals start at $39 a pair — two decals, one for each side of the bow — cut to the size Transport Canada requires. Every licensed pleasure craft in Saskatchewan has to carry its Pleasure Craft Licence number on the hull, and the rule is specific: block characters at least 7.5 cm (3 inches) high, on both sides of the bow, above the waterline, in a colour that contrasts with the hull. Saskatchewan-issued licences start with the SK prefix — something like SK1234567 — and that full string is what goes on the boat. You need a Pleasure Craft Licence if your boat has a motor of 10 hp (7.5 kW) or more, and Transport Canada sets a $250 fine for operating without a valid one. Four letter heights are priced online: 3 inches at $39 a pair clears the legal minimum and suits most runabouts and aluminum fishing boats; 3.5 inches at $45 and 4 inches at $52 read further off the water; 6 inches at $65 suits pontoons and cruisers where a 3-inch character looks lost on the hull. The decals are die-cut from 3 mil vinyl on our Roland TrueVIS VG2 eco-solvent printer/cutter at 216 33rd St W in Saskatoon — no printing, no background, no visible sheet edge, just the bare characters. Nine colours are available at no upcharge: black, white, red, blue, gold, silver, orange, green, and yellow. Black on a bare aluminum or light hull and white on a dark hull cover most boats, and the contrast requirement is a legal one, not a style preference — pick a colour that stands off your hull. Type your licence number straight into the configurator and you'll see it previewed in the colour and height you picked before you pay. Each set ships on premask transfer tape, so applying it is a three-step job: wipe the hull clean, position the tape and press it down, then peel the tape away and leave the letters behind. Aluminum, fibreglass, and painted hulls all take it fine as long as the surface is clean and dry. Add your boat's name for $18 — most people put the number on the bow and the name on the transom or across the side. Full-colour graphics, logos, and fleet sets for outfitters and fishing lodges are quoted directly. Artwork is straightforward — we set the characters from the number you type, so there's nothing for you to design. If you want a custom layout or a logo alongside the name, in-house design is $35 flat with a same-day proof. Standard turnaround is 1–3 business days; same-day rush is +$40 flat on orders placed before 10 AM. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$39",
+    category: "DECAL",
+    material_code: "PLACEHOLDER_BOATNUM_3IN",
+    heroImage: "/images/gallery/gallery-boat-licence-number-lettering.webp",
+    galleryImages: [
+      "/images/gallery/gallery-boat-licence-number-lettering.webp",
+      "/images/gallery/gallery-vinyl-lettering-skbk-trailer.webp",
+      "/images/gallery/gallery-vinyl-lettering-nova-auto-centre.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizeSectionLabel: "Letter height",
+    sizePresets: [
+      { label: "3\" — legal minimum", width_in: 18, height_in: 3, material_code: "PLACEHOLDER_BOATNUM_3IN" },
+      { label: "3.5\"", width_in: 21, height_in: 3.5, material_code: "PLACEHOLDER_BOATNUM_35IN" },
+      { label: "4\"", width_in: 24, height_in: 4, material_code: "PLACEHOLDER_BOATNUM_4IN" },
+      { label: "6\" — pontoons & cruisers", width_in: 36, height_in: 6, material_code: "PLACEHOLDER_BOATNUM_6IN" },
+      { label: "Boat name decal", width_in: 18, height_in: 3.5, material_code: "PLACEHOLDER_BOATNUM_NAME" },
+    ],
+    qtyPresets: [1, 2, 3, 6],
+    lotPriced: true,
+    colorOptions: [
+      { label: "Black", hex: "#111111", note: "Aluminum, white and light hulls" },
+      { label: "White", hex: "#FFFFFF", note: "Dark blue, black and green hulls" },
+      { label: "Red", hex: "#D0021B" },
+      { label: "Blue", hex: "#1B4F9C" },
+      { label: "Gold", hex: "#C9A227" },
+      { label: "Silver", hex: "#B4B8BC", note: "Reads best on dark hulls" },
+      { label: "Orange", hex: "#E8621F" },
+      { label: "Green", hex: "#1E7A3C" },
+      { label: "Yellow", hex: "#F2C200", note: "Reads best on dark hulls" },
+    ],
+    customTextFields: [
+      {
+        key: "licence_number",
+        label: "Your licence number",
+        placeholder: "SK1234567",
+        required: true,
+        maxLength: 20,
+        pattern: "^[A-Za-z]{2}\\s?\\d{4,8}$",
+        patternHint: "Two letters then the digits, e.g. SK1234567 — copy it off your Pleasure Craft Licence.",
+        help: "Saskatchewan licences start with SK. We cut it closed up with no space, the way it appears on your licence — the preview below is exactly what goes on the hull. Want the boat's name too? Add this pair, then add the $18 boat name decal as a second item.",
+        preview: true,
+        transform: "compact",
+        appliesToMaterial: [
+          "PLACEHOLDER_BOATNUM_3IN",
+          "PLACEHOLDER_BOATNUM_35IN",
+          "PLACEHOLDER_BOATNUM_4IN",
+          "PLACEHOLDER_BOATNUM_6IN",
+        ],
+      },
+      {
+        key: "boat_name",
+        label: "Boat name",
+        placeholder: "CARNIVAL",
+        required: true,
+        maxLength: 30,
+        help: "Exactly as you want it cut. This is the $18 name decal on its own — add the registration pair separately if you need it.",
+        preview: true,
+        appliesToMaterial: ["PLACEHOLDER_BOATNUM_NAME"],
+      },
+    ],
+    livePreview: { hullLabel: "Preview on your hull" },
+    specs: [
+      { label: "Price", value: "3\" $39 · 3.5\" $45 · 4\" $52 · 6\" $65 per pair · boat name decal $18" },
+      { label: "Material", value: "3 mil vinyl — die-cut characters, no printed background" },
+      { label: "Character height", value: "3\" meets the 7.5 cm Transport Canada minimum; 3.5\", 4\" and 6\" also available" },
+      { label: "Colours", value: "Black, white, red, blue, gold, silver, orange, green, yellow — no upcharge" },
+      { label: "Application", value: "Premask transfer tape included — peel, position, press, peel" },
+      { label: "Turnaround", value: "1–3 business days · same-day rush +$40 flat before 10 AM" },
+    ],
+    whoUsesThis: ["Boaters", "Outfitters", "Fishing Lodges", "Marinas", "Acreage"],
+    faqs: [
+      {
+        q: "How big do the letters have to be on my boat?",
+        a: "At least 7.5 cm (3 inches) high, in block characters, in a colour that contrasts with your hull. The $39 pair is cut at exactly 3 inches, so it clears the minimum. Going bigger is a readability choice, not a legal one: 3.5\" is $45, 4\" is $52, and 6\" is $65 a pair — worth it on a pontoon or cruiser where a 3\" character looks lost.",
+      },
+      {
+        q: "What colour should I pick?",
+        a: "Whatever contrasts hardest with your hull — that part is the law, not a style preference. Black on bare aluminum or a white/light hull; white or silver on dark blue, black, or green. All nine colours (black, white, red, blue, gold, silver, orange, green, yellow) are the same price, so choose for contrast, not cost. The configurator previews your number in the colour you pick.",
+      },
+      {
+        q: "Where on the boat does the number go?",
+        a: "Both sides of the bow, above the waterline, as far forward as practical, and not blocked by rails or equipment. That's why the set is sold as a pair at $39 — you need one on the port side and one on the starboard side.",
+      },
+      {
+        q: "Does Saskatchewan have its own boat registration?",
+        a: "No. Boat licensing is federal, through Transport Canada's Pleasure Craft Licence system. Saskatchewan-issued licence numbers simply carry the SK prefix, like SK1234567. The $39 pair is cut with whatever number is on your licence.",
+      },
+      {
+        q: "Do I need a licence for my boat?",
+        a: "If it has a motor of 10 hp (7.5 kW) or more, yes. Transport Canada sets a $250 fine for operating a pleasure craft without a valid licence, and separate penalties apply under the Canada Shipping Act if the number isn't displayed properly. The licence itself is free to get — we just cut the decals for $39.",
+      },
+      {
+        q: "Will these stick to an aluminum boat?",
+        a: "Yes. The 3 mil vinyl bonds to aluminum, fibreglass, and painted hulls as long as the surface is clean, dry, and above about 10°C when you apply it. Aluminum is the most common hull we cut these for at $39 a pair, since magnets won't hold on it.",
+      },
+      {
+        q: "Can I get my boat's name too?",
+        a: "Yes — a boat name decal is $18 on top of the $39 registration pair, so $57 for both. Most owners put the licence number on the bow and the name on the transom or along the side.",
+      },
+      {
+        q: "I run an outfitting business with several boats. Can you do a fleet?",
+        a: "Yes. You can order straight from the cart — set the quantity to the number of boats and the price scales per boat ($39 each at 3\"). For full-colour graphics or a logo alongside the number, use the quote form instead: a recent six-boat set of 18×4\" full-colour decals was quoted at $29 each.",
+      },
+      {
+        q: "How fast can I get them?",
+        a: "1–3 business days is standard once we have your licence number. Same-day rush is +$40 flat if you order before 10 AM. Pickup is at 216 33rd St W in Saskatoon.",
+      },
+    ],
+    relatedSlugs: ["vinyl-lettering", "window-decals", "stickers"],
+    materialInfo: {
+      headline: "3 mil die-cut vinyl — no print, no background, just the characters",
+      bullets: [
+        "Cut to 3\" block characters — meets the 7.5 cm Transport Canada minimum",
+        "Contrasting colour options so the number reads against any hull",
+        "Premask transfer tape included — aligns the whole string in one pass",
+        "Holds on aluminum, fibreglass, and painted hulls above the waterline",
       ],
     },
   },

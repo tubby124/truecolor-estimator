@@ -13,7 +13,10 @@ import { getPricingRules } from "@/lib/data/loader";
 import { PRODUCTS } from "@/lib/data/products-content";
 
 const BASE_URL = "https://truecolorprinting.ca";
-const EXPECTED_SLUGS = [
+// The original five shipped 2026-07-15 with a fixed publish date. The boat guide
+// was added 2026-08-06 and carries its own date, so date assertions are scoped to
+// the original set rather than the whole list.
+const LAUNCH_SLUGS = [
   "coroplast-sign-template-18x24",
   "die-cut-coroplast-project",
   "coroplast-vs-aluminum-composite",
@@ -21,10 +24,17 @@ const EXPECTED_SLUGS = [
   "trade-show-print-kit",
 ] as const;
 
+const EXPECTED_SLUGS = [
+  ...LAUNCH_SLUGS,
+  "saskatchewan-boat-registration-number-rules",
+] as const;
+
+const EXPECTED_COUNT = EXPECTED_SLUGS.length;
+
 describe("print resource data contract", () => {
-  it("publishes exactly the five approved non-location resources", () => {
+  it("publishes exactly the approved non-location resources", () => {
     expect(PRINT_RESOURCE_SLUGS).toEqual(EXPECTED_SLUGS);
-    expect(PRINT_RESOURCES).toHaveLength(5);
+    expect(PRINT_RESOURCES).toHaveLength(EXPECTED_COUNT);
     expect(PRINT_RESOURCES.map(({ slug }) => slug)).toEqual(PRINT_RESOURCE_SLUGS);
     expect(PRINT_RESOURCES.map((resource) => resource.type)).toEqual([
       "template",
@@ -32,6 +42,7 @@ describe("print resource data contract", () => {
       "comparison",
       "kit",
       "kit",
+      "guide",
     ]);
 
     const routeText = PRINT_RESOURCES.map(
@@ -49,7 +60,7 @@ describe("print resource data contract", () => {
       PRINT_RESOURCES.map(({ description }) => description),
       PRINT_RESOURCES.map(({ canonical }) => canonical),
     ]) {
-      expect(new Set(values).size).toBe(5);
+      expect(new Set(values).size).toBe(EXPECTED_COUNT);
     }
 
     for (const resource of PRINT_RESOURCES) {
@@ -142,7 +153,7 @@ describe("print resource metadata and schemas", () => {
         images: ["image" in resource ? resource.image.src : "/og-image.png"],
       });
     }
-    expect(finalTitles.size).toBe(5);
+    expect(finalTitles.size).toBe(EXPECTED_COUNT);
   });
 
   it("builds breadcrumbs plus an appropriate visible-content schema with unique ids", () => {
@@ -165,18 +176,41 @@ describe("print resource metadata and schemas", () => {
 });
 
 describe("print resource indexing and download", () => {
-  it("includes all five resources exactly once with the fixed publish date", () => {
+  it("includes every resource in the sitemap exactly once", () => {
     const entries = sitemap();
     expect(
       entries.filter(({ url }) => url.includes("/print-resources/")).map(({ url }) => url),
-    ).toHaveLength(5);
+    ).toHaveLength(EXPECTED_COUNT);
     for (const slug of EXPECTED_SLUGS) {
       const matches = entries.filter(
         ({ url }) => url === `${BASE_URL}/print-resources/${slug}`,
       );
       expect(matches).toHaveLength(1);
-      expect(new Date(matches[0].lastModified as string | Date).toISOString()).toBe(
-        "2026-07-15T00:00:00.000Z",
+    }
+  });
+
+  it("keeps the launch resources on their fixed publish date and dates newer ones honestly", () => {
+    const entries = sitemap();
+    const lastModFor = (slug: string) =>
+      new Date(
+        entries.find(({ url }) => url === `${BASE_URL}/print-resources/${slug}`)!
+          .lastModified as string | Date,
+      ).toISOString();
+
+    for (const slug of LAUNCH_SLUGS) {
+      expect(lastModFor(slug)).toBe("2026-07-15T00:00:00.000Z");
+    }
+
+    // A resource added later must not inherit the launch date — sitemap lastmod
+    // trust depends on dates reflecting real change.
+    expect(lastModFor("saskatchewan-boat-registration-number-rules")).toBe(
+      "2026-08-06T00:00:00.000Z",
+    );
+
+    // And each resource's own `updated` field must agree with its sitemap entry.
+    for (const resource of PRINT_RESOURCES) {
+      expect(lastModFor(resource.slug)).toBe(
+        new Date(`${resource.updated}T00:00:00.000Z`).toISOString(),
       );
     }
   });
