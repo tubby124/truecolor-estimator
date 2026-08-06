@@ -416,6 +416,41 @@ const PAGES = [
     ],
   },
   {
+    loc: `${BASE}/boat-registration-numbers`,
+    images: [
+      {
+        loc: `${IND}/boat-registration-numbers/boat-registration-number-decal-aluminum-bow-1200x800.webp`,
+        title: "SK boat registration number decal on an aluminum boat bow",
+        caption: "Black die-cut SK licence number decal applied above the waterline on an aluminum fishing boat — cut in Saskatoon by True Color Display Printing",
+      },
+      {
+        loc: `${IND}/boat-registration-numbers/boat-registration-number-decal-transfer-tape-1200x1200.webp`,
+        title: "Die-cut boat registration number lettering on transfer tape",
+        caption: "SK boat licence number die-cut from 3 mil vinyl and supplied on premask transfer tape, ready to apply — True Color, Saskatoon SK",
+      },
+      {
+        loc: `${IND}/boat-registration-numbers/boat-name-decal-transom-red-1200x800.webp`,
+        title: "Red boat name decal on a transom",
+        caption: "Die-cut red vinyl boat name decal applied to a boat transom — True Color Display Printing, Saskatoon SK",
+      },
+      {
+        loc: `${GAL}/gallery-boat-licence-number-lettering.webp`,
+        title: "Matching port and starboard SK boat licence number decals",
+        caption: "Real True Color job — matched pair of SK boat registration decals plus a red boat name decal, cut at 216 33rd St W, Saskatoon",
+      },
+    ],
+  },
+  {
+    loc: `${BASE}/print-resources/saskatchewan-boat-registration-number-rules`,
+    images: [
+      {
+        loc: `${GAL}/gallery-boat-licence-number-lettering.webp`,
+        title: "Saskatchewan boat registration number rules — die-cut decal example",
+        caption: "SK pleasure craft licence decals cut to the Transport Canada minimum of 7.5 cm block characters — True Color Display Printing, Saskatoon",
+      },
+    ],
+  },
+  {
     loc: `${BASE}/vinyl-lettering-saskatoon`,
     images: [
       {

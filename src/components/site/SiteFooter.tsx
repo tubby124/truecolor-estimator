@@ -96,6 +96,7 @@ export function SiteFooter() {
                 <Link href="/window-perf-saskatoon" className="block hover:text-white transition-colors">Window Perf</Link>
                 <Link href="/wall-graphics-saskatoon" className="block hover:text-white transition-colors">Wall Graphics</Link>
                 <Link href="/vinyl-lettering-saskatoon" className="block hover:text-white transition-colors">Vinyl Lettering</Link>
+                <Link href="/boat-registration-numbers" className="block hover:text-white transition-colors">Boat Registration Numbers</Link>
                 <Link href="/aluminum-signs-saskatoon" className="block hover:text-white transition-colors">Aluminum Signs</Link>
                 <Link href="/foamboard-printing-saskatoon" className="block hover:text-white transition-colors">Foamboard Printing</Link>
                 <Link href="/large-format-printing-saskatoon" className="block hover:text-white transition-colors">Large Format</Link>

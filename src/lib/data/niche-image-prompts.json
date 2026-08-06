@@ -389,6 +389,61 @@
           "imagePath": "/images/industries/poster-printing/retractable-trade-show-display.webp"
         }
       ]
+    },
+    {
+      "slug": "boat-registration-numbers",
+      "name": "Boat Registration Number Decals",
+      "type": "landing-page",
+      "status": "partial",
+      "prompts": [
+        {
+          "id": "boat-hero-aluminum-bow",
+          "name": "Aluminum Fishing Boat Bow — Hero",
+          "category": "Hero (3:2)",
+          "prompt": "Close-up of the bow of an aluminum fishing boat floating on a calm northern Saskatchewan lake. Crisp black die-cut vinyl block characters reading exactly 'SK1234567' as one unbroken string with NO space between the letters and the digits applied above the waterline on the port bow, about 3 inches tall, evenly spaced on a straight baseline, sharply contrasting against the bare brushed aluminum hull. Early morning light, glassy water, dark treed shoreline soft and out of focus behind. Photorealistic, shallow depth of field, no text overlays, no watermarks, no logos. 3:2 landscape. Do not insert a space, gap, hyphen or separator anywhere inside the number.",
+          "imagePath": "/images/industries/boat-registration-numbers/boat-registration-number-decal-aluminum-bow-1200x800.webp",
+          "status": "done"
+        },
+        {
+          "id": "boat-hero-fibreglass-dock",
+          "name": "White Fibreglass Runabout at Dock",
+          "category": "Hero (3:2)",
+          "prompt": "Bow of a white fibreglass runabout tied to a weathered wooden dock. Bold navy blue die-cut vinyl block characters reading exactly 'SK7654321' as one unbroken string with NO space between the letters and the digits on the bow above the waterline, clean even letter spacing, perfectly straight baseline, roughly 3 inches tall. Prairie lake, clear blue sky, midday sun. Photorealistic, sharp focus on the lettering, no text overlays, no watermarks, no branding. 3:2 landscape. Do not insert a space, gap, hyphen or separator anywhere inside the number.",
+          "imagePath": "/images/industries/boat-registration-numbers/hero-fibreglass-dock.webp"
+        },
+        {
+          "id": "boat-product-flatlay",
+          "name": "Die-Cut Lettering Flat-Lay on Transfer Tape",
+          "category": "Product (1:1)",
+          "prompt": "Overhead flat-lay on a light grey cutting mat: a strip of die-cut black vinyl lettering reading exactly 'SK1234567' as one unbroken string with NO space between the letters and the digits laid out on clear premask transfer tape, with the white backing paper peeled back at one corner to reveal the cut characters underneath. A plastic squeegee rests beside it. Clean, even studio lighting, soft shadow, neutral background, no branding, no text overlays. Photorealistic, top-down, square 1:1. Do not insert a space, gap, hyphen or separator anywhere inside the number.",
+          "imagePath": "/images/industries/boat-registration-numbers/boat-registration-number-decal-transfer-tape-1200x1200.webp",
+          "status": "done"
+        },
+        {
+          "id": "boat-application-squeegee",
+          "name": "Applying the Decal — Squeegee In Use",
+          "category": "Process (3:2)",
+          "prompt": "Two hands using a blue plastic squeegee to press white die-cut vinyl block lettering onto the dark navy blue hull of a boat sitting on a trailer in a driveway. The lettering reads exactly 'SK4482091' — a Canadian Saskatchewan pleasure craft licence number — as one unbroken string with NO space between the letters and the digits. Clear premask transfer tape still covers the letters, one corner beginning to lift away. Natural outdoor daylight, suburban driveway, boat trailer fender visible at the edge of frame. Photorealistic, mid-action, no text overlays, no watermarks. 3:2 landscape. Do not insert a space, gap, hyphen or separator anywhere inside the number. Do not use a US state registration format such as 'NY 1234 MH' — this is a Canadian number and must be the letters SK immediately followed by seven digits.",
+          "imagePath": "/images/industries/boat-registration-numbers/process-squeegee-application.webp",
+          "status": "regenerate"
+        },
+        {
+          "id": "boat-outfitter-fleet",
+          "name": "Outfitter Fleet — Multiple Boats",
+          "category": "Fleet (3:2)",
+          "prompt": "Three matching aluminum fishing boats pulled up side by side on a rocky northern Saskatchewan lakeshore at a log fishing lodge. Each bow carries black die-cut block registration lettering above the waterline, all the same style and size. The three numbers read exactly 'SK7823456', 'SK7823457' and 'SK7823458' — each one an unbroken string with NO space between the letters and the digits. Overcast sky, dense pine treeline behind, wet gravel shore. Wide establishing shot, photorealistic, no text overlays, no watermarks, no visible brand names. 3:2 landscape. Do not insert a space, gap, hyphen or separator anywhere inside any of the numbers.",
+          "imagePath": "/images/industries/boat-registration-numbers/fleet-outfitter-lakeshore.webp",
+          "status": "regenerate"
+        },
+        {
+          "id": "boat-name-transom",
+          "name": "Boat Name Decal on Transom",
+          "category": "Add-on (3:2)",
+          "prompt": "Stern of a boat out of the water on a trailer, showing a red die-cut vinyl boat name decal reading 'CARNIVAL' applied across the transom in bold condensed block capitals. Outboard motor tilted up beside it. Late afternoon light, clean white hull, marina background softly out of focus. Photorealistic, no text overlays beyond the boat name itself, no watermarks. 3:2 landscape.",
+          "imagePath": "/images/industries/boat-registration-numbers/boat-name-decal-transom-red-1200x800.webp",
+          "status": "done"
+        }
+      ]
     }
   ]
 }
