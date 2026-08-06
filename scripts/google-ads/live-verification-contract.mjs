@@ -232,7 +232,7 @@ export function validateCompetitorDestinationInventory(
 // count moves only when the ad-group inventory does. Independently asserted here rather than
 // imported from the contract on purpose: the checker must be able to disagree with the config,
 // or it stops being a check.
-const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 40;
+const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 44;
 
 function evaluateLiveState(live, {
   expectedCampaigns,
@@ -265,7 +265,7 @@ function evaluateLiveState(live, {
     if (!campaign || campaign.presence !== "PRESENCE" || !campaign.networks?.targetGoogleSearch || campaign.networks?.targetSearchNetwork || campaign.networks?.targetContentNetwork || campaign.networks?.targetPartnerSearchNetwork) failures.push(`${name} network or presence setting changed`);
     if (campaign?.finalUrlSuffix !== EXPECTED_SUFFIX) failures.push(`${name} final URL suffix changed`);
   }
-  if (live.adGroups !== 20
+  if (live.adGroups !== 24
     || live.pausedAdGroups !== expectedPausedAdGroups
     || (expectedEnabledAdGroups !== null && live.enabledAdGroups !== expectedEnabledAdGroups)) failures.push(adGroupStateFailure);
   // 2026-08-06 variant-B copy rollout: 20 -> 30 RSAs. Ten Core ad groups gain a second,
@@ -288,7 +288,10 @@ function evaluateLiveState(live, {
   // 2026-08-06 first search-term harvest: 121 -> 143 positive (11 mined terms x EXACT+PHRASE),
   // 229 -> 253 negative (t shirt / tshirt / london drugs / photo lab x EXACT+PHRASE x 3 campaigns).
   // Reports drift until apply-sync lands, which is the intended import-completion signal.
-  if (live.positiveKeywords !== 143 || live.negativeCriteria !== 253) failures.push("keyword counts changed");
+  // 2026-08-06 second harvest: +1 Core group (Decals -> /products/window-decals) and +3
+  // Competitor groups (Print Baron, Mister Print, Labels Made Easy) plus "vista print".
+  // 143 -> 159 positive, 253 -> 262 negative, 20 -> 24 ad groups, 40 -> 44 ads.
+  if (live.positiveKeywords !== 159 || live.negativeCriteria !== 262) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,
@@ -485,8 +488,8 @@ export function evaluatePausedLiveState(live) {
     expectedEnabledAdGroups: null,
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
-    adGroupStateFailure: "19 staged ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "38 staged RSAs must be enabled (19 groups x A+B) and both held Brand RSAs paused",
+    adGroupStateFailure: "23 staged ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "42 staged RSAs must be enabled and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: false,
@@ -499,11 +502,11 @@ export function evaluateLaunchedLiveState(live) {
     expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
     expectedPausedAdGroups: 1,
     expectedPausedResponsiveSearchAds: 2,
-    expectedEnabledAdGroups: 19,
-    expectedEnabledResponsiveSearchAds: 38,
+    expectedEnabledAdGroups: 23,
+    expectedEnabledResponsiveSearchAds: 42,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
-    adGroupStateFailure: "19 ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "38 RSAs must be enabled (19 groups x A+B) and both held Brand RSAs paused",
+    adGroupStateFailure: "23 ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "42 RSAs must be enabled and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: true,

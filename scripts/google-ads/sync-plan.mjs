@@ -112,6 +112,13 @@ for (const campaign of paidSearchConfig.campaigns) {
     const key = `${campaign.name}||${neg.text}||${MATCH[neg.matchType]}`;
     if (!liveCampaignNegatives.has(key)) newNegatives.push({ campaign: campaign.name, text: neg.text, matchType: neg.matchType });
   }
+  // Campaign-scoped routing negatives (Core's competitor terms), exported as PHRASE. These
+  // were previously invisible to the diff, so a newly contracted competitor never got blocked
+  // on Core and the drift never showed up here.
+  for (const term of campaign.campaignNegatives ?? []) {
+    const key = `${campaign.name}||${term}||PHRASE`;
+    if (!liveCampaignNegatives.has(key)) newNegatives.push({ campaign: campaign.name, text: term, matchType: "PHRASE" });
+  }
 }
 
 // ── report ───────────────────────────────────────────────────────────────────

@@ -71,7 +71,7 @@ test("launch candidate transitions require evidence and can reach fresh-live pre
   assert.equal(ready.status, "READY_FOR_FRESH_LIVE_PREFLIGHT");
   assert.equal(ready.activationPermitted, false);
   assert.equal(ready.blockers.length, 0);
-  assert.equal(ready.candidates.length, 19);
+  assert.equal(ready.candidates.length, 23);
   assert.equal(ready.held.length, 1);
   assert.deepEqual(ready.held.map((group) => group.tier), ["HOLD_AUCTION_INSIGHTS"]);
 });
@@ -99,7 +99,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 20, pausedAdGroups: 1, enabledAdGroups: 19, positiveKeywords: 143, negativeCriteria: 253,
+    adGroups: 24, pausedAdGroups: 1, enabledAdGroups: 23, positiveKeywords: 159, negativeCriteria: 262,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",
@@ -114,7 +114,7 @@ const makePausedLiveState = () => ({
       matchType,
       status: "ENABLED",
     }))),
-    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 40, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 38,
+    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 44, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 42,
     competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
       campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
       campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
@@ -240,9 +240,9 @@ const makeLaunchedLiveState = () => {
   }));
   // Stage 1 holds Brand paused, so its single ad group and RSA stay paused.
   live.pausedAdGroups = 1;
-  live.enabledAdGroups = 19;
+  live.enabledAdGroups = 23;
   live.pausedResponsiveSearchAds = 2;
-  live.enabledResponsiveSearchAds = 38;
+  live.enabledResponsiveSearchAds = 42;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "ENABLED" }));
   live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "ENABLED" }));
@@ -439,12 +439,12 @@ test("launched live verification enforces the exact Stage 1 state", () => {
   // Enabling the held Brand ad group or RSA is also drift.
   const brandGroupLive = makeLaunchedLiveState();
   brandGroupLive.pausedAdGroups = 0;
-  brandGroupLive.enabledAdGroups = 20;
+  brandGroupLive.enabledAdGroups = 24;
   assert.ok(evaluateLaunchedLiveState(brandGroupLive).failures.length > 0);
 
   const brandRsaLive = makeLaunchedLiveState();
   brandRsaLive.pausedResponsiveSearchAds = 0;
-  brandRsaLive.enabledResponsiveSearchAds = 40;
+  brandRsaLive.enabledResponsiveSearchAds = 44;
   assert.ok(evaluateLaunchedLiveState(brandRsaLive).failures.length > 0);
 
   const wrongBudget = makeLaunchedLiveState();
@@ -737,8 +737,8 @@ test("canonical routing and campaign caps are complete", () => {
     absoluteCapCad: 30,
     maximumWindowHours: 72,
   });
-  assert.equal(competitors.adGroups.length, 9);
-  assert.equal(competitors.adGroups.flatMap((group) => group.keywords).length, 9);
+  assert.equal(competitors.adGroups.length, 12);
+  assert.equal(competitors.adGroups.flatMap((group) => group.keywords).length, 13);
   assert.ok(competitors.adGroups.every((group) => (
     group.finalUrl === "https://truecolorprinting.ca/why-true-color?source=google-ads"
   )));
@@ -790,7 +790,7 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.ok(!manifest.blockers.includes("RSA_POLICY_APPROVAL"));
   assert.ok(!manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
   assert.ok(!manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
-  assert.equal(manifest.launchCandidates.length, 19);
+  assert.equal(manifest.launchCandidates.length, 23);
   assert.equal(manifest.heldGroups.length, 1);
   assert.ok(manifest.heldGroups.every((group) => group.tier === "HOLD_AUCTION_INSIGHTS"));
   assert.ok(manifest.launchCandidates.every((group) => group.targetStatus === "ENABLED"));
@@ -835,7 +835,7 @@ test("exports negatives with canonical scope types and never as positive keyword
   const positives = parseCsv(artifacts["keywords.csv"]);
   assert.deepEqual(positives.headers, ["Campaign", "Ad group", "Keyword", "Type", "Status", "Final URL"]);
   assert.ok(positives.rows.every((row) => ["Exact", "Phrase"].includes(row.Type)));
-  assert.equal(positives.rows.filter((row) => row.Campaign === "GOOG_Search_TC_CompetitorConquest_2026").length, 9);
+  assert.equal(positives.rows.filter((row) => row.Campaign === "GOOG_Search_TC_CompetitorConquest_2026").length, 13);
   assert.ok(positives.rows.filter((row) => row.Campaign === "GOOG_Search_TC_CompetitorConquest_2026").every((row) => row.Type === "Exact"));
 });
 

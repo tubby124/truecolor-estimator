@@ -141,3 +141,49 @@ actually stop the apparel/photo-lab impressions, and whether the 11 new terms pi
 **Resolved:** the earlier worry that delivery was concentrating on `/printing-prices-saskatoon`
 was a viewport artifact of the screenshot. The 5 clicks are spread across four ad groups —
 stickers, sign shop, generic price, and stickers again. Not a routing problem.
+
+---
+
+## 2026-08-06 (fourth pass) — Decals ad group + 3 new competitors, routed to orderable pages
+
+**What shipped:**
+- **New Core ad group `Decals` → `/products/window-decals`** (the orderable configurator, not the
+  SEO page). Terms: decals saskatoon, clear window decals for business, custom boat decals, boat
+  decals near me, window decals saskatoon, custom decals. Built from harvest evidence, ahead of
+  the T+14d gate, because the destination already existed and the queries were being absorbed by
+  looser groups.
+- **3 new Competitor groups**: Print Baron, Mister Print, Labels Made Easy. Plus `vista print`
+  (spaced) added to the Vistaprint group — it had been slipping past the `vistaprint` negative.
+  Because Core's campaign negatives derive from the competitor list, this blocks the Core leak
+  and captures the conquest query in one edit.
+- `rsa` (variant A) is now **optional**. Groups created from here ship variant B alone rather than
+  inventing a vague legacy ad to sit beside good copy. `rsaVariantB` stays mandatory.
+- Registered `$11/sqft` (window decal T1 rate) — the validator rejected the decal copy until the
+  fact had a source, which is the registry working exactly as intended.
+
+Counts: 20→24 ad groups, 40→44 ads, 143→159 keywords, 253→262 negatives.
+
+**Three defects found during this pass, all by tooling rather than review:**
+1. `apply-sync` built a planned RSA entry even when `group.rsa` was absent, so the dry run planned
+   8 ads for 4 new groups and crashed on an undefined payload. **Caught by dry-run-by-default
+   before it touched the account** — the single best argument for that default.
+2. `export-google-ads.mjs` assumed every group has `rsa` and only ever exported one ad per group,
+   so variant B was missing from the Editor CSV artifacts entirely.
+3. **`apply-sync` never synced campaign-scoped routing negatives at all.** Only account negatives
+   were diffed. Core's competitor negatives existed live purely because the original Editor import
+   created them — so adding a competitor to the contract silently failed to block it on Core, and
+   `sync-plan` reported clean while the drift was real. Fixed in both scripts; the 4 missing
+   negatives were then created.
+
+Defect 3 is the serious one: a diff tool that cannot see a whole class of object will report
+"in sync" forever. Worth checking whether any other contract field has the same blind spot.
+
+**Hypothesis:** Decals had demand and nowhere to land. Competitor leakage was costing Core
+impressions on navigational queries that will never convert there.
+
+**Metric + date:** Next mining run — do decal terms pick up clicks, and do print baron / mister
+print / labels made easy stop appearing in Core's search terms?
+
+**Outcome:** _pending._
+
+**Promoted to rule:** yes — `rsa` optional / `rsaVariantB` mandatory is in the rule file.

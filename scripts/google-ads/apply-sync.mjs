@@ -128,8 +128,10 @@ function computePlan(live) {
       // Count-based so a second RSA (variant B) can be created beside the live, policy-approved
       // variant A. Still CREATE-ONLY: an ad already live is never updated or removed, and once
       // the shortfall is filled this returns empty, so the post-apply re-diff lands at zero.
+      // `rsa` is optional — ad groups created after 2026-08-06 ship variant B alone, so an
+      // absent legacy ad must not become a planned create with an undefined payload.
       const plannedAds = [
-        { label: "rsa", ad: group.rsa },
+        ...(group.rsa ? [{ label: "rsa", ad: group.rsa }] : []),
         ...(group.rsaVariantB ? [{ label: "rsaVariantB", ad: group.rsaVariantB }] : []),
       ];
       const liveAdCount = live.adsByGroup.get(group.name) ?? 0;
@@ -151,6 +153,15 @@ function computePlan(live) {
     for (const neg of paidSearchConfig.accountNegatives) {
       if (!live.campaignNegatives.has(`${campaign.name}||${neg.text}||${neg.matchType}`)) {
         newCampaignNegatives.push({ campaign: campaign.name, text: neg.text, matchType: neg.matchType });
+      }
+    }
+    // Campaign-scoped routing negatives (Core's competitor terms). These were previously NOT
+    // synced at all — they existed live only because the original Editor import created them,
+    // so adding a competitor to the contract silently failed to block it on Core. Exported as
+    // PHRASE, matching export-google-ads.mjs.
+    for (const term of campaign.campaignNegatives ?? []) {
+      if (!live.campaignNegatives.has(`${campaign.name}||${term}||PHRASE`)) {
+        newCampaignNegatives.push({ campaign: campaign.name, text: term, matchType: "PHRASE" });
       }
     }
   }

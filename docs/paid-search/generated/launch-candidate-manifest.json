@@ -198,6 +198,12 @@
     },
     {
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Decals",
+      "tier": "TIER_1_PRODUCT",
+      "targetStatus": "ENABLED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
       "adGroup": "Large Format Printing",
       "tier": "TIER_1_PRODUCT",
       "targetStatus": "ENABLED"
@@ -253,6 +259,24 @@
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Vistaprint",
+      "tier": "TIER_1_CONQUEST",
+      "targetStatus": "ENABLED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Print Baron",
+      "tier": "TIER_1_CONQUEST",
+      "targetStatus": "ENABLED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Mister Print",
+      "tier": "TIER_1_CONQUEST",
+      "targetStatus": "ENABLED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
+      "adGroup": "Comparison - Labels Made Easy",
       "tier": "TIER_1_CONQUEST",
       "targetStatus": "ENABLED"
     }

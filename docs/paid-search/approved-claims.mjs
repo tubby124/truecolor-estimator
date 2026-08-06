@@ -48,6 +48,7 @@ export const SOURCED_FACTS = {
   // ── prices ────────────────────────────────────────────────────────────────
   "$8.25/sqft": { kind: "price", meaning: "vinyl banner T1 sqft rate", source: "pricing_rules.v1.csv — banner T1" },
   "$8/sqft": { kind: "price", meaning: "coroplast T1 sqft rate", source: "pricing_rules.v1.csv — coroplast 0-12 sqft" },
+  "$11/sqft": { kind: "price", meaning: "window decal T1 sqft rate", source: "PRICING_QUICK_REFERENCE.md — Window Decals $11.00/sqft" },
   "$219": { kind: "price", meaning: "retractable banner, economy stand + print", source: "PRICING_QUICK_REFERENCE.md — lot-priced table" },
   "$110": { kind: "price", meaning: "1000 business cards, 2-sided", source: ".claude/rules/truecolor-pricing-comms.md" },
   "+$40": { kind: "price", meaning: "same-day rush fee, flat, PST-exempt", source: ".claude/rules/truecolor-domain.md — rush +$40 flat" },
