@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Freezer Labels Regina SK | From $5.50/sqft | True Color" },
+  title: { absolute: "Freezer Labels Regina SK | From $25 | True Color" },
   description:
-    "Freezer-grade adhesive labels for Regina butchers, food processors, raw pet food makers. From $5.50/sqft on 3mil vinyl. Printed in Saskatoon, shipped to Regina.",
+    "Freezer-grade adhesive labels for Regina butchers, food processors, raw pet food makers. From $25 on 3mil vinyl. Printed in Saskatoon, shipped to Regina.",
   alternates: { canonical: "/freezer-labels-regina" },
   openGraph: {
     title: "Freezer Labels Regina SK | True Color Display Printing",
     description:
-      "3mil vinyl with freezer-grade adhesive (ARLPMF7008). Holds at -18°C. Printed in Saskatoon, shipped to Regina. From $5.50/sqft. $25 order minimum.",
+      "3mil vinyl with freezer-grade adhesive (ARLPMF7008). Holds at -18°C. Printed in Saskatoon, shipped to Regina. From $25. $25 order minimum.",
     url: "https://truecolorprinting.ca/freezer-labels-regina",
     images: [{ url: "/images/products/og/freezer-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -21,13 +21,13 @@ export default function FreezerLabelsReginaPage() {
   return (
     <IndustryPage
       canonicalSlug="freezer-labels-regina"
-      primaryProductSlug="stickers"
+      primaryProductSlug="freezer-labels"
       title="Freezer Labels — Regina SK"
-      subtitle="Freezer-grade adhesive labels for Regina food businesses. From $5.50/sqft. Shipped from Saskatoon."
+      subtitle="Freezer-grade adhesive labels for Regina food businesses. From $25. Shipped from Saskatoon."
       heroImage="/images/products/heroes/freezer-labels-hero-1200x500.webp"
       heroAlt="Freezer adhesive labels printed for Regina SK food businesses by True Color Display Printing"
       description={
-        "Freezer-grade adhesive labels printed in Saskatoon, shipped to Regina 260 km south. From $5.50/sqft on 3mil vinyl with permanent freezer-grade adhesive (ARLPMF7008) — holds at -18°C through condensation cycles. Built for Regina butchers, food processors, raw pet food makers, ice cream makers, and frozen meal manufacturers. Same Roland UV print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier adds 1–2 days. Same-day rush at +$40 flat if ordered before 10 AM."
+        "Freezer-grade adhesive labels printed in Saskatoon, shipped to Regina 260 km south. From $25 on 3mil vinyl with permanent freezer-grade adhesive (ARLPMF7008) — holds at -18°C through condensation cycles. Built for Regina butchers, food processors, raw pet food makers, ice cream makers, and frozen meal manufacturers. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier adds 1–2 days. Same-day rush at +$40 flat if ordered before 10 AM."
       }
       descriptionNode={
         <>
@@ -36,8 +36,8 @@ export default function FreezerLabelsReginaPage() {
             labels to Regina businesses 260 km south. Standard stock is 3mil white vinyl with
             freezer-grade adhesive (ARLPMF7008) — holds at -18°C through condensation cycles
             and survives Saskatchewan winter ambient temperatures down to -40°C. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. A 10×2&quot; label at
-            quantity 500 runs about $300. Full pricing tiers and material spec on our{" "}
+            <strong>$25 for 25 labels</strong>. A 3×4&quot; label is $67 for 100; a 10×2&quot; label at
+            quantity 500 is $280. Full pricing and material spec on our{" "}
             <Link href="/freezer-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               freezer labels Saskatoon page
             </Link>.
@@ -65,8 +65,8 @@ export default function FreezerLabelsReginaPage() {
         </>
       }
       products={[
-        { name: "Freezer Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
+        { name: "Freezer Labels", from: "from $25 / 25", slug: "freezer-labels" },
+        { name: "Stickers", from: "from $25 / 25", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
@@ -75,9 +75,9 @@ export default function FreezerLabelsReginaPage() {
       whyPoints={[
         "3mil vinyl + freezer-grade adhesive (ARLPMF7008) — holds at -18°C through frost cycles",
         "Already shipping this stock to Saskatoon raw pet food makers, butchers, food processors",
-        "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
+        "25 labels from $25 — a 3×4\" label is $67 for 100, $167.50 for 250",
         "$25 order-total minimum — no five-digit MOQ from a label converter",
-        "Roland UV inks cure to a solid film — print survives freezer-thaw cycles",
+        "Roland TrueVIS VG2 eco-solvent inks cure to a solid film — print survives freezer-thaw cycles",
         "1–3 business day production + 1–2 business day courier to Regina",
         "Same-day rush at +$40 flat when ordered before 10 AM",
         "In-house Photoshop designer: $35 flat for label layout, same-day proof",
@@ -89,7 +89,7 @@ export default function FreezerLabelsReginaPage() {
         },
         {
           q: "How much do freezer labels cost shipped to Regina?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 10×2\" label at quantity 500 runs about $300. Regina courier is customer's cost.",
+          a: "25 labels start at $25. A 3×4\" freezer label is $67 for 100 and $167.50 for 250; a 4×6\" is $133 for 100. Larger formats price by area — a 10×2\" at quantity 500 is $280. Configure your exact size and quantity on the product page to see the price before ordering. Regina courier is customer's cost.",
         },
         {
           q: "Will the adhesive actually hold in a Regina freezer?",
