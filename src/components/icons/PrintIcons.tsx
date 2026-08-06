@@ -19,6 +19,7 @@ import {
   Wrench,
   Printer,
   Shapes,
+  Ship,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -43,6 +44,7 @@ export const SLUG_ICON_MAP: Record<string, LucideIcon> = {
   "rack-cards": FileText,
   "door-hangers": FileText,
   "custom-shape-signs": Shapes,
+  "boat-registration-numbers": Ship,
 };
 
 /** Map category ID → Lucide icon (staff CategoryPicker) */

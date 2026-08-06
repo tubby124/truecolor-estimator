@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { fetchFeed, fetchMergedFeeds, formatRelativeDate, type FeedItem } from "@/lib/rss/fetchFeeds";
+import { PRINT_RESOURCES } from "@/lib/data/print-resources";
 
 export const revalidate = 21600; // ISR: rebuild every 6 hours
 
@@ -77,6 +78,7 @@ const pageSchema = {
 
 // FIX 3: Section anchors for jump navigation
 const SECTION_ANCHORS = [
+  { label: "Our Guides", anchor: "our-guides" },
   { label: "Print Industry", anchor: "print-industry" },
   { label: "Graphic Design", anchor: "graphic-design" },
   { label: "Small Business", anchor: "small-business" },
@@ -371,6 +373,43 @@ export default async function ResourcesPage() {
 
       {/* Feed sections */}
       <main id="main-content" className="max-w-6xl mx-auto px-6 py-10">
+        {/* Owned guides and templates.
+            Driven off PRINT_RESOURCES rather than a hand-written list: every
+            print resource declares Home › Resources › [title] in its breadcrumb
+            schema, so this hub has to link them all or that parent claim is a
+            lie and the pages sit orphaned. Data-driven means a new resource is
+            linked the moment it is added — enforced by a test in
+            src/lib/seo/__tests__/print-resources.test.ts. */}
+        <section id="our-guides" className="mb-16 scroll-mt-28">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-[#1c1712]">Our Guides &amp; Templates</h2>
+            <p className="text-gray-600 text-sm mt-1.5 max-w-2xl leading-relaxed">
+              Written in-house from real production jobs — artwork templates, material
+              comparisons, and compliance rules you can check before you order.
+            </p>
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+            {PRINT_RESOURCES.map((resource) => (
+              <li key={resource.slug}>
+                <Link
+                  href={resource.canonical}
+                  className="group flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 transition-colors hover:border-[#16C2F3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16C2F3]"
+                >
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-[#16C2F3]">
+                    {resource.eyebrow}
+                  </span>
+                  <span className="mt-2 font-bold leading-snug text-[#1c1712] group-hover:text-[#16C2F3]">
+                    {resource.title}
+                  </span>
+                  <span className="mt-2 text-sm leading-relaxed text-gray-500">
+                    {resource.intro}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         {sections.slice(0, 4).map((section) => (
           <FeedBlock key={section.title} section={section} />
         ))}
