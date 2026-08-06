@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Candle & Jar Labels Prince Albert SK | From $5.50/sqft | True Color" },
+  title: { absolute: "Candle & Jar Labels Prince Albert SK | From $25 | True Color" },
   description:
-    "Heat-resistant candle labels and mason jar labels for Prince Albert candle makers, jam canners, artisan crafters. From $5.50/sqft. Courier to PA.",
+    "Heat-resistant candle labels and mason jar labels for Prince Albert candle makers, jam canners, artisan crafters. From $25. Courier to PA.",
   alternates: { canonical: "/candle-jar-labels-prince-albert-sk" },
   openGraph: {
     title: "Candle & Jar Labels Prince Albert SK | True Color Display Printing",
     description:
-      "Heat-resistant labels for candles, mason jars, jam jars. From $5.50/sqft. Printed in Saskatoon, couriered to Prince Albert.",
+      "Heat-resistant labels for candles, mason jars, jam jars. From $25. Printed in Saskatoon, couriered to Prince Albert.",
     url: "https://truecolorprinting.ca/candle-jar-labels-prince-albert-sk",
     images: [{ url: "/images/products/og/candle-jar-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -21,13 +21,13 @@ export default function CandleJarLabelsPrinceAlbertPage() {
   return (
     <IndustryPage
       canonicalSlug="candle-jar-labels-prince-albert-sk"
-      primaryProductSlug="stickers"
+      primaryProductSlug="candle-jar-labels"
       title="Candle & Jar Labels — Prince Albert SK"
-      subtitle="Heat-resistant labels for PA candle makers, jam canners, artisan crafters. From $5.50/sqft."
+      subtitle="Heat-resistant labels for PA candle makers, jam canners, artisan crafters. From $25."
       heroImage="/images/products/heroes/candle-jar-labels-hero-1200x500.webp"
       heroAlt="Heat-resistant candle and mason-jar labels printed for Prince Albert SK crafters by True Color Display Printing"
       description={
-        "Custom heat-resistant candle labels and mason-jar labels printed in Saskatoon, couriered to Prince Albert 140 km north. From $5.50/sqft on matte BOPP vinyl with heat-resistant adhesive — bonds to warm glass after hot-wax pour, no curling near the flame, no yellowing over long burns. Built for PA soy and beeswax candle makers, Saskatoon-berry jam canners, indigenous-craft fragrance brands, and farmers market vendors. Saskatoon-to-PA courier is one of our fastest lanes."
+        "Custom heat-resistant candle labels and mason-jar labels printed in Saskatoon, couriered to Prince Albert 140 km north. From $25 on matte BOPP vinyl with heat-resistant adhesive — bonds to warm glass after hot-wax pour, no curling near the flame, no yellowing over long burns. Built for PA soy and beeswax candle makers, Saskatoon-berry jam canners, indigenous-craft fragrance brands, and farmers market vendors. Saskatoon-to-PA courier is one of our fastest lanes."
       }
       descriptionNode={
         <>
@@ -36,7 +36,7 @@ export default function CandleJarLabelsPrinceAlbertPage() {
             our Saskatoon shop and couriers to Prince Albert 140 km north. Standard stock is
             matte BOPP vinyl with heat-resistant adhesive — bonds to warm glass without
             bubbling and survives long candle burns without yellowing. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full spec on our{" "}
+            <strong>$25 for 25 labels</strong> — a 2.5×3.5&quot; jar label is $55 for 100 and $122.50 for 250. Full spec on our{" "}
             <Link href="/candle-jar-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               candle &amp; jar labels Saskatoon page
             </Link>.
@@ -62,9 +62,9 @@ export default function CandleJarLabelsPrinceAlbertPage() {
         </>
       }
       products={[
-        { name: "Candle & Jar Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Product Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
+        { name: "Candle & Jar Labels", from: "from $25 / 25", slug: "candle-jar-labels" },
+        { name: "Product Labels", from: "from $25 / 25", slug: "product-labels" },
+        { name: "Stickers", from: "from $25 / 25", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
@@ -72,7 +72,7 @@ export default function CandleJarLabelsPrinceAlbertPage() {
       whyPoints={[
         "Heat-resistant adhesive — bonds to warm glass after hot-wax pour without bubbling",
         "Matte BOPP face survives 40+ hour candle burn without yellowing",
-        "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4)",
+        "25 labels from $25 — a 2.5×3.5\" jar label is $55 for 100, $122.50 for 250",
         "$25 order-total minimum — perfect for small startup and indigenous-craft batches",
         "Wrap-around bodies, top-of-lid circles, side ingredient panels — any shape included",
         "1–3 business day print + 1 business day courier to Prince Albert",
@@ -86,7 +86,7 @@ export default function CandleJarLabelsPrinceAlbertPage() {
         },
         {
           q: "How much do candle labels cost shipped to Prince Albert?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" wrap-around at quantity 250 runs about $200.",
+          a: "25 labels start at $25. A 2.5×3.5\" jar label is $55 for 100 and $122.50 for 250; a 3×4\" is $67 for 100 and $167.50 for 250. A full 2.5×8\" mason jar wraparound is $1.11 each at any quantity, because a label that size prices by area rather than by the small-label quantity ladder.",
         },
         {
           q: "Will the label survive a candle burn without yellowing?",
