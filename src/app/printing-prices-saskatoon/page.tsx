@@ -33,10 +33,10 @@ const WIDE_FORMAT_ROWS = [
   { product: "Vinyl Banners (13oz)", rate: "$8.25/sqft", example: "2×4 ft = $66", slug: "/banner-printing-saskatoon" },
   { product: "ACP Aluminum Signs (3mm)", rate: "$13.00/sqft", example: '18×24" = $39', slug: "/aluminum-signs-saskatoon" },
   { product: "Foamboard Displays", rate: "$10.00/sqft", example: '18×24" = $45', slug: "/foamboard-printing-saskatoon" },
-  { product: "Window Decals", rate: "$11.00/sqft", example: "Small decals hit the $25 order min", slug: "/window-decals-saskatoon" },
-  { product: "Window Perf (see-through)", rate: "$8.00/sqft", example: "Small jobs hit the $25 order min", slug: "/window-perf-saskatoon" },
-  { product: "Vehicle Magnets (30mil)", rate: "$24.00/sqft", example: "Small magnets hit the $25 order min", slug: "/vehicle-magnets-saskatoon" },
-  { product: "Vinyl Lettering (cut)", rate: "$8.50/sqft", example: "Small sets hit the $25 order min", slug: "/vinyl-lettering-saskatoon" },
+  { product: "Window Decals", rate: "$11.00/sqft", example: "Small decals top up to the $25 minimum", slug: "/window-decals-saskatoon" },
+  { product: "Window Perf (see-through)", rate: "$8.00/sqft", example: "Small jobs top up to the $25 minimum", slug: "/window-perf-saskatoon" },
+  { product: "Vehicle Magnets (30mil)", rate: "$24.00/sqft", example: "Small magnets top up to the $25 minimum", slug: "/vehicle-magnets-saskatoon" },
+  { product: "Vinyl Lettering (cut)", rate: "$8.50/sqft", example: "Small sets top up to the $25 minimum", slug: "/vinyl-lettering-saskatoon" },
   { product: "Wall Graphics (removable)", rate: "$11.00/sqft", example: "No wall damage on removal", slug: "/wall-graphics-saskatoon" },
 ];
 
@@ -53,7 +53,7 @@ const LOT_PRICE_ROWS = [
 const FAQS = [
   {
     q: "How much does printing cost in Saskatoon?",
-    a: "At True Color, wide-format printing starts at $8/sqft for coroplast signs and $8.25/sqft for vinyl banners. Paper products are lot-priced: 250 double-sided business cards are $45, 100 full-letter flyers are $45, and 25 custom stickers are $25. Every price on this page comes from the same engine that powers our online estimator — what you see is what you pay, pre-tax.",
+    a: "At True Color, signs and banners are priced by the square foot, starting at $8/sqft for coroplast signs and $8.25/sqft for vinyl banners. Cards, flyers and stickers are sold as a batch for one flat price: 250 double-sided business cards are $45, 100 full-letter flyers are $45, and 25 custom stickers are $25. Every price on this page comes from the same system that runs our online estimator — what you see is what you pay, pre-tax.",
   },
   {
     q: "How much does a 18×24 yard sign cost in Saskatoon?",
@@ -85,7 +85,7 @@ const FAQS = [
   },
   {
     q: "Why is True Color cheaper than Staples or FedEx Office?",
-    a: "Everything prints in-house in Saskatoon on our own Roland UV flatbed and Konica Minolta digital press — no outsourcing, no shipping, no national-chain overhead. For most large-format and sign products our prices beat Staples and FedEx Office, and you get a local designer and same-day rush they can't match.",
+    a: "Everything prints in-house in Saskatoon on our own Roland TrueVIS VG2 eco-solvent printer/cutter and Konica Minolta digital press — no outsourcing, no shipping, no national-chain overhead. For most large-format and sign products our prices beat Staples and FedEx Office, and you get a local designer and same-day rush they can't match.",
   },
 ];
 
@@ -141,28 +141,36 @@ export default function PrintingPricesSaskatoonPage() {
               Most Saskatoon print shops make you fill out a quote form and wait. This page lists our
               real 2026 prices — coroplast signs from $8/sqft, vinyl banners from $66, 250 business
               cards for $45 — pulled from the same pricing engine that runs our online estimator.
-              Everything prints in-house on our Roland UV flatbed and Konica Minolta digital press at
-              216 33rd St W, Saskatoon.
+              Everything prints in-house on our Roland TrueVIS VG2 eco-solvent printer/cutter and
+              Konica Minolta digital press at 216 33rd St W, Saskatoon.
             </p>
-            <Link
-              href="/products"
-              className="inline-block mt-7 bg-[#16C2F3] hover:bg-[#0fb0dd] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors"
-            >
-              Get My Exact Price →
-            </Link>
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <Link
+                href="/products"
+                className="inline-block bg-[#16C2F3] hover:bg-[#0fb0dd] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors"
+              >
+                Get My Exact Price →
+              </Link>
+              <a
+                href="tel:+13069548688"
+                className="inline-block border border-white/30 hover:border-white/60 hover:bg-white/10 text-white font-semibold px-7 py-3.5 rounded-lg transition-colors"
+              >
+                Call (306) 954-8688
+              </a>
+            </div>
           </div>
         </section>
 
         <div className="max-w-5xl mx-auto px-6 py-14">
           <section className="mb-14">
             <h2 className="text-2xl font-bold text-[#1c1712] mb-3">
-              Wide-Format Printing Prices (per square foot)
+              Signs, Banners &amp; Decals — Priced by the Square Foot
             </h2>
             <p className="text-gray-600 leading-relaxed mb-6 max-w-2xl">
-              Signs, banners, decals and magnets price by the square foot. Rates below are tier-1;
-              larger jobs step down automatically (coroplast drops to $7.50/sqft over 12 sqft and
-              $7.25/sqft over 32 sqft). Quantity discounts on coroplast: 5+ signs save 8%, 10+ save
-              17%, 25+ save 23%.
+              These are the rates for a standard-size job. Bigger pieces get a lower rate
+              automatically — coroplast drops to $7.50/sqft once a sign passes 12 square feet, and
+              $7.25/sqft past 32 square feet. Order more than one and it drops again: 5 or more
+              coroplast signs save 8%, 10 or more save 17%, 25 or more save 23%.
             </p>
             <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
               <table className="w-full text-left text-sm">
@@ -192,11 +200,12 @@ export default function PrintingPricesSaskatoonPage() {
 
           <section className="mb-14">
             <h2 className="text-2xl font-bold text-[#1c1712] mb-3">
-              Paper &amp; Print Product Prices (flat lot pricing)
+              Cards, Flyers &amp; Stickers — One Flat Price per Batch
             </h2>
             <p className="text-gray-600 leading-relaxed mb-6 max-w-2xl">
-              Cards, flyers, stickers and similar products are priced per lot — the tiered quantity
-              prices are the bulk discount.
+              These are sold as a set quantity for a set price, not by the square foot. The bigger
+              the batch, the less each piece costs — that discount is already built into the prices
+              below, so there is nothing extra to work out.
             </p>
             <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
               <table className="w-full text-left text-sm">
@@ -228,42 +237,52 @@ export default function PrintingPricesSaskatoonPage() {
             <h2 className="text-2xl font-bold text-[#1c1712] mb-4">What Changes the Price</h2>
             <ul className="space-y-3 text-gray-700 leading-relaxed">
               <li>
-                <strong>Size.</strong> Wide-format products price by square foot, so a 24×36&quot;
-                coroplast sign (6 sqft) is $48 while an 18×24&quot; (3 sqft) is $24.
+                <strong>How big it is.</strong>{" "}
+                Signs, banners and decals are priced by the square foot. A 24×36&quot; coroplast
+                sign is 6 square feet, so $48. Drop it to 18×24&quot; and you are at 3 square feet
+                — $24.
               </li>
               <li>
-                <strong>Sides.</strong> Double-sided coroplast runs $14/sqft tier-1 instead of $8 —
-                it is two full prints plus alignment.
+                <strong>One side or two.</strong>{" "}
+                Printing both sides of a coroplast sign is $14/sqft instead of $8. It is two full
+                print runs plus the work of lining them up back to back.
               </li>
               <li>
-                <strong>Quantity.</strong> Coroplast orders of 5+ save 8%, 10+ save 17%, 25+ save
-                23%. Lot-priced products (cards, flyers, stickers) build the discount into each
-                quantity tier.
+                <strong>How many you order.</strong>{" "}
+                Order 5 or more coroplast signs and you save 8%, 10 or more saves 17%, 25 or more
+                saves 23%. Banners, aluminum signs and decals each have their own discount steps,
+                and the estimator applies them for you. Business cards, flyers and stickers already
+                have the volume break built into every quantity you see above.
               </li>
               <li>
-                <strong>Design.</strong> Print-ready file = no design fee. Our in-house designer is
-                $35 flat for standard layouts with a same-day proof, $50 for original logo design,
-                $75 for logo recreation from a low-res file. See{" "}
+                <strong>Whether your artwork is ready to print.</strong>{" "}
+                Send a print-ready file and there is no design charge at all. If you want us to
+                build it, our in-house designer is $35 flat for a standard layout with a same-day
+                proof, $50 for an original logo, and $75 to rebuild a logo from a low-resolution
+                file. See{" "}
                 <Link href="/graphic-design-saskatoon" className="text-[#16C2F3] underline font-medium">
                   graphic design pricing
                 </Link>
                 .
               </li>
               <li>
-                <strong>Rush.</strong> Same-day rush is +$40 flat on any order placed before 10 AM —
-                see{" "}
+                <strong>How fast you need it.</strong>{" "}
+                Standard turnaround is 1–3 business days after you approve the artwork. Same-day
+                rush is +$40 flat if you order before 10 AM — see{" "}
                 <Link href="/same-day-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
                   same-day printing
                 </Link>
                 .
               </li>
               <li>
-                <strong>Order minimum.</strong> One rule: a $25 order-total minimum at checkout.
-                There are no per-product minimums.
+                <strong>The $25 order-total minimum at checkout.</strong>{" "}
+                That is the only minimum we have — there are no per-product minimums. If you order
+                one small sign or decal that comes to less than $25, it tops up to $25.
               </li>
               <li>
-                <strong>Taxes.</strong> GST 5% + PST 6% are added at checkout to the full charge,
-                including design and rush services bundled with printed-material orders.
+                <strong>Tax.</strong>{" "}
+                GST 5% and PST 6% are added at checkout on the full charge, including design and
+                rush when they are part of a printed order.
               </li>
             </ul>
           </section>
@@ -315,12 +334,20 @@ export default function PrintingPricesSaskatoonPage() {
               Pick a product, enter your size and quantity, and the estimator shows the same price
               we charge in-store. No quote forms, no callbacks.
             </p>
-            <Link
-              href="/products"
-              className="inline-block bg-[#16C2F3] hover:bg-[#0fb0dd] text-white font-semibold px-8 py-4 rounded-lg transition-colors"
-            >
-              Open the Price Estimator →
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/products"
+                className="inline-block bg-[#16C2F3] hover:bg-[#0fb0dd] text-white font-semibold px-8 py-4 rounded-lg transition-colors"
+              >
+                Open the Price Estimator →
+              </Link>
+              <a
+                href="tel:+13069548688"
+                className="inline-block border border-white/30 hover:border-white/60 hover:bg-white/10 text-white font-semibold px-8 py-4 rounded-lg transition-colors"
+              >
+                Or call (306) 954-8688
+              </a>
+            </div>
           </section>
         </div>
       </main>
