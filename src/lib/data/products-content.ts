@@ -683,6 +683,92 @@ export const PRODUCTS: Record<string, ProductContent> = {
     },
   },
 
+  // Boat registration numbers — added 2026-08-06.
+  // Uses the DECAL category with dedicated material codes (same pattern as
+  // window-decals vs window-perf) rather than a new category. Priced by the
+  // STEP 4a price_per_unit rules PR-BOATNUM-3IN / PR-BOATNUM-NAME, which have
+  // is_lot_price=FALSE so qty multiplies per boat. lotPriced:true here is a UI
+  // flag only — it hides the custom-size input, which would otherwise price any
+  // dimensions at $39 because the rule has no sqft bounds.
+  "boat-registration-numbers": {
+    slug: "boat-registration-numbers",
+    name: "Boat Registration Number Decals",
+    tagline: "SK licence numbers cut to Transport Canada spec. $39 a pair.",
+    description:
+      "Boat registration number decals are $39 a pair — two decals, one for each side of the bow — cut to the size Transport Canada requires. Every licensed pleasure craft in Saskatchewan has to carry its Pleasure Craft Licence number on the hull, and the rule is specific: block characters at least 7.5 cm (3 inches) high, on both sides of the bow, above the waterline, in a colour that contrasts with the hull. Saskatchewan-issued licences start with the SK prefix — something like SK9612467 — and that full string is what goes on the boat. You need a Pleasure Craft Licence if your boat has a motor of 10 hp (7.5 kW) or more, and Transport Canada sets a $250 fine for operating without a valid one. We cut the standard set at 3 inches tall on an 18-inch run, which fits the licence format and clears the legal minimum without crowding the bow. The decals are die-cut from 3 mil vinyl on our Roland TrueVIS VG2 eco-solvent printer/cutter at 216 33rd St W in Saskatoon — no printing, no background, no visible sheet edge, just the bare characters. Black and white cover almost every hull; red, blue, and gold are available at no upcharge. Each set ships on premask transfer tape, so applying it is a three-step job: wipe the hull clean, position the tape and press it down, then peel the tape away and leave the letters behind. Aluminum, fibreglass, and painted hulls all take it fine as long as the surface is clean and dry. Add your boat's name for $18 — most people put the number on the bow and the name on the transom or across the side. If you need characters larger than 3 inches, full-colour graphics, or a set for a fleet, send us the details through the quote form and we'll price it. Northern outfitters and fishing lodges order these six and eight at a time for aluminum fleet boats, and that volume is quoted directly rather than through the cart. Artwork is straightforward — we set the characters from the number you give us, so there's nothing for you to design. If you want a custom layout or a logo alongside the name, in-house design is $35 flat with a same-day proof. Standard turnaround is 1–3 business days; same-day rush is +$40 flat on orders placed before 10 AM. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$39",
+    category: "DECAL",
+    material_code: "PLACEHOLDER_BOATNUM_3IN",
+    heroImage: "/images/gallery/gallery-boat-licence-number-lettering.webp",
+    galleryImages: [
+      "/images/gallery/gallery-boat-licence-number-lettering.webp",
+      "/images/gallery/gallery-vinyl-lettering-skbk-trailer.webp",
+      "/images/gallery/gallery-vinyl-lettering-nova-auto-centre.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizeSectionLabel: "What you need",
+    sizePresets: [
+      { label: "Registration number — pair (3\" letters)", width_in: 18, height_in: 3, material_code: "PLACEHOLDER_BOATNUM_3IN" },
+      { label: "Boat name decal (single)", width_in: 18, height_in: 3.5, material_code: "PLACEHOLDER_BOATNUM_NAME" },
+    ],
+    qtyPresets: [1, 2, 3, 6],
+    lotPriced: true,
+    specs: [
+      { label: "Price", value: "$39 per pair (both sides of the bow) · boat name decal $18" },
+      { label: "Material", value: "3 mil vinyl — die-cut characters, no printed background" },
+      { label: "Character height", value: "3 inches (7.5 cm) — meets the Transport Canada minimum" },
+      { label: "Colours", value: "Black, white, red, blue, gold — no upcharge" },
+      { label: "Application", value: "Premask transfer tape included — peel, position, press, peel" },
+      { label: "Turnaround", value: "1–3 business days · same-day rush +$40 flat before 10 AM" },
+    ],
+    whoUsesThis: ["Boaters", "Outfitters", "Fishing Lodges", "Marinas", "Acreage"],
+    faqs: [
+      {
+        q: "How big do the letters have to be on my boat?",
+        a: "At least 7.5 cm (3 inches) high, in block characters, in a colour that contrasts with your hull. Our standard $39 pair is cut at exactly 3 inches, so it clears the minimum. Anything larger is available through the quote form.",
+      },
+      {
+        q: "Where on the boat does the number go?",
+        a: "Both sides of the bow, above the waterline, as far forward as practical, and not blocked by rails or equipment. That's why the set is sold as a pair at $39 — you need one on the port side and one on the starboard side.",
+      },
+      {
+        q: "Does Saskatchewan have its own boat registration?",
+        a: "No. Boat licensing is federal, through Transport Canada's Pleasure Craft Licence system. Saskatchewan-issued licence numbers simply carry the SK prefix, like SK9612467. The $39 pair is cut with whatever number is on your licence.",
+      },
+      {
+        q: "Do I need a licence for my boat?",
+        a: "If it has a motor of 10 hp (7.5 kW) or more, yes. Transport Canada sets a $250 fine for operating a pleasure craft without a valid licence, and separate penalties apply under the Canada Shipping Act if the number isn't displayed properly. The licence itself is free to get — we just cut the decals for $39.",
+      },
+      {
+        q: "Will these stick to an aluminum boat?",
+        a: "Yes. The 3 mil vinyl bonds to aluminum, fibreglass, and painted hulls as long as the surface is clean, dry, and above about 10°C when you apply it. Aluminum is the most common hull we cut these for at $39 a pair, since magnets won't hold on it.",
+      },
+      {
+        q: "Can I get my boat's name too?",
+        a: "Yes — a boat name decal is $18 on top of the $39 registration pair, so $57 for both. Most owners put the licence number on the bow and the name on the transom or along the side.",
+      },
+      {
+        q: "I run an outfitting business with several boats. Can you do a fleet?",
+        a: "Yes, and it's worth quoting rather than ordering one at a time. Fleet sets, character heights above 3 inches, and full-colour graphics are all priced through the quote form. As a reference point, a recent six-boat set of 18×4\" full-colour decals was quoted at $29 each.",
+      },
+      {
+        q: "How fast can I get them?",
+        a: "1–3 business days is standard once we have your licence number. Same-day rush is +$40 flat if you order before 10 AM. Pickup is at 216 33rd St W in Saskatoon.",
+      },
+    ],
+    relatedSlugs: ["vinyl-lettering", "window-decals", "stickers"],
+    materialInfo: {
+      headline: "3 mil die-cut vinyl — no print, no background, just the characters",
+      bullets: [
+        "Cut to 3\" block characters — meets the 7.5 cm Transport Canada minimum",
+        "Contrasting colour options so the number reads against any hull",
+        "Premask transfer tape included — aligns the whole string in one pass",
+        "Holds on aluminum, fibreglass, and painted hulls above the waterline",
+      ],
+    },
+  },
+
   "retractable-banners": {
     slug: "retractable-banners",
     name: "Retractable Banner Stands",

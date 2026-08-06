@@ -205,6 +205,7 @@ export function ProductPageClient({ product }: Props) {
             minChargeValue={priceData.minChargeValue}
             preMinSubtotal={priceData.preMinSubtotal}
             lineItems={priceData.lineItems}
+            showQtyDiscountTiers={!product.lotPriced}
           />
         </div>
       </div>
