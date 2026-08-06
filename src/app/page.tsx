@@ -245,6 +245,16 @@ export default function HomePage() {
         <ReviewsSection />
       </div>
 
+      {/* ── GALLERY STRIP ────────────────────────────────────────────────────────
+          Moved up from below LocalShopSection (2026-08-06, owner request): real
+          customer work should be visible without scrolling to the bottom. Sitting
+          it directly after the reviews pairs social proof with visual proof, and
+          its dark band also breaks up what used to be three consecutive #1c1712
+          sections (LocalShop → Gallery → Industries) at the foot of the page. */}
+      <div className="reveal-section">
+        <GalleryStrip />
+      </div>
+
       {/* ── PRODUCT GRID ─────────────────────────────────────────────────────── */}
       <section className="reveal-section px-6 py-16 max-w-6xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-bold text-[#1c1712] mb-2">Signs, Banners &amp; Print Products — Saskatoon</h2>
@@ -368,11 +378,6 @@ export default function HomePage() {
 
       {/* ── LOCAL SHOP ───────────────────────────────────────────────────────── */}
       <LocalShopSection />
-
-      {/* ── GALLERY STRIP ────────────────────────────────────────────────────── */}
-      <div className="reveal-section">
-        <GalleryStrip />
-      </div>
 
       {/* ── INDUSTRIES ───────────────────────────────────────────────────────── */}
       <section className="reveal-section bg-[#1c1712] px-6 py-16">
