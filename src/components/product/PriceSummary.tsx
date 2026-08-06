@@ -35,6 +35,14 @@ interface PriceSummaryProps {
   materialLabel: string;
   addonQtys: Record<string, number>;
   category: Category;
+  /**
+   * Whether this product can actually receive the engine's qty bulk discount.
+   * STEP 4.5 only fires when the price came from a sqft tier (basePricePerSqft),
+   * so lot- and unit-priced products in a sqft category (e.g. boat registration
+   * numbers, which sit in DECAL but price per unit) must not advertise tiers
+   * they will never get. Defaults to true to preserve existing behaviour.
+   */
+  showQtyDiscountTiers?: boolean;
 }
 
 const DESIGN_LABELS: Record<number, string> = {
@@ -60,6 +68,7 @@ export function PriceSummary({
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
   pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
   minChargeApplied, minChargeValue, preMinSubtotal, lineItems = [],
+  showQtyDiscountTiers = true,
 }: PriceSummaryProps) {
   // Addon sub-lines = engine line_items beyond the first (base product) item
   const addonLines = lineItems.length > 1 ? lineItems.slice(1) : [];
@@ -119,8 +128,9 @@ export function PriceSummary({
                 </div>
               )}
 
-              {/* Bulk savings tier table — always shown for categories with qty discounts */}
-              {QTY_DISCOUNT_TIERS[category] && (
+              {/* Bulk savings tier table — categories with qty discounts, unless
+                  this product is priced by lot/unit and so can never receive one */}
+              {showQtyDiscountTiers && QTY_DISCOUNT_TIERS[category] && (
                 <div className="mt-3 pt-3 border-t border-gray-100">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
                     Order more, pay less

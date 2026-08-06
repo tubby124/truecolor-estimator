@@ -4,7 +4,8 @@ export { PRINT_RESOURCE_SLUGS } from "@/lib/data/print-resource-slugs";
 
 const BASE_URL = "https://truecolorprinting.ca";
 
-export type PrintResourceType = "template" | "project" | "comparison" | "kit";
+// "guide" falls through to the Article schema branch, same as project/comparison.
+export type PrintResourceType = "template" | "project" | "comparison" | "kit" | "guide";
 
 export interface PrintResourceSection {
   readonly heading: string;
@@ -19,6 +20,18 @@ export interface PrintResourceProductLink {
   readonly note: string;
 }
 
+/**
+ * Non-configurator internal link (e.g. an indexable landing page). Kept separate
+ * from productLinks so the "every product link is a live configurator" contract
+ * stays strict — but needed because `/products/*` is noindex by header, so a
+ * resource linking only there passes no internal link equity to an indexable page.
+ */
+export interface PrintResourceRelatedLink {
+  readonly href: `/${string}`;
+  readonly label: string;
+  readonly note: string;
+}
+
 export interface PrintResource {
   readonly slug: string;
   readonly type: PrintResourceType;
@@ -27,7 +40,8 @@ export interface PrintResource {
   readonly description: string;
   readonly intro: string;
   readonly canonical: `/print-resources/${string}`;
-  readonly updated: "2026-07-15";
+  /** ISO date this resource was created or last meaningfully revised (YYYY-MM-DD). */
+  readonly updated: `${number}-${number}-${number}`;
   readonly image?: {
     readonly src: string;
     readonly alt: string;
@@ -41,6 +55,7 @@ export interface PrintResource {
   };
   readonly sections: readonly PrintResourceSection[];
   readonly productLinks: readonly PrintResourceProductLink[];
+  readonly relatedLinks?: readonly PrintResourceRelatedLink[];
 }
 
 export const PRINT_RESOURCES = [
@@ -382,6 +397,132 @@ export const PRINT_RESOURCES = [
         href: "/products/business-cards",
         label: "Configure business cards",
         note: "Create the compact follow-up piece for booth conversations.",
+      },
+    ],
+  },
+  {
+    slug: "saskatchewan-boat-registration-number-rules",
+    type: "guide",
+    eyebrow: "Compliance guide",
+    title: "Saskatchewan Boat Registration Number Rules",
+    description:
+      "What Transport Canada requires on a Saskatchewan pleasure craft: block characters at least 7.5 cm high, both sides of the bow, in a contrasting colour.",
+    intro:
+      "Boat licence numbers are one of the few print jobs where the specification is written into federal law. Get the height, placement, or contrast wrong and the decals are non-compliant even though they look fine.",
+    canonical: "/print-resources/saskatchewan-boat-registration-number-rules",
+    updated: "2026-08-06",
+    image: {
+      src: "/images/gallery/gallery-boat-licence-number-lettering.webp",
+      alt: "Die-cut SK boat licence number decals and a red boat name decal on premask transfer tape",
+      width: 1200,
+      height: 900,
+    },
+    sections: [
+      {
+        heading: "Who needs a licence number on the hull",
+        paragraphs: [
+          "A Pleasure Craft Licence (PCL) is required for any pleasure craft powered by a motor of 10 hp (7.5 kW) or more. The licence is issued federally by Transport Canada, not by the province, and there is no charge to obtain one. Saskatchewan-issued licence numbers carry the SK prefix.",
+          "Once a vessel is licensed, the number must be displayed on the hull. Transport Canada sets a monetary penalty for operating a pleasure craft without a valid licence, and separate penalties apply under the Canada Shipping Act, 2001 where a number is missing, undersized, or unreadable against the hull.",
+        ],
+        bullets: [
+          "Motor 10 hp (7.5 kW) or more — licence required",
+          "Licensing is federal; the SK prefix simply marks where it was issued",
+          "The licence itself is issued at no charge — only the decals are purchased",
+          "Registration (a different, optional regime) is not the same thing as licensing",
+        ],
+      },
+      {
+        heading: "The four rules that decide whether decals are compliant",
+        paragraphs: [
+          "Canada Shipping Act, 2001, section 204 sets the marking requirement. Four things have to be true at once, and the fourth is the one people most often get wrong because it is a legal requirement rather than an aesthetic choice.",
+        ],
+        bullets: [
+          "Height — block characters at least 7.5 cm (3 inches) tall",
+          "Placement — both sides of the bow, as far forward as practical",
+          "Position — above the waterline, unobstructed by rails or hardware",
+          "Contrast — a colour that contrasts with the hull it sits on",
+        ],
+      },
+      {
+        heading: "Format: no space after the prefix",
+        paragraphs: [
+          "The licence number is a single unbroken string. It appears on the licence closed up — SK straight into the digits — and that is how it should be cut. Adding a space after the prefix is a common request and it does not match the document the number came from.",
+          "Every set True Color has cut has been closed up. If you order online, type the number either way and it is normalized before the artwork is set; the live preview on the product page shows the exact string that will be cut before you pay.",
+        ],
+      },
+      {
+        heading: "Choosing a character height",
+        paragraphs: [
+          "Three inches is the legal minimum, not a recommendation. It is the right call on most runabouts and aluminum fishing boats, where a taller character starts to crowd the bow. On a pontoon or a cruiser with a tall topside, a 3-inch character is compliant but reads as undersized from any distance.",
+          "Because the number goes on both sides of the bow, heights are ordered as a matched pair. Four heights are configurable online — three, three and a half, four, and six inches — with the boat name available as a separate decal. Current pricing for each height is on the product page.",
+        ],
+        bullets: [
+          "Three inches — legal minimum; runabouts, aluminum fishing boats, most trailered craft",
+          "Three and a half or four inches — larger fibreglass hulls, better readability off the water",
+          "Six inches — pontoons and cruisers where the topside dwarfs a smaller character",
+        ],
+      },
+      {
+        heading: "Choosing a colour that actually complies",
+        paragraphs: [
+          "Contrast is the requirement, so the hull decides the colour. Black on bare aluminum or a white hull; white or silver on dark blue, black, or dark green. A colour that reads well in a design mockup can still fail on the water if it sits too close in value to the hull behind it.",
+          "Colour carries no upcharge at True Color, so there is no cost reason to compromise on contrast. Nine colours are cut from the same 3 mil film: black, white, red, blue, gold, silver, orange, green, and yellow.",
+          "The configurator previews the number in the selected colour and height against a light or dark hull, so a low-contrast choice is visible before the order is placed rather than after the vinyl is on the boat.",
+        ],
+      },
+      {
+        heading: "Why die-cut vinyl rather than a printed sticker or a magnet",
+        paragraphs: [
+          "Die-cut lettering has no background and no carrier sheet — only the characters land on the hull, so there is no rectangle of vinyl outlining the number and nothing to lift at the edges. A printed decal puts a visible panel on the bow and gives water an edge to work under.",
+          "Magnets are not an option on the most common Saskatchewan hull. Aluminum is not ferrous, so magnetic signage will not hold on an aluminum fishing boat at all, which is why adhesive vinyl is the default for these jobs.",
+        ],
+        bullets: [
+          "3 mil vinyl, plotter-cut — characters only, no printed background",
+          "Premask transfer tape holds the whole string in alignment during application",
+          "Bonds to aluminum, fibreglass, and painted hulls",
+          "Magnets do not work on aluminum — adhesive vinyl is the only practical option",
+        ],
+      },
+      {
+        heading: "Applying the decals",
+        paragraphs: [
+          "Application takes about ten minutes per side and needs no tools beyond a squeegee or a credit card. The surface must be clean, dry, and above roughly 10°C — cold vinyl will not key to the hull, which is the usual reason a set lifts in the first season.",
+        ],
+        bullets: [
+          "Clean the hull and let it dry completely — no wax or polish residue",
+          "Position the whole taped string at once and check it is level before pressing",
+          "Press firmly from the centre outward to push air out",
+          "Peel the transfer tape back on itself at a sharp angle, slowly",
+          "Leave it a day before launching so the adhesive can set",
+        ],
+      },
+      {
+        heading: "Fleets, outfitters, and lodges",
+        paragraphs: [
+          "Operators running several boats can order straight from the configurator by setting the quantity to the number of boats — every set is cut identically so the fleet matches. Full-colour graphics, logos alongside the number, and non-standard character heights are quoted separately through the quote form.",
+          "One caution for outfitters: commercial vessels fall under different marking regulations than pleasure craft. If a boat is operated commercially rather than as a pleasure craft, confirm which requirement applies to your operation before ordering — the pleasure-craft rules on this page may not be the ones you are held to.",
+        ],
+      },
+    ],
+    productLinks: [
+      {
+        slug: "boat-registration-numbers",
+        href: "/products/boat-registration-numbers",
+        label: "Configure boat registration decals",
+        note: "Pick height and colour, type your number, and preview it before ordering.",
+      },
+      {
+        slug: "vinyl-lettering",
+        href: "/products/vinyl-lettering",
+        label: "Configure vinyl lettering",
+        note: "Same die-cut method for boat names, trailers, and storefront text.",
+      },
+    ],
+    relatedLinks: [
+      {
+        href: "/boat-registration-numbers",
+        label: "Boat registration number decals",
+        note: "Sizes, colours, pricing, and the full FAQ for SK licence number decals.",
       },
     ],
   },

@@ -82,6 +82,14 @@ export function ProductPageClient({ product }: Props) {
       configData.qty <= 0
     ) return;
 
+    // Hard gate: a product with required spec text (boat licence number) must not
+    // reach the cart without it — the number IS the artwork for these jobs.
+    if (configData.customTextValid === false) {
+      showToast("Enter your licence number before adding to cart", "error");
+      document.getElementById(`ctf-${product.customTextFields?.find((f) => f.required)?.key}`)?.focus();
+      return;
+    }
+
     const designLabel =
       configData.designStatus !== "PRINT_READY"
         ? ` | ${
@@ -93,7 +101,19 @@ export function ProductPageClient({ product }: Props) {
           }`
         : "";
 
-    const label = `${configData.sizeLabel} — ${configData.sidesLabel} × ${configData.qty}${designLabel}`;
+    // Customer-typed spec (e.g. a boat licence number) goes INTO the label, because
+    // label is what travels to checkout, the order line, the staff notification and
+    // the Wave invoice. Keeping it here means production sees the exact characters
+    // to cut without any new fields threaded through those four layers.
+    // configData.customText already contains only the fields relevant to the
+    // selected size, so a stale value can't leak in here.
+    const specParts = Object.values(configData.customText ?? {})
+      .map((v) => v.trim().toUpperCase())
+      .filter(Boolean);
+    if (configData.color) specParts.push(configData.color);
+    const specLabel = specParts.length > 0 ? ` | ${specParts.join(" | ")}` : "";
+
+    const label = `${configData.sizeLabel} — ${configData.sidesLabel} × ${configData.qty}${specLabel}${designLabel}`;
 
     addToCart({
       product_name: product.name,
@@ -108,6 +128,8 @@ export function ProductPageClient({ product }: Props) {
         sides: configData.sides,
         qty: configData.qty,
         design_status: configData.designStatus,
+        color: configData.color,
+        custom_text: configData.customText,
         addons: Object.entries(configData.addonQtys)
           .filter(([, q]) => q > 0)
           .map(([addonLabel, addonQty]) => `${addonLabel} ×${addonQty}`),
@@ -205,6 +227,7 @@ export function ProductPageClient({ product }: Props) {
             minChargeValue={priceData.minChargeValue}
             preMinSubtotal={priceData.preMinSubtotal}
             lineItems={priceData.lineItems}
+            showQtyDiscountTiers={!product.lotPriced}
           />
         </div>
       </div>
