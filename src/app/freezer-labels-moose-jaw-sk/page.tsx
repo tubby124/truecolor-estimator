@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Freezer Labels Moose Jaw | From $5.50/sqft | True Color" },
+  title: { absolute: "Freezer Labels Moose Jaw | From $25 | True Color" },
   description:
-    "Freezer-grade adhesive labels for Moose Jaw butchers, breweries, ranches. From $5.50/sqft on 3mil vinyl. Printed in Saskatoon, shipped to Moose Jaw.",
+    "Freezer-grade adhesive labels for Moose Jaw butchers, breweries, ranches. From $25 on 3mil vinyl. Printed in Saskatoon, shipped to Moose Jaw.",
   alternates: { canonical: "/freezer-labels-moose-jaw-sk" },
   openGraph: {
     title: "Freezer Labels Moose Jaw SK | True Color Display Printing",
     description:
-      "3mil vinyl with freezer-grade adhesive (ARLPMF7008). Holds at -18°C. Printed in Saskatoon, shipped to Moose Jaw. From $5.50/sqft.",
+      "3mil vinyl with freezer-grade adhesive (ARLPMF7008). Holds at -18°C. Printed in Saskatoon, shipped to Moose Jaw. From $25.",
     url: "https://truecolorprinting.ca/freezer-labels-moose-jaw-sk",
     images: [{ url: "/images/products/og/freezer-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -21,13 +21,13 @@ export default function FreezerLabelsMooseJawPage() {
   return (
     <IndustryPage
       canonicalSlug="freezer-labels-moose-jaw-sk"
-      primaryProductSlug="stickers"
+      primaryProductSlug="freezer-labels"
       title="Freezer Labels — Moose Jaw SK"
-      subtitle="Freezer-grade adhesive labels for Moose Jaw food businesses. From $5.50/sqft. Shipped from Saskatoon."
+      subtitle="Freezer-grade adhesive labels for Moose Jaw food businesses. From $25. Shipped from Saskatoon."
       heroImage="/images/products/heroes/freezer-labels-hero-1200x500.webp"
       heroAlt="Freezer adhesive labels printed for Moose Jaw SK food businesses by True Color Display Printing"
       description={
-        "Freezer-grade adhesive labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $5.50/sqft on 3mil vinyl with permanent freezer-grade adhesive (ARLPMF7008). Built for Moose Jaw butchers, brewers, distilleries, ranches with on-site processing, and smaller food makers selling at the farmers market. Same in-house Roland UV print quality and 1–3 business day turnaround. Ground courier 1–2 business days. Same-day rush at +$40 flat if ordered before 10 AM."
+        "Freezer-grade adhesive labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on 3mil vinyl with permanent freezer-grade adhesive (ARLPMF7008). Built for Moose Jaw butchers, brewers, distilleries, ranches with on-site processing, and smaller food makers selling at the farmers market. Same in-house Roland TrueVIS VG2 eco-solvent print quality and 1–3 business day turnaround. Ground courier 1–2 business days. Same-day rush at +$40 flat if ordered before 10 AM."
       }
       descriptionNode={
         <>
@@ -35,7 +35,7 @@ export default function FreezerLabelsMooseJawPage() {
             True Color Display Printing prints freezer-grade adhesive labels at our Saskatoon
             shop and ships to Moose Jaw 240 km south. Stock is 3mil white vinyl with
             freezer-grade adhesive (ARLPMF7008) — holds at -18°C through condensation cycles.
-            Pricing from <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full pricing
+            Pricing starts at <strong>$25 for 25 labels</strong> — a 3×4&quot; label is $67 for 100. Full pricing
             tiers and material spec on our{" "}
             <Link href="/freezer-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               freezer labels Saskatoon page
@@ -65,8 +65,8 @@ export default function FreezerLabelsMooseJawPage() {
         </>
       }
       products={[
-        { name: "Freezer Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
+        { name: "Freezer Labels", from: "from $25 / 25", slug: "freezer-labels" },
+        { name: "Stickers", from: "from $25 / 25", slug: "stickers" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
@@ -75,9 +75,9 @@ export default function FreezerLabelsMooseJawPage() {
       whyPoints={[
         "3mil vinyl + freezer-grade adhesive (ARLPMF7008) — holds at -18°C through frost cycles",
         "Already shipping this stock to Saskatoon raw pet food makers and butchers",
-        "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
+        "25 labels from $25 — a 3×4\" label is $67 for 100, $167.50 for 250",
         "$25 order-total minimum — no MOQ from a label converter",
-        "Roland UV inks cure to a solid film — survives freezer-thaw cycles",
+        "Roland TrueVIS VG2 eco-solvent inks cure to a solid film — survives freezer-thaw cycles",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
         "Same-day rush at +$40 flat when ordered before 10 AM",
         "In-house Photoshop designer: $35 flat for label layout",
@@ -89,7 +89,7 @@ export default function FreezerLabelsMooseJawPage() {
         },
         {
           q: "How much do freezer labels cost shipped to Moose Jaw?",
-          a: "Sqft-tiered: $5.50/sqft (T1), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 10×2\" label at quantity 500 runs about $300. Moose Jaw courier is customer's cost.",
+          a: "25 labels start at $25. A 3×4\" freezer label is $67 for 100 and $167.50 for 250; a 4×6\" is $133 for 100. Larger formats price by area — a 10×2\" at quantity 500 is $280. Moose Jaw courier is customer's cost.",
         },
         {
           q: "Will the adhesive hold in a Moose Jaw freezer?",

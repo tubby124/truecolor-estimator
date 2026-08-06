@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Cosmetic Labels Moose Jaw SK | From $5.50/sqft | True Color" },
+  title: { absolute: "Cosmetic Labels Moose Jaw SK | From $25 | True Color" },
   description:
-    "Waterproof cosmetic and skincare labels for Moose Jaw beauty brands and soap makers. BOPP vinyl from $5.50/sqft. Printed in Saskatoon, shipped to Moose Jaw.",
+    "Waterproof cosmetic and skincare labels for Moose Jaw beauty brands and soap makers. BOPP vinyl from $25 for 25. Printed in Saskatoon, shipped to Moose Jaw.",
   alternates: { canonical: "/cosmetic-labels-moose-jaw-sk" },
   openGraph: {
     title: "Cosmetic Labels Moose Jaw SK | True Color Display Printing",
     description:
-      "Waterproof BOPP vinyl cosmetic labels. Survives bathroom moisture. From $5.50/sqft. Printed in Saskatoon, shipped to Moose Jaw.",
+      "Waterproof BOPP vinyl cosmetic labels. Survives bathroom moisture. From $25. Printed in Saskatoon, shipped to Moose Jaw.",
     url: "https://truecolorprinting.ca/cosmetic-labels-moose-jaw-sk",
     images: [{ url: "/images/products/og/cosmetic-labels-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -21,13 +21,13 @@ export default function CosmeticLabelsMooseJawPage() {
   return (
     <IndustryPage
       canonicalSlug="cosmetic-labels-moose-jaw-sk"
-      primaryProductSlug="stickers"
+      primaryProductSlug="cosmetic-labels"
       title="Cosmetic Labels — Moose Jaw SK"
-      subtitle="Waterproof skincare and cosmetic labels for Moose Jaw beauty brands. From $5.50/sqft."
+      subtitle="Waterproof skincare and cosmetic labels for Moose Jaw beauty brands. From $25."
       heroImage="/images/products/heroes/cosmetic-labels-hero-1200x500.webp"
       heroAlt="Waterproof cosmetic and skincare labels printed for Moose Jaw SK beauty brands by True Color Display Printing"
       description={
-        "Custom cosmetic and skincare labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $5.50/sqft on waterproof BOPP vinyl — survives bathroom humidity and product spills without smudging. Built for Moose Jaw handmade soap makers, bath bomb crafters, lotion and balm producers, and farmers market beauty vendors. Roland UV ink doesn't smudge or peel. In-house design ($35 flat), 1–3 business day turnaround. Ground courier 1–2 days."
+        "Custom cosmetic and skincare labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on waterproof BOPP vinyl — survives bathroom humidity and product spills without smudging. Built for Moose Jaw handmade soap makers, bath bomb crafters, lotion and balm producers, and farmers market beauty vendors. Roland TrueVIS VG2 eco-solvent ink doesn't smudge or peel. In-house design ($35 flat), 1–3 business day turnaround. Ground courier 1–2 days."
       }
       descriptionNode={
         <>
@@ -36,7 +36,7 @@ export default function CosmeticLabelsMooseJawPage() {
             Saskatoon shop and ships to Moose Jaw 240 km south. Standard cosmetic stock is{" "}
             <strong>waterproof BOPP vinyl</strong> with a clear or white face — survives
             bathroom humidity and accidental product spills on the bottle. Pricing from{" "}
-            <strong>$5.50/sqft</strong> with a $25 order-total minimum at checkout. Full spec on our{" "}
+            <strong>$25 for 25 labels</strong> — a 2.5×3.5&quot; label is $55 for 100 and $122.50 for 250. Full spec on our{" "}
             <Link href="/cosmetic-labels-saskatoon" className="text-[#16C2F3] underline font-medium">
               cosmetic labels Saskatoon page
             </Link>.
@@ -62,17 +62,17 @@ export default function CosmeticLabelsMooseJawPage() {
         </>
       }
       products={[
-        { name: "Cosmetic Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Product Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
+        { name: "Cosmetic Labels", from: "from $25 / 25", slug: "cosmetic-labels" },
+        { name: "Product Labels", from: "from $25 / 25", slug: "product-labels" },
+        { name: "Stickers", from: "from $25 / 25", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Postcards", from: "100 for $45", slug: "postcards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },
       ]}
       whyPoints={[
         "Waterproof BOPP vinyl — survives bathroom humidity and product spills",
-        "Roland UV ink cures to a solid film — no smudging or peeling",
-        "Sqft-tier pricing: $5.50/sqft (T1) down to $3.20/sqft (T4)",
+        "Roland TrueVIS VG2 eco-solvent ink cures to a solid film — no smudging or peeling",
+        "25 labels from $25 — a 2.5×3.5\" label is $55 for 100, $122.50 for 250",
         "$25 order-total minimum — perfect for farmers market test batches",
         "Contour cutting included — rectangle, oval, circle, custom die",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
@@ -86,7 +86,7 @@ export default function CosmeticLabelsMooseJawPage() {
         },
         {
           q: "How much do cosmetic labels cost shipped to Moose Jaw?",
-          a: "Sqft-tiered: $5.50/sqft (T1, 0–12 sqft), $5.00/sqft (T2), $4.30/sqft (T3), $3.20/sqft (T4 at 100+ sqft). $25 order minimum. A 3×4\" oval at quantity 250 runs about $200. Moose Jaw courier is customer's cost.",
+          a: "25 labels start at $25. A 2.5×3.5\" cosmetic label is $55 for 100 and $122.50 for 250; a 3×4\" is $67 for 100 and $167.50 for 250. Configure your exact size and quantity on the product page to see the price before ordering. Moose Jaw courier is customer's cost.",
         },
         {
           q: "Do you print labels for handmade soap and bath bombs?",
@@ -94,7 +94,7 @@ export default function CosmeticLabelsMooseJawPage() {
         },
         {
           q: "Will the label survive bathroom moisture?",
-          a: "Yes — waterproof BOPP vinyl is designed for it. The face material doesn't absorb moisture. The Roland UV ink cures to a solid film so it doesn't bead, smudge, or peel even when soap or lotion gets on the bottle.",
+          a: "Yes — waterproof BOPP vinyl is designed for it. The face material doesn't absorb moisture. The Roland TrueVIS VG2 eco-solvent ink cures to a solid film so it doesn't bead, smudge, or peel even when soap or lotion gets on the bottle.",
         },
         {
           q: "Can you do a small first run for a Moose Jaw indie brand?",
