@@ -412,7 +412,7 @@ test("live verification contract rejects launch-critical drift and missing noind
 
 test("launched live verification enforces the exact Stage 1 state", () => {
   assert.deepEqual(LAUNCHED_EXPECTED_CAMPAIGNS, {
-    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 18, ceiling: 4, status: "ENABLED" },
+    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 21, ceiling: 5, status: "ENABLED" },
     GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 2.5, status: "ENABLED" },
     GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" },
   });
@@ -751,7 +751,7 @@ test("canonical routing and campaign caps are complete", () => {
   assert.ok(competitors.adGroups.every((group) => group.keywords.every((keyword) => keyword.matchType === "EXACT")));
   assert.equal(competitors.adGroups.find((group) => group.key === "ink-house").keywords[0].text, "ink house saskatoon");
   assert.equal(competitors.adGroups.find((group) => group.key === "rayacom").keywords[0].text, "rayacom saskatoon");
-  assert.deepEqual(paidSearchConfig.bidding.cpcCeilingCadByCampaignKind, { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 });
+  assert.deepEqual(paidSearchConfig.bidding.cpcCeilingCadByCampaignKind, { CORE: 5, COMPETITOR: 2.5, BRAND: 1.5 });
   assert.equal(paidSearchConfig.adAssets.sitelinks.length, 6);
   assert.equal(paidSearchConfig.adAssets.callouts.length, 6);
   assert.equal(core.adGroups.find((g) => g.key === "coroplast").finalUrl, "https://truecolorprinting.ca/products/coroplast-signs");
@@ -814,7 +814,7 @@ test("exports canonical Editor campaign, RSA, and location entities", () => {
   const expectedCampaignStatus = (name) => name === "GOOG_Search_TC_BrandDefense_2026" ? "PAUSED" : "ENABLED";
   assert.ok(campaigns.rows.every((row) => row.Status === expectedCampaignStatus(row.Campaign)));
   assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026").Budget, "21");
-  assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026")["Maximum CPC bid limit"], "4");
+  assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026")["Maximum CPC bid limit"], "5");
   assert.ok(campaigns.rows.every((row) => row["Start date"] === "2026-08-03" && row["End date"] === "2026-09-17"));
   const adGroups = parseCsv(artifacts["ad-groups.csv"]);
   assert.ok(adGroups.rows.every((row) => row.Status === expectedCampaignStatus(row.Campaign)));

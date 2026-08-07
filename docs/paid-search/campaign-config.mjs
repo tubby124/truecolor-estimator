@@ -220,9 +220,9 @@ export const paidSearchConfig = {
   },
   bidding: {
     strategy: "MAXIMIZE_CLICKS",
-    cpcCeilingCadByCampaignKind: { CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 },
+    cpcCeilingCadByCampaignKind: { CORE: 5, COMPETITOR: 2.5, BRAND: 1.5 },
     forecastDate: "2026-07-17",
-    rationale: "Owner directive 2026-08-03 PM: buy the cheapest clicks the market offers; do not pre-pay for delivery. Ceilings return to the forecast-optimal Core CA$4.00 / Competitor CA$2.50 / Brand CA$1.50 while daily budgets stay raised. Budget is permission to spend; the ceiling is the price per click. Weeks 1-2 are a measurement phase — raise ceilings only if Search lost IS (rank) proves auctions are lost to rank rather than to a thin market.",
+    rationale: "Owner directive 2026-08-03 PM: buy the cheapest clicks the market offers; do not pre-pay for delivery. Weeks 1-2 are a measurement phase — raise ceilings only if Search lost IS (rank) proves auctions are lost to rank rather than to a thin market. 2026-08-07: that condition was met — Core lost 60.2% of impression share to RANK vs 8.6% to budget over Aug 5-7 (184 impressions, directionally consistent since Aug 6). Owner approved raising the Core ceiling CA$4.00 -> CA$5.00; Competitor and Brand ceilings unchanged (Competitor has zero impressions — its gate is 2026-08-12, and a ceiling raise there is explicitly deferred to that gate). Caveat recorded honestly: 184 impressions is a small sample, so judge this raise at the Aug 12 gate on fresh lost-IS data, not on day-over-day noise.",
   },
   adAssets: {
     // Sitelinks and callouts render on EVERY impression across all 20 ad groups — more surface

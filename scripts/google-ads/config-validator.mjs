@@ -339,10 +339,12 @@ export function validateConfig(config) {
     maximumWindowHours: 72,
   })) fail("Controlled test must be Coroplast at CA$5/day with CA$25/CA$30 protection and a 72-hour maximum window");
   if (config.accountCustomerId !== "1072816342") fail("Customer ID must match confirmed True Color child account 1072816342");
+  // 2026-08-07: Core ceiling 4 -> 5, approved on the exact evidence the 2026-08-03 rationale
+  // demanded — lost IS (rank) 60.2% vs lost IS (budget) 8.6% on Core over Aug 5-7.
   if (config.bidding?.strategy !== "MAXIMIZE_CLICKS"
-    || JSON.stringify(config.bidding?.cpcCeilingCadByCampaignKind) !== JSON.stringify({ CORE: 4, COMPETITOR: 2.5, BRAND: 1.5 })
+    || JSON.stringify(config.bidding?.cpcCeilingCadByCampaignKind) !== JSON.stringify({ CORE: 5, COMPETITOR: 2.5, BRAND: 1.5 })
     || config.bidding?.forecastDate !== "2026-07-17") {
-    fail("Bidding must use the approved forecast-optimal campaign-specific Maximize Clicks ceilings");
+    fail("Bidding must use the approved campaign-specific Maximize Clicks ceilings (Core raised to CA$5 on 2026-08-07 lost-IS-rank evidence)");
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
   if (JSON.stringify(config.conversionMeasurement) !== JSON.stringify(CONVERSION_MEASUREMENT)) {
