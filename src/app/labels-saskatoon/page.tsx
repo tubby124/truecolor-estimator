@@ -27,7 +27,7 @@ export default function LabelsSaskatoonHubPage() {
       heroImage="/images/products/heroes/freezer-labels-hero-1200x500.webp"
       heroAlt="Custom adhesive labels printed in Saskatoon by True Color Display Printing"
       description={
-        "Custom adhesive labels printed in Saskatoon, starting at $25 for 25 on 3 mil vinyl. Whether you need freezer-grade labels that survive -18°C deep freezers, retail product labels for a Saskatchewan-made artisan brand, waterproof cosmetic labels for a skincare line, heat-resistant labels for candle jars, or thousands of identical labels delivered on a continuous roll for an automated packaging line — we print all of it in-house at 216 33rd St W on our Roland TrueVIS VG2 eco-solvent printer/cutter. No outsourcing, no five-digit case quantities, no waiting on a label broker. Same-day rush available at +$40 flat for orders placed before 10 AM. In-house Photoshop designer builds label layouts at $35 flat with a same-day proof."
+        "Custom adhesive labels printed in Saskatoon, starting at $25 for 25 on 3 mil vinyl. Whether you need freezer-grade labels that survive -18°C deep freezers, retail product labels for a Saskatchewan-made artisan brand, waterproof cosmetic labels for a skincare line, heat-resistant labels for candle jars, or thousands of identical labels delivered on a continuous roll for an automated packaging line — we print all of it in-house at 216 33rd St W on our Roland TrueVIS VG2 eco-solvent printer/cutter. No outsourcing, no five-digit case quantities, no waiting on a label broker. Same-day rush available at +$40 flat for orders placed before 10 AM. In-house Photoshop designer builds label layouts at $40 flat with a same-day proof."
       }
       descriptionNode={
         <>
@@ -91,7 +91,7 @@ export default function LabelsSaskatoonHubPage() {
             Turnaround is <strong>1–3 business days</strong> after artwork approval. Same-day
             rush available at <strong>+$40 flat</strong> when ordered before 10 AM. Don&apos;t
             have artwork? Our in-house Photoshop designer builds label layouts at{" "}
-            <strong>$35 flat</strong> with a same-day proof — logos, ingredient panels, batch
+            <strong>$40 flat</strong> with a same-day proof — logos, ingredient panels, batch
             codes, barcodes all included.
           </p>
         </>
@@ -112,7 +112,7 @@ export default function LabelsSaskatoonHubPage() {
         "Contour cut to rectangle, oval, circle, or custom shape — setup included in the sqft rate",
         "In-house Roland TrueVIS VG2 eco-solvent printer/cutter at 216 33rd St W — no outsourcing, no file handoffs",
         "1–3 business day turnaround after artwork approval, +$40 flat for same-day rush",
-        "In-house Photoshop designer at $35 flat with same-day proof — label layouts built from your logo + brief",
+        "In-house Photoshop designer at $40 flat with same-day proof — label layouts built from your logo + brief",
       ]}
       faqs={[
         {
@@ -133,7 +133,7 @@ export default function LabelsSaskatoonHubPage() {
         },
         {
           q: "Do I need print-ready artwork?",
-          a: "If you have it (AI, PDF, PSD, PNG, JPG, even a high-quality photo of what you're trying to recreate), send it and we'll proof it. If you don't, our in-house Photoshop designer builds a label layout for $35 flat with a same-day proof. Logos, ingredient panels, weight/lot tracking fields, barcodes — all standard label work, all included in the $35.",
+          a: "If you have it (AI, PDF, PSD, PNG, JPG, even a high-quality photo of what you're trying to recreate), send it and we'll proof it. If you don't, our in-house Photoshop designer builds a label layout for $40 flat with a same-day proof. Logos, ingredient panels, weight/lot tracking fields, barcodes — all standard label work, all included in the $35.",
         },
         {
           q: "Can True Color print labels for a packaging line?",

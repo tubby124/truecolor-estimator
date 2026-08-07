@@ -38,7 +38,7 @@ const descriptionNode = (
       (306) 954-8688 to confirm availability.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed">
-      Our in-house designer handles layout for $35 flat with a same-day proof, so you don&apos;t
+      Our in-house designer handles layout for $40 flat with a same-day proof, so you don&apos;t
       need production-ready files. We match your existing brand guide, letterhead colours, and logo
       standards exactly. Pickup at 216 33rd St W, Saskatoon. Need aluminum composite for an
       exterior building sign?{" "}
@@ -69,7 +69,7 @@ export default function LawOfficeSignsSaskatoonPage() {
       subtitle="ACP suite signs, lobby directories, and business cards for Saskatoon legal and financial professionals."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Professional ACP aluminum signs and business cards for Saskatoon law offices printed by True Color Display Printing"
-      description="Your firm name on a crooked, faded exterior sign tells clients something before they walk in. ACP aluminum composite panels from $13/sqft are the standard for permanent suite signs, building directories, and reception wall plaques — rigid, UV-resistant, 10+ years outdoor lifespan. Our in-house Roland UV printer locks colour panel to panel. New partner? Business cards print in 24–48 hours, 500 two-sided for $65. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="Your firm name on a crooked, faded exterior sign tells clients something before they walk in. ACP aluminum composite panels from $13/sqft are the standard for permanent suite signs, building directories, and reception wall plaques — rigid, UV-resistant, 10+ years outdoor lifespan. Our in-house Roland UV printer locks colour panel to panel. New partner? Business cards print in 24–48 hours, 500 two-sided for $65. In-house designer $40 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
@@ -85,7 +85,7 @@ export default function LawOfficeSignsSaskatoonPage() {
         "500 two-sided business cards for $65 — batch orders for entire firms, one proof, one pickup",
         "Brochures for practice area summaries — 100 tri-fold copies for $70",
         "Retractable banner stands from $219 — waiting rooms, firm events, and networking conferences",
-        "In-house designer $35 flat — matches your brand guide exactly, same-day proof",
+        "In-house designer $40 flat — matches your brand guide exactly, same-day proof",
         "Same-day rush +$40 flat — order before 10 AM for same-day pickup",
       ]}
       faqs={[
@@ -95,7 +95,7 @@ export default function LawOfficeSignsSaskatoonPage() {
         },
         {
           q: "Can you print a lobby directory panel for a multi-tenant professional building?",
-          a: "Yes — we produce custom lobby directory panels in ACP or foam board at any size. Common sizes are 18×24\" up to 24×48\". ACP is best for permanent wall-mount installations. Bring your tenant list and we handle the layout for $35 flat with a same-day proof.",
+          a: "Yes — we produce custom lobby directory panels in ACP or foam board at any size. Common sizes are 18×24\" up to 24×48\". ACP is best for permanent wall-mount installations. Bring your tenant list and we handle the layout for $40 flat with a same-day proof.",
         },
         {
           q: "How fast can you print business cards for a new associate?",
@@ -103,7 +103,7 @@ export default function LawOfficeSignsSaskatoonPage() {
         },
         {
           q: "Do you print practice area brochures for law firm client intake areas?",
-          a: "Yes — tri-fold brochures on gloss or matte stock are a common order for law offices. 100 copies for $70, 250 for $105. Our in-house designer can lay out your practice areas from a Word document or PDF for $35 flat. Standard turnaround 1–3 business days.",
+          a: "Yes — tri-fold brochures on gloss or matte stock are a common order for law offices. 100 copies for $70, 250 for $105. Our in-house designer can lay out your practice areas from a Word document or PDF for $40 flat. Standard turnaround 1–3 business days.",
         },
         {
           q: "Can you match our firm's existing brand colours and letterhead?",
