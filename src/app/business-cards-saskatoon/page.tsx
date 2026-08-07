@@ -169,7 +169,7 @@ Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready i
         },
         {
           q: "Can you design my business cards?",
-          a: "Yes — bring your logo (any quality) and contact information and our in-house designer will lay it out for $35–$50. If you have a rough layout in Word or Canva, we can work with that too.",
+          a: "Yes — bring your logo (any quality) and contact information and our in-house designer will lay it out for $40 flat. If you have a rough layout in Word or Canva, we can work with that too.",
         },
         {
           q: "What's the minimum order?",

@@ -119,7 +119,7 @@ export default function GraphicDesignSaskatoonPage() {
         },
         {
           q: "Do you create logos from scratch?",
-          a: "Yes. Full original design from scratch is $50 for a standard logo/layout concept, and logo recreation or vectorization from a low-resolution file is $50. You'll receive a print-ready file plus source files you can use anywhere.",
+          a: "Yes. Full original design from scratch is $50 for a standard logo/layout concept, and logo recreation or vectorization from a low-resolution file is $40. You'll receive a print-ready file plus source files you can use anywhere.",
         },
         {
           q: "Can you do logo design in Saskatoon and print it on signs or cards?",
@@ -127,7 +127,7 @@ export default function GraphicDesignSaskatoonPage() {
         },
         {
           q: "Can you make my logo print-ready from a JPG or PNG?",
-          a: "Yes. Logo recreation or vectorization from a low-resolution JPG or PNG is $50, and basic resizing or colour setup is $35. We prepare print-ready PDFs for signs, banners, flyers, cards, wall graphics, vehicle magnets, and window decals.",
+          a: "Yes. Logo recreation or vectorization from a low-resolution JPG or PNG is $40, and basic resizing or colour setup is $40. We prepare print-ready PDFs for signs, banners, flyers, cards, wall graphics, vehicle magnets, and window decals.",
         },
         {
           q: "Can you modify or resize my existing artwork?",
