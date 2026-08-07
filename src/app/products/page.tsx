@@ -30,13 +30,13 @@ type SeoOnlyCard = { name: string; fromPrice: string; href: string; image: strin
 const SEO_ONLY_CARDS: SeoOnlyCard[] = [
   {
     name: "Image Upscale",
-    fromPrice: "from $15",
+    fromPrice: "$20 flat",
     href: "/image-upscale-saskatoon",
     image: "/images/products/heroes/image-upscale-hero-1200x500.webp",
   },
   {
     name: "Logo Vectorization",
-    fromPrice: "from $50",
+    fromPrice: "$40 flat",
     href: "/logo-vectorization-saskatoon",
     image: "/images/products/heroes/logo-vectorization-hero-1200x500.webp",
   },

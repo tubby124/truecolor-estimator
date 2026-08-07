@@ -93,7 +93,7 @@ export default function RetractableBannersSaskatoonPage() {
         },
         {
           q: "What file format do you need?",
-          a: "PDF at 150 dpi minimum, sized to print dimensions. Vector artwork (AI, EPS) is preferred for logos. Our in-house designer can build the full layout from your logo and content — usually $35–$50.",
+          a: "PDF at 150 dpi minimum, sized to print dimensions. Vector artwork (AI, EPS) is preferred for logos. Our in-house designer can build the full layout from your logo and content — $40 flat.",
         },
       ]}
     />
