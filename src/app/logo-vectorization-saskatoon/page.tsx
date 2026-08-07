@@ -21,7 +21,7 @@ export default function LogoVectorizationSaskatoonPage() {
   return (
     <IndustryPage
       canonicalSlug="logo-vectorization-saskatoon"
-      primaryProductSlug="vinyl-banners"
+      primaryProductSlug="logo-vectorization"
       title="Logo Vectorization — Saskatoon"
       subtitle="Raster to vector logo conversion. $40 flat. Free with $250+ large-format orders."
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"

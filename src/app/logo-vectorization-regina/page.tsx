@@ -21,7 +21,7 @@ export default function LogoVectorizationReginaPage() {
   return (
     <IndustryPage
       canonicalSlug="logo-vectorization-regina"
-      primaryProductSlug="stickers"
+      primaryProductSlug="logo-vectorization"
       title="Logo Vectorization — Regina SK"
       subtitle="Convert raster logos to scalable vector files for Regina businesses. $40 flat. Same-day digital delivery."
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"
