@@ -27,7 +27,7 @@ export default function ProductLabelsReginaPage() {
       heroImage="/images/products/heroes/product-labels-hero-1200x500.webp"
       heroAlt="Retail product labels printed for Regina SK artisan brands by True Color Display Printing"
       description={
-        "Custom retail product labels printed in Saskatoon, shipped to Regina 260 km south. From $25 on 3mil vinyl — gloss, matte, or soft-touch finish. Built for Regina artisan food brands, craft beverages, packaged goods, soap and candle makers, and any SaskMade product going on a retail shelf. Contour-cut to any shape, no die fee. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier adds 1–2 days."
+        "Custom retail product labels printed in Saskatoon, shipped to Regina 260 km south. From $25 on 3mil vinyl — gloss, matte, or soft-touch finish. Built for Regina artisan food brands, craft beverages, packaged goods, soap and candle makers, and any SaskMade product going on a retail shelf. Contour-cut to any shape, no die fee. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($40 flat), 1–3 business day turnaround. Ground courier adds 1–2 days."
       }
       descriptionNode={
         <>
@@ -81,7 +81,7 @@ export default function ProductLabelsReginaPage() {
         "Waterproof BOPP option available for beverage labels and bath products",
         "1–3 business day print + 1–2 day courier to Regina",
         "Same-day rush at +$40 flat when ordered before 10 AM",
-        "In-house Photoshop designer: $35 flat with same-day proof",
+        "In-house Photoshop designer: $40 flat with same-day proof",
       ]}
       faqs={[
         {
