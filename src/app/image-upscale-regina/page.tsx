@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Upscaling Regina SK | From $15 | True Color" },
+  title: { absolute: "Image Upscaling Regina SK | $20 Flat | True Color" },
   description:
-    "AI image upscaling and photo enhancement for Regina businesses. Print-ready files from low-res sources. From $15. Same-day digital delivery.",
+    "AI image upscaling and photo enhancement for Regina businesses. Print-ready files from low-res sources. $20 flat. Same-day digital delivery.",
   alternates: { canonical: "/image-upscale-regina" },
   openGraph: {
     title: "Image Upscaling Regina SK | True Color Display Printing",
     description:
-      "AI image upscaling and photo restoration. Print-ready files from low-res photos. From $15. Same-day digital delivery to Regina.",
+      "AI image upscaling and photo restoration. Print-ready files from low-res photos. $20 flat. Same-day digital delivery to Regina.",
     url: "https://truecolorprinting.ca/image-upscale-regina",
     images: [{ url: "/images/products/og/image-upscale-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -27,7 +27,7 @@ export default function ImageUpscaleReginaPage() {
       heroImage="/images/products/heroes/image-upscale-hero-1200x500.webp"
       heroAlt="AI image upscaling service for Regina SK businesses by True Color Display Printing"
       description={
-        "AI image upscaling and photo enhancement for Regina businesses. From $15 per image — print-ready sharp output from blurry, low-resolution, or grainy source files. Built for Regina realtors who need a sharp listing photo, restaurants reusing old menu shots, small businesses with only a tiny logo file, and anyone trying to print a banner or sign from a phone snapshot. We process the file in-house in Saskatoon and email the result the same business day. No courier needed — files delivered as high-res PNG, JPG, or TIFF over email or Dropbox link."
+        "AI image upscaling and photo enhancement for Regina businesses. $20 flat per image — print-ready sharp output from blurry, low-resolution, or grainy source files. Built for Regina realtors who need a sharp listing photo, restaurants reusing old menu shots, small businesses with only a tiny logo file, and anyone trying to print a banner or sign from a phone snapshot. We process the file in-house in Saskatoon and email the result the same business day. No courier needed — files delivered as high-res PNG, JPG, or TIFF over email or Dropbox link."
       }
       descriptionNode={
         <>
@@ -35,9 +35,9 @@ export default function ImageUpscaleReginaPage() {
             True Color Display Printing offers AI image upscaling and photo restoration as a
             digital service. Send us your low-resolution photo, pixelated logo, or grainy
             family photograph and we&apos;ll return a sharp, print-ready high-resolution file
-            via email or Dropbox link. <strong>$20 upscale</strong> handles 2×
-            resolution for prints up to 12×18&quot;; $35 enhanced adds 4× upscaling,
-            noise reduction, and sharpening for banner-sized output. Same-day digital
+            via email or Dropbox link. It&apos;s <strong>$20 flat per image</strong> — 2×
+            resolution for prints up to 12×18&quot;, or 4× upscaling with noise reduction
+            and sharpening for banner-sized output, at the same one price. Same-day digital
             delivery to Regina — no shipping required.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -73,18 +73,18 @@ export default function ImageUpscaleReginaPage() {
         </>
       }
       products={[
-        { name: "Image Upscaling", from: "from $15", slug: "stickers" },
-        { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
+        { name: "Image Upscaling", from: "$20 flat", slug: "image-upscale" },
+        { name: "Logo Vectorization", from: "$40 flat", slug: "logo-vectorization" },
         { name: "Photo Posters", from: "from $25", slug: "photo-posters" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
       ]}
       whyPoints={[
-        "AI upscaling from $15 — $35 enhanced tier for banner-sized output",
+        "AI upscaling at $20 flat per image — one price, no tier ladder",
         "Same-business-day digital delivery to Regina — no courier required",
         "We tell you the right output resolution for your target print size + substrate",
-        "Roland UV print quality once upscaled — combine with a True Color print job for one workflow",
+        "Roland TrueVIS VG2 eco-solvent print quality once upscaled — combine with a True Color print job for one workflow",
         "Standard formats: PNG, JPG, TIFF, PDF — Dropbox or email delivery",
         "Family photo restoration: scratches, faded colours, tears repaired",
         "Rush (under 4 hours) available at +$40 flat",
@@ -93,7 +93,7 @@ export default function ImageUpscaleReginaPage() {
       faqs={[
         {
           q: "How much does image upscaling cost in Regina?",
-          a: "$15 for basic 2× upscaling, $35 for enhanced 4× upscaling with AI noise reduction and sharpening, and $75 for full photo restoration. Rush turnaround (under 4 hours) adds $40 flat. No shipping cost — files delivered digitally.",
+          a: "$20 flat per image — basic upscaling, AI noise reduction and sharpening all included, no tier ladder. Rush turnaround (under 4 hours) adds $40 flat. No shipping cost — files delivered digitally.",
         },
         {
           q: "How do I send True Color my photo for upscaling?",
@@ -105,7 +105,7 @@ export default function ImageUpscaleReginaPage() {
         },
         {
           q: "Will an upscaled image actually look sharp when printed large?",
-          a: "Yes — that's the whole point. The AI reconstructs detail rather than just stretching pixels. Edges stay crisp, text stays readable, faces stay natural. We test the upscaled file against the intended print size in our Photoshop before sending it back so we know it'll work on our Roland UV printer.",
+          a: "Yes — that's the whole point. The AI reconstructs detail rather than just stretching pixels. Edges stay crisp, text stays readable, faces stay natural. We test the upscaled file against the intended print size in our Photoshop before sending it back so we know it'll work on our Roland TrueVIS VG2 eco-solvent printer.",
         },
         {
           q: "What's the turnaround for Regina upscale jobs?",

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Graphic Design Saskatoon | Custom Artwork & Print Layouts | True Color",
     description:
-      "In-house Photoshop designer. Custom logos, artwork mods, print layouts from $35. Design + print in one shop. Local pickup 216 33rd St W, Saskatoon.",
+      "In-house Photoshop designer. Custom logos, artwork mods, print layouts from $40. Design + print in one shop. Local pickup 216 33rd St W, Saskatoon.",
     url: "https://truecolorprinting.ca/graphic-design-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -21,13 +21,13 @@ export default function GraphicDesignSaskatoonPage() {
   return (
     <IndustryPage
       canonicalSlug="graphic-design-saskatoon"
-      primaryProductSlug="vinyl-banners"
+      primaryProductSlug="custom-logo-design"
       title="Graphic Design — Saskatoon"
       subtitle="Design + print in one shop. In-house Photoshop wizard. From sketch to finished sign."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Custom graphic design and printing in Saskatoon by True Color Display Printing"
       description={
-        "Most print shops in Saskatoon make you show up with a print-ready file. True Color is different — our in-house designer handles everything from a rough idea to a finished, print-ready layout, and then prints it the same day. No outsourcing, no agency mark-ups, no back-and-forth with a freelancer who's never seen a commercial printer. Your designer and your printer are in the same building.\n\nOur designer specializes in Photoshop-level custom work: logos built from scratch, artwork modified to fit new dimensions, low-resolution files cleaned up for large-format printing, full layouts for banners, signs, flyers, business cards, vehicle magnets, and retractable stands. If you've got a vision but not the software, that's exactly what we're here for. Bring a napkin sketch, a reference photo, or just a description — we'll build it.\n\nLogo design in Saskatoon usually starts with one practical question: do you need a new brand mark, or do you need an existing logo cleaned up for print? Basic artwork setup and resizing is $40 flat, full original design from scratch is $50, and logo recreation or vectorization from a low-resolution JPG or PNG is $50. We build print-ready files for signs, banners, cards, flyers, decals, and wall graphics so the logo is usable beyond a single order.\n\nStandard design layouts (business cards, flyers, basic banners) start at $40 flat — that covers your initial layout and two rounds of revisions. Complex projects like full logo creation, multi-panel trade show displays, or vehicle wrap layouts are quoted individually. Either way, you'll have a proof to approve before anything goes to print.\n\nEvery file we create is yours to keep. We send the print-ready PDF, and if you want the source file in PSD or AI format, just ask — no ransom fees. You paid for the design work, you own the artwork.\n\nTurnaround is fast because everything happens in-house. Submit your brief by 10 AM and most standard layouts come back as a proof the same day. Rush design is available on the same +$40 flat fee as our rush printing. If you need a banner designed and in your hands by 5 PM today, call (306) 954-8688 — it happens more often than you'd think.\n\nSaskatoon businesses, contractors, real estate agents, event organizers, and community groups rely on True Color because design and print in one shop means fewer emails, fewer handoffs, and no delays waiting for files to move between vendors. Come in, describe what you need, leave with a finished product."
+        "Most print shops in Saskatoon make you show up with a print-ready file. True Color is different — our in-house designer handles everything from a rough idea to a finished, print-ready layout, and then prints it the same day. No outsourcing, no agency mark-ups, no back-and-forth with a freelancer who's never seen a commercial printer. Your designer and your printer are in the same building.\n\nOur designer specializes in Photoshop-level custom work: logos built from scratch, artwork modified to fit new dimensions, low-resolution files cleaned up for large-format printing, full layouts for banners, signs, flyers, business cards, vehicle magnets, and retractable stands. If you've got a vision but not the software, that's exactly what we're here for. Bring a napkin sketch, a reference photo, or just a description — we'll build it.\n\nLogo design in Saskatoon usually starts with one practical question: do you need a new brand mark, or do you need an existing logo cleaned up for print? Basic artwork setup and resizing is $40 flat, full original design from scratch is $40, and logo recreation or vectorization from a low-resolution JPG or PNG is $40. We build print-ready files for signs, banners, cards, flyers, decals, and wall graphics so the logo is usable beyond a single order.\n\nStandard design layouts (business cards, flyers, basic banners) start at $40 flat — that covers your initial layout and two rounds of revisions. Complex projects like full logo creation, multi-panel trade show displays, or vehicle wrap layouts are quoted individually. Either way, you'll have a proof to approve before anything goes to print.\n\nEvery file we create is yours to keep. We send the print-ready PDF, and if you want the source file in PSD or AI format, just ask — no ransom fees. You paid for the design work, you own the artwork.\n\nTurnaround is fast because everything happens in-house. Submit your brief by 10 AM and most standard layouts come back as a proof the same day. Rush design is available on the same +$40 flat fee as our rush printing. If you need a banner designed and in your hands by 5 PM today, call (306) 954-8688 — it happens more often than you'd think.\n\nSaskatoon businesses, contractors, real estate agents, event organizers, and community groups rely on True Color because design and print in one shop means fewer emails, fewer handoffs, and no delays waiting for files to move between vendors. Come in, describe what you need, leave with a finished product."
       }
       descriptionNode={
         <>
@@ -56,8 +56,8 @@ export default function GraphicDesignSaskatoonPage() {
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             Logo design in Saskatoon usually starts with one practical question: do you need a new
             brand mark, or do you need an existing logo cleaned up for print? Basic artwork setup
-            and resizing is $40 flat, full original design from scratch is $50, and logo recreation
-            or vectorization from a low-resolution JPG or PNG is $50. We build print-ready files for
+            and resizing is $40 flat, full original design from scratch is $40, and logo recreation
+            or vectorization from a low-resolution JPG or PNG is $40. We build print-ready files for
             signs, banners, cards, flyers, decals, and{" "}
             <Link href="/wall-graphics-saskatoon" className="text-[#16C2F3] underline font-medium">
               wall graphics
@@ -115,15 +115,15 @@ export default function GraphicDesignSaskatoonPage() {
         },
         {
           q: "Can you design and print in the same shop?",
-          a: "Yes — and that's what makes True Color different from most Saskatoon print shops. Our full-time designer works in the same building as our Roland UV printer. You submit your brief, get a proof, approve it, and your finished product is on the press immediately. No files moving between vendors, no delays.",
+          a: "Yes — and that's what makes True Color different from most Saskatoon print shops. Our full-time designer works in the same building as our Roland TrueVIS VG2 eco-solvent printer. You submit your brief, get a proof, approve it, and your finished product is on the press immediately. No files moving between vendors, no delays.",
         },
         {
           q: "Do you create logos from scratch?",
-          a: "Yes. Full original design from scratch is $50 for a standard logo/layout concept, and logo recreation or vectorization from a low-resolution file is $40. You'll receive a print-ready file plus source files you can use anywhere.",
+          a: "Yes. Full original design from scratch is $40 for a standard logo/layout concept, and logo recreation or vectorization from a low-resolution file is $40. You'll receive a print-ready file plus source files you can use anywhere.",
         },
         {
           q: "Can you do logo design in Saskatoon and print it on signs or cards?",
-          a: "Yes — True Color handles logo design in Saskatoon and prints the finished artwork in the same shop. Basic artwork setup is $40 flat, full original design is $50, and we can apply the logo to business cards from $45, banners from $66, coroplast signs from $25, or ACP aluminum signs from $39.",
+          a: "Yes — True Color handles logo design in Saskatoon and prints the finished artwork in the same shop. Basic artwork setup is $40 flat, full original design is $40 too, and we can apply the logo to business cards from $45, banners from $66, coroplast signs from $25, or ACP aluminum signs from $39.",
         },
         {
           q: "Can you make my logo print-ready from a JPG or PNG?",
