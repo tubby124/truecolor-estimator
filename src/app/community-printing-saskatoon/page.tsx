@@ -117,7 +117,7 @@ export default function CommunityPrintingSaskatoonPage() {
         },
         {
           q: "Can you print flyers and programs for a community gala or fundraiser dinner?",
-          a: "Yes — 80lb gloss flyers start at 100 for $45 (8.5×11 inch, 2-sided). Programs on heavier 14pt gloss are also available. Postcards for save-the-date mailings start at 50 for $40. Our in-house designer can create event layouts from your content for $35 flat with same-day proof.",
+          a: "Yes — 80lb gloss flyers start at 100 for $45 (8.5×11 inch, 2-sided). Programs on heavier 14pt gloss are also available. Postcards for save-the-date mailings start at 50 for $40. Our in-house designer can create event layouts from your content for $40 flat with same-day proof.",
         },
       ]}
       relatedCities={[
