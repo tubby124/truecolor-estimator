@@ -254,3 +254,60 @@ evidence-justified lever, and it is the first one the data has ever supported.
 **Promoted to rule:** the "thin market, no bid fixes it" line in `google-ads-copy.md` now has to
 be read against live lost-IS, not assumed. An average computed over the wrong denominator will
 happily confirm whatever you already believed.
+
+---
+
+## 2026-08-07 — Core CA$18 -> CA$21, two negatives, and a diagnosis that flipped back
+
+Three delivering days (Aug 5–7): CA$29.08, 150 impressions, 18 clicks, **12% CTR**,
+CA$1.62 avg CPC, 0 conversions. Per-day: Aug 5 CA$6.89 · Aug 6 CA$18.09 · Aug 7 CA$4.09 (partial).
+
+**Correction 3 — "budget-limited" was right for one day, then stopped being the story.**
+The Aug 6 note promoted budget to *the* evidence-justified lever on 32.1% lost IS (budget).
+That raise (14 -> 18) worked: budget loss fell **32.1% -> 8.6%**. But the same window shows
+**60.2% of impression share lost to RANK** — seven times the remaining budget loss. Average burn
+is CA$9.69/day against CA$22/day of already-enabled capacity, so on most days the account cannot
+spend the budget it already has. Aug 6 alone capped out (CA$18.09 vs CA$18).
+
+Raised Core 18 -> 21 anyway — the cap-out is real evidence and it is the cheap lever — but
+recorded the honest expectation in the contract comment: **this is a small lever.** Enabled total
+is now CA$25/day, exactly at `MAX_UNMONITORED_DAILY_BURN_CAD`. Any further raise requires lifting
+that safety bound, which is a deliberate decision, not a pacing reflex.
+
+**Do not read a weak pacing response as the raise failing.** Read it as confirmation that rank,
+not budget, is binding. The next lever to evaluate is the CPC ceiling (CORE currently CA$4) —
+but not during Maximize Clicks calibration, and not before the learning week closes.
+
+**Negatives added (2): "canvas", "shirt printing".** Both verified against the catalog, not
+assumed:
+- `canvas` — zero references in `products.v1.csv` or `products-content.ts`. No canvas capability.
+- `shirt printing` — the Aug 6 `t shirt` / `tshirt` phrase-negatives do **not** block
+  "shirt printing saskatoon" (neither substring occurs in it). Apparel intent was leaking
+  through a second door the first pass never closed.
+
+**Rejected the miner's own recommendations.** `mine-search-terms.mjs` flagged
+`photo printing saskatoon`, `professional sticker printer`, and `business card price list` as
+negative candidates on the "spend > 0, conversions = 0" rule. All three are core products —
+stickers are the strongest commercial category on the site. **The miner cannot see conversions
+because ad-attributed conversion upload has never fired**, so its zero-conversion signal is
+currently meaningless and will flag every good keyword equally. The script warns about this
+itself; heed the warning. Negating those three would have cut the best traffic in the account.
+
+**Also NOT negated:** every boat term (`boat hull registration numbers`, `custom boat decals`,
+`boat decals near me`). Boat registration numbers are a real product — 45 references in
+`products-content.ts`.
+
+**Promoted to rule:** a waste-mining rule keyed on conversions is inert until conversion upload
+is proven live. Until then, verify every negative against the product catalog, not against the
+conversion column. Same failure shape as Correction 1 — a metric computed on a signal that cannot
+yet exist will confirm whatever you already believed.
+
+**Applied:** `apply-sync.mjs --execute` created 12 campaign negatives (readback 281 negative
+criteria); `apply-budgets.mjs --execute` set Core CA$21/day (readback clean, Brand still PAUSED).
+Post-apply `sync-plan.mjs` re-diff: **zero**. Validator VALIDATED, 96/96 ads tests pass,
+8 generated artifacts deterministic.
+
+**Untouched and still open:** `CompetitorConquest` is ENABLED with 0 impressions / 0 spend across
+all three days while competitor queries (`print baron saskatoon`, `mister print saskatoon`,
+`77 signs saskatoon`) draw impressions on Core instead. That is both a routing fault and the
+untapped delivery capacity the pacing gap needs. Diagnose after the learning week.

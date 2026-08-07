@@ -407,6 +407,19 @@ export const paidSearchConfig = {
     // "london drugs" + "photo lab": retail photo-developing intent, drew 9 impressions.
     // "photo printing" deliberately NOT negated — photo posters are a real product from $15.
     "t shirt", "tshirt", "london drugs", "photo lab",
+    // 2026-08-07 mining (52 terms / CA$12.98 / 7 days, first window with real delivery).
+    // "canvas": zero references to canvas anywhere in products.v1.csv or products-content.ts —
+    // True Color has no canvas capability. "shirt printing": the Aug 6 "t shirt"/"tshirt"
+    // phrase-negatives do NOT block "shirt printing saskatoon" (verified: neither substring
+    // appears in it), so apparel intent was still leaking through a second door.
+    // Deliberately NOT negated: every boat term ("boat hull registration numbers",
+    // "custom boat decals", "boat decals near me") — boat registration numbers are a real
+    // product with 45 references in products-content.ts. Also NOT negated: "photo printing
+    // saskatoon", "professional sticker printer", "business card price list", which the miner
+    // flagged as zero-conversion waste. All three are core products; the miner cannot see
+    // conversions because ad-attributed conversion upload has not fired yet, so its
+    // zero-conversion signal is currently meaningless.
+    "canvas", "shirt printing",
   ]),
   campaigns: [
     {
@@ -417,8 +430,17 @@ export const paidSearchConfig = {
       // the CA$14 budget and Core lost 32.1% of impression share to budget. Enabled daily total
       // becomes CA$22, still inside the CA$25 unmonitored-burn bound. The CA$600 hard stop is
       // unchanged and remains the binding constraint on total spend.
-      dailyBudgetCad: 18,
-      maximumPilotCad: 828,
+      // 2026-08-07: raised 18 -> 21, the ceiling reachable without lifting
+      // MAX_UNMONITORED_DAILY_BURN_CAD (enabled total becomes exactly CA$25 = Core 21 +
+      // Competitor 4; Brand stays PAUSED at 3). Evidence: Aug 6 spent CA$18.09 against the
+      // CA$18 budget — a full cap-out — and Core still loses 8.6% of impression share to budget.
+      // Honest expectation, recorded so the next raise is judged against it: this is a SMALL
+      // lever. Average burn is CA$9.69/day against CA$22/day of already-enabled capacity, so
+      // headroom only binds on strong days like Aug 6. Lost IS to RANK is 60.2% — seven times
+      // the budget loss — and no budget number touches that. Do not read a weak pacing response
+      // as evidence the raise failed; read it as confirmation that rank, not budget, is binding.
+      dailyBudgetCad: 21,
+      maximumPilotCad: 966,
       campaignNegatives: competitorTargets.flatMap(([, , terms]) => terms),
       gates: [],
       adGroups: [

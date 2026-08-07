@@ -308,7 +308,10 @@ function evaluateLiveState(live, {
   //   [EXACT|PHRASE] "boat decals near me" -> Decals
   // Remove those four in the Google Ads UI right after apply-sync. Until then this line
   // reporting drift is correct and expected — it is the removal reminder.
-  if (live.positiveKeywords !== 159 || live.negativeCriteria !== 269) failures.push("keyword counts changed");
+  // 2026-08-07: negativeCriteria 269 -> 281. Added account negatives "canvas" and
+  // "shirt printing" (2 terms x EXACT+PHRASE x 3 campaigns = 12). Composition is now
+  // 204 account-negative criteria + 64 ad-group cross-negatives + 13 campaign negatives.
+  if (live.positiveKeywords !== 159 || live.negativeCriteria !== 281) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,

@@ -12,14 +12,17 @@ import {
 
 // A PAUSED campaign keeps its staged daily budget but contributes CA$0 to approved pilot spend.
 const EXPECTED = {
-  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 18, maximum: 828, status: "ENABLED" },
+  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 21, maximum: 966, status: "ENABLED" },
   COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 4, maximum: 184, status: "ENABLED" },
   BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 0, status: "PAUSED" },
 };
 const PILOT_START_DATE = "2026-08-03";
 const PILOT_END_DATE = "2026-09-17";
 const PILOT_INCLUSIVE_DAYS = 46;
-const LAUNCHABLE_DAILY_BUDGET_CAD = 25;
+// 2026-08-07: 25 -> 28 (Core 21 + Competitor 4 + Brand 3). This is the contract TOTAL across
+// all three campaigns and is deliberately NOT the safety bound. MAX_UNMONITORED_DAILY_BURN_CAD
+// stays at 25 and still binds the ENABLED subset (Core 21 + Competitor 4 = 25, exactly at it).
+const LAUNCHABLE_DAILY_BUDGET_CAD = 28;
 // Enabled-only daily burn ceiling. At CA$18/day an unmonitored account needs 33 days to reach
 // the CA$600 ceiling, which is far longer than any plausible monitor outage goes unnoticed.
 const MAX_UNMONITORED_DAILY_BURN_CAD = 25;
@@ -227,6 +230,7 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   "screen printing", "photocopy", "document printing", "print outs",
   "label maker", "label printers",
   "t shirt", "tshirt", "london drugs", "photo lab",
+  "canvas", "shirt printing",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 // Claim validation moved to docs/paid-search/approved-claims.mjs (2026-08-06).
