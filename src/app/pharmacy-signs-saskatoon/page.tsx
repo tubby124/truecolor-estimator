@@ -38,7 +38,7 @@ const descriptionNode = (
       call (306) 954-8688.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed">
-      Our in-house designer handles seasonal campaign artwork for $35 flat with a same-day proof.
+      Our in-house designer handles seasonal campaign artwork for $40 flat with a same-day proof.
       We keep your files and brand assets on record so updating from flu season to allergy season
       is a quick edit, not a full redesign. For broader healthcare signage options,{" "}
       <Link
@@ -68,7 +68,7 @@ export default function PharmacySignsSaskatoonPage() {
       subtitle="Seasonal health campaign displays, window decals, and banners for Saskatoon pharmacies and health stores."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Foamboard displays and vinyl banners for Saskatoon pharmacy seasonal health campaigns printed by True Color Display Printing"
-      description="Flu shot season opens a narrow window — patients who see your signage walk in; patients who don't walk past. Saskatoon pharmacies use foamboard displays from $10/sqft for flu season, back-to-school immunizations, and spring allergy campaigns. Window decals from $11/sqft for year-round storefront branding. Vinyl banners from $66 for outdoor vaccination clinic announcements. Health promo flyers 100 for $45. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="Flu shot season opens a narrow window — patients who see your signage walk in; patients who don't walk past. Saskatoon pharmacies use foamboard displays from $10/sqft for flu season, back-to-school immunizations, and spring allergy campaigns. Window decals from $11/sqft for year-round storefront branding. Vinyl banners from $66 for outdoor vaccination clinic announcements. Health promo flyers 100 for $45. In-house designer $40 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
@@ -84,7 +84,7 @@ export default function PharmacySignsSaskatoonPage() {
         "Vinyl banners from $66 — outdoor vaccination clinic and entrance announcements with grommets included",
         "Health promo flyers — 100 for $45, countertop-ready and effective for community distribution",
         "Retractable banner stands from $219 — in-store vaccination clinic setup and health fair use",
-        "In-house designer $35 flat — seasonal artwork updated fast between campaigns, same-day proof",
+        "In-house designer $40 flat — seasonal artwork updated fast between campaigns, same-day proof",
         "Same-day rush +$40 flat — when a vaccination clinic pops up on short notice",
       ]}
       faqs={[
@@ -106,7 +106,7 @@ export default function PharmacySignsSaskatoonPage() {
         },
         {
           q: "What flyer sizes and quantities work for a pharmacy health promotion?",
-          a: "8.5×11\" full-colour gloss flyers are the most common format. 100 copies for $45, 500 for $135. Place them on the counter, include in prescription bags, or use for community drop campaigns. Our designer can create a health promo flyer from your campaign brief for $35 flat.",
+          a: "8.5×11\" full-colour gloss flyers are the most common format. 100 copies for $45, 500 for $135. Place them on the counter, include in prescription bags, or use for community drop campaigns. Our designer can create a health promo flyer from your campaign brief for $40 flat.",
         },
         {
           q: "Do you print retractable banners for in-store vaccination clinic setups?",
@@ -114,7 +114,7 @@ export default function PharmacySignsSaskatoonPage() {
         },
         {
           q: "Can we reuse our seasonal signage artwork year over year?",
-          a: "Yes — we keep your artwork on file. For annual campaigns like flu season, we pull your existing design, update the dates or any changed messaging, and send a revised proof. No design fee for minor text updates. Full redesigns are $35 flat.",
+          a: "Yes — we keep your artwork on file. For annual campaigns like flu season, we pull your existing design, update the dates or any changed messaging, and send a revised proof. No design fee for minor text updates. Full redesigns are $40 flat.",
         },
         {
           q: "Do you print health promotion signage for compounding pharmacies and health stores?",

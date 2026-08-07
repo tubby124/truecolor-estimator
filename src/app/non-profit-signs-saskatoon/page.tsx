@@ -26,7 +26,7 @@ export default function NonProfitSignsSaskatoonPage() {
       subtitle="Fundraiser campaigns, galas, and awareness days — without blowing the budget."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Non-profit and charity signs and banners printed in Saskatoon"
-      description="True Color prints signs, banners, flyers, and event displays for non-profits, charities, community organizations, and fundraising events across Saskatoon. Coroplast yard signs from $24 (18×24&quot;). Vinyl banners from $66 with grommets. Flyers 100 for $45. Retractable banners from $219 for gala entrances and donor recognition. Volume discounts apply at 5+ signs (8% off). $25 order-total minimum applies at checkout. In-house designer $35 flat, same-day proof. Same-day rush +$40 flat on orders before 10 AM. We print in-house on our Roland UV printer. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints signs, banners, flyers, and event displays for non-profits, charities, community organizations, and fundraising events across Saskatoon. Coroplast yard signs from $24 (18×24&quot;). Vinyl banners from $66 with grommets. Flyers 100 for $45. Retractable banners from $219 for gala entrances and donor recognition. Volume discounts apply at 5+ signs (8% off). $25 order-total minimum applies at checkout. In-house designer $40 flat, same-day proof. Same-day rush +$40 flat on orders before 10 AM. We print in-house on our Roland UV printer. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -61,7 +61,7 @@ export default function NonProfitSignsSaskatoonPage() {
             {" "}for a door-to-door campaign or canvass? We handle quantities from 100 to 10,000+.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Our in-house designer works for $35 flat with same-day proof — no need to budget for
+            Our in-house designer works for $40 flat with same-day proof — no need to budget for
             an agency. Bring your logo and messaging and we&apos;ll build a print-ready layout.
             We understand non-profit budgets and will help you pick the right combination of
             products to maximize visibility per dollar. Pickup at 216 33rd St W, Saskatoon or
@@ -85,7 +85,7 @@ export default function NonProfitSignsSaskatoonPage() {
         "Door-to-door flyer run — 100 for $45, 500 for $135, quantities to 10,000+",
         "Donor packages and program guides — tri-fold brochures 100 for $70",
         "$25 order-total minimum — order the quantities you actually need",
-        "No agency budget needed — in-house designer $35 flat, logo to print-ready in same day",
+        "No agency budget needed — in-house designer $40 flat, logo to print-ready in same day",
       ]}
       faqs={[
         {
@@ -102,7 +102,7 @@ export default function NonProfitSignsSaskatoonPage() {
         },
         {
           q: "Can you print flyers for a door-to-door awareness campaign?",
-          a: "Yes — flyers on 80lb gloss stock, double-sided: 100 for $45, 500 for $135. We handle quantities up to 10,000+. Bring your artwork or use our in-house designer for $35 flat. Standard turnaround is 1–3 business days. Same-day rush available for +$40 flat on orders before 10 AM.",
+          a: "Yes — flyers on 80lb gloss stock, double-sided: 100 for $45, 500 for $135. We handle quantities up to 10,000+. Bring your artwork or use our in-house designer for $40 flat. Standard turnaround is 1–3 business days. Same-day rush available for +$40 flat on orders before 10 AM.",
         },
         {
           q: "What's the fastest way to get event signage for a non-profit event this week?",
@@ -110,15 +110,15 @@ export default function NonProfitSignsSaskatoonPage() {
         },
         {
           q: "Can you print retractable banners for a donor recognition wall?",
-          a: "Yes — retractable banners are ideal for donor walls. Economy model at $219, Deluxe at $299, Premium at $349. Print a different sponsor or donor tier on each banner and line them up at the entrance or stage. They store flat in a carry bag between events. Layout from our designer is $35 flat.",
+          a: "Yes — retractable banners are ideal for donor walls. Economy model at $219, Deluxe at $299, Premium at $349. Print a different sponsor or donor tier on each banner and line them up at the entrance or stage. They store flat in a carry bag between events. Layout from our designer is $40 flat.",
         },
         {
           q: "Do you print brochures for community programs?",
-          a: "Yes — tri-fold brochures on 80lb gloss: 100 for $70, 250 for $105, 500 for $195. Common uses: donor thank-you packages, community program guides, outreach campaign handouts, newcomer welcome kits, and grant application leave-behinds. Design is $35 flat with same-day proof.",
+          a: "Yes — tri-fold brochures on 80lb gloss: 100 for $70, 250 for $105, 500 for $195. Common uses: donor thank-you packages, community program guides, outreach campaign handouts, newcomer welcome kits, and grant application leave-behinds. Design is $40 flat with same-day proof.",
         },
         {
           q: "Where can non-profits get signs printed in Saskatoon?",
-          a: "True Color Display Printing at 216 33rd St W, Saskatoon — (306) 954-8688. We print in-house on our Roland UV printer, apply a $25 order-total minimum at checkout, offer volume discounts, same-day rush, and an in-house designer for $35 flat. We serve non-profits, charities, and community organizations across Saskatoon and Saskatchewan.",
+          a: "True Color Display Printing at 216 33rd St W, Saskatoon — (306) 954-8688. We print in-house on our Roland UV printer, apply a $25 order-total minimum at checkout, offer volume discounts, same-day rush, and an in-house designer for $40 flat. We serve non-profits, charities, and community organizations across Saskatoon and Saskatchewan.",
         },
       ]}
     />
