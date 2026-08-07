@@ -18,6 +18,7 @@ import {
 } from "@/lib/analytics/client-event-dedupe";
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
+import { computePstBase } from "@/lib/pricing/tax";
 import { readUtmFromStorage } from "@/components/site/UtmCapture";
 
 const DEFAULT_GST_RATE = 0.05;
@@ -358,8 +359,10 @@ export default function CheckoutPage() {
   const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
   const subtotal = itemsSubtotal; // line items subtotal (pre-discount, pre-setup-fee) for the "Subtotal" row
   // Saskatchewan PST-20 taxes the full customer charge for taxable printed
-  // material, including bundled design, rush, and setup charges.
-  const pstBase = Math.max(0, discountedSubtotal + rush);
+  // material, including bundled design, rush, and setup charges. Standalone
+  // service lines are GST-only — shared helper so this preview can never drift
+  // from what POST /api/orders actually charges.
+  const pstBase = computePstBase({ items, discountedSubtotal, rush });
   const gst = Math.round((discountedSubtotal + rush) * gstRate * 100) / 100;
   const pst = Math.round(pstBase * PST_RATE * 100) / 100;
   const total = discountedSubtotal + rush + gst + pst;

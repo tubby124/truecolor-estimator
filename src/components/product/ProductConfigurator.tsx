@@ -313,7 +313,14 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   useEffect(() => {
     const designFee = DESIGN_FEES[designStatus] ?? 0;
     const taxes = price != null
-      ? computeTax({ sell_price: price, design_fee: designFee, rush_fee: rushFee, gst_rate: gstRate })
+      ? computeTax({
+          sell_price: price,
+          design_fee: designFee,
+          rush_fee: rushFee,
+          gst_rate: gstRate,
+          // Standalone services ship no tangible goods — GST only, no PST.
+          pst_exempt: product.serviceMode,
+        })
       : null;
     onPriceChange?.({
       price,
@@ -766,7 +773,8 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         </div>
       )}
 
-      {/* Quantity */}
+      {/* Quantity — hidden for flat-fee services, which are always qty 1 */}
+      {!product.serviceMode && (
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="qty-label">Quantity</p>
         <div className="flex flex-wrap gap-3 pt-4" role="radiogroup" aria-labelledby="qty-label">
@@ -877,6 +885,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           </p>
         )}
       </div>
+      )}
 
       {/* Add-ons */}
       {product.addons && product.addons.length > 0 && (

@@ -17,19 +17,58 @@ export interface TaxBreakdown {
   pstBase: number;   // sell_price for taxable printed-material sales
 }
 
-type TaxInput = Pick<EstimateResponse, "sell_price" | "design_fee" | "rush_fee" | "gst_rate">;
+type TaxInput = Pick<EstimateResponse, "sell_price" | "design_fee" | "rush_fee" | "gst_rate"> & {
+  /** Standalone service line (design, vectorization, upscale) — GST only, no PST. */
+  pst_exempt?: boolean;
+};
 
 const PST_RATE = 0.06;
 const GST_RATE_FALLBACK = 0.05;
+
+/**
+ * Engine categories that are pure services with no tangible printed goods
+ * attached. PST-20 taxes the full charge on a printed-material sale, but a
+ * standalone design or imaging job ships no goods — so it is GST only.
+ * Matches taxable_pst=FALSE on the SVC-* rows in data/tables/services.v1.csv.
+ * Owner decision 2026-08-06.
+ */
+const PST_EXEMPT_CATEGORIES = new Set(["DESIGN", "SERVICE"]);
+
+export function isPstExemptCategory(category: string | undefined | null): boolean {
+  return !!category && PST_EXEMPT_CATEGORIES.has(category.toUpperCase());
+}
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
+/**
+ * Single source of truth for the order-level PST base. Checkout's total preview
+ * and POST /api/orders MUST both call this — a mismatch between them is the exact
+ * failure mode that produced the 2026-03-09 PST bug (staff quoting a total the
+ * API didn't charge). See .claude/rules/payment-tax.md.
+ *
+ * Service-only order  → 0 (no tangible goods, so rush and setup aren't taxed either).
+ * Mixed cart          → everything except the service lines stays taxable, which
+ *                       keeps the PST-20 treatment intact for the printed portion.
+ */
+export function computePstBase(opts: {
+  items: { category?: string | null; sell_price: number }[];
+  discountedSubtotal: number;
+  rush: number;
+}): number {
+  const { items, discountedSubtotal, rush } = opts;
+  if (items.length > 0 && items.every((i) => isPstExemptCategory(i.category))) return 0;
+  const exempt = items
+    .filter((i) => isPstExemptCategory(i.category))
+    .reduce((s, i) => s + i.sell_price, 0);
+  return Math.max(0, round2(discountedSubtotal + rush - exempt));
+}
+
 export function computeTax(result: TaxInput): TaxBreakdown {
   const sell = result.sell_price ?? 0;
   const gstRate = result.gst_rate ?? GST_RATE_FALLBACK;
-  const pstBase = Math.max(0, sell);
+  const pstBase = result.pst_exempt ? 0 : Math.max(0, sell);
   const gst = round2(sell * gstRate);
   const pst = round2(pstBase * PST_RATE);
   const total = round2(sell + gst + pst);

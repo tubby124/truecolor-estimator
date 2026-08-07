@@ -94,6 +94,13 @@ export interface ProductContent {
   colorOptions?: ColorOption[];
   /** Free-text spec fields folded into the cart label (e.g. boat licence number). */
   customTextFields?: CustomTextField[];
+  /**
+   * Flat-fee service with no physical dimensions (design, vectorization, upscale).
+   * Hides the quantity picker and pins qty to 1. The job brief and source files are
+   * collected by the notes + artwork upload fields that already exist at checkout,
+   * so a service order doubles as a paid intake form.
+   */
+  serviceMode?: boolean;
   /** Show a live decal preview rendering the customer's text in the chosen colour. */
   livePreview?: {
     hullLabel: string;
@@ -1874,6 +1881,239 @@ export const PRODUCTS: Record<string, ProductContent> = {
         "Same-day rush available (+$40 flat)",
       ],
     },
+  },
+
+  // ── Standalone services ─────────────────────────────────────────────────────
+  // Flat-fee design and imaging work, orderable without a print job attached.
+  // Prices trace to services.v1.csv / pricing_rules.v1.csv (PR-SVC-*), owner-approved
+  // 2026-08-06. serviceMode hides size + quantity; the customer's brief and source
+  // files are collected by the notes + artwork upload fields already at checkout.
+  "logo-vectorization": {
+    slug: "logo-vectorization",
+    name: "Logo Vectorization",
+    tagline: "Blurry logo redrawn as clean vector files. $40 flat.",
+    description:
+      "Logo vectorization is $40 flat at our Saskatoon shop — we redraw your logo as true vector artwork so it stays razor sharp at any size, from a business card to a 4×8 sign. Most people land here because the only copy of their logo is a low-resolution JPG or PNG pulled off a website or an old email, and it turns into a blurry, pixelated mess the moment it's scaled up for a banner or a vehicle decal. A raster image is a fixed grid of pixels; a vector is math, so it has no resolution to run out of. We rebuild the shapes, match the colours, and hand back print-ready files. You get EPS, SVG, PDF, and a transparent PNG, and those files are yours to keep and reuse anywhere — another printer, a sign shop, your web developer. Turnaround is 1–3 business days, or same-day rush for +$40 flat if you order before 10 AM. Order it here, then describe the job and upload whatever you have — a JPG, a screenshot, a photo of a printed business card, even a napkin sketch — in the notes and artwork fields at checkout. If your logo is already vector (an AI, EPS, or PDF with live artwork), you probably don't need this; send it over and we'll print from it as-is. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$40",
+    category: "DESIGN",
+    material_code: "SVC-DESIGN-LOGO",
+    heroImage: "/images/products/product/logo-vectorization-product-800x600.webp",
+    galleryImages: [
+      "/images/products/product/logo-vectorization-product-800x600.webp",
+      "/images/products/product/logo-vectorization-formats-800x600.webp",
+      "/images/products/product/logo-vectorization-sign-application-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [{ label: "Flat fee", width_in: 0, height_in: 0, material_code: "SVC-DESIGN-LOGO" }],
+    qtyPresets: [1],
+    lotPriced: true,
+    serviceMode: true,
+    specs: [
+      { label: "Price", value: "$40 flat — one logo, any complexity" },
+      { label: "You receive", value: "EPS, SVG, PDF, and transparent PNG" },
+      { label: "Send us", value: "JPG, PNG, screenshot, photo of a printed sample, or a sketch" },
+      { label: "Turnaround", value: "1–3 business days · same-day rush +$40 flat before 10 AM" },
+      { label: "Proof", value: "Same-day proof before anything goes to print" },
+      { label: "File ownership", value: "Yours to keep and use anywhere" },
+    ],
+    whoUsesThis: ["Trades", "Retail", "Agriculture", "Real Estate", "Events"],
+    faqs: [
+      {
+        q: "How much does logo vectorization cost?",
+        a: "$40 flat for one logo, regardless of how complex it is. There's no tiered pricing and no hourly billing — it's one price. Same-day rush is +$40 flat if you order before 10 AM.",
+      },
+      {
+        q: "How do I send you my logo?",
+        a: "Place the $40 order here, then upload your file and describe what you need in the notes and artwork fields at checkout. A JPG, PNG, screenshot, or even a clear photo of a printed business card all work. If the file is too large to upload, order first and email it to info@true-color.ca with your order number.",
+      },
+      {
+        q: "What files do I get back?",
+        a: "EPS, SVG, PDF, and a transparent PNG — $40 covers all four formats. They're yours to keep and reuse with any printer, sign shop, or web developer.",
+      },
+      {
+        q: "Do I need this if I already have a logo file?",
+        a: "Only if it's a raster file — JPG, PNG, GIF, BMP. If you have an AI or EPS file, or a PDF with live vector artwork, you don't need the $40 service; send it over and we'll print from it directly at no extra charge.",
+      },
+      {
+        q: "Will the colours match my brand exactly?",
+        a: "Tell us your brand colours in the checkout notes — Pantone, CMYK, or hex — and we'll match them in the vector file. If you don't know them, we'll pull the closest match from your supplied artwork and confirm it on the same-day proof before finalizing.",
+      },
+      {
+        q: "Can you vectorize a hand-drawn sketch?",
+        a: "Yes. $40 covers redrawing from a sketch, a photo, or a scan. If you want an original logo designed from scratch rather than an existing mark redrawn, that's custom logo design — also $40.",
+      },
+    ],
+    relatedSlugs: ["custom-logo-design", "image-upscale", "vinyl-banners", "business-cards"],
+  },
+
+  "image-upscale": {
+    slug: "image-upscale",
+    name: "Image Upscale & Enhancement",
+    tagline: "Low-resolution photo rebuilt for large-format print. $20 flat.",
+    description:
+      "Image upscaling is $20 flat in Saskatoon — we raise the resolution of a photo or graphic so it holds up when printed large instead of going soft and pixelated. This is the fix when a photo looks fine on a phone screen but falls apart the moment it's blown up to a 3×6 banner or a 24×36 poster. Screens display around 72 dots per inch; large-format print wants roughly 150 DPI at final size, so a small web image simply doesn't carry enough data. We enhance the resolution, clean up compression artifacts and noise, and sharpen the detail so the file is genuinely print-ready on our Roland TrueVIS VG2. Common jobs: a logo grabbed off a website that has to go on a vehicle magnet, an old family photo scanned for a memorial poster, a product shot from a supplier that's only 600 pixels wide, or a headshot that needs to work on a retractable banner. Order the $20 upscale here and upload the image in the artwork field at checkout, with a note telling us the final printed size you need. Turnaround is 1–3 business days, or same-day rush for +$40 flat before 10 AM. Upscaling has real limits — it recovers detail, it doesn't invent it — so if the source is too far gone we'll tell you before charging and point you at the alternative. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$20",
+    category: "SERVICE",
+    material_code: "SVC-UPSCALE",
+    heroImage: "/images/products/product/image-upscale-product-800x600.webp",
+    galleryImages: [
+      "/images/products/product/image-upscale-product-800x600.webp",
+      "/images/products/product/image-upscale-old-photo-restored-800x600.webp",
+      "/images/products/product/image-upscale-banner-print-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [{ label: "Flat fee", width_in: 0, height_in: 0, material_code: "SVC-UPSCALE" }],
+    qtyPresets: [1],
+    lotPriced: true,
+    serviceMode: true,
+    specs: [
+      { label: "Price", value: "$20 flat — one image" },
+      { label: "Target resolution", value: "~150 DPI at your final printed size" },
+      { label: "Includes", value: "Resolution enhancement, noise and artifact cleanup, sharpening" },
+      { label: "Send us", value: "JPG, PNG, TIFF, or a scan" },
+      { label: "Turnaround", value: "1–3 business days · same-day rush +$40 flat before 10 AM" },
+      { label: "Honest limit", value: "Recovers detail, cannot invent it — we check before charging" },
+    ],
+    whoUsesThis: ["Real Estate", "Events", "Retail", "Food & Bev", "Trades"],
+    faqs: [
+      {
+        q: "How much does image upscaling cost?",
+        a: "$20 flat per image. That replaced an older three-tier ladder — it's one price now regardless of how much work the file needs. Same-day rush is +$40 flat before 10 AM.",
+      },
+      {
+        q: "How do I know if my image needs upscaling?",
+        a: "Rough rule: you want about 150 DPI at final printed size. A 1000-pixel-wide image is fine up to roughly 6 inches wide, but will look soft on a 3-foot banner. Send it over — we check the file before charging the $20 and tell you if it's already good enough.",
+      },
+      {
+        q: "Can you fix a really blurry or tiny image?",
+        a: "Sometimes. Upscaling recovers and reconstructs detail; it can't invent what was never captured. A 200-pixel logo will improve but won't become a crisp 4-foot sign. We look first and tell you honestly — if it won't work, we don't take the $20, and for a logo specifically the better fix is vectorization at $40.",
+      },
+      {
+        q: "What's the difference between upscaling and vectorization?",
+        a: "Upscaling ($20) enhances a photo or complex image so it prints larger. Vectorization ($40) redraws a logo or line-art graphic as true vector artwork that scales infinitely with no quality loss at all. Photos get upscaled; logos get vectorized.",
+      },
+      {
+        q: "Do I get the enhanced file to keep?",
+        a: "Yes. The $20 includes the upscaled file sent back to you, and it's yours to reuse anywhere.",
+      },
+    ],
+    relatedSlugs: ["logo-vectorization", "photo-posters", "vinyl-banners", "foamboard-displays"],
+  },
+
+  "custom-logo-design": {
+    slug: "custom-logo-design",
+    name: "Custom Logo & Graphic Design",
+    tagline: "Original design from scratch by our in-house designer. $40 flat.",
+    description:
+      "Custom design is $40 flat with a same-day proof — original artwork built from scratch by our in-house designer in Saskatoon, working in Photoshop and Illustrator. That covers a new logo, a full sign or banner layout, a business card design, a flyer, or a vehicle decal layout. One flat $40 is the entire design charge; we don't bill hourly and we don't run a tiered scope ladder, so a simple wordmark and a detailed layout cost the same. Most customers order this alongside a print job, but you can buy it on its own — the finished files are yours whether or not you print with us. Order the $40 design here, then tell us what you need in the notes field at checkout: the business name, what the piece is for, colours or styles you like, and anything you want avoided. Upload any reference material in the artwork field — competitor examples, a rough sketch, photos, your existing branding. You get a same-day proof to review, and we revise from your feedback before anything is finalized. Turnaround on the design itself is same-day for the first proof; printing after approval runs 1–3 business days, or same-day rush for +$40 flat before 10 AM. If you already have a logo that just needs redrawing rather than inventing, order logo vectorization at $40 instead. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$40",
+    category: "DESIGN",
+    material_code: "SVC-DESIGN-FULL",
+    heroImage: "/images/products/product/logo-vectorization-sign-application-800x600.webp",
+    galleryImages: [
+      "/images/products/product/logo-vectorization-sign-application-800x600.webp",
+      "/images/products/product/logo-vectorization-formats-800x600.webp",
+      "/images/products/product/logo-vectorization-product-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [{ label: "Flat fee", width_in: 0, height_in: 0, material_code: "SVC-DESIGN-FULL" }],
+    qtyPresets: [1],
+    lotPriced: true,
+    serviceMode: true,
+    specs: [
+      { label: "Price", value: "$40 flat — any scope, no hourly billing" },
+      { label: "Designer", value: "In-house, Photoshop and Illustrator" },
+      { label: "Proof", value: "Same-day proof, revised from your feedback" },
+      { label: "Covers", value: "Logos, signs, banners, business cards, flyers, decal layouts" },
+      { label: "You receive", value: "Print-ready files, yours to keep" },
+      { label: "Turnaround", value: "Same-day first proof · print 1–3 business days after approval" },
+    ],
+    whoUsesThis: ["Trades", "Retail", "Real Estate", "Food & Bev", "Events"],
+    faqs: [
+      {
+        q: "How much is custom design?",
+        a: "$40 flat, whatever the scope. A simple wordmark and a full sign layout are the same price — there's no hourly rate and no tiered scope ladder. Same-day proof included.",
+      },
+      {
+        q: "How do I tell you what I want?",
+        a: "Place the $40 order, then use the notes field at checkout: business name, what the piece is for, colours and styles you like, anything to avoid. Upload references in the artwork field — competitor examples, sketches, photos, existing branding. The more specific you are, the closer the first proof lands.",
+      },
+      {
+        q: "How many revisions do I get?",
+        a: "We proof same-day and revise from your feedback until it's right. $40 covers the design and the revisions — we don't meter them. A complete change of direction partway through may need a second $40 design charge, and we'd tell you before doing that.",
+      },
+      {
+        q: "Can I get the design without printing with you?",
+        a: "Yes. $40 buys the design outright and the files are yours, whether or not you print with us. Most customers do print here, but it isn't a condition.",
+      },
+      {
+        q: "What's the difference between this and logo vectorization?",
+        a: "This is original artwork designed from scratch. Vectorization ($40, same price) redraws a logo you already have into clean vector files. If the mark exists and just needs rebuilding, order vectorization; if it doesn't exist yet, order this.",
+      },
+      {
+        q: "How fast is it?",
+        a: "First proof is same-day. Printing after you approve runs 1–3 business days, or same-day rush for +$40 flat if approved before 10 AM.",
+      },
+    ],
+    relatedSlugs: ["logo-vectorization", "artwork-setup", "business-cards", "vinyl-banners"],
+  },
+
+  "artwork-setup": {
+    slug: "artwork-setup",
+    name: "Artwork Setup & File Fixes",
+    tagline: "We make your existing file print-ready. $40 flat.",
+    description:
+      "Artwork setup is $40 flat — our in-house designer in Saskatoon takes the file you already have and makes it print-ready. This is the smaller job: resizing a design to different sign dimensions, adding bleed and safe margins, converting RGB to CMYK so colours print the way you expect, fixing a missing font, straightening a scan, dropping a background out, or reworking a layout that was built for a different size. It's not a redesign — it's making a file that already exists actually work on press. $40 covers it regardless of how many small fixes are involved. Order it here, then upload your file and tell us what needs doing in the notes and artwork fields at checkout. You get a same-day proof before anything prints. Turnaround is 1–3 business days on the print itself, or same-day rush for +$40 flat before 10 AM. If your file is already print-ready — correct size, CMYK, 150 DPI, fonts outlined — you don't need this at all and there's no design charge on your order. If you need artwork created from nothing, order custom design at $40; if you need a low-resolution logo rebuilt as vector, order logo vectorization at $40. Pickup at 216 33rd St W, Saskatoon.",
+    fromPrice: "$40",
+    category: "DESIGN",
+    material_code: "SVC-DESIGN-BASIC",
+    heroImage: "/images/products/product/logo-vectorization-formats-800x600.webp",
+    galleryImages: [
+      "/images/products/product/logo-vectorization-formats-800x600.webp",
+      "/images/products/product/logo-vectorization-product-800x600.webp",
+      "/images/products/product/image-upscale-banner-print-800x600.webp",
+    ],
+    defaultSides: 1,
+    sideOptions: false,
+    sizePresets: [{ label: "Flat fee", width_in: 0, height_in: 0, material_code: "SVC-DESIGN-BASIC" }],
+    qtyPresets: [1],
+    lotPriced: true,
+    serviceMode: true,
+    specs: [
+      { label: "Price", value: "$40 flat — covers the fixes your file needs" },
+      { label: "Covers", value: "Resizing, bleed and margins, RGB→CMYK, font fixes, background removal" },
+      { label: "Not included", value: "Original design from scratch — that's custom design, also $40" },
+      { label: "Proof", value: "Same-day proof before print" },
+      { label: "Send us", value: "PDF, AI, PSD, JPG, PNG, or a scan" },
+      { label: "Turnaround", value: "1–3 business days · same-day rush +$40 flat before 10 AM" },
+    ],
+    whoUsesThis: ["Trades", "Retail", "Real Estate", "Events", "Agriculture"],
+    faqs: [
+      {
+        q: "How much is artwork setup?",
+        a: "$40 flat. That covers the fixes your file needs to go to press — there's no per-fix charge and no hourly rate.",
+      },
+      {
+        q: "Do I actually need this?",
+        a: "Only if your file isn't press-ready. If it's already the correct size, CMYK, 150 DPI at final size, with fonts outlined, there's no design charge on your order at all. Send it over and we'll tell you before charging the $40.",
+      },
+      {
+        q: "What counts as artwork setup versus custom design?",
+        a: "Setup ($40) modifies a file that already exists — resize, bleed, colour conversion, background removal. Custom design ($40, same price) creates artwork from scratch. Same cost either way, so order whichever describes your job.",
+      },
+      {
+        q: "My file is in the wrong colour mode. Is that a problem?",
+        a: "It's the most common fix we do. RGB is a screen colour space and it shifts when printed — reds especially. $40 covers converting to CMYK and correcting the shift so what you approve on the proof is what comes off the Roland.",
+      },
+      {
+        q: "Can you remove the background from my photo?",
+        a: "Yes, that's part of the $40 setup charge. If the photo is also too low-resolution to print at the size you want, add image upscaling for $20.",
+      },
+    ],
+    relatedSlugs: ["custom-logo-design", "logo-vectorization", "image-upscale", "coroplast-signs"],
   },
 };
 

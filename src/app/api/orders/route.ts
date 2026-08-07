@@ -32,6 +32,7 @@ import { estimate } from "@/lib/engine";
 import { getConfigNum } from "@/lib/data/loader";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
+import { computePstBase } from "@/lib/pricing/tax";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { classifyReferrer } from "@/lib/analytics/referrer";
 import { mergeLatestPaidAttribution, mergeUtmAttribution } from "@/lib/analytics/utm";
@@ -376,8 +377,11 @@ export async function POST(req: NextRequest) {
     const smallOrderFee = orderMin.surcharge;
     const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
     // Saskatchewan PST-20 taxes the full charge for taxable printed material,
-    // including design, production, rush, and setup charges.
-    const pstBase = Math.max(0, discountedSubtotal + rush);
+    // including design, production, rush, and setup charges. Standalone service
+    // lines (DESIGN/SERVICE — vectorization, upscale, design with no print job)
+    // ship no tangible goods and are GST-only; computePstBase carves them out and
+    // returns 0 for a service-only order. Checkout's preview calls the same helper.
+    const pstBase = computePstBase({ items, discountedSubtotal, rush });
     const gst = Math.round((discountedSubtotal + rush) * GST_RATE * 100) / 100;
     const pst = Math.round(pstBase * PST_RATE * 100) / 100;
     const total = discountedSubtotal + rush + gst + pst;
