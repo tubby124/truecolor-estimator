@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 const description =
-  "When you need a display that looks polished at close range — at a trade show booth, a retail counter, or an open house — foam board delivers at a fraction of the cost of framed prints or custom fixtures. Foamboard printing in Saskatoon starts at $45 for an 18×24\" board and $65 for a 24×36\" board, printed on 5mm white foam core using our in-house Roland UV printer for full-colour, photo-quality results with sharp edges. Standard turnaround is 1–3 business days. Same-day rush is +$40 flat when ordered before 10 AM. In-house designer handles layout for $35 flat with a same-day proof. Local pickup at 216 33rd St W, Saskatoon.";
+  "When you need a display that looks polished at close range — at a trade show booth, a retail counter, or an open house — foam board delivers at a fraction of the cost of framed prints or custom fixtures. Foamboard printing in Saskatoon starts at $45 for an 18×24\" board and $65 for a 24×36\" board, printed on 5mm white foam core using our in-house Roland UV printer for full-colour, photo-quality results with sharp edges. Standard turnaround is 1–3 business days. Same-day rush is +$40 flat when ordered before 10 AM. In-house designer handles layout for $40 flat with a same-day proof. Local pickup at 216 33rd St W, Saskatoon.";
 
 export default function FoamboardPrintingSaskatoon() {
   return (
@@ -72,7 +72,7 @@ export default function FoamboardPrintingSaskatoon() {
               See the full foamboard estimator
             </Link>{" "}
             for dimensions and quantities. Same-day rush is +$40 flat, order before 10 AM. Our
-            in-house designer creates your layout for $35 flat with a same-day proof — no files
+            in-house designer creates your layout for $40 flat with a same-day proof — no files
             required. Standard turnaround is 1–3 business days. Local pickup at 216 33rd St W,
             Saskatoon — call{" "}
             <a href="tel:+13069548688" className="text-[#16C2F3] underline font-medium">
@@ -114,7 +114,7 @@ export default function FoamboardPrintingSaskatoon() {
         "5mm white foam core — rigid enough to wall-mount flat, light enough to carry to a trade show without checking luggage",
         "18×24\" starts at $45 | 24×36\" starts at $65 — custom smaller carts top up to the $25 checkout floor",
         "We print same-day for +$40 flat — order before 10 AM, pick up same day in Saskatoon",
-        "In-house designer for $35 flat, same-day proof — show up with a logo and a list of points, leave with a file-ready layout",
+        "In-house designer for $40 flat, same-day proof — show up with a logo and a list of points, leave with a file-ready layout",
         "Mounts with adhesive strips, foam tape, or a standard wall bracket — no framing, no installation crew",
         "1–3 business day standard turnaround | Local pickup at 216 33rd St W, Saskatoon",
       ]}
@@ -149,7 +149,7 @@ export default function FoamboardPrintingSaskatoon() {
         },
         {
           q: "Do I need to provide print-ready artwork for foam board printing?",
-          a: "No. Our in-house designer creates your layout for $35 flat with a same-day proof. Provide your logo, text, and any images or references — we handle the design and send a proof for approval before printing. Revisions are included until you sign off.",
+          a: "No. Our in-house designer creates your layout for $40 flat with a same-day proof. Provide your logo, text, and any images or references — we handle the design and send a proof for approval before printing. Revisions are included until you sign off.",
         },
       ]}
       canonicalSlug="foamboard-printing-saskatoon"

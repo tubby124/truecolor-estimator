@@ -88,7 +88,7 @@ export default function FlyerPrintingPrinceAlbertPage() {
         },
         {
           q: "Can you print flyers for a Prince Albert healthcare or government campaign?",
-          a: "Yes — we print for healthcare facilities, government public awareness campaigns, and nonprofit organizations across Prince Albert. We match institutional brand standards. Provide your logo and brief and our designer handles the layout for $35–$50.",
+          a: "Yes — we print for healthcare facilities, government public awareness campaigns, and nonprofit organizations across Prince Albert. We match institutional brand standards. Provide your logo and brief and our designer handles the layout for $40–$50.",
         },
         {
           q: "What flyer sizes do you offer for Prince Albert customers?",
