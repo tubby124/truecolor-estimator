@@ -107,18 +107,18 @@ export default function MothersDayPrintingSaskatoonPage() {
       subtitle="Banners from $66 · flyers from $45 · photo prints from $45 · window decals from $11/sqft. In-house design $35. Same-day rush +$40."
       heroImage="/images/products/product/banner-vinyl-colorful-800x600.webp"
       heroAlt="Mother's Day printing in Saskatoon by True Color Display Printing — vinyl banners, photo prints, flyers, and window decals"
-      description="True Color Display Printing offers Mother's Day printing in Saskatoon, Saskatchewan, starting from $45 with 1–3 business day turnaround and in-house design for $35 flat. Vinyl banners start at $8.25/sqft (2×6 ft = $90), photo prints from $45 for an 18×24 inch poster and $65 for 24×36 inch, flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. In-house Roland UV flatbed printer — True Color Display Printing controls colour, timeline, and quality without outsourcing. Same-day rush available for +$40 flat when ordered before 10 AM. Saskatoon restaurants, spas, salons, florists, and gift shops order banners, photo prints, and flyers from True Color Display Printing at 216 33rd St W, Saskatoon SK. In-house Photoshop designer preps layouts for $35 flat, same-day proof. Order deadline for standard turnaround: May 5, 2026. Same-day rush available up to May 7–8 for +$40 flat — call (306) 954-8688."
+      description="True Color Display Printing offers Mother's Day printing in Saskatoon, Saskatchewan, starting from $45 with 1–3 business day turnaround and in-house design for $40 flat. Vinyl banners start at $8.25/sqft (2×6 ft = $90), photo prints from $45 for an 18×24 inch poster and $65 for 24×36 inch, flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. In-house Roland UV flatbed printer — True Color Display Printing controls colour, timeline, and quality without outsourcing. Same-day rush available for +$40 flat when ordered before 10 AM. Saskatoon restaurants, spas, salons, florists, and gift shops order banners, photo prints, and flyers from True Color Display Printing at 216 33rd St W, Saskatoon SK. In-house Photoshop designer preps layouts for $40 flat, same-day proof. Order deadline for standard turnaround: May 5, 2026. Same-day rush available up to May 7–8 for +$40 flat — call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            True Color Display Printing offers Mother&apos;s Day printing in Saskatoon, Saskatchewan, starting from $45 with 1–3 business day turnaround and in-house design for $35 flat. Vinyl banners start at $8.25/sqft (a 2×6 ft banner is $90), photo prints and posters from $45 for 18×24&quot;, flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. All printing is done in-house on a Roland UV flatbed printer — True Color Display Printing controls colour, timeline, and quality without outsourcing. Same-day rush is available for +$40 flat when ordered before 10 AM at (306) 954-8688.
+            True Color Display Printing offers Mother&apos;s Day printing in Saskatoon, Saskatchewan, starting from $45 with 1–3 business day turnaround and in-house design for $40 flat. Vinyl banners start at $8.25/sqft (a 2×6 ft banner is $90), photo prints and posters from $45 for 18×24&quot;, flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. All printing is done in-house on a Roland UV flatbed printer — True Color Display Printing controls colour, timeline, and quality without outsourcing. Same-day rush is available for +$40 flat when ordered before 10 AM at (306) 954-8688.
           </p>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             We print photos of Mom — portraits, family shots, collages — as large-format{" "}
             <Link href="/photo-poster-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               photo posters
             </Link>{" "}
-            on glossy or matte stock from $45 (18×24&quot;) or $65 (24×36&quot;). Bring in a digital file, a phone photo, or a USB drive — True Color&apos;s in-house designer can clean up exposure, crop, and prep the file for $35 flat. These make a memorable last-minute gift and are ready in 1–3 business days, or same day with the +$40 rush.
+            on glossy or matte stock from $45 (18×24&quot;) or $65 (24×36&quot;). Bring in a digital file, a phone photo, or a USB drive — True Color&apos;s in-house designer can clean up exposure, crop, and prep the file for $40 flat. These make a memorable last-minute gift and are ready in 1–3 business days, or same day with the +$40 rush.
           </p>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             Saskatoon restaurants, spas, salons, florists, and gift shops order{" "}
@@ -129,7 +129,7 @@ export default function MothersDayPrintingSaskatoonPage() {
             <Link href="/flyer-printing-saskatoon" className="text-[#16C2F3] underline font-medium">
               flyers
             </Link>{" "}
-            to nearby households ahead of the long weekend. True Color&apos;s in-house Photoshop designer preps layouts from a rough description, logo file, or brand colours for $35 flat — most proofs come back the same day. Design and printing happen at 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors, no delays.
+            to nearby households ahead of the long weekend. True Color&apos;s in-house Photoshop designer preps layouts from a rough description, logo file, or brand colours for $40 flat — most proofs come back the same day. Design and printing happen at 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors, no delays.
           </p>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             The standard order deadline for 1–3 business day turnaround is the Tuesday before Mother&apos;s Day (May 5 for 2026). Same-day rush is available up to May 7–8 for +$40 flat. For{" "}
@@ -168,7 +168,7 @@ export default function MothersDayPrintingSaskatoonPage() {
       whyPoints={[
         "Print photos of Mom as photo posters from $15 — portrait, collage, or family shot",
         "In-house Roland UV flatbed printer — we print, proof, and finish without outsourcing",
-        "Design in-house: $35 flat, same-day proof from your logo, photo, or rough description",
+        "Design in-house: $40 flat, same-day proof from your logo, photo, or rough description",
         "Same-day rush for +$40 flat when ordered before 10 AM — call (306) 954-8688 to confirm",
         "Volume discount: 5% off at 5+ banners, 10% off at 10+ banners, 15% off at 25+",
         "One shop for everything: banners, photo prints, flyers, window decals, foamboard, and signs",
@@ -176,11 +176,11 @@ export default function MothersDayPrintingSaskatoonPage() {
       faqs={[
         {
           q: "How much does Mother's Day printing cost in Saskatoon?",
-          a: "True Color Display Printing offers Mother's Day banners from $8.25/sqft (2×6 ft = $90), photo posters from $15, flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. In-house design is $35 flat. Same-day rush is +$40 flat.",
+          a: "True Color Display Printing offers Mother's Day banners from $8.25/sqft (2×6 ft = $90), photo posters from $15, flyers from $45 for 100 full-letter double-sided, window decals from $11/sqft, and postcards from $35 for 50 cards. In-house design is $40 flat. Same-day rush is +$40 flat.",
         },
         {
           q: "Can you print photos of my mom as a large-format poster?",
-          a: "Yes — True Color Display Printing prints family photos, portraits, and collages as large-format posters on glossy or matte stock. An 18×24\" photo print is $45 and a 24×36\" print is $65. Bring a digital file, USB drive, or phone photo — the in-house designer can prep the image for $35 flat. Ready in 1–3 business days, or same day with the +$40 rush.",
+          a: "Yes — True Color Display Printing prints family photos, portraits, and collages as large-format posters on glossy or matte stock. An 18×24\" photo print is $45 and a 24×36\" print is $65. Bring a digital file, USB drive, or phone photo — the in-house designer can prep the image for $40 flat. Ready in 1–3 business days, or same day with the +$40 rush.",
         },
         {
           q: "What is the order deadline for Mother's Day 2026?",
@@ -196,7 +196,7 @@ export default function MothersDayPrintingSaskatoonPage() {
         },
         {
           q: "Can I get my Mother's Day printing designed and printed at the same shop?",
-          a: "Yes — True Color Display Printing has an in-house Photoshop designer who handles layouts from a rough brief, logo file, brand colours, or photo. Design fee is $35 flat and most proofs come back the same day. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors.",
+          a: "Yes — True Color Display Printing has an in-house Photoshop designer who handles layouts from a rough brief, logo file, brand colours, or photo. Design fee is $40 flat and most proofs come back the same day. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors.",
         },
         {
           q: "What's the best banner size for a Mother's Day storefront?",
@@ -204,7 +204,7 @@ export default function MothersDayPrintingSaskatoonPage() {
         },
         {
           q: "What file format do I need for Mother's Day printing?",
-          a: "True Color Display Printing accepts PDF at 150 dpi minimum (at print size) and JPG files for photos and simpler designs. If you have a low-resolution logo, rough layout, or just a description of what you need, the in-house designer can build the file for $35 flat. Most design proofs are returned the same business day.",
+          a: "True Color Display Printing accepts PDF at 150 dpi minimum (at print size) and JPG files for photos and simpler designs. If you have a low-resolution logo, rough layout, or just a description of what you need, the in-house designer can build the file for $40 flat. Most design proofs are returned the same business day.",
         },
       ]}
     />
