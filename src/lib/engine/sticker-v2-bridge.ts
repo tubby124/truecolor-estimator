@@ -16,6 +16,7 @@
 
 import { getConfigNum } from "@/lib/data/loader";
 import { quoteStickerV2 } from "@/lib/pricing/sticker-model-v2";
+import { computeDesignFee } from "./design-fee";
 import type { EstimateRequest, EstimateResponse } from "./types";
 import type { StickerMaterial, StickerShape, StickerFinish } from "@/lib/pricing/__tests__/sticker-fixtures";
 
@@ -90,19 +91,8 @@ export function runStickerV2(req: EstimateRequest): EstimateResponse | null {
 
   // Design + rush fees layered on top of V2 unit price × qty (V2 itself
   // doesn't include design/rush — keeps the model focused on physical pricing).
-  let designFee = 0;
-  let designRuleId: string | null = null;
   const designStatus = req.design_status ?? "PRINT_READY";
-  if (designStatus === "MINOR_EDIT") {
-    designFee = getConfigNum("design_minor_edit_fee");
-    designRuleId = "PR-DESIGN-BASIC";
-  } else if (designStatus === "FULL_DESIGN") {
-    designFee = getConfigNum("design_full_design_fee");
-    designRuleId = "PR-DESIGN-FULL";
-  } else if (designStatus === "LOGO_RECREATION") {
-    designFee = getConfigNum("design_logo_recreation_fee");
-    designRuleId = "PR-DESIGN-LOGO";
-  }
+  const { fee: designFee, ruleId: designRuleId } = computeDesignFee(designStatus);
 
   let rushFee = 0;
   if (req.is_rush || (req.addons ?? []).includes("RUSH")) {

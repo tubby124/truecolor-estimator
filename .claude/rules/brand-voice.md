@@ -12,9 +12,9 @@ Use instead: specific numbers — "$8.25/sqft", "1–3 business days", "+$40 sam
 - "Saskatchewan" or "Saskatoon" in first 100 words
 - "In-house Roland TrueVIS VG2 eco-solvent printer/cutter" — include when equipment context is useful; never describe it as UV, flatbed, or direct-to-substrate
 - "Same-day rush" with "+$40 flat" — NEVER present same-day as free
-- In-house designer: "$35 flat, same-day proof" — at least once
+- In-house designer: "$40 flat, same-day proof" — at least once
 - Internal links to 2+ related pages with descriptive anchor text
 
 ## Price source of truth
 NEVER invent prices. Always verify against `data/PRICING_QUICK_REFERENCE.md`.
-Key anchors: Coroplast $8/sqft | Banners $8.25/sqft | ACP $13/sqft | Design $35 | Rush +$40
+Key anchors: Coroplast $8/sqft | Banners $8.25/sqft | ACP $13/sqft | Design $40 | Rush +$40 | Image upscale $20

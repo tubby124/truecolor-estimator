@@ -412,9 +412,9 @@ export function OptionsPanel({ category, state, onChange, categoryLabel }: Props
         <div className="space-y-2" role="radiogroup" aria-label="Design / Artwork">
           {[
             { val: "PRINT_READY", label: "Files are print-ready", sub: "No charge" },
-            { val: "MINOR_EDIT", label: "Minor edits needed", sub: "+$35.00" },
-            { val: "FULL_DESIGN", label: "Full design from scratch", sub: "+$50.00" },
-            { val: "LOGO_RECREATION", label: "Logo recreation / vectorize", sub: "+$75.00" },
+            { val: "MINOR_EDIT", label: "Minor edits needed", sub: "+$40.00" },
+            { val: "FULL_DESIGN", label: "Full design from scratch", sub: "+$40.00" },
+            { val: "LOGO_RECREATION", label: "Logo recreation / vectorize", sub: "+$40.00" },
           ].map((opt) => (
             <button
               key={opt.val}

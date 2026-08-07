@@ -276,6 +276,164 @@ for (const row of lotRows) {
 }
 if (lowMarginCount === 0) pass(`All lot-priced products with known costs are above ${MARGIN_FLOOR * 100}% margin`);
 
+// ─── [10] CSV structural integrity ────────────────────────────────────────
+// loader.ts splits positionally, so a stray comma or a dropped column silently
+// shifts every downstream value — min_charge can become a price with no error.
+// Nothing caught this before; it is how the service rows sat mis-columned for months.
+console.log("\n[10] Checking CSV structural integrity (field counts, stray commas) ...");
+
+/** Split a CSV line on commas that are not inside double quotes. */
+function splitCsvLine(line) {
+  const out = [];
+  let cur = "";
+  let inQuotes = false;
+  for (const ch of line) {
+    if (ch === '"') inQuotes = !inQuotes;
+    else if (ch === "," && !inQuotes) { out.push(cur); cur = ""; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
+function loadCsv(relPath) {
+  const lines = readFile(relPath).split("\n").filter((l) => l.trim().length > 0);
+  const header = splitCsvLine(lines[0]);
+  const rows = lines.slice(1).map((l, i) => ({ lineNo: i + 2, fields: splitCsvLine(l) }));
+  return { header, rows };
+}
+
+const CSV_FILES = [
+  "data/tables/pricing_rules.v1.csv",
+  "data/tables/products.v1.csv",
+  "data/tables/services.v1.csv",
+  "data/tables/materials.v1.csv",
+  "data/tables/qty_discounts.v1.csv",
+];
+
+let structuralIssues = 0;
+for (const relPath of CSV_FILES) {
+  const { header, rows } = loadCsv(relPath);
+  const expected = header.length;
+  for (const { lineNo, fields } of rows) {
+    // Trailing empty columns are conventionally omitted in these files (180 of 186
+    // pricing_rules rows carry 17 of 18). Too MANY fields always means a stray comma.
+    if (fields.length > expected) {
+      fail(`${relPath}:${lineNo} has ${fields.length} fields, header declares ${expected} — stray comma in an unquoted field (${fields[0]})`);
+      structuralIssues++;
+    }
+  }
+}
+if (structuralIssues === 0) pass(`All ${CSV_FILES.length} CSVs are structurally sound — no stray commas or over-long rows`);
+
+// ─── [11] Price-column exclusivity + service-rule shape ───────────────────
+// STEP 4a rejects any rule where price_per_sqft is set, so a flat-fee rule with its
+// price in the sqft column can never match. A rule with BOTH columns set is worse:
+// it silently disables the per-unit path and prices per square foot instead.
+console.log("\n[11] Checking pricing rule price-column shape ...");
+const { header: prHeader, rows: prRows } = loadCsv("data/tables/pricing_rules.v1.csv");
+const PR = Object.fromEntries(prHeader.map((h, i) => [h, i]));
+const FLAT_FEE_CATEGORIES = new Set(["SERVICE", "DESIGN", "ADDON", "INSTALLATION"]);
+
+let shapeIssues = 0;
+for (const { lineNo, fields } of prRows) {
+  const ruleId = fields[PR.rule_id];
+  const category = fields[PR.category];
+  const perSqft = (fields[PR.price_per_sqft] ?? "").trim();
+  const perUnit = (fields[PR.price_per_unit] ?? "").trim();
+
+  if (perSqft && perUnit) {
+    fail(`${ruleId} (line ${lineNo}) sets BOTH price_per_sqft and price_per_unit — Step 4a is silently disabled and it will price per-sqft`);
+    shapeIssues++;
+  }
+  if (FLAT_FEE_CATEGORIES.has(category)) {
+    if (!perUnit) {
+      fail(`${ruleId} (line ${lineNo}) is category ${category} but has no price_per_unit — Step 4a can never match it, so the service is unquotable`);
+      shapeIssues++;
+    }
+    if (perSqft) {
+      fail(`${ruleId} (line ${lineNo}) is category ${category} with a price_per_sqft — flat fees must never be priced per square foot`);
+      shapeIssues++;
+    }
+  }
+}
+if (shapeIssues === 0) pass("All pricing rules have exactly one price column; every flat-fee rule is Step 4a-matchable");
+
+// ─── [12] Ambiguous rule matching (row order decides the price) ───────────
+// STEP 4a/4b use rules.find() — first match wins, so two rules with the same
+// discriminators make the later one dead code and make pricing depend on row order.
+console.log("\n[12] Checking for ambiguous (duplicate-match) pricing rules ...");
+const seenKeys = new Map();
+let ambiguous = 0;
+for (const { lineNo, fields } of prRows) {
+  const key = [
+    fields[PR.category],
+    fields[PR.material_code] ?? "",
+    fields[PR.sides] ?? "",
+    fields[PR.sqft_min] ?? "",
+    fields[PR.sqft_max] ?? "",
+    fields[PR.qty_min] ?? "",
+    fields[PR.qty_max] ?? "",
+  ].join("|");
+  if (seenKeys.has(key)) {
+    fail(`${fields[PR.rule_id]} (line ${lineNo}) matches identically to ${seenKeys.get(key)} — rules.find() returns the first, making this row unreachable`);
+    ambiguous++;
+  } else {
+    seenKeys.set(key, fields[PR.rule_id]);
+  }
+}
+if (ambiguous === 0) pass("No two pricing rules share the same match key — no row-order dependence");
+
+// ─── [13] Fee agreement across the three tables ──────────────────────────
+// config.v1.csv is the authority for fees the engine adds inside another quote.
+// services.v1.csv and pricing_rules.v1.csv restate the same numbers for humans and
+// for standalone SKUs; when they drift, the table you read is not the price charged.
+// PR-SVC-DESIGN-LOGO sat at $75 while config said $50 until 2026-08-06.
+console.log("\n[13] Checking design/rush/addon fee agreement across config, services, pricing_rules ...");
+const configCsv = loadCsv("data/tables/config.v1.csv");
+const configMap = Object.fromEntries(configCsv.rows.map(({ fields }) => [fields[0], fields[1]]));
+const servicesCsv = loadCsv("data/tables/services.v1.csv");
+const SV = Object.fromEntries(servicesCsv.header.map((h, i) => [h, i]));
+const serviceMap = Object.fromEntries(
+  servicesCsv.rows.map(({ fields }) => [fields[SV.service_id], fields[SV.default_price]])
+);
+const ruleUnitPrice = Object.fromEntries(
+  prRows.map(({ fields }) => [fields[PR.rule_id], (fields[PR.price_per_unit] ?? "").trim()])
+);
+
+const FEE_LINKS = [
+  { configKey: "design_minor_edit_fee",      serviceId: "SVC-DESIGN-BASIC", ruleId: "PR-SVC-DESIGN-BASIC" },
+  { configKey: "design_full_design_fee",     serviceId: "SVC-DESIGN-FULL",  ruleId: "PR-SVC-DESIGN-FULL" },
+  { configKey: "design_logo_recreation_fee", serviceId: "SVC-DESIGN-LOGO",  ruleId: "PR-SVC-DESIGN-LOGO" },
+  { configKey: "rush_fee_flat",              serviceId: "SVC-RUSH",         ruleId: "PR-ADDON-RUSH" },
+  { configKey: "grommet_price_per_unit",     serviceId: "SVC-GROMMET",      ruleId: "PR-ADDON-GROMMET" },
+  { configKey: "hstake_price_per_unit",      serviceId: "SVC-HSTAKE",       ruleId: null },
+];
+
+let feeDrift = 0;
+for (const { configKey, serviceId, ruleId } of FEE_LINKS) {
+  const cfg = parseFloat(configMap[configKey]);
+  if (isNaN(cfg)) { fail(`config.v1.csv is missing or non-numeric for "${configKey}"`); feeDrift++; continue; }
+
+  const svc = parseFloat(serviceMap[serviceId]);
+  if (!isNaN(svc) && Math.abs(svc - cfg) > 0.001) {
+    fail(`FEE DRIFT: config.${configKey}=$${cfg} but services.v1.csv ${serviceId}.default_price=$${svc}`);
+    feeDrift++;
+  }
+  if (ruleId) {
+    const rule = parseFloat(ruleUnitPrice[ruleId]);
+    if (!isNaN(rule) && Math.abs(rule - cfg) > 0.001) {
+      fail(`FEE DRIFT: config.${configKey}=$${cfg} but pricing_rules.v1.csv ${ruleId}.price_per_unit=$${rule}`);
+      feeDrift++;
+    }
+  }
+}
+if (feeDrift === 0) pass(`All ${FEE_LINKS.length} engine fees agree across config.v1.csv, services.v1.csv, and pricing_rules.v1.csv`);
+
+// NOTE: engine reachability (can every listed product actually be priced?) is covered
+// by the "catalog reachability" suite in src/lib/engine/__tests__/engine.test.ts, which
+// calls estimate() for real rather than re-deriving qty tiers from regex here.
+
 // ─── Summary ──────────────────────────────────────────────────────────────
 console.log("\n" + "─".repeat(60));
 if (errors === 0 && warnings === 0) {

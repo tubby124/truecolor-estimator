@@ -18,4 +18,4 @@
 - [ ] Physical address or phone number present (or linked to contact page)
 - [ ] Specific material names (13oz scrim vinyl, 4mm coroplast, aluminum composite, etc.)
 - [ ] Real turnaround time ("1–3 business days after artwork approval" — not just "fast")
-- [ ] Specific service details ("$35 flat, same-day proof, in-house Photoshop" — not "we offer design")
+- [ ] Specific service details ("$40 flat, same-day proof, in-house Photoshop" — not "we offer design")

@@ -8,9 +8,10 @@ grommet_spacing_ft,2,Space between grommets in feet for auto-calculation (perime
 grommet_minimum_count,4,Minimum grommet count regardless of perimeter,estimatorRules.csv:row4,2026-02-19
 hstake_price_per_unit,2.50,Sell price per H-Stake yard sign stake (was $2.00 — bumped per owner 2026-02-19),services.v1.csv:SVC-HSTAKE,2026-02-19
 hstake_cost_per_unit,0.63,Cost per H-Stake unit (DS00043) for margin calculation only,materials.v1.csv:DS00043,2026-02-19
-design_minor_edit_fee,35.00,Design fee for minor edits to customer-provided artwork,services.v1.csv:SVC-DESIGN-BASIC,2026-02-19
-design_full_design_fee,50.00,Design fee for full custom design from scratch,services.v1.csv:SVC-DESIGN-FULL,2026-02-19
-design_logo_recreation_fee,50.00,Design fee for logo recreation or vectorization; owner-approved 2026-08-06 75.00 -> 50.00 to match the price advertised on /products,services.v1.csv:SVC-DESIGN-LOGO,2026-08-06
+design_minor_edit_fee,40.00,Design fee flat — owner-approved 2026-08-06 35.00 -> 40.00. Tiers collapsed to one price: every design job invoiced Jul-Aug 2026 was $40 regardless of scope,services.v1.csv:SVC-DESIGN-BASIC,2026-08-06
+design_full_design_fee,40.00,Design fee flat — owner-approved 2026-08-06 50.00 -> 40.00. Collapsed into the single $40 design price,services.v1.csv:SVC-DESIGN-FULL,2026-08-06
+design_logo_recreation_fee,40.00,Design fee flat — owner-approved 2026-08-06 50.00 -> 40.00. The Jul 13 2026 job was a full vector logo rebuild (.AI/.EPS/.SVG/.PDF/PNG, 2-day turnaround) invoiced at $40, so vectorization is not a premium tier in practice,services.v1.csv:SVC-DESIGN-LOGO,2026-08-06
+upscale_fee_flat,20.00,Image upscale / resolution enhancement flat fee — owner-approved 2026-08-06. Replaces the unsold $15/$35/$75 tier ladder advertised on /image-upscale-saskatoon,services.v1.csv:SVC-UPSCALE,2026-08-06
 rush_fee_flat,40.00,Flat rush order surcharge added to all rush jobs,services.v1.csv:SVC-RUSH,2026-02-19
 roland_ink_cost_per_sqft,0.16,Roland wide-format ink cost per sqft (color) for cost estimation,estimatorRules.csv:row12,2026-02-19
 konica_ink_cost_per_sheet,0.0573,Konica AccurioPress C3070 COLOUR click charge per sheet — Year 3 rate (base $0.054 + 3% annual escalation x2). Contract: Order S00665431 signed 2023-11-23 via Meridian OneCap lease. 60-month maintenance term. Update each Nov: multiply by 1.03. Year 4 (Nov 2026): $0.0590. Year 5 (Nov 2027): $0.0608.,Konica Minolta Order S00665431 — Maintenance Agreement p2,2026-03-31

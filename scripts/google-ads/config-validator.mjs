@@ -278,7 +278,7 @@ const TRACKING_MAPPINGS = {
 };
 const REQUIRED_CALLOUTS = [
   "Coroplast Signs From $25", "Banners From $66", "250 Cards $45",
-  "Same-Day Rush +$40 Flat", "Design $35 Flat", "4.9 From 43 Reviews",
+  "Same-Day Rush +$40 Flat", "Design $40 Flat", "4.9 From 43 Reviews",
 ];
 const REQUIRED_SITELINK_PATHS = [
   "/products/coroplast-signs", "/products/stickers", "/products/vinyl-banners",

@@ -23,7 +23,7 @@
 
 import type { Category } from "@/lib/data/types";
 import { getFlyerCatalog, type FlyerSku } from "./flyer-catalog";
-import { getProducts, getPricingRules } from "./loader";
+import { getProducts, getPricingRules, getConfigNum } from "./loader";
 import {
   STICKER_CONFIG,
   type OptionChoice,
@@ -103,10 +103,12 @@ function sqftControls(opts: {
     ]},
     { key: "qty", label: "Quantity", kind: "number", required: true, defaultValue: 1, min: 1, max: 10000 },
     { key: "design_status", label: "Artwork", kind: "select", required: false, defaultValue: "PRINT_READY", choices: [
+      // Design is one flat fee across all three tiers — read it from config.v1.csv
+      // rather than restating the number here (this file is server-side, so it can).
       { value: "PRINT_READY",      label: "Print-ready file" },
-      { value: "MINOR_EDIT",       label: "Minor edits ($35 design fee)" },
-      { value: "FULL_DESIGN",      label: "Full design ($50 design fee)" },
-      { value: "LOGO_RECREATION",  label: "Logo recreation ($75 design fee)" },
+      { value: "MINOR_EDIT",       label: `Minor edits ($${getConfigNum("design_minor_edit_fee")} design fee)` },
+      { value: "FULL_DESIGN",      label: `Full design ($${getConfigNum("design_full_design_fee")} design fee)` },
+      { value: "LOGO_RECREATION",  label: `Logo recreation ($${getConfigNum("design_logo_recreation_fee")} design fee)` },
     ]},
     { key: "is_rush", label: "Rush", kind: "toggle", required: false, defaultValue: false, hint: "+$40 flat — must be in before 10 AM" },
   );
@@ -182,9 +184,9 @@ function buildRegistry(): Partial<Record<Category, ProductConfig>> {
       },
       { key: "design_status", label: "Artwork", kind: "select", required: false, defaultValue: "PRINT_READY", choices: [
         { value: "PRINT_READY",     label: "Print-ready file" },
-        { value: "MINOR_EDIT",      label: "Minor edits ($35)" },
-        { value: "FULL_DESIGN",     label: "Full design ($50)" },
-        { value: "LOGO_RECREATION", label: "Logo recreation ($75)" },
+        { value: "MINOR_EDIT",      label: `Minor edits ($${getConfigNum("design_minor_edit_fee")})` },
+        { value: "FULL_DESIGN",     label: `Full design ($${getConfigNum("design_full_design_fee")})` },
+        { value: "LOGO_RECREATION", label: `Logo recreation ($${getConfigNum("design_logo_recreation_fee")})` },
       ]},
       { key: "is_rush", label: "Rush (+$40)", kind: "toggle", required: false, defaultValue: false },
     ],

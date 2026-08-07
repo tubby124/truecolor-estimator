@@ -10,7 +10,7 @@ Priority: 0.95 tier-1 | 0.90 new local | 0.85 seasonal | 0.80 secondary
 - "Saskatchewan" or "Saskatoon" in first paragraph
 - "In-house Roland TrueVIS VG2 eco-solvent printer/cutter" mentioned when equipment context is useful
 - "Same-day rush" with "+$40 flat"
-- In-house designer mentioned ($35 flat)
+- In-house designer mentioned ($40 flat)
 - Internal links to 2+ related pages
 - NEVER invent prices — verify against data/PRICING_QUICK_REFERENCE.md
 

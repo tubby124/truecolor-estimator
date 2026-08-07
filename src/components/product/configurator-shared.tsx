@@ -160,9 +160,10 @@ export function DesignAndRushControls({
           className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[var(--brand)] focus:outline-none"
         >
           <option value="PRINT_READY">Print-ready file</option>
-          <option value="MINOR_EDIT">Minor edits (+$35)</option>
-          <option value="FULL_DESIGN">Full design (+$50)</option>
-          <option value="LOGO_RECREATION">Logo recreation (+$75)</option>
+          {/* Design is one flat $40 across all tiers — authority is config.v1.csv. */}
+          <option value="MINOR_EDIT">Minor edits (+$40)</option>
+          <option value="FULL_DESIGN">Full design (+$40)</option>
+          <option value="LOGO_RECREATION">Logo recreation (+$40)</option>
         </select>
       </div>
       <label className="flex items-center gap-3 cursor-pointer">

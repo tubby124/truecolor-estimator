@@ -65,11 +65,15 @@ function contrastRatio(hexA: string, hexB: string): number {
 // large text, which is the closest standard analogue to 3-inch characters at range.
 const HULL_CONTRAST_MIN = 3;
 
+// Authority is config.v1.csv (design_minor_edit_fee / _full_design_fee /
+// _logo_recreation_fee) — the engine reads it there. This is a client component so it
+// cannot call getConfigNum(); these values are a mirror for optimistic UI only and must
+// be kept in step. Design collapsed to ONE flat $40 across all tiers on 2026-08-06.
 const DESIGN_FEES: Record<string, number> = {
   PRINT_READY: 0,
-  MINOR_EDIT: 35,
-  FULL_DESIGN: 50,
-  LOGO_RECREATION: 75,
+  MINOR_EDIT: 40,
+  FULL_DESIGN: 40,
+  LOGO_RECREATION: 40,
 };
 
 // Grommet estimator — mirrors engine formula (spacing + min from config.v1.csv)
@@ -954,9 +958,9 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         <div className="flex flex-col gap-2" role="radiogroup" aria-labelledby="design-label">
           {[
             { label: "I have a print-ready file", value: "PRINT_READY", note: "" },
-            { label: "Minor edits to my file", value: "MINOR_EDIT", note: "+$35" },
-            { label: "Design from scratch", value: "FULL_DESIGN", note: "+$50" },
-            { label: "Logo vectorization", value: "LOGO_RECREATION", note: "+$75" },
+            { label: "Minor edits to my file", value: "MINOR_EDIT", note: "+$40" },
+            { label: "Design from scratch", value: "FULL_DESIGN", note: "+$40" },
+            { label: "Logo vectorization", value: "LOGO_RECREATION", note: "+$40" },
           ].map((opt) => (
             <button
               key={opt.value}

@@ -10,7 +10,8 @@
 
 import { describe, it, expect } from "vitest";
 import { estimate } from "../index";
-import type { Addon } from "@/lib/data/types";
+import type { Addon, Category } from "@/lib/data/types";
+import { PRODUCTS, PRODUCT_SLUGS } from "@/lib/data/products-content";
 
 // ─── BLOCKED / Invalid inputs ─────────────────────────────────────────────────
 
@@ -22,11 +23,100 @@ describe("BLOCKED — invalid inputs", () => {
     expect(result.sell_price).toBeNull();
   });
 
-  it("returns BLOCKED when category has no fixed-size products and no dimensions given", () => {
-    // INSTALLATION has no fixed-size products and requires dims — should BLOCK
+  it("returns BLOCKED for INSTALLATION — deliberately quote-only, no pricing rule exists", () => {
+    // Installation is intentionally NOT self-serve. Real jobs ranged $60–$1,300 and
+    // availability is category-dependent (window/vehicle decals yes, ACP no), so it is
+    // routed to /quote instead of the estimator. PR-SVC-INSTALL is category=SERVICE,
+    // NOT category=INSTALLATION — there is no INSTALLATION rule at all, which is why
+    // this blocks. If an INSTALLATION rule is ever added this test will fail and force
+    // an explicit decision rather than silently shipping a self-serve install price.
     const result = estimate({ category: "INSTALLATION" });
     expect(result.status).toBe("BLOCKED");
     expect(result.sell_price).toBeNull();
+  });
+});
+
+// ─── STEP 4a: dimensionless service SKUs ──────────────────────────────────────
+// Until 2026-08-06 every service row in pricing_rules.v1.csv carried its flat price
+// in the price_per_sqft column with price_per_unit empty. Step 4a rejects exactly that
+// shape (`price_per_unit === null || price_per_sqft !== null`), so no service could ever
+// match, and the guard at index.ts:283 blocked the request before the design/rush steps
+// ran. The prices below are the CURRENT config values — this suite proves the plumbing,
+// not a repricing.
+
+describe("STEP 4a — dimensionless services price without width/height", () => {
+  it("DESIGN basic — prices with no dimensions at all", () => {
+    const result = estimate({
+      category: "DESIGN",
+      material_code: "SVC-DESIGN-BASIC",
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(40);
+    expect(result.sqft_calculated).toBeNull();
+    expect(result.rules_fired).toContain("PR-SVC-DESIGN-BASIC");
+    // A clarification would make checkout throw — revalidateItemPrices in
+    // api/orders/route.ts only accepts status === "QUOTED".
+    expect(result.needs_clarification).toBe(false);
+  });
+
+  it("DESIGN basic ×3 — multiplies by qty (is_lot_price=FALSE)", () => {
+    const result = estimate({
+      category: "DESIGN",
+      material_code: "SVC-DESIGN-BASIC",
+      qty: 3,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(120);
+  });
+
+  it("DESIGN full and logo resolve to their own rules, not the first DESIGN row", () => {
+    // All three DESIGN rules previously had an empty material_code, so rules.find()
+    // returned PR-SVC-DESIGN-BASIC for every DESIGN request and the other two were dead.
+    // They now all price $40; what this asserts is that each resolves to its OWN rule,
+    // so the disambiguation still holds if the prices ever diverge again.
+    const full = estimate({ category: "DESIGN", material_code: "SVC-DESIGN-FULL", qty: 1 });
+    expect(full.sell_price).toBe(40);
+    expect(full.rules_fired).toContain("PR-SVC-DESIGN-FULL");
+
+    const logo = estimate({ category: "DESIGN", material_code: "SVC-DESIGN-LOGO", qty: 1 });
+    expect(logo.sell_price).toBe(40);
+    expect(logo.rules_fired).toContain("PR-SVC-DESIGN-LOGO");
+  });
+
+  it("SERVICE upscale — flat $20, replaces the never-invoiced $15/$35/$75 ladder", () => {
+    const result = estimate({
+      category: "SERVICE",
+      material_code: "SVC-UPSCALE",
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(20);
+    expect(result.sqft_calculated).toBeNull();
+    expect(result.rules_fired).toContain("PR-SVC-UPSCALE");
+    expect(result.needs_clarification).toBe(false);
+    expect(result.wave_line_name).toBe("Image Upscale and Enhancement");
+  });
+
+  it("SERVICE install — prices dimensionlessly as a staff reference", () => {
+    const result = estimate({
+      category: "SERVICE",
+      material_code: "SVC-INSTALL",
+      qty: 1,
+    });
+    expect(result.status).toBe("QUOTED");
+    expect(result.sell_price).toBe(75);
+  });
+
+  it("service wave_line_name is human-readable, not CATEGORY – CODE – CUSTOM – Single", () => {
+    const result = estimate({
+      category: "DESIGN",
+      material_code: "SVC-DESIGN-BASIC",
+      qty: 1,
+    });
+    // This string lands on a real Wave invoice line the customer reads.
+    expect(result.wave_line_name).not.toContain("CUSTOM");
+    expect(result.wave_line_name.toLowerCase()).toContain("design");
   });
 });
 
@@ -324,32 +414,46 @@ describe("STEP 7 — design fee", () => {
     qty: 1,
   };
 
+  // Owner-approved 2026-08-06: design collapsed to ONE flat $40 across all three
+  // DesignStatus tiers (was 35 / 50 / 50). Evidence: every design job invoiced
+  // Jul–Aug 2026 was $40 regardless of scope — including the Jul 13 job, which was a
+  // full vector logo rebuild delivering .AI/.EPS/.SVG/.PDF/PNG on a 2-day turnaround.
+  // The tiers are kept in the DesignStatus union (not deleted) because historical
+  // orders store design_fee_cents and pre-deploy carts replay design_status through
+  // revalidateItemPrices — they are now accepted-but-unadvertised inputs that all
+  // price $40. All three assertions being 40 is intentional, not copy/paste.
+
   it("PRINT_READY — no design fee added", () => {
     const base = estimate({ ...baseRequest, design_status: "PRINT_READY" });
     const withFee = estimate({ ...baseRequest, design_status: "MINOR_EDIT" });
-    expect(withFee.sell_price! - base.sell_price!).toBe(35);
+    expect(withFee.sell_price! - base.sell_price!).toBe(40);
   });
 
-  it("MINOR_EDIT — adds $35", () => {
+  it("MINOR_EDIT — adds $40", () => {
     const base = estimate({ ...baseRequest, design_status: "PRINT_READY" });
     const result = estimate({ ...baseRequest, design_status: "MINOR_EDIT" });
-    expect(result.sell_price! - base.sell_price!).toBe(35);
+    expect(result.sell_price! - base.sell_price!).toBe(40);
     expect(result.line_items.some((li) => li.description.includes("Basic"))).toBe(true);
   });
 
-  it("FULL_DESIGN — adds $50", () => {
+  it("FULL_DESIGN — adds $40", () => {
     const base = estimate({ ...baseRequest, design_status: "PRINT_READY" });
     const result = estimate({ ...baseRequest, design_status: "FULL_DESIGN" });
-    expect(result.sell_price! - base.sell_price!).toBe(50);
+    expect(result.sell_price! - base.sell_price!).toBe(40);
   });
 
-  // Owner-approved 2026-08-06: dropped 75 -> 50 so the engine matches the price
-  // advertised on /products. Note this makes LOGO_RECREATION and FULL_DESIGN the
-  // same $50 — intentional, not a copy/paste error.
-  it("LOGO_RECREATION — adds $50", () => {
+  it("LOGO_RECREATION — adds $40", () => {
     const base = estimate({ ...baseRequest, design_status: "PRINT_READY" });
     const result = estimate({ ...baseRequest, design_status: "LOGO_RECREATION" });
-    expect(result.sell_price! - base.sell_price!).toBe(50);
+    expect(result.sell_price! - base.sell_price!).toBe(40);
+  });
+
+  it("design fee is identical across all three tiers — one flat price", () => {
+    const base = estimate({ ...baseRequest, design_status: "PRINT_READY" }).sell_price!;
+    const tiers = ["MINOR_EDIT", "FULL_DESIGN", "LOGO_RECREATION"] as const;
+    const deltas = tiers.map((t) => estimate({ ...baseRequest, design_status: t }).sell_price! - base);
+    expect(new Set(deltas).size).toBe(1);
+    expect(deltas[0]).toBe(40);
   });
 });
 
@@ -1628,4 +1732,58 @@ describe("BOAT registration number size ladder", () => {
       expect(prices[i]).toBeGreaterThan(prices[i - 1]);
     }
   });
+});
+
+// ─── Catalog-wide reachability guard ──────────────────────────────────────────
+// Every product the site offers must be priceable by the engine at every size and
+// quantity its own configurator presents. The historical failure mode is a product
+// shipping with qtyPresets that don't line up with the qty_min values in
+// pricing_rules.v1.csv — the page renders a price panel that never resolves, and
+// STEP 4b returns BLOCKED("Quantity N is not a standard lot size"). Nothing in
+// validate:pricing catches that today.
+
+describe("catalog reachability — every listed product prices at every preset", () => {
+  const sellable = PRODUCT_SLUGS.map((s) => PRODUCTS[s]).filter((p) => p && !p.comingSoon);
+
+  it("has products to check", () => {
+    expect(sellable.length).toBeGreaterThan(20);
+  });
+
+  for (const product of sellable) {
+    it(`${product.slug} prices at all ${product.sizePresets.length}×${product.qtyPresets.length} preset combinations`, () => {
+      // A tierPreset (paper weight, stand grade, page count) overrides the product's
+      // base material; a sizePreset can override it too. Cover every tier so a broken
+      // tier can't hide behind a working default.
+      const materials = product.tierPresets?.length
+        ? product.tierPresets.map((t) => t.material_code)
+        : [product.material_code];
+
+      const failures: string[] = [];
+
+      for (const material of materials) {
+        for (const size of product.sizePresets) {
+          for (const qty of product.qtyPresets) {
+            const result = estimate({
+              // ProductContent.category is a plain string; EstimateRequest wants Category.
+              // Narrowing here is the point of the test — an invalid category shows up as
+              // a BLOCKED failure below rather than being hidden by a compile error.
+              category: product.category as Category,
+              material_code: size.material_code ?? material,
+              width_in: size.width_in,
+              height_in: size.height_in,
+              sides: product.defaultSides,
+              qty,
+            });
+            if (result.status === "BLOCKED") {
+              failures.push(
+                `${size.label} × qty ${qty} (${size.material_code ?? material}) → ${result.clarification_notes.join("; ") || "BLOCKED"}`
+              );
+            }
+          }
+        }
+      }
+
+      expect(failures, `${product.slug} unpriceable combinations:\n  ${failures.join("\n  ")}`).toEqual([]);
+    });
+  }
 });

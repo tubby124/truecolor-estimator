@@ -44,7 +44,9 @@ The shop now enforces a **single $25 order-total minimum at checkout** via `src/
 - Lot-priced products (BCs, flyers, stickers, postcards, brochures, posters) = no minimums, flat totals.
 - BC "from $45" = 250 double-sided on 14pt gloss (1S = $40). 500 2S = $65, 1000 2S = $110.
 - Flyer "from $45" = 100 full-letter double-sided on 80lb gloss. 100lb upgrade: 100=$65, 250=$115, 1000=$250.
-- Rush +$40 and Design $35 always mentioned separately, never baked into "from" price.
+- Rush +$40 and Design $40 always mentioned separately, never baked into "from" price.
+- Design is ONE flat $40 for minor edits, full design, and logo vectorization alike. The $35/$50/$75 ladder was retired 2026-08-06 — every design job invoiced Jul-Aug 2026 was $40 regardless of scope. Never write $35, $50, or $75 for design.
+- Image upscale is a flat $20 (retired the never-invoiced $15/$35/$75 ladder, 2026-08-06).
 
 ## FAQ phrasing for small orders
 

@@ -53,7 +53,7 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 5. **Banners "from $66" is correct** — smallest 2×4ft = $66, already above $25 cart min.
 6. **Foamboard "from $45" is correct for the standard 18×24 fixed SKU**. Custom smaller foamboard can price by sqft, but landing pages should anchor the common 18×24 at $45 unless the page explicitly says custom sqft pricing.
 7. **Rush +$40 flat** — always mention separately. GST and PST apply when bundled with a printed-material order.
-8. **Design $35 flat** — always mention separately. GST and PST apply when bundled with a printed-material order.
+8. **Design $40 flat** — one price for minor edits, full design, and logo vectorization alike (the $35/$50/$75 ladder was retired 2026-08-06). **Image upscale $20 flat.** Always mention separately. GST and PST apply when bundled with a printed-material order.
 9. **All prices are pre-tax.** GST 5% + PST 6% are added at checkout to the full printed-material charge, including bundled design and rush services.
 10. **Product reference cards** (`products` array on IndustryPage): use T1 sqft rates for wide-format. Wide-format T1: Coroplast $8/sqft, Banners $8.25/sqft, ACP $13/sqft, Foamboard $10/sqft, Window Decals $11/sqft, Vehicle Magnets $24/sqft.
 11. **FROZEN ranking page titles** (do NOT change H1/title/slug): coroplast-signs-saskatoon ("From $8/sqft"), banner-printing-saskatoon ("From $8.25/sqft"), sign-company-saskatoon, business-cards-saskatoon, flyer-printing-saskatoon, sticker-printing-saskatoon, aluminum-signs-saskatoon. Body copy + FAQ updates allowed per SEO wave system.
@@ -417,9 +417,10 @@ Graphic print included in price (33" wide banner).
 | Grommets              | $2.50/each (auto-calculated) |
 | H-Stake               | $2.50/each |
 | Rush/Same-Day         | +$40 flat  |
-| Minor edit (design)   | +$35       |
-| Design from scratch   | +$50       |
-| Logo vectorization    | +$75       |
+| Minor edit (design)   | +$40       |
+| Design from scratch   | +$40       |
+| Logo vectorization    | +$40       |
+| Image upscale         | $20        |
 | Installation          | $75 base   |
 
 ---

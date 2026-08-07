@@ -43,7 +43,7 @@ const rsa = (product, specificHeadlines) => ({
 const sharedProofHeadlines = [
   "Rated 4.9 From 43 Reviews",
   "Same-Day Rush +$40 Flat",
-  "In-House Design $35 Flat",
+  "In-House Design $40 Flat",
   "Pick Up in Saskatoon",
   "Printed In-House Locally",
 ];
@@ -52,7 +52,7 @@ const variantDescriptions = (priceLine) => [
   priceLine,
   "Standard orders ready in 1-3 business days. Same-day rush +$40 flat.",
   "Pick up at 216 33rd St W in Saskatoon. Upload your artwork with the order.",
-  "In-house designer, $35 flat, same-day proof. Rated 4.9 from 43 reviews.",
+  "In-house designer, $40 flat, same-day proof. Rated 4.9 from 43 reviews.",
 ];
 
 const rsaVariantB = (specificHeadlines, priceLine) => ({
@@ -113,7 +113,7 @@ const brandVariantB = {
     "True Color Display Printing",
     "Your Local Print Shop",
     "Stickers, Signs, Banners",
-    "Design $35, Rush +$40",
+    "Design $40, Rush +$40",
     ...sharedProofHeadlines,
   ],
   descriptions: [
@@ -241,7 +241,7 @@ export const paidSearchConfig = {
       "Banners From $66",
       "250 Cards $45",
       "Same-Day Rush +$40 Flat",
-      "Design $35 Flat",
+      "Design $40 Flat",
       "4.9 From 43 Reviews",
     ],
     structuredSnippet: {
@@ -399,7 +399,7 @@ export const paidSearchConfig = {
     // 2026-08-05: proven waste from the GSC survey. "screen printing" drew 95 impressions and
     // True Color does not offer it (eco-solvent Roland + digital press only). The rest are
     // copy-shop or buy-a-device intent. "logo design" and "resume" were deliberately NOT added:
-    // in-house design is a real CA$35 service and resume printing is a real print job.
+    // in-house design is a real CA$40 service and resume printing is a real print job.
     "screen printing", "photocopy", "document printing", "print outs",
     "label maker", "label printers",
     // 2026-08-06 search-term mining (first real harvest, 41 terms / CA$8.05 / 14 days).

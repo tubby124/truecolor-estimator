@@ -52,7 +52,8 @@ export const SOURCED_FACTS = {
   "$219": { kind: "price", meaning: "retractable banner, economy stand + print", source: "PRICING_QUICK_REFERENCE.md — lot-priced table" },
   "$110": { kind: "price", meaning: "1000 business cards, 2-sided", source: ".claude/rules/truecolor-pricing-comms.md" },
   "+$40": { kind: "price", meaning: "same-day rush fee, flat, PST-exempt", source: ".claude/rules/truecolor-domain.md — rush +$40 flat" },
-  "$40": { kind: "price", meaning: "same-day rush fee, flat", source: ".claude/rules/truecolor-domain.md — rush +$40 flat" },
+  // One token, two genuine services at the same price — same pattern as "$39" below.
+  "$40": { kind: "price", meaning: "same-day rush fee, flat; ALSO in-house design fee, flat, same-day proof", source: ".claude/rules/truecolor-domain.md — rush +$40 flat AND design $40 flat; config.v1.csv design_minor_edit_fee/design_full_design_fee/design_logo_recreation_fee all 40.00" },
   "$66": { kind: "price", meaning: "vinyl banner 2x4ft", source: "PRICING_QUICK_REFERENCE.md — banners from $66" },
   "$65": { kind: "price", meaning: "500 business cards, 2-sided", source: ".claude/rules/truecolor-pricing-comms.md" },
   "$45": { kind: "price", meaning: "250 business cards 2S / 100 flyers 2S", source: "PRICING_QUICK_REFERENCE.md — lot-priced table" },
@@ -60,7 +61,11 @@ export const SOURCED_FACTS = {
   // records both so nobody later assumes a boat ad inherited the ACP provenance.
   "$39": { kind: "price", meaning: "ACP aluminum sign 18x24; ALSO boat registration decal pair, 3in", source: "PRICING_QUICK_REFERENCE.md — ACP from $39; Boat Registration Numbers from $39/pair (pricing_rules.v1.csv PR-BOATNUM-3IN)" },
   "$18": { kind: "price", meaning: "boat name decal, single", source: "pricing_rules.v1.csv — PR-BOATNUM-NAME $18.00/unit; PRICING_QUICK_REFERENCE.md lot-priced table" },
-  "$35": { kind: "price", meaning: "in-house design fee, flat, same-day proof", source: ".claude/rules/truecolor-domain.md — design $35 flat" },
+  // NOT the design fee. Design moved to $40 flat on 2026-08-06 and the $35/$50/$75
+  // ladder was retired; leaving "$35" pointed at design would let a stale ad claim
+  // revalidate. Postcards are the only remaining sourced $35 in ad copy.
+  "$35": { kind: "price", meaning: "100 postcards, lot price", source: "PRICING_QUICK_REFERENCE.md — Postcards from $35" },
+  "$20": { kind: "price", meaning: "image upscale / resolution enhancement, flat", source: "config.v1.csv — upscale_fee_flat 20.00; services.v1.csv SVC-UPSCALE" },
   "$25": { kind: "price", meaning: "order-total minimum at checkout; coroplast/sticker/sign from-price", source: "PRICING_QUICK_REFERENCE.md — $25 order-total minimum" },
 
   // ── conditions (make a turnaround claim honest) ───────────────────────────

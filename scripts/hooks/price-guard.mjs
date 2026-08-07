@@ -60,7 +60,10 @@ const KEY_PRICES = `KEY PRICES (verify against PRICING_QUICK_REFERENCE.md):
   Magnets from=$25 or $24/sqft | Decals from=$25 or $11/sqft | Lettering from=$25 or $8.50/sqft
   Volume discounts=QTY-based ONLY ("5+ signs", never "8+ sqft")
   IndustryPage product cards: T1 sqft rates
-  Rush=+$40 flat | Design=$35 flat | always separate`;
+  Rush=+$40 flat | Design=$40 flat | Image upscale=$20 flat | always separate
+  Design is ONE flat $40 across minor edits, full design, and logo vectorization.
+  There is no $35 / $50 / $75 design ladder and no $15/$35/$75 upscale ladder — both
+  were retired 2026-08-06. Never reintroduce them.`;
 
 const CONTEXTS = {
   NEW_LANDING_PAGE: `SKILL GATE: You MUST be running /truecolor-page [keyword] to create a new landing page.
