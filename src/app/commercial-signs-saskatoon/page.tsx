@@ -120,7 +120,7 @@ export default function CommercialSignsSaskatoonPage() {
         },
         {
           q: "Can you match my brand colours exactly?",
-          a: "Yes — provide your hex codes, Pantone references, or brand guide. Our Roland UV printer produces consistent, accurate colour. Bring an existing printed piece and we'll match it. In-house design is $35 flat with same-day proof if you need a layout built from scratch.",
+          a: "Yes — provide your hex codes, Pantone references, or brand guide. Our Roland UV printer produces consistent, accurate colour. Bring an existing printed piece and we'll match it. In-house design is $40 flat with same-day proof if you need a layout built from scratch.",
         },
         {
           q: "Do you offer window decals that can be removed without damaging the glass?",

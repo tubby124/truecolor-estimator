@@ -26,7 +26,7 @@ export default function ChurchBannersSaskatoonPage() {
       subtitle="Your Sunday service announcement needs to be up before Saturday — that's the turnaround Saskatoon faith communities count on."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Church and faith community banners printed in Saskatoon"
-      description="True Color prints banners, signs, and displays for churches, mosques, temples, and faith communities across Saskatoon. Vinyl banners start at $66 (2×4&quot;), printed in-house on our Roland UV printer with grommets included. Coroplast signs from $25 for parking and wayfinding. Retractable banners from $219 for lobby entrances. Foamboard displays from $45 for indoor event boards. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $35 flat with same-day proof — perfect for Easter, Christmas, Ramadan, and community outreach campaigns. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints banners, signs, and displays for churches, mosques, temples, and faith communities across Saskatoon. Vinyl banners start at $66 (2×4&quot;), printed in-house on our Roland UV printer with grommets included. Coroplast signs from $25 for parking and wayfinding. Retractable banners from $219 for lobby entrances. Foamboard displays from $45 for indoor event boards. Same-day rush available for +$40 flat on orders placed before 10 AM. In-house designer $40 flat with same-day proof — perfect for Easter, Christmas, Ramadan, and community outreach campaigns. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -62,7 +62,7 @@ export default function ChurchBannersSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Our in-house designer handles scripture text, seasonal imagery, Arabic script, and
-            custom layouts for $35 flat with same-day proof turnaround — no outside agency
+            custom layouts for $40 flat with same-day proof turnaround — no outside agency
             needed. We work within faith community budgets and can advise on the most
             cost-effective combination for your event. Pickup at 216 33rd St W, Saskatoon or
             call (306) 954-8688 to talk through your order.
@@ -84,7 +84,7 @@ export default function ChurchBannersSaskatoonPage() {
         "Event boards for every room — foamboard displays from $45, programs, speaker bios, welcome signs",
         "Community handouts for 100 people — tri-fold brochures 100 for $70",
         "Christmas Eve banner ready if you order before 10 AM — same-day rush +$40 flat",
-        "Arabic script, scripture text, seasonal imagery — in-house designer $35 flat, same-day proof",
+        "Arabic script, scripture text, seasonal imagery — in-house designer $40 flat, same-day proof",
       ]}
       faqs={[
         {
@@ -97,7 +97,7 @@ export default function ChurchBannersSaskatoonPage() {
         },
         {
           q: "Do you print banners for Ramadan and Eid events?",
-          a: "Yes — we print Ramadan and Eid banners for Saskatoon mosques and Muslim community organizations. We can print Arabic script, crescent moon imagery, and bilingual layouts. Banners from $66 (2×4\"). Designer available for $35 flat if you need a layout built from scratch.",
+          a: "Yes — we print Ramadan and Eid banners for Saskatoon mosques and Muslim community organizations. We can print Arabic script, crescent moon imagery, and bilingual layouts. Banners from $66 (2×4\"). Designer available for $40 flat if you need a layout built from scratch.",
         },
         {
           q: "What kind of indoor signage works best for church events?",
@@ -109,15 +109,15 @@ export default function ChurchBannersSaskatoonPage() {
         },
         {
           q: "Do you print brochures for community programs and outreach?",
-          a: "Yes — tri-fold brochures on 80lb gloss: 100 for $70, 250 for $105, 500 for $195. Common uses include newcomer welcome packages, food bank program guides, community event handouts, and outreach campaign materials. Design is $35 flat.",
+          a: "Yes — tri-fold brochures on 80lb gloss: 100 for $70, 250 for $105, 500 for $195. Common uses include newcomer welcome packages, food bank program guides, community event handouts, and outreach campaign materials. Design is $40 flat.",
         },
         {
           q: "How do I get a design done if we don't have a graphic designer?",
-          a: "Our in-house designer handles it for $35 flat with same-day proof turnaround. Bring your logo (or describe your community), the text you want, and any imagery or colour references. We handle everything from there. Most faith community layouts are proofed within a few hours.",
+          a: "Our in-house designer handles it for $40 flat with same-day proof turnaround. Bring your logo (or describe your community), the text you want, and any imagery or colour references. We handle everything from there. Most faith community layouts are proofed within a few hours.",
         },
         {
           q: "Where can churches get banners printed in Saskatoon?",
-          a: "True Color Display Printing at 216 33rd St W, Saskatoon — (306) 954-8688. We print in-house, offer same-day rush, and have an in-house designer for $35 flat. We serve churches, mosques, temples, and all faith communities across Saskatoon.",
+          a: "True Color Display Printing at 216 33rd St W, Saskatoon — (306) 954-8688. We print in-house, offer same-day rush, and have an in-house designer for $40 flat. We serve churches, mosques, temples, and all faith communities across Saskatoon.",
         },
       ]}
     />
