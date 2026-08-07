@@ -480,3 +480,46 @@ it is chosen rather than drifted into.
 **Promoted to rule:** a third-party toggle is not evidence of a working integration. Probe the
 API with `validateOnly` and assert the result — and when adding an optional field to a request
 that can fail the whole call, ship the fallback in the same commit as the field.
+
+---
+
+## 2026-08-07 PM (4) — Google Ads tag installed; EC live; and a correction to entry (3)
+
+**Correction 4 — entry (3) said enhanced conversions for leads "would attribute the phone-in and
+manual orders that are ~80% of gross charges." That is WRONG and the reasoning was lazy.**
+EC for leads works by tagging a **form submission** with hashed contact data, which is what links
+the email to the ad click; the later offline upload matches on that email. **A phone call never
+submits a form**, so there is nothing to match against and EC for leads does nothing for phone-in
+orders. The correct instrument for those is call conversion tracking — `qualified_call_60s`
+(AD_CALL, 7694360843), already wired to the call asset and APPROVED. EC for leads only helps the
+narrower case of a *form* lead whose click ID was lost. Same failure shape as Corrections 1–3:
+a plausible mechanism asserted without tracing whether the trigger can physically fire.
+
+**Root cause found while installing the tag: the site had NO Google Ads presence at all.**
+`buildGoogleTagBootstrapScript` derived the Ads tag ID *from a purchase conversion label*. No
+label was ever issued, so `NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL` was unset and the
+`AW-` config never emitted — the site ran GA4-only since launch. Every discussion of "enhanced
+conversions for leads" was moot: there was no tag on the page to collect anything. Fixed with
+`NEXT_PUBLIC_GOOGLE_ADS_TAG_ID` (AW-18330693756), independent of any conversion action; the
+label path still works unchanged. One `gtag.js` load serves both destinations.
+
+**CSP would have made the install a silent failure.** `googleadservices.com` and
+`googleads.g.doubleclick.net` were absent from `script-src`/`connect-src`. The tag would have
+installed, reported healthy in the Google Ads UI, and had its conversion pings dropped by the
+browser. Added both (additive only — no existing directive weakened). **The Google Ads UI cannot
+see a client-side CSP block, so "tag installed" in that UI is not evidence the tag works.**
+
+**Verified live, not assumed** (`curl` against production, GAQL against the account):
+- `gtag('config','AW-18330693756')` + `gtag('config','G-6HMQT7MNLL')` both in served HTML
+- CSP response header carries `googleadservices.com`
+- `acceptedCustomerDataTerms: true`, `enhancedConversionsForLeadsEnabled: true`
+- Enhanced conversions probe: **✅ LIVE** — hashed identifiers accepted
+- 5 enabled conversion actions; `purchase_online` + `quote_won` primary and counted
+
+**Still not built, and now correctly scoped:** a lead-conversion tag firing on quote submit. The
+EC-for-leads toggle is on but has nothing to collect until that ships. Deliberately deferred —
+`quote_requests` already captures `gclid` first-party (39 quotes since Jun 1), so most of that
+value is reachable without it. Revisit after the 2026-08-12 gate.
+
+**Promoted to rule:** when a client-side vendor tag is added, allowlist its domains in CSP in the
+same commit and verify from the **served HTML and response headers**, not the vendor's dashboard.
