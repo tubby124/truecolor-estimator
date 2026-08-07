@@ -1,8 +1,13 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
   buildDataManagerRequest,
+  buildUserIdentifiers,
   classifyPaidConversionDiagnostics,
   formatDataManagerTimestamp,
+  hashForDataManager,
+  normalizeEmailForHashing,
+  normalizePhoneForHashing,
   retrievePaidConversionDiagnostics,
   uploadPaidConversion,
   type PaidConversionJob,
@@ -28,6 +33,111 @@ const job: PaidConversionJob = {
   conversion_time: "2026-07-20T18:30:45.000Z",
   attempt_count: 1,
 };
+
+describe("enhanced conversions — hashed user-provided data", () => {
+  const sha256Hex = (value: string) => createHash("sha256").update(value, "utf8").digest("hex");
+
+  it("hashes NORMALIZED text, not raw input — the silent zero-match trap", () => {
+    // Google hashes the normalized form. Hashing raw input yields a valid-looking
+    // digest that matches nothing, with a 200 OK and no error anywhere.
+    expect(normalizeEmailForHashing("  Buyer@Example.COM ")).toBe("buyer@example.com");
+    expect(hashForDataManager("buyer@example.com")).toBe(sha256Hex("buyer@example.com"));
+    expect(hashForDataManager("buyer@example.com")).not.toBe(sha256Hex("  Buyer@Example.COM "));
+  });
+
+  it("canonicalizes gmail dots and plus-tags so aliases still match", () => {
+    expect(normalizeEmailForHashing("First.Last+ads@gmail.com")).toBe("firstlast@gmail.com");
+    expect(normalizeEmailForHashing("first.last@googlemail.com")).toBe("firstlast@gmail.com");
+    // Non-gmail domains treat dots as significant — do NOT strip them.
+    expect(normalizeEmailForHashing("first.last@true-color.ca")).toBe("first.last@true-color.ca");
+  });
+
+  it("normalizes Saskatchewan phone formats to E.164", () => {
+    expect(normalizePhoneForHashing("(306) 954-8688")).toBe("+13069548688");
+    expect(normalizePhoneForHashing("1-306-954-8688")).toBe("+13069548688");
+    expect(normalizePhoneForHashing("306.954.8688")).toBe("+13069548688");
+    expect(normalizePhoneForHashing("12345")).toBeNull();
+  });
+
+  it("rejects malformed contact details instead of hashing garbage", () => {
+    expect(normalizeEmailForHashing("not-an-email")).toBeNull();
+    expect(normalizeEmailForHashing("")).toBeNull();
+    expect(buildUserIdentifiers({ ...job, customer_email: "nope", customer_phone: "x" })).toEqual([]);
+  });
+
+  it("attaches hashed identifiers AND the HEX encoding declaration alongside the click ID", () => {
+    const request = buildDataManagerRequest(
+      { ...job, customer_email: "Buyer@Example.com", customer_phone: "(306) 954-8688" },
+      env,
+    ) as Record<string, unknown>;
+    // encoding is request-level and required with userData; without it Google reads
+    // hex digests as Base64 and matches nothing.
+    expect(request.encoding).toBe("HEX");
+    const event = (request.events as Array<Record<string, unknown>>)[0];
+    expect(event.adIdentifiers).toEqual({ gclid: "click-1" });
+    expect(event.userData).toEqual({
+      userIdentifiers: [
+        { emailAddress: sha256Hex("buyer@example.com") },
+        { phoneNumber: sha256Hex("+13069548688") },
+      ],
+    });
+  });
+
+  it("omits userData and encoding entirely when no contact details resolve", () => {
+    const request = buildDataManagerRequest(job, env) as Record<string, unknown>;
+    expect(request.encoding).toBeUndefined();
+    expect((request.events as Array<Record<string, unknown>>)[0].userData).toBeUndefined();
+  });
+
+  it("falls back to click-ID-only when the account has not signed EC terms", async () => {
+    // Verified live 2026-08-07: Google rejects the ENTIRE request, not just userData.
+    // Without this fallback a real sale would fail to upload instead of degrading.
+    const termsError = {
+      error: {
+        message: "terms",
+        details: [{ "@type": "type.googleapis.com/google.rpc.BadRequest", fieldViolations: [
+          { field: "events.events[0].destination_references[0]",
+            reason: "DESTINATION_ACCOUNT_ENHANCED_CONVERSIONS_TERMS_NOT_SIGNED" },
+        ] }],
+      },
+    };
+    const fetchImpl = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ access_token: "t" }) })
+      .mockResolvedValueOnce({ ok: false, status: 400, json: async () => termsError })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ requestId: "req-fallback" }) });
+
+    const result = await uploadPaidConversion(
+      { ...job, customer_email: "buyer@example.com" },
+      { fetchImpl: fetchImpl as unknown as typeof fetch, env },
+    );
+
+    expect(result).toEqual({ requestId: "req-fallback", enhancedConversionsApplied: false });
+    const retryBody = JSON.parse((fetchImpl.mock.calls[2][1] as { body: string }).body);
+    expect(retryBody.events[0].userData).toBeUndefined();
+    expect(retryBody.encoding).toBeUndefined();
+    expect(retryBody.events[0].adIdentifiers).toEqual({ gclid: "click-1" });
+  });
+
+  it("does not retry when the failure is unrelated to EC terms", async () => {
+    const fetchImpl = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ access_token: "t" }) })
+      .mockResolvedValueOnce({ ok: false, status: 500, json: async () => ({ error: { message: "boom" } }) });
+    await expect(uploadPaidConversion(
+      { ...job, customer_email: "buyer@example.com" },
+      { fetchImpl: fetchImpl as unknown as typeof fetch, env },
+    )).rejects.toThrow(/HTTP 500/);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it("never sends raw contact details in the request body", () => {
+    const body = JSON.stringify(buildDataManagerRequest(
+      { ...job, customer_email: "buyer@example.com", customer_phone: "(306) 954-8688" },
+      env,
+    ));
+    expect(body).not.toContain("buyer@example.com");
+    expect(body).not.toContain("9548688");
+  });
+});
 
 describe("server-side Google Data Manager paid conversion upload", () => {
   it("uses RFC 3339 time, CAD pretax value, transaction ID, and owned accounts/action", () => {
@@ -72,7 +182,11 @@ describe("server-side Google Data Manager paid conversion upload", () => {
     const fetchImpl = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: "access" }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ requestId: "request-9001" }), { status: 200 }));
-    await expect(uploadPaidConversion(job, { fetchImpl, env })).resolves.toEqual({ requestId: "request-9001" });
+    await expect(uploadPaidConversion(job, { fetchImpl, env })).resolves.toEqual({
+      requestId: "request-9001",
+      // This fixture job carries no contact details, so enhanced conversions cannot apply.
+      enhancedConversionsApplied: false,
+    });
     const upload = fetchImpl.mock.calls[1];
     expect(upload[0]).toBe("https://datamanager.googleapis.com/v1/events:ingest");
     expect(upload[1].headers).toMatchObject({
@@ -87,7 +201,10 @@ describe("server-side Google Data Manager paid conversion upload", () => {
     const fetchImpl = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: "access" }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({}), { status: 200 }));
-    await expect(uploadPaidConversion(job, { fetchImpl, env, validateOnly: true })).resolves.toEqual({ requestId: null });
+    await expect(uploadPaidConversion(job, { fetchImpl, env, validateOnly: true })).resolves.toEqual({
+      requestId: null,
+      enhancedConversionsApplied: false,
+    });
     expect(JSON.parse(fetchImpl.mock.calls[1][1].body)).toMatchObject({ validateOnly: true });
   });
 

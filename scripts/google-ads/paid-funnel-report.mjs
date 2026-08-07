@@ -132,6 +132,72 @@ for (const row of outbox ?? []) {
   const attributed = row.gclid || row.gbraid ? "AD-ATTRIBUTED" : "not ad-attributed";
   console.log(`  ${row.created_at.slice(0, 10)} ${row.order_number} ${row.conversion_type} CA$${row.conversion_value} [${row.status}] — ${attributed}`);
 }
+// ---------- 4. Enhanced conversions readiness ----------
+// The uploader attaches hashed email/phone and self-heals: if the account has not signed
+// the enhanced-conversions terms Google rejects the WHOLE request, so it retries without
+// userData. This probe (validateOnly — nothing is recorded) says which path is live today.
+const ecProbe = await (async () => {
+  try {
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: process.env.GOOGLE_ADS_CLIENT_ID,
+        client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET,
+        refresh_token: process.env.GOOGLE_DATA_MANAGER_REFRESH_TOKEN,
+        grant_type: "refresh_token",
+      }),
+    });
+    const { access_token: accessToken } = await tokenResponse.json();
+    const { createHash } = await import("node:crypto");
+    const response = await fetch("https://datamanager.googleapis.com/v1/events:ingest", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+        "x-goog-user-project": process.env.GOOGLE_DATA_MANAGER_PROJECT_ID,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        destinations: [{
+          operatingAccount: { accountType: "GOOGLE_ADS", accountId: "1072816342" },
+          loginAccount: { accountType: "GOOGLE_ADS", accountId: "1125402990" },
+          productDestinationId: process.env.GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID,
+        }],
+        encoding: "HEX",
+        events: [{
+          adIdentifiers: { gclid: "EC-READINESS-PROBE" },
+          userData: { userIdentifiers: [{ emailAddress: createHash("sha256").update("probe@example.com").digest("hex") }] },
+          conversionValue: 1, currency: "CAD",
+          eventTimestamp: new Date(`${range.endDate}T12:00:00Z`).toISOString(),
+          transactionId: "EC-READINESS-PROBE", eventSource: "WEB",
+        }],
+        validateOnly: true,
+      }),
+    });
+    if (response.ok) return "LIVE";
+    const errorBody = await response.json().catch(() => ({}));
+    const violation = (errorBody?.error?.details ?? [])
+      .flatMap((detail) => detail?.fieldViolations ?? [])
+      .find((v) => v?.reason);
+    return violation?.reason ?? `HTTP ${response.status}`;
+  } catch (error) {
+    return `probe failed: ${error.message.slice(0, 80)}`;
+  }
+})();
+
+console.log("\n=== ENHANCED CONVERSIONS ===");
+if (ecProbe === "LIVE") {
+  console.log("  ✅ LIVE — hashed email/phone are accepted and uploaded with every conversion.");
+} else if (ecProbe === "DESTINATION_ACCOUNT_ENHANCED_CONVERSIONS_TERMS_NOT_SIGNED") {
+  console.log("  ⚠️  INERT — account has not signed the enhanced-conversions terms.");
+  console.log("     Conversions still upload on the click ID alone (self-healing fallback).");
+  console.log("     Fix (owner, 2 clicks): Google Ads → Goals → Settings → Enhanced conversions");
+  console.log("     → tick 'Turn on enhanced conversions', accept the TERMS dialog, SAVE.");
+  console.log("     No redeploy needed — the next conversion picks it up automatically.");
+} else {
+  console.log(`  ⚠️  UNEXPECTED: ${ecProbe}`);
+}
+
 const attributedCount = (outbox ?? []).filter((r) => r.gclid || r.gbraid).length;
 console.log(`\nVERDICT: ${totalClicks} paid clicks, CA$${totalCost.toFixed(2)} spend, ${attributedCount} ad-attributed conversions in window.`);
 if (attributedCount === 0) console.log("Zero attributed conversions at this click volume is sample size, not breakage — the upload pipeline is armed and verified (2026-08-07 audit).");

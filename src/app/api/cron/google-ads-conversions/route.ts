@@ -123,6 +123,48 @@ function authorized(req: NextRequest, secret: string): boolean {
   return expectedBytes.length === suppliedBytes.length && timingSafeEqual(expectedBytes, suppliedBytes);
 }
 
+/**
+ * Enhanced conversions: resolve the buyer's contact details at UPLOAD time from
+ * orders -> customers, hand them to the uploader for hashing, and never persist them.
+ *
+ * Deliberately not stored on the outbox row: the outbox is a queue, not a customer
+ * record, and copying PII into it would create a second store to secure, audit, and
+ * purge for no gain. The join costs one indexed lookup per conversion.
+ *
+ * Fail-soft by design. If the lookup errors or the customer has no contact details,
+ * the conversion still uploads with the click ID alone — degraded match rate beats a
+ * dropped conversion. A hard failure here would turn a measurement upgrade into an
+ * outage of the thing it was meant to improve.
+ */
+async function attachEnhancedConversionIdentifiers(
+  supabase: ReturnType<typeof createServiceClient>,
+  job: PaidConversionJob,
+): Promise<PaidConversionJob> {
+  try {
+    const { data: order } = await supabase
+      .from("orders")
+      .select("customer_id, customer_phone_at_order")
+      .eq("order_number", job.order_number)
+      .maybeSingle();
+    if (!order) return job;
+
+    let email: string | null = null;
+    let phone: string | null = order.customer_phone_at_order ?? null;
+    if (order.customer_id) {
+      const { data: customer } = await supabase
+        .from("customers")
+        .select("email, phone")
+        .eq("id", order.customer_id)
+        .maybeSingle();
+      email = customer?.email ?? null;
+      phone = phone ?? customer?.phone ?? null;
+    }
+    return { ...job, customer_email: email, customer_phone: phone };
+  } catch {
+    return job;
+  }
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 503 });
@@ -141,7 +183,8 @@ export async function POST(req: NextRequest) {
   let failed = 0;
   for (const job of jobs) {
     try {
-      const result = await uploadPaidConversion(job);
+      const enrichedJob = await attachEnhancedConversionIdentifiers(supabase, job);
+      const result = await uploadPaidConversion(enrichedJob);
       if (!result.requestId) throw new Error("Data Manager ingest returned no request ID");
       const now = new Date();
       const { data: updated, error: updateError } = await supabase
