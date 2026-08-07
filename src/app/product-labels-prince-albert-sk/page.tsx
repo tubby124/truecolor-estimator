@@ -80,7 +80,7 @@ export default function ProductLabelsPrinceAlbertPage() {
         "Roland TrueVIS VG2 eco-solvent inks survive moisture, condensation, and outdoor handling",
         "1–3 business day print + 1 business day courier to Prince Albert",
         "Same-day rush at +$40 flat when ordered before 10 AM",
-        "In-house Photoshop designer: $35 flat with same-day proof",
+        "In-house Photoshop designer: $40 flat with same-day proof",
       ]}
       faqs={[
         {

@@ -27,7 +27,7 @@ export default function ProductLabelsMooseJawPage() {
       heroImage="/images/products/heroes/product-labels-hero-1200x500.webp"
       heroAlt="Retail product labels printed for Moose Jaw SK artisan brands by True Color Display Printing"
       description={
-        "Custom retail product labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on 3mil vinyl — gloss, matte, or soft-touch finish. Built for Moose Jaw craft brewers, distilleries, farmers market vendors, ranches selling direct-to-consumer beef and lamb, and small artisan brands. Contour-cut to any shape, no die fee. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier 1–2 days to Moose Jaw."
+        "Custom retail product labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on 3mil vinyl — gloss, matte, or soft-touch finish. Built for Moose Jaw craft brewers, distilleries, farmers market vendors, ranches selling direct-to-consumer beef and lamb, and small artisan brands. Contour-cut to any shape, no die fee. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($40 flat), 1–3 business day turnaround. Ground courier 1–2 days to Moose Jaw."
       }
       descriptionNode={
         <>
@@ -57,7 +57,7 @@ export default function ProductLabelsMooseJawPage() {
             <a href="tel:+13069548688" className="text-[#16C2F3] underline font-medium">
               (306) 954-8688
             </a>. We email a proof. Print 1–3 business days + ground courier 1–2 days to
-            Moose Jaw. In-house Photoshop designer builds label layouts for $35 flat with a
+            Moose Jaw. In-house Photoshop designer builds label layouts for $40 flat with a
             same-day proof.
           </p>
         </>
@@ -78,7 +78,7 @@ export default function ProductLabelsMooseJawPage() {
         "UV-cured ink survives bottle moisture and ice-bath beverage chilling",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
         "Same-day rush at +$40 flat when ordered before 10 AM",
-        "In-house Photoshop designer: $35 flat with same-day proof",
+        "In-house Photoshop designer: $40 flat with same-day proof",
       ]}
       faqs={[
         {
