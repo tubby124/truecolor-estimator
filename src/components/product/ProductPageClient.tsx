@@ -74,11 +74,13 @@ export function ProductPageClient({ product }: Props) {
   }, []);
 
   function handleAddToCart() {
+    // Flat-fee services carry no dimensions — the dimension gate would silently
+    // drop every add-to-cart click for them (button enabled, nothing added).
+    const dimensionsRequired = !product.serviceMode;
     if (
       priceData.price == null ||
       priceData.loading ||
-      configData.widthIn <= 0 ||
-      configData.heightIn <= 0 ||
+      (dimensionsRequired && (configData.widthIn <= 0 || configData.heightIn <= 0)) ||
       configData.qty <= 0
     ) return;
 
