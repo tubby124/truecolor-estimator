@@ -12,9 +12,11 @@
  *  3. Every products-content.ts slug exists in SiteNav.tsx PRODUCT_CATEGORIES
  *  4. Every products-content.ts slug has a Lucide icon in PrintIcons.tsx SLUG_ICON_MAP
  *  5. No MAGNET product in products.v1.csv has price < $45
+ *  6. Every slug used in a landing-page products={[...]} card has an
+ *     INDUSTRY_PRODUCT_IMAGES entry (else the card renders with no image)
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, globSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -440,6 +442,48 @@ if (feeDrift === 0) pass(`All ${FEE_LINKS.length} engine fees agree across confi
 // NOTE: engine reachability (can every listed product actually be priced?) is covered
 // by the "catalog reachability" suite in src/lib/engine/__tests__/engine.test.ts, which
 // calls estimate() for real rather than re-deriving qty tiers from regex here.
+
+// ─── Check: every landing-page product card has an image ──────────────────
+// IndustryPage renders the card image behind `{img && ...}`, so a slug missing
+// from INDUSTRY_PRODUCT_IMAGES degrades silently to a text-only card — no error,
+// no warning, just a blank spot on a live page. That shipped on the boat
+// registration page and across ~20 label pages before anyone noticed (2026-08-06).
+console.log("\n[14] Checking every landing-page product card has an image ...");
+{
+  const industryPage = readFile("src/components/site/IndustryPage.tsx");
+  const mapBlock = industryPage.match(
+    /const INDUSTRY_PRODUCT_IMAGES[^{]*\{([\s\S]*?)\n\};/,
+  );
+  const mapped = new Set(
+    mapBlock ? [...mapBlock[1].matchAll(/"([a-z0-9-]+)"\s*:/g)].map((m) => m[1]) : [],
+  );
+
+  const pageFiles = globSync("src/app/*/page.tsx", { cwd: ROOT });
+  const referenced = new Map(); // slug -> [pages]
+  for (const rel of pageFiles) {
+    const src = readFile(rel);
+    for (const block of src.matchAll(/products=\{\[([\s\S]*?)\]\}/g)) {
+      for (const m of block[1].matchAll(/slug:\s*"([a-z0-9-]+)"/g)) {
+        if (!referenced.has(m[1])) referenced.set(m[1], []);
+        referenced.get(m[1]).push(rel.split("/")[2]);
+      }
+    }
+  }
+
+  let missing = 0;
+  for (const [slug, pages] of [...referenced].sort()) {
+    if (mapped.has(slug)) continue;
+    missing++;
+    fail(
+      `"${slug}" is used in a products={[...]} card on ${pages.length} page(s) ` +
+        `(e.g. ${pages[0]}) but has no INDUSTRY_PRODUCT_IMAGES entry — the card ` +
+        `will render with no image. Add it in src/components/site/IndustryPage.tsx.`,
+    );
+  }
+  if (missing === 0) {
+    pass(`All ${referenced.size} product-card slugs have an INDUSTRY_PRODUCT_IMAGES entry`);
+  }
+}
 
 // ─── Summary ──────────────────────────────────────────────────────────────
 console.log("\n" + "─".repeat(60));

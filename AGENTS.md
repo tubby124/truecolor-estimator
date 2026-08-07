@@ -23,6 +23,7 @@
 - /ecommerce-ux         → before any checkout/order/email feature ships
 - /e2e-test             → before every production push to Railway
 - /truecolor-page       → before any new SEO landing page
+- /truecolor-product    → before adding ANY new product SKU, converting a quote-only item to self-serve, or changing a product's category/material code. Walks all 9 touchpoints (price → content → card image → icon → alias → nav → sitemap → tax → Wave). Skipping it is how four service SKUs shipped unbuyable on 2026-08-07. Flat-fee services MUST set `serviceMode: true` and an `SVC-` material code — the PST exemption and Wave line mapper both key off that prefix.
 - google-ads-copy rule  → before ANY edit to docs/paid-search/campaign-config.mjs, any new ad group, or any keyword expansion. Every number in an ad must resolve to a sourced fact in docs/paid-search/approved-claims.mjs; `node scripts/google-ads/config-validator.mjs` must return VALIDATED.
 - /tc-seo-opportunities → before editing ANY existing SEO page.tsx (loads fresh 28-day GSC rollup, confirms protected status, surfaces the right next-action — paa-faq, title rewrite, internal-link build, or no-touch). Enforced by hooks: blocks edits when `.claude/rules/seo-protected-pages.md` is >35 days stale.
 
