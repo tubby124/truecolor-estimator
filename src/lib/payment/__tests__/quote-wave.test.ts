@@ -229,4 +229,52 @@ describe("quote Wave provisioning", () => {
       })).toMatchObject({ applyGst: true, applyPst: true });
     }
   });
+
+  // Regression: the Wave invoice billed $44.40 against a $42.00 service-only
+  // order because a standalone service fell through to the category check and
+  // picked up PST. Found by e2e 2026-08-07.
+  it("never applies PST to a standalone SVC- service line", () => {
+    for (const [category, material_code] of [
+      ["DESIGN", "SVC-DESIGN-LOGO"],
+      ["DESIGN", "SVC-DESIGN-FULL"],
+      ["DESIGN", "SVC-DESIGN-BASIC"],
+      ["SERVICE", "SVC-UPSCALE"],
+    ]) {
+      expect(storedOrderItemToWaveLine({
+        product_name: material_code,
+        qty: 1,
+        unit_price: 40,
+        line_total: 40,
+        category,
+        material_code,
+        line_items_json: [{ taxClass: "design_service" }],
+      })).toMatchObject({ applyGst: true, applyPst: false });
+    }
+  });
+
+  it("still applies PST to a design fee bundled into a printed order", () => {
+    // No SVC- material code → this is a design charge on a printed job, which
+    // IS PST-taxable under PST-20. Must not be caught by the exemption.
+    expect(storedOrderItemToWaveLine({
+      product_name: "Design – Basic Artwork Setup",
+      qty: 1,
+      unit_price: 40,
+      line_total: 40,
+      category: "SIGN",
+      material_code: "MPHCC020",
+      line_items_json: [{ taxClass: "design_service" }],
+    })).toMatchObject({ applyGst: true, applyPst: true });
+  });
+
+  it("still applies PST to the small order setup fee (category SERVICE, no SVC- code)", () => {
+    expect(storedOrderItemToWaveLine({
+      product_name: "Small order setup fee",
+      qty: 1,
+      unit_price: 5,
+      line_total: 5,
+      category: "SERVICE",
+      material_code: null,
+      line_items_json: [{ taxClass: "printed_good" }],
+    })).toMatchObject({ applyGst: true, applyPst: true });
+  });
 });

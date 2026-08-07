@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isPstExemptCategory } from "@/lib/pricing/tax";
 import {
   approveWaveInvoice,
   createOrFindWaveCustomer,
@@ -20,6 +21,7 @@ interface StoredOrderItem {
   unit_price: unknown;
   line_total: unknown;
   category: unknown;
+  material_code?: unknown;
   line_items_json: unknown;
 }
 
@@ -142,6 +144,15 @@ export function storedOrderItemToWaveLine(item: StoredOrderItem): WaveLineItem {
     throw new Error("Stored order contains an invalid line item");
   }
 
+  // A standalone service SKU (SVC- material code) ships no tangible goods, so it
+  // is GST-only. This must be checked BEFORE the taxClass branch below: taxClass
+  // "design_service" means a design fee bundled into a printed order, which IS
+  // PST-taxable under PST-20 — the opposite of a service sold on its own.
+  // Without this, the Wave invoice billed $44.40 on a $42.00 order.
+  if (isPstExemptCategory(String(item.category ?? ""), item.material_code == null ? null : String(item.material_code))) {
+    return { description, qty, unitPrice, applyGst: true, applyPst: false };
+  }
+
   const taxClass = taxClassFromJson(item.line_items_json);
   const structuredTaxClasses = new Set([
     "printed_good",
@@ -167,7 +178,7 @@ async function loadStoredOrder(supabase: SupabaseClient, orderId: string): Promi
     .select(`
       id, order_number, subtotal, quote_request_id, is_rush, discount_code, discount_amount,
       customers ( name, email ),
-      order_items ( product_name, qty, unit_price, line_total, category, line_items_json )
+      order_items ( product_name, qty, unit_price, line_total, category, material_code, line_items_json )
     `)
     .eq("id", orderId)
     .single();
