@@ -89,7 +89,7 @@ export default function AboutPage() {
           <p className="text-gray-300 text-lg max-w-2xl leading-relaxed">
             True Color Display Printing is a Saskatoon print shop at 216 33rd St W.
             Coroplast signs from $8/sqft, vinyl banners from $8.25/sqft, business cards
-            from $45 for 250, flyers from $45 for 100. In-house designer for $35 flat
+            from $45 for 250, flyers from $45 for 100. In-house designer for $40 flat
             with a same-day proof. Same-day rush +$40 flat on orders before 10 AM.
             We own our presses, employ our own designer, and do every order in-house —
             no outsourcing, no shipping middlemen, just faster turnaround and real accountability.

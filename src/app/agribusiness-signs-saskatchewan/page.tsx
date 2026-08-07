@@ -136,7 +136,7 @@ const descriptionNode = (
     </p>
     <p className="text-gray-600 leading-relaxed mb-10">
       Our in-house designer builds print-ready layouts from your brand guide, a rough sketch, or
-      just a description for $35 flat with same-day proof. No outside designer, no delays.
+      just a description for $40 flat with same-day proof. No outside designer, no delays.
       Standard turnaround is 1\u20133 business days after artwork approval. Local pickup at 216
       33rd St W, Saskatoon. Running a farm or ranch? See{" "}
       <Link href="/agriculture-signs-saskatoon" className="text-[#16C2F3] underline font-medium">
@@ -157,7 +157,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
       subtitle="ACP building signs, trade show displays, and fleet branding for equipment dealers, seed retailers, and ag suppliers."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Agribusiness signs for Saskatchewan equipment dealers and agricultural suppliers"
-      description="Saskatchewan agribusiness companies — equipment dealers, seed retailers, fertilizer suppliers, grain elevators, and agricultural co-ops — rely on True Color Display Printing in Saskatoon for signage that matches the scale of their operations. ACP aluminum building signs from $13/sqft deliver a professional storefront that lasts 10+ years through Saskatchewan weather. Multi-location dealers ordering matching signage for branches in Humboldt, Kindersley, and Weyburn get consistent colour and branding from our in-house Roland UV printer. Trade show season drives the biggest orders — retractable banner stands from $219 (stand + full-colour print included) for Ag in Motion, Canadian Western Agribition, and the Crop Production Show. Vinyl banners from $66 for booth backdrops and outdoor fencing. Ag in Motion in Langham is 15 minutes from our shop — same-day rush (+$40 flat, order before 10 AM) means last-minute booth signage is not a problem. Between shows, seed retailers and fertilizer suppliers need seasonal product flyers updated every spring — 100 double-sided on 80lb gloss for $45. Business cards at 250 for $45 on 14pt gloss keep your sales reps and agronomists professional at every farm visit. Postcards from $35 for 50 handle direct mail campaigns to your customer base. Vehicle magnets from $24/sqft brand delivery trucks and field rep vehicles across the province. Our in-house designer builds print-ready layouts from your brand guide or rough sketch for $35 flat with same-day proof. Standard turnaround is 1–3 business days after artwork approval. Local pickup at 216 33rd St W, Saskatoon."
+      description="Saskatchewan agribusiness companies — equipment dealers, seed retailers, fertilizer suppliers, grain elevators, and agricultural co-ops — rely on True Color Display Printing in Saskatoon for signage that matches the scale of their operations. ACP aluminum building signs from $13/sqft deliver a professional storefront that lasts 10+ years through Saskatchewan weather. Multi-location dealers ordering matching signage for branches in Humboldt, Kindersley, and Weyburn get consistent colour and branding from our in-house Roland UV printer. Trade show season drives the biggest orders — retractable banner stands from $219 (stand + full-colour print included) for Ag in Motion, Canadian Western Agribition, and the Crop Production Show. Vinyl banners from $66 for booth backdrops and outdoor fencing. Ag in Motion in Langham is 15 minutes from our shop — same-day rush (+$40 flat, order before 10 AM) means last-minute booth signage is not a problem. Between shows, seed retailers and fertilizer suppliers need seasonal product flyers updated every spring — 100 double-sided on 80lb gloss for $45. Business cards at 250 for $45 on 14pt gloss keep your sales reps and agronomists professional at every farm visit. Postcards from $35 for 50 handle direct mail campaigns to your customer base. Vehicle magnets from $24/sqft brand delivery trucks and field rep vehicles across the province. Our in-house designer builds print-ready layouts from your brand guide or rough sketch for $40 flat with same-day proof. Standard turnaround is 1–3 business days after artwork approval. Local pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
@@ -174,7 +174,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         "Retractable stands from $219 — complete booth display for Agribition, Ag in Motion, Crop Production Show",
         "Multi-location consistency — same Roland UV printer means matched colour across every branch",
         "Seasonal flyer reprints from $45/100 — spring seed pricing, fall harvest specials, updated every year",
-        "In-house designer ($35 flat, same-day proof) — no print-ready files needed",
+        "In-house designer ($40 flat, same-day proof) — no print-ready files needed",
         "Same-day rush +$40 flat — Ag in Motion is 15 minutes from our shop",
       ]}
       faqs={[
@@ -208,7 +208,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         },
         {
           q: "Do you offer design help for agribusiness signage?",
-          a: "Yes — our in-house Photoshop designer creates print-ready layouts from your brand guide, a logo file, or a rough sketch. Minor edits and standard layouts are $35 flat with same-day proof. Full design from scratch is $50, and logo creation or vectorization is also $50. All artwork files are yours to keep.",
+          a: "Yes — our in-house Photoshop designer creates print-ready layouts from your brand guide, a logo file, or a rough sketch. Minor edits and standard layouts are $40 flat with same-day proof. Full design from scratch is $50, and logo creation or vectorization is also $50. All artwork files are yours to keep.",
         },
       ]}
     />
