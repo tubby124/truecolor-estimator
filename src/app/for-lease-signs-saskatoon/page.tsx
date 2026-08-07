@@ -61,7 +61,7 @@ export default function ForLeaseSignsSaskatoonPage() {
           <p className="text-gray-600 leading-relaxed mb-6">
             H-wire ground stakes are $2.50 each — bring or order them with the sign. For
             post-mounted installations on 4×4 wood posts, drill and zip-tie or use coroplast sign
-            brackets. Our in-house designer handles layouts for $35 flat with a same-day proof —
+            brackets. Our in-house designer handles layouts for $40 flat with a same-day proof —
             send us your brokerage logo, contact info, and a property photo, and a print-ready proof
             comes back the same day. No file? No problem — we build from a sketch or a verbal
             description.
@@ -100,7 +100,7 @@ export default function ForLeaseSignsSaskatoonPage() {
         "4×8 ft coroplast fence panels for strip-mall and industrial vacancies — $232 each",
         "Roland UV in-house printer — colour stays vibrant through Saskatchewan winters",
         "Same-day rush for +$40 flat — order before 10 AM, pickup by end of day",
-        "In-house designer at $35 flat — bring logo + property photo, get a same-day proof",
+        "In-house designer at $40 flat — bring logo + property photo, get a same-day proof",
         "H-wire ground stakes $2.50 each, post-mounting brackets available",
       ]}
       faqs={[
@@ -130,7 +130,7 @@ export default function ForLeaseSignsSaskatoonPage() {
         },
         {
           q: "Can you design a for-lease sign if I don't have a file?",
-          a: "Yes — our in-house designer handles for-lease sign layouts for $35 flat with a same-day proof. Send your brokerage logo, agent contact info, and a property photo, and a print-ready proof comes back the same day. No logo file? We can build from a sketch, a verbal description, or work with whatever you have.",
+          a: "Yes — our in-house designer handles for-lease sign layouts for $40 flat with a same-day proof. Send your brokerage logo, agent contact info, and a property photo, and a print-ready proof comes back the same day. No logo file? We can build from a sketch, a verbal description, or work with whatever you have.",
         },
         {
           q: "Do for-lease signs include H-stakes?",

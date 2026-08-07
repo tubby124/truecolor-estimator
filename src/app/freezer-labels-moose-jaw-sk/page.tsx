@@ -80,7 +80,7 @@ export default function FreezerLabelsMooseJawPage() {
         "Roland TrueVIS VG2 eco-solvent inks cure to a solid film — survives freezer-thaw cycles",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
         "Same-day rush at +$40 flat when ordered before 10 AM",
-        "In-house Photoshop designer: $35 flat for label layout",
+        "In-house Photoshop designer: $40 flat for label layout",
       ]}
       faqs={[
         {
