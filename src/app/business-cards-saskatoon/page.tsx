@@ -6,12 +6,12 @@ import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 export const metadata: Metadata = {
   title: { absolute: "Business Cards Saskatoon | 250 Cards from $45" },
   description:
-    "Business card printing in Saskatoon from $45 for 250 double-sided 14pt gloss cards. Same-day rush +$40, in-house design $35, local pickup.",
+    "Business card printing in Saskatoon from $45 for 250 double-sided 14pt gloss cards. Same-day rush +$40, in-house design $40, local pickup.",
   alternates: { canonical: "/business-cards-saskatoon" },
   openGraph: {
     title: "Business Cards Saskatoon | 250 Cards from $45",
     description:
-      "Business card printing in Saskatoon from $45 for 250 double-sided 14pt gloss cards. Same-day rush +$40, in-house design $35, local pickup.",
+      "Business card printing in Saskatoon from $45 for 250 double-sided 14pt gloss cards. Same-day rush +$40, in-house design $40, local pickup.",
     url: "https://truecolorprinting.ca/business-cards-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -49,7 +49,7 @@ const designDirections = [
   {
     title: "Card Finishes & Formats",
     subtitle:
-      "Standard 3.5×2\" · matte on request · single-sided from $40 — in-house designer $35 flat",
+      "Standard 3.5×2\" · matte on request · single-sided from $40 — in-house designer $40 flat",
     aspect: "3/4" as const,
     maxCols: 2 as const,
     items: [
@@ -105,7 +105,7 @@ Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready i
             <Link href="/graphic-design-saskatoon" className="text-[#16C2F3] underline font-medium">
               In-house designer
             </Link>{" "}
-            handles layout from your logo and contact info for $35 flat with a same-day proof.
+            handles layout from your logo and contact info for $40 flat with a same-day proof.
           </p>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             Pair your cards with{" "}
@@ -149,7 +149,7 @@ Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready i
         "250 double-sided business cards for $45 — cheaper than Staples or FedEx Office, faster turnaround",
         "14pt gloss stock — professional weight and finish, matte available on request",
         "500 for $65, 1000 for $110 — bulk pricing for sales teams and trade shows",
-        "In-house Photoshop designer: bring your logo and info, we build the layout from $35",
+        "In-house Photoshop designer: bring your logo and info, we build the layout from $40",
         "Same-day rush available (+$40 flat) when ordered before 10 AM",
         "Local pickup at 216 33rd St W, Saskatoon — no shipping wait, inspect before you leave",
         "Popular with contractors, real estate agents, tradespeople, and local retailers",
@@ -177,7 +177,7 @@ Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready i
         },
         {
           q: "Do you beat Staples and FedEx Office pricing?",
-          a: "Yes, consistently. 250 double-sided cards at Staples or FedEx Office run $60–$80. We're at $45 — same quality, faster local pickup, and an in-house designer who handles the layout for $35 flat.",
+          a: "Yes, consistently. 250 double-sided cards at Staples or FedEx Office run $60–$80. We're at $45 — same quality, faster local pickup, and an in-house designer who handles the layout for $40 flat.",
         },
         {
           q: "What paper stock options are available for business cards?",
@@ -185,7 +185,7 @@ Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready i
         },
         {
           q: "Can you design and print business cards in one shop in Saskatoon?",
-          a: "Yes — True Color has an in-house designer who builds business card layouts from your logo, headshot, and contact info. Standard layout fee is $35. Proof comes back same day on most jobs. Once approved, cards go straight to press — no emailing files between vendors.",
+          a: "Yes — True Color has an in-house designer who builds business card layouts from your logo, headshot, and contact info. Standard layout fee is $40. Proof comes back same day on most jobs. Once approved, cards go straight to press — no emailing files between vendors.",
         },
       ]}
     />

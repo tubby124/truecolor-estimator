@@ -39,7 +39,7 @@ const descriptionNode = (
       taproom.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed">
-      Our in-house designer works with craft brand aesthetics for $35 flat with a same-day proof
+      Our in-house designer works with craft brand aesthetics for $40 flat with a same-day proof
       — whether your brand is rustic-industrial, bright-modern, or minimalist. We keep your
       brand files on record for fast reorders when the next seasonal batch drops. Need stickers
       for your brand?{" "}
@@ -70,7 +70,7 @@ export default function BrewerySaskatoonPage() {
       subtitle="Taproom banners, beer brand stickers, and event signage for Saskatoon craft breweries and distilleries."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Vinyl banners, stickers, and taproom signage for Saskatoon craft breweries printed by True Color Display Printing"
-      description="Saskatoon craft breweries, taprooms, and distilleries rely on True Color for fast-turnaround signage that keeps up with seasonal launches and tap events. Vinyl banners from $8.25/sqft — 3×6\' taproom banner $135, grommets included. Beer brand stickers 250 for $325 on our Roland UV printer. Window decals from $11/sqft for taproom storefront branding. Retractable stands from $219 for events and tap takeovers. In-house designer $35 flat, same-day proof. Same-day rush +$40 flat. Pickup at 216 33rd St W, Saskatoon."
+      description="Saskatoon craft breweries, taprooms, and distilleries rely on True Color for fast-turnaround signage that keeps up with seasonal launches and tap events. Vinyl banners from $8.25/sqft — 3×6\' taproom banner $135, grommets included. Beer brand stickers 250 for $325 on our Roland UV printer. Window decals from $11/sqft for taproom storefront branding. Retractable stands from $219 for events and tap takeovers. In-house designer $40 flat, same-day proof. Same-day rush +$40 flat. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
@@ -112,7 +112,7 @@ export default function BrewerySaskatoonPage() {
         },
         {
           q: "Can you design taproom signage if we only have a logo file?",
-          a: "Yes — our in-house designer creates taproom signage, tap list boards, and event banners from your logo file for $35 flat with a same-day proof. Bring your brand colours, any specific messaging (beer names, ABV, event details), and any reference images for style direction. We handle the rest.",
+          a: "Yes — our in-house designer creates taproom signage, tap list boards, and event banners from your logo file for $40 flat with a same-day proof. Bring your brand colours, any specific messaging (beer names, ABV, event details), and any reference images for style direction. We handle the rest.",
         },
         {
           q: "What retractable banner setup works best for a Saskatchewan craft market or festival booth?",
