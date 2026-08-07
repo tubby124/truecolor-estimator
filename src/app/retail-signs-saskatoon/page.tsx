@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Retail Signs Saskatoon | Banners & Decals | True Color" },
   description:
-    "Vinyl banners, window decals, coroplast signs, and flyers for Saskatoon retailers. From $8/sqft. Same-day rush available. In-house designer $35 flat.",
+    "Vinyl banners, window decals, coroplast signs, and flyers for Saskatoon retailers. From $8/sqft. Same-day rush available. In-house designer $40 flat.",
   alternates: { canonical: "/retail-signs-saskatoon" },
   openGraph: {
     title: "Retail Signs Saskatoon | True Color Display Printing",
@@ -25,7 +25,7 @@ export default function RetailSignsSaskatoonPage() {
       subtitle="Banners, window graphics, and promo print for Saskatoon boutiques, pharmacies, and gift shops — 1–3 business days, local pickup at 216 33rd St W."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Retail store signage and banners printed in Saskatoon"
-      description="When you need retail signage before the weekend sale, you can't wait on shipping. Saskatoon boutiques, pharmacies, gift shops, and convenience stores get banners, window decals, coroplast signs, and flyers printed in-house at True Color. Vinyl banners from $8.25/sqft with grommets included. Standard turnaround 1–3 business days. Same-day rush +$40 flat. In-house designer $35 flat with same-day proof. Roland UV in-house — consistent colour, no outsourcing."
+      description="When you need retail signage before the weekend sale, you can't wait on shipping. Saskatoon boutiques, pharmacies, gift shops, and convenience stores get banners, window decals, coroplast signs, and flyers printed in-house at True Color. Vinyl banners from $8.25/sqft with grommets included. Standard turnaround 1–3 business days. Same-day rush +$40 flat. In-house designer $40 flat with same-day proof. Roland UV in-house — consistent colour, no outsourcing."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -42,7 +42,7 @@ export default function RetailSignsSaskatoonPage() {
           <p className="text-gray-600 leading-relaxed">
             Order before 10 AM and same-day rush gets your signs ready by end of business
             for <strong>+$40 flat</strong>. Our in-house designer sets up your artwork for{" "}
-            <strong>$35 flat</strong> with a same-day proof — bring your logo, a rough layout
+            <strong>$40 flat</strong> with a same-day proof — bring your logo, a rough layout
             idea, or just your brand colours and we handle the rest. For storefront window
             promotions, our{" "}
             <Link
@@ -84,7 +84,7 @@ export default function RetailSignsSaskatoonPage() {
         "Coroplast signs from $8/sqft — seasonal sales, parking, A-frame inserts ($24 for 18×24\")",
         "Window decals from $11/sqft — removable without residue, update your storefront every season",
         "Colours stay consistent across every reprint — we run Roland UV in-house, so there's no outsourcing",
-        "Bring a logo or a rough idea — our in-house designer builds your artwork for $35 flat, same-day proof",
+        "Bring a logo or a rough idea — our in-house designer builds your artwork for $40 flat, same-day proof",
         "Pick up at 216 33rd St W, Saskatoon — no shipping, no waiting on couriers",
       ]}
       faqs={[
@@ -110,7 +110,7 @@ export default function RetailSignsSaskatoonPage() {
         },
         {
           q: "Do I need to bring print-ready artwork?",
-          a: "No — our in-house designer handles layout and artwork preparation for $35 flat with a same-day proof. You can bring a logo file, a rough sketch, or just describe what you need. We use in-house Photoshop and can work from almost any starting point.",
+          a: "No — our in-house designer handles layout and artwork preparation for $40 flat with a same-day proof. You can bring a logo file, a rough sketch, or just describe what you need. We use in-house Photoshop and can work from almost any starting point.",
         },
       ]}
     />

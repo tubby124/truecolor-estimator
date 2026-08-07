@@ -26,7 +26,7 @@ export default function PropertyManagementSignsPage() {
       subtitle="For-rent signs, parking notices, and permanent exterior signage for Saskatoon properties."
       heroImage="/images/products/heroes/realestate-hero-1200x500.webp"
       heroAlt="Property management signs Saskatoon"
-      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $8/sqft (18×24&quot; = $24, single signs top up to the $25 order-total minimum at checkout), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $13/sqft. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="A vacant unit costs more per day than a for-rent sign. Saskatoon property managers order coroplast for-rent signs from $8/sqft (18×24&quot; = $24, single signs top up to the $25 order-total minimum at checkout), no-trespassing and reserved parking notices, and permanent ACP aluminum building signs from $13/sqft. Order 5 or more coroplast signs and save 8% — no code needed. We print in-house on our Roland UV — colour stays vibrant and weather-rated through Saskatchewan winters. Standard turnaround 1–3 business days. Same-day rush +$40 flat, order before 10 AM. In-house designer $40 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -73,7 +73,7 @@ export default function PropertyManagementSignsPage() {
           <p className="text-gray-600 leading-relaxed">
             Need your company logo on fleet or maintenance trucks? Vehicle magnets start at $24/sqft
             and remove cleanly when staff are off duty. Our in-house designer handles your layouts
-            for $35 flat — bring your logo and copy, and a proof comes back the same day.
+            for $40 flat — bring your logo and copy, and a proof comes back the same day.
             Call (306) 954-8688 or use the instant quote tool to price your full signage package.
             Pickup at 216 33rd St W, Saskatoon.
           </p>
@@ -92,7 +92,7 @@ export default function PropertyManagementSignsPage() {
         "ACP aluminum from $13/sqft for parking lot, entrance, and regulation signs that last decades",
         "Roland UV in-house printer — colour stays vibrant and weather-rated through Saskatchewan winters",
         "Same-day rush for $40 flat — sign up before the weekend, order before 10 AM",
-        "In-house designer at $35 flat — no-trespassing, reserved parking, and building ID layouts, same-day proof",
+        "In-house designer at $40 flat — no-trespassing, reserved parking, and building ID layouts, same-day proof",
         "Vinyl banners from $66 (2×4\') for leasing events and show-suite weekends — grommets included",
         "Vehicle magnets from $24/sqft for property management fleet trucks — remove on weekends",
       ]}
