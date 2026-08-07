@@ -311,3 +311,71 @@ Post-apply `sync-plan.mjs` re-diff: **zero**. Validator VALIDATED, 96/96 ads tes
 all three days while competitor queries (`print baron saskatoon`, `mister print saskatoon`,
 `77 signs saskatoon`) draw impressions on Core instead. That is both a routing fault and the
 untapped delivery capacity the pacing gap needs. Diagnose after the learning week.
+
+---
+
+## 2026-08-07 PM — CompetitorConquest zero-delivery diagnosis: the fix already shipped yesterday
+
+Diagnosed the open item from this morning's entry ahead of schedule because zero delivery on an
+ENABLED campaign smelled like a fault. It mostly wasn't. Full-stack live read (campaign, ad
+group, ad, keyword, criterion, change_event layers) via a scratchpad read-only script against
+`gaql-read.mjs`. **No mutation applied — the evidence says wait, so nothing was touched.**
+
+**Hypotheses tested, in order:**
+
+1. **Status/approval suppression — REFUTED.** Campaign ENABLED/SERVING/LEARNING
+   (`BIDDING_STRATEGY_LEARNING` only). All 21 RSAs `REVIEWED`/`APPROVED`/`ELIGIBLE` — including
+   all nine shared-payload conquest ads. All 13 positive keywords ENABLED/ELIGIBLE, zero
+   `LOW_SEARCH_VOLUME` flags. Live CPC ceiling confirmed 2,500,000 micros = CA$2.50. Geo is
+   PRESENCE + 35km proximity, Google Search only, all devices, English. Landing page
+   `/why-true-color?source=google-ads` re-verified HTTP 200 today. Nothing is suppressing this
+   campaign.
+
+2. **CPC ceiling too low (lost IS rank) — UNTESTABLE, not confirmed.** A campaign with zero
+   impressions has **no impression-share rows at all** — the metric that would prove
+   rank-loss cannot exist yet. Anyone raising the ceiling today would be bidding against a
+   number that does not exist. Blocked anyway by the learning-week discipline in this
+   morning's entry.
+
+3. **Core absorbing the traffic — TRUE, and already fixed.** `change_event` shows the four
+   2026-08-06 harvest keywords (`print baron saskatoon`, `mister print saskatoon`,
+   `labels made easy`, `vista print`) were created on Competitor at **Aug 6 15:57** and their
+   PHRASE routing negatives on Core at **Aug 6 15:58**. Every observed leak — `print baron
+   saskatoon` (3 imp), `mister print saskatoon` (1), `labels made easy` (2), `vista print
+   banner` (1) — is dated **Aug 6, before that sync**. Aug 7 search terms on Core: **zero
+   competitor-brand queries**. The leak this morning's entry flagged was a timing artifact of
+   the harvest itself, not a live routing fault. All 13 competitor terms verified present as
+   live PHRASE negatives on Core.
+
+4. **Near-zero volume — SUPPORTED for the original 9, refuted for the new 4.** Three delivering
+   days produced zero observable queries for qwik-signs/minuteman/ink-house/rayacom/24-hour/
+   anytime/pgi/staples/vistaprint anywhere (their Core negatives existed from launch, and no
+   close variant leaked into Core's search terms either). Meanwhile the new 4 have **proven
+   demand** — 7 impressions on Aug 6 alone. The conquest opportunity is concentrated in the
+   terms harvested from real search-term data, which is exactly what the "never from planner
+   guesses" rule predicts.
+
+**Conclusion: there is no fix to make today.** The routing fix shipped Aug 6 15:58; the
+campaign has had barely one day of fair eligibility on the only terms with proven volume.
+Pausing now would kill the test one day after it started being a test. Bidding changes now
+would confound the routing fix and violate change-one-thing-per-day.
+
+**Decision gate (earliest ~2026-08-12, after the learning week):**
+- If Competitor has impressions by then → IS rows exist → read lost IS (rank) and evaluate the
+  CA$2.50 ceiling on evidence.
+- If still zero impressions AND Core's search terms stay clean of competitor queries → the
+  proven-volume terms went dark too; conclude thin volume and pause the campaign rather than
+  manufacture delivery (broadening is blocked by contract).
+- The original 9 groups cost nothing while idle; no reason to prune them before the gate.
+
+**Also observed, deliberately left alone:** `77 signs saskatoon` (1 imp on Core, untargeted
+competitor). One impression is not evidence; adding a conquest target is a contract change
+that should ride the next harvest cadence if the query recurs.
+
+**Verification chain (clean state confirmed, no apply):** validator VALIDATED / errors [],
+96/96 ads tests, 8 artifacts deterministic, `sync-plan` re-diff zero including asset/destination
+drift.
+
+**Promoted to rule:** a zero-impression campaign produces **no** lost-IS data — "check lost IS
+rank" is only a valid instruction after the first impression exists. Absence of IS rows is
+itself the finding: the campaign never entered a recorded auction.
