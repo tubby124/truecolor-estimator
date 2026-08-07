@@ -2,10 +2,49 @@ import { describe, expect, it, vi } from "vitest";
 import {
   buildGoogleTagBootstrapScript,
   deriveGoogleAdsTagId,
+  normalizeGoogleAdsTagId,
   prepareEnhancedConversionEmail,
   prepareGoogleAdsPurchase,
   sendGoogleAdsPurchase,
 } from "../google-ads";
+
+const configuredAdsTags = (script: string): string[] => {
+  const fakeWindow: { dataLayer?: IArguments[] } = {};
+  Function("window", script)(fakeWindow);
+  return (fakeWindow.dataLayer ?? [])
+    .map((args) => Array.from(args))
+    .filter((args) => args[0] === "config" && String(args[1]).startsWith("AW-"))
+    .map((args) => String(args[1]));
+};
+
+describe("account-level Google Ads tag ID", () => {
+  it("configures the Ads tag with no conversion label present", () => {
+    // The real 2026-08-07 state: tag installed, no purchase label issued yet. Before
+    // this, no label meant no Ads tag at all and the site ran GA4-only.
+    expect(configuredAdsTags(buildGoogleTagBootstrapScript(undefined, "AW-18330693756")))
+      .toEqual(["AW-18330693756"]);
+  });
+
+  it("rejects anything that is not AW-digits instead of escaping it", () => {
+    // This value is interpolated into an inline <script>; validation is the boundary.
+    expect(normalizeGoogleAdsTagId("AW-123');alert(1)//")).toBeNull();
+    expect(normalizeGoogleAdsTagId("GT-MBHWQPCJ")).toBeNull();
+    expect(normalizeGoogleAdsTagId("G-6HMQT7MNLL")).toBeNull();
+    expect(normalizeGoogleAdsTagId("AW-123456789/label")).toBeNull();
+    expect(normalizeGoogleAdsTagId(" AW-18330693756 ")).toBe("AW-18330693756");
+    expect(configuredAdsTags(buildGoogleTagBootstrapScript(undefined, "AW-1');alert(1)//"))).toEqual([]);
+  });
+
+  it("configures the same account once when tag ID and label agree", () => {
+    expect(configuredAdsTags(buildGoogleTagBootstrapScript("AW-18330693756/lbl", "AW-18330693756")))
+      .toEqual(["AW-18330693756"]);
+  });
+
+  it("keeps the label-derived tag working when no explicit tag ID is set", () => {
+    expect(configuredAdsTags(buildGoogleTagBootstrapScript("AW-123456789/label", undefined)))
+      .toEqual(["AW-123456789"]);
+  });
+});
 
 describe("Google Ads purchase conversion", () => {
   it("queues a purchase before the external Google tag library loads", async () => {

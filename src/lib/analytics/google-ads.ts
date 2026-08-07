@@ -41,9 +41,39 @@ export function deriveGoogleAdsTagId(conversionLabel: string | undefined): strin
   return label.slice(0, label.indexOf("/"));
 }
 
-export function buildGoogleTagBootstrapScript(conversionLabel: string | undefined): string {
-  const googleAdsTagId = deriveGoogleAdsTagId(conversionLabel);
-  const adsConfig = googleAdsTagId ? `window.gtag('config','${googleAdsTagId}');` : "";
+/**
+ * The account-level Google Ads tag ID (e.g. "AW-18330693756"), independent of any
+ * per-conversion-action label.
+ *
+ * This exists because the tag and the label answer different questions. The label
+ * belongs to ONE conversion action; the tag ID is what puts Google Ads on the page at
+ * all — which is the prerequisite for enhanced conversions for leads and remarketing,
+ * neither of which involves a purchase label. Deriving the tag from the label meant no
+ * label, no tag, so the site ran with GA4 only.
+ *
+ * Validated with the same strictness as the label: this value is interpolated into an
+ * inline <script>, so anything but AW-digits is rejected rather than escaped.
+ */
+const TAG_ID_RE = /^AW-\d+$/;
+
+export function normalizeGoogleAdsTagId(tagId: string | undefined): string | null {
+  const trimmed = tagId?.trim();
+  if (!trimmed || !TAG_ID_RE.test(trimmed)) return null;
+  return trimmed;
+}
+
+export function buildGoogleTagBootstrapScript(
+  conversionLabel: string | undefined,
+  tagId?: string | undefined,
+): string {
+  // Either source can supply the tag. Prefer the explicit tag ID; fall back to the one
+  // implied by a conversion label so existing deployments keep working unchanged.
+  const explicitTagId = normalizeGoogleAdsTagId(tagId);
+  const labelTagId = deriveGoogleAdsTagId(conversionLabel);
+  // A Set keeps this correct when both are set to the same account — configuring the
+  // same destination twice is harmless but noisy in tag diagnostics.
+  const adsTagIds = [...new Set([explicitTagId, labelTagId].filter((id): id is string => id !== null))];
+  const adsConfig = adsTagIds.map((id) => `window.gtag('config','${id}');`).join("");
   return `window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};window.gtag('js',new Date());window.gtag('config','${GA4_MEASUREMENT_ID}');${adsConfig}`;
 }
 

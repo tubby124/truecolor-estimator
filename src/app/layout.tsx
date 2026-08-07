@@ -270,6 +270,9 @@ const founderSchema = {
 
 const googleTagBootstrapScript = buildGoogleTagBootstrapScript(
   process.env.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL,
+  // Account-level Google Ads tag (AW-18330693756). One gtag.js load below serves every
+  // configured destination, so the Ads tag needs a config call here, not a second script.
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_TAG_ID,
 );
 
 export default function RootLayout({
