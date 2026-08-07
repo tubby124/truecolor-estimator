@@ -132,7 +132,7 @@ const descriptionNode = (
       start from $25 for 25 die-cut vinyl stickers (2\u00d72\u201d) or from $60 (4\u00d74\u201d).
     </p>
     <p className="text-gray-600 leading-relaxed mb-10">
-      Our in-house designer handles layout for $35 flat with same-day proof — bring your farm logo
+      Our in-house designer handles layout for $40 flat with same-day proof — bring your farm logo
       or have us create one. Same-day rush is available for +$40 flat on orders placed before 10
       AM. Standard turnaround is 1\u20133 business days after artwork approval. Local Saskatoon
       pickup at 216 33rd St W means no shipping delays before the season starts. See also:{" "}
@@ -154,7 +154,7 @@ export default function AgricultureSignsSaskatoonPage() {
       subtitle="Farm gate signs, plot markers, trade show banners, and truck magnets — printed in Saskatoon on our Roland UV."
       heroImage="/images/products/heroes/agriculture-hero-1200x500.webp"
       heroAlt="Saskatchewan farm and agriculture signs printed by True Color Display Printing in Saskatoon"
-      description="Saskatchewan agriculture businesses use True Color Display Printing for everything from coroplast farm gate signs and acreage markers to trade show banners and truck door magnets. Our in-house Roland UV printer produces weatherproof signage that handles prairie winters, spring mud, and summer sun without fading or peeling. Coroplast signs start at $8/sqft (small jobs hit the $25 order-total minimum at checkout) — the standard for field plot markers, for-sale signs, and gate identification across Saskatchewan farmland. Vinyl banners from $66 work for Agribition booths, dealer days, and seasonal promotions. Vehicle magnets from $24/sqft turn farm trucks and equipment sales vehicles into mobile advertising across rural Saskatchewan. Business cards at 250 for $45 keep ag reps, seed dealers, and farm owners professional at every handshake. Saskatchewan farms with employees are required to post OHS safety notices under the Saskatchewan Employment Act — biosecurity signs at livestock operation entrances, restricted access warnings, and cattle crossing hazard signs are standard orders at True Color. Flyers from $45 and postcards from $35 handle seed catalogs, seasonal direct mail, and co-op promotions. Equipment branding stickers start from $25 for 25 die-cut vinyl stickers. Our in-house designer handles layout for $35 flat with same-day proof — bring your farm logo or have us create one. Same-day rush is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Local Saskatoon pickup at 216 33rd St W means no shipping delays before the season starts."
+      description="Saskatchewan agriculture businesses use True Color Display Printing for everything from coroplast farm gate signs and acreage markers to trade show banners and truck door magnets. Our in-house Roland UV printer produces weatherproof signage that handles prairie winters, spring mud, and summer sun without fading or peeling. Coroplast signs start at $8/sqft (small jobs hit the $25 order-total minimum at checkout) — the standard for field plot markers, for-sale signs, and gate identification across Saskatchewan farmland. Vinyl banners from $66 work for Agribition booths, dealer days, and seasonal promotions. Vehicle magnets from $24/sqft turn farm trucks and equipment sales vehicles into mobile advertising across rural Saskatchewan. Business cards at 250 for $45 keep ag reps, seed dealers, and farm owners professional at every handshake. Saskatchewan farms with employees are required to post OHS safety notices under the Saskatchewan Employment Act — biosecurity signs at livestock operation entrances, restricted access warnings, and cattle crossing hazard signs are standard orders at True Color. Flyers from $45 and postcards from $35 handle seed catalogs, seasonal direct mail, and co-op promotions. Equipment branding stickers start from $25 for 25 die-cut vinyl stickers. Our in-house designer handles layout for $40 flat with same-day proof — bring your farm logo or have us create one. Same-day rush is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Local Saskatoon pickup at 216 33rd St W means no shipping delays before the season starts."
       descriptionNode={descriptionNode}
       products={[
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
@@ -169,7 +169,7 @@ export default function AgricultureSignsSaskatoonPage() {
         "Trade show banners and retractable stands for Agribition, Ag in Motion, and Crop Production Show",
         "Truck door magnets from $24/sqft — removable, no paint damage, sticks to steel at highway speed",
         "Biosecurity and OHS safety signs — compliance signage for livestock operations and farm yards",
-        "In-house designer ($35 flat, same-day proof) — bring a logo or rough sketch",
+        "In-house designer ($40 flat, same-day proof) — bring a logo or rough sketch",
         "Same-day rush +$40 flat when ordered before 10 AM — call (306) 954-8688 to confirm",
       ]}
       faqs={[
@@ -203,7 +203,7 @@ export default function AgricultureSignsSaskatoonPage() {
         },
         {
           q: "Can I get banners and signs designed if I don\u2019t have a logo?",
-          a: "Yes \u2014 our in-house Photoshop designer handles layouts from a rough sketch, description, or brand guide for $35 flat. Logo creation or vectorization is $50. Most proofs come back same day. Design and print happen in the same building \u2014 no files moving between vendors.",
+          a: "Yes \u2014 our in-house Photoshop designer handles layouts from a rough sketch, description, or brand guide for $40 flat. Logo creation or vectorization is $50. Most proofs come back same day. Design and print happen in the same building \u2014 no files moving between vendors.",
         },
       ]}
     />

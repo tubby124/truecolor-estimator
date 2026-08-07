@@ -168,7 +168,7 @@ export default function BannerPrintingSaskatoonPage() {
         },
         {
           q: "Can I get a banner designed and printed at the same shop?",
-          a: "Yes — True Color has an in-house Photoshop designer who handles banner layouts from a rough brief, logo file, or description. Standard layout fee is $35. Most proofs come back same day. Design and print happen in the same building — no files moving between vendors, no delays.",
+          a: "Yes — True Color has an in-house Photoshop designer who handles banner layouts from a rough brief, logo file, or description. Standard layout fee is $40. Most proofs come back same day. Design and print happen in the same building — no files moving between vendors, no delays.",
         },
       ]}
     />
