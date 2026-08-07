@@ -161,7 +161,7 @@ export default function GalleryPage() {
               },
               {
                 q: "What file format do I need for printing?",
-                a: "We accept PDF, AI, EPS, PSD, PNG, and JPG files. For best results, send vector files (PDF or AI) at full size with 0.125\u201d bleed. No file? Our in-house designer creates print-ready artwork from sketches or low-res images for $35 flat.",
+                a: "We accept PDF, AI, EPS, PSD, PNG, and JPG files. For best results, send vector files (PDF or AI) at full size with 0.125\u201d bleed. No file? Our in-house designer creates print-ready artwork from sketches or low-res images for $40 flat.",
               },
             ].map(({ q, a }) => (
               <details key={q} className="group border border-gray-100 rounded-xl">
