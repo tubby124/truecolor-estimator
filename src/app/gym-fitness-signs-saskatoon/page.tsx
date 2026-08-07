@@ -30,7 +30,7 @@ const descriptionNode = (
     without the cost of a permanent wall installation — swap them out each quarter for $10/sqft.
     Window decals turn your storefront glass into a second billboard: price lists, class times,
     brand accent panels — all from $11/sqft. Need artwork? Our in-house Photoshop designer
-    handles it for $35 flat with a same-day proof — no outside agency, no back-and-forth
+    handles it for $40 flat with a same-day proof — no outside agency, no back-and-forth
     delays. We print your order same-day for +$40 flat when you place it before 10 AM. Walk in
     at 216 33rd St W, Saskatoon.{" "}
     See{" "}
@@ -60,7 +60,7 @@ export default function GymFitnessSignsSaskatoonPage() {
       subtitle="Make opening week count — grand opening banners from $66, class boards, and membership signage printed in-house and ready to hang."
       heroImage="/images/products/heroes/sports-hero-1200x500.webp"
       heroAlt="Vinyl banners and window decals for Saskatoon gyms and fitness studios printed by True Color Display Printing"
-      description="Opening week at a Saskatoon gym is your highest-visibility moment — and the signage needs to match. Grand opening vinyl banners start at $66 for 2×4 ft with grommets included. Colours stay vivid with our in-house Roland UV printer — bold gym palettes in neon greens, deep blacks, and high-contrast reds that hold outdoors for 3–5 years. Retractable banners from $219, foamboard class schedule boards from $10/sqft, and window decals from $11/sqft complete the kit. In-house designer $35 flat, same-day proof. Rush +$40."
+      description="Opening week at a Saskatoon gym is your highest-visibility moment — and the signage needs to match. Grand opening vinyl banners start at $66 for 2×4 ft with grommets included. Colours stay vivid with our in-house Roland UV printer — bold gym palettes in neon greens, deep blacks, and high-contrast reds that hold outdoors for 3–5 years. Retractable banners from $219, foamboard class schedule boards from $10/sqft, and window decals from $11/sqft complete the kit. In-house designer $40 flat, same-day proof. Rush +$40."
       descriptionNode={descriptionNode}
       products={[
         { name: "Vinyl Banners", from: "2×4 ft from $66", slug: "vinyl-banners" },
@@ -76,7 +76,7 @@ export default function GymFitnessSignsSaskatoonPage() {
         "Retractable banners from $219 — membership packages sell better with a visual at reception than a brochure on a shelf",
         "Quarter-swap class schedule boards from $10/sqft — update your lobby display without touching the wall",
         "Window decals from $11/sqft — your storefront glass does double duty as branded street-facing advertising",
-        "In-house Photoshop designer — $35 flat, same-day proof, your artwork matched without an outside agency",
+        "In-house Photoshop designer — $40 flat, same-day proof, your artwork matched without an outside agency",
         "We print your order same-day for +$40 flat — place it before 10 AM, pick it up at 216 33rd St W, Saskatoon",
       ]}
       faqs={[
@@ -86,11 +86,11 @@ export default function GymFitnessSignsSaskatoonPage() {
         },
         {
           q: "What signage does a new CrossFit box or martial arts studio typically need?",
-          a: "Most new fitness studios order a combination of: one outdoor grand opening banner (3×6 ft, $135), one or two retractable banners for reception ($219–$349), window decals for the storefront glass ($11/sqft, with small jobs topped up to the $25 order-total minimum at checkout), and a foamboard class schedule board for the lobby (from $10/sqft). Our designer bundles the artwork across all pieces for $35 flat.",
+          a: "Most new fitness studios order a combination of: one outdoor grand opening banner (3×6 ft, $135), one or two retractable banners for reception ($219–$349), window decals for the storefront glass ($11/sqft, with small jobs topped up to the $25 order-total minimum at checkout), and a foamboard class schedule board for the lobby (from $10/sqft). Our designer bundles the artwork across all pieces for $40 flat.",
         },
         {
           q: "Can you match my gym's brand colours exactly?",
-          a: "Yes — our Roland UV printer reproduces Pantone-accurate colours. Send your brand guide or existing logo files and our in-house designer matches them. If you have a reference printed piece, bring it in and we colour-match on the press. Design fee is $35 flat per project.",
+          a: "Yes — our Roland UV printer reproduces Pantone-accurate colours. Send your brand guide or existing logo files and our in-house designer matches them. If you have a reference printed piece, bring it in and we colour-match on the press. Design fee is $40 flat per project.",
         },
         {
           q: "How do retractable banners work for a fitness studio lobby?",
