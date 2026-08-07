@@ -116,7 +116,7 @@ export default function SameDayPrintingSaskatoonPage() {
         },
         {
           q: "What if I don't have a print-ready file?",
-          a: "Our in-house designer can prep your file on the spot starting at $35. Bring a logo (any quality), a sketch, or a reference photo. Design turnaround is usually under 2 hours for simple layouts.",
+          a: "Our in-house designer can prep your file on the spot for $40 flat. Bring a logo (any quality), a sketch, or a reference photo. Design turnaround is usually under 2 hours for simple layouts.",
         },
         {
           q: "Do you offer same-day delivery in Saskatoon?",

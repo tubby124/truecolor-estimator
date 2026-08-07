@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Logo Vectorization Regina SK | From $50 | True Color" },
+  title: { absolute: "Logo Vectorization Regina SK | $40 Flat | True Color" },
   description:
     "Convert raster JPG/PNG logos to scalable vector AI/EPS/SVG/PDF for Regina businesses. From $40 flat per logo. Print-ready at any size. Same-day delivery.",
   alternates: { canonical: "/logo-vectorization-regina" },
@@ -23,7 +23,7 @@ export default function LogoVectorizationReginaPage() {
       canonicalSlug="logo-vectorization-regina"
       primaryProductSlug="stickers"
       title="Logo Vectorization — Regina SK"
-      subtitle="Convert raster logos to scalable vector files for Regina businesses. From $50. Same-day digital delivery."
+      subtitle="Convert raster logos to scalable vector files for Regina businesses. $40 flat. Same-day digital delivery."
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"
       heroAlt="Logo vectorization service for Regina SK businesses by True Color Display Printing"
       description={
@@ -80,7 +80,7 @@ export default function LogoVectorizationReginaPage() {
         "True vector output — scalable from business card to billboard without loss",
         "Output formats: AI, EPS, SVG, PDF, vector PNG — covers every Regina sign, print, embroidery vendor",
         "Same-business-day digital delivery to Regina — no courier required",
-        "$40 flat per simple logo — complex gradient/photo logos quoted +$25–$50",
+        "$40 flat per logo — gradients, photo elements, and 6+ colours included",
         "Preview before final delivery — verify the vector matches your raster",
         "Combine with True Color print job for one workflow (one designer, one quality bar)",
         "Rush (under 4 hours) available at +$40 flat",
@@ -89,7 +89,7 @@ export default function LogoVectorizationReginaPage() {
       faqs={[
         {
           q: "How much does logo vectorization cost in Regina?",
-          a: "$40 flat per simple logo (text + basic shapes, 1–4 colours). Complex logos with gradients, photo-realistic elements, or 6+ colours quoted +$25–$50 depending on detail. Rush (under 4 hours) +$40 flat. No shipping — digital delivery.",
+          a: "$40 flat per simple logo (text + basic shapes, 1–4 colours). Complex logos with gradients, photo-realistic elements, or 6+ colours are included at the same $40. Rush (under 4 hours) +$40 flat. No shipping — digital delivery.",
         },
         {
           q: "What file formats will I get back?",
@@ -109,7 +109,7 @@ export default function LogoVectorizationReginaPage() {
         },
         {
           q: "Can you vectorize a complex logo with gradients or photo elements?",
-          a: "Yes — complex logos with gradients, photo-realistic elements, or 6+ colours add $25–$50 depending on detail. We'll quote the upcharge before starting. Send the file and we'll review and confirm pricing within 1 hour.",
+          a: "Yes — complex logos with gradients, photo-realistic elements, or 6+ colours are included at the same $40. No complexity upcharge. Send the file and we'll review and confirm pricing within 1 hour.",
         },
       ]}
       relatedCities={[
