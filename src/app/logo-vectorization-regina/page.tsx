@@ -69,7 +69,7 @@ export default function LogoVectorizationReginaPage() {
         </>
       }
       products={[
-        { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
+        { name: "Logo Vectorization", from: "$40 flat", slug: "logo-vectorization" },
         { name: "Image Upscaling", from: "$20 flat", slug: "image-upscale" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
