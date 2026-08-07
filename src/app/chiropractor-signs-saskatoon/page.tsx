@@ -38,7 +38,7 @@ const descriptionNode = (
       ordered before 10 AM.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed">
-      Our in-house designer handles all layout for $35 flat with a same-day proof — from referral
+      Our in-house designer handles all layout for $40 flat with a same-day proof — from referral
       card design to window decal sizing. Window decals from $11/sqft make your storefront
       identifiable from the street. For broader healthcare signage context,{" "}
       <Link
@@ -68,7 +68,7 @@ export default function ChiropractorSignsSaskatoonPage() {
       subtitle="Reception displays, referral cards, and retractable banners for Saskatoon chiropractic and wellness clinics."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Foamboard displays and retractable banners for Saskatoon chiropractic and physiotherapy clinics printed by True Color Display Printing"
-      description="New patients decide whether to come back before they sit down — your reception signage is part of that first impression. Foamboard displays from $10/sqft for service menus and seasonal promos. Retractable banners from $219 for reception areas and health fairs. Business cards 250 for $45 — the backbone of a referral program. Window decals from $11/sqft for storefront visibility. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="New patients decide whether to come back before they sit down — your reception signage is part of that first impression. Foamboard displays from $10/sqft for service menus and seasonal promos. Retractable banners from $219 for reception areas and health fairs. Business cards 250 for $45 — the backbone of a referral program. Window decals from $11/sqft for storefront visibility. In-house designer $40 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "Foamboard Displays", from: "from $10/sqft", slug: "foamboard-displays" },
@@ -84,7 +84,7 @@ export default function ChiropractorSignsSaskatoonPage() {
         "250 referral business cards for $45 — print a batch per practitioner so every patient leaves with one",
         "Window decals from $11/sqft — patients spot your clinic from the street before they look it up",
         "New patient promo flyers — 100 copies for $45 on gloss stock, ready in 1–3 business days",
-        "In-house designer $35 flat — referral card layout, service menu design, same-day proof",
+        "In-house designer $40 flat — referral card layout, service menu design, same-day proof",
         "Same-day rush +$40 flat — order before 10 AM for same-day completion",
       ]}
       faqs={[
@@ -106,7 +106,7 @@ export default function ChiropractorSignsSaskatoonPage() {
         },
         {
           q: "Can you design a service menu display for our clinic's treatment offerings?",
-          a: "Yes — our in-house designer builds service menu layouts for $35 flat with a same-day proof. Bring your treatment list, pricing (if displayed), and brand colours. We size the layout for your reception wall space and prepare it for foam board printing. Standard turnaround 1–3 business days.",
+          a: "Yes — our in-house designer builds service menu layouts for $40 flat with a same-day proof. Bring your treatment list, pricing (if displayed), and brand colours. We size the layout for your reception wall space and prepare it for foam board printing. Standard turnaround 1–3 business days.",
         },
         {
           q: "What window decal options work for a physiotherapy or massage clinic?",
