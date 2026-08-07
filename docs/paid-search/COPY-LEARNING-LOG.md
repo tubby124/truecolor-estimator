@@ -379,3 +379,47 @@ drift.
 **Promoted to rule:** a zero-impression campaign produces **no** lost-IS data — "check lost IS
 rank" is only a valid instruction after the first impression exists. Absence of IS rows is
 itself the finding: the campaign never entered a recorded auction.
+
+---
+
+## 2026-08-07 PM (2) — GA4 was polluted 5:1 by our own e2e suite; funnel read is now clean
+
+**The find:** the paid-journeys Playwright spec navigates production with synthetic paid params
+(`utm_campaign=tc_core`, `gclid=test-click-123`) and GTM fired real GA4 hits on every run —
+10–29 fake "google / cpc" sessions per day since at least Jul 20, outnumbering real ad clicks
+~5:1. Every GA4 paid-segment read before today silently included them. Fixed at the source
+(analytics domains now blocked in the spec's browser context) and at the read (new report
+excludes `tc_core` and counts it as a pollution watch — 20 synthetic sessions in the Aug 5–7
+window; expect zero going forward).
+
+**New tool:** `scripts/google-ads/paid-funnel-report.mjs` — read-only, joins per-ad-group
+spend/clicks (GAQL), real post-click funnel events per landing page (GA4, synthetic excluded),
+and conversion-outbox state. Run via `railway run` at each cadence alongside `pacing-report`.
+
+**First clean funnel baseline (Aug 5–7, 21 clicks, CA$35.37):**
+- `/products/stickers`: view_item → add_to_cart → **begin_checkout** — one real clicker from
+  `sticker printing saskatoon` got one step from purchase. The configurator funnel works.
+- `/products/business-cards`: 2× price_calculated. Engaged.
+- `/printing-prices-saskatoon`, `/sign-company-saskatoon`: sessions but no funnel events —
+  these SEO-page destinations show no measurable progression yet. Watch, don't react (n=2).
+- Outbox: 1 purchase in window (CA$28), not ad-attributed. 0 attributed conversions at
+  21 clicks = sample size; pipeline verified armed.
+
+**Destination decision (owner raised it):** owner suggested repointing the
+`/printing-prices-saskatoon` ad to the homepage. Kept as-is, with owner-visible reasoning:
+Generic Print Price is the top ad group (71 imp / 8 clk, ~40% of Core spend), the page answers
+the exact price intent of its queries, and a final-URL change mid-calibration recreates the ad
+(new ID, policy re-review, serving-history reset) while the Maximize Clicks strategy is on day 3
+of its ~7-day learning window. Queued instead: post-pilot improvement wave tightening the page's
+paths to configurators (several links currently route to SEO pages first). Revisit at the
+2026-08-12 gate with funnel data.
+
+**Also shipped:** `/why-true-color` grid expanded 6 → 8 cards (ACP $39, vehicle magnets $25 —
+both verified against pricing-comms anchors); page contract test and e2e spec updated in the
+same pass. Landing content is not part of the ads contract, and CompetitorConquest has zero
+traffic, so this is trial-neutral.
+
+**Promoted to rule:** any test or monitor that touches production URLs with paid-looking
+params MUST block analytics ingestion (route-abort GTM/GA domains) — and any GA4 paid read
+MUST exclude known synthetic markers. A funnel report that cannot distinguish its own test
+traffic reports whatever the test suite does, not what customers do.
