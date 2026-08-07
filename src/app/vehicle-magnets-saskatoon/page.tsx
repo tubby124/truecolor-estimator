@@ -52,7 +52,7 @@ export default function VehicleMagnetsSaskatoonPage() {
           <p className="text-gray-600 leading-relaxed">
             Standard turnaround is 1–3 business days after artwork approval. Same-day rush is
             available for +$40 flat when ordered before 10 AM. Our in-house designer can clean up a
-            logo or build a simple door layout from scratch for $35.
+            logo or build a simple door layout from scratch for $40 flat.
           </p>
         </>
       }
@@ -93,7 +93,7 @@ export default function VehicleMagnetsSaskatoonPage() {
         },
         {
           q: "What file format do you need?",
-          a: "PDF or JPG at 150 dpi minimum. Vector files (AI, EPS) are ideal for logos. If you have a low-res file, our in-house designer can clean it up — usually $35–$50.",
+          a: "PDF or JPG at 150 dpi minimum. Vector files (AI, EPS) are ideal for logos. If you have a low-res file, our in-house designer can clean it up — $40 flat.",
         },
       ]}
     />
