@@ -523,3 +523,32 @@ value is reachable without it. Revisit after the 2026-08-12 gate.
 
 **Promoted to rule:** when a client-side vendor tag is added, allowlist its domains in CSP in the
 same commit and verify from the **served HTML and response headers**, not the vendor's dashboard.
+
+## 2026-08-07 PM (5) — Core ceiling CA$4 -> CA$5 on rank evidence; owner UI drift reverted; 25 live ads carry a stale $35 design price
+
+**Ceiling raise, taken on the evidence the rationale demanded.** Lost IS (rank) 60.2% vs lost IS
+(budget) 8.6% on Core over Aug 5–7 — auctions existed and were lost on rank, not thinness. Owner
+approved; Core `target_spend.cpc_bid_ceiling_micros` 4.00 → 5.00 CAD, applied via `apply-budgets`
+(scope widened to ceilings — they had the same no-mutation-path gap budgets had before Aug 6).
+Caveat recorded: 184 impressions is a small sample. Judge at the Aug 12 gate on fresh lost-IS,
+and expect avg CPC to drift up — the win condition is more impression share at acceptable CPC,
+not cheaper clicks.
+
+**Owner UI drift, found by dry-run diff, attributed by `change_event`.** At 11:41–11:43 the owner
+(web UI) raised Competitor's budget CA$4 → CA$10 and enabled Brand's ad group + one Brand RSA.
+Competitor has zero impressions, so the budget bought nothing and pushed enabled daily to CA$31 —
+over the CA$25 blast-radius bound. Reverted to contract (CA$4). Brand children re-paused via new
+`hold-brand.mjs` (sixth authority, pause-only, Brand-only). The held-children rule is
+defense-in-depth: if Brand's campaign is ever accidentally enabled, paused children still serve
+nothing. Lesson: **the account has a second author (the owner in the UI). Run the apply-* dry
+runs at the start of every ads session — the diff is the drift detector.**
+
+**🔴 OPEN: 25 of 45 live ads say "In-House Design $35 Flat" / "$35 flat, same-day proof" — the
+shop has charged $40 flat since 2026-08-06.** The contract copy was corrected to $40 the same
+day, but apply-sync is create-only and ad content is the documented count-not-text blind spot,
+so every RSA created before the correction still carries $35 live. Includes ENABLED Core groups
+receiving real clicks (Large Format, Decals, Boat Registration). This is the exact "ad quoting a
+price the shop no longer charges" consumer-trust problem the price-staleness rule exists for —
+but fixing it means updating RSA assets in place, which sends all 25 ads (9 of them Competitor
+copy, the riskiest to resubmit) back through policy review mid-pilot. Owner decision required:
+update now and eat the review-window delivery risk, or batch it with the next copy pass.
