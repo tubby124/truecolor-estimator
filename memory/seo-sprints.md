@@ -472,3 +472,34 @@ the seo-wave-guard hard cap.
     and must never be called UV. Left alone because correcting it changes the meta
     description, which is a separate concern from a price fix.
 - Next steps / trigger date: finish remaining batches, then GSC re-check 2026-08-13.
+
+### Phase 103 batch 2 (2026-08-06) — upscale + vectorization structural rewrite
+
+Not a price swap. Both pages were built around tier ladders that no longer exist, so
+title, meta, OG, subtitle, body, bullets and all 8 FAQs were rewritten on each.
+
+- Files changed: src/app/image-upscale-saskatoon/page.tsx,
+  src/app/logo-vectorization-saskatoon/page.tsx
+- Owner decisions applied (2026-08-06):
+  - Image upscale: $15/$35/$75 ladder -> **$20 flat**. The old $75 tier was *photo
+    restoration* (torn edges, scratch removal, colour repair, 1–2 days of manual
+    Photoshop) — a genuinely different service that cannot be sold at $20, so it is
+    now **quoted individually** with no published price.
+  - Logo vectorization: $50 simple / ~$100 complex -> **$40 flat, all logos**. Matches
+    the Jul 13 2026 invoice: full vector rebuild, 5 output formats, 2-day turnaround, $40.
+  - Free-when-bundled promises **kept as-is** ($100+ for upscale, $250+ for
+    vectorization) — the giveaway is cheaper now than when it was written.
+- Coherence fixes beyond the numbers:
+  - Upscale FAQ "How is this different from the $35 design fee?" -> $40, and its
+    worked example corrected ($35+$35=$70 -> $20+$40=$60).
+  - Vectorization "Quote is manual because every logo is different" removed — it
+    contradicted a flat rate.
+  - 3 missed "in-house designer rate of $35 flat" refs on the vectorization page,
+    caught by residual-grep verification rather than the initial pass.
+- Titles re-checked under 60 chars (47 and 52).
+- **Not fixed, flagged again for owner:** both pages describe the press as "Roland UV".
+  brand-voice.md forbids it — it is an eco-solvent printer/cutter. Deliberately left
+  alone: correcting it touches meta descriptions and is a separate concern from pricing.
+- Still outstanding: 3 image-upscale-* and 3 logo-vectorization-* city variants carry
+  the same ladders, plus ~85 pages with straightforward design-fee refs.
+- Next steps / trigger date: GSC re-check 2026-08-13.
