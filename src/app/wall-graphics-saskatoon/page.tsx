@@ -128,7 +128,7 @@ export default function WallGraphicsSaskatoonPage() {
             Our Roland UV printer handles any size up to 60 inches wide, with no practical length
             limit on rolled vinyl. Larger installs are done in panels with seams aligned to a natural
             break point in the design. Our in-house designer can build your layout to scale, match
-            your brand colours, and provide a to-scale proof before anything goes to print — $35 flat,
+            your brand colours, and provide a to-scale proof before anything goes to print — $40 flat,
             same-day proof.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
@@ -200,7 +200,7 @@ export default function WallGraphicsSaskatoonPage() {
         },
         {
           q: "Can you print custom wall graphics in Saskatoon?",
-          a: "Yes — True Color prints full-colour custom wall graphics in-house on our Roland UV printer. Any design, any size up to 60\" wide, from $11/sqft. Our in-house designer can build your layout from a rough concept, match brand colours, and provide a to-scale digital proof before printing for $35 flat.",
+          a: "Yes — True Color prints full-colour custom wall graphics in-house on our Roland UV printer. Any design, any size up to 60\" wide, from $11/sqft. Our in-house designer can build your layout from a rough concept, match brand colours, and provide a to-scale digital proof before printing for $40 flat.",
         },
         {
           q: "Where can I get wall graphics near me in Saskatoon?",
@@ -208,7 +208,7 @@ export default function WallGraphicsSaskatoonPage() {
         },
         {
           q: "Can you make wall graphics install-ready?",
-          a: "Yes. We prepare wall graphics as install-ready vinyl panels with scale checks, overlap notes, and a digital proof before printing. Design setup is $35 flat, wall graphics start at $11/sqft, and same-day rush is +$40 flat when production capacity is available.",
+          a: "Yes. We prepare wall graphics as install-ready vinyl panels with scale checks, overlap notes, and a digital proof before printing. Design setup is $40 flat, wall graphics start at $11/sqft, and same-day rush is +$40 flat when production capacity is available.",
         },
         {
           q: "How should I prepare my wall before installing graphics?",

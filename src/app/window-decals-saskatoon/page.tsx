@@ -25,7 +25,7 @@ export default function WindowDecalsSaskatoonPage() {
       subtitle="Custom window graphics, perforated vinyl, and lettering for storefronts, offices, and vehicles — no permanent commitment."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Custom window decals and perforated vinyl for Saskatoon storefronts"
-      description="Saskatoon businesses use True Color Display Printing for custom window decals, perforated window vinyl, and vinyl lettering. Window decals start at $11/sqft and are printed full-colour on our in-house Roland UV printer. Perforated window vinyl starts at $8/sqft; $25 order-total minimum applies at checkout — see out, brand in, no obstruction to interior visibility. Vinyl lettering from $8.50/sqft for hours, contact info, and logo text. All window graphics are UV-safe, removable without residue, and suitable for storefronts, offices, and vehicles. Standard turnaround is 1–3 business days. Same-day rush +$40 flat. In-house designer $35 flat with same-day proof."
+      description="Saskatoon businesses use True Color Display Printing for custom window decals, perforated window vinyl, and vinyl lettering. Window decals start at $11/sqft and are printed full-colour on our in-house Roland UV printer. Perforated window vinyl starts at $8/sqft; $25 order-total minimum applies at checkout — see out, brand in, no obstruction to interior visibility. Vinyl lettering from $8.50/sqft for hours, contact info, and logo text. All window graphics are UV-safe, removable without residue, and suitable for storefronts, offices, and vehicles. Standard turnaround is 1–3 business days. Same-day rush +$40 flat. In-house designer $40 flat with same-day proof."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -64,7 +64,7 @@ export default function WindowDecalsSaskatoonPage() {
             sizes to conform to. Need to brand a vehicle window or a glass office partition?
             We handle that too. Same-day production is available for a <strong>+$40 flat</strong>{" "}
             rush fee when ordered before 10 AM. Our in-house designer will prepare your
-            artwork for <strong>$35 flat</strong> with a same-day proof, so you can approve
+            artwork for <strong>$40 flat</strong> with a same-day proof, so you can approve
             exactly what goes on your glass before we cut. For wall and interior branding,
             see our{" "}
             <Link
@@ -97,7 +97,7 @@ export default function WindowDecalsSaskatoonPage() {
         "Vinyl lettering from $8.50/sqft — hours, phone number, or logo text with a clean etched-glass look",
         "We run Roland UV in-house, so colour is consistent and there are no outsourcing surprises",
         "Same-day turnaround for +$40 flat — order before 10 AM, pick up same day",
-        "Bring rough measurements — our designer ($35 flat, same-day proof) handles the rest",
+        "Bring rough measurements — our designer ($40 flat, same-day proof) handles the rest",
       ]}
       faqs={[
         {
@@ -122,7 +122,7 @@ export default function WindowDecalsSaskatoonPage() {
         },
         {
           q: "Do I need to measure my windows before ordering?",
-          a: "Rough measurements are enough to get a quote started. Our in-house designer ($35 flat, same-day proof) can work with your window dimensions and adjust the layout to fit. For precise installation on large windows, we recommend professional application — we can advise on local installers.",
+          a: "Rough measurements are enough to get a quote started. Our in-house designer ($40 flat, same-day proof) can work with your window dimensions and adjust the layout to fit. For precise installation on large windows, we recommend professional application — we can advise on local installers.",
         },
       ]}
     />
