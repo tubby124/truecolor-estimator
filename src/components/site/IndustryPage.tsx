@@ -24,6 +24,11 @@ const INDUSTRY_PRODUCT_IMAGES: Record<string, string> = {
   "magnet-calendars":    "/images/products/product/magnet-calendars-800x600.webp",
   "coil-bound-booklets": "/images/products/product/coil-bound-booklet-hero-800x600.webp",
   "boat-registration-numbers": "/images/industries/boat-registration-numbers/boat-registration-number-decal-aluminum-bow-1200x800.webp",
+  "product-labels":      "/images/products/product/product-labels-product-800x600.webp",
+  "cosmetic-labels":     "/images/products/product/cosmetic-labels-product-800x600.webp",
+  "candle-jar-labels":   "/images/products/product/candle-jar-labels-product-800x600.webp",
+  "freezer-labels":      "/images/products/product/freezer-labels-product-800x600.webp",
+  "roll-labels":         "/images/products/product/roll-labels-product-800x600.webp",
 };
 
 export interface IndustryProduct {
