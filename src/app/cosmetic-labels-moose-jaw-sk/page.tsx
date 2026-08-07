@@ -27,7 +27,7 @@ export default function CosmeticLabelsMooseJawPage() {
       heroImage="/images/products/heroes/cosmetic-labels-hero-1200x500.webp"
       heroAlt="Waterproof cosmetic and skincare labels printed for Moose Jaw SK beauty brands by True Color Display Printing"
       description={
-        "Custom cosmetic and skincare labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on waterproof BOPP vinyl — survives bathroom humidity and product spills without smudging. Built for Moose Jaw handmade soap makers, bath bomb crafters, lotion and balm producers, and farmers market beauty vendors. Roland TrueVIS VG2 eco-solvent ink doesn't smudge or peel. In-house design ($35 flat), 1–3 business day turnaround. Ground courier 1–2 days."
+        "Custom cosmetic and skincare labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on waterproof BOPP vinyl — survives bathroom humidity and product spills without smudging. Built for Moose Jaw handmade soap makers, bath bomb crafters, lotion and balm producers, and farmers market beauty vendors. Roland TrueVIS VG2 eco-solvent ink doesn't smudge or peel. In-house design ($40 flat), 1–3 business day turnaround. Ground courier 1–2 days."
       }
       descriptionNode={
         <>
@@ -56,7 +56,7 @@ export default function CosmeticLabelsMooseJawPage() {
             <a href="tel:+13069548688" className="text-[#16C2F3] underline font-medium">
               (306) 954-8688
             </a>. We email a proof. Print 1–3 business days + ground courier 1–2 days to
-            Moose Jaw. In-house Photoshop designer builds label layouts for $35 flat with a
+            Moose Jaw. In-house Photoshop designer builds label layouts for $40 flat with a
             same-day proof.
           </p>
         </>
@@ -77,7 +77,7 @@ export default function CosmeticLabelsMooseJawPage() {
         "Contour cutting included — rectangle, oval, circle, custom die",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
         "Same-day rush at +$40 flat when ordered before 10 AM",
-        "In-house Photoshop designer: $35 flat with same-day proof",
+        "In-house Photoshop designer: $40 flat with same-day proof",
       ]}
       faqs={[
         {
