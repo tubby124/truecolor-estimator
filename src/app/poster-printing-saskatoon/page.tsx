@@ -104,7 +104,7 @@ export default function PosterPrintingSaskatoonPage() {
       subtitle="Photo posters from $15 on Roland Photobase Matte 220gsm. Foamboard displays from $45. Retractable stands from $219. Same-day rush +$40."
       heroImage="/images/products/product/photo-posters-800x600.webp"
       heroAlt="Poster printing in Saskatoon by True Color Display Printing — photo posters, foamboard displays, and retractable banner stands"
-      description={`True Color Display Printing offers poster printing in Saskatoon, Saskatchewan, starting from $15 for a 12×18" photo poster on Roland Photobase Matte 220gsm with 1–3 business day turnaround and in-house design for $35 flat. An 18×24" poster is $22, a 24×36" poster is $35, and a 36×48" poster is $65. All posters are printed in-house on a Roland UV printer at 216 33rd St W, Saskatoon SK S7L 0V1 — (306) 954-8688.
+      description={`True Color Display Printing offers poster printing in Saskatoon, Saskatchewan, starting from $15 for a 12×18" photo poster on Roland Photobase Matte 220gsm with 1–3 business day turnaround and in-house design for $40 flat. An 18×24" poster is $22, a 24×36" poster is $35, and a 36×48" poster is $65. All posters are printed in-house on a Roland UV printer at 216 33rd St W, Saskatoon SK S7L 0V1 — (306) 954-8688.
 
 Photo posters on Roland Photobase Matte 220gsm are the standard format for events, concerts, fundraisers, school sports announcements, retail promotions, and real estate open houses in Saskatoon and Saskatchewan. The matte finish reduces glare for indoor display — waiting rooms, event lobbies, restaurant feature walls, clinic bulletin boards. For rigid freestanding display, True Color Display Printing also produces 5mm foamboard-mounted displays starting at $45 for 18×24" and $65 for 24×36". Foamboard displays are self-supporting on an easel and require no frame — standard for trade show presentations, real estate open house boards, and event lobby signage in Saskatoon.
 
@@ -127,7 +127,7 @@ True Color's in-house Photoshop designer handles layout, resizing, colour correc
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             True Color Display Printing offers poster printing in Saskatoon, Saskatchewan, starting
             from $15 for a 12×18&quot; photo poster on Roland Photobase Matte 220gsm with 1–3
-            business day turnaround and in-house design for $35 flat. An 18×24&quot; poster is $22,
+            business day turnaround and in-house design for $40 flat. An 18×24&quot; poster is $22,
             a 24×36&quot; poster is $35, and a 36×48&quot; poster is $65. All posters are printed
             in-house on a Roland UV printer at 216 33rd St W, Saskatoon SK. Same-day rush is
             available for +$40 flat when ordered before 10 AM — call (306) 954-8688.
@@ -170,7 +170,7 @@ True Color's in-house Photoshop designer handles layout, resizing, colour correc
           </p>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
             True Color&apos;s in-house Photoshop designer handles layout, resizing, colour
-            correction, and new artwork for $35 flat with a same-day proof. Bring a logo file,
+            correction, and new artwork for $40 flat with a same-day proof. Bring a logo file,
             rough description, or reference image — the designer will build a print-ready file
             without back-and-forth between vendors. Design and printing happen at the same location:
             216 33rd St W, Saskatoon SK S7L 0V1. For event packages, also see{" "}
@@ -203,7 +203,7 @@ True Color's in-house Photoshop designer handles layout, resizing, colour correc
         "Photo posters from $15 on Roland Photobase Matte 220gsm — single prints welcome",
         "No-frame display: 5mm foamboard mounts from $45 sit on any easel, ready to place",
         "In-house Roland UV printer — True Color Display Printing controls colour and timeline, no outsourcing",
-        "In-house Photoshop designer: $35 flat, same-day proof from logo, description, or reference image",
+        "In-house Photoshop designer: $40 flat, same-day proof from logo, description, or reference image",
         "Same-day rush for +$40 flat when ordered before 10 AM — call (306) 954-8688 to confirm",
         "Everything in one shop: photo posters, foamboard, retractable stands, banners, and flyers",
       ]}

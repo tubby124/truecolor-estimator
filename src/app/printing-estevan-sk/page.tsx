@@ -61,7 +61,7 @@ export default function PrintingEstevanPage() {
             We send a digital proof by email before printing — no surprises. After approval and
             payment, we print in-house and ship to your Estevan address. Standard timeline:
             3–5 business days. No design file? Our in-house designer handles artwork from any
-            format for $35 flat, same-day proof. Rush production available for +$40 — place
+            format for $40 flat, same-day proof. Rush production available for +$40 — place
             by 10 AM for same-day print.
           </p>
         </>
@@ -81,7 +81,7 @@ export default function PrintingEstevanPage() {
         "Coroplast from $8/sqft — Roland UV-printed, weatherproof, H-stakes $2.50 each",
         "Vinyl banners from $8.25/sqft — 13oz outdoor vinyl, hemmed and grommeted as standard",
         "Ships to Estevan — approve proof by email, 3–5 business days to your door",
-        "In-house designer — $35 flat, same-day proof, rush production +$40",
+        "In-house designer — $40 flat, same-day proof, rush production +$40",
       ]}
       faqs={[
         {
