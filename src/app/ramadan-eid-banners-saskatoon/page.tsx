@@ -119,7 +119,7 @@ export default function RamadanEidBannersPage() {
         },
         {
           q: "Can you print Arabic, Urdu, or Bengali text on a banner?",
-          a: "Yes — we print any language accurately. Send your artwork as a PDF with text outlined or embedded, and we'll reproduce it exactly. If you need design help with Arabic or Urdu script, our in-house designer can assist for $35–50.",
+          a: "Yes — we print any language accurately. Send your artwork as a PDF with text outlined or embedded, and we'll reproduce it exactly. If you need design help with Arabic or Urdu script, our in-house designer can assist for $40 flat.",
         },
         {
           q: "What banner size is right for a mosque entrance or Eid prayer hall?",

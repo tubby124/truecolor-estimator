@@ -5,14 +5,14 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Foam Board Printing Saskatoon | From $45 | Same-Day" },
   description:
-    "Foam board printing in Saskatoon from $45 (18×24\"). Photo-quality Roland UV on 5mm foam core. Trade shows, menus, open houses. Designer $35. Rush +$40.",
+    "Foam board printing in Saskatoon from $45 (18×24\"). Photo-quality Roland UV on 5mm foam core. Trade shows, menus, open houses. Designer $40. Rush +$40.",
   alternates: {
     canonical: "/foamboard-printing-saskatoon",
   },
   openGraph: {
     title: "Foam Board Printing Saskatoon | From $45 | Same-Day Rush",
     description:
-      "Foam board printing in Saskatoon from $45 (18×24\"). Photo-quality Roland UV on 5mm foam core. Trade shows, menus, open houses. Designer $35. Rush +$40.",
+      "Foam board printing in Saskatoon from $45 (18×24\"). Photo-quality Roland UV on 5mm foam core. Trade shows, menus, open houses. Designer $40. Rush +$40.",
     url: "https://truecolorprinting.ca/foamboard-printing-saskatoon",
     type: "website",
   },

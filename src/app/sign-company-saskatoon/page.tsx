@@ -201,7 +201,7 @@ export default function SignCompanySaskatoonPage() {
         },
         {
           q: "Do you offer graphic design for signs?",
-          a: "Yes — our in-house designer handles sign layouts for a flat fee of $35. That covers the initial proof and two revision rounds. If you have existing artwork, we'll review your file for free and flag any issues before printing. Logo creation and more complex sign packages are quoted individually.",
+          a: "Yes — our in-house designer handles sign layouts for a flat fee of $40. That covers the initial proof and two revision rounds. If you have existing artwork, we'll review your file for free and flag any issues before printing. Logo creation and more complex sign packages are quoted individually.",
         },
         {
           q: "What size are standard yard signs?",

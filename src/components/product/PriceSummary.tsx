@@ -12,6 +12,7 @@ interface PriceSummaryProps {
   loading: boolean;
   addonTotal: number;
   designFee: number;
+  designStatus?: string;
   gst: number | null;
   pst?: number | null;
   total: number | null;
@@ -45,10 +46,16 @@ interface PriceSummaryProps {
   showQtyDiscountTiers?: boolean;
 }
 
-const DESIGN_LABELS: Record<number, string> = {
-  35: "Minor edits",
-  50: "Design from scratch",
-  75: "Logo vectorization",
+/**
+ * Keyed by design_status, NOT by dollar amount. The three tiers collapsed to a
+ * single $40 on 2026-08-06, so a price-keyed lookup can no longer tell them
+ * apart — it silently fell through to the generic "Design included" for every
+ * tier. Never re-key this on the fee.
+ */
+const DESIGN_LABELS: Record<string, string> = {
+  MINOR_EDIT: "Minor edits",
+  FULL_DESIGN: "Design from scratch",
+  LOGO_RECREATION: "Logo vectorization",
 };
 
 // Bulk discount tiers by category — mirrors qty_discounts.v1.csv
@@ -63,7 +70,7 @@ const QTY_DISCOUNT_TIERS: Partial<Record<Category, { label: string; pct: number 
 };
 
 export function PriceSummary({
-  price, loading, addonTotal, designFee, gst, pst, total,
+  price, loading, addonTotal, designFee, designStatus, gst, pst, total,
   addedToCart, onAddToCart, productSlug,
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
   pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
@@ -205,7 +212,7 @@ export function PriceSummary({
               {designFee > 0 && (
                 <p className="text-sm text-[#16C2F3] flex items-center gap-1 pt-0.5">
                   <span>✏</span>
-                  <span>{DESIGN_LABELS[designFee] ?? "Design"} included</span>
+                  <span>{DESIGN_LABELS[designStatus ?? ""] ?? "Design"} included</span>
                 </p>
               )}
 
@@ -279,7 +286,7 @@ export function PriceSummary({
 
         {/* Design note */}
         <p className="text-xs text-gray-400 leading-relaxed border-t border-gray-100 pt-3">
-          No file? Our in-house designer handles artwork from a rough sketch — starting at $35.
+          No file? Our in-house designer handles artwork from a rough sketch — $40 flat.
         </p>
       </div>
     </div>

@@ -56,7 +56,7 @@ export default function CoroplastSignsReginaPage() {
             To order: submit your quote at truecolorprinting.ca or call (306) 954-8688. We send
             a digital proof for approval, then print and ship to Regina via courier.
             Standard production is 1–3 business days after artwork approval, plus 1–2 days
-            shipping. No print-ready file? Our in-house designer preps artwork for $35–$50.
+            shipping. No print-ready file? Our in-house designer preps artwork for $40 flat.
             H-stakes ship flat and arrive ready to push into prairie soil.
           </p>
         </>

@@ -54,7 +54,7 @@ export default function BannerPrintingMooseJawPage() {
             We email a proof for approval. Once confirmed and payment received, we print
             and ship to Moose Jaw via courier. Standard turnaround: 1–3 business days
             print, plus 1–2 days shipping. Shipping from Saskatoon to Moose Jaw runs
-            $20–$35 for most banner orders. No file? Designer service from $35–$50.
+            $20–$35 for most banner orders. No file? Designer service for $40 flat.
           </p>
         </>
       }

@@ -54,7 +54,7 @@ export default function SignsPrinceAlbertPage() {
             One supplier for everything your Prince Albert business needs to look professional.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            No design file? Our in-house designer handles file prep for $35–$50.
+            No design file? Our in-house designer handles file prep for $40 flat.
             Bring a logo in any format, a rough sketch, or just a description of what you need.
             To order: call (306) 954-8688 or submit your quote at truecolorprinting.ca.
             We email a digital proof, you approve, we ship. Standard timeline: 3–5 business days
@@ -75,7 +75,7 @@ export default function SignsPrinceAlbertPage() {
         "Vinyl banners from $8.25/sqft — grommets and hemming included",
         "Vehicle magnets from $24/sqft — removable fleet branding",
         "Business cards 250 for $45 — sharp colour, same-day in Saskatoon, shipped to PA",
-        "In-house designer — file prep from any format, starting at $35",
+        "In-house designer — file prep from any format, $40 flat",
         "Shipped to Prince Albert — order online, approve by email, courier delivery",
       ]}
       faqs={[

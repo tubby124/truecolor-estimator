@@ -6,12 +6,12 @@ import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 export const metadata: Metadata = {
   title: { absolute: "Mother's Day Printing Saskatoon | From $45 | True Color" },
   description:
-    "Banners, flyers, photo prints, and window decals for Saskatoon restaurants, spas, and florists. From $45. In-house design $35. Same-day rush +$40. 216 33rd St W.",
+    "Banners, flyers, photo prints, and window decals for Saskatoon restaurants, spas, and florists. From $45. In-house design $40. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/mothers-day-printing-saskatoon" },
   openGraph: {
     title: "Mother's Day Printing Saskatoon | True Color Display Printing",
     description:
-      "Mother's Day banners, flyers, photo prints, and window decals in Saskatoon from $45. In-house design $35. Same-day rush +$40. 216 33rd St W.",
+      "Mother's Day banners, flyers, photo prints, and window decals in Saskatoon from $45. In-house design $40. Same-day rush +$40. 216 33rd St W.",
     url: "https://truecolorprinting.ca/mothers-day-printing-saskatoon",
     type: "website",
   },

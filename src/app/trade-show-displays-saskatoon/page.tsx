@@ -56,7 +56,7 @@ export default function TradeShowDisplaysSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             Don&apos;t have print-ready artwork? Our in-house Photoshop designer builds
-            trade show layouts from scratch for $35 — bring your logo, colour codes, and
+            trade show layouts from scratch for $40 — bring your logo, colour codes, and
             key message, and we&apos;ll handle the rest with same-day proofs. Standard
             turnaround is 1–3 business days after artwork approval. Need to reprint
             worn-out banner graphics before the next event? Bring in your stand and we&apos;ll
@@ -90,7 +90,7 @@ export default function TradeShowDisplaysSaskatoonPage() {
         "33×80\" standard size fits most 10×10 and 8×10 booth configurations",
         "Foamboard countertop displays from $45 — lightweight, professional, easy to carry",
         "In-house Roland UV printer — no outsourcing, consistent colour, 1–3 business day turnaround",
-        "In-house designer builds full booth layouts from $35 — same-day proofs",
+        "In-house designer builds full booth layouts $40 flat — same-day proofs",
         "Graphic reprint service — replace worn banner graphics without buying a new stand",
         "Same-day rush available for +$40 flat on orders placed before 10 AM",
         "Local pickup at 216 33rd St W, Saskatoon — no shipping delay before your event",

@@ -53,7 +53,7 @@ export default function VehicleMagnetsMooseJawPage() {
             To order: submit your quote at truecolorprinting.ca or call (306) 954-8688.
             We email a proof for approval. Once confirmed, we print and ship to Moose Jaw
             via courier. Standard turnaround: 3–5 business days. Shipping from Saskatoon
-            to Moose Jaw typically runs $20–$35. No file? Designer service from $35–$50.
+            to Moose Jaw typically runs $20–$35. No file? Designer service for $40 flat.
           </p>
         </>
       }

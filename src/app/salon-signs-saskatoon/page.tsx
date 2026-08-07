@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Salon Signs Saskatoon | True Color Display Printing",
     description:
-      "Window vinyl, foamboard service menus, referral cards, and grand opening banners for Saskatoon salons, spas, and barber shops. In-house designer $35. Rush +$40.",
+      "Window vinyl, foamboard service menus, referral cards, and grand opening banners for Saskatoon salons, spas, and barber shops. In-house designer $40. Rush +$40.",
     url: "https://truecolorprinting.ca/salon-signs-saskatoon",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",

@@ -55,7 +55,7 @@ export default function BusinessCardsYorktonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             To order: submit your quote at truecolorprinting.ca or call (306) 954-8688.
-            Upload your artwork or have our designer build your card for $35–$50. We email
+            Upload your artwork or have our designer build your card for $40 flat. We email
             a proof before printing. Standard turnaround: 1–3 business days print, plus
             1–2 days shipping to Yorkton. Shipping typically runs $20–$35 for card orders.
           </p>
@@ -87,7 +87,7 @@ export default function BusinessCardsYorktonPage() {
         },
         {
           q: "Can you print business cards for Yorkton agricultural or grain businesses?",
-          a: "Yes — we print for agricultural suppliers, grain consultants, and farm equipment dealers across eastern Saskatchewan regularly. Our designer can work with your brand or build a card from a business name and logo. Design from $35–$50.",
+          a: "Yes — we print for agricultural suppliers, grain consultants, and farm equipment dealers across eastern Saskatchewan regularly. Our designer can work with your brand or build a card from a business name and logo. Design for $40 flat.",
         },
         {
           q: "Can I get matte business cards for a Yorkton professional services firm?",

@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Law Office Signs Saskatoon | ACP & Cards | True Color" },
   description:
-    "ACP aluminum signs, business cards, and lobby displays for Saskatoon law firms, notaries, and accountants. From $13/sqft. In-house designer $35. Local pickup.",
+    "ACP aluminum signs, business cards, and lobby displays for Saskatoon law firms, notaries, and accountants. From $13/sqft. In-house designer $40. Local pickup.",
   alternates: { canonical: "/law-office-signs-saskatoon" },
   openGraph: {
     title: "Law Office Signs Saskatoon | True Color Display Printing",

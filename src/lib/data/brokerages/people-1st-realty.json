@@ -24,7 +24,7 @@
   "productGroups": [
     {
       "title": "For Sale Signs",
-      "intro": "Aluminum For Sale signs with UV-printed branding. Coroplast directionals for sub-streets and rural use. Design fee +$35 if your sign needs a photo composite or copy changes.",
+      "intro": "Aluminum For Sale signs with UV-printed branding. Coroplast directionals for sub-streets and rural use. Design fee +$40 if your sign needs a photo composite or copy changes.",
       "layout": "list",
       "products": [
         {
@@ -43,7 +43,7 @@
         {
           "id": "for-sale-aluminum-picture-24x30",
           "label": "For Sale Sign with Photo — Aluminum 24×30\"",
-          "blurb": "UV film on ACP with agent photo + QR code. Mounting holes drilled 2\" inset. One-time +$35 design fee if your photo needs to be composited.",
+          "blurb": "UV film on ACP with agent photo + QR code. Mounting holes drilled 2\" inset. One-time +$40 design fee if your photo needs to be composited.",
           "imageSrc": "/images/brokerages/people-1st-realty/for-sale-portrait-photo.png",
           "imageOrientation": "portrait",
           "unitPrice": 65,

@@ -53,7 +53,7 @@ export default function VehicleMagnetsYorktonPage() {
             To order: submit your quote at truecolorprinting.ca or call (306) 954-8688.
             We email a proof for approval. Once confirmed, we print and ship to Yorkton
             via courier. Standard turnaround: 3–5 business days. Shipping from Saskatoon
-            to Yorkton (180 km east) typically runs $25–$45. Designer service from $35–$50.
+            to Yorkton (180 km east) typically runs $25–$45. Designer service for $40 flat.
           </p>
         </>
       }

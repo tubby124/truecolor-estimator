@@ -137,9 +137,12 @@ export const STICKER_CONFIG: ProductConfigShape = {
       hint: "Off-tier quantities round up to the nearest 25/50/100/250/500/1000." },
     { key: "design_status", label: "Artwork", kind: "select", required: false, defaultValue: "PRINT_READY", choices: [
       { value: "PRINT_READY",      label: "Print-ready file" },
-      { value: "MINOR_EDIT",       label: "Minor edits (+$35)" },
-      { value: "FULL_DESIGN",      label: "Full design (+$50)" },
-      { value: "LOGO_RECREATION",  label: "Logo recreation (+$75)" },
+      // Design collapsed to one flat $40 across all three tiers (owner-approved
+      // 2026-08-06). Hardcoded because this file is client-safe and cannot import
+      // the CSV loader — mirror any change to config.v1.csv design_* keys here.
+      { value: "MINOR_EDIT",       label: "Minor edits (+$40)" },
+      { value: "FULL_DESIGN",      label: "Full design (+$40)" },
+      { value: "LOGO_RECREATION",  label: "Logo recreation (+$40)" },
     ]},
     { key: "is_rush", label: "Rush (+$40)", kind: "toggle", required: false, defaultValue: false,
       hint: "Must be in before 10 AM same-day." },

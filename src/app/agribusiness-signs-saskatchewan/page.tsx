@@ -6,7 +6,7 @@ import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 export const metadata: Metadata = {
   title: { absolute: "Agribusiness Signs Saskatchewan | From $13/sqft | True Color" },
   description:
-    "Signs for SK agribusiness — equipment dealers, seed retailers, grain co-ops. ACP from $13/sqft, retractable stands $219. In-house design $35. Saskatoon pickup.",
+    "Signs for SK agribusiness — equipment dealers, seed retailers, grain co-ops. ACP from $13/sqft, retractable stands $219. In-house design $40. Saskatoon pickup.",
   alternates: { canonical: "/agribusiness-signs-saskatchewan" },
   openGraph: {
     title: "Agribusiness Signs Saskatchewan | True Color Display Printing",
@@ -208,7 +208,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         },
         {
           q: "Do you offer design help for agribusiness signage?",
-          a: "Yes — our in-house Photoshop designer creates print-ready layouts from your brand guide, a logo file, or a rough sketch. Minor edits and standard layouts are $40 flat with same-day proof. Full design from scratch is $50, and logo creation or vectorization is also $40. All artwork files are yours to keep.",
+          a: "Yes — our in-house Photoshop designer creates print-ready layouts from your brand guide, a logo file, or a rough sketch. Minor edits and standard layouts are $40 flat with same-day proof. Full design from scratch is $40, and logo creation or vectorization is also $40. All artwork files are yours to keep.",
         },
       ]}
     />

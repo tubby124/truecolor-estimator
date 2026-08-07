@@ -59,7 +59,7 @@ export default function CoroplastSignsPrinceAlbertPage() {
             We send a digital proof for email approval. After approval and payment, we print
             and ship to Prince Albert. Standard production: 1–3 business days, plus
             1–2 days shipping. Shipping from Saskatoon to Prince Albert (140 km north)
-            typically runs $25–$40 depending on order size. Designer service from $35–$50.
+            typically runs $25–$40 depending on order size. Designer service for $40 flat.
           </p>
         </>
       }

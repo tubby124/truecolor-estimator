@@ -60,7 +60,7 @@ export default function ProductLabelsReginaPage() {
             <a href="tel:+13069548688" className="text-[#16C2F3] underline font-medium">
               (306) 954-8688
             </a>. We email a proof for approval. Print 1–3 business days + courier 1–2 days.
-            No print-ready artwork? In-house Photoshop designer builds label layouts for $35
+            No print-ready artwork? In-house Photoshop designer builds label layouts for $40
             flat with same-day proof.
           </p>
         </>

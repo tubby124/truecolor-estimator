@@ -127,7 +127,7 @@ export default function ConstructionPage() {
         },
         {
           q: "I just have a rough logo from my phone. Can you work with that?",
-          a: "Yes — our in-house designer handles low-res logos, rough sketches, and phone photos. We'll upscale, clean up, and make it print-ready for coroplast, magnets, and business cards. Design service starts at $35. If you've worked with us before, your artwork is on file and reprints are ready faster.",
+          a: "Yes — our in-house designer handles low-res logos, rough sketches, and phone photos. We'll upscale, clean up, and make it print-ready for coroplast, magnets, and business cards. Design service is $40 flat. If you've worked with us before, your artwork is on file and reprints are ready faster.",
         },
       ]}
     />

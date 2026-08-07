@@ -126,7 +126,7 @@ export default function ForLeaseSignsSaskatoonPage() {
         },
         {
           q: "Can you update or reprint used lease signage?",
-          a: "Yes. If you already have used lease signage from an older listing, we can reprint the same layout, update the phone number, change a broker logo, or rebuild the file if all you have is a photo. For clean re-use across multiple properties, we recommend a simple coroplast layout with interchangeable contact details. Design setup is $35 when file rebuilding is needed.",
+          a: "Yes. If you already have used lease signage from an older listing, we can reprint the same layout, update the phone number, change a broker logo, or rebuild the file if all you have is a photo. For clean re-use across multiple properties, we recommend a simple coroplast layout with interchangeable contact details. Design setup is $40 when file rebuilding is needed.",
         },
         {
           q: "Can you design a for-lease sign if I don't have a file?",

@@ -54,7 +54,7 @@ export default function BannerPrintingYorktonPage() {
             We email a proof for approval. Once confirmed and payment received, we print
             and ship to Yorkton via courier. Standard turnaround: 1–3 business days print,
             plus 1–2 days shipping. Shipping from Saskatoon to Yorkton (180 km east)
-            typically runs $25–$45 for banner orders. Designer service from $35–$50.
+            typically runs $25–$45 for banner orders. Designer service for $40 flat.
           </p>
         </>
       }

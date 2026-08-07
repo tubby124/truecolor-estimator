@@ -58,7 +58,7 @@ export default function CoroplastSignsYorktonPage() {
             We send a digital proof for email approval. After approval and payment, we print
             and ship to Yorkton. Standard production: 1–3 business days, plus 1–2 days
             shipping. Shipping from Saskatoon to Yorkton (180 km east) typically runs
-            $25–$45 depending on order size. Designer service from $35–$50.
+            $25–$45 depending on order size. Designer service for $40 flat.
           </p>
         </>
       }

@@ -104,7 +104,7 @@ export default function BrochurePrintingSaskatoonPage() {
         },
         {
           q: "How do I set up my file for a tri-fold or half-fold?",
-          a: "For tri-fold: set up 3 equal panels at 3.67\" wide × 11\" tall on each side of an 8.5×11\" spread, with 1/8\" bleed. For half-fold: 2 panels at 4.25\" wide × 11\" on each side. We can send you a template — just ask. Our in-house designer also sets up layouts from scratch starting at $50.",
+          a: "For tri-fold: set up 3 equal panels at 3.67\" wide × 11\" tall on each side of an 8.5×11\" spread, with 1/8\" bleed. For half-fold: 2 panels at 4.25\" wide × 11\" on each side. We can send you a template — just ask. Our in-house designer also sets up layouts from scratch for $40 flat.",
         },
         {
           q: "How long does brochure printing take?",

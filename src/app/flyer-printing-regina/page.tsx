@@ -58,7 +58,7 @@ export default function FlyerPrintingReginaPage() {
             We send a digital proof by email before printing. Once approved and payment
             confirmed, we print and ship to your Regina address. Standard turnaround:
             1–3 business days print, plus 1–2 days shipping. No file? Our in-house
-            designer builds from your brand assets for $35–$50.
+            designer builds from your brand assets for $40 flat.
           </p>
         </>
       }

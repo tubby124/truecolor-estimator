@@ -168,7 +168,7 @@ export default function FlyerPrintingSaskatoonPage() {
         "100 minimum — price per flyer drops at 250, 500, and 1,000+",
         "In-house Konica Minolta digital press — consistent colour, fast turnaround",
         "Same-day rush for +$40 flat when ordered before 10 AM",
-        "In-house designer for layouts, menus, and event programs — from $35",
+        "In-house designer for layouts, menus, and event programs — $40 flat",
       ]}
       faqs={[
         {

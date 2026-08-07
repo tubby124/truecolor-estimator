@@ -75,7 +75,7 @@ export default function PrintingLloydminsterPage() {
         "ACP aluminum signs from $13/sqft — 10+ year outdoor lifespan for permanent installs",
         "Business cards 250 for $45 — professional full-colour, double-sided",
         "Shipped to Lloydminster SK — order online, proof by email, courier delivery",
-        "In-house designer: file prep from any format starting at $35",
+        "In-house designer: file prep from any format for $40 flat",
       ]}
       faqs={[
         {

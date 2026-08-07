@@ -55,7 +55,7 @@ export default function VehicleMagnetsPrinceAlbertPage() {
             We email a proof for approval. Once confirmed, we print and ship to Prince
             Albert via courier. Standard turnaround: 3–5 business days. Shipping from
             Saskatoon to Prince Albert (140 km north) typically runs $25–$40.
-            Designer service from $35–$50.
+            Designer service for $40 flat.
           </p>
         </>
       }

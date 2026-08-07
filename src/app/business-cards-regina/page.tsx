@@ -93,7 +93,7 @@ export default function BusinessCardsReginaPage() {
         },
         {
           q: "Can you design business cards for a Regina real estate agent?",
-          a: "Yes — our in-house designer handles card layouts from a logo and text brief for $35–$50. We produce cards for realtors, brokers, and property managers across Saskatchewan regularly. Provide your brokerage logo and contact details.",
+          a: "Yes — our in-house designer handles card layouts from a logo and text brief for $40 flat. We produce cards for realtors, brokers, and property managers across Saskatchewan regularly. Provide your brokerage logo and contact details.",
         },
         {
           q: "How long does it take to get business cards delivered to Regina?",

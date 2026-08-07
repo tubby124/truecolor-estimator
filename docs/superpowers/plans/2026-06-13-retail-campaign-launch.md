@@ -13,7 +13,7 @@
 **Hard constraints (from project rules):**
 - Cold mail goes through Brevo **marketing/campaign** channel only (never transactional API).
 - `/true-color-campaign-presend-audit` MUST pass before any campaign is scheduled.
-- Email copy: subject <50 chars · plain-text fallback · UTM'd `truecolorprinting.ca` links (NEVER a Railway/Vercel URL) · real prices per the $25 order-minimum comms rules · brand-voice mandatories (price + Saskatoon + Roland UV + $40 rush + $35 design in the sequence).
+- Email copy: subject <50 chars · plain-text fallback · UTM'd `truecolorprinting.ca` links (NEVER a Railway/Vercel URL) · real prices per the $25 order-minimum comms rules · brand-voice mandatories (price + Saskatoon + Roland UV + $40 rush + $40 design in the sequence).
 - Retail leads are identified by `industry_tags @> '{retail}'` (NOT `drip_niche`).
 - Eligible cohort predicate (verified 2026-06-13 = 251 leads):
   `industry_tags=cs.{retail}` AND `email IS NOT NULL` AND `drip_status='queued'` AND `suppression_reason IS NULL` AND `unsubscribed_at IS NULL` AND `validation_status <> 'invalid'`.
@@ -87,7 +87,7 @@ Invoke: `/true-color-campaign retail` (or `marketingskills:cold-email` + `market
   - Subject <50 chars, no spam-trigger words.
   - Body 200–300 words, brand voice (no "affordable"/"high quality"/"competitive").
   - At least one real price across the sequence: retail signage anchors — Coroplast from $25, Banners from $66, Window Decals from $25, Business Cards from $45 (per `truecolor-pricing-comms.md`). NEVER a stale "$30 minimum".
-  - "Saskatoon/Saskatchewan", "in-house Roland UV", "+$40 same-day rush", "$35 design" appear across the sequence.
+  - "Saskatoon/Saskatchewan", "in-house Roland UV", "+$40 same-day rush", "$40 design" appear across the sequence.
   - CTA: `https://truecolorprinting.ca/retail-signs-saskatoon?utm_source=brevo&utm_medium=email&utm_campaign=retail-drip-2026-06`
   - Plain-text fallback for each.
 

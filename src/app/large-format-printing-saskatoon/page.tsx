@@ -58,7 +58,7 @@ export default function LargeFormatPrintingSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             Our in-house Photoshop designer handles files that aren&apos;t print-ready — low-res
-            logos, Word documents, rough sketches — and produces professional artwork for $35
+            logos, Word documents, rough sketches — and produces professional artwork for $40
             flat with same-day proofs. No outsourcing your design either. We work with
             commercial accounts, marketing agencies, property managers, contractors, retailers,
             and individual business owners. Quantity discounts apply at 10+ and 25+ pieces.
@@ -98,7 +98,7 @@ export default function LargeFormatPrintingSaskatoonPage() {
         "Coroplast signs from $8/sqft — 4mm or 6mm flute, single or double-sided",
         "ACP aluminum signs from $13/sqft — professional-grade, outdoor-rated, permanent mounting",
         "Retractable banner stands from $219 — Economy, Deluxe, and Premium options",
-        "In-house designer: bring any file, get print-ready artwork from $35 same day",
+        "In-house designer: bring any file, get print-ready artwork $40 flat same day",
         "1–3 business day standard turnaround from artwork approval",
         "Quantity discounts at 10+ and 25+ pieces on coroplast, banners, and ACP",
       ]}
