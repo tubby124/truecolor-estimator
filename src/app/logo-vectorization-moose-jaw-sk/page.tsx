@@ -21,7 +21,7 @@ export default function LogoVectorizationMooseJawPage() {
   return (
     <IndustryPage
       canonicalSlug="logo-vectorization-moose-jaw-sk"
-      primaryProductSlug="stickers"
+      primaryProductSlug="logo-vectorization"
       title="Logo Vectorization — Moose Jaw SK"
       subtitle="Convert raster logos to scalable vector files for Moose Jaw businesses. $40 flat."
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"

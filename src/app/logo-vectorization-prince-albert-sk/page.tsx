@@ -21,7 +21,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
   return (
     <IndustryPage
       canonicalSlug="logo-vectorization-prince-albert-sk"
-      primaryProductSlug="stickers"
+      primaryProductSlug="logo-vectorization"
       title="Logo Vectorization — Prince Albert SK"
       subtitle="Convert raster logos to scalable vector files for PA businesses. $40 flat."
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"
