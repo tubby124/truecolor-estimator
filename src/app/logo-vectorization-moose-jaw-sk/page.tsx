@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Logo Vectorization Moose Jaw SK | From $50 | True Color" },
+  title: { absolute: "Logo Vectorization Moose Jaw SK | $40 Flat | True Color" },
   description:
     "Convert raster JPG/PNG logos to scalable vector AI/EPS/SVG/PDF for Moose Jaw businesses. From $40 flat per logo. Same-day digital delivery.",
   alternates: { canonical: "/logo-vectorization-moose-jaw-sk" },
@@ -23,7 +23,7 @@ export default function LogoVectorizationMooseJawPage() {
       canonicalSlug="logo-vectorization-moose-jaw-sk"
       primaryProductSlug="stickers"
       title="Logo Vectorization — Moose Jaw SK"
-      subtitle="Convert raster logos to scalable vector files for Moose Jaw businesses. From $50."
+      subtitle="Convert raster logos to scalable vector files for Moose Jaw businesses. $40 flat."
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"
       heroAlt="Logo vectorization service for Moose Jaw SK businesses by True Color Display Printing"
       description={
@@ -78,7 +78,7 @@ export default function LogoVectorizationMooseJawPage() {
         "True vector output — scalable from business card to building wrap without loss",
         "Output formats: AI, EPS, SVG, PDF, vector PNG — covers every Moose Jaw sign, print, embroidery vendor",
         "Same-business-day digital delivery to Moose Jaw — no courier required",
-        "$40 flat per simple logo — complex gradient/photo logos quoted +$25–$50",
+        "$40 flat per logo — gradients, photo elements, and 6+ colours included",
         "Preview before final delivery — verify the vector matches your raster",
         "Combine with True Color print job for one workflow",
         "Rush (under 4 hours) available at +$40 flat",
@@ -87,7 +87,7 @@ export default function LogoVectorizationMooseJawPage() {
       faqs={[
         {
           q: "How much does logo vectorization cost in Moose Jaw?",
-          a: "$40 flat per simple logo. Complex logos with gradients, photo-realistic elements, or 6+ colours +$25–$50 depending on detail. Rush (under 4 hours) +$40 flat. Digital delivery, no shipping cost.",
+          a: "$40 flat per simple logo. Complex logos with gradients, photo-realistic elements, or 6+ colours are included at the same $40. Rush (under 4 hours) +$40 flat. Digital delivery, no shipping cost.",
         },
         {
           q: "What file formats will I get back?",

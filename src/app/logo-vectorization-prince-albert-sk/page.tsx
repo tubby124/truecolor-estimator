@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Logo Vectorization Prince Albert SK | From $50 | True Color" },
+  title: { absolute: "Logo Vectorization Prince Albert SK | $40 Flat | True Color" },
   description:
     "Convert raster JPG/PNG logos to scalable vector AI/EPS/SVG/PDF for Prince Albert businesses. From $40 flat per logo. Same-day digital delivery.",
   alternates: { canonical: "/logo-vectorization-prince-albert-sk" },
@@ -23,7 +23,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
       canonicalSlug="logo-vectorization-prince-albert-sk"
       primaryProductSlug="stickers"
       title="Logo Vectorization — Prince Albert SK"
-      subtitle="Convert raster logos to scalable vector files for PA businesses. From $50."
+      subtitle="Convert raster logos to scalable vector files for PA businesses. $40 flat."
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"
       heroAlt="Logo vectorization service for Prince Albert SK businesses by True Color Display Printing"
       description={
@@ -75,7 +75,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
         "True vector output — scalable from business card to storefront sign without loss",
         "Output formats: AI, EPS, SVG, PDF, vector PNG — every PA sign, print, embroidery vendor covered",
         "Digital delivery — distance is irrelevant, same turnaround as a downtown Saskatoon customer",
-        "$40 flat per simple logo — complex gradient/photo logos quoted +$25–$50",
+        "$40 flat per logo — gradients, photo elements, and 6+ colours included",
         "Preview before final delivery — verify the vector matches your raster",
         "Combine with True Color print job for one workflow",
         "Rush (under 4 hours) available at +$40 flat",
@@ -84,7 +84,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
       faqs={[
         {
           q: "How much does logo vectorization cost in Prince Albert?",
-          a: "$40 flat per simple logo. Complex logos with gradients, photo-realistic elements, or 6+ colours +$25–$50 depending on detail. Rush (under 4 hours) +$40 flat. Digital delivery, no shipping cost.",
+          a: "$40 flat per simple logo. Complex logos with gradients, photo-realistic elements, or 6+ colours are included at the same $40. Rush (under 4 hours) +$40 flat. Digital delivery, no shipping cost.",
         },
         {
           q: "Do you charge more because Prince Albert is further north?",
