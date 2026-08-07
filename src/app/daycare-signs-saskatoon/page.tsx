@@ -37,7 +37,7 @@ const descriptionNode = (
       is available for +$40 flat when ordered before 10 AM — call (306) 954-8688.
     </p>
     <p className="text-gray-600 text-lg leading-relaxed">
-      Our in-house designer creates print-ready artwork for $35 flat with a same-day proof — you
+      Our in-house designer creates print-ready artwork for $40 flat with a same-day proof — you
       don&apos;t need to hire a graphic designer separately. We keep your files on record for
       fast seasonal reorders. Need signs for a school or education campaign beyond daycare?{" "}
       <Link
@@ -67,7 +67,7 @@ export default function DaycareSignsSaskatoonPage() {
       subtitle="Enrollment yard signs, grand opening banners, and window decals for Saskatoon daycares and preschools."
       heroImage="/images/products/heroes/healthcare-hero-1200x500.webp"
       heroAlt="Coroplast yard signs and vinyl banners for Saskatoon daycares and preschools printed by True Color Display Printing"
-      description="Empty spots cost Saskatoon daycares real money — and a yard sign on the right corner fills them faster than social media. Coroplast yard signs: 18×24&quot; at $24 each, 4mm, H-stakes included. Order 5+ and save 8%. A 20-sign neighbourhood campaign is around $440. Vinyl banners from $66 for grand openings and enrollment-open announcements. Window decals from $11/sqft for permanent storefront branding. In-house designer $35 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
+      description="Empty spots cost Saskatoon daycares real money — and a yard sign on the right corner fills them faster than social media. Coroplast yard signs: 18×24&quot; at $24 each, 4mm, H-stakes included. Order 5+ and save 8%. A 20-sign neighbourhood campaign is around $440. Vinyl banners from $66 for grand openings and enrollment-open announcements. Window decals from $11/sqft for permanent storefront branding. In-house designer $40 flat, same-day proof. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={descriptionNode}
       products={[
         { name: "Coroplast Signs", from: "18×24\" for $24", slug: "coroplast-signs" },
@@ -83,7 +83,7 @@ export default function DaycareSignsSaskatoonPage() {
         "Vinyl banners from $66 with grommets — grand openings, enrollment-open, summer program launches",
         "Window decals from $11/sqft — permanent storefront branding every passing parent sees",
         "Foamboard lobby and classroom displays — lightweight, reprints easily each semester",
-        "In-house designer $35 flat — handles your enrollment graphics, same-day proof",
+        "In-house designer $40 flat — handles your enrollment graphics, same-day proof",
         "Same-day rush +$40 flat — signs ready the day an enrollment window opens",
       ]}
       faqs={[
@@ -101,7 +101,7 @@ export default function DaycareSignsSaskatoonPage() {
         },
         {
           q: "Can you design our enrollment graphics if we don't have artwork?",
-          a: "Yes — our in-house designer creates print-ready artwork for $35 flat with a same-day proof. Bring your logo, your enrollment message, and your phone number. We handle the layout, sizing, and colour. You approve the proof before anything goes to print.",
+          a: "Yes — our in-house designer creates print-ready artwork for $40 flat with a same-day proof. Bring your logo, your enrollment message, and your phone number. We handle the layout, sizing, and colour. You approve the proof before anything goes to print.",
         },
         {
           q: "What window graphics work for a daycare storefront?",
