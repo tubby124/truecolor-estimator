@@ -3,14 +3,14 @@ import Link from "next/link";
 import { IndustryPage } from "@/components/site/IndustryPage";
 
 export const metadata: Metadata = {
-  title: { absolute: "Custom Labels Saskatoon | From $5.50/sqft | True Color" },
+  title: { absolute: "Custom Labels Saskatoon | From $25 | True Color" },
   description:
-    "Custom adhesive labels printed in Saskatoon — freezer, product, cosmetic, candle, and roll labels. From $5.50/sqft on 3mil vinyl. 1–3 day turnaround.",
+    "Custom adhesive labels printed in Saskatoon — freezer, product, cosmetic, candle, and roll labels. From $25 on 3mil vinyl. 1–3 day turnaround.",
   alternates: { canonical: "/labels-saskatoon" },
   openGraph: {
     title: "Custom Label Printing Saskatoon | True Color Display Printing",
     description:
-      "Freezer labels, product labels, cosmetic labels, candle labels, roll labels — all printed in-house at 216 33rd St W, Saskatoon. From $5.50/sqft.",
+      "Freezer labels, product labels, cosmetic labels, candle labels, roll labels — all printed in-house at 216 33rd St W, Saskatoon. From $25.",
     url: "https://truecolorprinting.ca/labels-saskatoon",
     images: [{ url: "/images/products/og/labels-saskatoon-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -21,22 +21,23 @@ export default function LabelsSaskatoonHubPage() {
   return (
     <IndustryPage
       canonicalSlug="labels-saskatoon"
-      primaryProductSlug="stickers"
+      primaryProductSlug="product-labels"
       title="Custom Labels — Saskatoon"
-      subtitle="Freezer, product, cosmetic, candle, and roll labels. From $5.50/sqft. Printed in Saskatoon."
+      subtitle="Freezer, product, cosmetic, candle, and roll labels. From $25. Printed in Saskatoon."
       heroImage="/images/products/heroes/freezer-labels-hero-1200x500.webp"
       heroAlt="Custom adhesive labels printed in Saskatoon by True Color Display Printing"
       description={
-        "Custom adhesive labels printed in Saskatoon, starting at $5.50/sqft on 3mil vinyl. Whether you need freezer-grade labels that survive -18°C deep freezers, retail product labels for a Saskatchewan-made artisan brand, waterproof cosmetic labels for a skincare line, heat-resistant labels for candle jars, or thousands of identical labels delivered on a continuous roll for an automated packaging line — we print all of it in-house at 216 33rd St W on our Roland UV printer. No outsourcing, no five-digit case quantities, no waiting on a label broker. Same-day rush available at +$40 flat for orders placed before 10 AM. In-house Photoshop designer builds label layouts at $35 flat with a same-day proof."
+        "Custom adhesive labels printed in Saskatoon, starting at $25 for 25 on 3 mil vinyl. Whether you need freezer-grade labels that survive -18°C deep freezers, retail product labels for a Saskatchewan-made artisan brand, waterproof cosmetic labels for a skincare line, heat-resistant labels for candle jars, or thousands of identical labels delivered on a continuous roll for an automated packaging line — we print all of it in-house at 216 33rd St W on our Roland TrueVIS VG2 eco-solvent printer/cutter. No outsourcing, no five-digit case quantities, no waiting on a label broker. Same-day rush available at +$40 flat for orders placed before 10 AM. In-house Photoshop designer builds label layouts at $35 flat with a same-day proof."
       }
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
             True Color Display Printing prints five categories of custom adhesive labels in
-            Saskatoon, all on our in-house Roland UV printer at 216 33rd St W. Pricing starts
-            at <strong>$5.50/sqft</strong> on 3mil vinyl with a $25 order-total minimum at checkout. Four-tier
-            sqft pricing scales down to <strong>$3.20/sqft</strong> beyond 100 sqft — the
-            same cost-honest sqft tier we use for stickers and decals. No five-digit MOQ from
+            Saskatoon, all on our in-house Roland TrueVIS VG2 eco-solvent printer/cutter at 216 33rd St W. Pricing starts
+            at <strong>$25 for 25 labels</strong> on 3 mil vinyl. A 3×4&quot; label is $67 for 100 and
+            $165 for 500; a 2.5×3.5&quot; is $55 for 100. Labels price per unit on the same
+            quantity ladder we use for stickers, because a small label costs about the same to
+            set up and cut whatever its area. No five-digit MOQ from
             a label converter. Pay for what you order.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -96,20 +97,20 @@ export default function LabelsSaskatoonHubPage() {
         </>
       }
       products={[
-        { name: "Freezer Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Product Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Cosmetic Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Candle & Jar Labels", from: "from $5.50/sqft", slug: "stickers" },
-        { name: "Roll Labels", from: "custom-quoted", slug: "stickers" },
-        { name: "Stickers", from: "from $5.50/sqft", slug: "stickers" },
+        { name: "Freezer Labels", from: "from $25 / 25", slug: "freezer-labels" },
+        { name: "Product Labels", from: "from $25 / 25", slug: "product-labels" },
+        { name: "Cosmetic Labels", from: "from $25 / 25", slug: "cosmetic-labels" },
+        { name: "Candle & Jar Labels", from: "from $25 / 25", slug: "candle-jar-labels" },
+        { name: "Roll Labels", from: "from $25 / 25", slug: "roll-labels" },
+        { name: "Stickers", from: "from $25 / 25", slug: "stickers" },
       ]}
       whyPoints={[
         "Five label categories under one roof — freezer, product, cosmetic, candle, roll — no need to source from multiple suppliers",
         "3mil vinyl + UV-cured ink — print survives moisture, frost, and bathroom humidity without smudging",
-        "Sqft-tier pricing from $5.50/sqft (T1) down to $3.20/sqft (T4 at 100+ sqft)",
+        "25 labels from $25 — a 3×4\" label is $67 for 100, $165 for 500",
         "$25 order-total minimum — no five-digit MOQ like a commercial label converter",
         "Contour cut to rectangle, oval, circle, or custom shape — setup included in the sqft rate",
-        "In-house Roland UV printer at 216 33rd St W — no outsourcing, no file handoffs",
+        "In-house Roland TrueVIS VG2 eco-solvent printer/cutter at 216 33rd St W — no outsourcing, no file handoffs",
         "1–3 business day turnaround after artwork approval, +$40 flat for same-day rush",
         "In-house Photoshop designer at $35 flat with same-day proof — label layouts built from your logo + brief",
       ]}
@@ -120,7 +121,7 @@ export default function LabelsSaskatoonHubPage() {
         },
         {
           q: "How much do custom labels cost in Saskatoon?",
-          a: "Pricing starts at $5.50/sqft on 3mil vinyl, with four sqft tiers that scale down as orders grow: $5.50 for 0–12 sqft, $5.00 for 12–32 sqft, $4.30 for 32–100 sqft, $3.20 for 100+ sqft. A $25 order-total minimum applies at checkout. Real-world anchor: a 10×2\" label at quantity 500 runs about $300. Roll labels are custom-quoted because the run size, die shape, and material core all affect setup.",
+          a: "25 labels start at $25. A 3×4\" label is $67 for 100, $167.50 for 250, and $165 for 500; a 2.5×3.5\" is $55 for 100. Larger formats price by area — a 10×2\" at quantity 500 is $280. Configure your exact size and quantity on any label product page to see the price before ordering. Roll labels are custom-quoted because the run size, die shape, and material core all affect setup.",
         },
         {
           q: "What's the turnaround on custom labels?",
