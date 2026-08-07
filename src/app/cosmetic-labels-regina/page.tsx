@@ -27,7 +27,7 @@ export default function CosmeticLabelsReginaPage() {
       heroImage="/images/products/heroes/cosmetic-labels-hero-1200x500.webp"
       heroAlt="Waterproof cosmetic and skincare labels printed for Regina SK beauty brands by True Color Display Printing"
       description={
-        "Custom cosmetic and skincare labels printed in Saskatoon, shipped to Regina 260 km south. From $25 on waterproof BOPP vinyl — survives bathroom humidity, hand soap residue, and product spills without smudging the print. Built for Regina indie beauty brands, soap and bath bomb makers, lotion and serum producers, and natural-product startups. Roland TrueVIS VG2 eco-solvent inks bond directly to the vinyl. Same in-house design ($35 flat), 1–3 business day turnaround. Ground courier adds 1–2 days."
+        "Custom cosmetic and skincare labels printed in Saskatoon, shipped to Regina 260 km south. From $25 on waterproof BOPP vinyl — survives bathroom humidity, hand soap residue, and product spills without smudging the print. Built for Regina indie beauty brands, soap and bath bomb makers, lotion and serum producers, and natural-product startups. Roland TrueVIS VG2 eco-solvent inks bond directly to the vinyl. Same in-house design ($40 flat), 1–3 business day turnaround. Ground courier adds 1–2 days."
       }
       descriptionNode={
         <>
@@ -59,7 +59,7 @@ export default function CosmeticLabelsReginaPage() {
             <a href="tel:+13069548688" className="text-[#16C2F3] underline font-medium">
               (306) 954-8688
             </a>. We email a proof. Print 1–3 business days + courier 1–2 days. No
-            print-ready artwork? In-house Photoshop designer builds label layouts for $35 flat
+            print-ready artwork? In-house Photoshop designer builds label layouts for $40 flat
             with same-day proof — ingredient panels, batch codes, INCI lists, barcodes
             included.
           </p>
@@ -81,7 +81,7 @@ export default function CosmeticLabelsReginaPage() {
         "Contour-cut to any shape — rectangle, oval, circle, custom die for unique bottles",
         "1–3 business day print + 1–2 day courier to Regina",
         "Same-day rush at +$40 flat when ordered before 10 AM",
-        "In-house Photoshop designer: $35 flat for label layout (INCI lists, batch codes, barcodes)",
+        "In-house Photoshop designer: $40 flat for label layout (INCI lists, batch codes, barcodes)",
       ]}
       faqs={[
         {
