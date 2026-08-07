@@ -107,7 +107,7 @@ export default function EducationSignsSaskatoonPage() {
         },
         {
           q: "Do you print foam board displays for school science fairs and hallway exhibits?",
-          a: "Yes — 3/16\" foam board at $10/sqft (standard 18×24\" fixed SKU from $45) is the standard for science fair backboards and hallway display panels. A 36×48 inch display board is $105. Foam board is lightweight enough for students to carry and can be mounted with adhesive strips or displayed on a tabletop easel. In-house design available for $35 flat if you need a professional layout.",
+          a: "Yes — 3/16\" foam board at $10/sqft (standard 18×24\" fixed SKU from $45) is the standard for science fair backboards and hallway display panels. A 36×48 inch display board is $105. Foam board is lightweight enough for students to carry and can be mounted with adhesive strips or displayed on a tabletop easel. In-house design available for $40 flat if you need a professional layout.",
         },
         {
           q: "Can you handle printing for multiple schools across a Saskatoon school division?",
