@@ -27,7 +27,7 @@ export default function CandleJarLabelsMooseJawPage() {
       heroImage="/images/products/heroes/candle-jar-labels-hero-1200x500.webp"
       heroAlt="Heat-resistant candle and mason-jar labels printed for Moose Jaw SK crafters by True Color Display Printing"
       description={
-        "Custom heat-resistant candle labels and mason-jar labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on matte BOPP vinyl with heat-resistant adhesive. Built for Moose Jaw soy candle crafters, beeswax candle makers, farmers market jam canners, and home-fragrance brands. No bubbling on warm glass, no curling near the flame, no yellowing over a long burn. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier 1–2 days."
+        "Custom heat-resistant candle labels and mason-jar labels printed in Saskatoon, shipped to Moose Jaw 240 km south. From $25 on matte BOPP vinyl with heat-resistant adhesive. Built for Moose Jaw soy candle crafters, beeswax candle makers, farmers market jam canners, and home-fragrance brands. No bubbling on warm glass, no curling near the flame, no yellowing over a long burn. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($40 flat), 1–3 business day turnaround. Ground courier 1–2 days."
       }
       descriptionNode={
         <>
@@ -55,7 +55,7 @@ export default function CandleJarLabelsMooseJawPage() {
             <a href="tel:+13069548688" className="text-[#16C2F3] underline font-medium">
               (306) 954-8688
             </a>. We email a proof. Print 1–3 business days + courier 1–2 days. In-house
-            Photoshop designer builds label layouts for $35 flat with same-day proof.
+            Photoshop designer builds label layouts for $40 flat with same-day proof.
           </p>
         </>
       }
@@ -75,7 +75,7 @@ export default function CandleJarLabelsMooseJawPage() {
         "Wrap-around bodies, top-of-lid circles, side ingredient panels — any shape included",
         "1–3 business day print + 1–2 day courier to Moose Jaw",
         "Same-day rush at +$40 flat when ordered before 10 AM",
-        "In-house Photoshop designer: $35 flat with same-day proof",
+        "In-house Photoshop designer: $40 flat with same-day proof",
       ]}
       faqs={[
         {
