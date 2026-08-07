@@ -142,7 +142,7 @@ export default function StPatricksDayPage() {
         "250 promotional flyers on 80lb gloss — $110 + GST, double-sided printing included",
         "Retractable banner stand + full-colour shamrock print — $219 complete, reuse every year",
         "Same-day rush for +$40 flat — order before 10 AM, pick up same day — call (306) 954-8688",
-        "In-house designer handles shamrock layouts, Celtic patterns, and custom bar branding — $35–50",
+        "In-house designer handles shamrock layouts, Celtic patterns, and custom bar branding — $40 flat",
         "Local Saskatoon pickup at 216 33rd St W — no shipping delays from out-of-province printers",
       ]}
       faqs={[

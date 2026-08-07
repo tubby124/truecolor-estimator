@@ -110,7 +110,7 @@ export default function TradeShowDisplaysSaskatoonPage() {
         },
         {
           q: "Can you design my trade show booth graphics?",
-          a: "Yes — our in-house Photoshop designer builds trade show layouts from scratch for $35. Bring your logo, brand colours, and key message. Proofs are typically ready the same day. We work with your existing brand guidelines to produce booth graphics that match your other marketing materials.",
+          a: "Yes — our in-house Photoshop designer builds trade show layouts from scratch for $40 flat. Bring your logo, brand colours, and key message. Proofs are typically ready the same day. We work with your existing brand guidelines to produce booth graphics that match your other marketing materials.",
         },
         {
           q: "Can I reprint just the banner graphic without buying a new stand?",
