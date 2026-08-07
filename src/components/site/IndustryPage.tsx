@@ -29,6 +29,10 @@ const INDUSTRY_PRODUCT_IMAGES: Record<string, string> = {
   "candle-jar-labels":   "/images/products/product/candle-jar-labels-product-800x600.webp",
   "freezer-labels":      "/images/products/product/freezer-labels-product-800x600.webp",
   "roll-labels":         "/images/products/product/roll-labels-product-800x600.webp",
+  "logo-vectorization":  "/images/products/product/logo-vectorization-product-800x600.webp",
+  "image-upscale":       "/images/products/product/image-upscale-product-800x600.webp",
+  "custom-logo-design":  "/images/products/product/logo-vectorization-sign-application-800x600.webp",
+  "artwork-setup":       "/images/products/product/logo-vectorization-formats-800x600.webp",
 };
 
 export interface IndustryProduct {
