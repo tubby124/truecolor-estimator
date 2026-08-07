@@ -503,3 +503,35 @@ title, meta, OG, subtitle, body, bullets and all 8 FAQs were rewritten on each.
 - Still outstanding: 3 image-upscale-* and 3 logo-vectorization-* city variants carry
   the same ladders, plus ~85 pages with straightforward design-fee refs.
 - Next steps / trigger date: GSC re-check 2026-08-13.
+
+### Phase 103 batches 3-51 (2026-08-06) — full design-fee sweep across 100 pages
+
+Completed the $35 -> $40 design correction across the whole site. 51 commits,
+2 page.tsx each, per the truecolor-seo-safety.md hard cap. Wave 1 price-only:
+no title, H1, slug, or schema change on any page except the two service pages
+whose titles carried a now-retired price (image-upscale, logo-vectorization,
+and their city variants).
+
+- Method: three sweeps with EXACT verified string rules, never proximity
+  heuristics. A first heuristic attempt was scrapped after a dry run showed it
+  would rewrite `5x7" postcards: 50 for $45, 100 for $50, 250 for $95. Design
+  is $35 flat` — turning a real 100-postcard price into $40 because "Design"
+  sat nearer the amount than "postcards". Every rule since is an exact string
+  confirmed across the tree to be the design fee and nothing else.
+- A second trap avoided the same way: "starting at $35" means the design fee on
+  same-day-printing-saskatoon but "starting at $35 for 50 mini postcards" on the
+  postcard page. Identical words, opposite meaning — handled with long-form rules.
+- Also corrected: /products SEO_ONLY_CARDS (Image Upscale "from $15" -> "$20
+  flat", Logo Vectorization "from $50" -> "$40 flat"); the +$25-$50 complexity
+  upcharge on all three logo-vectorization city variants (no upcharge now);
+  the $15/$35/$75 upscale ladder on all three image-upscale city variants.
+- Left deliberately untouched: postcards "from $35", installation "$75", salon
+  door panel "$66-$75", photo posters "$15", the $100/$250 free-bundle
+  thresholds, and "illustrated logo / hand-drawn elements quoted separately"
+  (genuinely custom work, not vectorization).
+- Gates after the sweep: tsc 0, 667 tests, validate:pricing 0 errors, ads
+  config-validator VALIDATED, build 0.
+- **Still open for owner:** several pages describe the press as "Roland UV".
+  brand-voice.md forbids this — it is an eco-solvent printer/cutter. Not fixed
+  here because it touches meta descriptions and is a separate concern.
+- Next steps / trigger date: GSC re-check 2026-08-13.
