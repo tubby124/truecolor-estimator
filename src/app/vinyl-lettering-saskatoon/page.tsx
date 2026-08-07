@@ -26,7 +26,7 @@ export default function VinylLetteringSaskatoonPage() {
       subtitle="Vehicle door lettering from $8.50/sqft | Boat numbers and storefront hours priced by size — cut vinyl, ready same-day."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Vinyl lettering Saskatoon storefront and vehicle"
-      description="Cut vinyl lettering is the cleanest, lowest-cost way to put text and simple shapes on Saskatoon storefront windows, vehicle doors, office glass, boats, and trailers. From $8.50/sqft. Vehicle door lettering from $25/door. Boat registration numbers from $25/set. Storefront hours and business name from $25. A $25 order-total minimum applies at checkout. Professionally cut on a Roland UV plotter using outdoor-rated cast vinyl that lasts 5–7 years — no DIY application risk, no 5–9 day shipping wait. Same-day rush +$40 flat. Designer $35 flat. Simple text layout included at no extra charge. Pickup at 216 33rd St W, Saskatoon."
+      description="Cut vinyl lettering is the cleanest, lowest-cost way to put text and simple shapes on Saskatoon storefront windows, vehicle doors, office glass, boats, and trailers. From $8.50/sqft. Vehicle door lettering from $25/door. Boat registration numbers from $25/set. Storefront hours and business name from $25. A $25 order-total minimum applies at checkout. Professionally cut on a Roland UV plotter using outdoor-rated cast vinyl that lasts 5–7 years — no DIY application risk, no 5–9 day shipping wait. Same-day rush +$40 flat. Designer $40 flat. Simple text layout included at no extra charge. Pickup at 216 33rd St W, Saskatoon."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -78,7 +78,7 @@ export default function VinylLetteringSaskatoonPage() {
             Not sure which vinyl product fits your job? Call (306) 954-8688 and we&apos;ll walk
             you through it in two minutes. Standard turnaround is 1–3 business days. Same-day rush
             is available for $40 flat on orders placed before 10 AM. Our in-house designer handles
-            text layout and spacing for $35 flat with a same-day proof — or just tell us the text
+            text layout and spacing for $40 flat with a same-day proof — or just tell us the text
             and font and we&apos;ll set it up at no extra charge for simple text-only jobs.
             Pickup at 216 33rd St W, Saskatoon.
           </p>
@@ -136,7 +136,7 @@ export default function VinylLetteringSaskatoonPage() {
         },
         {
           q: "Why not just order vinyl lettering online for cheaper?",
-          a: "You can — sites like BannerBuzz and Etsy sell cut vinyl lettering for $15–$25. But you'll wait 5–9 days for shipping, apply it yourself (bubbles, crooked letters, and wrinkled transfers are common first-time mistakes), and have no recourse if the size or colour is wrong. At True Color, your lettering is professionally cut on a Roland UV plotter, weeded, masked, and ready in 1–3 days — or same-day with rush (+$40). We handle layout for $35, install from $75, and you can walk in at 216 33rd St W to pick it up. For $40–$55, you skip the DIY risk and get it right the first time.",
+          a: "You can — sites like BannerBuzz and Etsy sell cut vinyl lettering for $15–$25. But you'll wait 5–9 days for shipping, apply it yourself (bubbles, crooked letters, and wrinkled transfers are common first-time mistakes), and have no recourse if the size or colour is wrong. At True Color, your lettering is professionally cut on a Roland UV plotter, weeded, masked, and ready in 1–3 days — or same-day with rush (+$40). We handle layout for $40, install from $75, and you can walk in at 216 33rd St W to pick it up. For $40–$55, you skip the DIY risk and get it right the first time.",
         },
       ]}
     />
