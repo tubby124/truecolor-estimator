@@ -180,7 +180,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
       : product.material_code;
 
   const fetchPrice = useCallback(async (requestId: number, signal: AbortSignal) => {
-    if (!effectiveWidth || !effectiveHeight) return;
+    // Flat-fee services have no dimensions — the engine prices them off the
+    // category + SVC- material code alone, so the dimension gate must not
+    // short-circuit the quote (it left Add to Cart permanently disabled).
+    if (!product.serviceMode && (!effectiveWidth || !effectiveHeight)) return;
     // Build engine addon codes from active addonQtys (uses engineCode field from products-content.ts)
     const engineAddons = product.addons
       ? product.addons
@@ -268,7 +271,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
     setMinChargeValue(null);
     setPreMinSubtotal(null);
     setRushFee(0);
-    if (!effectiveWidth || !effectiveHeight) {
+    if (!product.serviceMode && (!effectiveWidth || !effectiveHeight)) {
       setLoading(false);
       return;
     }
@@ -961,7 +964,10 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
         </div>
       )}
 
-      {/* Design help */}
+      {/* Design help — hidden on flat-fee services. Offering a "+$40 design"
+          add-on on top of a $40 design service would charge the customer twice
+          for the same work. */}
+      {!product.serviceMode && (
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3" id="design-label">Do You Have a Design File?</p>
         <div className="flex flex-col gap-2" role="radiogroup" aria-labelledby="design-label">
@@ -991,6 +997,7 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }
