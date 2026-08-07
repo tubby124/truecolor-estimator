@@ -88,7 +88,7 @@ export default function BannerPrintingYorktonPage() {
         },
         {
           q: "Can I print bilingual banners for a Yorkton community event?",
-          a: "Yes — we print bilingual English/French banners and any other language. Provide your text in the order notes and our designer lays it out. File prep is $35–$50 depending on complexity.",
+          a: "Yes — we print bilingual English/French banners and any other language. Provide your text in the order notes and our designer lays it out. File prep is $40 flat.",
         },
         {
           q: "How long do vinyl banners last outdoors in Yorkton conditions?",

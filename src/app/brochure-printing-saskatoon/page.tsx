@@ -116,7 +116,7 @@ export default function BrochurePrintingSaskatoonPage() {
         },
         {
           q: "Can the brochure be designed in-house?",
-          a: "Yes — our in-house designer handles tri-fold and half-fold brochure layouts from a rough brief, logo file, or existing content. Layout setup fee starts at $50. Most proofs come back same day.",
+          a: "Yes — our in-house designer handles tri-fold and half-fold brochure layouts from a rough brief, logo file, or existing content. Layout setup fee is $40 flat. Most proofs come back same day.",
         },
       ]}
     />
