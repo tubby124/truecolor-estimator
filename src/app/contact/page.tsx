@@ -43,7 +43,7 @@ const FAQS = [
   },
   {
     q: "Can I drop off artwork in person?",
-    a: "Absolutely. Bring a USB, a printout, or walk in with nothing at all. Our in-house designer can build artwork from a sketch for $35 flat with a same-day proof.",
+    a: "Absolutely. Bring a USB, a printout, or walk in with nothing at all. Our in-house designer can build artwork from a sketch for $40 flat with a same-day proof.",
   },
   {
     q: "Is there a shipping option?",
@@ -301,7 +301,7 @@ export default function ContactPage() {
             </p>
             <p className="text-gray-600 text-base leading-relaxed mb-4">
               Bring a print-ready PDF, a rough sketch, or nothing at all. Our in-house designer
-              can produce a same-day proof for $35 flat. Most standard orders are ready within
+              can produce a same-day proof for $40 flat. Most standard orders are ready within
               1–3 business days. Need it faster? Same-day rush is +$40 flat — order before 10 AM
               and call to confirm capacity.
             </p>
