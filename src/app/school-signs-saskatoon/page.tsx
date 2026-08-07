@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 const description =
-  "Tournament weekend is Thursday. Your coroplast signs, gym banner, and event flyers need to be ready by Friday. Saskatoon K-12 schools, daycares, and school boards get exactly that from True Color — coroplast yard signs from $8/sqft (18×24\" = $24 each), vinyl banners from $8.25/sqft with grommets included, and flyers from $45 per 100. We print in-house on our Roland UV printer — weather-resistant colour with no outsourcing delays. Same-day rush for +$40 flat when you order before 10 AM. In-house designer $35 flat with a same-day proof. Standard turnaround is 1–3 business days.";
+  "Tournament weekend is Thursday. Your coroplast signs, gym banner, and event flyers need to be ready by Friday. Saskatoon K-12 schools, daycares, and school boards get exactly that from True Color — coroplast yard signs from $8/sqft (18×24\" = $24 each), vinyl banners from $8.25/sqft with grommets included, and flyers from $45 per 100. We print in-house on our Roland UV printer — weather-resistant colour with no outsourcing delays. Same-day rush for +$40 flat when you order before 10 AM. In-house designer $40 flat with a same-day proof. Standard turnaround is 1–3 business days.";
 
 export default function SchoolSignsSaskatoon() {
   return (
@@ -62,7 +62,7 @@ export default function SchoolSignsSaskatoon() {
           <p>
             Event flyers start at $45 for 100 copies (500 for $135), and business cards for admin
             and teachers start at $45 for 250. Rush orders go same day for a +$40 flat fee when
-            you order before 10 AM. Our in-house designer creates your layout for $35 flat with a
+            you order before 10 AM. Our in-house designer creates your layout for $40 flat with a
             same-day proof — no files required. Standard turnaround is 1–3 business days from
             artwork approval. Pick up at 216 33rd St W, Saskatoon, or call{" "}
             <a href="tel:+13069548688" className="text-[#16C2F3] underline font-medium">
@@ -103,7 +103,7 @@ export default function SchoolSignsSaskatoon() {
         "Signs ready before your event — same-day rush for +$40 flat, order before 10 AM",
         "Coroplast colour holds through rain, wind, and a full Saskatchewan fall — printed Roland UV in-house",
         "Order 5+ coroplast signs and the price drops 8% automatically",
-        "Bring a logo and your text — our designer builds the layout for $35 flat, same-day proof",
+        "Bring a logo and your text — our designer builds the layout for $40 flat, same-day proof",
         "Gym banners come with grommets — no extra charge, ready to hang on tournament day",
         "1–3 business day standard turnaround — nothing outsourced, no third-party delays",
         "Pick up at 216 33rd St W, Saskatoon — no shipping, no courier to track",
@@ -123,11 +123,11 @@ export default function SchoolSignsSaskatoon() {
         },
         {
           q: "How much does it cost to print event flyers for a school fundraiser?",
-          a: "Flyers start at $45 for 100 copies and $135 for 500 copies. If you need a layout designed from scratch, our in-house designer handles it for $35 flat with a same-day proof. Standard turnaround is 1–3 business days from artwork approval.",
+          a: "Flyers start at $45 for 100 copies and $135 for 500 copies. If you need a layout designed from scratch, our in-house designer handles it for $40 flat with a same-day proof. Standard turnaround is 1–3 business days from artwork approval.",
         },
         {
           q: "Can we get business cards for school admin staff?",
-          a: "Yes. Business cards are 250 for $45 or 500 for $65 (2-sided). Our designer can set up a school-branded template for $35 flat so all staff cards stay consistent. Rush production is +$40 if you need them same day.",
+          a: "Yes. Business cards are 250 for $45 or 500 for $65 (2-sided). Our designer can set up a school-branded template for $40 flat so all staff cards stay consistent. Rush production is +$40 if you need them same day.",
         },
         {
           q: "Do you offer bulk pricing for school board orders?",
@@ -139,7 +139,7 @@ export default function SchoolSignsSaskatoon() {
         },
         {
           q: "Do I need to provide print-ready artwork?",
-          a: "No. Our in-house designer creates your layout from scratch for $35 flat and sends a proof same day. You just provide your logo, text, and any colours or references. Edits are included until you approve.",
+          a: "No. Our in-house designer creates your layout from scratch for $40 flat and sends a proof same day. You just provide your logo, text, and any colours or references. Edits are included until you approve.",
         },
       ]}
       canonicalSlug="school-signs-saskatoon"
