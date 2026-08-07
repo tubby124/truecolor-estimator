@@ -60,7 +60,7 @@ export default function SignsNorthBattlefordPage() {
             truecolorprinting.ca. We email a digital proof for your approval before printing.
             Once approved and payment confirmed, we print in-house and ship to your North Battleford
             address. Standard timeline: 3–5 business days. No design file? Our in-house designer
-            preps artwork from any format for $35 flat, same-day proof. Rush orders available for
+            preps artwork from any format for $40 flat, same-day proof. Rush orders available for
             +$40 — place by 10 AM.
           </p>
         </>
@@ -80,7 +80,7 @@ export default function SignsNorthBattlefordPage() {
         "ACP aluminum from $13/sqft — permanent facility and business signage, 10+ year outdoor lifespan",
         "Vinyl banners from $8.25/sqft — hemmed edges, grommets every 2 ft, 13oz outdoor vinyl",
         "Ships to North Battleford — approve proof by email, 3–5 business days to your door",
-        "In-house designer — $35 flat, same-day proof, works from any logo or rough description",
+        "In-house designer — $40 flat, same-day proof, works from any logo or rough description",
       ]}
       faqs={[
         {

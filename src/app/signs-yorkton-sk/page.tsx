@@ -59,7 +59,7 @@ export default function SignsYorktonPage() {
             To order for Yorkton delivery: call (306) 954-8688 or submit at truecolorprinting.ca.
             We send a digital proof by email for your approval before printing. After approval
             and payment, we print in-house and ship to your Yorkton address. Standard timeline:
-            3–5 business days. No design file? Our in-house designer handles it for $35 flat,
+            3–5 business days. No design file? Our in-house designer handles it for $40 flat,
             same-day proof. Rush orders for +$40 — place by 10 AM for same-day production.
           </p>
         </>
@@ -79,7 +79,7 @@ export default function SignsYorktonPage() {
         "Coroplast from $8/sqft — UV-printed, H-stakes $2.50 each, 2–3 year outdoor lifespan",
         "ACP aluminum from $13/sqft — permanent storefronts and facility signs, 10+ year lifespan",
         "Ships to Yorkton — approve proof by email, 3–5 business days to your door",
-        "In-house designer — $35 flat, same-day proof, any format accepted",
+        "In-house designer — $40 flat, same-day proof, any format accepted",
       ]}
       faqs={[
         {
