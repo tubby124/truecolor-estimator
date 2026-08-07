@@ -23,6 +23,7 @@ const INDUSTRY_PRODUCT_IMAGES: Record<string, string> = {
   "photo-posters":       "/images/products/product/photo-posters-800x600.webp",
   "magnet-calendars":    "/images/products/product/magnet-calendars-800x600.webp",
   "coil-bound-booklets": "/images/products/product/coil-bound-booklet-hero-800x600.webp",
+  "boat-registration-numbers": "/images/industries/boat-registration-numbers/boat-registration-number-decal-aluminum-bow-1200x800.webp",
 };
 
 export interface IndustryProduct {
