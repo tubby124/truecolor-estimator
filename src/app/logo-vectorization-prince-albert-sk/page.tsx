@@ -5,12 +5,12 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Logo Vectorization Prince Albert SK | From $50 | True Color" },
   description:
-    "Convert raster JPG/PNG logos to scalable vector AI/EPS/SVG/PDF for Prince Albert businesses. From $50 flat per logo. Same-day digital delivery.",
+    "Convert raster JPG/PNG logos to scalable vector AI/EPS/SVG/PDF for Prince Albert businesses. From $40 flat per logo. Same-day digital delivery.",
   alternates: { canonical: "/logo-vectorization-prince-albert-sk" },
   openGraph: {
     title: "Logo Vectorization Prince Albert SK | True Color Display Printing",
     description:
-      "Raster to vector logo conversion. AI, EPS, SVG, PDF output. From $50 flat per logo. Same-day digital delivery to Prince Albert.",
+      "Raster to vector logo conversion. AI, EPS, SVG, PDF output. From $40 flat per logo. Same-day digital delivery to Prince Albert.",
     url: "https://truecolorprinting.ca/logo-vectorization-prince-albert-sk",
     images: [{ url: "/images/products/og/logo-vectorization-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -27,13 +27,13 @@ export default function LogoVectorizationPrinceAlbertPage() {
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"
       heroAlt="Logo vectorization service for Prince Albert SK businesses by True Color Display Printing"
       description={
-        "Convert raster logos (JPG, PNG, GIF) to true vector files (AI, EPS, SVG, PDF, vector PNG) for Prince Albert businesses. From $50 flat per logo — scales sharp from a business card to a vinyl banner or storefront sign. Built for PA tourism operators, hunting/fishing outfitters, indigenous-craft brands, fisheries, and small businesses with only a low-resolution web logo. Files delivered same business day via email or Dropbox link — distance is irrelevant for digital deliverables."
+        "Convert raster logos (JPG, PNG, GIF) to true vector files (AI, EPS, SVG, PDF, vector PNG) for Prince Albert businesses. From $40 flat per logo — scales sharp from a business card to a vinyl banner or storefront sign. Built for PA tourism operators, hunting/fishing outfitters, indigenous-craft brands, fisheries, and small businesses with only a low-resolution web logo. Files delivered same business day via email or Dropbox link — distance is irrelevant for digital deliverables."
       }
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
             True Color Display Printing converts raster logos to true scalable vector files
-            for Prince Albert businesses. <strong>$50 flat per logo</strong> — output bundle
+            for Prince Albert businesses. <strong>$40 flat per logo</strong> — output bundle
             includes Adobe Illustrator (.ai), EPS, SVG, PDF, and high-res vector PNG. Same
             logo prints sharp on a business card, fishing-lodge sign, vinyl banner, or
             outfitter vehicle decal. Same-business-day digital delivery to PA — distance
@@ -64,7 +64,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
         </>
       }
       products={[
-        { name: "Logo Vectorization", from: "from $50 flat", slug: "stickers" },
+        { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
         { name: "Image Upscaling", from: "from $15", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
@@ -75,7 +75,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
         "True vector output — scalable from business card to storefront sign without loss",
         "Output formats: AI, EPS, SVG, PDF, vector PNG — every PA sign, print, embroidery vendor covered",
         "Digital delivery — distance is irrelevant, same turnaround as a downtown Saskatoon customer",
-        "$50 flat per simple logo — complex gradient/photo logos quoted +$25–$50",
+        "$40 flat per simple logo — complex gradient/photo logos quoted +$25–$50",
         "Preview before final delivery — verify the vector matches your raster",
         "Combine with True Color print job for one workflow",
         "Rush (under 4 hours) available at +$40 flat",
@@ -84,7 +84,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
       faqs={[
         {
           q: "How much does logo vectorization cost in Prince Albert?",
-          a: "$50 flat per simple logo. Complex logos with gradients, photo-realistic elements, or 6+ colours +$25–$50 depending on detail. Rush (under 4 hours) +$40 flat. Digital delivery, no shipping cost.",
+          a: "$40 flat per simple logo. Complex logos with gradients, photo-realistic elements, or 6+ colours +$25–$50 depending on detail. Rush (under 4 hours) +$40 flat. Digital delivery, no shipping cost.",
         },
         {
           q: "Do you charge more because Prince Albert is further north?",

@@ -5,12 +5,12 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Logo Vectorization Moose Jaw SK | From $50 | True Color" },
   description:
-    "Convert raster JPG/PNG logos to scalable vector AI/EPS/SVG/PDF for Moose Jaw businesses. From $50 flat per logo. Same-day digital delivery.",
+    "Convert raster JPG/PNG logos to scalable vector AI/EPS/SVG/PDF for Moose Jaw businesses. From $40 flat per logo. Same-day digital delivery.",
   alternates: { canonical: "/logo-vectorization-moose-jaw-sk" },
   openGraph: {
     title: "Logo Vectorization Moose Jaw SK | True Color Display Printing",
     description:
-      "Raster to vector logo conversion. AI, EPS, SVG, PDF output. From $50 flat per logo. Same-day digital delivery to Moose Jaw.",
+      "Raster to vector logo conversion. AI, EPS, SVG, PDF output. From $40 flat per logo. Same-day digital delivery to Moose Jaw.",
     url: "https://truecolorprinting.ca/logo-vectorization-moose-jaw-sk",
     images: [{ url: "/images/products/og/logo-vectorization-og-1200x630.webp", width: 1200, height: 630 }],
     type: "website",
@@ -27,13 +27,13 @@ export default function LogoVectorizationMooseJawPage() {
       heroImage="/images/products/heroes/logo-vectorization-hero-1200x500.webp"
       heroAlt="Logo vectorization service for Moose Jaw SK businesses by True Color Display Printing"
       description={
-        "Convert raster logos (JPG, PNG, GIF) to true vector files (AI, EPS, SVG, PDF, vector PNG) for Moose Jaw businesses. From $50 flat per logo — scales sharp from a business card to a 4×8' banner or 10-storey building wrap. Built for Moose Jaw breweries, distilleries, ranches, restaurants, and small businesses with only a low-resolution web logo that needs vector format for signage, embroidery, or large-format printing. Files delivered same business day via email or Dropbox link."
+        "Convert raster logos (JPG, PNG, GIF) to true vector files (AI, EPS, SVG, PDF, vector PNG) for Moose Jaw businesses. From $40 flat per logo — scales sharp from a business card to a 4×8' banner or 10-storey building wrap. Built for Moose Jaw breweries, distilleries, ranches, restaurants, and small businesses with only a low-resolution web logo that needs vector format for signage, embroidery, or large-format printing. Files delivered same business day via email or Dropbox link."
       }
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
             True Color Display Printing converts raster logos to true scalable vector files
-            for Moose Jaw businesses. <strong>$50 flat per logo</strong> — output bundle
+            for Moose Jaw businesses. <strong>$40 flat per logo</strong> — output bundle
             includes Adobe Illustrator (.ai), EPS, SVG, PDF, and high-res vector PNG. The
             same logo prints sharp on a business card, beer bottle label, vinyl banner, or
             building wrap. Same-business-day digital delivery — no shipping required.
@@ -67,7 +67,7 @@ export default function LogoVectorizationMooseJawPage() {
         </>
       }
       products={[
-        { name: "Logo Vectorization", from: "from $50 flat", slug: "stickers" },
+        { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
         { name: "Image Upscaling", from: "from $15", slug: "stickers" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
@@ -78,7 +78,7 @@ export default function LogoVectorizationMooseJawPage() {
         "True vector output — scalable from business card to building wrap without loss",
         "Output formats: AI, EPS, SVG, PDF, vector PNG — covers every Moose Jaw sign, print, embroidery vendor",
         "Same-business-day digital delivery to Moose Jaw — no courier required",
-        "$50 flat per simple logo — complex gradient/photo logos quoted +$25–$50",
+        "$40 flat per simple logo — complex gradient/photo logos quoted +$25–$50",
         "Preview before final delivery — verify the vector matches your raster",
         "Combine with True Color print job for one workflow",
         "Rush (under 4 hours) available at +$40 flat",
@@ -87,7 +87,7 @@ export default function LogoVectorizationMooseJawPage() {
       faqs={[
         {
           q: "How much does logo vectorization cost in Moose Jaw?",
-          a: "$50 flat per simple logo. Complex logos with gradients, photo-realistic elements, or 6+ colours +$25–$50 depending on detail. Rush (under 4 hours) +$40 flat. Digital delivery, no shipping cost.",
+          a: "$40 flat per simple logo. Complex logos with gradients, photo-realistic elements, or 6+ colours +$25–$50 depending on detail. Rush (under 4 hours) +$40 flat. Digital delivery, no shipping cost.",
         },
         {
           q: "What file formats will I get back?",
