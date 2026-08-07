@@ -27,7 +27,7 @@ export default function FreezerLabelsReginaPage() {
       heroImage="/images/products/heroes/freezer-labels-hero-1200x500.webp"
       heroAlt="Freezer adhesive labels printed for Regina SK food businesses by True Color Display Printing"
       description={
-        "Freezer-grade adhesive labels printed in Saskatoon, shipped to Regina 260 km south. From $25 on 3mil vinyl with permanent freezer-grade adhesive (ARLPMF7008) — holds at -18°C through condensation cycles. Built for Regina butchers, food processors, raw pet food makers, ice cream makers, and frozen meal manufacturers. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($35 flat), 1–3 business day turnaround. Ground courier adds 1–2 days. Same-day rush at +$40 flat if ordered before 10 AM."
+        "Freezer-grade adhesive labels printed in Saskatoon, shipped to Regina 260 km south. From $25 on 3mil vinyl with permanent freezer-grade adhesive (ARLPMF7008) — holds at -18°C through condensation cycles. Built for Regina butchers, food processors, raw pet food makers, ice cream makers, and frozen meal manufacturers. Same Roland TrueVIS VG2 eco-solvent print quality, in-house design ($40 flat), 1–3 business day turnaround. Ground courier adds 1–2 days. Same-day rush at +$40 flat if ordered before 10 AM."
       }
       descriptionNode={
         <>
@@ -60,7 +60,7 @@ export default function FreezerLabelsReginaPage() {
               (306) 954-8688
             </a>. We email a proof for approval. Print runs 1–3 business days after sign-off,
             ground courier 1–2 days to Regina. No print-ready artwork? In-house Photoshop
-            designer builds a label layout for $35 flat with same-day proof.
+            designer builds a label layout for $40 flat with same-day proof.
           </p>
         </>
       }
@@ -80,7 +80,7 @@ export default function FreezerLabelsReginaPage() {
         "Roland TrueVIS VG2 eco-solvent inks cure to a solid film — print survives freezer-thaw cycles",
         "1–3 business day production + 1–2 business day courier to Regina",
         "Same-day rush at +$40 flat when ordered before 10 AM",
-        "In-house Photoshop designer: $35 flat for label layout, same-day proof",
+        "In-house Photoshop designer: $40 flat for label layout, same-day proof",
       ]}
       faqs={[
         {
