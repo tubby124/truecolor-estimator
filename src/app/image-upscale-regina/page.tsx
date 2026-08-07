@@ -35,7 +35,7 @@ export default function ImageUpscaleReginaPage() {
             True Color Display Printing offers AI image upscaling and photo restoration as a
             digital service. Send us your low-resolution photo, pixelated logo, or grainy
             family photograph and we&apos;ll return a sharp, print-ready high-resolution file
-            via email or Dropbox link. <strong>$15 basic upscale</strong> handles 2×
+            via email or Dropbox link. <strong>$20 upscale</strong> handles 2×
             resolution for prints up to 12×18&quot;; $35 enhanced adds 4× upscaling,
             noise reduction, and sharpening for banner-sized output. Same-day digital
             delivery to Regina — no shipping required.

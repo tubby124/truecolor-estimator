@@ -129,7 +129,7 @@ export default function LargeFormatPrintingSaskatoonPage() {
         },
         {
           q: "What file format do you need for large format printing?",
-          a: "Ideal: PDF or AI at 100% size, 100 DPI minimum (150+ preferred for banner-scale). We also accept PSD, EPS, and high-res JPEG/PNG. Don't have a print-ready file? Our in-house designer can prep your artwork from a logo, Word doc, or rough sketch — from $35, proof same day.",
+          a: "Ideal: PDF or AI at 100% size, 100 DPI minimum (150+ preferred for banner-scale). We also accept PSD, EPS, and high-res JPEG/PNG. Don't have a print-ready file? Our in-house designer can prep your artwork from a logo, Word doc, or rough sketch — $40 flat, proof same day.",
         },
         {
           q: "Where can I get large format printing in Saskatoon?",
