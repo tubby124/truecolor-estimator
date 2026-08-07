@@ -77,7 +77,7 @@ const FAQS = [
   },
   {
     q: "How much does design work cost?",
-    a: "Our in-house Photoshop designer charges $35 flat for standard layouts (business cards, flyers, single-panel banners) including two revision rounds and a same-day proof on briefs submitted before 10 AM. Full original logo design is $50, and logo recreation or vectorization from a low-res file is also $50.",
+    a: "Our in-house Photoshop designer charges $40 flat for standard layouts (business cards, flyers, single-panel banners) including two revision rounds and a same-day proof on briefs submitted before 10 AM. Full original logo design is $50, and logo recreation or vectorization from a low-res file is also $50.",
   },
   {
     q: "Are taxes included in these prices?",
@@ -257,7 +257,7 @@ export default function PrintingPricesSaskatoonPage() {
               <li>
                 <strong>Whether your artwork is ready to print.</strong>{" "}
                 Send a print-ready file and there is no design charge at all. If you want us to
-                build it, our in-house designer is $35 flat for a standard layout with a same-day
+                build it, our in-house designer is $40 flat for a standard layout with a same-day
                 proof, and $50 either for an original logo or to rebuild one from a
                 low-resolution file. See{" "}
                 <Link href="/graphic-design-saskatoon" className="text-[#16C2F3] underline font-medium">

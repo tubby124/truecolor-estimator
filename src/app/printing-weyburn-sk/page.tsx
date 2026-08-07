@@ -60,7 +60,7 @@ export default function PrintingWeyburnPage() {
             To order for Weyburn delivery: call (306) 954-8688 or submit at truecolorprinting.ca.
             We email a digital proof before printing. After approval and payment, we print
             in-house and ship to your Weyburn address. Standard timeline: 3–5 business days.
-            No design file? Our in-house designer preps artwork from any format for $35 flat,
+            No design file? Our in-house designer preps artwork from any format for $40 flat,
             same-day proof. Rush production available for +$40 — place by 10 AM.
           </p>
         </>
@@ -80,7 +80,7 @@ export default function PrintingWeyburnPage() {
         "Vehicle magnets from $24/sqft — industrial and potash sector fleet branding, removable and reusable",
         "Vinyl banners from $8.25/sqft — 13oz outdoor vinyl, hemmed and grommeted as standard",
         "Ships to Weyburn — approve proof by email, 3–5 business days to your door",
-        "In-house designer — $35 flat, same-day proof, rush production +$40",
+        "In-house designer — $40 flat, same-day proof, rush production +$40",
       ]}
       faqs={[
         {
