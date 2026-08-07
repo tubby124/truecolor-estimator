@@ -12,8 +12,10 @@ const EXPECTED_PRODUCT_HREFS = [
   "/products/business-cards",
   "/products/flyers",
   "/products/retractable-banners",
+  "/products/acp-signs",
+  "/products/vehicle-magnets",
 ];
-const EXPECTED_FROM_PRICES = ["$25", "$25", "$66", "$45", "$45", "$219"];
+const EXPECTED_FROM_PRICES = ["$25", "$25", "$66", "$45", "$45", "$219", "$39", "$25"];
 
 describe("paid-only why True Color page contract", () => {
   it("uses a non-duplicated title and is noindex, follow", () => {
@@ -27,7 +29,7 @@ describe("paid-only why True Color page contract", () => {
     );
   });
 
-  it("exposes exactly the six direct product CTA destinations", () => {
+  it("exposes exactly the eight direct product CTA destinations", () => {
     expect(PAID_PRODUCTS.map((product) => product.href)).toEqual(EXPECTED_PRODUCT_HREFS);
     expect(PAID_PRODUCTS.map((product) => product.fromPrice)).toEqual(EXPECTED_FROM_PRICES);
     expect(PAID_PRODUCTS.every((product) => product.heroImage.startsWith("/images/"))).toBe(true);

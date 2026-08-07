@@ -34,6 +34,7 @@ export const metadata: Metadata = {
 
 const PAID_PRODUCT_SLUGS = [
   "coroplast-signs", "stickers", "vinyl-banners", "business-cards", "flyers", "retractable-banners",
+  "acp-signs", "vehicle-magnets",
 ] as const;
 
 export const PAID_PRODUCTS = PAID_PRODUCT_SLUGS.map((slug) => {
