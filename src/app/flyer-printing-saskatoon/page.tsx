@@ -189,7 +189,7 @@ export default function FlyerPrintingSaskatoonPage() {
         },
         {
           q: "What file format do I need for flyers?",
-          a: "PDF at 150 dpi minimum (at the print size) is preferred. High-res PNG or JPG also accepted. Bleed of 1/8\" on all sides for full-bleed designs. No file? Our in-house designer handles layouts from a rough concept — starting at $35.",
+          a: "PDF at 150 dpi minimum (at the print size) is preferred. High-res PNG or JPG also accepted. Bleed of 1/8\" on all sides for full-bleed designs. No file? Our in-house designer handles layouts from a rough concept — for $40 flat.",
         },
         {
           q: "Do flyers come double-sided?",

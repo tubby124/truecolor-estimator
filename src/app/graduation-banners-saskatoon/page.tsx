@@ -135,7 +135,7 @@ export default function GraduationBannersPage() {
         "Foam board photo backdrop panels from $10/sqft — 24×36\" display for $65, no adhesive, reusable",
         "Retractable banner stand + full-colour grad print — $219 complete, no separate graphic fee",
         "Same-day rush for +$40 flat — don't risk a late delivery before grad day — call (306) 954-8688",
-        "In-house designer builds layouts from your school crest, grad photo, and year — $35–50 flat",
+        "In-house designer builds layouts from your school crest, grad photo, and year — $40 flat flat",
         "Volume discounts on 5+ banners — schools ordering for multiple events save automatically",
         "Local Saskatoon pickup at 216 33rd St W — no shipping from Toronto, no surprises",
       ]}
