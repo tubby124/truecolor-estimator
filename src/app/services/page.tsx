@@ -6,12 +6,12 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 export const metadata: Metadata = {
   title: { absolute: "Printing Services Saskatoon | Design & Install | True Color" },
   description:
-    "Full-service print shop in Saskatoon. Coroplast from $8/sqft, banners from $66, cards from $45. In-house Roland UV, designer $35, rush +$40. 216 33rd St W.",
+    "Full-service print shop in Saskatoon. Coroplast from $8/sqft, banners from $66, cards from $45. In-house Roland UV, designer $40, rush +$40. 216 33rd St W.",
   alternates: { canonical: "/services" },
   openGraph: {
     title: "Printing Services Saskatoon | Design & Install | True Color",
     description:
-      "Full-service print shop in Saskatoon. Coroplast from $8/sqft, banners from $66, cards from $45. In-house Roland UV, designer $35, rush +$40. 216 33rd St W.",
+      "Full-service print shop in Saskatoon. Coroplast from $8/sqft, banners from $66, cards from $45. In-house Roland UV, designer $40, rush +$40. 216 33rd St W.",
     url: "https://truecolorprinting.ca/services",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     type: "website",
@@ -78,7 +78,7 @@ export default function ServicesPage() {
             True Color Display Printing is a full-service print shop at{" "}
             <a href="https://maps.google.com/?q=216+33rd+St+W+Saskatoon+SK+S7L+0V1" target="_blank" rel="noopener noreferrer" className="text-[#16C2F3] hover:underline">216 33rd St W, Saskatoon</a>.
             We print signs, banners, business cards, flyers, decals, and large-format displays on our in-house Roland UV printer.
-            Coroplast signs from $8/sqft. Vinyl banners from $66. Business cards from $45 for 250. In-house designer for $35 flat with a same-day proof. Same-day rush production for +$40 flat on orders before 10 AM. Standard turnaround is 1&ndash;3 business days.
+            Coroplast signs from $8/sqft. Vinyl banners from $66. Business cards from $45 for 250. In-house designer for $40 flat with a same-day proof. Same-day rush production for +$40 flat on orders before 10 AM. Standard turnaround is 1&ndash;3 business days.
           </p>
         </div>
 
@@ -118,9 +118,10 @@ export default function ServicesPage() {
             heading="Graphic Design"
             description="No file? No problem. Our in-house designer handles artwork from rough sketches to print-ready layouts."
             details={[
-              "Logo tweak / minor edits \u2014 $20\u2013$35",
-              "Print layout (flyer, banner, card) \u2014 $35\u2013$50",
-              "Original logo design or vectorization \u2014 $50",
+              "Logo tweak / minor edits \u2014 $40 flat",
+              "Print layout (flyer, banner, card) \u2014 $40 flat",
+              "Original logo design or vectorization \u2014 $40 flat",
+              "Image upscale / resolution fix \u2014 $20 flat",
             ]}
             detailsNote="Same-day proof included. Revisions until you sign off."
             cta="Design services"
@@ -234,7 +235,7 @@ export default function ServicesPage() {
             {[
               "In-house Roland UV printer \u2014 no outsourcing, no shipping delays",
               "16 products priced live online \u2014 see your exact price in 30 seconds",
-              "In-house designer for $35 flat with same-day proof",
+              "In-house designer for $40 flat with same-day proof",
               "Same-day rush production for +$40 flat (order before 10 AM)",
               "Standard turnaround 1\u20133 business days from artwork approval",
               "Local pickup at 216 33rd St W, Saskatoon \u2014 Mon\u2013Fri 9 AM\u20135 PM",

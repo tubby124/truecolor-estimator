@@ -439,3 +439,36 @@ Backfill attributed **14 quotes / $2,977.03** all-time, of which **7 quotes / $9
 - No homepage or SEO page edits. Commit `9455b75` (2026-07-02) already rewrote the homepage title
   targeting `print shop` / `printing near me`; both still show 0% CTR a month later, so metadata is
   not the lever. The 7d sample in the brief (8 -> 6 clicks) is below noise.
+
+## SEO Phase 103 — Design fee $35 -> $40 price-correction sweep (2026-08-06)
+
+Owner-approved 2026-08-06: design collapses to ONE flat $40 across minor edits, full
+design, and logo vectorization. Image upscale becomes a flat $20. Evidence: every
+design job invoiced Jul-Aug 2026 was $40 regardless of scope, including a full vector
+logo rebuild (.AI/.EPS/.SVG/.PDF/PNG, 2-day turnaround) on Jul 13. The site was
+advertising $35 while the shop charged $40.
+
+This is a **Wave 1 price-only correction** — no title, H1, slug, schema, or structural
+change on any page. Permitted on DEFEND pages under the "price corrections allowed,
+no restructuring" clause in seo-protected-pages.md. Shipped 2 page.tsx per commit per
+the seo-wave-guard hard cap.
+
+- Files changed (this commit): src/app/page.tsx, src/app/services/page.tsx
+- What shipped:
+  - Homepage: designer badge, $35 stat tile, and body copy -> $40
+  - /services: meta + OG description, body copy, and the Graphic Design card
+  - /services design ladder ($20-$35 / $35-$50 / $50) collapsed to "$40 flat" x3,
+    plus a new "Image upscale / resolution fix — $20 flat" line
+- What was deferred/flagged:
+  - **93 more page.tsx files still carry the stale design price.** Continuing in
+    2-file batches. Do not push to production until the sweep completes — the engine
+    already charges $40, so any un-swept page under-advertises.
+  - image-upscale-* (4 pages) and logo-vectorization-* (4 pages) need a genuine
+    rewrite, not a number swap: both are structured around tier ladders that no
+    longer exist. image-upscale-saskatoon also has an FAQ titled "How is this
+    different from the $35 design fee?" that goes incoherent at $40 vs $20.
+  - **Not fixed, flagged for owner:** /services lines 9/14/80/111 describe the press
+    as "Roland UV". brand-voice.md forbids this — it is an eco-solvent printer/cutter
+    and must never be called UV. Left alone because correcting it changes the meta
+    description, which is a separate concern from a price fix.
+- Next steps / trigger date: finish remaining batches, then GSC re-check 2026-08-13.

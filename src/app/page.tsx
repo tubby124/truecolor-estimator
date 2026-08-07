@@ -204,7 +204,7 @@ export default function HomePage() {
               <svg className="w-5 h-5 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
               </svg>
-              <span className="font-medium text-gray-700">In-house designer · $35 flat</span>
+              <span className="font-medium text-gray-700">In-house designer · $40 flat</span>
             </span>
             <span className="reveal-section delay-3 flex items-center gap-2.5 whitespace-nowrap">
               <svg className="w-5 h-5 shrink-0 text-[#16C2F3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -234,7 +234,7 @@ export default function HomePage() {
             <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">Standard Turnaround</p>
           </div>
           <div>
-            <p className="text-3xl font-black text-[#1c1712]">$35</p>
+            <p className="text-3xl font-black text-[#1c1712]">$40</p>
             <p className="text-xs uppercase tracking-widest text-gray-400 mt-1.5">In-House Design</p>
           </div>
         </div>
@@ -434,7 +434,7 @@ export default function HomePage() {
             <p>
               Got a rough sketch? A low-res logo? No file at all? Our in-house designer
               handles artwork prep, upscaling, and layout on our Roland UV printer — from
-              your napkin sketch to print-ready in the same visit. Design is $35 flat
+              your napkin sketch to print-ready in the same visit. Design is $40 flat
               with a same-day proof.
             </p>
             <p>
