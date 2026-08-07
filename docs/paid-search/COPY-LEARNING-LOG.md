@@ -423,3 +423,60 @@ traffic, so this is trial-neutral.
 params MUST block analytics ingestion (route-abort GTM/GA domains) — and any GA4 paid read
 MUST exclude known synthetic markers. A funnel report that cannot distinguish its own test
 traffic reports whatever the test suite does, not what customers do.
+
+---
+
+## 2026-08-07 PM (3) — Enhanced conversions implemented; the UI toggle alone was inert, and naive implementation would have caused an outage
+
+Owner enabled "Turn on enhanced conversions" (method: Google Ads API) in the Google Ads UI and
+asked whether it was actually tracking. It was not, and the reason matters.
+
+**The upload sent no user data at all.** `buildDataManagerRequest` attached only `adIdentifiers`
+(gclid/gbraid/wbraid). Enhanced conversions is entirely a function of what the API *sends* —
+ticking the box changes nothing until hashed contact details ride along with the conversion.
+
+**The trap that would have caused an outage.** Verified live with byte-identical `validateOnly`
+payloads on 2026-08-07:
+
+| Payload | Result |
+|---|---|
+| with `userData` | **HTTP 400** `DESTINATION_ACCOUNT_ENHANCED_CONVERSIONS_TERMS_NOT_SIGNED` |
+| without `userData` | **HTTP 200** accepted |
+
+Google rejects the **entire request**, not just the userData block. Shipping unconditional
+userData would have turned a measurement upgrade into a **conversion-upload outage**, discovered
+only when the first real ad sale silently failed to land. `acceptedCustomerDataTerms: true` reads
+true on the account (GAQL-verified) — **customer data terms and enhanced-conversions terms are
+different acceptances.** The UI showing "Customer data terms: Accepted" does not mean EC is armed.
+
+**What shipped:**
+- Normalization + SHA-256 hex hashing with the rules Google actually matches on: trim, lowercase,
+  gmail dot/plus canonicalization, phone → E.164. **Hashing unnormalized text yields a
+  valid-looking digest that matches nothing, with a 200 OK** — same silent-failure shape as
+  Correction 1 and the miner's conversion column.
+- Request-level `encoding: "HEX"`, required whenever userData is present. Omitting it makes Google
+  read hex digests as Base64 — another silent zero-match.
+- **Self-healing fallback:** on the EC-terms violation specifically, the uploader retries once
+  without userData. Unrelated failures do NOT retry. Consequence: conversions keep landing today,
+  and enhanced conversions begin working the instant the owner accepts the terms — no redeploy,
+  no config flip, no coordination.
+- Identifiers are resolved at **upload time** from `orders` → `customers` and never persisted.
+  The outbox stays a queue, not a second PII store. Coverage measured: **54/54 orders since Jul 1
+  have a resolvable email**, 37/54 a phone.
+- `paid-funnel-report.mjs` now probes and prints EC readiness (LIVE / INERT + the exact fix), so
+  this state can never again be assumed from a UI screenshot.
+
+**Owner action still required (2 clicks, cannot be done via API):** Google Ads → Goals →
+Settings → Enhanced conversions → accept the **terms dialog** → Save. The report says INERT until
+then. Nothing else is blocked by it.
+
+**Not implemented, deliberately:** *Enhanced conversions for leads* (shown "Not configured yet").
+That variant uploads conversions with **no click ID**, which would attribute the phone-in and
+manual orders that are ~80% of gross charges — the single largest known attribution gap. It is
+also a materially different privacy posture (sending customer PII for orders that never touched
+an ad) and needs its own conversion action. **Owner decision, not a code change.** Flagged here so
+it is chosen rather than drifted into.
+
+**Promoted to rule:** a third-party toggle is not evidence of a working integration. Probe the
+API with `validateOnly` and assert the result — and when adding an optional field to a request
+that can fail the whole call, ship the fallback in the same commit as the field.
