@@ -56,7 +56,7 @@ export default function WindowPerfSaskatoonPage() {
             All window perf is custom-sized to your exact window dimensions — no standard sizes to
             conform to. Standard turnaround is 1–3 business days. Same-day production available
             for a <strong>+$40 flat</strong> rush fee when ordered before 10 AM. Our in-house
-            designer can set up your artwork for <strong>$35 flat</strong> with a same-day proof.
+            designer can set up your artwork for <strong>$40 flat</strong> with a same-day proof.
             For wall and interior branding beyond glass, see our{" "}
             <Link
               href="/wall-graphics-saskatoon"
@@ -87,7 +87,7 @@ export default function WindowPerfSaskatoonPage() {
         "Printed on Roland UV with outdoor inks — 2–3 years rated Saskatchewan exposure",
         "Applies like a standard decal, removes cleanly when your campaign or lease ends",
         "Same-day turnaround for +$40 flat — order before 10 AM, pick up same day",
-        "In-house designer $35 flat with same-day proof — bring your logo and window size",
+        "In-house designer $40 flat with same-day proof — bring your logo and window size",
       ]}
       faqs={[
         {
