@@ -90,7 +90,7 @@ export default function BusinessCardsPrinceAlbertPage() {
         },
         {
           q: "Can you design business cards for a Prince Albert government or healthcare office?",
-          a: "Yes — our designer builds card layouts from a logo, position title, and contact info for $35–$50. We handle government brand standards and institutional identity requirements. Provide your organization&apos;s logo and we&apos;ll match the style.",
+          a: "Yes — our designer builds card layouts from a logo, position title, and contact info for $40 flat. We handle government brand standards and institutional identity requirements. Provide your organization&apos;s logo and we&apos;ll match the style.",
         },
         {
           q: "How long does it take to get business cards in Prince Albert?",

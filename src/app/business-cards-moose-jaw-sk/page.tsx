@@ -91,7 +91,7 @@ export default function BusinessCardsMooseJawPage() {
         },
         {
           q: "Can you design business cards for a Moose Jaw trades business?",
-          a: "Yes — our designer builds card layouts from a logo, business name, and contact info for $35–$50. Common for electricians, plumbers, landscapers, and HVAC businesses across the Moose Jaw area.",
+          a: "Yes — our designer builds card layouts from a logo, business name, and contact info for $40 flat. Common for electricians, plumbers, landscapers, and HVAC businesses across the Moose Jaw area.",
         },
         {
           q: "How long does it take to get business cards in Moose Jaw?",
