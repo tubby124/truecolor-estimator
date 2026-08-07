@@ -65,7 +65,7 @@ export default function PhotoPosterPrintingSaskatoonPage() {
             File requirements: send your highest-resolution original file — at least 150 DPI at
             final print size, 300 DPI preferred. JPG, PNG, TIFF, and PDF all accepted. Our
             in-house designer can adjust crops, correct white balance, and prepare your file for
-            print for $35 flat with a same-day proof. Standard turnaround is 1–3 business days.
+            print for $40 flat with a same-day proof. Standard turnaround is 1–3 business days.
             Same-day rush available for $40 flat on orders placed before 10 AM. Call (306) 954-8688
             or visit us at 216 33rd St W, Saskatoon.
           </p>
@@ -84,7 +84,7 @@ export default function PhotoPosterPrintingSaskatoonPage() {
         "Order one print or fifty at the same per-unit price — $25 order-total minimum at checkout, no quantity lock-in",
         "Every poster matches your banners and signs — same Roland UV printer for consistent colour across jobs",
         "Event photo ready before the weekend — same-day rush $40 flat on orders before 10 AM",
-        "Crops corrected, white balance fixed, file print-ready — in-house designer $35 flat, same-day proof",
+        "Crops corrected, white balance fixed, file print-ready — in-house designer $40 flat, same-day proof",
         "18×24\" property photo for open house display — $22, ready in 1–3 business days",
         "Local pickup at 216 33rd St W — 1–3 business day standard turnaround",
       ]}
@@ -111,7 +111,7 @@ export default function PhotoPosterPrintingSaskatoonPage() {
         },
         {
           q: "Can you do same-day photo poster printing in Saskatoon?",
-          a: "Yes — same-day rush is available for $40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days from file approval. Call (306) 954-8688 to confirm same-day availability. File prep by our in-house designer (if needed) is $35 flat.",
+          a: "Yes — same-day rush is available for $40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days from file approval. Call (306) 954-8688 to confirm same-day availability. File prep by our in-house designer (if needed) is $40 flat.",
         },
         {
           q: "Do you print sports team photos as large posters?",
