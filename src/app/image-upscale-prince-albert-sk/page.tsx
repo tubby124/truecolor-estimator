@@ -67,7 +67,7 @@ export default function ImageUpscalePrinceAlbertPage() {
       }
       products={[
         { name: "Image Upscaling", from: "from $15", slug: "stickers" },
-        { name: "Logo Vectorization", from: "from $50 flat", slug: "stickers" },
+        { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
         { name: "Photo Posters", from: "from $25", slug: "photo-posters" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
@@ -81,7 +81,7 @@ export default function ImageUpscalePrinceAlbertPage() {
         "Standard formats: PNG, JPG, TIFF, PDF — Dropbox or email delivery",
         "Tourism operator and indigenous-craft brand asset cleanup is a regular PA print job",
         "Rush (under 4 hours) available at +$40 flat",
-        "$35 in-house designer add-on if you need layout work on the upscaled file",
+        "$40 in-house designer add-on if you need layout work on the upscaled file",
       ]}
       faqs={[
         {

@@ -74,7 +74,7 @@ export default function ImageUpscaleReginaPage() {
       }
       products={[
         { name: "Image Upscaling", from: "from $15", slug: "stickers" },
-        { name: "Logo Vectorization", from: "from $50 flat", slug: "stickers" },
+        { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
         { name: "Photo Posters", from: "from $25", slug: "photo-posters" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
@@ -88,7 +88,7 @@ export default function ImageUpscaleReginaPage() {
         "Standard formats: PNG, JPG, TIFF, PDF — Dropbox or email delivery",
         "Family photo restoration: scratches, faded colours, tears repaired",
         "Rush (under 4 hours) available at +$40 flat",
-        "$35 in-house designer add-on if you also need layout work on the upscaled file",
+        "$40 in-house designer add-on if you also need layout work on the upscaled file",
       ]}
       faqs={[
         {
