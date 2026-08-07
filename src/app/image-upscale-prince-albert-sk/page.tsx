@@ -35,9 +35,9 @@ export default function ImageUpscalePrinceAlbertPage() {
             True Color Display Printing offers AI image upscaling and photo restoration as a
             digital service. Send your low-resolution photo, pixelated logo, or grainy
             photograph and we&apos;ll return a sharp, print-ready high-resolution file via
-            email or Dropbox link. <strong>$20 upscale</strong> handles 2×
-            resolution for prints up to 12×18&quot;; $35 enhanced adds 4× upscaling,
-            noise reduction, and sharpening for banner-sized output.
+            email or Dropbox link. It&apos;s <strong>$20 flat per image</strong> — 2×
+            resolution for prints up to 12×18&quot;, or 4× upscaling with noise reduction
+            and sharpening for banner-sized output, at the same one price.
             Same-business-day digital delivery to Prince Albert. Distance is irrelevant for
             digital files — same turnaround whether you&apos;re in PA or downtown Saskatoon.
           </p>
