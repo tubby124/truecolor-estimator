@@ -34,8 +34,23 @@ const GST_RATE_FALLBACK = 0.05;
  */
 const PST_EXEMPT_CATEGORIES = new Set(["DESIGN", "SERVICE"]);
 
-export function isPstExemptCategory(category: string | undefined | null): boolean {
-  return !!category && PST_EXEMPT_CATEGORIES.has(category.toUpperCase());
+/**
+ * A line is exempt only when it is a real standalone service SKU: the category
+ * says DESIGN/SERVICE *and* the material code carries the `SVC-` prefix the
+ * engine already uses to identify services (see engine buildWaveName).
+ *
+ * The material-code half is load-bearing, not belt-and-braces. `SERVICE` is an
+ * overloaded category — the "Small order setup fee" line is written with
+ * category SERVICE and IS PST-taxable (it's setup on tangible goods; see
+ * order TC-2026-0166). Keying the exemption off the category alone would zero
+ * the PST on any order that fee ever reaches.
+ */
+export function isPstExemptCategory(
+  category: string | undefined | null,
+  materialCode?: string | undefined | null,
+): boolean {
+  if (!category || !PST_EXEMPT_CATEGORIES.has(category.toUpperCase())) return false;
+  return !!materialCode && materialCode.toUpperCase().startsWith("SVC-");
 }
 
 function round2(n: number): number {
@@ -53,15 +68,15 @@ function round2(n: number): number {
  *                       keeps the PST-20 treatment intact for the printed portion.
  */
 export function computePstBase(opts: {
-  items: { category?: string | null; sell_price: number }[];
+  items: { category?: string | null; sell_price: number; config?: { material_code?: string | null } | null }[];
   discountedSubtotal: number;
   rush: number;
 }): number {
   const { items, discountedSubtotal, rush } = opts;
-  if (items.length > 0 && items.every((i) => isPstExemptCategory(i.category))) return 0;
-  const exempt = items
-    .filter((i) => isPstExemptCategory(i.category))
-    .reduce((s, i) => s + i.sell_price, 0);
+  const exemptLine = (i: (typeof items)[number]) =>
+    isPstExemptCategory(i.category, i.config?.material_code);
+  if (items.length > 0 && items.every(exemptLine)) return 0;
+  const exempt = items.filter(exemptLine).reduce((s, i) => s + i.sell_price, 0);
   return Math.max(0, round2(discountedSubtotal + rush - exempt));
 }
 
