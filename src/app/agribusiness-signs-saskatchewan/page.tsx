@@ -208,7 +208,7 @@ export default function AgribusinessSignsSaskatchewanPage() {
         },
         {
           q: "Do you offer design help for agribusiness signage?",
-          a: "Yes — our in-house Photoshop designer creates print-ready layouts from your brand guide, a logo file, or a rough sketch. Minor edits and standard layouts are $40 flat with same-day proof. Full design from scratch is $50, and logo creation or vectorization is also $50. All artwork files are yours to keep.",
+          a: "Yes — our in-house Photoshop designer creates print-ready layouts from your brand guide, a logo file, or a rough sketch. Minor edits and standard layouts are $40 flat with same-day proof. Full design from scratch is $50, and logo creation or vectorization is also $40. All artwork files are yours to keep.",
         },
       ]}
     />

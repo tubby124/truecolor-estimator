@@ -99,7 +99,7 @@ export default function BannerPrintingReginaPage() {
         },
         {
           q: "Can you print banners in French for Saskatchewan events?",
-          a: "Yes — we print any language, including bilingual English/French banners. Provide your text in the order notes and our designer will lay it out. File prep is $35–$50 depending on complexity.",
+          a: "Yes — we print any language, including bilingual English/French banners. Provide your text in the order notes and our designer will lay it out. File prep is $40 flat.",
         },
         {
           q: "Do you ship to other Saskatchewan cities besides Regina?",
