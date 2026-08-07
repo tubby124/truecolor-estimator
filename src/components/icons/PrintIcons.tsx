@@ -20,6 +20,10 @@ import {
   Printer,
   Shapes,
   Ship,
+  PenTool,
+  Sparkles,
+  Palette,
+  Wand2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -51,6 +55,12 @@ export const SLUG_ICON_MAP: Record<string, LucideIcon> = {
   "door-hangers": FileText,
   "custom-shape-signs": Shapes,
   "boat-registration-numbers": Ship,
+  // Standalone services — no printed substrate, so these get tool/asset icons
+  // rather than a product shape.
+  "logo-vectorization": PenTool,
+  "image-upscale": Sparkles,
+  "custom-logo-design": Palette,
+  "artwork-setup": Wand2,
 };
 
 /** Map category ID → Lucide icon (staff CategoryPicker) */

@@ -55,6 +55,13 @@ const SEO_ALIASES = {
   "postcards":          "/postcard-printing-saskatoon",
   "brochures":          "/brochure-printing-saskatoon",
   "photo-posters":      "/photo-poster-printing-saskatoon",
+  // Standalone services (added 2026-08-06). Each is sold from an existing service
+  // landing page rather than getting a page of its own — /products/* is noindex,
+  // so a dedicated sitemap entry would be wrong.
+  "logo-vectorization": "/logo-vectorization-saskatoon",
+  "image-upscale":      "/image-upscale-saskatoon",
+  "custom-logo-design": "/graphic-design-saskatoon",
+  "artwork-setup":      "/graphic-design-saskatoon",
 };
 
 // Products that are estimator-only (no dedicated SEO page or /products/ route expected).
