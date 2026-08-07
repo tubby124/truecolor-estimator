@@ -7,6 +7,8 @@ const paidProductRoutes = [
   "/products/business-cards",
   "/products/flyers",
   "/products/retractable-banners",
+  "/products/acp-signs",
+  "/products/vehicle-magnets",
 ] as const;
 
 const resourceRoutes = [
@@ -18,6 +20,17 @@ const resourceRoutes = [
 ] as const;
 
 test.describe("paid and organic ordering journeys", () => {
+  // These journeys navigate with synthetic paid params (utm_medium=cpc, fake gclid).
+  // Without this block, every run against production fires real GA4 hits and pollutes
+  // the google/cpc segment — by 2026-08-07 the fake sessions outnumbered real ad
+  // clicks ~5:1, corrupting the paid-funnel read the ads cadence depends on.
+  test.beforeEach(async ({ page }) => {
+    await page.route(
+      /googletagmanager\.com|google-analytics\.com|analytics\.google\.com|doubleclick\.net/,
+      (route) => route.abort(),
+    );
+  });
+
   test("paid landing page preserves first-touch attribution and routes to configurators", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     const response = await page.goto(
