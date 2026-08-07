@@ -58,7 +58,7 @@ export default function FlyerPrintingReginaPage() {
             We send a digital proof by email before printing. Once approved and payment
             confirmed, we print and ship to your Regina address. Standard turnaround:
             1–3 business days print, plus 1–2 days shipping. No file? Our in-house
-            designer builds from your brand assets for $35–$50.
+            designer builds from your brand assets for $40 flat.
           </p>
         </>
       }
@@ -100,7 +100,7 @@ export default function FlyerPrintingReginaPage() {
         },
         {
           q: "Can you design a flyer for my Regina business from scratch?",
-          a: "Yes — our in-house designer builds flyer layouts from a logo, colour palette, and brief for $35–$50. Common requests: grand openings, seasonal sales, service menus, and event announcements. Provide your logo and key text and we handle the layout.",
+          a: "Yes — our in-house designer builds flyer layouts from a logo, colour palette, and brief for $40 flat. Common requests: grand openings, seasonal sales, service menus, and event announcements. Provide your logo and key text and we handle the layout.",
         },
       ]}
       relatedCities={[

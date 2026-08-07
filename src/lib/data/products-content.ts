@@ -173,7 +173,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What file format do I need to provide?",
-        a: "PDF (preferred), PNG at 150+ DPI, or AI. No file? Our in-house designer handles artwork prep, upscaling, and layout from a rough sketch — starting at $35.",
+        a: "PDF (preferred), PNG at 150+ DPI, or AI. No file? Our in-house designer handles artwork prep and layout from a rough sketch — $40 flat. Image upscaling is $20 flat.",
       },
     ],
     relatedSlugs: ["vehicle-magnets", "vinyl-banners", "acp-signs"],
@@ -323,7 +323,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Business Cards",
     tagline: "250 cards on 14pt gloss stock. $45.",
     description:
-      "14pt gloss card stock is the benchmark for professional business cards in Canada — thick enough to feel substantial in hand, smooth enough for sharp full-colour printing on both sides. At True Color, business cards run on our Konica Minolta digital production press for precise colour matching and a consistent result across every card in the run. The standard 250-card run is $45 double-sided — front design plus a printed reverse, included in the same price since both faces run in one pass. The universal 3.5×2\" format fits every card holder, wallet slot, and Rolodex. Bring a design file (PDF, AI, or EPS preferred) and we'll prep it for print. No design yet? Our in-house designer creates business card layouts from scratch for $50, or updates your existing design for $35 — usually completed the same day. Quantities: 250, 500, or 1000 cards. The per-card cost drops meaningfully at 500 and 1000, so if you distribute them at networking events or on job sites, order up. Single-sided is also available for a leaner look. Business cards are ready for pickup at 216 33rd St W, Saskatoon in 1–3 business days, or next-day with same-day rush.",
+      "14pt gloss card stock is the benchmark for professional business cards in Canada — thick enough to feel substantial in hand, smooth enough for sharp full-colour printing on both sides. At True Color, business cards run on our Konica Minolta digital production press for precise colour matching and a consistent result across every card in the run. The standard 250-card run is $45 double-sided — front design plus a printed reverse, included in the same price since both faces run in one pass. The universal 3.5×2\" format fits every card holder, wallet slot, and Rolodex. Bring a design file (PDF, AI, or EPS preferred) and we'll prep it for print. No design yet? Our in-house designer creates business card layouts from scratch, or updates your existing design, for $40 flat — usually completed the same day. Quantities: 250, 500, or 1000 cards. The per-card cost drops meaningfully at 500 and 1000, so if you distribute them at networking events or on job sites, order up. Single-sided is also available for a leaner look. Business cards are ready for pickup at 216 33rd St W, Saskatoon in 1–3 business days, or next-day with same-day rush.",
     fromPrice: "$45",
     category: "BUSINESS_CARD",
     material_code: "PLACEHOLDER_14PT",
@@ -362,7 +362,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "Do you design business cards?",
-        a: "Yes — our in-house designer can create a layout from scratch (+$50) or make minor adjustments to your existing design (+$35). Just bring your logo and any content you want on the card.",
+        a: "Yes — our in-house designer can create a layout from scratch or make minor adjustments to your existing design — both +$40 flat. Just bring your logo and any content you want on the card.",
       },
       {
         q: "What file format should I provide?",
@@ -377,7 +377,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Flyers",
     tagline: "100 full-letter, double-sided flyers on 80lb gloss from $45.",
     description:
-      "Printed on Pacesetter 80lb gloss text — a bright white, FSC-certified press sheet that produces sharp colour reproduction at an efficient price. The 80lb weight is standard for professional flyers and restaurant menus: stiff enough to hold its shape when handed out, light enough to keep postage manageable for direct mail. True Color runs flyers on our Konica Minolta digital production press with consistent colour from the first sheet to the last. 100 flyers is the minimum. Choose single-sided for basic handouts, menus, or event flyers where the back is blank — or double-sided when you need both faces printed (programs, real estate one-pagers, contractor service lists). Want a heavier feel? Select 100lb gloss — noticeably thicker in hand and a step up in perceived quality. Half-letter (8.5×5.5\") is available directly in the picker above and prints at the same quality as full letter. Common uses in Saskatoon: restaurant menus, event programs, open house handouts, election campaign materials, contractor service lists, and non-profit fundraiser sheets. Supply PDF or high-res PNG at 150+ DPI. No file? Our in-house designer handles layout from a rough concept — starts at $35. Pickup at 216 33rd St W, Saskatoon in 1–2 business days, or same-day rush for $40 flat.",
+      "Printed on Pacesetter 80lb gloss text — a bright white, FSC-certified press sheet that produces sharp colour reproduction at an efficient price. The 80lb weight is standard for professional flyers and restaurant menus: stiff enough to hold its shape when handed out, light enough to keep postage manageable for direct mail. True Color runs flyers on our Konica Minolta digital production press with consistent colour from the first sheet to the last. 100 flyers is the minimum. Choose single-sided for basic handouts, menus, or event flyers where the back is blank — or double-sided when you need both faces printed (programs, real estate one-pagers, contractor service lists). Want a heavier feel? Select 100lb gloss — noticeably thicker in hand and a step up in perceived quality. Half-letter (8.5×5.5\") is available directly in the picker above and prints at the same quality as full letter. Common uses in Saskatoon: restaurant menus, event programs, open house handouts, election campaign materials, contractor service lists, and non-profit fundraiser sheets. Supply PDF or high-res PNG at 150+ DPI. No file? Our in-house designer handles layout from a rough concept — $40 flat. Pickup at 216 33rd St W, Saskatoon in 1–2 business days, or same-day rush for $40 flat.",
     fromPrice: "$45",
     category: "FLYER",
     material_code: "PLACEHOLDER_80LB",
@@ -604,7 +604,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What file format do I need?",
-        a: "PDF (preferred), PNG at 150+ DPI, or AI. Need a design? Our in-house team handles it from a rough sketch — starting at $35.",
+        a: "PDF (preferred), PNG at 150+ DPI, or AI. Need a design? Our in-house team handles it from a rough sketch — $40 flat.",
       },
     ],
     relatedSlugs: ["window-perf", "vinyl-lettering", "vehicle-magnets"],
@@ -974,7 +974,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Vinyl Stickers",
     tagline: "Die-cut vinyl stickers. Minimum 25. Durable indoors and out.",
     description:
-      "Vinyl stickers are printed on Arlon DPF 510 matte adhesive vinyl — the same 3.2 mil calendered film we use for window decals — and die-cut to clean square edges with no white border or carrier sheet separating each sticker. Roland eco-solvent inks produce vivid, durable colour for product packaging, smooth indoor surfaces, and promotional applications. Eight sizes available online — 2×2\", 2×3\", 3×3\", 4×4\", 4×6\", 5×5\", 6×6\", and 8×8\" — starting at 25 stickers. Small label runs start at $25 for 25× 2×2\"; large promo stickers run $380 for 50× 8×8\". Price drops sharply with quantity: 4×4\" stickers run $1.90 each at 50 units and $0.65 each at 1000 units. Custom shapes — circles, ovals, die-cut brand logos — are available by quote. Common uses in Saskatoon: product labels for local food and ag businesses, branded stickers for farm equipment dealerships, event giveaway packs, coffee shop cup stickers, and packaging seals. Stickers are safe for product packaging as long as they don't contact food directly. The removable adhesive peels cleanly from most smooth surfaces — good for promotional campaigns where you want customers to stick your brand on a laptop or water bottle without permanently marking their property. Supply a PDF or high-res PNG at 150+ DPI. In-house design from $35. Pickup at 216 33rd St W, Saskatoon.",
+      "Vinyl stickers are printed on Arlon DPF 510 matte adhesive vinyl — the same 3.2 mil calendered film we use for window decals — and die-cut to clean square edges with no white border or carrier sheet separating each sticker. Roland eco-solvent inks produce vivid, durable colour for product packaging, smooth indoor surfaces, and promotional applications. Eight sizes available online — 2×2\", 2×3\", 3×3\", 4×4\", 4×6\", 5×5\", 6×6\", and 8×8\" — starting at 25 stickers. Small label runs start at $25 for 25× 2×2\"; large promo stickers run $380 for 50× 8×8\". Price drops sharply with quantity: 4×4\" stickers run $1.90 each at 50 units and $0.65 each at 1000 units. Custom shapes — circles, ovals, die-cut brand logos — are available by quote. Common uses in Saskatoon: product labels for local food and ag businesses, branded stickers for farm equipment dealerships, event giveaway packs, coffee shop cup stickers, and packaging seals. Stickers are safe for product packaging as long as they don't contact food directly. The removable adhesive peels cleanly from most smooth surfaces — good for promotional campaigns where you want customers to stick your brand on a laptop or water bottle without permanently marking their property. Supply a PDF or high-res PNG at 150+ DPI. In-house design $40 flat. Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$25",
     category: "STICKER",
     material_code: "ARLPMF7008",
@@ -1030,7 +1030,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What file do I need to supply?",
-        a: "PDF or high-res PNG at 150+ DPI. For die-cut shapes, include a separate cut path in the file. Need a design? Our in-house team starts at $35.",
+        a: "PDF or high-res PNG at 150+ DPI. For die-cut shapes, include a separate cut path in the file. Need a design? Our in-house team is $40 flat.",
       },
     ],
     relatedSlugs: ["window-decals", "business-cards", "flyers"],
@@ -1121,7 +1121,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What file should I send?",
-        a: "PDF or high-res PNG at 150+ DPI, with bleed if your artwork runs to the edge. No print-ready file? Our in-house designer is $35 flat and returns a same-day proof on briefs in before 10 AM.",
+        a: "PDF or high-res PNG at 150+ DPI, with bleed if your artwork runs to the edge. No print-ready file? Our in-house designer is $40 flat and returns a same-day proof on briefs in before 10 AM.",
       },
     ],
     relatedSlugs: ["stickers", "cosmetic-labels", "freezer-labels"],
@@ -1445,7 +1445,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What file format do I need?",
-        a: "PDF with 1/8\" bleed on all sides, or high-res PNG at 300 DPI. Our in-house designer can set up the layout for $35 if you have a rough concept.",
+        a: "PDF with 1/8\" bleed on all sides, or high-res PNG at 300 DPI. Our in-house designer can set up the layout for $40 flat if you have a rough concept.",
       },
     ],
     relatedSlugs: ["flyers", "brochures", "business-cards"],
@@ -1456,7 +1456,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Brochures",
     tagline: "Tri-fold or half-fold. 100lb gloss. From $70.",
     description:
-      "Brochures on 100lb gloss text paper are the step up from flyers when you want something that feels premium in hand. The 100lb weight is noticeably heavier than standard 80lb flyer paper — thick enough to hold a fold without cracking, with a smooth gloss surface that makes full-colour images and brand photography pop. True Color prints brochures on our Konica Minolta digital press, folds and scores them in-house, and has them ready for pickup in 2–3 business days. Choose tri-fold (three equal panels, six sides total) for a compact format that fits in pockets and brochure rack displays. Choose half-fold (folded in half, four larger panels) when you need more content space per panel — popular for event programs, service menus, and property listings. Half-fold adds a small upcharge: $15 extra at 100 qty, $10 extra at 250, $15 extra at 500. Minimum order is 100 brochures. Common uses in Saskatoon: medical clinic and dental practice service menus, real estate property packages, ag dealership spec sheets, contractor company overviews, and non-profit program guides. Supply a print-ready PDF with 1/8\" bleed on all sides. Need layout? Our in-house designer handles tri-fold and half-fold setups from $50. Pickup at 216 33rd St W.",
+      "Brochures on 100lb gloss text paper are the step up from flyers when you want something that feels premium in hand. The 100lb weight is noticeably heavier than standard 80lb flyer paper — thick enough to hold a fold without cracking, with a smooth gloss surface that makes full-colour images and brand photography pop. True Color prints brochures on our Konica Minolta digital press, folds and scores them in-house, and has them ready for pickup in 2–3 business days. Choose tri-fold (three equal panels, six sides total) for a compact format that fits in pockets and brochure rack displays. Choose half-fold (folded in half, four larger panels) when you need more content space per panel — popular for event programs, service menus, and property listings. Half-fold adds a small upcharge: $15 extra at 100 qty, $10 extra at 250, $15 extra at 500. Minimum order is 100 brochures. Common uses in Saskatoon: medical clinic and dental practice service menus, real estate property packages, ag dealership spec sheets, contractor company overviews, and non-profit program guides. Supply a print-ready PDF with 1/8\" bleed on all sides. Need layout? Our in-house designer handles tri-fold and half-fold setups for $40 flat. Pickup at 216 33rd St W.",
     fromPrice: "$70",
     category: "BROCHURE",
     material_code: "PLACEHOLDER_100LB",
@@ -1509,7 +1509,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Rack Cards",
     tagline: "4×9\" DL rack cards. 100lb gloss. Single or double-sided. From $25.",
     description:
-      "Rack cards are the 4\"×9\" (DL format) cards you see standing upright in lobby display racks — at hotels, clinics, restaurants, real estate offices, and tourism centres. True Color prints rack cards on 100lb gloss stock, the same premium paper used for brochures, and cuts them in-house to the standard 4×9\" dimension. Choose single-sided for a front-only menu, price list, or offer card. Choose double-sided to add a QR code, map, contact details, or secondary message on the back — both sides print at no extra charge beyond the stated price. Order as few as 100 for a test run or up to 1000 for a full rack campaign. Common uses in Saskatoon and Saskatchewan: real estate listing cards and open house takeaways, restaurant daily-special cards, clinic service menus, tourism attraction cards, contractor service overviews, and event venue promotions. Supply a print-ready PDF at 4\"×9\" with 1/8\" bleed on all sides. Need a layout? Our in-house designer can set it up from scratch for $35 flat, same-day proof. Rush order available — +$40 for same-day turnaround when you drop off artwork before 10 AM. Standard turnaround is 1–3 business days. Pickup at 216 33rd St W, Saskatoon.",
+      "Rack cards are the 4\"×9\" (DL format) cards you see standing upright in lobby display racks — at hotels, clinics, restaurants, real estate offices, and tourism centres. True Color prints rack cards on 100lb gloss stock, the same premium paper used for brochures, and cuts them in-house to the standard 4×9\" dimension. Choose single-sided for a front-only menu, price list, or offer card. Choose double-sided to add a QR code, map, contact details, or secondary message on the back — both sides print at no extra charge beyond the stated price. Order as few as 100 for a test run or up to 1000 for a full rack campaign. Common uses in Saskatoon and Saskatchewan: real estate listing cards and open house takeaways, restaurant daily-special cards, clinic service menus, tourism attraction cards, contractor service overviews, and event venue promotions. Supply a print-ready PDF at 4\"×9\" with 1/8\" bleed on all sides. Need a layout? Our in-house designer can set it up from scratch for $40 flat, same-day proof. Rush order available — +$40 for same-day turnaround when you drop off artwork before 10 AM. Standard turnaround is 1–3 business days. Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$25",
     category: "FLYER",
     material_code: "PLACEHOLDER_100LB_RACK",
@@ -1657,7 +1657,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Magnet Calendars",
     tagline: "Any size. Team schedules, business calendars, promotions.",
     description:
-      "Promotional magnet calendars are printed on the same 30mil flexible magnetic sheeting as our vehicle magnets, topped with a white gloss vinyl laminate surface that holds vivid full-colour print. The result is a rigid-feeling, professional magnet that sticks to fridges, filing cabinets, locker doors, and any ferromagnetic steel surface. Sports teams order their season schedules on 5×7\" or 8.5×11\" magnets — fans stick them on the fridge and see your logo every day for eight months. Realtors print year-at-a-glance calendars with their headshot and contact info as year-round leave-behinds. Contractors use custom sizes with their phone number and services list as a practical branded giveaway that outlasts any paper flyer. Any standard size from 4×7\" to 8.5×11\" is on the estimator, or enter custom dimensions in the calculator. Pricing is based on square footage — a 5×7\" magnet at 25 units runs well under $2 each before GST. Volume discounts apply: 5% off at 5–9 units, 10% off at 10+. For orders of 50 or more, call us for team bulk pricing. In-house layout and design from $35 for calendar grids, schedule tables, and branded templates. Pickup at 216 33rd St W, Saskatoon.",
+      "Promotional magnet calendars are printed on the same 30mil flexible magnetic sheeting as our vehicle magnets, topped with a white gloss vinyl laminate surface that holds vivid full-colour print. The result is a rigid-feeling, professional magnet that sticks to fridges, filing cabinets, locker doors, and any ferromagnetic steel surface. Sports teams order their season schedules on 5×7\" or 8.5×11\" magnets — fans stick them on the fridge and see your logo every day for eight months. Realtors print year-at-a-glance calendars with their headshot and contact info as year-round leave-behinds. Contractors use custom sizes with their phone number and services list as a practical branded giveaway that outlasts any paper flyer. Any standard size from 4×7\" to 8.5×11\" is on the estimator, or enter custom dimensions in the calculator. Pricing is based on square footage — a 5×7\" magnet at 25 units runs well under $2 each before GST. Volume discounts apply: 5% off at 5–9 units, 10% off at 10+. For orders of 50 or more, call us for team bulk pricing. In-house layout and design $40 flat for calendar grids, schedule tables, and branded templates. Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$45",
     category: "MAGNET",
     material_code: "MAG302437550M",
@@ -1709,7 +1709,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "What file do I need?",
-        a: "PDF or high-res PNG at 150+ DPI at your chosen size. Include 1/8\" bleed on all sides. For calendar templates (month grids, schedule tables), our designer can set these up from $35.",
+        a: "PDF or high-res PNG at 150+ DPI at your chosen size. Include 1/8\" bleed on all sides. For calendar templates (month grids, schedule tables), our designer can set these up for $40 flat.",
       },
     ],
     relatedSlugs: ["vehicle-magnets", "coroplast-signs", "flyers"],
@@ -1804,7 +1804,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     name: "Custom-Shape Signs",
     tagline: "Die-cut to any outline — keys, badges, logos, custom shapes.",
     description:
-      "Custom-shape signs are coroplast or aluminum composite cut to any outline you want — a key shape for an auto dealership, a badge shape for a security company, a custom logo cutout for storefront branding, or any irregular shape that a standard rectangular sign won't deliver. True Color cuts custom shapes in-house at 216 33rd St W, Saskatoon — no outsourcing, no waiting on a third-party fabricator. The base material is 4mm coroplast (the same weatherproof corrugated polypropylene used for our standard yard signs) for outdoor or short-term work, or 3mm ACP (aluminum composite) for permanent installations. The shape is plotted on our cutter from your vector artwork; the full-colour graphic is eco-solvent printed in-house and finished onto the selected substrate. Pricing starts at $50 for a small custom-shape coroplast (around 24×24\") which covers the cut setup and material; design assistance to clean up or recreate your artwork as a print-ready vector is +$15 for simple shape work, or +$35 for full custom design. The SaskNation Used Cars key shape pictured above is a typical example: roughly 36×24\", coroplast with green border, full-colour print, cut to the key outline — exactly the kind of branded statement piece that a rectangular sign can't pull off. Common Saskatoon use cases: real estate \"Just Listed\" signs cut to a house outline, dealership signage cut to a key or car outline, gym signs cut to a shield or badge shape, retail directional signs cut to an arrow shape, and tradeshow booth signage cut to a logo silhouette. Supply your shape as a vector PDF, AI, or SVG with the cut path on a separate layer; if you only have a JPG or PNG, our designer recreates the vector for the $15 simple-shape rate. Same-day rush available on most jobs (+$40 flat). Pickup at 216 33rd St W, Saskatoon.",
+      "Custom-shape signs are coroplast or aluminum composite cut to any outline you want — a key shape for an auto dealership, a badge shape for a security company, a custom logo cutout for storefront branding, or any irregular shape that a standard rectangular sign won't deliver. True Color cuts custom shapes in-house at 216 33rd St W, Saskatoon — no outsourcing, no waiting on a third-party fabricator. The base material is 4mm coroplast (the same weatherproof corrugated polypropylene used for our standard yard signs) for outdoor or short-term work, or 3mm ACP (aluminum composite) for permanent installations. The shape is plotted on our cutter from your vector artwork; the full-colour graphic is eco-solvent printed in-house and finished onto the selected substrate. Pricing starts at $50 for a small custom-shape coroplast (around 24×24\") which covers the cut setup and material; design assistance to clean up or recreate your artwork as a print-ready vector is +$40 flat, whether it's a simple trace or a full custom design. The SaskNation Used Cars key shape pictured above is a typical example: roughly 36×24\", coroplast with green border, full-colour print, cut to the key outline — exactly the kind of branded statement piece that a rectangular sign can't pull off. Common Saskatoon use cases: real estate \"Just Listed\" signs cut to a house outline, dealership signage cut to a key or car outline, gym signs cut to a shield or badge shape, retail directional signs cut to an arrow shape, and tradeshow booth signage cut to a logo silhouette. Supply your shape as a vector PDF, AI, or SVG with the cut path on a separate layer; if you only have a JPG or PNG, our designer recreates the vector for the $40 flat design fee. Same-day rush available on most jobs (+$40 flat). Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$50",
     category: "SIGN",
     material_code: "MPHCC020",
@@ -1830,7 +1830,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
       { label: "Print", value: "Full-colour eco-solvent printed graphic" },
       { label: "Cut", value: "In-house plotter cut to your vector outline" },
       { label: "File required", value: "PDF / AI / SVG with cut path on a separate layer (vector)" },
-      { label: "Design from raster (JPG/PNG)", value: "+$15 simple shape recreation, +$35 full custom design" },
+      { label: "Design from raster (JPG/PNG)", value: "+$40 flat — simple trace or full custom design" },
       { label: "Sides", value: "Single-sided (double-sided custom shapes by quote)" },
       { label: "Setup", value: "$50 starting price covers cut setup + small shape" },
       { label: "Turnaround", value: "2–4 business days · same-day rush +$40 flat" },
@@ -1843,11 +1843,11 @@ export const PRODUCTS: Record<string, ProductContent> = {
       },
       {
         q: "How much is design help if I only have a logo image?",
-        a: "$15 for simple shape recreation (clean tracing of an existing logo or outline), or $35 for full custom design from a rough sketch. Most custom-shape jobs land in the $15 tier — we just need a clean vector cut path.",
+        a: "$40 flat, whether it's a clean trace of an existing logo or outline or a full custom design from a rough sketch. There's no tier ladder — one price either way. Most custom-shape jobs just need a clean vector cut path.",
       },
       {
         q: "What file format do you need for the cut path?",
-        a: "Vector PDF, AI, or SVG with the cut path on a separate layer (typically named \"CutContour\" or stroked in a spot colour). If you don't have vector artwork, send your highest-resolution raster and we'll recreate it for $15.",
+        a: "Vector PDF, AI, or SVG with the cut path on a separate layer (typically named \"CutContour\" or stroked in a spot colour). If you don't have vector artwork, send your highest-resolution raster and we'll recreate it for $40 flat.",
       },
       {
         q: "Coroplast or ACP — which should I pick?",
@@ -1877,7 +1877,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
         "4mm coroplast for outdoor/short-term — weatherproof, lightweight, $50 base",
         "3mm ACP for permanent installations — rigid, indefinite outdoor lifespan",
         "Plotter-cut in-house from your vector artwork — no outsourcing",
-        "Design assist for raster files: $15 simple shape, $35 full design",
+        "Design assist for raster files: $40 flat — simple trace or full design",
         "Same-day rush available (+$40 flat)",
       ],
     },

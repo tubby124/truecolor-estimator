@@ -98,7 +98,7 @@ export default function VinylLetteringSaskatoonPage() {
         "Standard colours: white, black, red, dark blue, gold — available in stock for fast turnaround",
         "Removable without damaging glass or factory paint when it's time to update",
         "Same-day rush for $40 flat — need your storefront hours on the door before opening? Done",
-        "In-house designer at $35 — text layout, spacing, and font selection handled same day",
+        "In-house designer at $40 — text layout, spacing, and font selection handled same day",
         "Local pickup at 216 33rd St W, Saskatoon — 1–3 business day standard turnaround",
       ]}
       faqs={[

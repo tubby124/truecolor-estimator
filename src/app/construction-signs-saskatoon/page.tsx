@@ -93,7 +93,7 @@ export default function ConstructionPage() {
         "30mil truck door magnets that stay on at highway speeds — from $24/sqft (12×18\" door magnet ≈ $36)",
         "Safety signs: Hard Hat Area, No Entry, site ID — coroplast $8/sqft, 18×24\" $24 ($25 order-total minimum at checkout)",
         "250 business cards from $45 — one stop for signs, magnets, and cards — call (306) 954-8688",
-        "In-house designer handles low-res logos, rough sketches, and phone photos — from $35",
+        "In-house designer handles low-res logos, rough sketches, and phone photos — $40 flat",
         "Local Saskatoon pickup at 216 33rd St W — no shipping delays from a national print chain",
       ]}
       faqs={[
@@ -127,7 +127,7 @@ export default function ConstructionPage() {
         },
         {
           q: "I just have a rough logo from my phone. Can you work with that?",
-          a: "Yes — our in-house designer handles low-res logos, rough sketches, and phone photos. We'll upscale, clean up, and make it print-ready for coroplast, magnets, and business cards. Design service starts at $35. If you've worked with us before, your artwork is on file and reprints are ready faster.",
+          a: "Yes — our in-house designer handles low-res logos, rough sketches, and phone photos. We'll upscale, clean up, and make it print-ready for coroplast, magnets, and business cards. Design service is $40 flat. If you've worked with us before, your artwork is on file and reprints are ready faster.",
         },
       ]}
     />

@@ -228,7 +228,7 @@ export default function WallGraphicsSaskatoonPage() {
         },
         {
           q: "What file do I need to provide for wall graphics?",
-          a: "PDF at 150 dpi minimum at print size. JPG is accepted for photo-based prints. If you don't have a print-ready file, our in-house designer will build the layout from your brief for $35–$50. We also clean up low-resolution logos for large-format use.",
+          a: "PDF at 150 dpi minimum at print size. JPG is accepted for photo-based prints. If you don't have a print-ready file, our in-house designer will build the layout from your brief for $40 flat. We also clean up low-resolution logos for large-format use.",
         },
       ]}
     />

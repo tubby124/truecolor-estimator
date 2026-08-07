@@ -61,7 +61,7 @@ export default function BannerPrintingReginaPage() {
             We send you a digital proof for approval before printing anything. Once approved and
             payment confirmed, your order goes to print — standard turnaround is 1–3 business days,
             then 1–2 days shipping to Regina via courier. Plan for 3–5 business days total.
-            No print-ready file? Our in-house designer preps artwork from any format for $35–$50.
+            No print-ready file? Our in-house designer preps artwork from any format for $40 flat.
           </p>
         </>
       }
@@ -78,7 +78,7 @@ export default function BannerPrintingReginaPage() {
         "Volume pricing: 5% off at 5+ banners, 10% off at 10+ banners, 15% off at 25+ banners",
         "Retractable banner stands from $219 — complete, ready to use",
         "Ships to Regina — order online, approve proof by email, delivered by courier",
-        "In-house designer: file prep from any format starting at $35",
+        "In-house designer: file prep from any format for $40 flat",
       ]}
       faqs={[
         {

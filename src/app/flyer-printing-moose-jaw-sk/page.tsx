@@ -58,7 +58,7 @@ export default function FlyerPrintingMooseJawPage() {
             We email a proof for approval. Once confirmed and payment received, we print
             and ship to Moose Jaw. Standard production: 1–3 business days, plus 1–2 days
             shipping. Shipping from Saskatoon to Moose Jaw typically $20–$35 for flyer
-            orders. Designer service from $35–$50 if no artwork on file.
+            orders. Designer service for $40 flat if no artwork on file.
           </p>
         </>
       }

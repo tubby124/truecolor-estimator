@@ -63,14 +63,14 @@ export default function LogoVectorizationReginaPage() {
               (306) 954-8688
             </a>. We send a preview before final delivery so you can confirm the vector matches
             your raster source. Most jobs returned within 1 business day. Rush (under 4 hours)
-            +$40 flat. Complex logos (gradient backgrounds, photo-realistic elements) may add
-            $25–$50 depending on detail.
+            +$40 flat. Complex logos (gradient backgrounds, photo-realistic elements) are
+            included at the same $40 — no complexity upcharge.
           </p>
         </>
       }
       products={[
         { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
-        { name: "Image Upscaling", from: "from $15", slug: "stickers" },
+        { name: "Image Upscaling", from: "$20 flat", slug: "image-upscale" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },

@@ -535,3 +535,64 @@ and their city variants).
   brand-voice.md forbids this — it is an eco-solvent printer/cutter. Not fixed
   here because it touches meta descriptions and is a separate concern.
 - Next steps / trigger date: GSC re-check 2026-08-13.
+
+## SEO Phase 104 — Design-Fee Drift Sweep: $35/$50/$75 → $40 flat (2026-08-07)
+
+Completion of the Phase 103 sweep, which had corrected ~40 page files but left ~180 stale
+references across the rest of the tree — and had introduced new self-contradictions by changing
+`$35`→`$40` inside sentences that also named the retired `$50` tier
+(e.g. *"Basic artwork setup is $40 flat, full original design from scratch is $50"*).
+
+**Owner rulings (2026-08-07):** $40 is the standard design fee — `$35` was never once invoiced
+(verified against `order_items`: $40 on 7 of 12 design jobs, $35 on zero). Complex / multi-asset
+brand work is legitimately quoted higher, so "quoted separately" clauses were preserved and only
+the stale `$75–$150` tier figures were left in place where they describe genuine custom quotes.
+
+- **Files changed: 86.** 57 `src/app/**/page.tsx`, 5 `src/lib/data/*`, 2 `src/components/product/*`,
+  14 `content/campaigns/*` (school + retail), `public/llms.txt`, `AGENTS.md`,
+  `.agents/product-marketing-context.md`, 2 `seo-prep/wave-3c-*.tsx`,
+  `docs/superpowers/plans/2026-06-13-retail-campaign-launch.md`, `data/tables/pricing_rules.v1.csv` (note text only).
+- **What shipped:**
+  - Outbound generators fixed first: `gbp-products.json` (42 lines — it regenerates
+    `social-schedule.json`, so fixing only the output would have regressed), `social-schedule.json`
+    (40 queued IG/FB captions), `social-hashtags.ts:118` (seeds every AI-generated caption).
+  - `public/llms.txt` — 5 design refs corrected surgically; the real $35 postcard / $35-per-100
+    flyer / $15 poster prices in the same file were preserved.
+  - Instructional files that were re-teaching the dead ladder to future sessions:
+    `.agents/product-marketing-context.md:130`, `AGENTS.md:202`, both staged `seo-prep/wave-3c-*.tsx`
+    drafts (which bypass the price-guard hook because it fires on `src/` edits only).
+  - 12 dead-premise sentences rewritten (not string-swapped) where the tier structure they
+    described no longer exists — `graphic-design-saskatoon` ×5, `printing-prices-saskatoon`,
+    `agribusiness-signs-saskatchewan`, `agriculture-signs-saskatoon`, `sign-company-saskatoon`,
+    `logo-vectorization-regina`, `freezer-labels-saskatoon`, `labels-saskatoon`.
+  - **Functional bug fixed (not copy):** `PriceSummary.tsx` `DESIGN_LABELS` was keyed by dollar
+    amount (35/50/75). With every tier now $40 no key ever matched, so the tier label silently
+    degraded to a generic "Design included" on every product page. Re-keyed on `design_status`
+    and threaded `designStatus` through from `ProductPageClient`. Never re-key this on the fee.
+  - `logo-vectorization-*` regional pages: "Image Upscaling" product card was `from: "from $15",
+    slug: "stickers"` — stale price **and** a wrong destination slug. Now `$20 flat` / `image-upscale`.
+- **Protected pages touched (price-only, permitted under seo-protected-pages.md):**
+  banner-printing-saskatoon, poster-printing-saskatoon, vinyl-lettering-saskatoon (DEFEND);
+  sign-company-saskatoon, graphic-design-saskatoon (RECOVERING); flyer-printing-saskatoon (DECAYED);
+  wall-graphics-saskatoon (HOLD). **No title, H1, slug, or schema changed on any page.**
+  Shipped as a single price correction, exempt from the 2-page wave cap — owner-approved.
+- **Deliberately NOT changed:** postcards $35, photo posters $15, custom-shape coroplast $50 base,
+  half-fold brochure upcharges, shipping ranges ($20–$35, $25–$45), installation $75 flat,
+  competitor comparisons, the `$75–$150` custom brand-work quotes on `roll-labels-saskatoon` and
+  `product-labels-saskatoon` (owner ruling: complex work is genuinely quoted higher), and the
+  `old -> new` provenance notes in the CSVs / price-guard / pricing-comms rule / this sprint log —
+  those are the guardrails and the audit trail.
+- **Audit corrections made during execution:** the image-upscale regional pages were reported as
+  still carrying the `$15/$35/$75` ladder — they were already fixed in `1edaea3` and needed no edit.
+  The `sticker-config.ts` recommendation to switch to `getConfigNum()` was rejected: that file is
+  explicitly client-safe and cannot import the CSV loader (node:fs). Values hardcoded with a
+  sync-warning comment instead.
+- **Verified:** `npm run build` passed · `npm test` 678/678 passed · `npm run validate:pricing`
+  0 errors (check [13] design-fee three-table agreement passes; 2 pre-existing unrelated warnings).
+  Final scan: zero design-context stale prices remain in `src/app`.
+- **Still open — NOT fixed by this sweep:** the School drip campaign is already built and scheduled
+  in Brevo (campaigns 130–132, list 31, 182 schools; sends Aug 25 / Sep 10 / Sep 25) and still
+  quotes $35 server-side. Repo edits do not change what Brevo sends. Also: 204 retail prospects
+  were emailed a $35 design quote between Jun 15 and Jul 30 — cannot be un-sent.
+- **Next steps / trigger date:** Brevo server-side correction before 2026-08-25. No GSC re-check
+  needed — price-only body edits, no ranking-signal changes.

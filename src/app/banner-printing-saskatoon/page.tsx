@@ -160,7 +160,7 @@ export default function BannerPrintingSaskatoonPage() {
         },
         {
           q: "What file format do you need for banners?",
-          a: "PDF at 150 dpi minimum (at print size). JPG files are accepted for simpler designs. If you have a low-res logo or rough layout, our in-house designer can prep it for $35–$50.",
+          a: "PDF at 150 dpi minimum (at print size). JPG files are accepted for simpler designs. If you have a low-res logo or rough layout, our in-house designer can prep it for $40 flat.",
         },
         {
           q: "Do you print banners for Saskatoon events and trade shows?",

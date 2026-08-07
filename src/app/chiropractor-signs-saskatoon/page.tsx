@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Chiropractor Signs Saskatoon | Displays & Cards | True Color" },
   description:
-    "Foamboard displays, retractable banners, and referral cards for Saskatoon chiropractors and physiotherapists. From $10/sqft. In-house designer $35. Local pickup.",
+    "Foamboard displays, retractable banners, and referral cards for Saskatoon chiropractors and physiotherapists. From $10/sqft. In-house designer $40. Local pickup.",
   alternates: { canonical: "/chiropractor-signs-saskatoon" },
   openGraph: {
     title: "Chiropractor Signs Saskatoon | True Color Display Printing",

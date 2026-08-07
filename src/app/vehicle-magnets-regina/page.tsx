@@ -55,7 +55,7 @@ export default function VehicleMagnetsReginaPage() {
             a digital proof by email before printing. Once approved and payment confirmed, we
             print and ship to your Regina address. Standard turnaround is 1–3 business days
             after approval, plus 1–2 days shipping. No print-ready file? Our in-house designer
-            can build your layout from a logo, business card, or rough sketch for $35–$50.
+            can build your layout from a logo, business card, or rough sketch for $40 flat.
           </p>
         </>
       }

@@ -58,7 +58,7 @@ export default function RealEstatePage() {
           <p className="text-gray-600 leading-relaxed mb-6">
             Our in-house designer handles brokerage templates, low-res headshots, and
             last-minute copy changes so your files are print-ready without hiring an outside
-            designer — design starts at $35 and proofs come back the same day. We work with
+            designer — design is $40 flat and proofs come back the same day. We work with
             RE/MAX, Century 21, eXp, Coldwell Banker, Royal LePage, and independent brokerages.
             Need to brand your vehicle? 12×18&quot; vehicle magnets from $36 each —
             your face and phone number visible at every showing and open house.

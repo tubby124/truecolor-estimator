@@ -55,7 +55,7 @@ export default function BusinessCardsMooseJawPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             To order: submit your quote at truecolorprinting.ca or call (306) 954-8688.
-            Upload your artwork or have our designer build your card for $35–$50. We email
+            Upload your artwork or have our designer build your card for $40 flat. We email
             a proof before printing. Standard turnaround: 1–3 business days print, plus
             1–2 days shipping to Moose Jaw. Shipping typically runs $15–$25 for card orders.
           </p>

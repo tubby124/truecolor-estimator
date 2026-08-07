@@ -199,7 +199,7 @@ estimate(EstimateRequest) → EstimateResponse
 4. Sqft-tier pricing (match rule by category + material + sqft range)
 5. Add-ons: GROMMETS (auto from perimeter), H_STAKE ($2.50), CARD_STOCK_16PT (+$10)
 6. Apply minimum charge (min_charge from rule, or category default)
-7. Design fee (MINOR_EDIT +$35, FULL_DESIGN +$50, LOGO_RECREATION +$75)
+7. Design fee (+$40 flat — MINOR_EDIT, FULL_DESIGN, and LOGO_RECREATION are all one price)
 8. Rush fee (+$40 flat, PST-exempt)
 9. Totals: sell_price (pre-tax), gst = sell_price × gst_rate, total = sell_price + gst
 10. PST at checkout only: pst = (sell_price - design_fee) * 0.06 per item

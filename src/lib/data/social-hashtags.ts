@@ -115,7 +115,7 @@ PRODUCTS & PRICES (all pre-GST):
 - Business cards (250): $45 double-sided | fast turnaround
 - Retractable banners: Starting ~$110 | portable, trade show ready
 - Window decals, stickers, foam board displays, postcards, brochures, photo posters, magnet calendars
-- Graphic design: $35 flat for standard layouts | full custom from scratch | same-day proofs included
+- Graphic design: $40 flat — one price for minor edits, full design from scratch, and logo vectorization | same-day proofs included | complex multi-asset brand work quoted separately
 
 WHO WE SERVE: Restaurants, bars, retailers, farms, construction, healthcare, events, sports teams — any Saskatoon business that needs something printed.
 

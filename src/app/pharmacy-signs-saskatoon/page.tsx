@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Pharmacy Signs Saskatoon | Displays & Banners | True Color" },
   description:
-    "Foamboard promo displays, flu season banners, and window decals for Saskatoon pharmacies and health stores. From $10/sqft. In-house designer $35. Local pickup.",
+    "Foamboard promo displays, flu season banners, and window decals for Saskatoon pharmacies and health stores. From $10/sqft. In-house designer $40. Local pickup.",
   alternates: { canonical: "/pharmacy-signs-saskatoon" },
   openGraph: {
     title: "Pharmacy Signs Saskatoon | True Color Display Printing",

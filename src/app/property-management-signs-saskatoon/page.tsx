@@ -103,7 +103,7 @@ export default function PropertyManagementSignsPage() {
         },
         {
           q: "Can I get no-trespassing and reserved parking signs printed here?",
-          a: "Yes — we print no-trespassing, reserved parking, no-dumping, and any other regulation sign on coroplast (temporary/seasonal) or ACP aluminum (permanent exterior). Coroplast 18×24\" is $24 each (tops up to the $25 order-total minimum for a single sign); $24 each for additional copies in the same order. ACP is $13/sqft (small panels hit the $25 order minimum). We match standard regulation wording or use your custom text. In-house designer handles layouts for $35.",
+          a: "Yes — we print no-trespassing, reserved parking, no-dumping, and any other regulation sign on coroplast (temporary/seasonal) or ACP aluminum (permanent exterior). Coroplast 18×24\" is $24 each (tops up to the $25 order-total minimum for a single sign); $24 each for additional copies in the same order. ACP is $13/sqft (small panels hit the $25 order minimum). We match standard regulation wording or use your custom text. In-house designer handles layouts for $40.",
         },
         {
           q: "What material is best for outdoor property signs in Saskatchewan?",
@@ -119,7 +119,7 @@ export default function PropertyManagementSignsPage() {
         },
         {
           q: "Can you print vinyl banners for a leasing event or show suite?",
-          a: "Yes — vinyl banners are one of the highest-impact tools for a leasing event or show-suite weekend. A 2×4' banner is $66 with grommets included — hang it on a fence, railing, or building exterior. Larger 3×6' banners are $135. Same-day rush available for $40. We can design a leasing event banner for $35.",
+          a: "Yes — vinyl banners are one of the highest-impact tools for a leasing event or show-suite weekend. A 2×4' banner is $66 with grommets included — hang it on a fence, railing, or building exterior. Larger 3×6' banners are $135. Same-day rush available for $40. We can design a leasing event banner for $40.",
         },
         {
           q: "Can I get my property management company logo on vehicle magnets?",

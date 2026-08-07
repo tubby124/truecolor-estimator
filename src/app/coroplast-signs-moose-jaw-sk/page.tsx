@@ -59,7 +59,7 @@ export default function CoroplastSignsMooseJawPage() {
             We send a digital proof for email approval. After approval and payment, we print
             and ship to Moose Jaw — standard production is 1–3 business days, plus 1–2 days
             shipping. Shipping from Saskatoon to Moose Jaw typically runs $20–$35 depending
-            on order size. No print-ready file? Our designer preps artwork for $35–$50.
+            on order size. No print-ready file? Our designer preps artwork for $40 flat.
           </p>
         </>
       }

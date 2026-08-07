@@ -68,7 +68,7 @@ export default function LogoVectorizationMooseJawPage() {
       }
       products={[
         { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
-        { name: "Image Upscaling", from: "from $15", slug: "stickers" },
+        { name: "Image Upscaling", from: "$20 flat", slug: "image-upscale" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
@@ -95,7 +95,7 @@ export default function LogoVectorizationMooseJawPage() {
         },
         {
           q: "Do you vectorize logos for Moose Jaw breweries and distilleries?",
-          a: "Yes — brewery and distillery brand assets are a common vectorization job. The same logo file needs to print sharp on a bottle label, tap handle engraving, hat embroidery, vinyl banner, and storefront sign. One $50 vector file replaces five separate format quotes.",
+          a: "Yes — brewery and distillery brand assets are a common vectorization job. The same logo file needs to print sharp on a bottle label, tap handle engraving, hat embroidery, vinyl banner, and storefront sign. One $40 vector file replaces five separate format quotes.",
         },
         {
           q: "How do I send True Color my logo for vectorization?",

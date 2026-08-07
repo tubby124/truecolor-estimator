@@ -121,7 +121,7 @@ Photo posters on Roland Photobase Matte 220gsm are the standard format for event
 
 True Color Display Printing serves the full range of Saskatoon poster buyers: event planners and non-profits running fundraisers, restaurants promoting seasonal specials, retail stores updating interior displays, schools ordering sports and event posters, real estate agents printing open house boards, and University of Saskatchewan researchers printing academic conference posters (36×48" = $65). The Saskatoon Fringe Festival (late July–August) generates high seasonal demand from 200+ performing artists needing 18×24" and 24×36" event posters. Retractable banner stands ($219, economy, graphic print included) are used by Saskatoon businesses for trade show booths, event displays, and recurring branded presentations that pack into a carry bag between events.
 
-True Color's in-house Photoshop designer handles layout, resizing, colour correction, and new artwork for a flat $35 design fee with a same-day proof — eliminating the need for a separate design vendor before printing. Same-day rush printing is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Walk-ins welcome at 216 33rd St W, Saskatoon SK S7L 0V1. Phone: (306) 954-8688. Every poster printed at True Color Display Printing is produced in-house on the Roland UV printer — no outsourcing, consistent colour, reliable timelines.`}
+True Color's in-house Photoshop designer handles layout, resizing, colour correction, and new artwork for a flat $40 design fee with a same-day proof — eliminating the need for a separate design vendor before printing. Same-day rush printing is available for +$40 flat on orders placed before 10 AM. Standard turnaround is 1–3 business days after artwork approval. Walk-ins welcome at 216 33rd St W, Saskatoon SK S7L 0V1. Phone: (306) 954-8688. Every poster printed at True Color Display Printing is produced in-house on the Roland UV printer — no outsourcing, consistent colour, reliable timelines.`}
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -226,11 +226,11 @@ True Color's in-house Photoshop designer handles layout, resizing, colour correc
         },
         {
           q: "What file format do I need for poster or display printing?",
-          a: "True Color Display Printing accepts PDF at 150 dpi minimum at print size, or high-resolution JPG/PNG at 300 dpi in CMYK colour mode. If your file is lower resolution or not print-ready, True Color's in-house Photoshop designer can prepare it for a flat $35 fee with a same-day proof. Call (306) 954-8688 to confirm file specs before sending artwork.",
+          a: "True Color Display Printing accepts PDF at 150 dpi minimum at print size, or high-resolution JPG/PNG at 300 dpi in CMYK colour mode. If your file is lower resolution or not print-ready, True Color's in-house Photoshop designer can prepare it for a flat $40 fee with a same-day proof. Call (306) 954-8688 to confirm file specs before sending artwork.",
         },
         {
           q: "Can I get event displays designed and printed at the same shop in Saskatoon?",
-          a: "Yes. True Color Display Printing has an in-house Photoshop designer who handles layout, resizing, colour correction, and new artwork for a flat $35 design fee with a same-day proof — across posters, foamboard, and retractable banner graphics. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors. Same-day rush is available for +$40 flat on orders placed before 10 AM. Call (306) 954-8688.",
+          a: "Yes. True Color Display Printing has an in-house Photoshop designer who handles layout, resizing, colour correction, and new artwork for a flat $40 design fee with a same-day proof — across posters, foamboard, and retractable banner graphics. Design and printing happen at the same location — 216 33rd St W, Saskatoon SK S7L 0V1 — no files moving between vendors. Same-day rush is available for +$40 flat on orders placed before 10 AM. Call (306) 954-8688.",
         },
         {
           q: "What's the best poster or display option for a fundraiser, gala, or non-profit event in Saskatoon?",

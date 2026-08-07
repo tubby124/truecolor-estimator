@@ -54,7 +54,7 @@ export default function BannerPrintingPrinceAlbertPage() {
             We email a proof for approval. Once confirmed and payment received, we print
             and ship to Prince Albert via courier. Standard turnaround: 1–3 business days
             print, plus 1–2 days shipping. Shipping from Saskatoon to Prince Albert
-            typically runs $25–$40 for banner orders. Designer service from $35–$50.
+            typically runs $25–$40 for banner orders. Designer service for $40 flat.
           </p>
         </>
       }

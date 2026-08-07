@@ -77,7 +77,7 @@ const FAQS = [
   },
   {
     q: "How much does design work cost?",
-    a: "Our in-house Photoshop designer charges $40 flat for standard layouts (business cards, flyers, single-panel banners) including two revision rounds and a same-day proof on briefs submitted before 10 AM. Full original logo design is $40, and logo recreation or vectorization from a low-res file is also $40.",
+    a: "Our in-house Photoshop designer charges $40 flat for standard layouts (business cards, flyers, single-panel banners) including two revision rounds and a same-day proof on briefs submitted before 10 AM. Full original logo design, recreation, and vectorization from a low-res file are all the same $40. Complex multi-asset brand projects are quoted individually.",
   },
   {
     q: "Are taxes included in these prices?",

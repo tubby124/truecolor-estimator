@@ -133,7 +133,7 @@ export default function LabelsSaskatoonHubPage() {
         },
         {
           q: "Do I need print-ready artwork?",
-          a: "If you have it (AI, PDF, PSD, PNG, JPG, even a high-quality photo of what you're trying to recreate), send it and we'll proof it. If you don't, our in-house Photoshop designer builds a label layout for $40 flat with a same-day proof. Logos, ingredient panels, weight/lot tracking fields, barcodes — all standard label work, all included in the $35.",
+          a: "If you have it (AI, PDF, PSD, PNG, JPG, even a high-quality photo of what you're trying to recreate), send it and we'll proof it. If you don't, our in-house Photoshop designer builds a label layout for $40 flat with a same-day proof. Logos, ingredient panels, weight/lot tracking fields, barcodes — all standard label work, all included in the $40.",
         },
         {
           q: "Can True Color print labels for a packaging line?",

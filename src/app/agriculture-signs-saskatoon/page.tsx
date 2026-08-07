@@ -203,7 +203,7 @@ export default function AgricultureSignsSaskatoonPage() {
         },
         {
           q: "Can I get banners and signs designed if I don\u2019t have a logo?",
-          a: "Yes \u2014 our in-house Photoshop designer handles layouts from a rough sketch, description, or brand guide for $40 flat. Logo creation or vectorization is $50. Most proofs come back same day. Design and print happen in the same building \u2014 no files moving between vendors.",
+          a: "Yes \u2014 our in-house Photoshop designer handles layouts from a rough sketch, description, or brand guide for $40 flat. Logo creation and vectorization are the same $40. Most proofs come back same day. Design and print happen in the same building \u2014 no files moving between vendors.",
         },
       ]}
     />

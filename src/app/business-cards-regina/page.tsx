@@ -57,7 +57,7 @@ export default function BusinessCardsReginaPage() {
           <p className="text-gray-600 leading-relaxed">
             To order: submit your quote at truecolorprinting.ca or call (306) 954-8688.
             Upload your artwork or have our in-house designer build your card from scratch
-            for $35–$50. We email a proof before printing. Once approved and payment
+            for $40 flat. We email a proof before printing. Once approved and payment
             confirmed, we print and ship to Regina. Standard turnaround: 1–3 business days
             print, plus 1–2 days shipping.
           </p>
@@ -93,7 +93,7 @@ export default function BusinessCardsReginaPage() {
         },
         {
           q: "Can you design business cards for a Regina real estate agent?",
-          a: "Yes — our in-house designer handles card layouts from a logo and text brief for $35–$50. We produce cards for realtors, brokers, and property managers across Saskatchewan regularly. Provide your brokerage logo and contact details.",
+          a: "Yes — our in-house designer handles card layouts from a logo and text brief for $40 flat. We produce cards for realtors, brokers, and property managers across Saskatchewan regularly. Provide your brokerage logo and contact details.",
         },
         {
           q: "How long does it take to get business cards delivered to Regina?",

@@ -33,7 +33,7 @@ export default function PrintingNearMeSaskatoonPage() {
       subtitle="Local print shop at 216 33rd St W — banners, business cards, flyers, signs, stickers. Same-day rush +$40 when ordered before 10 AM. Pickup, no shipping delays."
       heroImage="/images/products/product/banner-vinyl-colorful-800x600.webp"
       heroAlt="Local Saskatoon print shop — True Color Display Printing at 216 33rd St W"
-      description="True Color Display Printing is a local Saskatoon print shop at 216 33rd St W — banners, business cards, flyers, signs, stickers, vinyl, vehicle magnets, foamboard, ACP aluminum. Full-colour Roland UV printer in-house. Standard turnaround 1–3 business days. Same-day rush available for +$40 flat when ordered before 10 AM. In-house designer $35 flat with same-day proof. Local pickup means no shipping delays."
+      description="True Color Display Printing is a local Saskatoon print shop at 216 33rd St W — banners, business cards, flyers, signs, stickers, vinyl, vehicle magnets, foamboard, ACP aluminum. Full-colour Roland UV printer in-house. Standard turnaround 1–3 business days. Same-day rush available for +$40 flat when ordered before 10 AM. In-house designer $40 flat with same-day proof. Local pickup means no shipping delays."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -74,7 +74,7 @@ export default function PrintingNearMeSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Don&apos;t have artwork ready? Our in-house designer prepares files for{" "}
-            <strong>$35 flat</strong> with same-day digital proof. Bring a logo, a rough
+            <strong>$40 flat</strong> with same-day digital proof. Bring a logo, a rough
             sketch, or a Word doc — we build the print-ready file. Call{" "}
             <strong>(306) 954-8688</strong> or visit the shop directly. Open Mon–Fri.
             We&apos;re a 5-minute drive from Riversdale, 8th Street, and downtown
@@ -95,7 +95,7 @@ export default function PrintingNearMeSaskatoonPage() {
         "Local pickup at 216 33rd St W — no shipping delays, no courier fees",
         "Roland UV printer in-house — same colour quality every run, no outsourcing",
         "Same-day rush +$40 flat when ordered before 10 AM — most jobs out by 4 PM",
-        "In-house designer $35 flat with same-day proof — bring any rough idea",
+        "In-house designer $40 flat with same-day proof — bring any rough idea",
         "Real prices on every product — banners $66, BCs $45, flyers $45, signs $30, stickers $160 (no \"contact for pricing\" runaround)",
         "Saskatoon-owned, family-run — staff who answer the phone are the same people printing your job",
         "Wide format + commercial print under one roof — fewer vendors to coordinate for trade shows + grand openings",
@@ -111,7 +111,7 @@ export default function PrintingNearMeSaskatoonPage() {
         },
         {
           q: "What does it cost to print at a local Saskatoon shop?",
-          a: "Real entry prices: vinyl banners from $66 (2×4ft), business cards from $45 (250), flyers from $45 (100), coroplast signs from $30, die-cut stickers from $160 (100). All include full-colour print. Same-day rush +$40. In-house designer $35 if you need artwork built.",
+          a: "Real entry prices: vinyl banners from $66 (2×4ft), business cards from $45 (250), flyers from $45 (100), coroplast signs from $30, die-cut stickers from $160 (100). All include full-colour print. Same-day rush +$40. In-house designer $40 if you need artwork built.",
         },
         {
           q: "Can I bring my file in person, or do I have to email?",

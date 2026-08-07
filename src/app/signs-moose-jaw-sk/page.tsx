@@ -58,7 +58,7 @@ export default function SignsMooseJawPage() {
             We send a digital proof for your approval before printing. After approval and payment,
             we print in-house in Saskatoon and ship to your Moose Jaw address.
             Standard timeline: 3–5 business days. No design file? Our designer preps
-            artwork for $35–$50 — from any logo, photo, or rough description.
+            artwork for $40 flat — from any logo, photo, or rough description.
           </p>
         </>
       }
@@ -76,7 +76,7 @@ export default function SignsMooseJawPage() {
         "Vehicle magnets from $24/sqft — removable, no adhesive residue",
         "Retractable banner stands from $219 — complete and ready to use",
         "Ships to Moose Jaw — order online, proof approval by email",
-        "In-house designer — from $35 to prep any file format",
+        "In-house designer — $40 flat to prep any file format",
       ]}
       faqs={[
         {

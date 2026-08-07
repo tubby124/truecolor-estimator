@@ -207,6 +207,7 @@ export function ProductPageClient({ product }: Props) {
             loading={priceData.loading}
             addonTotal={priceData.addonTotal}
             designFee={priceData.designFee}
+            designStatus={configData.designStatus}
             gst={priceData.gst}
             pst={priceData.pst}
             total={priceData.total}

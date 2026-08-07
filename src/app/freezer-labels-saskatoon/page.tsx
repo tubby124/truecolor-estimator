@@ -61,7 +61,7 @@ export default function FreezerLabelsSaskatoonPage() {
         },
         {
           q: "Can you design the label or do I need print-ready artwork?",
-          a: "Either works. If you have print-ready artwork (AI, PDF, PSD, PNG, JPG), send it and we'll proof it. If you don't, our in-house Photoshop designer builds a label layout for $40 flat with a same-day proof. Logos, ingredient panels, weight/lot tracking fields — all standard label work, all included in the $35.",
+          a: "Either works. If you have print-ready artwork (AI, PDF, PSD, PNG, JPG), send it and we'll proof it. If you don't, our in-house Photoshop designer builds a label layout for $40 flat with a same-day proof. Logos, ingredient panels, weight/lot tracking fields — all standard label work, all included in the $40.",
         },
         {
           q: "Who uses these labels in Saskatoon?",
@@ -77,7 +77,7 @@ export default function FreezerLabelsSaskatoonPage() {
         },
         {
           q: "Where can I buy freezer labels in Saskatoon?",
-          a: "True Color Display Printing at 216 33rd St W, Saskatoon. Call (306) 954-8688 or email info@true-color.ca to start a quote. Standard hours, in-person pickup, in-house Roland TrueVIS VG2 eco-solvent printer/cutter, $35 design help if you need a label layout built, +$40 flat for same-day rush if your production line can't wait the 1–3 business day standard turnaround.",
+          a: "True Color Display Printing at 216 33rd St W, Saskatoon. Call (306) 954-8688 or email info@true-color.ca to start a quote. Standard hours, in-person pickup, in-house Roland TrueVIS VG2 eco-solvent printer/cutter, $40 design help if you need a label layout built, +$40 flat for same-day rush if your production line can't wait the 1–3 business day standard turnaround.",
         },
       ]}
     />

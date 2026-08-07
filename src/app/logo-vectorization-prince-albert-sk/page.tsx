@@ -65,7 +65,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
       }
       products={[
         { name: "Logo Vectorization", from: "from $40 flat", slug: "stickers" },
-        { name: "Image Upscaling", from: "from $15", slug: "stickers" },
+        { name: "Image Upscaling", from: "$20 flat", slug: "image-upscale" },
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
@@ -92,7 +92,7 @@ export default function LogoVectorizationPrinceAlbertPage() {
         },
         {
           q: "Do you vectorize logos for PA tourism operators and outfitters?",
-          a: "Yes — PA fishing lodges, hunting camps, and eco-tour operators often have only old web logos that look fine on a website but pixelate when printed on a vehicle decal, sign, or merchandise. A $50 vector file works across every use case.",
+          a: "Yes — PA fishing lodges, hunting camps, and eco-tour operators often have only old web logos that look fine on a website but pixelate when printed on a vehicle decal, sign, or merchandise. A $40 vector file works across every use case.",
         },
         {
           q: "What file formats will I get back?",

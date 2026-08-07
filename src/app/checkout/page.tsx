@@ -938,7 +938,7 @@ export default function CheckoutPage() {
                 </div>
               )}
               <p className="text-xs text-gray-400 mt-2">
-                No file yet? Bring it on USB or email us after — our designer starts at $35.
+                No file yet? Bring it on USB or email us after — our designer is $40 flat.
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 For the best results, you can also email high-quality artwork directly to{" "}

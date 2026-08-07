@@ -58,7 +58,7 @@ export default function FlyerPrintingPrinceAlbertPage() {
             We email a proof for approval. Once confirmed and payment received, we print
             and ship to Prince Albert. Standard production: 1–3 business days, plus
             1–2 days shipping. Shipping from Saskatoon to Prince Albert (140 km north)
-            typically runs $25–$40 for flyer orders. Designer service from $35–$50.
+            typically runs $25–$40 for flyer orders. Designer service for $40 flat.
           </p>
         </>
       }
@@ -88,7 +88,7 @@ export default function FlyerPrintingPrinceAlbertPage() {
         },
         {
           q: "Can you print flyers for a Prince Albert healthcare or government campaign?",
-          a: "Yes — we print for healthcare facilities, government public awareness campaigns, and nonprofit organizations across Prince Albert. We match institutional brand standards. Provide your logo and brief and our designer handles the layout for $40–$50.",
+          a: "Yes — we print for healthcare facilities, government public awareness campaigns, and nonprofit organizations across Prince Albert. We match institutional brand standards. Provide your logo and brief and our designer handles the layout for $40 flat.",
         },
         {
           q: "What flyer sizes do you offer for Prince Albert customers?",

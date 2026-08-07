@@ -58,7 +58,7 @@ export default function PrintingSwiftCurrentPage() {
             truecolorprinting.ca. We email a digital proof for approval, then print in Saskatoon
             and ship to Swift Current via courier. Standard timeline: 3–5 business days.
             Shipping is the customer&apos;s responsibility — we quote it before you commit.
-            No design file? Our in-house designer preps artwork from any format for $35–$50.
+            No design file? Our in-house designer preps artwork from any format for $40 flat.
           </p>
         </>
       }

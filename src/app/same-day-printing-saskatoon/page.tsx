@@ -97,7 +97,7 @@ export default function SameDayPrintingSaskatoonPage() {
         "Rush fee is $40 flat on the full order — no per-sign or per-item upcharge",
         "Order before 10 AM — ready for pickup by 5 PM the same day",
         "In-house Roland UV printer — we never outsource, so we control the timeline",
-        "In-house designer: bring your file or we prep it on the spot (from $35)",
+        "In-house designer: bring your file or we prep it on the spot ($40 flat)",
         "Call (306) 954-8688 to confirm same-day capacity before ordering",
         "Pickup at 216 33rd St W, Saskatoon — no shipping delay, ever",
       ]}
