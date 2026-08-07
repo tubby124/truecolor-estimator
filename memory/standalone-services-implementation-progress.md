@@ -65,14 +65,37 @@ prices them. Confirmed live against `POST /api/estimate`:
 
 No rows added to `products.v1.csv`. `/pricing-review` therefore does not apply —
 no price is being created or changed anywhere in the data layer.
-- [ ] **Wave 2 — tax correctness**: exempt DESIGN/SERVICE lines from PST in
-      `api/orders/route.ts` + `lib/pricing/tax.ts` + checkout total preview.
-      Gate: `/ecommerce-ux` before this ships.
-- [ ] **Wave 3 — wire the funnel**: repoint `primaryProductSlug` on all 9 landing
-      pages, add the service to their `products` arrays, add
-      `INDUSTRY_PRODUCT_IMAGES` entries.
-- [ ] **Wave 4 — verify**: `npm run validate:pricing`, `npm test`, `/pricing-health`,
-      `/e2e-test`, then push.
+- [x] **Wave 2 — tax correctness**: `computePstBase()` in `lib/pricing/tax.ts` is now
+      the shared source of truth, called by BOTH `api/orders/route.ts` and the
+      checkout preview. Service-only order → PST base 0 (rush + setup included);
+      mixed cart → PST-20 treatment retained on the printed portion.
+      `/ecommerce-ux` gate run. 7 new tests.
+- [x] **Wave 3 — wire the funnel**: all 9 landing pages repointed;
+      `INDUSTRY_PRODUCT_IMAGES` + `SLUG_ICON_MAP` + `SEO_ALIASES` entries added.
+      Product cards on the upscale pages also repointed off `stickers`.
+      Service cards NOT added to the "What you need" grid — optional follow-up.
+- [x] **Wave 4 — verify**: `validate:pricing` 0 errors, 678/678 tests, `tsc` clean,
+      build clean, post-edit price hook clean on every touched page.
+      **NOT YET RUN: `/pricing-health` and `/e2e-test` — both are required before push.**
+
+## STATUS: committed locally, NOT pushed
+Commits: `67c0b61` (SKUs + tax) · `a5a9d08`/`7ba0c4c` (card images) · `19f0015`,
+`1edaea3`, `af69e28` + 2 CTA pairs (landing pages). Nothing deployed to Railway.
+
+## Retired-price drift cleaned up along the way
+The owner retired both price ladders on 2026-08-06 but the pages were never updated:
+- $15/$35/$75 upscale ladder → **$20 flat** on image-upscale-{regina,moose-jaw-sk,
+  prince-albert-sk}, including title tags and meta descriptions.
+- $50 design tier → **$40 flat** on graphic-design-saskatoon, including a $35 meta ref.
+- Four "Roland UV" descriptions → eco-solvent. The post-edit price hook hard-blocks
+  on these; found only because the hook was run manually after a scripted edit.
+
+## Still open (not blockers)
+- Stale "$35 design" copy in the stickers entry of `products-content.ts`; sweep the
+  file for $35/$50/$75 design references.
+- `AGENTS.md` line 205 documents `pst = (sell_price - design_fee) * 0.06`, which the
+  code does not do (it taxes the full subtotal). Pre-existing doc/code drift.
+- Dedicated card art for custom-logo-design / artwork-setup (reusing vectorization art).
 
 ## Images
 `logo-vectorization-product-800x600.webp` and `image-upscale-product-800x600.webp`
