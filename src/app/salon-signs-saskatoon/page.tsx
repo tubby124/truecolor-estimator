@@ -27,7 +27,7 @@ const descriptionNode = (
     before anyone opens the door. Colour accuracy matters here — our Roland UV in-house
     printer reproduces your exact brand palette, whether that is a specific dusty rose,
     champagne gold, or deep plum. Send your Pantone reference or brand guide and our
-    in-house designer matches it for $35 flat with a same-day proof. Foamboard service
+    in-house designer matches it for $40 flat with a same-day proof. Foamboard service
     menu displays from $10/sqft replace the laminated handout sheet at reception or each
     station — an 18×24&quot; board runs $45, a 24×36&quot; runs $65. Grand opening vinyl banners
     start at $66 for a 2×4 ft and pull walk-by traffic during your first weeks open.
@@ -61,7 +61,7 @@ export default function SalonSignsSaskatoonPage() {
       subtitle="Your storefront window decides in 3 seconds — window vinyl, service menus, and referral cards printed with exact colour accuracy."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Window decals and foamboard service menus for Saskatoon hair salons and spas printed by True Color Display Printing"
-      description="A potential client decides whether to walk into your salon before they ever read your reviews. That decision happens at your storefront window. Window decals from $11/sqft are the most impactful print piece for Saskatoon hair salons, nail salons, spas, and barber shops — our Roland UV in-house printer reproduces your exact brand palette, whether dusty rose, champagne gold, or deep plum. In-house designer $35 flat, same-day proof. Foamboard service menus from $10/sqft, referral cards 250 for $45, grand opening banners from $66. Rush +$40 flat."
+      description="A potential client decides whether to walk into your salon before they ever read your reviews. That decision happens at your storefront window. Window decals from $11/sqft are the most impactful print piece for Saskatoon hair salons, nail salons, spas, and barber shops — our Roland UV in-house printer reproduces your exact brand palette, whether dusty rose, champagne gold, or deep plum. In-house designer $40 flat, same-day proof. Foamboard service menus from $10/sqft, referral cards 250 for $45, grand opening banners from $66. Rush +$40 flat."
       descriptionNode={descriptionNode}
       products={[
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },
@@ -77,21 +77,21 @@ export default function SalonSignsSaskatoonPage() {
         "Foamboard service menus from $10/sqft — an 18×24\" board at reception replaces the laminated handout and looks the part",
         "Referral business cards 250 for $45 — your lowest cost-per-acquisition tool when a happy client hands one to a friend",
         "Grand opening vinyl banners from $66 — attract walk-by traffic during the weeks that set your client base",
-        "In-house Photoshop designer — $35 flat, same-day proof, brand-accurate results without an outside agency",
+        "In-house Photoshop designer — $40 flat, same-day proof, brand-accurate results without an outside agency",
         "We print same-day for +$40 flat — order before 10 AM, pick up at 216 33rd St W, Saskatoon",
       ]}
       faqs={[
         {
           q: "How much does window vinyl cost for a salon storefront in Saskatoon?",
-          a: "Window decals are priced from $11/sqft; $25 order-total minimum applies at checkout. A typical salon door panel (roughly 24×36 inches = 6 sqft) runs approximately $66–$75 depending on coverage. A larger display window with price list, logo, and accent panels might range from $120–$200 depending on square footage. Our in-house designer can lay out the full window for $35 flat.",
+          a: "Window decals are priced from $11/sqft; $25 order-total minimum applies at checkout. A typical salon door panel (roughly 24×36 inches = 6 sqft) runs approximately $66–$75 depending on coverage. A larger display window with price list, logo, and accent panels might range from $120–$200 depending on square footage. Our in-house designer can lay out the full window for $40 flat.",
         },
         {
           q: "Can you match our salon's brand colours exactly on printed materials?",
-          a: "Yes — our Roland UV printer reproduces Pantone-accurate colour. Send us your brand guide, a hex code, or a Pantone chip and our in-house designer matches it. If you have existing printed materials from another supplier, bring a sample and we colour-match on the press. Design fee is $35 flat per project.",
+          a: "Yes — our Roland UV printer reproduces Pantone-accurate colour. Send us your brand guide, a hex code, or a Pantone chip and our in-house designer matches it. If you have existing printed materials from another supplier, bring a sample and we colour-match on the press. Design fee is $40 flat per project.",
         },
         {
           q: "What is the most popular signage order for a new salon opening?",
-          a: "The most common new-salon package includes: one grand opening vinyl banner (2×4 ft at $66 or 3×6 ft at $135), window decals for the storefront glass (from $11/sqft), a foamboard service menu for behind the desk (from $10/sqft), and 250–500 referral business cards ($45–$65). Our designer bundles all artwork for $35 flat.",
+          a: "The most common new-salon package includes: one grand opening vinyl banner (2×4 ft at $66 or 3×6 ft at $135), window decals for the storefront glass (from $11/sqft), a foamboard service menu for behind the desk (from $10/sqft), and 250–500 referral business cards ($45–$65). Our designer bundles all artwork for $40 flat.",
         },
         {
           q: "How do foamboard service menus work inside a salon?",
@@ -99,7 +99,7 @@ export default function SalonSignsSaskatoonPage() {
         },
         {
           q: "Can you print branded stickers for our retail product line?",
-          a: "Yes — die-cut stickers are a popular product branding tool for salons selling retail lines. 4×4\" die-cut stickers are priced at 100 for $160, 250 for $325, or 500 for $475. Custom shapes and sizes available — send us your artwork or have our designer create labels for $35 flat.",
+          a: "Yes — die-cut stickers are a popular product branding tool for salons selling retail lines. 4×4\" die-cut stickers are priced at 100 for $160, 250 for $325, or 500 for $475. Custom shapes and sizes available — send us your artwork or have our designer create labels for $40 flat.",
         },
         {
           q: "How quickly can you turn around salon signage for a grand opening?",
