@@ -26,7 +26,7 @@ export default function HotelSignsSaskatoonPage() {
       subtitle="Conference setup by noon. Your signage is ready."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Hotel and conference centre signs printed in Saskatoon"
-      description="True Color prints signs and displays for hotels, motels, B&Bs, and conference centres in Saskatoon. Foamboard displays from $45 for meeting room signs, event programs, and wayfinding boards. Retractable banners from $219 for conference branding and sponsor displays. Vinyl banners from $66 for outdoor event promotions and seasonal signage. ACP aluminum signs from $13/sqft for permanent exterior directional. Window decals from $11/sqft for lobby and entrance branding. Same-day rush available for +$40 flat on orders placed before 10 AM — event setup today, sign ordered this morning. In-house Roland UV printer. Designer $35 flat. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
+      description="True Color prints signs and displays for hotels, motels, B&Bs, and conference centres in Saskatoon. Foamboard displays from $45 for meeting room signs, event programs, and wayfinding boards. Retractable banners from $219 for conference branding and sponsor displays. Vinyl banners from $66 for outdoor event promotions and seasonal signage. ACP aluminum signs from $13/sqft for permanent exterior directional. Window decals from $11/sqft for lobby and entrance branding. Same-day rush available for +$40 flat on orders placed before 10 AM — event setup today, sign ordered this morning. In-house Roland UV printer. Designer $40 flat. Pickup at 216 33rd St W, Saskatoon or call (306) 954-8688."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -63,7 +63,7 @@ export default function HotelSignsSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed">
             Window decals from $11/sqft work for lobby branding, seasonal promotions, and directional
-            arrows on glass partitions. Our in-house designer handles layouts for $35 flat with
+            arrows on glass partitions. Our in-house designer handles layouts for $40 flat with
             same-day proof — bring your event schedule, sponsor logos, or hotel brand guide and
             we&apos;ll build print-ready files. Pickup at 216 33rd St W, Saskatoon or call
             (306) 954-8688 to confirm same-day availability.
@@ -85,7 +85,7 @@ export default function HotelSignsSaskatoonPage() {
         "Lobby branding and glass partition wayfinding — window decals from $11/sqft",
         "Conference starts at noon, order before 10 AM — same-day rush +$40 flat",
         "Consistent colour across every sign in the building — Roland UV in-house, no outsourcing",
-        "Event schedule to print-ready in hours — in-house designer $35 flat, same-day proof",
+        "Event schedule to print-ready in hours — in-house designer $40 flat, same-day proof",
       ]}
       faqs={[
         {
@@ -98,7 +98,7 @@ export default function HotelSignsSaskatoonPage() {
         },
         {
           q: "Can you print retractable banners for a conference or corporate event?",
-          a: "Yes — retractable banners are a hotel and conference centre staple. Economy at $219, Deluxe at $299, Premium at $349. Use them at registration desks, sponsor recognition walls, stage backdrops, and branded entrances. They pack flat into a carry case between events. Layout from our designer is $35 flat.",
+          a: "Yes — retractable banners are a hotel and conference centre staple. Economy at $219, Deluxe at $299, Premium at $349. Use them at registration desks, sponsor recognition walls, stage backdrops, and branded entrances. They pack flat into a carry case between events. Layout from our designer is $40 flat.",
         },
         {
           q: "Do you print permanent exterior signs for hotels?",
@@ -110,7 +110,7 @@ export default function HotelSignsSaskatoonPage() {
         },
         {
           q: "Do you print window decals for hotel lobbies?",
-          a: "Yes — window decals from $11/sqft work for lobby branding, seasonal promotions, directional arrows on glass partitions, and room number indicators on glass doors. We print on perforated window film (see-through from inside) or opaque vinyl depending on your needs. Design is $35 flat.",
+          a: "Yes — window decals from $11/sqft work for lobby branding, seasonal promotions, directional arrows on glass partitions, and room number indicators on glass doors. We print on perforated window film (see-through from inside) or opaque vinyl depending on your needs. Design is $40 flat.",
         },
         {
           q: "Can you handle signage for a multi-day conference at a Saskatoon hotel?",
