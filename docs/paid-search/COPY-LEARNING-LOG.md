@@ -524,6 +524,7 @@ value is reachable without it. Revisit after the 2026-08-12 gate.
 **Promoted to rule:** when a client-side vendor tag is added, allowlist its domains in CSP in the
 same commit and verify from the **served HTML and response headers**, not the vendor's dashboard.
 
+
 ## 2026-08-07 PM (5) — Core ceiling CA$4 -> CA$5 on rank evidence; owner UI drift reverted; 25 live ads carry a stale $35 design price
 
 **Ceiling raise, taken on the evidence the rationale demanded.** Lost IS (rank) 60.2% vs lost IS
@@ -552,3 +553,23 @@ price the shop no longer charges" consumer-trust problem the price-staleness rul
 but fixing it means updating RSA assets in place, which sends all 25 ads (9 of them Competitor
 copy, the riskiest to resubmit) back through policy review mid-pilot. Owner decision required:
 update now and eat the review-window delivery risk, or batch it with the next copy pass.
+
+---
+---
+
+## 2026-08-07 — Search-term routing correction: photo posters + Staples conquest
+
+**What shipped:**
+- Added a new Core ad group, `Photo Posters`, for mined `photo printing saskatoon` demand.
+- Routed it to `/photo-poster-printing-saskatoon` with variant-B-only copy: photo posters from $15, matte photo prints, local Saskatoon printing.
+- Added sourced `$15` photo-poster price to `approved-claims.mjs` from `PRICING_QUICK_REFERENCE.md` and `products.v1.csv`.
+- Added `staples saskatoon printing` to the existing Staples conquest group, while adding the same phrase as a Core campaign negative so it routes to `/why-true-color?source=google-ads` instead of Generic Print Price.
+- Kept `signs saskatoon`, `professional sticker printer`, `photo printing saskatoon`, and Staples/comparison wording live as legitimate demand; only `3d printer` stayed blocked as hard mismatch.
+
+**Hypothesis:** The issue was routing, not waste. Photo-printing clicks should see a product-specific photo-poster page; Staples shoppers should see the premium/local comparison page; sign/sticker terms should keep serving because they are real buyer language.
+
+**Metric + date:** Check search terms and GA4 funnel after 20 additional clicks or by 2026-08-12: photo terms should land on `/photo-poster-printing-saskatoon`, Staples query should land on `/why-true-color`, and Generic Print Price should stop absorbing those two intents.
+
+**Outcome:** _pending — write this back after the next search-term read._
+
+**Promoted to rule:** no — still an experiment. Candidate rule if it works: mined legitimate demand should become its own destination split before being labeled waste.

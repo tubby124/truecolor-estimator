@@ -152,6 +152,7 @@ const ROUTES = {
   "retractable-banners": "/products/retractable-banners",
   "rush-same-day": "/same-day-printing-saskatoon",
   "generic-print-price": "/printing-prices-saskatoon",
+  "photo-posters": "/photo-poster-printing-saskatoon",
   "generic-sign-shop": "/sign-company-saskatoon",
   decals: "/products/window-decals",
   "large-format": "/large-format-printing-saskatoon",
@@ -185,6 +186,7 @@ const CORE_TERMS = {
   "retractable-banners": ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing", "retractable banner"],
   "rush-same-day": ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon", "same day printing"],
   "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon", "saskatoon print shops", "saskatoon printing", "printing in saskatoon", "printers saskatoon"],
+  "photo-posters": ["photo printing saskatoon", "photo poster printing saskatoon"],
   "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs", "signage saskatoon"],
   "large-format": ["large format printing", "large format printing saskatoon", "large format signs"],
   decals: ["decals saskatoon", "clear window decals for business", "window decals saskatoon", "custom decals"],
@@ -201,6 +203,7 @@ const CORE_CROSS_NEGATIVES = {
   "retractable-banners": ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "flyers"],
   "rush-same-day": ["business cards", "flyers", "stickers", "banners", "coroplast"],
   "generic-print-price": ["same day", "rush", "sign shop", "sign company"],
+  "photo-posters": ["stickers", "labels", "business cards", "flyers"],
   "generic-sign-shop": ["same day", "rush", "printing prices", "print shop prices"],
   "large-format": ["stickers", "labels", "business cards", "flyers"],
   decals: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat"],
@@ -214,7 +217,7 @@ const COMPETITOR_GROUPS = {
   "24-hour-signs": ["24 hour signs"],
   "anytime-printing": ["anytime printing"],
   "pgi-printers": ["pgi printers"],
-  "staples-printing": ["staples printing saskatoon"],
+  "staples-printing": ["staples printing saskatoon", "staples saskatoon printing"],
   vistaprint: ["vistaprint saskatoon", "vista print"],
   "print-baron": ["print baron saskatoon"],
   "mister-print": ["mister print saskatoon"],
@@ -230,7 +233,7 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   "screen printing", "photocopy", "document printing", "print outs",
   "label maker", "label printers",
   "t shirt", "tshirt", "london drugs", "photo lab",
-  "canvas", "shirt printing",
+  "canvas", "shirt printing", "3d printer",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 // Claim validation moved to docs/paid-search/approved-claims.mjs (2026-08-06).

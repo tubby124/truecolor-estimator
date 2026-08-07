@@ -28,7 +28,7 @@
  * and FAILS if pricing is newer. Rationale: the moment ads carry real prices, a CSV repricing
  * silently makes every live ad false. That is a trust problem, not a style problem.
  */
-export const VERIFIED_ON = "2026-08-06";
+export const VERIFIED_ON = "2026-08-07";
 
 export const PRICING_SOURCE_FILE = "data/PRICING_QUICK_REFERENCE.md";
 
@@ -61,6 +61,7 @@ export const SOURCED_FACTS = {
   // records both so nobody later assumes a boat ad inherited the ACP provenance.
   "$39": { kind: "price", meaning: "ACP aluminum sign 18x24; ALSO boat registration decal pair, 3in", source: "PRICING_QUICK_REFERENCE.md — ACP from $39; Boat Registration Numbers from $39/pair (pricing_rules.v1.csv PR-BOATNUM-3IN)" },
   "$18": { kind: "price", meaning: "boat name decal, single", source: "pricing_rules.v1.csv — PR-BOATNUM-NAME $18.00/unit; PRICING_QUICK_REFERENCE.md lot-priced table" },
+  "$15": { kind: "price", meaning: "photo poster 12x18 in matte", source: "PRICING_QUICK_REFERENCE.md — Photo Posters from $15; products.v1.csv POST-12X18 sell_price 15.00" },
   // NOT the design fee. Design moved to $40 flat on 2026-08-06 and the $35/$50/$75
   // ladder was retired; leaving "$35" pointed at design would let a stale ad claim
   // revalidate. Postcards are the only remaining sourced $35 in ad copy.

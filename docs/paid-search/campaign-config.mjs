@@ -167,7 +167,7 @@ const competitorTargets = [
   ["24-hour-signs", "24 Hour Signs", ["24 hour signs"]],
   ["anytime-printing", "Anytime Printing", ["anytime printing"]],
   ["pgi-printers", "PGI Printers", ["pgi printers"]],
-  ["staples-printing", "Staples Printing", ["staples printing saskatoon"]],
+  ["staples-printing", "Staples Printing", ["staples printing saskatoon", "staples saskatoon printing"]],
   // "vista print" (spaced) was leaking into Core because the "vistaprint" negative never
   // matched it. Adding it here both captures the conquest query and, because Core's campaign
   // negatives are derived from this list, stops the leak in the same edit.
@@ -419,7 +419,11 @@ export const paidSearchConfig = {
     // flagged as zero-conversion waste. All three are core products; the miner cannot see
     // conversions because ad-attributed conversion upload has not fired yet, so its
     // zero-conversion signal is currently meaningless.
-    "canvas", "shirt printing",
+    // 2026-08-07 owner correction: "signs saskatoon" and "professional sticker printer"
+    // are legitimate buyer language, and "staples saskatoon printing" / "photo printing
+    // saskatoon" are not waste by default because they can route to competitor-comparison,
+    // premium/product, or photo-poster demand. Only "3d printer" is a hard mismatch.
+    "canvas", "shirt printing", "3d printer",
   ]),
   campaigns: [
     {
@@ -619,6 +623,28 @@ export const paidSearchConfig = {
           ],
           priceLine: "Signs from $25, 250 cards $45, banners from $66. Every price is online.",
           crossNegatives: ["same day", "rush", "sign shop", "sign company"],
+        }),
+        // 2026-08-07 owner correction: "photo printing saskatoon" is not waste. True Color
+        // sells photo posters from $15, so route photo-printing demand to the dedicated
+        // photo-poster landing page instead of letting Generic Print Price absorb it.
+        coreGroup({
+          key: "photo-posters", name: "Photo Posters", product: "photo posters",
+          finalUrl: `${ROOT}/photo-poster-printing-saskatoon`,
+          terms: ["photo printing saskatoon", "photo poster printing saskatoon"],
+          variantB: [
+            "Photo Posters From $15",
+            "Photo Printing Saskatoon",
+            "Premium Matte Photo Paper",
+            "Matte Posters From $15",
+            "Photo Posters Saskatoon",
+            "Gallery-Quality Colour",
+            "Print Photos Locally",
+            "Event & Art Photo Prints",
+            "Photo & Art Poster Prints",
+            "Matte Photo Prints From $15",
+          ],
+          priceLine: "Photo posters start at $15 on matte photo paper, printed locally in Saskatoon.",
+          crossNegatives: ["stickers", "labels", "business cards", "flyers"],
         }),
         coreGroup({
           key: "generic-sign-shop", name: "Generic Sign Shop", product: "signs",

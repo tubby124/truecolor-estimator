@@ -236,7 +236,7 @@ export function validateCompetitorDestinationInventory(
 // or it stops being a check.
 // 2026-08-06 boat split: 44 -> 45. The new Boat Registration Decals Core group ships
 // variant B only (no legacy variant A to preserve), so the inventory grows by exactly one ad.
-const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 45;
+const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 46;
 
 function evaluateLiveState(live, {
   expectedCampaigns,
@@ -269,9 +269,9 @@ function evaluateLiveState(live, {
     if (!campaign || campaign.presence !== "PRESENCE" || !campaign.networks?.targetGoogleSearch || campaign.networks?.targetSearchNetwork || campaign.networks?.targetContentNetwork || campaign.networks?.targetPartnerSearchNetwork) failures.push(`${name} network or presence setting changed`);
     if (campaign?.finalUrlSuffix !== EXPECTED_SUFFIX) failures.push(`${name} final URL suffix changed`);
   }
-  // 2026-08-06 boat split: 24 -> 25 ad groups. Boat terms moved out of Decals onto their own
-  // group so they can point at /boat-registration-numbers (one destination per ad group).
-  if (live.adGroups !== 25
+  // 2026-08-07 photo-poster split: 25 -> 26 ad groups. Photo printing terms route to the
+  // dedicated photo-poster landing page instead of Generic Print Price.
+  if (live.adGroups !== 26
     || live.pausedAdGroups !== expectedPausedAdGroups
     || (expectedEnabledAdGroups !== null && live.enabledAdGroups !== expectedEnabledAdGroups)) failures.push(adGroupStateFailure);
   // 2026-08-06 variant-B copy rollout: 20 -> 30 RSAs. Ten Core ad groups gain a second,
@@ -311,9 +311,14 @@ function evaluateLiveState(live, {
   // Remove those four in the Google Ads UI right after apply-sync. Until then this line
   // reporting drift is correct and expected — it is the removal reminder.
   // 2026-08-07: negativeCriteria 269 -> 281. Added account negatives "canvas" and
-  // "shirt printing" (2 terms x EXACT+PHRASE x 3 campaigns = 12). Composition is now
-  // 204 account-negative criteria + 64 ad-group cross-negatives + 13 campaign negatives.
-  if (live.positiveKeywords !== 159 || live.negativeCriteria !== 281) failures.push("keyword counts changed");
+  // "shirt printing" (2 negatives x EXACT+PHRASE x 3 campaigns).
+  // 2026-08-07 owner correction/mining pass: negativeCriteria 281 -> 287. Added only
+  // "3d printer" as an account negative; kept signs/sticker/staples/photo terms as legitimate demand.
+  // 2026-08-07 routing fix: positiveKeywords 159 -> 164 and negativeCriteria 287 -> 292.
+  // Added a Photo Posters ad group for photo-printing demand and added "staples saskatoon printing"
+  // to the Staples conquest group so it routes to /why-true-color instead of Generic Print Price.
+  // Current composition: 210 account-negative criteria + 68 ad-group cross-negatives + 14 campaign negatives.
+  if (live.positiveKeywords !== 164 || live.negativeCriteria !== 292) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,
@@ -510,8 +515,8 @@ export function evaluatePausedLiveState(live) {
     expectedEnabledAdGroups: null,
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
-    adGroupStateFailure: "24 staged ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "43 staged RSAs must be enabled and both held Brand RSAs paused",
+    adGroupStateFailure: "25 staged ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "44 staged RSAs must be enabled and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: false,
@@ -524,12 +529,12 @@ export function evaluateLaunchedLiveState(live) {
     expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
     expectedPausedAdGroups: 1,
     expectedPausedResponsiveSearchAds: 2,
-    // 2026-08-06 boat split: +1 enabled Core ad group and its variant-B RSA.
-    expectedEnabledAdGroups: 24,
-    expectedEnabledResponsiveSearchAds: 43,
+    // 2026-08-07 photo-poster routing split: +1 enabled Core ad group and its variant-B RSA.
+    expectedEnabledAdGroups: 25,
+    expectedEnabledResponsiveSearchAds: 44,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
-    adGroupStateFailure: "24 ad groups must be enabled and the held Brand ad group paused",
-    rsaStateFailure: "43 RSAs must be enabled and both held Brand RSAs paused",
+    adGroupStateFailure: "25 ad groups must be enabled and the held Brand ad group paused",
+    rsaStateFailure: "44 RSAs must be enabled and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     expectedNonBrandChildStatus: "ENABLED",
     requireExactCampaignInventory: true,

@@ -192,6 +192,12 @@
     },
     {
       "campaign": "GOOG_Search_TC_CoreProducts_2026",
+      "adGroup": "Photo Posters",
+      "tier": "TIER_1_PRODUCT",
+      "targetStatus": "ENABLED"
+    },
+    {
+      "campaign": "GOOG_Search_TC_CoreProducts_2026",
       "adGroup": "Generic Sign Shop",
       "tier": "TIER_1_PRODUCT",
       "targetStatus": "ENABLED"
