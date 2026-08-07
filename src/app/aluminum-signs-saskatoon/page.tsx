@@ -183,7 +183,7 @@ export default function AluminumSignsSaskatoonPage() {
         },
         {
           q: "What file format do I need for aluminum signs?",
-          a: "PDF or JPG at 150 dpi minimum. Vector files (AI, EPS) are preferred for logos and text-heavy designs. Our in-house designer can clean up or recreate artwork — usually $35–$50 depending on complexity.",
+          a: "PDF or JPG at 150 dpi minimum. Vector files (AI, EPS) are preferred for logos and text-heavy designs. Our in-house designer can clean up or recreate artwork — $40 flat depending on complexity.",
         },
         {
           q: "What's the difference between 1-sided and 2-sided ACP aluminum signs?",

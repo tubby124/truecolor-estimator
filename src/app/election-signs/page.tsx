@@ -97,7 +97,7 @@ export default function ElectionSignsPage() {
         },
         {
           q: "What file format do you need?",
-          a: "PDF or JPG at 150 dpi minimum. If you only have a Word doc or low-res image, our in-house designer can prep it for print — usually $35–$50.",
+          a: "PDF or JPG at 150 dpi minimum. If you only have a Word doc or low-res image, our in-house designer can prep it for print — $40 flat.",
         },
         {
           q: "What's the best size for election campaign yard signs?",
@@ -109,7 +109,7 @@ export default function ElectionSignsPage() {
         },
         {
           q: "How much do vehicle magnets cost for campaign cars in Saskatoon?",
-          a: "30mil vehicle magnets start at $45 per magnet at True Color Display Printing. A standard 12×18 inch door magnet is $45–60, a 12×24 inch pair runs $60–80. They're rated for highway speeds and remove cleanly without damaging paint — ideal for campaign vehicles that go back to personal use after election day. Bring your candidate's logo or we design from scratch for $35.",
+          a: "30mil vehicle magnets start at $45 per magnet at True Color Display Printing. A standard 12×18 inch door magnet is $45–60, a 12×24 inch pair runs $60–80. They're rated for highway speeds and remove cleanly without damaging paint — ideal for campaign vehicles that go back to personal use after election day. Bring your candidate's logo or we design from scratch for $40 flat.",
         },
         {
           q: "Can you print campaign flyers and business cards for door-knocking teams?",
