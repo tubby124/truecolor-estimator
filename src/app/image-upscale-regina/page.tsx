@@ -21,9 +21,9 @@ export default function ImageUpscaleReginaPage() {
   return (
     <IndustryPage
       canonicalSlug="image-upscale-regina"
-      primaryProductSlug="stickers"
+      primaryProductSlug="image-upscale"
       title="Image Upscaling — Regina SK"
-      subtitle="AI image upscaling and photo enhancement for Regina businesses. From $15. Same-day digital delivery."
+      subtitle="AI image upscaling and photo enhancement for Regina businesses. $20 flat. Same-day digital delivery."
       heroImage="/images/products/heroes/image-upscale-hero-1200x500.webp"
       heroAlt="AI image upscaling service for Regina SK businesses by True Color Display Printing"
       description={

@@ -20,7 +20,7 @@ export default function ImageUpscaleSaskatoonPage() {
   return (
     <IndustryPage
       canonicalSlug="image-upscale-saskatoon"
-      primaryProductSlug="vinyl-banners"
+      primaryProductSlug="image-upscale"
       title="Image Upscale & Photo Restoration — Saskatoon"
       subtitle="AI image upscaling, $20 flat. Free with $100+ print orders. Photo restoration quoted."
       heroImage="/images/products/heroes/image-upscale-hero-1200x500.webp"
