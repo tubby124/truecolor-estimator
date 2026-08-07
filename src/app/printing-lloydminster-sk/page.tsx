@@ -57,7 +57,7 @@ export default function PrintingLloydminsterPage() {
             We send a digital proof by email. Once approved and paid, we print in Saskatoon and
             ship to your Lloydminster SK address. Standard timeline: 3–5 business days.
             Our in-house designer preps files from any format — logo, Word doc, rough sketch —
-            starting at $35.
+            for $40 flat.
           </p>
         </>
       }
