@@ -16,6 +16,7 @@
 //   SYNC extension assets    -> apply-assets.mjs
 //   SET budgets + ceilings   -> apply-budgets.mjs
 //   HOLD Brand children      -> this file (pause-only, Brand-only, cannot enable anything)
+//   RETIRE Competitor        -> retire-competitor.mjs (seventh holder, pause-only, Competitor-only)
 //
 // Run: railway run node scripts/google-ads/hold-brand.mjs           (dry run)
 //      railway run node scripts/google-ads/hold-brand.mjs --execute

@@ -13,15 +13,22 @@ import {
 // A PAUSED campaign keeps its staged daily budget but contributes CA$0 to approved pilot spend.
 const EXPECTED = {
   CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 21, maximum: 966, status: "ENABLED" },
-  COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 4, maximum: 184, status: "ENABLED" },
+  // 2026-08-09 RETIRED: zero impressions across the whole pilot, and Core's search terms stayed
+  // clean of competitor queries after the Aug 6 15:58 routing sync — both halves of the
+  // 2026-08-12 gate's "conclude thin volume and pause" branch.
+  COMPETITOR: { name: "GOOG_Search_TC_CompetitorConquest_2026", daily: 4, maximum: 0, status: "PAUSED" },
   BRAND: { name: "GOOG_Search_TC_BrandDefense_2026", daily: 3, maximum: 0, status: "PAUSED" },
 };
 const PILOT_START_DATE = "2026-08-03";
 const PILOT_END_DATE = "2026-09-17";
 const PILOT_INCLUSIVE_DAYS = 46;
 // 2026-08-07: 25 -> 28 (Core 21 + Competitor 4 + Brand 3). This is the contract TOTAL across
-// all three campaigns and is deliberately NOT the safety bound. MAX_UNMONITORED_DAILY_BURN_CAD
-// stays at 25 and still binds the ENABLED subset (Core 21 + Competitor 4 = 25, exactly at it).
+// all three campaigns and is deliberately NOT the safety bound. It stays 28 through the
+// 2026-08-09 Competitor retirement on purpose: a paused campaign keeps its staged budget, so
+// the total is unchanged and this assertion still catches an unintended budget edit.
+// MAX_UNMONITORED_DAILY_BURN_CAD binds the ENABLED subset, which the retirement drops from
+// CA$25 (Core 21 + Competitor 4, exactly at the bound) to CA$21 (Core alone) — CA$4 of fresh
+// headroom under the bound, available to Core on evidence without touching the safety ceiling.
 const LAUNCHABLE_DAILY_BUDGET_CAD = 28;
 // Enabled-only daily burn ceiling. At CA$18/day an unmonitored account needs 33 days to reach
 // the CA$600 ceiling, which is far longer than any plausible monitor outage goes unnoticed.
@@ -490,7 +497,7 @@ export function validateConfig(config) {
       if (group.status !== expected.status) fail(`${campaign.name}/${group.name} must record the approved launch target status ${expected.status}`);
       const expectedLaunchTier = kind === "CORE"
         ? "TIER_1_PRODUCT"
-        : kind === "COMPETITOR" ? "TIER_1_CONQUEST" : "HOLD_AUCTION_INSIGHTS";
+        : kind === "COMPETITOR" ? "RETIRED_THIN_VOLUME" : "HOLD_AUCTION_INSIGHTS";
       if (group.launchTier !== expectedLaunchTier) fail(`${campaign.name}/${group.name} has the wrong conversion-first launch tier`);
       let parsed;
       try { parsed = new URL(group.finalUrl); } catch { fail(`${campaign.name}/${group.name} has invalid URL`); continue; }

@@ -555,6 +555,7 @@ copy, the riskiest to resubmit) back through policy review mid-pilot. Owner deci
 update now and eat the review-window delivery risk, or batch it with the next copy pass.
 
 ---
+<<<<<<< HEAD
 ---
 
 ## 2026-08-07 — Search-term routing correction: photo posters + Staples conquest
@@ -573,3 +574,74 @@ update now and eat the review-window delivery risk, or batch it with the next co
 **Outcome:** _pending — write this back after the next search-term read._
 
 **Promoted to rule:** no — still an experiment. Candidate rule if it works: mined legitimate demand should become its own destination split before being labeled waste.
+=======
+
+## 2026-08-09 — CompetitorConquest RETIRED; four pre-existing drift items surfaced by the same pass
+
+**Owner call, taken three days before the 2026-08-12 gate.** The gate's own stop-condition was
+already satisfied, so this is the documented branch firing early, not an override of it: Competitor
+delivered **0 impressions / 0 clicks / CA$0.00** across the entire pilot (2026-08-03..08-09), and
+Core's search terms stayed clean of competitor queries after the Aug 6 15:58 routing sync. The
+2026-08-07 diagnosis said "if still zero impressions AND Core's search terms stay clean → conclude
+thin volume and pause". Both halves held.
+
+**Executed through a new authority, not the UI.** `scripts/google-ads/retire-competitor.mjs` is the
+**seventh mutation authority** — pause-only, Competitor-only, cannot enable/create/remove anything.
+It fails closed on two guards before touching a thing: campaign-name identity, and a metrics read
+that **aborts if impressions > 0** (if it ever started delivering, that is a live judgement call
+with real lost-IS rows, not a gate outcome). Readback confirmed campaign + 12 ad groups + 21 ads
+all PAUSED. The UI was deliberately not used — owner UI edits are the exact second-author drift
+that had to be reverted on 2026-08-07.
+
+**Contract + verifier changed in the same pass** (the rule that keeps getting paid for): config
+Competitor → `status: PAUSED`, `maximumPilotCad: 0`, children PAUSED, tier `RETIRED_THIN_VOLUME`;
+validator `EXPECTED.COMPETITOR` + tier expectation; `LAUNCHED_EXPECTED_CAMPAIGNS` → PAUSED; launched
+counts enabled 24→12 groups / 43→22 RSAs and paused 1→13 / 2→23. 96/96 tests, validator VALIDATED,
+8 artifacts deterministic.
+
+**`expectedNonBrandChildStatus` had to be split into `expectedCoreChildStatus` +
+`expectedCompetitorChildStatus`.** One knob stopped being expressible the moment Core children were
+ENABLED while Competitor children were PAUSED. Collapsing them back into one would silently stop
+checking one of the two — the same shape as every other blind spot in this log.
+
+**`/why-true-color` did NOT fail — it was never tested.** The page was built for these nine ads, and
+those ads served zero impressions, so it never received a single paid click from the campaign it
+exists for. "The landing page isn't working" is unproven, not proven. It stays live (200, noindex,
+paid-marker present, 8-card product grid). Its next legitimate test is as a destination for
+**Generic Sign Shop**, which spent CA$13.87 over 8 clicks on `/sign-company-saskatoon` and produced
+**zero funnel events** — a page that IS getting paid traffic and failing. That is a destination
+experiment and must ship on its own, not bundled with this retirement.
+
+### The "drift" was a stale local clone, not drift — corrected before push
+
+The first pass of this entry claimed four pre-existing drift items, including an undeclared
+"Photo Posters" Core ad group "created outside the contract". **That was wrong, and the error is
+worth keeping.** Every one of those gaps was this Mac's clone being one commit behind `origin/main`.
+
+`6c9d0fe "Route mined paid-search demand by intent"` (ZaraBot VPS, 2026-08-07 21:03Z) adds the
+`photo-posters` Core ad group routing "photo printing saskatoon" to
+`/photo-poster-printing-saskatoon`, plus the keyword and negative changes, and it updates the
+verifier counts to match. `change_event` had already said the group was created via
+`GOOGLE_ADS_API`, not the web UI — that was the tell, and it was read as suspicious rather than as
+evidence of a legitimate apply-sync run from the other machine.
+
+After rebasing onto it, everything reconciles exactly and the account has **no drift at all**:
+
+| | Contract (post-rebase) | Live | |
+|---|---|---|---|
+| enabled ad groups | 13 Core | 13 | ✅ |
+| paused ad groups | 12 Competitor + 1 Brand | 13 | ✅ |
+| enabled RSAs | 23 Core | 23 | ✅ |
+| paused RSAs | 21 Competitor + 2 Brand | 23 | ✅ |
+
+**Promoted to rule (the real lesson):** this repo has two authors on two machines — this Mac and
+the ZaraBot VPS — and both run `apply-*` against the same live Google Ads account. `git fetch`
+BEFORE reading the live account, not after. A live account that disagrees with the contract is far
+more likely to be a stale checkout than rogue drift, and "the account has an undeclared ad group"
+is a serious accusation to get wrong. The verifier was right the whole time; the clone was stale.
+
+**Promoted to rule:** a status-only mutation is the cheapest possible way to discover inventory
+drift, because it forces the verifier's count assertions to be re-derived from the contract. Run
+`validate:google-ads:launched` after every retirement or hold — it reports what the account really
+has, not what the last green check remembered.
+>>>>>>> aa5d405 (feat(ads): retire CompetitorConquest — seventh mutation authority, pause-only)

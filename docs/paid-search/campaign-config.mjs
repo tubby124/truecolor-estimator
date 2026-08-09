@@ -752,15 +752,25 @@ export const paidSearchConfig = {
       ...campaignBase,
       kind: "COMPETITOR",
       name: "GOOG_Search_TC_CompetitorConquest_2026",
+      // RETIRED 2026-08-09 on the owner's call, three days early against the 2026-08-12 gate.
+      // The gate's own stop-condition was met: zero impressions across the whole pilot, and
+      // Core's search terms stayed clean of competitor queries after the Aug 6 15:58 routing
+      // sync. Both halves of "conclude thin volume and pause" are satisfied. The budget stays
+      // at 4 (exactly the Brand precedent) so the contract TOTAL that
+      // LAUNCHABLE_DAILY_BUDGET_CAD asserts does not move; maximumPilotCad drops to 0 because
+      // a paused campaign contributes nothing to the qualifying-spend plan.
+      status: "PAUSED",
       dailyBudgetCad: 4,
-      maximumPilotCad: 184,
+      maximumPilotCad: 0,
       campaignNegatives: [],
       gates: [],
       adGroups: competitorTargets.map(([key, name, terms]) => ({
         key,
         name: `Comparison - ${name}`,
-        status: "ENABLED",
-        launchTier: "TIER_1_CONQUEST",
+        // Children held PAUSED as defence-in-depth, same as Brand: if this campaign is ever
+        // re-enabled by accident (UI, script, or restore), paused children still serve nothing.
+        status: "PAUSED",
+        launchTier: "RETIRED_THIN_VOLUME",
         finalUrl: `${ROOT}/why-true-color?source=google-ads`,
         keywords: terms.map((term) => keyword(term, "EXACT")),
         crossNegatives: [],

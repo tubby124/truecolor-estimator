@@ -219,81 +219,81 @@
       "adGroup": "Large Format Printing",
       "tier": "TIER_1_PRODUCT",
       "targetStatus": "ENABLED"
-    },
+    }
+  ],
+  "heldGroups": [
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Qwik Signs",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Minuteman Press",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Ink House",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Rayacom",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - 24 Hour Signs",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Anytime Printing",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - PGI Printers",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Staples Printing",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Vistaprint",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Print Baron",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Mister Print",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
     },
     {
       "campaign": "GOOG_Search_TC_CompetitorConquest_2026",
       "adGroup": "Comparison - Labels Made Easy",
-      "tier": "TIER_1_CONQUEST",
-      "targetStatus": "ENABLED"
-    }
-  ],
-  "heldGroups": [
+      "tier": "RETIRED_THIN_VOLUME",
+      "targetStatus": "PAUSED"
+    },
     {
       "campaign": "GOOG_Search_TC_BrandDefense_2026",
       "adGroup": "True Color Brand",

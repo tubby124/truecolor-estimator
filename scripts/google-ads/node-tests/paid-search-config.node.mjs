@@ -71,9 +71,14 @@ test("launch candidate transitions require evidence and can reach fresh-live pre
   assert.equal(ready.status, "READY_FOR_FRESH_LIVE_PREFLIGHT");
   assert.equal(ready.activationPermitted, false);
   assert.equal(ready.blockers.length, 0);
-  assert.equal(ready.candidates.length, 25);
-  assert.equal(ready.held.length, 1);
-  assert.deepEqual(ready.held.map((group) => group.tier), ["HOLD_AUCTION_INSIGHTS"]);
+  // 2026-08-09 Competitor retirement: candidates 25 -> 13 (Core alone), held 1 -> 13
+  // (12 retired Competitor groups + the 1 held Brand group). Retired groups must land in `held`
+  // rather than vanish — an unrecognised tier silently dropping an ad group out of BOTH lists
+  // is exactly the class of blind spot this contract keeps paying for.
+  assert.equal(ready.candidates.length, 13);
+  assert.equal(ready.held.length, 13);
+  assert.deepEqual([...new Set(ready.held.map((group) => group.tier))].sort(), ["HOLD_AUCTION_INSIGHTS", "RETIRED_THIN_VOLUME"]);
+  assert.equal(ready.held.filter((group) => group.tier === "RETIRED_THIN_VOLUME").length, 12);
 });
 
 // Fixture-only conversion IDs exercise the contract; they are not True Color account IDs.
@@ -238,14 +243,16 @@ const makeLaunchedLiveState = () => {
     ...campaign,
     status: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name]?.status ?? campaign.status,
   }));
-  // Stage 1 holds Brand paused, so its single ad group and RSA stay paused.
-  live.pausedAdGroups = 1;
-  live.enabledAdGroups = 25;
-  live.pausedResponsiveSearchAds = 2;
-  live.enabledResponsiveSearchAds = 44;
+  // Stage 1 holds Brand paused; since 2026-08-09 it also holds all 12 retired Competitor groups
+  // and their 21 RSAs paused. Enabled is Core alone: 13 groups, 23 RSAs.
+  live.pausedAdGroups = 13;
+  live.enabledAdGroups = 13;
+  live.pausedResponsiveSearchAds = 23;
+  live.enabledResponsiveSearchAds = 23;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
-  live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "ENABLED" }));
-  live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "ENABLED" }));
+  // Competitor ads are retired, so their destinations must read back PAUSED, not ENABLED.
+  live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "PAUSED" }));
+  live.accountWideAdAssociations = live.accountWideAdAssociations.map((ad) => ({ ...ad, status: "PAUSED" }));
   live.spendCadPilot = 12.5;
   return live;
 };
@@ -413,7 +420,8 @@ test("live verification contract rejects launch-critical drift and missing noind
 test("launched live verification enforces the exact Stage 1 state", () => {
   assert.deepEqual(LAUNCHED_EXPECTED_CAMPAIGNS, {
     GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 21, ceiling: 5, status: "ENABLED" },
-    GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 2.5, status: "ENABLED" },
+    // Competitor retired 2026-08-09 — PAUSED is now its approved Stage 1 status.
+    GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 2.5, status: "PAUSED" },
     GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" },
   });
 
@@ -676,13 +684,17 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(core.dailyBudgetCad, 21);
   assert.equal(core.maximumPilotCad, 966);
   assert.equal(competitors.dailyBudgetCad, 4);
-  assert.equal(competitors.maximumPilotCad, 184);
+  // 2026-08-09 RETIRED: keeps its staged daily budget (Brand precedent) but plans CA$0 spend.
+  assert.equal(competitors.status, "PAUSED");
+  assert.equal(competitors.maximumPilotCad, 0);
   assert.equal(brand.dailyBudgetCad, 3);
   assert.equal(brand.maximumPilotCad, 0);
   assert.equal(paidSearchConfig.targetQualifyingSpendCad, 600);
   assert.equal(paidSearchConfig.maximumPilotCad, 600);
   const plannedMaximumCad = paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.maximumPilotCad, 0);
-  assert.equal(plannedMaximumCad, 1150);
+  // 2026-08-09: 1150 -> 966 (Competitor's 184 retired to 0). Core alone must still be able to
+  // reach the CA$600 qualifying target, which the assertions below enforce.
+  assert.equal(plannedMaximumCad, 966);
   // Budget capacity intentionally EXCEEDS the CA$600 runtime ceiling: daily budgets are
   // permission to capture cheap clicks on good days, and the 15-minute hard-stop monitor is
   // the binding constraint on total spend. Capacity must still be able to reach the target.
@@ -692,13 +704,15 @@ test("canonical routing and campaign caps are complete", () => {
   const enabledDailyBudget = paidSearchConfig.campaigns
     .filter((campaign) => campaign.status === "ENABLED")
     .reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0);
-  // 2026-08-07: 22 -> 25 (Core 18 -> 21). This is a snapshot of the current value; the line
-  // below is the actual blast-radius bound and now binds exactly. Any further Core raise
-  // requires lifting MAX_UNMONITORED_DAILY_BURN_CAD, which is a deliberate safety decision.
-  assert.equal(enabledDailyBudget, 25);
+  // 2026-08-07: 22 -> 25 (Core 18 -> 21). 2026-08-09: 25 -> 21, because retiring Competitor
+  // removed its CA$4 from the ENABLED subset. This is a snapshot of the current value; the line
+  // below is the actual blast-radius bound. The retirement bought CA$4 of headroom under it, so
+  // Core can now be raised to CA$25 on evidence without touching MAX_UNMONITORED_DAILY_BURN_CAD.
+  assert.equal(enabledDailyBudget, 21);
   assert.ok(enabledDailyBudget <= 25);
   for (const campaign of paidSearchConfig.campaigns) {
-    const expectedStatus = campaign.kind === "BRAND" ? "PAUSED" : "ENABLED";
+    // COMPETITOR joined BRAND on the paused side when it was retired 2026-08-09.
+    const expectedStatus = campaign.kind === "BRAND" || campaign.kind === "COMPETITOR" ? "PAUSED" : "ENABLED";
     assert.equal(campaign.status, expectedStatus);
     assert.ok(campaign.adGroups.every((group) => group.status === expectedStatus));
     // A paused campaign keeps its staged daily budget but contributes CA$0 to approved pilot spend.
@@ -796,9 +810,12 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.ok(!manifest.blockers.includes("RSA_POLICY_APPROVAL"));
   assert.ok(!manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
   assert.ok(!manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
-  assert.equal(manifest.launchCandidates.length, 25);
-  assert.equal(manifest.heldGroups.length, 1);
-  assert.ok(manifest.heldGroups.every((group) => group.tier === "HOLD_AUCTION_INSIGHTS"));
+  // 25 -> 13 with the 2026-08-09 Competitor retirement; Core's 13 groups are the only candidates.
+  assert.equal(manifest.launchCandidates.length, 13);
+  // 1 -> 13: the 12 retired Competitor groups join the 1 held Brand group.
+  assert.equal(manifest.heldGroups.length, 13);
+  assert.equal(manifest.heldGroups.filter((group) => group.tier === "HOLD_AUCTION_INSIGHTS").length, 1);
+  assert.equal(manifest.heldGroups.filter((group) => group.tier === "RETIRED_THIN_VOLUME").length, 12);
   assert.ok(manifest.launchCandidates.every((group) => group.targetStatus === "ENABLED"));
   assert.ok(manifest.heldGroups.every((group) => group.targetStatus === "PAUSED"));
 });
@@ -811,7 +828,10 @@ test("exports canonical Editor campaign, RSA, and location entities", () => {
   for (const unsupported of ["Google Search", "Search partners", "Display Network", "Location option", "Location", "Location criterion ID"]) {
     assert.ok(!campaigns.headers.includes(unsupported));
   }
-  const expectedCampaignStatus = (name) => name === "GOOG_Search_TC_BrandDefense_2026" ? "PAUSED" : "ENABLED";
+  // Competitor joined Brand on the paused side when it was retired 2026-08-09, so the exported
+  // Editor artifacts must carry PAUSED for both — importing this CSV must never re-enable it.
+  const PAUSED_IN_ARTIFACTS = new Set(["GOOG_Search_TC_BrandDefense_2026", "GOOG_Search_TC_CompetitorConquest_2026"]);
+  const expectedCampaignStatus = (name) => PAUSED_IN_ARTIFACTS.has(name) ? "PAUSED" : "ENABLED";
   assert.ok(campaigns.rows.every((row) => row.Status === expectedCampaignStatus(row.Campaign)));
   assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026").Budget, "21");
   assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026")["Maximum CPC bid limit"], "5");
