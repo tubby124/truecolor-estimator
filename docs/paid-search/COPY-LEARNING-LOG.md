@@ -645,3 +645,70 @@ drift, because it forces the verifier's count assertions to be re-derived from t
 `validate:google-ads:launched` after every retirement or hold — it reports what the account really
 has, not what the last green check remembered.
 >>>>>>> aa5d405 (feat(ads): retire CompetitorConquest — seventh mutation authority, pause-only)
+
+---
+
+## 2026-08-09 (2) — the stale $35 design price, fixed without a delivery gap; 20 keywords landed
+
+**Two things shipped after the Competitor retirement, same session.**
+
+### 20 contract keywords were staged but never live
+
+`sync-plan` reported 20 keywords in the contract and absent from the account — the tail of the VPS
+`6c9d0fe` session, where the config was committed but `apply-sync` never ran. Applied: 32 criteria
+created, readback **164 positive / 292 negative — exactly the contract**. Flyers, Generic Print
+Price, Generic Sign Shop, Decals, and Boat Registration were all targeting fewer terms than the
+contract said for two days. Nothing alerted, because a keyword that was never created cannot drift.
+
+### The stale-price fix: 12 ads, zero delivery gap
+
+Scope was smaller than the Aug 7 entry feared — **the retirement did half the work**. Of 25 ads
+quoting `$35`, 13 were Competitor + Brand and are now PAUSED, serving nothing. Only **12 ENABLED
+Core RSAs** actually needed replacing, and the riskiest group (the nine Competitor RSAs the Aug 7
+entry did not want to resubmit) had already left the serving set.
+
+**`replace-stale-price-ads.mjs` is the eighth mutation authority.** Two phases, because Google RSA
+text is immutable — "editing" copy is always create-new + retire-old, and every new ad enters
+policy review:
+
+- `--create` builds the replacement **from the contract** and creates it **PAUSED**. It reviews
+  while the stale ad keeps serving. Nothing stops delivering, and nothing starts either.
+- `--swap` waits for `APPROVED`/`REVIEWED`, then enables the replacement and pauses the stale ad in
+  **one atomic mutate** — no delivery gap, and no window where both prices serve.
+
+This is the answer to the open question the Aug 7 entry left: it framed the choice as "update now
+and eat the review-window delivery risk, or batch it later". Both options were avoidable. The
+delivery risk only exists if you edit in place.
+
+**Staleness is decided against the contract, NOT by grepping `$35`.** `$35` is a *legitimate live
+price* — postcards start at $35 — so a `$35` grep would eventually mangle a correct ad. Instead every
+live ad is fingerprinted (order-independent, since Google returns assets in serving order) and
+compared to its own ad group's contract copy:
+
+| classification | action |
+|---|---|
+| matches variant A | legacy control arm — **never touched** (google-ads-copy.md) |
+| matches variant B | already current — skipped |
+| matches neither | stale — replaced with contract variant B |
+
+Live classification confirmed the model exactly: 23 Core ads = 10 variant A + 1 already-current
+(Photo Posters, created *after* the Aug 6 correction) + 12 stale. This generalises — it catches any
+copy drift from contract, not just this one price.
+
+**Fails closed on:** contract copy that itself still quotes a retired design price (otherwise the
+tool republishes the bug as the fix), live ad groups missing from the contract (a stale clone, per
+the previous entry), and any replacement Google has not yet cleared.
+
+**Promoted to rule:** `apply-sync` diffs ads by **count**, not content, so corrected copy in the
+contract reaches the account only if the ad count also changes. It never does for a price edit.
+Any pricing change must be followed by `replace-stale-price-ads.mjs --create`, or the corrected
+price lives in git and the retired one keeps serving. Three days of `$35` is the cost of learning
+this once.
+
+### 🟡 Left open deliberately — the 12 paused stale ads
+
+`--swap` **pauses** the stale ad rather than removing it. That keeps the change reversible, but it
+means the account permanently carries 12 paused ads the contract does not describe, so the launched
+verifier will report ad-count drift until someone decides. Removing them is the only end state that
+matches the contract exactly — that is an owner call, not an automated one, and it was deliberately
+not taken here. Until then, expect `validate:google-ads:launched` to flag RSA counts.
