@@ -239,6 +239,15 @@ export function validateCompetitorDestinationInventory(
 // 2026-08-06 boat split: 44 -> 45. The new Boat Registration Decals Core group ships
 // variant B only (no legacy variant A to preserve), so the inventory grows by exactly one ad.
 const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 46;
+// 2026-08-09: replace-stale-price-ads.mjs swapped 12 Core RSAs that quoted the retired $35 design
+// price for contract-correct $40 copy. Google RSA text is immutable, so every "edit" is a new ad,
+// and --swap PAUSES the superseded ad rather than removing it — the reversible choice.
+//
+// Counted EXPLICITLY, not folded into the total, so it stays visible and reversible. The ENABLED
+// count is unchanged at 23 Core; all 12 of these are PAUSED and quote a price the shop no longer
+// charges. Remove them from the account and this constant returns to 0 in the same pass — that is
+// the only end state that matches the contract exactly, and it is deliberately an owner decision.
+const SUPERSEDED_COPY_RSAS_PAUSED = 12;
 
 function evaluateLiveState(live, {
   expectedCampaigns,
@@ -255,6 +264,9 @@ function evaluateLiveState(live, {
   // them back into one knob would silently stop checking one of the two.
   expectedCoreChildStatus,
   expectedCompetitorChildStatus,
+  // Ads superseded by a copy replacement and left PAUSED. Defaults to 0 so any mode that does not
+  // opt in keeps asserting the pure contract inventory.
+  supersededCopyRsas = 0,
   requireExactCampaignInventory,
   requireZeroSpend,
 }) {
@@ -283,7 +295,9 @@ function evaluateLiveState(live, {
   // 2026-08-06 variant-B copy rollout: 20 -> 30 RSAs. Ten Core ad groups gain a second,
   // price-anchored RSA beside the live policy-approved variant A. Reports drift until
   // apply-sync lands, which is the intended import-completion signal, not a fault.
-  if (live.responsiveSearchAds !== EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS
+  // Superseded-copy ads are added to the expected TOTAL and to the expected PAUSED count, never to
+  // the enabled count — a superseded ad that reads back ENABLED is drift and must still fail.
+  if (live.responsiveSearchAds !== EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS + supersededCopyRsas
     || live.pausedResponsiveSearchAds !== expectedPausedResponsiveSearchAds
     || (expectedEnabledResponsiveSearchAds !== null
       && live.enabledResponsiveSearchAds !== expectedEnabledResponsiveSearchAds)) failures.push(rsaStateFailure);
@@ -542,9 +556,11 @@ export function evaluateLaunchedLiveState(live) {
     // paused is the 12 retired Competitor groups + the 1 held Brand group (13), plus their
     // 21 Competitor RSAs + 2 Brand RSAs (23).
     expectedPausedAdGroups: 13,
-    expectedPausedResponsiveSearchAds: 23,
+    // 23 contract-paused (21 retired Competitor + 2 held Brand) + 12 superseded Core copy ads.
+    expectedPausedResponsiveSearchAds: 23 + SUPERSEDED_COPY_RSAS_PAUSED,
     expectedEnabledAdGroups: 13,
     expectedEnabledResponsiveSearchAds: 23,
+    supersededCopyRsas: SUPERSEDED_COPY_RSAS_PAUSED,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
     adGroupStateFailure: "13 Core ad groups must be enabled and the 12 retired Competitor groups plus the held Brand group paused",
     rsaStateFailure: "23 Core RSAs must be enabled and the 21 retired Competitor RSAs plus both held Brand RSAs paused",

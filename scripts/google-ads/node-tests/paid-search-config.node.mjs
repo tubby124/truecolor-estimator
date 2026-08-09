@@ -247,7 +247,11 @@ const makeLaunchedLiveState = () => {
   // and their 21 RSAs paused. Enabled is Core alone: 13 groups, 23 RSAs.
   live.pausedAdGroups = 13;
   live.enabledAdGroups = 13;
-  live.pausedResponsiveSearchAds = 23;
+  // 2026-08-09 copy replacement: 12 superseded Core RSAs are PAUSED rather than removed, so the
+  // account carries 46 + 12 = 58 ads and 23 + 12 = 35 paused. Enabled is unchanged at 23 — a
+  // superseded ad reading back ENABLED must still fail.
+  live.responsiveSearchAds = 58;
+  live.pausedResponsiveSearchAds = 35;
   live.enabledResponsiveSearchAds = 23;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   // Competitor ads are retired, so their destinations must read back PAUSED, not ENABLED.
