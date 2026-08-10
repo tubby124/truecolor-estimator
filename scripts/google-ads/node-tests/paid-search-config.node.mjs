@@ -146,7 +146,8 @@ const makePausedLiveState = () => ({
       adResourceName: ad.adResourceName,
       finalUrls: [COMPETITOR_DESTINATION_BINDING.finalUrl],
     })),
-    rsaApprovalStatuses: ["APPROVED"], manualAssets: 13, assetApprovalStatuses: ["APPROVED"], campaignAssetLinks: 39,
+    // campaignAssetLinks = 39 contract callout/sitelink links + 14 owner-added image links (2026-08-10).
+    rsaApprovalStatuses: ["APPROVED"], manualAssets: 13, assetApprovalStatuses: ["APPROVED"], campaignAssetLinks: 53,
     locationTargets: 0, proximityTargets: 3, radius35KmTargets: 3, languageTargets: 3, englishLanguageTargets: 3,
     positiveGeoCriteria: paidSearchConfig.campaigns.map((campaign) => ({
       campaign: campaign.name,

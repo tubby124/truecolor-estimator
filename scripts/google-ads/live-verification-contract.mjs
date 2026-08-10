@@ -360,7 +360,15 @@ function evaluateLiveState(live, {
       || keyword.adGroup !== "Stickers and Labels"
       || keyword.status !== expectedCoreChildStatus)) failures.push(nearMeStateFailure);
   if (live.competitorMatchTypes?.length !== 1 || live.competitorMatchTypes[0] !== "EXACT") failures.push("competitor targeting is not exact-only");
-  if (live.manualAssets !== 13 || live.campaignAssetLinks !== 39) failures.push("asset counts changed");
+  // 2026-08-10: the owner accepted Google's image-assets prompt from the mobile app — 14
+  // site-scraped IMAGE assets linked AD_IMAGE/ENABLED on Core only. Adopted deliberately (image
+  // assets on Search are a genuinely useful rec: larger SERP presence, no bid/cost mechanics),
+  // pending owner curation of the scraped set. Counted explicitly, not folded into 39: the 39
+  // remains the contract-managed callout/sitelink inventory, and manualAssets stays 13 because
+  // the scraped images are not 'TC PPC %' assets. If curation unlinks images, update this
+  // constant in the same pass.
+  const OWNER_IMAGE_ASSET_LINKS = 14;
+  if (live.manualAssets !== 13 || live.campaignAssetLinks !== 39 + OWNER_IMAGE_ASSET_LINKS) failures.push("asset counts changed");
   if (live.locationTargets !== 0 || live.proximityTargets !== 3 || live.radius35KmTargets !== 3) failures.push("Saskatoon +35 km proximity criteria changed");
   const positiveGeoCriteria = live.positiveGeoCriteria ?? [];
   if (positiveGeoCriteria.length !== 3
