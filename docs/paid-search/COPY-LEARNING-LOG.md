@@ -754,3 +754,26 @@ same shape — which is the entire point of having a preview.
 **Also for the record:** `mr print` (account negative) is a spelling variant of the retired
 Competitor group's `mister print saskatoon` EXACT target. No collision while Competitor is RETIRED;
 if it is ever revived, revisit this negative first.
+
+---
+
+## 2026-08-10 (2) — outbox re-evaluation migration APPLIED to prod; pilot-window backfill complete
+
+Applied `20260810120000_outbox_reevaluation.sql` to project dczbgraekmzirxknjvwe via the
+Management API (owner-directed; recorded in supabase_migrations.schema_migrations so `db push`
+will not re-apply). Live trigger definition verified verbatim against the local-cluster replay:
+fires on status, paid_at, conversion_type, and all six click-ID columns.
+
+Backfill (pilot window only, paid_at >= 2026-08-03, owner decision — pre-pilot orders stay NULL
+deliberately): 3 orders repaired. TC-2026-0314 was quote-linked via
+quote_requests.converted_order_id and became quote_won with the quote's 35 attribution columns
+inherited (COALESCE — order-side values never overwritten); TC-2026-0309 and TC-2026-0316 became
+purchase_online. The trigger fired on every UPDATE: all 5 pilot-window paid orders now hold an
+outbox row (was 2 of 5). All 5 are not_attributable — none carried a click ID — so nothing
+uploaded to Google; they are now visible and promotable, which is the point.
+
+The conversion pipeline is closed end-to-end as of this entry: capture (UtmCapture) -> order
+(online + staff-manual + quote-won paths all set conversion identity) -> outbox (re-evaluable,
+promotable) -> Data Manager (verified solid). The remaining gap is upstream: getting a click ID
+onto orders at all (7-day ITP ceiling, no server-side cookie, cross-device) — see the Aug 10
+audit's capture-hardening items.
