@@ -5,7 +5,9 @@ import {
   ATTRIBUTION_KEYS,
   isPaidAttribution,
   LATEST_PAID_COOKIE_NAME,
+  type PaidAttributionTouch,
   parseStoredAttribution,
+  parseStoredPaidAttributionTouch,
   sanitizeUtm,
   type UtmAttribution,
   UTM_COOKIE_NAME,
@@ -115,6 +117,21 @@ export function readUtmFromStorage(): UtmAttribution | null {
     if (!raw) return null;
     const out = parseStoredAttribution(raw);
     return Object.keys(out).length ? out : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Latest-paid counterpart to readUtmFromStorage. Submit payloads need this
+ * because the latest paid touch is otherwise 100% cookie-dependent: Safari ITP
+ * caps script-written cookies at ~7 days while localStorage survives, so a click
+ * that converts weeks later is only recoverable from here.
+ */
+export function readLatestPaidFromStorage(): PaidAttributionTouch | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return parseStoredPaidAttributionTouch(window.localStorage.getItem(LATEST_PAID_LS_KEY));
   } catch {
     return null;
   }

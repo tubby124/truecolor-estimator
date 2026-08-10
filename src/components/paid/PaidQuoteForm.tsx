@@ -3,10 +3,13 @@
 import { useRef, useState } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { CheckCircle2, Send } from "lucide-react";
-import { readUtmFromStorage } from "@/components/site/UtmCapture";
+import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
 import { ToastContainer, useToast } from "@/components/ui";
 import { trackGenerateLead } from "@/lib/analytics";
-import { appendAttributionToFormData } from "@/lib/analytics/utm";
+import {
+  appendAttributionToFormData,
+  appendLatestPaidAttributionToFormData,
+} from "@/lib/analytics/utm";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { trackPaidCta } from "@/components/paid/PaidProductLink";
@@ -149,6 +152,7 @@ export function PaidQuoteForm() {
 
     const payload = buildPaidQuotePayload(fd, turnstileToken);
     appendAttributionToFormData(payload, readUtmFromStorage());
+    appendLatestPaidAttributionToFormData(payload, readLatestPaidFromStorage());
     const { submissionKey } = getOrCreateQuoteSubmission(
       "paid-compact-quote",
       payload,

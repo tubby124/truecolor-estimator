@@ -28,6 +28,7 @@ import { classifyReferrer } from "@/lib/analytics/referrer";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 import {
   ATTRIBUTION_KEYS,
+  collectLatestPaidHints,
   mergeLatestPaidAttribution,
   mergeUtmAttribution,
 } from "@/lib/analytics/utm";
@@ -468,8 +469,13 @@ export async function POST(req: NextRequest) {
       Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
       req.headers.get("cookie"),
     );
+    // Prefixed latest-paid hints win over the flat first-touch bag when present:
+    // the flat fields describe first touch and only ever acted as a loose fallback.
+    const latestPaidHints = collectLatestPaidHints((name) => form.get(name));
     const latestPaidTouch = mergeLatestPaidAttribution(
-      Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
+      Object.keys(latestPaidHints).length > 0
+        ? latestPaidHints
+        : Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
       req.headers.get("cookie"),
     );
     const refClass = classifyReferrer(

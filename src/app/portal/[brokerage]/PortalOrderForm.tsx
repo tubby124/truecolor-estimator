@@ -8,8 +8,11 @@ import type {
   BrokerageProductGroup,
   BrokerageProductOption,
 } from "@/lib/data/brokerages";
-import { readUtmFromStorage } from "@/components/site/UtmCapture";
-import { appendAttributionToFormData } from "@/lib/analytics/utm";
+import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
+import {
+  appendAttributionToFormData,
+  appendLatestPaidAttributionToFormData,
+} from "@/lib/analytics/utm";
 import {
   clearQuoteSubmission,
   getOrCreateQuoteSubmission,
@@ -270,6 +273,7 @@ export function PortalOrderForm({
       form.append("brokerage_slug", brokerage.slug);
       form.append("shipping_address", shipForApi);
       appendAttributionToFormData(form, readUtmFromStorage());
+      appendLatestPaidAttributionToFormData(form, readLatestPaidFromStorage());
       const { submissionKey } = getOrCreateQuoteSubmission(
         `brokerage-portal:${brokerage.slug}`,
         form,

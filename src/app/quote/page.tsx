@@ -7,7 +7,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { readUtmFromStorage } from "@/components/site/UtmCapture";
+import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
+import { appendLatestPaidAttributionToFormData } from "@/lib/analytics/utm";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 import {
@@ -173,6 +174,11 @@ function QuoteForm() {
           fd.append(key, value);
         }
       }
+      // Latest-paid fallback — without this, the paid touch is cookie-only at
+      // submit time and dies with Safari's 7-day ITP eviction. /quote was the
+      // last submit path missing it (checkout, PaidQuoteForm, ContactForm, and
+      // the portal all send it).
+      appendLatestPaidAttributionToFormData(fd, readLatestPaidFromStorage());
 
       const res = await fetch("/api/quote-request", {
         method: "POST",

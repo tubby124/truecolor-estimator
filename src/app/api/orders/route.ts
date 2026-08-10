@@ -35,11 +35,19 @@ import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/o
 import { computePstBase } from "@/lib/pricing/tax";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { classifyReferrer } from "@/lib/analytics/referrer";
-import { mergeLatestPaidAttribution, mergeUtmAttribution } from "@/lib/analytics/utm";
+import {
+  collectLatestPaidHints,
+  type LatestPaidHintPayload,
+  mergeLatestPaidAttribution,
+  mergeUtmAttribution,
+} from "@/lib/analytics/utm";
 import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytics/attribution-db";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 
-export interface CreateOrderRequest {
+// `LatestPaidHintPayload` contributes the optional `latest_paid_*` fields the
+// checkout submit sends when localStorage still holds a paid touch that the
+// cookie lost (Safari ITP). Whitelisted server-side by collectLatestPaidHints.
+export interface CreateOrderRequest extends LatestPaidHintPayload {
   checkout_submission_id: string;
   items: CartItem[];
   contact: {
@@ -449,12 +457,19 @@ export async function POST(req: NextRequest) {
         },
         req.headers.get("cookie"),
       );
+      // Prefixed latest-paid hints win over the flat first-touch bag when present:
+      // the flat fields describe first touch and only ever acted as a loose fallback.
+      const latestPaidHints = collectLatestPaidHints(
+        (name) => (body as unknown as Record<string, unknown>)[name],
+      );
       const latestPaidTouch = mergeLatestPaidAttribution(
-        {
-          utm_source, utm_campaign, utm_medium, utm_content, utm_term,
-          gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
-          loc_interest_ms, adgroupid, creative, campaignid, network,
-        },
+        Object.keys(latestPaidHints).length > 0
+          ? latestPaidHints
+          : {
+              utm_source, utm_campaign, utm_medium, utm_content, utm_term,
+              gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
+              loc_interest_ms, adgroupid, creative, campaignid, network,
+            },
         req.headers.get("cookie"),
       );
       // Prefer the cookie's first-touch landing_referrer (true upstream — e.g.

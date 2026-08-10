@@ -2,8 +2,11 @@
 
 import { useState, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { readUtmFromStorage } from "@/components/site/UtmCapture";
-import { appendAttributionToFormData } from "@/lib/analytics/utm";
+import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
+import {
+  appendAttributionToFormData,
+  appendLatestPaidAttributionToFormData,
+} from "@/lib/analytics/utm";
 import {
   clearQuoteSubmission,
   getOrCreateQuoteSubmission,
@@ -79,6 +82,7 @@ export function ContactForm() {
       ]),
     );
     appendAttributionToFormData(payload, readUtmFromStorage());
+    appendLatestPaidAttributionToFormData(payload, readLatestPaidFromStorage());
     const { submissionKey } = getOrCreateQuoteSubmission(
       "contact-quote",
       payload,

@@ -19,7 +19,8 @@ import {
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { computePstBase } from "@/lib/pricing/tax";
-import { readUtmFromStorage } from "@/components/site/UtmCapture";
+import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
+import { toLatestPaidHintPayload } from "@/lib/analytics/utm";
 
 const DEFAULT_GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -495,6 +496,9 @@ export default function CheckoutPage() {
       }
 
       const attribution = readUtmFromStorage() ?? {};
+      // Latest paid touch travels under its own prefix so it cannot collide with
+      // the flat first-touch fields spread below.
+      const latestPaidHints = toLatestPaidHintPayload(readLatestPaidFromStorage());
 
       const body: CreateOrderRequest = {
         checkout_submission_id: getOrCreateCheckoutSubmissionId(),
@@ -514,6 +518,7 @@ export default function CheckoutPage() {
         discount_amount: appliedDiscount?.amount,
         marketing_consent: marketingConsent,
         ...attribution,
+        ...latestPaidHints,
       };
       const res = await fetch("/api/orders", {
         method: "POST",
