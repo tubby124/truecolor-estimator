@@ -71,6 +71,18 @@ for (const row of await search(
   "campaign negatives",
 )) liveCampaignNegatives.add(`${row.campaign.name}||${row.campaignCriterion.keyword.text}||${row.campaignCriterion.keyword.matchType}`);
 
+// Ad-group cross-negatives. These were previously INVISIBLE to this diff while apply-sync
+// created them anyway (it queries the same rows and reads group.crossNegatives), so the plan
+// under-reported every routing change: the Aug 6 boat-split added 6 cross-negatives that never
+// appeared here, and a reviewer approving this output would have got more criteria than the
+// summary promised. Same class of bug as the campaign-negative and extension-asset blind spots
+// above — a diff that cannot see an object type reports "in sync" forever.
+const liveGroupNegatives = new Set();
+for (const row of await search(
+  "SELECT ad_group.name, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type FROM ad_group_criterion WHERE ad_group_criterion.negative = true AND ad_group_criterion.type = 'KEYWORD' AND ad_group_criterion.status != 'REMOVED'",
+  "ad group negatives",
+)) liveGroupNegatives.add(`${row.adGroup.name}||${row.adGroupCriterion.keyword.text}||${row.adGroupCriterion.keyword.matchType}`);
+
 const liveAds = new Map();
 for (const row of await search(
   "SELECT ad_group.name, ad_group_ad.ad.id FROM ad_group_ad WHERE ad_group_ad.status != 'REMOVED'",
@@ -118,6 +130,7 @@ const MATCH = { EXACT: "EXACT", PHRASE: "PHRASE" };
 const newGroups = [];
 const newKeywords = [];
 const newAds = [];
+const newGroupNegatives = [];
 
 for (const campaign of paidSearchConfig.campaigns) {
   for (const group of campaign.adGroups) {
@@ -137,6 +150,12 @@ for (const campaign of paidSearchConfig.campaigns) {
     for (const kw of group.keywords) {
       const key = `${group.name}||${kw.text}||${MATCH[kw.matchType]}`;
       if (!liveKeywords.has(key)) newKeywords.push({ group: group.name, text: kw.text, matchType: kw.matchType });
+    }
+    // Cross-negatives are PHRASE at the ad-group level, matching apply-sync and export.
+    for (const term of group.crossNegatives ?? []) {
+      if (!liveGroupNegatives.has(`${group.name}||${term}||PHRASE`)) {
+        newGroupNegatives.push({ group: group.name, text: term });
+      }
     }
   }
 }
@@ -170,6 +189,7 @@ section("AD GROUPS TO CREATE", newGroups, (g) => `${g.name} [${g.status}] -> ${g
 section("RESPONSIVE SEARCH ADS TO CREATE", newAds, (a) => `RSA in "${a.group}" (${a.headlines} headlines, ${a.descriptions} descriptions)`);
 section("KEYWORDS TO ADD", newKeywords, (k) => `[${k.matchType}] ${k.text}   (${k.group})`);
 section("CAMPAIGN NEGATIVES TO ADD", newNegatives, (n) => `[${n.matchType}] ${n.text}   (${n.campaign})`);
+section("AD GROUP CROSS-NEGATIVES TO ADD", newGroupNegatives, (n) => `[PHRASE] ${n.text}   (${n.group})`);
 
 // Extras — live but not in the contract. Never auto-removed; surfaced for judgement.
 const contractGroupNames = new Set(paidSearchConfig.campaigns.flatMap((c) => c.adGroups.map((g) => g.name)));
@@ -219,6 +239,6 @@ if (driftWarnings.length === 0) {
   console.log("  A clean SUMMARY below does NOT mean these are resolved.");
 }
 
-console.log(`\nSUMMARY: ${newGroups.length} ad groups, ${newAds.length} RSAs, ${newKeywords.length} keywords, ${newNegatives.length} negatives to create.`);
+console.log(`\nSUMMARY: ${newGroups.length} ad groups, ${newAds.length} RSAs, ${newKeywords.length} keywords, ${newNegatives.length + newGroupNegatives.length} negatives to create (${newNegatives.length} campaign + ${newGroupNegatives.length} ad-group).`);
 if (driftWarnings.length) console.log(`WARNING: ${driftWarnings.length} asset/destination drift item(s) above are NOT covered by that summary.`);
 console.log("This tool is READ-ONLY. Nothing was changed.");

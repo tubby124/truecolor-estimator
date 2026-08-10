@@ -1390,6 +1390,40 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     (pricedQuoteDeliveriesRes.data ?? []) as PricedQuoteDeliveryRow[],
     now,
   );
+
+  // Paid revenue that never REACHED the conversion outbox. The outbox queries
+  // above can only summarize rows that exist; an order with conversion_type
+  // NULL produces no row at all, so it is invisible to every one of them.
+  // Query the orders side to close that blind spot.
+  const paidOrderStatuses = ["payment_received", "in_production", "ready_for_pickup", "complete"];
+  const paidWindowStart = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: paidOrders7dRaw, error: paidOrders7dError } = await supabase
+    .from("orders")
+    .select("id, conversion_type")
+    .in("status", paidOrderStatuses)
+    .not("paid_at", "is", null)
+    .gte("paid_at", paidWindowStart)
+    .limit(1000);
+  const paidOrders7d = (paidOrders7dRaw ?? []) as Array<{ id: string; conversion_type: string | null }>;
+  const paidOrdersMissingConversionType7d = paidOrders7dError
+    ? 0
+    : paidOrders7d.filter((o) => o.conversion_type === null).length;
+  const classifiedPaidOrderIds = paidOrders7d
+    .filter((o) => o.conversion_type !== null)
+    .map((o) => o.id);
+  let paidOrdersMissingOutboxRow7d = 0;
+  if (!paidOrders7dError && classifiedPaidOrderIds.length > 0) {
+    const { data: enqueuedRaw, error: enqueuedError } = await supabase
+      .from("google_ads_conversion_outbox")
+      .select("order_id")
+      .in("order_id", classifiedPaidOrderIds);
+    if (!enqueuedError) {
+      const enqueued = new Set(
+        ((enqueuedRaw ?? []) as Array<{ order_id: string }>).map((r) => r.order_id),
+      );
+      paidOrdersMissingOutboxRow7d = classifiedPaidOrderIds.filter((id) => !enqueued.has(id)).length;
+    }
+  }
   const paidSearchActions = new Set<PaidSearchRecommendedAction>([
     "raise CPC ceiling, auctions lost on price",
     "raise daily budget, budget-limited",
@@ -1549,6 +1583,8 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     googleAdsMonitorDetail: latestByName.get("google-ads-monitor")?.detail ?? null,
     googleAdsEnabledFor48h,
     measurementOutboxes,
+    paidOrdersMissingConversionType7d,
+    paidOrdersMissingOutboxRow7d,
     wavePaymentEffects,
     waveProvisioning,
     quoteDeliveries,
