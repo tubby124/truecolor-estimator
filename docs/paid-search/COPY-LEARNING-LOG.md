@@ -777,3 +777,27 @@ The conversion pipeline is closed end-to-end as of this entry: capture (UtmCaptu
 promotable) -> Data Manager (verified solid). The remaining gap is upstream: getting a click ID
 onto orders at all (7-day ITP ceiling, no server-side cookie, cross-device) — see the Aug 10
 audit's capture-hardening items.
+
+---
+
+## 2026-08-10 (3) — Google's "remove redundant keywords" recommendation reverted the keyword apply; restored
+
+At 01:23 Regina the owner, from the Google Ads MOBILE APP, applied Google's "remove redundant
+keywords" recommendation — mistakenly, prompted by the app after the 00:24 keyword apply. It
+removed 32 criteria (the EXACT/PHRASE structure Google reads as duplication), leaving the account
+17 keywords short of contract including 4 of the 12 verifier-required near-me keywords. Caught
+within the hour because the owner asked for a re-check and sync-plan diffed against contract;
+change_event attributed it (GOOGLE_ADS_MOBILE_APP + REMOVE ×32). Restored via apply-sync:
+readback 164/372 = contract, re-diff zero.
+
+**Why the recommendation is wrong for this account:** the EXACT+PHRASE pairing is deliberate —
+the mining/expansion cadence reads performance PER MATCH TYPE (it is how the `printing saskatoon`
+leak was isolated), and the live verifier asserts exact inventory. Google's rec optimizes for
+broad-match Smart Bidding accounts, which this deliberately is not (contract forbids broad).
+
+**Promoted to rule — the account now has THREE authors: this Mac, the ZaraBot VPS, and Google's
+recommendation engine via the owner's phone.** Never apply in-app/in-UI recommendations on this
+account; DISMISS them. Any recommendation worth taking becomes a contract change through the
+normal cadence. Owner action items: dismiss the "redundant keywords" card so it stops re-prompting,
+and verify auto-apply recommendations are OFF (Google Ads → Recommendations → Auto-apply).
+sync-plan after any owner phone/UI session is the drift detector — it caught this in minutes.
