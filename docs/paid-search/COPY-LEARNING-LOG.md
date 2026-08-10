@@ -801,3 +801,159 @@ account; DISMISS them. Any recommendation worth taking becomes a contract change
 normal cadence. Owner action items: dismiss the "redundant keywords" card so it stops re-prompting,
 and verify auto-apply recommendations are OFF (Google Ads → Recommendations → Auto-apply).
 sync-plan after any owner phone/UI session is the drift detector — it caught this in minutes.
+
+---
+
+## 2026-08-10 (4) — 🟠 STAGED, NOT APPLIED — Generic Sign Shop repointed to /why-true-color; the variant-A pause exception
+
+> **STATUS: STAGED — PENDING APPLY. Nothing in this entry has touched the live account.**
+> The contract, validator, verifier counts, tooling, tests, and artifacts are all changed in the
+> repo and green. The account still serves the OLD destination. Both dry runs were read-only.
+> Delete this banner and record the readback when `--create` and `--swap` have actually run.
+
+### Why the ad moves
+
+Generic Sign Shop is the group the 2026-08-09 retirement entry named as `/why-true-color`'s next
+legitimate test, and the case has only got stronger:
+
+- It spent **CA$13.87 over 8 clicks on `/sign-company-saskatoon` and produced ZERO funnel events.**
+  Not weak conversion — *no telemetry at all*, because that page emits none. It is an organic SEO
+  page: no `view_paid_landing`, no `select_item`, no `paid_landing_cta`, no `click_to_call`, no
+  `generate_lead`. Every one of those clicks was unmeasurable by construction.
+- Google's own Quality Score data rates its landing-page experience **BELOW_AVERAGE** (the QS-3
+  cluster). We are paying a rank/CPC penalty for the destination on top of learning nothing.
+- No price above the fold, and full site nav — the click can leave before it ever sees a number.
+
+`/why-true-color` is the inverse on every axis: instrumented end to end for paid, 8 priced product
+cards above the fold, no nav escape hatches, noindex, verified 200 on the exact tracked URL with the
+paid marker present. And it **currently serves nothing** — it was built for the nine Competitor
+RSAs that never delivered a single impression before the campaign was retired. The page has never
+had a paid click. This is the first real test of an asset the account already owns.
+
+**`/sign-company-saskatoon` is NOT edited.** It is RECOVERING (34.9 → 24.0, 259 impressions) and
+protected. The AD moves; the PAGE stays for organic. That separation is the whole point — this is
+a destination experiment, so **destination is the only variable that changed.** Copy is
+byte-identical to the pre-repoint contract: no headline, description, or price was touched, and
+every number still resolves in `approved-claims.mjs`. Changing copy in the same pass would have
+made the result unattributable.
+
+### 🔴 The variant-A pause — a documented exception to "never touch variant A"
+
+`google-ads-copy.md` says the legacy variant-A ad is the control arm and must not be edited. That
+rule is preserved **literally**: nothing edits variant A, and `replace-stale-price-ads.mjs` has no
+code path that rewrites any existing ad — RSA text is immutable, so it cannot.
+
+But this group had **two** enabled ads (legacy A + variant B) and **both point at
+`/sign-company-saskatoon`**. Swapping only variant B would leave the group serving two different
+landing pages at once. That does not degrade the experiment, it **voids** it — there is no spend
+level at which a split-destination group produces a readable result, and this account has CA$600 of
+qualifying spend to allocate.
+
+So for a group whose DESTINATION changed, and only for such a group, the legacy ad is **PAUSED in
+the same atomic swap**. Pausing is not editing: copy, policy approval, and history are intact and
+one status flip from returning. The copy-only staleness case is untouched — variant A at the
+contract destination is still never acted on, and there is a regression test that proves it.
+
+The contract side of that decision: the group **drops `headlines`** and ships variant B alone, like
+`photo-posters`, `decals`, and `boat`. This is forced arithmetic, not taste — an ad that ends up
+PAUSED cannot also be counted as live contract inventory, or
+`EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS` disagrees with the account by exactly one ad forever.
+
+### 🔴 Tool defect found and fixed in the same pass: staleness was blind to the destination
+
+`replace-stale-price-ads.mjs` fingerprinted **copy only**. An ad carrying byte-identical contract
+copy while pointing at a superseded URL therefore read back as "already current", and the tool
+reported nothing to do. A destination repoint was exactly as invisible to it as a price edit had
+been to `apply-sync`.
+
+**This is the documented trap for the third time** — "a diff tool that cannot see a class of object
+reports 'in sync' forever" — one class further out each time: `sync-plan` could not see assets, then
+could not see cross-negatives; `apply-sync` could not see ad text; `replace-stale-price-ads` could
+not see ad destinations. Fingerprint is now **headlines + descriptions + sorted finalUrls**.
+
+Variant-A identification stays deliberately copy-only, so the control arm remains *nameable* even
+when the contract has moved the destination out from under it. The pure classification and planning
+logic moved to `stale-ad-replacement-contract.mjs` (same split as `hard-stop-contract.mjs` and
+`controlled-test-contract.mjs`) — the old file opened an OAuth session at import time, so not one
+of its decisions could be unit-tested. Nine tests now cover it.
+
+### The counts
+
+| | before | after swap | why |
+|---|---:|---:|---|
+| `EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS` | 46 | **45** | group stops declaring variant A |
+| `SUPERSEDED_COPY_RSAS_PAUSED` | 12 | **14** | + old variant B, + legacy variant A |
+| Core enabled RSAs | 23 | **22** | group goes from 2 serving ads to 1 |
+| paused RSAs (`23 + superseded`) | 35 | **37** | |
+| account RSA total (`45 + 14`) | 58 | **59** | one net-new ad |
+| ad groups | 26 | **26** | destination change, not inventory change |
+| keywords | 164 / 372 | **unchanged** | not one keyword moves |
+
+The new variant-B ad is **not** an addition to `EXPECTED_TOTAL`: it replaces the old variant B in
+contract inventory, and the old one moves into `SUPERSEDED_COPY_RSAS_PAUSED`. Counting it in both
+places would double-count it. `45 + 14 = 59` is the only arithmetic that reproduces the account.
+
+### The two-phase plan, and what the verifier will flag in between
+
+RSA text is immutable, so this is create-then-swap, same as the $35 fix:
+
+1. `--create` — builds the replacement from the contract, **PAUSED, at the new URL**. It enters
+   policy review while both old ads keep serving. Nothing stops delivering; nothing starts.
+2. `--swap` — once the replacement reads `APPROVED`/`REVIEWED`, **one atomic mutate**: enable the
+   replacement, pause the old variant B, pause the legacy variant A. No delivery gap, and no window
+   where two destinations serve.
+
+**`validate:google-ads:launched` reports drift between the phases. That is expected and correct —
+it is the import-completion signal, exactly as the $35 fix documented.** The verifier is gated to
+the END state, so:
+
+| state | total | enabled | paused | verifier |
+|---|---:|---:|---:|---|
+| now (nothing applied) | 58 | 23 | 35 | ❌ all three — the repo is ahead of the account |
+| after `--create` | 59 | 23 | 36 | ✅ total · ❌ enabled (23 vs 22) · ❌ paused (36 vs 37) |
+| after `--swap` | **59** | **22** | **37** | ✅ green |
+
+Do not "fix" the intermediate reading. A green verifier between the phases would mean the swap had
+already happened.
+
+### Held out deliberately
+
+- **No copy change.** One variable per change. Headlines still sell signs and the destination
+  carries coroplast/ACP/vinyl cards, so the copy is destination-consistent as written.
+- **No keyword change.** The 7 terms × EXACT+PHRASE stay exactly as they are.
+- **The 14 superseded paused ads stay paused, not removed** — same open owner call as the 12 from
+  2026-08-09. Removal is the only end state that matches the contract exactly; it is not automated.
+- **`/sign-company-saskatoon` not edited, not redirected, not noindexed.** It keeps ranking.
+
+### Validator generalisation, done deliberately
+
+The exact tracked href `…/why-true-color?source=google-ads` lived inside a `kind === "COMPETITOR"`
+branch. That encoded an accident of history — the page was built for the Competitor campaign — as
+if it were a rule. It is a paid landing page, not a competitor landing page. It is now
+`TRACKED_PAID_LANDING_HREF` + a `TRACKED_HREF_ROUTES` opt-in map, asserted for CORE and COMPETITOR
+alike, **and fail-closed in both directions**: a Core group on that path without declaring itself in
+the map is rejected, because it would otherwise pass the pathname check while escaping the exact-href
+assertion the live verifier depends on.
+
+`COMPETITOR_DESTINATION_BINDING` is unaffected, and this was proven from the code rather than
+assumed: `competitorRsaDestinations` is filtered by campaign name, and every allowlisted ad is
+pinned by resource name and ad id — **never by URL**. Core ads at the same destination cannot
+collide with it. A test now locks that in, including the contrast case (a stray ad at that URL
+*inside* the Competitor campaign still fails), so the guard is correctly scoped rather than weakened.
+
+### Metric + date
+
+Check GA4 + search terms after **20 clicks on this group or by 2026-08-24**, whichever comes first.
+The bar is deliberately low, because the current reading is zero: `/why-true-color` should emit
+`view_paid_landing` on every paid session, and at least one of `select_item` / `paid_landing_cta` /
+`click_to_call` should fire. **If the repoint produces measurable post-click behaviour where the SEO
+page produced literally none, the destination question is answered for the rest of the account** —
+and the same test is then owed by `rush-same-day`, `generic-print-price`, and `large-format`, which
+all point at SEO pages with the same instrumentation gap.
+
+### Promoted to rule
+
+**A destination is part of an ad's identity, not metadata about it.** Any tool that decides whether
+a live ad matches the contract must fingerprint where it points, not just what it says. And any
+group whose destination moves must retire **every** enabled ad at the old destination in the same
+atomic mutate — a split-destination ad group is not a degraded experiment, it is no experiment.

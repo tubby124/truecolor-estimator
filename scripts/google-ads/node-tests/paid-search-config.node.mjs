@@ -20,6 +20,16 @@ import {
   withoutLoginCustomerHeader,
 } from "../live-verification-contract.mjs";
 import { COMPETITOR_RSA_REVIEW } from "../request-competitor-rsa-review.mjs";
+import {
+  buildCoreContractIndex,
+  buildSwapOperations,
+  classifyLiveCoreAds,
+  findRetiredPriceInContract,
+  fingerprintCopy,
+  fingerprintDestinations,
+  planDestinationSwap,
+  planReplacementCreates,
+} from "../stale-ad-replacement-contract.mjs";
 
 const clone = () => structuredClone(paidSearchConfig);
 const parseCsv = (source) => {
@@ -119,7 +129,9 @@ const makePausedLiveState = () => ({
       matchType,
       status: "ENABLED",
     }))),
-    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 46, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 44,
+    // 2026-08-10 Generic Sign Shop repoint: 46 -> 45 contract RSAs. The group stopped declaring a
+    // legacy variant A, because that ad points at the retired destination and is paused by the swap.
+    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 45, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 43,
     competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
       campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
       campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
@@ -248,12 +260,14 @@ const makeLaunchedLiveState = () => {
   // and their 21 RSAs paused. Enabled is Core alone: 13 groups, 23 RSAs.
   live.pausedAdGroups = 13;
   live.enabledAdGroups = 13;
-  // 2026-08-09 copy replacement: 12 superseded Core RSAs are PAUSED rather than removed, so the
-  // account carries 46 + 12 = 58 ads and 23 + 12 = 35 paused. Enabled is unchanged at 23 — a
-  // superseded ad reading back ENABLED must still fail.
-  live.responsiveSearchAds = 58;
-  live.pausedResponsiveSearchAds = 35;
-  live.enabledResponsiveSearchAds = 23;
+  // 2026-08-09 copy replacement: 12 superseded Core RSAs are PAUSED rather than removed.
+  // 2026-08-10 Generic Sign Shop destination repoint adds 2 more superseded ads (the group's old
+  // variant B AND its legacy variant A, both pinned to /sign-company-saskatoon) and creates one
+  // replacement, so the account carries 45 + 14 = 59 ads, 23 + 14 = 37 paused, and 22 enabled.
+  // Enabled falls by one because that group went from two serving ads to one.
+  live.responsiveSearchAds = 59;
+  live.pausedResponsiveSearchAds = 37;
+  live.enabledResponsiveSearchAds = 22;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   // Competitor ads are retired, so their destinations must read back PAUSED, not ENABLED.
   live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "PAUSED" }));
@@ -1104,4 +1118,267 @@ test("requires explicit date-change and advanced-geo preview controls", () => {
     mutate(config);
     assert.equal(validateConfig(config).localStatus, "INVALID");
   }
+});
+
+// ── 2026-08-10 Generic Sign Shop destination repoint ────────────────────────────────────────────
+
+test("Generic Sign Shop routes to the exact tracked paid landing page and ships variant B alone", () => {
+  const core = paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE");
+  const group = core.adGroups.find((item) => item.key === "generic-sign-shop");
+  assert.equal(group.finalUrl, "https://truecolorprinting.ca/why-true-color?source=google-ads");
+  // The legacy variant-A ad points at the retired destination and is PAUSED by the swap, so the
+  // contract must stop declaring it — otherwise EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS over-counts.
+  assert.equal("rsa" in group, false);
+  assert.ok(group.rsaVariantB);
+  // /sign-company-saskatoon must NOT disappear from the repo — it stays live for organic. It is
+  // simply no longer an ad destination.
+  const destinations = paidSearchConfig.campaigns.flatMap((c) => c.adGroups.map((g) => g.finalUrl));
+  assert.equal(destinations.some((url) => url.includes("/sign-company-saskatoon")), false);
+});
+
+test("a Core group on the paid landing page must carry the exact tracked href", () => {
+  for (const mutate of [
+    // Right path, missing the tracking query — this is what silently escapes the live verifier.
+    (c) => {
+      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-sign-shop");
+      group.finalUrl = "https://truecolorprinting.ca/why-true-color";
+    },
+    // Query present but altered.
+    (c) => {
+      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-sign-shop");
+      group.finalUrl = "https://truecolorprinting.ca/why-true-color?source=paid";
+    },
+    // A DIFFERENT Core group sneaking onto the paid landing page without declaring it.
+    (c) => {
+      const group = c.campaigns[0].adGroups.find((g) => g.key === "large-format");
+      group.finalUrl = "https://truecolorprinting.ca/why-true-color?source=google-ads";
+    },
+  ]) {
+    const config = clone();
+    mutate(config);
+    assert.equal(validateConfig(config).localStatus, "INVALID");
+  }
+});
+
+test("Core ads sharing the /why-true-color destination cannot break the competitor binding", () => {
+  // The competitor destination check filters by CAMPAIGN, and pins each allowlisted ad by resource
+  // name and ad id — never by URL. A Core ad at the same URL therefore has no way to collide. This
+  // test exists so that stays true: it is the only thing standing between the repoint and a false
+  // "competitor target is shared outside its allowlisted association" failure.
+  const live = makeLaunchedLiveState();
+  assert.deepEqual(evaluateLaunchedLiveState(live).failures, []);
+
+  const withCoreAdAtSameUrl = structuredClone(live);
+  withCoreAdAtSameUrl.accountWideAdAssociations.push({
+    campaignId: "24048123058",
+    campaignResourceName: "customers/1072816342/campaigns/24048123058",
+    campaignName: "GOOG_Search_TC_CoreProducts_2026",
+    adGroupId: "1111111111",
+    adGroupResourceName: "customers/1072816342/adGroups/1111111111",
+    adGroupName: "Generic Sign Shop",
+    adGroupAdResourceName: "customers/1072816342/adGroupAds/1111111111~2222222222",
+    status: "ENABLED",
+    adId: "2222222222",
+    adResourceName: "customers/1072816342/ads/2222222222",
+    finalUrls: [COMPETITOR_DESTINATION_BINDING.finalUrl],
+  });
+  assert.deepEqual(evaluateLaunchedLiveState(withCoreAdAtSameUrl).failures, []);
+
+  // Contrast: an extra ad at that URL INSIDE the competitor campaign is still checked, so the
+  // guard has not been weakened — only correctly scoped.
+  const withCompetitorStray = structuredClone(live);
+  withCompetitorStray.competitorRsaDestinations.push({
+    ...structuredClone(withCompetitorStray.competitorRsaDestinations[0]),
+    adGroupAdResourceName: "customers/1072816342/adGroupAds/3333333333~4444444444",
+    adId: "4444444444",
+    adResourceName: "customers/1072816342/ads/4444444444",
+    finalUrls: ["https://truecolorprinting.ca/"],
+  });
+  assert.ok(evaluateLaunchedLiveState(withCompetitorStray).failures.length > 0);
+});
+
+// ── replace-stale-price-ads: URL-aware classification + the variant-A destination exception ─────
+
+const OLD_SIGN_URL = "https://truecolorprinting.ca/sign-company-saskatoon";
+
+// Rebuild the pre-repoint shape of the group so the fixtures describe what is ACTUALLY live today:
+// a legacy variant A and a contract-copy variant B, both still pointing at the retired page.
+const legacySignShopVariantA = {
+  headlines: [
+    "Saskatoon Sign Shop", "Custom Signs Saskatoon", "Explore Local Sign Options",
+    "Order Printing Online", "Exact Prices Online", "Local Saskatoon Pickup",
+    "Rush Options Available", "Upload Your Artwork", "Configure Your Order",
+    "Saskatoon Print Shop", "Clear Online Pricing", "Print Locally in Saskatoon",
+    "Rated 4.9 From 43 Reviews",
+  ],
+  descriptions: [
+    "Configure signs online, see exact pricing, and submit your order online.",
+    "Choose local Saskatoon pickup and upload your artwork with your order.",
+    "Rush options are available. Review your configuration and price before ordering.",
+    "Work with a Saskatoon print shop rated 4.9 from 43 Google reviews.",
+  ],
+};
+
+const contractIndexWithLegacySignShopA = () => {
+  const core = structuredClone(paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE"));
+  core.adGroups.find((group) => group.key === "generic-sign-shop").rsa = legacySignShopVariantA;
+  return buildCoreContractIndex(core);
+};
+
+const liveAd = ({ groupId, groupName, adId, status = "ENABLED", ad, finalUrls, approval = "APPROVED", review = "REVIEWED" }) => ({
+  groupId,
+  groupName,
+  groupResource: `customers/1072816342/adGroups/${groupId}`,
+  adId,
+  adResource: `customers/1072816342/ads/${adId}`,
+  status,
+  approval,
+  review,
+  finalUrls,
+  urlFp: fingerprintDestinations(finalUrls),
+  fp: fingerprintCopy(ad.headlines, ad.descriptions),
+  sample: [],
+});
+
+const signShopContractB = () => paidSearchConfig.campaigns
+  .find((campaign) => campaign.kind === "CORE").adGroups
+  .find((group) => group.key === "generic-sign-shop").rsaVariantB;
+
+test("same copy at a superseded destination classifies STALE, and variant A stays nameable", () => {
+  const index = contractIndexWithLegacySignShopA();
+  const [legacyA, oldB] = classifyLiveCoreAds([
+    liveAd({ groupId: "100", groupName: "Generic Sign Shop", adId: "1", ad: legacySignShopVariantA, finalUrls: [OLD_SIGN_URL] }),
+    liveAd({ groupId: "100", groupName: "Generic Sign Shop", adId: "2", ad: signShopContractB(), finalUrls: [OLD_SIGN_URL] }),
+  ], index);
+
+  // Byte-identical CONTRACT copy — under the old copy-only rule this read as "already current" and
+  // the tool reported nothing to do. Destination is part of the ad now.
+  assert.equal(oldB.kind, "STALE");
+  // Variant A is matched on copy alone, so it is still recognised as the control arm even though
+  // the contract has moved the destination out from under it.
+  assert.equal(legacyA.kind, "VARIANT_A_STALE_URL");
+});
+
+test("variant A at the contract destination is never classified stale (copy-only case unchanged)", () => {
+  const core = structuredClone(paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE"));
+  const coroplast = core.adGroups.find((group) => group.key === "coroplast");
+  const index = buildCoreContractIndex(core);
+
+  const classified = classifyLiveCoreAds([
+    liveAd({ groupId: "200", groupName: coroplast.name, adId: "10", ad: coroplast.rsa, finalUrls: [coroplast.finalUrl] }),
+    liveAd({ groupId: "200", groupName: coroplast.name, adId: "11", ad: coroplast.rsaVariantB, finalUrls: [coroplast.finalUrl] }),
+    liveAd({
+      groupId: "200",
+      groupName: coroplast.name,
+      adId: "12",
+      ad: { headlines: coroplast.rsaVariantB.headlines, descriptions: ["In-house designer, $35 flat, same-day proof.", "b", "c", "d"] },
+      finalUrls: [coroplast.finalUrl],
+    }),
+  ], index);
+
+  assert.deepEqual(classified.map((ad) => ad.kind), ["VARIANT_A", "VARIANT_B_CURRENT", "STALE"]);
+
+  // The copy-only swap retires the drifted ad ONLY. The control arm keeps serving, exactly as it
+  // did before URL-awareness existed — this is the regression guard on the documented exception.
+  const paused = classified.map((ad) => (ad.adId === "11" ? { ...ad, status: "PAUSED" } : ad));
+  const { ready } = planDestinationSwap(paused);
+  assert.equal(ready.length, 1);
+  assert.equal(ready[0].destinationChanged, false);
+  assert.deepEqual(ready[0].retire.map((ad) => ad.adId), ["12"]);
+});
+
+test("a destination change retires BOTH old ads in the group, in one atomic mutate", () => {
+  const index = contractIndexWithLegacySignShopA();
+  const NEW_SIGN_URL = "https://truecolorprinting.ca/why-true-color?source=google-ads";
+  const before = [
+    liveAd({ groupId: "100", groupName: "Generic Sign Shop", adId: "1", ad: legacySignShopVariantA, finalUrls: [OLD_SIGN_URL] }),
+    liveAd({ groupId: "100", groupName: "Generic Sign Shop", adId: "2", ad: signShopContractB(), finalUrls: [OLD_SIGN_URL] }),
+  ];
+
+  // Phase 1 — --create plans exactly one new ad for the group, at the new destination.
+  const { todo } = planReplacementCreates(classifyLiveCoreAds(before, index));
+  assert.equal(todo.length, 1);
+  assert.equal(todo[0].groupName, "Generic Sign Shop");
+  assert.equal(todo[0].contract.finalUrl, NEW_SIGN_URL);
+
+  // Between the phases nothing is swappable: the replacement exists but is still PAUSED and
+  // unreviewed, so the old ads keep serving. This is the transient state the live verifier flags.
+  const underReview = classifyLiveCoreAds([...before, liveAd({
+    groupId: "100", groupName: "Generic Sign Shop", adId: "3", status: "PAUSED",
+    ad: signShopContractB(), finalUrls: [NEW_SIGN_URL],
+    approval: "UNKNOWN", review: "REVIEW_IN_PROGRESS",
+  })], index);
+  assert.equal(planDestinationSwap(underReview).ready.length, 0);
+  assert.equal(planDestinationSwap(underReview).waiting.length, 1);
+  // --create is idempotent across the wait: the group already has its replacement.
+  assert.equal(planReplacementCreates(underReview).todo.length, 0);
+
+  // Phase 2 — once APPROVED/REVIEWED, the swap enables the replacement and pauses BOTH old ads.
+  const approved = classifyLiveCoreAds([...before, liveAd({
+    groupId: "100", groupName: "Generic Sign Shop", adId: "3", status: "PAUSED",
+    ad: signShopContractB(), finalUrls: [NEW_SIGN_URL],
+  })], index);
+  const { ready } = planDestinationSwap(approved);
+  assert.equal(ready.length, 1);
+  assert.equal(ready[0].destinationChanged, true);
+  assert.deepEqual(ready[0].retire.map((ad) => ad.adId).sort(), ["1", "2"]);
+
+  // One mutate, three operations: enable the new ad, pause the old B, pause the legacy A. Leaving
+  // the legacy A enabled would split the group across two landing pages and void the experiment.
+  const operations = buildSwapOperations(ready);
+  assert.equal(operations.length, 3);
+  assert.equal(operations.filter((op) => op.update.status === "ENABLED").length, 1);
+  assert.equal(operations.filter((op) => op.update.status === "PAUSED").length, 2);
+  // Pause only — this tool has no code path that rewrites an existing ad.
+  assert.ok(operations.every((op) => op.updateMask === "status"));
+});
+
+test("the replacement tool fails closed on a contract that still quotes a retired design price", () => {
+  const core = structuredClone(paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE"));
+  assert.equal(findRetiredPriceInContract(buildCoreContractIndex(core)), null);
+  core.adGroups[0].rsaVariantB.descriptions[3] = "In-house designer, $35 flat, same-day proof.";
+  assert.equal(findRetiredPriceInContract(buildCoreContractIndex(core)), core.adGroups[0].name);
+});
+
+test("the destination exception fires even when the contract drops variant A in the same pass", () => {
+  // This is the SHAPE THAT ACTUALLY SHIPS. The repoint removes `headlines` from the group (a
+  // paused ad cannot also be counted as live contract inventory), so the legacy control arm reads
+  // back as plain STALE. It must still be recognised as a destination change and retired.
+  const core = paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE");
+  const group = core.adGroups.find((item) => item.key === "generic-sign-shop");
+  const index = buildCoreContractIndex(core);
+
+  const classified = classifyLiveCoreAds([
+    liveAd({ groupId: "100", groupName: group.name, adId: "1", ad: legacySignShopVariantA, finalUrls: [OLD_SIGN_URL] }),
+    liveAd({ groupId: "100", groupName: group.name, adId: "2", ad: group.rsaVariantB, finalUrls: [OLD_SIGN_URL] }),
+    liveAd({ groupId: "100", groupName: group.name, adId: "3", status: "PAUSED", ad: group.rsaVariantB, finalUrls: [group.finalUrl] }),
+  ], index);
+  assert.deepEqual(classified.map((ad) => ad.kind), ["STALE", "STALE", "VARIANT_B_CURRENT"]);
+
+  // Still exactly ONE create per group, never two.
+  const beforeCreate = classified.slice(0, 2);
+  assert.equal(planReplacementCreates(beforeCreate).todo.length, 1);
+  assert.equal(planReplacementCreates(beforeCreate).skipped.length, 1);
+
+  const { ready } = planDestinationSwap(classified);
+  assert.equal(ready.length, 1);
+  assert.equal(ready[0].destinationChanged, true);
+  assert.deepEqual(ready[0].retire.map((ad) => ad.adId).sort(), ["1", "2"]);
+  assert.equal(buildSwapOperations(ready).length, 3);
+});
+
+test("superseded ads left PAUSED are never re-replaced or re-retired", () => {
+  // The account permanently carries paused superseded ads (12 from the 2026-08-09 price fix, 2 more
+  // from this repoint). They are STALE forever by construction; neither phase may act on them.
+  const core = paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE");
+  const group = core.adGroups.find((item) => item.key === "generic-sign-shop");
+  const index = buildCoreContractIndex(core);
+  const settled = classifyLiveCoreAds([
+    liveAd({ groupId: "100", groupName: group.name, adId: "1", status: "PAUSED", ad: legacySignShopVariantA, finalUrls: [OLD_SIGN_URL] }),
+    liveAd({ groupId: "100", groupName: group.name, adId: "2", status: "PAUSED", ad: group.rsaVariantB, finalUrls: [OLD_SIGN_URL] }),
+    liveAd({ groupId: "100", groupName: group.name, adId: "3", ad: group.rsaVariantB, finalUrls: [group.finalUrl] }),
+  ], index);
+  assert.equal(planReplacementCreates(settled).todo.length, 0);
+  assert.equal(planDestinationSwap(settled).ready.length, 0);
+  assert.equal(planDestinationSwap(settled).waiting.length, 0);
 });
