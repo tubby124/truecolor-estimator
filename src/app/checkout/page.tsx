@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { trackArtworkUpload, trackBeginCheckout } from "@/lib/analytics";
+import { trackAddPaymentInfo, trackArtworkUpload, trackBeginCheckout } from "@/lib/analytics";
 import {
   BEGIN_CHECKOUT_EVENT_KEY,
   checkoutEventFingerprint,
@@ -149,6 +149,8 @@ export default function CheckoutPage() {
   // Rush + payment state
   const [isRush, setIsRush] = useState(false);
   const [payMethod, setPayMethod] = useState<"clover_card" | "etransfer">("clover_card");
+  // Last payment_type sent to GA4 — keeps add_payment_info to one event per method
+  const paymentInfoTrackedRef = useRef<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -367,22 +369,42 @@ export default function CheckoutPage() {
   const pst = Math.round(pstBase * PST_RATE * 100) / 100;
   const total = discountedSubtotal + rush + gst + pst;
 
+  // Fires GA4 add_payment_info — the only funnel signal between begin_checkout
+  // and purchase. Deduped per method so re-selecting the same option is a no-op.
+  function trackPaymentMethod(method: "clover_card" | "etransfer") {
+    if (paymentInfoTrackedRef.current === method) return;
+    paymentInfoTrackedRef.current = method;
+    trackAddPaymentInfo({
+      value: total,
+      payment_type: method,
+      items: items.map((c) => ({
+        item_id: c.product_slug,
+        item_name: c.product_name,
+        item_category: c.category,
+        price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price,
+        quantity: c.qty,
+      })),
+    });
+  }
+
   async function applyCoupon() {
     if (!couponCode.trim()) return;
-    if (!isLoggedIn || !accessToken) {
-      setCouponError("Sign in or create an account to use discount codes.");
-      return;
-    }
     setCouponLoading(true);
     setCouponError("");
     try {
+      // Guests are allowed — /api/orders re-validates the code server-side and
+      // already accepts guest redemptions. Email (when entered) lets the server
+      // check the per-account limit for guests too.
       const res = await fetch("/api/discount/validate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
-        body: JSON.stringify({ code: couponCode.trim().toUpperCase() }),
+        body: JSON.stringify({
+          code: couponCode.trim().toUpperCase(),
+          ...(email.trim() ? { email: email.trim().toLowerCase() } : {}),
+        }),
       });
       const data = (await res.json()) as {
         valid?: boolean;
@@ -432,6 +454,9 @@ export default function CheckoutPage() {
       }
     }
     setLoading(true);
+    // Guarantee the funnel step exists even when the customer never touched the
+    // payment radios (clover_card is preselected). No-op if already sent.
+    trackPaymentMethod(payMethod);
     try {
       // Upload artwork files one-by-one via server-side API (bypasses storage RLS)
       const filePaths: string[] = [];
@@ -1003,7 +1028,7 @@ export default function CheckoutPage() {
                     name="pay"
                     value="clover_card"
                     checked={payMethod === "clover_card"}
-                    onChange={() => setPayMethod("clover_card")}
+                    onChange={() => { setPayMethod("clover_card"); trackPaymentMethod("clover_card"); }}
                     className="accent-[#16C2F3]"
                   />
                   <div>
@@ -1018,7 +1043,7 @@ export default function CheckoutPage() {
                     name="pay"
                     value="etransfer"
                     checked={payMethod === "etransfer"}
-                    onChange={() => setPayMethod("etransfer")}
+                    onChange={() => { setPayMethod("etransfer"); trackPaymentMethod("etransfer"); }}
                     className="accent-[#16C2F3]"
                   />
                   <div>
@@ -1083,6 +1108,13 @@ export default function CheckoutPage() {
               </p>
             )}
 
+            {/* Tax-inclusive total — mirrors the summary line so the mobile
+                single-column layout shows it before the button, not after */}
+            <p className="text-xs text-gray-500">
+              Estimated total incl. GST (5%) + PST (6%):{" "}
+              <span className="font-semibold text-[#1c1712]">${total.toFixed(2)} CAD</span>
+            </p>
+
             {/* Submit */}
             {payMethod === "clover_card" ? (
               <button
@@ -1129,7 +1161,11 @@ export default function CheckoutPage() {
           {/* ── Right — Order Summary ── */}
           <div>
             <div className="bg-gray-50 rounded-2xl p-6 sticky top-24">
-              <h2 className="text-lg font-bold text-[#1c1712] mb-5">Order summary</h2>
+              <h2 className="text-lg font-bold text-[#1c1712] mb-1">Order summary</h2>
+              <p className="text-xs text-gray-500 mb-5">
+                Estimated total incl. GST (5%) + PST (6%):{" "}
+                <span className="font-semibold text-[#1c1712]">${total.toFixed(2)} CAD</span>
+              </p>
 
               <div className="space-y-5 mb-5">
                 {items.map((item) => {
@@ -1168,70 +1204,55 @@ export default function CheckoutPage() {
                 })}
               </div>
 
-              {/* Promo code */}
+              {/* Promo code — available to guests and signed-in customers alike */}
               <div className="border-t border-gray-100 pt-4 mb-4">
-                {isLoggedIn ? (
+                {!appliedDiscount ? (
                   <div>
-                    {!appliedDiscount ? (
-                      <div>
+                    <button
+                      type="button"
+                      onClick={() => setCouponOpen(!couponOpen)}
+                      className="text-xs text-[#16C2F3] hover:underline flex items-center gap-1"
+                    >
+                      {couponOpen ? "▲" : "▼"} Have a promo code?
+                    </button>
+                    {couponOpen && (
+                      <div className="mt-2 flex gap-2">
+                        <input
+                          type="text"
+                          value={couponCode}
+                          onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void applyCoupon(); } }}
+                          placeholder="Enter code"
+                          className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] uppercase tracking-wider"
+                          disabled={couponLoading}
+                        />
                         <button
                           type="button"
-                          onClick={() => setCouponOpen(!couponOpen)}
-                          className="text-xs text-[#16C2F3] hover:underline flex items-center gap-1"
+                          onClick={() => void applyCoupon()}
+                          disabled={couponLoading || !couponCode.trim()}
+                          className="bg-[#1c1712] hover:bg-black disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
                         >
-                          {couponOpen ? "▲" : "▼"} Have a promo code?
-                        </button>
-                        {couponOpen && (
-                          <div className="mt-2 flex gap-2">
-                            <input
-                              type="text"
-                              value={couponCode}
-                              onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
-                              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void applyCoupon(); } }}
-                              placeholder="Enter code"
-                              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#16C2F3] uppercase tracking-wider"
-                              disabled={couponLoading}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => void applyCoupon()}
-                              disabled={couponLoading || !couponCode.trim()}
-                              className="bg-[#1c1712] hover:bg-black disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
-                            >
-                              {couponLoading ? "…" : "Apply"}
-                            </button>
-                          </div>
-                        )}
-                        {couponError && (
-                          <p className="text-xs text-red-500 mt-1.5">✗ {couponError}</p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between bg-green-50 border border-green-100 rounded-lg px-3 py-2">
-                        <div>
-                          <p className="text-xs font-semibold text-green-700">✓ {appliedDiscount.code} applied — you saved ${discount.toFixed(2)}</p>
-                          <p className="text-xs text-green-600">{appliedDiscount.description}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setAppliedDiscount(null)}
-                          className="text-xs text-gray-400 hover:text-red-500 transition-colors ml-2 shrink-0"
-                        >
-                          Remove
+                          {couponLoading ? "…" : "Apply"}
                         </button>
                       </div>
                     )}
+                    {couponError && (
+                      <p className="text-xs text-red-500 mt-1.5">✗ {couponError}</p>
+                    )}
                   </div>
                 ) : (
-                  <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2.5">
-                    <p className="text-xs font-bold text-orange-800 mb-0.5">$10 off your first order</p>
-                    <p className="text-xs text-orange-700">
-                      <Link href="/account?signup=1" className="font-semibold text-orange-900 underline underline-offset-2 hover:opacity-80">
-                        Create a free account
-                      </Link>{" "}
-                      and your discount applies automatically. Code:{" "}
-                      <span className="font-mono font-bold tracking-wider">WELCOME10</span>
-                    </p>
+                  <div className="flex items-center justify-between bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+                    <div>
+                      <p className="text-xs font-semibold text-green-700">✓ {appliedDiscount.code} applied — you saved ${discount.toFixed(2)}</p>
+                      <p className="text-xs text-green-600">{appliedDiscount.description}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAppliedDiscount(null)}
+                      className="text-xs text-gray-400 hover:text-red-500 transition-colors ml-2 shrink-0"
+                    >
+                      Remove
+                    </button>
                   </div>
                 )}
               </div>
