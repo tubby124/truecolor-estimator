@@ -168,7 +168,12 @@ const ecProbe = await (async () => {
           adIdentifiers: { gclid: "EC-READINESS-PROBE" },
           userData: { userIdentifiers: [{ emailAddress: createHash("sha256").update("probe@example.com").digest("hex") }] },
           conversionValue: 1, currency: "CAD",
-          eventTimestamp: new Date(`${range.endDate}T12:00:00Z`).toISOString(),
+          // One hour ago, NOT noon on range.endDate. endDate is normally TODAY, so noon UTC is in
+          // the future whenever this runs before 06:00 Saskatoon — Data Manager then rejects the
+          // probe with EVENT_TIME_INVALID and the report claims enhanced conversions are broken
+          // when they are fine. A readiness probe that fails on the clock teaches people to
+          // ignore it, which is worse than having no probe.
+          eventTimestamp: new Date(Date.now() - 3_600_000).toISOString(),
           transactionId: "EC-READINESS-PROBE", eventSource: "WEB",
         }],
         validateOnly: true,
