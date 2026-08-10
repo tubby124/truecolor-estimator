@@ -1,43 +1,58 @@
 /**
  * POST /api/discount/validate
  *
- * Validates a discount code for the currently logged-in customer.
- * Requires a valid Supabase session (Authorization: Bearer <access_token>).
+ * Validates a discount code for the checkout preview.
+ *
+ * Auth is OPTIONAL. A Bearer token identifies the customer when present;
+ * otherwise the optional `email` in the body is used for the per-account
+ * usage check. Guests are allowed on purpose: POST /api/orders is the
+ * authoritative re-validation and it already accepts guest-submitted codes
+ * (the customer row is keyed on email, not on an auth account), so gating
+ * this preview behind a session only stopped guests from entering a code
+ * they were legitimately given — while still charging the discounted total.
  *
  * Returns: { valid: true, discount_amount, description, code }
- * Errors: 401 (not logged in), 400 (invalid/expired/already used), 404 (not found)
+ * Errors: 400 (invalid/expired/already used), 404 (not found), 429 (too many attempts)
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Extract and verify session
-    const authHeader = req.headers.get("authorization") ?? "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-    if (!token) {
+    // Public route — rate limit per IP so codes can't be enumerated.
+    if (!rateLimit(`discount-validate:${getClientIp(req)}`, 10, 60_000)) {
       return NextResponse.json(
-        { error: "Sign in to use a discount code." },
-        { status: 401 }
+        { error: "Too many attempts. Try again in a minute." },
+        { status: 429 }
       );
     }
 
-    // Verify the access token by calling Supabase auth
-    const supabaseService = createServiceClient();
-    const { data: { user }, error: authErr } = await supabaseService.auth.getUser(token);
-    if (authErr || !user?.email) {
-      return NextResponse.json(
-        { error: "Session expired. Please sign in again." },
-        { status: 401 }
-      );
-    }
-
-    const { code: rawCode } = (await req.json()) as { code?: string };
+    const { code: rawCode, email: rawEmail } = (await req.json()) as {
+      code?: string;
+      email?: string;
+    };
     if (!rawCode?.trim()) {
       return NextResponse.json({ error: "Enter a discount code." }, { status: 400 });
     }
     const code = rawCode.trim().toUpperCase();
+
+    const supabaseService = createServiceClient();
+
+    // 1. Identify the customer — session token wins, guest email is the fallback.
+    //    Either may be absent; the per-account check is skipped when unknown and
+    //    POST /api/orders re-runs it against the real customer row before charging.
+    let customerEmail: string | null = null;
+    const authHeader = req.headers.get("authorization") ?? "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (token) {
+      const { data: { user } } = await supabaseService.auth.getUser(token);
+      customerEmail = user?.email?.toLowerCase().trim() ?? null;
+    }
+    if (!customerEmail && rawEmail?.trim()) {
+      customerEmail = rawEmail.trim().toLowerCase();
+    }
 
     // 2. Look up the code (case-insensitive)
     const { data: discountCode, error: codeErr } = await supabaseService
@@ -60,39 +75,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "This discount code has expired." }, { status: 400 });
     }
 
-    // 5. Find customer by email
-    const { data: customer } = await supabaseService
-      .from("customers")
-      .select("id")
-      .eq("email", user.email.toLowerCase().trim())
-      .maybeSingle();
+    // 5. Check per-account usage — only possible once we know who is ordering.
+    if (customerEmail) {
+      const { data: customer } = await supabaseService
+        .from("customers")
+        .select("id")
+        .eq("email", customerEmail)
+        .maybeSingle();
 
-    if (!customer) {
-      // Customer hasn't placed an order yet — code is valid (they're logged in, account exists)
-      // Allow it through; redemption will create the customer row if needed during order
-      return NextResponse.json({
-        valid: true,
-        code: discountCode.code,
-        discount_amount: Number(discountCode.discount_amount),
-        description: discountCode.description ?? `${discountCode.code} discount`,
-      });
+      if (customer) {
+        const { count: usedCount } = await supabaseService
+          .from("discount_redemptions")
+          .select("*", { count: "exact", head: true })
+          .eq("code_id", discountCode.id)
+          .eq("customer_id", customer.id);
+
+        if ((usedCount ?? 0) >= discountCode.per_account_limit) {
+          return NextResponse.json(
+            { error: "You've already used this discount code." },
+            { status: 400 }
+          );
+        }
+      }
     }
 
-    // 6. Check per-account usage
-    const { count: usedCount } = await supabaseService
-      .from("discount_redemptions")
-      .select("*", { count: "exact", head: true })
-      .eq("code_id", discountCode.id)
-      .eq("customer_id", customer.id);
-
-    if ((usedCount ?? 0) >= discountCode.per_account_limit) {
-      return NextResponse.json(
-        { error: "You've already used this discount code." },
-        { status: 400 }
-      );
-    }
-
-    // 7. Check global max_uses
+    // 6. Check global max_uses
     if (discountCode.max_uses !== null) {
       const { count: totalUsed } = await supabaseService
         .from("discount_redemptions")
@@ -118,4 +125,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not validate code. Try again." }, { status: 500 });
   }
 }
-

@@ -57,6 +57,14 @@ GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""same day""",Negative
 GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""rush""",Negative
 GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""sign shop""",Negative
 GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""sign company""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""photo printing""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""poster printing""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""sticker printing""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""banner printing""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""business card""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""flyer printing""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""coroplast""",Negative
+GOOG_Search_TC_CoreProducts_2026,Generic Print Price,"""decal""",Negative
 GOOG_Search_TC_CoreProducts_2026,Photo Posters,"""stickers""",Negative
 GOOG_Search_TC_CoreProducts_2026,Photo Posters,"""labels""",Negative
 GOOG_Search_TC_CoreProducts_2026,Photo Posters,"""business cards""",Negative
@@ -151,6 +159,30 @@ GOOG_Search_TC_CoreProducts_2026,,[shirt printing],Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,"""shirt printing""",Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,[3d printer],Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,"""3d printer""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[feather flag],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""feather flag""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[walmart],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""walmart""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[mr print],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""mr print""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[print bros],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""print bros""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[pro print],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""pro print""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[lindas printing],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""lindas printing""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[77 signs],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""77 signs""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[stickermule],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""stickermule""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[cd label],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""cd label""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[who makes],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""who makes""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[print your own],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""print your own""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[ideas],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""ideas""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[jobs],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""jobs""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[hiring],Campaign negative
@@ -221,6 +253,30 @@ GOOG_Search_TC_CompetitorConquest_2026,,[shirt printing],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""shirt printing""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[3d printer],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""3d printer""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[feather flag],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""feather flag""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[walmart],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""walmart""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[mr print],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""mr print""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[print bros],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""print bros""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[pro print],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""pro print""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[lindas printing],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""lindas printing""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[77 signs],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""77 signs""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[stickermule],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""stickermule""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[cd label],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""cd label""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[who makes],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""who makes""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[print your own],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""print your own""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[ideas],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""ideas""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[jobs],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""jobs""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[hiring],Campaign negative
@@ -291,3 +347,27 @@ GOOG_Search_TC_BrandDefense_2026,,[shirt printing],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""shirt printing""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[3d printer],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""3d printer""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[feather flag],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""feather flag""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[walmart],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""walmart""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[mr print],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""mr print""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[print bros],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""print bros""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[pro print],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""pro print""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[lindas printing],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""lindas printing""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[77 signs],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""77 signs""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[stickermule],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""stickermule""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[cd label],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""cd label""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[who makes],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""who makes""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[print your own],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""print your own""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[ideas],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""ideas""",Campaign negative

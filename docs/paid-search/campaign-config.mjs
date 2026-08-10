@@ -424,6 +424,33 @@ export const paidSearchConfig = {
     // saskatoon" are not waste by default because they can route to competitor-comparison,
     // premium/product, or photo-poster demand. Only "3d printer" is a hard mismatch.
     "canvas", "shirt printing", "3d printer",
+    // 2026-08-10 search-term audit. Three families, all zero-capability or zero-intent:
+    // (a) competitors with NO conquest ad group — "mr print", "print bros", "pro print",
+    //     "lindas printing", "77 signs", "stickermule", plus "walmart" (retail photo-lab
+    //     intent, same family as the Aug 6 "london drugs" / "photo lab" negatives).
+    // (b) no-capability products — "feather flag" (zero references anywhere in
+    //     products.v1.csv or products-content.ts) and "cd label".
+    // (c) research / DIY intent — "who makes", "print your own", "ideas". Same family as
+    //     the existing "how to", "diy", and "template" negatives.
+    //
+    // Deliberately NOT negated, and each for a reason that is already precedent in this file:
+    // - "staples" and "rayacom": both are COMPETITOR_TERMS with live (paused) conquest ad
+    //   groups, so an account-wide negative is blocked by contract — config-validator's
+    //   PROTECTED_ACCOUNT_NEGATIVES guard hard-fails them. The narrow competitor-era
+    //   negatives "staples printing saskatoon", "staples saskatoon printing", and
+    //   "rayacom saskatoon" already carry this intent as Core campaign negatives.
+    // - "art print": True Color sells art posters. gallery-projects.ts carries a real-client
+    //   "Art Print — Morris Minor" from $15 routed to /photo-poster-printing-saskatoon, and
+    //   the Photo Posters ad group's own approved copy says "Photo & Art Poster Prints".
+    //   Negating it would repeat the 2026-08-07 owner correction that reinstated photo demand.
+    // - "book binding": binding is a real in-house service — products-content.ts describes
+    //   coil-bound booklets that True Color "prints, cuts, punches, and binds in-house".
+    // - "invitation": invitations are flat card/sheet printing on stock already carried
+    //   (postcards from $35, flyers from $45). Same call as the Aug 5 decision to keep
+    //   "logo design" and "resume": a real print job is not waste just because no SKU is
+    //   named after it.
+    "feather flag", "walmart", "mr print", "print bros", "pro print", "lindas printing",
+    "77 signs", "stickermule", "cd label", "who makes", "print your own", "ideas",
   ]),
   campaigns: [
     {
@@ -622,7 +649,15 @@ export const paidSearchConfig = {
             "Printing Services Saskatoon",
           ],
           priceLine: "Signs from $25, 250 cards $45, banners from $66. Every price is online.",
-          crossNegatives: ["same day", "rush", "sign shop", "sign company"],
+          // 2026-08-10: eight product cross-negatives added. This group targets the generic
+          // "what does printing cost in Saskatoon" query and lands on a price-index page, so
+          // any query that names a specific product must route to that product's own group
+          // and its orderable destination instead of being absorbed here. Routing, not waste.
+          crossNegatives: [
+            "same day", "rush", "sign shop", "sign company",
+            "photo printing", "poster printing", "sticker printing", "banner printing",
+            "business card", "flyer printing", "coroplast", "decal",
+          ],
         }),
         // 2026-08-07 owner correction: "photo printing saskatoon" is not waste. True Color
         // sells photo posters from $15, so route photo-printing demand to the dedicated

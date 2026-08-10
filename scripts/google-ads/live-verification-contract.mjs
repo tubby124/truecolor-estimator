@@ -337,8 +337,16 @@ function evaluateLiveState(live, {
   // 2026-08-07 routing fix: positiveKeywords 159 -> 164 and negativeCriteria 287 -> 292.
   // Added a Photo Posters ad group for photo-printing demand and added "staples saskatoon printing"
   // to the Staples conquest group so it routes to /why-true-color instead of Generic Print Price.
-  // Current composition: 210 account-negative criteria + 68 ad-group cross-negatives + 14 campaign negatives.
-  if (live.positiveKeywords !== 164 || live.negativeCriteria !== 292) failures.push("keyword counts changed");
+  // 2026-08-10 search-term audit: negativeCriteria 292 -> 372, positiveKeywords UNCHANGED at 164
+  // (this pass adds negatives only). Two tiers:
+  //   +72 account negatives — 12 new terms x EXACT+PHRASE x 3 campaigns. "staples", "rayacom",
+  //       "art print", "book binding", and "invitation" were audited and held out; the first two
+  //       are blocked by the PROTECTED_ACCOUNT_NEGATIVES guard and the last three are real
+  //       capability. Rationale lives in campaign-config.mjs beside the terms.
+  //   +8 ad-group cross-negatives — eight product terms on Generic Print Price only, so a query
+  //       naming a specific product routes to that product's group instead of the price-index page.
+  // Current composition: 282 account-negative criteria + 76 ad-group cross-negatives + 14 campaign negatives.
+  if (live.positiveKeywords !== 164 || live.negativeCriteria !== 372) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,
