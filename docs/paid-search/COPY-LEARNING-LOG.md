@@ -712,3 +712,45 @@ means the account permanently carries 12 paused ads the contract does not descri
 verifier will report ad-count drift until someone decides. Removing them is the only end state that
 matches the contract exactly — that is an owner call, not an automated one, and it was deliberately
 not taken here. Until then, expect `validate:google-ads:launched` to flag RSA counts.
+
+---
+
+## 2026-08-10 — negatives pass (80 criteria) from the first full search-term audit; sync-plan was blind to cross-negatives
+
+**Account change of the day.** Applied 72 campaign negatives (12 account-level terms ×EXACT+PHRASE×3)
++ 8 PHRASE crossNegatives fencing Generic Print Price. Readback 164 positive / 372 negative — exactly
+contract; post-apply re-diff zero. Evidence base: search-term mining showed `printing saskatoon`
+[PHRASE] carried 23.4% of spend and was the sole entry point for every off-catalog query in the
+account (staples, mr print, 3d printer, wedding invitations, shirt printing, art prints…), with
+~CA$55 of the remaining CA$510 projected to leak unfenced. The fence is additive — no keyword was
+removed or demoted; match-type demotion of `printing saskatoon` waits for post-fence data.
+
+**Added (account):** feather flag · walmart · mr print · print bros · pro print · lindas printing ·
+77 signs · stickermule · cd label · who makes · print your own · ideas
+**Added (Generic Print Price crossNegatives):** photo printing · poster printing · sticker printing ·
+banner printing · business card · flyer printing · coroplast · decal
+
+**Held out of the proposed list, deliberately — the audit list was overzealous on capability:**
+- `staples`, `rayacom` — hard-blocked by `PROTECTED_ACCOUNT_NEGATIVES` (COMPETITOR_TERMS); narrow
+  variants already exist as Core campaign negatives. The validator + an existing test enforce this.
+- `art print` — the shop SELLS this (gallery: "Art Print — Morris Minor", from $15, routed to
+  photo-posters; the group's approved copy says "Photo & Art Poster Prints"). Negating it would
+  repeat the 2026-08-07 photo-printing correction in reverse.
+- `book binding` — real in-house coil-binding service per products-content.
+- `invitation` — flat card/sheet printing on carried stock; same call as keeping `logo design`.
+**Rule reinforced:** every negative candidate gets checked against the catalog before it ships.
+An external audit list is a hypothesis, not an order.
+
+**🔴 Tool defect found and fixed in the same pass: `sync-plan.mjs` never saw ad-group
+cross-negatives.** It queried neither `ad_group_criterion WHERE negative = true` nor
+`group.crossNegatives`, while `apply-sync` creates from exactly that field — so the first dry run
+showed 72 of the 80 criteria the apply would create. This is the documented trap verbatim ("a diff
+tool that cannot see a class of object reports 'in sync' forever") and it had been silently wrong
+since the Aug 6 boat-split shipped 6 cross-negatives that never appeared in any plan. sync-plan now
+queries live ad-group negatives, diffs them, reports a dedicated section, and splits the summary
+(campaign + ad-group). Still read-only. The reviewer-facing preview and the mutation are now the
+same shape — which is the entire point of having a preview.
+
+**Also for the record:** `mr print` (account negative) is a spelling variant of the retired
+Competitor group's `mister print saskatoon` EXACT target. No collision while Competitor is RETIRED;
+if it is ever revived, revisit this negative first.

@@ -209,7 +209,11 @@ const CORE_CROSS_NEGATIVES = {
   flyers: ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "retractable banner"],
   "retractable-banners": ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "flyers"],
   "rush-same-day": ["business cards", "flyers", "stickers", "banners", "coroplast"],
-  "generic-print-price": ["same day", "rush", "sign shop", "sign company"],
+  "generic-print-price": [
+    "same day", "rush", "sign shop", "sign company",
+    "photo printing", "poster printing", "sticker printing", "banner printing",
+    "business card", "flyer printing", "coroplast", "decal",
+  ],
   "photo-posters": ["stickers", "labels", "business cards", "flyers"],
   "generic-sign-shop": ["same day", "rush", "printing prices", "print shop prices"],
   "large-format": ["stickers", "labels", "business cards", "flyers"],
@@ -241,6 +245,11 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   "label maker", "label printers",
   "t shirt", "tshirt", "london drugs", "photo lab",
   "canvas", "shirt printing", "3d printer",
+  // 2026-08-10 search-term audit: untargeted competitors, no-capability products, research
+  // intent. "staples", "rayacom", "art print", "book binding", and "invitation" were audited
+  // in the same pass and deliberately excluded — see the rationale block in campaign-config.mjs.
+  "feather flag", "walmart", "mr print", "print bros", "pro print", "lindas printing",
+  "77 signs", "stickermule", "cd label", "who makes", "print your own", "ideas",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 // Claim validation moved to docs/paid-search/approved-claims.mjs (2026-08-06).
