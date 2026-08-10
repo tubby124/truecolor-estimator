@@ -804,7 +804,7 @@ sync-plan after any owner phone/UI session is the drift detector — it caught t
 
 ---
 
-## 2026-08-10 (4) — 🟠 STAGED, NOT APPLIED — Generic Sign Shop repointed to /why-true-color; the variant-A pause exception
+## 2026-08-10 (4) — ✅ APPLIED 2026-08-10: --create executed (ad 820395764385 PAUSED into review), approval polled, --swap executed atomically (enabled 820395764385, paused 817302599508 + 820283120310). Readback clean; launched verifier safetyFailures NONE (59 total / 22 enabled / 37 paused); sync-plan zero. Generic Sign Shop now serves /why-true-color?source=google-ads exclusively.
 
 > **STATUS: STAGED — PENDING APPLY. Nothing in this entry has touched the live account.**
 > The contract, validator, verifier counts, tooling, tests, and artifacts are all changed in the
