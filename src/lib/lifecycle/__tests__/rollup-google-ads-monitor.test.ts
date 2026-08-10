@@ -19,6 +19,8 @@ const inputs = (heartbeat: RollupInputs["heartbeats"][number]): RollupInputs => 
     revenue: { queryFailed: 0, dead: 0, staleProcessing: 0, overdueRetry: 0 },
     quote: { queryFailed: 0, dead: 0, staleProcessing: 0, overdueRetry: 0 },
   },
+  paidOrdersMissingConversionType7d: 0,
+  paidOrdersMissingOutboxRow7d: 0,
   wavePaymentEffects: { queryFailed: 0, dead: 0, staleProcessing: 0, overdueRetry: 0 },
   waveProvisioning: { staleCreating: 0, ambiguous: 0, failed: 0 },
   quoteDeliveries: {

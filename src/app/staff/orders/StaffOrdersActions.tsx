@@ -199,6 +199,11 @@ interface FormState {
   customMessage: string;
   customSubject: string;
   overrideTotal: string;
+  /** Website quote this manual order fulfils, from ?quote=<uuid>. Makes the
+   *  order a quote_won conversion server-side and carries the quote's paid-
+   *  search click IDs onto it, so the Google Ads outbox trigger can attribute
+   *  the revenue instead of parking it as not_attributable. */
+  quote_request_id: string;
 }
 
 function makeItem(): OrderItem {
@@ -256,7 +261,7 @@ const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
   payment_method: "clover", quote_only: true, notes: "",
-  customMessage: "", customSubject: "", overrideTotal: "",
+  customMessage: "", customSubject: "", overrideTotal: "", quote_request_id: "",
 };
 
 const MAX_ITEMS = 10;
@@ -413,7 +418,14 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     const isManualOpen = manual === "1" || manual === "quote";
     if (isManualOpen && lastConsumedManualRef.current !== manual) {
       lastConsumedManualRef.current = manual;
-      setForm({ ...EMPTY_FORM, quote_only: manual !== "1" });
+      // ?quote=<uuid> links this manual order to the website quote request that
+      // produced it. The API turns that into conversion_type='quote_won' plus
+      // the quote's attribution columns.
+      setForm({
+        ...EMPTY_FORM,
+        quote_only: manual !== "1",
+        quote_request_id: searchParams?.get("quote")?.trim() ?? "",
+      });
       setError(null);
       setSuccess(null);
       setTotalOverrideOpen(false);
@@ -720,6 +732,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
           overrideTotal: overrideRequested && overrideTotalCents ? overrideTotalCents / 100 : undefined,
           payment_method: form.payment_method,
           quote_only: form.quote_only,
+          quote_request_id: form.quote_request_id.trim() || undefined,
           notes: form.notes.trim() || undefined,
           customMessage: form.customMessage.trim() || undefined,
           customSubject: form.customSubject.trim() || undefined,

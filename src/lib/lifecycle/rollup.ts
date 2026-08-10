@@ -96,6 +96,27 @@ export interface RollupInputs {
     revenue: MeasurementOutboxCounts;
     quote: MeasurementOutboxCounts;
   };
+  /**
+   * Paid orders in the last 7 days whose conversion_type is still NULL.
+   *
+   * Every failure class in `measurementOutboxes` inspects outbox rows that
+   * EXIST. This one is the blind spot underneath them: the outbox trigger's
+   * NULL guard returns early on an unclassified order, so no row is ever
+   * created and every existing check reads healthy. /api/staff/manual-order
+   * inserted orders this way for 90 days — 95 of 98 paid orders produced no
+   * outbox row at all while the dashboard stayed green. Red, not yellow:
+   * silence here is unrecoverable revenue measurement.
+   */
+  paidOrdersMissingConversionType7d: number;
+  /**
+   * Paid orders in the last 7 days that ARE classified but still have no
+   * google_ads_conversion_outbox row. Classification is present, so the trigger
+   * should have enqueued one; a gap means it did not fire — or the order was
+   * already paid before the trigger existed. Yellow: usually a backfill gap
+   * rather than a live break, and the re-evaluation trigger can repair it as
+   * soon as the row is touched.
+   */
+  paidOrdersMissingOutboxRow7d: number;
   /** Durable receipt/GA4/Brevo work created by a paid Wave transition. */
   wavePaymentEffects: MeasurementOutboxCounts;
   /** Wave-before-Clover reservations that need intervention. */
@@ -363,6 +384,25 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
         });
       }
     }
+  }
+
+  // ── Paid revenue that never REACHED the conversion outbox ────────────────
+  // The block above can only see rows that exist. These two see the orders
+  // that should have produced a row and did not — the failure mode that hid
+  // 95 of 98 paid orders behind a green dashboard for 90 days.
+  if (inputs.paidOrdersMissingConversionType7d > 0) {
+    reds.push({
+      key: "conversion:missing-type",
+      panel: "panel-cron-heartbeats",
+      label: `${inputs.paidOrdersMissingConversionType7d} paid order(s) in 7d have no conversion_type — the Google Ads outbox trigger skips them silently`,
+    });
+  }
+  if (inputs.paidOrdersMissingOutboxRow7d > 0) {
+    yellows.push({
+      key: "conversion:missing-outbox-row",
+      panel: "panel-cron-heartbeats",
+      label: `${inputs.paidOrdersMissingOutboxRow7d} classified paid order(s) in 7d have no conversion outbox row`,
+    });
   }
 
   // ── Wave paid-order effects ──────────────────────────────────────────────

@@ -18,6 +18,25 @@ const lifecycleData = readFileSync(
   path.join(process.cwd(), "src/app/staff/lifecycle/data.ts"),
   "utf8",
 );
+const reevaluationMigration = readFileSync(
+  path.join(process.cwd(), "supabase/migrations/20260810120000_outbox_reevaluation.sql"),
+  "utf8",
+);
+const manualOrderRoute = readFileSync(
+  path.join(process.cwd(), "src/app/api/staff/manual-order/route.ts"),
+  "utf8",
+);
+const rollupSource = readFileSync(
+  path.join(process.cwd(), "src/lib/lifecycle/rollup.ts"),
+  "utf8",
+);
+/** Executable SQL only. The migration's WHY block quotes the old
+ *  `ON CONFLICT ... DO NOTHING` clause it replaces, so a raw substring check
+ *  would match the comment instead of the statement. */
+const reevaluationSql = reevaluationMigration
+  .split("\n")
+  .filter((line) => !line.trimStart().startsWith("--"))
+  .join("\n");
 
 describe("Google Ads conversion outbox database contract", () => {
   it("enqueues only paid revenue classifications with pretax value", () => {
@@ -99,5 +118,131 @@ describe("Google Ads conversion outbox database contract", () => {
       'new Set(["payment_received", "in_production", "ready_for_pickup", "complete"])',
     );
     expect(lifecycleData).not.toContain('new Set(["paid", "in_production"');
+  });
+});
+
+describe("Google Ads conversion outbox re-evaluation", () => {
+  it("re-fires on classification and on every click-ID column", () => {
+    const triggerDef = /AFTER INSERT OR UPDATE OF([\s\S]*?)ON public\.orders/
+      .exec(reevaluationMigration)?.[1];
+    expect(triggerDef).toBeTruthy();
+    for (const column of [
+      "status",
+      "paid_at",
+      "conversion_type",
+      "gclid",
+      "gbraid",
+      "wbraid",
+      "latest_paid_gclid",
+      "latest_paid_gbraid",
+      "latest_paid_wbraid",
+    ]) {
+      expect(triggerDef).toContain(column);
+    }
+  });
+
+  it("replaces DO NOTHING with a guarded promotion instead of a blind overwrite", () => {
+    expect(reevaluationSql).toContain("ON CONFLICT (order_id) DO UPDATE SET");
+    expect(reevaluationSql).not.toContain("ON CONFLICT (order_id) DO NOTHING");
+    expect(reevaluationSql).toContain(
+      "WHERE google_ads_conversion_outbox.status = 'not_attributable'",
+    );
+    expect(reevaluationSql).toContain(
+      "AND num_nonnulls(EXCLUDED.gclid, EXCLUDED.gbraid, EXCLUDED.wbraid) = 1",
+    );
+  });
+
+  it("resets delivery bookkeeping when it promotes a row back to pending", () => {
+    for (const reset of [
+      "status = 'pending'",
+      "attempt_count = 0",
+      "next_attempt_at = now()",
+      "processing_started_at = NULL",
+      "last_error = NULL",
+      "data_manager_request_id = NULL",
+      "submitted_at = NULL",
+      "diagnostic_attempt_count = 0",
+    ]) {
+      expect(reevaluationMigration).toContain(reset);
+    }
+  });
+
+  it("preserves the NULL guard and the atomic latest-paid selection", () => {
+    expect(reevaluationMigration).toContain("NEW.conversion_type IS NULL");
+    expect(reevaluationMigration).toContain(
+      "NEW.conversion_type NOT IN ('purchase_online', 'quote_won')",
+    );
+    expect(reevaluationMigration).toContain("v_gclid := NULLIF(NEW.latest_paid_gclid, '')");
+    expect(reevaluationMigration).toContain(
+      "COALESCE(NEW.total, 0) - COALESCE(NEW.gst, 0) - COALESCE(NEW.pst, 0)",
+    );
+    expect(reevaluationMigration.indexOf("NEW.conversion_type IS NULL")).toBeLessThan(
+      reevaluationMigration.indexOf("INSERT INTO public.google_ads_conversion_outbox"),
+    );
+  });
+
+  it("documents the three locks that made late repair impossible", () => {
+    expect(reevaluationMigration).toContain("ONE-SHOT TRIGGER");
+    expect(reevaluationMigration).toContain("DO NOTHING");
+    expect(reevaluationMigration).toContain("TERMINAL not_attributable");
+    expect(reevaluationMigration).toContain("95 of 98 paid orders");
+  });
+
+  it("keeps the SECURITY DEFINER trigger function off the API roles", () => {
+    expect(reevaluationMigration).toContain(
+      "REVOKE ALL ON FUNCTION public.enqueue_paid_google_ads_conversion()",
+    );
+  });
+});
+
+describe("manual order conversion identity", () => {
+  it("classifies every manual order instead of inserting conversion_type NULL", () => {
+    expect(manualOrderRoute).toContain(
+      'conversion_type: quoteRequestId ? "quote_won" : "purchase_online"',
+    );
+  });
+
+  it("mirrors the online path's conversion_key shape", () => {
+    expect(manualOrderRoute).toContain("`quote_won:${quoteRequestId}`");
+    expect(manualOrderRoute).toContain("`purchase_online:${orderNumber}`");
+  });
+
+  it("copies the same attribution columns materialize_quote_order copies", () => {
+    // Names are identical on quote_requests and orders, so the RPC's insert
+    // column list is the contract. Drift here silently loses the click ID.
+    const rpcMigration = readFileSync(
+      path.join(
+        process.cwd(),
+        "supabase/migrations/20260720100000_quote_conversion_measurement.sql",
+      ),
+      "utf8",
+    );
+    const declared = [
+      ...manualOrderRoute.matchAll(/"((?:latest_paid_|utm_|google_|gclid|gbraid|wbraid)[a-z_]*)"/g),
+    ].map((m) => m[1]);
+    expect(declared.length).toBeGreaterThanOrEqual(35);
+    for (const column of declared) {
+      expect(rpcMigration).toContain(column);
+    }
+  });
+
+  it("refuses a second order against an already-linked quote", () => {
+    expect(manualOrderRoute).toContain('.eq("quote_request_id", quoteRequestId)');
+    expect(manualOrderRoute).toContain("status: 409");
+  });
+});
+
+describe("paid revenue that never reached the outbox", () => {
+  it("registers both blind-spot signals in the shared rollup", () => {
+    expect(rollupSource).toContain("paidOrdersMissingConversionType7d");
+    expect(rollupSource).toContain("paidOrdersMissingOutboxRow7d");
+    expect(rollupSource).toContain('key: "conversion:missing-type"');
+    expect(rollupSource).toContain('key: "conversion:missing-outbox-row"');
+  });
+
+  it("queries the orders side, not just existing outbox rows", () => {
+    expect(lifecycleData).toContain("paidOrdersMissingConversionType7d");
+    expect(lifecycleData).toContain("paidOrdersMissingOutboxRow7d");
+    expect(lifecycleData).toContain('.not("paid_at", "is", null)');
   });
 });
