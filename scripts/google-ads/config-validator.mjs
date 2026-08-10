@@ -150,6 +150,23 @@ const CONVERSION_MEASUREMENT = {
   },
 };
 const COMPETITOR_TERMS = ["qwik signs", "minuteman press", "ink house", "rayacom", "24 hour signs", "anytime printing", "pgi printers", "staples", "vistaprint", "vista print", "print baron", "mister print", "labels made easy"];
+// The exact tracked paid-landing destination. `?source=google-ads` is load-bearing, not cosmetic:
+// live-verify-paused fetches this precise href and asserts the paid-page marker, HTML content
+// type, noindex, and no redirect. A group routed to bare /why-true-color would pass the pathname
+// check and silently fall outside that verification.
+//
+// 2026-08-10 GENERALISED off Competitor. Until today this constant existed only inside a
+// `kind === "COMPETITOR"` branch, which encoded an accident of history — /why-true-color was built
+// for the (now RETIRED) Competitor campaign — as if it were a rule. It is a paid landing page, not
+// a competitor landing page. Any campaign kind may route to it; what must never relax is that the
+// href is EXACT. CORE groups opt in through TRACKED_HREF_ROUTES below, so the pathname map stays
+// the single source of truth for every other destination.
+const TRACKED_PAID_LANDING_HREF = "https://truecolorprinting.ca/why-true-color?source=google-ads";
+// Core groups whose destination is the tracked paid landing page rather than a plain path. Keyed
+// by group key so adding one is a one-line, reviewable contract decision.
+const TRACKED_HREF_ROUTES = {
+  "generic-sign-shop": TRACKED_PAID_LANDING_HREF,
+};
 const ROUTES = {
   coroplast: "/products/coroplast-signs",
   "stickers-labels": "/products/stickers",
@@ -160,7 +177,11 @@ const ROUTES = {
   "rush-same-day": "/same-day-printing-saskatoon",
   "generic-print-price": "/printing-prices-saskatoon",
   "photo-posters": "/photo-poster-printing-saskatoon",
-  "generic-sign-shop": "/sign-company-saskatoon",
+  // 2026-08-10: repointed off /sign-company-saskatoon. That page emits zero analytics events and
+  // carries a BELOW_AVERAGE landing-page-experience rating; it stays live and untouched for
+  // organic (RECOVERING, protected). Paid now lands on the instrumented paid page — see
+  // TRACKED_HREF_ROUTES, which additionally pins the exact ?source=google-ads href.
+  "generic-sign-shop": "/why-true-color",
   decals: "/products/window-decals",
   "large-format": "/large-format-printing-saskatoon",
   // Second Core group routed to an SEO landing page rather than a /products configurator
@@ -512,7 +533,17 @@ export function validateConfig(config) {
       try { parsed = new URL(group.finalUrl); } catch { fail(`${campaign.name}/${group.name} has invalid URL`); continue; }
       if (parsed.protocol !== "https:" || parsed.hostname !== "truecolorprinting.ca") fail(`${campaign.name}/${group.name} must use the one approved domain`);
       if (kind === "CORE" && parsed.pathname !== ROUTES[group.key]) fail(`${group.key} has the wrong destination`);
-      if (kind === "COMPETITOR" && parsed.href !== "https://truecolorprinting.ca/why-true-color?source=google-ads") {
+      // A Core group routed to the paid landing page must carry the FULL tracked href, not just
+      // the right path — the live verifier only checks the exact query URL.
+      if (kind === "CORE" && TRACKED_HREF_ROUTES[group.key] && parsed.href !== TRACKED_HREF_ROUTES[group.key]) {
+        fail(`${group.name} must route to the exact tracked ${TRACKED_HREF_ROUTES[group.key]} destination`);
+      }
+      // Fail-closed the other way too: a Core group that lands on /why-true-color WITHOUT opting
+      // into TRACKED_HREF_ROUTES would escape the exact-href assertion entirely.
+      if (kind === "CORE" && parsed.pathname === "/why-true-color" && !TRACKED_HREF_ROUTES[group.key]) {
+        fail(`${group.name} routes to the paid landing page but is not declared in TRACKED_HREF_ROUTES`);
+      }
+      if (kind === "COMPETITOR" && parsed.href !== TRACKED_PAID_LANDING_HREF) {
         fail(`${group.name} must route to the exact tracked /why-true-color Google Ads destination`);
       }
       if (kind === "BRAND" && parsed.pathname !== "/") fail(`${group.name} must route to the homepage`);

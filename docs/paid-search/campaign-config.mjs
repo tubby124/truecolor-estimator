@@ -681,11 +681,40 @@ export const paidSearchConfig = {
           priceLine: "Photo posters start at $15 on matte photo paper, printed locally in Saskatoon.",
           crossNegatives: ["stickers", "labels", "business cards", "flyers"],
         }),
+        // 2026-08-10 DESTINATION REPOINT — /sign-company-saskatoon -> /why-true-color.
+        //
+        // WHY: this group spent CA$13.87 over 8 clicks on /sign-company-saskatoon and produced
+        // ZERO funnel events, because that page emits none — it is an organic SEO page with no
+        // paid instrumentation, no price above the fold, and Google rates its landing-page
+        // experience BELOW_AVERAGE (the QS-3 cluster). /why-true-color is the opposite on every
+        // axis: fully instrumented for paid (view_paid_landing, select_item, paid_landing_cta,
+        // click_to_call, generate_lead), 8 priced product cards above the fold, no site-nav
+        // escape hatches, noindex, and it currently serves nothing — it was built for the
+        // Competitor campaign that was RETIRED 2026-08-09, so it has never received a paid click.
+        //
+        // /sign-company-saskatoon is NOT edited. It is RECOVERING (34.9 -> 24.0, 259 imp) and
+        // protected by seo-protected-pages.md. The AD moves; the PAGE stays for organic. This is
+        // the destination experiment the 2026-08-09 retirement entry said must ship on its own.
+        //
+        // ONE VARIABLE PER CHANGE: copy below is byte-identical to the pre-repoint contract. The
+        // headlines still sell signs and every number still resolves in approved-claims.mjs;
+        // /why-true-color carries coroplast/ACP/vinyl cards, so the copy stays destination-
+        // consistent without editing it. No rule requires a copy change here, so none is made —
+        // otherwise the result cannot be attributed to the destination.
+        //
+        // VARIANT A IS DROPPED FROM THIS GROUP — the contract-side half of the destination change.
+        // `headlines` used to build the legacy variant-A ad ("Saskatoon Sign Shop", "Custom Signs
+        // Saskatoon", "Explore Local Sign Options" + the 10 shared UI headlines). That live ad is
+        // NOT edited and NOT removed: replace-stale-price-ads --swap PAUSES it, because a control
+        // arm still pointing at /sign-company-saskatoon would split this group's traffic across
+        // two landing pages and make the destination experiment unreadable. Once it stops serving
+        // it is no longer part of the contract's inventory, and saying otherwise would make
+        // EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS disagree with the account by exactly one ad.
+        // This group now ships variant B alone, like photo-posters, decals, and boat.
         coreGroup({
           key: "generic-sign-shop", name: "Generic Sign Shop", product: "signs",
-          finalUrl: `${ROOT}/sign-company-saskatoon`,
+          finalUrl: `${ROOT}/why-true-color?source=google-ads`,
           terms: ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs", "signage saskatoon"],
-          headlines: ["Saskatoon Sign Shop", "Custom Signs Saskatoon", "Explore Local Sign Options"],
           variantB: [
             "Custom Signs From $25",
             "Aluminum Signs From $39",
