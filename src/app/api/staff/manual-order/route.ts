@@ -162,6 +162,33 @@ function buildProofUrl(proofPath?: string): string | undefined {
   return `${supabaseUrl}/storage/v1/object/public/print-files/${trimmed.replace(/^\/+/, "")}`;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * The attribution columns materialize_quote_order copies quote_requests → orders
+ * (supabase/migrations/20260720100000_quote_conversion_measurement.sql).
+ * Column names are identical on both tables, so a fetched quote row spreads
+ * straight into the orders insert.
+ *
+ * Keep this list in lockstep with that RPC. A manual order raised against a
+ * website quote must carry the same click IDs, or the Google Ads conversion
+ * outbox trigger classifies the revenue as not_attributable.
+ */
+const QUOTE_ATTRIBUTION_COLUMNS = [
+  "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+  "gclid", "gbraid", "wbraid", "google_keyword", "google_matchtype",
+  "google_device", "google_loc_physical_ms", "google_loc_interest_ms",
+  "google_adgroup_id", "google_creative_id", "google_campaign_id", "google_network",
+  "latest_paid_utm_source", "latest_paid_utm_medium", "latest_paid_utm_campaign",
+  "latest_paid_utm_content", "latest_paid_utm_term", "latest_paid_gclid",
+  "latest_paid_gbraid", "latest_paid_wbraid", "latest_paid_google_keyword",
+  "latest_paid_google_matchtype", "latest_paid_google_device",
+  "latest_paid_google_loc_physical_ms", "latest_paid_google_loc_interest_ms",
+  "latest_paid_google_adgroup_id", "latest_paid_google_creative_id",
+  "latest_paid_google_campaign_id", "latest_paid_google_network",
+  "latest_paid_touch_captured_at",
+] as const;
+
 export async function POST(req: NextRequest) {
   const auth = await requireStaffUser();
   if (auth instanceof NextResponse) return auth;
@@ -180,6 +207,9 @@ export async function POST(req: NextRequest) {
       customMessage?: string;
       customSubject?: string;
       overrideTotal?: number;
+      /** Website quote this manual order fulfils. Makes the order a quote_won
+       *  conversion and carries the quote's paid-search attribution across. */
+      quote_request_id?: string;
     };
 
     const { contact, payment_method, notes } = body;
@@ -229,6 +259,58 @@ export async function POST(req: NextRequest) {
     }));
 
     const supabase = createServiceClient();
+
+    // ── 0. Optional quote linkage + conversion identity ──
+    // Every manual order used to insert with conversion_type NULL, and the Google
+    // Ads outbox trigger's NULL guard silently skipped it — 95 of 98 paid orders
+    // in a 90-day window produced no outbox row at all. Classify here instead:
+    // a manual order raised against a website quote IS the quote_won conversion
+    // and must carry that quote's click IDs; everything else is purchase_online.
+    const quoteRequestId = body.quote_request_id?.trim() || null;
+    let quoteAttribution: Record<string, unknown> = {};
+    if (quoteRequestId) {
+      if (!UUID_RE.test(quoteRequestId)) {
+        return NextResponse.json({ error: "quote_request_id must be a UUID" }, { status: 400 });
+      }
+
+      const { data: quoteRow, error: quoteErr } = await supabase
+        .from("quote_requests")
+        .select(QUOTE_ATTRIBUTION_COLUMNS.join(", "))
+        .eq("id", quoteRequestId)
+        .maybeSingle();
+      if (quoteErr) {
+        console.error("[manual-order] quote attribution fetch:", quoteErr);
+        return NextResponse.json({ error: "Failed to load the linked quote" }, { status: 500 });
+      }
+      if (!quoteRow) {
+        return NextResponse.json({ error: "Quote request not found" }, { status: 404 });
+      }
+
+      // orders.quote_request_id and orders.conversion_key are both UNIQUE. A
+      // second order for the same quote fails the insert as a 23505 that the
+      // order_number retry loop below cannot distinguish from a number
+      // collision, so it would burn all three attempts and return a 500.
+      const { data: existingLink, error: existingLinkErr } = await supabase
+        .from("orders")
+        .select("order_number")
+        .eq("quote_request_id", quoteRequestId)
+        .maybeSingle();
+      if (existingLinkErr) {
+        console.error("[manual-order] existing quote linkage lookup:", existingLinkErr);
+        return NextResponse.json({ error: "Failed to verify the linked quote" }, { status: 500 });
+      }
+      if (existingLink) {
+        return NextResponse.json(
+          { error: `That quote is already linked to order ${(existingLink as { order_number: string }).order_number}` },
+          { status: 409 },
+        );
+      }
+
+      const row = quoteRow as unknown as Record<string, unknown>;
+      quoteAttribution = Object.fromEntries(
+        QUOTE_ATTRIBUTION_COLUMNS.map((column) => [column, row[column] ?? null]),
+      );
+    }
 
     // ── 1. Upsert customer ──
     const { data: customer, error: custErr } = await supabase
@@ -334,6 +416,14 @@ export async function POST(req: NextRequest) {
           pst,
           total,
           payment_method: "clover_card",
+          // conversion_key mirrors how /api/orders/route.ts builds it for the
+          // online path: "<conversion_type>:<stable identifier>".
+          quote_request_id: quoteRequestId,
+          conversion_type: quoteRequestId ? "quote_won" : "purchase_online",
+          conversion_key: quoteRequestId
+            ? `quote_won:${quoteRequestId}`
+            : `purchase_online:${orderNumber}`,
+          ...quoteAttribution,
           notes: notes?.trim() || null,
           staff_notes: quoteOnly
             ? `[QUOTE] Manual quote — ${items.length} item(s) — Pay Now link sent; customer can pay to confirm or reply for changes.`
