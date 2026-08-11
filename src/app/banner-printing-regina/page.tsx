@@ -6,7 +6,7 @@ import { CITY_HUB_PAGES } from "@/lib/data/cities";
 export const metadata: Metadata = {
   title: { absolute: "Banner Printing Regina SK | From $8.25/sqft | True Color" },
   description:
-    "Custom vinyl banner printing for Regina businesses. 13oz vinyl banners from $8.25/sqft, grommets included. Order online — shipped to Regina. True Color Display Printing, Saskatoon.",
+    "Vinyl banner printing for Regina businesses. 13oz banners from $8.25/sqft with grommets included — order online, shipped to Regina from Saskatoon.",
   alternates: { canonical: "/banner-printing-regina" },
   openGraph: {
     title: "Banner Printing Regina SK | True Color Display Printing",

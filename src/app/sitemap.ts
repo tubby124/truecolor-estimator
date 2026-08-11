@@ -109,7 +109,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/product-labels-saskatoon`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/cosmetic-labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/candle-jar-labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/roll-labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/roll-labels-saskatoon`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/image-upscale-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/logo-vectorization-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.75 },
 
@@ -152,7 +152,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // /trades-signs-saskatoon removed 2026-05-05 → 301 to /construction-signs-saskatoon
 
     // ── SK city/province pages ────────────────────────────────────────────────
-    { url: `${BASE_URL}/banner-printing-regina`, lastModified: new Date("2026-01-25"), changeFrequency: "monthly", priority: 0.75 },
+    { url: `${BASE_URL}/banner-printing-regina`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/coroplast-signs-regina`, lastModified: new Date("2026-01-25"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/signs-prince-albert-sk`, lastModified: new Date("2026-01-28"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/printing-lloydminster-sk`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.75 },

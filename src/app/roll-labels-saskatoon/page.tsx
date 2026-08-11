@@ -90,7 +90,7 @@ export default function RollLabelsSaskatoonPage() {
         },
         {
           q: "Can you design my roll label too?",
-          a: "Yes. Our in-house designer builds production-ready roll-label files for $40 flat — covers initial layout and two revision rounds. We handle die-line setup, bleed, and CRA-compliant cannabis label layouts. Logo creation or full brand work is quoted separately (most simple logos $75–$150). You get a same-day proof on standard label layouts submitted before 10 AM.",
+          a: "Yes. Our in-house designer builds production-ready roll-label files for $40 flat — covers initial layout and two revision rounds. We handle die-line setup, bleed, and CRA-compliant cannabis label layouts. Logo creation and logo vectorization are the same $40 flat — there is no design ladder. You get a same-day proof on standard label layouts submitted before 10 AM.",
         },
         {
           q: "Where do I pick up or get roll labels shipped in Saskatchewan?",
