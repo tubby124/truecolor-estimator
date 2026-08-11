@@ -1,6 +1,81 @@
 # Full SEO Audit - truecolorprinting.ca
 
-## 2026-06-08 Codebase Delta Audit (current)
+## 2026-08-11 Codebase Delta Audit (current)
+
+**Date:** 2026-08-11
+**Previous score:** 80/100 (2026-06-08 baseline)
+**Method:** Codebase-first delta audit, 3 parallel Opus agents + inline checks, no live crawl.
+**Coverage:** 10 ranking/protected pages deep-audited (the classic 5 + sticker, wall-graphics, graphic-design, aluminum, poster), repo-wide price-drift sweep, full technical/schema/performance/AI pass.
+
+### SEO Health Score: 80 / 100 (flat vs 2026-06-08 — but the composition changed)
+
+| Category | Weight | 2026-06-08 | 2026-08-11 | Δ | Weighted |
+|----------|--------|------------|------------|---|----------|
+| Technical SEO | 25% | 77 | 78 | +1 | 19.50 |
+| Content Quality | 25% | 80 | 78 | −2 | 19.50 |
+| On-Page SEO | 20% | 81 | 80 | −1 | 16.00 |
+| Schema / Structured Data | 10% | 78 | 79 | +1 | 7.90 |
+| Performance (CWV) | 10% | 77 | 77 | 0 | 7.70 |
+| Images | 5% | 92 | 93 | +1 | 4.65 |
+| AI Search Readiness | 5% | 91 | 90 | −1 | 4.50 |
+| **TOTAL** | 100% | **80** | **80** | **0 net** | **79.75** |
+
+**Headline:** Infrastructure won, content trust drifted. The two-month gap shipped real wins — orphan pages 40 → 4, SearchAction live, Product schema started (sticker + boat), aggregateRating healthy at 4.9/43 with hook guards, zero oversized images, zero broken image-sitemap refs, the dead per-product minimums fully purged repo-wide. But the 2026-08-06 design-fee sweep ($35→$40) left 4 hard stragglers, several pages carry sqft math that matches no CSV tier, and llms.txt has fallen badly behind site growth (87 of 124 pages missing — the old "13 missing" finding got worse, not better). Score is flat because the wins and the drift cancel out.
+
+### RESOLVED since 2026-06-08
+
+| Item | Was | Now | Wave |
+|------|-----|-----|------|
+| **N1** Root meta description 172 chars | Over cap | **140 chars** — within cap | Wave A ✅ |
+| **N2** WebSite SearchAction missing | Absent | **Live** — `/products?q=` urlTemplate (shipped 2026-06-22 with real product search) | Wave B ✅ |
+| **N5** graphic-design zero internal links | 0 links | **3 links** in descriptionNode | Wave A ✅ |
+| **N6** wall-graphics no DesignDirectionGrid | Missing | **Present** (shipped 2026-06-22) | Wave C ✅ |
+| **R2-era** aluminum-signs no DDG, 6 FAQs | Weak | **DDG present, 8 FAQs, page ranks 6.5 (DEFEND)** | ✅ |
+| **Wave 3.4a** 40 orphan pages | 40 unlinked | **4** — only print-resources + why-true-color (noindex paid landing, intentional) + 2 out-of-season seasonal pages | ✅ effectively closed |
+| **Wave 3.4b** 48 long metas | 48 | 39 (all non-protected city/niche pages) | PARTIAL |
+| **Wave 4 start** Product schema | 0 pages | **2 pages** — sticker-printing (Product+AggregateOffer) + boat-registration-numbers | IN PROGRESS |
+| **N9-era** HeroSlider QuoteModal import | Static import | **Removed entirely** (only archived copy remains); hero has priority + fetchPriority="high", slide-0 markup SSR'd | ✅ |
+| Stale per-product minimums ("$30 minimum" etc.) | Leaking | **0 hits repo-wide** — $25 order-total phrasing consistent everywhere | ✅ |
+| llms.txt price accuracy | 11+ stale refs (May) | All anchors correct incl. design $40; review count 4.9/43 matches lib/reviews (contract test enforces) | ✅ |
+| Image weight | 3 files 400–500KB | **Zero files >400KB**; WebP share 89% (361/405) | ✅ |
+| Image sitemap integrity | unverified | 29 pages / 254 entries, **0 broken refs**, all locs in sitemap | ✅ |
+
+### NEW / PENDING in this audit
+
+| # | Issue | File | Severity | Wave |
+|---|-------|------|----------|------|
+| **P1** | Design-fee drift survived the 8/06 sweep: mothers-day subtitle "**$35**" (self-contradicts $40 elsewhere on same page), same-day "design **starts at $35**", brochure "**from $50**" ×2 | `mothers-day-printing-saskatoon/page.tsx:107`, `same-day-printing-saskatoon/page.tsx:60`, `brochure-printing-saskatoon/page.tsx:50,84` | **HIGH** | Trust cleanup — next commit |
+| **P2** | Sqft math that matches no CSV tier: banner "2×8 — $124" (=$120), "4×8 — $248" (=$240), "$299 Premium" (that's the Deluxe tier); coroplast "24×48 — $90" (=$64 1S / $112 2S); wall-graphics "~$280" 4×8 (=$240) + "vinyl from $13/sqft" (that's the ACP rate) | `banner-printing-saskatoon:33,45,66`, `coroplast-signs-saskatoon:66`, `wall-graphics-saskatoon:187,191` | **HIGH** | Trust cleanup — DEFEND pages allow price corrections, body-only, narrow commits |
+| **P3** | City-page price drift: BC Yorkton "1,000 = $95 on 16pt" (truth: $110 on 14pt); flyer Moose Jaw "250 = $85, 1,000 = $195" (truth: $110 / $185) | `business-cards-yorkton-sk:86`, `flyer-printing-moose-jaw-sk:87` | MEDIUM | Trust cleanup |
+| **P4** | Soft ladder re-introduction: "custom artwork $75–$150" on label pages contradicts one-price $40 rule | `product-labels-saskatoon:76`, `roll-labels-saskatoon:93` | MEDIUM | Trust cleanup |
+| **P5** | **llms.txt covers 37 of 124 URLs** — entire labels cluster, city matrices, industry pages, print-resources missing; links 301'd `/event-banners`; upscale $20 absent; self-declared date stale | `public/llms.txt` | **HIGH for AI channel** (coroplast orders already attribute to ChatGPT/Bing) | Wave B-2 — pure additive |
+| **P6** | Trustindex live widget is BACK on the homepage — `5ac1960` (Jul 22) reverted the f43db23 static-proof swap; injects cdn loader + 250ms synthetic mousemove/scroll polling loop. `/reviews-widget` route is now dead code (zero references) | `ReviewsSection.tsx`, `src/app/reviews-widget/route.ts` | MEDIUM (perf) — verify this revert was intentional | Wave 5 |
+| **P7** | Sitemap bulk-date fingerprint: 83 of 124 URLs share 4 dates (41 still on 2026-05-25 — the disaster-commit date) | `src/app/sitemap.ts` | LOW (only fixable honestly — dates update as pages actually change) | Process note |
+| **P8** | 6 of 10 audited metas outside 140–155 band (5 under 140 from recovery-era thinning, poster at 158); 39 non-protected pages still >155 | recovery pages + city pages | LOW-MEDIUM | Wave 1-metadata, next eligible window |
+| **P9** | graphic-design-saskatoon: still no DesignDirectionGrid, no price in first paragraph, prose still implies tiered design pricing ("quoted individually") | `graphic-design-saskatoon/page.tsx:69–72,104,114` | MEDIUM | Wave C |
+| **P10** | sticker productOffer highPrice: 475 while page quotes $640 and grid tops at $2,600 | `sticker-printing-saskatoon/page.tsx:186` | LOW | Schema polish |
+| **P11** | canonicalSlug prop is optional but load-bearing — pages omitting it silently lose Service.url AND the whole BreadcrumbList; needs a pass to confirm every landing page passes it | `IndustryPage.tsx:110,133` | MEDIUM | Schema audit |
+| **P12** | FAQPage JSON-LD on 1 of ~100 landing pages, and AGENTS.md ("required on every page") directly contradicts truecolor-seo-safety.md ("don't add more") | rules conflict | LOW | Owner decision needed |
+| **P13** | Docs stale: seo-standards.md + seo-protected-pages.md say 117 sitemap URLs (actual 124); protected-pages doc last refreshed 2026-07-15 — **35-day hook block fires 2026-08-19** | docs | PROCESS | Refresh GSC before 8/19 |
+| P14 | OG description 164 chars (>155); root og fine otherwise | `layout.tsx:68–69` | LOW | 1-line |
+| P15 | Image-sitemap covers 23% of pages (29/124) — remaining cheap growth surface given location freeze | `image-sitemap.xml/route.ts` | LOW | Additive |
+
+### Top 3 actions
+
+1. **Trust-drift cleanup commits (P1–P4).** ~9 price corrections across 8 files. DEFEND rules allow price-only body fixes; keep protected pages to one per commit (banner, coroplast, wall-graphics are protected — three narrow commits + one batch commit for non-protected pages). This is the same class of issue as Wave 3.3 — stale numbers erode snippet trust and AI answer consistency, and AI channels are now producing real coroplast orders.
+2. **Regenerate llms.txt (P5).** 87 missing pages, one 301'd link, missing $20 upscale anchor. Pure additive, zero page.tsx touch, no wave risk. Highest-leverage AI-channel fix given ChatGPT-attributed revenue.
+3. **Refresh seo-protected-pages.md from GSC before 2026-08-19 (P13)** or all SEO page edits hard-block. Do this first if the trust cleanup won't ship this week. Also the sticker die-cut decay clock unlocks ~2026-08-14 — the refresh decides whether that title rewrite is finally allowed.
+
+### Verification
+- 3 parallel Opus agents read source only (no crawl, no edits)
+- Price claims cross-checked against data/PRICING_QUICK_REFERENCE.md (2026-08-06)
+- Inline checks: nav/footer orphan diff (119 linked hrefs vs page dirs), DDG grep, batch meta-length scan
+- Repo-wide stale-pattern grep: "$30 minimum"/"from $30" coroplast/upscale ladder = 0 hits
+- Source code unchanged by this audit (READ-ONLY per skill spec)
+
+---
+
+## 2026-06-08 Codebase Delta Audit
 
 **Date:** 2026-06-08
 **Previous score:** 79/100 (2026-05-29 baseline)

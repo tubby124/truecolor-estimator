@@ -190,6 +190,8 @@ export function ProductPageClient({ product }: Props) {
             <UnifiedConfigurator
               category={product.category as Category}
               mode="customer"
+              productName={product.name}
+              fromPrice={product.fromPrice}
               onPriceChange={handlePriceChange}
               onConfigChange={handleConfigChange}
             />

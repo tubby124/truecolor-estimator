@@ -1,6 +1,45 @@
 # SEO Remaining Waves — truecolorprinting.ca
 
-**Last updated:** 2026-07-15
+**Last updated:** 2026-08-11 (full /seo-audit — score 80, flat)
+
+## 2026-08-11 Audit Result — Score 80 → 80 (flat; infrastructure up, content trust down)
+
+Full findings: `FULL-AUDIT-REPORT.md` § 2026-08-11. New queue, priority order:
+
+### Trust cleanup (do first — same class as Wave 3.3)
+
+| # | Item | File | Notes |
+|---|------|------|-------|
+| T1 | Design "$35" → $40 | `mothers-day-printing-saskatoon:107`, `same-day-printing-saskatoon:60` | 8/06 sweep stragglers |
+| T2 | Brochure design "from $50" ×2 → $40 flat | `brochure-printing-saskatoon:50,84` | |
+| T3 | Banner sqft math: 2×8 $124→$120, 4×8 $248→$240, "$299 Premium"→Deluxe label | `banner-printing-saskatoon:33,45,66` | PROTECTED — own commit, price-only |
+| T4 | Coroplast "24×48 — $90" → $64 (or $112 if 2S intended) | `coroplast-signs-saskatoon:66` | PROTECTED commercial winner — own commit |
+| T5 | Wall-graphics "~$280" → $240; "vinyl from $13/sqft" → correct decal rate | `wall-graphics-saskatoon:187,191` | PROTECTED/HOLD — price-only allowed |
+| T6 | BC Yorkton "1,000 = $95 / 16pt" → $110 / 14pt; flyer MJ "250 $85 / 1000 $195" → $110/$185 | city pages | batch commit OK |
+| T7 | Label pages "$75–$150 custom artwork" → $40 flat framing | `product-labels-saskatoon:76`, `roll-labels-saskatoon:93` | batch commit OK |
+
+### Wave B-2 — llms.txt regeneration (pure additive, no page touch)
+
+- Backfill the 87 missing sitemap URLs (labels cluster, city matrices, industry pages, print-resources)
+- Remove 301'd `/event-banners` link
+- Add image upscale $20 flat anchor
+- Bump the self-declared "Last updated" date
+- Why now: coroplast orders already attribute to ChatGPT + Bing — this is the AI-channel storefront
+
+### Process gates
+
+- **Refresh `seo-protected-pages.md` from GSC before 2026-08-19** — the 35-day PostToolUse block fires then. Refresh also decides the sticker die-cut clock (~2026-08-14 unlock).
+- Update stale doc page counts (117 → 124) in seo-standards.md + seo-protected-pages.md during the refresh.
+- Resolve the FAQPage rules conflict (AGENTS.md mandates it; seo-safety says don't add) — owner decision.
+- Verify the Jul 22 Trustindex live-widget revert (`5ac1960`) was intentional; if yes, delete dead `/reviews-widget` route.
+
+### Carried forward
+- Wave 4 Product schema: 2 of 4+ pages done (sticker, boat) — continue one page per ship window; fix sticker highPrice 475 → real ceiling while there
+- Wave 5 CWV: gtag now `afterInteractive` (analytics-fidelity choice), Trustindex widget back on homepage, motion ships for carousel only
+- Wave 8 category hubs: still awaiting owner approval
+- graphic-design-saskatoon: DDG + price-in-first-para (Wave C)
+
+---
 **Full audit:** `FULL-AUDIT-REPORT.md`
 **GSC baseline (2026-03-12):** BC #1 | banner #2 | flyer #3 | sign #4 | coroplast #5
 **GSC actual (2026-04-12):** See ranking slip section below — baseline is no longer accurate
