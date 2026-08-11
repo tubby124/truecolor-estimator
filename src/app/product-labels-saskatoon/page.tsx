@@ -73,7 +73,7 @@ export default function ProductLabelsSaskatoonPage() {
         },
         {
           q: "Can you help design my label?",
-          a: "Yes — our in-house Photoshop designer builds print-ready label layouts at $40 flat with same-day proof. That covers ingredient list formatting, CFIA nutrition facts blocks, barcode placement, bilingual English/French text, allergen warnings, and net weight callouts. If your label needs full custom artwork (illustrated logo, hand-drawn elements), we quote that separately — usually $75 to $150 depending on complexity.",
+          a: "Yes — our in-house Photoshop designer builds print-ready label layouts at $40 flat with same-day proof. That covers ingredient list formatting, CFIA nutrition facts blocks, barcode placement, bilingual English/French text, allergen warnings, and net weight callouts. Full custom artwork — illustrated logos, hand-drawn elements, logo vectorization — is the same $40 flat. There is no design ladder: one price covers a minor edit or a label built from scratch.",
         },
         {
           q: "Where do I pick up my product labels?",

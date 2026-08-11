@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Flyer Printing Moose Jaw SK | 100 for $45 | True Color" },
   description:
-    "Custom flyer printing for Moose Jaw SK businesses and events. 100 flyers from $45 on 80lb gloss. Printed in Saskatoon — shipped to Moose Jaw. True Color Display Printing.",
+    "Flyer printing for Moose Jaw SK businesses and events. 100 full-colour flyers from $45 on 80lb gloss, printed in Saskatoon, shipped to Moose Jaw.",
   alternates: { canonical: "/flyer-printing-moose-jaw-sk" },
   openGraph: {
     title: "Flyer Printing Moose Jaw SK | True Color Display Printing",
@@ -35,8 +35,8 @@ export default function FlyerPrintingMooseJawPage() {
               full-colour flyers
             </Link>{" "}
             to Moose Jaw businesses and events 75 km to the southwest. Standard pricing:
-            100 letter-size (8.5×11&quot;) flyers on 80lb gloss for $45, 250 for $85,
-            500 for $135, 1,000 for $195. Full colour, double-sided standard, UV gloss.
+            100 letter-size (8.5×11&quot;) flyers on 80lb gloss for $45, 250 for $110,
+            500 for $135, 1,000 for $185. Full colour, double-sided standard, UV gloss.
             Moose Jaw&apos;s tourism sector and seasonal events create steady demand
             for high-quality printed flyers.
           </p>
@@ -71,7 +71,7 @@ export default function FlyerPrintingMooseJawPage() {
       ]}
       whyPoints={[
         "100 letter-size flyers for $45 on 80lb gloss — full colour, double-sided",
-        "250 for $85, 500 for $135, 1,000 for $195 — volume pricing built in",
+        "250 for $110, 500 for $135, 1,000 for $185 — volume pricing built in",
         "Half-letter and tabloid sizes for tourism menus and event programs",
         "Tourism, seasonal events, and small business clients in Moose Jaw served",
         "Ships to Moose Jaw — 3–5 business days, typical shipping $20–$35",
@@ -84,7 +84,7 @@ export default function FlyerPrintingMooseJawPage() {
         },
         {
           q: "How much does flyer printing cost with delivery to Moose Jaw?",
-          a: "100 letter-size flyers are $45, 250 are $85, 500 are $135, 1,000 are $195. Shipping from Saskatoon to Moose Jaw (75 km) typically runs $20–$35 depending on order weight. Call (306) 954-8688 for a shipping estimate.",
+          a: "100 letter-size flyers are $45, 250 are $110, 500 are $135, 1,000 are $185. Shipping from Saskatoon to Moose Jaw (75 km) typically runs $20–$35 depending on order weight. Call (306) 954-8688 for a shipping estimate.",
         },
         {
           q: "Can you print tourism flyers for a Moose Jaw attraction?",

@@ -106,7 +106,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Label & service SEO pages — Wave 2026-05-14 product expansion ───────
     { url: `${BASE_URL}/labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/freezer-labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/product-labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/product-labels-saskatoon`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/cosmetic-labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/candle-jar-labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/roll-labels-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.8 },
@@ -175,7 +175,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/banner-printing-moose-jaw-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/vehicle-magnets-moose-jaw-sk`, lastModified: new Date("2026-05-20"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/business-cards-moose-jaw-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/flyer-printing-moose-jaw-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/flyer-printing-moose-jaw-sk`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.7 },
     // Prince Albert
     { url: `${BASE_URL}/coroplast-signs-prince-albert-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/banner-printing-prince-albert-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
