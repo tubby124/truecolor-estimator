@@ -76,11 +76,15 @@ export function trackViewItemList(params: {
   });
 }
 
-export function trackClickToCall(params: { placement: string }) {
+export function trackClickToCall(params: {
+  placement: string;
+  page_path: string;
+  link_url: string;
+}) {
   gtag("event", "click_to_call", {
     placement: params.placement,
-    page_path: "/why-true-color",
-    link_url: "tel:+13069548688",
+    page_path: params.page_path,
+    link_url: params.link_url,
   });
 }
 

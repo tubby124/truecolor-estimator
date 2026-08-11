@@ -3,7 +3,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import {
-  trackClickToCall,
   trackPaidEngagement,
   trackPaidLandingView,
   trackSelectItem,
@@ -99,7 +98,7 @@ export function PaidPhoneLink({ placement, className, children }: PaidPhoneLinkP
     <a
       href="tel:+13069548688"
       className={className}
-      onClick={() => trackClickToCall({ placement })}
+      data-call-placement={placement}
     >
       {children}
     </a>
