@@ -25,5 +25,5 @@ Skills: `/truecolor-page [keyword]` | `/paa-faq [keyword]`
 - Allowed growth formats: customer case studies, real project proof, non-location resources, performance, attribution, GBP, Bing, and AI citation work.
 
 ## Current Status
-Sitemap: 117 pages | GSC through 2026-07-12 | location expansion frozen
+Sitemap: 124 pages | GSC through 2026-08-08 | location expansion frozen
 Full sprint history: memory/seo-sprints.md

@@ -184,7 +184,7 @@ export default function WallGraphicsSaskatoonPage() {
       faqs={[
         {
           q: "How much do wall graphics cost in Saskatoon?",
-          a: "Removable vinyl wall graphics at True Color start at $11/sqft; small jobs top up to the $25 order-total minimum at checkout. A standard 4×8 ft wall graphic runs approximately $280 before design. Exact pricing depends on material, finish, and size — use the quote form on this page or call (306) 954-8688 for a same-day quote.",
+          a: "Removable vinyl wall graphics at True Color start at $11/sqft; small jobs top up to the $25 order-total minimum at checkout. A standard 4×8 ft wall graphic is 32 sqft, which reaches the $7.50/sqft volume tier — $240 before design. Exact pricing depends on material, finish, and size — use the quote form on this page or call (306) 954-8688 for a same-day quote.",
         },
         {
           q: "Can wall decals be removed without damaging the wall?",
