@@ -1,9 +1,9 @@
-# SEO Protected Pages — Rankings as of 2026-07-15
+# SEO Protected Pages — Rankings as of 2026-08-11
 
 > This file supplements ~/.claude/rules/truecolor-seo-safety.md with specific page rankings.
 > **Refresh cadence: every 28 days from GSC (weekly read is fine; full doc refresh ≥ every 28 days).**
-> Last refreshed: 2026-07-15 from `seo_gsc_snapshots` Supabase table (available 28-day window 2026-06-17 → 2026-07-12, full SQL aggregation past the 1,000-row cap; normal GSC three-day lag).
-> Prior full refresh: 2026-06-15. Positions below are impression-weighted page-level rollups across ALL queries serving each page.
+> Last refreshed: 2026-08-11 from `seo_gsc_snapshots` Supabase table (28-day window 2026-07-12 → 2026-08-08, server-side SQL aggregation — no row-cap truncation; normal GSC three-day lag).
+> Prior full refresh: 2026-07-15. Positions below are impression-weighted page-level rollups across ALL queries serving each page.
 
 These pages have confirmed rankings AS OF the refresh date above. Any edit requires:
 1. Price-only fixes (no content restructuring) on DEFEND pages
@@ -12,12 +12,25 @@ These pages have confirmed rankings AS OF the refresh date above. Any edit requi
 
 ## 🛑 Location-page expansion is frozen (owner directive — 2026-07-15)
 
-The sitemap now contains 117 public URLs and roughly 105 geo-keyword URLs. This exceeds the SEO skill's 50-location-page hard gate.
+The sitemap now contains 124 public URLs (recounted 2026-08-11) and roughly 105 geo-keyword URLs. This exceeds the SEO skill's 50-location-page hard gate.
 
 - Do not create any net-new city/location landing page, including another Saskatoon, Regina, Yorkton, Moose Jaw, Prince Albert, or Saskatchewan matrix page.
 - New non-location case studies, customer proof, and genuinely useful resource content are still allowed.
 - Existing location pages may be improved, consolidated, redirected, or noindexed only after page-level GSC and conversion evidence. Never bulk-prune them.
 - Current growth work is CTR, proof, attribution, performance, GBP/Bing/AI distribution, and conversion—not URL count.
+
+## ✅ Full refresh headline (2026-08-11)
+
+Clicks finally moved: 9,725 impressions / 58 clicks / 0.60% CTR / position 28.2 versus 8,141 / 48 / 0.59% / 26.9 prior window. Impressions +19% AND clicks +21% — the first window since May where click growth kept pace with discovery. Average position drifted 1.3 deeper, which is normal when impression expansion adds long-tail queries.
+
+What moved (2026-07-12 → 2026-08-08 vs prior 28d):
+
+- **Homepage:** pos 22.4 (was 19.2 prior window) but clicks 20 → **29** (+45%) on 1,798 imp. The Jul 2 metadata rewrite is converting better even as new queries drag the average deeper. No further rewrite.
+- **Winners:** sticker 12.8 → **11.8** with 5 → **7 clicks**; sign-company 27.3 → **21.1** on 523 imp (strong recovery continues); wall-graphics got its **first clicks ever** (0 → 2) at 14.0; flyer 37.0 → 35.0 with imp 587 → **765**; same-day 32.7 → 29.8 with its first click.
+- **Sliders (do NOT panic-edit):** business-cards 16.1 → **30.4** (volatile all summer; see decay note below); coroplast 34.9 → **51.2** organic (still DEFEND — commercial winner via Bing/ChatGPT/direct); aluminum 8.1 → **17.4** (one-window slide off page 1, hold); poster 10.4 → 15.1 with clicks 9 → 3 (post-Jul-4 settling); photo-poster 14.0 → 15.9 but imp 121 → **369** (big discovery expansion).
+- **Flyer is the next eligible wave:** 765 impressions, zero clicks, no edits since Jun 4. The Phase 101 Wave 1 metadata fix (restore rush + price ladder to title/meta) is now the clear #1 candidate for the next ship window.
+- **business-cards decay note:** below pos 10 continuously since the May 25 crash except one brief window — the 60-day decay rule makes it title/meta-rewrite ELIGIBLE. But only ONE protected-page metadata wave at a time: flyer first (bigger impression pool, 765 vs 192). BC queues behind it.
+- **2026-08-11 trust cleanup shipped this window:** price-only body corrections on banner/coroplast/wall-graphics/sticker(schema) + design-fee stragglers + llms.txt full regeneration. Per DEFEND rules these are price corrections, not restructuring — no volatility clock reset expected.
 
 ## ✅ Full refresh headline (2026-07-15)
 
@@ -84,34 +97,36 @@ This is a spot-check via the standard opportunities script, not the full-paginat
 - **sticker-printing-saskatoon die-cut cluster:** conflicting-signal trap first flagged at the 2026-06-15 baseline (Phase 99), reconfirmed 2026-07-02 (Phase 100) as "17+ days active." Clock start ≈ **2026-06-15**. If the cluster (die cut labels, die cut stickers, custom die cut labels near me — all sub-10, ~0% CTR) is still sub-10 organic AND sub-5 local pack for 60 consecutive days, the decay-rule unlock date is **~2026-08-14**. Do not title-rewrite before that unless the SERP-rendering investigation (Phase 102 batch) independently proves the on-page title isn't what Google is showing.
 - **wall-graphics-saskatoon:** NOT on the same clock — this page is climbing (13.8→11.8→6.1), not decaying, so the 60-day sub-10 decay rule does not apply to it. It stays HOLD under the conflicting-signal rule (page-1 + 0% CTR) until the 2026-07-13 full refresh confirms the position and a schema/snippet fix (not title) path is evaluated.
 
-## Protected pages (current — 2026-07-15)
+## Protected pages (current — 2026-08-11)
 
 | Page | Page pos (all queries) | 28d imp | clk | Lock level | Notes |
 |------|------------------------|---------|-----|------------|-------|
-| sticker-printing-saskatoon | **12.5** | **660** | 5 | **DEFEND (HOLD — do not edit)** | Exact local query wins; broad die-cut/near-me cluster remains a zero-click conflicting signal. Do not add more FAQ/body copy or touch title/meta. |
-| wall-graphics-saskatoon | **11.3** | 195 | 0 | **HOLD — conflicting signal** | Improved from 14.5 but still zero clicks; main query recently slipped 5.6→8.1. Hold and diagnose rendered snippet. |
-| business-cards-saskatoon | **17.3** | 124 | 2 | **RECOVERING** | Position improved 21.2→17.3 and impressions grew. Hold. |
-| banner-printing-saskatoon | **28.6** | 174 | 0 | **RECOVERING slowly** | Mild position improvement, zero clicks. No new edit this wave. |
-| flyer-printing-saskatoon | **36.1** | 535 | 0 | **DECAYED — discovery improving** | Impressions and position improved, but CTR is still zero. Metadata/intent wave remains later, not next. |
-| graphic-design-saskatoon | **25.8** | 146 | 0 | **RECOVERING** | Position improved materially; continue holding. |
-| coroplast-signs-saskatoon | **36.4** | 60 | 2 | **DEFEND — commercial winner** | Organic rollup softened, but paid orders and revenue increased sharply across Google, Bing, ChatGPT, and unknown/direct. Protect the converting page. |
-| aluminum-signs-saskatoon | **6.5** | 50 | 0 | **DEFEND (PROMOTED 2026-07-15)** | Improved from 27.0 to page 1. Do not touch title/H1/meta. |
-| sign-company-saskatoon | **24.0** | 259 | 0 | **RECOVERING strongly** | Position improved 34.9→24.0 and impressions expanded. Hold. |
-| vinyl-lettering-saskatoon | **31.3** | 37 | 0 | **DEFEND (HOLD)** | Low sample and prior protected history; no reactive edit. |
-| signs-yorkton-sk | **47.8** | 275 | 0 | **DECAYED — location freeze** | No rewrite priority; owner ended location-page expansion. Evaluate only in the future inventory audit. |
-| agriculture-signs-saskatoon | 5.0 (1 imp — NOISE) | 1 | 0 | **DEFEND (LOW CONFIDENCE)** | Sample too small to claim anything. Hold defensively. |
-| business-cards-moose-jaw-sk | 9.0 (1 imp — NOISE) | 1 | 0 | **LOCATION FREEZE** | Technically healthy but no meaningful demand. No new work. |
+| sticker-printing-saskatoon | **11.8** | **770** | **7** | **DEFEND (HOLD — do not edit)** | Improving on both position and clicks. The die-cut conflicting-signal cluster is moot while the page climbs — do not touch title/meta/FAQ. |
+| wall-graphics-saskatoon | **14.0** | 201 | **2** | **HOLD — finally converting** | First clicks ever (0 → 2). Snippet started working — absolutely no edits while this beds in. |
+| business-cards-saskatoon | **30.4** | 192 | 1 | **DECAY-ELIGIBLE (queued behind flyer)** | Slid 16.1 → 30.4 this window; sub-10 for 60+ days since May crash → title/meta rewrite eligible per decay rule. One metadata wave at a time: flyer ships first. |
+| banner-printing-saskatoon | **29.0** | 308 | 0 | **RECOVERING slowly** | Flat position, impressions growing. 2026-08-11 price-only body fix shipped (no clock reset). |
+| flyer-printing-saskatoon | **35.0** | **765** | 0 | **DECAYED — NEXT ELIGIBLE WAVE** | Highest-impression landing page, zero clicks, untouched since Jun 4. Phase 101 Wave 1 metadata fix (rush + price back into title/meta) is the #1 next ship. |
+| graphic-design-saskatoon | **27.8** | 145 | 0 | **RECOVERING (stalled)** | 25.8 → 27.8. Hold; deferred Wave C items (DDG, price-in-first-para) stay deferred. |
+| coroplast-signs-saskatoon | **51.2** | 106 | 0 | **DEFEND — commercial winner** | Organic deepened (36 → 51) but revenue flows via Bing/ChatGPT/Google/direct. Protect; 2026-08-11 price-only fix shipped. |
+| aluminum-signs-saskatoon | **17.4** | 112 | 1 | **DEFEND (HOLD)** | Slipped off page 1 (6.5 → 17.4) in one window. Do not react — hold through next refresh. |
+| sign-company-saskatoon | **21.1** | **523** | 0 | **RECOVERING strongly** | 34.9 → 24.0 → 21.1 with impressions doubling. Hold. |
+| vinyl-lettering-saskatoon | **43.5** | 86 | 0 | **DEFEND (HOLD)** | Deepening (31 → 43) on low sample; no reactive edit. |
+| signs-yorkton-sk | **55.0** | 187 | 1 | **DECAYED — location freeze** | No rewrite priority. |
+| agriculture-signs-saskatoon | **79.2** | 47 | 0 | **LOCATION FREEZE** | Real impressions now but very deep; freeze bucket. |
+| business-cards-moose-jaw-sk | 52.5 (2 imp — NOISE) | 2 | 0 | **LOCATION FREEZE** | No meaningful demand. |
+| photo-poster-printing-saskatoon | **15.9** | **369** | 2 | **DEFEND (in main table since 2026-08-11)** | Impressions tripled (121 → 369); position settling after expansion. Do not touch. |
+| poster-printing-saskatoon | **15.1** | 236 | 3 | **DEFEND (in main table since 2026-08-11)** | Post-Jul-4 settling (10.4 → 15.1, clicks 9 → 3). Normal volatility — hold through next refresh. |
 
-## New DEFEND candidates (high-impression pages NOT yet in the formal list — surface from full 28d survey)
+## Watch list (high-impression pages NOT in the protected table)
 
 | Page | Page pos | 28d imp | clk | Note |
 |------|---------:|--------:|----:|------|
-| photo-poster-printing-saskatoon | **9.1** | 93 | 2 | **DEFEND.** Page 1 with clicks; keep protected. |
-| poster-printing-saskatoon | **10.1** | 297 | 8 | **DEFEND.** Jul 4 differentiation improved position 16.0→10.1 and doubled clicks. |
-| foamboard-printing-saskatoon | 19.6 | 171 | 1 | Page 2 with real demand. Existing-page opportunity after higher-priority work. |
-| same-day-printing-saskatoon | 24.5 | 166 | 0 | Position improved sharply but CTR remains zero. Hold. |
-| retail-signs-saskatoon | 41.7 | 258 | 0 | High impressions but deep; location inventory audit only. |
-| community-printing-saskatoon | 45.7 | 60 | 0 | Low near-term ROI; location freeze. |
+| large-format-printing-saskatoon | 37.5 | **626** | 0 | Second-highest landing-page impressions on the site, deep position. Strong future content/CTR candidate after flyer + BC waves. |
+| banner-printing-regina | 35.5 | 366 | 1 | Real regional demand; meta trimmed 2026-08-11 (was 180 chars). Location freeze otherwise. |
+| same-day-printing-saskatoon | 29.8 | 281 | 1 | First click this window. Hold. |
+| retail-signs-saskatoon | 53.8 | 222 | 0 | Deep; inventory-audit bucket. |
+| coroplast-signs-regina | 32.4 | 215 | 0 | Regional coroplast demand growing (97 → 215 imp). |
+| foamboard-printing-saskatoon | 20.7 | 186 | 2 | Page 2 with steady clicks; opportunity after higher-priority work. |
 
 ## Competing pages (Google can't decide which URL ranks for a keyword)
 
