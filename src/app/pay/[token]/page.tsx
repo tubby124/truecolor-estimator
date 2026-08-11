@@ -310,6 +310,15 @@ function AlreadyPaidPage() {
           >
             Contact Us →
           </a>
+          <p style={{ fontSize: 14, color: "#6b7280", marginTop: 18 }}>
+            Or call us at{" "}
+            <a
+              href="tel:+13069548688"
+              style={{ color: "#16C2F3", fontWeight: 600, textDecoration: "none" }}
+            >
+              (306) 954-8688
+            </a>
+          </p>
           <p style={{ fontSize: 12, color: "#9ca3af", marginTop: 24 }}>
             True Color Display Printing · info@true-color.ca
           </p>
@@ -363,6 +372,15 @@ function UpdatedLinkPage() {
           >
             Contact Us →
           </a>
+          <p style={{ fontSize: 14, color: "#6b7280", marginTop: 18 }}>
+            Or call us at{" "}
+            <a
+              href="tel:+13069548688"
+              style={{ color: "#16C2F3", fontWeight: 600, textDecoration: "none" }}
+            >
+              (306) 954-8688
+            </a>
+          </p>
           <p style={{ fontSize: 12, color: "#9ca3af", marginTop: 24 }}>
             True Color Display Printing · info@true-color.ca
           </p>
@@ -430,6 +448,15 @@ function ExpiredPage() {
           >
             Contact Us →
           </a>
+          <p style={{ fontSize: 14, color: "#6b7280", marginTop: 18 }}>
+            Or call us at{" "}
+            <a
+              href="tel:+13069548688"
+              style={{ color: "#16C2F3", fontWeight: 600, textDecoration: "none" }}
+            >
+              (306) 954-8688
+            </a>
+          </p>
           <p
             style={{ fontSize: 12, color: "#9ca3af", marginTop: 24 }}
           >
@@ -499,6 +526,15 @@ function ErrorPage() {
           >
             Contact Us →
           </a>
+          <p style={{ fontSize: 14, color: "#6b7280", marginTop: 18 }}>
+            Or call us at{" "}
+            <a
+              href="tel:+13069548688"
+              style={{ color: "#16C2F3", fontWeight: 600, textDecoration: "none" }}
+            >
+              (306) 954-8688
+            </a>
+          </p>
           <p
             style={{ fontSize: 12, color: "#9ca3af", marginTop: 24 }}
           >
