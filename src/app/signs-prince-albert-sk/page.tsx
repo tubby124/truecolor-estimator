@@ -6,7 +6,7 @@ import { CITY_HUB_PAGES } from "@/lib/data/cities";
 export const metadata: Metadata = {
   title: { absolute: "Signs Prince Albert SK | Coroplast & Banners | True Color" },
   description:
-    "Custom signs and banners for Prince Albert SK businesses. Coroplast from $8/sqft, vinyl banners from $8.25/sqft, business cards. Printed in Saskatoon — shipped to Prince Albert.",
+    "Signs and banners for Prince Albert SK. Coroplast from $8/sqft, vinyl banners from $8.25/sqft, business cards — printed and shipped from Saskatoon.",
   alternates: { canonical: "/signs-prince-albert-sk" },
   openGraph: {
     title: "Signs Prince Albert SK | True Color Display Printing",

@@ -153,8 +153,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // ── SK city/province pages ────────────────────────────────────────────────
     { url: `${BASE_URL}/banner-printing-regina`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.75 },
-    { url: `${BASE_URL}/coroplast-signs-regina`, lastModified: new Date("2026-01-25"), changeFrequency: "monthly", priority: 0.75 },
-    { url: `${BASE_URL}/signs-prince-albert-sk`, lastModified: new Date("2026-01-28"), changeFrequency: "monthly", priority: 0.75 },
+    { url: `${BASE_URL}/coroplast-signs-regina`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.75 },
+    { url: `${BASE_URL}/signs-prince-albert-sk`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/printing-lloydminster-sk`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/signs-moose-jaw-sk`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/printing-swift-current-sk`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.75 },

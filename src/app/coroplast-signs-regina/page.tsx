@@ -6,7 +6,7 @@ import { CITY_HUB_PAGES } from "@/lib/data/cities";
 export const metadata: Metadata = {
   title: { absolute: "Coroplast Signs Regina SK | From $8/sqft | True Color" },
   description:
-    "Custom coroplast signs for Regina businesses. From $8/sqft — yard signs, job site signs, real estate signs. Printed in Saskatoon and shipped to Regina. Volume pricing available.",
+    "Custom coroplast signs for Regina businesses from $8/sqft — yard signs, job site signs, and real estate signs printed in Saskatoon, shipped to Regina.",
   alternates: { canonical: "/coroplast-signs-regina" },
   openGraph: {
     title: "Coroplast Signs Regina SK | True Color Display Printing",
