@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "True Color Printing | Signs, Banners & Cards Saskatoon",
     description:
-      "Instant online pricing for signs, banners, business cards, magnets & flyers. Local Saskatoon print shop with in-house designer. No quote forms — see your price now.",
+      "Instant online pricing for signs, banners, business cards, magnets & flyers. Saskatoon print shop with in-house designer. See your price now.",
     url: "https://truecolorprinting.ca",
     siteName: "True Color Display Printing",
     locale: "en_CA",
