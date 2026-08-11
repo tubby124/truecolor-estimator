@@ -11,8 +11,23 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
+import { isPaidAttribution, parseLatestPaidAttributionCookie, parseUtmCookie } from "@/lib/analytics/utm";
 
 const DISMISS_KEY = "tc_promo_banner_v1";
+
+/**
+ * Paid clicks must never be diverted into the signup flow — the banner is the
+ * first clickable element on every page, so it would outrank the ad's own CTA.
+ * Reads the same cookies the middleware writes via `buildAttributionSetCookies`.
+ */
+function isPaidSession(): boolean {
+  if (new URLSearchParams(window.location.search).get("source") === "google-ads") return true;
+  const cookieHeader = document.cookie;
+  return (
+    parseLatestPaidAttributionCookie(cookieHeader) !== null ||
+    isPaidAttribution(parseUtmCookie(cookieHeader))
+  );
+}
 
 export function PromoBanner() {
   const [visible, setVisible] = useState(false);
@@ -20,6 +35,9 @@ export function PromoBanner() {
   useEffect(() => {
     // Already dismissed
     if (localStorage.getItem(DISMISS_KEY) === "1") return;
+
+    // Paid session — leave the ad's own CTA as the first action
+    if (isPaidSession()) return;
 
     // Check auth — hide for logged-in users
     const supabase = createClient();

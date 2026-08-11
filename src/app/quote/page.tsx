@@ -107,12 +107,24 @@ function QuoteForm() {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, file } : i)));
   }
 
-  async function handleSubmit() {
+  // Errors used to render above the fold with the submit button off-screen on
+  // mobile — the tap looked dead. Always bring the first bad field into view.
+  function revealField(elementId: string) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.focus({ preventScroll: true });
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     let hasErrors = false;
+    let firstInvalidId: string | null = null;
 
     if (!name.trim() || !email.trim()) {
       setContactError("Name and email are required.");
       hasErrors = true;
+      firstInvalidId = !name.trim() ? "qr-name" : "qr-email";
     } else {
       setContactError("");
     }
@@ -121,9 +133,11 @@ function QuoteForm() {
     for (const item of items) {
       if (!item.qty.trim()) {
         errors[item.id] = "Quantity is required.";
+        firstInvalidId ??= `qty-${item.id}`;
       } else if (!item.material.trim() && !item.notes.trim()) {
         errors[item.id] =
           "Please specify a material or add notes describing this item.";
+        firstInvalidId ??= `material-${item.id}`;
       }
     }
     if (Object.keys(errors).length > 0) {
@@ -131,7 +145,10 @@ function QuoteForm() {
       hasErrors = true;
     }
 
-    if (hasErrors) return;
+    if (hasErrors) {
+      if (firstInvalidId) revealField(firstInvalidId);
+      return;
+    }
     if (turnstileSiteKey && !turnstileToken) {
       setContactError(
         "Security verification is still loading. Please wait a moment.",
@@ -268,7 +285,10 @@ function QuoteForm() {
           </p>
         </div>
 
-        <div className="space-y-6">
+        <form
+          onSubmit={(e) => void handleSubmit(e)}
+          className="space-y-6"
+        >
           {/* ── Step 1: Contact info ── */}
           <section
             aria-label="Contact information"
