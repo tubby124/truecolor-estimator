@@ -16,6 +16,7 @@ import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notification
 import { recordAuditEvent } from "@/lib/audit/record";
 import { recordPaymentAttempt } from "@/lib/payments/attempts";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 
 const CLOVER_BASE =
   process.env.CLOVER_ENVIRONMENT === "sandbox"
@@ -162,6 +163,27 @@ export async function POST(req: NextRequest, { params }: Params) {
     if ((updated?.length ?? 0) === 0) {
       return NextResponse.json({ error: "Order changed while confirming payment; refresh and try again" }, { status: 409 });
     }
+
+    const measurementItems = Array.isArray(order.order_items) ? order.order_items : [];
+    void sendMeasurementProtocolPurchase({
+      transaction_id: order.id,
+      value: Number(order.total),
+      customer_id: order.customer_id,
+      payment_type: "clover_card",
+      tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
+      items: measurementItems.map((item) => ({
+        item_id: (item.product_name ?? "").slice(0, 100),
+        item_name: item.product_name ?? "Unknown",
+        price: Number(item.qty) > 0
+          ? Number(item.line_total) / Number(item.qty)
+          : Number(item.line_total),
+        quantity: Number(item.qty ?? 1),
+      })),
+    }).then((delivered) => {
+      if (!delivered) console.error("[confirm-clover] GA4 MP purchase was not delivered (non-fatal)");
+    }).catch((err) => {
+      console.error("[confirm-clover] GA4 MP purchase failed (non-fatal):", err);
+    });
 
     await recordPaymentAttempt(supabase, {
       order_id: order.id,

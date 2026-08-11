@@ -23,6 +23,15 @@ export interface MpEventParams {
   params: Record<string, unknown> & { items?: MpItem[] };
 }
 
+export interface MpPurchaseParams {
+  transaction_id: string;
+  value: number;
+  customer_id?: string | null;
+  payment_type?: string;
+  tax?: number;
+  items?: MpItem[];
+}
+
 // Deterministic client_id when no cookie is available — keeps a single customer
 // stable across server-side events even without their browser fingerprint.
 function deriveClientId(seed: string): string {
@@ -83,4 +92,20 @@ export async function sendMeasurementProtocolEvent(input: MpEventParams & { debu
 
 export function deriveClientIdFromCustomer(customerId: string): string {
   return deriveClientId(`tc-customer:${customerId}`);
+}
+
+export function sendMeasurementProtocolPurchase(input: MpPurchaseParams): Promise<boolean> {
+  return sendMeasurementProtocolEvent({
+    event_name: "purchase",
+    client_id: deriveClientIdFromCustomer(input.customer_id ?? input.transaction_id),
+    user_id: input.customer_id ?? undefined,
+    params: {
+      transaction_id: input.transaction_id,
+      value: input.value,
+      currency: "CAD",
+      ...(input.payment_type ? { payment_type: input.payment_type } : {}),
+      ...(input.tax !== undefined ? { tax: input.tax } : {}),
+      items: input.items ?? [],
+    },
+  });
 }

@@ -1,4 +1,4 @@
-import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
+import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -136,26 +136,21 @@ export async function performWavePaymentEffect(
   }
 
   if (job.effect_type === "ga4_purchase") {
-    const delivered = await sendMeasurementProtocolEvent({
-      event_name: "purchase",
-      client_id: deriveClientIdFromCustomer(order.customer_id ?? order.id),
-      user_id: order.customer_id ?? undefined,
-      params: {
-        transaction_id: order.order_number,
-        value: Number(order.total),
-        currency: "CAD",
-        tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
-        payment_type: "wave",
-        items: items.map((item) => ({
-          item_id: (item.product_name ?? "").slice(0, 100),
-          item_name: item.product_name ?? "Unknown",
-          price:
-            Number(item.qty) > 0
-              ? Number(item.line_total) / Number(item.qty)
-              : Number(item.line_total),
-          quantity: Number(item.qty ?? 1),
-        })),
-      },
+    const delivered = await sendMeasurementProtocolPurchase({
+      transaction_id: order.id,
+      value: Number(order.total),
+      customer_id: order.customer_id,
+      tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
+      payment_type: "wave",
+      items: items.map((item) => ({
+        item_id: (item.product_name ?? "").slice(0, 100),
+        item_name: item.product_name ?? "Unknown",
+        price:
+          Number(item.qty) > 0
+            ? Number(item.line_total) / Number(item.qty)
+            : Number(item.line_total),
+        quantity: Number(item.qty ?? 1),
+      })),
     });
     if (!delivered) throw new Error("GA4 Measurement Protocol did not accept Wave purchase");
     return;

@@ -6,8 +6,7 @@ import type {
 
 const mocks = vi.hoisted(() => ({
   sendPaymentReceipt: vi.fn(),
-  sendMeasurementProtocolEvent: vi.fn(),
-  deriveClientIdFromCustomer: vi.fn((id: string) => `client:${id}`),
+  sendMeasurementProtocolPurchase: vi.fn(),
 }));
 
 vi.mock("@/lib/email/paymentReceipt", () => ({
@@ -15,8 +14,7 @@ vi.mock("@/lib/email/paymentReceipt", () => ({
 }));
 
 vi.mock("@/lib/analytics/measurementProtocol", () => ({
-  sendMeasurementProtocolEvent: mocks.sendMeasurementProtocolEvent,
-  deriveClientIdFromCustomer: mocks.deriveClientIdFromCustomer,
+  sendMeasurementProtocolPurchase: mocks.sendMeasurementProtocolPurchase,
 }));
 
 import {
@@ -85,7 +83,7 @@ describe("Wave payment effect worker", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.sendPaymentReceipt.mockResolvedValue(undefined);
-    mocks.sendMeasurementProtocolEvent.mockResolvedValue(true);
+    mocks.sendMeasurementProtocolPurchase.mockResolvedValue(true);
   });
 
   it("retries a transient GA4 failure and completes the same durable job later", async () => {
@@ -113,7 +111,7 @@ describe("Wave payment effect worker", () => {
         return orderQuery();
       },
     };
-    mocks.sendMeasurementProtocolEvent
+    mocks.sendMeasurementProtocolPurchase
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(true);
 
@@ -128,16 +126,13 @@ describe("Wave payment effect worker", () => {
 
     expect(first).toEqual({ claimed: 1, sent: 0, retried: 1, dead: 0 });
     expect(retry).toEqual({ claimed: 1, sent: 1, retried: 0, dead: 0 });
-    expect(mocks.sendMeasurementProtocolEvent).toHaveBeenCalledTimes(2);
-    expect(mocks.sendMeasurementProtocolEvent).toHaveBeenLastCalledWith(
+    expect(mocks.sendMeasurementProtocolPurchase).toHaveBeenCalledTimes(2);
+    expect(mocks.sendMeasurementProtocolPurchase).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        event_name: "purchase",
-        params: expect.objectContaining({
-          transaction_id: "TC-0123",
-          value: 111,
-          currency: "CAD",
-          payment_type: "wave",
-        }),
+        transaction_id: "order-123",
+        value: 111,
+        customer_id: "customer-123",
+        payment_type: "wave",
       }),
     );
     expect(rpcCalls.map((call) => call.name)).toEqual([
