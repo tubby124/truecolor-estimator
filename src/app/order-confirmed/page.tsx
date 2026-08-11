@@ -110,6 +110,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       {/* GA4 purchase event — only fires when payment is confirmed (not while pending) */}
       {oid && orderSummary && shouldTrackConfirmedPurchase({ status: orderSummary.status, paidAt: orderSummary.paid_at }) && (
         <PurchaseEvent
+          orderId={oid}
           orderNumber={orderSummary.order_number}
           total={Number(orderSummary.total)}
           paymentMethod={orderSummary.payment_method}

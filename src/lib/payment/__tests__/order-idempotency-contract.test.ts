@@ -31,6 +31,10 @@ describe("catalog order submission idempotency contract", () => {
     expect(route).toContain("checkout_line_key: `${checkout_submission_id}:${index}`");
     expect(route).toContain('.upsert(orderItems, { onConflict: "checkout_line_key", ignoreDuplicates: true })');
     expect(route).toContain('.select("checkout_line_key, line_total")');
+    expect(checkout).toContain("res.status === 409 || res.status === 503");
+    expect(checkout).toContain("sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY)");
+    expect(checkout).toContain('throw new Error("CHECKOUT_RETRY_AVAILABLE")');
+    expect(source("src/lib/errors/sanitize.ts")).toContain("pay by e-transfer to info@true-color.ca");
   });
 
   it("reuses stored order data after a duplicate POST and never starts Wave for a new order", () => {

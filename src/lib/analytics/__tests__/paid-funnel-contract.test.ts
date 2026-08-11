@@ -29,4 +29,33 @@ describe("paid funnel event ownership", () => {
     expect(checkout).toContain("BEGIN_CHECKOUT_EVENT_KEY");
     expect(checkout).toContain("checkoutEventFingerprint(cart)");
   });
+
+  it("delegates every customer tel link through one global tracker", () => {
+    const tracker = source("src/components/site/CallTracker.tsx");
+    expect(tracker).toContain('document.addEventListener("click", handleClick, { capture: true })');
+    expect(tracker).toContain('closest<HTMLAnchorElement>(\'a[href^="tel:"]\')');
+    expect(tracker).toContain('anchor.dataset.callPlacement ?? "tel_link"');
+    expect(source("src/components/site/SiteNav.tsx")).toContain("<CallTracker />");
+    const paidLinks = source("src/components/paid/PaidProductLink.tsx");
+    expect(paidLinks).toContain("data-call-placement={placement}");
+    expect(paidLinks).not.toContain("trackClickToCall");
+  });
+
+  it("uses the order UUID for server-side purchase deduplication", () => {
+    const measurement = source("src/lib/analytics/measurementProtocol.ts");
+    expect(measurement).toContain("export function sendMeasurementProtocolPurchase");
+    expect(measurement).toContain('currency: "CAD"');
+    for (const route of [
+      "src/app/api/webhooks/clover/route.ts",
+      "src/app/api/staff/orders/[id]/confirm-clover/route.ts",
+      "src/app/api/staff/orders/[id]/confirm-etransfer/route.ts",
+      "src/app/api/staff/orders/[id]/status/route.ts",
+      "src/app/api/cron/reconcile-payments/route.ts",
+      "src/lib/payment/wave-payment-effects.ts",
+    ]) {
+      expect(source(route), route).toContain("sendMeasurementProtocolPurchase");
+    }
+    expect(source("src/lib/payment/wave-payment-effects.ts")).toContain("transaction_id: order.id");
+    expect(source("src/app/order-confirmed/PurchaseEvent.tsx")).toContain("transaction_id: orderId");
+  });
 });

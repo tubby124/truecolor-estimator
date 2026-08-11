@@ -23,7 +23,7 @@ import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
-import { sendMeasurementProtocolEvent, deriveClientIdFromCustomer } from "@/lib/analytics/measurementProtocol";
+import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { fetchCloverPaymentAmountCents } from "@/lib/payment/clover";
@@ -462,7 +462,9 @@ export async function POST(req: NextRequest) {
             })
             .eq("id", pendingOrder.id)
             .eq("status", "pending_payment")
-            .select("id, order_number, customer_id, total, is_rush, wave_invoice_id, wave_invoice_approved_at, wave_payment_recorded_at");
+            .select(`id, order_number, customer_id, total, gst, pst, is_rush,
+                     wave_invoice_id, wave_invoice_approved_at, wave_payment_recorded_at,
+                     order_items ( product_name, qty, line_total )`);
 
           if (error) {
             console.error("[clover-webhook] order update failed:", error.message);
@@ -530,6 +532,26 @@ export async function POST(req: NextRequest) {
               }
 
               const order = updatedOrders[0];
+              const purchaseItems = Array.isArray(order.order_items) ? order.order_items : [];
+              void sendMeasurementProtocolPurchase({
+                transaction_id: order.id,
+                value: Number(order.total),
+                customer_id: order.customer_id,
+                payment_type: "clover_card",
+                tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
+                items: purchaseItems.map((item) => ({
+                  item_id: (item.product_name ?? "").slice(0, 100),
+                  item_name: item.product_name ?? "Unknown",
+                  price: Number(item.qty) > 0
+                    ? Number(item.line_total) / Number(item.qty)
+                    : Number(item.line_total),
+                  quantity: Number(item.qty ?? 1),
+                })),
+              }).then((delivered) => {
+                if (!delivered) console.error("[clover-webhook] GA4 MP purchase was not delivered (non-fatal)");
+              }).catch((err) => {
+                console.error("[clover-webhook] GA4 MP purchase failed (non-fatal):", err);
+              });
 
               // ── Wave: approve invoice + record payment ──────────────────────
               // MUST run BEFORE the receipt email so the email's "Download Tax
@@ -672,27 +694,6 @@ export async function POST(req: NextRequest) {
                         waveInvoiceUrl,
                       });
                       console.log(`[clover-webhook] receipt sent → ${customer.email}${waveInvoiceUrl ? " (with Wave PDF)" : ""}`);
-
-                      // GA4 Measurement Protocol — server-side purchase event (non-fatal, fire-and-forget)
-                      // Captures orders that client-side gtag missed (ad blockers, ITP, corp networks)
-                      void sendMeasurementProtocolEvent({
-                        event_name: "purchase",
-                        client_id: deriveClientIdFromCustomer(order.customer_id ?? order.id),
-                        user_id: order.customer_id ?? undefined,
-                        params: {
-                          transaction_id: order.order_number,
-                          value: Number(order.total),
-                          currency: "CAD",
-                          tax: Number(fullOrder.gst ?? 0) + Number(fullOrder.pst ?? 0),
-                          payment_type: "clover_card",
-                          items: receiptItems.map((i) => ({
-                            item_id: (i.product_name ?? "").slice(0, 100),
-                            item_name: i.product_name ?? "Unknown",
-                            price: Number(i.qty) > 0 ? Number(i.line_total) / Number(i.qty) : Number(i.line_total),
-                            quantity: Number(i.qty ?? 1),
-                          })),
-                        },
-                      }).catch((err) => console.error("[clover-webhook] GA4 MP failed (non-fatal):", err));
 
                       // Meta Conversions API — Purchase event (server-side, deduped via event_id=order_number)
                       void sendMetaCapiEvent({

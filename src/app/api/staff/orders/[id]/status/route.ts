@@ -23,6 +23,7 @@ import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvo
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 
 const VALID_STATUSES = [
   "pending_payment",
@@ -142,11 +143,32 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (status === "payment_received" && current?.status === "pending_payment") {
       const { data: statsOrder } = await supabase
         .from("orders")
-        .select("customer_id, total")
+        .select(`customer_id, total, gst, pst, payment_method,
+                 order_items ( product_name, qty, line_total )`)
         .eq("id", id)
         .single();
       if (statsOrder) {
         await incrementCustomerOrderStats(supabase, statsOrder.customer_id, Number(statsOrder.total ?? 0));
+        const measurementItems = Array.isArray(statsOrder.order_items) ? statsOrder.order_items : [];
+        void sendMeasurementProtocolPurchase({
+          transaction_id: id,
+          value: Number(statsOrder.total),
+          customer_id: statsOrder.customer_id,
+          payment_type: statsOrder.payment_method ?? "staff_manual",
+          tax: Number(statsOrder.gst ?? 0) + Number(statsOrder.pst ?? 0),
+          items: measurementItems.map((item) => ({
+            item_id: (item.product_name ?? "").slice(0, 100),
+            item_name: item.product_name ?? "Unknown",
+            price: Number(item.qty) > 0
+              ? Number(item.line_total) / Number(item.qty)
+              : Number(item.line_total),
+            quantity: Number(item.qty ?? 1),
+          })),
+        }).then((delivered) => {
+          if (!delivered) console.error("[staff/orders/status] GA4 MP purchase was not delivered (non-fatal)");
+        }).catch((err) => {
+          console.error("[staff/orders/status] GA4 MP purchase failed (non-fatal):", err);
+        });
       }
     }
 

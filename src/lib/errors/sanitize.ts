@@ -14,6 +14,8 @@ const ERROR_MAP: Record<string, string> = {
   ORDER_NOT_FOUND: "Order not found. Please contact us at 954-8688.",
   SESSION_EXPIRED: "Your session has expired. Please refresh the page and try again.",
   DUPLICATE_ORDER: "It looks like this order was already submitted. Check your email for confirmation.",
+  CHECKOUT_RETRY_AVAILABLE:
+    "We could not confirm this checkout. Try again to start a fresh checkout, pay by e-transfer to info@true-color.ca, or call (306) 954-8688.",
 };
 
 const FALLBACK_MESSAGE =

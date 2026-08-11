@@ -20,6 +20,7 @@ import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -85,6 +86,27 @@ export async function POST(_req: NextRequest, { params }: Params) {
     }
 
     console.log(`[confirm-etransfer] order ${order.order_number} → payment_received`);
+
+    const measurementItems = Array.isArray(order.order_items) ? order.order_items : [];
+    void sendMeasurementProtocolPurchase({
+      transaction_id: order.id,
+      value: Number(order.total),
+      customer_id: order.customer_id,
+      payment_type: "etransfer",
+      tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
+      items: measurementItems.map((item) => ({
+        item_id: (item.product_name ?? "").slice(0, 100),
+        item_name: item.product_name ?? "Unknown",
+        price: Number(item.qty) > 0
+          ? Number(item.line_total) / Number(item.qty)
+          : Number(item.line_total),
+        quantity: Number(item.qty ?? 1),
+      })),
+    }).then((delivered) => {
+      if (!delivered) console.error("[confirm-etransfer] GA4 MP purchase was not delivered (non-fatal)");
+    }).catch((err) => {
+      console.error("[confirm-etransfer] GA4 MP purchase failed (non-fatal):", err);
+    });
 
     // Audit event: staff confirmed eTransfer
     void recordAuditEvent({

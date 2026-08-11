@@ -13,6 +13,7 @@ import {
 } from "@/lib/analytics/client-event-dedupe";
 
 interface Props {
+  orderId: string;
   orderNumber: string;
   total: number;
   paymentMethod: string;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function PurchaseEvent({
+  orderId,
   orderNumber,
   total,
   paymentMethod,
@@ -42,7 +44,7 @@ export function PurchaseEvent({
       return;
     }
     trackPurchase({
-      transaction_id: orderNumber,
+      transaction_id: orderId,
       value: total,
       payment_method: paymentMethod,
       items: items ?? [],

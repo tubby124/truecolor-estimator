@@ -46,7 +46,7 @@ describe("Wave payment atomic outbox contract", () => {
 
   it("keeps purchase revenue on the existing order trigger and external effects idempotent", () => {
     expect(migration).not.toContain("INSERT INTO public.google_ads_conversion_outbox");
-    expect(worker).toContain("transaction_id: order.order_number");
+    expect(worker).toContain("transaction_id: order.id");
     expect(worker).toContain("idempotencyKey: `wave-receipt/${order.id}`");
     expect(worker).toContain("updateEnabled: true");
   });

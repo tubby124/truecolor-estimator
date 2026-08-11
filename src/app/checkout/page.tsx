@@ -531,7 +531,15 @@ export default function CheckoutPage() {
         checkoutUrl?: string | null;
         error?: string;
       };
-      if (!res.ok) throw new Error(data.error ?? "Could not create order");
+      if (!res.ok) {
+        if (res.status === 409 || res.status === 503) {
+          try {
+            sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY);
+          } catch { /* ignore */ }
+          throw new Error("CHECKOUT_RETRY_AVAILABLE");
+        }
+        throw new Error(data.error ?? "Could not create order");
+      }
 
       // If logged in, save the used company to their profile (non-fatal)
       if (isLoggedIn && accessToken && company.trim()) {
