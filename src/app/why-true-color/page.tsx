@@ -105,6 +105,9 @@ export default function WhyTrueColorPage() {
             <h1 className="mt-3 text-4xl font-black leading-[0.98] tracking-[-0.035em] text-[#1c1712] sm:text-6xl">
               Real printing. Clear pricing. Local pickup.
             </h1>
+            <p className="mt-4 inline-block rounded-lg border border-[#c92719]/25 bg-white px-3 py-2 font-mono text-sm font-bold tracking-tight text-[#c92719] sm:text-base">
+              Signs from $25 · Cards from $45 · Banners from $66
+            </p>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-gray-700 sm:text-lg">
               Choose a product, configure the details, and see your price before checkout. Your order is printed in Saskatoon and reviewed by a real person before production.
             </p>
