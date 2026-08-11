@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useOptimistic, useTransition } from "react";
+import Link from "next/link";
 import type { QuoteRequest, ItemMeta } from "@/app/staff/quotes/page";
 import { timeAgo, buildEstimateLink } from "./helpers";
 import { QuoteBuilderModal } from "./QuoteBuilderModal";
@@ -187,6 +188,18 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
                 </button>
               </>
             )}
+
+            {/* Links the manual order back to this quote request — the API
+                turns ?quote= into conversion_type='quote_won' plus attribution.
+                Retyping the order by hand loses that linkage. */}
+            <Link
+              href={`/staff/orders?manual=1&quote=${encodeURIComponent(quote.id)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1.5 bg-[#1c1712] hover:bg-[#2d2620] text-white text-sm font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+              title="Create an order from this quote — opens the manual order form linked to this quote request"
+            >
+              Create Order
+            </Link>
 
             <button
               onClick={(e) => {
