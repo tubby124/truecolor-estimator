@@ -139,6 +139,18 @@ export function IndustryPage({
     ],
   } : null;
 
+  // FAQPage JSON-LD — owner-approved sitewide 2026-08-11 (supersedes the older
+  // "don't add more FAQPage" note; kept for knowledge graph + AI-engine citation)
+  const faqSchema = faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: { "@type": "Answer", text: faq.a },
+    })),
+  } : null;
+
   const ctaHref = primaryProductSlug ? `/products/${primaryProductSlug}` : "/products";
 
   const productSchema = productOffer ? {
@@ -176,6 +188,9 @@ export function IndustryPage({
       )}
       {productSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
+      )}
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       )}
       <SiteNav />
 
