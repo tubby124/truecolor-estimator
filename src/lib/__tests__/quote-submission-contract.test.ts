@@ -90,8 +90,16 @@ describe("quote submission exact-once contract", () => {
     expect(route).toContain('"complete_quote_request_delivery"');
     expect(route).toContain('"record_quote_request_delivery_failure"');
     expect(route).toContain(
-      '"Your quote was saved, but its confirmation is still being delivered.',
+      '"Your quote was saved. Confirmation delivery is pending, but you do not need to submit it again.',
     );
+    expect(route).toContain("return quoteSuccess(");
     expect(route).not.toContain("will get back to you within 1 business day");
+  });
+
+  it("keeps swallowed artwork upload failures visible to staff", () => {
+    const route = source("src/app/api/quote-request/route.ts");
+    expect(route).toContain("uploadErrors.push(`upload: item ${i + 1} artwork upload failed`)");
+    expect(route).toContain("const notificationErrors = [...uploadErrors, ...deliveryErrors]");
+    expect(route).toContain("notification_last_error: notificationErrors.join");
   });
 });

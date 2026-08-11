@@ -40,6 +40,7 @@ import {
   getQuoteTurnstileConfig,
   parseQuoteSubmissionKey,
 } from "@/lib/quote-request-guard";
+import { sanitizeError } from "@/lib/errors/sanitize";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -71,9 +72,14 @@ function esc(str: string): string {
     .replace(/'/g, "&#x27;");
 }
 
-function quoteSuccess(id: string, duplicate = false) {
+function quoteSuccess(id: string, duplicate = false, warning?: string) {
   const ref = id.replace(/-/g, "").slice(0, 8).toUpperCase();
-  return NextResponse.json({ sent: true, ref, duplicate });
+  return NextResponse.json({
+    sent: true,
+    ref,
+    duplicate,
+    ...(warning ? { warning } : {}),
+  });
 }
 
 interface QuoteRequestDelivery {
@@ -352,7 +358,7 @@ export async function POST(req: NextRequest) {
     const supabase = createServiceClient();
     const { data: existingQuote, error: existingQuoteError } = await supabase
       .from("quote_requests")
-      .select("id, file_links")
+      .select("id, file_links, notification_last_error")
       .eq("submission_key", submissionKey)
       .maybeSingle();
     if (existingQuoteError) {
@@ -377,6 +383,11 @@ export async function POST(req: NextRequest) {
           (value): value is string | null =>
             typeof value === "string" || value === null,
         )
+      : [];
+    const uploadErrors = typeof existingQuote?.notification_last_error === "string"
+      ? existingQuote.notification_last_error
+          .split(" | ")
+          .filter((detail) => detail.startsWith("upload:"))
       : [];
 
     if (!insertedId) {
@@ -441,6 +452,7 @@ export async function POST(req: NextRequest) {
               `[quote-request] item ${i} upload failed:`,
               uploadError.message,
             );
+            uploadErrors.push(`upload: item ${i + 1} artwork upload failed`);
             fileLinks.push(null);
             continue;
           }
@@ -453,10 +465,12 @@ export async function POST(req: NextRequest) {
               `[quote-request] item ${i} signed URL failed:`,
               signedError.message,
             );
+            uploadErrors.push(`upload: item ${i + 1} artwork link creation failed`);
           }
           fileLinks.push(signed?.signedUrl ?? null);
         } catch (storageErr) {
           console.error(`[quote-request] item ${i} storage error:`, storageErr);
+          uploadErrors.push(`upload: item ${i + 1} artwork storage failed`);
           fileLinks.push(null);
         }
       }
@@ -898,20 +912,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (deliveryErrors.length > 0) {
+    const notificationErrors = [...uploadErrors, ...deliveryErrors];
+    if (notificationErrors.length > 0) {
       await supabase
         .from("quote_requests")
         .update({
-          notification_last_error: deliveryErrors.join(" | ").slice(0, 1000),
+          notification_last_error: notificationErrors.join(" | ").slice(0, 1000),
         })
         .eq("id", insertedId);
-      return NextResponse.json(
-        {
-          error:
-            "Your quote was saved, but its confirmation is still being delivered. Please try again with this form.",
-        },
-        { status: 503 },
-      );
+      if (deliveryErrors.length > 0) {
+        return quoteSuccess(
+          insertedId,
+          isDuplicate,
+          "Your quote was saved. Confirmation delivery is pending, but you do not need to submit it again.",
+        );
+      }
+      return quoteSuccess(insertedId, isDuplicate);
     }
 
     await supabase
@@ -920,8 +936,7 @@ export async function POST(req: NextRequest) {
       .eq("id", insertedId);
     return quoteSuccess(insertedId, isDuplicate);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to send";
-    console.error("[quote-request]", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[quote-request]", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
   }
 }

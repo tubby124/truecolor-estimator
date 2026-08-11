@@ -62,6 +62,7 @@ function QuoteForm() {
   const [items, setItems] = useState<QuoteItem[]>([makeItem(defaultProduct)]);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [deliveryWarning, setDeliveryWarning] = useState("");
   const [contactError, setContactError] = useState("");
   const [itemErrors, setItemErrors] = useState<Record<string, string>>({});
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
@@ -201,9 +202,14 @@ function QuoteForm() {
         method: "POST",
         body: fd, // No Content-Type header — browser sets multipart boundary
       });
-      const data = (await res.json()) as { sent?: boolean; error?: string };
+      const data = (await res.json()) as {
+        sent?: boolean;
+        error?: string;
+        warning?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Failed to send");
       clearQuoteSubmission("multi-item-quote", submissionKey);
+      setDeliveryWarning(data.warning ?? "");
       setSent(true);
     } catch (err) {
       setContactError(
@@ -255,6 +261,11 @@ function QuoteForm() {
               The shop will follow up with <strong>{email}</strong>. Check your
               inbox for a confirmation.
             </p>
+            {deliveryWarning && (
+              <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                {deliveryWarning}
+              </p>
+            )}
             <Link
               href="/products"
               className="inline-block bg-[#16C2F3] text-white font-bold px-8 py-4 rounded-xl hover:bg-[#0fb0dd] transition-colors cursor-pointer"
