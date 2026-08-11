@@ -136,7 +136,7 @@ Check GSC after each wave before proceeding to the next.
 - Adding schema to ranking pages has low risk but must be a separate commit from content changes
 - After adding schema: run Google Rich Results Test on the affected page
 - Product schema: do NOT add to any page with a price inconsistency — resolve prices first
-- FAQPage schema: won't generate rich results for non-gov/health sites (Aug 2023 restriction) — keep for knowledge graph but don't add more
+- FAQPage schema: OWNER DECISION 2026-08-11 — emitted sitewide from IndustryPage (every landing page with FAQs). Won't generate Google rich results (Aug 2023 restriction) but feeds knowledge graph + AI-engine citation (ChatGPT/Gemini/Perplexity), which already drive real orders. FAQ CONTENT rule: answers must target real search queries (GSC + PAA data via /tc-seo-opportunities and /paa-faq), not generic filler — upgrade FAQ content page-by-page under normal wave discipline.
 - Schema + content change on same page = two separate commits, 7 days apart
 
 ## 301 Redirect Rules
