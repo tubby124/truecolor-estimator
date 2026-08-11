@@ -24,6 +24,7 @@ import { useState, useEffect } from "react";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { EstimateResponse } from "@/lib/engine/types";
 import type { LineItem } from "@/lib/cart/cart";
+import { trackPriceCalculated } from "@/lib/analytics";
 import { computeTax } from "@/lib/pricing/tax";
 import {
   STICKER_CONFIG,
@@ -43,7 +44,30 @@ interface UnifiedConfiguratorProps {
   /** Emits the raw EstimateResponse so a parent (staff page) can drive its
    *  existing QuotePanel + ProductProof + Add-to-Cart flow unchanged. */
   onResponse?: (response: EstimateResponse | null, loading: boolean) => void;
+  /** Product display name for the <h1> — same source as ProductConfigurator's
+   *  `product.name`. Optional so the current mount sites (which pass no
+   *  ProductContent) keep working; falls back to STICKER_CONTENT below. */
+  productName?: string;
+  /** Hero "from" price, e.g. "$25" — same source as ProductConfigurator's
+   *  `product.fromPrice`. Optional, same reason as productName. */
+  fromPrice?: string;
 }
+
+/**
+ * Mirrors the `stickers` entry in src/lib/data/products-content.ts (name /
+ * fromPrice / material_code). ProductConfigurator reads those three off its
+ * `product: ProductContent` prop, but neither mount site hands this component a
+ * ProductContent — and importing the 145 KB catalog into a client bundle to read
+ * two strings would weigh down /products/stickers, a paid-ads destination. Same
+ * mirror-the-source-of-truth arrangement sticker-config.ts already uses for the
+ * design fees. Keep in step with products-content.ts; when a later wave promotes
+ * a second category, pass productName/fromPrice in as props instead.
+ */
+const STICKER_CONTENT = {
+  name: "Vinyl Stickers",
+  fromPrice: "$25",
+  materialCode: "ARLPMF7008",
+} as const;
 
 const EMPTY_PRICE: PriceData = {
   price: null, loading: false, addonTotal: 0, designFee: 0, rushFee: 0,
@@ -61,7 +85,12 @@ function defaultChoice(choices: OptionChoice[] | undefined, fallback: OptionChoi
 
 export function UnifiedConfigurator({
   category, mode, prefilled, onPriceChange, onConfigChange, onResponse,
+  productName, fromPrice,
 }: UnifiedConfiguratorProps) {
+  // Same two values ProductConfigurator renders above its controls — prop when
+  // the mount site has ProductContent, mirrored sticker content otherwise.
+  const displayName = productName ?? STICKER_CONTENT.name;
+  const displayFromPrice = fromPrice ?? STICKER_CONTENT.fromPrice;
   // Wave 1 — client bundle only knows about STICKER. Other categories are
   // promoted in subsequent waves; until then the component renders a fallback
   // (the flag-gating at the mount site already prevents this branch from
