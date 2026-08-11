@@ -183,7 +183,7 @@ export default function StickerPrintingSaskatoonPage() {
         description:
           "Full-colour die-cut vinyl stickers printed in-house on a Roland UV press in Saskatoon. Waterproof, scratch-resistant, custom shapes and sizes. Default size 4x4 inch.",
         lowPrice: 25,
-        highPrice: 475,
+        highPrice: 640,
         offerCount: 4,
       }}
       faqs={[
