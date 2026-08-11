@@ -6,7 +6,7 @@ import { CITY_HUB_PAGES } from "@/lib/data/cities";
 export const metadata: Metadata = {
   title: { absolute: "Printing Lloydminster SK | Signs & Banners | True Color" },
   description:
-    "Custom printing for Lloydminster SK businesses. Coroplast signs, vinyl banners, vehicle magnets, business cards. Printed in Saskatoon — shipped to Lloydminster. True Color Display Printing.",
+    "Printing for Lloydminster SK businesses — coroplast signs from $8/sqft, vinyl banners, vehicle magnets, business cards, shipped from Saskatoon.",
   alternates: { canonical: "/printing-lloydminster-sk" },
   openGraph: {
     title: "Printing Lloydminster SK | True Color Display Printing",

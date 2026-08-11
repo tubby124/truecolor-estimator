@@ -6,7 +6,7 @@ import { CITY_HUB_PAGES } from "@/lib/data/cities";
 export const metadata: Metadata = {
   title: { absolute: "Signs Moose Jaw SK | Coroplast & Banners | True Color" },
   description:
-    "Custom signs and banners for Moose Jaw SK businesses. Coroplast from $8/sqft, vinyl banners, vehicle magnets. Printed in Saskatoon — shipped to Moose Jaw. True Color Display Printing.",
+    "Signs and banners for Moose Jaw SK businesses. Coroplast from $8/sqft, vinyl banners, vehicle magnets — printed in Saskatoon, shipped to Moose Jaw.",
   alternates: { canonical: "/signs-moose-jaw-sk" },
   openGraph: {
     title: "Signs Moose Jaw SK | True Color Display Printing",
