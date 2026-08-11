@@ -9,9 +9,8 @@ export const revalidate = 21600; // ISR: rebuild every 6 hours
 
 export const metadata: Metadata = {
   title: "Printing Resources Saskatoon | True Color",
-  // FIX 1: trimmed to 155 chars
   description:
-    "Printing news, graphic design, small business tips, Saskatchewan agriculture, restaurant, construction & real estate resources — updated every 6 hours for Saskatoon businesses.",
+    "Printing, graphic design, and small business resources for Saskatoon — agriculture, restaurant, construction, and real estate news, updated every 6 hours.",
   alternates: { canonical: "/resources" },
   openGraph: {
     title: "Print & Design Resources | True Color Display Printing",
