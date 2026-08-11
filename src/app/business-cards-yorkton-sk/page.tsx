@@ -26,7 +26,7 @@ export default function BusinessCardsYorktonPage() {
       subtitle="Full-colour double-sided cards from $45 — printed in Saskatoon, shipped to Yorkton."
       heroImage="/images/products/heroes/retail-hero-1200x500.webp"
       heroAlt="Business cards for Yorkton SK professionals — True Color Display Printing Saskatoon"
-      description="True Color Display Printing in Saskatoon prints and ships business cards to Yorkton professionals, agricultural businesses, and retail operators 180 km east. 250 full-colour double-sided cards for $45 on 16pt gloss stock."
+      description="True Color Display Printing in Saskatoon prints and ships business cards to Yorkton professionals, agricultural businesses, and retail operators 180 km east. 250 full-colour double-sided cards for $45 on 14pt gloss stock."
       descriptionNode={
         <>
           <p className="text-gray-600 text-lg leading-relaxed">
@@ -34,9 +34,9 @@ export default function BusinessCardsYorktonPage() {
             <Link href="/business-cards-saskatoon" className="text-[#16C2F3] underline font-medium">
               business cards
             </Link>{" "}
-            to Yorkton professionals and businesses 180 km east. Our cards are 16pt gloss
+            to Yorkton professionals and businesses 180 km east. Our cards are 14pt gloss
             stock, full-colour double-sided, with a UV coating. 250 cards for $45, 500 for
-            $65, 1,000 for $95. Yorkton serves as the commercial hub for eastern
+            $65, 1,000 for $110. Yorkton serves as the commercial hub for eastern
             Saskatchewan — agricultural suppliers, retail businesses, and service trades
             all order regularly.
           </p>
@@ -69,8 +69,8 @@ export default function BusinessCardsYorktonPage() {
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
       ]}
       whyPoints={[
-        "250 full-colour double-sided cards for $45 — 16pt gloss stock, UV-coated",
-        "500 cards for $65 / 1,000 for $95 — volume pricing built in",
+        "250 full-colour double-sided cards for $45 — 14pt gloss stock, UV-coated",
+        "500 cards for $65 / 1,000 for $110 — volume pricing built in",
         "Matte laminate and rounded corners available for premium finish",
         "Agricultural, retail, and professional services in Yorkton served",
         "Ships to Yorkton — 3–5 business days, shipping typically $20–$35",
@@ -83,7 +83,7 @@ export default function BusinessCardsYorktonPage() {
         },
         {
           q: "How much does it cost to get business cards delivered to Yorkton?",
-          a: "250 cards are $45, 500 are $65, 1,000 are $95 — all double-sided full colour on 16pt gloss. Shipping from Saskatoon to Yorkton (180 km east) typically runs $20–$35 for business card orders.",
+          a: "250 cards are $45, 500 are $65, 1,000 are $110 — all double-sided full colour on 14pt gloss. Shipping from Saskatoon to Yorkton (180 km east) typically runs $20–$35 for business card orders.",
         },
         {
           q: "Can you print business cards for Yorkton agricultural or grain businesses?",

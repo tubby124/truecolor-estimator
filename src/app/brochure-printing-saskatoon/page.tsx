@@ -47,7 +47,7 @@ export default function BrochurePrintingSaskatoonPage() {
             Common Saskatoon uses: medical and dental clinic service menus, real estate property
             packages, agricultural dealership spec sheets, contractor company overviews, university
             program guides, and non-profit annual reports. Supply a print-ready PDF with 1/8&quot;
-            bleed. Need a layout? Our in-house designer handles tri-fold and half-fold setups from $50
+            bleed. Need a layout? Our in-house designer handles tri-fold and half-fold setups for $40 flat
             — proofs typically same day.
           </p>
           <p className="text-gray-600 leading-relaxed">
@@ -81,7 +81,7 @@ export default function BrochurePrintingSaskatoonPage() {
         "100lb gloss text — noticeably heavier and more premium than standard flyer paper",
         "Tri-fold and half-fold available — folded and scored in-house, not outsourced",
         "In-house Konica Minolta digital press — consistent colour, sharp images",
-        "In-house designer for tri-fold and half-fold layout setup — from $50",
+        "In-house designer for tri-fold and half-fold layout setup — $40 flat",
         "Ready in 2–3 business days; same-day rush available for +$40 flat",
         "Minimum 100 brochures — no massive run required",
       ]}

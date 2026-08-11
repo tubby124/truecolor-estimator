@@ -47,7 +47,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // ── Print product SEO pages — sprint (2026-03-03) ────────────────────────
     { url: `${BASE_URL}/flyer-printing-saskatoon`, lastModified: new Date("2026-06-05"), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/brochure-printing-saskatoon`, lastModified: new Date("2026-03-03"), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${BASE_URL}/brochure-printing-saskatoon`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/booklet-printing-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.9 },
 
     // ── Service & hub SEO pages — sprint (2026-03-03) ────────────────────────
@@ -186,7 +186,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/coroplast-signs-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/banner-printing-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/vehicle-magnets-yorkton-sk`, lastModified: new Date("2026-05-20"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/business-cards-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/business-cards-yorkton-sk`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/flyer-printing-yorkton-sk`, lastModified: new Date("2026-04-13"), changeFrequency: "monthly", priority: 0.7 },
 
     // ── Legal ─────────────────────────────────────────────────────────────────
