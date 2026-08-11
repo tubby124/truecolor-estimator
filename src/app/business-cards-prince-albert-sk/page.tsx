@@ -5,7 +5,7 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 export const metadata: Metadata = {
   title: { absolute: "Business Cards Prince Albert SK | 250 for $45 | True Color" },
   description:
-    "Business cards for Prince Albert SK professionals. 250 cards for $45, double-sided full colour. Printed in Saskatoon — shipped to Prince Albert. True Color Display Printing.",
+    "Business cards for Prince Albert SK professionals. 250 double-sided full-colour cards for $45, printed in Saskatoon and shipped to Prince Albert.",
   alternates: { canonical: "/business-cards-prince-albert-sk" },
   openGraph: {
     title: "Business Cards Prince Albert SK | True Color Display Printing",

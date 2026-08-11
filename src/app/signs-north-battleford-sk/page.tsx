@@ -6,7 +6,7 @@ import { CITY_HUB_PAGES } from "@/lib/data/cities";
 export const metadata: Metadata = {
   title: { absolute: "Signs North Battleford SK | Coroplast & Banners | True Color" },
   description:
-    "Custom signs for North Battleford SK businesses. Coroplast from $8/sqft, vehicle magnets, ACP aluminum, vinyl banners. Printed in Saskatoon — shipped to North Battleford.",
+    "Signs for North Battleford SK businesses. Coroplast from $8/sqft, vehicle magnets, ACP aluminum, and vinyl banners printed and shipped from Saskatoon.",
   alternates: { canonical: "/signs-north-battleford-sk" },
   openGraph: {
     title: "Signs North Battleford SK | True Color Display Printing",
