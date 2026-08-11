@@ -56,8 +56,8 @@ export default function SameDayPrintingSaskatoonPage() {
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
             No print-ready file? Not a problem. Our in-house designer can prep your artwork
-            on the spot from a low-res logo, a Word doc, or a rough sketch — design starts
-            at $35 and usually takes under 2 hours for simple layouts. Pickup is at
+            on the spot from a low-res logo, a Word doc, or a rough sketch — design is a flat
+            $40 and usually takes under 2 hours for simple layouts. Pickup is at
             216 33rd St W, Saskatoon. No delivery fees, no shipping guesswork —
             your order is in your hands the same day you ordered it.
           </p>

@@ -29,7 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // ── Tier 1 SEO landing pages ──────────────────────────────────────────────
     { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.95 },
-    { url: `${BASE_URL}/same-day-printing-saskatoon`, lastModified: new Date("2025-11-15"), changeFrequency: "monthly", priority: 0.95 },
+    { url: `${BASE_URL}/same-day-printing-saskatoon`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.95 },
 
     // ── Product SEO pages (launched in batches Nov 2025 – Jan 2026) ──────────
     { url: `${BASE_URL}/banner-printing-saskatoon`, lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.9 },
@@ -141,7 +141,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ── Seasonal pages ────────────────────────────────────────────────────────
     // /st-patricks-day-printing-saskatoon removed from sitemap 2026-05-05 — out of season + page now noindex; restore Feb 2027
     { url: `${BASE_URL}/graduation-banners-saskatoon`, lastModified: new Date("2026-03-12"), changeFrequency: "monthly", priority: 0.85 },
-    { url: `${BASE_URL}/mothers-day-printing-saskatoon`, lastModified: new Date("2026-05-20"), changeFrequency: "monthly", priority: 0.85 },
+    { url: `${BASE_URL}/mothers-day-printing-saskatoon`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.85 },
     // /canada-day-printing-saskatoon — add when page is built
     // /back-to-school-signs-saskatoon — add when page is built
 
