@@ -28,7 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/print-resources/saskatchewan-boat-registration-number-rules`, lastModified: new Date("2026-08-06"), changeFrequency: "yearly", priority: 0.8 },
 
     // ── Tier 1 SEO landing pages ──────────────────────────────────────────────
-    { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.95 },
+    { url: `${BASE_URL}/coroplast-signs-saskatoon`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.95 },
     { url: `${BASE_URL}/same-day-printing-saskatoon`, lastModified: new Date("2026-08-11"), changeFrequency: "monthly", priority: 0.95 },
 
     // ── Product SEO pages (launched in batches Nov 2025 – Jan 2026) ──────────

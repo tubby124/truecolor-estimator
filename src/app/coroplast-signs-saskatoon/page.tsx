@@ -63,7 +63,7 @@ const designDirections = [
         src: "/images/industries/coroplast/sign-contractor.webp",
         alt: "Contractor company coroplast sign printed in Saskatoon — True Color Display Printing, Saskatoon SK",
         label: "Contractor Company Sign",
-        caption: "24×48\" — $90",
+        caption: "24×48\" — $64",
       },
       {
         src: "/images/industries/coroplast/sign-hoarding.webp",
