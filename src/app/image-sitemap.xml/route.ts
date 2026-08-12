@@ -99,7 +99,7 @@ const PAGES = [
   // HOMEPAGE
   // ══════════════════════════════════════════════════════════════════════════
   {
-    loc: BASE,
+    loc: `${BASE}/`,
     images: [
       {
         loc: `${IMG}/coroplast-yard-sign-800x600.webp`,
@@ -1528,8 +1528,6 @@ function buildXml(): string {
         (img) => `
     <image:image>
       <image:loc>${escape(img.loc)}</image:loc>
-      <image:title>${escape(img.title)}</image:title>
-      <image:caption>${escape(img.caption)}</image:caption>
     </image:image>`
       )
       .join("");

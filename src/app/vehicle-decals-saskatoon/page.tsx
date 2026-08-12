@@ -41,6 +41,10 @@ const serviceSchema = {
   name: "Vehicle Decals Saskatoon",
   serviceType: "Vehicle Vinyl Decal Printing and Installation",
   url: "https://truecolorprinting.ca/vehicle-decals-saskatoon",
+  areaServed: [
+    { "@type": "City", name: "Saskatoon" },
+    { "@type": "AdministrativeArea", name: "Saskatchewan" },
+  ],
   provider: {
     "@type": "LocalBusiness",
     name: "True Color Display Printing",
@@ -65,6 +69,43 @@ const serviceSchema = {
   },
 };
 
+const FAQS = [
+  {
+    q: "How much does a vehicle decal cost in Saskatoon?",
+    a: "Print-only vehicle decals are $14/sqft with a $25 order-total minimum at checkout. A standard door panel (29×16.5\") is 3.3 sqft — about $46.20 print-only. A full van side panel (72×24\") is 12 sqft — $168. Installation is quoted separately starting at $75 for a simple job.",
+  },
+  {
+    q: "Why is installation quoted separately?",
+    a: "Die-cut vinyl installation is skilled labour — weeding, transfer tape, wet or dry application, squeegee, and peel. It's done in our dedicated bay. The time and complexity varies by job size, number of pieces, and vehicle surface. We quote it accurately rather than bundling a flat fee that under- or over-charges you.",
+  },
+  {
+    q: "What's the difference between a die-cut decal and a regular sticker?",
+    a: "A die-cut decal is cut to the exact contour of your design — no background rectangle. It looks like the graphic is painted on the vehicle. A regular sticker has a square or rectangular background. Die-cut takes longer to produce (weeding removes the waste vinyl) and more skill to apply, but the result looks far more professional.",
+  },
+  {
+    q: "How long do vehicle decals last?",
+    a: "Oracal cast vinyl printed on our Roland UV press typically lasts 5–7 years on exterior vehicle surfaces. Saskatchewan UV and cold don't noticeably degrade well-applied cast vinyl. Removal is possible without paint damage if done with heat and patience.",
+  },
+  {
+    q: "Can I apply the decal myself?",
+    a: "Yes — we include transfer tape and can add wet-application fluid on request. Small decals are manageable DIY. Door panels and rear windows are trickier — bubbles and misalignment are common mistakes. If your vehicle is your brand, professional installation is worth the extra cost.",
+  },
+  {
+    q: "Do you do full vehicle wraps?",
+    a: "We print the vinyl panels for full wraps. For certified wrap installation (which requires a stretch-wrap specialist), we can refer you to a local installer. Partial wraps, door panels, rear windows, and side graphics we handle in-house.",
+  },
+] as const;
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQS.map(({ q, a }) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: a },
+  })),
+};
+
 const SIZES = [
   { name: "Small decal", sqft: "custom", print: "$14/sqft", note: "Business logos, small graphics" },
   { name: "Door panel (29×16.5\")", sqft: "3.3 sqft", print: "$46.20", note: "Standard car/SUV door" },
@@ -79,6 +120,7 @@ export default function VehicleDecalsSaskatoonPage() {
     <div className="min-h-screen bg-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <SiteNav />
 
       <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
@@ -256,32 +298,7 @@ export default function VehicleDecalsSaskatoonPage() {
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-[#1c1712] mb-6">Vehicle Decal FAQ</h2>
           <div className="space-y-4 max-w-3xl">
-            {[
-              {
-                q: "How much does a vehicle decal cost in Saskatoon?",
-                a: "Print-only vehicle decals are $14/sqft with a $25 order-total minimum at checkout. A standard door panel (29×16.5\") is 3.3 sqft — about $46.20 print-only. A full van side panel (72×24\") is 12 sqft — $168. Installation is quoted separately starting at $75 for a simple job.",
-              },
-              {
-                q: "Why is installation quoted separately?",
-                a: "Die-cut vinyl installation is skilled labour — weeding, transfer tape, wet or dry application, squeegee, and peel. It's done in our dedicated bay. The time and complexity varies by job size, number of pieces, and vehicle surface. We quote it accurately rather than bundling a flat fee that under- or over-charges you.",
-              },
-              {
-                q: "What's the difference between a die-cut decal and a regular sticker?",
-                a: "A die-cut decal is cut to the exact contour of your design — no background rectangle. It looks like the graphic is painted on the vehicle. A regular sticker has a square or rectangular background. Die-cut takes longer to produce (weeding removes the waste vinyl) and more skill to apply, but the result looks far more professional.",
-              },
-              {
-                q: "How long do vehicle decals last?",
-                a: "Oracal cast vinyl printed on our Roland UV press typically lasts 5–7 years on exterior vehicle surfaces. Saskatchewan UV and cold don't noticeably degrade well-applied cast vinyl. Removal is possible without paint damage if done with heat and patience.",
-              },
-              {
-                q: "Can I apply the decal myself?",
-                a: "Yes — we include transfer tape and can add wet-application fluid on request. Small decals are manageable DIY. Door panels and rear windows are trickier — bubbles and misalignment are common mistakes. If your vehicle is your brand, professional installation is worth the extra cost.",
-              },
-              {
-                q: "Do you do full vehicle wraps?",
-                a: "We print the vinyl panels for full wraps. For certified wrap installation (which requires a stretch-wrap specialist), we can refer you to a local installer. Partial wraps, door panels, rear windows, and side graphics we handle in-house.",
-              },
-            ].map(({ q, a }) => (
+            {FAQS.map(({ q, a }) => (
               <details key={q} className="group border border-gray-100 rounded-xl">
                 <summary className="cursor-pointer px-6 py-4 font-semibold text-[#1c1712] text-sm flex items-center justify-between">
                   {q}
