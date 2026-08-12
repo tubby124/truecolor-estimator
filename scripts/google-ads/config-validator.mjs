@@ -165,6 +165,7 @@ const TRACKED_PAID_LANDING_HREF = "https://truecolorprinting.ca/why-true-color?s
 // Core groups whose destination is the tracked paid landing page rather than a plain path. Keyed
 // by group key so adding one is a one-line, reviewable contract decision.
 const TRACKED_HREF_ROUTES = {
+  "generic-print-price": TRACKED_PAID_LANDING_HREF,
   "generic-sign-shop": TRACKED_PAID_LANDING_HREF,
 };
 const ROUTES = {
@@ -175,7 +176,9 @@ const ROUTES = {
   flyers: "/products/flyers",
   "retractable-banners": "/products/retractable-banners",
   "rush-same-day": "/same-day-printing-saskatoon",
-  "generic-print-price": "/printing-prices-saskatoon",
+  // 2026-08-12: repointed after the /why-true-color price strip shipped above the mobile fold.
+  // The SEO price page stays untouched; paid traffic moves to the instrumented paid page.
+  "generic-print-price": "/why-true-color",
   "photo-posters": "/photo-poster-printing-saskatoon",
   // 2026-08-10: repointed off /sign-company-saskatoon. That page emits zero analytics events and
   // carries a BELOW_AVERAGE landing-page-experience rating; it stays live and untouched for

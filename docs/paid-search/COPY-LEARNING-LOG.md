@@ -957,3 +957,98 @@ all point at SEO pages with the same instrumentation gap.
 a live ad matches the contract must fingerprint where it points, not just what it says. And any
 group whose destination moves must retire **every** enabled ad at the old destination in the same
 atomic mutate — a split-destination ad group is not a degraded experiment, it is no experiment.
+
+---
+
+## 2026-08-12 — ✅ APPLIED — Generic Print Price repointed to /why-true-color
+
+> **STATUS: LIVE AND VERIFIED.**
+> `--create --execute` created replacement RSA `820692287702` PAUSED at the tracked destination.
+> After Google returned it ready, `--swap --execute` atomically enabled that replacement and paused
+> old ads `817302599505` and `820283120307` at `/printing-prices-saskatoon`. Immediate readback was
+> clean: replacement ENABLED, both superseded ads PAUSED, zero enabled superseded ads. The launched
+> verifier then reported zero safety failures (60 total / 21 enabled / 39 paused RSAs), all RSA
+> policy states APPROVED/REVIEWED, and `sync-plan.mjs` returned zero drift in every category.
+
+### Why the ad moves
+
+The Aug 7 funnel read made Generic Print Price the explicit Aug 12 destination gate: it was the
+top ad group at **71 impressions / 8 clicks / about 40% of Core spend**, while sessions on
+`/printing-prices-saskatoon` produced no funnel events. The group was deliberately left in place
+during calibration until the paid landing page could answer its generic price intent above the
+mobile fold.
+
+That precondition is now met. `/why-true-color` shows the verified strip **“Signs from $25 · Cards
+from $45 · Banners from $66”** directly under its H1 and emits `view_paid_landing` plus the paid CTA,
+item-selection, and tap-to-call events. `/printing-prices-saskatoon` is not edited: the AD moves and
+the SEO PAGE stays.
+
+**Destination is the only experiment variable.** Variant-B headlines, descriptions, approved
+prices, keywords, and cross-negatives are byte-identical to the pre-repoint contract.
+
+### The variant-A pause
+
+Before the swap, Generic Print Price had two enabled ads at `/printing-prices-saskatoon`: legacy variant A
+and variant B. Leaving variant A enabled after moving variant B would split the group across two
+destinations and void the experiment. The group therefore drops `headlines` from the contract and
+ships variant B alone. The atomic swap PAUSES both old ads; it does not edit or remove either one.
+
+### The counts
+
+| | before | after swap | why |
+|---|---:|---:|---|
+| `EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS` | 45 | **44** | group stops declaring variant A |
+| `SUPERSEDED_COPY_RSAS_PAUSED` | 14 | **16** | + old variant B, + legacy variant A |
+| Core enabled RSAs | 22 | **21** | group goes from 2 serving ads to 1 |
+| paused RSAs (`23 + superseded`) | 37 | **39** | both old ads retire |
+| account RSA total (`44 + 16`) | 59 | **60** | one net-new replacement ad |
+| ad groups | 26 | **26** | destination change only |
+| keywords | 164 / 372 | **unchanged** | no keyword moves |
+
+The replacement is the group's variant B in contract inventory, not an additional contract ad.
+The two old ads move into the explicit superseded count, so `44 + 16 = 60` reproduces the end state.
+
+### Two-phase plan and verifier states
+
+1. `--create` creates one replacement RSA PAUSED at the tracked URL. Both old ads keep serving while
+   Google reviews it.
+2. Once the replacement reads APPROVED/REVIEWED, `--swap` atomically enables it and pauses both old
+   enabled ads. There is no delivery gap and no split-destination window.
+
+| state | total | enabled | paused | launched verifier |
+|---|---:|---:|---:|---|
+| before `--create` | 59 | 22 | 37 | expected drift: repo is ahead of account |
+| after `--create` | 60 | 22 | 38 | total green; enabled/paused intentionally drift |
+| after `--swap` | **60** | **21** | **39** | green |
+
+The between-phase drift is the import-completion signal. Do not change the contract to make the
+intermediate state green.
+
+### Held out deliberately
+
+- No copy, keyword, cross-negative, bid, budget, conversion, or landing-page content changes.
+- The 16 superseded ads remain PAUSED, not removed; removal remains a separate owner call.
+- Tasks 2 and 3 remain future daily account slots. This repoint is the only Aug 12 account change.
+
+### Page-backed follow-up queue (verified before expansion)
+
+No landing page needs to be invented for the mined demand. All four destinations returned HTTP 200
+on 2026-08-12 and expose the correct next step:
+
+| Future slot | Mined demand | Destination | Customer action |
+|---|---|---|---|
+| 2 | `poster printing saskatoon`, `big poster printing` | `/photo-poster-printing-saskatoon` | Opens the orderable Photo Posters configurator |
+| 2 | `same day business cards printing`, `business card price list` | `/products/business-cards` | Exact-price calculator and checkout |
+| 2 | `shirts` negative | none — True Color does not print apparel | Blocks the plural leak missed by `t shirt`, `tshirt`, and `shirt printing` |
+| 3 | `car stickers near me`, `custom car stickers`, `vehicle stickers custom`, `custom car advertising stickers`, `rv vinyl decals`, `car window decals canada` | `/vehicle-decals-saskatoon` | Dedicated quote CTA; print and installation are job-specific |
+
+Slot 2 is an existing-group expansion plus one waste negative. Slot 3 is a distinct Vehicle Decals
+ad group with its own RSA and quote destination; it must not be folded into the Window Decals group,
+because storefront/window-vinyl checkout and installed vehicle work are different jobs. Build and
+apply each slot through the normal expansion workflow only after this destination swap completes.
+
+### Metric gate
+
+Read this group at **20 clicks or 2026-08-24, whichever comes first**. `/why-true-color` should emit
+`view_paid_landing` on every paid session from Generic Print Price; read CTA, item-selection, and
+tap-to-call activity as the next-step signals. Do not read the result early.
