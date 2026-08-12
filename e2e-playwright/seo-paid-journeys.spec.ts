@@ -9,6 +9,12 @@ const paidProductRoutes = [
   "/products/retractable-banners",
   "/products/acp-signs",
   "/products/vehicle-magnets",
+  "/products/photo-posters",
+  "/products/window-decals",
+  "/products/vinyl-lettering",
+  "/products/foamboard-displays",
+  "/products/postcards",
+  "/products/brochures",
 ] as const;
 
 const resourceRoutes = [
@@ -26,7 +32,7 @@ test.describe("paid and organic ordering journeys", () => {
   // clicks ~5:1, corrupting the paid-funnel read the ads cadence depends on.
   test.beforeEach(async ({ page }) => {
     await page.route(
-      /googletagmanager\.com|google-analytics\.com|analytics\.google\.com|doubleclick\.net/,
+      /googletagmanager\.com|google-analytics\.com|analytics\.google\.com|doubleclick\.net|connect\.facebook\.net|facebook\.com\/tr/,
       (route) => route.abort(),
     );
   });
@@ -44,7 +50,8 @@ test.describe("paid and organic ordering journeys", () => {
       await expect(page.locator(`main a[href="${href}"]`)).not.toHaveCount(0);
     }
 
-    await expect(page.locator('main a[href^="https://www.google.com/maps/dir"]')).toHaveCount(1);
+    await expect(page.locator('main a[href^="https://www.google.com/maps/dir"]')).toHaveCount(2);
+    await expect(page.getByRole("link", { name: "216 33rd St W, Saskatoon, SK" })).toHaveAttribute("target", "_blank");
 
     await page.locator('main a[href="/products/coroplast-signs"]').first().click();
     await expect(page).toHaveURL(/\/products\/coroplast-signs$/);
@@ -62,6 +69,23 @@ test.describe("paid and organic ordering journeys", () => {
       matchtype: "e",
       device: "m",
     });
+  });
+
+  test("closing actions navigate to real pages instead of inert same-page anchors", async ({ page }) => {
+    await page.goto("/why-true-color", { waitUntil: "domcontentloaded" });
+    const closing = page.locator('[aria-labelledby="closing-cta-heading"]');
+
+    await expect(closing.getByRole("link", { name: "Start My Order" })).toHaveAttribute("href", "/products");
+    await expect(closing.getByRole("link", { name: "Request My Quote" })).toHaveAttribute("href", "/quote");
+
+    await closing.getByRole("link", { name: "Start My Order" }).click();
+    await expect(page).toHaveURL(/\/products$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/What are you printing/i);
+
+    await page.goto("/why-true-color", { waitUntil: "domcontentloaded" });
+    await page.locator('[aria-labelledby="closing-cta-heading"]').getByRole("link", { name: "Request My Quote" }).click();
+    await expect(page).toHaveURL(/\/quote$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/quote/i);
   });
 
   test("paid landing page is stable at every launch viewport", async ({ page }) => {
@@ -134,14 +158,18 @@ test.describe("paid and organic ordering journeys", () => {
       await page.setViewportSize({ width: 390, height: 844 });
       await page.goto(route, { waitUntil: "domcontentloaded" });
       const qtyButtons = page.getByRole("radiogroup", { name: "Quantity" }).getByRole("radio");
-      await expect(qtyButtons.nth(1)).toBeVisible();
+      const numberedQtyButtons = qtyButtons.filter({ hasText: /^\s*\d+\s*$/ });
+      await expect(numberedQtyButtons.first()).toBeVisible();
       const addButton = page.getByRole("button", { name: /Add to Cart/i });
       // The first accepted estimate proves hydration and pricing are ready
       // before exercising a real configuration change.
       await expect(addButton).toBeEnabled();
-      const selectedQty = Number((await qtyButtons.nth(1).innerText()).trim());
-      await qtyButtons.nth(1).click();
-      await expect(qtyButtons.nth(1)).toHaveAttribute("aria-checked", "true");
+      const targetQty = (await numberedQtyButtons.count()) > 1
+        ? numberedQtyButtons.nth(1)
+        : numberedQtyButtons.first();
+      const selectedQty = Number((await targetQty.innerText()).trim());
+      await targetQty.click();
+      await expect(targetQty).toHaveAttribute("aria-checked", "true");
       await expect(addButton).toBeEnabled();
       await addButton.click();
       await expect(page.getByRole("link", { name: "Continue shopping" })).toBeVisible();

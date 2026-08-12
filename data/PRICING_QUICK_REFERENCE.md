@@ -1,5 +1,5 @@
 # True Color Display Printing — Pricing Quick Reference
-**Updated:** 2026-08-06 | **Source of truth:** `data/tables/` CSVs
+**Updated:** 2026-08-11 | **Source of truth:** `data/tables/` CSVs
 **How to update prices:** Edit the CSVs only — no code changes needed. Then `git push main` → live in ~2 min.
 
 ---
@@ -180,6 +180,9 @@ Magnet Calendars (any size, sqft-based — $24/sqft): 4×7" raw $4.67 each · 5�
 | 20.01+ sqft  | $7.50     |
 
 **Qty bulk discounts:** 5+=5% · 10+=10%
+
+**Small orders:** $25 order-total minimum applies at checkout. The legacy `min_charge` column is
+aligned to $25, although the live engine correctly uses the single cart-level minimum described above.
 
 ---
 

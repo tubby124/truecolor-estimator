@@ -14,8 +14,17 @@ const EXPECTED_PRODUCT_HREFS = [
   "/products/retractable-banners",
   "/products/acp-signs",
   "/products/vehicle-magnets",
+  "/products/photo-posters",
+  "/products/window-decals",
+  "/products/vinyl-lettering",
+  "/products/foamboard-displays",
+  "/products/postcards",
+  "/products/brochures",
 ];
-const EXPECTED_FROM_PRICES = ["$25", "$25", "$66", "$45", "$45", "$219", "$39", "$25"];
+const EXPECTED_FROM_PRICES = [
+  "$25", "$25", "$66", "$45", "$45", "$219", "$39", "$25",
+  "$15", "$25", "$25", "$45", "$35", "$70",
+];
 
 describe("paid-only why True Color page contract", () => {
   it("uses a non-duplicated title and is noindex, follow", () => {
@@ -29,7 +38,7 @@ describe("paid-only why True Color page contract", () => {
     );
   });
 
-  it("exposes exactly the eight direct product CTA destinations", () => {
+  it("exposes the eight featured and six additional direct product CTA destinations", () => {
     expect(PAID_PRODUCTS.map((product) => product.href)).toEqual(EXPECTED_PRODUCT_HREFS);
     expect(PAID_PRODUCTS.map((product) => product.fromPrice)).toEqual(EXPECTED_FROM_PRICES);
     expect(PAID_PRODUCTS.every((product) => product.heroImage.startsWith("/images/"))).toBe(true);
@@ -64,6 +73,9 @@ describe("paid-only why True Color page contract", () => {
     expect(source).toContain("/images/about/shop-exterior.webp");
     expect(source).toContain("/images/gallery/gallery-shop-roland-large-format.webp");
     expect(source).toContain("Request My Quote");
+    expect(source).toContain('href="/products" action="browse_products" placement="closing"');
+    expect(source).toContain('href="/quote" action="custom_quote" placement="closing"');
+    expect(source).toContain("216 33rd St W, Saskatoon, SK");
     expect(source).not.toMatch(/src=\{product\.heroImage\}[\s\S]{0,180}unoptimized/);
   });
 

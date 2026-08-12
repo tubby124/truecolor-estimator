@@ -8,6 +8,7 @@ import {
   trackSelectItem,
   trackViewItemList,
 } from "@/lib/analytics";
+import type { AnalyticsPlacement } from "@/lib/analytics";
 
 declare global {
   interface Window {
@@ -31,12 +32,12 @@ export function trackPaidCta(params: { action: string; placement: string; destin
   }
 }
 
-function trackSelectProduct(productSlug: string, productName: string) {
+function trackSelectProduct(productSlug: string, productName: string, itemListName: string) {
   if (typeof window === "undefined" || typeof window.gtag !== "function") return;
   window.gtag("event", "select_product", {
     item_id: productSlug,
     item_name: productName,
-    item_list_name: "Paid competitor product chooser",
+    item_list_name: itemListName,
   });
 }
 
@@ -46,9 +47,19 @@ interface PaidProductLinkProps {
   productName: string;
   className: string;
   children: ReactNode;
+  placement?: AnalyticsPlacement;
+  itemListName?: string;
 }
 
-export function PaidProductLink({ href, productSlug, productName, className, children }: PaidProductLinkProps) {
+export function PaidProductLink({
+  href,
+  productSlug,
+  productName,
+  className,
+  children,
+  placement = "product_catalogue",
+  itemListName = "Paid competitor product chooser",
+}: PaidProductLinkProps) {
   return (
     <Link
       href={href}
@@ -57,11 +68,11 @@ export function PaidProductLink({ href, productSlug, productName, className, chi
         trackSelectItem({
           item_id: productSlug,
           item_name: productName,
-          item_list_name: "Paid competitor product chooser",
-          placement: "product_catalogue",
+          item_list_name: itemListName,
+          placement,
           destination: href,
         });
-        trackSelectProduct(productSlug, productName);
+        trackSelectProduct(productSlug, productName, itemListName);
       }}
     >
       {children}
@@ -71,19 +82,25 @@ export function PaidProductLink({ href, productSlug, productName, className, chi
 
 interface PaidProductListTrackerProps {
   products: Array<{ slug: string; name: string }>;
+  itemListName?: string;
+  trackLandingView?: boolean;
 }
 
-export function PaidProductListTracker({ products }: PaidProductListTrackerProps) {
+export function PaidProductListTracker({
+  products,
+  itemListName = "Paid competitor product chooser",
+  trackLandingView = true,
+}: PaidProductListTrackerProps) {
   const tracked = useRef(false);
   useEffect(() => {
     if (tracked.current) return;
     tracked.current = true;
-    trackPaidLandingView();
+    if (trackLandingView) trackPaidLandingView();
     trackViewItemList({
-      item_list_name: "Paid competitor product chooser",
+      item_list_name: itemListName,
       items: products.map((product) => ({ item_id: product.slug, item_name: product.name })),
     });
-  }, [products]);
+  }, [itemListName, products, trackLandingView]);
   return null;
 }
 
