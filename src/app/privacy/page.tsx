@@ -16,7 +16,7 @@ export default function PrivacyPage() {
       <main id="main-content" className="max-w-4xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold text-[#1c1712] mb-4">Privacy Policy</h1>
         <p className="text-gray-500 mb-12">
-          Last updated: February 2026 · True Color Display Printing Ltd.
+          Last updated: August 2026 · True Color Display Printing Ltd.
         </p>
 
         <div className="prose prose-gray max-w-none space-y-8 text-gray-700 leading-relaxed">
@@ -92,6 +92,14 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>Supabase</strong> — secure order database
+              </li>
+              <li>
+                <strong>Google</strong> — advertising measurement. When you submit a quote or place
+                an order, we may share a SHA-256 hash of your email address and, if provided, your
+                phone number with Google to help measure whether our advertising led to that quote
+                or order. We normalize and hash this information before it is transmitted; we do
+                not send the plain-text email address or phone number through this
+                enhanced-conversions process.
               </li>
             </ul>
             <p className="mt-2">
