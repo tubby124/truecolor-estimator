@@ -248,7 +248,8 @@ export function validateCompetitorDestinationInventory(
 // 2026-08-12 Generic Print Price destination repoint: 45 -> 44. The same destination-change
 // exception drops that group's legacy variant A from contract inventory; variant B remains the
 // group's sole serving contract ad after the swap.
-const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 44;
+// 2026-08-12 Vehicle Decals routing: 44 -> 45. The new Core group ships one variant-B RSA only.
+const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 45;
 // 2026-08-09: replace-stale-price-ads.mjs swapped 12 Core RSAs that quoted the retired $35 design
 // price for contract-correct $40 copy. Google RSA text is immutable, so every "edit" is a new ad,
 // and --swap PAUSES the superseded ad rather than removing it — the reversible choice.
@@ -266,7 +267,8 @@ const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 44;
 // the Core ENABLED count falls 23 -> 22 while the account total rises 58 -> 59.
 // 2026-08-12 Generic Print Price destination repoint: 14 -> 16. Its old variant B and legacy
 // variant A both point at /printing-prices-saskatoon and retire together in the atomic swap.
-// End state: 44 contract RSAs + 16 superseded paused RSAs = 60 account RSAs.
+// Vehicle Decals adds one contract RSA after the repoint:
+// 45 contract RSAs + 16 superseded paused RSAs = 61 account RSAs.
 const SUPERSEDED_COPY_RSAS_PAUSED = 16;
 
 function evaluateLiveState(live, {
@@ -307,9 +309,9 @@ function evaluateLiveState(live, {
     if (!campaign || campaign.presence !== "PRESENCE" || !campaign.networks?.targetGoogleSearch || campaign.networks?.targetSearchNetwork || campaign.networks?.targetContentNetwork || campaign.networks?.targetPartnerSearchNetwork) failures.push(`${name} network or presence setting changed`);
     if (campaign?.finalUrlSuffix !== EXPECTED_SUFFIX) failures.push(`${name} final URL suffix changed`);
   }
-  // 2026-08-07 photo-poster split: 25 -> 26 ad groups. Photo printing terms route to the
-  // dedicated photo-poster landing page instead of Generic Print Price.
-  if (live.adGroups !== 26
+  // 2026-08-07 photo-poster split: 25 -> 26 ad groups. 2026-08-12 vehicle routing: 26 -> 27;
+  // car/RV searches now land on the dedicated quote page instead of sticker/window checkout.
+  if (live.adGroups !== 27
     || live.pausedAdGroups !== expectedPausedAdGroups
     || (expectedEnabledAdGroups !== null && live.enabledAdGroups !== expectedEnabledAdGroups)) failures.push(adGroupStateFailure);
   // 2026-08-06 variant-B copy rollout: 20 -> 30 RSAs. Ten Core ad groups gain a second,
@@ -365,8 +367,11 @@ function evaluateLiveState(live, {
   //       capability. Rationale lives in campaign-config.mjs beside the terms.
   //   +8 ad-group cross-negatives — eight product terms on Generic Print Price only, so a query
   //       naming a specific product routes to that product's group instead of the price-index page.
-  // Current composition: 282 account-negative criteria + 76 ad-group cross-negatives + 14 campaign negatives.
-  if (live.positiveKeywords !== 164 || live.negativeCriteria !== 372) failures.push("keyword counts changed");
+  // 2026-08-12 page-backed expansion: positives 164 -> 188. Added 7 Vehicle Decals, 3 Business
+  // Card, and 2 Photo Poster terms, all EXACT+PHRASE. Negatives 372 -> 391: "shirts" account-wide
+  // (+6), car/vehicle/rv routing on Stickers and Decals (+6), and 7 Vehicle group cross-negatives.
+  // Current composition: 288 account-negative criteria + 89 ad-group cross-negatives + 14 campaign negatives.
+  if (live.positiveKeywords !== 188 || live.negativeCriteria !== 391) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,
@@ -571,9 +576,10 @@ export function evaluatePausedLiveState(live) {
     expectedEnabledAdGroups: null,
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
-    adGroupStateFailure: "25 staged ad groups must be enabled and the held Brand ad group paused",
-    // 44 -> 43: Generic Sign Shop dropped legacy A; 43 -> 42: Generic Print Price followed.
-    rsaStateFailure: "42 staged RSAs must be enabled and both held Brand RSAs paused",
+    adGroupStateFailure: "26 staged ad groups must be enabled and the held Brand ad group paused",
+    // 44 -> 43: Generic Sign Shop dropped legacy A; 43 -> 42: Generic Print Price followed;
+    // Vehicle Decals adds one new staged RSA, bringing the enabled staging count to 43.
+    rsaStateFailure: "43 staged RSAs must be enabled and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
     // Paused mode describes the PRE-LAUNCH staging state, where every non-Brand child was staged
     // ENABLED beneath paused campaigns. It is the rollback reference and is deliberately left at
@@ -589,24 +595,26 @@ export function evaluateLaunchedLiveState(live) {
   return evaluateLiveState(live, {
     expectedCampaigns: LAUNCHED_EXPECTED_CAMPAIGNS,
     // 2026-08-07 photo-poster routing split gave Core a 13th ad group and 23rd RSA.
-    // 2026-08-09 Competitor retirement: enabled is now Core alone (13 groups / 23 RSAs), and
+    // 2026-08-12 Vehicle Decals adds a 14th group and one variant-B-only RSA.
+    // 2026-08-09 Competitor retirement: enabled is Core alone, and
     // paused is the 12 retired Competitor groups + the 1 held Brand group (13), plus their
     // 21 Competitor RSAs + 2 Brand RSAs (23).
     expectedPausedAdGroups: 13,
     // 23 contract-paused (21 retired Competitor + 2 held Brand) + 16 superseded Core copy ads.
     expectedPausedResponsiveSearchAds: 23 + SUPERSEDED_COPY_RSAS_PAUSED,
-    expectedEnabledAdGroups: 13,
+    expectedEnabledAdGroups: 14,
     // 2026-08-10 Generic Sign Shop destination repoint: 23 -> 22. That group had TWO enabled ads
     // (legacy variant A + variant B), both pointed at /sign-company-saskatoon. After the swap it
     // has ONE: the new variant B at /why-true-color?source=google-ads. The ad-group count is
-    // unchanged at 13 — this is a destination change, not an inventory change.
+    // unchanged at 13 at that point — it was a destination change, not an inventory change.
     // 2026-08-12 Generic Print Price follows the same two-enabled-to-one-enabled destination
     // repoint, reducing the Core serving inventory by one more: 22 -> 21.
-    expectedEnabledResponsiveSearchAds: 21,
+    // Vehicle Decals adds one enabled RSA: 21 -> 22.
+    expectedEnabledResponsiveSearchAds: 22,
     supersededCopyRsas: SUPERSEDED_COPY_RSAS_PAUSED,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
-    adGroupStateFailure: "13 Core ad groups must be enabled and the 12 retired Competitor groups plus the held Brand group paused",
-    rsaStateFailure: "21 Core RSAs must be enabled and the 21 retired Competitor RSAs plus both held Brand RSAs paused",
+    adGroupStateFailure: "14 Core ad groups must be enabled and the 12 retired Competitor groups plus the held Brand group paused",
+    rsaStateFailure: "22 Core RSAs must be enabled and the 21 retired Competitor RSAs plus both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     expectedCoreChildStatus: "ENABLED",
     expectedCompetitorChildStatus: "PAUSED",

@@ -406,7 +406,7 @@ export const paidSearchConfig = {
     // Apparel: True Color has no garment capability (eco-solvent Roland + digital press).
     // "london drugs" + "photo lab": retail photo-developing intent, drew 9 impressions.
     // "photo printing" deliberately NOT negated — photo posters are a real product from $15.
-    "t shirt", "tshirt", "london drugs", "photo lab",
+    "t shirt", "tshirt", "shirts", "london drugs", "photo lab",
     // 2026-08-07 mining (52 terms / CA$12.98 / 7 days, first window with real delivery).
     // "canvas": zero references to canvas anywhere in products.v1.csv or products-content.ts —
     // True Color has no canvas capability. "shirt printing": the Aug 6 "t shirt"/"tshirt"
@@ -529,7 +529,9 @@ export const paidSearchConfig = {
             "Small Runs Welcome",
           ],
           priceLine: "Custom stickers from $25 for 25. See your exact price online before ordering.",
-          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner"],
+          // 2026-08-12 vehicle routing: mined car/RV searches now have a dedicated quote group.
+          // Block the broad sticker terms from absorbing them again.
+          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "car", "vehicle", "rv"],
         }),
         coreGroup({
           key: "vinyl-banners", name: "Vinyl Banners", product: "vinyl banners",
@@ -554,7 +556,12 @@ export const paidSearchConfig = {
         coreGroup({
           key: "business-cards", name: "Business Cards", product: "business cards",
           finalUrl: `${ROOT}/products/business-cards`,
-          terms: ["business cards saskatoon", "business card printing saskatoon", "order business cards online", "business card printing"],
+          terms: [
+            "business cards saskatoon", "business card printing saskatoon",
+            "order business cards online", "business card printing",
+            // 2026-08-12 mined, clicked buyer language routed to the orderable calculator.
+            "same day business cards printing", "business card price list", "business card printer",
+          ],
           headlines: ["Order Business Cards", "Business Cards Saskatoon", "Price Business Cards"],
           variantB: [
             "250 Business Cards $45",
@@ -674,7 +681,11 @@ export const paidSearchConfig = {
         coreGroup({
           key: "photo-posters", name: "Photo Posters", product: "photo posters",
           finalUrl: `${ROOT}/photo-poster-printing-saskatoon`,
-          terms: ["photo printing saskatoon", "photo poster printing saskatoon"],
+          terms: [
+            "photo printing saskatoon", "photo poster printing saskatoon",
+            // 2026-08-12 mined poster demand; this page opens the Photo Posters configurator.
+            "poster printing saskatoon", "big poster printing",
+          ],
           variantB: [
             "Photo Posters From $15",
             "Photo Printing Saskatoon",
@@ -765,7 +776,40 @@ export const paidSearchConfig = {
             "Custom Window Graphics",
           ],
           priceLine: "Custom decals from $25, window vinyl $11/sqft. See your price online.",
-          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat"],
+          // 2026-08-12: vehicle terms moved to their own quote group below. These phrase
+          // negatives keep generic storefront/window decal keywords from stealing the clicks.
+          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat", "car", "vehicle", "rv"],
+        }),
+        // 2026-08-12: seven search terms already served through broad sticker/decal keywords,
+        // spending CA$10+ on the wrong storefront-window/sticker destinations. Vehicle work is
+        // print plus job-specific installation, so it gets one destination and one CTA:
+        // /vehicle-decals-saskatoon -> /quote. Ships variant B only; no fake legacy control.
+        coreGroup({
+          key: "vehicle-decals", name: "Vehicle Decals", product: "vehicle decals",
+          finalUrl: `${ROOT}/vehicle-decals-saskatoon`,
+          terms: [
+            "car stickers near me",
+            "custom car stickers",
+            "vehicle stickers custom",
+            "custom car advertising stickers",
+            "rv vinyl decals",
+            "car window decals canada",
+            "car decals saskatoon",
+          ],
+          variantB: [
+            "Vehicle Decals From $25",
+            "Custom Car Decals Saskatoon",
+            "Car & Truck Door Decals",
+            "Vehicle Lettering Saskatoon",
+            "RV Vinyl Decals",
+            "Rear Window Decals",
+            "Business Vehicle Graphics",
+            "Custom Car Stickers",
+            "Printed & Installed Locally",
+            "Quote Vehicle Decals",
+          ],
+          priceLine: "Print-only vehicle decals from $25 order total. Installation quoted separately.",
+          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat", "storefront"],
         }),
         // 2026-08-06: split out of the Decals group the day /boat-registration-numbers went
         // live. "custom boat decals" and "boat decals near me" are proven search-term-harvest

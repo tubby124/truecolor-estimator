@@ -186,6 +186,7 @@ const ROUTES = {
   // TRACKED_HREF_ROUTES, which additionally pins the exact ?source=google-ads href.
   "generic-sign-shop": "/why-true-color",
   decals: "/products/window-decals",
+  "vehicle-decals": "/vehicle-decals-saskatoon",
   "large-format": "/large-format-printing-saskatoon",
   // Second Core group routed to an SEO landing page rather than a /products configurator
   // (after large-format). Deliberate: the boat queries are compliance questions — how big,
@@ -212,22 +213,31 @@ const CORE_TERMS = {
     "sticker makers",
   ],
   "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing", "banner with grommets"],
-  "business-cards": ["business cards saskatoon", "business card printing saskatoon", "order business cards online", "business card printing"],
+  "business-cards": [
+    "business cards saskatoon", "business card printing saskatoon", "order business cards online",
+    "business card printing", "same day business cards printing", "business card price list",
+    "business card printer",
+  ],
   flyers: ["flyer printing saskatoon", "custom flyers saskatoon", "order flyers online", "flyer printing", "flyers printing"],
   "retractable-banners": ["retractable banners saskatoon", "retractable banner printing", "pull up banners saskatoon", "trade show banners printing", "retractable banner"],
   "rush-same-day": ["same day printing saskatoon", "rush printing saskatoon", "urgent printing saskatoon", "same day printing"],
   "generic-print-price": ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon", "saskatoon print shops", "saskatoon printing", "printing in saskatoon", "printers saskatoon"],
-  "photo-posters": ["photo printing saskatoon", "photo poster printing saskatoon"],
+  "photo-posters": ["photo printing saskatoon", "photo poster printing saskatoon", "poster printing saskatoon", "big poster printing"],
   "generic-sign-shop": ["sign shop saskatoon", "sign company saskatoon", "custom signs saskatoon", "saskatoon sign company", "sign companies saskatoon", "saskatoon signs", "signage saskatoon"],
   "large-format": ["large format printing", "large format printing saskatoon", "large format signs"],
   decals: ["decals saskatoon", "clear window decals for business", "window decals saskatoon", "custom decals"],
+  "vehicle-decals": [
+    "car stickers near me", "custom car stickers", "vehicle stickers custom",
+    "custom car advertising stickers", "rv vinyl decals", "car window decals canada",
+    "car decals saskatoon",
+  ],
   // 2026-08-06: boat terms split out of `decals` — one destination per ad group, and these
   // two proven queries now land on /boat-registration-numbers.
   boat: ["custom boat decals", "boat decals near me"],
 };
 const CORE_CROSS_NEGATIVES = {
   coroplast: ["stickers", "labels", "vinyl banner", "business cards", "flyers", "retractable banner"],
-  "stickers-labels": ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner"],
+  "stickers-labels": ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "car", "vehicle", "rv"],
   "vinyl-banners": ["coroplast", "stickers", "labels", "business cards", "flyers", "retractable banner"],
   "business-cards": ["coroplast", "stickers", "labels", "vinyl banner", "flyers", "retractable banner"],
   flyers: ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "retractable banner"],
@@ -241,7 +251,8 @@ const CORE_CROSS_NEGATIVES = {
   "photo-posters": ["stickers", "labels", "business cards", "flyers"],
   "generic-sign-shop": ["same day", "rush", "printing prices", "print shop prices"],
   "large-format": ["stickers", "labels", "business cards", "flyers"],
-  decals: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat"],
+  decals: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat", "car", "vehicle", "rv"],
+  "vehicle-decals": ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "boat", "storefront"],
   boat: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "window decals"],
 };
 const COMPETITOR_GROUPS = {
@@ -267,7 +278,7 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   "how to", "canva", "download", "printable", "machine", "equipment", "supplies",
   "screen printing", "photocopy", "document printing", "print outs",
   "label maker", "label printers",
-  "t shirt", "tshirt", "london drugs", "photo lab",
+  "t shirt", "tshirt", "shirts", "london drugs", "photo lab",
   "canvas", "shirt printing", "3d printer",
   // 2026-08-10 search-term audit: untargeted competitors, no-capability products, research
   // intent. "staples", "rayacom", "art print", "book binding", and "invitation" were audited

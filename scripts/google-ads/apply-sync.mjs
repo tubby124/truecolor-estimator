@@ -11,8 +11,8 @@
 //      railway run node scripts/google-ads/apply-sync.mjs --execute  (apply)
 //
 // Success = a follow-up sync-plan.mjs run reports all zeros, and
-// validate:google-ads:launched stops reporting count drift (20 groups / 20 RSAs /
-// 121 positive keywords / 229 negative criteria).
+// validate:google-ads:launched stops reporting count drift (27 groups / 61 account RSAs /
+// 188 positive keywords / 391 negative criteria).
 //
 // NOTE: the new RSA enters Google policy review on creation. It serves once APPROVED.
 import { paidSearchConfig } from "../../docs/paid-search/campaign-config.mjs";

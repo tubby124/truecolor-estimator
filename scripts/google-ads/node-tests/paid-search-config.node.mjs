@@ -81,11 +81,12 @@ test("launch candidate transitions require evidence and can reach fresh-live pre
   assert.equal(ready.status, "READY_FOR_FRESH_LIVE_PREFLIGHT");
   assert.equal(ready.activationPermitted, false);
   assert.equal(ready.blockers.length, 0);
-  // 2026-08-09 Competitor retirement: candidates 25 -> 13 (Core alone), held 1 -> 13
+  // 2026-08-09 Competitor retirement left Core alone; the 2026-08-12 Vehicle Decals
+  // expansion adds one page-backed Core group. Held inventory remains unchanged.
   // (12 retired Competitor groups + the 1 held Brand group). Retired groups must land in `held`
   // rather than vanish — an unrecognised tier silently dropping an ad group out of BOTH lists
   // is exactly the class of blind spot this contract keeps paying for.
-  assert.equal(ready.candidates.length, 13);
+  assert.equal(ready.candidates.length, 14);
   assert.equal(ready.held.length, 13);
   assert.deepEqual([...new Set(ready.held.map((group) => group.tier))].sort(), ["HOLD_AUCTION_INSIGHTS", "RETIRED_THIN_VOLUME"]);
   assert.equal(ready.held.filter((group) => group.tier === "RETIRED_THIN_VOLUME").length, 12);
@@ -114,7 +115,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 26, pausedAdGroups: 1, enabledAdGroups: 25, positiveKeywords: 164, negativeCriteria: 372,
+    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 188, negativeCriteria: 391,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",
@@ -131,7 +132,8 @@ const makePausedLiveState = () => ({
     }))),
     // Destination repoints dropped legacy A from Generic Sign Shop (46 -> 45) and Generic Print
     // Price (45 -> 44); those ads point at retired destinations and are paused by their swaps.
-    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 44, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 42,
+    // The page-backed Vehicle Decals expansion then adds one fresh variant-B ad (44 -> 45).
+    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 45, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 43,
     competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
       campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
       campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
@@ -257,18 +259,20 @@ const makeLaunchedLiveState = () => {
     status: LAUNCHED_EXPECTED_CAMPAIGNS[campaign.name]?.status ?? campaign.status,
   }));
   // Stage 1 holds Brand paused; since 2026-08-09 it also holds all 12 retired Competitor groups
-  // and their 21 RSAs paused. Enabled is Core alone: 13 groups, 23 RSAs.
+  // and their 21 RSAs paused. Enabled is Core alone: 14 groups after Vehicle Decals,
+  // with 22 serving RSAs after the two destination swaps and the new vehicle ad.
   live.pausedAdGroups = 13;
-  live.enabledAdGroups = 13;
+  live.enabledAdGroups = 14;
   // 2026-08-09 copy replacement: 12 superseded Core RSAs are PAUSED rather than removed.
   // 2026-08-10 Generic Sign Shop destination repoint adds 2 more superseded ads (the group's old
   // variant B AND its legacy variant A, both pinned to /sign-company-saskatoon) and creates one
   // replacement, so the account carried 45 + 14 = 59 ads, 37 paused, and 22 enabled.
   // 2026-08-12 Generic Print Price repeats that pattern: +1 replacement, +2 superseded paused,
-  // and -1 enabled. End state is 44 + 16 = 60 total, 39 paused, and 21 enabled.
-  live.responsiveSearchAds = 60;
+  // and -1 enabled. Vehicle Decals then adds one contract ad. End state is
+  // 45 + 16 = 61 total, 39 paused, and 22 enabled.
+  live.responsiveSearchAds = 61;
   live.pausedResponsiveSearchAds = 39;
-  live.enabledResponsiveSearchAds = 21;
+  live.enabledResponsiveSearchAds = 22;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   // Competitor ads are retired, so their destinations must read back PAUSED, not ENABLED.
   live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "PAUSED" }));
@@ -830,8 +834,8 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   assert.ok(!manifest.blockers.includes("RSA_POLICY_APPROVAL"));
   assert.ok(!manifest.blockers.includes("QUOTE_WON_UPLOAD_CLICKS_ACTION"));
   assert.ok(!manifest.blockers.includes("QUALIFIED_CALL_ACTION"));
-  // 25 -> 13 with the 2026-08-09 Competitor retirement; Core's 13 groups are the only candidates.
-  assert.equal(manifest.launchCandidates.length, 13);
+  // Competitor stays retired; Core's 14 groups, including Vehicle Decals, are the candidates.
+  assert.equal(manifest.launchCandidates.length, 14);
   // 1 -> 13: the 12 retired Competitor groups join the 1 held Brand group.
   assert.equal(manifest.heldGroups.length, 13);
   assert.equal(manifest.heldGroups.filter((group) => group.tier === "HOLD_AUCTION_INSIGHTS").length, 1);
@@ -1156,6 +1160,44 @@ test("Generic Print Price routes to the exact tracked paid landing page and ship
     "Printing Services Saskatoon",
   ]);
   assert.equal(group.rsaVariantB.descriptions[0], "Signs from $25, 250 cards $45, banners from $66. Every price is online.");
+});
+
+test("page-backed product expansion routes proven searches and blocks apparel and vehicle leakage", () => {
+  const core = paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE");
+  const vehicle = core.adGroups.find((group) => group.key === "vehicle-decals");
+  const stickers = core.adGroups.find((group) => group.key === "stickers-labels");
+  const decals = core.adGroups.find((group) => group.key === "decals");
+  const cards = core.adGroups.find((group) => group.key === "business-cards");
+  const posters = core.adGroups.find((group) => group.key === "photo-posters");
+  const keywordTexts = (group) => [...new Set(group.keywords.map(({ text }) => text))];
+
+  assert.equal(vehicle.finalUrl, "https://truecolorprinting.ca/vehicle-decals-saskatoon");
+  assert.equal("rsa" in vehicle, false);
+  assert.ok(vehicle.rsaVariantB);
+  assert.deepEqual(keywordTexts(vehicle), [
+    "car stickers near me",
+    "custom car stickers",
+    "vehicle stickers custom",
+    "custom car advertising stickers",
+    "rv vinyl decals",
+    "car window decals canada",
+    "car decals saskatoon",
+  ]);
+  assert.ok(["car", "vehicle", "rv"].every((term) => stickers.crossNegatives.includes(term)));
+  assert.ok(["car", "vehicle", "rv"].every((term) => decals.crossNegatives.includes(term)));
+  assert.ok([
+    "same day business cards printing",
+    "business card price list",
+    "business card printer",
+  ].every((term) => keywordTexts(cards).includes(term)));
+  assert.ok([
+    "poster printing saskatoon",
+    "big poster printing",
+  ].every((term) => keywordTexts(posters).includes(term)));
+  assert.deepEqual(
+    paidSearchConfig.accountNegatives.filter(({ text }) => text === "shirts").map(({ matchType }) => matchType),
+    ["EXACT", "PHRASE"],
+  );
 });
 
 test("a Core group on the paid landing page must carry the exact tracked href", () => {

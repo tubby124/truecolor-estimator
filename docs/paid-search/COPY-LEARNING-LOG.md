@@ -1052,3 +1052,50 @@ apply each slot through the normal expansion workflow only after this destinatio
 Read this group at **20 clicks or 2026-08-24, whichever comes first**. `/why-true-color` should emit
 `view_paid_landing` on every paid session from Generic Print Price; read CTA, item-selection, and
 tap-to-call activity as the next-step signals. Do not read the result early.
+
+---
+
+## 2026-08-12 — Page-backed product routing expansion
+
+**Status: APPLIED — LIVE READBACK CLEAN; NEW RSA IN POLICY REVIEW**
+
+This batch uses served search terms rather than speculative planner terms. It keeps the Core budget
+at **CA$21/day** and changes routing only where a live page already answers the query.
+
+### What is added
+
+- Business Cards receives `same day business cards printing`, `business card price list`, and
+  `business card printer`, routed to `/products/business-cards` for exact pricing and checkout.
+- Photo Posters receives `poster printing saskatoon` and `big poster printing`, routed to
+  `/photo-poster-printing-saskatoon` and its product configurator.
+- A new Vehicle Decals ad group receives `car stickers near me`, `custom car stickers`,
+  `vehicle stickers custom`, `custom car advertising stickers`, `rv vinyl decals`,
+  `car window decals canada`, and `car decals saskatoon`. It routes to
+  `/vehicle-decals-saskatoon`, whose primary next step is the quote flow.
+- `shirts` is added as both exact and phrase account-negative inventory in all three campaigns.
+- `car`, `vehicle`, and `rv` become cross-negatives in Stickers and Labels and Decals, preventing
+  those broad product groups from stealing vehicle searches again. Vehicle Decals carries seven
+  product cross-negatives of its own.
+
+### Inventory change
+
+| | before | after |
+|---|---:|---:|
+| ad groups | 26 | **27** |
+| positive keywords | 164 | **188** |
+| negative criteria | 372 | **391** |
+| contract RSAs | 44 | **45** |
+| live account RSAs after apply | 60 | **61** |
+| enabled / paused live RSAs | 21 / 39 | **22 / 39** |
+
+The 24 positive keywords are 12 mined search terms expressed as exact and phrase. The 19 negative
+criteria are six campaign-level `shirts` criteria, six source-group vehicle routing negatives, and
+seven destination-group product negatives.
+
+The batch was applied to customer `1072816342` on 2026-08-12. Live readback returned 27 ad groups,
+188 positive keywords, and 391 negative criteria; a second sync plan returned zero objects to
+create and zero drift. Vehicle Decals is ad group `200731192282`; its enabled RSA is ad
+`820691361252` at `/vehicle-decals-saskatoon`. All 14 ad destinations returned HTTP 200, the full
+107-test Google Ads suite passed, and deterministic export verification passed. Google initially
+returned the new RSA as `UNKNOWN / REVIEW_IN_PROGRESS`; record final approval here once it reads
+`APPROVED / REVIEWED`.
