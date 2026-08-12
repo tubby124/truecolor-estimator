@@ -16,7 +16,7 @@
  *     INDUSTRY_PRODUCT_IMAGES entry (else the card renders with no image)
  */
 
-import { readFileSync, globSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -458,7 +458,10 @@ console.log("\n[14] Checking every landing-page product card has an image ...");
     mapBlock ? [...mapBlock[1].matchAll(/"([a-z0-9-]+)"\s*:/g)].map((m) => m[1]) : [],
   );
 
-  const pageFiles = globSync("src/app/*/page.tsx", { cwd: ROOT });
+  const pageFiles = readdirSync(resolve(ROOT, "src/app"), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => `src/app/${entry.name}/page.tsx`)
+    .filter((rel) => existsSync(resolve(ROOT, rel)));
   const referenced = new Map(); // slug -> [pages]
   for (const rel of pageFiles) {
     const src = readFile(rel);
