@@ -28,7 +28,7 @@
  * and FAILS if pricing is newer. Rationale: the moment ads carry real prices, a CSV repricing
  * silently makes every live ad false. That is a trust problem, not a style problem.
  */
-export const VERIFIED_ON = "2026-08-07";
+export const VERIFIED_ON = "2026-08-11";
 
 export const PRICING_SOURCE_FILE = "data/PRICING_QUICK_REFERENCE.md";
 
@@ -51,7 +51,7 @@ export const SOURCED_FACTS = {
   "$11/sqft": { kind: "price", meaning: "window decal T1 sqft rate", source: "PRICING_QUICK_REFERENCE.md — Window Decals $11.00/sqft" },
   "$219": { kind: "price", meaning: "retractable banner, economy stand + print", source: "PRICING_QUICK_REFERENCE.md — lot-priced table" },
   "$110": { kind: "price", meaning: "1000 business cards, 2-sided", source: ".claude/rules/truecolor-pricing-comms.md" },
-  "+$40": { kind: "price", meaning: "same-day rush fee, flat, PST-exempt", source: ".claude/rules/truecolor-domain.md — rush +$40 flat" },
+  "+$40": { kind: "price", meaning: "same-day rush fee, flat; tax treatment follows order context", source: "PRICING_QUICK_REFERENCE.md — Rush/Same-Day +$40 flat" },
   // One token, two genuine services at the same price — same pattern as "$39" below.
   "$40": { kind: "price", meaning: "same-day rush fee, flat; ALSO in-house design fee, flat, same-day proof", source: ".claude/rules/truecolor-domain.md — rush +$40 flat AND design $40 flat; config.v1.csv design_minor_edit_fee/design_full_design_fee/design_logo_recreation_fee all 40.00" },
   "$66": { kind: "price", meaning: "vinyl banner 2x4ft", source: "PRICING_QUICK_REFERENCE.md — banners from $66" },
