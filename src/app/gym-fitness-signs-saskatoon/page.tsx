@@ -42,7 +42,7 @@ const descriptionNode = (
     </Link>{" "}
     or browse our full{" "}
     <Link
-      href="/sports-signs-saskatoon"
+      href="/banner-printing-saskatoon"
       className="text-[#16C2F3] underline font-medium"
     >
       sports and recreation signage options

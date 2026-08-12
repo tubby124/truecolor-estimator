@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  GALLERY_PRODUCT_HREFS,
   GALLERY_PROJECTS,
   PUBLISHED_GALLERY_PROJECTS,
 } from "../gallery-projects";
@@ -52,5 +53,11 @@ describe("gallery project manifest", () => {
       expect(project.height).toBeGreaterThan(0);
       expect(project.src).toMatch(/^\/images\/gallery\/[a-z0-9-]+\.webp$/);
     }
+  });
+
+  it("routes ACP projects to the canonical aluminum signs page", () => {
+    expect(GALLERY_PRODUCT_HREFS["acp-signs"]).toBe("/aluminum-signs-saskatoon");
+    expect(GALLERY_PROJECTS.filter((project) => project.productSlug === "acp-signs"))
+      .not.toContainEqual(expect.objectContaining({ productHref: "/acp-signs-saskatoon" }));
   });
 });

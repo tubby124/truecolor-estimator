@@ -35,6 +35,16 @@ const nextConfig: NextConfig = {
         destination: "/banner-printing-saskatoon",
         permanent: true,
       },
+      {
+        source: "/sports-signs-saskatoon",
+        destination: "/banner-printing-saskatoon",
+        permanent: true,
+      },
+      {
+        source: "/acp-signs-saskatoon",
+        destination: "/aluminum-signs-saskatoon",
+        permanent: true,
+      },
       // /retail-signs-saskatoon has its own page — redirect removed 2026-03-05
       // /agriculture-signs-saskatoon → keep (don't redirect — different keyword target)
       // /election-signs → keep canonical (has "Saskatoon" in title/content)
