@@ -631,11 +631,20 @@ export const paidSearchConfig = {
           priceLine: "Same-day rush is +$40 flat when you order before 10 AM. Price it online now.",
           crossNegatives: ["business cards", "flyers", "stickers", "banners", "coroplast"],
         }),
+        // 2026-08-12 DESTINATION REPOINT — /printing-prices-saskatoon -> /why-true-color.
+        //
+        // The /why-true-color price strip is now live above the mobile fold, satisfying the
+        // precondition for moving this high-volume generic-price group onto the instrumented paid
+        // landing page. Destination is the only experiment variable: variant-B copy, terms, and
+        // cross-negatives remain byte-identical.
+        //
+        // VARIANT A IS DROPPED FROM THE CONTRACT and will be PAUSED, never edited, in the same
+        // atomic swap as the old variant B. Leaving either old ad enabled would split the group
+        // across two destinations and make the experiment unreadable.
         coreGroup({
           key: "generic-print-price", name: "Generic Print Price", product: "printing",
-          finalUrl: `${ROOT}/printing-prices-saskatoon`,
+          finalUrl: `${ROOT}/why-true-color?source=google-ads`,
           terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon", "saskatoon print shops", "saskatoon printing", "printing in saskatoon", "printers saskatoon"],
-          headlines: ["Printing Prices Saskatoon", "See Printing Prices Online", "Configure Printing Online"],
           variantB: [
             "Signs From $25, Cards $45",
             "Printing Prices Saskatoon",
