@@ -378,9 +378,9 @@ function evaluateLiveState(live, {
   // search-terms suggestions.
   // 2026-08-14 negatives 391 -> 415: mining pass #2 (83c0859) added 24 account negatives
   // (t shirts / tarpaulin / printing press / etsy, EXACT+PHRASE x 3 campaigns) but missed this
-  // pin — the exact trap expand-keywords warns about. NOTE: live reads 421 until the owner
-  // deletes the 6 un-negated "decal printer" criteria in the UI (cc7d9b6); that drift is real
-  // and this verifier SHOULD flag it until the deletion lands.
+  // pin — the exact trap expand-keywords warns about. Same day, later: the 6 un-negated
+  // "decal printer" criteria (cc7d9b6) were deleted via owner-authorized scoped script with
+  // pre/post verification — live re-read 415, matching this pin exactly.
   if (live.positiveKeywords !== 192 || live.negativeCriteria !== 415) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
