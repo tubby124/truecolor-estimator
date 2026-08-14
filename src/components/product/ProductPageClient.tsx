@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { addToCart } from "@/lib/cart/cart";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductConfigurator, type PriceData, type ConfigData } from "@/components/product/ProductConfigurator";
@@ -14,6 +14,7 @@ import { metaTrackViewContent, metaTrackAddToCart } from "@/lib/analytics/metaPi
 import { SameDayClock } from "@/components/home/SameDayClock";
 import { flags } from "@/lib/flags";
 import { PaidCartConfirmation } from "@/components/paid/PaidCartConfirmation";
+import { MobileCallPriceBar } from "@/components/product/MobileCallPriceBar";
 
 // Friendly material labels shown in the customer proof
 const MATERIAL_LABELS: Record<string, string> = {
@@ -49,6 +50,38 @@ export function ProductPageClient({ product }: Props) {
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
   const [configData, setConfigData] = useState<ConfigData>(EMPTY_CONFIG);
   const [addedToCart, setAddedToCart] = useState(false);
+
+  // Mobile paid-search call/price bar (src/components/product/MobileCallPriceBar.tsx)
+  // stacks ABOVE the existing sticky Add to Cart bar below — never covers it.
+  // Height is live-measured off the existing bar (ref) so the stack stays
+  // correct even if that bar's content height changes (price wraps, etc).
+  // Starting guess matches the bar's typical rendered height pre-measurement
+  // to avoid a one-frame overlap flash before ResizeObserver reports in.
+  const mobileAddToCartBarRef = useRef<HTMLDivElement>(null);
+  const [mobileAddToCartBarHeight, setMobileAddToCartBarHeight] = useState(84);
+
+  useLayoutEffect(() => {
+    const el = mobileAddToCartBarRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    // getBoundingClientRect (not entries[0].contentRect, which excludes
+    // padding/border) so the offset matches the bar's full rendered box —
+    // this div has py-3 padding + a border-t that contentRect would drop.
+    const measure = () => {
+      const height = el.getBoundingClientRect().height;
+      if (height) setMobileAddToCartBarHeight(height);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    measure();
+    return () => observer.disconnect();
+  }, [addedToCart]);
+
+  function scrollToConfigurator() {
+    const el = document.getElementById("product-configurator");
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.focus({ preventScroll: true });
+  }
 
   // Fire view_item once on mount (GA4 + Meta Pixel)
   useEffect(() => {
@@ -166,8 +199,11 @@ export function ProductPageClient({ product }: Props) {
   const materialLabel = MATERIAL_LABELS[product.slug] ?? product.name;
 
   return (
-    // pb-24 on mobile/tablet for sticky bar clearance; removed on lg+
-    <div className={addedToCart ? "pb-44 sm:pb-32" : "pb-24 lg:pb-0"}>
+    // pb-24 on mobile/tablet for sticky bar clearance; removed on lg+.
+    // Mobile-only (<md) gets extra clearance (pb-40) to reserve space for
+    // MobileCallPriceBar stacked above the sticky bar — that bar is
+    // md:hidden, so md/lg clearance is unchanged from the original value.
+    <div className={addedToCart ? "pb-44 sm:pb-32" : "pb-40 md:pb-24 lg:pb-0"}>
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       {/* ── 3-column grid ────────────────────────────────────────────────── */}
       {/* minmax(0,…) so a wide thumbnail rail can't blow the columns past the viewport (grid min-content blowout) */}
@@ -185,7 +221,12 @@ export function ProductPageClient({ product }: Props) {
             ProductConfigurator. PriceSummary + Add to Cart sit outside, drive
             by the same PriceData/ConfigData callbacks → no payment-path
             changes either way. */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <div
+          id="product-configurator"
+          tabIndex={-1}
+          aria-label="Product options and price"
+          className="bg-white border border-gray-200 rounded-2xl p-6 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2"
+        >
           {product.slug === "stickers" && flags.useProductConfigStickerPublic() ? (
             <UnifiedConfigurator
               category={product.category as Category}
@@ -236,7 +277,7 @@ export function ProductPageClient({ product }: Props) {
       </div>
 
       {/* ── Mobile / tablet sticky bottom bar ────────────────────────────── */}
-      {!addedToCart && <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
+      {!addedToCart && <div ref={mobileAddToCartBarRef} className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
         {/* Price summary */}
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 leading-none mb-0.5">Price (before tax)</p>
@@ -267,6 +308,15 @@ export function ProductPageClient({ product }: Props) {
           {addedToCart ? "✓ Added" : "Add to Cart →"}
         </button>
       </div>}
+
+      {/* Paid-search (Google Ads) mobile call/price bar — stacks above the
+          sticky Add to Cart bar via live-measured offset; hidden once
+          addedToCart (PaidCartConfirmation below owns that moment). */}
+      <MobileCallPriceBar
+        visible={!addedToCart}
+        bottomOffset={mobileAddToCartBarHeight}
+        onGetPriceClick={scrollToConfigurator}
+      />
 
       {addedToCart && <PaidCartConfirmation productName={product.name} />}
     </div>
