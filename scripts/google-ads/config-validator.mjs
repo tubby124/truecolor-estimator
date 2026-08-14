@@ -215,6 +215,8 @@ const CORE_TERMS = {
     "custom labels",
     "vinyl sticker maker",
     "sticker makers",
+    "print stickers near me",
+    "who makes stickers",
   ],
   "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing", "banner with grommets"],
   "business-cards": [

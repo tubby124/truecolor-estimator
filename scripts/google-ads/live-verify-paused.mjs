@@ -12,6 +12,8 @@ const NEAR_ME_TERMS = new Set([
   "custom labels near me",
   "die cut labels near me",
   "custom die cut labels near me",
+  // 2026-08-14 sticker expansion.
+  "print stickers near me",
 ]);
 const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
 const QUALIFIED_CALL_ASSET_ID = "394889103183";

@@ -28,6 +28,8 @@ const EXPECTED_NEAR_ME_TERMS = [
   "custom labels near me",
   "die cut labels near me",
   "custom die cut labels near me",
+  // 2026-08-14 sticker expansion.
+  "print stickers near me",
 ];
 const HISTORICAL_BROWSER_PURCHASE_ACTION_ID = "7689029977";
 export const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
@@ -371,15 +373,24 @@ function evaluateLiveState(live, {
   // Card, and 2 Photo Poster terms, all EXACT+PHRASE. Negatives 372 -> 391: "shirts" account-wide
   // (+6), car/vehicle/rv routing on Stickers and Decals (+6), and 7 Vehicle group cross-negatives.
   // Current composition: 288 account-negative criteria + 89 ad-group cross-negatives + 14 campaign negatives.
-  if (live.positiveKeywords !== 188 || live.negativeCriteria !== 391) failures.push("keyword counts changed");
+  // 2026-08-14 sticker expansion: positives 188 -> 192. Added "print stickers near me" and
+  // "who makes stickers" to Stickers and Labels, EXACT+PHRASE — owner-picked from the account's
+  // search-terms suggestions.
+  // 2026-08-14 negatives 391 -> 415: mining pass #2 (83c0859) added 24 account negatives
+  // (t shirts / tarpaulin / printing press / etsy, EXACT+PHRASE x 3 campaigns) but missed this
+  // pin — the exact trap expand-keywords warns about. NOTE: live reads 421 until the owner
+  // deletes the 6 un-negated "decal printer" criteria in the UI (cc7d9b6); that drift is real
+  // and this verifier SHOULD flag it until the deletion lands.
+  if (live.positiveKeywords !== 192 || live.negativeCriteria !== 415) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,
   ]));
   const nearMeKeywords = live.nearMeKeywords ?? [];
   const observedNearMeKeywords = new Set(nearMeKeywords.map((keyword) => `${keyword.text}|${keyword.matchType}`));
-  if (nearMeKeywords.length !== 12
-    || observedNearMeKeywords.size !== 12
+  // 2026-08-14: 12 -> 14 ("print stickers near me" EXACT+PHRASE joined the near-me set).
+  if (nearMeKeywords.length !== 14
+    || observedNearMeKeywords.size !== 14
     || [...expectedNearMeKeywords].some((keyword) => !observedNearMeKeywords.has(keyword))
     || nearMeKeywords.some((keyword) => keyword.campaign !== "GOOG_Search_TC_CoreProducts_2026"
       || keyword.adGroup !== "Stickers and Labels"

@@ -115,7 +115,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 188, negativeCriteria: 391,
+    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 192, negativeCriteria: 415,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",
@@ -123,6 +123,8 @@ const makePausedLiveState = () => ({
       "custom labels near me",
       "die cut labels near me",
       "custom die cut labels near me",
+      // 2026-08-14 sticker expansion.
+      "print stickers near me",
     ].flatMap((text) => ["EXACT", "PHRASE"].map((matchType) => ({
       campaign: "GOOG_Search_TC_CoreProducts_2026",
       adGroup: "Stickers and Labels",

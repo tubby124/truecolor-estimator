@@ -1172,3 +1172,32 @@ language unless the term names hardware ("label printers", "printer ink" stay ne
 **Outcome:** Superseded the same day. The owner re-decided at **CA$25/day** with the full pacing picture (at 35 the CA$600 hard stop lands ~Aug 26; at 25 it lands ~Aug 31-Sep 1, letting the pause fire with more data behind it). `apply-budgets --execute` re-landed the live budget at 25 with a clean readback, and the 25/32 safety bounds this raise had lifted to 35/42 were restored. Separately: a Canada-wide LOCATION criterion added to Core at 11:42 the same morning (untracked — not part of this entry's mutation log) was removed; live geo re-verified as 3x Saskatoon 35 km proximity only, and no spend had leaked outside Saskatchewan. Process note: this raise mutated the account first and reconciled the contract after, raising both blast-radius bounds in the same push — future budget changes go contract-first through apply-budgets so the validator caps bind BEFORE the account moves.
 
 **Promoted to rule:** no — this is a delivery adjustment, not a reusable budget rule.
+
+---
+
+## 2026-08-14 — Sticker expansion: owner-picked search-terms suggestions
+
+**What shipped:** `print stickers near me` and `who makes stickers` added to Stickers and
+Labels, EXACT+PHRASE (4 keywords, positives 188 -> 192). Applied via sync-plan ->
+apply-sync --execute; post-apply re-diff zero, readback clean.
+
+**Why:** Owner picked both from the account's "Add as keyword" search-terms suggestions.
+Shop-seeking buyer language — same family as the kept "sticker makers" / "vinyl sticker
+maker" and consistent with the "<product> printer = buyer language" rule candidate from
+mining pass #2. The sticker page is the site's commercial winner (10 paid orders last
+window), so the routing target is a delivering group.
+
+**Not added:** `car stickers near me` from the same suggestion panel — it already exists in
+the Vehicle Decals group (2026-08-12 expansion). Same-day readback: the Vehicle Decals RSA
+is APPROVED / REVIEWED and ENABLED, so those queries serve from the right group already.
+
+**Also fixed in the same pass:** live-verification-contract negatives pin 391 -> 415 — the
+2026-08-12/13 mining pass applied 24 account negatives live but missed the pin (the exact
+trap the expand-keywords header warns about). Live reads 421 until the 6 un-negated
+"decal printer" criteria are deleted in the UI; the verifier should flag that until then.
+
+**Metric + date:** watch the two new keywords in the Aug 17-21 mining pass — impressions,
+CTR vs group average, and any junk queries phrase-match lets through ("who makes stickers"
+is the riskier of the two; negate informational variants if they surface).
+
+**Outcome:** _pending — write back at the Aug 17-21 mining pass._

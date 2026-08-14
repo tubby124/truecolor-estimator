@@ -551,6 +551,10 @@ export const paidSearchConfig = {
             "custom labels",
             "vinyl sticker maker",
             "sticker makers",
+            // 2026-08-14 owner-picked from the account's search-terms suggestions: shop-seeking
+            // buyer language, same family as the kept "sticker makers" / "vinyl sticker maker".
+            "print stickers near me",
+            "who makes stickers",
           ],
           headlines: ["Order Custom Stickers", "Stickers Printed Locally", "Custom Labels Saskatoon"],
           variantB: [
