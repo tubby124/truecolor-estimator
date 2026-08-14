@@ -129,9 +129,9 @@ const makePausedLiveState = () => ({
       matchType,
       status: "ENABLED",
     }))),
-    // 2026-08-10 Generic Sign Shop repoint: 46 -> 45 contract RSAs. The group stopped declaring a
-    // legacy variant A, because that ad points at the retired destination and is paused by the swap.
-    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 45, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 43,
+    // Destination repoints dropped legacy A from Generic Sign Shop (46 -> 45) and Generic Print
+    // Price (45 -> 44); those ads point at retired destinations and are paused by their swaps.
+    competitorMatchTypes: ["EXACT"], responsiveSearchAds: 44, pausedResponsiveSearchAds: 2, enabledResponsiveSearchAds: 42,
     competitorRsaDestinations: COMPETITOR_RSA_REVIEW.ads.map((ad) => ({
       campaignId: COMPETITOR_RSA_REVIEW.campaign.id,
       campaignResourceName: COMPETITOR_RSA_REVIEW.campaign.resourceName,
@@ -263,11 +263,12 @@ const makeLaunchedLiveState = () => {
   // 2026-08-09 copy replacement: 12 superseded Core RSAs are PAUSED rather than removed.
   // 2026-08-10 Generic Sign Shop destination repoint adds 2 more superseded ads (the group's old
   // variant B AND its legacy variant A, both pinned to /sign-company-saskatoon) and creates one
-  // replacement, so the account carries 45 + 14 = 59 ads, 23 + 14 = 37 paused, and 22 enabled.
-  // Enabled falls by one because that group went from two serving ads to one.
-  live.responsiveSearchAds = 59;
-  live.pausedResponsiveSearchAds = 37;
-  live.enabledResponsiveSearchAds = 22;
+  // replacement, so the account carried 45 + 14 = 59 ads, 37 paused, and 22 enabled.
+  // 2026-08-12 Generic Print Price repeats that pattern: +1 replacement, +2 superseded paused,
+  // and -1 enabled. End state is 44 + 16 = 60 total, 39 paused, and 21 enabled.
+  live.responsiveSearchAds = 60;
+  live.pausedResponsiveSearchAds = 39;
+  live.enabledResponsiveSearchAds = 21;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   // Competitor ads are retired, so their destinations must read back PAUSED, not ENABLED.
   live.competitorRsaDestinations = live.competitorRsaDestinations.map((ad) => ({ ...ad, status: "PAUSED" }));
@@ -1136,16 +1137,37 @@ test("Generic Sign Shop routes to the exact tracked paid landing page and ships 
   assert.equal(destinations.some((url) => url.includes("/sign-company-saskatoon")), false);
 });
 
+test("Generic Print Price routes to the exact tracked paid landing page and ships byte-identical variant B alone", () => {
+  const core = paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE");
+  const group = core.adGroups.find((item) => item.key === "generic-print-price");
+  assert.equal(group.finalUrl, "https://truecolorprinting.ca/why-true-color?source=google-ads");
+  assert.equal("rsa" in group, false);
+  assert.ok(group.rsaVariantB);
+  assert.deepEqual(group.rsaVariantB.headlines.slice(0, 10), [
+    "Signs From $25, Cards $45",
+    "Printing Prices Saskatoon",
+    "Banners From $66",
+    "Flyers From $45",
+    "See Exact Prices Online",
+    "No Quote Needed",
+    "Real Prices, Not Estimates",
+    "Price It Yourself Online",
+    "Print Shop Saskatoon",
+    "Printing Services Saskatoon",
+  ]);
+  assert.equal(group.rsaVariantB.descriptions[0], "Signs from $25, 250 cards $45, banners from $66. Every price is online.");
+});
+
 test("a Core group on the paid landing page must carry the exact tracked href", () => {
   for (const mutate of [
     // Right path, missing the tracking query — this is what silently escapes the live verifier.
     (c) => {
-      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-sign-shop");
+      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-print-price");
       group.finalUrl = "https://truecolorprinting.ca/why-true-color";
     },
     // Query present but altered.
     (c) => {
-      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-sign-shop");
+      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-print-price");
       group.finalUrl = "https://truecolorprinting.ca/why-true-color?source=paid";
     },
     // A DIFFERENT Core group sneaking onto the paid landing page without declaring it.

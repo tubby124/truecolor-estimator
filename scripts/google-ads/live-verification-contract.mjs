@@ -243,9 +243,12 @@ export function validateCompetitorDestinationInventory(
 // group across two landing pages), so the contract stops declaring it and ships variant B alone.
 // The replacement variant-B ad is NOT an addition: it replaces the old variant B in the contract
 // inventory, and the old variant B moves into SUPERSEDED_COPY_RSAS_PAUSED below. Counting the new
-// ad here as well would double-count it — the account holds 59 RSAs after the swap, and
-// 45 + 14 = 59 is the only arithmetic that reproduces that.
-const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 45;
+// ad here as well would double-count it — the account held 59 RSAs after the swap, and
+// 45 + 14 = 59 was the only arithmetic that reproduced that state.
+// 2026-08-12 Generic Print Price destination repoint: 45 -> 44. The same destination-change
+// exception drops that group's legacy variant A from contract inventory; variant B remains the
+// group's sole serving contract ad after the swap.
+const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 44;
 // 2026-08-09: replace-stale-price-ads.mjs swapped 12 Core RSAs that quoted the retired $35 design
 // price for contract-correct $40 copy. Google RSA text is immutable, so every "edit" is a new ad,
 // and --swap PAUSES the superseded ad rather than removing it — the reversible choice.
@@ -261,7 +264,10 @@ const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 45;
 //   +1  legacy variant A — same old URL; paused (never edited) so the group serves ONE destination
 // The variant-A pause is the documented exception in replace-stale-price-ads.mjs. It is the reason
 // the Core ENABLED count falls 23 -> 22 while the account total rises 58 -> 59.
-const SUPERSEDED_COPY_RSAS_PAUSED = 14;
+// 2026-08-12 Generic Print Price destination repoint: 14 -> 16. Its old variant B and legacy
+// variant A both point at /printing-prices-saskatoon and retire together in the atomic swap.
+// End state: 44 contract RSAs + 16 superseded paused RSAs = 60 account RSAs.
+const SUPERSEDED_COPY_RSAS_PAUSED = 16;
 
 function evaluateLiveState(live, {
   expectedCampaigns,
@@ -566,8 +572,8 @@ export function evaluatePausedLiveState(live) {
     expectedEnabledResponsiveSearchAds: null,
     campaignStateFailure: "is not paused Search",
     adGroupStateFailure: "25 staged ad groups must be enabled and the held Brand ad group paused",
-    // 44 -> 43: Generic Sign Shop no longer declares a legacy variant A (2026-08-10 repoint).
-    rsaStateFailure: "43 staged RSAs must be enabled and both held Brand RSAs paused",
+    // 44 -> 43: Generic Sign Shop dropped legacy A; 43 -> 42: Generic Print Price followed.
+    rsaStateFailure: "42 staged RSAs must be enabled and both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and staged enabled",
     // Paused mode describes the PRE-LAUNCH staging state, where every non-Brand child was staged
     // ENABLED beneath paused campaigns. It is the rollback reference and is deliberately left at
@@ -587,18 +593,20 @@ export function evaluateLaunchedLiveState(live) {
     // paused is the 12 retired Competitor groups + the 1 held Brand group (13), plus their
     // 21 Competitor RSAs + 2 Brand RSAs (23).
     expectedPausedAdGroups: 13,
-    // 23 contract-paused (21 retired Competitor + 2 held Brand) + 14 superseded Core copy ads.
+    // 23 contract-paused (21 retired Competitor + 2 held Brand) + 16 superseded Core copy ads.
     expectedPausedResponsiveSearchAds: 23 + SUPERSEDED_COPY_RSAS_PAUSED,
     expectedEnabledAdGroups: 13,
     // 2026-08-10 Generic Sign Shop destination repoint: 23 -> 22. That group had TWO enabled ads
     // (legacy variant A + variant B), both pointed at /sign-company-saskatoon. After the swap it
     // has ONE: the new variant B at /why-true-color?source=google-ads. The ad-group count is
     // unchanged at 13 — this is a destination change, not an inventory change.
-    expectedEnabledResponsiveSearchAds: 22,
+    // 2026-08-12 Generic Print Price follows the same two-enabled-to-one-enabled destination
+    // repoint, reducing the Core serving inventory by one more: 22 -> 21.
+    expectedEnabledResponsiveSearchAds: 21,
     supersededCopyRsas: SUPERSEDED_COPY_RSAS_PAUSED,
     campaignStateFailure: "is not in its approved Stage 1 launch state",
     adGroupStateFailure: "13 Core ad groups must be enabled and the 12 retired Competitor groups plus the held Brand group paused",
-    rsaStateFailure: "22 Core RSAs must be enabled and the 21 retired Competitor RSAs plus both held Brand RSAs paused",
+    rsaStateFailure: "21 Core RSAs must be enabled and the 21 retired Competitor RSAs plus both held Brand RSAs paused",
     nearMeStateFailure: "all 12 GSC-backed near-me keywords must remain present and enabled",
     expectedCoreChildStatus: "ENABLED",
     expectedCompetitorChildStatus: "PAUSED",

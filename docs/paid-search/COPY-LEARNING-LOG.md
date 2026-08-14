@@ -957,3 +957,78 @@ all point at SEO pages with the same instrumentation gap.
 a live ad matches the contract must fingerprint where it points, not just what it says. And any
 group whose destination moves must retire **every** enabled ad at the old destination in the same
 atomic mutate — a split-destination ad group is not a degraded experiment, it is no experiment.
+
+---
+
+## 2026-08-12 — 🟠 STAGED, NOT APPLIED — Generic Print Price repointed to /why-true-color
+
+> **STATUS: STAGED — PENDING APPLY. Nothing in this entry has touched the live account.**
+> The contract, validator, verifier counts, tests, and artifacts are changed locally and green.
+> The account still serves the OLD destination. Dry runs are read-only.
+> Delete this banner and record the readback after `--create` and `--swap` have actually run.
+
+### Why the ad moves
+
+The Aug 7 funnel read made Generic Print Price the explicit Aug 12 destination gate: it was the
+top ad group at **71 impressions / 8 clicks / about 40% of Core spend**, while sessions on
+`/printing-prices-saskatoon` produced no funnel events. The group was deliberately left in place
+during calibration until the paid landing page could answer its generic price intent above the
+mobile fold.
+
+That precondition is now met. `/why-true-color` shows the verified strip **“Signs from $25 · Cards
+from $45 · Banners from $66”** directly under its H1 and emits `view_paid_landing` plus the paid CTA,
+item-selection, and tap-to-call events. `/printing-prices-saskatoon` is not edited: the AD moves and
+the SEO PAGE stays.
+
+**Destination is the only experiment variable.** Variant-B headlines, descriptions, approved
+prices, keywords, and cross-negatives are byte-identical to the pre-repoint contract.
+
+### The variant-A pause
+
+Generic Print Price currently has two enabled ads at `/printing-prices-saskatoon`: legacy variant A
+and variant B. Leaving variant A enabled after moving variant B would split the group across two
+destinations and void the experiment. The group therefore drops `headlines` from the contract and
+ships variant B alone. The atomic swap PAUSES both old ads; it does not edit or remove either one.
+
+### The counts
+
+| | before | after swap | why |
+|---|---:|---:|---|
+| `EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS` | 45 | **44** | group stops declaring variant A |
+| `SUPERSEDED_COPY_RSAS_PAUSED` | 14 | **16** | + old variant B, + legacy variant A |
+| Core enabled RSAs | 22 | **21** | group goes from 2 serving ads to 1 |
+| paused RSAs (`23 + superseded`) | 37 | **39** | both old ads retire |
+| account RSA total (`44 + 16`) | 59 | **60** | one net-new replacement ad |
+| ad groups | 26 | **26** | destination change only |
+| keywords | 164 / 372 | **unchanged** | no keyword moves |
+
+The replacement is the group's variant B in contract inventory, not an additional contract ad.
+The two old ads move into the explicit superseded count, so `44 + 16 = 60` reproduces the end state.
+
+### Two-phase plan and verifier states
+
+1. `--create` creates one replacement RSA PAUSED at the tracked URL. Both old ads keep serving while
+   Google reviews it.
+2. Once the replacement reads APPROVED/REVIEWED, `--swap` atomically enables it and pauses both old
+   enabled ads. There is no delivery gap and no split-destination window.
+
+| state | total | enabled | paused | launched verifier |
+|---|---:|---:|---:|---|
+| now | 59 | 22 | 37 | expected drift: repo is ahead of account |
+| after `--create` | 60 | 22 | 38 | total green; enabled/paused intentionally drift |
+| after `--swap` | **60** | **21** | **39** | green |
+
+The between-phase drift is the import-completion signal. Do not change the contract to make the
+intermediate state green.
+
+### Held out deliberately
+
+- No copy, keyword, cross-negative, bid, budget, conversion, or landing-page content changes.
+- The 16 superseded ads remain PAUSED, not removed; removal remains a separate owner call.
+- Tasks 2 and 3 remain future daily account slots. This repoint is the only Aug 12 account change.
+
+### Metric gate
+
+Read this group at **20 clicks or 2026-08-24, whichever comes first**. `/why-true-color` should emit
+`view_paid_landing` on every paid session from Generic Print Price; read CTA, item-selection, and
+tap-to-call activity as the next-step signals. Do not read the result early.
