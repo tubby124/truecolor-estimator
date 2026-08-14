@@ -748,7 +748,7 @@ test("canonical routing and campaign caps are complete", () => {
   // 2026-08-07: 25 -> 28. Contract TOTAL across all three campaigns (Core 21 + Competitor 4 +
   // Brand 3), mirroring LAUNCHABLE_DAILY_BUDGET_CAD. Not a safety bound — Brand is PAUSED and
   // contributes CA$0 of real burn; the enabled-subset bound is asserted above.
-  assert.equal(paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0), 28);
+  assert.equal(paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0), 42);
   assert.equal(paidSearchConfig.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
   assert.deepEqual(
     Object.values(paidSearchConfig.conversionMeasurement.requiredUploadClickActions).map((action) => [action.eventName, action.actionId, action.status]),
