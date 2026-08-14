@@ -1156,3 +1156,19 @@ contract on this one term; sync-plan will NOT flag it (it never proposes deletio
 
 Candidate rule for the next mining pass: "<product> printer" phrasing defaults to buyer
 language unless the term names hardware ("label printers", "printer ink" stay negated).
+
+---
+
+## 2026-08-14 — Core daily budget raised on budget-limited delivery
+
+**What shipped:** Live Google Ads campaign `GOOG_Search_TC_CoreProducts_2026` daily budget raised from **CA$21 to CA$35**. The campaign remained ENABLED; no keywords, ads, CPC ceiling, targeting, or campaign status changed.
+
+**Evidence:** Aug 3–14 readback showed 115 clicks on CA$180.14 spend, three paid-Google-attributed quote requests, and 21.3% Search impression share lost to budget. Owner explicitly approved the raise after the readback.
+
+**Safety:** Google Ads validate-only mutation passed before execution. Post-mutation GAQL readback confirmed CA$35/day. The account-level CA$600 warning/protective-pause/absolute cap remains unchanged; the hard-stop monitor is still the binding total-spend control.
+
+**Metric + date:** Re-read spend, lost impression share, paid quote requests, and quote-to-priced/checkout movement after 7 days or when cumulative account spend reaches CA$450 warning threshold, whichever comes first.
+
+**Outcome:** _pending — write back after the next performance read._
+
+**Promoted to rule:** no — this is a delivery adjustment, not a reusable budget rule.
