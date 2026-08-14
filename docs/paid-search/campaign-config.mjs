@@ -458,8 +458,11 @@ export const paidSearchConfig = {
     //     "shirt printing" fix closed the first.
     // (b) no-capability — "tarpaulin": zero references in products.v1.csv or
     //     products-content.ts (banners are 13oz scrim vinyl, not tarp restitching).
-    // (c) buy-a-device intent — "printing press", "decal printer": same family as the
-    //     existing "machine", "equipment", "label printers" negatives.
+    // (c) buy-a-device intent — "printing press": same family as the existing "machine",
+    //     "equipment", "label printers" negatives. "decal printer" was negated in this pass
+    //     then REVERSED same day by owner correction — it reads as "a shop that prints
+    //     decals" (buyer language, like the kept "business card printer" keyword and the
+    //     2026-08-07 "professional sticker printer" correction), not as a device.
     // (d) marketplace competitor with NO conquest ad group — "etsy": same call as the
     //     Aug 10 "stickermule" negative. Not in COMPETITOR_TERMS, so the
     //     PROTECTED_ACCOUNT_NEGATIVES guard does not apply.
@@ -475,7 +478,7 @@ export const paidSearchConfig = {
     // - "3d printer saskatoon" and "feather flag" clicks in this window are covered by
     //   the Aug 7/10 negatives; whether those reached the live account is verified by
     //   the sync-plan diff run alongside this edit, not by adding duplicates here.
-    "t shirts", "tarpaulin", "printing press", "decal printer", "etsy",
+    "t shirts", "tarpaulin", "printing press", "etsy",
   ]),
   campaigns: [
     {

@@ -1141,3 +1141,18 @@ read; a stale contract makes live state look like drift.
 
 **Metric gate:** next mining pass per the 3–7 day cadence (due Aug 17–21). Judge the negated
 families by absence in the next search-term report, not by conversion deltas.
+
+## 2026-08-14 (2) — owner correction: "decal printer" un-negated
+
+Owner call, same day as the pass that added it: "decal printer" is buyer language — "a shop
+that prints decals" — not buy-a-device intent. Same family as the kept "business card printer"
+keyword and the 2026-08-07 "professional sticker printer" correction. Removed from
+accountNegatives and the validator's canonical copy in the same pass.
+
+**Live-account follow-up required:** the 6 live criteria ([EXACT]+[PHRASE] × 3 campaigns)
+created by apply-sync earlier today must be REMOVED in the Google Ads UI — apply-sync creates
+only and no mutation authority deletes negatives. Until then the account is stricter than the
+contract on this one term; sync-plan will NOT flag it (it never proposes deletions).
+
+Candidate rule for the next mining pass: "<product> printer" phrasing defaults to buyer
+language unless the term names hardware ("label printers", "printer ink" stay negated).
