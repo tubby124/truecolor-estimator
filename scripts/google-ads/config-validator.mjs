@@ -285,6 +285,12 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   // in the same pass and deliberately excluded — see the rationale block in campaign-config.mjs.
   "feather flag", "walmart", "mr print", "print bros", "pro print", "lindas printing",
   "77 signs", "stickermule", "cd label", "who makes", "print your own", "ideas",
+  // 2026-08-14 mining: plural gap ("t shirts" — negatives don't match plurals), no-capability
+  // ("tarpaulin"), buy-a-device ("printing press", "decal printer"), marketplace competitor
+  // with no conquest group ("etsy" — stickermule precedent). Full rationale + the
+  // deliberately-NOT-negated list (staples/vistaprint per owner correction, photo printing,
+  // roll up banner stand, bottle labels, vehicle decals) in campaign-config.mjs.
+  "t shirts", "tarpaulin", "printing press", "decal printer", "etsy",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 // Claim validation moved to docs/paid-search/approved-claims.mjs (2026-08-06).

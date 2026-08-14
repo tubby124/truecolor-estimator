@@ -451,6 +451,31 @@ export const paidSearchConfig = {
     //   named after it.
     "feather flag", "walmart", "mr print", "print bros", "pro print", "lindas printing",
     "77 signs", "stickermule", "cd label", "who makes", "print your own", "ideas",
+    // 2026-08-14 mining (220 terms / CA$75.30 / 7-day window Aug 7-14).
+    // (a) plural gap — "custom t shirts saskatoon" drew a paid click past the Aug 6
+    //     "t shirt"/"tshirt" negatives because negative keywords do NOT match plurals
+    //     or close variants. "t shirts" closes the second door, same as the Aug 7
+    //     "shirt printing" fix closed the first.
+    // (b) no-capability — "tarpaulin": zero references in products.v1.csv or
+    //     products-content.ts (banners are 13oz scrim vinyl, not tarp restitching).
+    // (c) buy-a-device intent — "printing press", "decal printer": same family as the
+    //     existing "machine", "equipment", "label printers" negatives.
+    // (d) marketplace competitor with NO conquest ad group — "etsy": same call as the
+    //     Aug 10 "stickermule" negative. Not in COMPETITOR_TERMS, so the
+    //     PROTECTED_ACCOUNT_NEGATIVES guard does not apply.
+    // Deliberately NOT negated this pass:
+    // - "staples same day business cards", "can you print stickers at staples",
+    //   "vistaprint business cards" — staples/vistaprint are COMPETITOR_TERMS with live
+    //   (paused) conquest groups; account-wide negatives are contract-blocked and the
+    //   2026-08-07 owner correction says this intent can route to competitor-comparison.
+    //   Flagged for the next conquest-activation review instead.
+    // - "photo printing saskatoon" (photo posters from $15 — owner-protected Aug 7),
+    //   "roll up banner stand" (retractable banners from $219), "bottle label printing"
+    //   (labels from $5.50/sqft), vehicle/rv decal family (real decal demand).
+    // - "3d printer saskatoon" and "feather flag" clicks in this window are covered by
+    //   the Aug 7/10 negatives; whether those reached the live account is verified by
+    //   the sync-plan diff run alongside this edit, not by adding duplicates here.
+    "t shirts", "tarpaulin", "printing press", "decal printer", "etsy",
   ]),
   campaigns: [
     {

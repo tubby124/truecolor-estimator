@@ -555,7 +555,6 @@ copy, the riskiest to resubmit) back through policy review mid-pilot. Owner deci
 update now and eat the review-window delivery risk, or batch it with the next copy pass.
 
 ---
-<<<<<<< HEAD
 ---
 
 ## 2026-08-07 — Search-term routing correction: photo posters + Staples conquest
@@ -574,7 +573,6 @@ update now and eat the review-window delivery risk, or batch it with the next co
 **Outcome:** _pending — write this back after the next search-term read._
 
 **Promoted to rule:** no — still an experiment. Candidate rule if it works: mined legitimate demand should become its own destination split before being labeled waste.
-=======
 
 ## 2026-08-09 — CompetitorConquest RETIRED; four pre-existing drift items surfaced by the same pass
 
@@ -644,7 +642,10 @@ is a serious accusation to get wrong. The verifier was right the whole time; the
 drift, because it forces the verifier's count assertions to be re-derived from the contract. Run
 `validate:google-ads:launched` after every retirement or hold — it reports what the account really
 has, not what the last green check remembered.
->>>>>>> aa5d405 (feat(ads): retire CompetitorConquest — seventh mutation authority, pause-only)
+
+_2026-08-14 note: the marker lines that previously garbled this section (a merge committed
+unresolved on the other machine) were removed during the Aug-14 rebase; both entries above are
+kept in chronological order, content unchanged._
 
 ---
 
@@ -1099,3 +1100,44 @@ create and zero drift. Vehicle Decals is ad group `200731192282`; its enabled RS
 107-test Google Ads suite passed, and deterministic export verification passed. Google initially
 returned the new RSA as `UNKNOWN / REVIEW_IN_PROGRESS`; record final approval here once it reads
 `APPROVED / REVIEWED`.
+
+---
+
+## 2026-08-14 — ✅ APPLIED: negatives pass (30 criteria) from the second full search-term audit
+
+**Window:** Aug 7–14, 220 distinct terms, CA$75.30 spend, 0 recorded conversions (expected —
+the only primary actions are offline `purchase_online`/`quote_won` uploads and no paid-click
+order or won quote exists yet; the first two GCLID-attributed quote requests landed Aug 13
+and are still `requested`).
+
+**Added (account-wide set, ×2 match types ×3 campaigns = 30 criteria):**
+- `t shirts` — plural gap: "custom t shirts saskatoon" drew a paid click past the Aug 6
+  `t shirt`/`tshirt` negatives; negative keywords do not match plurals or close variants.
+- `tarpaulin` — zero capability references in products.v1.csv / products-content.ts.
+- `printing press`, `decal printer` — buy-a-device intent, same family as `machine`/`label printers`.
+- `etsy` — marketplace competitor with no conquest group; stickermule precedent.
+
+**Deliberately NOT negated:** staples/vistaprint queries ("staples same day business cards",
+"vistaprint business cards" etc.) — COMPETITOR_TERMS with paused conquest groups, protected by
+the validator, and the 2026-08-07 owner correction keeps competitor-comparison routing open;
+flagged for the conquest-activation review. "photo printing saskatoon" (photo posters),
+"roll up banner stand" (retractable banners), "bottle label printing" (labels), and the
+vehicle/rv decal family are all real demand and stay.
+
+**Process evidence:** approved-claims VERIFIED_ON bumped 2026-08-07 → 2026-08-14 after re-checking
+all 14 dollar facts against the 2026-08-11 PRICING_QUICK_REFERENCE (min_charge alignment only —
+no advertised number changed). config-validator VALIDATED (errors: []); test:google-ads 106/106;
+sync-plan dry-run showed exactly the 30 expected adds and confirmed the Aug 10 harvest is live;
+apply-sync --execute created 30/30; readback 421 negative criteria (332 campaign + 89 ad-group);
+post-apply sync-plan re-diff zero.
+
+**Stale-clone correction (resolved during rebase):** this pass initially flagged the live
+"Vehicle Decals" ad group as out-of-contract drift. It is not — the 2026-08-12 page-backed
+routing expansion (committed from the other machine) added it to the contract; this clone was
+behind origin. Same cause explains the "t shirts" negative being partially redundant with the
+remote's "shirts" negative — both are live and harmless together, kept in the contract so it
+matches the account. Lesson: run the cross-device pull (or git fetch) BEFORE any sync-plan
+read; a stale contract makes live state look like drift.
+
+**Metric gate:** next mining pass per the 3–7 day cadence (due Aug 17–21). Judge the negated
+families by absence in the next search-term report, not by conversion deltas.
