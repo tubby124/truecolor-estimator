@@ -705,8 +705,8 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.pilot.startDate, "2026-08-03");
   assert.equal(paidSearchConfig.pilot.endDate, "2026-09-17");
   assert.equal(paidSearchConfig.pilot.inclusiveDays, 46);
-  assert.equal(core.dailyBudgetCad, 35);
-  assert.equal(core.maximumPilotCad, 1610);
+  assert.equal(core.dailyBudgetCad, 25);
+  assert.equal(core.maximumPilotCad, 1150);
   assert.equal(competitors.dailyBudgetCad, 4);
   // 2026-08-09 RETIRED: keeps its staged daily budget (Brand precedent) but plans CA$0 spend.
   assert.equal(competitors.status, "PAUSED");
@@ -718,7 +718,8 @@ test("canonical routing and campaign caps are complete", () => {
   const plannedMaximumCad = paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.maximumPilotCad, 0);
   // 2026-08-09: 1150 -> 966 (Competitor's 184 retired to 0). Core alone must still be able to
   // reach the CA$600 qualifying target, which the assertions below enforce.
-  assert.equal(plannedMaximumCad, 1610);
+  // 2026-08-14: 966 -> 1150 (Core 21 -> 25 across the 46 pilot days).
+  assert.equal(plannedMaximumCad, 1150);
   // Budget capacity intentionally EXCEEDS the CA$600 runtime ceiling: daily budgets are
   // permission to capture cheap clicks on good days, and the 15-minute hard-stop monitor is
   // the binding constraint on total spend. Capacity must still be able to reach the target.
@@ -732,8 +733,9 @@ test("canonical routing and campaign caps are complete", () => {
   // removed its CA$4 from the ENABLED subset. This is a snapshot of the current value; the line
   // below is the actual blast-radius bound. The retirement bought CA$4 of headroom under it, so
   // Core can now be raised to CA$25 on evidence without touching MAX_UNMONITORED_DAILY_BURN_CAD.
-  assert.equal(enabledDailyBudget, 35);
-  assert.ok(enabledDailyBudget <= 35);
+  // 2026-08-14: 21 -> 25 (Core raised on pacing evidence) — the subset sits exactly at the bound.
+  assert.equal(enabledDailyBudget, 25);
+  assert.ok(enabledDailyBudget <= 25);
   for (const campaign of paidSearchConfig.campaigns) {
     // COMPETITOR joined BRAND on the paused side when it was retired 2026-08-09.
     const expectedStatus = campaign.kind === "BRAND" || campaign.kind === "COMPETITOR" ? "PAUSED" : "ENABLED";
@@ -748,7 +750,8 @@ test("canonical routing and campaign caps are complete", () => {
   // 2026-08-07: 25 -> 28. Contract TOTAL across all three campaigns (Core 21 + Competitor 4 +
   // Brand 3), mirroring LAUNCHABLE_DAILY_BUDGET_CAD. Not a safety bound — Brand is PAUSED and
   // contributes CA$0 of real burn; the enabled-subset bound is asserted above.
-  assert.equal(paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0), 42);
+  // 2026-08-14: 28 -> 32 (Core 21 -> 25).
+  assert.equal(paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.dailyBudgetCad, 0), 32);
   assert.equal(paidSearchConfig.conversionMeasurement.revenueSource, "SERVER_UPLOAD_CLICKS");
   assert.deepEqual(
     Object.values(paidSearchConfig.conversionMeasurement.requiredUploadClickActions).map((action) => [action.eventName, action.actionId, action.status]),
@@ -857,7 +860,7 @@ test("exports canonical Editor campaign, RSA, and location entities", () => {
   const PAUSED_IN_ARTIFACTS = new Set(["GOOG_Search_TC_BrandDefense_2026", "GOOG_Search_TC_CompetitorConquest_2026"]);
   const expectedCampaignStatus = (name) => PAUSED_IN_ARTIFACTS.has(name) ? "PAUSED" : "ENABLED";
   assert.ok(campaigns.rows.every((row) => row.Status === expectedCampaignStatus(row.Campaign)));
-  assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026").Budget, "35");
+  assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026").Budget, "25");
   assert.equal(campaigns.rows.find((row) => row.Campaign === "GOOG_Search_TC_CoreProducts_2026")["Maximum CPC bid limit"], "5");
   assert.ok(campaigns.rows.every((row) => row["Start date"] === "2026-08-03" && row["End date"] === "2026-09-17"));
   const adGroups = parseCsv(artifacts["ad-groups.csv"]);

@@ -1169,6 +1169,6 @@ language unless the term names hardware ("label printers", "printer ink" stay ne
 
 **Metric + date:** Re-read spend, lost impression share, paid quote requests, and quote-to-priced/checkout movement after 7 days or when cumulative account spend reaches CA$450 warning threshold, whichever comes first.
 
-**Outcome:** _pending — write back after the next performance read._
+**Outcome:** Superseded the same day. The owner re-decided at **CA$25/day** with the full pacing picture (at 35 the CA$600 hard stop lands ~Aug 26; at 25 it lands ~Aug 31-Sep 1, letting the pause fire with more data behind it). `apply-budgets --execute` re-landed the live budget at 25 with a clean readback, and the 25/32 safety bounds this raise had lifted to 35/42 were restored. Separately: a Canada-wide LOCATION criterion added to Core at 11:42 the same morning (untracked — not part of this entry's mutation log) was removed; live geo re-verified as 3x Saskatoon 35 km proximity only, and no spend had leaked outside Saskatchewan. Process note: this raise mutated the account first and reconciled the contract after, raising both blast-radius bounds in the same push — future budget changes go contract-first through apply-budgets so the validator caps bind BEFORE the account moves.
 
 **Promoted to rule:** no — this is a delivery adjustment, not a reusable budget rule.

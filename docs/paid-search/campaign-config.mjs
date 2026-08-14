@@ -500,8 +500,15 @@ export const paidSearchConfig = {
       // as evidence the raise failed; read it as confirmation that rank, not budget, is binding.
       // 2026-08-14: owner approved CA$21 -> CA$35 after budget-limited delivery
       // and three paid-Google-attributed quote requests. The CA$600 account hard stop is unchanged.
-      dailyBudgetCad: 35,
-      maximumPilotCad: 1610,
+      // 2026-08-14 later, SUPERSEDES the 35: owner re-decided at CA$25 with the full pacing
+      // picture (burn CA$19.67/day, 21.3% lost IS to budget; the CA$600 hard stop lands
+      // ~Aug 31-Sep 1 at 25 vs ~Aug 26 at 35). 25 spends CompetitorConquest's freed CA$4/day
+      // and keeps the ENABLED subset exactly at the CA$25 unmonitored-burn bound — the 35
+      // reconcile had silently lifted that bound to 35, which this decision reverts. The
+      // Canada-wide LOCATION criterion added to Core at 11:42 the same morning (never
+      // contract-backed) was removed; live geo re-verified as 3x Saskatoon 35 km proximity only.
+      dailyBudgetCad: 25,
+      maximumPilotCad: 1150,
       campaignNegatives: competitorTargets.flatMap(([, , terms]) => terms),
       gates: [],
       adGroups: [
