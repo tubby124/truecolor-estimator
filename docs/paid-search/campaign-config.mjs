@@ -498,8 +498,10 @@ export const paidSearchConfig = {
       // headroom only binds on strong days like Aug 6. Lost IS to RANK is 60.2% — seven times
       // the budget loss — and no budget number touches that. Do not read a weak pacing response
       // as evidence the raise failed; read it as confirmation that rank, not budget, is binding.
-      dailyBudgetCad: 21,
-      maximumPilotCad: 966,
+      // 2026-08-14: owner approved CA$21 -> CA$35 after budget-limited delivery
+      // and three paid-Google-attributed quote requests. The CA$600 account hard stop is unchanged.
+      dailyBudgetCad: 35,
+      maximumPilotCad: 1610,
       campaignNegatives: competitorTargets.flatMap(([, , terms]) => terms),
       gates: [],
       adGroups: [

@@ -41,7 +41,7 @@ const LOGIN = "1125402990";
 const BRAND_ID = "24048123064";
 // Hard ceiling on total ENABLED daily budget, mirroring config-validator's blast-radius bound.
 // Asserted independently here on purpose: a checker that trusts the thing it checks is not one.
-const MAX_ENABLED_DAILY_BURN_CAD = 25;
+const MAX_ENABLED_DAILY_BURN_CAD = 35;
 
 const args = process.argv.slice(2);
 for (const arg of args) if (arg !== "--execute") throw new Error(`unknown argument: ${arg}`);
