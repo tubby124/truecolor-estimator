@@ -9,6 +9,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
 import { appendLatestPaidAttributionToFormData } from "@/lib/analytics/utm";
+import { trackGenerateLead } from "@/lib/analytics";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 import {
@@ -211,6 +212,10 @@ function QuoteForm() {
       clearQuoteSubmission("multi-item-quote", submissionKey);
       setDeliveryWarning(data.warning ?? "");
       setSent(true);
+      trackGenerateLead({
+        lead_source: "quote_request",
+        form_id: "multi-item-quote",
+      });
     } catch (err) {
       setContactError(
         err instanceof Error ? err.message : "Something went wrong.",
