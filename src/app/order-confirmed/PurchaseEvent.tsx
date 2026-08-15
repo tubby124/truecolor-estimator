@@ -69,8 +69,7 @@ export function PurchaseEvent({
       value: total,
       num_items: (items ?? []).reduce((s, i) => s + (i.quantity ?? 1), 0),
       contents: (items ?? []).map((i) => ({ id: i.item_id, quantity: i.quantity ?? 1, item_price: i.price ?? 0 })),
-      eventId: orderNumber,
-    });
+    }, { eventId: orderNumber });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

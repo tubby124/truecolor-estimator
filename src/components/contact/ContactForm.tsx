@@ -11,6 +11,7 @@ import {
   clearQuoteSubmission,
   getOrCreateQuoteSubmission,
 } from "@/lib/quote-request-client";
+import { metaTrackLead } from "@/lib/analytics/metaPixel";
 
 const PRODUCT_OPTIONS = [
   "Coroplast Signs",
@@ -95,12 +96,15 @@ export function ContactForm() {
         method: "POST",
         body: payload,
       });
-      const data = (await res.json()) as { sent?: boolean; error?: string };
+      const data = (await res.json()) as { sent?: boolean; error?: string; tracking_event_id?: string | null };
       if (!res.ok || !data.sent) {
         setErrorMsg(data.error ?? "Something went wrong. Please try again.");
         setStatus("error");
       } else {
         clearQuoteSubmission("contact-quote", submissionKey);
+        if (data.tracking_event_id) {
+          metaTrackLead({ content_name: "Contact Form", value: 200 }, { eventId: data.tracking_event_id });
+        }
         setStatus("sent");
         formRef.current?.reset();
       }

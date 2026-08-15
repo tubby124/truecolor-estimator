@@ -45,6 +45,7 @@ export default function PrivacyPage() {
               <li>Order details (product type, dimensions, quantity)</li>
               <li>Payment information (processed securely — we do not store card numbers)</li>
               <li>Files you upload for printing (stored securely, used only for your order)</li>
+              <li>Optional marketing measurement data, such as browser and advertising click identifiers, if you accept marketing cookies</li>
             </ul>
           </section>
 
@@ -101,9 +102,15 @@ export default function PrivacyPage() {
                 not send the plain-text email address or phone number through this
                 enhanced-conversions process.
               </li>
+              <li>
+                <strong>Google Analytics</strong> — website measurement
+              </li>
+              <li>
+                <strong>Meta</strong> — optional advertising measurement and conversion reporting when you accept marketing cookies
+              </li>
             </ul>
             <p className="mt-2">
-              We do not sell your personal information to any third party.
+              You can accept or decline marketing cookies in the site banner. We do not sell your personal information to any third party.
             </p>
           </section>
 

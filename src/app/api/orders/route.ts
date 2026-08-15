@@ -42,6 +42,7 @@ import {
   mergeUtmAttribution,
 } from "@/lib/analytics/utm";
 import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytics/attribution-db";
+import { getMetaCapiRequestContext } from "@/lib/analytics/metaCapi";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 
 // `LatestPaidHintPayload` contributes the optional `latest_paid_*` fields the
@@ -426,6 +427,7 @@ export async function POST(req: NextRequest) {
     // 3. Create order row — retry up to 3 times on order_number collision (Postgres code 23505)
     // count+1 approach: safe for a small shop; retry handles the rare concurrent-request edge case
     const orderYear = new Date().getFullYear();
+    const metaContext = getMetaCapiRequestContext(req);
     type OrderRow = {
       id: string;
       order_number: string;
@@ -503,6 +505,9 @@ export async function POST(req: NextRequest) {
           referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
           referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
           raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,
+          meta_tracking_consent: metaContext.marketingConsent,
+          meta_fbp: metaContext.fbp ?? null,
+          meta_fbc: metaContext.fbc ?? null,
         })
         .select("id, order_number, customer_id, status, paid_at, total, payment_method, conversion_type, quote_request_id, checkout_request_fingerprint")
         .single();

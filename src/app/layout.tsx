@@ -6,6 +6,7 @@ import { BackToTop } from "@/components/site/BackToTop";
 import { AuthRedirect } from "@/components/site/AuthRedirect";
 import { UtmCapture } from "@/components/site/UtmCapture";
 import { MetaPixel } from "@/components/site/MetaPixel";
+import { MarketingConsent } from "@/components/site/MarketingConsent";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 import { buildGoogleTagBootstrapScript } from "@/lib/analytics/google-ads";
 
@@ -303,6 +304,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
         <MetaPixel />
+        <MarketingConsent />
         {/* Trustindex loader-cert.js removed — was injecting visible
             "Trustmark widget validation failed" error text on every page.
             Reviews widget (ReviewsSection) and Instagram feed (loader-feed.js)

@@ -17,6 +17,7 @@ import {
   clearQuoteSubmission,
   getOrCreateQuoteSubmission,
 } from "@/lib/quote-request-client";
+import { metaTrackLead } from "@/lib/analytics/metaPixel";
 
 // localStorage key per-brokerage so an agent who orders from two different
 // brokerage portals (rare but possible) doesn't bleed details across.
@@ -292,7 +293,11 @@ export function PortalOrderForm({
       const result = (await res.json().catch(() => ({}))) as {
         sent?: boolean;
         ref?: string | null;
+        tracking_event_id?: string | null;
       };
+      if (result.tracking_event_id) {
+        metaTrackLead({ content_name: `Quote Portal — ${brokerage.slug}`, value: 200 }, { eventId: result.tracking_event_id });
+      }
       // Save profile after successful submission so next visit pre-fills.
       try {
         const profile: SavedProfile = {
