@@ -108,8 +108,15 @@ const WIDE_FORMAT_TIERS = [
   { sqft_max: Infinity,  rate_per_sqft: 5 }, // 30+ sqft (huge wall jobs)
 ];
 
+// perf_8mil IS live - the sticker configurator's "Perforated / 8mil window"
+// chip (RMVN006) routes here. Rate $8/sqft is fit to TUDS (14-15 sqft x qty
+// 6/10, 2026-05-15). Floor: was $50 (untested - both TUDS pieces are
+// rate-dominated); raised to $70 on 2026-08-16 against Juliana Ionescu's two
+// paid window decals (3.61 sqft -> $68, 4.49 sqft -> $72, 2026-06-09), which
+// the $50 floor undercharged ~30%. Still n=4 from 2 customers; nothing yet
+// between ~5 and ~12 sqft (crossover is 8.75 sqft) - revisit when data lands.
 const PERF_8MIL_RATE_PER_SQFT = 8;
-const PERF_8MIL_MIN_TOTAL_PER_UNIT = 50;
+const PERF_8MIL_MIN_TOTAL_PER_UNIT = 70;
 
 const CLEAR_VINYL_MULTIPLIER = 1.44;
 // DIE_CUT shape: removed as a multiplier — Albert's email data shows die-cut
