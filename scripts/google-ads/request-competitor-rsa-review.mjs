@@ -4,7 +4,11 @@ const API_VERSION = "v24";
 const EXECUTION_CONFIRMATION = "REQUEST_COMPETITOR_RSA_REVIEW";
 const OLD_FINAL_URL = "https://truecolorprinting.ca/why-true-color";
 const PROPOSED_FINAL_URL = `${OLD_FINAL_URL}?source=google-ads`;
-const LANDING_MARKER = "Real printing. Clear pricing. Local pickup.";
+// Structural marker, not copy. The previous marker was the hero H1 sentence, so the 2026-08-16
+// keyword-bearing H1 rewrite silently turned the verifier's "paid page rendered" check into a
+// launch blocker. The closing-CTA heading id is asserted by e2e-playwright/seo-paid-journeys.spec.ts
+// too, so it cannot disappear without a test failing first.
+const LANDING_MARKER = 'id="closing-cta-heading"';
 
 const freeze = (value) => Object.freeze(value);
 

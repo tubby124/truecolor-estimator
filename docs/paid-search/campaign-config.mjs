@@ -596,8 +596,9 @@ export const paidSearchConfig = {
     //     intent, same family as the Aug 6 "london drugs" / "photo lab" negatives).
     // (b) no-capability products — "feather flag" (zero references anywhere in
     //     products.v1.csv or products-content.ts) and "cd label".
-    // (c) research / DIY intent — "who makes", "print your own", "ideas". Same family as
-    //     the existing "how to", "diy", and "template" negatives.
+    // (c) research / DIY intent — "print your own", "ideas". Same family as the existing
+    //     "how to", "diy", and "template" negatives. "who makes" was negated in this pass
+    //     then REVERSED by owner correction 2026-08-16 — see the note beside "avery" below.
     //
     // Deliberately NOT negated, and each for a reason that is already precedent in this file:
     // - "staples" and "rayacom": both are COMPETITOR_TERMS with live (paused) conquest ad
@@ -616,7 +617,7 @@ export const paidSearchConfig = {
     //   "logo design" and "resume": a real print job is not waste just because no SKU is
     //   named after it.
     "feather flag", "walmart", "mr print", "print bros", "pro print", "lindas printing",
-    "77 signs", "stickermule", "cd label", "who makes", "print your own", "ideas",
+    "77 signs", "stickermule", "cd label", "print your own", "ideas",
     // 2026-08-14 mining (220 terms / CA$75.30 / 7-day window Aug 7-14).
     // (a) plural gap — "custom t shirts saskatoon" drew a paid click past the Aug 6
     //     "t shirt"/"tshirt" negatives because negative keywords do NOT match plurals
@@ -654,9 +655,15 @@ export const paidSearchConfig = {
     //     group. Identical call to the Aug 10 "stickermule" and Aug 14 "etsy" negatives:
     //     not in COMPETITOR_TERMS, so PROTECTED_ACCOUNT_NEGATIVES does not block it, and
     //     with no conquest group there is nowhere legitimate for the click to land.
-    // Deliberately NOT negated this pass: "who makes stickers" stays a real buyer query —
-    // it is being removed as a KEYWORD (blocked by the "who makes" account negative since
-    // 2026-08-10, so it could never have served) rather than negated a second time.
+    // 2026-08-16 OWNER REVERSAL — "who makes" REMOVED from this list (added 2026-08-10 under
+    // (c) "research / DIY intent"). That read was wrong: "who makes stickers" is not someone
+    // researching how stickers are manufactured, it is a local buyer asking WHO to buy from —
+    // the same shop-seeking language as the kept "sticker makers" and "vinyl sticker maker"
+    // keywords. As a PHRASE account negative it blocked that whole family on all three
+    // campaigns. Earlier today the conflict was resolved by deleting the KEYWORD
+    // (remove-conflicting-keywords.mjs, since executed); the owner call is the opposite —
+    // delete the NEGATIVE and restore the keyword. remove-account-negatives.mjs takes the six
+    // live criteria off the account; the keyword is re-created by apply-sync.mjs.
     "avery", "sticker you",
   ]),
   campaigns: [
@@ -733,12 +740,9 @@ export const paidSearchConfig = {
             // 2026-08-14 owner-picked from the account's search-terms suggestions: shop-seeking
             // buyer language, same family as the kept "sticker makers" / "vinyl sticker maker".
             "print stickers near me",
-            // 2026-08-16 REMOVED "who makes stickers": DEAD ON ARRIVAL. The account negative
-            // "who makes" (added 2026-08-10, EXACT+PHRASE on all three campaigns) blocks every
-            // query this keyword could match, so it has never been eligible to serve and never
-            // will be while that negative stands. A keyword that cannot win an auction is not a
-            // keyword; it is a line item that makes the coverage count look bigger than it is.
-            // Removed from the live account by remove-conflicting-keywords.mjs.
+            // 2026-08-16 RESTORED after owner correction: "who makes stickers" is local buyer
+            // intent, so the blocking "who makes" account negative was deleted, not this keyword.
+            "who makes stickers",
           ],
           headlines: ["Order Custom Stickers", "Stickers Printed Locally", "Custom Labels Saskatoon"],
           variantB: [

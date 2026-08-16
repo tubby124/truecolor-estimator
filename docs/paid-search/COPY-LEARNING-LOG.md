@@ -1370,3 +1370,39 @@ Three API facts learned the hard way (each now encoded in the scripts):
 3. In-market `80886 Signage` is not SEARCH-eligible (`user_interest.availabilities`) — 5 observation criteria per group, not 6.
 
 Owner UI actions still open: remove "About Us" codeless action (or disable auto-created conversions); link the Google Business Profile location asset; confirm GA4 `generate_lead` import now shows (it is ENABLED + secondary via API).
+
+### 2026-08-16 PM — owner reversal: `who makes` de-negated, `who makes stickers` restored
+
+Earlier today the `who makes` / `who makes stickers` conflict was resolved by deleting the
+**keyword** (`remove-conflicting-keywords.mjs`, executed — positives 192 → 190). The owner
+reversed the call: `who makes stickers` is a local buyer asking **who to buy from**, the same
+shop-seeking language as the kept `sticker makers` and `vinyl sticker maker`. The wrong object
+was deleted — the negative was the mistake, not the keyword.
+
+**The lesson, and it is not "we picked wrong":** the 2026-08-10 audit filed `who makes` under
+"research / DIY intent" alongside `how to` and `diy`. Those are *method* questions. `who makes`
+is a *vendor* question, and a PHRASE account negative on a vendor question suppresses the exact
+demand a local print shop exists to catch — silently, across all three campaigns, with nothing
+in any report to show for it. **A negative keyword deletes demand you then cannot measure.**
+When a term could plausibly be read as buyer intent, the burden of proof sits on the negative,
+not on the keyword. Grouping a term into a negative family by surface shape (`who…`, `how…`) is
+not the same as reading its intent.
+
+Second lesson, structural: the conflict was real and **either** deletion resolved it, so the
+mechanical checks passed both ways. Coverage counts and validators cannot tell you which of two
+consistent states is the right one — only intent can. Record the intent in the config next to
+the term, which is why every entry in `accountNegatives` carries its rationale inline.
+
+**Shipped:** `who makes` removed from `accountNegatives` (contract + `config-validator.mjs`
+mirror); `who makes stickers` EXACT+PHRASE restored to Stickers and Labels; pins moved
+positives 190 → 192 and negativeCriteria 429 → 423 (composition: 318 account-negative criteria
++ 91 ad-group cross-negatives + 14 campaign negatives). New authority
+`scripts/google-ads/remove-account-negatives.mjs` — allowlisted, dry-run default, pre/post
+readback, and it **refuses to run while the contract still lists the term as an account
+negative**. `apply-sync.mjs` is create-only on purpose, so removing a negative needed its own
+verb rather than a diff-driven deleter that a config typo could weaponise.
+
+`remove-conflicting-keywords.mjs` is left untouched as the historical record. Its own guard now
+turns against it: with the blocking negative gone it reports `REFUSED … the keyword is
+reachable again` and exits NO_OP. That is the guard working, not a bug — the same
+"prove it before you cut" rule that let it act in the morning is what stops it in the evening.

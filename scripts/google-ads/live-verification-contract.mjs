@@ -401,14 +401,17 @@ function evaluateLiveState(live, {
   // "decal printer" criteria (cc7d9b6) were deleted via owner-authorized scoped script with
   // pre/post verification — live re-read 415, matching this pin exactly.
   // 2026-08-16 pass #3. positives 192 -> 190: "who makes stickers" EXACT+PHRASE removed from
-  // Stickers and Labels. It was DEAD — the account negative "who makes" (2026-08-10) blocked
-  // every query it could match, so it never served. Removed live by
-  // remove-conflicting-keywords.mjs; the pin moves in the same pass as the contract.
+  // Stickers and Labels, blocked by the "who makes" account negative (2026-08-10).
   // negatives 415 -> 429: +12 account ("avery", "sticker you" x EXACT+PHRASE x 3 campaigns)
   // and +2 ad-group cross-negatives ("decal", "decals" on Stickers and Labels only).
-  // Composition after this pass: 324 account-negative criteria + 91 ad-group cross-negatives
-  // + 14 campaign negatives = 429.
-  if (live.positiveKeywords !== 190 || live.negativeCriteria !== 429) failures.push("keyword counts changed");
+  // 2026-08-16 owner reversal, same day: the "who makes" negative is the thing that was wrong,
+  // not the keyword — "who makes stickers" is local shop-seeking intent. Both pins move back.
+  //   positives 190 -> 192: "who makes stickers" EXACT+PHRASE restored by apply-sync.mjs.
+  //   negatives 429 -> 423: "who makes" EXACT+PHRASE removed from all three campaigns (-6) by
+  //   remove-account-negatives.mjs.
+  // Composition after the reversal: 318 account-negative criteria + 91 ad-group cross-negatives
+  // + 14 campaign negatives = 423.
+  if (live.positiveKeywords !== 192 || live.negativeCriteria !== 423) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,

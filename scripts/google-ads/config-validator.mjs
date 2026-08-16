@@ -270,8 +270,9 @@ const CORE_TERMS = {
     "vinyl sticker maker",
     "sticker makers",
     "print stickers near me",
-    // 2026-08-16: "who makes stickers" removed — the account negative "who makes" blocked it
-    // from ever serving. See campaign-config.mjs for the full rationale.
+    // 2026-08-16 owner correction: "who makes stickers" restored — the "who makes" account
+    // negative was deleted instead. See campaign-config.mjs for the full rationale.
+    "who makes stickers",
   ],
   "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing", "banner with grommets"],
   "business-cards": [
@@ -347,7 +348,9 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   // intent. "staples", "rayacom", "art print", "book binding", and "invitation" were audited
   // in the same pass and deliberately excluded — see the rationale block in campaign-config.mjs.
   "feather flag", "walmart", "mr print", "print bros", "pro print", "lindas printing",
-  "77 signs", "stickermule", "cd label", "who makes", "print your own", "ideas",
+  // "who makes" was in this list from 2026-08-10 until the 2026-08-16 owner reversal:
+  // "who makes stickers" is shop-seeking buyer intent, not research intent.
+  "77 signs", "stickermule", "cd label", "print your own", "ideas",
   // 2026-08-14 mining: plural gap ("t shirts" — negatives don't match plurals), no-capability
   // ("tarpaulin"), buy-a-device ("printing press"), marketplace competitor with no conquest
   // group ("etsy" — stickermule precedent). "decal printer" was negated then reversed same

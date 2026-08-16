@@ -123,7 +123,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 190, negativeCriteria: 429,
+    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 192, negativeCriteria: 423,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",
@@ -1558,8 +1558,8 @@ test("superseded ads left PAUSED are never re-replaced or re-retired", () => {
   assert.equal(planDestinationSwap(settled).waiting.length, 0);
 });
 
-// ── 2026-08-16 pass: negatives, dead keyword, goal graph, audiences, price asset ──────────────
-test("2026-08-16 negative and dead-keyword pass is complete in the contract", () => {
+// ── 2026-08-16 pass: negatives, "who makes" reversal, goal graph, audiences, price asset ─────
+test("2026-08-16 negative pass and the 'who makes' reversal are complete in the contract", () => {
   const negatives = paidSearchConfig.accountNegatives;
   for (const term of ["avery", "sticker you"]) {
     for (const matchType of ["EXACT", "PHRASE"]) {
@@ -1575,10 +1575,16 @@ test("2026-08-16 negative and dead-keyword pass is complete in the contract", ()
   for (const term of ["decal", "decals"]) {
     assert.ok(stickers.crossNegatives.includes(term), `stickers cross-negative "${term}" is missing`);
   }
-  // "who makes stickers" could never serve: the account negative "who makes" blocks every query
-  // it could match. A keyword that cannot win an auction is not coverage.
-  assert.ok(!stickers.keywords.some((keyword) => keyword.text === "who makes stickers"));
-  assert.ok(negatives.some((negative) => negative.text === "who makes"));
+  // 2026-08-16 owner reversal: "who makes stickers" is a local buyer asking WHO to buy from,
+  // not research intent. The account negative "who makes" goes; the keyword stays. Both halves
+  // are asserted together so a future pass cannot restore one without the other.
+  for (const matchType of ["EXACT", "PHRASE"]) {
+    assert.ok(
+      stickers.keywords.some((keyword) => keyword.text === "who makes stickers" && keyword.matchType === matchType),
+      `keyword "who makes stickers" [${matchType}] is missing`,
+    );
+  }
+  assert.ok(!negatives.some((negative) => negative.text === "who makes"));
 });
 
 test("live verification rejects conversion-graph and audience drift", () => {
@@ -1609,9 +1615,9 @@ test("live verification rejects conversion-graph and audience drift", () => {
     // PRICE asset counts.
     (live) => { live.manualAssets = 13; },
     (live) => { live.campaignAssetLinks = 53; },
-    // Keyword pins after the dead-keyword removal and the two negative additions.
-    (live) => { live.positiveKeywords = 192; },
-    (live) => { live.negativeCriteria = 415; },
+    // Keyword pins after the "who makes" reversal: the keyword is back, the negative is gone.
+    (live) => { live.positiveKeywords = 190; },
+    (live) => { live.negativeCriteria = 429; },
   ];
   for (const drift of drifts) {
     const live = structuredClone(base);
