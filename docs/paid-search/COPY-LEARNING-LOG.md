@@ -1201,3 +1201,42 @@ CTR vs group average, and any junk queries phrase-match lets through ("who makes
 is the riskier of the two; negate informational variants if they surface).
 
 **Outcome:** _pending — write back at the Aug 17-21 mining pass._
+
+## 2026-08-15 — Paid quote attribution trace (attribution-repair plan, Task 1)
+
+**Trigger:** a real sticker sale showed as `not_attributable` in the outbox. Read-only trace of
+prod (`google_ads_conversion_outbox` → `orders` → `quote_requests`, last 45d, no PII).
+
+**Context counts (45d):** 50 paid orders · outbox: 14 `not_attributable` (13 purchase_online,
+1 quote_won), 1 `sent` · quote_requests: 36 total, 2 with a click id (both 2026-08-13, utm=google,
+neither converted yet), 3 with utm~google, 10 converted.
+
+**No-PII trace table (not_attributable rows):**
+
+| order | created | items | quote_exists | quote_has_click | order_linked | order_has_click | outbox | classification |
+|---|---|---|---|---|---|---|---|---|
+| TC-2026-0328 | 08-14 | MANUAL: Stickers x40 (staff manual quote → Pay Now) | yes (unlinked, same customer ≤30d) | no | no | no | not_attributable | **QUOTE_UNATTRIBUTED** (+ ORDER_NOT_LINKED) |
+| TC-2026-0314 | 08-06 | MANUAL: Logo design (quote_won, linked) | yes | no | yes | no | not_attributable | QUOTE_UNATTRIBUTED |
+| TC-2026-0325 | 08-12 | MANUAL: Stickers x50 (staff manual order) | no | — | no | no | not_attributable | NO_QUOTE_RECORD |
+| 11 others (0299, 0308–0310, 0316, 0320, 0321, 0323, 0324, 0326, 0327) | 07-24…08-13 | staff manual orders / manual quotes | no | — | no | no | not_attributable | NO_QUOTE_RECORD |
+
+Control: TC-2026-0330 (08-15, online STICKER purchase, etransfer) → outbox `sent`. Online checkout
+path carries the click id end-to-end.
+
+**Classification of the sticker sale: `QUOTE_UNATTRIBUTED`.** The customer's website quote had no
+gclid/gbraid/wbraid (and staff created the manual quote without `quote_request_id`, so it was also
+unlinked — but linking would still have produced `not_attributable`, honestly). No backfill.
+
+**Code path:** `src/app/api/staff/manual-order/route.ts` (~L405-425) sets `conversion_type =
+quoteRequestId ? "quote_won" : "purchase_online"` and spreads `quoteAttribution` only when a
+quote id is supplied — so every unlinked staff order is stamped `purchase_online` and lands in the
+outbox as `purchase_online/not_attributable`. The outbox trigger
+(`supabase/migrations/20260720110000_google_ads_conversion_outbox.sql` L65-73) then does the right
+thing. Net: 13/14 "unattributed online purchases" are really staff-created orders — the report
+label is misleading, the data is not.
+
+**Implications for Task 4/5:** (a) staff manual-order must surface/auto-link an existing web quote
+for the same customer so linkage isn't optional; (b) the report must split staff-created orders
+from online checkout before counting "unattributed online sales"; (c) with only 2/36 quotes
+carrying a click id, the quote-side capture rate is the bottleneck, not the copy path — that's
+Task 2/3 territory (paid quote → lead conversion) plus watching the two 08-13 gclid quotes convert.
