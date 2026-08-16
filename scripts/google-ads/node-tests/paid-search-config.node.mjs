@@ -59,6 +59,13 @@ test("canonical paid-search artifacts validate locally without claiming a fresh 
   assert.deepEqual(result.errors, []);
 });
 
+test("qualified quote lead contract allows the owner to record a verified numeric UI action ID", () => {
+  const configured = clone();
+  configured.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "9000000003";
+  configured.conversionMeasurement.qualifiedQuoteLeadAction.status = "VERIFIED_LIVE";
+  assert.equal(validateConfig(configured).localStatus, "VALIDATED");
+});
+
 test("launch candidate transitions require evidence and can reach fresh-live preflight", () => {
   const blocked = evaluateLaunchCandidate(clone());
   assert.equal(blocked.status, "BLOCKED");
@@ -626,6 +633,10 @@ test("locks the confirmed True Color child account and verified account-side gat
     (c) => { c.liveGoogleAds.conversionGoalGraph.biddingActionIds.push("7689029977"); },
     (c) => { c.liveGoogleAds.geoTarget.center.latitude = 0; },
     (c) => { c.conversionMeasurement.requiredUploadClickActions.purchaseOnline.actionId = "7689029977"; },
+    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "7694360837"; },
+    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "7694360840"; },
+    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.primaryForGoal = true; },
+    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "not-numeric"; c.conversionMeasurement.qualifiedQuoteLeadAction.status = "VERIFIED_LIVE"; },
   ]) {
     const config = clone();
     mutate(config);
@@ -762,6 +773,20 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.channel, "GA4");
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.googleAdsDelivery, false);
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.phoneClicksAreQualifiedCalls, false);
+  assert.deepEqual(paidSearchConfig.conversionMeasurement.qualifiedQuoteLeadAction, {
+    eventName: "quote_submit_qualified",
+    envVar: "GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID",
+    actionId: null,
+    status: "PENDING_OWNER_UI",
+    requiredType: "UPLOAD_CLICKS",
+    requiredCategory: "SUBMIT_LEAD_FORM",
+    primaryForGoal: false,
+    promotionGate: "secondary until 10-20 verified paid-click quote submissions are observed and lead quality is acceptable",
+    includedInConversions: false,
+    currency: "CAD",
+    dynamicValue: false,
+    valueMode: "NONE",
+  });
   assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.actionId, "7694360843");
   assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.minimumDurationSeconds, 60);
   assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.includedInConversions, false);

@@ -135,6 +135,20 @@ const CONVERSION_MEASUREMENT = {
       dynamicValue: true,
     },
   },
+  qualifiedQuoteLeadAction: {
+    eventName: "quote_submit_qualified",
+    envVar: "GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID",
+    actionId: null,
+    status: "PENDING_OWNER_UI",
+    requiredType: "UPLOAD_CLICKS",
+    requiredCategory: "SUBMIT_LEAD_FORM",
+    primaryForGoal: false,
+    promotionGate: "secondary until 10-20 verified paid-click quote submissions are observed and lead quality is acceptable",
+    includedInConversions: false,
+    currency: "CAD",
+    dynamicValue: false,
+    valueMode: "NONE",
+  },
   qualifiedCallAction: {
     envVar: "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID",
     actionId: "7694360843",
@@ -413,8 +427,43 @@ export function validateConfig(config) {
     fail("Bidding must use the approved campaign-specific Maximize Clicks ceilings (Core raised to CA$5 on 2026-08-07 lost-IS-rank evidence)");
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
-  if (JSON.stringify(config.conversionMeasurement) !== JSON.stringify(CONVERSION_MEASUREMENT)) {
-    fail("Revenue measurement must match the freshly verified purchase_online, quote_won, and qualified-call action contract");
+  const { qualifiedQuoteLeadAction, ...conversionMeasurement } = config.conversionMeasurement ?? {};
+  const { qualifiedQuoteLeadAction: expectedQualifiedQuoteLeadAction, ...expectedConversionMeasurement } = CONVERSION_MEASUREMENT;
+  if (JSON.stringify(conversionMeasurement) !== JSON.stringify(expectedConversionMeasurement)) {
+    fail("Revenue measurement must match the verified revenue action contract");
+  }
+  if (!qualifiedQuoteLeadAction) {
+    fail("Qualified quote lead conversion action contract is required");
+  } else {
+    const {
+      actionId,
+      status,
+      primaryForGoal,
+      ...qualifiedQuoteLeadStatic
+    } = qualifiedQuoteLeadAction;
+    const {
+      actionId: _expectedActionId,
+      status: _expectedStatus,
+      primaryForGoal: _expectedPrimaryForGoal,
+      ...expectedQualifiedQuoteLeadStatic
+    } = expectedQualifiedQuoteLeadAction;
+    if (JSON.stringify(qualifiedQuoteLeadStatic) !== JSON.stringify(expectedQualifiedQuoteLeadStatic)) {
+      fail("Qualified quote lead conversion action static contract drifted");
+    }
+    if (actionId !== null && (typeof actionId !== "string" || !/^\d+$/.test(actionId))) {
+      fail("Qualified quote lead action ID must be null or numeric");
+    }
+    if (primaryForGoal === true && status !== "VERIFIED_LIVE") {
+      fail("Qualified quote lead action cannot be primary before VERIFIED_LIVE");
+    }
+    if (status === "PENDING_OWNER_UI" && (actionId !== null || primaryForGoal !== false)) {
+      fail("Pending qualified quote lead action must be secondary with no action ID");
+    }
+    if (status === "VERIFIED_LIVE" && typeof actionId === "string" && /^\d+$/.test(actionId)) {
+      // A verified action may remain secondary or be promoted after the documented evidence gate.
+    } else if (status !== "PENDING_OWNER_UI") {
+      fail("Qualified quote lead action must be PENDING_OWNER_UI or VERIFIED_LIVE with a numeric ID");
+    }
   }
   const suffixParams = new URLSearchParams(config.tracking?.finalUrlSuffix ?? "");
   for (const [key, expectedValue] of Object.entries(TRACKING_MAPPINGS)) {

@@ -93,7 +93,9 @@ const newest = (a, b) => (String(b?.created_at ?? "") > String(a?.created_at ?? 
  * @param {Array} input.linkedOutbox   extra outbox rows for converted quote orders outside the
  *                                     window — used for click-ID survival lookups, never counted
  */
-export function summarizeQuoteAttribution({ outbox = [], orders = [], quoteRequests = [], linkedOutbox = [] } = {}) {
+export function summarizeQuoteAttribution({
+  outbox = [], orders = [], quoteRequests = [], linkedOutbox = [], quoteLeadOutbox = [],
+} = {}) {
   const ordersById = new Map();
   for (const order of orders) if (order?.id) ordersById.set(order.id, order);
 
@@ -163,7 +165,10 @@ export function summarizeQuoteAttribution({ outbox = [], orders = [], quoteReque
     rows: survivalRows,
   };
 
-  return { quotes, byConversionType, unattributable, survival };
+  const qualifiedLead = emptyStatusCounts();
+  for (const row of quoteLeadOutbox) countStatus(qualifiedLead, row?.status);
+
+  return { quotes, byConversionType, qualifiedLead, unattributable, survival };
 }
 
 const statusLine = (counts) =>
@@ -173,8 +178,8 @@ const statusLine = (counts) =>
 const label = (text) => `  ${text.padEnd(46)}`;
 
 /** Render the section body as lines. Pure — the report just prints what comes back. */
-export function formatQuoteAttributionSection(summary) {
-  const { quotes, byConversionType, unattributable, survival } = summary;
+export function formatQuoteAttributionSection(summary, { qualifiedLeadConfigured = false } = {}) {
+  const { quotes, byConversionType, qualifiedLead, unattributable, survival } = summary;
   const lines = [
     "=== QUOTE ATTRIBUTION COVERAGE (window) ===",
     "  How to read this: 1-2 = paid demand, 3-4 = signal actually sent to Google, 5 = honest non-attribution",
@@ -183,7 +188,9 @@ export function formatQuoteAttributionSection(summary) {
     `${label("1. Website quote requests")}${quotes.total}`,
     `${label("2. Google-paid quote requests")}${quotes.withClickId}` +
       `   (any click ID, first-touch or latest_paid; utm_source~google: ${quotes.withGoogleUtmSource})`,
-    `${label("3. Qualified-lead conversions uploaded")}n/a — conversion action \`quote_submit_qualified\` not created yet (plan Task 2)`,
+    `${label("3. Qualified-lead conversions uploaded")}${qualifiedLeadConfigured
+      ? statusLine(qualifiedLead)
+      : "n/a — conversion action `quote_submit_qualified` not created yet (plan Task 2)"}`,
     `${label("4. Paid quote_won conversions uploaded")}${statusLine(byConversionType.quote_won)}`,
     `${label("5. Unattributable paid sales by origin")}${unattributable.total} total — ` +
       ORDER_ORIGINS.map((origin) => `${origin} ${unattributable.byOrigin[origin]}`).join(" | "),

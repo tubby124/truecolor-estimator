@@ -22,6 +22,10 @@ const reevaluationMigration = readFileSync(
   path.join(process.cwd(), "supabase/migrations/20260810120000_outbox_reevaluation.sql"),
   "utf8",
 );
+const quoteLeadMigration = readFileSync(
+  path.join(process.cwd(), "supabase/migrations/20260816010000_google_ads_quote_lead_outbox.sql"),
+  "utf8",
+);
 const manualOrderRoute = readFileSync(
   path.join(process.cwd(), "src/app/api/staff/manual-order/route.ts"),
   "utf8",
@@ -84,7 +88,7 @@ describe("Google Ads conversion outbox database contract", () => {
 
   it("bounds both sequential claims within the five-minute worker deadline", () => {
     expect(worker).toContain("const CLAIM_LIMIT = 1");
-    expect(worker.match(/p_limit: CLAIM_LIMIT/g)).toHaveLength(3);
+    expect(worker.match(/p_limit: CLAIM_LIMIT/g)).toHaveLength(4);
   });
 
   it("claims due diagnostics with row locking and a crash lease", () => {
@@ -124,6 +128,26 @@ describe("Google Ads conversion outbox database contract", () => {
       'new Set(["payment_received", "in_production", "ready_for_pickup", "complete"])',
     );
     expect(lifecycleData).not.toContain('new Set(["paid", "in_production"');
+  });
+});
+
+describe("Google Ads qualified quote lead outbox database contract", () => {
+  it("is one row per quote with RLS and no browser-side delivery path", () => {
+    expect(quoteLeadMigration).toContain("CREATE TABLE IF NOT EXISTS public.google_ads_quote_lead_outbox");
+    expect(quoteLeadMigration).toContain("quote_request_id uuid NOT NULL UNIQUE REFERENCES public.quote_requests(id) ON DELETE RESTRICT");
+    expect(quoteLeadMigration).toContain("ALTER TABLE public.google_ads_quote_lead_outbox ENABLE ROW LEVEL SECURITY");
+    expect(quoteLeadMigration).toContain("REVOKE ALL ON TABLE public.google_ads_quote_lead_outbox FROM anon, authenticated");
+    expect(quoteLeadMigration).not.toContain("CREATE POLICY");
+  });
+
+  it("uses the existing latest-paid then first-touch click-ID precedence and never replays a quote", () => {
+    expect(quoteLeadMigration).toContain("NEW.latest_paid_gclid");
+    expect(quoteLeadMigration).toContain("NEW.latest_paid_gbraid");
+    expect(quoteLeadMigration).toContain("NEW.latest_paid_wbraid");
+    expect(quoteLeadMigration).toContain("NEW.gclid");
+    expect(quoteLeadMigration).toContain("num_nonnulls(v_gclid, v_gbraid, v_wbraid) = 1 THEN 'pending' ELSE 'not_attributable'");
+    expect(quoteLeadMigration).toContain("AFTER INSERT ON public.quote_requests");
+    expect(quoteLeadMigration).toContain("ON CONFLICT (quote_request_id) DO NOTHING");
   });
 });
 

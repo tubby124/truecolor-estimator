@@ -32,6 +32,23 @@ interface QuoteMeasurementJob {
   attempt_count: number;
 }
 
+interface QuoteLeadConversionJob {
+  id: string;
+  quote_request_id: string;
+  gclid: string | null;
+  gbraid: string | null;
+  wbraid: string | null;
+  conversion_time: string;
+  attempt_count: number;
+}
+
+export interface QuoteLeadPassResult {
+  claimed: number;
+  sent: number;
+  failed: number;
+  dormant: boolean;
+}
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -163,6 +180,101 @@ async function attachEnhancedConversionIdentifiers(
   } catch {
     return job;
   }
+}
+
+async function attachQuoteLeadIdentifiers(
+  supabase: ReturnType<typeof createServiceClient>,
+  job: QuoteLeadConversionJob,
+): Promise<PaidConversionJob> {
+  try {
+    const { data: quote } = await supabase
+      .from("quote_requests")
+      .select("email, phone")
+      .eq("id", job.quote_request_id)
+      .maybeSingle();
+    return {
+      ...job,
+      order_number: job.quote_request_id,
+      conversion_type: "quote_submit_qualified",
+      conversion_value: undefined,
+      customer_email: quote?.email ?? null,
+      customer_phone: quote?.phone ?? null,
+    };
+  } catch {
+    return {
+      ...job,
+      order_number: job.quote_request_id,
+      conversion_type: "quote_submit_qualified",
+      conversion_value: undefined,
+    };
+  }
+}
+
+/**
+ * A quote lead is a durable offline conversion, but it stays entirely dormant
+ * until the owner creates the UI action and records its ID in Railway. The
+ * outbox trigger may still honestly classify click IDs while the action is off.
+ */
+export async function processQuoteLeadConversions(
+  supabase: ReturnType<typeof createServiceClient>,
+  options: {
+    env?: { GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID?: string };
+    upload?: typeof uploadPaidConversion;
+  } = {},
+): Promise<QuoteLeadPassResult> {
+  const env = options.env ?? process.env;
+  if (!env.GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID?.trim()) {
+    console.info("quote lead action not configured");
+    return { claimed: 0, sent: 0, failed: 0, dormant: true };
+  }
+
+  const { data, error } = await supabase
+    .rpc("claim_google_ads_quote_lead_conversions", { p_limit: CLAIM_LIMIT });
+  if (error) throw new Error(`quote lead queue claim failed: ${error.message}`);
+
+  const jobs = (data ?? []) as QuoteLeadConversionJob[];
+  let sent = 0;
+  let failed = 0;
+  const upload = options.upload ?? uploadPaidConversion;
+  for (const job of jobs) {
+    try {
+      const enrichedJob = await attachQuoteLeadIdentifiers(supabase, job);
+      const result = await upload(enrichedJob, { env });
+      if (!result.requestId) throw new Error("Data Manager ingest returned no request ID");
+      const { data: updated, error: updateError } = await supabase
+        .from("google_ads_quote_lead_outbox")
+        .update({
+          status: "sent",
+          data_manager_request_id: result.requestId,
+          submitted_at: new Date().toISOString(),
+          sent_at: new Date().toISOString(),
+          last_error: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", job.id)
+        .eq("status", "processing")
+        .select("id")
+        .maybeSingle();
+      if (updateError || !updated) {
+        throw new Error(`quote lead sent-state update failed: ${updateError?.message ?? "row was not processing"}`);
+      }
+      sent += 1;
+    } catch (error) {
+      failed += 1;
+      const terminal = job.attempt_count >= MAX_UPLOAD_ATTEMPTS;
+      await supabase
+        .from("google_ads_quote_lead_outbox")
+        .update({
+          status: terminal ? "dead" : "retry",
+          last_error: (error instanceof Error ? error.message : "Unknown upload error").slice(0, 1000),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", job.id)
+        .eq("status", "processing");
+    }
+  }
+
+  return { claimed: jobs.length, sent, failed, dormant: false };
 }
 
 export async function POST(req: NextRequest) {
@@ -370,6 +482,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  let quoteLead: QuoteLeadPassResult;
+  try {
+    quoteLead = await processQuoteLeadConversions(supabase);
+  } catch {
+    quoteLead = { claimed: 0, sent: 0, failed: 1, dormant: false };
+  }
+  failed += quoteLead.failed;
+
   const { data: quoteEventData, error: quoteEventClaimError } = await supabase
     .rpc("claim_quote_measurement_events", { p_limit: CLAIM_LIMIT });
   const quoteEvents = (quoteEventData ?? []) as QuoteMeasurementJob[];
@@ -416,10 +536,13 @@ export async function POST(req: NextRequest) {
   }
 
   const ok = failed === 0;
+  const quoteLeadMetrics = quoteLead.dormant
+    ? ""
+    : ` quote_lead_claimed=${quoteLead.claimed} quote_lead_sent=${quoteLead.sent} quote_lead_dormant=false`;
   await recordCronRun(
     "google-ads-conversions",
     ok,
-    `revenue_claimed=${jobs.length} revenue_submitted=${submitted} diagnostics_claimed=${diagnosticJobs.length} diagnostics_sent=${sent} diagnostics_processing=${diagnosticProcessing} diagnostics_retry=${diagnosticRetry} diagnostics_dead=${diagnosticDead} quote_claimed=${quoteEvents.length} quote_sent=${quoteSent} failed=${failed}`,
+    `revenue_claimed=${jobs.length} revenue_submitted=${submitted} diagnostics_claimed=${diagnosticJobs.length} diagnostics_sent=${sent} diagnostics_processing=${diagnosticProcessing} diagnostics_retry=${diagnosticRetry} diagnostics_dead=${diagnosticDead}${quoteLeadMetrics} quote_claimed=${quoteEvents.length} quote_sent=${quoteSent} failed=${failed}`,
   );
 
   return NextResponse.json({
@@ -435,6 +558,7 @@ export async function POST(req: NextRequest) {
         dead: diagnosticDead,
       },
     },
+    ...(quoteLead.dormant ? {} : { quoteLeads: quoteLead }),
     quotes: { claimed: quoteEvents.length, sent: quoteSent },
     failed,
   }, { status: ok ? 200 : 503 });

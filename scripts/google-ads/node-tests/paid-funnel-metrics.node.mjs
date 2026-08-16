@@ -229,6 +229,19 @@ test("rendered section states the six counters and refuses to invent a qualified
   assert.match(rendered, /honestly unattributable/);
 });
 
+test("renders qualified-lead outbox status counts only after the action is configured", () => {
+  const summary = summarizeQuoteAttribution({
+    ...productionWindowFixture(),
+    quoteLeadOutbox: [
+      { status: "sent" },
+      { status: "retry" },
+      { status: "not_attributable" },
+    ],
+  });
+  const rendered = formatQuoteAttributionSection(summary, { qualifiedLeadConfigured: true }).join("\n");
+  assert.match(rendered, /3\. Qualified-lead conversions uploaded\s+1 sent \| 1 pending\/retry \| 1 not_attributable \| 0 dead/);
+});
+
 test("zero attributed revenue alongside real commercial signal triggers the honest verdict", () => {
   const summary = summarizeQuoteAttribution(productionWindowFixture());
   assert.equal(needsIncompleteCoverageVerdict({ attributedCount: 0, summary }), true);
