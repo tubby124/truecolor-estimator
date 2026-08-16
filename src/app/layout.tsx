@@ -303,8 +303,13 @@ export default function RootLayout({
           src="https://www.googletagmanager.com/gtag/js?id=G-6HMQT7MNLL"
           strategy="afterInteractive"
         />
-        <MetaPixel />
-        <MarketingConsent />
+        {/* Meta stays dormant unless the banner is enabled: no banner → no consent → no pixel/CAPI. */}
+        {process.env.NEXT_PUBLIC_MARKETING_CONSENT_BANNER === "true" ? (
+          <>
+            <MetaPixel />
+            <MarketingConsent />
+          </>
+        ) : null}
         {/* Trustindex loader-cert.js removed — was injecting visible
             "Trustmark widget validation failed" error text on every page.
             Reviews widget (ReviewsSection) and Instagram feed (loader-feed.js)
