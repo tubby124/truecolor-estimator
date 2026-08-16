@@ -43,6 +43,10 @@ base.describe("Auth — Sign Up / Sign In", () => {
 
   // 1. Sign up new account -> "Check your inbox" confirmation
   base("sign up creates account and logs user in immediately", async ({ page }) => {
+    base.skip(
+      process.env.E2E_ALLOW_EXTERNAL_SIDE_EFFECTS !== "1",
+      "E2E_ALLOW_EXTERNAL_SIDE_EFFECTS=1 is required: sign-up sends a real welcome email and creates a Brevo contact",
+    );
     const email = testEmail(TEST_SUFFIXES.signup);
 
     // Ensure clean state

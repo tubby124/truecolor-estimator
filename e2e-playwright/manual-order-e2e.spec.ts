@@ -15,10 +15,13 @@ import {
   deleteTestOrders,
 } from "./helpers/supabase-admin";
 
-const BASE_URL = "http://localhost:3000";
-const MANUAL_ORDER_URL = `${BASE_URL}/api/staff/manual-order`;
-
 // ---------- helpers ----------
+
+function configuredBaseUrl() {
+  const baseUrl = test.info().project.use.baseURL;
+  if (typeof baseUrl !== "string") throw new Error("Playwright baseURL is required for manual-order E2E tests");
+  return baseUrl;
+}
 
 function loadEnvSync(): Record<string, string> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -93,17 +96,17 @@ test.describe("Manual Order API (staff → customer account)", () => {
 
     // Sign in through the real staff login page so @supabase/ssr writes the
     // same chunked cookies that server route handlers verify with getUser().
-    const context = await browser.newContext();
+    const context = await browser.newContext({ baseURL: configuredBaseUrl() });
     const page = await context.newPage();
 
-    await page.goto(`${BASE_URL}/staff/login`);
+    await page.goto("/staff/login");
     await page.fill('input[type="email"]', STAFF_EMAIL);
     await page.fill('input[type="password"]', STAFF_PASSWORD);
     await page.click('button[type="submit"]');
 
     try {
       await page.waitForURL(/\/staff(\/orders)?$/, { timeout: 15_000 });
-      await page.goto(`${BASE_URL}/staff/orders`, { waitUntil: "networkidle" });
+      await page.goto("/staff/orders", { waitUntil: "networkidle" });
     } catch {
       console.error("Staff login failed: did not reach staff portal");
       await context.close();
@@ -111,7 +114,7 @@ test.describe("Manual Order API (staff → customer account)", () => {
     }
 
     // Capture all cookies as a header string
-    const allCookies = await context.cookies(BASE_URL);
+    const allCookies = await context.cookies();
     staffCookies = allCookies.map((c) => `${c.name}=${c.value}`).join("; ");
 
     await context.close();
@@ -139,7 +142,7 @@ test.describe("Manual Order API (staff → customer account)", () => {
     expect(staffCookies).toContain("sb-");
 
     const payload = buildPayload("1");
-    const res = await request.post(MANUAL_ORDER_URL, {
+    const res = await request.post("/api/staff/manual-order", {
       headers: { Cookie: staffCookies, "Content-Type": "application/json" },
       data: payload,
     });
@@ -173,7 +176,7 @@ test.describe("Manual Order API (staff → customer account)", () => {
     expect(staffCookies).toContain("sb-");
 
     const payload = buildPayload("2");
-    const res = await request.post(MANUAL_ORDER_URL, {
+    const res = await request.post("/api/staff/manual-order", {
       headers: { Cookie: staffCookies, "Content-Type": "application/json" },
       data: payload,
     });
@@ -211,7 +214,7 @@ test.describe("Manual Order API (staff → customer account)", () => {
 
     // Now create a manual order for this existing user
     const payload = buildPayload("3");
-    const res = await request.post(MANUAL_ORDER_URL, {
+    const res = await request.post("/api/staff/manual-order", {
       headers: { Cookie: staffCookies, "Content-Type": "application/json" },
       data: payload,
     });
@@ -238,7 +241,7 @@ test.describe("Manual Order API (staff → customer account)", () => {
 
     // Create the manual order (which creates the auth account)
     const payload = buildPayload("4");
-    const res = await request.post(MANUAL_ORDER_URL, {
+    const res = await request.post("/api/staff/manual-order", {
       headers: { Cookie: staffCookies, "Content-Type": "application/json" },
       data: payload,
     });
@@ -252,7 +255,7 @@ test.describe("Manual Order API (staff → customer account)", () => {
       await admin.auth.admin.generateLink({
         type: "magiclink",
         email,
-        options: { redirectTo: `${BASE_URL}/account/callback` },
+        options: { redirectTo: new URL("/account/callback", configuredBaseUrl()).toString() },
       });
 
     expect(linkErr).toBeNull();
@@ -287,7 +290,7 @@ test.describe("Manual Order API (staff → customer account)", () => {
 
     // Create the manual order (which creates the auth account)
     const payload = buildPayload("5");
-    const res = await request.post(MANUAL_ORDER_URL, {
+    const res = await request.post("/api/staff/manual-order", {
       headers: { Cookie: staffCookies, "Content-Type": "application/json" },
       data: payload,
     });
@@ -342,7 +345,7 @@ test.describe("Manual Order API (staff → customer account)", () => {
     ];
     const payload = buildPayload("6", { items });
 
-    const res = await request.post(MANUAL_ORDER_URL, {
+    const res = await request.post("/api/staff/manual-order", {
       headers: { Cookie: staffCookies, "Content-Type": "application/json" },
       data: payload,
     });
