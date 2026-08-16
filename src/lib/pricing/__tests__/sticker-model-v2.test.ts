@@ -149,6 +149,64 @@ describe("Sticker Model V2 — fit against Albert's RETAIL quotes (wholesale exc
     expect(violations, violations.slice(0, 10).join("\n")).toEqual([]);
   });
 
+  // ---------------------------------------------------------------------
+  // Quantity envelope (2026-08-16). The preset test above only covers the six
+  // buttons; a TYPED qty could land mid-tier and cost more than a larger order
+  // (99 × 4×4 = $118.80 vs 100 × 4×4 = $100). The envelope caps every qty >= 10
+  // at the cheapest tier-start total above it. qty 1-9 is deliberately excluded
+  // (owner declined restructuring those tiers).
+  // ---------------------------------------------------------------------
+
+  it("order total never decreases across EVERY integer quantity 10..1100", () => {
+    const sizes: [number, number][] = [[2,2],[3,3],[4,4],[5,5],[8,8],[12,1.5]];
+    const materials: StickerQuoteFixture["material"][] = ["vinyl_white", "vinyl_clear"];
+    const shapes: StickerQuoteFixture["shape"][] = ["square", "circle"];
+    const violations: string[] = [];
+    for (const material of materials) for (const shape of shapes) for (const [w, h] of sizes) {
+      let prev = quoteStickerV2({ width_in: w, height_in: h, qty: 10, material, shape, finish: "gloss_lam" }).total;
+      for (let qty = 11; qty <= 1100; qty++) {
+        const total = quoteStickerV2({ width_in: w, height_in: h, qty, material, shape, finish: "gloss_lam" }).total;
+        if (total < prev - 1e-9) {
+          violations.push(`${material}/${shape} ${w}x${h} qty ${qty - 1}->${qty}: $${prev} -> $${total}`);
+        }
+        prev = total;
+      }
+    }
+    expect(violations, violations.slice(0, 10).join("\n")).toEqual([]);
+  });
+
+  it("does NOT apply the envelope below qty 10 — qty 9 keeps its qty_2_9 tier price", () => {
+    for (let qty = 1; qty <= 9; qty++) {
+      const r = quoteStickerV2({ width_in: 4, height_in: 4, qty, material: "vinyl_white", shape: "square", finish: "gloss_lam" });
+      expect(r.qty_envelope_applied, `qty ${qty}`).toBe(false);
+      expect(r.qty_envelope_from_qty, `qty ${qty}`).toBeNull();
+      expect(r.qty_tier_label, `qty ${qty}`).toBe(qty === 1 ? "qty_1" : "qty_2_9");
+      // $25/ea floor dominates a 4×4 in both qty 1-9 tiers — unchanged by the envelope.
+      expect(r.unit_price, `qty ${qty}`).toBe(25);
+      expect(r.total, `qty ${qty}`).toBe(25 * qty);
+    }
+  });
+
+  it("caps 99 × 4×4 at the 100 × 4×4 total (the cliff this envelope exists for)", () => {
+    const base = { width_in: 4, height_in: 4, material: "vinyl_white" as const, shape: "square" as const, finish: "gloss_lam" as const };
+    const q99 = quoteStickerV2({ ...base, qty: 99 });
+    const q100 = quoteStickerV2({ ...base, qty: 100 });
+    expect(q100.total).toBe(100);
+    expect(q99.total).toBe(q100.total);
+    expect(q99.qty_envelope_applied).toBe(true);
+    expect(q99.qty_envelope_from_qty).toBe(100);
+    expect(q99.unit_price).toBe(1.01); // 100 / 99, rounded to the cent
+    expect(q100.qty_envelope_applied).toBe(false);
+  });
+
+  it("preset quantities never trigger the envelope (they were already monotone)", () => {
+    for (const qty of [25, 50, 100, 250, 500, 1000]) {
+      const r = quoteStickerV2({ width_in: 4, height_in: 4, qty, material: "vinyl_white", shape: "square", finish: "gloss_lam" });
+      expect(r.qty_envelope_applied, `qty ${qty}`).toBe(false);
+      expect(r.qty_envelope_from_qty, `qty ${qty}`).toBeNull();
+    }
+  });
+
   it("never undercharges retail customers by more than 50% (revenue protection)", () => {
     for (const d of retailDiffs) {
       if (d.total_delta_pct < -50) {
