@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "1413637299787953";
+export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "2456385404880011";
 
 export interface MetaItem {
   id: string;

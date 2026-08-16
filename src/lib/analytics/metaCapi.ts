@@ -3,7 +3,7 @@ import { createHash } from "crypto";
 import type { NextRequest } from "next/server";
 import { META_MARKETING_CONSENT_COOKIE } from "@/lib/analytics/metaConsent";
 
-const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "1413637299787953";
+const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "2456385404880011";
 const CAPI_TOKEN = process.env.META_CAPI_ACCESS_TOKEN;
 const CAPI_TEST_CODE = process.env.META_CAPI_TEST_EVENT_CODE;
 const CAPI_GRAPH_VERSION = process.env.META_CAPI_GRAPH_VERSION ?? "v23.0";

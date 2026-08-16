@@ -1,6 +1,8 @@
 # Meta PPC Measurement Runbook
 
-The site uses Meta dataset **1413637299787953** (`truecolor`) for a consent-aware web Pixel and Conversions API (CAPI) setup.
+The site uses Meta dataset **2456385404880011** (`truecolor-website`) for a consent-aware web Pixel and Conversions API (CAPI) setup.
+
+The older `truecolor` dataset is App-type, cannot issue a Conversions API token, and is retired—do not use it for CAPI.
 
 ## What the site sends
 
@@ -18,12 +20,12 @@ Meta tracking is disabled unless the visitor accepts the optional marketing-cook
 
 ## One-time production activation
 
-1. In Meta Events Manager, open dataset `truecolor` (Pixel ID `1413637299787953`). Confirm `truecolorprinting.ca` is connected and verify the domain in Business Settings if it is not already verified.
+1. In Meta Events Manager, open dataset `truecolor-website` (Pixel ID `2456385404880011`). Confirm `truecolorprinting.ca` is connected and verify the domain in Business Settings if it is not already verified.
 2. In Events Manager, generate a Conversions API access token for this dataset. Do not put it in Git or a client-side variable.
 3. In Railway, add these service variables:
 
    ```text
-   NEXT_PUBLIC_META_PIXEL_ID=1413637299787953
+   NEXT_PUBLIC_META_PIXEL_ID=2456385404880011
    META_CAPI_ACCESS_TOKEN=<token from Events Manager>
    META_CAPI_GRAPH_VERSION=v23.0
    ```
