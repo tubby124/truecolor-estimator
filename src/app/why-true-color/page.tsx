@@ -112,18 +112,26 @@ export default function WhyTrueColorPage() {
         <div className="mx-auto grid max-w-5xl gap-7 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#c92719]">Saskatoon print shop · order online</p>
+            {/* Keyword-bearing for BOTH generic paid ad groups (print + signs).
+                The old "Real printing. Clear pricing. Local pickup." carried no
+                query language, which is what Google Ads scored as BELOW_AVERAGE
+                landing-page experience on ~85% of keywords. */}
             <h1 className="mt-3 text-4xl font-black leading-[0.98] tracking-[-0.035em] text-[#1c1712] sm:text-6xl">
-              Real printing. Clear pricing. Local pickup.
+              Saskatoon Print &amp; Sign Shop — Real Pricing, Local Pickup
             </h1>
             <p className="mt-4 inline-block rounded-lg border border-[#c92719]/25 bg-white px-3 py-2 font-mono text-sm font-bold tracking-tight text-[#c92719] sm:text-base">
-              Signs from $25 · Cards from $45 · Banners from $66
+              Printing services Saskatoon · signs from $25 · business cards from $45 · banners from $66
             </p>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-gray-700 sm:text-lg">
               Choose a product, configure the details, and see your price before checkout. Your order is printed in Saskatoon and reviewed by a real person before production.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              {/* Primary hero CTA is a REAL navigation to /products, not an
+                  in-page anchor. An anchor scroll produces no pageview and no
+                  landing-page engagement signal for Google; the paid_landing_cta
+                  event is unchanged because PaidCtaLink still owns the click. */}
               <PaidCtaLink
-                href="#products"
+                href="/products"
                 action="browse_products"
                 placement="hero"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#c92719] px-6 font-black text-white transition hover:bg-[#a91f14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c92719] focus-visible:ring-offset-2"
@@ -139,7 +147,15 @@ export default function WhyTrueColorPage() {
                 Request a custom quote
               </PaidCtaLink>
             </div>
-            <p className="mt-4 text-sm text-gray-600">Guest checkout · No account required · Prices shown before payment</p>
+            <PaidCtaLink
+              href="#products"
+              action="browse_products_anchor"
+              placement="hero"
+              className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-[#00718f] underline underline-offset-4 transition hover:text-[#c92719] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3] focus-visible:ring-offset-2"
+            >
+              Or browse products &amp; prices on this page
+            </PaidCtaLink>
+            <p className="mt-2 text-sm text-gray-600">Guest checkout · No account required · Prices shown before payment</p>
           </div>
 
           <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_24px_60px_rgba(28,23,18,0.12)] sm:p-8">

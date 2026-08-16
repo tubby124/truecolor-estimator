@@ -136,20 +136,29 @@ export default function VehicleDecalsSaskatoonPage() {
               Full-colour die-cut vinyl for door panels, rear windows, and side graphics. Printed on our Roland UV wide-format press.{" "}
               <strong>From $14/sqft; $25 order-total minimum applies at checkout.</strong> Installation quoted separately.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            {/* Primary CTA lands on the decal configurator, not /quote. A quote
+                form is a dead end for a paid click that arrived ready to price a
+                job — /products/window-decals is the same product with a live
+                price. Quote and gallery stay reachable as text links. */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <Link
-                href="/quote"
+                href="/products/window-decals"
                 className="bg-[#16C2F3] text-white font-bold px-7 py-3.5 rounded-lg hover:bg-[#0fb0dd] transition-colors text-center"
               >
-                Get a Quote →
+                Get My Price →
               </Link>
               <Link
-                href="/gallery"
-                className="border border-gray-300 text-gray-700 font-semibold px-7 py-3.5 rounded-lg hover:border-[#16C2F3] hover:text-[#16C2F3] transition-colors text-center"
+                href="/quote"
+                className="text-[#16C2F3] font-semibold underline underline-offset-4 min-h-[44px] inline-flex items-center justify-center hover:text-[#0fb0dd] transition-colors text-center"
               >
-                See Our Work →
+                Get a quote for an install
               </Link>
             </div>
+            <p className="mt-3 text-sm text-gray-500">
+              <Link href="/gallery" className="underline underline-offset-4 hover:text-[#16C2F3] transition-colors">
+                See our work
+              </Link>
+            </p>
           </div>
           <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
             <Image
