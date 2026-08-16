@@ -1359,3 +1359,14 @@ The lifecycle guard already permits that transition; it will reject a numeric ID
 The new PRICE asset enters Google policy review. `live-verify` reports
 `one or more manual assets are not policy-approved` as a **launchBlocker** (not a safetyFailure)
 until review completes. That is normal and self-clearing.
+
+### 2026-08-16 PM — EXECUTED (orchestrator record)
+
+All four new/extended authorities ran `--execute` against 107-281-6342 and read back CLEAN; `validate:google-ads:launched` = **0 safety failures** (BLOCKED only on the new PRICE asset's policy review + the pre-existing offline-uploader clearance). Live IDs: `qualified_call_website_60s` = **7723091936** (WEBSITE_CALL), `click_to_call_intent` = **7723091939** (WEBPAGE); labels set on Railway (`NEXT_PUBLIC_GOOGLE_ADS_WEBSITE_CALL_LABEL`, `NEXT_PUBLIC_GOOGLE_ADS_CLICK_TO_CALL_LABEL`, `GOOGLE_ADS_WEBSITE_CALL_CONVERSION_ACTION_ID`). Deploy `1372918` SUCCESS; headless-iPhone smoke on prod: tel: tap → `click_to_call_intent` conversion ping + GA4 `click_to_call`; `phone_conversion_number` config live on every page.
+
+Three API facts learned the hard way (each now encoded in the scripts):
+1. `status=REMOVED` on a conversion action needs a `remove` op, not an update — and **codeless (auto-created) actions return MUTATE_NOT_ALLOWED either way**. "About Us" 7688596965 is UI-only for the owner; verifier relaxed to "non-counting until removed".
+2. `view_through_lookback_window_days` is VALUE_MUST_BE_UNSET on WEBSITE_CALL.
+3. In-market `80886 Signage` is not SEARCH-eligible (`user_interest.availabilities`) — 5 observation criteria per group, not 6.
+
+Owner UI actions still open: remove "About Us" codeless action (or disable auto-created conversions); link the Google Business Profile location asset; confirm GA4 `generate_lead` import now shows (it is ENABLED + secondary via API).
