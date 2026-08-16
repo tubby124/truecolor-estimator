@@ -107,7 +107,16 @@ const VINYL_TIERS: VinylTier[] = [
   // deferred to the next /pricing-review pending a check of whether Sergio's
   // overcharge is actually a CIRCLE_SHAPE_MULTIPLIER issue instead.
   { qty_max: 249,      label: "qty_100_249",  per_unit_floor: 0.65,  rate_per_sqft: 9  },
-  { qty_max: 499,      label: "qty_250_499",  per_unit_floor: 0.35,  rate_per_sqft: 8  },
+  // 2026-08-16 PM: rate 8 -> 7.9. With 8 here and 4 in the next tier the exact
+  // per-unit prices are equal at qty 250 and 500 (8s x 250 = 4s x 500), so the
+  // cent-rounding of the unit decides which preset total is higher - for 848
+  // size combos incl. the default 4x4 (0.89 x 250 = $222.50 vs 0.44 x 500 =
+  // $220) ordering 500 came out CHEAPER than 250. No retail fixture is
+  // rate-dominated in this tier, so 7.9 costs nothing in fit and makes the
+  // order total non-decreasing across every preset (25/50/100/250/500/1000)
+  // for every size <= 2 sqft and every material/shape multiplier - locked by
+  // the "preset totals never decrease" test in sticker-model-v2.test.ts.
+  { qty_max: 499,      label: "qty_250_499",  per_unit_floor: 0.35,  rate_per_sqft: 7.9 },
   // 2026-08-16 PM: 500-999 floor 0.20 -> 0.33 against David Hodges (3x3 q500
   // square, paid, $0.42 - was -40.5%) and Assem Sethi (2x2 q500 circle $0.50 -
   // was -28%); 0.33 is the value that brings BOTH inside +/-25%. Rate-dominated

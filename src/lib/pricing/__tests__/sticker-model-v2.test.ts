@@ -125,6 +125,30 @@ describe("Sticker Model V2 — fit against Albert's RETAIL quotes (wholesale exc
     expect(pct).toBeGreaterThanOrEqual(80);
   });
 
+  // 2026-08-16: locks the configurator-facing invariant that ordering MORE
+  // never costs LESS in total across the preset qty buttons, for every size
+  // preset + a fine custom-size grid, every material and shape. (Per-unit is
+  // allowed to step up once, 25->50, to keep "25 stickers from $25" true.)
+  it("order total never decreases across preset quantities (25/50/100/250/500/1000)", () => {
+    const presets = [25, 50, 100, 250, 500, 1000];
+    const sizes: [number, number][] = [[1,3],[2,2],[2,3],[2,4],[3,3],[4,4],[4,6],[5,5],[6,6],[8,8]];
+    for (let w = 1; w <= 24; w += 0.5) for (let h = w; h <= 24; h += 0.5) sizes.push([w, h]);
+    const combos: Array<[StickerQuoteFixture["material"], StickerQuoteFixture["shape"]]> = [
+      ["vinyl_white", "square"], ["vinyl_white", "die_cut"], ["vinyl_white", "circle"],
+      ["vinyl_clear", "square"], ["vinyl_clear", "circle"], ["perf_8mil", "square"],
+    ];
+    const violations: string[] = [];
+    for (const [material, shape] of combos) for (const [w, h] of sizes) {
+      let prev = -1;
+      for (const qty of presets) {
+        const r = quoteStickerV2({ width_in: w, height_in: h, qty, material, shape, finish: "gloss_lam" });
+        if (r.total < prev - 1e-9) violations.push(`${material}/${shape} ${w}x${h} qty ${qty}: $${prev} -> $${r.total}`);
+        prev = r.total;
+      }
+    }
+    expect(violations, violations.slice(0, 10).join("\n")).toEqual([]);
+  });
+
   it("never undercharges retail customers by more than 50% (revenue protection)", () => {
     for (const d of retailDiffs) {
       if (d.total_delta_pct < -50) {
