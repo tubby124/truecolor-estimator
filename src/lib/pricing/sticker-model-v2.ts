@@ -68,6 +68,15 @@ interface VinylTier {
 const VINYL_TIERS: VinylTier[] = [
   { qty_max: 1,        label: "qty_1",        per_unit_floor: 25.00, rate_per_sqft: 9  },
   { qty_max: 9,        label: "qty_2_9",      per_unit_floor: 25.00, rate_per_sqft: 18 },
+  // 2026-08-16 (NOT changed, deliberately): five retail floor-dominated fixtures
+  // in qty 10-99 (Olivia q40 $1.25, Luby q50 $0.90, Samantha q50 $1.30/$1.20,
+  // Michaela q50 $1.20 invoice-verified) have median $1.20 - the $1.00 floor
+  // undercharges 4 of 5. But this floor is pinned by the "$25 for 25x 2x2"
+  // marketing anchor (products-content fromPrice, sticker-printing-saskatoon
+  // page + schema, llms.txt, merchant feed, price-consistency) - 25 x $1.10 =
+  // $27.50 breaks all of them, and raising only qty_50_99 puts a per-unit
+  // UPTICK between the 25 and 50 preset buttons. Owner decision, tracked in
+  // the sticker /pricing-review brief (small-sticker additive model).
   { qty_max: 49,       label: "qty_10_49",    per_unit_floor: 1.00,  rate_per_sqft: 8  },
   { qty_max: 99,       label: "qty_50_99",    per_unit_floor: 1.00,  rate_per_sqft: 8  },
   // 2026-08-16 recalibration: floor raised 0.55->0.65 against expanded fixture
@@ -151,7 +160,15 @@ export function quoteStickerV2(inputs: StickerInputs): StickerQuoteResult {
   if (sqft > WIDE_FORMAT_THRESHOLD_SQFT) {
     const wfTier = WIDE_FORMAT_TIERS.find((t) => sqft <= t.sqft_max)!;
     tier_label = `wide_format_sqft_${wfTier.sqft_max === Infinity ? "30plus" : "≤" + wfTier.sqft_max}`;
-    per_unit_floor = ORDER_MIN;
+    // 2026-08-16 fix: this used to be ORDER_MIN ($25) - the ORDER-level minimum
+    // applied as a PER-PIECE floor. At qty>1 that inflated every wide-format
+    // piece under 25/rate sqft (e.g. 2.1 sqft x qty 100 = $2,500 vs $1,520 for
+    // a 1.9 sqft piece at the same qty - a 64% jump for a marginally bigger
+    // item). The order minimum is already enforced on `total` below. The
+    // per-piece floor now inherits the catalog tier's floor for that qty
+    // (identical for qty 1 and 2-9, where the tier floor IS $25), so the
+    // 2.0 sqft mode boundary stays floor-continuous.
+    per_unit_floor = pickVinylTier(inputs.qty).per_unit_floor;
     effective_rate = wfTier.rate_per_sqft;
     modifiers.push("wide_format_mode");
   } else {
