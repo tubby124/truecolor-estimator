@@ -1,6 +1,8 @@
 // GA4 event utility — wraps window.gtag safely (no-ops if GA4 not loaded yet)
 // Measurement ID: G-6HMQT7MNLL
 
+import { sendGoogleAdsClickToCall } from "@/lib/analytics/google-ads";
+
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
@@ -81,11 +83,18 @@ export function trackClickToCall(params: {
   page_path: string;
   link_url: string;
 }) {
+  // GA4 stays unconditional: it is the behavioural record of every tel: tap on
+  // every device, and is what the funnel reports read.
   gtag("event", "click_to_call", {
     placement: params.placement,
     page_path: params.page_path,
     link_url: params.link_url,
   });
+
+  // Google Ads gets a stricter signal — dial-capable devices only, once per
+  // session, and only when a valid conversion label is configured. Returns false
+  // and does nothing otherwise.
+  sendGoogleAdsClickToCall();
 }
 
 export function trackAddToCart(params: {
@@ -164,9 +173,15 @@ export function trackGenerateLead(params: { value?: number; lead_source: string;
   });
 }
 
-export function trackPaidLandingView() {
+/**
+ * @param pagePath Defaults to the current pathname. The hardcoded
+ * "/why-true-color" it replaced attributed every paid landing view to one URL,
+ * which made the event useless the moment a second paid surface existed.
+ * Undefined during server rendering, where there is no location.
+ */
+export function trackPaidLandingView(pagePath?: string) {
   gtag("event", "view_paid_landing", {
-    page_path: "/why-true-color",
+    page_path: pagePath ?? (typeof window !== "undefined" ? window.location.pathname : undefined),
   });
 }
 

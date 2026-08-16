@@ -35,10 +35,44 @@ describe("paid funnel event ownership", () => {
     expect(tracker).toContain('document.addEventListener("click", handleClick, { capture: true })');
     expect(tracker).toContain('closest<HTMLAnchorElement>(\'a[href^="tel:"]\')');
     expect(tracker).toContain('anchor.dataset.callPlacement ?? "tel_link"');
-    expect(source("src/components/site/SiteNav.tsx")).toContain("<CallTracker />");
     const paidLinks = source("src/components/paid/PaidProductLink.tsx");
     expect(paidLinks).toContain("data-call-placement={placement}");
     expect(paidLinks).not.toContain("trackClickToCall");
+  });
+
+  it("mounts that tracker on every surface that renders a tel: link", () => {
+    // SiteNav covers the main tree. These four render outside it — the paid
+    // landing page has its own layout, and /pay, error and 404 bypass it — so
+    // each needs its own mount or the calls placed from them are invisible.
+    for (const surface of [
+      "src/components/site/SiteNav.tsx",
+      "src/app/why-true-color/layout.tsx",
+      "src/app/pay/[token]/page.tsx",
+      "src/app/error.tsx",
+      "src/app/not-found.tsx",
+    ]) {
+      expect(source(surface), surface).toContain("<CallTracker />");
+    }
+  });
+
+  it("marks the displayed number for the Google Ads swap without touching JSON-LD", () => {
+    for (const surface of [
+      "src/app/why-true-color/layout.tsx",
+      "src/app/contact/page.tsx",
+    ]) {
+      expect(source(surface), surface).toContain('className="tc-phone"');
+    }
+    // The JSON-LD telephone is a structured-data contract with Search; a
+    // forwarding number there would misrepresent the business.
+    const layout = source("src/app/layout.tsx");
+    expect(layout).toContain('telephone: "+13069548688"');
+    expect(layout).not.toMatch(/tc-phone/);
+  });
+
+  it("keeps the paid landing view attributable to the page it fired on", () => {
+    const analytics = source("src/lib/analytics.ts");
+    expect(analytics).toContain("export function trackPaidLandingView(pagePath?: string)");
+    expect(analytics).not.toContain('page_path: "/why-true-color"');
   });
 
   it("uses the order UUID for server-side purchase deduplication", () => {

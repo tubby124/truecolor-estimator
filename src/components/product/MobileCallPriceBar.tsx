@@ -9,6 +9,12 @@ import { trackPaidCta } from "@/components/paid/PaidProductLink";
 // sticky Add to Cart bar (never replacing or covering it). Additive only:
 // does not alter ProductPageClient's existing sticky bar or cart flow.
 
+// Deliberately NOT tagged with the Google Ads swap class ("tc-phone"): this bar
+// shows "Call Now", never the number itself, and Google's swapper rewrites the
+// content of every element carrying that class. Tagging it would replace the
+// label and icon with a phone number. The bar is still fully measured — the
+// swap rewrites its tel: href (it is client-rendered, so WebsiteCallSwap's
+// MutationObserver is what catches it), and CallTracker reports the tap.
 const PHONE_DISPLAY = "(306) 954-8688";
 const PHONE_TEL = "tel:+13069548688";
 const CALL_PLACEMENT = "product_page_mobile_call_bar";

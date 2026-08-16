@@ -7,6 +7,7 @@ import {
   failOrderCheckout,
   reserveOrderCheckout,
 } from "@/lib/payment/order-checkout";
+import { CallTracker } from "@/components/site/CallTracker";
 import { createServiceClient } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { recordPaymentAttempt } from "@/lib/payments/attempts";
@@ -276,6 +277,7 @@ function AlreadyPaidPage() {
           background: "#f1f5f9",
         }}
       >
+        <CallTracker />
         <div
           style={{
             maxWidth: 480,
@@ -338,6 +340,7 @@ function UpdatedLinkPage() {
           background: "#f1f5f9",
         }}
       >
+        <CallTracker />
         <div
           style={{
             maxWidth: 480,
@@ -400,6 +403,7 @@ function ExpiredPage() {
           background: "#f1f5f9",
         }}
       >
+        <CallTracker />
         <div
           style={{
             maxWidth: 480,
@@ -478,6 +482,7 @@ function ErrorPage() {
           background: "#f1f5f9",
         }}
       >
+        <CallTracker />
         <div
           style={{
             maxWidth: 480,

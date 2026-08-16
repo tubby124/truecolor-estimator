@@ -8,7 +8,8 @@ import { UtmCapture } from "@/components/site/UtmCapture";
 import { MetaPixel } from "@/components/site/MetaPixel";
 import { MarketingConsent } from "@/components/site/MarketingConsent";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
-import { buildGoogleTagBootstrapScript } from "@/lib/analytics/google-ads";
+import { WebsiteCallSwap } from "@/components/site/WebsiteCallSwap";
+import { buildGoogleTagBootstrapScript, normalizeGoogleAdsConversionLabel } from "@/lib/analytics/google-ads";
 
 // Self-hosted Geist + Geist Mono variable WOFF2 files. Switched from
 // next/font/google because Railway builds were intermittently failing on
@@ -269,11 +270,23 @@ const founderSchema = {
   ],
 };
 
+// Consent posture: the marketing banner is dormant today, so the number swap ships
+// with the base tag. Turning the banner on moves the swap behind granted consent —
+// it writes a forwarding number into the page, which is marketing measurement, not
+// the analytics baseline. GA4 and the Google Ads base tag are unchanged either way.
+const marketingConsentBannerEnabled = process.env.NEXT_PUBLIC_MARKETING_CONSENT_BANNER === "true";
+const websiteCallLabel = normalizeGoogleAdsConversionLabel(
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_WEBSITE_CALL_LABEL,
+);
+
 const googleTagBootstrapScript = buildGoogleTagBootstrapScript(
   process.env.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_CONVERSION_LABEL,
   // Account-level Google Ads tag (AW-18330693756). One gtag.js load below serves every
   // configured destination, so the Ads tag needs a config call here, not a second script.
   process.env.NEXT_PUBLIC_GOOGLE_ADS_TAG_ID,
+  // Website call conversions. Withheld from the beforeInteractive queue when the
+  // consent banner is live; WebsiteCallSwap then registers it on consent instead.
+  marketingConsentBannerEnabled ? undefined : (websiteCallLabel ?? undefined),
 );
 
 export default function RootLayout({
@@ -297,6 +310,9 @@ export default function RootLayout({
         </a>
         <AuthRedirect />
         <UtmCapture />
+        {websiteCallLabel ? (
+          <WebsiteCallSwap label={websiteCallLabel} requiresConsent={marketingConsentBannerEnabled} />
+        ) : null}
         {children}
         <BackToTop />
         <Script

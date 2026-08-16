@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { CallTracker } from "@/components/site/CallTracker";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-[#1c1712] flex flex-col items-center justify-center text-center px-6">
+      {/* 404s render outside SiteNav; without this the tel: link here is untracked. */}
+      <CallTracker />
       <p className="text-[#16C2F3] text-sm font-semibold tracking-widest uppercase mb-4">
         404 — Page not found
       </p>

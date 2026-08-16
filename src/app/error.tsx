@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CallTracker } from "@/components/site/CallTracker";
 
 export default function GlobalError({
   reset,
@@ -10,6 +11,9 @@ export default function GlobalError({
 }) {
   return (
     <div className="min-h-screen bg-[#1c1712] flex flex-col items-center justify-center text-center px-6">
+      {/* Error boundaries replace the tree that carries SiteNav, so this page
+          would otherwise lose the tel: listener exactly when callers use it. */}
+      <CallTracker />
       <p className="text-[#16C2F3] text-sm font-semibold tracking-widest uppercase mb-4">
         Something went wrong
       </p>
