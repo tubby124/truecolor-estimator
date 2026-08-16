@@ -25,6 +25,7 @@
 //      railway run node scripts/google-ads/apply-assets.mjs --execute
 
 import { paidSearchConfig } from "../../docs/paid-search/campaign-config.mjs";
+import { PRICE_MICROS, priceKeyFromContract, priceKeyFromLive } from "./asset-contract.mjs";
 
 const V = "v24";
 const CUSTOMER = "1072816342";
@@ -41,7 +42,6 @@ const MANAGED_FIELD_TYPES = new Set(["CALLOUT", "SITELINK", "PRICE"]);
 // `WHERE asset.name LIKE 'TC PPC %'`, so an unnamed asset would be invisible to the verifier
 // and the manualAssets pin (13 -> 14) would never move. Callouts and sitelinks predate that
 // convention; new managed assets carry the name.
-const PRICE_MICROS = (cad) => String(Math.round(cad * 1_000_000));
 
 const args = process.argv.slice(2);
 for (const arg of args) if (arg !== "--execute") throw new Error(`unknown argument: ${arg}`);
@@ -115,42 +115,6 @@ async function readLive() {
 
 const calloutKey = (text) => `CALLOUT::${text}`;
 const sitelinkKey = (s) => `SITELINK::${s.linkText}::${s.description1}::${s.description2}`;
-// A price asset is a single object carrying up to eight offerings, so the key has to fingerprint
-// ALL of them. Keying on the name alone would let an edited offering read back "in sync" — the
-// exact class of blindness that let the account serve "Exact Online Pricing" for weeks.
-const priceOfferingSignature = (offer) => [
-  offer.header, offer.description, offer.priceMicros, offer.currencyCode, offer.finalUrl,
-].join("~");
-const priceKey = (price) => [
-  "PRICE", price.name, price.type, price.priceQualifier, price.languageCode,
-  price.offerings.map(priceOfferingSignature).join("|"),
-].join("::");
-const priceKeyFromContract = (price) => priceKey({
-  name: price.name,
-  type: price.type,
-  priceQualifier: price.priceQualifier,
-  languageCode: price.languageCode,
-  offerings: price.offerings.map((offer) => ({
-    header: offer.header,
-    description: offer.description,
-    priceMicros: PRICE_MICROS(offer.priceCad),
-    currencyCode: "CAD",
-    finalUrl: offer.finalUrl,
-  })),
-});
-const priceKeyFromLive = (asset) => priceKey({
-  name: asset.name ?? "",
-  type: asset.priceAsset?.type ?? "",
-  priceQualifier: asset.priceAsset?.priceQualifier ?? "",
-  languageCode: asset.priceAsset?.languageCode ?? "",
-  offerings: (asset.priceAsset?.priceOfferings ?? []).map((offer) => ({
-    header: offer.header ?? "",
-    description: offer.description ?? "",
-    priceMicros: String(offer.price?.amountMicros ?? ""),
-    currencyCode: offer.price?.currencyCode ?? "",
-    finalUrl: offer.finalUrl ?? "",
-  })),
-});
 const liveAssetKey = (asset) => {
   if (asset.type === "CALLOUT") return calloutKey(asset.calloutAsset?.calloutText ?? "");
   if (asset.type === "PRICE") return priceKeyFromLive(asset);

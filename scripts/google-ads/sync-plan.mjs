@@ -6,6 +6,7 @@
 //
 // Run: railway run node scripts/google-ads/sync-plan.mjs
 import { paidSearchConfig } from "../../docs/paid-search/campaign-config.mjs";
+import { observationAudienceDriftWarnings, priceAssetDriftWarnings } from "./sync-plan-contract.mjs";
 
 const CUSTOMER = "1072816342";
 const LOGIN = "1125402990";
@@ -55,9 +56,12 @@ console.log(`account: ${account.id} ${account.currencyCode} ${account.timeZone}\
 // ── live state ───────────────────────────────────────────────────────────────
 const liveGroups = new Map();
 for (const row of await search(
-  "SELECT ad_group.id, ad_group.name, ad_group.status, campaign.name FROM ad_group WHERE ad_group.status != 'REMOVED'",
+  "SELECT ad_group.id, ad_group.name, ad_group.status, campaign.name, ad_group.targeting_setting.target_restrictions FROM ad_group WHERE ad_group.status != 'REMOVED'",
   "ad groups",
-)) liveGroups.set(row.adGroup.name, { id: row.adGroup.id, status: row.adGroup.status, campaign: row.campaign.name });
+)) liveGroups.set(row.adGroup.name, {
+  id: String(row.adGroup.id), status: row.adGroup.status, campaign: row.campaign.name,
+  targetRestrictions: row.adGroup.targetingSetting?.targetRestrictions ?? [],
+});
 
 const liveKeywords = new Set();
 for (const row of await search(
@@ -109,6 +113,7 @@ for (const row of await search(
 // gets ignored.
 const liveCallouts = new Set();
 const liveSitelinks = new Map();
+const livePriceAssets = [];
 for (const row of await search(
   `SELECT asset.type, asset.callout_asset.callout_text, asset.sitelink_asset.link_text,
           asset.sitelink_asset.description1, asset.sitelink_asset.description2
@@ -124,6 +129,28 @@ for (const row of await search(
     });
   }
 }
+
+for (const row of await search(
+  `SELECT asset.resource_name, asset.name, asset.type, asset.price_asset.type,
+          asset.price_asset.price_qualifier, asset.price_asset.language_code,
+          asset.price_asset.price_offerings
+   FROM campaign_asset
+   WHERE campaign_asset.status != 'REMOVED' AND asset.type = 'PRICE'`,
+  "linked price assets",
+)) livePriceAssets.push(row.asset);
+
+const liveAudienceCriteria = [];
+for (const row of await search(
+  "SELECT ad_group.id, ad_group.name, ad_group_criterion.type, ad_group_criterion.status, "
+  + "ad_group_criterion.user_interest.user_interest_category, ad_group_criterion.user_list.user_list "
+  + "FROM ad_group_criterion WHERE ad_group_criterion.type IN ('USER_INTEREST','USER_LIST') "
+  + "AND ad_group_criterion.status != 'REMOVED'",
+  "observation audiences",
+)) liveAudienceCriteria.push({
+  adGroupId: String(row.adGroup.id),
+  userInterest: row.adGroupCriterion.userInterest?.userInterestCategory ?? null,
+  userList: row.adGroupCriterion.userList?.userList ?? null,
+});
 
 // ── contract state ───────────────────────────────────────────────────────────
 const MATCH = { EXACT: "EXACT", PHRASE: "PHRASE" };
@@ -229,12 +256,21 @@ for (const sitelink of paidSearchConfig.adAssets?.sitelinks ?? []) {
   }
 }
 
+driftWarnings.push(...priceAssetDriftWarnings(paidSearchConfig.adAssets?.prices ?? [], livePriceAssets));
+driftWarnings.push(...observationAudienceDriftWarnings(
+  paidSearchConfig.observationAudiences,
+  liveGroups,
+  liveAudienceCriteria,
+  CUSTOMER,
+));
+
 console.log(`\n=== ASSET / DESTINATION DRIFT — apply-sync CANNOT fix these (${driftWarnings.length}) ===`);
 if (driftWarnings.length === 0) {
   console.log("  (none)");
 } else {
   for (const warning of driftWarnings) console.log(`  ! ${warning}`);
-  console.log("\n  Extension-asset drift is fixed by:  railway run node scripts/google-ads/apply-assets.mjs");
+  console.log("\n  Extension-asset / PRICE asset drift is fixed by:  railway run node scripts/google-ads/apply-assets.mjs");
+  console.log("  Observation-audience drift is fixed by:  railway run node scripts/google-ads/apply-audiences.mjs");
   console.log("  Destination drift is NOT auto-fixable — correct the contract or the ad group by hand.");
   console.log("  A clean SUMMARY below does NOT mean these are resolved.");
 }
