@@ -1,5 +1,6 @@
 material_code,material_name,category,finish,thickness_or_weight,cost_model,cost_rate,is_generic,is_placeholder,supplier_unit_cost,supplier_unit_type,supplier_date,supplier_invoice_ref,width_in,aliases,keywords,source_ref
 ARLPMF7008,Arlon DPF 510 Matte Vinyl,VINYL,Matte,3.2mil,per_sqft,0.27,FALSE,FALSE,,,,,,ARLPMF7008,"vinyl,decal,sticker,vehicle decal,wrap",materialLibrary.csv:row2
+ARLPMF7008_CLEAR,Clear Adhesive Vinyl Sticker Film,VINYL,Clear,4mil,per_sqft,0.25,FALSE,FALSE,,,,,,ARLPMF7008_CLEAR,"clear vinyl,clear sticker,clear background",Derived: same as RMAD005 clear film $0.25/sqft; premium is process (CLEAR_VINYL_MULTIPLIER 1.44 in sticker-model-v2.ts) not material — 2026-08-16
 RMVN006,Vision Perf 70/30 Window Vinyl,VINYL,Gloss,6mil,per_sqft,0.42,FALSE,FALSE,,,,,,RMVN006,"perf,perforated,window perf,one way",materialLibrary.csv:row3
 RMAD005,Clear Adhesive Vinyl (Removable),VINYL,Clear,4mil,per_sqft,0.25,FALSE,FALSE,,,,,,RMAD005,"clear vinyl,removable vinyl,window decal",materialLibrary.csv:row4
 RMBF004,13oz Matte Vinyl Banner,BANNER_VINYL,Matte,13oz,per_sqft,0.17,FALSE,FALSE,,,,,,RMBF004,"vinyl banner,outdoor banner,indoor banner",materialLibrary.csv:row5
