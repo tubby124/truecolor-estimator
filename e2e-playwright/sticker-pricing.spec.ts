@@ -95,7 +95,9 @@ test.describe("STICKER pricing API — dimensions and qty affect price", () => {
     const s2x3 = await estimate(request, { category: "STICKER", material_code: "PLACEHOLDER_STICKER_2X3", width_in: 2, height_in: 3, qty: 100 });
     expect(s2x2.status).toBe("QUOTED");
     expect(s2x3.status).toBe("QUOTED");
-    expect(s2x3.sell_price!).toBeGreaterThan(s2x2.sell_price!);
+    // The owner-calibrated V2 per-unit floor intentionally makes 2×2 and 2×3
+    // both CA$65 at qty 100. Keep the regression guard: a larger size must not cost less.
+    expect(s2x3.sell_price!).toBeGreaterThanOrEqual(s2x2.sell_price!);
   });
 
   test("non-STICKER categories not touched by area-scaling (regression guard)", async ({ request }) => {
