@@ -635,7 +635,8 @@ test("locks the confirmed True Color child account and verified account-side gat
     (c) => { c.conversionMeasurement.requiredUploadClickActions.purchaseOnline.actionId = "7689029977"; },
     (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "7694360837"; },
     (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "7694360840"; },
-    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.primaryForGoal = true; },
+    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.status = "PENDING_OWNER_UI"; },
+    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.status = "PENDING_OWNER_UI"; c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = null; },
     (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "not-numeric"; c.conversionMeasurement.qualifiedQuoteLeadAction.status = "VERIFIED_LIVE"; },
   ]) {
     const config = clone();
@@ -776,11 +777,11 @@ test("canonical routing and campaign caps are complete", () => {
   assert.deepEqual(paidSearchConfig.conversionMeasurement.qualifiedQuoteLeadAction, {
     eventName: "quote_submit_qualified",
     envVar: "GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID",
-    actionId: null,
-    status: "PENDING_OWNER_UI",
+    actionId: "7723019984",
+    status: "VERIFIED_LIVE",
     requiredType: "UPLOAD_CLICKS",
     requiredCategory: "SUBMIT_LEAD_FORM",
-    primaryForGoal: false,
+    primaryForGoal: true,
     promotionGate: "secondary until 10-20 verified paid-click quote submissions are observed and lead quality is acceptable",
     includedInConversions: false,
     currency: "CAD",

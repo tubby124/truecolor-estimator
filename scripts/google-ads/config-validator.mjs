@@ -453,6 +453,10 @@ export function validateConfig(config) {
     if (actionId !== null && (typeof actionId !== "string" || !/^\d+$/.test(actionId))) {
       fail("Qualified quote lead action ID must be null or numeric");
     }
+    const revenueActionIds = Object.values(conversionMeasurement.requiredUploadClickActions ?? {}).map((a) => a?.actionId);
+    if (actionId !== null && revenueActionIds.includes(actionId)) {
+      fail("Qualified quote lead action must not reuse a revenue (purchase/quote_won) action ID");
+    }
     if (primaryForGoal === true && status !== "VERIFIED_LIVE") {
       fail("Qualified quote lead action cannot be primary before VERIFIED_LIVE");
     }

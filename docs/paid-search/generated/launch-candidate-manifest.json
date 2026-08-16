@@ -47,6 +47,20 @@
         "dynamicValue": true
       }
     },
+    "qualifiedQuoteLeadAction": {
+      "eventName": "quote_submit_qualified",
+      "envVar": "GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID",
+      "actionId": "7723019984",
+      "status": "VERIFIED_LIVE",
+      "requiredType": "UPLOAD_CLICKS",
+      "requiredCategory": "SUBMIT_LEAD_FORM",
+      "primaryForGoal": true,
+      "promotionGate": "secondary until 10-20 verified paid-click quote submissions are observed and lead quality is acceptable",
+      "includedInConversions": false,
+      "currency": "CAD",
+      "dynamicValue": false,
+      "valueMode": "NONE"
+    },
     "qualifiedCallAction": {
       "envVar": "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID",
       "actionId": "7694360843",

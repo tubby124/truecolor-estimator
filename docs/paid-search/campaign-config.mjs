@@ -282,11 +282,18 @@ export const paidSearchConfig = {
     qualifiedQuoteLeadAction: {
       eventName: "quote_submit_qualified",
       envVar: "GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID",
-      actionId: null,
-      status: "PENDING_OWNER_UI",
+      // 2026-08-16 owner created it in the UI (account 107-281-6342); read back via GAQL:
+      // id 7723019984, ENABLED, UPLOAD_CLICKS, SUBMIT_LEAD_FORM, ONE_PER_CLICK, 30d window,
+      // value 0 (alwaysUseDefaultValue). Google's redesigned flow forced primaryForGoal=true and
+      // includeInConversionsMetric=true; the "Submit lead form" goal is NOT an account-default
+      // goal, so it does not influence bidding today. Target intent below stays secondary /
+      // excluded (includedInConversions: false) — flip it to secondary in the UI when the
+      // action-detail view is available, and only promote after the promotionGate.
+      actionId: "7723019984",
+      status: "VERIFIED_LIVE",
       requiredType: "UPLOAD_CLICKS",
       requiredCategory: "SUBMIT_LEAD_FORM",
-      primaryForGoal: false,
+      primaryForGoal: true,
       promotionGate: "secondary until 10-20 verified paid-click quote submissions are observed and lead quality is acceptable",
       includedInConversions: false,
       currency: "CAD",
