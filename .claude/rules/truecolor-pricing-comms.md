@@ -41,7 +41,7 @@ The shop now enforces a **single $25 order-total minimum at checkout** via `src/
 - Sqft rates = FAQ, comparison context, AND product reference cards on IndustryPage.
 - Product reference cards (`products` array): use T1 sqft rates for wide-format (matches ranking pages). Marketing headlines/titles/meta use the "from $X" anchors above.
 - T1 sqft rates for product cards: Coroplast $8 | Banners $8.25 | ACP $13 | Foamboard $10 | Window Decals $11 | Magnets $24 | Vinyl Lettering $8.50. Labels/stickers are NOT sqft-rated — quote the V2 grid in `data/PRICING_QUICK_REFERENCE.md`.
-- Lot-priced products (BCs, flyers, stickers, postcards, brochures, posters) = no minimums, flat totals.
+- Lot-priced products (BCs, flyers, postcards, brochures, posters) = no minimums, flat totals. Stickers are per-unit (V2), not lot-priced.
 - BC "from $45" = 250 double-sided on 14pt gloss (1S = $40). 500 2S = $65, 1000 2S = $110.
 - Flyer "from $45" = 100 full-letter double-sided on 80lb gloss. 100lb upgrade: 100=$65, 250=$115, 1000=$250.
 - Rush +$40 and Design $40 always mentioned separately, never baked into "from" price.
