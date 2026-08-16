@@ -28,6 +28,8 @@ export interface CartItem {
     color?: string;
     /** Customer-typed spec values (e.g. boat licence number). Also folded into `label`. */
     custom_text?: Record<string, string>;
+    /** Sticker V2 cut shape — carries the circle multiplier through checkout revalidation. */
+    shape?: "square" | "circle" | "die_cut";
   };
   sell_price: number; // pre-tax total (all units) — engine sell_price, includes addons
   gst_rate: number; // e.g. 0.05 — stored at add-to-cart time so display never hardcodes

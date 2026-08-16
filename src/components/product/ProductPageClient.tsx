@@ -148,6 +148,10 @@ export function ProductPageClient({ product, initialSelection }: Props) {
       .map((v) => v.trim().toUpperCase())
       .filter(Boolean);
     if (configData.color) specParts.push(configData.color);
+    // Sticker shape rides in the label (what production, the order line and the
+    // Wave invoice see) AND in config.shape (what checkout re-prices with).
+    if (configData.shape === "circle") specParts.push("CIRCLE");
+    else if (configData.shape === "die_cut") specParts.push("CUSTOM DIE-CUT");
     const specLabel = specParts.length > 0 ? ` | ${specParts.join(" | ")}` : "";
 
     const label = `${configData.sizeLabel} — ${configData.sidesLabel} × ${configData.qty}${specLabel}${designLabel}`;
@@ -167,6 +171,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
         design_status: configData.designStatus,
         color: configData.color,
         custom_text: configData.customText,
+        shape: configData.shape,
         addons: Object.entries(configData.addonQtys)
           .filter(([, q]) => q > 0)
           .map(([addonLabel, addonQty]) => `${addonLabel} ×${addonQty}`),

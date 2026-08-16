@@ -120,6 +120,9 @@ export interface ConfigData {
   customText?: Record<string, string>;
   /** False when a required custom text field is empty or fails its pattern. */
   customTextValid?: boolean;
+  /** Sticker V2 cut shape. Must travel to the cart + checkout revalidation —
+   *  circle carries a price multiplier, so dropping it re-prices the line. */
+  shape?: "square" | "circle" | "die_cut";
 }
 
 interface Props {

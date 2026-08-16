@@ -153,7 +153,9 @@ describe("quote payment linkage contract", () => {
   });
 
   it("never accepts a public client price when the engine blocks or throws", () => {
-    const orders = source("src/app/api/orders/route.ts");
+    // revalidateItemPrices was extracted to src/lib/orders/revalidate.ts on
+    // 2026-08-16 (pure module, re-exported by the route) - the contract spans both.
+    const orders = source("src/app/api/orders/route.ts") + source("src/lib/orders/revalidate.ts");
     expect(orders).not.toContain("accepting client price");
     expect(orders).toContain("must use the quote flow");
     expect(orders).toContain("Unable to price ${item.product_name}");

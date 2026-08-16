@@ -272,10 +272,13 @@ export function UnifiedConfigurator({
       materialCode: effectiveMaterial,
       sizeLabel: selectedSize?.label ?? "",
       sidesLabel: "Single-sided",
+      // Same value the price call sends (line ~192) so cart + checkout
+      // revalidation price the identical shape.
+      ...(v2Active ? { shape: stickerShape } : {}),
     });
   }, [
     effectiveW, effectiveH, effectiveQty, designStatus,
-    effectiveMaterial, selectedSize?.label, onConfigChange,
+    effectiveMaterial, selectedSize?.label, onConfigChange, v2Active, stickerShape,
   ]);
 
   if (!cfg || cfg.status !== "live") {
@@ -342,7 +345,7 @@ export function UnifiedConfigurator({
           <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Shape">
             {([
               { value: "square",  label: "Square",          sub: "Standard cut" },
-              { value: "circle",  label: "Circle",          sub: "+80% (cut path)" },
+              { value: "circle",  label: "Circle",          sub: "+40% (cut path)" },
               { value: "die_cut", label: "Custom die-cut",  sub: "Same as square" },
             ] as const).map((sh) => {
               const selected = stickerShape === sh.value;

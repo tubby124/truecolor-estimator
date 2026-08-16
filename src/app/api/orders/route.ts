@@ -28,7 +28,7 @@ import { encodePaymentToken } from "@/lib/payment/token";
 import type { CartItem } from "@/lib/cart/cart";
 import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
-import { estimate } from "@/lib/engine";
+import { revalidateItemPrices } from "@/lib/orders/revalidate";
 import { getConfigNum } from "@/lib/data/loader";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
@@ -92,56 +92,10 @@ const PST_RATE = 0.06;
 // repricing, since it lives outside src/lib/engine.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-/**
- * Server-side price revalidation.
- * Re-runs the pricing engine for each cart item and overrides the client-submitted
- * sell_price with the authoritative server price. Prevents price manipulation attacks
- * where a malicious user submits fake prices (e.g. sell_price: 0.01).
- *
- * If the engine can't price an item, checkout is rejected. Custom/unusual work
- * must use the quote flow; public client prices are never authoritative.
- *
- * NOTE: is_rush is intentionally NOT passed to the engine here. Rush is a flat $40
- * per-order fee applied at the order level (line 246), not per-item. Passing is_rush
- * to estimate() would add $40 to EACH item's sell_price, then the order-level rush
- * would add another $40, resulting in overcharging.
- */
-export function revalidateItemPrices(items: CartItem[]): CartItem[] {
-  return items.map((item) => {
-    try {
-      const result = estimate({
-        category: item.category as Parameters<typeof estimate>[0]["category"],
-        material_code: item.config.material_code,
-        width_in: item.config.width_in,
-        height_in: item.config.height_in,
-        sides: item.config.sides as 1 | 2 | undefined,
-        qty: item.qty,
-        addons: item.config.addons as Parameters<typeof estimate>[0]["addons"],
-        design_status: item.config.design_status as Parameters<typeof estimate>[0]["design_status"],
-        is_rush: false,
-      });
-
-      if (result.status === "QUOTED" && result.sell_price != null) {
-        const serverPrice = result.sell_price;
-        const clientPrice = item.sell_price;
-        const diff = Math.abs(serverPrice - clientPrice);
-        const diffPct = clientPrice > 0 ? diff / clientPrice : 1;
-
-        if (diffPct > 0.01 || diff > 0.5) {
-          // Log manipulation attempt or stale client-side price
-          console.warn(
-            `[orders] price revalidation: client=$${clientPrice.toFixed(2)} server=$${serverPrice.toFixed(2)} diff=$${diff.toFixed(2)} (${(diffPct * 100).toFixed(1)}%) — using server price | item: ${item.product_name}`
-          );
-        }
-        return { ...item, sell_price: serverPrice, design_fee: result.design_fee ?? 0, line_items: result.line_items };
-      }
-      throw new Error(`Pricing engine returned ${result.status}`);
-    } catch (err) {
-      console.error(`[orders] price revalidation error for ${item.product_name}:`, err);
-      throw new Error(`Unable to price ${item.product_name}. Please request a custom quote.`);
-    }
-  });
-}
+// Server-side price revalidation lives in src/lib/orders/revalidate.ts (pure) so it
+// can be unit-tested without this route's server-only imports. Re-exported for
+// any existing importer.
+export { revalidateItemPrices };
 
 export async function POST(req: NextRequest) {
   // Rate limit: 5 orders per IP per minute (generous for a print shop)

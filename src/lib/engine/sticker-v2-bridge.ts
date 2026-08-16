@@ -102,6 +102,16 @@ export function runStickerV2(req: EstimateRequest): EstimateResponse | null {
   const subtotal = Math.round((result.total + designFee + rushFee) * 100) / 100;
   const gstRate = getConfigNum("gst_rate");
 
+  // The engine-wide meaning of min_charge_* is the ORDER-level small-order
+  // floor (QuotePanel / PriceSummary render it as "Small-Order Fee ... You pay
+  // $X" with a progress bar toward the floor). V2 applies its $25 order minimum
+  // inside quoteStickerV2 (total = max(25, qty x unit)), so surface exactly
+  // that here. Previously this exported the PER-UNIT tier floor
+  // (floor_dominated / per_unit_floor), which made the public product page
+  // show "You pay $1.00" on every small sticker.
+  const preMinSubtotal = Math.round(qty * result.unit_price * 100) / 100;
+  const orderMinApplied = preMinSubtotal < result.total;
+
   const lineItems = [];
   lineItems.push({
     description: `STICKER – ${req.width_in}″×${req.height_in}″ – Qty ${qty} (${result.qty_tier_label})${result.modifiers_applied.length > 0 ? ` [${result.modifiers_applied.join(", ")}]` : ""}`,
@@ -135,8 +145,8 @@ export function runStickerV2(req: EstimateRequest): EstimateResponse | null {
     sqft_calculated: result.sqft,
     price_per_sqft: result.sqft_rate,
     tier_applied: result.qty_tier_label,
-    min_charge_applied: result.floor_dominated,
-    min_charge_value: result.per_unit_floor,
+    min_charge_applied: orderMinApplied,
+    min_charge_value: orderMinApplied ? result.total : null,
     min_charge_skipped: false,
     rules_fired: [`STICKER-V2-${result.qty_tier_label}`, ...result.modifiers_applied],
     cost: null, // V2 doesn't compute cost yet; UI will show margin badge as N/A
@@ -151,6 +161,6 @@ export function runStickerV2(req: EstimateRequest): EstimateResponse | null {
     qty_discount_pct: null,
     qty_discount_applied: false,
     price_per_unit: result.unit_price,
-    pre_min_subtotal: null,
+    pre_min_subtotal: orderMinApplied ? preMinSubtotal : null,
   };
 }
