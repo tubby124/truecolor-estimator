@@ -70,7 +70,18 @@ const VINYL_TIERS: VinylTier[] = [
   { qty_max: 9,        label: "qty_2_9",      per_unit_floor: 25.00, rate_per_sqft: 18 },
   { qty_max: 49,       label: "qty_10_49",    per_unit_floor: 1.00,  rate_per_sqft: 8  },
   { qty_max: 99,       label: "qty_50_99",    per_unit_floor: 1.00,  rate_per_sqft: 8  },
-  { qty_max: 249,      label: "qty_100_249",  per_unit_floor: 0.55,  rate_per_sqft: 8  },
+  // 2026-08-16 recalibration: floor raised 0.55->0.65 against expanded fixture
+  // set (52 quotes incl. 28 pulled 2026-05-29->2026-08-16). Fixes a confirmed
+  // undercharge (La Troupe du Jour, 3x3 qty150 die_cut: was -31.3%, now -18.8%)
+  // without pushing this tier's worst-performing fixture (Sergio/Rayacom,
+  // suspected non-retail account, +75.7% overcharge) any further wrong - 0.65
+  // deliberately stays under Sergio's $0.6806 rate-crossover point. Does NOT
+  // fix the Arieanna Barsi ground-truth case (4x4 qty100: actual $120, engine
+  // $89) - that fixture is rate-dominated (sqft*rate=$0.89 > any reasonable
+  // floor), so a floor change can't reach it. Needs a rate_per_sqft change,
+  // deferred to the next /pricing-review pending a check of whether Sergio's
+  // overcharge is actually a CIRCLE_SHAPE_MULTIPLIER issue instead.
+  { qty_max: 249,      label: "qty_100_249",  per_unit_floor: 0.65,  rate_per_sqft: 8  },
   { qty_max: 499,      label: "qty_250_499",  per_unit_floor: 0.35,  rate_per_sqft: 8  },
   { qty_max: 999,      label: "qty_500_999",  per_unit_floor: 0.20,  rate_per_sqft: 4  },
   { qty_max: Infinity, label: "qty_1000_plus",per_unit_floor: 0.15,  rate_per_sqft: 3  },
