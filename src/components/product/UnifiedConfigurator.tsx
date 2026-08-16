@@ -44,11 +44,11 @@ interface UnifiedConfiguratorProps {
   /** Emits the raw EstimateResponse so a parent (staff page) can drive its
    *  existing QuotePanel + ProductProof + Add-to-Cart flow unchanged. */
   onResponse?: (response: EstimateResponse | null, loading: boolean) => void;
-  /** Product display name for the <h1> — same source as ProductConfigurator's
+  /** Product display name for the card heading — same source as ProductConfigurator's
    *  `product.name`. Optional so the current mount sites (which pass no
    *  ProductContent) keep working; falls back to STICKER_CONTENT below. */
   productName?: string;
-  /** Hero "from" price, e.g. "$25" — same source as ProductConfigurator's
+  /** Card "from" price, e.g. "$25" — same source as ProductConfigurator's
    *  `product.fromPrice`. Optional, same reason as productName. */
   fromPrice?: string;
 }
@@ -295,14 +295,13 @@ export function UnifiedConfigurator({
 
   return (
     <div className="space-y-6">
-      {/* Product name — same block/position/classes as ProductConfigurator.tsx:411.
-          Customer surfaces only: the staff estimator already heads this card with
-          its own "Job Details" h2 and must not gain a second page-level heading. */}
+      {/* Accessible label for this card only — mirrors ProductConfigurator.
+          The visible name / subline / from-price are SERVER rendered above the
+          gallery in src/app/products/[slug]/page.tsx (paid-search fold). Never
+          promote this back to h1: the page template owns the only h1. Staff
+          mode already heads this card with its own "Job Details" h2. */}
       {mode === "customer" && (
-        <div>
-          <h1 className="text-2xl font-bold text-[#1c1712]">{displayName}</h1>
-          <p className="text-gray-400 text-sm mt-1">Starting from {displayFromPrice}</p>
-        </div>
+        <h2 className="sr-only">{displayName} — starting from {displayFromPrice}</h2>
       )}
 
       {/* STICKER V2 — Material chip (white vinyl / clear vinyl / perforated 8mil) */}

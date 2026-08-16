@@ -78,6 +78,30 @@ export default async function ProductPage({ params, searchParams }: Props) {
           <span className="text-[#1c1712] font-medium">{product.name}</span>
         </nav>
 
+        {/* Paid-search fold header — SERVER rendered.
+            Google Ads scores landing-page experience on the server HTML fold, and
+            /products/* is noindex + the destination for 8 paid ad groups. The H1,
+            the query-language subline and the from-price used to live inside the
+            client configurator BELOW the gallery (~537px on a 375x812 viewport,
+            under the fold once the two fixed bottom bars are subtracted). Rendering
+            them here puts the keyword and the price above the gallery in DOM order.
+            The configurators no longer emit their own h1 — exactly one per page. */}
+        <header className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1c1712] leading-tight">
+            {product.paidHeadline ?? `${product.name} Saskatoon`}
+          </h1>
+          {product.paidSubline && (
+            <p className="mt-1.5 text-base text-gray-600">{product.paidSubline}</p>
+          )}
+          {!product.comingSoon && (
+            <p className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-gray-500">
+              <span className="font-mono text-lg font-bold text-[#c92719]">From {product.fromPrice}</span>
+              <span aria-hidden="true">·</span>
+              <span>Printed in Saskatoon · pickup at 216 33rd St W</span>
+            </p>
+          )}
+        </header>
+
         {/* Interactive product layout — gallery + options + sticky price panel */}
         <div className="mb-8">
           {product.comingSoon ? (

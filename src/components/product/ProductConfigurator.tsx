@@ -420,11 +420,12 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
   return (
     <div className="space-y-6">
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-      {/* Product name */}
-      <div>
-        <h1 className="text-2xl font-bold text-[#1c1712]">{product.name}</h1>
-        <p className="text-gray-400 text-sm mt-1">Starting from {product.fromPrice}</p>
-      </div>
+      {/* Accessible label for this card only. The visible product name, keyword
+          subline and from-price are now SERVER rendered above the gallery in
+          src/app/products/[slug]/page.tsx so they land in the paid-search fold.
+          This must stay an h2 (or lower) — a second h1 on the page is exactly
+          the landing-page-experience defect that move was made to fix. */}
+      <h2 className="sr-only">{product.name} — starting from {product.fromPrice}</h2>
 
       {/* Tier selector */}
       {product.tierPresets && (

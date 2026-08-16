@@ -71,6 +71,18 @@ export interface ProductContent {
   tagline: string;
   description: string;
   fromPrice: string;
+  /**
+   * Paid-search H1 override for /products/[slug]. Google Ads landing-page
+   * experience is scored on the SERVER-rendered fold, so the H1 lives in the
+   * page template, not the client configurator. Defaults to `${name} Saskatoon`.
+   */
+  paidHeadline?: string;
+  /**
+   * One-line keyword-bearing subline rendered directly under the paid H1.
+   * Carries the ad group's query language ("custom stickers & labels") that the
+   * product `name` alone does not. Set only on slugs a paid ad group targets.
+   */
+  paidSubline?: string;
   category: string;
   material_code?: string;
   heroImage: string;
@@ -120,6 +132,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     description:
       "Coroplast is 4mm corrugated polypropylene — think cardboard, but fully waterproof, UV-resistant, and built to survive Saskatchewan winters at -40°C. It's the most-ordered outdoor sign material at True Color because it hits the right balance: lightweight enough to install by hand, durable enough for 2–3 years of direct prairie sun. Real estate agents rely on 18×24\" coroplast for listing and open house signs. Contractors bolt 4×8 sheets to site hoardings. Election campaigns order 200+ at a time for lawn placement. Events use 12×18\" directional signs across venue grounds. Our Roland TrueVIS VG2 eco-solvent printer/cutter produces sharp, full-colour graphics in-house; the finished graphic is applied to the coroplast board. Single-sided is most common. Double-sided (both faces printed and bonded back-to-back) costs roughly 50% more and works well for directional signs visible from both approaches. Add wire H-stakes ($2.50 each) for ground installation or grommets ($2.50 each) for fence and wall mounting — both are available as add-ons in the estimator. True Color prints coroplast signs in-house at 216 33rd St W, Saskatoon. No outsourcing. Small carts top up to the $25 order-total minimum at checkout. Same-day rush available (+$40 flat) on most orders placed before 10 AM.",
     fromPrice: "$25",
+    paidSubline: "Coroplast lawn & site signs",
     category: "SIGN",
     material_code: "MPHCC020",
     heroImage: "/images/products/product/coroplast-yard-sign-800x600.webp",
@@ -199,6 +212,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     description:
       "13oz scrim vinyl is the industry standard for outdoor banners — and for good reason. The 'scrim' is a woven polyester mesh core laminated with PVC on both sides, giving the material its tear resistance. Pull a corner of 13oz vinyl in sustained prairie wind and it won't rip. True Color prints on this material in-house with Roland eco-solvent inks that stay vivid through a full Saskatchewan season. Hemmed edges are included standard on every banner — a double-folded reinforced edge along the perimeter that prevents fraying and protects corners under tension. Add grommets at $2.50 each and hang with bungee cords or zip ties. Vinyl banners are the most versatile large-format print product we make. Storefronts use 3×6 ft banners for grand openings and seasonal sales. Construction sites post 4×8 ft banners on hoarding fences. Sports teams hang them in rinks and gyms for sponsor recognition. Trade show exhibitors use 2×4 ft table banners for booth backdrops. Order any custom size — enter exact dimensions in the estimator, no extra setup charge. Single-sided is standard; double-sided available on request. Outdoor lifespan is 1–3 years depending on sun exposure and wind. Same-day rush available on select sizes. Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$66",
+    paidSubline: "Banner printing",
     category: "BANNER",
     material_code: "RMBF004",
     heroImage: "/images/products/product/banner-vinyl-colorful-800x600.webp",
@@ -325,6 +339,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     description:
       "14pt gloss card stock is the benchmark for professional business cards in Canada — thick enough to feel substantial in hand, smooth enough for sharp full-colour printing on both sides. At True Color, business cards run on our Konica Minolta digital production press for precise colour matching and a consistent result across every card in the run. The standard 250-card run is $45 double-sided — front design plus a printed reverse, included in the same price since both faces run in one pass. The universal 3.5×2\" format fits every card holder, wallet slot, and Rolodex. Bring a design file (PDF, AI, or EPS preferred) and we'll prep it for print. No design yet? Our in-house designer creates business card layouts from scratch, or updates your existing design, for $40 flat — usually completed the same day. Quantities: 250, 500, or 1000 cards. The per-card cost drops meaningfully at 500 and 1000, so if you distribute them at networking events or on job sites, order up. Single-sided is also available for a leaner look. Business cards are ready for pickup at 216 33rd St W, Saskatoon in 1–3 business days, or next-day with same-day rush.",
     fromPrice: "$45",
+    paidSubline: "Business card printing",
     category: "BUSINESS_CARD",
     material_code: "PLACEHOLDER_14PT",
     heroImage: "/images/products/product/business-cards-800x600.webp",
@@ -379,6 +394,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     description:
       "Printed on Pacesetter 80lb gloss text — a bright white, FSC-certified press sheet that produces sharp colour reproduction at an efficient price. The 80lb weight is standard for professional flyers and restaurant menus: stiff enough to hold its shape when handed out, light enough to keep postage manageable for direct mail. True Color runs flyers on our Konica Minolta digital production press with consistent colour from the first sheet to the last. 100 flyers is the minimum. Choose single-sided for basic handouts, menus, or event flyers where the back is blank — or double-sided when you need both faces printed (programs, real estate one-pagers, contractor service lists). Want a heavier feel? Select 100lb gloss — noticeably thicker in hand and a step up in perceived quality. Half-letter (8.5×5.5\") is available directly in the picker above and prints at the same quality as full letter. Common uses in Saskatoon: restaurant menus, event programs, open house handouts, election campaign materials, contractor service lists, and non-profit fundraiser sheets. Supply PDF or high-res PNG at 150+ DPI. No file? Our in-house designer handles layout from a rough concept — $40 flat. Pickup at 216 33rd St W, Saskatoon in 1–2 business days, or same-day rush for $40 flat.",
     fromPrice: "$45",
+    paidSubline: "Flyer printing",
     category: "FLYER",
     material_code: "PLACEHOLDER_80LB",
     heroImage: "/images/products/product/flyers-stack-800x600.webp",
@@ -561,6 +577,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     description:
       "Adhesive vinyl window decals give storefronts, offices, and vehicles a clean, professional look without a permanent commitment. Printed on Arlon DPF 510 matte adhesive vinyl — a 3.2 mil calendered vinyl film. True Color prints window decals with Roland eco-solvent inks for vivid, UV-resistant colour. Common uses across Saskatoon: coffee shop window promos, dental office hours on the front door, barber shop logos on the window, contractor logos on truck rear windows, and real estate brokerage door graphics. Any size is possible — enter your custom dimensions in the estimator. For die-cut shapes (circles, logos, custom outlines), contact us for a quote. Standard finish is matte; gloss is available on request. For vehicle windows where you want the graphic visible from outside but not reverse-printed for the driver, specify exterior-facing standard print. For inside-mounted graphics that read correctly from outside, specify reverse-print interior application. Installation is $75 base rate if you want it done professionally, or we supply the decal pre-masked on transfer tape for straightforward self-application on flat glass. Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$25",
+    paidSubline: "Custom decals & window graphics",
     category: "DECAL",
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/window-decal-before-after-800x600.webp",
@@ -917,6 +934,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     description:
       "A retractable banner stand gives you a professional 33.5×80\" printed display that sets up in under 30 seconds and collapses into a compact carrying case. All three tiers at True Color include the stand, a custom full-colour printed banner, and a carry bag or case — no hidden add-ons to price out separately. Economy ($219) is the right choice for occasional use: conferences, open houses, trade show appearances a few times per year. The aluminum mechanism is reliable and the carry bag makes transport easy. Deluxe ($299) adds a premium tension mechanism for a tighter, flatter banner surface and a padded carry case instead of a basic bag — better for frequent use and long-distance travel to exhibitions across Saskatchewan. Premium ($349) includes the Deluxe stand plus expedited turnaround and a professional print finish for launch-ready displays. The 33.5×80\" size is the industry standard for retractable stands — prints are not interchangeable between manufacturers, so if you have an existing stand from another brand, check dimensions before ordering a replacement. True Color prints replacement banners for existing stands too: send us the model number and we'll confirm sizing. Printed and assembled in-house at 216 33rd St W, Saskatoon. Same-day rush available on Economy tier.",
     fromPrice: "$219",
+    paidSubline: "Retractable banner stands",
     category: "DISPLAY",
     material_code: "RBS33507875S",
     heroImage: "/images/products/product/retractable-stand-600x900.webp",
@@ -976,6 +994,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     description:
       "Vinyl stickers are printed on Arlon DPF 510 matte adhesive vinyl — the same 3.2 mil calendered film we use for window decals — and die-cut to clean square edges with no white border or carrier sheet separating each sticker. Roland eco-solvent inks produce vivid, durable colour for product packaging, smooth indoor surfaces, and promotional applications. Eight sizes available online — 2×2\", 2×3\", 3×3\", 4×4\", 4×6\", 5×5\", 6×6\", and 8×8\" — starting at 25 stickers. Small label runs start at $25 for 25× 2×2\"; large promo stickers run $200 for 50× 8×8\". Price drops sharply with quantity: 4×4\" stickers run $1.20 each at 50 units, $1.00 at 100, and $0.33 each at 1000 units. Custom shapes — circles, ovals, die-cut brand logos — are available by quote. Common uses in Saskatoon: product labels for local food and ag businesses, branded stickers for farm equipment dealerships, event giveaway packs, coffee shop cup stickers, and packaging seals. Stickers are safe for product packaging as long as they don't contact food directly. The removable adhesive peels cleanly from most smooth surfaces — good for promotional campaigns where you want customers to stick your brand on a laptop or water bottle without permanently marking their property. Supply a PDF or high-res PNG at 150+ DPI. In-house design $40 flat. Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$25",
+    paidSubline: "Custom stickers & labels — vinyl, die-cut, roll",
     category: "STICKER",
     material_code: "ARLPMF7008",
     heroImage: "/images/products/product/stickers-800x600.webp",

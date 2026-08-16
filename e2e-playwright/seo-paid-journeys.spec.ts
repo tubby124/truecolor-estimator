@@ -102,7 +102,7 @@ test.describe("paid and organic ordering journeys", () => {
         await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),
         `${viewport.width}x${viewport.height} horizontal overflow`,
       ).toBe(false);
-      await expect(page.getByRole("heading", { name: "Real printing. Clear pricing. Local pickup." })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Saskatoon Print & Sign Shop — Real Pricing, Local Pickup" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Google reviews from local customers" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Printed here. Pick up here." })).toBeVisible();
       await expect(page.getByRole("link", { name: "Get Directions" })).toBeVisible();
@@ -181,6 +181,37 @@ test.describe("paid and organic ordering journeys", () => {
       await expect(page.getByText(new RegExp(`×\\s*${selectedQty}`)).first()).toBeVisible();
     });
   }
+
+  test("product pages put one keyword-bearing h1 and the from-price above the gallery", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/products/stickers", { waitUntil: "domcontentloaded" });
+
+    const headings = page.locator("h1");
+    await expect(headings).toHaveCount(1);
+    await expect(headings).toContainText("Saskatoon");
+
+    // DOM order is what Google Ads scores for landing-page experience: the
+    // heading and the price must precede the gallery image, not sit in the
+    // configurator card below it.
+    const order = await page.evaluate(() => {
+      const main = document.querySelector("#main-content");
+      if (!main) return null;
+      const nodes = [...main.querySelectorAll("*")];
+      const h1 = nodes.findIndex((node) => node.tagName === "H1");
+      const price = nodes.findIndex(
+        (node) => node.children.length === 0 && /From\s*\$25/.test(node.textContent ?? ""),
+      );
+      const gallery = nodes.findIndex((node) => node.tagName === "IMG");
+      return { h1, price, gallery };
+    });
+
+    expect(order).not.toBeNull();
+    expect(order!.h1).toBeGreaterThanOrEqual(0);
+    expect(order!.price).toBeGreaterThanOrEqual(0);
+    expect(order!.gallery).toBeGreaterThanOrEqual(0);
+    expect(order!.h1).toBeLessThan(order!.gallery);
+    expect(order!.price).toBeLessThan(order!.gallery);
+  });
 
   test("checkout blocks invalid email and failed selected artwork before order creation", async ({ page }) => {
     await page.route("**/api/checkout-sessions", async (route) => {
