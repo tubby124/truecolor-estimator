@@ -3,7 +3,8 @@
 // Joins three sources the ads cadence needs in one view:
 //   1. Google Ads  — per-ad-group spend/clicks (via the shared read-only gaql client)
 //   2. GA4         — what paid clickers DID post-click (google/cpc funnel events per landing page)
-//   3. Supabase    — google_ads_conversion_outbox state (did any click become money?)
+//   3. Supabase    — google_ads_conversion_outbox state (did any click become money?) plus
+//                    quote-attribution coverage (quote_requests + order origin)
 //
 // GA4 is read through the same service-account auth as src/lib/seo/ga4-client.ts.
 //
@@ -19,6 +20,13 @@
 import { google } from "googleapis";
 import { createClient } from "@supabase/supabase-js";
 import { createReader } from "./gaql-read.mjs";
+import {
+  INCOMPLETE_COVERAGE_VERDICT,
+  formatQuoteAttributionSection,
+  loadQuoteAttributionInputs,
+  needsIncompleteCoverageVerdict,
+  summarizeQuoteAttribution,
+} from "./paid-funnel-metrics.mjs";
 
 const SYNTHETIC_CAMPAIGN = "tc_core";
 const FUNNEL_EVENTS = [
@@ -121,7 +129,7 @@ if (syntheticSessions > 0) console.log("  Expected to trend to ZERO after the 20
 const supa = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY);
 const { data: outbox, error } = await supa
   .from("google_ads_conversion_outbox")
-  .select("order_number, conversion_type, gclid, gbraid, status, conversion_value, created_at")
+  .select("order_id, order_number, conversion_type, gclid, gbraid, wbraid, status, conversion_value, created_at")
   .gte("created_at", `${range.startDate}T00:00:00Z`)
   .order("created_at", { ascending: false });
 if (error) throw new Error(`outbox read failed: ${error.message}`);
@@ -132,6 +140,21 @@ for (const row of outbox ?? []) {
   const attributed = row.gclid || row.gbraid ? "AD-ATTRIBUTED" : "not ad-attributed";
   console.log(`  ${row.created_at.slice(0, 10)} ${row.order_number} ${row.conversion_type} CA$${row.conversion_value} [${row.status}] — ${attributed}`);
 }
+// ---------- 3b. Quote attribution coverage ----------
+// The flat outbox listing above answers "did money get attributed?" but not "why not?". A
+// not_attributable row on a staff phone/walk-in order is honest — there was never a click ID.
+// Verified on production 2026-08-15: 10 of the 14 unattributable rows in a 45-day window were
+// staff-created and the other 4 were organic online checkouts, so a single flat count read as
+// "online checkout is losing attribution" when nothing paid was actually lost. Split by origin.
+const attributionInputs = await loadQuoteAttributionInputs(supa, {
+  sinceIso: `${range.startDate}T00:00:00Z`,
+  outbox: outbox ?? [],
+});
+const attribution = summarizeQuoteAttribution(attributionInputs);
+
+console.log("");
+for (const line of formatQuoteAttributionSection(attribution)) console.log(line);
+
 // ---------- 4. Enhanced conversions readiness ----------
 // The uploader attaches hashed email/phone and self-heals: if the account has not signed
 // the enhanced-conversions terms Google rejects the WHOLE request, so it retries without
@@ -206,4 +229,7 @@ if (ecProbe === "LIVE") {
 const attributedCount = (outbox ?? []).filter((r) => r.gclid || r.gbraid).length;
 console.log(`\nVERDICT: ${totalClicks} paid clicks, CA$${totalCost.toFixed(2)} spend, ${attributedCount} ad-attributed conversions in window.`);
 if (attributedCount === 0) console.log("Zero attributed conversions at this click volume is sample size, not breakage — the upload pipeline is armed and verified (2026-08-07 audit).");
+if (needsIncompleteCoverageVerdict({ attributedCount, summary: attribution })) {
+  for (const line of INCOMPLETE_COVERAGE_VERDICT) console.log(line);
+}
 console.log("\nThis tool is READ-ONLY. Nothing was changed.");

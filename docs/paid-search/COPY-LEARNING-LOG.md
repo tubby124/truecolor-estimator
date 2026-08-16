@@ -1218,7 +1218,8 @@ neither converted yet), 3 with utm~google, 10 converted.
 | TC-2026-0328 | 08-14 | MANUAL: Stickers x40 (staff manual quote → Pay Now) | yes (unlinked, same customer ≤30d) | no | no | no | not_attributable | **QUOTE_UNATTRIBUTED** (+ ORDER_NOT_LINKED) |
 | TC-2026-0314 | 08-06 | MANUAL: Logo design (quote_won, linked) | yes | no | yes | no | not_attributable | QUOTE_UNATTRIBUTED |
 | TC-2026-0325 | 08-12 | MANUAL: Stickers x50 (staff manual order) | no | — | no | no | not_attributable | NO_QUOTE_RECORD |
-| 11 others (0299, 0308–0310, 0316, 0320, 0321, 0323, 0324, 0326, 0327) | 07-24…08-13 | staff manual orders / manual quotes | no | — | no | no | not_attributable | NO_QUOTE_RECORD |
+| TC-2026-0299, 0308, 0310, 0320 | 07-24…08-10 | ONLINE checkout (DECAL/SIGN/PHOTO_POSTER/BANNER), organic referrers | no | — | no | no | not_attributable | NO_QUOTE_RECORD (organic — no click id ever existed) |
+| 7 others (0309, 0316, 0321, 0323, 0324, 0326, 0327) | 08-04…08-13 | staff manual orders / manual quotes | no | — | no | no | not_attributable | NO_QUOTE_RECORD |
 
 Control: TC-2026-0330 (08-15, online STICKER purchase, etransfer) → outbox `sent`. Online checkout
 path carries the click id end-to-end.
@@ -1232,11 +1233,23 @@ quoteRequestId ? "quote_won" : "purchase_online"` and spreads `quoteAttribution`
 quote id is supplied — so every unlinked staff order is stamped `purchase_online` and lands in the
 outbox as `purchase_online/not_attributable`. The outbox trigger
 (`supabase/migrations/20260720110000_google_ads_conversion_outbox.sql` L65-73) then does the right
-thing. Net: 13/14 "unattributed online purchases" are really staff-created orders — the report
-label is misleading, the data is not.
+thing. Net (corrected same day by the Task 5 prod re-check): the 14 rows split staff_manual 6 /
+staff_quote 4 / online_checkout 4 — the 4 online checkouts carry `checkout_submission_id` and organic
+referrers, so no paid click was ever there to lose. Zero real attribution leaks in the window; the
+report label was misleading, the data is not.
 
 **Implications for Task 4/5:** (a) staff manual-order must surface/auto-link an existing web quote
 for the same customer so linkage isn't optional; (b) the report must split staff-created orders
 from online checkout before counting "unattributed online sales"; (c) with only 2/36 quotes
 carrying a click id, the quote-side capture rate is the bottleneck, not the copy path — that's
 Task 2/3 territory (paid quote → lead conversion) plus watching the two 08-13 gclid quotes convert.
+
+**Task 5 shipped (same day):** `scripts/google-ads/paid-funnel-report.mjs` now prints a "QUOTE
+ATTRIBUTION COVERAGE" section — quote requests, Google-paid quote requests, qualified leads (explicit
+`n/a` until `quote_submit_qualified` exists), quote_won uploads by status, unattributable paid sales
+split by origin (staff_manual / staff_quote / online_checkout / unknown, with the google-tagged
+online subset called out as the only real leak), and click-ID survival quote → order → outbox. Pure
+logic + tests in `paid-funnel-metrics.mjs` / `node-tests/paid-funnel-metrics.node.mjs`. Origin is a
+staff_notes-prefix + `checkout_submission_id` heuristic until `orders` gets an explicit origin column.
+Prod 45d readout: 35 quotes · 2 Google-paid · quote_won 0 sent/1 not_attributable · unattributable
+14 = 4 online (0 google-tagged) + 6 staff_manual + 4 staff_quote · click-ID survival 2 quotes/0 converted.
