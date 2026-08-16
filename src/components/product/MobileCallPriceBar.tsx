@@ -2,6 +2,7 @@
 
 import { Phone, Tag } from "lucide-react";
 import { trackPaidCta } from "@/components/paid/PaidProductLink";
+import { BUSINESS_INFO } from "@/lib/business-info";
 
 // PPC (Google Ads) mobile landing bar for /products/[slug]. ~83% of paid
 // search traffic on these pages is mobile — this gives a one-tap call
@@ -9,13 +10,6 @@ import { trackPaidCta } from "@/components/paid/PaidProductLink";
 // sticky Add to Cart bar (never replacing or covering it). Additive only:
 // does not alter ProductPageClient's existing sticky bar or cart flow.
 
-// Deliberately NOT tagged with the Google Ads swap class ("tc-phone"): this bar
-// shows "Call Now", never the number itself, and Google's swapper rewrites the
-// content of every element carrying that class. Tagging it would replace the
-// label and icon with a phone number. The bar is still fully measured — the
-// swap rewrites its tel: href (it is client-rendered, so WebsiteCallSwap's
-// MutationObserver is what catches it), and CallTracker reports the tap.
-const PHONE_DISPLAY = "(306) 954-8688";
 const PHONE_TEL = "tel:+13069548688";
 const CALL_PLACEMENT = "product_page_mobile_call_bar";
 
@@ -54,11 +48,11 @@ export function MobileCallPriceBar({ visible, bottomOffset, onGetPriceClick }: M
       <a
         href={PHONE_TEL}
         data-call-placement={CALL_PLACEMENT}
-        aria-label={`Call True Color Display Printing at ${PHONE_DISPLAY}`}
+        aria-label={`Call True Color Display Printing at ${BUSINESS_INFO.phone.display}`}
         className="flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-[var(--brand)] text-[var(--brand)] font-bold text-sm px-3 py-2.5 transition-colors hover:bg-[var(--brand-50)] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
       >
         <Phone size={17} aria-hidden="true" />
-        Call Now
+        <span className="tc-phone">{BUSINESS_INFO.phone.display}</span>
       </a>
       <button
         type="button"

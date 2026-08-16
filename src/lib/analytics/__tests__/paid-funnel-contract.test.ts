@@ -59,6 +59,7 @@ describe("paid funnel event ownership", () => {
     for (const surface of [
       "src/app/why-true-color/layout.tsx",
       "src/app/contact/page.tsx",
+      "src/components/product/MobileCallPriceBar.tsx",
     ]) {
       expect(source(surface), surface).toContain('className="tc-phone"');
     }
