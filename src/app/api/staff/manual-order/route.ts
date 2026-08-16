@@ -25,6 +25,21 @@ import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
+import {
+  QUOTE_ATTRIBUTION_SELECT,
+  AUTO_LINK_EXCLUDED_LIFECYCLE_STATUSES,
+  autoLinkStaffNote,
+  autoLinkWindowStartIso,
+  hasPaidClickId,
+  normalizeQuoteEmail,
+  pickQuoteAttributionForOrder,
+  resolveAutoLinkCandidate,
+  shortQuoteRef,
+  type AttributionWarning,
+  type OrderAttributionColumns,
+  type QuoteCandidate,
+  type QuoteLinkSource,
+} from "@/lib/quotes/quote-attribution";
 
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -163,31 +178,6 @@ function buildProofUrl(proofPath?: string): string | undefined {
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-/**
- * The attribution columns materialize_quote_order copies quote_requests → orders
- * (supabase/migrations/20260720100000_quote_conversion_measurement.sql).
- * Column names are identical on both tables, so a fetched quote row spreads
- * straight into the orders insert.
- *
- * Keep this list in lockstep with that RPC. A manual order raised against a
- * website quote must carry the same click IDs, or the Google Ads conversion
- * outbox trigger classifies the revenue as not_attributable.
- */
-const QUOTE_ATTRIBUTION_COLUMNS = [
-  "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
-  "gclid", "gbraid", "wbraid", "google_keyword", "google_matchtype",
-  "google_device", "google_loc_physical_ms", "google_loc_interest_ms",
-  "google_adgroup_id", "google_creative_id", "google_campaign_id", "google_network",
-  "latest_paid_utm_source", "latest_paid_utm_medium", "latest_paid_utm_campaign",
-  "latest_paid_utm_content", "latest_paid_utm_term", "latest_paid_gclid",
-  "latest_paid_gbraid", "latest_paid_wbraid", "latest_paid_google_keyword",
-  "latest_paid_google_matchtype", "latest_paid_google_device",
-  "latest_paid_google_loc_physical_ms", "latest_paid_google_loc_interest_ms",
-  "latest_paid_google_adgroup_id", "latest_paid_google_creative_id",
-  "latest_paid_google_campaign_id", "latest_paid_google_network",
-  "latest_paid_touch_captured_at",
-] as const;
 
 export async function POST(req: NextRequest) {
   const auth = await requireStaffUser();
