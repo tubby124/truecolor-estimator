@@ -221,13 +221,13 @@ $8.50/sqft · $25 order-total minimum applies at checkout to small carts
 | 25   | $25  | $25  | $25  | $25     | $37.50  | $39     | $56.25  | $100  |
 | 50   | $60  | $60  | $60  | $60     | $75     | $78     | $112.50 | $200  |
 | 100  | $65  | $65  | $65  | $100    | $150    | $156    | $225    | $400  |
-| 250  | $87.50 | $87.50 | $125 | $222.50 | $332.50 | $347.50 | $500 | $890  |
+| 250  | $87.50 | $87.50 | $122.50 | $220 | $330 | $342.50 | $495 | $877.50 |
 | 500  | $165 | $165 | $165 | $220    | $335    | $345    | $500    | $890  |
 | 1000 | $200 | $200 | $200 | $330    | $500    | $520    | $750    | $1330 |
 
-4×4″ per-unit: 25=$1.00 · 50=$1.20 · 100=$1.00 · 250=$0.89 · 500=$0.44 · 1000=$0.33
+4×4″ per-unit: 25=$1.00 · 50=$1.20 · 100=$1.00 · 250=$0.88 · 500=$0.44 · 1000=$0.33
 Circle shape ×1.40 · clear vinyl ×1.44 · perforated 8mil window: max($70/pc, $8/sqft)
-Known step artifacts (rate 8→4 at qty 500): 4×4 250=$222.50 vs 500=$220; 6×6/8×8 flat 250→500.
+Order total is non-decreasing across the presets for every size/material/shape (locked by test); 4×4 is flat 250→500 ($220) by design of the 500-tier rate step.
 Most popular: 100× 4×4″ = $100
 
 ---
