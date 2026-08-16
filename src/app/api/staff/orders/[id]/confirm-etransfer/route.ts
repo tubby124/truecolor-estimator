@@ -21,6 +21,7 @@ import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
+import { sendMetaCapiEvent } from "@/lib/analytics/metaCapi";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -42,9 +43,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
         subtotal, gst, pst, total, is_rush,
         discount_code, discount_amount, wave_invoice_id,
         wave_invoice_approved_at, wave_payment_recorded_at,
-        created_at, receipt_token,
+        created_at, receipt_token, meta_tracking_consent, meta_fbp, meta_fbc,
         order_items ( product_name, qty, width_in, height_in, sides, line_total ),
-        customer_id, customers ( name, email, marketing_consent )
+        customer_id, customers ( name, email, phone, marketing_consent )
       `)
       .eq("id", id)
       .single();
@@ -61,7 +62,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
     }
 
     const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;
-    const customer = customerRaw as { name: string; email: string; marketing_consent?: boolean | null } | null;
+    const customer = customerRaw as { name: string; email: string; phone?: string | null; marketing_consent?: boolean | null } | null;
 
     if (!customer?.email) {
       return NextResponse.json({ error: "No customer email on this order" }, { status: 400 });
@@ -150,6 +151,33 @@ export async function POST(_req: NextRequest, { params }: Params) {
     const items = Array.isArray(order.order_items) ? order.order_items : [];
     const totalStr = Number(order.total).toFixed(2);
     const orderTotal = Number(order.total ?? 0);
+
+    if (order.meta_tracking_consent === true) {
+      void sendMetaCapiEvent({
+        event_name: "Purchase",
+        event_id: order.order_number,
+        event_source_url: "https://truecolorprinting.ca/order-confirmed",
+        user_data: {
+          email: customer.email,
+          phone: customer.phone ?? undefined,
+          fbp: order.meta_fbp ?? undefined,
+          fbc: order.meta_fbc ?? undefined,
+          external_id: order.customer_id ?? undefined,
+        },
+        custom_data: {
+          currency: "CAD",
+          value: Number(order.total),
+          content_type: "product",
+          content_ids: items.map((item) => (item.product_name ?? "").slice(0, 100)),
+          num_items: items.reduce((sum, item) => sum + Number(item.qty ?? 1), 0),
+          contents: items.map((item) => ({
+            id: (item.product_name ?? "").slice(0, 100),
+            quantity: Number(item.qty ?? 1),
+            item_price: Number(item.qty) > 0 ? Number(item.line_total) / Number(item.qty) : Number(item.line_total),
+          })),
+        },
+      }).catch((err) => console.error("[confirm-etransfer] Meta CAPI failed (non-fatal):", err));
+    }
 
     // ── 1. Wave: approve invoice + record payment ────────────────────────────────
     // Runs BEFORE the receipt email so the email's "Download Tax Invoice (PDF)"

@@ -24,7 +24,7 @@ import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
-import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
+import { sendMetaCapiEvent } from "@/lib/analytics/metaCapi";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { fetchCloverPaymentAmountCents } from "@/lib/payment/clover";
 import { summarizeOrderPayments, type OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
@@ -652,7 +652,7 @@ export async function POST(req: NextRequest) {
                   // Customer-facing emails per order: 9 → 4 (2026-05-14).
                   const { data: fullOrder } = await supabase
                     .from("orders")
-                    .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, receipt_token, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
+                    .select(`subtotal, gst, pst, total, is_rush, discount_code, discount_amount, created_at, receipt_token, meta_tracking_consent, meta_fbp, meta_fbc, order_items ( product_name, qty, width_in, height_in, sides, line_total )`)
                     .eq("id", order.id)
                     .single();
                   const receiptItems = fullOrder && Array.isArray(fullOrder.order_items) ? fullOrder.order_items : [];
@@ -695,28 +695,33 @@ export async function POST(req: NextRequest) {
                       });
                       console.log(`[clover-webhook] receipt sent → ${customer.email}${waveInvoiceUrl ? " (with Wave PDF)" : ""}`);
 
-                      // Meta Conversions API — Purchase event (server-side, deduped via event_id=order_number)
-                      void sendMetaCapiEvent({
-                        event_name: "Purchase",
-                        event_id: order.order_number,
-                        event_source_url: "https://truecolorprinting.ca/order-confirmed",
-                        user_data: {
-                          email: customer.email,
-                          external_id: order.customer_id ?? undefined,
-                        },
-                        custom_data: {
-                          currency: "CAD",
-                          value: Number(order.total),
-                          content_type: "product",
-                          content_ids: receiptItems.map((i) => (i.product_name ?? "").slice(0, 100)),
-                          num_items: receiptItems.reduce((s, i) => s + Number(i.qty ?? 1), 0),
-                          contents: receiptItems.map((i) => ({
-                            id: (i.product_name ?? "").slice(0, 100),
-                            quantity: Number(i.qty ?? 1),
-                            item_price: Number(i.qty) > 0 ? Number(i.line_total) / Number(i.qty) : Number(i.line_total),
-                          })),
-                        },
-                      }).catch((err) => console.error("[clover-webhook] Meta CAPI failed (non-fatal):", err));
+                      // Report the payment-confirmed order, never the redirect. The
+                      // browser event on /order-confirmed shares this order number.
+                      if (fullOrder.meta_tracking_consent === true) {
+                        void sendMetaCapiEvent({
+                          event_name: "Purchase",
+                          event_id: order.order_number,
+                          event_source_url: "https://truecolorprinting.ca/order-confirmed",
+                          user_data: {
+                            email: customer.email,
+                            fbp: fullOrder.meta_fbp ?? undefined,
+                            fbc: fullOrder.meta_fbc ?? undefined,
+                            external_id: order.customer_id ?? undefined,
+                          },
+                          custom_data: {
+                            currency: "CAD",
+                            value: Number(order.total),
+                            content_type: "product",
+                            content_ids: receiptItems.map((i) => (i.product_name ?? "").slice(0, 100)),
+                            num_items: receiptItems.reduce((s, i) => s + Number(i.qty ?? 1), 0),
+                            contents: receiptItems.map((i) => ({
+                              id: (i.product_name ?? "").slice(0, 100),
+                              quantity: Number(i.qty ?? 1),
+                              item_price: Number(i.qty) > 0 ? Number(i.line_total) / Number(i.qty) : Number(i.line_total),
+                            })),
+                          },
+                        }).catch((err) => console.error("[clover-webhook] Meta CAPI failed (non-fatal):", err));
+                      }
 
                       // Insert discount_redemptions for staff-assigned discounts that bypassed checkout (non-fatal)
                       if (fullOrder.discount_code) {

@@ -16,6 +16,7 @@ import {
   clearQuoteSubmission,
   getOrCreateQuoteSubmission,
 } from "@/lib/quote-request-client";
+import { metaTrackLead } from "@/lib/analytics/metaPixel";
 
 interface QuoteItem {
   id: string;
@@ -207,10 +208,14 @@ function QuoteForm() {
         sent?: boolean;
         error?: string;
         warning?: string;
+        tracking_event_id?: string | null;
       };
       if (!res.ok) throw new Error(data.error ?? "Failed to send");
       clearQuoteSubmission("multi-item-quote", submissionKey);
       setDeliveryWarning(data.warning ?? "");
+      if (data.tracking_event_id) {
+        metaTrackLead({ content_name: "Quote Request", value: 200 }, { eventId: data.tracking_event_id });
+      }
       setSent(true);
       trackGenerateLead({
         lead_source: "quote_request",

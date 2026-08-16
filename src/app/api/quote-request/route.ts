@@ -25,7 +25,6 @@ import {
 } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { classifyReferrer } from "@/lib/analytics/referrer";
-import { sendMetaCapiEvent } from "@/lib/analytics/metaPixel";
 import {
   ATTRIBUTION_KEYS,
   collectLatestPaidHints,
@@ -41,6 +40,7 @@ import {
   parseQuoteSubmissionKey,
 } from "@/lib/quote-request-guard";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { getMetaCapiRequestContext, sendMetaCapiEvent } from "@/lib/analytics/metaCapi";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -77,6 +77,7 @@ function quoteSuccess(id: string, duplicate = false, warning?: string) {
   return NextResponse.json({
     sent: true,
     ref,
+    tracking_event_id: `quote-${id}`,
     duplicate,
     ...(warning ? { warning } : {}),
   });
@@ -495,6 +496,7 @@ export async function POST(req: NextRequest) {
     const refClass = classifyReferrer(
       utm.landing_referrer || req.headers.get("referer"),
     );
+    const metaContext = getMetaCapiRequestContext(req);
 
     // Save to DB before sending emails. The attributed quote row is the funnel
     // source of truth, so a DB failure must not show a false success state.
@@ -576,27 +578,31 @@ export async function POST(req: NextRequest) {
     }
 
     if (!isDuplicate) {
-      // Meta Conversions API — Lead event (server-side, deduped via event_id=quote-{insertedId})
-      void sendMetaCapiEvent({
-        event_name: "Lead",
-        event_id: `quote-${insertedId}`,
-        event_source_url: "https://truecolorprinting.ca/quote",
-        user_data: {
-          email,
-          phone: phone || undefined,
-          client_ip_address: ip,
-          external_id: insertedId,
-        },
-        custom_data: {
-          content_name: brokerageSlug
-            ? `Quote Portal — ${brokerageSlug}`
-            : "Quote Request",
-          lead_event_source: refClass.source,
-          referrer_medium: refClass.medium,
-        },
-      }).catch((err) =>
-        console.error("[quote-request] Meta CAPI failed (non-fatal):", err),
-      );
+      // Meta Conversions API — only after marketing consent, with the same ID
+      // returned to the browser for client/server deduplication.
+      if (metaContext.marketingConsent) {
+        void sendMetaCapiEvent({
+          event_name: "Lead",
+          event_id: `quote-${insertedId}`,
+          event_source_url: "https://truecolorprinting.ca/quote",
+          user_data: {
+            email,
+            phone: phone || undefined,
+            client_ip_address: metaContext.clientIp,
+            client_user_agent: metaContext.clientUserAgent,
+            fbp: metaContext.fbp,
+            fbc: metaContext.fbc,
+            external_id: insertedId,
+          },
+          custom_data: {
+            currency: "CAD",
+            value: 200,
+            content_name: brokerageSlug ? `Quote Portal — ${brokerageSlug}` : "Quote Request",
+            lead_event_source: refClass.source,
+            referrer_medium: refClass.medium,
+          },
+        }).catch((err) => console.error("[quote-request] Meta CAPI failed (non-fatal):", err));
+      }
     }
 
     // Side-channel notifications — fire-and-forget. Failures must never break the response.
