@@ -595,8 +595,6 @@ export async function POST(req: NextRequest) {
             external_id: insertedId,
           },
           custom_data: {
-            currency: "CAD",
-            value: 200,
             content_name: brokerageSlug ? `Quote Portal — ${brokerageSlug}` : "Quote Request",
             lead_event_source: refClass.source,
             referrer_medium: refClass.medium,

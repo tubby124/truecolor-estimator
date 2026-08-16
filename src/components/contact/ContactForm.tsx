@@ -103,7 +103,7 @@ export function ContactForm() {
       } else {
         clearQuoteSubmission("contact-quote", submissionKey);
         if (data.tracking_event_id) {
-          metaTrackLead({ content_name: "Contact Form", value: 200 }, { eventId: data.tracking_event_id });
+          metaTrackLead({ content_name: "Contact Form" }, { eventId: data.tracking_event_id });
         }
         setStatus("sent");
         formRef.current?.reset();

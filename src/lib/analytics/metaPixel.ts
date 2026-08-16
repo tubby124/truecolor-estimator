@@ -43,5 +43,6 @@ export function metaTrackPurchase(p: { content_ids: string[]; value: number; cur
 }
 
 export function metaTrackLead(p: { content_name?: string; value?: number; currency?: string }, options?: EventOptions) {
-  fbq("Lead", { currency: "CAD", ...p }, options);
+  // Leads carry no value: an unpriced quote/contact has no honest revenue figure (see quote-link-contract test).
+  fbq("Lead", { ...p }, options);
 }

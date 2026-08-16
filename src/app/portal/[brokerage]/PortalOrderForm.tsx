@@ -296,7 +296,7 @@ export function PortalOrderForm({
         tracking_event_id?: string | null;
       };
       if (result.tracking_event_id) {
-        metaTrackLead({ content_name: `Quote Portal — ${brokerage.slug}`, value: 200 }, { eventId: result.tracking_event_id });
+        metaTrackLead({ content_name: `Quote Portal — ${brokerage.slug}` }, { eventId: result.tracking_event_id });
       }
       // Save profile after successful submission so next visit pre-fills.
       try {

@@ -214,7 +214,7 @@ function QuoteForm() {
       clearQuoteSubmission("multi-item-quote", submissionKey);
       setDeliveryWarning(data.warning ?? "");
       if (data.tracking_event_id) {
-        metaTrackLead({ content_name: "Quote Request", value: 200 }, { eventId: data.tracking_event_id });
+        metaTrackLead({ content_name: "Quote Request" }, { eventId: data.tracking_event_id });
       }
       setSent(true);
       trackGenerateLead({
