@@ -9,6 +9,7 @@ import { PriceSummary } from "@/components/product/PriceSummary";
 import { useToast, ToastContainer } from "@/components/ui";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { Category } from "@/lib/data/types";
+import type { MerchantOfferSelection } from "@/lib/merchant/merchant-catalog";
 import { trackViewItem, trackAddToCart } from "@/lib/analytics";
 import { metaTrackViewContent, metaTrackAddToCart } from "@/lib/analytics/metaPixel";
 import { SameDayClock } from "@/components/home/SameDayClock";
@@ -30,6 +31,7 @@ const MATERIAL_LABELS: Record<string, string> = {
 
 interface Props {
   product: ProductContent;
+  initialSelection?: MerchantOfferSelection;
 }
 
 const EMPTY_PRICE: PriceData = {
@@ -45,7 +47,7 @@ const EMPTY_CONFIG: ConfigData = {
   materialCode: "", sizeLabel: "", sidesLabel: "Single-sided",
 };
 
-export function ProductPageClient({ product }: Props) {
+export function ProductPageClient({ product, initialSelection }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
   const [configData, setConfigData] = useState<ConfigData>(EMPTY_CONFIG);
@@ -231,12 +233,14 @@ export function ProductPageClient({ product }: Props) {
             <UnifiedConfigurator
               category={product.category as Category}
               mode="customer"
+              prefilled={initialSelection}
               onPriceChange={handlePriceChange}
               onConfigChange={handleConfigChange}
             />
           ) : (
             <ProductConfigurator
               product={product}
+              initialSelection={initialSelection}
               onPriceChange={handlePriceChange}
               onConfigChange={handleConfigChange}
             />

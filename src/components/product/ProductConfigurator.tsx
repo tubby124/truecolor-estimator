@@ -8,6 +8,7 @@ import { useToast, ToastContainer } from "@/components/ui";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { trackPriceCalculated } from "@/lib/analytics";
 import { computeTax } from "@/lib/pricing/tax";
+import type { MerchantOfferSelection } from "@/lib/merchant/merchant-catalog";
 
 const BULK_HINTS: Record<string, Record<number, string>> = {
   SIGN:           { 5: "save 8%", 10: "save 17%", 25: "save 23%" },
@@ -123,18 +124,21 @@ export interface ConfigData {
 
 interface Props {
   product: ProductContent;
+  initialSelection?: MerchantOfferSelection;
   onPriceChange?: (data: PriceData) => void;
   onConfigChange?: (config: ConfigData) => void;
 }
 
-export function ProductConfigurator({ product, onPriceChange, onConfigChange }: Props) {
+export function ProductConfigurator({ product, initialSelection, onPriceChange, onConfigChange }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
-  const [selectedSize, setSelectedSize] = useState(product.sizePresets[0]);
+  const [selectedSize, setSelectedSize] = useState(
+    () => product.sizePresets.find((preset) => preset.label === initialSelection?.sizeLabel) ?? product.sizePresets[0],
+  );
   const [customW, setCustomW] = useState("");
   const [customH, setCustomH] = useState("");
   const [isCustom, setIsCustom] = useState(false);
-  const [sides, setSides] = useState<1 | 2>(product.defaultSides);
-  const [qty, setQty] = useState(product.qtyPresets[0]);
+  const [sides, setSides] = useState<1 | 2>(initialSelection?.sides ?? product.defaultSides);
+  const [qty, setQty] = useState(initialSelection?.qty ?? product.qtyPresets[0]);
   const [customQty, setCustomQty] = useState("");
   const [isCustomQty, setIsCustomQty] = useState(false);
   const [isCustomFlexSize, setIsCustomFlexSize] = useState(false);
@@ -145,7 +149,12 @@ export function ProductConfigurator({ product, onPriceChange, onConfigChange }: 
   const [loading, setLoading] = useState(false);
   const [designStatus, setDesignStatus] = useState<string>("PRINT_READY");
   const [addonQtys, setAddonQtys] = useState<Record<string, number>>({});
-  const [selectedTier, setSelectedTier] = useState(0);
+  const [selectedTier, setSelectedTier] = useState(() => {
+    const requestedTier = product.tierPresets?.findIndex(
+      (tier) => tier.material_code === initialSelection?.materialCode,
+    ) ?? -1;
+    return requestedTier >= 0 ? requestedTier : 0;
+  });
   const [selectedColor, setSelectedColor] = useState(product.colorOptions?.[0]);
   const [customText, setCustomText] = useState<Record<string, string>>({});
   const [touchedText, setTouchedText] = useState<Record<string, boolean>>({});
