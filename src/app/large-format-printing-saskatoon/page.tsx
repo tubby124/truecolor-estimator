@@ -22,7 +22,7 @@ export default function LargeFormatPrintingSaskatoonPage() {
       canonicalSlug="large-format-printing-saskatoon"
       primaryProductSlug="vinyl-banners"
       title="Large Format Printing Saskatoon"
-      subtitle="Coroplast signs, vinyl banners, ACP aluminum, and retractable displays — printed in-house on our Roland UV printer."
+      subtitle="Coroplast signs from $8/sqft, vinyl banners from $66, retractable stands from $219 — printed in-house on our Roland UV printer."
       heroImage="/images/products/heroes/construction-hero-1200x500.webp"
       heroAlt="Large format printing Saskatoon — vinyl banners, coroplast signs, and ACP aluminum signs printed in-house"
       description="True Color Display Printing is Saskatoon's in-house large format print shop. We print coroplast signs, vinyl banners up to any length, aluminum composite (ACP) signs, retractable banner stands, foamboard displays, vehicle magnets, and window graphics entirely on our Roland UV printer — no outsourcing to Calgary or Winnipeg, no supplier delays. Standard turnaround is 1–3 business days. Same-day rush available for +$40 flat."

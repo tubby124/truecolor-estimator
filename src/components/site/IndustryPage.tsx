@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { StickyMobileCTA } from "@/components/site/StickyMobileCTA";
+import { PaidPhoneLink, PaidProductListTracker } from "@/components/paid/PaidProductLink";
 
 const INDUSTRY_PRODUCT_IMAGES: Record<string, string> = {
   "vinyl-banners":       "/images/products/product/banner-vinyl-colorful-800x600.webp",
@@ -194,8 +195,19 @@ export function IndustryPage({
       )}
       <SiteNav />
 
+      {/* D8 — paid landing measurement. Fires view_paid_landing + view_item_list
+          once on mount. No explicit path is passed: trackPaidLandingView()
+          defaults to window.location.pathname, so every IndustryPage destination
+          reports itself without this component knowing its own route. */}
+      <PaidProductListTracker products={products} itemListName="Industry landing product list" />
+
       {/* Hero */}
-      <section className="relative h-64 md:h-80 overflow-hidden">
+      {/* h-80 at every breakpoint (was h-64 md:h-80). Desktop is unchanged;
+          mobile gains 64px so the hero CTA row can wrap to two lines for the
+          added call button without the top of the h1 being clipped — this
+          section is overflow-hidden with its content pinned to bottom-0, so
+          anything taller than the box disappears upward. */}
+      <section className="relative h-80 overflow-hidden">
         <Image
           src={heroImage}
           alt={heroAlt}
@@ -211,12 +223,25 @@ export function IndustryPage({
             {title}
           </h1>
           <p className="text-gray-200 text-base md:text-lg mb-4">{subtitle}</p>
-          <Link
-            href={ctaHref}
-            className="inline-block bg-[#16C2F3] text-white font-bold px-8 py-3 min-h-[44px] flex items-center justify-center rounded-lg hover:bg-[#0fb0dd] transition-colors"
-          >
-            Get My Price →
-          </Link>
+          {/* D7 — a tel: link must be in the mobile fold on every IndustryPage
+              destination. Desktop is unchanged (px-8 restored at sm:, both
+              buttons sit on one row); mobile gets a compact call button that
+              wraps to its own row only on very narrow viewports.
+              SiteNav's CallTracker already instruments tel: clicks. */}
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={ctaHref}
+              className="inline-flex bg-[#16C2F3] text-white font-bold px-6 sm:px-8 py-3 min-h-[44px] items-center justify-center rounded-lg hover:bg-[#0fb0dd] transition-colors"
+            >
+              Get My Price →
+            </Link>
+            <PaidPhoneLink
+              placement="industry_hero"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 sm:px-6 py-3 rounded-lg border border-white/70 bg-white/10 text-white font-bold text-sm sm:text-base backdrop-blur-sm hover:bg-white hover:text-[#1c1712] transition-colors"
+            >
+              Call (306) 954-8688
+            </PaidPhoneLink>
+          </div>
         </div>
       </section>
 
