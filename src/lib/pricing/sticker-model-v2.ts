@@ -68,17 +68,26 @@ interface VinylTier {
 const VINYL_TIERS: VinylTier[] = [
   { qty_max: 1,        label: "qty_1",        per_unit_floor: 25.00, rate_per_sqft: 9  },
   { qty_max: 9,        label: "qty_2_9",      per_unit_floor: 25.00, rate_per_sqft: 18 },
-  // 2026-08-16 (NOT changed, deliberately): five retail floor-dominated fixtures
-  // in qty 10-99 (Olivia q40 $1.25, Luby q50 $0.90, Samantha q50 $1.30/$1.20,
-  // Michaela q50 $1.20 invoice-verified) have median $1.20 - the $1.00 floor
-  // undercharges 4 of 5. But this floor is pinned by the "$25 for 25x 2x2"
-  // marketing anchor (products-content fromPrice, sticker-printing-saskatoon
-  // page + schema, llms.txt, merchant feed, price-consistency) - 25 x $1.10 =
-  // $27.50 breaks all of them, and raising only qty_50_99 puts a per-unit
-  // UPTICK between the 25 and 50 preset buttons. Owner decision, tracked in
-  // the sticker /pricing-review brief (small-sticker additive model).
-  { qty_max: 49,       label: "qty_10_49",    per_unit_floor: 1.00,  rate_per_sqft: 8  },
-  { qty_max: 99,       label: "qty_50_99",    per_unit_floor: 1.00,  rate_per_sqft: 8  },
+  // 2026-08-16 PM recalibration (owner direction: raise the website engine
+  // where it undercharges, constants only, no restructure):
+  //  - qty 10-99 floor 1.00 -> 1.20. Five retail floor-dominated fixtures
+  //    (Olivia q40 $1.25, Luby q50 $0.90, Samantha q50 $1.30/$1.20, Michaela
+  //    q50 $1.20 invoice-verified) have median $1.20; four land within 8%,
+  //    Luby is the one overcharged (+33%). This retires the "$25 for 25x 2x2"
+  //    anchor -> smallest order is now 25 x $1.20 = $30 ("from $30").
+  //  - qty 10-249 rate 8 -> 9 $/sqft. Fixes Arieanna Barsi (4x4 q100
+  //    invoice-verified $1.20; was $0.89 -> $1.00) and makes the catalog rate
+  //    equal to the wide-format <=10 sqft rate so the 2.0 sqft mode boundary is
+  //    rate-continuous. Applied to all three tiers 10-249 together so per-unit
+  //    stays monotone across 49->50 and 99->100 for every size. Cost: Amber
+  //    Apl (10x6 q24 $3.00) goes +11% -> +25% (edge of band).
+  //  Known: total still drops at custom qty 99->100 for small stickers
+  //  (99 x $1.20 = $119 vs 100 x $0.65 = $65) - pre-existing shape of the
+  //  stepped floors (Albert himself quotes ~$60 for either 50 or 100 3x3s);
+  //  presets are 50/100 so it only shows on typed off-tier qty. Real fix is a
+  //  continuous floor curve = structural, next /pricing-review.
+  { qty_max: 49,       label: "qty_10_49",    per_unit_floor: 1.20,  rate_per_sqft: 9  },
+  { qty_max: 99,       label: "qty_50_99",    per_unit_floor: 1.20,  rate_per_sqft: 9  },
   // 2026-08-16 recalibration: floor raised 0.55->0.65 against expanded fixture
   // set (52 quotes incl. 28 pulled 2026-05-29->2026-08-16). Fixes a confirmed
   // undercharge (La Troupe du Jour, 3x3 qty150 die_cut: was -31.3%, now -18.8%)
@@ -90,10 +99,17 @@ const VINYL_TIERS: VinylTier[] = [
   // floor), so a floor change can't reach it. Needs a rate_per_sqft change,
   // deferred to the next /pricing-review pending a check of whether Sergio's
   // overcharge is actually a CIRCLE_SHAPE_MULTIPLIER issue instead.
-  { qty_max: 249,      label: "qty_100_249",  per_unit_floor: 0.65,  rate_per_sqft: 8  },
+  { qty_max: 249,      label: "qty_100_249",  per_unit_floor: 0.65,  rate_per_sqft: 9  },
   { qty_max: 499,      label: "qty_250_499",  per_unit_floor: 0.35,  rate_per_sqft: 8  },
-  { qty_max: 999,      label: "qty_500_999",  per_unit_floor: 0.20,  rate_per_sqft: 4  },
-  { qty_max: Infinity, label: "qty_1000_plus",per_unit_floor: 0.15,  rate_per_sqft: 3  },
+  // 2026-08-16 PM: 500-999 floor 0.20 -> 0.33 against David Hodges (3x3 q500
+  // square, paid, $0.42 - was -40.5%) and Assem Sethi (2x2 q500 circle $0.50 -
+  // was -28%); 0.33 is the value that brings BOTH inside +/-25%. Rate-dominated
+  // fixtures (Evolution Pet 10x2/10x3.5, MOBO Kim 4x4) unaffected. 1000+ floor
+  // 0.15 -> 0.20 (no fixture data at 1000+) purely so 1000 x floor >= 500 x
+  // 0.33 - keeps the order TOTAL non-decreasing between the 500 and 1000
+  // preset buttons.
+  { qty_max: 999,      label: "qty_500_999",  per_unit_floor: 0.33,  rate_per_sqft: 4  },
+  { qty_max: Infinity, label: "qty_1000_plus",per_unit_floor: 0.20,  rate_per_sqft: 3  },
 ];
 
 // WIDE-FORMAT MODE — applies when per-piece sqft > 2.0. Albert's large-sticker
@@ -125,7 +141,14 @@ const CLEAR_VINYL_MULTIPLIER = 1.44;
 // qty 4 die_cut: $30 ≈ catalog $30.06). Setup overhead for die-cut is real
 // but inconsistent enough that hardcoding 1.15× over-charged 3 of 4 die-cut
 // fixtures. Staff override stays available for die-cut shape jobs.
-const CIRCLE_SHAPE_MULTIPLIER = 1.80; // Round cuts have material waste; tuned against MOBO Kim 4" circle qty 500 = $0.79/ea
+// CIRCLE: was 1.80 (tuned to MOBO Kim 4" circle q500 = $0.79/ea - a wholesale
+// account). Retail circle evidence is thin and split: Sergio/Rayacom 3.5"
+// q150 $0.70 and Rayacom 2" q50 $0.80 (msg 19afee5b2d50f803) show NO premium
+// vs squares; Assem Sethi 2" q250/q500 ($0.60/$0.50, unconfirmed quote) need
+// ~1.4x over the tier floor. 2026-08-16 PM: 1.80 -> 1.40 - keeps both Assem
+// rows in band, cuts Sergio from +97% to +53% overcharge (still the worst
+// retail circle miss). Revisit with the next confirmed retail circle order.
+const CIRCLE_SHAPE_MULTIPLIER = 1.40;
 const ORDER_MIN = 25;
 
 function pickVinylTier(qty: number): VinylTier {
