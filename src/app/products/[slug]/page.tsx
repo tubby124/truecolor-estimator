@@ -9,10 +9,12 @@ import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
 import { PRODUCT_IMAGES } from "@/lib/data/productImages";
 import { NotifyMeForm } from "@/components/product/NotifyMeForm";
+import { getMerchantOfferSelection } from "@/lib/merchant/merchant-catalog";
 
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ merchant?: string | string[] }>;
 }
 
 export async function generateStaticParams() {
@@ -39,10 +41,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const product = getProduct(slug);
   if (!product) notFound();
+  const merchant = (await searchParams).merchant;
+  const merchantOffer = getMerchantOfferSelection(slug, typeof merchant === "string" ? merchant : undefined);
 
   // Related products
   const related = product.relatedSlugs.map((s) => getProduct(s)).filter(Boolean);
@@ -87,7 +91,7 @@ export default async function ProductPage({ params }: Props) {
               <NotifyMeForm productName={product.name} productSlug={slug} />
             </div>
           ) : (
-            <ProductPageClient product={product} />
+            <ProductPageClient product={product} initialSelection={merchantOffer} />
           )}
         </div>
 
