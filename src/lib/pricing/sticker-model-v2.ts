@@ -16,6 +16,12 @@
  *   unit_price *= shape_multiplier (die_cut = 1.15)
  *   total = max(ORDER_MIN, qty × unit_price)
  *
+ * QUANTITY ENVELOPE (2026-08-16): after the base quote, a typed qty is never
+ * charged more than a larger tier-start qty would cost — total is capped at the
+ * cheapest of {50,100,250,500,1000} above it (e.g. 99× 4×4 pays the 100× price).
+ * Applies at qty >= 10 ONLY: the owner declined restructuring the qty 1-9 tiers,
+ * so qty 9 must keep its $25/ea tier price and may not borrow qty 10's.
+ *
  * Per vault: Projects/true-color/2026-05-29-product-configurator-unification-wave1-plan.md
  */
 
@@ -42,6 +48,10 @@ export interface StickerQuoteResult {
   material_multiplier: number;
   shape_multiplier: number;
   modifiers_applied: string[];
+  /** True when the quantity envelope capped `total` at a larger qty's price. */
+  qty_envelope_applied: boolean;
+  /** The tier-start qty whose total was borrowed, or null when not applied. */
+  qty_envelope_from_qty: number | null;
 }
 
 interface VinylTier {
@@ -175,7 +185,9 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-export function quoteStickerV2(inputs: StickerInputs): StickerQuoteResult {
+/** Base quote — NO quantity envelope. `quoteStickerV2` wraps this; the envelope
+ *  calls it for candidate quantities, so it must never recurse itself. */
+function quoteStickerBase(inputs: StickerInputs): StickerQuoteResult {
   const sqft = (inputs.width_in * inputs.height_in) / 144;
   const modifiers: string[] = [];
 
@@ -194,6 +206,8 @@ export function quoteStickerV2(inputs: StickerInputs): StickerQuoteResult {
       material_multiplier: 1,
       shape_multiplier: 1,
       modifiers_applied: modifiers,
+      qty_envelope_applied: false,
+      qty_envelope_from_qty: null,
     };
   }
 
@@ -257,5 +271,52 @@ export function quoteStickerV2(inputs: StickerInputs): StickerQuoteResult {
     material_multiplier: material_mult,
     shape_multiplier: shape_mult,
     modifiers_applied: modifiers,
+    qty_envelope_applied: false,
+    qty_envelope_from_qty: null,
+  };
+}
+
+// QUANTITY ENVELOPE — a typed qty must never cost MORE in total than a larger
+// qty would. The stepped floors make the base model non-monotone at tier
+// boundaries (99 × 4×4 = $118.80 vs 100 × 4×4 = $100), which is invisible on the
+// preset buttons but real for a typed quantity. The cap runs the SAME base quote
+// at each tier-start qty above the requested one and borrows the cheapest total,
+// so material/shape multipliers, ORDER_MIN, wide-format and perf modes are all
+// carried along.
+//
+// qty >= 10 ONLY — owner declined restructuring the qty 1-9 tiers (they anchor
+// the $25 one-off / small-run price), so qty 9 keeps its qty_2_9 price and must
+// not borrow qty 10's. The 9 -> 10 drop is pre-existing and deliberately intact.
+const QTY_ENVELOPE_MIN_QTY = 10;
+
+/** Tier-start quantities strictly above `qty` and at/above the envelope floor. */
+function qtyEnvelopeCandidates(qty: number): number[] {
+  return VINYL_TIERS
+    .filter((t) => Number.isFinite(t.qty_max))
+    .map((t) => t.qty_max + 1)
+    .filter((q) => q >= QTY_ENVELOPE_MIN_QTY && q > qty);
+}
+
+export function quoteStickerV2(inputs: StickerInputs): StickerQuoteResult {
+  const base = quoteStickerBase(inputs);
+  if (inputs.qty < QTY_ENVELOPE_MIN_QTY) return base;
+
+  let bestTotal = base.total;
+  let bestFromQty: number | null = null;
+  for (const candidateQty of qtyEnvelopeCandidates(inputs.qty)) {
+    const candidate = quoteStickerBase({ ...inputs, qty: candidateQty });
+    if (candidate.total < bestTotal - 1e-9) {
+      bestTotal = candidate.total;
+      bestFromQty = candidateQty;
+    }
+  }
+  if (bestFromQty === null) return base;
+
+  return {
+    ...base,
+    unit_price: round2(bestTotal / inputs.qty),
+    total: round2(bestTotal),
+    qty_envelope_applied: true,
+    qty_envelope_from_qty: bestFromQty,
   };
 }

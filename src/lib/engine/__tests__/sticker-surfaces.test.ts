@@ -23,11 +23,12 @@ import { estimate } from "../index";
 import type { EstimateRequest } from "../types";
 import type { CartItem } from "@/lib/cart/cart";
 import { revalidateItemPrices } from "@/lib/orders/revalidate";
+import { quoteStickerV2 } from "@/lib/pricing/sticker-model-v2";
 
 const MATERIALS = ["ARLPMF7008", "ARLPMF7008_CLEAR", "RMVN006", "PLACEHOLDER_STICKER_4X4"] as const;
 const SHAPES = ["square", "circle", "die_cut"] as const;
 const SIZES: [number, number][] = [[2, 2], [3, 3], [4, 4], [4, 6], [8, 8], [12, 18], [24, 24]];
-const QTYS = [1, 5, 25, 50, 99, 100, 250, 500, 1000];
+const QTYS = [1, 5, 25, 50, 99, 100, 249, 250, 500, 1000];
 
 function configuratorRequest(
   material_code: string, w: number, h: number, qty: number, shape: EstimateRequest["shape"],
@@ -82,23 +83,60 @@ describe("Sticker quote surfaces agree (V2 on)", () => {
     expect(ckCi.sell_price).toBe(shownCi);
   });
 
-  it("response is internally consistent: sell_price === line total; unit x qty === total unless the $25 order-min applied", () => {
+  it("response is internally consistent: sell_price === line total; unit x qty === total unless the $25 order-min or the qty envelope applied", () => {
     for (const [w, h] of SIZES) for (const qty of QTYS) {
       const r = estimate(configuratorRequest("ARLPMF7008", w, h, qty, "square"));
       const line = r.line_items[0];
       expect(r.sell_price).toBe(line.line_total);
       expect(r.price_per_unit).toBe(line.unit_price);
       const unitTimesQty = Math.round(line.unit_price * qty * 100) / 100;
+      const model = quoteStickerV2({ width_in: w, height_in: h, qty, material: "vinyl_white", shape: "square", finish: "gloss_lam" });
       if (r.min_charge_applied) {
         // $25 order-min pinned the total; UI shows "Your items $X -> You pay $25".
         expect(r.min_charge_value).toBe(r.sell_price);
         expect(r.pre_min_subtotal).toBe(unitTimesQty);
         expect(unitTimesQty).toBeLessThan(r.sell_price!);
+        // The order-min and the envelope are mutually exclusive — every envelope
+        // candidate is itself >= $25, so a capped total can never be min-pinned.
+        expect(model.qty_envelope_applied, `${w}x${h} q${qty}`).toBe(false);
+      } else if (model.qty_envelope_applied) {
+        // The envelope caps the total at a larger qty's price and back-solves
+        // unit = total / qty, so unit x qty drifts by up to half a cent per unit
+        // in EITHER direction. sell_price stays authoritative; no small-order fee.
+        expect(Math.abs(unitTimesQty - r.sell_price!), `${w}x${h} q${qty}`).toBeLessThanOrEqual(qty * 0.005 + 1e-9);
+        expect(r.min_charge_value, `${w}x${h} q${qty}`).toBeNull();
+        expect(r.pre_min_subtotal, `${w}x${h} q${qty}`).toBeNull();
       } else {
         expect(unitTimesQty).toBe(r.sell_price);
         expect(r.min_charge_value).toBeNull();
         expect(r.pre_min_subtotal).toBeNull();
       }
+    }
+  });
+
+  it("configurator === checkout for a TYPED off-tier qty (99, 249) where the envelope caps the price", () => {
+    for (const qty of [99, 249]) {
+      const req = configuratorRequest("ARLPMF7008", 4, 4, qty, "square");
+      const shown = estimate(req);
+      expect(shown.status, `q${qty}`).toBe("QUOTED");
+
+      const model = quoteStickerV2({ width_in: 4, height_in: 4, qty, material: "vinyl_white", shape: "square", finish: "gloss_lam" });
+      expect(model.qty_envelope_applied, `q${qty}`).toBe(true);
+      expect(shown.sell_price, `q${qty}`).toBe(model.total);
+
+      // The whole point: a typed qty never costs more than the larger order.
+      const larger = estimate(configuratorRequest("ARLPMF7008", 4, 4, model.qty_envelope_from_qty!, "square"));
+      expect(shown.sell_price!, `q${qty}`).toBeLessThanOrEqual(larger.sell_price!);
+
+      // Checkout revalidates to the same number (client price deliberately wrong).
+      const [item] = revalidateItemPrices([cartItemFrom(req, 1)]);
+      expect(item.sell_price, `q${qty}`).toBe(shown.sell_price);
+
+      // q249 back-solves to $0.88/ea -> 249 x 0.88 = $219.12 vs a $220 total.
+      // That one-cent-per-unit shortfall must NOT read as an order-min top-up.
+      expect(shown.min_charge_applied, `q${qty}`).toBe(false);
+      expect(shown.min_charge_value, `q${qty}`).toBeNull();
+      expect(shown.pre_min_subtotal, `q${qty}`).toBeNull();
     }
   });
 
