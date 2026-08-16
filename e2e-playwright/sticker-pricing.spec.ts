@@ -95,7 +95,12 @@ test.describe("STICKER pricing API — dimensions and qty affect price", () => {
     const s2x3 = await estimate(request, { category: "STICKER", material_code: "PLACEHOLDER_STICKER_2X3", width_in: 2, height_in: 3, qty: 100 });
     expect(s2x2.status).toBe("QUOTED");
     expect(s2x3.status).toBe("QUOTED");
-    expect(s2x3.sell_price!).toBeGreaterThan(s2x2.sell_price!);
+    // Both are floor-dominated at qty 100 (per_unit_floor $0.65 > sqft x $9 rate
+    // for either size) so they intentionally price identically at $65 — see
+    // data/PRICING_QUICK_REFERENCE.md's V2 grid, recalibrated 2026-08-16 against
+    // 42 retail Albert quotes. A bigger size must never cost LESS, so keep the
+    // regression guard as >=, not the old CSV-era strict >.
+    expect(s2x3.sell_price!).toBeGreaterThanOrEqual(s2x2.sell_price!);
   });
 
   test("non-STICKER categories not touched by area-scaling (regression guard)", async ({ request }) => {
