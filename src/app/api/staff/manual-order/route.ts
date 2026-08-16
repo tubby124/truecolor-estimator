@@ -25,6 +25,21 @@ import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
+import {
+  QUOTE_ATTRIBUTION_SELECT,
+  AUTO_LINK_EXCLUDED_LIFECYCLE_STATUSES,
+  autoLinkStaffNote,
+  autoLinkWindowStartIso,
+  hasPaidClickId,
+  normalizeQuoteEmail,
+  pickQuoteAttributionForOrder,
+  resolveAutoLinkCandidate,
+  shortQuoteRef,
+  type AttributionWarning,
+  type OrderAttributionColumns,
+  type QuoteCandidate,
+  type QuoteLinkSource,
+} from "@/lib/quotes/quote-attribution";
 
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -164,31 +179,6 @@ function buildProofUrl(proofPath?: string): string | undefined {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/**
- * The attribution columns materialize_quote_order copies quote_requests → orders
- * (supabase/migrations/20260720100000_quote_conversion_measurement.sql).
- * Column names are identical on both tables, so a fetched quote row spreads
- * straight into the orders insert.
- *
- * Keep this list in lockstep with that RPC. A manual order raised against a
- * website quote must carry the same click IDs, or the Google Ads conversion
- * outbox trigger classifies the revenue as not_attributable.
- */
-const QUOTE_ATTRIBUTION_COLUMNS = [
-  "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
-  "gclid", "gbraid", "wbraid", "google_keyword", "google_matchtype",
-  "google_device", "google_loc_physical_ms", "google_loc_interest_ms",
-  "google_adgroup_id", "google_creative_id", "google_campaign_id", "google_network",
-  "latest_paid_utm_source", "latest_paid_utm_medium", "latest_paid_utm_campaign",
-  "latest_paid_utm_content", "latest_paid_utm_term", "latest_paid_gclid",
-  "latest_paid_gbraid", "latest_paid_wbraid", "latest_paid_google_keyword",
-  "latest_paid_google_matchtype", "latest_paid_google_device",
-  "latest_paid_google_loc_physical_ms", "latest_paid_google_loc_interest_ms",
-  "latest_paid_google_adgroup_id", "latest_paid_google_creative_id",
-  "latest_paid_google_campaign_id", "latest_paid_google_network",
-  "latest_paid_touch_captured_at",
-] as const;
-
 export async function POST(req: NextRequest) {
   const auth = await requireStaffUser();
   if (auth instanceof NextResponse) return auth;
@@ -260,23 +250,38 @@ export async function POST(req: NextRequest) {
 
     const supabase = createServiceClient();
 
-    // ── 0. Optional quote linkage + conversion identity ──
+    // ── 0. Quote linkage + conversion identity ──
     // Every manual order used to insert with conversion_type NULL, and the Google
     // Ads outbox trigger's NULL guard silently skipped it — 95 of 98 paid orders
     // in a 90-day window produced no outbox row at all. Classify here instead:
     // a manual order raised against a website quote IS the quote_won conversion
     // and must carry that quote's click IDs; everything else is purchase_online.
-    const quoteRequestId = body.quote_request_id?.trim() || null;
-    let quoteAttribution: Record<string, unknown> = {};
-    if (quoteRequestId) {
-      if (!UUID_RE.test(quoteRequestId)) {
-        return NextResponse.json({ error: "quote_request_id must be a UUID" }, { status: 400 });
-      }
+    //
+    // Attribution is always read from the quote row SERVER-side. The client may
+    // supply a quote id and nothing else — a browser-supplied gclid/utm would be
+    // an unverifiable claim on ad revenue.
+    //
+    // 2026-08-15 attribution trace: 13 of 14 not_attributable outbox rows were
+    // staff orders created without quote_request_id while the same customer had
+    // a website quote on file. Linkage can no longer depend on staff remembering.
+    const normalizedEmail = normalizeQuoteEmail(contact.email);
+    const requestedQuoteId = body.quote_request_id?.trim() || null;
+    if (requestedQuoteId && !UUID_RE.test(requestedQuoteId)) {
+      return NextResponse.json({ error: "quote_request_id must be a UUID" }, { status: 400 });
+    }
 
+    let quoteRequestId: string | null = requestedQuoteId;
+    let linkSource: QuoteLinkSource = requestedQuoteId ? "explicit" : "none";
+    let quoteAttribution: Partial<OrderAttributionColumns> = {};
+    let quoteCarriedClickId = false;
+    let attributionWarning: AttributionWarning | null = null;
+    let autoLinkNote = "";
+
+    if (requestedQuoteId) {
       const { data: quoteRow, error: quoteErr } = await supabase
         .from("quote_requests")
-        .select(QUOTE_ATTRIBUTION_COLUMNS.join(", "))
-        .eq("id", quoteRequestId)
+        .select(QUOTE_ATTRIBUTION_SELECT)
+        .eq("id", requestedQuoteId)
         .maybeSingle();
       if (quoteErr) {
         console.error("[manual-order] quote attribution fetch:", quoteErr);
@@ -293,7 +298,7 @@ export async function POST(req: NextRequest) {
       const { data: existingLink, error: existingLinkErr } = await supabase
         .from("orders")
         .select("order_number")
-        .eq("quote_request_id", quoteRequestId)
+        .eq("quote_request_id", requestedQuoteId)
         .maybeSingle();
       if (existingLinkErr) {
         console.error("[manual-order] existing quote linkage lookup:", existingLinkErr);
@@ -307,9 +312,64 @@ export async function POST(req: NextRequest) {
       }
 
       const row = quoteRow as unknown as Record<string, unknown>;
-      quoteAttribution = Object.fromEntries(
-        QUOTE_ATTRIBUTION_COLUMNS.map((column) => [column, row[column] ?? null]),
-      );
+      quoteCarriedClickId = hasPaidClickId(row);
+      quoteAttribution = pickQuoteAttributionForOrder(row);
+    } else {
+      // No quote id supplied. Look for this customer's own open website quote in
+      // the last 30 days instead of stamping a purchase_online that can never be
+      // attributed. Two or more open quotes are reported, never guessed between:
+      // linking the wrong one would move a real click ID onto the wrong sale.
+      // A lookup failure is non-fatal — the order is still created, unlinked.
+      const { data: candidateRows, error: candidateErr } = await supabase
+        .from("quote_requests")
+        .select(`id, ${QUOTE_ATTRIBUTION_SELECT}`)
+        .eq("email", normalizedEmail)
+        .is("converted_order_id", null)
+        .not("lifecycle_status", "in", `(${AUTO_LINK_EXCLUDED_LIFECYCLE_STATUSES.join(",")})`)
+        .gte("created_at", autoLinkWindowStartIso())
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (candidateErr) {
+        console.error("[manual-order] auto-link candidate lookup (non-fatal):", candidateErr);
+      } else if (candidateRows && candidateRows.length > 0) {
+        const rows = candidateRows as unknown as QuoteCandidate[];
+        // quote_requests.converted_order_id is only written by the structured
+        // Pay Now RPC, so a quote an earlier manual order already claimed still
+        // reads as open here. orders is the authority on what is already linked.
+        const { data: linkedRows, error: linkedErr } = await supabase
+          .from("orders")
+          .select("quote_request_id")
+          .in("quote_request_id", rows.map((row) => row.id));
+        if (linkedErr) {
+          console.error("[manual-order] auto-link linkage filter (non-fatal):", linkedErr);
+        } else {
+          const claimed = new Set(
+            ((linkedRows ?? []) as { quote_request_id: string | null }[])
+              .map((row) => row.quote_request_id)
+              .filter((id): id is string => !!id),
+          );
+          const decision = resolveAutoLinkCandidate(rows.filter((row) => !claimed.has(row.id)));
+          if (decision.kind === "linked") {
+            quoteRequestId = decision.quote.id;
+            linkSource = "auto_email_match";
+            quoteCarriedClickId = hasPaidClickId(decision.quote);
+            quoteAttribution = pickQuoteAttributionForOrder(decision.quote);
+            autoLinkNote = autoLinkStaffNote(decision.quote.id);
+            console.log(
+              `[manual-order] auto-linked web quote ${shortQuoteRef(decision.quote.id)} by email match`,
+            );
+          } else if (decision.kind === "ambiguous") {
+            attributionWarning = {
+              code: "MULTIPLE_OPEN_QUOTES",
+              quoteRequestIds: decision.quoteRequestIds,
+            };
+            console.warn("[manual-order] multiple open web quotes — left unlinked", {
+              candidates: decision.quoteRequestIds.map(shortQuoteRef),
+            });
+          }
+        }
+      }
     }
 
     // ── 1. Upsert customer ──
@@ -425,9 +485,9 @@ export async function POST(req: NextRequest) {
             : `purchase_online:${orderNumber}`,
           ...quoteAttribution,
           notes: notes?.trim() || null,
-          staff_notes: quoteOnly
+          staff_notes: (quoteOnly
             ? `[QUOTE] Manual quote — ${items.length} item(s) — Pay Now link sent; customer can pay to confirm or reply for changes.`
-            : `Manual order — ${items.length} item(s) created by staff via payment request`,
+            : `Manual order — ${items.length} item(s) created by staff via payment request`) + autoLinkNote,
         })
         .select("id, order_number")
         .single();
@@ -444,6 +504,16 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       return NextResponse.json({ error: "Failed to create order after retries" }, { status: 500 });
+    }
+
+    // The quote had a click ID but the order row will not — never let that pass
+    // silently; it is the exact failure that turns paid revenue into
+    // not_attributable in the Google Ads outbox.
+    if (quoteRequestId && quoteCarriedClickId && !hasPaidClickId(quoteAttribution)) {
+      console.warn("[manual-order] attribution copy produced no click id", {
+        orderNumber: order.order_number,
+        quoteId8: shortQuoteRef(quoteRequestId),
+      });
     }
 
     // Customer lifetime stats (order_count / total_spent) are now incremented
@@ -657,10 +727,23 @@ export async function POST(req: NextRequest) {
         item_count: items.length,
         payment_method: body.payment_method ?? "clover",
         quote_only: quoteOnly,
+        quote_request_id: quoteRequestId,
+        link_source: linkSource,
+        ...(attributionWarning ? { attribution_warning: attributionWarning.code } : {}),
       },
     });
 
-    return NextResponse.json({ orderId: order.id, orderNumber: order.order_number, paymentUrl });
+    // The staff order modal reads orderId/orderNumber/paymentUrl only; the
+    // linkage fields are additive so a warning is auditable from the response
+    // without changing the UI contract.
+    return NextResponse.json({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      paymentUrl,
+      quoteRequestId,
+      linkSource,
+      ...(attributionWarning ? { attributionWarning } : {}),
+    });
   } catch (err) {
     console.error("[manual-order]", err instanceof Error ? err.message : err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });
