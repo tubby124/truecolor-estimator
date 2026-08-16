@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { MarketingConsentSettingsLink } from "@/components/site/MarketingConsentSettingsLink";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -110,7 +111,10 @@ export default function PrivacyPage() {
               </li>
             </ul>
             <p className="mt-2">
-              You can accept or decline marketing cookies in the site banner. We do not sell your personal information to any third party.
+              You can accept or decline marketing cookies in the site banner, and you can change or
+              withdraw that choice at any time with{" "}
+              <MarketingConsentSettingsLink /> on this page. We do not sell your personal
+              information to any third party.
             </p>
           </section>
 

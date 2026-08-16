@@ -29,16 +29,23 @@ export function MarketingConsent() {
       role="dialog"
       aria-modal="false"
       aria-label="Cookie choices"
-      className="fixed inset-x-4 bottom-4 z-[200] mx-auto max-w-xl rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl sm:p-6"
+      // z-[45] sits above the z-40/z-30 sticky bars so the banner is never
+      // hidden, but below the z-50 PaidCartConfirmation sheet.
+      // Bottom offsets clear the tallest bar stack at each breakpoint:
+      //   <768px  product Add-to-Cart bar (~80px) + MobileCallPriceBar (64px
+      //           + safe area, md:hidden) = 9rem + safe area
+      //   768px+  product Add-to-Cart bar only (~80px, lg:hidden) -> 6rem
+      //   1024px+ MultiQuoteCart collapsed bar (~49px, all widths) -> 4rem
+      className="fixed inset-x-4 bottom-[calc(9rem+env(safe-area-inset-bottom))] z-[45] mx-auto max-w-xl rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl sm:p-5 md:bottom-24 lg:bottom-16"
     >
-      <h2 className="text-base font-bold text-[#1c1712]">Optional marketing cookies</h2>
-      <p className="mt-2 text-sm leading-6 text-gray-600">
-        With your permission, we use Meta&apos;s tools to measure advertising and show more relevant ads. Declining will not affect your quote, order, or site experience. See our{" "}
+      <h2 className="text-sm font-bold text-[#1c1712] sm:text-base">Optional marketing cookies</h2>
+      <p className="mt-1.5 text-xs leading-5 text-gray-600 sm:mt-2 sm:text-sm sm:leading-6">
+        Meta&apos;s tools measure our advertising. Declining will not affect your quote or order. See our{" "}
         <Link href="/privacy" className="font-semibold text-[#087fa1] underline underline-offset-2">
           Privacy Policy
         </Link>.
       </p>
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+      <div className="mt-3 flex flex-row justify-end gap-2 sm:mt-4">
         <button
           type="button"
           onClick={() => choose("denied")}
@@ -49,9 +56,10 @@ export function MarketingConsent() {
         <button
           type="button"
           onClick={() => choose("granted")}
+          aria-label="Accept marketing cookies"
           className="min-h-11 rounded-lg bg-[#16C2F3] px-4 py-2 text-sm font-bold text-white hover:bg-[#0fb0dd] focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:ring-offset-2"
         >
-          Accept marketing cookies
+          Accept
         </button>
       </div>
     </section>
