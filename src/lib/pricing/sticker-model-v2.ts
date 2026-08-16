@@ -70,11 +70,18 @@ const VINYL_TIERS: VinylTier[] = [
   { qty_max: 9,        label: "qty_2_9",      per_unit_floor: 25.00, rate_per_sqft: 18 },
   // 2026-08-16 PM recalibration (owner direction: raise the website engine
   // where it undercharges, constants only, no restructure):
-  //  - qty 10-99 floor 1.00 -> 1.20. Five retail floor-dominated fixtures
-  //    (Olivia q40 $1.25, Luby q50 $0.90, Samantha q50 $1.30/$1.20, Michaela
-  //    q50 $1.20 invoice-verified) have median $1.20; four land within 8%,
-  //    Luby is the one overcharged (+33%). This retires the "$25 for 25x 2x2"
-  //    anchor -> smallest order is now 25 x $1.20 = $30 ("from $30").
+  //  - qty 50-99 floor 1.00 -> 1.20. Five retail floor-dominated fixtures in
+  //    qty 40-50 (Olivia q40 $1.25, Luby q50 $0.90, Samantha q50 $1.30/$1.20,
+  //    Michaela q50 $1.20 invoice-verified) have median $1.20; four land
+  //    within 8%, Luby is the one overcharged (+33%).
+  //  - qty 10-49 floor stays 1.00 ON PURPOSE: "25 stickers from $25" is a LIVE
+  //    Google Ads claim (campaign-config.mjs headlines/sitelinks/priceLine)
+  //    and the anchor behind products-content fromPrice, the sticker page,
+  //    llms.txt, the merchant feed and price-consistency. 25 x $1.00 = $25
+  //    keeps every one of them true. Accepted cost: for stickers <= ~4x4 the
+  //    per-unit price steps UP $1.00 -> $1.20 between the 25 and 50 preset
+  //    buttons (order total still rises, $25 -> $60). Retire this the day the
+  //    ads + copy move off "$25 for 25".
   //  - qty 10-249 rate 8 -> 9 $/sqft. Fixes Arieanna Barsi (4x4 q100
   //    invoice-verified $1.20; was $0.89 -> $1.00) and makes the catalog rate
   //    equal to the wide-format <=10 sqft rate so the 2.0 sqft mode boundary is
@@ -86,7 +93,7 @@ const VINYL_TIERS: VinylTier[] = [
   //  stepped floors (Albert himself quotes ~$60 for either 50 or 100 3x3s);
   //  presets are 50/100 so it only shows on typed off-tier qty. Real fix is a
   //  continuous floor curve = structural, next /pricing-review.
-  { qty_max: 49,       label: "qty_10_49",    per_unit_floor: 1.20,  rate_per_sqft: 9  },
+  { qty_max: 49,       label: "qty_10_49",    per_unit_floor: 1.00,  rate_per_sqft: 9  },
   { qty_max: 99,       label: "qty_50_99",    per_unit_floor: 1.20,  rate_per_sqft: 9  },
   // 2026-08-16 recalibration: floor raised 0.55->0.65 against expanded fixture
   // set (52 quotes incl. 28 pulled 2026-05-29->2026-08-16). Fixes a confirmed

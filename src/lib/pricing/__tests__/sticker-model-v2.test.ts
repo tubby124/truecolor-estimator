@@ -115,9 +115,10 @@ describe("Sticker Model V2 — fit against Albert's RETAIL quotes (wholesale exc
   // fix, not by moving the number to match wherever the code happens to land.
   // 2026-08-16 (later same day): perf_8mil floor 50->70 fixed the perf cluster
   // (both Juliana window decals now within 3%) -> 32/42 = 76.2%. Bar 70->75.
-  // 2026-08-16 PM recalibration (floors 10-99 -> 1.20, rates 10-249 -> 9,
+  // 2026-08-16 PM recalibration (floor 50-99 -> 1.20, rates 10-249 -> 9,
   // floor 500-999 -> 0.33, circle 1.8 -> 1.4): Michaela exact, Arieanna, David
   // Hodges, Assem-500 all in band; Luby out (+33%) -> 34/42 = 81.0%. Bar 75->80.
+  // (qty_10_49 floor kept at 1.00 to preserve the live "25 stickers from $25" ads claim.)
   it("fits at least 80% of RETAIL fixtures within ±25% of Albert's actual quote", () => {
     const within = retailDiffs.filter((d) => d.within_25pct).length;
     const pct = (within / retailDiffs.length) * 100;
