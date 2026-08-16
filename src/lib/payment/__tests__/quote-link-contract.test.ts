@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { QUOTE_ATTRIBUTION_COLUMNS } from "@/lib/quotes/quote-attribution";
 
 function source(relativePath: string): string {
   return readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -156,5 +157,111 @@ describe("quote payment linkage contract", () => {
     expect(orders).not.toContain("accepting client price");
     expect(orders).toContain("must use the quote flow");
     expect(orders).toContain("Unable to price ${item.product_name}");
+  });
+});
+
+/**
+ * The TS→SQL boundary. Both quote-to-order paths must move the same attribution
+ * columns: Pay Now through materialize_quote_order, staff manual orders through
+ * pickQuoteAttributionForOrder. Drift on either side turns paid revenue into
+ * `not_attributable` in the Google Ads outbox with no error anywhere.
+ */
+describe("quote → order attribution copy contract", () => {
+  const migration = source("supabase/migrations/20260720100000_quote_conversion_measurement.sql");
+  const materializer = migration.slice(
+    migration.indexOf("CREATE OR REPLACE FUNCTION public.materialize_quote_order"),
+  );
+  const insertHeader = "INSERT INTO public.orders (";
+  const insertStart = materializer.indexOf(insertHeader);
+  const valuesStart = materializer.indexOf(") VALUES (", insertStart);
+  const insertColumns = materializer
+    .slice(insertStart + insertHeader.length, valuesStart)
+    .split(",")
+    .map((column) => column.trim())
+    .filter(Boolean);
+  const valuesBlock = materializer.slice(valuesStart, materializer.indexOf(") RETURNING", valuesStart));
+  const quoteSelect = materializer.slice(0, materializer.indexOf("INTO v_quote"));
+  const ATTRIBUTION_COLUMN = /^(?:utm_|google_|latest_paid_|gclid$|gbraid$|wbraid$)/;
+
+  const manualOrder = source("src/app/api/staff/manual-order/route.ts");
+
+  it("copies exactly the attribution columns materialize_quote_order inserts", () => {
+    const sqlAttributionColumns = insertColumns.filter((column) => ATTRIBUTION_COLUMN.test(column));
+    expect(sqlAttributionColumns.length).toBeGreaterThanOrEqual(35);
+    expect([...sqlAttributionColumns].sort()).toEqual([...QUOTE_ATTRIBUTION_COLUMNS].sort());
+  });
+
+  it("sources every copied column from the row-locked quote, not from an argument", () => {
+    for (const column of QUOTE_ATTRIBUTION_COLUMNS) {
+      expect(quoteSelect).toContain(`q.${column}`);
+      expect(valuesBlock).toContain(`v_quote.${column}`);
+    }
+  });
+
+  it("loads manual-order attribution server-side and never from the request body", () => {
+    expect(manualOrder).toContain("pickQuoteAttributionForOrder");
+    expect(manualOrder).toContain("QUOTE_ATTRIBUTION_SELECT");
+    expect(manualOrder).toContain('.from("quote_requests")');
+    expect(manualOrder).not.toMatch(/body\.(?:gclid|gbraid|wbraid|utm_|latest_paid_)/);
+    expect(manualOrder).not.toMatch(/(?:gclid|gbraid|wbraid)\s*:\s*body\b/);
+    // quote_request_id is the only attribution input a client may supply.
+    expect(manualOrder).toContain("body.quote_request_id?.trim() || null");
+  });
+
+  it("auto-links one recent unconverted quote for the same normalized email", () => {
+    expect(manualOrder).toContain("normalizeQuoteEmail(contact.email)");
+    expect(manualOrder).toContain('.eq("email", normalizedEmail)');
+    expect(manualOrder).toContain('.is("converted_order_id", null)');
+    expect(manualOrder).toContain('.not("lifecycle_status", "in"');
+    expect(manualOrder).toContain('.gte("created_at", autoLinkWindowStartIso())');
+    expect(manualOrder).toContain('linkSource = "auto_email_match"');
+    expect(manualOrder).toContain("autoLinkStaffNote(decision.quote.id)");
+    expect(manualOrder).toContain("+ autoLinkNote");
+  });
+
+  it("keeps quote_won identity and non-quote sales honestly purchase_online", () => {
+    expect(manualOrder).toContain('conversion_type: quoteRequestId ? "quote_won" : "purchase_online"');
+    expect(manualOrder).toContain("`quote_won:${quoteRequestId}`");
+    expect(manualOrder).toContain("`purchase_online:${orderNumber}`");
+  });
+
+  it("reports multiple open quotes instead of guessing which one to claim", () => {
+    expect(manualOrder).toContain('code: "MULTIPLE_OPEN_QUOTES"');
+    expect(manualOrder).toContain("quoteRequestIds: decision.quoteRequestIds");
+    expect(manualOrder).toContain("...(attributionWarning ? { attributionWarning } : {})");
+  });
+
+  it("warns loudly when a linked quote's click id does not survive the copy", () => {
+    expect(manualOrder).toContain(
+      '[manual-order] attribution copy produced no click id',
+    );
+    expect(manualOrder).toContain("quoteCarriedClickId && !hasPaidClickId(quoteAttribution)");
+  });
+
+  it("requires a shared product word before crediting an email-matched quote", () => {
+    expect(manualOrder).toContain(".select(`id, items, ${QUOTE_ATTRIBUTION_SELECT}`)");
+    expect(manualOrder).toContain("extractQuoteProductTexts(decision.quote)");
+    expect(manualOrder).toContain("productsOverlap(orderProducts, quoteProducts)");
+    expect(manualOrder).toContain('code: "POSSIBLE_QUOTE_MATCH_NO_PRODUCT_OVERLAP"');
+  });
+
+  it("degrades a failed auto-link lookup to no link instead of a 500", () => {
+    expect(manualOrder).toContain("auto-link candidate lookup (non-fatal)");
+    expect(manualOrder).toContain("auto-link linkage filter (non-fatal)");
+    // Both lookups also survive a rejected promise, not just a PostgREST error.
+    expect(manualOrder.match(/catch \(transportErr\)/g)?.length).toBe(2);
+  });
+
+  it("keeps the order when a concurrent insert claims the auto-linked quote", () => {
+    expect(manualOrder).toContain('pgError.code !== "23505"');
+    expect(manualOrder).toContain('collision.includes("order_number")');
+    expect(manualOrder).toContain('code: "AUTO_LINK_LOST_RACE"');
+    expect(manualOrder).toContain('linkSource === "auto_email_match" && quoteRequestId && !isOrderNumberCollision');
+    expect(manualOrder).toContain('linkSource = "none"');
+  });
+
+  it("records linkage provenance on the audit event", () => {
+    expect(manualOrder).toContain("quote_request_id: quoteRequestId");
+    expect(manualOrder).toContain("link_source: linkSource");
   });
 });

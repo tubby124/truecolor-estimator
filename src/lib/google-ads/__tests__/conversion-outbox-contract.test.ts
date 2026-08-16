@@ -26,6 +26,12 @@ const manualOrderRoute = readFileSync(
   path.join(process.cwd(), "src/app/api/staff/manual-order/route.ts"),
   "utf8",
 );
+/** The manual-order route's attribution column list moved into this shared
+ *  helper so the Pay Now path can reuse it; the list is still the contract. */
+const quoteAttributionHelper = readFileSync(
+  path.join(process.cwd(), "src/lib/quotes/quote-attribution.ts"),
+  "utf8",
+);
 const rollupSource = readFileSync(
   path.join(process.cwd(), "src/lib/lifecycle/rollup.ts"),
   "utf8",
@@ -217,8 +223,9 @@ describe("manual order conversion identity", () => {
       ),
       "utf8",
     );
+    expect(manualOrderRoute).toContain("pickQuoteAttributionForOrder");
     const declared = [
-      ...manualOrderRoute.matchAll(/"((?:latest_paid_|utm_|google_|gclid|gbraid|wbraid)[a-z_]*)"/g),
+      ...quoteAttributionHelper.matchAll(/"((?:latest_paid_|utm_|google_|gclid|gbraid|wbraid)[a-z_]*)"/g),
     ].map((m) => m[1]);
     expect(declared.length).toBeGreaterThanOrEqual(35);
     for (const column of declared) {
@@ -227,7 +234,7 @@ describe("manual order conversion identity", () => {
   });
 
   it("refuses a second order against an already-linked quote", () => {
-    expect(manualOrderRoute).toContain('.eq("quote_request_id", quoteRequestId)');
+    expect(manualOrderRoute).toContain('.eq("quote_request_id", requestedQuoteId)');
     expect(manualOrderRoute).toContain("status: 409");
   });
 });
