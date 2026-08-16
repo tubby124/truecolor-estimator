@@ -29,18 +29,18 @@ The shop now enforces a **single $25 order-total minimum at checkout** via `src/
 | Vinyl Lettering | from $25 | $8.50/sqft (T1) | small lettering jobs reach the $25 order floor |
 | Flyers | from $45 | lot price | 100 flyers 80lb 2S = $45 (real) |
 | Brochures | from $70 | lot price | tri-fold 100lb (real) |
-| Stickers | from $25 | lot price | 25 stickers ≈ $25 (real) |
+| Stickers | from $25 | V2 per-unit model (`src/lib/pricing/sticker-model-v2.ts`, NOT the dead STICKER-* CSV rows) | 25× 2×2" = $25 (real; $1.00/ea floor at qty 25-49). 4×4: 100 = $100, 500 = $220, 1000 = $330 |
 | Posters | from $15 | per-unit | 1 small poster — bumps to $25 at checkout if single-item order |
 | Retractable Banners | from $219 | lot price | economy stand + print (real) |
 | Postcards | from $35 | lot price | 100 postcards (real) |
-| Labels (cosmetic / candle / freezer / product) | from $5.50/sqft | sqft tier | small label runs hit the $25 order floor |
+| Labels (cosmetic / candle / freezer / product) | from $25 | V2 sticker model (labels = STICKER category, same engine) | 25 labels start at $25 (the "$5.50/sqft" claim was retired 2026-08-06 — see products-content.ts) |
 
 ## Key Rules
 
 - "from $X" in marketing headlines/titles/meta = the smallest realistic checkout total. Bounded below by $25.
 - Sqft rates = FAQ, comparison context, AND product reference cards on IndustryPage.
 - Product reference cards (`products` array): use T1 sqft rates for wide-format (matches ranking pages). Marketing headlines/titles/meta use the "from $X" anchors above.
-- T1 sqft rates for product cards: Coroplast $8 | Banners $8.25 | ACP $13 | Foamboard $10 | Window Decals $11 | Magnets $24 | Vinyl Lettering $8.50 | Labels $5.50.
+- T1 sqft rates for product cards: Coroplast $8 | Banners $8.25 | ACP $13 | Foamboard $10 | Window Decals $11 | Magnets $24 | Vinyl Lettering $8.50. Labels/stickers are NOT sqft-rated — quote the V2 grid in `data/PRICING_QUICK_REFERENCE.md`.
 - Lot-priced products (BCs, flyers, stickers, postcards, brochures, posters) = no minimums, flat totals.
 - BC "from $45" = 250 double-sided on 14pt gloss (1S = $40). 500 2S = $65, 1000 2S = $110.
 - Flyer "from $45" = 100 full-letter double-sided on 80lb gloss. 100lb upgrade: 100=$65, 250=$115, 1000=$250.
