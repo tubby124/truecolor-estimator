@@ -109,8 +109,15 @@ export function runStickerV2(req: EstimateRequest): EstimateResponse | null {
   // that here. Previously this exported the PER-UNIT tier floor
   // (floor_dominated / per_unit_floor), which made the public product page
   // show "You pay $1.00" on every small sticker.
+  // The quantity envelope also breaks unit x qty === total: it caps the total at
+  // a larger qty's price and back-solves unit_price = total / qty, which rounds
+  // to the cent (99 x 4x4 -> $100 total, $1.01/ea, 99 x 1.01 = $99.99). Without
+  // this guard that one-cent shortfall reads as an order-minimum top-up and the
+  // product page renders a phantom "Small-Order Fee". The two are mutually
+  // exclusive: the envelope only fires when the base total exceeded a cheaper
+  // candidate, and every candidate is itself >= the $25 order minimum.
   const preMinSubtotal = Math.round(qty * result.unit_price * 100) / 100;
-  const orderMinApplied = preMinSubtotal < result.total;
+  const orderMinApplied = !result.qty_envelope_applied && preMinSubtotal < result.total;
 
   const lineItems = [];
   lineItems.push({
