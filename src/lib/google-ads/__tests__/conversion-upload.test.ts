@@ -19,6 +19,7 @@ const env = {
   GOOGLE_DATA_MANAGER_REFRESH_TOKEN: "refresh",
   GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID: "111",
   GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID: "222",
+  GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID: "333",
   GOOGLE_DATA_MANAGER_PROJECT_ID: "true-color-ads-data",
 };
 
@@ -162,6 +163,29 @@ describe("server-side Google Data Manager paid conversion upload", () => {
   it("selects the distinct quote-won destination", () => {
     expect(buildDataManagerRequest({ ...job, conversion_type: "quote_won" }, env).destinations[0].productDestinationId)
       .toBe("222");
+  });
+
+  it("uploads qualified quote leads without an invented value or currency", () => {
+    const request = buildDataManagerRequest({
+      ...job,
+      order_number: "quote-request-1",
+      conversion_type: "quote_submit_qualified",
+      conversion_value: undefined,
+    }, env);
+    expect(request.destinations[0].productDestinationId).toBe("333");
+    expect(request.events[0]).toMatchObject({
+      adIdentifiers: { gclid: "click-1" },
+      transactionId: "quote-request-1",
+    });
+    expect(request.events[0]).not.toHaveProperty("conversionValue");
+    expect(request.events[0]).not.toHaveProperty("currency");
+  });
+
+  it("keeps purchase and quote-won request bodies unchanged", () => {
+    const purchase = buildDataManagerRequest(job, env);
+    const quoteWon = buildDataManagerRequest({ ...job, conversion_type: "quote_won" }, env);
+    expect(purchase.events[0]).toMatchObject({ conversionValue: 100.25, currency: "CAD" });
+    expect(quoteWon.events[0]).toMatchObject({ conversionValue: 100.25, currency: "CAD" });
   });
 
   it.each([

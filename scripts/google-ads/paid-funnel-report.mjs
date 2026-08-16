@@ -150,10 +150,20 @@ const attributionInputs = await loadQuoteAttributionInputs(supa, {
   sinceIso: `${range.startDate}T00:00:00Z`,
   outbox: outbox ?? [],
 });
-const attribution = summarizeQuoteAttribution(attributionInputs);
+const quoteLeadActionConfigured = Boolean(process.env.GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID?.trim());
+let quoteLeadOutbox = [];
+if (quoteLeadActionConfigured) {
+  const { data, error: quoteLeadError } = await supa
+    .from("google_ads_quote_lead_outbox")
+    .select("status")
+    .gte("created_at", `${range.startDate}T00:00:00Z`);
+  if (quoteLeadError) throw new Error(`quote lead outbox read failed: ${quoteLeadError.message}`);
+  quoteLeadOutbox = data ?? [];
+}
+const attribution = summarizeQuoteAttribution({ ...attributionInputs, quoteLeadOutbox });
 
 console.log("");
-for (const line of formatQuoteAttributionSection(attribution)) console.log(line);
+for (const line of formatQuoteAttributionSection(attribution, { qualifiedLeadConfigured: quoteLeadActionConfigured })) console.log(line);
 
 // ---------- 4. Enhanced conversions readiness ----------
 // The uploader attaches hashed email/phone and self-heals: if the account has not signed

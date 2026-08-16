@@ -4,7 +4,7 @@ const DATA_MANAGER_ENDPOINT = "https://datamanager.googleapis.com/v1/events:inge
 const TRUE_COLOR_CUSTOMER_ID = "1072816342";
 const TRUE_COLOR_LOGIN_CUSTOMER_ID = "1125402990";
 
-export type PaidConversionType = "purchase_online" | "quote_won";
+export type PaidConversionType = "purchase_online" | "quote_won" | "quote_submit_qualified";
 
 export interface PaidConversionJob {
   id: string;
@@ -13,7 +13,7 @@ export interface PaidConversionJob {
   gclid: string | null;
   gbraid: string | null;
   wbraid: string | null;
-  conversion_value: number | string;
+  conversion_value?: number | string;
   conversion_time: string;
   attempt_count: number;
   // Enhanced conversions (enabled in the Google Ads UI 2026-08-07, method = Google Ads API).
@@ -78,6 +78,7 @@ interface GoogleDataManagerEnv {
   GOOGLE_DATA_MANAGER_REFRESH_TOKEN?: string;
   GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID?: string;
   GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID?: string;
+  GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID?: string;
   GOOGLE_DATA_MANAGER_PROJECT_ID?: string;
 }
 
@@ -90,7 +91,9 @@ function requireEnv(env: GoogleDataManagerEnv, name: keyof GoogleDataManagerEnv)
 export function conversionActionId(type: PaidConversionType, env: GoogleDataManagerEnv = process.env): string {
   const name = type === "quote_won"
     ? "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID"
-    : "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID";
+    : type === "quote_submit_qualified"
+      ? "GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID"
+      : "GOOGLE_ADS_PURCHASE_CONVERSION_ACTION_ID";
   const id = requireEnv(env, name);
   if (!/^\d+$/.test(id)) throw new Error(`${name} must be a numeric Google Ads conversion action ID`);
   return id;
@@ -117,8 +120,11 @@ export function buildDataManagerRequest(
 ) {
   const clickIds = [job.gclid, job.gbraid, job.wbraid].filter((value) => Boolean(value?.trim()));
   if (clickIds.length !== 1) throw new Error("exactly one Google click identifier is required");
+  const hasRevenueValue = job.conversion_type !== "quote_submit_qualified";
   const value = Number(job.conversion_value);
-  if (!Number.isFinite(value) || value <= 0) throw new Error("conversion_value must be positive");
+  if (hasRevenueValue && (!Number.isFinite(value) || value <= 0)) {
+    throw new Error("conversion_value must be positive");
+  }
   const transactionId = job.order_number.trim();
   if (!transactionId) throw new Error("order_number is required");
 
@@ -141,8 +147,10 @@ export function buildDataManagerRequest(
         ...(job.wbraid ? { wbraid: job.wbraid } : {}),
       },
       ...(userIdentifiers.length > 0 ? { userData: { userIdentifiers } } : {}),
-      conversionValue: Number(value.toFixed(2)),
-      currency: "CAD",
+      ...(hasRevenueValue ? {
+        conversionValue: Number(value.toFixed(2)),
+        currency: "CAD",
+      } : {}),
       eventTimestamp: formatDataManagerTimestamp(job.conversion_time),
       transactionId,
       eventSource: "WEB",
