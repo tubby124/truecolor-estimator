@@ -31,7 +31,7 @@
 // 2026-08-14 re-verification (independent of the 2026-08-11 refresh committed from the other
 // machine): all 14 dollar facts re-checked against the 2026-08-11 PRICING_QUICK_REFERENCE —
 // the min_charge column alignment changed no advertised number; every fact still true.
-export const VERIFIED_ON = "2026-08-14";
+export const VERIFIED_ON = "2026-08-16";
 
 export const PRICING_SOURCE_FILE = "data/PRICING_QUICK_REFERENCE.md";
 

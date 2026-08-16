@@ -1,5 +1,5 @@
 # True Color Display Printing — Pricing Quick Reference
-**Updated:** 2026-08-11 | **Source of truth:** `data/tables/` CSVs
+**Updated:** 2026-08-16 | **Source of truth:** `data/tables/` CSVs
 **How to update prices:** Edit the CSVs only — no code changes needed. Then `git push main` → live in ~2 min.
 
 ---
@@ -211,18 +211,24 @@ $8.50/sqft · $25 order-total minimum applies at checkout to small carts
 
 ### Vinyl Stickers (STICKER · Arlon DPF 510 · Die-Cut · 8 Sizes)
 
-| Qty  | 2×2″ | 2×3″ | 3×3″ | 4×4″  | 4×6″ | 5×5″ | 6×6″ | 8×8″ |
-|------|------|------|------|-------|------|------|------|------|
-| 25   | $25  | $25  | $40  | $60   | $90  | $95  | $135 | $240 |
-| 50   | $30  | $40  | $60  | $95   | $145 | $150 | $215 | $380 |
-| 100  | $45  | $70  | $105 | $160  | $240 | $250 | $360 | $640 |
-| 250  | $95  | $140 | $210 | $325  | $490 | $510 | $730 | $1300|
-| 500  | $135 | $205 | $305 | $475  | $715 | $740 | $1070| $1900|
-| 1000 | $185 | $280 | $420 | $650  | $975 | $1020| $1465| $2600|
+> Priced by the live V2 model (`src/lib/pricing/sticker-model-v2.ts`, per-unit =
+> max(tier floor, sqft × tier rate), $25 order-total minimum) — NOT the
+> STICKER-* rows in products.v1.csv (dead while NEXT_PUBLIC_USE_STICKER_PRICING_V2=true).
+> Recalibrated 2026-08-16 against 42 retail Albert quotes. Grid = white vinyl, square/die-cut.
 
-4×4″ per-unit: 50=$1.90 · 100=$1.60 · 250=$1.30 · 500=$0.95 · 1000=$0.65
-Material codes: 4×4″=ARLPMF7008 · all other sizes=PLACEHOLDER_STICKER_{SIZE}
-Most popular: 100× 4×4″
+| Qty  | 2×2″ | 2×3″ | 3×3″ | 4×4″    | 4×6″    | 5×5″    | 6×6″    | 8×8″  |
+|------|------|------|------|---------|---------|---------|---------|-------|
+| 25   | $25  | $25  | $25  | $25     | $37.50  | $39     | $56.25  | $100  |
+| 50   | $60  | $60  | $60  | $60     | $75     | $78     | $112.50 | $200  |
+| 100  | $65  | $65  | $65  | $100    | $150    | $156    | $225    | $400  |
+| 250  | $87.50 | $87.50 | $125 | $222.50 | $332.50 | $347.50 | $500 | $890  |
+| 500  | $165 | $165 | $165 | $220    | $335    | $345    | $500    | $890  |
+| 1000 | $200 | $200 | $200 | $330    | $500    | $520    | $750    | $1330 |
+
+4×4″ per-unit: 25=$1.00 · 50=$1.20 · 100=$1.00 · 250=$0.89 · 500=$0.44 · 1000=$0.33
+Circle shape ×1.40 · clear vinyl ×1.44 · perforated 8mil window: max($70/pc, $8/sqft)
+Known step artifacts (rate 8→4 at qty 500): 4×4 250=$222.50 vs 500=$220; 6×6/8×8 flat 250→500.
+Most popular: 100× 4×4″ = $100
 
 ---
 
