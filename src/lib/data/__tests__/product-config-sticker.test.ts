@@ -90,59 +90,72 @@ describe("STICKER engine round-trip — public preset matches engine price", () 
     expect(r.sell_price).toBe(25);
   });
 
-  it("4×4 qty 100 ARLPMF7008 = $160 (catch-all reference)", () => {
+  it("4×4 qty 100 ARLPMF7008 = $100", () => {
     const r = estimate({
       category: "STICKER",
       material_code: "ARLPMF7008",
       width_in: 4, height_in: 4, sides: 1, qty: 100,
     });
     expect(r.status).toBe("QUOTED");
-    expect(r.sell_price).toBe(160);
+    expect(r.sell_price).toBe(100); // V2 model (2026-08-16) — was $160 under the dead STICKER-* CSV path
   });
 
-  it("custom 1.25×1.25 qty 100 ARLPMF7008 = $15.63 (area-scaled, above floor)", () => {
+  it("custom 1.25×1.25 qty 100 ARLPMF7008 = $65 (per-unit tier floor dominates)", () => {
     const r = estimate({
       category: "STICKER",
       material_code: "ARLPMF7008",
       width_in: 1.25, height_in: 1.25, sides: 1, qty: 100,
     });
     expect(r.status).toBe("QUOTED");
-    // 160 × (1.5625 / 16) = 15.625 → ceilCent → 15.63 → max(15.63, 15) = 15.63
-    expect(r.sell_price).toBe(15.63);
+    // V2 model (2026-08-16) — was $15.63 under the legacy 4×4-reference area-scale.
+    // V2 has no area-scale/$15-floor path: tiny stickers land on the qty-tier
+    // per-unit floor ($0.65/ea at qty 100-249) → 100 × $0.65 = $65.
+    expect(r.sell_price).toBe(65);
   });
 
-  it("custom 1×1 qty 100 ARLPMF7008 = $15 (area-scaled, hits the $15 floor)", () => {
+  it("custom 1×1 qty 100 ARLPMF7008 = $65 (same per-unit floor as 1.25×1.25)", () => {
     const r = estimate({
       category: "STICKER",
       material_code: "ARLPMF7008",
       width_in: 1, height_in: 1, sides: 1, qty: 100,
     });
     expect(r.status).toBe("QUOTED");
-    // 160 × (1 / 16) = 10 → ceilCent → 10 → max(10, 15) = 15
-    expect(r.sell_price).toBe(15);
+    // V2 model (2026-08-16) — was $15 (legacy $15 area-scale floor). Under V2 both
+    // 1×1 and 1.25×1.25 are floor-dominated, so they price identically at $65.
+    expect(r.sell_price).toBe(65);
   });
 
-  it("custom 2.5×7 qty 250 ARLPMF7008 area-scales from 4×4 reference", () => {
+  it("custom 2.5×7 qty 250 ARLPMF7008 = $240 (sqft rate above the tier floor)", () => {
     const r = estimate({
       category: "STICKER",
       material_code: "ARLPMF7008",
       width_in: 2.5, height_in: 7, sides: 1, qty: 250,
     });
     expect(r.status).toBe("QUOTED");
-    // PR-STICKER-250 baseline = $325 (4×4 reference). 2.5×7 = 17.5 sqin.
-    // Ratio = 17.5 / 16 = 1.09375. 325 × 1.09375 = 355.47 → ceilCent → 355.47.
-    expect(r.sell_price).toBeCloseTo(355.47, 2);
+    // V2 model (2026-08-16) — was $355.47 under the legacy PR-STICKER-250 ($325)
+    // 4×4-reference area-scale, which no longer runs in prod.
+    expect(r.sell_price).toBe(240);
   });
 
-  it("off-tier qty (99) is BLOCKED by engine — UI must snap before calling", () => {
-    // This documents the engine's contract that necessitates qty_snap_to_tier
-    // in the UI layer. The engine itself does not snap; the configurator does.
-    const r = estimate({
+  it("off-tier qty (99) is QUOTED under V2 and never costs more than qty 100", () => {
+    // Legacy engine BLOCKED off-tier quantities ("not a standard lot size") and
+    // relied on qty_snap_to_tier in the UI. V2 quotes any qty (flags.ts) and the
+    // configurator bypasses the snap when v2Active (UnifiedConfigurator.tsx:155);
+    // the qty envelope in sticker-model-v2.ts guarantees 99 <= 100 price.
+    const r99 = estimate({
       category: "STICKER",
       material_code: "ARLPMF7008",
       width_in: 4, height_in: 4, sides: 1, qty: 99,
     });
-    expect(r.status).toBe("BLOCKED");
+    const r100 = estimate({
+      category: "STICKER",
+      material_code: "ARLPMF7008",
+      width_in: 4, height_in: 4, sides: 1, qty: 100,
+    });
+    expect(r99.status).toBe("QUOTED");
+    expect(r100.status).toBe("QUOTED");
+    expect(r99.sell_price).toBeLessThanOrEqual(r100.sell_price!);
+    expect(r99.sell_price).toBe(100); // V2 model + envelope (2026-08-16)
   });
 
   it("post-snap qty (99 → 100) prices at the 100-tier baseline", () => {
@@ -154,6 +167,6 @@ describe("STICKER engine round-trip — public preset matches engine price", () 
       width_in: 4, height_in: 4, sides: 1, qty: snap.to,
     });
     expect(r.status).toBe("QUOTED");
-    expect(r.sell_price).toBe(160);
+    expect(r.sell_price).toBe(100); // V2 model (2026-08-16) — was $160 under the dead STICKER-* CSV path
   });
 });
