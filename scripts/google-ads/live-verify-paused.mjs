@@ -110,6 +110,8 @@ const [
   adGroupCallLinks,
   spend,
   incentives,
+  coreAdGroupTargeting,
+  audienceCriteriaRows,
 ] = await Promise.all([
   search("SELECT customer.id, customer.currency_code, customer.time_zone FROM customer LIMIT 1"),
   search(`SELECT campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.start_date_time, campaign.end_date_time, campaign.final_url_suffix, campaign.target_spend.cpc_bid_ceiling_micros, campaign.network_settings.target_google_search, campaign.network_settings.target_search_network, campaign.network_settings.target_content_network, campaign.network_settings.target_partner_search_network, campaign.geo_target_type_setting.positive_geo_target_type, campaign.campaign_budget, campaign_budget.amount_micros FROM campaign WHERE campaign.name IN (${names}) ORDER BY campaign.name`),
@@ -135,7 +137,28 @@ const [
     "SELECT applied_incentive.resource_name, applied_incentive.incentive_state, applied_incentive.fulfillment_expiration_date_time, applied_incentive.currency_code, applied_incentive.reward_amount_micros, applied_incentive.required_min_spend_micros, applied_incentive.current_spend_towards_fulfillment_micros FROM applied_incentive",
     directCustomerHeaders,
   ),
+  // Observation-audience readback, two halves. bid_only lives on the AD GROUP's targeting
+  // setting, not on the criterion, so neither query alone can tell an OBSERVATION audience from
+  // a TARGETING one — they have to be joined.
+  search(`SELECT campaign.name, ad_group.id, ad_group.name, ad_group.status, ad_group.targeting_setting.target_restrictions FROM ad_group WHERE campaign.name IN (${names}) AND ad_group.status != 'REMOVED'`),
+  search(`SELECT campaign.name, ad_group.id, ad_group.name, ad_group_criterion.criterion_id, ad_group_criterion.type, ad_group_criterion.status, ad_group_criterion.user_interest.user_interest_category, ad_group_criterion.user_list.user_list FROM ad_group_criterion WHERE campaign.name IN (${names}) AND ad_group_criterion.type IN ('USER_INTEREST','USER_LIST') AND ad_group_criterion.status != 'REMOVED'`),
 ]);
+const audienceBidOnlyByAdGroup = new Map(coreAdGroupTargeting.map((row) => [
+  String(row.adGroup?.id ?? ""),
+  (row.adGroup?.targetingSetting?.targetRestrictions ?? [])
+    .some((restriction) => restriction?.targetingDimension === "AUDIENCE" && restriction?.bidOnly === true),
+]));
+const audienceCriteria = audienceCriteriaRows.map((row) => ({
+  campaign: row.campaign?.name,
+  adGroupId: String(row.adGroup?.id ?? ""),
+  adGroupName: row.adGroup?.name,
+  criterionId: String(row.adGroupCriterion?.criterionId ?? ""),
+  type: row.adGroupCriterion?.type,
+  status: row.adGroupCriterion?.status,
+  userInterest: row.adGroupCriterion?.userInterest?.userInterestCategory ?? null,
+  userList: row.adGroupCriterion?.userList?.userList ?? null,
+  bidOnly: audienceBidOnlyByAdGroup.get(String(row.adGroup?.id ?? "")) === true,
+}));
 
 const endpointUrls = [
   "https://truecolorprinting.ca/products/coroplast-signs",
@@ -381,6 +404,7 @@ const live = {
       : null,
   },
   spendCadPilot,
+  audienceCriteria,
   endpointChecks,
 };
 const { failures: safetyFailures, launchBlockers } = mode === "paused"

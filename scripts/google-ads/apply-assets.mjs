@@ -33,7 +33,15 @@ const APPROVED_CAMPAIGN_IDS = ["24048123058", "24048123061", "24048123064"];
 const BRAND_ID = "24048123064";
 // Field types this script is allowed to touch. STRUCTURED_SNIPPET is deliberately excluded —
 // its contract values are the sitelink texts, which this pass does not change.
-const MANAGED_FIELD_TYPES = new Set(["CALLOUT", "SITELINK"]);
+// 2026-08-16 +PRICE. A price asset renders the price as a structured table under the ad rather
+// than as prose inside a callout, which is the strongest asset this account has: the entire
+// competitive position is "the price is on the page before you talk to anyone".
+const MANAGED_FIELD_TYPES = new Set(["CALLOUT", "SITELINK", "PRICE"]);
+// PRICE assets are created with an EXPLICIT name. live-verify counts manual assets with
+// `WHERE asset.name LIKE 'TC PPC %'`, so an unnamed asset would be invisible to the verifier
+// and the manualAssets pin (13 -> 14) would never move. Callouts and sitelinks predate that
+// convention; new managed assets carry the name.
+const PRICE_MICROS = (cad) => String(Math.round(cad * 1_000_000));
 
 const args = process.argv.slice(2);
 for (const arg of args) if (arg !== "--execute") throw new Error(`unknown argument: ${arg}`);
@@ -89,9 +97,11 @@ async function readLive() {
   }
   const assets = [];
   for (const row of await search(
-    `SELECT asset.resource_name, asset.type, asset.callout_asset.callout_text,
-            asset.sitelink_asset.link_text, asset.sitelink_asset.description1, asset.sitelink_asset.description2
-     FROM asset WHERE asset.type IN ('CALLOUT','SITELINK')`, "assets")) {
+    `SELECT asset.resource_name, asset.name, asset.type, asset.callout_asset.callout_text,
+            asset.sitelink_asset.link_text, asset.sitelink_asset.description1, asset.sitelink_asset.description2,
+            asset.price_asset.type, asset.price_asset.price_qualifier, asset.price_asset.language_code,
+            asset.price_asset.price_offerings
+     FROM asset WHERE asset.type IN ('CALLOUT','SITELINK','PRICE')`, "assets")) {
     assets.push(row.asset);
   }
   const links = [];
@@ -105,6 +115,51 @@ async function readLive() {
 
 const calloutKey = (text) => `CALLOUT::${text}`;
 const sitelinkKey = (s) => `SITELINK::${s.linkText}::${s.description1}::${s.description2}`;
+// A price asset is a single object carrying up to eight offerings, so the key has to fingerprint
+// ALL of them. Keying on the name alone would let an edited offering read back "in sync" — the
+// exact class of blindness that let the account serve "Exact Online Pricing" for weeks.
+const priceOfferingSignature = (offer) => [
+  offer.header, offer.description, offer.priceMicros, offer.currencyCode, offer.finalUrl,
+].join("~");
+const priceKey = (price) => [
+  "PRICE", price.name, price.type, price.priceQualifier, price.languageCode,
+  price.offerings.map(priceOfferingSignature).join("|"),
+].join("::");
+const priceKeyFromContract = (price) => priceKey({
+  name: price.name,
+  type: price.type,
+  priceQualifier: price.priceQualifier,
+  languageCode: price.languageCode,
+  offerings: price.offerings.map((offer) => ({
+    header: offer.header,
+    description: offer.description,
+    priceMicros: PRICE_MICROS(offer.priceCad),
+    currencyCode: "CAD",
+    finalUrl: offer.finalUrl,
+  })),
+});
+const priceKeyFromLive = (asset) => priceKey({
+  name: asset.name ?? "",
+  type: asset.priceAsset?.type ?? "",
+  priceQualifier: asset.priceAsset?.priceQualifier ?? "",
+  languageCode: asset.priceAsset?.languageCode ?? "",
+  offerings: (asset.priceAsset?.priceOfferings ?? []).map((offer) => ({
+    header: offer.header ?? "",
+    description: offer.description ?? "",
+    priceMicros: String(offer.price?.amountMicros ?? ""),
+    currencyCode: offer.price?.currencyCode ?? "",
+    finalUrl: offer.finalUrl ?? "",
+  })),
+});
+const liveAssetKey = (asset) => {
+  if (asset.type === "CALLOUT") return calloutKey(asset.calloutAsset?.calloutText ?? "");
+  if (asset.type === "PRICE") return priceKeyFromLive(asset);
+  return sitelinkKey({
+    linkText: asset.sitelinkAsset?.linkText ?? "",
+    description1: asset.sitelinkAsset?.description1 ?? undefined,
+    description2: asset.sitelinkAsset?.description2 ?? undefined,
+  });
+};
 
 const live = await readLive();
 
@@ -128,21 +183,17 @@ console.log(`account: ${live.account.id} ${live.account.currencyCode} ${live.acc
 // ── desired state from the contract ──────────────────────────────────────────
 const wantCallouts = paidSearchConfig.adAssets?.callouts ?? [];
 const wantSitelinks = paidSearchConfig.adAssets?.sitelinks ?? [];
-const wantKeys = new Set([...wantCallouts.map(calloutKey), ...wantSitelinks.map((s) => sitelinkKey({
-  linkText: s.text, description1: s.description1, description2: s.description2,
-}))]);
+const wantPrices = paidSearchConfig.adAssets?.prices ?? [];
+const wantKeys = new Set([
+  ...wantCallouts.map(calloutKey),
+  ...wantSitelinks.map((s) => sitelinkKey({
+    linkText: s.text, description1: s.description1, description2: s.description2,
+  })),
+  ...wantPrices.map(priceKeyFromContract),
+]);
 
 const liveAssetByKey = new Map();
-for (const asset of live.assets) {
-  const key = asset.type === "CALLOUT"
-    ? calloutKey(asset.calloutAsset?.calloutText ?? "")
-    : sitelinkKey({
-      linkText: asset.sitelinkAsset?.linkText ?? "",
-      description1: asset.sitelinkAsset?.description1 ?? undefined,
-      description2: asset.sitelinkAsset?.description2 ?? undefined,
-    });
-  liveAssetByKey.set(key, asset);
-}
+for (const asset of live.assets) liveAssetByKey.set(liveAssetKey(asset), asset);
 
 const assetsToCreate = [
   ...wantCallouts.filter((text) => !liveAssetByKey.has(calloutKey(text)))
@@ -154,6 +205,32 @@ const assetsToCreate = [
       payload: { finalUrls: [s.finalUrl], sitelinkAsset: { linkText: s.text, description1: s.description1, description2: s.description2 } },
       label: `sitelink "${s.text}" (${s.description1} / ${s.description2})`,
     })),
+  ...wantPrices.filter((price) => !liveAssetByKey.has(priceKeyFromContract(price)))
+    .map((price) => ({
+      kind: "PRICE",
+      key: priceKeyFromContract(price),
+      payload: {
+        name: price.name,
+        // No asset-level finalUrls: PriceOffering.final_url is required per offering and carries
+        // the destination. If Google ever rejects the create for a missing asset-level URL, add
+        // `finalUrls: [price.offerings[0].finalUrl]` here — do not guess a different URL.
+        priceAsset: {
+          type: price.type,
+          priceQualifier: price.priceQualifier,
+          languageCode: price.languageCode,
+          priceOfferings: price.offerings.map((offer) => ({
+            header: offer.header,
+            description: offer.description,
+            finalUrl: offer.finalUrl,
+            price: { amountMicros: PRICE_MICROS(offer.priceCad), currencyCode: "CAD" },
+            // `unit` is deliberately omitted. The enum only offers time units (PER_HOUR ...
+            // PER_NIGHT) and none of them describe a print job; sending UNSPECIFIED would be
+            // asserting a unit that does not exist.
+          })),
+        },
+      },
+      label: `price asset "${price.name}" (${price.offerings.length} offerings, ${price.type}/${price.priceQualifier})`,
+    })),
 ];
 
 // Links whose asset is a managed type but is NOT described by the contract.
@@ -161,14 +238,7 @@ const linksToRemove = live.links.filter((link) => {
   if (!MANAGED_FIELD_TYPES.has(link.fieldType)) return false;
   const asset = live.assets.find((a) => a.resourceName === link.asset);
   if (!asset) return false;
-  const key = asset.type === "CALLOUT"
-    ? calloutKey(asset.calloutAsset?.calloutText ?? "")
-    : sitelinkKey({
-      linkText: asset.sitelinkAsset?.linkText ?? "",
-      description1: asset.sitelinkAsset?.description1 ?? undefined,
-      description2: asset.sitelinkAsset?.description2 ?? undefined,
-    });
-  return !wantKeys.has(key);
+  return !wantKeys.has(liveAssetKey(asset));
 });
 
 console.log(`\nPLAN: ${assetsToCreate.length} assets to create, ${assetsToCreate.length * APPROVED_CAMPAIGN_IDS.length} links to add, ${linksToRemove.length} stale links to remove`);
@@ -212,13 +282,7 @@ for (const link of after.links) {
   if (!MANAGED_FIELD_TYPES.has(link.fieldType)) continue;
   const asset = after.assets.find((a) => a.resourceName === link.asset);
   if (!asset) continue;
-  afterKeys.add(asset.type === "CALLOUT"
-    ? calloutKey(asset.calloutAsset?.calloutText ?? "")
-    : sitelinkKey({
-      linkText: asset.sitelinkAsset?.linkText ?? "",
-      description1: asset.sitelinkAsset?.description1 ?? undefined,
-      description2: asset.sitelinkAsset?.description2 ?? undefined,
-    }));
+  afterKeys.add(liveAssetKey(asset));
 }
 const missing = [...wantKeys].filter((key) => !afterKeys.has(key));
 const extra = [...afterKeys].filter((key) => !wantKeys.has(key));

@@ -1253,3 +1253,109 @@ logic + tests in `paid-funnel-metrics.mjs` / `node-tests/paid-funnel-metrics.nod
 staff_notes-prefix + `checkout_submission_id` heuristic until `orders` gets an explicit origin column.
 Prod 45d readout: 35 quotes · 2 Google-paid · quote_won 0 sent/1 not_attributable · unattributable
 14 = 4 online (0 google-tagged) + 6 staff_manual + 4 staff_quote · click-ID survival 2 quotes/0 converted.
+
+---
+
+## 2026-08-16 — Goal-graph restoration, dead-keyword removal, PRICE asset, observation audiences
+
+**Why this pass exists.** `npm run validate:google-ads:launched` was returning UNSAFE with four
+safetyFailures. One was pure pin drift (the Core budget was raised 21 → 25 on 2026-08-14 in
+`campaign-config.mjs` + `config-validator.mjs`, but `live-verification-contract.mjs` was left at
+21 — the fifth time this repo has shipped a value without moving the checker that checks it).
+The other three were one root cause: `quote_submit_qualified` (7723019984) was created in
+Google's redesigned UI, which forces `primary_for_goal=true`, and the config was then edited to
+**match the accident instead of correct it** (commit 1836242). Because all three campaigns
+inherit goals at CUSTOMER level, one primary SUBMIT_LEAD_FORM action made the customer-level
+"Submit lead form" goal biddable on the customer *and* on every campaign.
+
+**The lesson, stated plainly:** when the UI forces a value the contract forbids, the contract is
+right. Editing the contract to agree with the account converts a caught error into a documented
+one. Every fix in this pass moves the account to the contract, never the reverse.
+
+### What changed
+
+| Area | Change |
+|---|---|
+| Verifier drift | Core budget pin 21 → 25 in both expected-campaign maps + the node-test mirror |
+| Goal graph | `qualifiedQuoteLeadAction.primaryForGoal` true → **false**; new verifier pins for the quote-lead action, the removed About Us action, and the GA4 `generate_lead` import |
+| New actions | `websiteCallAction` + `clickToCallIntentAction` declared PENDING_CREATE with a validator lifecycle guard that allows `actionId: null` until VERIFIED_LIVE and forbids primary **permanently** |
+| Negatives | `avery`, `sticker you` account-wide (+12 criteria); `decal`, `decals` on Stickers and Labels (+2) |
+| Dead keyword | `who makes stickers` removed — the 2026-08-10 account negative `who makes` blocked every query it could match, so it never served (positives 192 → 190) |
+| PRICE asset | `TC PPC Price - Core Products`, SERVICES/FROM, 8 offerings, every string through `claimFailureReason` with STRICT opts |
+| Audiences | 5 in-market user_interest IDs + 1 remarketing user_list on all 14 enabled Core ad groups, `bid_only: true` (OBSERVATION) |
+
+Two decisions worth recording:
+
+1. **`12x18` did not make it into the price asset.** The photo-poster offering reads
+   "Matte poster from $15", not "12x18 from $15". `12x18` is a real spec but it is **not** a
+   registered token in `approved-claims.mjs`, and that registry's own rule is "never add a token
+   to make copy pass — change the copy instead." The copy changed.
+2. **The price asset links to all three campaigns**, matching the existing 13 managed assets
+   (39 links = 13 × 3 → 42 = 14 × 3). Competitor and Brand are PAUSED, so the two extra links
+   cost nothing and a future re-enable needs no second pass.
+
+### Pin changes (all moved in this same pass — that is the point)
+
+- `positiveKeywords` 192 → **190**, `negativeCriteria` 415 → **429** (324 account + 91 ad-group + 14 campaign)
+- `manualAssets` 13 → **14**, `campaignAssetLinks` 39 + 14 image → **42 + 14 image = 56**
+- New: audience criteria = **6 per ad group × 14 ad groups = 84**, every one `bid_only: true`
+
+### Exact run order
+
+Every script is dry-run by default. Run the dry run, read the plan, then re-run with `--execute`.
+Order matters: conversion actions first (the goal graph is what the verifier fails on), keywords
+and assets next, audiences last (they are additive and cannot break anything else).
+
+```
+# 1. dry runs — confirm each plan matches what is written above
+railway run node scripts/google-ads/apply-conversion-actions.mjs
+railway run node scripts/google-ads/remove-conflicting-keywords.mjs
+railway run node scripts/google-ads/apply-assets.mjs
+railway run node scripts/google-ads/apply-audiences.mjs
+
+# 2. execute, in this order
+railway run node scripts/google-ads/apply-conversion-actions.mjs --execute
+railway run node scripts/google-ads/remove-conflicting-keywords.mjs --execute
+railway run node scripts/google-ads/apply-assets.mjs --execute
+railway run node scripts/google-ads/apply-audiences.mjs --execute
+
+# 3. re-verify
+npm run test:google-ads
+node scripts/google-ads/config-validator.mjs
+railway run npm run validate:google-ads:launched
+```
+
+### Account negatives still need a separate sync
+
+`apply-conversion-actions.mjs` and friends do **not** push keywords or negatives. The two new
+account negatives (`avery`, `sticker you`) and the two new Stickers cross-negatives
+(`decal`, `decals`) reach the account through the normal create path:
+
+```
+railway run node scripts/google-ads/sync-plan.mjs        # read-only diff
+railway run node scripts/google-ads/apply-sync.mjs       # dry run
+railway run node scripts/google-ads/apply-sync.mjs --execute
+```
+
+Until that runs, `negativeCriteria` reads 415 against a pin of 429. That drift **is** the
+import-completion signal, exactly as it has been for every previous negatives pass.
+
+### Railway env vars to set after `apply-conversion-actions.mjs --execute`
+
+The script prints each value; copy them verbatim from its output, do not reconstruct them.
+
+- `GOOGLE_ADS_WEBSITE_CALL_CONVERSION_ACTION_ID` — numeric ID of `qualified_call_website_60s`
+- `NEXT_PUBLIC_GOOGLE_ADS_WEBSITE_CALL_LABEL` — `AW-…/…` parsed from that action's `tag_snippets`
+- `NEXT_PUBLIC_GOOGLE_ADS_CLICK_TO_CALL_LABEL` — `AW-…/…` for `click_to_call_intent`
+
+Then set `actionId` and `status: "VERIFIED_LIVE"` for `websiteCallAction` and
+`clickToCallIntentAction` in `docs/paid-search/campaign-config.mjs`, mirror them in
+`config-validator.mjs`, and regenerate with `node scripts/google-ads/export-google-ads.mjs`.
+The lifecycle guard already permits that transition; it will reject a numeric ID left on
+`PENDING_CREATE`, and it will reject either action ever being primary.
+
+### Expected transient state after execute
+
+The new PRICE asset enters Google policy review. `live-verify` reports
+`one or more manual assets are not policy-approved` as a **launchBlocker** (not a safetyFailure)
+until review completes. That is normal and self-clearing.

@@ -248,6 +248,86 @@ export const paidSearchConfig = {
       header: "Types",
       values: ["Coroplast Signs", "Custom Stickers", "Vinyl Banners", "Business Cards", "Custom Flyers", "Retractable Banners"],
     },
+    // 2026-08-16 PRICE asset. Sitelinks and callouts already carry prices, but they carry them
+    // as prose. A price asset renders the price as a PRICE — a structured, scannable table under
+    // the ad — which is the single strongest asset True Color has, because the whole competitive
+    // position is "the price is on the page and you can see it before you talk to anyone".
+    //
+    // Every header and description below is run through claimFailureReason() with
+    // STRICT_CLAIM_OPTS, exactly like RSA copy: no number appears here that does not resolve to a
+    // sourced fact in docs/paid-search/approved-claims.mjs. That is why the photo poster line
+    // says "Matte poster from $15" and not "12x18 from $15" — "12x18" is a real spec but it is
+    // NOT a registered token, and inventing a token to make copy pass is banned by the registry.
+    //
+    // Google limits: 3-8 offerings, header <= 25 chars, description <= 25 chars. Eight are
+    // declared, the maximum, because Google picks which subset to render per auction and a
+    // wider set gives it more to match against the query.
+    prices: [
+      {
+        name: "TC PPC Price - Core Products",
+        type: "SERVICES",
+        priceQualifier: "FROM",
+        languageCode: "en",
+        // Linked to all three approved campaigns for symmetry with the existing 13 managed
+        // callout/sitelink assets (39 links = 13 x 3). Competitor and Brand are PAUSED, so the
+        // extra two links cost nothing and a future re-enable does not need a second pass.
+        linkedCampaigns: "ALL_APPROVED",
+        offerings: [
+          { header: "Coroplast Signs", description: "4mm coroplast from $25", priceCad: 25, finalUrl: `${ROOT}/products/coroplast-signs` },
+          { header: "Business Cards", description: "250 cards, 14pt gloss", priceCad: 45, finalUrl: `${ROOT}/products/business-cards` },
+          { header: "Vinyl Banners", description: "2x4ft, 13oz scrim", priceCad: 66, finalUrl: `${ROOT}/products/vinyl-banners` },
+          { header: "Retractable Banners", description: "Stand and print, $219", priceCad: 219, finalUrl: `${ROOT}/products/retractable-banners` },
+          { header: "Custom Stickers", description: "25 die-cut vinyl, $25", priceCad: 25, finalUrl: `${ROOT}/products/stickers` },
+          { header: "Photo Posters", description: "Matte poster from $15", priceCad: 15, finalUrl: `${ROOT}/photo-poster-printing-saskatoon` },
+          { header: "Custom Flyers", description: "100 flyers, 80lb gloss", priceCad: 45, finalUrl: `${ROOT}/products/flyers` },
+          { header: "Boat Numbers", description: "3-inch pair from $39", priceCad: 39, finalUrl: `${ROOT}/boat-registration-numbers` },
+        ],
+      },
+    ],
+  },
+  // 2026-08-16 OBSERVATION audiences. bid_only = true is the load-bearing field: it makes every
+  // audience an OBSERVATION, not a TARGET. A targeting audience would SHRINK reach — on a
+  // 35 km presence-only Saskatoon radius with CA$25/day that is the opposite of what is needed.
+  // Observation changes nothing about who sees the ads; it only labels the traffic so the next
+  // bid decision has a segment to read. Zero delivery risk, real reporting gain.
+  //
+  // Applied by scripts/google-ads/apply-audiences.mjs. The ad-group allowlist is written out by
+  // hand rather than derived from the live account so a future config typo can never silently
+  // widen the blast radius (same rule as remove-migrated-keywords.mjs).
+  observationAudiences: {
+    mode: "OBSERVATION",
+    targetRestriction: { targetingDimension: "AUDIENCE", bidOnly: true },
+    campaign: "GOOG_Search_TC_CoreProducts_2026",
+    criteriaPerAdGroup: 5,
+    // 80886 "Signage" is NOT available on the SEARCH channel (user_interest.availabilities:
+    // DISPLAY/VIDEO/DEMAND_GEN only) — the live API rejected it 2026-08-16. Four in-market + one list.
+    userInterests: [
+      { criterionId: "80519", name: "Business Printing & Document Services" },
+      { criterionId: "80516", name: "Photo Printing Services" },
+      { criterionId: "80517", name: "Advertising & Marketing Services" },
+      { criterionId: "80463", name: "Business Services" },
+    ],
+    // 130 users today — far below the 1,000-user Search serving threshold, so it will not
+    // segment anything yet. Attached now because the list only grows once it is attached.
+    userLists: [
+      { id: "9446693977", name: "All visitors (AdWords)", searchEligible: true },
+    ],
+    adGroups: [
+      { id: "197192347366", name: "Coroplast Signs" },
+      { id: "197192347406", name: "Stickers and Labels" },
+      { id: "197192347566", name: "Vinyl Banners" },
+      { id: "197192347606", name: "Business Cards" },
+      { id: "197192347646", name: "Flyers" },
+      { id: "197192347806", name: "Retractable Banners" },
+      { id: "197192347846", name: "Rush and Same Day" },
+      { id: "197192347886", name: "Generic Print Price" },
+      { id: "197192348046", name: "Generic Sign Shop" },
+      { id: "197370354845", name: "Photo Posters" },
+      { id: "199625721792", name: "Boat Registration Decals" },
+      { id: "200550934762", name: "Decals" },
+      { id: "200731192282", name: "Vehicle Decals" },
+      { id: "201694453809", name: "Large Format Printing" },
+    ],
   },
   tracking: {
     autoTaggingRequired: true,
@@ -284,18 +364,83 @@ export const paidSearchConfig = {
       envVar: "GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID",
       // 2026-08-16 owner created it in the UI (account 107-281-6342); read back via GAQL:
       // id 7723019984, ENABLED, UPLOAD_CLICKS, SUBMIT_LEAD_FORM, ONE_PER_CLICK, 30d window,
-      // value 0 (alwaysUseDefaultValue). Google's redesigned flow forced primaryForGoal=true and
-      // includeInConversionsMetric=true; the "Submit lead form" goal is NOT an account-default
-      // goal, so it does not influence bidding today. Target intent below stays secondary /
-      // excluded (includedInConversions: false) — flip it to secondary in the UI when the
-      // action-detail view is available, and only promote after the promotionGate.
+      // value 0 (alwaysUseDefaultValue). Google's redesigned creation flow forced
+      // primaryForGoal=true and includeInConversionsMetric=true, and the config was edited to
+      // MATCH that rather than to correct it (commit 1836242).
+      //
+      // 2026-08-16 SAME DAY, CORRECTED BACK. Recording the accident as the intent is how a
+      // safety contract stops being one. The live consequence was not cosmetic: a primary
+      // SUBMIT_LEAD_FORM action made the customer-level "Submit lead form" goal BIDDABLE on the
+      // customer and, because all three campaigns inherit at CUSTOMER goal level, on every
+      // campaign. Maximize Clicks does not read goals today, but the goal graph is the thing the
+      // live verifier pins, and it read UNSAFE on three separate checks until this was reverted.
+      //
+      // Target and now live intent: SECONDARY and EXCLUDED. A quote submission is a lead, not
+      // revenue; only purchase_online and quote_won may influence bidding. Promotion to primary
+      // is gated on the evidence below and is a deliberate, separate decision.
+      // Applied by scripts/google-ads/apply-conversion-actions.mjs (op i + op ii).
       actionId: "7723019984",
       status: "VERIFIED_LIVE",
       requiredType: "UPLOAD_CLICKS",
       requiredCategory: "SUBMIT_LEAD_FORM",
-      primaryForGoal: true,
+      primaryForGoal: false,
       promotionGate: "secondary until 10-20 verified paid-click quote submissions are observed and lead quality is acceptable",
       includedInConversions: false,
+      currency: "CAD",
+      dynamicValue: false,
+      valueMode: "NONE",
+    },
+    // Two browser-side PHONE_CALL_LEAD actions that do not exist yet. They are declared here
+    // BEFORE creation so the contract, the validator, and the verifier all describe the same
+    // end state and the creation script has an allowlist to work from. Both are permanently
+    // SECONDARY and EXCLUDED: a phone call is a lead, and docs/paid-search/ADS-CONVERSION-GAP-MEMO.md
+    // forbids any imported or browser-side action from becoming primary. `actionId` stays null
+    // until apply-conversion-actions.mjs reads it back live and the ID is pasted here.
+    websiteCallAction: {
+      eventName: "qualified_call_website_60s",
+      envVar: "GOOGLE_ADS_WEBSITE_CALL_CONVERSION_ACTION_ID",
+      labelEnvVar: "NEXT_PUBLIC_GOOGLE_ADS_WEBSITE_CALL_LABEL",
+      // 2026-08-16 created by apply-conversion-actions.mjs --execute; GAQL readback: ENABLED,
+      // WEBSITE_CALL, PHONE_CALL_LEAD, ONE_PER_CLICK, 60s, 30d, primary=false, include=false.
+      // The AW-.../LABEL pair lives only in Railway (labelEnvVar). Google rejects a view-through
+      // window on WEBSITE_CALL (VALUE_MUST_BE_UNSET), so none is declared.
+      actionId: "7723091936",
+      status: "VERIFIED_LIVE",
+      requiredType: "WEBSITE_CALL",
+      requiredCategory: "PHONE_CALL_LEAD",
+      primaryForGoal: false,
+      countingType: "ONE_PER_CLICK",
+      includedInConversions: false,
+      minimumDurationSeconds: 60,
+      clickThroughLookbackDays: 30,
+      viewThroughLookbackDays: null,
+      currency: "CAD",
+      dynamicValue: false,
+      valueMode: "NONE",
+    },
+    // Click-to-call INTENT, deliberately distinct from the 60-second qualified call above.
+    // A tel: tap is not a conversation; counting it as one is exactly the mistake
+    // conversionMeasurement.diagnosticEvents.phoneClicksAreQualifiedCalls === false exists to
+    // prevent. It is measured because tap volume is the leading indicator for the duration-
+    // qualified action, and it is excluded from bidding for the same reason it is measured
+    // separately. No server-side ID env var: this fires from the browser via gtag send_to, so
+    // only the AW-.../LABEL pair is needed and only the label is public.
+    clickToCallIntentAction: {
+      eventName: "click_to_call_intent",
+      envVar: null,
+      labelEnvVar: "NEXT_PUBLIC_GOOGLE_ADS_CLICK_TO_CALL_LABEL",
+      // 2026-08-16 created by apply-conversion-actions.mjs --execute; GAQL readback: ENABLED,
+      // WEBPAGE, PHONE_CALL_LEAD, ONE_PER_CLICK, 30d, primary=false, include=false.
+      actionId: "7723091939",
+      status: "VERIFIED_LIVE",
+      requiredType: "WEBPAGE",
+      requiredCategory: "PHONE_CALL_LEAD",
+      primaryForGoal: false,
+      countingType: "ONE_PER_CLICK",
+      includedInConversions: false,
+      minimumDurationSeconds: null,
+      clickThroughLookbackDays: 30,
+      viewThroughLookbackDays: null,
       currency: "CAD",
       dynamicValue: false,
       valueMode: "NONE",
@@ -500,6 +645,19 @@ export const paidSearchConfig = {
     //   the Aug 7/10 negatives; whether those reached the live account is verified by
     //   the sync-plan diff run alongside this edit, not by adding duplicates here.
     "t shirts", "tarpaulin", "printing press", "etsy",
+    // 2026-08-16 mining pass #3.
+    // (a) "avery" — a label-STOCK brand (Avery 5160 etc.). The query is "where do I buy
+    //     blank Avery sheets", i.e. the same buy-a-device/buy-supplies family as the
+    //     existing "supplies", "label maker", and "label printers" negatives. True Color
+    //     prints finished labels on roll vinyl; it does not sell blank sheet stock.
+    // (b) "sticker you" — StickerYou, an online sticker marketplace with NO conquest ad
+    //     group. Identical call to the Aug 10 "stickermule" and Aug 14 "etsy" negatives:
+    //     not in COMPETITOR_TERMS, so PROTECTED_ACCOUNT_NEGATIVES does not block it, and
+    //     with no conquest group there is nowhere legitimate for the click to land.
+    // Deliberately NOT negated this pass: "who makes stickers" stays a real buyer query —
+    // it is being removed as a KEYWORD (blocked by the "who makes" account negative since
+    // 2026-08-10, so it could never have served) rather than negated a second time.
+    "avery", "sticker you",
   ]),
   campaigns: [
     {
@@ -575,7 +733,12 @@ export const paidSearchConfig = {
             // 2026-08-14 owner-picked from the account's search-terms suggestions: shop-seeking
             // buyer language, same family as the kept "sticker makers" / "vinyl sticker maker".
             "print stickers near me",
-            "who makes stickers",
+            // 2026-08-16 REMOVED "who makes stickers": DEAD ON ARRIVAL. The account negative
+            // "who makes" (added 2026-08-10, EXACT+PHRASE on all three campaigns) blocks every
+            // query this keyword could match, so it has never been eligible to serve and never
+            // will be while that negative stands. A keyword that cannot win an auction is not a
+            // keyword; it is a line item that makes the coverage count look bigger than it is.
+            // Removed from the live account by remove-conflicting-keywords.mjs.
           ],
           headlines: ["Order Custom Stickers", "Stickers Printed Locally", "Custom Labels Saskatoon"],
           variantB: [
@@ -593,7 +756,13 @@ export const paidSearchConfig = {
           priceLine: "Custom stickers from $25 for 25. See your exact price online before ordering.",
           // 2026-08-12 vehicle routing: mined car/RV searches now have a dedicated quote group.
           // Block the broad sticker terms from absorbing them again.
-          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "car", "vehicle", "rv"],
+          // 2026-08-16 "decal"/"decals": the same routing fix, one door further. Decals have
+          // TWO dedicated Core groups (Decals -> /products/window-decals, Vehicle Decals ->
+          // /vehicle-decals-saskatoon) and a boat group; a decal query absorbed here lands on
+          // the sticker configurator instead. Both singular and plural are listed because
+          // negative keywords do not match plurals — the exact gap the 2026-08-14
+          // "t shirt" -> "t shirts" fix was opened by.
+          crossNegatives: ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "car", "vehicle", "rv", "decal", "decals"],
         }),
         coreGroup({
           key: "vinyl-banners", name: "Vinyl Banners", product: "vinyl banners",

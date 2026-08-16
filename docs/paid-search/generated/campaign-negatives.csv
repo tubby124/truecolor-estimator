@@ -27,6 +27,8 @@ GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""retractable banner""",Ne
 GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""car""",Negative
 GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""vehicle""",Negative
 GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""rv""",Negative
+GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""decal""",Negative
+GOOG_Search_TC_CoreProducts_2026,Stickers and Labels,"""decals""",Negative
 GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""coroplast""",Negative
 GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""stickers""",Negative
 GOOG_Search_TC_CoreProducts_2026,Vinyl Banners,"""labels""",Negative
@@ -206,6 +208,10 @@ GOOG_Search_TC_CoreProducts_2026,,[printing press],Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,"""printing press""",Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,[etsy],Campaign negative
 GOOG_Search_TC_CoreProducts_2026,,"""etsy""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[avery],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""avery""",Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,[sticker you],Campaign negative
+GOOG_Search_TC_CoreProducts_2026,,"""sticker you""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[jobs],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""jobs""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[hiring],Campaign negative
@@ -310,6 +316,10 @@ GOOG_Search_TC_CompetitorConquest_2026,,[printing press],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""printing press""",Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,[etsy],Campaign negative
 GOOG_Search_TC_CompetitorConquest_2026,,"""etsy""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[avery],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""avery""",Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,[sticker you],Campaign negative
+GOOG_Search_TC_CompetitorConquest_2026,,"""sticker you""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[jobs],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""jobs""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[hiring],Campaign negative
@@ -414,3 +424,7 @@ GOOG_Search_TC_BrandDefense_2026,,[printing press],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""printing press""",Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,[etsy],Campaign negative
 GOOG_Search_TC_BrandDefense_2026,,"""etsy""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[avery],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""avery""",Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,[sticker you],Campaign negative
+GOOG_Search_TC_BrandDefense_2026,,"""sticker you""",Campaign negative

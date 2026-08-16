@@ -70,6 +70,45 @@ export function buildArtifacts(config) {
     }
   }
   const rsaHeaders = ["Campaign", "Ad group", "Type", "Status", "Final URL", ...Array.from({ length: 15 }, (_, index) => `Headline ${index + 1}`), ...Array.from({ length: 4 }, (_, index) => `Description ${index + 1}`)];
+  // 2026-08-16 PRICE assets. Exported as their own CSV rather than folded into the summary JSON
+  // so a repricing shows up as a reviewable row-level diff — the same reason keywords and
+  // negatives are CSVs. Ad assets are account-level, so there is no Campaign/Ad group column.
+  const priceRows = (config.adAssets?.prices ?? []).flatMap((price) => price.offerings.map((offer) => ({
+    Asset: price.name,
+    "Asset type": "Price",
+    "Price type": price.type,
+    Qualifier: price.priceQualifier,
+    Language: price.languageCode,
+    Header: offer.header,
+    Description: offer.description,
+    Price: offer.priceCad,
+    Currency: config.currency,
+    "Final URL": offer.finalUrl,
+  })));
+  // 2026-08-16 observation audiences. bid_only is exported on every row because it is the field
+  // that separates "label the traffic" from "cut the traffic".
+  const audienceRows = (config.observationAudiences?.adGroups ?? []).flatMap((group) => [
+    ...(config.observationAudiences?.userInterests ?? []).map((item) => ({
+      Campaign: config.observationAudiences.campaign,
+      "Ad group": group.name,
+      "Ad group ID": group.id,
+      "Audience type": "In-market (user_interest)",
+      "Audience ID": item.criterionId,
+      "Audience name": item.name,
+      Mode: config.observationAudiences.mode,
+      "Bid only": config.observationAudiences.targetRestriction.bidOnly,
+    })),
+    ...(config.observationAudiences?.userLists ?? []).map((item) => ({
+      Campaign: config.observationAudiences.campaign,
+      "Ad group": group.name,
+      "Ad group ID": group.id,
+      "Audience type": "Remarketing (user_list)",
+      "Audience ID": item.id,
+      "Audience name": item.name,
+      Mode: config.observationAudiences.mode,
+      "Bid only": config.observationAudiences.targetRestriction.bidOnly,
+    })),
+  ]);
   const summary = {
     artifactStatus: "BUILT",
     accountCustomerId: config.accountCustomerId,
@@ -82,6 +121,8 @@ export function buildArtifacts(config) {
     spendControls: config.spendControls,
     controlledTest: config.controlledTest,
     conversionMeasurement: config.conversionMeasurement,
+    priceAssetsConfigured: (config.adAssets?.prices ?? []).length,
+    observationAudiences: config.observationAudiences,
     editorSupportedEntitiesImportReady: true,
     editorImportTargetEncoded: false,
     targetAccountPreflightRequired: true,
@@ -98,6 +139,8 @@ export function buildArtifacts(config) {
     "keywords.csv": csv(["Campaign", "Ad group", "Keyword", "Type", "Status", "Final URL"], keywordRows),
     "responsive-search-ads.csv": csv(rsaHeaders, adRows),
     "campaign-negatives.csv": csv(["Campaign", "Ad group", "Keyword", "Type"], negativeRows),
+    "price-assets.csv": csv(["Asset", "Asset type", "Price type", "Qualifier", "Language", "Header", "Description", "Price", "Currency", "Final URL"], priceRows),
+    "observation-audiences.csv": csv(["Campaign", "Ad group", "Ad group ID", "Audience type", "Audience ID", "Audience name", "Mode", "Bid only"], audienceRows),
     "launch-candidate-manifest.json": `${JSON.stringify({
       accountCustomerId: config.accountCustomerId,
       activationPermitted: false,

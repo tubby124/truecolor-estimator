@@ -131,9 +131,45 @@
       "status": "VERIFIED_LIVE",
       "requiredType": "UPLOAD_CLICKS",
       "requiredCategory": "SUBMIT_LEAD_FORM",
-      "primaryForGoal": true,
+      "primaryForGoal": false,
       "promotionGate": "secondary until 10-20 verified paid-click quote submissions are observed and lead quality is acceptable",
       "includedInConversions": false,
+      "currency": "CAD",
+      "dynamicValue": false,
+      "valueMode": "NONE"
+    },
+    "websiteCallAction": {
+      "eventName": "qualified_call_website_60s",
+      "envVar": "GOOGLE_ADS_WEBSITE_CALL_CONVERSION_ACTION_ID",
+      "labelEnvVar": "NEXT_PUBLIC_GOOGLE_ADS_WEBSITE_CALL_LABEL",
+      "actionId": "7723091936",
+      "status": "VERIFIED_LIVE",
+      "requiredType": "WEBSITE_CALL",
+      "requiredCategory": "PHONE_CALL_LEAD",
+      "primaryForGoal": false,
+      "countingType": "ONE_PER_CLICK",
+      "includedInConversions": false,
+      "minimumDurationSeconds": 60,
+      "clickThroughLookbackDays": 30,
+      "viewThroughLookbackDays": null,
+      "currency": "CAD",
+      "dynamicValue": false,
+      "valueMode": "NONE"
+    },
+    "clickToCallIntentAction": {
+      "eventName": "click_to_call_intent",
+      "envVar": null,
+      "labelEnvVar": "NEXT_PUBLIC_GOOGLE_ADS_CLICK_TO_CALL_LABEL",
+      "actionId": "7723091939",
+      "status": "VERIFIED_LIVE",
+      "requiredType": "WEBPAGE",
+      "requiredCategory": "PHONE_CALL_LEAD",
+      "primaryForGoal": false,
+      "countingType": "ONE_PER_CLICK",
+      "includedInConversions": false,
+      "minimumDurationSeconds": null,
+      "clickThroughLookbackDays": 30,
+      "viewThroughLookbackDays": null,
       "currency": "CAD",
       "dynamicValue": false,
       "valueMode": "NONE"
@@ -164,6 +200,99 @@
       "optimizationRole": "NONE",
       "phoneClicksAreQualifiedCalls": false
     }
+  },
+  "priceAssetsConfigured": 1,
+  "observationAudiences": {
+    "mode": "OBSERVATION",
+    "targetRestriction": {
+      "targetingDimension": "AUDIENCE",
+      "bidOnly": true
+    },
+    "campaign": "GOOG_Search_TC_CoreProducts_2026",
+    "criteriaPerAdGroup": 5,
+    "userInterests": [
+      {
+        "criterionId": "80519",
+        "name": "Business Printing & Document Services"
+      },
+      {
+        "criterionId": "80516",
+        "name": "Photo Printing Services"
+      },
+      {
+        "criterionId": "80517",
+        "name": "Advertising & Marketing Services"
+      },
+      {
+        "criterionId": "80463",
+        "name": "Business Services"
+      }
+    ],
+    "userLists": [
+      {
+        "id": "9446693977",
+        "name": "All visitors (AdWords)",
+        "searchEligible": true
+      }
+    ],
+    "adGroups": [
+      {
+        "id": "197192347366",
+        "name": "Coroplast Signs"
+      },
+      {
+        "id": "197192347406",
+        "name": "Stickers and Labels"
+      },
+      {
+        "id": "197192347566",
+        "name": "Vinyl Banners"
+      },
+      {
+        "id": "197192347606",
+        "name": "Business Cards"
+      },
+      {
+        "id": "197192347646",
+        "name": "Flyers"
+      },
+      {
+        "id": "197192347806",
+        "name": "Retractable Banners"
+      },
+      {
+        "id": "197192347846",
+        "name": "Rush and Same Day"
+      },
+      {
+        "id": "197192347886",
+        "name": "Generic Print Price"
+      },
+      {
+        "id": "197192348046",
+        "name": "Generic Sign Shop"
+      },
+      {
+        "id": "197370354845",
+        "name": "Photo Posters"
+      },
+      {
+        "id": "199625721792",
+        "name": "Boat Registration Decals"
+      },
+      {
+        "id": "200550934762",
+        "name": "Decals"
+      },
+      {
+        "id": "200731192282",
+        "name": "Vehicle Decals"
+      },
+      {
+        "id": "201694453809",
+        "name": "Large Format Printing"
+      }
+    ]
   },
   "editorSupportedEntitiesImportReady": true,
   "editorImportTargetEncoded": false,

@@ -574,6 +574,16 @@ const EXPECTED_CONVERSION_ACTIONS = Object.freeze([
   }),
 ] as const);
 
+/**
+ * The legacy codeless "About Us" PAGE_VIEW action. It counted 101 page loads as conversions in
+ * 30 days and is REMOVED as of the 2026-08-16 conversion-graph pass
+ * (scripts/google-ads/apply-conversion-actions.mjs, op iii).
+ *
+ * The inventory query filters `status != 'REMOVED'`, so after the removal this action is simply
+ * ABSENT. Its absence is now the target state, not drift — but the shape stays pinned so that an
+ * account where it is still ENABLED (a rollback, a restore, a second account) is still checked
+ * against exactly what it used to be, rather than silently passing.
+ */
 const EXPECTED_LEGACY_PAGE_VIEW_ACTION = Object.freeze({
   id: "7688596965",
   name: "About Us",
@@ -583,6 +593,37 @@ const EXPECTED_LEGACY_PAGE_VIEW_ACTION = Object.freeze({
   primaryForGoal: true,
   includeInConversionsMetric: false,
 } as const);
+
+/**
+ * Secondary actions that exist for MEASUREMENT only and must never influence bidding. Keyed by
+ * NAME because their IDs are assigned by Google at creation time and land in
+ * docs/paid-search/campaign-config.mjs afterwards; pinning an ID here before it exists would
+ * mean pinning a placeholder, and a placeholder pin is not a check.
+ *
+ * The generic guards below already reject any unknown action that is included or primary, so
+ * these three would pass without being listed. They are listed anyway: an explicit expectation
+ * distinguishes "known and deliberately secondary" from "unknown and happens to be harmless",
+ * and the next person reading a conversion report needs that distinction.
+ */
+const EXPECTED_SECONDARY_ACTION_NAMES = Object.freeze([
+  // 2026-08-16 created by apply-conversion-actions.mjs (op v). WEBSITE_CALL, 60s duration gate.
+  "qualified_call_website_60s",
+  // 2026-08-16 created by apply-conversion-actions.mjs (op v). WEBPAGE tel: tap intent — a tap
+  // is not a conversation, which is why it is measured separately from the 60s action.
+  "click_to_call_intent",
+  // 2026-08-16 GA4 import un-hidden (op iv). ADS-CONVERSION-GAP-MEMO.md forbids a GA4 import
+  // from ever being primary: GA4 and Google Ads attribution disagree, so a primary import
+  // double-counts against the UPLOAD_CLICKS revenue actions this account actually bids on.
+  "generate_lead",
+] as const);
+
+/**
+ * PAGE_VIEW~WEBSITE is OPTIONAL as of 2026-08-16. Google materialises a customer conversion goal
+ * per category~origin in use; removing the only PAGE_VIEW action can take the goal with it.
+ * Requiring it would turn a completed cleanup into a hard failure. It stays listed so that if it
+ * IS present it must still be non-biddable.
+ */
+const OPTIONAL_CUSTOMER_CONVERSION_GOAL_KEYS = Object.freeze(["PAGE_VIEW~WEBSITE"] as const);
 
 const EXPECTED_CUSTOMER_CONVERSION_GOALS = Object.freeze([
   Object.freeze({ category: "PURCHASE", origin: "WEBSITE", biddable: true }),
@@ -621,8 +662,15 @@ function validateCustomerConversionGoals(
   }
 
   for (const expected of EXPECTED_CUSTOMER_CONVERSION_GOALS) {
-    const actual = byKey.get(conversionGoalKey(expected.category, expected.origin));
-    if (!actual || actual.biddable !== expected.biddable) {
+    const key = conversionGoalKey(expected.category, expected.origin);
+    const actual = byKey.get(key);
+    if (!actual) {
+      if ((OPTIONAL_CUSTOMER_CONVERSION_GOAL_KEYS as readonly string[]).includes(key)) continue;
+      throw new Error(
+        `Google Ads customer conversion goal ${expected.category}/${expected.origin} has drifted`,
+      );
+    }
+    if (actual.biddable !== expected.biddable) {
       throw new Error(
         `Google Ads customer conversion goal ${expected.category}/${expected.origin} has drifted`,
       );
@@ -697,16 +745,34 @@ function validateConversionGoalInventory(
     }
   }
 
+  // Absent === REMOVED here: the inventory query filters `status != 'REMOVED'`. That is the
+  // 2026-08-16 target state, so absence is accepted. If the action IS still present it must
+  // match its historical shape exactly — a partially-edited About Us action is still drift.
   const legacyPageView = byId.get(EXPECTED_LEGACY_PAGE_VIEW_ACTION.id);
   if (
-    !legacyPageView
-    || Object.entries(EXPECTED_LEGACY_PAGE_VIEW_ACTION).some(
+    legacyPageView
+    && (Object.entries(EXPECTED_LEGACY_PAGE_VIEW_ACTION).some(
       ([key, value]) =>
         legacyPageView[key as keyof GoogleAdsConversionGoalAttestation] !== value,
     )
-    || legacyPageView.ownerCustomer !== `customers/${TRUE_COLOR_GOOGLE_ADS_CUSTOMER_ID}`
+      || legacyPageView.ownerCustomer !== `customers/${TRUE_COLOR_GOOGLE_ADS_CUSTOMER_ID}`)
   ) {
     throw new Error("Google Ads legacy About Us conversion action has drifted");
+  }
+
+  // Measurement-only actions: present or not, they may never be primary or included.
+  for (const name of EXPECTED_SECONDARY_ACTION_NAMES) {
+    const secondary = actions.filter((action) => action.name === name);
+    if (secondary.length > 1) {
+      throw new Error(`Google Ads secondary conversion action ${name} is duplicated`);
+    }
+    const action = secondary[0];
+    if (!action) continue;
+    if (action.primaryForGoal || action.includeInConversionsMetric) {
+      throw new Error(
+        `Google Ads secondary conversion action ${name} must stay secondary and excluded from bidding`,
+      );
+    }
   }
 
   const customerGoalsByKey = new Map(

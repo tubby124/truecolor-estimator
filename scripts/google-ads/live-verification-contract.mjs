@@ -1,16 +1,22 @@
 import { COMPETITOR_RSA_REVIEW } from "./request-competitor-rsa-review.mjs";
 
 // Budgets/ceilings track the CURRENT staged values (Core raised to CA$21 + ceiling CA$5 on
-// 2026-08-07) — a rollback pause does not revert budgets or bids, so the paused map must match.
+// 2026-08-07; Core budget raised again 21 -> 25 on 2026-08-14 pacing evidence) — a rollback pause
+// does not revert budgets or bids, so the paused map must match.
+// 2026-08-16 DRIFT FIX: this map and LAUNCHED_EXPECTED_CAMPAIGNS were left at 21 when the
+// 2026-08-14 raise landed in campaign-config.mjs + config-validator.mjs (EXPECTED.CORE.daily 25,
+// LAUNCHABLE_DAILY_BUDGET_CAD 32). The live account reads 25. The checker disagreeing with the
+// thing it checks is the failure mode this repo has now paid for five times — the pins move in
+// the SAME pass as the value, always.
 export const PAUSED_EXPECTED_CAMPAIGNS = Object.freeze({
-  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 21, ceiling: 5, status: "PAUSED" }),
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 25, ceiling: 5, status: "PAUSED" }),
   GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 2.5, status: "PAUSED" }),
   GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" }),
 });
 // Stage 1 launch = Core + Competitor enabled, Brand held paused (2026-08-03 PM owner decision).
 // Brand contributes the single paused ad group and RSA in the launched counts below.
 export const LAUNCHED_EXPECTED_CAMPAIGNS = Object.freeze({
-  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 21, ceiling: 5, status: "ENABLED" }),
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 25, ceiling: 5, status: "ENABLED" }),
   // 2026-08-09 RETIRED: zero impressions across the pilot resolved the 2026-08-12 gate to its
   // documented pause branch. Budget/ceiling stay staged so drift in them is still detected.
   GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 2.5, status: "PAUSED" }),
@@ -36,6 +42,19 @@ export const OFFLINE_UPLOADER_CLEARANCE = "REAL_TRANSACTION_RECONCILED";
 export const OFFLINE_UPLOADER_LAUNCH_BLOCKER =
   "offline conversion uploader requires a reconciled real transaction before launch";
 const QUALIFIED_CALL_ASSET_ID = "394889103183";
+const QUALIFIED_QUOTE_LEAD_ACTION_ID = "7723019984";
+const LEGACY_ABOUT_US_ACTION_ID = "7688596965";
+const GA4_GENERATE_LEAD_ACTION_ID = "7721413630";
+// 2026-08-16 observation audiences. Asserted here by hand, NOT imported from campaign-config —
+// the checker must be able to disagree with the config or it stops being a check. Five criteria
+// per group: four in-market user_interest IDs + one remarketing user_list (80886 Signage is not
+// available on SEARCH — live API rejection 2026-08-16).
+const EXPECTED_AUDIENCE_CRITERIA_PER_AD_GROUP = 5;
+const EXPECTED_AUDIENCE_AD_GROUP_IDS = [
+  "197192347366", "197192347406", "197192347566", "197192347606", "197192347646",
+  "197192347806", "197192347846", "197192347886", "197192348046", "197370354845",
+  "199625721792", "200550934762", "200731192282", "201694453809",
+];
 const PROMOTION_CLEARANCES = new Set([
   "UI_CONFIRMED_ACTIVE",
   "API_APPLIED_INCENTIVE_REDEEMED",
@@ -381,7 +400,15 @@ function evaluateLiveState(live, {
   // pin — the exact trap expand-keywords warns about. Same day, later: the 6 un-negated
   // "decal printer" criteria (cc7d9b6) were deleted via owner-authorized scoped script with
   // pre/post verification — live re-read 415, matching this pin exactly.
-  if (live.positiveKeywords !== 192 || live.negativeCriteria !== 415) failures.push("keyword counts changed");
+  // 2026-08-16 pass #3. positives 192 -> 190: "who makes stickers" EXACT+PHRASE removed from
+  // Stickers and Labels. It was DEAD — the account negative "who makes" (2026-08-10) blocked
+  // every query it could match, so it never served. Removed live by
+  // remove-conflicting-keywords.mjs; the pin moves in the same pass as the contract.
+  // negatives 415 -> 429: +12 account ("avery", "sticker you" x EXACT+PHRASE x 3 campaigns)
+  // and +2 ad-group cross-negatives ("decal", "decals" on Stickers and Labels only).
+  // Composition after this pass: 324 account-negative criteria + 91 ad-group cross-negatives
+  // + 14 campaign negatives = 429.
+  if (live.positiveKeywords !== 190 || live.negativeCriteria !== 429) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,
@@ -404,7 +431,11 @@ function evaluateLiveState(live, {
   // the scraped images are not 'TC PPC %' assets. If curation unlinks images, update this
   // constant in the same pass.
   const OWNER_IMAGE_ASSET_LINKS = 14;
-  if (live.manualAssets !== 13 || live.campaignAssetLinks !== 39 + OWNER_IMAGE_ASSET_LINKS) failures.push("asset counts changed");
+  // 2026-08-16 PRICE asset: manualAssets 13 -> 14, contract links 39 -> 42. The price asset is
+  // created with an explicit "TC PPC Price - Core Products" name so it lands inside the
+  // 'TC PPC %' query that defines manualAssets, and it is linked to all three approved
+  // campaigns like every other managed asset (13 x 3 = 39 becomes 14 x 3 = 42).
+  if (live.manualAssets !== 14 || live.campaignAssetLinks !== 42 + OWNER_IMAGE_ASSET_LINKS) failures.push("asset counts changed");
   if (live.locationTargets !== 0 || live.proximityTargets !== 3 || live.radius35KmTargets !== 3) failures.push("Saskatoon +35 km proximity criteria changed");
   const positiveGeoCriteria = live.positiveGeoCriteria ?? [];
   if (positiveGeoCriteria.length !== 3
@@ -501,6 +532,49 @@ function evaluateLiveState(live, {
     && (includedConversionActions.length !== 2
       || includedConversionActions.some((action) => !expectedIncludedConversionIds.has(action.id)))) {
     failures.push("purchase_online and quote_won must be the only included conversion actions");
+  }
+  // 2026-08-16 goal-graph restoration. Three pins that together say "revenue only influences
+  // bidding, everything else is measured":
+  //   (a) the quote-lead action is SECONDARY and EXCLUDED until its documented promotionGate
+  //   (b) the junk About Us PAGE_VIEW action is non-counting (UI removal pending — codeless
+  //       actions reject API mutation); it had 101 page-load "conversions" in 30 days
+  //   (c) the GA4 generate_lead import is ENABLED so it is visible, and SECONDARY so it can
+  //       never influence bidding (ADS-CONVERSION-GAP-MEMO.md forbids primary GA4 imports)
+  const inventory = live.conversionActionInventory ?? [];
+  const findAction = (id) => inventory.find((action) => action?.id === id);
+  const quoteLeadAction = findAction(QUALIFIED_QUOTE_LEAD_ACTION_ID);
+  if (quoteLeadAction
+    && (quoteLeadAction.primaryForGoal !== false || quoteLeadAction.included !== false)) {
+    failures.push("quote_submit_qualified must stay secondary and excluded until its promotion gate");
+  }
+  // Google refuses API mutation on codeless (auto-created) actions — MUTATE_NOT_ALLOWED, verified
+  // 2026-08-16 — so removal is a UI-only owner action. Until then it must stay non-counting.
+  const aboutUsAction = findAction(LEGACY_ABOUT_US_ACTION_ID);
+  if (aboutUsAction && aboutUsAction.status !== "REMOVED"
+    && (aboutUsAction.primaryForGoal !== false || aboutUsAction.included !== false)) {
+    failures.push("legacy About Us PAGE_VIEW conversion action must be non-counting (secondary + excluded) until removed in the UI");
+  }
+  const ga4GenerateLead = findAction(GA4_GENERATE_LEAD_ACTION_ID);
+  if (!ga4GenerateLead
+    || ga4GenerateLead.status !== "ENABLED"
+    || ga4GenerateLead.primaryForGoal !== false
+    || ga4GenerateLead.included !== false) {
+    failures.push("GA4 generate_lead import must be ENABLED, secondary, and excluded from bidding");
+  }
+  // Observation audiences: exactly six criteria on each of the 14 Core ad groups, every one of
+  // them bid-only. A criterion that reads back bid_only=false is a TARGETING audience and would
+  // silently cut delivery to list members only.
+  const audienceCriteria = live.audienceCriteria ?? [];
+  const audienceByAdGroup = new Map();
+  for (const criterion of audienceCriteria) {
+    const key = String(criterion?.adGroupId ?? "");
+    audienceByAdGroup.set(key, (audienceByAdGroup.get(key) ?? 0) + 1);
+  }
+  if (audienceCriteria.some((criterion) => criterion?.bidOnly !== true)
+    || audienceCriteria.length !== EXPECTED_AUDIENCE_AD_GROUP_IDS.length * EXPECTED_AUDIENCE_CRITERIA_PER_AD_GROUP
+    || EXPECTED_AUDIENCE_AD_GROUP_IDS.some((id) => audienceByAdGroup.get(id) !== EXPECTED_AUDIENCE_CRITERIA_PER_AD_GROUP)
+    || [...audienceByAdGroup.keys()].some((id) => !EXPECTED_AUDIENCE_AD_GROUP_IDS.includes(id))) {
+    failures.push("every enabled Core ad group must carry exactly six bid-only observation audience criteria");
   }
   const historicalBrowserPurchase = live.historicalBrowserPurchaseConversion;
   if (!historicalBrowserPurchase

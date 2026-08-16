@@ -149,6 +149,46 @@ const CONVERSION_MEASUREMENT = {
     dynamicValue: false,
     valueMode: "NONE",
   },
+  // 2026-08-16 PENDING_CREATE mirrors. Same lifecycle rule as qualifiedQuoteLeadAction:
+  // actionId/status/primaryForGoal are checked by the lifecycle guard below, everything else
+  // must match byte for byte. Both are permanently secondary — the memo forbids a browser-side
+  // or imported action from ever influencing bidding.
+  websiteCallAction: {
+    eventName: "qualified_call_website_60s",
+    envVar: "GOOGLE_ADS_WEBSITE_CALL_CONVERSION_ACTION_ID",
+    labelEnvVar: "NEXT_PUBLIC_GOOGLE_ADS_WEBSITE_CALL_LABEL",
+    actionId: null,
+    status: "PENDING_CREATE",
+    requiredType: "WEBSITE_CALL",
+    requiredCategory: "PHONE_CALL_LEAD",
+    primaryForGoal: false,
+    countingType: "ONE_PER_CLICK",
+    includedInConversions: false,
+    minimumDurationSeconds: 60,
+    clickThroughLookbackDays: 30,
+    viewThroughLookbackDays: null, // VALUE_MUST_BE_UNSET for WEBSITE_CALL (live API, 2026-08-16)
+    currency: "CAD",
+    dynamicValue: false,
+    valueMode: "NONE",
+  },
+  clickToCallIntentAction: {
+    eventName: "click_to_call_intent",
+    envVar: null,
+    labelEnvVar: "NEXT_PUBLIC_GOOGLE_ADS_CLICK_TO_CALL_LABEL",
+    actionId: null,
+    status: "PENDING_CREATE",
+    requiredType: "WEBPAGE",
+    requiredCategory: "PHONE_CALL_LEAD",
+    primaryForGoal: false,
+    countingType: "ONE_PER_CLICK",
+    includedInConversions: false,
+    minimumDurationSeconds: null,
+    clickThroughLookbackDays: 30,
+    viewThroughLookbackDays: null,
+    currency: "CAD",
+    dynamicValue: false,
+    valueMode: "NONE",
+  },
   qualifiedCallAction: {
     envVar: "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID",
     actionId: "7694360843",
@@ -230,7 +270,8 @@ const CORE_TERMS = {
     "vinyl sticker maker",
     "sticker makers",
     "print stickers near me",
-    "who makes stickers",
+    // 2026-08-16: "who makes stickers" removed — the account negative "who makes" blocked it
+    // from ever serving. See campaign-config.mjs for the full rationale.
   ],
   "vinyl-banners": ["vinyl banners saskatoon", "banner printing saskatoon", "custom vinyl banners", "banner printing", "banner with grommets"],
   "business-cards": [
@@ -257,7 +298,9 @@ const CORE_TERMS = {
 };
 const CORE_CROSS_NEGATIVES = {
   coroplast: ["stickers", "labels", "vinyl banner", "business cards", "flyers", "retractable banner"],
-  "stickers-labels": ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "car", "vehicle", "rv"],
+  // 2026-08-16 +decal/+decals: decals have their own Core groups; singular AND plural because
+  // negative keywords do not match plurals.
+  "stickers-labels": ["coroplast", "vinyl banner", "business cards", "flyers", "retractable banner", "car", "vehicle", "rv", "decal", "decals"],
   "vinyl-banners": ["coroplast", "stickers", "labels", "business cards", "flyers", "retractable banner"],
   "business-cards": ["coroplast", "stickers", "labels", "vinyl banner", "flyers", "retractable banner"],
   flyers: ["coroplast", "stickers", "labels", "vinyl banner", "business cards", "retractable banner"],
@@ -311,6 +354,10 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   // day by owner correction (buyer language, not a device). Full rationale + the
   // deliberately-NOT-negated list in campaign-config.mjs.
   "t shirts", "tarpaulin", "printing press", "etsy",
+  // 2026-08-16 mining pass #3: label-stock brand ("avery" — buy-supplies intent, same family
+  // as "label maker"/"label printers") and a marketplace competitor with no conquest group
+  // ("sticker you" — stickermule/etsy precedent). Rationale in campaign-config.mjs.
+  "avery", "sticker you",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 // Claim validation moved to docs/paid-search/approved-claims.mjs (2026-08-06).
@@ -364,6 +411,23 @@ const REQUIRED_CALLOUTS = [
   "Coroplast Signs From $25", "Banners From $66", "250 Cards $45",
   "Same-Day Rush +$40 Flat", "Design $40 Flat", "4.9 From 43 Reviews",
 ];
+// 2026-08-16 PRICE asset contract. Google's own limits (3-8 offerings, 25-char header, 25-char
+// description) are asserted here rather than discovered at import time, and the copy goes
+// through the same STRICT claim gate as RSA text — a price asset is the most literal price
+// claim the account can make, so it gets the strictest check, not a looser one.
+const PRICE_ASSET_NAME = "TC PPC Price - Core Products";
+const ALLOWED_PRICE_ASSET_TYPES = ["SERVICES", "PRODUCT_TIERS"];
+const PRICE_OFFERING_MIN = 3;
+const PRICE_OFFERING_MAX = 8;
+const PRICE_HEADER_MAX_CHARS = 25;
+const PRICE_DESCRIPTION_MAX_CHARS = 25;
+// bid_only=true is what makes an audience an OBSERVATION. If this ever reads false the audience
+// becomes a TARGET and reach collapses to list members only — on a 35 km radius at CA$25/day
+// that is a delivery outage, not a tuning change.
+const OBSERVATION_AUDIENCE_BID_ONLY = true;
+// 80886 Signage deliberately absent — not available on SEARCH (live API rejection 2026-08-16).
+const OBSERVATION_USER_INTEREST_IDS = ["80519", "80516", "80517", "80463"];
+const OBSERVATION_USER_LIST_IDS = ["9446693977"];
 const REQUIRED_SITELINK_PATHS = [
   "/products/coroplast-signs", "/products/stickers", "/products/vinyl-banners",
   "/products/business-cards", "/products/flyers", "/products/retractable-banners",
@@ -427,11 +491,74 @@ export function validateConfig(config) {
     fail("Bidding must use the approved campaign-specific Maximize Clicks ceilings (Core raised to CA$5 on 2026-08-07 lost-IS-rank evidence)");
   }
   if (!config.tracking?.autoTaggingRequired) fail("Auto-tagging must be an external account requirement");
-  const { qualifiedQuoteLeadAction, ...conversionMeasurement } = config.conversionMeasurement ?? {};
-  const { qualifiedQuoteLeadAction: expectedQualifiedQuoteLeadAction, ...expectedConversionMeasurement } = CONVERSION_MEASUREMENT;
+  const {
+    qualifiedQuoteLeadAction,
+    websiteCallAction,
+    clickToCallIntentAction,
+    ...conversionMeasurement
+  } = config.conversionMeasurement ?? {};
+  const {
+    qualifiedQuoteLeadAction: expectedQualifiedQuoteLeadAction,
+    websiteCallAction: expectedWebsiteCallAction,
+    clickToCallIntentAction: expectedClickToCallIntentAction,
+    ...expectedConversionMeasurement
+  } = CONVERSION_MEASUREMENT;
   if (JSON.stringify(conversionMeasurement) !== JSON.stringify(expectedConversionMeasurement)) {
     fail("Revenue measurement must match the verified revenue action contract");
   }
+  const revenueActionIdsForReuse = Object.values(conversionMeasurement.requiredUploadClickActions ?? {})
+    .map((action) => action?.actionId);
+  /**
+   * Lifecycle guard for an action that is declared BEFORE it exists in the account.
+   *
+   * The shape (type, category, windows, value mode) is frozen and compared byte for byte.
+   * Only three fields are allowed to move as the action is created and read back:
+   *   actionId          null -> numeric, once, and never a revenue action's ID
+   *   status            the pending state -> VERIFIED_LIVE
+   *   primaryForGoal    false while pending; a `promotionGate` action may later be promoted,
+   *                     a `neverPrimary` action may not — ever.
+   * Declaring the action here and letting the script invent its own shape is how the checker
+   * and the thing it checks drift apart, which this repo has now paid for five times.
+   */
+  const checkStagedAction = (label, actual, expected, { pendingStatus, neverPrimary }) => {
+    if (!actual) { fail(`${label} conversion action contract is required`); return; }
+    const { actionId, status, primaryForGoal, ...actualStatic } = actual;
+    const {
+      actionId: _expectedId, status: _expectedStatus, primaryForGoal: _expectedPrimary,
+      ...expectedStatic
+    } = expected;
+    if (JSON.stringify(actualStatic) !== JSON.stringify(expectedStatic)) {
+      fail(`${label} conversion action static contract drifted`);
+    }
+    if (actionId !== null && (typeof actionId !== "string" || !/^\d+$/.test(actionId))) {
+      fail(`${label} action ID must be null or numeric`);
+    }
+    if (actionId !== null && revenueActionIdsForReuse.includes(actionId)) {
+      fail(`${label} action must not reuse a revenue (purchase/quote_won) action ID`);
+    }
+    if (neverPrimary && primaryForGoal !== false) {
+      fail(`${label} action must never be primary — only purchase_online and quote_won may influence bidding`);
+    }
+    if (!neverPrimary && primaryForGoal === true && status !== "VERIFIED_LIVE") {
+      fail(`${label} action cannot be primary before VERIFIED_LIVE`);
+    }
+    if (status === pendingStatus && (actionId !== null || primaryForGoal !== false)) {
+      fail(`Pending ${label} action must be secondary with no action ID`);
+    }
+    if (status === "VERIFIED_LIVE") {
+      if (typeof actionId !== "string" || !/^\d+$/.test(actionId)) {
+        fail(`${label} action must carry a numeric ID once VERIFIED_LIVE`);
+      }
+    } else if (status !== pendingStatus) {
+      fail(`${label} action must be ${pendingStatus} or VERIFIED_LIVE with a numeric ID`);
+    }
+  };
+  checkStagedAction("Website call", websiteCallAction, expectedWebsiteCallAction, {
+    pendingStatus: "PENDING_CREATE", neverPrimary: true,
+  });
+  checkStagedAction("Click-to-call intent", clickToCallIntentAction, expectedClickToCallIntentAction, {
+    pendingStatus: "PENDING_CREATE", neverPrimary: true,
+  });
   if (!qualifiedQuoteLeadAction) {
     fail("Qualified quote lead conversion action contract is required");
   } else {
@@ -507,6 +634,65 @@ export function validateConfig(config) {
     const reason = claimFailureReason(claim, STRICT_CLAIM_OPTS);
     if (reason) fail(`Ad asset ${reason}`);
   }
+  const prices = config.adAssets?.prices ?? [];
+  if (prices.length !== 1) fail("Exactly one PRICE asset is declared");
+  for (const price of prices) {
+    if (price.name !== PRICE_ASSET_NAME) fail(`PRICE asset name must be "${PRICE_ASSET_NAME}" — live-verify counts assets by the 'TC PPC %' name prefix`);
+    if (!ALLOWED_PRICE_ASSET_TYPES.includes(price.type)) fail(`PRICE asset type must be one of ${ALLOWED_PRICE_ASSET_TYPES.join("/")}`);
+    if (price.priceQualifier !== "FROM") fail("PRICE asset must use the FROM qualifier — every number in the table is a starting price");
+    if (price.languageCode !== "en") fail("PRICE asset language must be en");
+    if (price.linkedCampaigns !== "ALL_APPROVED") fail("PRICE asset link scope must be the three approved campaigns");
+    const offerings = price.offerings ?? [];
+    if (offerings.length < PRICE_OFFERING_MIN || offerings.length > PRICE_OFFERING_MAX) {
+      fail(`PRICE asset must carry ${PRICE_OFFERING_MIN}-${PRICE_OFFERING_MAX} offerings (Google limit)`);
+    }
+    if (new Set(offerings.map((offer) => offer.header)).size !== offerings.length) fail("PRICE offering headers must be distinct");
+    for (const offer of offerings) {
+      if (!offer.header || offer.header.length > PRICE_HEADER_MAX_CHARS) fail(`PRICE offering header exceeds ${PRICE_HEADER_MAX_CHARS} characters: ${offer.header}`);
+      if (!offer.description || offer.description.length > PRICE_DESCRIPTION_MAX_CHARS) fail(`PRICE offering description exceeds ${PRICE_DESCRIPTION_MAX_CHARS} characters: ${offer.description}`);
+      if (!Number.isFinite(offer.priceCad) || offer.priceCad <= 0) fail(`PRICE offering needs a positive CAD amount: ${offer.header}`);
+      let parsed;
+      try { parsed = new URL(offer.finalUrl); } catch { fail(`Invalid PRICE offering URL: ${offer.finalUrl}`); continue; }
+      if (parsed.protocol !== "https:" || parsed.hostname !== "truecolorprinting.ca") fail(`PRICE offering must use the one approved domain: ${offer.header}`);
+      for (const claim of [offer.header, offer.description]) {
+        const reason = claimFailureReason(claim, STRICT_CLAIM_OPTS);
+        if (reason) fail(`PRICE offering ${reason}`);
+      }
+    }
+  }
+
+  const audiences = config.observationAudiences;
+  if (!audiences) {
+    fail("observationAudiences declaration is required");
+  } else {
+    if (audiences.mode !== "OBSERVATION") fail("Audiences must be OBSERVATION only — targeting would shrink an already-thin 35 km radius");
+    if (audiences.targetRestriction?.targetingDimension !== "AUDIENCE"
+      || audiences.targetRestriction?.bidOnly !== OBSERVATION_AUDIENCE_BID_ONLY) {
+      fail("Audience target restriction must be AUDIENCE with bid_only true");
+    }
+    if (audiences.campaign !== EXPECTED.CORE.name) fail("Observation audiences must be scoped to the Core campaign");
+    if (!sameSet((audiences.userInterests ?? []).map((item) => item.criterionId), OBSERVATION_USER_INTEREST_IDS)) {
+      fail("Observation in-market user_interest IDs must match the approved five");
+    }
+    if (!sameSet((audiences.userLists ?? []).map((item) => item.id), OBSERVATION_USER_LIST_IDS)) {
+      fail("Observation user_list IDs must match the approved remarketing list");
+    }
+    const expectedPerGroup = (audiences.userInterests ?? []).length + (audiences.userLists ?? []).length;
+    if (audiences.criteriaPerAdGroup !== expectedPerGroup) {
+      fail(`observationAudiences.criteriaPerAdGroup must equal ${expectedPerGroup} — the live verifier pins this number per enabled ad group`);
+    }
+    const coreCampaign = (config.campaigns ?? []).find((campaign) => campaign.kind === "CORE");
+    const coreGroupNames = (coreCampaign?.adGroups ?? []).map((group) => group.name);
+    const declaredNames = (audiences.adGroups ?? []).map((group) => group.name);
+    if (!sameSet(declaredNames, coreGroupNames)) {
+      fail("observationAudiences.adGroups must cover exactly the Core ad groups — a group missing from this list silently gets no audience data");
+    }
+    const declaredIds = (audiences.adGroups ?? []).map((group) => group.id);
+    if (declaredIds.some((id) => typeof id !== "string" || !/^\d+$/.test(id)) || new Set(declaredIds).size !== declaredIds.length) {
+      fail("observationAudiences ad-group IDs must be distinct numeric strings");
+    }
+  }
+
   const claims = config.approvedClaims ?? [];
   if (claims.length !== SOURCED_APPROVED_CLAIMS.length
     || !claims.every((claim, index) => claim.text === SOURCED_APPROVED_CLAIMS[index].text && claim.source === SOURCED_APPROVED_CLAIMS[index].source)) {

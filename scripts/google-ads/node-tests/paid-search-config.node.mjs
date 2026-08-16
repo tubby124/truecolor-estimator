@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { claimFailureReason } from "../../../docs/paid-search/approved-claims.mjs";
 import { paidSearchConfig } from "../../../docs/paid-search/campaign-config.mjs";
 import { validateConfig } from "../config-validator.mjs";
 import { buildArtifacts } from "../export-google-ads.mjs";
@@ -122,7 +123,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 192, negativeCriteria: 415,
+    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 190, negativeCriteria: 429,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",
@@ -169,8 +170,9 @@ const makePausedLiveState = () => ({
       adResourceName: ad.adResourceName,
       finalUrls: [COMPETITOR_DESTINATION_BINDING.finalUrl],
     })),
-    // campaignAssetLinks = 39 contract callout/sitelink links + 14 owner-added image links (2026-08-10).
-    rsaApprovalStatuses: ["APPROVED"], manualAssets: 13, assetApprovalStatuses: ["APPROVED"], campaignAssetLinks: 53,
+    // campaignAssetLinks = 42 contract callout/sitelink/price links + 14 owner-added image links
+    // (2026-08-10). 2026-08-16: the PRICE asset takes managed assets 13 -> 14 and links 39 -> 42.
+    rsaApprovalStatuses: ["APPROVED"], manualAssets: 14, assetApprovalStatuses: ["APPROVED"], campaignAssetLinks: 56,
     locationTargets: 0, proximityTargets: 3, radius35KmTargets: 3, languageTargets: 3, englishLanguageTargets: 3,
     positiveGeoCriteria: paidSearchConfig.campaigns.map((campaign) => ({
       campaign: campaign.name,
@@ -191,13 +193,30 @@ const makePausedLiveState = () => ({
       quoteWon: { envVar: "GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID", id: "9000000002" },
       qualifiedCall: { envVar: "GOOGLE_ADS_QUALIFIED_CALL_CONVERSION_ACTION_ID", id: "9000000003" },
     },
+    // 2026-08-16 target inventory. About Us (7688596965) is deliberately ABSENT — the live query
+    // filters status != REMOVED, so its absence IS the removal. quote_submit_qualified is back to
+    // secondary/excluded and the GA4 generate_lead import is ENABLED but never primary.
     conversionActionInventory: [
-      { id: "9000000001", name: "purchase_online", included: true },
-      { id: "9000000002", name: "quote_won", included: true },
-      { id: "9000000003", name: "qualified_call_60s", included: false },
-      { id: "7689029977", name: "Purchase - Website (True Color)", included: false },
-      { id: "7688596965", name: "About Us", included: false },
+      { id: "9000000001", name: "purchase_online", status: "ENABLED", primaryForGoal: true, included: true },
+      { id: "9000000002", name: "quote_won", status: "ENABLED", primaryForGoal: true, included: true },
+      { id: "9000000003", name: "qualified_call_60s", status: "ENABLED", primaryForGoal: false, included: false },
+      { id: "7689029977", name: "Purchase - Website (True Color)", status: "ENABLED", primaryForGoal: false, included: false },
+      { id: "7723019984", name: "quote_submit_qualified", status: "ENABLED", primaryForGoal: false, included: false },
+      { id: "7721413630", name: "generate_lead", status: "ENABLED", primaryForGoal: false, included: false },
     ],
+    // 14 enabled Core ad groups x 5 bid-only observation criteria (4 in-market + 1 remarketing).
+    audienceCriteria: [
+      "197192347366", "197192347406", "197192347566", "197192347606", "197192347646",
+      "197192347806", "197192347846", "197192347886", "197192348046", "197370354845",
+      "199625721792", "200550934762", "200731192282", "201694453809",
+    ].flatMap((adGroupId) => Array.from({ length: 5 }, (_, index) => ({
+      campaign: "GOOG_Search_TC_CoreProducts_2026",
+      adGroupId,
+      criterionId: `${adGroupId}${index}`,
+      type: index === 4 ? "USER_LIST" : "USER_INTEREST",
+      status: "ENABLED",
+      bidOnly: true,
+    }))),
     customerConversionGoals: [
       { category: "PURCHASE", origin: "WEBSITE", biddable: true },
       { category: "PHONE_CALL_LEAD", origin: "CALL_FROM_ADS", biddable: false },
@@ -452,7 +471,7 @@ test("live verification contract rejects launch-critical drift and missing noind
 
 test("launched live verification enforces the exact Stage 1 state", () => {
   assert.deepEqual(LAUNCHED_EXPECTED_CAMPAIGNS, {
-    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 21, ceiling: 5, status: "ENABLED" },
+    GOOG_Search_TC_CoreProducts_2026: { id: "24048123058", budget: 25, ceiling: 5, status: "ENABLED" },
     // Competitor retired 2026-08-09 — PAUSED is now its approved Stage 1 status.
     GOOG_Search_TC_CompetitorConquest_2026: { id: "24048123061", budget: 4, ceiling: 2.5, status: "PAUSED" },
     GOOG_Search_TC_BrandDefense_2026: { id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" },
@@ -636,8 +655,43 @@ test("locks the confirmed True Color child account and verified account-side gat
     (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "7694360837"; },
     (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "7694360840"; },
     (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.status = "PENDING_OWNER_UI"; },
-    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.status = "PENDING_OWNER_UI"; c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = null; },
+    // NOTE 2026-08-16: "PENDING_OWNER_UI + null id + secondary" used to be drift here only
+    // because the config declared the action PRIMARY. Now that it is correctly secondary, that
+    // combination is the legitimate pre-creation state and is no longer an error. The real
+    // invariant — an unrecognised lifecycle status — is asserted instead.
+    (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.status = "SOMETHING_ELSE"; },
     (c) => { c.conversionMeasurement.qualifiedQuoteLeadAction.actionId = "not-numeric"; c.conversionMeasurement.qualifiedQuoteLeadAction.status = "VERIFIED_LIVE"; },
+    // The two browser-side call actions (VERIFIED_LIVE since 2026-08-16) share the same lifecycle guard.
+    (c) => { c.conversionMeasurement.websiteCallAction.primaryForGoal = true; },
+    (c) => { c.conversionMeasurement.clickToCallIntentAction.primaryForGoal = true; },
+    (c) => { c.conversionMeasurement.websiteCallAction.actionId = "7694360837"; },
+    (c) => { c.conversionMeasurement.websiteCallAction.actionId = "abc"; },
+    // Regressing to PENDING_CREATE while an ID is recorded is the "forgot to finish the paste" state.
+    (c) => { c.conversionMeasurement.websiteCallAction.status = "PENDING_CREATE"; },
+    (c) => { c.conversionMeasurement.websiteCallAction.actionId = null; },
+    (c) => { c.conversionMeasurement.clickToCallIntentAction.status = "PENDING_OWNER_UI"; },
+    (c) => { c.conversionMeasurement.websiteCallAction.minimumDurationSeconds = 30; },
+    (c) => { c.conversionMeasurement.clickToCallIntentAction.requiredCategory = "SUBMIT_LEAD_FORM"; },
+    (c) => { delete c.conversionMeasurement.websiteCallAction; },
+    // PRICE asset guards.
+    (c) => { c.adAssets.prices[0].offerings[0].header = "Coroplast Signs And Banners Too"; },
+    (c) => { c.adAssets.prices[0].offerings[0].description = "12x18 posters from $15"; },
+    (c) => { c.adAssets.prices[0].offerings[0].description = "Ready today, no risk"; },
+    (c) => { c.adAssets.prices[0].priceQualifier = "UP_TO"; },
+    (c) => { c.adAssets.prices[0].type = "EVENTS"; },
+    (c) => { c.adAssets.prices[0].name = "Price - Core Products"; },
+    (c) => { c.adAssets.prices[0].offerings = c.adAssets.prices[0].offerings.slice(0, 2); },
+    (c) => { c.adAssets.prices[0].offerings[0].finalUrl = "https://example.com/coroplast"; },
+    (c) => { c.adAssets.prices[0].offerings[0].priceCad = 0; },
+    // OBSERVATION audience guards. bid_only false is the delivery-outage case.
+    (c) => { c.observationAudiences.targetRestriction.bidOnly = false; },
+    (c) => { c.observationAudiences.mode = "TARGETING"; },
+    (c) => { c.observationAudiences.adGroups.pop(); },
+    (c) => { c.observationAudiences.criteriaPerAdGroup = 6; },
+    (c) => { c.observationAudiences.userInterests[0].criterionId = "99999"; },
+    (c) => { c.observationAudiences.userLists[0].id = "1"; },
+    (c) => { c.observationAudiences.adGroups[0].id = "not-numeric"; },
+    (c) => { delete c.observationAudiences; },
   ]) {
     const config = clone();
     mutate(config);
@@ -774,6 +828,10 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.channel, "GA4");
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.googleAdsDelivery, false);
   assert.equal(paidSearchConfig.conversionMeasurement.diagnosticEvents.phoneClicksAreQualifiedCalls, false);
+  // 2026-08-16: primaryForGoal is FALSE. It was flipped to true on 2026-08-16 to match what
+  // Google's redesigned creation UI forced, which recorded the accident as the intent and made
+  // the customer-level Submit-lead-form goal biddable on all three campaigns. A quote submission
+  // is a lead, not revenue; only purchase_online and quote_won may influence bidding.
   assert.deepEqual(paidSearchConfig.conversionMeasurement.qualifiedQuoteLeadAction, {
     eventName: "quote_submit_qualified",
     envVar: "GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID",
@@ -781,13 +839,35 @@ test("canonical routing and campaign caps are complete", () => {
     status: "VERIFIED_LIVE",
     requiredType: "UPLOAD_CLICKS",
     requiredCategory: "SUBMIT_LEAD_FORM",
-    primaryForGoal: true,
+    primaryForGoal: false,
     promotionGate: "secondary until 10-20 verified paid-click quote submissions are observed and lead quality is acceptable",
     includedInConversions: false,
     currency: "CAD",
     dynamicValue: false,
     valueMode: "NONE",
   });
+  // The two browser-side PHONE_CALL_LEAD actions were created live by apply-conversion-actions.mjs
+  // on 2026-08-16 and read back via GAQL; the contract, the validator, and the verifier all
+  // describe the same end state.
+  for (const [key, expected] of Object.entries({
+    websiteCallAction: { eventName: "qualified_call_website_60s", requiredType: "WEBSITE_CALL", minimumDurationSeconds: 60, envVar: "GOOGLE_ADS_WEBSITE_CALL_CONVERSION_ACTION_ID", labelEnvVar: "NEXT_PUBLIC_GOOGLE_ADS_WEBSITE_CALL_LABEL", actionId: "7723091936" },
+    clickToCallIntentAction: { eventName: "click_to_call_intent", requiredType: "WEBPAGE", minimumDurationSeconds: null, envVar: null, labelEnvVar: "NEXT_PUBLIC_GOOGLE_ADS_CLICK_TO_CALL_LABEL", actionId: "7723091939" },
+  })) {
+    const action = paidSearchConfig.conversionMeasurement[key];
+    assert.equal(action.eventName, expected.eventName);
+    assert.equal(action.requiredType, expected.requiredType);
+    assert.equal(action.requiredCategory, "PHONE_CALL_LEAD");
+    assert.equal(action.countingType, "ONE_PER_CLICK");
+    assert.equal(action.clickThroughLookbackDays, 30);
+    assert.equal(action.minimumDurationSeconds, expected.minimumDurationSeconds);
+    assert.equal(action.envVar, expected.envVar);
+    assert.equal(action.labelEnvVar, expected.labelEnvVar);
+    assert.equal(action.actionId, expected.actionId);
+    assert.equal(action.status, "VERIFIED_LIVE");
+    // Permanent, not a lifecycle stage: a browser-side or imported action may never bid.
+    assert.equal(action.primaryForGoal, false);
+    assert.equal(action.includedInConversions, false);
+  }
   assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.actionId, "7694360843");
   assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.minimumDurationSeconds, 60);
   assert.equal(paidSearchConfig.conversionMeasurement.qualifiedCallAction.includedInConversions, false);
@@ -837,7 +917,7 @@ test("exports deterministic Google Ads Editor CSV artifacts", () => {
   const second = buildArtifacts(clone());
   assert.deepEqual(first, second);
   assert.deepEqual(Object.keys(first).sort(), [
-    "ad-groups.csv", "campaign-negatives.csv", "campaigns.csv", "keywords.csv", "launch-candidate-manifest.json", "locations.csv", "responsive-search-ads.csv", "validation-summary.json",
+    "ad-groups.csv", "campaign-negatives.csv", "campaigns.csv", "keywords.csv", "launch-candidate-manifest.json", "locations.csv", "observation-audiences.csv", "price-assets.csv", "responsive-search-ads.csv", "validation-summary.json",
   ]);
   assert.match(first["campaigns.csv"], /GOOG_Search_TC_CoreProducts_2026/);
   assert.match(first["keywords.csv"], /\[coroplast signs saskatoon\]/);
@@ -1476,4 +1556,98 @@ test("superseded ads left PAUSED are never re-replaced or re-retired", () => {
   assert.equal(planReplacementCreates(settled).todo.length, 0);
   assert.equal(planDestinationSwap(settled).ready.length, 0);
   assert.equal(planDestinationSwap(settled).waiting.length, 0);
+});
+
+// ── 2026-08-16 pass: negatives, dead keyword, goal graph, audiences, price asset ──────────────
+test("2026-08-16 negative and dead-keyword pass is complete in the contract", () => {
+  const negatives = paidSearchConfig.accountNegatives;
+  for (const term of ["avery", "sticker you"]) {
+    for (const matchType of ["EXACT", "PHRASE"]) {
+      assert.ok(
+        negatives.some((negative) => negative.text === term && negative.matchType === matchType),
+        `account negative "${term}" [${matchType}] is missing`,
+      );
+    }
+  }
+  const stickers = paidSearchConfig.campaigns
+    .find((campaign) => campaign.kind === "CORE").adGroups
+    .find((group) => group.key === "stickers-labels");
+  for (const term of ["decal", "decals"]) {
+    assert.ok(stickers.crossNegatives.includes(term), `stickers cross-negative "${term}" is missing`);
+  }
+  // "who makes stickers" could never serve: the account negative "who makes" blocks every query
+  // it could match. A keyword that cannot win an auction is not coverage.
+  assert.ok(!stickers.keywords.some((keyword) => keyword.text === "who makes stickers"));
+  assert.ok(negatives.some((negative) => negative.text === "who makes"));
+});
+
+test("live verification rejects conversion-graph and audience drift", () => {
+  const base = makePausedLiveState();
+  assert.deepEqual(evaluatePausedLiveState(base), { failures: [], launchBlockers: [] });
+  {
+    // A still-present but non-counting About Us is tolerated (UI removal pending).
+    const tolerated = makePausedLiveState();
+    tolerated.conversionActionInventory.push({ id: "7688596965", name: "About Us", status: "ENABLED", primaryForGoal: false, included: false });
+    assert.deepEqual(evaluatePausedLiveState(tolerated), { failures: [], launchBlockers: [] });
+  }
+  const drifts = [
+    // The exact 2026-08-16 regression: a UI-created lead action left primary/included.
+    (live) => { live.conversionActionInventory.find((a) => a.id === "7723019984").primaryForGoal = true; },
+    (live) => { live.conversionActionInventory.find((a) => a.id === "7723019984").included = true; },
+    // About Us cannot be removed via API (codeless); it must at least be non-counting.
+    (live) => { live.conversionActionInventory.push({ id: "7688596965", name: "About Us", status: "ENABLED", primaryForGoal: true, included: false }); },
+    (live) => { live.conversionActionInventory.push({ id: "7688596965", name: "About Us", status: "ENABLED", primaryForGoal: false, included: true }); },
+    // The GA4 import must be visible AND never primary.
+    (live) => { live.conversionActionInventory = live.conversionActionInventory.filter((a) => a.id !== "7721413630"); },
+    (live) => { live.conversionActionInventory.find((a) => a.id === "7721413630").status = "HIDDEN"; },
+    (live) => { live.conversionActionInventory.find((a) => a.id === "7721413630").primaryForGoal = true; },
+    // bid_only false turns an OBSERVATION audience into TARGETING and cuts delivery.
+    (live) => { live.audienceCriteria[0].bidOnly = false; },
+    (live) => { live.audienceCriteria = live.audienceCriteria.slice(0, -1); },
+    (live) => { live.audienceCriteria = []; },
+    (live) => { live.audienceCriteria.push({ adGroupId: "999999999", bidOnly: true }); },
+    // PRICE asset counts.
+    (live) => { live.manualAssets = 13; },
+    (live) => { live.campaignAssetLinks = 53; },
+    // Keyword pins after the dead-keyword removal and the two negative additions.
+    (live) => { live.positiveKeywords = 192; },
+    (live) => { live.negativeCriteria = 415; },
+  ];
+  for (const drift of drifts) {
+    const live = structuredClone(base);
+    drift(live);
+    assert.ok(evaluatePausedLiveState(live).failures.length > 0, `drift was not detected: ${drift}`);
+  }
+});
+
+test("price asset and observation audiences are declared within Google limits", () => {
+  const [price] = paidSearchConfig.adAssets.prices;
+  assert.equal(price.name, "TC PPC Price - Core Products");
+  assert.equal(price.priceQualifier, "FROM");
+  assert.equal(price.languageCode, "en");
+  assert.ok(["SERVICES", "PRODUCT_TIERS"].includes(price.type));
+  assert.ok(price.offerings.length >= 3 && price.offerings.length <= 8);
+  for (const offer of price.offerings) {
+    assert.ok(offer.header.length <= 25, `header too long: ${offer.header}`);
+    assert.ok(offer.description.length <= 25, `description too long: ${offer.description}`);
+    assert.ok(offer.finalUrl.startsWith("https://truecolorprinting.ca/"));
+    // Same STRICT claim gate as RSA copy: every number must resolve to a sourced fact.
+    for (const claim of [offer.header, offer.description]) {
+      assert.equal(claimFailureReason(claim, { requireConditionQualifier: true }), null, `unsourced claim: ${claim}`);
+    }
+  }
+  const audiences = paidSearchConfig.observationAudiences;
+  assert.equal(audiences.mode, "OBSERVATION");
+  assert.equal(audiences.targetRestriction.bidOnly, true);
+  assert.equal(audiences.targetRestriction.targetingDimension, "AUDIENCE");
+  assert.equal(audiences.adGroups.length, 14);
+  assert.equal(audiences.criteriaPerAdGroup, audiences.userInterests.length + audiences.userLists.length);
+  assert.equal(audiences.criteriaPerAdGroup, 5);
+  // 80886 Signage is DISPLAY/VIDEO/DEMAND_GEN only — must never come back on a Search campaign.
+  assert.ok(!audiences.userInterests.some((interest) => interest.criterionId === "80886"));
+  const coreNames = paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE").adGroups.map((group) => group.name);
+  assert.deepEqual(audiences.adGroups.map((group) => group.name).sort(), [...coreNames].sort());
+  const audienceCsv = buildArtifacts(clone())["observation-audiences.csv"];
+  assert.match(audienceCsv, /Business Printing & Document Services/);
+  assert.doesNotMatch(audienceCsv, /,false\n/);
 });
