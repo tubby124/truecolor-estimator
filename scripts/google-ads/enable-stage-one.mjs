@@ -1,4 +1,4 @@
-// One-time Stage 1 launch: enable Core + Competitor only. Brand stays held.
+// Controlled restart: enable Core only. Competitor and Brand stay held.
 //
 // Dry-run by default. Pass --execute to mutate. Every precondition is checked
 // against a live readback before any write, and the end state is re-read and
@@ -18,10 +18,10 @@ const CORE_ID = "24048123058";
 const COMPETITOR_ID = "24048123061";
 const BRAND_ID = "24048123064";
 
-// Campaigns this script is permitted to enable. Brand is deliberately absent.
-const ENABLE_IDS = Object.freeze([CORE_ID, COMPETITOR_ID]);
+// Campaign this script is permitted to enable. Competitor and Brand are deliberately held.
+const ENABLE_IDS = Object.freeze([CORE_ID]);
 // Campaigns that must remain PAUSED both before and after.
-const MUST_STAY_PAUSED_IDS = Object.freeze([BRAND_ID]);
+const MUST_STAY_PAUSED_IDS = Object.freeze([COMPETITOR_ID, BRAND_ID]);
 
 const EXPECTED_ACCOUNT = Object.freeze({
   id: HARD_STOP_CUSTOMER_ID,
@@ -145,7 +145,7 @@ if (unexpectedState.length > 0) {
 }
 
 if (toEnable.length === 0) {
-  console.log("Nothing to do: Core and Competitor are already ENABLED.");
+  console.log("Nothing to do: Core is already ENABLED.");
   process.exit(0);
 }
 
@@ -185,4 +185,4 @@ if (readbackProblems.length > 0) {
   process.exit(1);
 }
 
-console.log("\nStage 1 launch verified: Core + Competitor ENABLED, Brand held PAUSED.");
+console.log("\nControlled restart verified: Core ENABLED; Competitor + Brand held PAUSED.");

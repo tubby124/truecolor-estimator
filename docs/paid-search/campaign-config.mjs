@@ -693,8 +693,11 @@ export const paidSearchConfig = {
       // reconcile had silently lifted that bound to 35, which this decision reverts. The
       // Canada-wide LOCATION criterion added to Core at 11:42 the same morning (never
       // contract-backed) was removed; live geo re-verified as 3x Saskatoon 35 km proximity only.
-      dailyBudgetCad: 25,
-      maximumPilotCad: 1150,
+      // 2026-08-17: owner approved CA$25 -> CA$30 after live readback still showed
+      // 24.7% lost impression share to budget. Competitor and Brand remain paused;
+      // the CA$600 account-level hard stop remains the binding total-spend control.
+      dailyBudgetCad: 30,
+      maximumPilotCad: 1380,
       campaignNegatives: competitorTargets.flatMap(([, , terms]) => terms),
       gates: [],
       adGroups: [

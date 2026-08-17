@@ -9,14 +9,14 @@ import { COMPETITOR_RSA_REVIEW } from "./request-competitor-rsa-review.mjs";
 // thing it checks is the failure mode this repo has now paid for five times — the pins move in
 // the SAME pass as the value, always.
 export const PAUSED_EXPECTED_CAMPAIGNS = Object.freeze({
-  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 25, ceiling: 5, status: "PAUSED" }),
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 30, ceiling: 5, status: "PAUSED" }),
   GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 2.5, status: "PAUSED" }),
   GOOG_Search_TC_BrandDefense_2026: Object.freeze({ id: "24048123064", budget: 3, ceiling: 1.5, status: "PAUSED" }),
 });
 // Stage 1 launch = Core + Competitor enabled, Brand held paused (2026-08-03 PM owner decision).
 // Brand contributes the single paused ad group and RSA in the launched counts below.
 export const LAUNCHED_EXPECTED_CAMPAIGNS = Object.freeze({
-  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 25, ceiling: 5, status: "ENABLED" }),
+  GOOG_Search_TC_CoreProducts_2026: Object.freeze({ id: "24048123058", budget: 30, ceiling: 5, status: "ENABLED" }),
   // 2026-08-09 RETIRED: zero impressions across the pilot resolved the 2026-08-12 gate to its
   // documented pause branch. Budget/ceiling stay staged so drift in them is still detected.
   GOOG_Search_TC_CompetitorConquest_2026: Object.freeze({ id: "24048123061", budget: 4, ceiling: 2.5, status: "PAUSED" }),

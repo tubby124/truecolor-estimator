@@ -12,7 +12,7 @@ import {
 
 // A PAUSED campaign keeps its staged daily budget but contributes CA$0 to approved pilot spend.
 const EXPECTED = {
-  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 25, maximum: 1150, status: "ENABLED" },
+  CORE: { name: "GOOG_Search_TC_CoreProducts_2026", daily: 30, maximum: 1380, status: "ENABLED" },
   // 2026-08-09 RETIRED: zero impressions across the whole pilot, and Core's search terms stayed
   // clean of competitor queries after the Aug 6 15:58 routing sync — both halves of the
   // 2026-08-12 gate's "conclude thin volume and pause" branch.
@@ -30,13 +30,12 @@ const PILOT_INCLUSIVE_DAYS = 46;
 // CA$25 (Core 21 + Competitor 4, exactly at the bound) to CA$21 (Core alone) — CA$4 of fresh
 // headroom under the bound, available to Core on evidence without touching the safety ceiling.
 // 2026-08-14: 28 -> 32 (Core 21 -> 25 on pacing evidence; Competitor 4 and Brand 3 stay paused
-// at their staged budgets). The ENABLED subset rises to exactly the CA$25 bound — spending the
-// freed headroom, not raising the safety ceiling. The same-day 42/35 values from the CA$35
-// reconcile were reverted when the owner re-decided at 25.
-const LAUNCHABLE_DAILY_BUDGET_CAD = 32;
+// at their staged budgets). 2026-08-17: 32 -> 37 (Core 25 -> 30) after the owner approved a
+// budget-limited delivery increase; the CA$600 account hard stop remains unchanged.
+const LAUNCHABLE_DAILY_BUDGET_CAD = 37;
 // Enabled-only daily burn ceiling. At CA$18/day an unmonitored account needs 33 days to reach
 // the CA$600 ceiling, which is far longer than any plausible monitor outage goes unnoticed.
-const MAX_UNMONITORED_DAILY_BURN_CAD = 25;
+const MAX_UNMONITORED_DAILY_BURN_CAD = 30;
 const launchableDailyBudgetCad = (campaigns) => campaigns
   .filter((campaign) => campaign.status === "ENABLED")
   .reduce((sum, campaign) => sum + (campaign.dailyBudgetCad ?? 0), 0);
