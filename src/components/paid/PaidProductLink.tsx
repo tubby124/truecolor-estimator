@@ -80,6 +80,54 @@ export function PaidProductLink({
   );
 }
 
+interface PriceGuideProductLinkProps {
+  href: string;
+  productSlug: string;
+  productName: string;
+  placement: string;
+  className: string;
+  children: ReactNode;
+}
+
+/**
+ * The price guide is a paid-search landing page, but it is server-rendered.
+ * Keep the SEO article links intact and use this client link only for the
+ * intentional handoff into an orderable product configurator.
+ */
+export function PriceGuideProductLink({
+  href,
+  productSlug,
+  productName,
+  placement,
+  className,
+  children,
+}: PriceGuideProductLinkProps) {
+  return (
+    <Link
+      href={href}
+      className={className}
+      onClick={() => {
+        trackSelectItem({
+          item_id: productSlug,
+          item_name: productName,
+          item_list_name: "Printing prices guide",
+          placement: "product_catalogue",
+          destination: href,
+        });
+        if (typeof window !== "undefined" && typeof window.gtag === "function") {
+          window.gtag("event", "price_guide_product_selected", {
+            product_slug: productSlug,
+            placement,
+            destination: href,
+          });
+        }
+      }}
+    >
+      {children}
+    </Link>
+  );
+}
+
 interface PaidProductListTrackerProps {
   products: Array<{ slug: string; name: string }>;
   itemListName?: string;

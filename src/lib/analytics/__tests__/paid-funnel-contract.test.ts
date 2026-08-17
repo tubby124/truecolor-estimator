@@ -12,6 +12,16 @@ describe("paid funnel event ownership", () => {
     expect(source("src/components/paid/PaidProductLink.tsx")).toContain('window.gtag("event", "select_product"');
   });
 
+  it("tracks paid price-guide handoffs without replacing SEO article links", () => {
+    const guide = source("src/app/printing-prices-saskatoon/page.tsx");
+    const links = source("src/components/paid/PaidProductLink.tsx");
+    expect(links).toContain('window.gtag("event", "price_guide_product_selected"');
+    expect(guide).toContain('action="price_guide_product_picker"');
+    expect(guide).toContain('placement="batch_price_row"');
+    expect(guide).toContain('href={`/products/${row.productSlug}`}');
+    expect(guide).toContain('href={row.seoSlug}');
+  });
+
   it("durably owns quote_submit on the successful DB insert path, not the browser", () => {
     const migration = source("supabase/migrations/20260720100000_quote_conversion_measurement.sql");
     expect(migration).toContain("AFTER INSERT ON public.quote_requests");

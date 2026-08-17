@@ -3,14 +3,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { PaidCtaLink, PriceGuideProductLink } from "@/components/paid/PaidProductLink";
 
 const PRICED_WORK = [
-  { src: "/images/gallery/gallery-coroplast-aw-bogo-promo.webp", alt: "A&W promo sign on coroplast printed in Saskatoon", label: "Coroplast promo sign", price: "from $8/sqft", href: "/coroplast-signs-saskatoon" },
-  { src: "/images/gallery/gallery-banner-bbq-junction.webp", alt: "BBQ Junction wide vinyl banner printed in Saskatoon", label: "Vinyl banner", price: "from $66", href: "/banner-printing-saskatoon" },
-  { src: "/images/gallery/gallery-business-cards-exp-premium-black.webp", alt: "Premium black eXp Realty business cards printed in Saskatoon", label: "250 business cards", price: "from $45", href: "/business-cards-saskatoon" },
-  { src: "/images/gallery/gallery-flyer-madina-spice.webp", alt: "Madina Spice grocery flyers printed in Saskatoon", label: "100 flyers", price: "from $45", href: "/flyer-printing-saskatoon" },
-  { src: "/images/gallery/gallery-retractable-express-photography.webp", alt: "Express Photography retractable banner printed in Saskatoon", label: "Retractable banner", price: "from $219", href: "/retractable-banners-saskatoon" },
-  { src: "/images/gallery/gallery-acp-coop-humboldt-platinum.webp", alt: "Co-op Humboldt ACP sponsor sign printed in Saskatoon", label: "ACP aluminum sign", price: "from $13/sqft", href: "/aluminum-signs-saskatoon" },
+  { src: "/images/gallery/gallery-coroplast-aw-bogo-promo.webp", alt: "A&W restaurant promo sign on coroplast printed in Saskatoon", label: "Coroplast promo sign", price: "from $8/sqft", productSlug: "coroplast-signs" },
+  { src: "/images/gallery/gallery-banner-bbq-junction.webp", alt: "BBQ Junction wide vinyl banner printed in Saskatoon", label: "Vinyl banner", price: "from $66", productSlug: "vinyl-banners" },
+  { src: "/images/gallery/gallery-business-cards-exp-premium-black.webp", alt: "Premium black eXp Realty business cards printed in Saskatoon", label: "250 business cards", price: "from $45", productSlug: "business-cards" },
+  { src: "/images/gallery/gallery-flyer-madina-spice.webp", alt: "Madina Spice grocery flyers printed in Saskatoon", label: "100 flyers", price: "from $45", productSlug: "flyers" },
+  { src: "/images/gallery/gallery-retractable-express-photography.webp", alt: "Express Photography retractable banner printed in Saskatoon", label: "Retractable banner", price: "from $219", productSlug: "retractable-banners" },
+  { src: "/images/gallery/gallery-acp-coop-humboldt-platinum.webp", alt: "Co-op Humboldt ACP sponsor sign printed in Saskatoon", label: "ACP aluminum sign", price: "from $13/sqft", productSlug: "acp-signs" },
 ] as const;
 
 export const metadata: Metadata = {
@@ -29,25 +30,25 @@ export const metadata: Metadata = {
 };
 
 const WIDE_FORMAT_ROWS = [
-  { product: "Coroplast Signs (4mm)", rate: "$8.00/sqft", example: '18×24" = $24', slug: "/coroplast-signs-saskatoon" },
-  { product: "Vinyl Banners (13oz)", rate: "$8.25/sqft", example: "2×4 ft = $66", slug: "/banner-printing-saskatoon" },
-  { product: "ACP Aluminum Signs (3mm)", rate: "$13.00/sqft", example: '18×24" = $39', slug: "/aluminum-signs-saskatoon" },
-  { product: "Foamboard Displays", rate: "$10.00/sqft", example: '18×24" = $45', slug: "/foamboard-printing-saskatoon" },
-  { product: "Window Decals", rate: "$11.00/sqft", example: "Small decals top up to the $25 minimum", slug: "/window-decals-saskatoon" },
-  { product: "Window Perf (see-through)", rate: "$8.00/sqft", example: "Small jobs top up to the $25 minimum", slug: "/window-perf-saskatoon" },
-  { product: "Vehicle Magnets (30mil)", rate: "$24.00/sqft", example: "Small magnets top up to the $25 minimum", slug: "/vehicle-magnets-saskatoon" },
-  { product: "Vinyl Lettering (cut)", rate: "$8.50/sqft", example: "Small sets top up to the $25 minimum", slug: "/vinyl-lettering-saskatoon" },
-  { product: "Wall Graphics (removable)", rate: "$11.00/sqft", example: "No wall damage on removal", slug: "/wall-graphics-saskatoon" },
+  { product: "Coroplast Signs (4mm)", rate: "$8.00/sqft", example: '18×24" = $24', seoSlug: "/coroplast-signs-saskatoon", productSlug: "coroplast-signs" },
+  { product: "Vinyl Banners (13oz)", rate: "$8.25/sqft", example: "2×4 ft = $66", seoSlug: "/banner-printing-saskatoon", productSlug: "vinyl-banners" },
+  { product: "ACP Aluminum Signs (3mm)", rate: "$13.00/sqft", example: '18×24" = $39', seoSlug: "/aluminum-signs-saskatoon", productSlug: "acp-signs" },
+  { product: "Foamboard Displays", rate: "$10.00/sqft", example: '18×24" = $45', seoSlug: "/foamboard-printing-saskatoon", productSlug: "foamboard-displays" },
+  { product: "Window Decals", rate: "$11.00/sqft", example: "Small decals top up to the $25 minimum", seoSlug: "/window-decals-saskatoon", productSlug: "window-decals" },
+  { product: "Window Perf (see-through)", rate: "$8.00/sqft", example: "Small jobs top up to the $25 minimum", seoSlug: "/window-perf-saskatoon", productSlug: "window-perf" },
+  { product: "Vehicle Magnets (30mil)", rate: "$24.00/sqft", example: "Small magnets top up to the $25 minimum", seoSlug: "/vehicle-magnets-saskatoon", productSlug: "vehicle-magnets" },
+  { product: "Vinyl Lettering (cut)", rate: "$8.50/sqft", example: "Small sets top up to the $25 minimum", seoSlug: "/vinyl-lettering-saskatoon", productSlug: "vinyl-lettering" },
+  { product: "Wall Graphics (removable)", rate: "$11.00/sqft", example: "No wall damage on removal", seoSlug: "/wall-graphics-saskatoon", productSlug: "wall-graphics" },
 ];
 
 const LOT_PRICE_ROWS = [
-  { product: "Business Cards", price: "$45", detail: '250 double-sided, 14pt gloss (single-sided $40). 500 = $65, 1000 = $110', slug: "/business-cards-saskatoon" },
-  { product: "Flyers", price: "$45", detail: "100 full-letter double-sided on 80lb gloss", slug: "/flyer-printing-saskatoon" },
-  { product: "Stickers", price: "$25", detail: '25 custom-cut 2×2" stickers, any shape', slug: "/sticker-printing-saskatoon" },
-  { product: "Postcards", price: "$35", detail: '50 double-sided 3×4" on 14pt gloss', slug: "/postcard-printing-saskatoon" },
-  { product: "Brochures", price: "$70", detail: "100 tri-fold on 100lb gloss, scored and folded", slug: "/brochure-printing-saskatoon" },
-  { product: "Photo Posters", price: "$15", detail: '12×18" on 220gsm matte photo paper', slug: "/photo-poster-printing-saskatoon" },
-  { product: "Retractable Banners", price: "$219", detail: "Economy stand with print, hardware included", slug: "/retractable-banners-saskatoon" },
+  { product: "Business Cards", price: "$45", detail: '250 double-sided, 14pt gloss (single-sided $40). 500 = $65, 1000 = $110', seoSlug: "/business-cards-saskatoon", productSlug: "business-cards" },
+  { product: "Flyers", price: "$45", detail: "100 full-letter double-sided on 80lb gloss", seoSlug: "/flyer-printing-saskatoon", productSlug: "flyers" },
+  { product: "Stickers", price: "$25", detail: '25 custom-cut 2×2" stickers, any shape', seoSlug: "/sticker-printing-saskatoon", productSlug: "stickers" },
+  { product: "Postcards", price: "$35", detail: '50 double-sided 3×4" on 14pt gloss', seoSlug: "/postcard-printing-saskatoon", productSlug: "postcards" },
+  { product: "Brochures", price: "$70", detail: "100 tri-fold on 100lb gloss, scored and folded", seoSlug: "/brochure-printing-saskatoon", productSlug: "brochures" },
+  { product: "Photo Posters", price: "$15", detail: '12×18" on 220gsm matte photo paper', seoSlug: "/photo-poster-printing-saskatoon", productSlug: "photo-posters" },
+  { product: "Retractable Banners", price: "$219", detail: "Economy stand with print, hardware included", seoSlug: "/retractable-banners-saskatoon", productSlug: "retractable-banners" },
 ];
 
 const FAQS = [
@@ -145,12 +146,14 @@ export default function PrintingPricesSaskatoonPage() {
               Konica Minolta digital press at 216 33rd St W, Saskatoon.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link
+              <PaidCtaLink
                 href="/products"
+                action="price_guide_product_picker"
+                placement="price_guide_hero"
                 className="inline-block bg-[#16C2F3] hover:bg-[#0fb0dd] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors"
               >
-                Get My Exact Price →
-              </Link>
+                Choose a Product & See My Exact Price →
+              </PaidCtaLink>
               <a
                 href="tel:+13069548688"
                 className="inline-block border border-white/30 hover:border-white/60 hover:bg-white/10 text-white font-semibold px-7 py-3.5 rounded-lg transition-colors"
@@ -179,18 +182,30 @@ export default function PrintingPricesSaskatoonPage() {
                     <th className="px-5 py-3 font-semibold">Product</th>
                     <th className="px-5 py-3 font-semibold">Rate</th>
                     <th className="px-5 py-3 font-semibold">Example</th>
+                    <th className="px-5 py-3"><span className="sr-only">Order</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
                   {WIDE_FORMAT_ROWS.map((row) => (
                     <tr key={row.product}>
                       <td className="px-5 py-3">
-                        <Link href={row.slug} className="text-[#16C2F3] underline font-medium">
+                        <Link href={row.seoSlug} className="text-[#16C2F3] underline font-medium">
                           {row.product}
                         </Link>
                       </td>
                       <td className="px-5 py-3 font-mono">{row.rate}</td>
                       <td className="px-5 py-3">{row.example}</td>
+                      <td className="px-5 py-3 text-right">
+                        <PriceGuideProductLink
+                          href={`/products/${row.productSlug}`}
+                          productSlug={row.productSlug}
+                          productName={row.product}
+                          placement="wide_format_price_row"
+                          className="inline-flex whitespace-nowrap rounded-lg bg-[#1c1712] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-black"
+                        >
+                          Price this product
+                        </PriceGuideProductLink>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -214,18 +229,30 @@ export default function PrintingPricesSaskatoonPage() {
                     <th className="px-5 py-3 font-semibold">Product</th>
                     <th className="px-5 py-3 font-semibold">From</th>
                     <th className="px-5 py-3 font-semibold">What you get</th>
+                    <th className="px-5 py-3"><span className="sr-only">Order</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
                   {LOT_PRICE_ROWS.map((row) => (
                     <tr key={row.product}>
                       <td className="px-5 py-3">
-                        <Link href={row.slug} className="text-[#16C2F3] underline font-medium">
+                        <Link href={row.seoSlug} className="text-[#16C2F3] underline font-medium">
                           {row.product}
                         </Link>
                       </td>
                       <td className="px-5 py-3 font-mono">{row.price}</td>
                       <td className="px-5 py-3">{row.detail}</td>
+                      <td className="px-5 py-3 text-right">
+                        <PriceGuideProductLink
+                          href={`/products/${row.productSlug}`}
+                          productSlug={row.productSlug}
+                          productName={row.product}
+                          placement="batch_price_row"
+                          className="inline-flex whitespace-nowrap rounded-lg bg-[#1c1712] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-black"
+                        >
+                          Price this product
+                        </PriceGuideProductLink>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -294,7 +321,14 @@ export default function PrintingPricesSaskatoonPage() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {PRICED_WORK.map((item) => (
-                <Link key={item.src} href={item.href} className="group block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:border-[#16C2F3]">
+                <PriceGuideProductLink
+                  key={item.src}
+                  href={`/products/${item.productSlug}`}
+                  productSlug={item.productSlug}
+                  productName={item.label}
+                  placement="priced_work_gallery"
+                  className="group block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:border-[#16C2F3]"
+                >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <Image src={item.src} alt={item.alt} fill loading="lazy" className="object-cover transition group-hover:scale-[1.02]" sizes="(max-width: 768px) 50vw, 33vw" />
                   </div>
@@ -302,7 +336,8 @@ export default function PrintingPricesSaskatoonPage() {
                     <span className="font-semibold text-[#1c1712]">{item.label}</span>
                     <span className="font-mono text-[#16C2F3]">{item.price}</span>
                   </div>
-                </Link>
+                  <span className="block px-4 pb-3 text-xs font-semibold text-[#00718f]">Price this product →</span>
+                </PriceGuideProductLink>
               ))}
             </div>
           </section>
