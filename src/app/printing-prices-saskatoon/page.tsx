@@ -38,7 +38,8 @@ const WIDE_FORMAT_ROWS = [
   { product: "Window Perf (see-through)", rate: "$8.00/sqft", example: "Small jobs top up to the $25 minimum", seoSlug: "/window-perf-saskatoon", productSlug: "window-perf" },
   { product: "Vehicle Magnets (30mil)", rate: "$24.00/sqft", example: "Small magnets top up to the $25 minimum", seoSlug: "/vehicle-magnets-saskatoon", productSlug: "vehicle-magnets" },
   { product: "Vinyl Lettering (cut)", rate: "$8.50/sqft", example: "Small sets top up to the $25 minimum", seoSlug: "/vinyl-lettering-saskatoon", productSlug: "vinyl-lettering" },
-  { product: "Wall Graphics (removable)", rate: "$11.00/sqft", example: "No wall damage on removal", seoSlug: "/wall-graphics-saskatoon", productSlug: "wall-graphics" },
+  // Wall graphics are custom-scoped and have no live configurator. Route this one honestly to a quote, never a 404 product slug.
+  { product: "Wall Graphics (removable)", rate: "$11.00/sqft", example: "No wall damage on removal", seoSlug: "/wall-graphics-saskatoon", productSlug: "wall-graphics", orderHref: "/quote", ctaLabel: "Get a custom quote" },
 ];
 
 const LOT_PRICE_ROWS = [
@@ -182,7 +183,7 @@ export default function PrintingPricesSaskatoonPage() {
                     <th className="px-5 py-3 font-semibold">Product</th>
                     <th className="px-5 py-3 font-semibold">Rate</th>
                     <th className="px-5 py-3 font-semibold">Example</th>
-                    <th className="px-5 py-3"><span className="sr-only">Order</span></th>
+                    <th className="hidden px-5 py-3 sm:table-cell"><span className="sr-only">Order</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -192,18 +193,27 @@ export default function PrintingPricesSaskatoonPage() {
                         <Link href={row.seoSlug} className="text-[#16C2F3] underline font-medium">
                           {row.product}
                         </Link>
+                        <PriceGuideProductLink
+                          href={row.orderHref ?? `/products/${row.productSlug}`}
+                          productSlug={row.productSlug}
+                          productName={row.product}
+                          placement="wide_format_price_row"
+                          className="mt-2 flex w-fit rounded-lg bg-[#1c1712] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-black sm:hidden"
+                        >
+                          {row.ctaLabel ?? "Price this product"}
+                        </PriceGuideProductLink>
                       </td>
                       <td className="px-5 py-3 font-mono">{row.rate}</td>
                       <td className="px-5 py-3">{row.example}</td>
-                      <td className="px-5 py-3 text-right">
+                      <td className="hidden px-5 py-3 text-right sm:table-cell">
                         <PriceGuideProductLink
-                          href={`/products/${row.productSlug}`}
+                          href={row.orderHref ?? `/products/${row.productSlug}`}
                           productSlug={row.productSlug}
                           productName={row.product}
                           placement="wide_format_price_row"
                           className="inline-flex whitespace-nowrap rounded-lg bg-[#1c1712] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-black"
                         >
-                          Price this product
+                          {row.ctaLabel ?? "Price this product"}
                         </PriceGuideProductLink>
                       </td>
                     </tr>
@@ -229,7 +239,7 @@ export default function PrintingPricesSaskatoonPage() {
                     <th className="px-5 py-3 font-semibold">Product</th>
                     <th className="px-5 py-3 font-semibold">From</th>
                     <th className="px-5 py-3 font-semibold">What you get</th>
-                    <th className="px-5 py-3"><span className="sr-only">Order</span></th>
+                    <th className="hidden px-5 py-3 sm:table-cell"><span className="sr-only">Order</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -239,10 +249,19 @@ export default function PrintingPricesSaskatoonPage() {
                         <Link href={row.seoSlug} className="text-[#16C2F3] underline font-medium">
                           {row.product}
                         </Link>
+                        <PriceGuideProductLink
+                          href={`/products/${row.productSlug}`}
+                          productSlug={row.productSlug}
+                          productName={row.product}
+                          placement="batch_price_row"
+                          className="mt-2 flex w-fit rounded-lg bg-[#1c1712] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-black sm:hidden"
+                        >
+                          Price this product
+                        </PriceGuideProductLink>
                       </td>
                       <td className="px-5 py-3 font-mono">{row.price}</td>
                       <td className="px-5 py-3">{row.detail}</td>
-                      <td className="px-5 py-3 text-right">
+                      <td className="hidden px-5 py-3 text-right sm:table-cell">
                         <PriceGuideProductLink
                           href={`/products/${row.productSlug}`}
                           productSlug={row.productSlug}

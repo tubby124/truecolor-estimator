@@ -18,6 +18,9 @@ describe("paid funnel event ownership", () => {
     expect(links).toContain('window.gtag("event", "price_guide_product_selected"');
     expect(guide).toContain('action="price_guide_product_picker"');
     expect(guide).toContain('placement="batch_price_row"');
+    expect(guide).toContain('sm:hidden');
+    expect(guide).toContain('orderHref: "/quote"');
+    expect(guide).not.toContain('`/products/wall-graphics`');
     expect(guide).toContain('href={`/products/${row.productSlug}`}');
     expect(guide).toContain('href={row.seoSlug}');
   });
