@@ -439,7 +439,10 @@ export async function GET(req: NextRequest) {
              customers ( email, name, company )`)
     .eq("payment_method", "clover_card")
     .eq("status", "pending_payment")
-    .not("payment_reference", "is", null)
+    // 2026-08-19: no payment_reference filter. TC-2026-0322 proved the
+    // checkout session ref can fail to persist while money captured — NULL-ref
+    // orphans are exactly the rows this check exists to heal. Matching safety
+    // lives below: exact cents + timing + strong/unique disambiguation.
     .lt("created_at", cutoff10minClover)
     .order("created_at", { ascending: false })
     .limit(50);

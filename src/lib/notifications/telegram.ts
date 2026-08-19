@@ -90,7 +90,8 @@ function isBusinessSignalMessage(message: string, category: string | null): bool
     category === "payment:partial_received" ||
     category === "signup:account_created" ||
     category === "quote:request_created" ||
-    category === "customer:reply_needs_human"
+    category === "customer:reply_needs_human" ||
+    category === "payment:chase_needed"
   );
 }
 

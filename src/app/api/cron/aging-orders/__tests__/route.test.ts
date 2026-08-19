@@ -32,12 +32,14 @@ function query(result: QueryResult | Promise<never>) {
     eq: vi.fn(),
     lt: vi.fn(),
     not: vi.fn(),
+    or: vi.fn(),
     order: vi.fn(),
   };
   builder.select.mockReturnValue(builder);
   builder.eq.mockReturnValue(builder);
   builder.lt.mockReturnValue(builder);
   builder.not.mockReturnValue(builder);
+  builder.or.mockReturnValue(builder);
   builder.order.mockImplementation(() => Promise.resolve(result));
   return builder;
 }

@@ -123,6 +123,9 @@ async function fetchOrders() {
       proof_sent_at,
       file_storage_paths,
       payment_reference,
+      followup_count,
+      followup_paused_at,
+      followup_paused_reason,
       customers ( name, email, company, phone ),
       order_items (
         id,

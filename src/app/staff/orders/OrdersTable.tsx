@@ -54,6 +54,9 @@ export interface Order {
   proof_sent_at: string | null;
   file_storage_paths: string[] | null;
   payment_reference: string | null;
+  followup_count?: number | null;
+  followup_paused_at?: string | null;
+  followup_paused_reason?: string | null;
   card_decline_label?: string;
   latest_payment_attempt?: LatestPaymentAttempt | null;
   is_archived: boolean;
@@ -180,6 +183,7 @@ export function OrdersTable({ initialOrders }: Props) {
   // Resend payment link — keyed by order id
   const [resendingPaymentId, setResendingPaymentId] = useState<string | null>(null);
   const [resendSuccessIds, setResendSuccessIds] = useState<Set<string>>(new Set());
+  const [pausingFollowupId, setPausingFollowupId] = useState<string | null>(null);
 
   // Confirm eTransfer — keyed by order id
   const [confirmingEtransferId, setConfirmingEtransferId] = useState<string | null>(null);
@@ -447,6 +451,39 @@ export function OrdersTable({ initialOrders }: Props) {
     }
   }
 
+  // ── Pause/resume payment reminders ─────────────────────────────────────────
+
+  async function handleFollowupPause(orderId: string, orderNumber: string, paused: boolean) {
+    setPausingFollowupId(orderId);
+    try {
+      let reason: string | undefined;
+      if (paused) {
+        const entered = window.prompt(`Pause reminders for ${orderNumber} — reason? (e.g. "e-transfer sent")`);
+        if (entered === null) { setPausingFollowupId(null); return; }
+        reason = entered || "staff-paused";
+      }
+      const res = await fetch(`/api/staff/orders/${orderId}/followup-pause`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paused, ...(paused ? { reason } : {}) }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Pause failed");
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId
+            ? { ...o, followup_paused_at: paused ? new Date().toISOString() : null, followup_paused_reason: paused ? (reason ?? null) : null }
+            : o
+        )
+      );
+      showToast(`${orderNumber} — reminders ${paused ? "paused" : "resumed"}`, "success");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed — try again", "error");
+    } finally {
+      setPausingFollowupId(null);
+    }
+  }
+
   // ── Confirm eTransfer ─────────────────────────────────────────────────────────
 
   async function handleConfirmEtransfer(orderId: string, orderNumber: string) {
@@ -684,6 +721,8 @@ export function OrdersTable({ initialOrders }: Props) {
                 resendingPayment={resendingPaymentId === order.id}
                 resendSuccess={resendSuccessIds.has(order.id)}
                 onResendPayment={() => handleResendPayment(order.id, order.order_number)}
+                pausingFollowup={pausingFollowupId === order.id}
+                onFollowupPause={(paused) => handleFollowupPause(order.id, order.order_number, paused)}
                 sendingReceipt={sendingReceiptId === order.id}
                 receiptSent={receiptSentIds.has(order.id)}
                 onSendReceipt={() => handleSendReceipt(order.id, order.order_number, customer?.email ?? "")}

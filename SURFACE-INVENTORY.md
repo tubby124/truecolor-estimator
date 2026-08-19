@@ -101,8 +101,8 @@ One rotated/misconfigured secret = every payment for that channel silently dropp
 |---|---|---|
 | reconcile-payments | `src/app/api/cron/reconcile-payments/route.ts` | N |
 | daily-payment-digest | `src/app/api/cron/daily-payment-digest/route.ts` | N |
-| payment-followup (24h recovery) | `src/app/api/cron/payment-followup/route.ts` | N |
-| aging-orders | `src/app/api/cron/aging-orders/route.ts` | N |
+| payment-followup (2h/24h/5d unpaid-order ladder + stale money signal) | `src/app/api/cron/payment-followup/route.ts` | Y — sends T1/T2/T3 from `hello@outreach.true-color.ca`, Reply-To `info@true-color.ca`; Telegram `payment:chase_needed` when money stuck >72h |
+| aging-orders (live chase digest) | `src/app/api/cron/aging-orders/route.ts` | Y — excludes archived zombie rows; digest to `info@true-color.ca` with ladder/exhausted/paused sections |
 | stale-quotes | `src/app/api/cron/stale-quotes/route.ts` | N |
 | keepalive | `src/app/api/cron/keepalive/route.ts` | N |
 | gsc-sync / gsc-backfill | `src/app/api/cron/gsc-sync`, `gsc-backfill` | N (SEO, not payment) |

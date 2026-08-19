@@ -72,7 +72,14 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
     const { data: transitioned, error: updateErr } = await supabase
       .from("orders")
-      .update({ status: "payment_received", paid_at: new Date().toISOString() })
+      .update({
+        status: "payment_received",
+        paid_at: new Date().toISOString(),
+        // 2026-08-19: reminders die the moment staff records the e-Transfer,
+        // even if a later step in this handler partially fails.
+        followup_paused_at: new Date().toISOString(),
+        followup_paused_reason: "etransfer-confirmed",
+      })
       .eq("id", id)
       .eq("status", "pending_payment")
       .select("id")

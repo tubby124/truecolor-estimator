@@ -28,6 +28,8 @@ interface StaffOrderCardProps {
   resendingPayment: boolean;
   resendSuccess: boolean;
   onResendPayment: () => void;
+  pausingFollowup: boolean;
+  onFollowupPause: (paused: boolean) => void;
   sendingReceipt: boolean;
   receiptSent: boolean;
   onSendReceipt: () => void;
@@ -50,6 +52,8 @@ export function StaffOrderCard({
   resendingPayment,
   resendSuccess,
   onResendPayment,
+  pausingFollowup,
+  onFollowupPause,
   sendingReceipt,
   receiptSent,
   onSendReceipt,
@@ -821,6 +825,28 @@ export function StaffOrderCard({
               <p className="text-xs text-gray-400 mt-1">
                 Re-emails the customer a fresh payment link
               </p>
+              {order.followup_paused_at ? (
+                <button
+                  onClick={() => onFollowupPause(false)}
+                  disabled={pausingFollowup}
+                  className="mt-2 text-sm font-semibold px-4 py-2 rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 disabled:opacity-50 transition-colors"
+                >
+                  {pausingFollowup ? "Resuming…" : "▶ Resume reminders"}
+                </button>
+              ) : (
+                <button
+                  onClick={() => onFollowupPause(true)}
+                  disabled={pausingFollowup}
+                  className="mt-2 text-sm font-semibold px-4 py-2 rounded-lg border border-amber-400 text-amber-600 hover:bg-amber-50 disabled:opacity-50 transition-colors"
+                >
+                  {pausingFollowup ? "Pausing…" : "⏸ Pause reminders"}
+                </button>
+              )}
+              {order.followup_paused_at && (
+                <p className="text-xs text-amber-600 mt-1">
+                  Reminders paused{order.followup_paused_reason ? ` — ${order.followup_paused_reason}` : ""} · ladder at T{order.followup_count ?? 0}/3
+                </p>
+              )}
             </div>
           )}
 
