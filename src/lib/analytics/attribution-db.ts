@@ -18,6 +18,9 @@ export interface AttributionDbColumns {
   google_creative_id: string | null;
   google_campaign_id: string | null;
   google_network: string | null;
+  // Pathname only: query strings can contain user-entered data and do not add
+  // enough reporting value to justify retaining them in first-party records.
+  landing_path: string | null;
 }
 
 export type LatestPaidAttributionDbColumns = {
@@ -43,6 +46,7 @@ export function mapAttributionToDb(attribution: UtmAttribution): AttributionDbCo
     google_creative_id: attribution.creative ?? null,
     google_campaign_id: attribution.campaignid ?? null,
     google_network: attribution.network ?? null,
+    landing_path: attribution.landing_path ?? null,
   };
 }
 
@@ -68,6 +72,7 @@ export function mapLatestPaidAttributionToDb(
     latest_paid_google_creative_id: mapped.google_creative_id,
     latest_paid_google_campaign_id: mapped.google_campaign_id,
     latest_paid_google_network: mapped.google_network,
+    latest_paid_landing_path: mapped.landing_path,
     latest_paid_touch_captured_at: touch?.capturedAt ?? null,
   };
 }

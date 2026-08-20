@@ -4,9 +4,11 @@ import {
   INCOMPLETE_COVERAGE_VERDICT,
   classifyOrderOrigin,
   formatQuoteAttributionSection,
+  formatPaidLandingPathSection,
   hasClickId,
   hasGoogleUtmSource,
   needsIncompleteCoverageVerdict,
+  summarizePaidLandingPaths,
   summarizeQuoteAttribution,
 } from "../paid-funnel-metrics.mjs";
 
@@ -240,6 +242,30 @@ test("renders qualified-lead outbox status counts only after the action is confi
   });
   const rendered = formatQuoteAttributionSection(summary, { qualifiedLeadConfigured: true }).join("\n");
   assert.match(rendered, /3\. Qualified-lead conversions uploaded\s+1 sent \| 1 pending\/retry \| 1 not_attributable \| 0 dead/);
+});
+
+test("paid landing-path report uses first-party rows without mixing GA4 or GSC counts", () => {
+  const rows = summarizePaidLandingPaths({
+    quoteRequests: [
+      { gclid: "a", landing_path: "/yard-signs", latest_paid_landing_path: "/coroplast-signs" },
+      { latest_paid_gbraid: "b", landing_path: "/labels" },
+      { utm_source: "google", landing_path: "/banners" },
+      { utm_source: "organic", landing_path: "/ignore" },
+    ],
+    orders: [
+      { latest_paid_gclid: "c", latest_paid_landing_path: "/coroplast-signs" },
+      { gclid: "d" },
+    ],
+  });
+  assert.deepEqual(rows, [
+    { path: "/coroplast-signs", quotes: 1, orders: 1 },
+    { path: "(path unknown)", quotes: 0, orders: 1 },
+    { path: "/banners", quotes: 1, orders: 0 },
+    { path: "/labels", quotes: 1, orders: 0 },
+  ]);
+  const rendered = formatPaidLandingPathSection(rows).join("\n");
+  assert.match(rendered, /do not add the systems together/);
+  assert.equal(rendered.includes("gclid"), false);
 });
 
 test("zero attributed revenue alongside real commercial signal triggers the honest verdict", () => {

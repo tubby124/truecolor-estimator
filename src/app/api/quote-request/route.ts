@@ -26,7 +26,7 @@ import {
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
 import { classifyReferrer } from "@/lib/analytics/referrer";
 import {
-  ATTRIBUTION_KEYS,
+  ATTRIBUTION_CONTEXT_KEYS,
   collectLatestPaidHints,
   mergeLatestPaidAttribution,
   mergeUtmAttribution,
@@ -481,7 +481,7 @@ export async function POST(req: NextRequest) {
     // Prefer the cookie's landing_referrer (true upstream — google, maps, chatgpt)
     // over the POST request's Referer header which is always self-domain.
     const utm = mergeUtmAttribution(
-      Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
+      Object.fromEntries(ATTRIBUTION_CONTEXT_KEYS.map((key) => [key, form.get(key)])),
       req.headers.get("cookie"),
     );
     // Prefixed latest-paid hints win over the flat first-touch bag when present:
@@ -490,7 +490,7 @@ export async function POST(req: NextRequest) {
     const latestPaidTouch = mergeLatestPaidAttribution(
       Object.keys(latestPaidHints).length > 0
         ? latestPaidHints
-        : Object.fromEntries(ATTRIBUTION_KEYS.map((key) => [key, form.get(key)])),
+        : Object.fromEntries(ATTRIBUTION_CONTEXT_KEYS.map((key) => [key, form.get(key)])),
       req.headers.get("cookie"),
     );
     const refClass = classifyReferrer(

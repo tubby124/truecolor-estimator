@@ -40,6 +40,39 @@ export function hasGoogleUtmSource(row) {
 }
 
 /**
+ * First-party commercial evidence by captured landing pathname. This deliberately
+ * does not merge GA4 sessions or GSC clicks: their attribution models differ.
+ */
+export function summarizePaidLandingPaths({ quoteRequests = [], orders = [] } = {}) {
+  const byPath = new Map();
+  const add = (row, kind) => {
+    if (!hasClickId(row) && !hasGoogleUtmSource(row)) return;
+    const path = isFilled(row?.latest_paid_landing_path)
+      ? row.latest_paid_landing_path
+      : (isFilled(row?.landing_path) ? row.landing_path : "(path unknown)");
+    const bucket = byPath.get(path) ?? { path, quotes: 0, orders: 0 };
+    bucket[kind] += 1;
+    byPath.set(path, bucket);
+  };
+  for (const quote of quoteRequests) add(quote, "quotes");
+  for (const order of orders) add(order, "orders");
+  return [...byPath.values()].sort((a, b) =>
+    (b.orders - a.orders) || (b.quotes - a.quotes) || a.path.localeCompare(b.path),
+  );
+}
+
+export function formatPaidLandingPathSection(rows) {
+  const lines = [
+    "=== FIRST-PARTY PAID LANDING-PATH SIGNAL (window) ===",
+    "  Paid quotes and paid orders are counted separately; a converted quote can appear in both.",
+    "  Compare this with GA4 paid sessions and GSC organic page data—do not add the systems together.",
+  ];
+  if (rows.length === 0) lines.push("  (no paid quote/order rows with captured attribution in range)");
+  for (const row of rows) lines.push(`  ${row.path}: ${row.quotes} paid quote(s) | ${row.orders} paid order(s)`);
+  return lines;
+}
+
+/**
  * Where did this order come from?
  *
  * HEURISTIC — `orders` has no explicit origin column, so this reads two existing signals in
@@ -249,20 +282,30 @@ export async function loadQuoteAttributionInputs(supa, { sinceIso, outbox = [] }
 
   const quoteRequests = await read(
     "quote_requests",
-    "id, created_at, gclid, gbraid, wbraid, latest_paid_gclid, latest_paid_gbraid, latest_paid_wbraid, utm_source, latest_paid_utm_source, converted_order_id, lifecycle_status",
+    "id, created_at, gclid, gbraid, wbraid, latest_paid_gclid, latest_paid_gbraid, latest_paid_wbraid, utm_source, latest_paid_utm_source, landing_path, latest_paid_landing_path, converted_order_id, lifecycle_status",
+    (q) => q.gte("created_at", sinceIso).order("created_at", { ascending: false }),
+  );
+
+  const orderSelect = "id, order_number, quote_request_id, conversion_type, staff_notes, checkout_submission_id, created_at, gclid, gbraid, wbraid, latest_paid_gclid, latest_paid_gbraid, latest_paid_wbraid, utm_source, latest_paid_utm_source, landing_path, latest_paid_landing_path";
+  const recentOrders = await read(
+    "orders",
+    orderSelect,
     (q) => q.gte("created_at", sinceIso).order("created_at", { ascending: false }),
   );
 
   const convertedOrderIds = uniq(quoteRequests.map((quote) => quote.converted_order_id));
   const orderIds = uniq([...outbox.map((row) => row.order_id), ...convertedOrderIds]);
 
-  const orders = orderIds.length
+  const linkedOrders = orderIds.length
     ? await read(
         "orders",
-        "id, order_number, quote_request_id, conversion_type, staff_notes, checkout_submission_id, created_at, gclid, gbraid, wbraid, latest_paid_gclid, latest_paid_gbraid, latest_paid_wbraid, utm_source, latest_paid_utm_source",
+        orderSelect,
         (q) => q.in("id", orderIds),
       )
     : [];
+  const ordersById = new Map();
+  for (const order of [...recentOrders, ...linkedOrders]) if (order?.id) ordersById.set(order.id, order);
+  const orders = [...ordersById.values()];
 
   // Outbox rows for quote-converted orders can predate the window; fetched separately so they
   // never inflate the window counts.

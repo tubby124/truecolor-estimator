@@ -23,8 +23,10 @@ import { createReader } from "./gaql-read.mjs";
 import {
   INCOMPLETE_COVERAGE_VERDICT,
   formatQuoteAttributionSection,
+  formatPaidLandingPathSection,
   loadQuoteAttributionInputs,
   needsIncompleteCoverageVerdict,
+  summarizePaidLandingPaths,
   summarizeQuoteAttribution,
 } from "./paid-funnel-metrics.mjs";
 
@@ -161,9 +163,12 @@ if (quoteLeadActionConfigured) {
   quoteLeadOutbox = data ?? [];
 }
 const attribution = summarizeQuoteAttribution({ ...attributionInputs, quoteLeadOutbox });
+const paidLandingPaths = summarizePaidLandingPaths(attributionInputs);
 
 console.log("");
 for (const line of formatQuoteAttributionSection(attribution, { qualifiedLeadConfigured: quoteLeadActionConfigured })) console.log(line);
+console.log("");
+for (const line of formatPaidLandingPathSection(paidLandingPaths)) console.log(line);
 
 // ---------- 4. Enhanced conversions readiness ----------
 // The uploader attaches hashed email/phone and self-heals: if the account has not signed

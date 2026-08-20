@@ -21,6 +21,7 @@ export const QUOTE_ATTRIBUTION_COLUMNS = [
   "gclid", "gbraid", "wbraid", "google_keyword", "google_matchtype",
   "google_device", "google_loc_physical_ms", "google_loc_interest_ms",
   "google_adgroup_id", "google_creative_id", "google_campaign_id", "google_network",
+  "landing_path",
   "latest_paid_utm_source", "latest_paid_utm_medium", "latest_paid_utm_campaign",
   "latest_paid_utm_content", "latest_paid_utm_term", "latest_paid_gclid",
   "latest_paid_gbraid", "latest_paid_wbraid", "latest_paid_google_keyword",
@@ -28,6 +29,7 @@ export const QUOTE_ATTRIBUTION_COLUMNS = [
   "latest_paid_google_loc_physical_ms", "latest_paid_google_loc_interest_ms",
   "latest_paid_google_adgroup_id", "latest_paid_google_creative_id",
   "latest_paid_google_campaign_id", "latest_paid_google_network",
+  "latest_paid_landing_path",
   "latest_paid_touch_captured_at",
 ] as const;
 

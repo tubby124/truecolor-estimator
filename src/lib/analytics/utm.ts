@@ -4,6 +4,7 @@ export const PAID_ATTRIBUTION_KEYS = [
   "loc_physical_ms", "loc_interest_ms", "adgroupid", "creative", "campaignid", "network",
 ] as const;
 export const ATTRIBUTION_KEYS = [...UTM_KEYS, ...PAID_ATTRIBUTION_KEYS] as const;
+export const ATTRIBUTION_CONTEXT_KEYS = [...ATTRIBUTION_KEYS, "landing_path", "landing_referrer"] as const;
 
 export type UtmKey = (typeof UTM_KEYS)[number];
 export type PaidAttributionKey = (typeof PAID_ATTRIBUTION_KEYS)[number];
@@ -38,6 +39,19 @@ function clean(value: unknown, maxLength = 100): string | undefined {
   return trimmed.slice(0, maxLength);
 }
 
+function cleanLandingPath(value: unknown): string | undefined {
+  const raw = clean(value, 500);
+  // Store a page identifier, never an absolute URL or query string. This keeps
+  // attribution useful for page-level analysis without persisting user-entered
+  // parameters (or accepting a path that could be used as an external URL).
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return undefined;
+  try {
+    return new URL(raw, "https://truecolorprinting.invalid").pathname;
+  } catch {
+    return undefined;
+  }
+}
+
 const CLICK_ID_RE = /^[A-Za-z0-9._~-]{1,200}$/;
 const NUMERIC_ID_RE = /^\d{1,30}$/;
 const ENUM_VALUES = {
@@ -69,7 +83,7 @@ export function sanitizeUtm(input: Record<string, unknown>): UtmAttribution {
     const value = clean(input[key], 30);
     if (value && NUMERIC_ID_RE.test(value)) out[key] = value;
   }
-  const lp = clean(input.landing_path, 200);
+  const lp = cleanLandingPath(input.landing_path);
   if (lp) out.landing_path = lp;
   const lr = clean(input.landing_referrer, 500);
   if (lr) out.landing_referrer = lr;
@@ -207,7 +221,7 @@ export function mergeLatestPaidAttribution(
 }
 
 export type LatestPaidHintPayload = Partial<
-  Record<`${typeof LATEST_PAID_HINT_PREFIX}${(typeof ATTRIBUTION_KEYS)[number]}` | "latest_paid_captured_at", string>
+  Record<`${typeof LATEST_PAID_HINT_PREFIX}${(typeof ATTRIBUTION_KEYS)[number]}` | "latest_paid_landing_path" | "latest_paid_captured_at", string>
 >;
 
 /** Flattens a stored paid touch into prefixed fields for a JSON submit body. */
@@ -216,7 +230,7 @@ export function toLatestPaidHintPayload(
 ): LatestPaidHintPayload {
   if (!touch) return {};
   const out: Record<string, string> = {};
-  for (const key of ATTRIBUTION_KEYS) {
+  for (const key of [...ATTRIBUTION_KEYS, "landing_path"] as const) {
     const value = touch.attribution[key];
     if (value) out[`${LATEST_PAID_HINT_PREFIX}${key}`] = value;
   }
@@ -246,7 +260,7 @@ export function collectLatestPaidHints(
   get: (name: string) => unknown,
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  for (const key of ATTRIBUTION_KEYS) {
+  for (const key of [...ATTRIBUTION_KEYS, "landing_path"] as const) {
     const value = get(`${LATEST_PAID_HINT_PREFIX}${key}`);
     if (value != null && value !== "") out[key] = value;
   }
@@ -315,7 +329,7 @@ export function buildAttributionSetCookies(
   const secure = context.secure ?? url.protocol === "https:";
   const attribution = sanitizeUtm({
     ...input,
-    landing_path: url.pathname + url.search,
+    landing_path: url.pathname,
     landing_referrer: context.referrer ?? undefined,
   });
 
@@ -350,8 +364,8 @@ export function appendAttributionToFormData(
   attribution: UtmAttribution | null,
 ): void {
   if (!attribution) return;
-  for (const key of ATTRIBUTION_KEYS) {
-    const value = attribution[key];
+  for (const key of ATTRIBUTION_CONTEXT_KEYS) {
+    const value = attribution[key as keyof UtmAttribution];
     if (value) formData.append(key, value);
   }
 }

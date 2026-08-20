@@ -145,6 +145,13 @@ describe("UTM attribution helpers", () => {
     expect(merged.landing_referrer).toBe("https://maps.google.com/");
   });
 
+  it("normalizes landing paths and rejects external or query-bearing values", () => {
+    expect(sanitizeUtm({ landing_path: "/coroplast-signs?email=private@example.com#details" }).landing_path)
+      .toBe("/coroplast-signs");
+    expect(sanitizeUtm({ landing_path: "https://evil.example/path" }).landing_path).toBeUndefined();
+    expect(sanitizeUtm({ landing_path: "//evil.example/path" }).landing_path).toBeUndefined();
+  });
+
   it("sanitizes click IDs and supported Google ValueTrack fields", () => {
     expect(sanitizeUtm({
       gclid: "  abc_DEF-123  ",
@@ -266,6 +273,7 @@ describe("UTM attribution helpers", () => {
       ["gclid", "click_123"],
       ["keyword", "yard signs"],
       ["campaignid", "42"],
+      ["landing_path", "/ignored"],
     ]);
   });
 

@@ -21,6 +21,7 @@ describe("mapAttributionToDb", () => {
       creative: "400",
       campaignid: "500",
       network: "g",
+      landing_path: "/products/vinyl-banners",
     })).toEqual({
       utm_source: "google",
       utm_medium: "cpc",
@@ -39,6 +40,7 @@ describe("mapAttributionToDb", () => {
       google_creative_id: "400",
       google_campaign_id: "500",
       google_network: "g",
+      landing_path: "/products/vinyl-banners",
     });
   });
 
@@ -48,12 +50,13 @@ describe("mapAttributionToDb", () => {
 
   it("maps latest paid touch into separate prefixed columns", () => {
     expect(mapLatestPaidAttributionToDb({
-      attribution: { utm_source: "google", utm_medium: "cpc", gclid: "paid-click" },
+      attribution: { utm_source: "google", utm_medium: "cpc", gclid: "paid-click", landing_path: "/yard-signs" },
       capturedAt: "2026-07-20T12:00:00.000Z",
     })).toMatchObject({
       latest_paid_utm_source: "google",
       latest_paid_utm_medium: "cpc",
       latest_paid_gclid: "paid-click",
+      latest_paid_landing_path: "/yard-signs",
       latest_paid_touch_captured_at: "2026-07-20T12:00:00.000Z",
     });
   });

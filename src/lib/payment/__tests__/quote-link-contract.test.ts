@@ -184,20 +184,37 @@ describe("quote → order attribution copy contract", () => {
   const valuesBlock = materializer.slice(valuesStart, materializer.indexOf(") RETURNING", valuesStart));
   const quoteSelect = materializer.slice(0, materializer.indexOf("INTO v_quote"));
   const ATTRIBUTION_COLUMN = /^(?:utm_|google_|latest_paid_|gclid$|gbraid$|wbraid$)/;
+  const LANDING_PATH_COLUMNS = ["landing_path", "latest_paid_landing_path"] as const;
+  const MATERIALIZED_ATTRIBUTION_COLUMNS = QUOTE_ATTRIBUTION_COLUMNS
+    .filter((column) => !LANDING_PATH_COLUMNS.includes(column as typeof LANDING_PATH_COLUMNS[number]));
 
   const manualOrder = source("src/app/api/staff/manual-order/route.ts");
 
   it("copies exactly the attribution columns materialize_quote_order inserts", () => {
     const sqlAttributionColumns = insertColumns.filter((column) => ATTRIBUTION_COLUMN.test(column));
     expect(sqlAttributionColumns.length).toBeGreaterThanOrEqual(35);
-    expect([...sqlAttributionColumns].sort()).toEqual([...QUOTE_ATTRIBUTION_COLUMNS].sort());
+    expect([...sqlAttributionColumns].sort()).toEqual([...MATERIALIZED_ATTRIBUTION_COLUMNS].sort());
   });
 
   it("sources every copied column from the row-locked quote, not from an argument", () => {
-    for (const column of QUOTE_ATTRIBUTION_COLUMNS) {
+    for (const column of MATERIALIZED_ATTRIBUTION_COLUMNS) {
       expect(quoteSelect).toContain(`q.${column}`);
       expect(valuesBlock).toContain(`v_quote.${column}`);
     }
+  });
+
+  it("inherits both landing paths from a linked quote in the database transaction", () => {
+    const migration = source("supabase/migrations/20260820180000_landing_path_attribution.sql");
+    const compact = migration.replace(/\s+/g, " ");
+    for (const column of LANDING_PATH_COLUMNS) {
+      expect(QUOTE_ATTRIBUTION_COLUMNS).toContain(column);
+      expect(migration).toContain(`ADD COLUMN IF NOT EXISTS ${column} text`);
+      expect(migration).toContain(`q.${column}`);
+      expect(compact).toMatch(new RegExp(
+        `NEW\\.${column} := COALESCE\\(\\s*NEW\\.${column},\\s*v_quote\\.${column}`,
+      ));
+    }
+    expect(migration).toContain("BEFORE INSERT OR UPDATE OF quote_request_id ON public.orders");
   });
 
   it("loads manual-order attribution server-side and never from the request body", () => {
