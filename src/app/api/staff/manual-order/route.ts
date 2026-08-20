@@ -46,6 +46,27 @@ import {
 const GST_RATE = 0.05;
 const PST_RATE = 0.06;
 
+// Commercial source is deliberately separate from paid-click attribution. A
+// staff-taken call can be a real sale without being a Google Ads conversion;
+// only a linked website quote may carry a paid click ID into the revenue outbox.
+const ACQUISITION_SOURCES = [
+  "website_quote",
+  "google_ads_call",
+  "google_organic_call",
+  "repeat_customer",
+  "referral",
+  "walk_in",
+  "other",
+] as const;
+type AcquisitionSource = (typeof ACQUISITION_SOURCES)[number];
+
+function parseAcquisitionSource(value: unknown, quoteRequestId: string | null): AcquisitionSource | null {
+  if (quoteRequestId) return "website_quote";
+  return typeof value === "string" && (ACQUISITION_SOURCES as readonly string[]).includes(value)
+    ? value as AcquisitionSource
+    : null;
+}
+
 export interface OrderItemInput {
   kind?: "product" | "fee";  // default "product" — fee lines skip the spec block
   title?: string;            // optional invoice line headline (overrides display name)
@@ -199,6 +220,8 @@ export async function POST(req: NextRequest) {
       customMessage?: string;
       customSubject?: string;
       overrideTotal?: number;
+      /** Required for staff-created calls/walk-ins; linked web quotes become website_quote. */
+      acquisition_source?: string;
       /** Website quote this manual order fulfils. Makes the order a quote_won
        *  conversion and carries the quote's paid-search attribution across. */
       quote_request_id?: string;
@@ -409,6 +432,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const acquisitionSource = parseAcquisitionSource(body.acquisition_source, quoteRequestId);
+    if (!acquisitionSource) {
+      return NextResponse.json(
+        { error: "Select how this customer found True Color before creating the order" },
+        { status: 400 },
+      );
+    }
+
     // ── 1. Upsert customer ──
     const { data: customer, error: custErr } = await supabase
       .from("customers")
@@ -520,11 +551,13 @@ export async function POST(req: NextRequest) {
           conversion_key: quoteRequestId
             ? `quote_won:${quoteRequestId}`
             : `purchase_online:${orderNumber}`,
+          acquisition_source: acquisitionSource,
           ...quoteAttribution,
           notes: notes?.trim() || null,
           staff_notes: (quoteOnly
             ? `[QUOTE] Manual quote — ${items.length} item(s) — Pay Now link sent; customer can pay to confirm or reply for changes.`
-            : `Manual order — ${items.length} item(s) created by staff via payment request`) + autoLinkNote,
+            : `Manual order — ${items.length} item(s) created by staff via payment request`) +
+            ` · source=${acquisitionSource}` + autoLinkNote,
         })
         .select("id, order_number")
         .single();
@@ -789,6 +822,7 @@ export async function POST(req: NextRequest) {
         quote_only: quoteOnly,
         quote_request_id: quoteRequestId,
         link_source: linkSource,
+        acquisition_source: acquisitionSource,
         ...(attributionWarning ? { attribution_warning: attributionWarning.code } : {}),
       },
     });

@@ -204,6 +204,7 @@ interface FormState {
    *  search click IDs onto it, so the Google Ads outbox trigger can attribute
    *  the revenue instead of parking it as not_attributable. */
   quote_request_id: string;
+  acquisition_source: "" | "google_ads_call" | "google_organic_call" | "repeat_customer" | "referral" | "walk_in" | "other";
 }
 
 function makeItem(): OrderItem {
@@ -261,7 +262,7 @@ const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
   payment_method: "clover", quote_only: true, notes: "",
-  customMessage: "", customSubject: "", overrideTotal: "", quote_request_id: "",
+  customMessage: "", customSubject: "", overrideTotal: "", quote_request_id: "", acquisition_source: "",
 };
 
 const MAX_ITEMS = 10;
@@ -697,6 +698,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
 
     if (!form.name.trim()) { setError("Customer name is required"); return; }
     if (!form.email.trim()) { setError("Customer email is required"); return; }
+    if (!form.quote_request_id && !form.acquisition_source) { setError("Select how this customer found True Color"); return; }
     if (!allItemsValid) { setError("Each item needs a product and amount greater than $0"); return; }
     if (overrideValidationError) { setError(overrideValidationError); return; }
     if (preview.error) { setError(preview.error); return; }
@@ -733,6 +735,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
           payment_method: form.payment_method,
           quote_only: form.quote_only,
           quote_request_id: form.quote_request_id.trim() || undefined,
+          acquisition_source: form.acquisition_source || undefined,
           notes: form.notes.trim() || undefined,
           customMessage: form.customMessage.trim() || undefined,
           customSubject: form.customSubject.trim() || undefined,
@@ -922,6 +925,35 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
+                </div>
+
+                <div className="mx-6 mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4">
+                  {form.quote_request_id ? (
+                    <p className="text-sm font-semibold text-sky-900">
+                      Linked website quote — source and paid-click attribution will be carried automatically.
+                    </p>
+                  ) : (
+                    <label className="block text-sm font-bold text-slate-800">
+                      How did this customer find True Color? <span className="text-red-600">*</span>
+                      <select
+                        required
+                        value={form.acquisition_source}
+                        onChange={(e) => setForm((prev) => ({ ...prev, acquisition_source: e.target.value as FormState["acquisition_source"] }))}
+                        className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select source…</option>
+                        <option value="google_ads_call">Google Ads call</option>
+                        <option value="google_organic_call">Google / website call (not an ad)</option>
+                        <option value="repeat_customer">Repeat customer</option>
+                        <option value="referral">Referral</option>
+                        <option value="walk_in">Walk-in</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </label>
+                  )}
+                  <p className="mt-2 text-xs leading-5 text-slate-600">
+                    This records commercial source. It does not claim a Google Ads conversion unless the sale is tied to a tracked ad click or linked website quote.
+                  </p>
                 </div>
 
                 {/* Success state */}
