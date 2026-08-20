@@ -247,13 +247,26 @@ describe("manual order conversion identity", () => {
       ),
       "utf8",
     );
+    const landingPathMigration = readFileSync(
+      path.join(
+        process.cwd(),
+        "supabase/migrations/20260820180000_landing_path_attribution.sql",
+      ),
+      "utf8",
+    );
+    // Deployed attribution now spans the original quote conversion RPC migration
+    // plus the later landing-path migration; checking the composed chain keeps
+    // helper-declared columns from drifting without rewriting historical SQL.
+    const composedAttributionMigration = `${rpcMigration}\n${landingPathMigration}`;
     expect(manualOrderRoute).toContain("pickQuoteAttributionForOrder");
-    const declared = [
-      ...quoteAttributionHelper.matchAll(/"((?:latest_paid_|utm_|google_|gclid|gbraid|wbraid)[a-z_]*)"/g),
-    ].map((m) => m[1]);
-    expect(declared.length).toBeGreaterThanOrEqual(35);
+    const declaredBlock = /export const QUOTE_ATTRIBUTION_COLUMNS = \[([\s\S]*?)\] as const;/
+      .exec(quoteAttributionHelper)?.[1] ?? "";
+    const declared = [...declaredBlock.matchAll(/"([a-z_]+)"/g)].map((m) => m[1]);
+    expect(declared).toContain("landing_path");
+    expect(declared).toContain("latest_paid_landing_path");
+    expect(declared.length).toBeGreaterThanOrEqual(37);
     for (const column of declared) {
-      expect(rpcMigration).toContain(column);
+      expect(composedAttributionMigration).toContain(column);
     }
   });
 
