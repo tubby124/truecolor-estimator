@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Commercial signs for Saskatoon retailers, dealerships, salons, gyms, and breweries. Coroplast, ACP, banners, and window decals printed in-house.",
   alternates: { canonical: "/commercial-signs-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Commercial Signs Saskatoon | True Color Display Printing",
     description:
       "Commercial signage for Saskatoon retailers, car dealerships, salons, gyms, and breweries. ACP aluminum from $13/sqft. In-house printing.",

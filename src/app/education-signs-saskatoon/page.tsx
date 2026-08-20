@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Signs and banners for Saskatoon schools and daycares. Coroplast yard signs, vinyl banners, and foam board displays from $8/sqft.",
   alternates: { canonical: "/education-signs-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Education Signs Saskatoon | True Color Display Printing",
     description:
       "Yard signs, enrollment banners, and event displays for Saskatoon schools and daycares. Coroplast from $8/sqft. In-house printing.",

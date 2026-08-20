@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     "Clinic signs, wayfinding, patient banners, and office directories for Saskatoon healthcare providers. ACP from $13/sqft. In-house designer. Local pickup.",
   alternates: { canonical: "/healthcare-signs-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Healthcare Signs Saskatoon | True Color Display Printing",
     description:
       "Professional clinic and medical office signage in Saskatoon. ACP directories, foam board displays, vinyl banners. Same-day available.",

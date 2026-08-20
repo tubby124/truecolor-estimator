@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Same-day printing in Saskatoon. Order before 10 AM, pick up by 5 PM. Signs, banners, cards & flyers. Rush +$40 flat — no per-item upcharge. 216 33rd St W.",
   alternates: { canonical: "/same-day-printing-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Same Day Printing Saskatoon | True Color Display Printing",
     description:
       "Order before 10 AM, ready by 5 PM. Signs, banners, cards, flyers. Rush +$40 flat. Local Saskatoon pickup.",

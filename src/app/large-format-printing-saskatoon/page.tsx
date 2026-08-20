@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Large format printing in Saskatoon — coroplast, vinyl banners, ACP aluminum, retractable displays & foamboard. Roland UV, 1–3 day turnaround. Local pickup.",
   alternates: { canonical: "/large-format-printing-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Large Format Printing Saskatoon | True Color Display Printing",
     description:
       "Coroplast, vinyl banners, ACP aluminum signs, retractable displays — all printed in-house. 1–3 day turnaround in Saskatoon.",

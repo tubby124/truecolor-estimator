@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     canonical: "/foamboard-printing-saskatoon",
   },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Foam Board Printing Saskatoon | From $45 | Same-Day Rush",
     description:
       "Foam board printing in Saskatoon from $45 (18×24\"). Photo-quality Roland UV on 5mm foam core. Trade shows, menus, open houses. Designer $40. Rush +$40.",

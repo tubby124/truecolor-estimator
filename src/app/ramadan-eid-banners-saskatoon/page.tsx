@@ -52,6 +52,7 @@ export const metadata: Metadata = {
   // Seasonal noindex — flip back to indexed by removing this `robots` block in early March 2027 for next Ramadan season (Eid 2027 ≈ March 20)
   robots: { index: false, follow: true },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Ramadan & Eid Banners Saskatoon | Iftar Night Printing | True Color",
     description:
       "Vinyl banners from $90, flyers from $110, retractable stands from $219. Printed in 48 hours. Serving Saskatoon mosques, halal restaurants & Islamic schools.",

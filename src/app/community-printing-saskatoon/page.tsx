@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Affordable printing for Saskatoon non-profits, churches, and events. Banners from $8.25/sqft, coroplast from $8/sqft, volume pricing available.",
   alternates: { canonical: "/community-printing-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Community Printing Saskatoon | True Color Display Printing",
     description:
       "Banners, signs, and printed materials for Saskatoon non-profits, churches, and community events. Volume pricing available.",

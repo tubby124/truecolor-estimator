@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     "Banners, flyers, photo prints, and window decals for Saskatoon restaurants, spas, and florists. From $45. In-house design $40. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/mothers-day-printing-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Mother's Day Printing Saskatoon | True Color Display Printing",
     description:
       "Mother's Day banners, flyers, photo prints, and window decals in Saskatoon from $45. In-house design $40. Same-day rush +$40. 216 33rd St W.",

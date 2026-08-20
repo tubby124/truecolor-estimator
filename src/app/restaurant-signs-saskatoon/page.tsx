@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Menu boards, vinyl banners, flyers, and window graphics for Saskatoon restaurants, cafes, and food trucks. Local pickup. Same-day available. In-house designer.",
   alternates: { canonical: "/restaurant-signs-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Restaurant Signs Saskatoon | True Color Display Printing",
     description:
       "Foam board menus, vinyl banners, and window decals for Saskatoon restaurants. Same-day available. Local pickup at 216 33rd St W.",

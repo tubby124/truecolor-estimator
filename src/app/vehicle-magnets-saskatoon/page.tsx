@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Custom vehicle magnets in Saskatoon from $24/sqft. 30mil thick, full colour, removable and reusable. Same-day rush available. Local pickup at 216 33rd St W.",
   alternates: { canonical: "/vehicle-magnets-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Vehicle Magnets Saskatoon | True Color Display Printing",
     description:
       "30mil vehicle magnets from $24/sqft. Full colour, removable, reusable. Same-day available. Local Saskatoon pickup.",

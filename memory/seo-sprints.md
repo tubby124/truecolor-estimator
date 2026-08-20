@@ -635,3 +635,12 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **Propagation:** Updated 69 public Open Graph/Twitter references to request `og-image.png?v=20260820`, including root metadata. This forces social platforms to fetch the new card instead of retaining their cached old blue preview. Purpose-built product/gallery share images remain untouched.
 - **Guardrails:** No page content, title/H1, canonical/schema, sitemap, redirects, pricing, or page layout changed.
 - **Verification:** Targeted metadata lint passed; full production build passed.
+
+---
+
+## SEO Phase 108 — Complete default share-image metadata coverage (2026-08-20)
+
+- **Gap caught during live verification:** 23 public routes defined their own Open Graph title/description but omitted `images`. Next.js did not inherit the root `og:image` for those overrides, so their share cards could render without an image.
+- **What changed:** Added the approved default social-card URL (`/og-image.png?v=20260820`) to each of those 23 route-level Open Graph objects, including `/why-true-color`.
+- **Intentionally retained:** Routes with genuine purpose-built product/gallery Open Graph images keep those specific images; they are not overwritten by the sitewide default card.
+- **Verification:** targeted lint and full production build passed.

@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     "Photo poster printing in Saskatoon from $15. Roland Photobase Matte 220gsm. 18×24\" $22, 24×36\" $35. Foamboard displays $45. Same-day rush +$40. 216 33rd St W.",
   alternates: { canonical: "/poster-printing-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Poster Printing Saskatoon | True Color Display Printing",
     description:
       "Photo posters from $15 in Saskatoon. 18×24\" = $22, 24×36\" = $35. Foamboard from $45. Same-day rush +$40 flat. In-house Roland UV printer.",

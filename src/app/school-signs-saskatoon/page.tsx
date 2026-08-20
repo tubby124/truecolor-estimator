@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     canonical: "/school-signs-saskatoon",
   },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "School Signs Saskatoon | True Color Display Printing",
     description:
       "Coroplast signs from $8/sqft, vinyl banners from $8.25/sqft, and flyers for Saskatoon K-12 schools, daycares & sports teams. Rush orders +$40. Local pickup.",

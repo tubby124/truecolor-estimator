@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Coil-bound booklet printing in Saskatoon from $65/book at 25 copies. 80lb or 100lb gloss, 14pt cover, in-house binding. Pickup 216 33rd St W.",
   alternates: { canonical: "/booklet-printing-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Booklet Printing Saskatoon | Coil-Bound | True Color Display Printing",
     description:
       "Coil-bound booklet printing in Saskatoon. 80lb or 100lb gloss interior, 14pt cover, 12mm plastic coil. From $65/book at 25 copies. In-house production.",

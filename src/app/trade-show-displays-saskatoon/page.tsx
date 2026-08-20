@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Trade show displays in Saskatoon from $219. Retractable banners, vinyl banners, foamboard, coroplast signs. Roland UV, 1–3 day turnaround. 216 33rd St W.",
   alternates: { canonical: "/trade-show-displays-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Trade Show Displays Saskatoon | True Color Display Printing",
     description:
       "Retractable banners from $219, foamboard displays, vinyl banners. In-house Saskatoon printing, 1–3 day turnaround.",

@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     "Farm signs, acreage markers & trade show banners for SK agriculture. Coroplast from $8/sqft. In-house Roland UV printer. Same-day rush +$40. Saskatoon pickup.",
   alternates: { canonical: "/agriculture-signs-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Agriculture Signs Saskatchewan | True Color Display Printing",
     description:
       "Farm gate signs, plot markers, trade show banners, and truck magnets for Saskatchewan ag businesses. Coroplast from $8/sqft. Local Saskatoon pickup.",

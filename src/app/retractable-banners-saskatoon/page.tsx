@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Retractable banner stands in Saskatoon from $219 — stand + full-colour print included. Trade shows, events, storefronts. Same-day rush available. Local pickup.",
   alternates: { canonical: "/retractable-banners-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Retractable Banners Saskatoon | True Color Display Printing",
     description:
       "Retractable banner stands from $219. Stand + full-colour print. Same-day available. Local Saskatoon pickup.",

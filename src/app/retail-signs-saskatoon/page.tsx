@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Vinyl banners, window decals, coroplast signs, and flyers for Saskatoon retailers. From $8/sqft. Same-day rush available. In-house designer $40 flat.",
   alternates: { canonical: "/retail-signs-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Retail Signs Saskatoon | True Color Display Printing",
     description:
       "Banners, window decals, coroplast signs, and flyers for Saskatoon boutiques, pharmacies, and gift shops. Same-day rush available. Local pickup.",

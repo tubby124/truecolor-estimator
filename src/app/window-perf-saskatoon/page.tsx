@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Window perf from $8/sqft in Saskatoon. See through from inside, full-colour outside. In-house Roland UV print. Same-day rush +$40.",
   alternates: { canonical: "/window-perf-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Perforated Window Vinyl Saskatoon | True Color Display Printing",
     description:
       "Window perf from $8/sqft in Saskatoon. Brand your storefront windows while preserving interior visibility. Local pickup 216 33rd St W. Same-day rush available.",

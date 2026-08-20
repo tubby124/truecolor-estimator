@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Brochure printing in Saskatoon from $70/100. Tri-fold & half-fold on 100lb gloss, scored & folded in-house. Same-day rush available. Pickup 216 33rd St W.",
   alternates: { canonical: "/brochure-printing-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Brochure Printing Saskatoon | True Color Display Printing",
     description:
       "Tri-fold and half-fold brochure printing in Saskatoon from $70/100 on 100lb gloss. In-house folding, same-day rush available.",

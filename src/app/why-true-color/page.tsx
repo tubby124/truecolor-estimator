@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   description:
     "Choose a print product, see pricing, and order online from True Color Display Printing in Saskatoon.",
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Compare Print Options & Order Online | True Color Display Printing",
     description:
       "Configure and order printing online, or request a custom quote from our Saskatoon shop.",

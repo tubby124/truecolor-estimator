@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     "Signs for SK agribusiness — equipment dealers, seed retailers, grain co-ops. ACP from $13/sqft, retractable stands $219. In-house design $40. Saskatoon pickup.",
   alternates: { canonical: "/agribusiness-signs-saskatchewan" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Agribusiness Signs Saskatchewan | True Color Display Printing",
     description:
       "ACP building signs, trade show displays, and fleet magnets for Saskatchewan agribusiness. Volume pricing. Local Saskatoon pickup.",

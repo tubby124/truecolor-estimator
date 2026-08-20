@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Custom window decals from $11/sqft, perforated vinyl from $8/sqft, and vinyl lettering from $8.50/sqft in Saskatoon. In-house Roland UV. Same-day rush +$40.",
   alternates: { canonical: "/window-decals-saskatoon" },
   openGraph: {
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     title: "Window Decals Saskatoon | True Color Display Printing",
     description:
       "Window decals, perforated window vinyl, and vinyl lettering for Saskatoon storefronts and offices. From $8/sqft. Local pickup. Same-day rush available.",
