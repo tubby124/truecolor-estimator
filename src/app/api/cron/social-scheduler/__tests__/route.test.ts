@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { NextRequest } from "next/server";
 
 // ── Mocks (must be hoisted above the route import) ───────────────────────────
 
@@ -82,7 +83,7 @@ function makeFrom(script: Script) {
 function req(authToken: string | undefined) {
   const headers: Record<string, string> = {};
   if (authToken !== undefined) headers.authorization = `Bearer ${authToken}`;
-  return new Request("https://truecolorprinting.ca/api/cron/social-scheduler", { headers });
+  return new Request("https://truecolorprinting.ca/api/cron/social-scheduler", { headers }) as NextRequest;
 }
 const authedReq = () => req("cron-secret");
 const unauthReq = () => req(undefined);
