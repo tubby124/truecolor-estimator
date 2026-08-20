@@ -1,48 +1,27 @@
 import { NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { metaEnabled } from "@/lib/social/meta";
+import { publishSocialPost } from "@/lib/social/publisher";
+import type { PlatformPublishResult } from "@/lib/social/meta";
 
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
-const BLOTATO_BASE = "https://backend.blotato.com";
-
-// Poll a Blotato submission until published/failed (max ~16s)
-async function pollSubmission(
-  submissionId: string,
-  apiKey: string,
-): Promise<{ status: "published" | "failed"; publicUrl?: string; errorMessage?: string }> {
-  for (let i = 0; i < 8; i++) {
-    await new Promise((r) => setTimeout(r, 2000));
-    try {
-      const res = await fetch(`${BLOTATO_BASE}/v2/posts/${submissionId}`, {
-        headers: { "blotato-api-key": apiKey },
-      });
-      if (!res.ok) continue;
-      const data = await res.json() as {
-        status?: string;
-        publicUrl?: string;
-        errorMessage?: string;
-      };
-      if (data.status === "published") {
-        return { status: "published", publicUrl: data.publicUrl };
-      }
-      if (data.status === "failed") {
-        return { status: "failed", errorMessage: data.errorMessage };
-      }
-    } catch { /* keep polling */ }
-  }
-  // Timed out — treat as in-progress
-  return { status: "failed", errorMessage: "Timed out waiting for Blotato confirmation" };
-}
-
 /**
  * POST /api/staff/social/posts/[id]/publish
  *
- * If BLOTATO_API_KEY is set:
- *   → Fires real Blotato API calls per platform, polls for result, updates post status
- * If not set:
- *   → Marks post as "ready" (n8n fallback)
+ * Publishes a social post to its selected platforms.
+ *
+ * Transport:
+ *   - Instagram / Facebook  → Meta Graph API directly (META_PAGE_ID / META_IG_USER_ID /
+ *                             META_PAGE_ACCESS_TOKEN set on Railway)
+ *   - Twitter / TikTok      → Blotato (legacy, BLOTATO_API_KEY)
+ *   - Neither configured    → post is marked "ready"; nothing is dispatched
+ *
+ * Future-scheduled posts are NOT dispatched here — the cron social-scheduler
+ * fires them when they come due, so there is exactly one publishing path for
+ * scheduled content.
  */
 export async function POST(_req: Request, { params }: Params) {
   const auth = await requireStaffUser();
@@ -51,7 +30,6 @@ export async function POST(_req: Request, { params }: Params) {
   const { id } = await params;
   const supabase = createServiceClient();
 
-  // Fetch the post
   const { data: post, error: fetchError } = await supabase
     .from("social_posts")
     .select("*")
@@ -76,10 +54,26 @@ export async function POST(_req: Request, { params }: Params) {
     return NextResponse.json({ error: `Post is already ${post.status}` }, { status: 409 });
   }
 
-  const blotatoKey = process.env.BLOTATO_API_KEY;
+  // Future-scheduled: hand off to the cron; never dispatch early (double-publish guard).
+  const scheduleTime = post.schedule_time ? new Date(post.schedule_time) : null;
+  const isFuture = scheduleTime && scheduleTime > new Date();
+  if (isFuture) {
+    const { data: updated, error: updateError } = await supabase
+      .from("social_posts")
+      .update({ status: "ready" })
+      .eq("id", id)
+      .select()
+      .single();
+    if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+    return NextResponse.json({
+      ...updated,
+      _message: `Scheduled — the cron will publish when it comes due (${scheduleTime?.toLocaleString()}).`,
+    });
+  }
 
-  // No Blotato key — mark as ready for n8n fallback
-  if (!blotatoKey) {
+  // Nothing configured: mark ready with a hint (same contract as the old Blotato fallback).
+  const blotatoKey = process.env.BLOTATO_API_KEY;
+  if (!metaEnabled() && !blotatoKey) {
     const { data, error } = await supabase
       .from("social_posts")
       .update({ status: "ready" })
@@ -89,173 +83,83 @@ export async function POST(_req: Request, { params }: Params) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({
       ...data,
-      _message: "Post marked as ready. Add BLOTATO_API_KEY in Railway to enable direct publishing.",
+      _message: "Post marked as ready. Set META_PAGE_ID / META_IG_USER_ID / META_PAGE_ACCESS_TOKEN in Railway to enable direct IG/FB publishing.",
     });
   }
 
-  // === BLOTATO DIRECT PUBLISH ===
-
-  // Get connected accounts for this post's platforms
-  const { data: accounts } = await supabase
-    .from("social_accounts")
-    .select("*")
-    .eq("is_active", true)
-    .in("platform", post.platforms);
-
-  if (!accounts || accounts.length === 0) {
-    return NextResponse.json(
-      { error: "No connected Blotato accounts found. Go to Settings and click 'Refresh from Blotato'." },
-      { status: 400 }
-    );
-  }
-
-  // Mark as "posting" immediately
-  await supabase
+  // Mark as "posting" immediately (claim before dispatching — the cron uses the
+  // same guard to avoid double-firing).
+  const { data: claimed, error: claimError } = await supabase
     .from("social_posts")
     .update({ status: "posting" })
-    .eq("id", id);
-
-  // Determine if this is a scheduled future post
-  const now = new Date();
-  const scheduleTime = post.schedule_time ? new Date(post.schedule_time) : null;
-  const isFuture = scheduleTime && scheduleTime > now;
-
-  // Caption map per platform
-  const captionMap: Record<string, string> = {
-    instagram: post.caption_instagram || post.caption_raw || "",
-    facebook: post.caption_facebook || post.caption_raw || "",
-    twitter: post.caption_twitter || post.caption_raw || "",
-    tiktok: post.caption_instagram || post.caption_raw || "",
-  };
-
-  // Fire one Blotato call per platform
-  const submissions: Array<{
-    platform: string;
-    submissionId?: string;
-    error?: string;
-  }> = [];
-
-  for (const platform of post.platforms as string[]) {
-    const account = accounts.find((a: { platform: string }) => a.platform === platform);
-    if (!account) {
-      submissions.push({ platform, error: `No connected ${platform} account` });
-      continue;
-    }
-
-    // Build platform-specific target
-    const isVideo = (post.image_url ?? "").match(/\.(mp4|mov|webm)$/i);
-    let target: Record<string, unknown> = { targetType: platform };
-    if (platform === "facebook" && account.blotato_page_id) {
-      target = { targetType: "facebook", pageId: account.blotato_page_id, ...(isVideo ? { mediaType: "reel" } : {}) };
-    } else if (platform === "instagram") {
-      target = { targetType: "instagram", ...(isVideo ? { mediaType: "reel" } : {}) };
-    } else if (platform === "tiktok") {
-      target = {
-        targetType: "tiktok",
-        privacyLevel: "PUBLIC_TO_EVERYONE",
-        disabledComments: false,
-        disabledDuet: false,
-        disabledStitch: false,
-        isBrandedContent: false,
-        isYourBrand: false,
-        isAiGenerated: true,
-      };
-    }
-
-    const payload: Record<string, unknown> = {
-      post: {
-        accountId: account.blotato_account_id,
-        content: {
-          text: captionMap[platform] || post.caption_raw,
-          mediaUrls: post.image_urls?.length ? post.image_urls : (post.image_url ? [post.image_url] : []),
-          platform,
-        },
-        target,
-      },
-      useNextFreeSlot: false,
-    };
-
-    // If post has hashtags and platform is Instagram, try sending as firstComment
-    if (platform === "instagram" && post.hashtags) {
-      (payload.post as Record<string, unknown>).firstComment = post.hashtags;
-    }
-
-    if (isFuture && scheduleTime) {
-      payload.scheduledTime = scheduleTime.toISOString();
-    }
-
-    try {
-      const res = await fetch(`${BLOTATO_BASE}/v2/posts`, {
-        method: "POST",
-        headers: {
-          "blotato-api-key": blotatoKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        submissions.push({ platform, error: `Blotato ${res.status}: ${errText.slice(0, 200)}` });
-        continue;
-      }
-
-      const result = await res.json() as { postSubmissionId?: string };
-      submissions.push({ platform, submissionId: result.postSubmissionId });
-    } catch (e) {
-      submissions.push({ platform, error: e instanceof Error ? e.message : "Network error" });
-    }
+    .eq("id", id)
+    .eq("status", "ready")
+    .select()
+    .single();
+  if (claimError) return NextResponse.json({ error: claimError.message }, { status: 500 });
+  if (!claimed) {
+    return NextResponse.json({ error: "Post was already claimed by another publisher" }, { status: 409 });
   }
 
-  // Poll successful submissions for final status
-  const results = await Promise.all(
-    submissions.map(async (sub) => {
-      if (!sub.submissionId) {
-        return { platform: sub.platform, status: "failed" as const, errorMessage: sub.error };
-      }
-      // For future-scheduled posts: Blotato queued it, don't poll — just record as in-progress
-      if (isFuture) {
-        return { platform: sub.platform, status: "in-progress" as const, submissionId: sub.submissionId };
-      }
-      const polled = await pollSubmission(sub.submissionId, blotatoKey);
-      return { platform: sub.platform, submissionId: sub.submissionId, ...polled };
-    })
-  );
+  const { results, attempted } = await publishSocialPost(claimed);
 
-  // Upsert results into social_post_results
+  if (!attempted) {
+    const { data: updated, error: updateError } = await supabase
+      .from("social_posts")
+      .update({ status: "ready", error_message: null })
+      .eq("id", id)
+      .select()
+      .single();
+    if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+    return NextResponse.json({
+      ...updated,
+      _message: "No publisher was configured for the selected platforms.",
+    });
+  }
+
+  // Persist per-platform results
   for (const r of results) {
     await supabase.from("social_post_results").upsert(
       {
         post_id: id,
         platform: r.platform,
         blotato_submission_id: r.submissionId ?? null,
-        status: r.status === "published" ? "published" : r.status === "in-progress" ? "in-progress" : "failed",
-        public_url: "publicUrl" in r ? r.publicUrl ?? null : null,
-        error_message: "errorMessage" in r ? r.errorMessage ?? null : null,
+        status: r.status,
+        public_url: r.publicUrl ?? null,
+        error_message: r.errorMessage ?? null,
         posted_at: r.status === "published" ? new Date().toISOString() : null,
       },
       { onConflict: "post_id,platform" }
     );
   }
 
-  // Determine final post status
+  // Final post status
   const allPublished = results.every((r) => r.status === "published");
   const anyFailed = results.some((r) => r.status === "failed");
-  const allInProgress = results.every((r) => r.status === "in-progress");
+  const anyInProgress = results.some((r) => r.status === "in-progress");
 
   let finalStatus: string;
   let errorMessage: string | null = null;
 
   if (allPublished) {
     finalStatus = "posted";
-  } else if (allInProgress || isFuture) {
-    finalStatus = "posting"; // Blotato is handling scheduled post
-  } else if (anyFailed && !allPublished) {
+  } else if (anyInProgress && !anyFailed) {
+    finalStatus = "posting";
+    errorMessage = "One or more platforms still processing — the cron will reconcile.";
+  } else if (anyFailed && !allPublished && !anyInProgress) {
     finalStatus = "failed";
     errorMessage = results
-      .filter((r) => r.status === "failed" && "errorMessage" in r)
-      .map((r) => `${r.platform}: ${"errorMessage" in r ? r.errorMessage : "failed"}`)
+      .filter((r) => r.status === "failed" && r.errorMessage)
+      .map((r) => `${r.platform}: ${r.errorMessage}`)
       .join(" | ");
+  } else if (anyFailed && anyInProgress) {
+    finalStatus = "failed";
+    errorMessage = [
+      ...results
+        .filter((r) => r.status === "failed" && r.errorMessage)
+        .map((r) => `${r.platform}: ${r.errorMessage}`),
+      ...results.filter((r) => r.status === "in-progress").map((r) => `${r.platform}: processing`),
+    ].join(" | ");
   } else {
     finalStatus = "posting";
   }
@@ -266,7 +170,6 @@ export async function POST(_req: Request, { params }: Params) {
       status: finalStatus,
       posted_at: finalStatus === "posted" ? new Date().toISOString() : null,
       error_message: errorMessage,
-      blotato_submission_id: submissions[0]?.submissionId ?? null,
     })
     .eq("id", id)
     .select()
@@ -274,7 +177,7 @@ export async function POST(_req: Request, { params }: Params) {
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
 
-  // Send failure email notification to staff
+  // Failure email to staff
   if (finalStatus === "failed" && errorMessage) {
     try {
       const { sendEmail } = await import("@/lib/email/smtp");
@@ -301,15 +204,11 @@ export async function POST(_req: Request, { params }: Params) {
     }
   }
 
-  return NextResponse.json({
-    ...updated,
-    _results: results,
-    _message: allPublished
-      ? "Posted successfully to all platforms!"
-      : isFuture
-      ? `Scheduled with Blotato for ${scheduleTime?.toLocaleString()}`
-      : anyFailed
+  const message = allPublished
+    ? "Posted successfully to all platforms!"
+    : anyFailed
       ? "Some platforms failed — check error_message"
-      : "Publishing in progress",
-  });
+      : "Publishing in progress";
+
+  return NextResponse.json({ ...updated, _results: results as PlatformPublishResult[], _message: message });
 }
