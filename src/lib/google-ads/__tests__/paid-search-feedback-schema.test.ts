@@ -153,6 +153,9 @@ describe("paid-search feedback schema contract", () => {
       "jsonb_array_length(conversion_goal_attestation -> 'conversionActions') BETWEEN 3 AND 100",
     );
     expect(conversionGraphRepairMigration).toContain(
+      ") NOT VALID;",
+    );
+    expect(conversionGraphRepairMigration).toContain(
       "Unknown included/biddable actions are intentionally rejected by the application contract",
     );
     expect(conversionGraphRepairMigration).not.toMatch(/DROP CONSTRAINT IF EXISTS (?!google_ads_metric_sync_runs_conversion_goal_attestation_check)/);

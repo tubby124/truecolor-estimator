@@ -4,7 +4,9 @@
 -- primary. This forward-only repair replaces only that stale attestation constraint.
 -- purchase_online and quote_won remain the only primary/included bidding revenue actions.
 -- Unknown included/biddable actions are intentionally rejected by the application contract
--- before persistence and by the jsonpath guard below at the receipt boundary.
+-- before persistence and by the jsonpath guard below at the receipt boundary. `NOT VALID`
+-- intentionally preserves pre-repair historical receipts while enforcing this graph on every
+-- newly inserted or updated receipt; it must not be treated as an unchecked bypass.
 
 ALTER TABLE public.google_ads_metric_sync_runs
   DROP CONSTRAINT IF EXISTS google_ads_metric_sync_runs_conversion_goal_attestation_check;
@@ -107,4 +109,4 @@ ALTER TABLE public.google_ads_metric_sync_runs
         '$[*] ? (@.biddable == true && !(@.category == "PURCHASE" && @.origin == "WEBSITE"))'
       )
     )
-  );
+  ) NOT VALID;
