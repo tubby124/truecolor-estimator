@@ -2,7 +2,7 @@
 
 /* ─── Design System Tokens ──────────────────────────────────────────────────
    True Color Display Printing — Premium print shop, Saskatoon SK
-   Brand: #e63020 (red). All prices CAD. GST applied at subtotal.
+   Brand: customer-facing UI uses cyan #16C2F3; prices CAD. GST applied at subtotal.
    Never add decorative gradients, shadows, or ornaments.
    ─────────────────────────────────────────────────────────────────────────── */
 
@@ -10,8 +10,8 @@
   /* Core palette */
   --background: #f8f8f8;
   --foreground: #111111;
-  --brand: #e63020;
-  --brand-50: #fff1f0;
+  --brand: #16c2f3;
+  --brand-50: #eefaff;
   --muted: #6b6b6b;
   --border: #e5e5e5;
   --white: #ffffff;

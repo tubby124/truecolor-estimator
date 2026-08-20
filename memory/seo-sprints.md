@@ -616,3 +616,13 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **Explicitly retained:** The genuine Saskatchewan service-area hub links, Regina banner/coroplast links, and all Wave 2/3 city-product links. Those routes have not been approved for consolidation; their footer links remain until a future wave passes page-level evidence checks and its redirects ship.
 - **Guardrails:** No destination page content, title, H1, schema, sitemap entry, route, or redirect mapping changed. This is an internal-link cleanup aligned only to already-live redirects.
 - **Verification required:** lint, TypeScript/build, and production footer/redirect smoke before declaring live.
+
+---
+
+## SEO Phase 106 — Customer-facing palette correction (2026-08-20)
+
+- **Owner direction:** The stale red primary-brand token does not represent the live True Color marketing site. Customer-facing visual hierarchy is espresso `#1c1712`, warm cream/off-white surfaces, and cyan `#16C2F3` CTAs.
+- **What changed:** Replaced the root customer UI `--brand` / `--brand-50` tokens with cyan equivalents. Replaced the handful of direct red decorative/link/button accents on the homepage, Roll Labels, Candle Jar Labels, and print-resource template with the existing cyan/blue system.
+- **Scope intentionally excluded:** Staff/Social Studio has its own legacy colour map and campaign-specific colours; it was not mass-restyled in this customer-facing correction. Red remains valid only for explicitly seasonal/campaign semantics, such as Canada Day.
+- **SEO safety:** No titles, H1s, URLs, canonical/schema, content copy, sitemap, redirects, or metadata changed.
+- **Verification:** Targeted lint passed (CSS was correctly ignored by ESLint) and full production build passed with the project-required 4 GB Node heap.

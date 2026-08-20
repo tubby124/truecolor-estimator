@@ -452,7 +452,7 @@ export default function HomePage() {
           </div>
 
           {/* Pull quote */}
-          <blockquote className="border-l-4 border-[#e63020] pl-6 py-2 mb-10">
+          <blockquote className="border-l-4 border-[#16C2F3] pl-6 py-2 mb-10">
             <p className="text-xl font-semibold text-[#1c1712]">
               &ldquo;Send the file Friday. Pick it up Saturday. Done.&rdquo;
             </p>
