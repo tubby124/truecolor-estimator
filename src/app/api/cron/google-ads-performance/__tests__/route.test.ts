@@ -111,7 +111,7 @@ const conversionActions = [
     category: "PAGE_VIEW",
     origin: "WEBSITE",
     ownerCustomer: "customers/1072816342",
-    primaryForGoal: false,
+    primaryForGoal: true,
     includeInConversionsMetric: false,
   },
 ];
@@ -561,10 +561,18 @@ describe("Google Ads performance sync cron", () => {
     ]);
   });
 
-  it("persists classified conversion-inventory mismatches before staging rows", async () => {
-    mocks.fetchPerformance.mockRejectedValue(
-      new Error("Google Ads legacy About Us conversion action has drifted"),
-    );
+  it("rejects conversion ownership or goal drift before staging rows", async () => {
+    mocks.fetchPerformance.mockResolvedValue({
+      ...performance,
+      inventory: {
+        ...performance.inventory,
+        conversionActions: performance.inventory.conversionActions.map((action) =>
+          action.id === "7694360843"
+            ? { ...action, ownerCustomer: "customers/1125402990" }
+            : action
+        ),
+      },
+    });
 
     const response = await POST(request());
 

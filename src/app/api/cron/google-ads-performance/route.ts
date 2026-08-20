@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { recordCronRun } from "@/lib/cron/heartbeat";
 import {
   fetchGoogleAdsDailyPerformance,
+  TRUE_COLOR_GOOGLE_ADS_CAMPAIGNS,
   TRUE_COLOR_GOOGLE_ADS_CUSTOMER_ID,
+  type GoogleAdsValidatedDailyPerformance,
 } from "@/lib/google-ads/performance-client";
 import {
   buildReviewOnlySearchTermProposals,
@@ -63,11 +65,138 @@ function requestedLookbackDays(req: NextRequest): number | undefined {
   return validateManualLookbackDays(Number(raw));
 }
 
+function assertCanonicalInventory(
+  performance: GoogleAdsValidatedDailyPerformance,
+): void {
+  const { inventory } = performance;
+  if (
+    inventory.customerId !== TRUE_COLOR_GOOGLE_ADS_CUSTOMER_ID
+    || inventory.currencyCode !== "CAD"
+    || inventory.timeZone !== "America/Regina"
+    || inventory.campaigns.length !== TRUE_COLOR_GOOGLE_ADS_CAMPAIGNS.length
+  ) {
+    throw new Error("INVENTORY_VALIDATION_FAILED");
+  }
+
+  const byId = new Map(inventory.campaigns.map((campaign) => [campaign.id, campaign]));
+  for (const expected of TRUE_COLOR_GOOGLE_ADS_CAMPAIGNS) {
+    const actual = byId.get(expected.id);
+    if (
+      !actual
+      || actual.name !== expected.name
+      || !(expected.allowedStatuses as readonly string[]).includes(actual.status)
+    ) {
+      throw new Error("INVENTORY_VALIDATION_FAILED");
+    }
+  }
+
+  const expectedOwner = `customers/${TRUE_COLOR_GOOGLE_ADS_CUSTOMER_ID}`;
+  if (
+    inventory.conversionTracking.googleAdsConversionCustomer !== expectedOwner
+    || inventory.conversionTracking.conversionTrackingStatus
+      !== "CONVERSION_TRACKING_MANAGED_BY_SELF"
+    || inventory.conversionTracking.conversionTrackingId !== "18330693756"
+    || inventory.conversionTracking.crossAccountConversionTrackingId !== null
+  ) {
+    throw new Error("INVENTORY_VALIDATION_FAILED");
+  }
+
+  const expectedConversionActions = [
+    {
+      id: "7694360837",
+      name: "purchase_online",
+      category: "PURCHASE",
+      origin: "WEBSITE",
+      primaryForGoal: true,
+      includeInConversionsMetric: true,
+    },
+    {
+      id: "7694360840",
+      name: "quote_won",
+      category: "PURCHASE",
+      origin: "WEBSITE",
+      primaryForGoal: true,
+      includeInConversionsMetric: true,
+    },
+    {
+      id: "7694360843",
+      name: "qualified_call_60s",
+      category: "PHONE_CALL_LEAD",
+      origin: "CALL_FROM_ADS",
+      primaryForGoal: false,
+      includeInConversionsMetric: false,
+    },
+    {
+      id: "7688596965",
+      name: "About Us",
+      category: "PAGE_VIEW",
+      origin: "WEBSITE",
+      primaryForGoal: true,
+      includeInConversionsMetric: false,
+    },
+  ] as const;
+  const conversionById = new Map(
+    inventory.conversionActions.map((action) => [action.id, action]),
+  );
+  for (const expected of expectedConversionActions) {
+    const actual = conversionById.get(expected.id);
+    if (
+      !actual
+      || actual.name !== expected.name
+      || actual.status !== "ENABLED"
+      || actual.category !== expected.category
+      || actual.origin !== expected.origin
+      || actual.ownerCustomer !== expectedOwner
+      || actual.primaryForGoal !== expected.primaryForGoal
+      || actual.includeInConversionsMetric !== expected.includeInConversionsMetric
+    ) {
+      throw new Error("INVENTORY_VALIDATION_FAILED");
+    }
+  }
+
+  const expectedCustomerGoals = [
+    { category: "PURCHASE", origin: "WEBSITE", biddable: true },
+    { category: "PAGE_VIEW", origin: "WEBSITE", biddable: false },
+    {
+      category: "PHONE_CALL_LEAD",
+      origin: "CALL_FROM_ADS",
+      biddable: false,
+    },
+  ] as const;
+  for (const expected of expectedCustomerGoals) {
+    if (!inventory.customerConversionGoals.some((actual) =>
+      actual.category === expected.category
+      && actual.origin === expected.origin
+      && actual.biddable === expected.biddable
+    )) {
+      throw new Error("INVENTORY_VALIDATION_FAILED");
+    }
+  }
+  if (inventory.customerConversionGoals.some((actual) =>
+    actual.biddable
+    && !expectedCustomerGoals.some((expected) =>
+      expected.biddable
+      && actual.category === expected.category
+      && actual.origin === expected.origin
+    )
+  )) {
+    throw new Error("INVENTORY_VALIDATION_FAILED");
+  }
+  for (const action of inventory.conversionActions) {
+    if (
+      !expectedConversionActions.some(({ id }) => id === action.id)
+      && (action.primaryForGoal || action.includeInConversionsMetric)
+    ) {
+      throw new Error("INVENTORY_VALIDATION_FAILED");
+    }
+  }
+}
+
 function sanitizedReceiptError(error: unknown): string {
   const message = error instanceof Error ? error.message : "";
   if (
     message === "INVENTORY_VALIDATION_FAILED"
-    || /account inventory|campaign inventory|canonical campaign|conversion action|conversion goal|About Us|bidding flags|biddable/i.test(message)
+    || /account inventory|campaign inventory|canonical campaign/i.test(message)
   ) {
     return "Google Ads account inventory validation failed";
   }
@@ -307,10 +436,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // The client is the single conversion-inventory contract: it validates exact account
-    // identity, CAD, Regina time, canonical campaigns, conversion tracking, and bidding flags
-    // before it starts metric report reads. Do not duplicate that contract in this route.
+    // The client validates exact account identity, CAD, Regina time, and the
+    // complete canonical campaign inventory before it starts report reads.
+    // Awaiting this call completes every upstream read before snapshot writes.
     const performance = await fetchGoogleAdsDailyPerformance(range);
+    assertCanonicalInventory(performance);
 
     const fetchedAt = new Date().toISOString();
     const metricRecords = mapPerformanceToMetricRecords(performance, {
