@@ -53,8 +53,8 @@ type Script = (
 function makeFrom(script: Script) {
   const chains: Array<{ table: string; chain: string[]; args: unknown[][] }> = [];
   fromMock.mockReset().mockImplementation((table: string) => {
-    let chain: string[] = [];
-    let args: unknown[][] = [];
+    const chain: string[] = [];
+    const args: unknown[][] = [];
     const proxy: Record<string, unknown> = new Proxy(
       {},
       {
