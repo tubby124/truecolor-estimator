@@ -10,6 +10,7 @@ import {
 } from "@/lib/data/order-constants";
 import { StaffOrderCard } from "@/components/staff/orders/StaffOrderCard";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
+import { calculateOrdersDashboardStats as buildOrdersDashboardStats } from "@/lib/staff/orders-dashboard-stats";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -70,6 +71,12 @@ interface Props {
   initialOrders: Order[];
   newQuoteCount: number;
 }
+
+const ORDERS_STATS_TIME_ZONE = "America/Regina";
+const CAD_CURRENCY_FORMATTER = new Intl.NumberFormat("en-CA", {
+  style: "currency",
+  currency: "CAD",
+});
 
 // ─── Stat card ─────────────────────────────────────────────────────────────────
 
@@ -174,7 +181,6 @@ function downloadOrdersCsv(rows: Order[], filterLabel: string): void {
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
-  void newQuoteCount;
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
@@ -182,6 +188,7 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "total_desc" | "status_asc">("newest");
+  const [businessTotalsOpen, setBusinessTotalsOpen] = useState(false);
 
   // Resend payment link — keyed by order id
   const [resendingPaymentId, setResendingPaymentId] = useState<string | null>(null);
@@ -285,32 +292,7 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
   // ── Stats ──────────────────────────────────────────────────────────────────────
 
   const stats = useMemo(() => {
-    const live = orders.filter((o) => !o.is_archived);
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10);
-
-    const dayOfWeek = now.getDay();
-    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - daysFromMonday);
-    weekStart.setHours(0, 0, 0, 0);
-
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    return {
-      active: live.filter((o) => o.status !== "complete").length,
-      pendingPayment: live.filter((o) => o.status === "pending_payment").length,
-      inProduction: live.filter((o) => o.status === "in_production").length,
-      revenueToday: live
-        .filter((o) => o.created_at.slice(0, 10) === todayStr)
-        .reduce((sum, o) => sum + Number(o.total), 0),
-      revenueWeek: live
-        .filter((o) => new Date(o.created_at) >= weekStart)
-        .reduce((sum, o) => sum + Number(o.total), 0),
-      revenueMonth: live
-        .filter((o) => new Date(o.created_at) >= monthStart)
-        .reduce((sum, o) => sum + Number(o.total), 0),
-    };
+    return buildOrdersDashboardStats(orders, { now: new Date(), timeZone: ORDERS_STATS_TIME_ZONE });
   }, [orders]);
 
   // ── Filter tab counts ──────────────────────────────────────────────────────────
@@ -611,14 +593,64 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
         </div>
       )}
 
-      {/* ── Stats bar — 6 cards ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mb-8">
-        <StatCard label="Active orders" value={stats.active} />
-        <StatCard label="Pending payment" value={stats.pendingPayment} accent="yellow" />
-        <StatCard label="In production" value={stats.inProduction} accent="purple" />
-        <StatCard label="Today" value={`$${stats.revenueToday.toFixed(2)}`} accent="blue" />
-        <StatCard label="This week" value={`$${stats.revenueWeek.toFixed(2)}`} accent="green" />
-        <StatCard label="This month" value={`$${stats.revenueMonth.toFixed(2)}`} accent="indigo" />
+      {/* ── Stats bar — 5 operational cards + business totals disclosure ── */}
+      <div className="mb-8 space-y-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
+          <StatCard label="Active orders" value={stats.active} />
+          <StatCard label="Pending payment" value={stats.pendingPayment} accent="yellow" />
+          <StatCard label="In production" value={stats.inProduction} accent="purple" />
+          <StatCard label="Ready for pickup" value={stats.readyForPickup} accent="green" />
+          <StatCard label="New quote requests" value={newQuoteCount} accent="blue" />
+        </div>
+
+        <div className="bg-white border border-gray-100 rounded-xl p-4">
+          <button
+            type="button"
+            aria-expanded={businessTotalsOpen}
+            aria-controls="business-totals-panel"
+            onClick={() => setBusinessTotalsOpen((open) => !open)}
+            className="flex w-full items-center justify-between gap-3 text-left text-sm font-semibold text-[#1c1712] hover:text-[#16C2F3] transition-colors"
+          >
+            <span>Business totals</span>
+            <span className="text-xs uppercase tracking-widest text-gray-400">
+              {businessTotalsOpen ? "Hide" : "Show"}
+            </span>
+          </button>
+
+          {businessTotalsOpen && (
+            <div id="business-totals-panel" className="mt-4 border-t border-gray-100 pt-4">
+              <p className="text-xs text-gray-400 mb-3">
+                Paid orders only. Archived and unpaid orders are excluded.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 leading-tight">
+                    Paid today
+                  </p>
+                  <p className="text-xl font-bold tabular-nums text-blue-700">
+                    {CAD_CURRENCY_FORMATTER.format(stats.paidToday)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 leading-tight">
+                    Paid this week
+                  </p>
+                  <p className="text-xl font-bold tabular-nums text-green-700">
+                    {CAD_CURRENCY_FORMATTER.format(stats.paidWeek)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 leading-tight">
+                    Paid this month
+                  </p>
+                  <p className="text-xl font-bold tabular-nums text-indigo-600">
+                    {CAD_CURRENCY_FORMATTER.format(stats.paidMonth)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Search + filter + sort row ── */}
