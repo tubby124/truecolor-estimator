@@ -40,6 +40,7 @@ import {
   type LatestPaidHintPayload,
   mergeLatestPaidAttribution,
   mergeUtmAttribution,
+  sanitizeUtm,
 } from "@/lib/analytics/utm";
 import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytics/attribution-db";
 import { getMetaCapiRequestContext } from "@/lib/analytics/metaCapi";
@@ -458,7 +459,9 @@ export async function POST(req: NextRequest) {
           ...mapLatestPaidAttributionToDb(latestPaidTouch),
           referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
           referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
-          raw_referrer: (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(0, 500) || null,
+          raw_referrer: (utm.landing_referrer ?? sanitizeUtm({
+            landing_referrer: req.headers.get("referer"),
+          }).landing_referrer ?? "").slice(0, 500) || null,
           meta_tracking_consent: metaContext.marketingConsent,
           meta_fbp: metaContext.fbp ?? null,
           meta_fbc: metaContext.fbc ?? null,

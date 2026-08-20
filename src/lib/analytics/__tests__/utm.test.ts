@@ -117,20 +117,20 @@ describe("UTM attribution helpers", () => {
   it("preserves landing_path and landing_referrer from the first-touch cookie", () => {
     const cookiePayload = encodeURIComponent(JSON.stringify({
       landing_path: "/products/vinyl-banners",
-      landing_referrer: "https://www.google.com/",
+      landing_referrer: "https://www.google.com",
       captured_at: Date.now(),
     }));
 
     expect(parseUtmCookie(`${UTM_COOKIE_NAME}=${cookiePayload}`)).toEqual({
       landing_path: "/products/vinyl-banners",
-      landing_referrer: "https://www.google.com/",
+      landing_referrer: "https://www.google.com",
     });
   });
 
   it("merges landing_referrer from cookie alongside explicit utm hints", () => {
     const cookiePayload = encodeURIComponent(JSON.stringify({
       landing_path: "/coroplast-signs-saskatoon",
-      landing_referrer: "https://maps.google.com/",
+      landing_referrer: "https://maps.google.com",
       captured_at: Date.now(),
     }));
 
@@ -142,7 +142,7 @@ describe("UTM attribution helpers", () => {
     expect(merged.utm_source).toBe("brevo");
     expect(merged.utm_campaign).toBe("spring_drip");
     expect(merged.landing_path).toBe("/coroplast-signs-saskatoon");
-    expect(merged.landing_referrer).toBe("https://maps.google.com/");
+    expect(merged.landing_referrer).toBe("https://maps.google.com");
   });
 
   it("normalizes landing paths and rejects external or query-bearing values", () => {
@@ -150,6 +150,13 @@ describe("UTM attribution helpers", () => {
       .toBe("/coroplast-signs");
     expect(sanitizeUtm({ landing_path: "https://evil.example/path" }).landing_path).toBeUndefined();
     expect(sanitizeUtm({ landing_path: "//evil.example/path" }).landing_path).toBeUndefined();
+  });
+
+  it("keeps only a referrer's origin and rejects malformed values", () => {
+    expect(sanitizeUtm({
+      landing_referrer: "https://www.google.com/search?q=private+customer#fragment",
+    }).landing_referrer).toBe("https://www.google.com");
+    expect(sanitizeUtm({ landing_referrer: "javascript:alert(1)" }).landing_referrer).toBeUndefined();
   });
 
   it("sanitizes click IDs and supported Google ValueTrack fields", () => {

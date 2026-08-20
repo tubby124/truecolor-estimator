@@ -52,6 +52,20 @@ function cleanLandingPath(value: unknown): string | undefined {
   }
 }
 
+function cleanLandingReferrer(value: unknown): string | undefined {
+  const raw = clean(value, 500);
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
+    // Source classification only needs the referring site. Keep no upstream
+    // path/query because referrer URLs can contain user-entered values.
+    return url.origin;
+  } catch {
+    return undefined;
+  }
+}
+
 const CLICK_ID_RE = /^[A-Za-z0-9._~-]{1,200}$/;
 const NUMERIC_ID_RE = /^\d{1,30}$/;
 const ENUM_VALUES = {
@@ -85,7 +99,7 @@ export function sanitizeUtm(input: Record<string, unknown>): UtmAttribution {
   }
   const lp = cleanLandingPath(input.landing_path);
   if (lp) out.landing_path = lp;
-  const lr = clean(input.landing_referrer, 500);
+  const lr = cleanLandingReferrer(input.landing_referrer);
   if (lr) out.landing_referrer = lr;
   return out;
 }

@@ -96,15 +96,14 @@ describe("buildAttributionSetCookies (middleware server-side click capture)", ()
         device: "m",
         campaignid: "42",
         network: "g",
-        landing_path:
-          "/coroplast-signs-saskatoon?gclid=EAIaIQobCh_123&utm_source=google&utm_medium=cpc&utm_campaign=coroplast&keyword=coroplast%20signs&matchtype=e&device=m&campaignid=42&network=g",
-        landing_referrer: "https://www.google.com/",
+        landing_path: "/coroplast-signs-saskatoon",
+        landing_referrer: "https://www.google.com",
       },
       capturedAt: new Date(NOW).toISOString(),
     });
 
     expect(parseUtmCookie(header).gclid).toBe("EAIaIQobCh_123");
-    expect(parseUtmCookie(header).landing_referrer).toBe("https://www.google.com/");
+    expect(parseUtmCookie(header).landing_referrer).toBe("https://www.google.com");
   });
 
   it("carries a 90-day latest-paid TTL, a 30-day first-touch TTL, and Lax/Secure/Path flags", () => {

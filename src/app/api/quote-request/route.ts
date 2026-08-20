@@ -30,6 +30,7 @@ import {
   collectLatestPaidHints,
   mergeLatestPaidAttribution,
   mergeUtmAttribution,
+  sanitizeUtm,
 } from "@/lib/analytics/utm";
 import {
   mapAttributionToDb,
@@ -522,10 +523,9 @@ export async function POST(req: NextRequest) {
             referrer_source: (utm.utm_source ?? refClass.source).slice(0, 100),
             referrer_medium: (utm.utm_medium ?? refClass.medium).slice(0, 50),
             raw_referrer:
-              (utm.landing_referrer ?? req.headers.get("referer") ?? "").slice(
-                0,
-                500,
-              ) || null,
+              (utm.landing_referrer ?? sanitizeUtm({
+                landing_referrer: req.headers.get("referer"),
+              }).landing_referrer ?? "").slice(0, 500) || null,
             ...mapAttributionToDb(utm),
             ...mapLatestPaidAttributionToDb(latestPaidTouch),
           })
