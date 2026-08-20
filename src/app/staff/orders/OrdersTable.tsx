@@ -46,6 +46,7 @@ export interface Order {
   wave_invoice_number: string | null;
   wave_invoice_approved_at: string | null;
   wave_payment_recorded_at: string | null;
+  paid_at: string | null;
   created_at: string;
   notes: string | null;
   staff_notes: string | null;
@@ -67,6 +68,7 @@ export interface Order {
 
 interface Props {
   initialOrders: Order[];
+  newQuoteCount: number;
 }
 
 // ─── Stat card ─────────────────────────────────────────────────────────────────
@@ -171,7 +173,8 @@ function downloadOrdersCsv(rows: Order[], filterLabel: string): void {
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
-export function OrdersTable({ initialOrders }: Props) {
+export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
+  void newQuoteCount;
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);

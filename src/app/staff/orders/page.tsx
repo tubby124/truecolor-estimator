@@ -62,7 +62,7 @@ export default async function StaffOrdersPage() {
             </p>
           </div>
         ) : (
-          <OrdersTable initialOrders={orders} />
+          <OrdersTable initialOrders={orders} newQuoteCount={newQuoteCount} />
         )}
       </main>
 
@@ -115,6 +115,7 @@ async function fetchOrders() {
       wave_invoice_number,
       wave_invoice_approved_at,
       wave_payment_recorded_at,
+      paid_at,
       created_at,
       notes,
       staff_notes,
