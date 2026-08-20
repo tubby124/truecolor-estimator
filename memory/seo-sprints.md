@@ -606,3 +606,13 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **Guardrails:** No page files, H1s, titles, descriptions, schema, protected-page URLs, or internal anchors changed. Each redirect has a semantic equivalent and sources must never become 404s. The city-page-consolidation test locks the redirect/sitemap contract.
 - **Data limitation:** orders and quote_requests do not persist landing_path, so historical order-level attribution by city landing page cannot be proven. This wave is limited to the lowest-evidence 18 URLs rather than city product pages.
 - **Next steps / trigger date:** Verify production redirect status, target canonical/indexability, and sitemap after deploy. Observe GSC and GA4 for 7–14 days before any Wave 2 city×product consolidation. Stop if protected Saskatoon pages show material regression.
+
+---
+
+## SEO Phase 105 — City-matrix consolidation, Wave 1 internal-link cleanup (2026-08-20)
+
+- **Finding:** The 18 Wave 1 URLs correctly redirect and were removed from the sitemap, but `SiteFooter.tsx` still linked sitewide to those retired label and AI-service city variants. That was contrary to the Wave 1 plan's internal-variant-grid cleanup requirement.
+- **What changed:** Removed only the 18 links whose source URLs are already permanently redirected: 12 label city variants plus 3 image-upscale and 3 logo-vectorization city variants. The Saskatoon label and AI-service links remain.
+- **Explicitly retained:** The genuine Saskatchewan service-area hub links, Regina banner/coroplast links, and all Wave 2/3 city-product links. Those routes have not been approved for consolidation; their footer links remain until a future wave passes page-level evidence checks and its redirects ship.
+- **Guardrails:** No destination page content, title, H1, schema, sitemap entry, route, or redirect mapping changed. This is an internal-link cleanup aligned only to already-live redirects.
+- **Verification required:** lint, TypeScript/build, and production footer/redirect smoke before declaring live.

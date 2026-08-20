@@ -216,18 +216,6 @@ export function SiteFooter() {
             <Link href="/freezer-labels-saskatoon" className="hover:text-white transition-colors">Freezer Labels</Link>
             <Link href="/product-labels-saskatoon" className="hover:text-white transition-colors">Product Labels</Link>
             <Link href="/roll-labels-saskatoon" className="hover:text-white transition-colors">Roll Labels</Link>
-            <Link href="/candle-jar-labels-regina" className="hover:text-white transition-colors">Candle Labels Regina</Link>
-            <Link href="/cosmetic-labels-regina" className="hover:text-white transition-colors">Cosmetic Labels Regina</Link>
-            <Link href="/freezer-labels-regina" className="hover:text-white transition-colors">Freezer Labels Regina</Link>
-            <Link href="/product-labels-regina" className="hover:text-white transition-colors">Product Labels Regina</Link>
-            <Link href="/candle-jar-labels-moose-jaw-sk" className="hover:text-white transition-colors">Candle Labels Moose Jaw</Link>
-            <Link href="/cosmetic-labels-moose-jaw-sk" className="hover:text-white transition-colors">Cosmetic Labels Moose Jaw</Link>
-            <Link href="/freezer-labels-moose-jaw-sk" className="hover:text-white transition-colors">Freezer Labels Moose Jaw</Link>
-            <Link href="/product-labels-moose-jaw-sk" className="hover:text-white transition-colors">Product Labels Moose Jaw</Link>
-            <Link href="/candle-jar-labels-prince-albert-sk" className="hover:text-white transition-colors">Candle Labels Prince Albert</Link>
-            <Link href="/cosmetic-labels-prince-albert-sk" className="hover:text-white transition-colors">Cosmetic Labels Prince Albert</Link>
-            <Link href="/freezer-labels-prince-albert-sk" className="hover:text-white transition-colors">Freezer Labels Prince Albert</Link>
-            <Link href="/product-labels-prince-albert-sk" className="hover:text-white transition-colors">Product Labels Prince Albert</Link>
           </div>
         </div>
 
@@ -237,12 +225,6 @@ export function SiteFooter() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 text-sm">
             <Link href="/logo-vectorization-saskatoon" className="hover:text-white transition-colors">Logo Vectorization</Link>
             <Link href="/image-upscale-saskatoon" className="hover:text-white transition-colors">Image Upscale</Link>
-            <Link href="/logo-vectorization-regina" className="hover:text-white transition-colors">Logo Vec Regina</Link>
-            <Link href="/image-upscale-regina" className="hover:text-white transition-colors">Image Upscale Regina</Link>
-            <Link href="/logo-vectorization-moose-jaw-sk" className="hover:text-white transition-colors">Logo Vec Moose Jaw</Link>
-            <Link href="/image-upscale-moose-jaw-sk" className="hover:text-white transition-colors">Image Upscale Moose Jaw</Link>
-            <Link href="/logo-vectorization-prince-albert-sk" className="hover:text-white transition-colors">Logo Vec Prince Albert</Link>
-            <Link href="/image-upscale-prince-albert-sk" className="hover:text-white transition-colors">Image Upscale Prince Albert</Link>
           </div>
         </div>
 
