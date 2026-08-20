@@ -69,11 +69,13 @@ describe("calculateOrdersDashboardStats", () => {
     expect(stats.paidMonth).toBe(100.5);
   });
 
-  it("never counts archived, pending-payment, unpaid, or invalid totals as paid revenue", () => {
+  it("counts paid revenue by paid_at regardless of status while preserving pending-payment count", () => {
     const stats = calculateOrdersDashboardStats(
       [
         order({ status: "payment_received", total: "12.25" }),
         order({ status: "pending_payment", total: 100, paid_at: "2026-08-18T16:00:00.000Z" }),
+        order({ status: "legacy_status", total: 25, paid_at: "2026-08-18T16:00:00.000Z" }),
+        order({ status: null, total: 5, paid_at: "2026-08-18T16:00:00.000Z" }),
         order({ status: "payment_received", total: 100, paid_at: null }),
         order({ status: "payment_received", total: "not-a-number" }),
         order({ status: "in_production", total: null }),
@@ -82,8 +84,9 @@ describe("calculateOrdersDashboardStats", () => {
       { now: NOW, timeZone: TIME_ZONE },
     );
 
-    expect(stats.paidToday).toBe(12.25);
-    expect(stats.paidWeek).toBe(12.25);
-    expect(stats.paidMonth).toBe(12.25);
+    expect(stats.pendingPayment).toBe(1);
+    expect(stats.paidToday).toBe(142.25);
+    expect(stats.paidWeek).toBe(142.25);
+    expect(stats.paidMonth).toBe(142.25);
   });
 });

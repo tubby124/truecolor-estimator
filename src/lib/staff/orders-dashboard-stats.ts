@@ -32,7 +32,6 @@ const ZERO_STATS: OrdersDashboardStats = {
 };
 
 const ACTIVE_STATUSES = new Set(["pending_payment", "payment_received", "in_production", "ready_for_pickup"]);
-const PAID_REVENUE_STATUSES = new Set(["complete", "payment_received", "in_production", "ready_for_pickup"]);
 const MS_PER_DAY = 86_400_000;
 
 type LocalDateParts = {
@@ -111,7 +110,7 @@ export function calculateOrdersDashboardStats(
     if (order.status === "in_production") stats.inProduction += 1;
     if (order.status === "ready_for_pickup") stats.readyForPickup += 1;
 
-    if (!order.paid_at || !PAID_REVENUE_STATUSES.has(order.status ?? "")) continue;
+    if (!order.paid_at) continue;
 
     const paidParts = localDateParts(new Date(order.paid_at), options.timeZone);
     if (!paidParts) continue;
