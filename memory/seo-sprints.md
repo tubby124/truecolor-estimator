@@ -596,3 +596,13 @@ the stale `$75–$150` tier figures were left in place where they describe genui
   were emailed a $35 design quote between Jun 15 and Jul 30 — cannot be un-sent.
 - **Next steps / trigger date:** Brevo server-side correction before 2026-08-25. No GSC re-check
   needed — price-only body edits, no ranking-signal changes.
+
+---
+
+## SEO Phase 104 — City-matrix consolidation, Wave 1 (2026-08-20)
+
+- **Source evidence:** Full sitemap inventory found 46 non-Saskatoon city variants. The 18 label/image-upscale/logo-vectorization matrix pages are substantially similar city permutations. Fresh GSC snapshots through 2026-08-17 showed no material click evidence for this cohort; GA4 showed only isolated low-volume organic sessions.
+- **What shipped:** Added 18 explicit permanent one-hop redirects in next.config.ts from the retired city variants to the exact indexed Saskatoon service equivalent. Removed only those 18 sources from src/app/sitemap.ts; retained all Saskatoon pages and regional city hubs, including Regina banner/coroplast.
+- **Guardrails:** No page files, H1s, titles, descriptions, schema, protected-page URLs, or internal anchors changed. Each redirect has a semantic equivalent and sources must never become 404s. The city-page-consolidation test locks the redirect/sitemap contract.
+- **Data limitation:** orders and quote_requests do not persist landing_path, so historical order-level attribution by city landing page cannot be proven. This wave is limited to the lowest-evidence 18 URLs rather than city product pages.
+- **Next steps / trigger date:** Verify production redirect status, target canonical/indexability, and sitemap after deploy. Observe GSC and GA4 for 7–14 days before any Wave 2 city×product consolidation. Stop if protected Saskatoon pages show material regression.

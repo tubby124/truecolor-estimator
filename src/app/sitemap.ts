@@ -113,30 +113,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/image-upscale-saskatoon`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.75 },
     { url: `${BASE_URL}/logo-vectorization-saskatoon`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.75 },
 
-    // ── Label & service city-variant SEO pages — Wave 2026-05-14 programmatic expansion ──
-    // Labels × Regina
-    { url: `${BASE_URL}/freezer-labels-regina`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/product-labels-regina`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/cosmetic-labels-regina`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/candle-jar-labels-regina`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    // Labels × Moose Jaw
-    { url: `${BASE_URL}/freezer-labels-moose-jaw-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/product-labels-moose-jaw-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/cosmetic-labels-moose-jaw-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/candle-jar-labels-moose-jaw-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    // Labels × Prince Albert
-    { url: `${BASE_URL}/freezer-labels-prince-albert-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/product-labels-prince-albert-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/cosmetic-labels-prince-albert-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/candle-jar-labels-prince-albert-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.7 },
-    // Image upscale × cities
-    { url: `${BASE_URL}/image-upscale-regina`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.65 },
-    { url: `${BASE_URL}/image-upscale-moose-jaw-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.65 },
-    { url: `${BASE_URL}/image-upscale-prince-albert-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.65 },
-    // Logo vectorization × cities
-    { url: `${BASE_URL}/logo-vectorization-regina`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.65 },
-    { url: `${BASE_URL}/logo-vectorization-moose-jaw-sk`, lastModified: new Date("2026-05-25"), changeFrequency: "monthly", priority: 0.65 },
-    { url: `${BASE_URL}/logo-vectorization-prince-albert-sk`, lastModified: new Date("2026-05-14"), changeFrequency: "monthly", priority: 0.65 },
+    // ── City-page consolidation — Wave 1 (2026-08-20) ───────────────────────
+    // 18 low-evidence city matrices now 301 to their exact Saskatoon service
+    // equivalents (see next.config.ts). They intentionally stay out of sitemap.
 
     // ── Seasonal pages ────────────────────────────────────────────────────────
     // /st-patricks-day-printing-saskatoon removed from sitemap 2026-05-05 — out of season + page now noindex; restore Feb 2027
