@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Hotel event signage from $45. Foamboard meeting room signs, retractable banners, vinyl, ACP exterior. Same-day rush available. Local Saskatoon pickup.",
     url: "https://truecolorprinting.ca/hotel-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

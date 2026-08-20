@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Yard signs from $8/sqft. Feature sheets, cards, vehicle magnets. Same-day rush available. Local Saskatoon pickup at 216 33rd St W.",
     url: "https://truecolorprinting.ca/real-estate-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

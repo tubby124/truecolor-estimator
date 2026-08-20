@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Vinyl banners from $8.25/sqft shipped to Moose Jaw. Grommets and hemming included. True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/banner-printing-moose-jaw-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

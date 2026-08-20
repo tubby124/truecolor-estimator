@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Coroplast yard signs from $24 each for Saskatoon daycares and preschools. Enrollment banners, window decals, and foamboard displays. Same-day rush +$40.",
     url: "https://truecolorprinting.ca/daycare-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Sign company in Saskatoon for coroplast signs from $25, ACP aluminum from $39, banners from $66, vehicle magnets and window decals. Local pickup.",
     url: "https://truecolorprinting.ca/sign-company-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

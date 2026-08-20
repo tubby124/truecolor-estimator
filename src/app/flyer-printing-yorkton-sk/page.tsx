@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Full-colour flyers from $45 for 100, shipped to Yorkton. 80lb gloss, any size. True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/flyer-printing-yorkton-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

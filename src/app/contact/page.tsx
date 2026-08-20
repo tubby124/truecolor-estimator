@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description:
       "Drop by our Saskatoon shop at 216 33rd St W or send a message. In-house Roland UV printer. Same-day rush +$40. Signs, banners, business cards from $25.",
     url: "https://truecolorprinting.ca/contact",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

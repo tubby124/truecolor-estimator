@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Wall graphics and removable wall coverings in Saskatoon from $11/sqft. Large vinyl murals, office walls, retail displays. Rush +$40.",
     url: "https://truecolorprinting.ca/wall-graphics-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

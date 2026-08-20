@@ -626,3 +626,12 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **Scope intentionally excluded:** Staff/Social Studio has its own legacy colour map and campaign-specific colours; it was not mass-restyled in this customer-facing correction. Red remains valid only for explicitly seasonal/campaign semantics, such as Canada Day.
 - **SEO safety:** No titles, H1s, URLs, canonical/schema, content copy, sitemap, redirects, or metadata changed.
 - **Verification:** Targeted lint passed (CSS was correctly ignored by ESLint) and full production build passed with the project-required 4 GB Node heap.
+
+---
+
+## SEO Phase 107 — Default social-share card refresh (2026-08-20)
+
+- **Owner-approved asset:** Replaced `public/og-image.png` with the approved 1200×630 True Color social-share card: warm cream, espresso/black, cyan accents, official wordmark, product collage, and Saskatoon location.
+- **Propagation:** Updated 69 public Open Graph/Twitter references to request `og-image.png?v=20260820`, including root metadata. This forces social platforms to fetch the new card instead of retaining their cached old blue preview. Purpose-built product/gallery share images remain untouched.
+- **Guardrails:** No page content, title/H1, canonical/schema, sitemap, redirects, pricing, or page layout changed.
+- **Verification:** Targeted metadata lint passed; full production build passed.

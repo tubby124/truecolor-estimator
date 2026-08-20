@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     description:
       "Meet the team behind True Color Display Printing. Roland TrueVIS UV printer, Konica Minolta press, in-house designer. Local Saskatoon shop at 216 33rd St W.",
     url: "https://truecolorprinting.ca/about",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "In-house Photoshop designer. Custom logos, artwork mods, print layouts from $40. Design + print in one shop. Local pickup 216 33rd St W, Saskatoon.",
     url: "https://truecolorprinting.ca/graphic-design-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Business card printing in Saskatoon from $45 for 250 double-sided 14pt gloss cards. Same-day rush +$40, in-house design $40, local pickup.",
     url: "https://truecolorprinting.ca/business-cards-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Lease signage and for-lease signs across Saskatchewan from $8/sqft. 18×24\" coroplast, post-mounted boards, fence panels. Same-day +$40. Bulk 5+ save 8%.",
     url: "https://truecolorprinting.ca/for-lease-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

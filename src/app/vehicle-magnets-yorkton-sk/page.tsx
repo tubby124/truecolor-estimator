@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Custom vehicle magnets from $24/sqft shipped to Yorkton. Agriculture, retail, contractor fleet branding. Roland UV-printed — True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/vehicle-magnets-yorkton-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

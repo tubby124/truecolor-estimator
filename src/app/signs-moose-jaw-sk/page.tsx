@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Coroplast signs, vinyl banners, and vehicle magnets for Moose Jaw SK. Printed in Saskatoon — shipped to Moose Jaw. From $8/sqft.",
     url: "https://truecolorprinting.ca/signs-moose-jaw-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

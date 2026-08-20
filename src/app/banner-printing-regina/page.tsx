@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Vinyl banners from $8.25/sqft shipped to Regina. Grommets included, full colour, any size. Order online — True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/banner-printing-regina",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

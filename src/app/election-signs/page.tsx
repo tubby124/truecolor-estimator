@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Custom coroplast election signs from $8/sqft. Double-sided available. Same-day rush. Local Saskatoon pickup.",
     url: "https://truecolorprinting.ca/election-signs",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

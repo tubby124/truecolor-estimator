@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Coroplast signs, vinyl banners, vehicle magnets, and business cards for Swift Current SK. Printed in Saskatoon — shipped to Swift Current.",
     url: "https://truecolorprinting.ca/printing-swift-current-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

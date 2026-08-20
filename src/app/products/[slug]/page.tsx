@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${product.name} Saskatoon | ${product.fromPrice} | True Color`,
       description: `${product.name} in Saskatoon. ${product.tagline} From ${product.fromPrice}. Local pickup at 216 33rd St W.`,
       url: `https://truecolorprinting.ca/products/${slug}`,
-      images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+      images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
       locale: "en_CA",
       type: "website",
     },

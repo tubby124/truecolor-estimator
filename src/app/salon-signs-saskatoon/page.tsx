@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Window vinyl, foamboard service menus, referral cards, and grand opening banners for Saskatoon salons, spas, and barber shops. In-house designer $40. Rush +$40.",
     url: "https://truecolorprinting.ca/salon-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

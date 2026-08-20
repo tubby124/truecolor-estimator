@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Vehicle magnets for demo fleets, monthly sales banners, coroplast price signs, and ACP lot signage for Saskatoon car dealerships and auto businesses. Rush +$40.",
     url: "https://truecolorprinting.ca/car-dealership-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

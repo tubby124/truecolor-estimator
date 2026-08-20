@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Photo posters from $15. Roland Photobase Matte 220gsm. 12×18\" to 36×48\". Single prints welcome; small carts top up to the $25 order-total minimum at checkout. Same-day rush available. Local Saskatoon pickup 216 33rd St W.",
     url: "https://truecolorprinting.ca/photo-poster-printing-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

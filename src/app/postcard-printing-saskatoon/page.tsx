@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "14pt gloss postcards from $35. 3×4, 4×6, and 5×7, double-sided. Same-day rush available. Saskatoon pickup at 216 33rd St W.",
     url: "https://truecolorprinting.ca/postcard-printing-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "For-rent coroplast signs from $8/sqft. Bulk 5+ save 8%. ACP aluminum, banners, vehicle magnets. Same-day rush available. Local Saskatoon pickup 216 33rd St W.",
     url: "https://truecolorprinting.ca/property-management-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Roll labels on a core for breweries, cannabis & food packagers. 1,000 from $325. BOPP or matte vinyl, 1\" or 3\" cores. Custom quote in 1 business day.",
     url: "https://truecolorprinting.ca/roll-labels-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

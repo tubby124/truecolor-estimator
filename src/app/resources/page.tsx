@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     // FIX 2: Open Graph image for social sharing
     images: [
       {
-        url: "https://truecolorprinting.ca/og-image.png",
+        url: "https://truecolorprinting.ca/og-image.png?v=20260820",
         width: 1200,
         height: 630,
         alt: "True Color Display Printing — Print & Design Resources for Saskatoon Businesses",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     title: "Print & Design Resources | True Color Display Printing",
     description:
       "Industry news for every Saskatoon business type — restaurants, farms, contractors, realtors, and more.",
-    images: ["https://truecolorprinting.ca/og-image.png"],
+    images: ["https://truecolorprinting.ca/og-image.png?v=20260820"],
   },
 };
 

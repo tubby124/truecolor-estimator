@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     description:
       "Business cards for new associates in 24–48 hrs. ACP suite signs, retractable banners, and foamboard displays for Saskatoon dental clinics. Local pickup.",
     url: "https://truecolorprinting.ca/dental-office-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

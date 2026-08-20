@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Custom vinyl lettering in Saskatoon from $8.50/sqft. Storefronts, vehicles, boats, office doors. In-house Roland UV cut vinyl. Same-day rush +$40.",
     url: "https://truecolorprinting.ca/vinyl-lettering-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

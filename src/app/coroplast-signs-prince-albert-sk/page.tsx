@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Coroplast yard signs from $8/sqft shipped to Prince Albert. Volume pricing, H-stakes $2.50. True Color Display Printing, Saskatoon.",
     url: "https://truecolorprinting.ca/coroplast-signs-prince-albert-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

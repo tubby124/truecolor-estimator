@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Coroplast signs, vehicle magnets, ACP aluminum, and vinyl banners for North Battleford SK. Printed in Saskatoon — shipped to North Battleford. From $8/sqft.",
     url: "https://truecolorprinting.ca/signs-north-battleford-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

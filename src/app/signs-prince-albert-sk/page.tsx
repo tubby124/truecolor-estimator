@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Coroplast signs, vinyl banners, and business cards for Prince Albert SK. Printed in Saskatoon — shipped to PA. True Color Display Printing.",
     url: "https://truecolorprinting.ca/signs-prince-albert-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Fundraiser and event signage from $24. Coroplast, banners, flyers, retractable. Volume discounts. $25 order-total minimum at checkout. Same-day rush. Local Saskatoon pickup.",
     url: "https://truecolorprinting.ca/non-profit-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

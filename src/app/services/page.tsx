@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Full-service print shop in Saskatoon. Coroplast from $8/sqft, banners from $66, cards from $45. In-house Roland UV, designer $40, rush +$40. 216 33rd St W.",
     url: "https://truecolorprinting.ca/services",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

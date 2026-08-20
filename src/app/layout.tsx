@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.png?v=20260820",
         width: 1200,
         height: 630,
         alt: "True Color Display Printing — Saskatoon Print Shop",
@@ -96,7 +96,7 @@ export const metadata: Metadata = {
     title: "True Color Printing | Signs, Banners & Cards Saskatoon",
     description:
       "Coroplast signs from $25. Vinyl banners from $66. Business cards from $45. In-house designer at 216 33rd St W Saskatoon.",
-    images: ["https://truecolorprinting.ca/og-image.png"],
+    images: ["https://truecolorprinting.ca/og-image.png?v=20260820"],
   },
 };
 
@@ -119,7 +119,7 @@ const organizationSchema = {
     width: 512,
     height: 512,
   },
-  image: "https://truecolorprinting.ca/og-image.png",
+  image: "https://truecolorprinting.ca/og-image.png?v=20260820",
   email: "info@true-color.ca",
   telephone: "+13069548688",
   founder: { "@id": "https://truecolorprinting.ca/#albert-yeung" },

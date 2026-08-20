@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     description:
       "Real 2026 Saskatoon printing prices: coroplast from $8/sqft, banners from $66, 250 business cards $45, flyers $45/100. Full cost guide, no quote forms.",
     url: "https://truecolorprinting.ca/printing-prices-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "article",
   },
 };

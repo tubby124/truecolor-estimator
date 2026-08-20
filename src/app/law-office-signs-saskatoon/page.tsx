@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Signage for Saskatoon law firms and financial advisors. ACP directories from $13/sqft, business cards 500 for $65. Same-day rush available.",
     url: "https://truecolorprinting.ca/law-office-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

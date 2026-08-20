@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Taproom banners, beer brand stickers, retractable stands, and window decals for Saskatoon craft breweries. Fast turnaround for seasonal launches and tap events.",
     url: "https://truecolorprinting.ca/brewery-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

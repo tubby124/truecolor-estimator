@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Flyer printing in Saskatoon from $45 for 100 full-colour double-sided flyers. 80lb or 100lb gloss, same-day rush +$40, local pickup.",
     url: "https://truecolorprinting.ca/flyer-printing-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Vehicle magnets, vinyl banners, coroplast signs, and ACP aluminum for Yorkton SK. Printed in Saskatoon — shipped to Yorkton. From $8/sqft.",
     url: "https://truecolorprinting.ca/signs-yorkton-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

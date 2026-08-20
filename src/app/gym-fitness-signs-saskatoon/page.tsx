@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Grand opening banners, class schedule boards, and membership drive signage for Saskatoon gyms, CrossFit boxes, and yoga studios. Rush +$40. Local pickup.",
     url: "https://truecolorprinting.ca/gym-fitness-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Vehicle magnets, ACP aluminum signs, coroplast, and vinyl banners for Estevan SK. Printed in Saskatoon — shipped to Estevan. Vehicle magnets from $24/sqft.",
     url: "https://truecolorprinting.ca/printing-estevan-sk",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };

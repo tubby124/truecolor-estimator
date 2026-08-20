@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Reception displays, retractable banners, and referral business cards for Saskatoon chiropractic and physiotherapy clinics. Same-day rush +$40 flat.",
     url: "https://truecolorprinting.ca/chiropractor-signs-saskatoon",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
     type: "website",
   },
 };
