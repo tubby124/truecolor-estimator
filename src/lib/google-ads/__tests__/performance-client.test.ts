@@ -94,7 +94,7 @@ const conversionInventory = [
       category: "PAGE_VIEW",
       origin: "WEBSITE",
       ownerCustomer: "customers/1072816342",
-      primaryForGoal: true,
+      primaryForGoal: false,
       includeInConversionsMetric: false,
     },
   },
@@ -130,6 +130,24 @@ function response(
     status,
     headers: { "content-type": "application/json", ...headers },
   });
+}
+
+async function fetchWithConversionInventory(rows: unknown[]) {
+  const fetchImpl = vi.fn()
+    .mockResolvedValueOnce(response({ access_token: "access" }))
+    .mockResolvedValueOnce(response({ results: [accountInventory] }))
+    .mockResolvedValueOnce(response({ results: campaignInventory }))
+    .mockResolvedValueOnce(response({ results: rows }))
+    .mockResolvedValueOnce(response({ results: customerConversionGoals }))
+    .mockResolvedValueOnce(response({ results: [] }))
+    .mockResolvedValueOnce(response({ results: [] }))
+    .mockResolvedValueOnce(response({ results: [] }))
+    .mockResolvedValueOnce(response({ results: [] }));
+  const result = await fetchGoogleAdsDailyPerformance(
+    { startDate: "2026-07-20", endDate: "2026-07-20" },
+    { fetchImpl, env },
+  );
+  return { fetchImpl, result };
 }
 
 describe("read-only Google Ads performance client", () => {
@@ -257,7 +275,7 @@ describe("read-only Google Ads performance client", () => {
       category: "PAGE_VIEW",
       origin: "WEBSITE",
       ownerCustomer: "customers/1072816342",
-      primaryForGoal: true,
+      primaryForGoal: false,
       includeInConversionsMetric: false,
     });
     expect(result.adGroups[0]).toMatchObject({
@@ -569,6 +587,39 @@ describe("read-only Google Ads performance client", () => {
     );
     expect((failure as Error).message).not.toContain("private");
     expect(exhaustedFetch).toHaveBeenCalledTimes(4);
+  });
+
+
+  it("accepts live-shaped or absent legacy About Us only while it stays secondary/excluded", async () => {
+    await expect(fetchWithConversionInventory(conversionInventory)).resolves.toMatchObject({
+      result: { campaigns: [] },
+    });
+
+    await expect(fetchWithConversionInventory(
+      conversionInventory.filter(({ conversionAction }) => conversionAction.id !== "7688596965"),
+    )).resolves.toMatchObject({ result: { searchTerms: [] } });
+
+    await expect(fetchWithConversionInventory(
+      conversionInventory.map((row) => row.conversionAction.id === "7688596965"
+        ? {
+            conversionAction: {
+              ...row.conversionAction,
+              primaryForGoal: true,
+            },
+          }
+        : row),
+    )).rejects.toThrow("legacy About Us conversion action has drifted");
+
+    await expect(fetchWithConversionInventory(
+      conversionInventory.map((row) => row.conversionAction.id === "7688596965"
+        ? {
+            conversionAction: {
+              ...row.conversionAction,
+              includeInConversionsMetric: true,
+            },
+          }
+        : row),
+    )).rejects.toThrow("legacy About Us conversion action has drifted");
   });
 
   it("fails before metric reads when conversion bidding goals drift", async () => {

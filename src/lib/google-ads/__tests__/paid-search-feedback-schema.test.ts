@@ -31,6 +31,14 @@ const weeklyElapsedPacingMigration = readFileSync(
   "utf8",
 );
 
+const conversionGraphRepairMigration = readFileSync(
+  path.join(
+    process.cwd(),
+    "supabase/migrations/20260820193000_google_ads_conversion_inventory_contract_repair.sql",
+  ),
+  "utf8",
+);
+
 describe("paid-search feedback schema contract", () => {
   it("stages each reporting grain under an exact run attempt and account", () => {
     expect(migration).toContain(
@@ -120,6 +128,34 @@ describe("paid-search feedback schema contract", () => {
     expect(weeklyMigration).toContain(
       "has_table_privilege(\n       'service_role',\n       'public.google_ads_daily_metrics',\n       'SELECT'",
     );
+  });
+
+  it("repairs the conversion goal attestation for the live secondary About Us action", () => {
+    expect(conversionGraphRepairMigration).toContain(
+      "DROP CONSTRAINT IF EXISTS google_ads_metric_sync_runs_conversion_goal_attestation_check",
+    );
+    expect(conversionGraphRepairMigration).toContain(
+      "ADD CONSTRAINT google_ads_metric_sync_runs_conversion_goal_attestation_check",
+    );
+    expect(conversionGraphRepairMigration).toContain(
+      "Live 2026-08-20 conversion graph",
+    );
+    expect(conversionGraphRepairMigration).toContain(
+      '"name": "About Us"',
+    );
+    expect(conversionGraphRepairMigration).toContain(
+      '"primaryForGoal": false',
+    );
+    expect(conversionGraphRepairMigration).toContain(
+      '"includeInConversionsMetric": false',
+    );
+    expect(conversionGraphRepairMigration).toContain(
+      "jsonb_array_length(conversion_goal_attestation -> 'conversionActions') BETWEEN 3 AND 100",
+    );
+    expect(conversionGraphRepairMigration).toContain(
+      "Unknown included/biddable actions are intentionally rejected by the application contract",
+    );
+    expect(conversionGraphRepairMigration).not.toMatch(/DROP CONSTRAINT IF EXISTS (?!google_ads_metric_sync_runs_conversion_goal_attestation_check)/);
   });
 
   it("attests self-owned conversion tracking and non-biddable legacy goals only on success", () => {

@@ -575,14 +575,10 @@ const EXPECTED_CONVERSION_ACTIONS = Object.freeze([
 ] as const);
 
 /**
- * The legacy codeless "About Us" PAGE_VIEW action. It counted 101 page loads as conversions in
- * 30 days and is REMOVED as of the 2026-08-16 conversion-graph pass
- * (scripts/google-ads/apply-conversion-actions.mjs, op iii).
- *
- * The inventory query filters `status != 'REMOVED'`, so after the removal this action is simply
- * ABSENT. Its absence is now the target state, not drift — but the shape stays pinned so that an
- * account where it is still ENABLED (a rollback, a restore, a second account) is still checked
- * against exactly what it used to be, rather than silently passing.
+ * The legacy codeless "About Us" PAGE_VIEW action. Live GAQL receipts on 2026-08-20 showed
+ * Google restored/materialised it as ENABLED but excluded from bidding and conversions. Absence
+ * still passes because the inventory query filters `status != 'REMOVED'`; if present, it must be
+ * owned by True Color and remain secondary/excluded.
  */
 const EXPECTED_LEGACY_PAGE_VIEW_ACTION = Object.freeze({
   id: "7688596965",
@@ -590,7 +586,7 @@ const EXPECTED_LEGACY_PAGE_VIEW_ACTION = Object.freeze({
   status: "ENABLED",
   category: "PAGE_VIEW",
   origin: "WEBSITE",
-  primaryForGoal: true,
+  primaryForGoal: false,
   includeInConversionsMetric: false,
 } as const);
 
