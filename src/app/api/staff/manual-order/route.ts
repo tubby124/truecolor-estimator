@@ -57,6 +57,7 @@ const ACQUISITION_SOURCES = [
   "referral",
   "walk_in",
   "other",
+  "unknown",
 ] as const;
 type AcquisitionSource = (typeof ACQUISITION_SOURCES)[number];
 

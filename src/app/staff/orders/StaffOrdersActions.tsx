@@ -204,7 +204,7 @@ interface FormState {
    *  search click IDs onto it, so the Google Ads outbox trigger can attribute
    *  the revenue instead of parking it as not_attributable. */
   quote_request_id: string;
-  acquisition_source: "" | "google_ads_call" | "google_organic_call" | "repeat_customer" | "referral" | "walk_in" | "other";
+  acquisition_source: "" | "google_ads_call" | "google_organic_call" | "repeat_customer" | "referral" | "walk_in" | "other" | "unknown";
 }
 
 function makeItem(): OrderItem {
@@ -948,11 +948,12 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                         <option value="referral">Referral</option>
                         <option value="walk_in">Walk-in</option>
                         <option value="other">Other</option>
+                        <option value="unknown">Unknown / customer did not say</option>
                       </select>
                     </label>
                   )}
                   <p className="mt-2 text-xs leading-5 text-slate-600">
-                    This records commercial source. It does not claim a Google Ads conversion unless the sale is tied to a tracked ad click or linked website quote.
+                    Choose Google Ads only when the caller confirms it or the tracked forwarding number proves it. This never claims an Ads conversion by itself.
                   </p>
                 </div>
 
