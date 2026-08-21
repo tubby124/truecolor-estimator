@@ -620,7 +620,7 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
           {businessTotalsOpen && (
             <div id="business-totals-panel" className="mt-4 border-t border-gray-100 pt-4">
               <p className="text-xs text-gray-400 mb-3">
-                Paid orders only. Archived and unpaid orders are excluded.
+                Paid totals include archived orders. Open balances stay separate so the work queue does not rewrite the books.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
@@ -646,6 +646,35 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
                   <p className="text-xl font-bold tabular-nums text-indigo-600">
                     {CAD_CURRENCY_FORMATTER.format(stats.paidMonth)}
                   </p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-gray-100 pt-4">
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 leading-tight">
+                    Orders received this month
+                  </p>
+                  <p className="text-xl font-bold tabular-nums text-[#1c1712]">
+                    {CAD_CURRENCY_FORMATTER.format(stats.ordersReceivedMonth)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 leading-tight">
+                    Open unpaid balance
+                  </p>
+                  <p className="text-xl font-bold tabular-nums text-yellow-700">
+                    {CAD_CURRENCY_FORMATTER.format(stats.openPendingBalance)}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-400">Live pending-payment orders only</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 leading-tight">
+                    Archived pending review
+                  </p>
+                  <p className="text-xl font-bold tabular-nums text-gray-600">
+                    {CAD_CURRENCY_FORMATTER.format(stats.archivedPendingMonth)}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-400">Not counted as open receivables</p>
                 </div>
               </div>
             </div>

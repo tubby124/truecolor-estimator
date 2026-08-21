@@ -28,6 +28,9 @@ describe("calculateOrdersDashboardStats", () => {
       paidToday: 0,
       paidWeek: 0,
       paidMonth: 0,
+      ordersReceivedMonth: 0,
+      openPendingBalance: 0,
+      archivedPendingMonth: 0,
     });
   });
 
@@ -69,7 +72,7 @@ describe("calculateOrdersDashboardStats", () => {
     expect(stats.paidMonth).toBe(100.5);
   });
 
-  it("counts paid revenue by paid_at regardless of status while preserving pending-payment count", () => {
+  it("keeps paid financial history after archive while isolating live and archived pending balances", () => {
     const stats = calculateOrdersDashboardStats(
       [
         order({ status: "payment_received", total: "12.25" }),
@@ -77,6 +80,8 @@ describe("calculateOrdersDashboardStats", () => {
         order({ status: "legacy_status", total: 25, paid_at: "2026-08-18T16:00:00.000Z" }),
         order({ status: null, total: 5, paid_at: "2026-08-18T16:00:00.000Z" }),
         order({ status: "payment_received", total: 100, paid_at: null }),
+        order({ status: "pending_payment", total: 30, paid_at: null, created_at: "2026-08-18T16:00:00.000Z" }),
+        order({ status: "pending_payment", total: 40, paid_at: null, is_archived: true, created_at: "2026-08-18T16:00:00.000Z" }),
         order({ status: "payment_received", total: "not-a-number" }),
         order({ status: "in_production", total: null }),
         order({ status: "ready_for_pickup", total: 100, is_archived: true }),
@@ -84,9 +89,12 @@ describe("calculateOrdersDashboardStats", () => {
       { now: NOW, timeZone: TIME_ZONE },
     );
 
-    expect(stats.pendingPayment).toBe(1);
-    expect(stats.paidToday).toBe(142.25);
-    expect(stats.paidWeek).toBe(142.25);
-    expect(stats.paidMonth).toBe(142.25);
+    expect(stats.pendingPayment).toBe(2);
+    expect(stats.openPendingBalance).toBe(30);
+    expect(stats.archivedPendingMonth).toBe(40);
+    expect(stats.ordersReceivedMonth).toBe(70);
+    expect(stats.paidToday).toBe(242.25);
+    expect(stats.paidWeek).toBe(242.25);
+    expect(stats.paidMonth).toBe(242.25);
   });
 });

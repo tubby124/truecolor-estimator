@@ -14,6 +14,9 @@ export type OrdersDashboardStats = {
   paidToday: number;
   paidWeek: number;
   paidMonth: number;
+  ordersReceivedMonth: number;
+  openPendingBalance: number;
+  archivedPendingMonth: number;
 };
 
 export type OrdersDashboardStatsOptions = {
@@ -29,6 +32,9 @@ const ZERO_STATS: OrdersDashboardStats = {
   paidToday: 0,
   paidWeek: 0,
   paidMonth: 0,
+  ordersReceivedMonth: 0,
+  openPendingBalance: 0,
+  archivedPendingMonth: 0,
 };
 
 const ACTIVE_STATUSES = new Set(["pending_payment", "payment_received", "in_production", "ready_for_pickup"]);
@@ -103,22 +109,39 @@ export function calculateOrdersDashboardStats(
   const stats = { ...ZERO_STATS };
 
   for (const order of orders) {
+    const total = safeTotal(order.total);
+    const createdParts = order.created_at
+      ? localDateParts(new Date(order.created_at), options.timeZone)
+      : null;
+    const paidParts = order.paid_at
+      ? localDateParts(new Date(order.paid_at), options.timeZone)
+      : null;
+
+    // Financial history is independent of the staff work queue: archived paid
+    // orders remain paid revenue and must not disappear from monthly totals.
+    if (paidParts) {
+      if (isSameLocalDay(paidParts, nowParts)) stats.paidToday += total;
+      if (paidParts.ordinal >= weekStartOrdinal && paidParts.ordinal <= nowParts.ordinal) stats.paidWeek += total;
+      if (paidParts.year === nowParts.year && paidParts.month === nowParts.month) stats.paidMonth += total;
+    }
+
+    if (createdParts && createdParts.year === nowParts.year && createdParts.month === nowParts.month) {
+      stats.ordersReceivedMonth += total;
+      if (order.is_archived && !order.paid_at && order.status === "pending_payment") {
+        stats.archivedPendingMonth += total;
+      }
+    }
+
+    // Operational work remains deliberately archive-free.
     if (order.is_archived) continue;
 
     if (ACTIVE_STATUSES.has(order.status ?? "")) stats.active += 1;
-    if (order.status === "pending_payment") stats.pendingPayment += 1;
+    if (order.status === "pending_payment") {
+      stats.pendingPayment += 1;
+      if (!order.paid_at) stats.openPendingBalance += total;
+    }
     if (order.status === "in_production") stats.inProduction += 1;
     if (order.status === "ready_for_pickup") stats.readyForPickup += 1;
-
-    if (!order.paid_at) continue;
-
-    const paidParts = localDateParts(new Date(order.paid_at), options.timeZone);
-    if (!paidParts) continue;
-
-    const total = safeTotal(order.total);
-    if (isSameLocalDay(paidParts, nowParts)) stats.paidToday += total;
-    if (paidParts.ordinal >= weekStartOrdinal && paidParts.ordinal <= nowParts.ordinal) stats.paidWeek += total;
-    if (paidParts.year === nowParts.year && paidParts.month === nowParts.month) stats.paidMonth += total;
   }
 
   return stats;
