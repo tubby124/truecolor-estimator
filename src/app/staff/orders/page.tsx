@@ -15,12 +15,14 @@ export const dynamic = "force-dynamic";
 
 export default async function StaffOrdersPage() {
   let orders: Awaited<ReturnType<typeof fetchOrders>> = [];
+  let dashboardOrders: Awaited<ReturnType<typeof fetchDashboardOrders>> = [];
   let fetchError: string | null = null;
   let newQuoteCount = 0;
 
   try {
-    [orders, newQuoteCount] = await Promise.all([
+    [orders, dashboardOrders, newQuoteCount] = await Promise.all([
       fetchOrders(),
+      fetchDashboardOrders(),
       fetchNewQuoteCount(),
     ]);
   } catch (err) {
@@ -62,7 +64,7 @@ export default async function StaffOrdersPage() {
             </p>
           </div>
         ) : (
-          <OrdersTable initialOrders={orders} newQuoteCount={newQuoteCount} />
+          <OrdersTable initialOrders={orders} initialDashboardOrders={dashboardOrders} newQuoteCount={newQuoteCount} />
         )}
       </main>
 
@@ -91,6 +93,30 @@ async function fetchNewQuoteCount(): Promise<number> {
       .select("*", { count: "exact", head: true })
       .gte("created_at", cutoff);
     return count ?? 0;
+  }
+}
+
+async function fetchDashboardOrders() {
+  const supabase = createServiceClient();
+  const pageSize = 1_000;
+  const orders: Array<{
+    id: string;
+    status: string | null;
+    total: number | string | null;
+    is_archived: boolean | null;
+    created_at: string | null;
+    paid_at: string | null;
+  }> = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, status, total, is_archived, created_at, paid_at")
+      .order("created_at", { ascending: false })
+      .range(from, from + pageSize - 1);
+    if (error) throw new Error(error.message);
+    orders.push(...(data ?? []));
+    if ((data ?? []).length < pageSize) return orders;
   }
 }
 

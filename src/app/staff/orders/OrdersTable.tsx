@@ -10,7 +10,7 @@ import {
 } from "@/lib/data/order-constants";
 import { StaffOrderCard } from "@/components/staff/orders/StaffOrderCard";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
-import { calculateOrdersDashboardStats as buildOrdersDashboardStats } from "@/lib/staff/orders-dashboard-stats";
+import { calculateOrdersDashboardStats as buildOrdersDashboardStats, type OrdersDashboardStatsOrder } from "@/lib/staff/orders-dashboard-stats";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -67,8 +67,11 @@ export interface Order {
   order_items: OrderItem[] | null;
 }
 
+type DashboardOrder = OrdersDashboardStatsOrder & { id: string };
+
 interface Props {
   initialOrders: Order[];
+  initialDashboardOrders: DashboardOrder[];
   newQuoteCount: number;
 }
 
@@ -204,8 +207,9 @@ function downloadOrdersCsv(rows: Order[], filterLabel: string): void {
 type OrderListFilter = "active" | "complete" | "archived" | "all";
 type QuickOrderFilter = "active" | "pending_payment" | "in_production" | "ready_for_pickup";
 
-export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
+export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCount }: Props) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [dashboardOrders, setDashboardOrders] = useState<DashboardOrder[]>(initialDashboardOrders);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [filter, setFilter] = useState<OrderListFilter>("active");
@@ -260,7 +264,8 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
       return merged;
     });
     setLastSync(new Date());
-  }, [initialOrders]);
+    setDashboardOrders(initialDashboardOrders);
+  }, [initialOrders, initialDashboardOrders]);
 
   // Supabase Realtime subscription — live order status updates
   useEffect(() => {
@@ -317,8 +322,8 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
   // ── Stats ──────────────────────────────────────────────────────────────────────
 
   const stats = useMemo(() => {
-    return buildOrdersDashboardStats(orders, { now: new Date(), timeZone: ORDERS_STATS_TIME_ZONE });
-  }, [orders]);
+    return buildOrdersDashboardStats(dashboardOrders, { now: new Date(), timeZone: ORDERS_STATS_TIME_ZONE });
+  }, [dashboardOrders]);
 
   // ── Filter tab counts ──────────────────────────────────────────────────────────
 
