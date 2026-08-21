@@ -47,8 +47,8 @@ describe("sendEmail", () => {
   });
 
   it("keeps a successful delivery successful when secondary email_log fails", async () => {
-    vi.stubEnv("SUPABASE_URL", "https://supabase.test");
-    vi.stubEnv("SUPABASE_SERVICE_KEY", "service-key");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://supabase.test");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "service-key");
     fetchMock
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ id: "resend-456" }), {
@@ -78,8 +78,8 @@ describe("sendEmail", () => {
   });
 
   it("surfaces an uncertain outcome when a required durable log write fails", async () => {
-    vi.stubEnv("SUPABASE_URL", "https://supabase.test");
-    vi.stubEnv("SUPABASE_SERVICE_KEY", "service-key");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://supabase.test");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "service-key");
     fetchMock
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ id: "resend-review" }), {
@@ -102,8 +102,8 @@ describe("sendEmail", () => {
   });
 
   it("passes a future delivery time to Resend and durably logs the accepted request", async () => {
-    vi.stubEnv("SUPABASE_URL", "https://supabase.test");
-    vi.stubEnv("SUPABASE_SERVICE_KEY", "service-key");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://supabase.test");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "service-key");
     fetchMock
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ id: "resend-scheduled" }), {

@@ -38,7 +38,7 @@ export function AccountClientPage() {
   const [quotesLoading, setQuotesLoading] = useState(false);
 
   // Profile editing
-  const [profile, setProfile] = useState<CustomerProfile>({ name: "", phone: "", company: "", address: "" });
+  const [profile, setProfile] = useState<CustomerProfile>({ name: "", phone: "", company: "", address: "", marketing_consent: false });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
   const [profileError, setProfileError] = useState("");
@@ -90,6 +90,7 @@ export function AccountClientPage() {
         phone: data.phone ?? "",
         company: data.company ?? "",
         address: data.address ?? "",
+        marketing_consent: data.marketing_consent === true,
       });
     } catch (err) {
       console.error("[account] fetchProfile:", err);

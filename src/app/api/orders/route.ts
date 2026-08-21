@@ -218,15 +218,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
     }
 
-    // Save CASL marketing consent (non-fatal — columns added via migration).
-    // Must `await` — void doesn't fire the HTTP request (2026-05-15 audit).
-    if (marketing_consent !== undefined) {
+    // An unchecked optional box is not a withdrawal: preserve any prior yes.
+    // Only an affirmative checkout action creates/refreshes consent.
+    if (marketing_consent === true) {
       const { error: consentErr } = await supabase
         .from("customers")
         .update({
-          marketing_consent: marketing_consent === true,
+          marketing_consent: true,
           consent_at: new Date().toISOString(),
           consent_ip: ip,
+          consent_source: "checkout",
+          consent_version: "marketing-v1-2026-08",
+          consent_withdrawn_at: null,
         } as Record<string, unknown>)
         .eq("id", customer.id);
       if (consentErr) console.error("[orders] marketing_consent save failed (non-fatal):", consentErr.message);

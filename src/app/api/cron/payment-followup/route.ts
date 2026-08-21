@@ -426,6 +426,23 @@ export async function GET(req: NextRequest) {
     console.error("[payment-followup] chase signal failed (non-fatal):", sigErr);
   }
 
+  // The existing hourly Railway service is the only scheduler we need. Keep the
+  // review worker disabled until its internal delivery proof passes; once the
+  // explicit flag is enabled it gets the same authenticated cron boundary.
+  if (process.env.REVIEW_REQUESTS_ENABLED === "true") {
+    try {
+      const reviewResponse = await fetch(`${SITE_URL}/api/cron/review-requests`, {
+        headers: { Authorization: `Bearer ${cronSecret}` },
+        signal: AbortSignal.timeout(45_000),
+      });
+      if (!reviewResponse.ok) {
+        console.error(`[payment-followup] review worker failed: HTTP ${reviewResponse.status}`);
+      }
+    } catch (reviewWorkerError) {
+      console.error("[payment-followup] review worker request failed:", reviewWorkerError);
+    }
+  }
+
   await recordCronRun(
     "payment-followup",
     true,

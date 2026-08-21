@@ -375,6 +375,21 @@ export async function syncOrderReplies(options: {
         });
         if (!audited) throw new Error("Inbound reply audit write failed");
 
+        // Any genuine reply is a stop signal for this customer's review cycle.
+        // This intentionally avoids parsing sentiment: a human resolves the
+        // conversation before the system ever asks for public feedback again.
+        if (order.customer_id && senderMatchesCustomer) {
+          const replySuppressedAt = received.iso;
+          const reason = "customer-replied";
+          const [{ error: cycleSuppressError }, { error: stateSuppressError }] = await Promise.all([
+            supabase.from("review_request_cycles").update({ suppressed_at: replySuppressedAt, suppression_reason: reason, updated_at: replySuppressedAt }).eq("order_id", order.id).is("suppressed_at", null),
+            supabase.from("customer_review_state").upsert({ customer_id: order.customer_id, suppressed_at: replySuppressedAt, suppression_reason: reason, updated_at: replySuppressedAt }, { onConflict: "customer_id" }),
+          ]);
+          if (cycleSuppressError || stateSuppressError) {
+            throw new Error(`Review suppression after reply failed: ${cycleSuppressError?.message ?? stateSuppressError?.message}`);
+          }
+        }
+
         const processedTimestamp = new Date().toISOString();
         const { error: processedError } = await supabase
           .from("order_messages")

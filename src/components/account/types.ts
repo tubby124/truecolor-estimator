@@ -65,4 +65,5 @@ export interface CustomerProfile {
   phone: string;
   company: string;
   address: string;
+  marketing_consent: boolean;
 }

@@ -184,6 +184,32 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // A failed review request must never quietly fall through to the reminder.
+  // The cycle stores provider IDs precisely so this does not depend on subject
+  // wording or a customer email address supplied by the webhook.
+  if (new Set(["email.bounced", "email.complained", "email.suppressed", "email.failed"]).has(event.type)) {
+    const { data: failedReviewCycles, error: reviewCycleError } = await supabase
+      .from("review_request_cycles")
+      .select("id,customer_id")
+      .or(`provider_initial_message_id.eq.${messageId},provider_reminder_message_id.eq.${messageId}`);
+    if (reviewCycleError) {
+      console.error("[resend-webhook] review suppression lookup failed:", reviewCycleError.message);
+      return NextResponse.json({ ok: false, error: "Failed to suppress review cycle" }, { status: 500 });
+    }
+    for (const cycle of failedReviewCycles ?? []) {
+      const reason = `provider-${event.type.replace("email.", "")}`;
+      const at = new Date().toISOString();
+      const [{ error: cycleSuppressError }, { error: customerSuppressError }] = await Promise.all([
+        supabase.from("review_request_cycles").update({ suppressed_at: at, suppression_reason: reason, updated_at: at }).eq("id", cycle.id),
+        supabase.from("customer_review_state").upsert({ customer_id: cycle.customer_id, suppressed_at: at, suppression_reason: reason, updated_at: at }, { onConflict: "customer_id" }),
+      ]);
+      if (cycleSuppressError || customerSuppressError) {
+        console.error("[resend-webhook] review suppression write failed:", cycleSuppressError?.message ?? customerSuppressError?.message);
+        return NextResponse.json({ ok: false, error: "Failed to suppress review cycle" }, { status: 500 });
+      }
+    }
+  }
+
   const quoteDeliveryError = await reconcileTaggedQuoteDelivery(
     supabase,
     event,

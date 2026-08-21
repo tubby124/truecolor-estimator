@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
   // Fetch base profile fields we know exist
   const { data: customer, error } = await admin
     .from("customers")
-    .select("name, email, company, phone, address")
+    .select("name, email, company, phone, address, marketing_consent")
     .eq("email", email)
     .maybeSingle();
 
@@ -78,6 +78,7 @@ export async function GET(req: NextRequest) {
     companies,
     phone: customer.phone ?? null,
     address: customer.address ?? null,
+    marketing_consent: customer.marketing_consent === true,
   });
 }
 
@@ -90,6 +91,7 @@ export async function PATCH(req: NextRequest) {
     phone?: string;
     address?: string;
     company?: string;
+    marketing_consent?: boolean;
   };
 
   const admin = getAdmin();
@@ -105,6 +107,13 @@ export async function PATCH(req: NextRequest) {
   if (body.name !== undefined) updates.name = body.name.trim() || null;
   if (body.phone !== undefined) updates.phone = body.phone.trim() || null;
   if (body.address !== undefined) updates.address = body.address.trim() || null;
+  if (body.marketing_consent !== undefined) {
+    updates.marketing_consent = body.marketing_consent;
+    updates.consent_at = new Date().toISOString();
+    updates.consent_source = "account_preferences";
+    updates.consent_version = "marketing-v1-2026-08";
+    updates.consent_withdrawn_at = body.marketing_consent ? null : new Date().toISOString();
+  }
 
   if (body.company !== undefined) {
     const newCompany = body.company.trim();

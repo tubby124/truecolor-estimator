@@ -237,8 +237,10 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   }
 
   // Log to email_log (non-fatal — never block email delivery on a DB write)
-  const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SECRET_KEY;
+  // Server writes must follow the application database, not a generic SUPABASE_URL
+  // inherited from another Railway project.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY;
   let emailLogWritten = false;
   if (supabaseUrl && supabaseKey) {
     const toList = toEmailList(options.to);

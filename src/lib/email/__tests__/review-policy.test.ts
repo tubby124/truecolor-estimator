@@ -15,8 +15,8 @@ describe("review solicitation policy", () => {
 
     expect(emailSource).not.toMatch(/review[\s\S]{0,120}\$10 off|\$10 off[\s\S]{0,120}review/i);
     expect(emailSource).not.toMatch(/happy with the results|if you(?:'|’)re happy|not 100% happy/i);
-    expect(emailSource).toContain("We send the same request to every customer");
-    expect(emailSource).toContain("there is no reward for leaving a review");
+    expect(emailSource).toContain("No reward.");
+    expect(emailSource).toContain("honest Google review");
     expect(source("src/lib/email/reviewRequest.ts")).not.toContain("bcc: process.env.SMTP_BCC");
   });
 

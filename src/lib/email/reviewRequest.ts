@@ -1,197 +1,115 @@
 /**
- * src/lib/email/reviewRequest.ts
+ * Honest Google review request — sent by the guarded review-request cron.
  *
- * Neutral review request email — sent to every customer when an order is
- * marked "complete" by staff.
- *
- * Sent from: PATCH /api/staff/orders/[id]/status when status === "complete"
- *
+ * The voice is owner-led and direct, not a copy of another brand. It must never
+ * exchange a discount, reward, or favourable-rating request for a review.
  */
 
 import { sendEmail } from "./smtp";
 import { emailHeader } from "./components/emailHeader";
 import { emailFooter } from "./components/emailFooter";
-import { orderTrackingNudge, orderTrackingNudgeText } from "./components/orderTrackingNudge";
 import { escHtml } from "./components/escHtml";
 import { preheader } from "./components/preheader";
 import { productAnchor } from "./components/productAnchor";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+export type ReviewRequestTouch = "initial" | "reminder";
 
 export interface ReviewRequestParams {
   orderId: string;
-  customerId?: string;
+  customerId: string;
   customerName: string;
   customerEmail: string;
   orderNumber: string;
-  /** ISO-8601 delivery time. Review requests are deferred after pickup. */
-  scheduledAt: string;
-  /** Optional — used for product-anchored subject ("How did your business cards turn out?") */
+  touch: ReviewRequestTouch;
+  /** Tokenized reply address lets an inbound customer reply stop this cycle. */
+  replyTo?: string;
   items?: Array<{ product_name: string; qty: number }>;
 }
 
-// ─── Google review link ───────────────────────────────────────────────────────
-// verified 2026-04-08 — opens True Color Display Printing Ltd. Google review dialog
-const GOOGLE_REVIEW_URL =
-  "https://g.page/r/CZH6HlbNejQAEAE/review";
-
-// ─── Entry point ──────────────────────────────────────────────────────────────
+// Verified 2026-08-21: opens True Color Display Printing Ltd. Google review dialog.
+const GOOGLE_REVIEW_URL = "https://g.page/r/CZH6HlbNejQAEAE/review";
 
 export async function sendReviewRequestEmail(
-  params: ReviewRequestParams
-): Promise<void> {
-  const from =
-    process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
+  params: ReviewRequestParams,
+): Promise<{ providerMessageId: string }> {
+  const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
   const anchor = productAnchor(params.items);
-  const subject =
-    anchor === "your order"
-      ? `How did your order turn out?`
-      : `How did your ${anchor} turn out?`;
-  const html = buildReviewRequestEmailHtml(params);
-  const text = buildReviewRequestEmailText(params);
+  const subject = params.touch === "initial"
+    ? anchor === "your order" ? "Quick gut check on your order" : `Quick gut check on your ${anchor}`
+    : anchor === "your order" ? "One last quick thing about your order" : `One last quick thing about your ${anchor}`;
 
-  await sendEmail({
+  return sendEmail({
     from,
     to: params.customerEmail,
+    replyTo: params.replyTo,
     subject,
-    html,
-    text,
+    html: buildReviewRequestEmailHtml(params),
+    text: buildReviewRequestEmailText(params),
     orderId: params.orderId,
     customerId: params.customerId,
-    scheduledAt: params.scheduledAt,
-    idempotencyKey: `review-request/${params.orderId}`,
+    idempotencyKey: `review-request/${params.touch}/${params.orderId}`,
     requireEmailLog: true,
-    tags: [{ name: "email_type", value: "review_request" }],
+    tags: [
+      { name: "email_type", value: "review_request" },
+      { name: "review_touch", value: params.touch },
+    ],
   });
-
-  console.log(
-    `[reviewRequest] email scheduled for ${params.scheduledAt} → ${params.customerEmail} | order ${params.orderNumber}`
-  );
 }
 
-// ─── HTML builder ─────────────────────────────────────────────────────────────
-
-function buildReviewRequestEmailHtml({
-  customerName,
-  orderNumber,
-}: ReviewRequestParams): string {
+function buildReviewRequestEmailHtml({ customerName, orderNumber, touch }: ReviewRequestParams): string {
   const firstName = customerName.split(" ")[0] || customerName;
+  const reminder = touch === "reminder";
+  const headline = reminder ? "One last tiny favour." : "Quick gut check.";
+  const body = reminder
+    ? "Your print is hopefully out there doing its job. If you have a minute, an honest Google review helps a local shop more than another generic ad ever could."
+    : "Did your finished print do what it needed to do? If yes, great. If not, reply and tell us. Either way, an honest Google review helps a local Saskatoon shop earn the next job.";
 
   return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>How did your order ${escHtml(orderNumber)} turn out?</title>
-</head>
-<body style="margin:0;padding:0;background-color:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-  ${preheader("Tell us honestly how your completed order turned out.")}
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-    style="background-color:#f4efe9;padding:32px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
-
-        ${emailHeader()}
-
-        <!-- HERO -->
-        <tr>
-          <td style="background:#ffffff;padding:36px 32px 24px;text-align:center;border-top:3px solid #f5c842;">
-            <div style="display:inline-block;width:50px;height:50px;background:#f5c842;border-radius:50%;line-height:50px;text-align:center;margin-bottom:16px;">
-              <span style="font-size:26px;color:#1c1712;line-height:50px;display:inline-block;">&#9733;</span>
-            </div>
-            <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              Your order is complete!
-            </h1>
-            <p style="margin:0 0 18px;font-size:14px;color:#6b7280;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-              Hi ${escHtml(firstName)}, we would appreciate your honest feedback about the finished order.
-            </p>
-            <div style="display:inline-block;background:#f4efe9;border-radius:8px;padding:8px 20px;border:1px solid #ddd5c8;">
-              <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:block;margin-bottom:2px;">
-                Order
-              </span>
-              <span style="font-size:17px;font-weight:700;color:#1c1712;letter-spacing:.04em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                ${escHtml(orderNumber)}
-              </span>
-            </div>
-          </td>
-        </tr>
-
-        <!-- BODY -->
-        <tr>
-          <td style="background:#ffffff;padding:8px 32px 32px;">
-
-            <!-- Review ask -->
-            <div style="background:#fffbea;border:1px solid #f5c842;border-radius:10px;padding:20px 24px;margin-bottom:24px;text-align:center;">
-              <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#1c1712;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                How did your order turn out?
-              </p>
-              <p style="margin:0 0 20px;font-size:14px;color:#4a3728;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-                Please share an honest Google review&mdash;what went well and what we could improve.
-                We send the same request to every customer, and there is no reward for leaving a review.
-              </p>
-              <!-- CTA Button -->
-              <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
-                <tr>
-                  <td style="background:#e52222;border-radius:8px;">
-                    <a href="${escHtml(GOOGLE_REVIEW_URL)}"
-                       style="display:inline-block;padding:14px 32px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.01em;">
-                      Leave a Google Review &#8594;
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </div>
-
-            ${orderTrackingNudge()}
-
-            <!-- Support block -->
-            <div style="background:#fdf4f4;border:1px solid #f0bfbb;border-radius:8px;padding:14px 16px;margin-bottom:8px;">
-              <p style="margin:0;font-size:13px;color:#7a1818;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;">
-                Need help with this order? Reply to this email or call us at
-                <a href="tel:+13069548688" style="color:#e52222;font-weight:600;text-decoration:none;">(306) 954-8688</a>
-                &mdash; we&rsquo;ll make it right.
-              </p>
-            </div>
-
-          </td>
-        </tr>
-
-        ${emailFooter(`This is a one-time courtesy email for order #${escHtml(orderNumber)}.`)}
-
-      </table>
-    </td></tr>
-  </table>
-
-</body>
-</html>`;
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>${escHtml(headline)}</title></head>
+<body style="margin:0;padding:0;background:#f4efe9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+  ${preheader(reminder ? "A final, no-pressure request for honest feedback." : "An honest review helps a local print shop grow.")}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4efe9;padding:32px 16px;"><tr><td align="center">
+    <table role="presentation" width="100%" style="max-width:560px" cellpadding="0" cellspacing="0">
+      ${emailHeader()}
+      <tr><td style="background:#1c1712;padding:34px 32px 26px;border-top:4px solid #f5c842;">
+        <p style="margin:0 0 12px;font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#f5c842;">True Color field report · ${reminder ? "final ping" : "your order"}</p>
+        <h1 style="margin:0;font-size:29px;line-height:1.1;font-weight:800;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escHtml(headline)}</h1>
+      </td></tr>
+      <tr><td style="background:#fff;padding:30px 32px 32px;">
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#1c1712;">Hi ${escHtml(firstName)},</p>
+        <p style="margin:0 0 18px;font-size:15px;line-height:1.65;color:#374151;">${escHtml(body)}</p>
+        <div style="margin:0 0 24px;padding:14px 16px;border-left:4px solid #f5c842;background:#fffbea;">
+          <p style="margin:0;font-size:13px;line-height:1.55;color:#4a3728;"><strong>Order ${escHtml(orderNumber)}</strong> · We want the real version: what worked, what did not, and what we can do better next time.</p>
+        </div>
+        <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#e52222;border-radius:7px;">
+          <a href="${escHtml(GOOGLE_REVIEW_URL)}" style="display:inline-block;padding:14px 24px;color:#fff;text-decoration:none;font-size:15px;font-weight:800;letter-spacing:.01em;">Leave an honest Google review →</a>
+        </td></tr></table>
+        <p style="margin:22px 0 0;font-size:12px;line-height:1.55;color:#6b7280;">No reward. No scripted five-star nonsense. Just your real experience. If something missed the mark, reply to this email or call (306) 954-8688 and we will deal with it.</p>
+      </td></tr>
+      ${emailFooter(`This is ${reminder ? "our final" : "a"} one-time follow-up for order #${escHtml(orderNumber)}.`)}
+    </table>
+  </td></tr></table>
+</body></html>`;
 }
 
-// ─── Plain-text fallback ──────────────────────────────────────────────────────
-
-function buildReviewRequestEmailText({
-  customerName,
-  orderNumber,
-}: ReviewRequestParams): string {
+function buildReviewRequestEmailText({ customerName, orderNumber, touch }: ReviewRequestParams): string {
   const firstName = customerName.split(" ")[0] || customerName;
-
+  const body = touch === "reminder"
+    ? "Your print is hopefully out there doing its job. If you have a minute, an honest Google review helps a local shop more than another generic ad ever could."
+    : "Did your finished print do what it needed to do? If yes, great. If not, reply and tell us. Either way, an honest Google review helps a local Saskatoon shop earn the next job.";
   return `Hi ${firstName},
 
-Your order #${orderNumber} is now complete. We would appreciate your honest feedback about the finished order.
+${body}
 
-Please share an honest Google review — what went well and what we could improve. We send the same request to every customer, and there is no reward for leaving a review:
+Order ${orderNumber}. We want the real version: what worked, what did not, and what we can do better next time.
 
+Leave an honest Google review:
 ${GOOGLE_REVIEW_URL}
 
-Need help with this order? Reply to this email or call us at (306) 954-8688.
-${orderTrackingNudgeText()}
-Thanks for supporting a local Saskatoon business,
-The True Color Team
+No reward. No scripted five-star nonsense. Just your real experience. If something missed the mark, reply to this email or call (306) 954-8688 and we will deal with it.
 
----
 True Color Display Printing
 216 33rd St W, Saskatoon, SK
 (306) 954-8688 · info@true-color.ca
-
-This is a one-time courtesy email for order #${orderNumber}.
 `;
 }

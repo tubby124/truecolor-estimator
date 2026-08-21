@@ -35,6 +35,9 @@ async function processUnsubscribe(email: string): Promise<void> {
       .update({
         marketing_consent: false,
         consent_at: new Date().toISOString(),
+        consent_source: "unsubscribe",
+        consent_version: "marketing-v1-2026-08",
+        consent_withdrawn_at: new Date().toISOString(),
       })
       .eq("email", normalized);
     console.log(`[unsubscribe page] ${normalized} opted out`);

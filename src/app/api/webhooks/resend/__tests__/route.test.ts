@@ -14,7 +14,17 @@ const harness = vi.hoisted(() => ({
 
 vi.mock("@/lib/supabase/server", () => ({
   createServiceClient: () => ({
-    from: (table: "email_log" | "order_messages") => ({
+    from: (table: "email_log" | "order_messages" | "review_request_cycles" | "customer_review_state") => {
+      if (table === "review_request_cycles") {
+        return {
+          select: () => ({ or: async () => ({ data: [], error: null }) }),
+          update: () => ({ eq: () => ({ is: async () => ({ error: null }) }) }),
+        };
+      }
+      if (table === "customer_review_state") {
+        return { upsert: async () => ({ error: null }) };
+      }
+      return {
       update: (updates: Record<string, unknown>) => {
         let allowedStatuses: string[] | undefined;
         const builder: Record<string, unknown> & PromiseLike<{ error: null }> = {
@@ -36,7 +46,8 @@ vi.mock("@/lib/supabase/server", () => ({
         };
         return builder;
       },
-    }),
+      };
+    },
     rpc: async (name: string, args: Record<string, unknown>) => {
       harness.rpcCalls.push({ name, args });
       return {

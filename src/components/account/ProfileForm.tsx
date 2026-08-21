@@ -58,6 +58,17 @@ export function ProfileForm({ profile, setProfile, onSave, saving, saved, error 
             />
           </div>
         </div>
+        <label className="flex items-start gap-3 rounded-xl border border-[#16C2F3]/30 bg-[#f0fbff] p-4 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={profile.marketing_consent}
+            onChange={(e) => setProfile((p) => ({ ...p, marketing_consent: e.target.checked }))}
+            className="mt-0.5 h-4 w-4 accent-[#16C2F3]"
+          />
+          <span className="text-sm text-[#1c1712] leading-5">
+            <strong>Keep me in the loop.</strong> Send me occasional reorder reminders, print tips, customer showcases, and promotions. You can unsubscribe anytime.
+          </span>
+        </label>
         {error && (
           <p className="text-sm text-red-600">{error}</p>
         )}

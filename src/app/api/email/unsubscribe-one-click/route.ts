@@ -39,6 +39,9 @@ async function unsubscribe(email: string): Promise<void> {
     .update({
       marketing_consent: false,
       consent_at: now,
+      consent_source: "unsubscribe",
+      consent_version: "marketing-v1-2026-08",
+      consent_withdrawn_at: now,
     })
     .eq("email", normalized);
 

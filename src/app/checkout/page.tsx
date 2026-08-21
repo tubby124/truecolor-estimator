@@ -1022,10 +1022,10 @@ export default function CheckoutPage() {
                 />
                 <div>
                   <p className="text-sm text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
-                    Send me updates on new products, promotions, and print tips
+                    Send me occasional reorder reminders, print tips, customer showcases, and promotions
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    You can unsubscribe at any time.
+                    Optional. See our <a href="/privacy" className="underline hover:text-[#16C2F3]">Privacy Policy</a>. You can unsubscribe at any time.
                   </p>
                 </div>
               </label>

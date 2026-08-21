@@ -46,7 +46,7 @@ async function logTelegramAttempt(opts: {
   error: string | null;
   messagePreview: string;
 }): Promise<void> {
-  const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY;
   if (!supabaseUrl || !supabaseKey) return;
   try {
