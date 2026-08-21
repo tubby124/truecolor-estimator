@@ -29,10 +29,12 @@ describe("sendReviewRequestEmail", () => {
     await sendReviewRequestEmail({
       orderId: "order-1", customerId: "customer-1", customerName: "Jamie Customer",
       customerEmail: "jamie@example.com", orderNumber: "TC-1001", touch: "reminder",
+      replyTo: "info+o_reply-token@true-color.ca",
     });
     expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({
       idempotencyKey: "review-request/reminder/order-1",
       subject: "One last quick thing about your order",
+      replyTo: "info+o_reply-token@true-color.ca",
     }));
   });
 });

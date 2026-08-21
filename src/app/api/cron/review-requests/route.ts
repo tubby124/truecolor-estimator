@@ -197,17 +197,51 @@ export async function GET(req: NextRequest) {
       .limit(CANDIDATE_SCAN_LIMIT);
     if (reminderError) throw reminderError;
 
-    for (const cycle of (reminders ?? []) as Cycle[]) {
-      const order = orders.find((item) => item.id === cycle.order_id);
+    // Reminders may be due long after their order fell outside the bounded
+    // initial-candidate scan above. Rehydrate their own orders/state instead
+    // of silently skipping a legitimate final touch.
+    const reminderCycles = (reminders ?? []) as Cycle[];
+    const reminderOrderIds = reminderCycles.map((cycle) => cycle.order_id);
+    const reminderCustomerIds = reminderCycles.map((cycle) => cycle.customer_id);
+    const [{ data: reminderOrders, error: reminderOrdersError }, { data: reminderStates, error: reminderStatesError }, { data: reminderReplyTokens, error: reminderReplyTokensError }] = await Promise.all([
+      reminderOrderIds.length
+        ? supabase.from("orders").select("id, order_number, customer_id, completed_at, order_items(product_name, qty), customers(id, name, email, marketing_consent)").in("id", reminderOrderIds)
+        : Promise.resolve({ data: [], error: null }),
+      reminderCustomerIds.length
+        ? supabase.from("customer_review_state").select("customer_id,last_review_request_at,last_review_order_id,review_confirmed_at,suppressed_at").in("customer_id", reminderCustomerIds)
+        : Promise.resolve({ data: [], error: null }),
+      reminderOrderIds.length
+        ? supabase.from("order_reply_tokens").select("order_id,reply_token").in("order_id", reminderOrderIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (reminderOrdersError || reminderStatesError || reminderReplyTokensError) {
+      throw reminderOrdersError ?? reminderStatesError ?? reminderReplyTokensError;
+    }
+    const reminderOrderById = new Map((reminderOrders ?? []).map((order) => [order.id, order as unknown as Order]));
+    const reminderStateByCustomer = new Map((reminderStates ?? []).map((state) => [state.customer_id, state as State]));
+    const reminderReplyTokenByOrder = new Map((reminderReplyTokens ?? []).map((row) => [row.order_id, row.reply_token]));
+
+    for (const cycle of reminderCycles) {
+      const order = reminderOrderById.get(cycle.order_id);
       const customer = order ? scalarCustomer(order.customers) : null;
-      const state = customer ? stateByCustomer.get(customer.id) : null;
-      if (!order || !customer || !state || !customer.marketing_consent || state.suppressed_at || state.review_confirmed_at || state.last_review_order_id !== order.id) {
+      const state = customer ? reminderStateByCustomer.get(customer.id) : null;
+      const replyToken = reminderReplyTokenByOrder.get(cycle.order_id);
+      if (!order || !customer || !state || !replyToken || !customer.marketing_consent || state.suppressed_at || state.review_confirmed_at || state.last_review_order_id !== order.id) {
         summary.reminder.skipped++; continue;
       }
       summary.reminder.eligible++;
       if (dryRun || summary.initial.sent + summary.reminder.sent >= cap) continue;
       try {
-        const sent = await sendReviewRequestEmail({ orderId: order.id, customerId: customer.id, customerName: customer.name, customerEmail: customer.email, orderNumber: order.order_number, touch: "reminder", items: order.order_items ?? [] });
+        const sent = await sendReviewRequestEmail({
+          orderId: order.id,
+          customerId: customer.id,
+          customerName: customer.name,
+          customerEmail: customer.email,
+          orderNumber: order.order_number,
+          touch: "reminder",
+          replyTo: `info+o_${replyToken}@true-color.ca`,
+          items: order.order_items ?? [],
+        });
         const sentAt = new Date().toISOString();
         const { error: updateError } = await supabase.from("review_request_cycles").update({ reminder_sent_at: sentAt, provider_reminder_message_id: sent.providerMessageId, updated_at: sentAt }).eq("id", cycle.id).is("reminder_sent_at", null);
         if (updateError) throw updateError;
