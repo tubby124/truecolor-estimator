@@ -185,7 +185,7 @@ export function AccountClientPage() {
     setSession(null);
     setOrders([]);
     setQuoteRequests([]);
-    setProfile({ name: "", phone: "", company: "", address: "" });
+    setProfile({ name: "", phone: "", company: "", address: "", marketing_consent: false });
   }
 
   function handleReorder(order: Order) {
