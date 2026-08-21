@@ -84,10 +84,14 @@ function StatCard({
   label,
   value,
   accent,
+  onClick,
+  selected = false,
 }: {
   label: string;
   value: string | number;
   accent?: "yellow" | "purple" | "blue" | "green" | "indigo";
+  onClick?: () => void;
+  selected?: boolean;
 }) {
   const colorMap = {
     yellow: "text-yellow-700",
@@ -96,15 +100,32 @@ function StatCard({
     green: "text-green-700",
     indigo: "text-indigo-600",
   };
-  return (
-    <div className="bg-white border border-gray-100 rounded-xl p-4">
+  const content = (
+    <>
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1 leading-tight">
         {label}
       </p>
       <p className={`text-2xl font-bold tabular-nums ${accent ? colorMap[accent] : "text-[#1c1712]"}`}>
         {value}
       </p>
-    </div>
+    </>
+  );
+
+  if (!onClick) return <div className="bg-white border border-gray-100 rounded-xl p-4">{content}</div>;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`rounded-xl border p-4 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:ring-offset-2 ${
+        selected
+          ? "border-[#16C2F3] bg-[#f0fbff]"
+          : "border-gray-100 bg-white hover:border-[#16C2F3] hover:bg-[#f8fdff]"
+      }`}
+    >
+      {content}
+    </button>
   );
 }
 
@@ -180,11 +201,15 @@ function downloadOrdersCsv(rows: Order[], filterLabel: string): void {
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
+type OrderListFilter = "active" | "complete" | "archived" | "all";
+type QuickOrderFilter = "active" | "pending_payment" | "in_production" | "ready_for_pickup";
+
 export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"active" | "complete" | "archived" | "all">("active");
+  const [filter, setFilter] = useState<OrderListFilter>("active");
+  const [quickFilter, setQuickFilter] = useState<QuickOrderFilter | null>(null);
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "total_desc" | "status_asc">("newest");
@@ -317,6 +342,12 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
     else if (filter === "archived") result = result.filter((o) => o.is_archived);
     else result = result.filter((o) => !o.is_archived); // "all" = all non-archived
 
+    if (quickFilter === "active") {
+      result = result.filter((o) => !o.is_archived && o.status !== "complete");
+    } else if (quickFilter) {
+      result = result.filter((o) => !o.is_archived && o.status === quickFilter);
+    }
+
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       result = result.filter((o) => {
@@ -345,7 +376,7 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
     }
 
     return sorted;
-  }, [orders, filter, search, sortBy]);
+  }, [orders, filter, quickFilter, search, sortBy]);
 
   // ── Status advance / override ──────────────────────────────────────────────
 
@@ -596,12 +627,52 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
       {/* ── Stats bar — 5 operational cards + business totals disclosure ── */}
       <div className="mb-8 space-y-3">
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
-          <StatCard label="Active orders" value={stats.active} />
-          <StatCard label="Pending payment" value={stats.pendingPayment} accent="yellow" />
-          <StatCard label="In production" value={stats.inProduction} accent="purple" />
-          <StatCard label="Ready for pickup" value={stats.readyForPickup} accent="green" />
-          <StatCard label="New quote requests" value={newQuoteCount} accent="blue" />
+          <StatCard
+            label="Active orders"
+            value={stats.active}
+            onClick={() => { setFilter("active"); setQuickFilter("active"); }}
+            selected={quickFilter === "active"}
+          />
+          <StatCard
+            label="Pending payment"
+            value={stats.pendingPayment}
+            accent="yellow"
+            onClick={() => { setFilter("all"); setQuickFilter("pending_payment"); }}
+            selected={quickFilter === "pending_payment"}
+          />
+          <StatCard
+            label="In production"
+            value={stats.inProduction}
+            accent="purple"
+            onClick={() => { setFilter("all"); setQuickFilter("in_production"); }}
+            selected={quickFilter === "in_production"}
+          />
+          <StatCard
+            label="Ready for pickup"
+            value={stats.readyForPickup}
+            accent="green"
+            onClick={() => { setFilter("all"); setQuickFilter("ready_for_pickup"); }}
+            selected={quickFilter === "ready_for_pickup"}
+          />
+          <StatCard
+            label="New quote requests"
+            value={newQuoteCount}
+            accent="blue"
+            onClick={() => router.push("/staff/quotes")}
+          />
         </div>
+        {quickFilter && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-[#bdebf8] bg-[#f0fbff] px-3 py-2 text-sm text-[#1c1712]">
+            <span>Quick filter is showing only the selected work.</span>
+            <button
+              type="button"
+              onClick={() => { setQuickFilter(null); setFilter("all"); }}
+              className="shrink-0 font-semibold text-[#087fa3] hover:text-[#065f7b] focus:outline-none focus:ring-2 focus:ring-[#16C2F3] focus:ring-offset-2 rounded"
+            >
+              Clear — show all live orders
+            </button>
+          </div>
+        )}
 
         <div className="bg-white border border-gray-100 rounded-xl p-4">
           <button
@@ -695,7 +766,7 @@ export function OrdersTable({ initialOrders, newQuoteCount }: Props) {
           {(["active", "complete", "archived", "all"] as const).map((f) => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => { setFilter(f); setQuickFilter(null); }}
               title={
                 f === "active" ? "Pending payment + paid + in-production"
                   : f === "complete" ? "Ready for pickup + picked up"
