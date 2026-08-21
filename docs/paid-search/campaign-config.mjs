@@ -876,19 +876,15 @@ export const paidSearchConfig = {
           priceLine: "Same-day rush is +$40 flat when you order before 10 AM. Price it online now.",
           crossNegatives: ["business cards", "flyers", "stickers", "banners", "coroplast"],
         }),
-        // 2026-08-12 DESTINATION REPOINT — /printing-prices-saskatoon -> /why-true-color.
+        // 2026-08-21 CONTROLLED DESTINATION TEST — Generic Print Price only.
         //
-        // The /why-true-color price strip is now live above the mobile fold, satisfying the
-        // precondition for moving this high-volume generic-price group onto the instrumented paid
-        // landing page. Destination is the only experiment variable: variant-B copy, terms, and
-        // cross-negatives remain byte-identical.
-        //
-        // VARIANT A IS DROPPED FROM THE CONTRACT and will be PAUSED, never edited, in the same
-        // atomic swap as the old variant B. Leaving either old ad enabled would split the group
-        // across two destinations and make the experiment unreadable.
+        // /why-true-color remains the control for Generic Sign Shop. This buyer path has
+        // a single product-choice task above the fold and sends each choice directly to
+        // an orderable configurator; it remains noindex and preserves paid attribution.
+        // Copy, terms, cross-negatives, budget, bidding, and targeting are unchanged.
         coreGroup({
           key: "generic-print-price", name: "Generic Print Price", product: "printing",
-          finalUrl: `${ROOT}/why-true-color?source=google-ads`,
+          finalUrl: `${ROOT}/printing-prices-order-online?source=google-ads`,
           terms: ["printing prices saskatoon", "print shop prices saskatoon", "printing quote saskatoon", "printing saskatoon", "printing services saskatoon", "saskatoon printing services", "print shop saskatoon", "print shops saskatoon", "saskatoon print shops", "saskatoon printing", "printing in saskatoon", "printers saskatoon"],
           variantB: [
             "Signs From $25, Cards $45",

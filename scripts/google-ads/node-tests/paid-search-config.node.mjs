@@ -1253,10 +1253,10 @@ test("Generic Sign Shop routes to the exact tracked paid landing page and ships 
   assert.equal(destinations.some((url) => url.includes("/sign-company-saskatoon")), false);
 });
 
-test("Generic Print Price routes to the exact tracked paid landing page and ships byte-identical variant B alone", () => {
+test("Generic Print Price routes to the controlled print-price chooser and ships byte-identical variant B alone", () => {
   const core = paidSearchConfig.campaigns.find((campaign) => campaign.kind === "CORE");
   const group = core.adGroups.find((item) => item.key === "generic-print-price");
-  assert.equal(group.finalUrl, "https://truecolorprinting.ca/why-true-color?source=google-ads");
+  assert.equal(group.finalUrl, "https://truecolorprinting.ca/printing-prices-order-online?source=google-ads");
   assert.equal("rsa" in group, false);
   assert.ok(group.rsaVariantB);
   assert.deepEqual(group.rsaVariantB.headlines.slice(0, 10), [
@@ -1316,12 +1316,12 @@ test("a Core group on the paid landing page must carry the exact tracked href", 
   for (const mutate of [
     // Right path, missing the tracking query — this is what silently escapes the live verifier.
     (c) => {
-      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-print-price");
+      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-sign-shop");
       group.finalUrl = "https://truecolorprinting.ca/why-true-color";
     },
     // Query present but altered.
     (c) => {
-      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-print-price");
+      const group = c.campaigns[0].adGroups.find((g) => g.key === "generic-sign-shop");
       group.finalUrl = "https://truecolorprinting.ca/why-true-color?source=paid";
     },
     // A DIFFERENT Core group sneaking onto the paid landing page without declaring it.
