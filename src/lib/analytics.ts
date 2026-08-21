@@ -27,6 +27,8 @@ export type AnalyticsPlacement =
   | "hero"
   | "homepage_product"
   | "product_catalogue"
+  | "paid_print_chooser"
+  | "paid_sign_chooser"
   | "gallery"
   | "product_page"
   | "checkout"

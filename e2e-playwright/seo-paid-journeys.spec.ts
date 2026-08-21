@@ -37,6 +37,32 @@ test.describe("paid and organic ordering journeys", () => {
     );
   });
 
+  for (const [route, heading, productRoutes] of [
+    [
+      "/printing-prices-order-online",
+      /Pick a print product/i,
+      ["/products/business-cards", "/products/stickers", "/products/flyers", "/products/photo-posters", "/products/vinyl-banners", "/products/coroplast-signs"],
+    ],
+    [
+      "/sign-shop-order-online",
+      /Pick a sign/i,
+      ["/products/coroplast-signs", "/products/acp-signs", "/products/vinyl-banners", "/products/window-decals", "/products/vehicle-magnets", "/products/stickers"],
+    ],
+  ] as const) {
+    test(`${route} is a noindex paid chooser with direct product routes`, async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 });
+      const response = await page.goto(`${route}?utm_source=google&utm_medium=cpc&utm_campaign=paid-route-test&gclid=test-click-123`);
+      expect(response?.status()).toBe(200);
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(heading);
+      for (const productRoute of productRoutes) {
+        await expect(page.locator(`main a[href="${productRoute}"]`)).not.toHaveCount(0);
+      }
+      await expect(page.getByRole("link", { name: "Request a custom quote" })).toHaveAttribute("href", "/quote");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
+    });
+  }
+
   test("paid landing page preserves first-touch attribution and routes to configurators", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     const response = await page.goto(
