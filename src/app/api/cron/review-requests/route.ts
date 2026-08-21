@@ -124,12 +124,13 @@ export async function GET(req: NextRequest) {
           .insert({ order_id: order.id, customer_id: customer.id, eligible_at: order.completed_at })
           .select("id")
           .maybeSingle();
-        if (createError || !created) {
+        if (createError || !created?.id) {
           summary.initial.skipped++;
           continue;
         }
-        cycleId = created.id;
-        cycleByOrder.set(order.id, { id: cycleId, order_id: order.id, customer_id: customer.id, initial_sent_at: null, reminder_sent_at: null, suppressed_at: null });
+        const createdCycleId = created.id;
+        cycleId = createdCycleId;
+        cycleByOrder.set(order.id, { id: createdCycleId, order_id: order.id, customer_id: customer.id, initial_sent_at: null, reminder_sent_at: null, suppressed_at: null });
       }
 
       const { data: replyToken, error: replyTokenError } = await supabase
@@ -144,6 +145,10 @@ export async function GET(req: NextRequest) {
         continue;
       }
       const replyTo = `info+o_${replyToken.reply_token}@true-color.ca`;
+      if (!cycleId) {
+        summary.initial.skipped++;
+        continue;
+      }
 
       try {
         const sent = await sendReviewRequestEmail({
