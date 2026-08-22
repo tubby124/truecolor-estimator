@@ -40,6 +40,7 @@ export interface Order {
   pay_url: string | null;
   latest_payment_attempt?: LatestPaymentAttempt | null;
   proof_storage_path: string | null;
+  proof_storage_paths: string[] | null;
   proof_sent_at: string | null;
   file_storage_paths: string[] | null;
   order_items: OrderItem[];

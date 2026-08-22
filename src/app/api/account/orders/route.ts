@@ -68,6 +68,7 @@ export async function GET(req: NextRequest) {
       paid_at,
       wave_payment_recorded_at,
       proof_storage_path,
+      proof_storage_paths,
       proof_sent_at,
       file_storage_paths,
       customers ( name, company ),

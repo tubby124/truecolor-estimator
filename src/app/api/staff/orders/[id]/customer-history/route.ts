@@ -42,8 +42,16 @@ export async function GET(req: NextRequest, { params }: Params) {
     const { data: orders, error } = await supabase
       .from("orders")
       .select(`
-        id, order_number, status, created_at, total, is_rush,
-        order_items ( product_name, qty )
+        id, order_number, status, created_at,
+        subtotal, gst, pst, total, is_rush, payment_method,
+        notes, staff_notes,
+        file_storage_paths,
+        proof_storage_path, proof_storage_paths, proof_sent_at,
+        order_items (
+          id, product_name, qty, width_in, height_in, sides,
+          design_status, line_total, category, material_code, addons,
+          file_storage_path
+        )
       `)
       .eq("customer_id", customer.id)
       .order("created_at", { ascending: false })

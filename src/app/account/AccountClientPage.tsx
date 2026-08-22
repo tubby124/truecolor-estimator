@@ -8,6 +8,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { addToCart } from "@/lib/cart/cart";
 import { AuthGate } from "@/components/account/AuthGate";
+import { toReorderCartItems } from "@/components/account/reorder";
 import { OrdersList } from "@/components/account/OrdersList";
 import { QuotesList } from "@/components/account/QuotesList";
 import { ProfileForm } from "@/components/account/ProfileForm";
@@ -189,30 +190,7 @@ export function AccountClientPage() {
   }
 
   function handleReorder(order: Order) {
-    order.order_items.forEach((item) => {
-      addToCart({
-        product_name: item.product_name,
-        product_slug: item.category.toLowerCase().replace(/_/g, "-"),
-        category: item.category,
-        label: `${
-          item.width_in && item.height_in
-            ? `${item.width_in}\u00d7${item.height_in}" \u2014 `
-            : ""
-        }${item.category === "BOOKLET" ? "~80 pages" : item.sides === 2 ? "Double-sided" : "Single-sided"} \u00d7 ${item.qty}`,
-        config: {
-          category: item.category,
-          material_code: item.material_code ?? undefined,
-          width_in: item.width_in ?? undefined,
-          height_in: item.height_in ?? undefined,
-          sides: item.sides,
-          qty: item.qty,
-          design_status: item.design_status,
-        },
-        sell_price: item.line_total,
-        gst_rate: 0.05,
-        qty: item.qty,
-      });
-    });
+    toReorderCartItems(order).forEach(addToCart);
     setReorderedId(order.id);
     setTimeout(() => router.push("/cart"), 800);
   }

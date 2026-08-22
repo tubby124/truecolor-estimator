@@ -6,6 +6,7 @@ import { SUPABASE_STORAGE_URL } from "./constants";
 import { StatusStepper } from "./StatusStepper";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
 import { formatAttemptAge } from "@/lib/payments/attempts";
+import { collectOrderAssetPaths } from "@/lib/orders/order-assets";
 
 interface OrderCardProps {
   order: Order;
@@ -26,6 +27,12 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
   const rushFee = order.is_rush
     ? Math.round((Number(order.total) - Number(order.subtotal) - Number(order.gst) - Number(order.pst ?? 0)) * 100) / 100
     : 0;
+  const artworkPaths = collectOrderAssetPaths(order);
+  const proofPaths = collectOrderAssetPaths(order, "proof");
+  const primaryItem = order.order_items[0];
+  const jobTitle = primaryItem
+    ? `${primaryItem.product_name}${order.order_items.length > 1 ? ` +${order.order_items.length - 1} more` : ""}`
+    : "Your print job";
 
   return (
     <div
@@ -50,7 +57,7 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-[#1c1712] text-base">
-                {order.order_number}
+                {jobTitle}
               </span>
               {order.is_rush && (
                 <span className="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
@@ -66,7 +73,7 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
                 {STATUS_LABELS[order.status] ?? order.status}
               </span>
               {/* Proof badge — visible without expanding */}
-              {order.proof_storage_path && (
+              {proofPaths.length > 0 && (
                 <span className="text-xs font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded-full animate-pulse">
                   Proof ready — review now
                 </span>
@@ -78,7 +85,7 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
               )}
             </div>
             <p className="text-xs text-gray-400 mt-1">
-              {formatDate(order.created_at)} &middot;{" "}
+              {formatDate(order.created_at)} &middot; Order {order.order_number} &middot;{" "}
               {order.order_items.length} item
               {order.order_items.length !== 1 ? "s" : ""} &middot; $
               {Number(order.total).toFixed(2)} CAD
@@ -315,6 +322,27 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
             })}
           </div>
 
+          {artworkPaths.length > 0 && (
+            <div className="border border-sky-100 bg-sky-50 rounded-xl p-4">
+              <p className="text-xs font-bold text-sky-700 uppercase tracking-widest mb-2">
+                Your files ({artworkPaths.length})
+              </p>
+              <div className="space-y-1.5">
+                {artworkPaths.map((path, index) => (
+                  <a
+                    key={path}
+                    href={`${SUPABASE_STORAGE_URL}/${path}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm font-semibold text-[#16C2F3] hover:underline"
+                  >
+                    📎 File {index + 1} — {path.split("/").pop()} →
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Totals */}
           <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 space-y-1.5 text-sm">
             <div className="flex justify-between text-gray-500">
@@ -368,7 +396,7 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
           )}
 
           {/* Proof section */}
-          {order.proof_storage_path && (
+          {proofPaths.length > 0 && (
             <div className="border border-violet-200 bg-violet-50 rounded-xl p-4">
               <p className="text-xs font-bold text-violet-600 uppercase tracking-widest mb-3">
                 Proof from True Color
@@ -385,11 +413,11 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
                 )}
               </p>
               {/\.(jpg|jpeg|png|webp)$/i.test(
-                order.proof_storage_path
+                proofPaths[0]
               ) ? (
                 <div>
                   <img
-                    src={`${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`}
+                    src={`${SUPABASE_STORAGE_URL}/${proofPaths[0]}`}
                     alt="Print proof"
                     className="w-full rounded-lg border border-violet-200 mb-3"
                     style={{
@@ -400,7 +428,7 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
                   />
                   <div className="flex gap-4 flex-wrap">
                     <a
-                      href={`${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`}
+                      href={`${SUPABASE_STORAGE_URL}/${proofPaths[0]}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-violet-600 font-semibold hover:underline"
@@ -408,7 +436,7 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
                       View full size &rarr;
                     </a>
                     <a
-                      href={`${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`}
+                      href={`${SUPABASE_STORAGE_URL}/${proofPaths[0]}`}
                       download
                       className="text-xs text-violet-600 font-semibold hover:underline"
                     >
@@ -418,13 +446,29 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
                 </div>
               ) : (
                 <a
-                  href={`${SUPABASE_STORAGE_URL}/${order.proof_storage_path}`}
+                  href={`${SUPABASE_STORAGE_URL}/${proofPaths[0]}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-violet-600 text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-violet-700 transition-colors"
                 >
                   📄 Download proof PDF &rarr;
                 </a>
+              )}
+              {proofPaths.length > 1 && (
+                <div className="mt-3 space-y-1.5">
+                  <p className="text-xs font-semibold text-violet-700">More proofs from this job</p>
+                  {proofPaths.slice(1).map((path, index) => (
+                    <a
+                      key={path}
+                      href={`${SUPABASE_STORAGE_URL}/${path}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-xs font-semibold text-violet-600 hover:underline"
+                    >
+                      🖼 Proof {index + 2} — {path.split("/").pop()} →
+                    </a>
+                  ))}
+                </div>
               )}
               <div className="mt-3 bg-white border border-violet-100 rounded-lg px-3 py-2.5">
                 <p className="text-xs text-gray-600 leading-relaxed">

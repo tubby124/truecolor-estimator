@@ -662,8 +662,9 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     setForm((prev) => ({ ...prev, items: prev.items.filter((it) => it.id !== id) }));
   }
 
-  function handleReorder(order: PastOrder) {
+  function handleReorder(order: PastOrder, options: { copyHistoricPrice?: boolean } = {}) {
     if (!order.order_items || order.order_items.length === 0) return;
+    const copyHistoricPrice = options.copyHistoricPrice ?? true;
     const reorderItems: OrderItem[] = order.order_items.slice(0, MAX_ITEMS).map((oi) => {
       const spec = parseProductNameToSpec(oi.product_name);
       // If parser couldn't pull a product out (legacy data, weird names), fall
@@ -682,8 +683,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         process: spec.process,
         qty: String(oi.qty),
         details: spec.details,
-        unitPrice: unit > 0 ? unit.toFixed(2) : "",
-        amount: String(oi.line_total),
+        unitPrice: copyHistoricPrice && unit > 0 ? unit.toFixed(2) : "",
+        amount: copyHistoricPrice ? String(oi.line_total) : "",
         proofPath: "",
         proofName: "",
       };
@@ -691,6 +692,36 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     setForm((prev) => ({ ...prev, items: reorderItems }));
     setPastOrdersOpen(false);
   }
+
+  // Customer-history records can start a new internal quote with the same
+  // customer and specifications. This creates no order, payment link, email,
+  // or file copy; staff still reviews current pricing and intentionally attaches
+  // any historical artwork they choose to reuse.
+  useEffect(() => {
+    function recreateFromHistory(event: Event) {
+      const detail = (event as CustomEvent<{ customer?: { name?: string; email?: string; company?: string | null; phone?: string | null }; order?: PastOrder }>).detail;
+      if (!detail?.customer || !detail.order) return;
+      const customer = detail.customer;
+      setForm({
+        ...EMPTY_FORM,
+        name: customer.name ?? "",
+        email: customer.email ?? "",
+        company: customer.company ?? "",
+        phone: customer.phone ?? "",
+        quote_only: true,
+        acquisition_source: "repeat_customer",
+      });
+      setCustomerLookup({ status: "found", name: customer.name, company: customer.company, phone: customer.phone, orderCount: 0 });
+      setError(null);
+      setSuccess(null);
+      setTotalOverrideOpen(false);
+      setModalOpen(true);
+      handleReorder(detail.order, { copyHistoricPrice: false });
+      showToast("Specs copied from the past job — set current pricing before sending.", "info");
+    }
+    window.addEventListener("tc:recreate-order", recreateFromHistory);
+    return () => window.removeEventListener("tc:recreate-order", recreateFromHistory);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
