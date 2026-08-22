@@ -253,14 +253,14 @@ describe("print resource indexing and download", () => {
     expect(svg).toContain("CONFIRM PRODUCTION TOLERANCES");
   });
 
-  it("uses an accessible brand red for normal text and the download button", () => {
+  it("uses accessible brand blue for normal text and the download button", () => {
     const pageSource = readFileSync(
       path.join(process.cwd(), "src/app/print-resources/[slug]/page.tsx"),
       "utf8",
     );
     expect(pageSource).not.toContain("text-[#e63020]");
     expect(pageSource).not.toContain("bg-[#e63020]");
-    expect(pageSource).toContain("text-[#b42318]");
-    expect(pageSource).toContain("bg-[#b42318]");
+    expect(pageSource).toContain("text-[#087fa1]");
+    expect(pageSource).toContain("bg-[#087fa1]");
   });
 });

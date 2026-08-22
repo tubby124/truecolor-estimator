@@ -5,6 +5,7 @@ import {
   classifyOrderOrigin,
   formatQuoteAttributionSection,
   formatPaidLandingPathSection,
+  summarizePaidLandingPathCoverage,
   hasClickId,
   hasGoogleUtmSource,
   needsIncompleteCoverageVerdict,
@@ -266,6 +267,14 @@ test("paid landing-path report uses first-party rows without mixing GA4 or GSC c
   const rendered = formatPaidLandingPathSection(rows).join("\n");
   assert.match(rendered, /do not add the systems together/);
   assert.equal(rendered.includes("gclid"), false);
+
+  const coverage = summarizePaidLandingPathCoverage(rows);
+  assert.deepEqual(coverage, {
+    totalOutcomes: 5,
+    knownRouteOutcomes: 4,
+    unknownRouteOutcomes: 1,
+    knownRouteCoveragePct: 80,
+  });
 });
 
 test("zero attributed revenue alongside real commercial signal triggers the honest verdict", () => {

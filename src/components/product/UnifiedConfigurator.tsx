@@ -41,6 +41,7 @@ interface UnifiedConfiguratorProps {
   prefilled?: Partial<ConfigData & { isRush: boolean }>;
   onPriceChange?: (data: PriceData) => void;
   onConfigChange?: (config: ConfigData) => void;
+  onPriceError?: (errorClass: "network" | "invalid_configuration" | "server") => void;
   /** Emits the raw EstimateResponse so a parent (staff page) can drive its
    *  existing QuotePanel + ProductProof + Add-to-Cart flow unchanged. */
   onResponse?: (response: EstimateResponse | null, loading: boolean) => void;
@@ -84,7 +85,7 @@ function defaultChoice(choices: OptionChoice[] | undefined, fallback: OptionChoi
 }
 
 export function UnifiedConfigurator({
-  category, mode, prefilled, onPriceChange, onConfigChange, onResponse,
+  category, mode, prefilled, onPriceChange, onConfigChange, onPriceError, onResponse,
   productName, fromPrice,
 }: UnifiedConfiguratorProps) {
   // Same two values ProductConfigurator renders above its controls — prop when
@@ -193,12 +194,17 @@ export function UnifiedConfigurator({
           }),
         });
         if (!res.ok) {
-          if (!cancelled) { setPriceData({ ...EMPTY_PRICE }); onResponse?.(null, false); }
+          if (!cancelled) {
+            onPriceError?.(res.status >= 500 ? "server" : "invalid_configuration");
+            setPriceData({ ...EMPTY_PRICE });
+            onResponse?.(null, false);
+          }
           return;
         }
         const data = (await res.json()) as EstimateResponse;
         if (cancelled) return;
         if (data.status !== "QUOTED" || data.sell_price == null) {
+          onPriceError?.("invalid_configuration");
           setPriceData({ ...EMPTY_PRICE, loading: false });
           onResponse?.(data, false);
           return;
@@ -247,14 +253,18 @@ export function UnifiedConfigurator({
           });
         }
         onResponse?.(data, false);
-      } catch {
-        if (!cancelled) { setPriceData({ ...EMPTY_PRICE, loading: false }); onResponse?.(null, false); }
+      } catch (error) {
+        if (!cancelled) {
+          onPriceError?.(error instanceof TypeError ? "network" : "server");
+          setPriceData({ ...EMPTY_PRICE, loading: false });
+          onResponse?.(null, false);
+        }
       }
     }, 250);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [
     inputsValid, category, effectiveMaterial, effectiveW, effectiveH, effectiveQty,
-    designStatus, isRush, onResponse, v2Active, stickerShape, mode, displayName,
+    designStatus, isRush, onResponse, onPriceError, v2Active, stickerShape, mode, displayName,
   ]);
 
   // Emit callbacks on every meaningful state change so parent can drive cart /

@@ -18,13 +18,14 @@ describe("staff orders revenue-disclosure data contract", () => {
     expect(ordersSelect).toContain("paid_at");
   });
 
-  it("passes existing server-calculated newQuoteCount into OrdersTable", () => {
+  it("passes a full-ledger dashboard dataset alongside the operational order queue", () => {
     const page = stripWhitespace(source("src/app/staff/orders/page.tsx"));
     const table = source("src/app/staff/orders/OrdersTable.tsx");
 
-    expect(page).toContain("<OrdersTable initialOrders={orders} newQuoteCount={newQuoteCount} />");
-    expect(table).toContain("newQuoteCount: number");
-    expect(table).toMatch(/export function OrdersTable\(\{\s*initialOrders,\s*newQuoteCount\s*\}: Props\)/);
+    expect(page).toContain("<OrdersTable initialOrders={orders} initialDashboardOrders={dashboardOrders} newQuoteCount={newQuoteCount} />");
+    expect(page).toContain("fetchDashboardOrders()");
+    expect(table).toContain("initialDashboardOrders: DashboardOrder[]");
+    expect(table).toMatch(/export function OrdersTable\(\{\s*initialOrders,\s*initialDashboardOrders,\s*newQuoteCount\s*\}: Props\)/);
   });
 
   it("renders five operational stats before hiding paid totals in the disclosure", () => {
@@ -35,7 +36,7 @@ describe("staff orders revenue-disclosure data contract", () => {
       table.indexOf("{/* ── Search + filter + sort row"),
     );
 
-    expect(statsSection.match(/<StatCard label=/g)).toHaveLength(5);
+    expect(statsSection.match(/<StatCard\b/g)).toHaveLength(5);
     expect(statsSection).toContain('label="Active orders"');
     expect(statsSection).toContain('label="Pending payment"');
     expect(statsSection).toContain('label="In production"');
@@ -45,7 +46,7 @@ describe("staff orders revenue-disclosure data contract", () => {
     expect(statsSection).not.toContain('label="This week"');
     expect(statsSection).not.toContain('label="This month"');
 
-    expect(normalized).toContain("buildOrdersDashboardStats(orders, { now: new Date(), timeZone: ORDERS_STATS_TIME_ZONE })");
+    expect(normalized).toContain("buildOrdersDashboardStats(dashboardOrders, { now: new Date(), timeZone: ORDERS_STATS_TIME_ZONE })");
     expect(statsSection).toContain("newQuoteCount");
   });
 
@@ -64,7 +65,7 @@ describe("staff orders revenue-disclosure data contract", () => {
     expect(statsSection).toContain("Business totals");
     expect(statsSection).toContain('{businessTotalsOpen ? "Hide" : "Show"}');
     expect(statsSection).toContain('id="business-totals-panel"');
-    expect(statsSection).toContain("Paid orders only. Archived and unpaid orders are excluded.");
+    expect(statsSection).toContain("Paid totals include archived orders. Open balances stay separate so the work queue does not rewrite the books.");
     expect(statsSection).toContain("Paid today");
     expect(statsSection).toContain("Paid this week");
     expect(statsSection).toContain("Paid this month");

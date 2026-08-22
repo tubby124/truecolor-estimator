@@ -130,9 +130,10 @@ interface Props {
   initialSelection?: MerchantOfferSelection;
   onPriceChange?: (data: PriceData) => void;
   onConfigChange?: (config: ConfigData) => void;
+  onPriceError?: (errorClass: "network" | "invalid_configuration" | "server") => void;
 }
 
-export function ProductConfigurator({ product, initialSelection, onPriceChange, onConfigChange }: Props) {
+export function ProductConfigurator({ product, initialSelection, onPriceChange, onConfigChange, onPriceError }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
   const [selectedSize, setSelectedSize] = useState(
     () => product.sizePresets.find((preset) => preset.label === initialSelection?.sizeLabel) ?? product.sizePresets[0],
@@ -239,7 +240,9 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
           quantity: effectiveQty,
         });
       } else {
-        // Engine returned BLOCKED — clear stale price so old price never persists
+        // Engine returned BLOCKED — clear stale price so old price never persists.
+        // Diagnostic only: no engine message or shopper-entered selection leaves the browser.
+        onPriceError?.("invalid_configuration");
         setPrice(null);
         setLineItems([]);
         setQtyDiscountApplied(false);
@@ -253,6 +256,7 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
       }
     } catch (err) {
       if (signal.aborted || requestId !== priceRequestSequence.current) return;
+      onPriceError?.(err instanceof TypeError ? "network" : "server");
       showToastRef.current(sanitizeError(err), "error");
     } finally {
       if (!signal.aborted && requestId === priceRequestSequence.current) setLoading(false);
@@ -269,6 +273,7 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
     effectiveQty,
     designStatus,
     addonQtys,
+    onPriceError,
   ]);
 
   // Fire price fetch — debounced 300ms for custom inputs, immediate for presets

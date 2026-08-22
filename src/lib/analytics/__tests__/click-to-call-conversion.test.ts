@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetClickToCallDedupeForTests, sendGoogleAdsClickToCall } from "../google-ads";
-import { trackClickToCall, trackPaidLandingView } from "@/lib/analytics";
+import {
+  trackClickToCall,
+  trackPaidLandingView,
+  trackProductConfigReady,
+  trackProductConfigStarted,
+  trackProductPriceError,
+  trackAddToCartBlocked,
+} from "@/lib/analytics";
 
 const LABEL = "AW-18330693756/CtC-Label_1";
 
@@ -133,6 +140,32 @@ describe("trackClickToCall", () => {
 
     expect(gtag.mock.calls.filter((call) => call[1] === "click_to_call")).toHaveLength(2);
     expect(conversions(gtag)).toEqual([["event", "conversion", { send_to: LABEL }]]);
+  });
+});
+
+describe("paid product funnel diagnostics", () => {
+  it("emits fixed, non-PII diagnostic payloads without a Google Ads conversion", () => {
+    const { win, gtag } = fakeWindow();
+    vi.stubGlobal("window", win);
+
+    trackProductConfigStarted({ product_slug: "business-cards", category: "BUSINESS_CARD" });
+    trackProductConfigReady({ product_slug: "business-cards", category: "BUSINESS_CARD" });
+    trackProductPriceError({ product_slug: "business-cards", category: "BUSINESS_CARD", error_class: "server" });
+    trackAddToCartBlocked({ product_slug: "business-cards", reason: "missing_price" });
+
+    expect(gtag).toHaveBeenCalledWith("event", "product_config_started", {
+      product_slug: "business-cards", category: "BUSINESS_CARD", surface: "product_page",
+    });
+    expect(gtag).toHaveBeenCalledWith("event", "product_config_ready", {
+      product_slug: "business-cards", category: "BUSINESS_CARD",
+    });
+    expect(gtag).toHaveBeenCalledWith("event", "product_price_error", {
+      product_slug: "business-cards", category: "BUSINESS_CARD", error_class: "server",
+    });
+    expect(gtag).toHaveBeenCalledWith("event", "add_to_cart_blocked", {
+      product_slug: "business-cards", reason: "missing_price",
+    });
+    expect(conversions(gtag)).toHaveLength(0);
   });
 });
 

@@ -61,11 +61,29 @@ export function summarizePaidLandingPaths({ quoteRequests = [], orders = [] } = 
   );
 }
 
+export function summarizePaidLandingPathCoverage(rows = []) {
+  const totalOutcomes = rows.reduce((total, row) => total + Number(row?.quotes ?? 0) + Number(row?.orders ?? 0), 0);
+  const unknownRouteOutcomes = rows
+    .filter((row) => row?.path === "(path unknown)")
+    .reduce((total, row) => total + Number(row?.quotes ?? 0) + Number(row?.orders ?? 0), 0);
+  const knownRouteOutcomes = totalOutcomes - unknownRouteOutcomes;
+  return {
+    totalOutcomes,
+    knownRouteOutcomes,
+    unknownRouteOutcomes,
+    knownRouteCoveragePct: totalOutcomes === 0 ? null : Math.round((knownRouteOutcomes / totalOutcomes) * 100),
+  };
+}
+
 export function formatPaidLandingPathSection(rows) {
+  const coverage = summarizePaidLandingPathCoverage(rows);
   const lines = [
     "=== FIRST-PARTY PAID LANDING-PATH SIGNAL (window) ===",
     "  Paid quotes and paid orders are counted separately; a converted quote can appear in both.",
     "  Compare this with GA4 paid sessions and GSC organic page data—do not add the systems together.",
+    coverage.totalOutcomes === 0
+      ? "  Route coverage: no attributable paid quote/order outcomes in this window."
+      : `  Route coverage: ${coverage.knownRouteOutcomes} known-route | ${coverage.unknownRouteOutcomes} unknown-route | ${coverage.knownRouteCoveragePct}% known.`,
   ];
   if (rows.length === 0) lines.push("  (no paid quote/order rows with captured attribution in range)");
   for (const row of rows) lines.push(`  ${row.path}: ${row.quotes} paid quote(s) | ${row.orders} paid order(s)`);

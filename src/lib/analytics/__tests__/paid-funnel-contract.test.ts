@@ -43,6 +43,18 @@ describe("paid funnel event ownership", () => {
     expect(checkout).toContain("checkoutEventFingerprint(cart)");
   });
 
+  it("keeps diagnostic product events visible but outside the Ads conversion graph", () => {
+    const analytics = source("src/lib/analytics.ts");
+    for (const event of ["product_config_started", "product_config_ready", "product_price_error", "add_to_cart_blocked"]) {
+      expect(analytics).toContain(`gtag("event", "${event}"`);
+    }
+    const report = source("scripts/google-ads/paid-funnel-report.mjs");
+    expect(report).toContain('"product_config_started"');
+    expect(report).toContain("Diagnostic only — not bid conversions");
+    const conversionConfig = source("docs/paid-search/campaign-config.mjs");
+    expect(conversionConfig).not.toContain('eventName: "product_config_started"');
+  });
+
   it("delegates every customer tel link through one global tracker", () => {
     const tracker = source("src/components/site/CallTracker.tsx");
     expect(tracker).toContain('document.addEventListener("click", handleClick, { capture: true })');

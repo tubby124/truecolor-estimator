@@ -34,6 +34,8 @@ const SYNTHETIC_CAMPAIGN = "tc_core";
 const FUNNEL_EVENTS = [
   "view_item", "price_calculated", "add_to_cart", "begin_checkout",
   "purchase", "paid_landing_cta", "view_paid_landing", "generate_lead",
+  // Diagnostic only — these never map to a Google Ads bidding goal.
+  "product_config_started", "product_config_ready", "product_price_error", "add_to_cart_blocked",
 ];
 
 const daysArg = process.argv.indexOf("--days");
@@ -110,6 +112,7 @@ for (const r of funnelRows) {
 }
 
 console.log("=== GA4 — real paid sessions by landing page (synthetic excluded) ===");
+console.log("  Diagnostic only — not bid conversions: product_config_started, product_config_ready, product_price_error, add_to_cart_blocked.");
 if (byLanding.size === 0) console.log("  (no real google/cpc sessions in range)");
 for (const [landing, { sessions, events }] of [...byLanding.entries()].sort((a, b) => b[1].sessions - a[1].sessions)) {
   const funnel = FUNNEL_EVENTS.filter((e) => events[e]).map((e) => `${e}=${events[e]}`).join(", ");

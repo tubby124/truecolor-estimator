@@ -111,7 +111,7 @@ export default async function PrintResourcePage({ params }: PrintResourcePagePro
                       </p>
                     </div>
                   </div>
-                  <a href={resource.download.href} download={resource.download.filename} aria-label={resource.download.label} className="inline-flex shrink-0 items-center justify-center gap-2 bg-[#16C2F3] px-5 py-3 text-sm font-black text-white transition-colors hover:bg-[#0fb0dd] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16C2F3]">
+                  <a href={resource.download.href} download={resource.download.filename} aria-label={resource.download.label} className="inline-flex shrink-0 items-center justify-center gap-2 bg-[#087fa1] px-5 py-3 text-sm font-black text-white transition-colors hover:bg-[#066b86] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16C2F3]">
                     <Download aria-hidden="true" className="h-4 w-4" />
                     Download SVG
                   </a>

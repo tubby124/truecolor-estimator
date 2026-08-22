@@ -21,6 +21,7 @@ const order: Order = {
   wave_payment_recorded_at: null,
   pay_url: null,
   proof_storage_path: null,
+  proof_storage_paths: null,
   proof_sent_at: null,
   file_storage_paths: null,
   order_items: [

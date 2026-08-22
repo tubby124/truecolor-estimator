@@ -213,6 +213,46 @@ export function trackPriceCalculated(params: {
   });
 }
 
+// Diagnostic-only product funnel events. These do not map to Google Ads goals;
+// they explain where a shopper stops without sending pricing selections, text,
+// artwork, or any personal data to analytics.
+export function trackProductConfigStarted(params: { product_slug: string; category: string }) {
+  gtag("event", "product_config_started", {
+    product_slug: params.product_slug,
+    category: params.category,
+    surface: "product_page",
+  });
+}
+
+export function trackProductConfigReady(params: { product_slug: string; category: string }) {
+  gtag("event", "product_config_ready", {
+    product_slug: params.product_slug,
+    category: params.category,
+  });
+}
+
+export function trackProductPriceError(params: {
+  product_slug: string;
+  category: string;
+  error_class: "network" | "invalid_configuration" | "server";
+}) {
+  gtag("event", "product_price_error", {
+    product_slug: params.product_slug,
+    category: params.category,
+    error_class: params.error_class,
+  });
+}
+
+export function trackAddToCartBlocked(params: {
+  product_slug: string;
+  reason: "missing_price" | "loading" | "invalid_configuration";
+}) {
+  gtag("event", "add_to_cart_blocked", {
+    product_slug: params.product_slug,
+    reason: params.reason,
+  });
+}
+
 export function trackViewQuote() {
   gtag("event", "view_quote_page");
 }

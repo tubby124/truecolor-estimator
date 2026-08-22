@@ -10,7 +10,14 @@ import { useToast, ToastContainer } from "@/components/ui";
 import type { ProductContent } from "@/lib/data/products-content";
 import type { Category } from "@/lib/data/types";
 import type { MerchantOfferSelection } from "@/lib/merchant/merchant-catalog";
-import { trackViewItem, trackAddToCart } from "@/lib/analytics";
+import {
+  trackViewItem,
+  trackAddToCart,
+  trackAddToCartBlocked,
+  trackProductConfigReady,
+  trackProductConfigStarted,
+  trackProductPriceError,
+} from "@/lib/analytics";
 import { metaTrackViewContent, metaTrackAddToCart } from "@/lib/analytics/metaPixel";
 import { SameDayClock } from "@/components/home/SameDayClock";
 import { flags } from "@/lib/flags";
@@ -52,6 +59,9 @@ export function ProductPageClient({ product, initialSelection }: Props) {
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
   const [configData, setConfigData] = useState<ConfigData>(EMPTY_CONFIG);
   const [addedToCart, setAddedToCart] = useState(false);
+  const productConfigStartedRef = useRef(false);
+  const productConfigReadyRef = useRef(false);
+  const productPriceErrorsRef = useRef(new Set<string>());
 
   // Mobile paid-search call/price bar (src/components/product/MobileCallPriceBar.tsx)
   // stacks ABOVE the existing sticky Add to Cart bar below — never covers it.
@@ -102,7 +112,23 @@ export function ProductPageClient({ product, initialSelection }: Props) {
 
   const handlePriceChange = useCallback((data: PriceData) => {
     setPriceData(data);
-  }, []);
+    if (data.price != null && !data.loading && !productConfigReadyRef.current) {
+      productConfigReadyRef.current = true;
+      trackProductConfigReady({ product_slug: product.slug, category: product.category });
+    }
+  }, [product.category, product.slug]);
+
+  const handleProductConfigInteraction = useCallback(() => {
+    if (productConfigStartedRef.current) return;
+    productConfigStartedRef.current = true;
+    trackProductConfigStarted({ product_slug: product.slug, category: product.category });
+  }, [product.category, product.slug]);
+
+  const handlePriceError = useCallback((errorClass: "network" | "invalid_configuration" | "server") => {
+    if (productPriceErrorsRef.current.has(errorClass)) return;
+    productPriceErrorsRef.current.add(errorClass);
+    trackProductPriceError({ product_slug: product.slug, category: product.category, error_class: errorClass });
+  }, [product.category, product.slug]);
 
   const handleConfigChange = useCallback((config: ConfigData) => {
     setConfigData(config);
@@ -112,16 +138,23 @@ export function ProductPageClient({ product, initialSelection }: Props) {
     // Flat-fee services carry no dimensions — the dimension gate would silently
     // drop every add-to-cart click for them (button enabled, nothing added).
     const dimensionsRequired = !product.serviceMode;
-    if (
-      priceData.price == null ||
-      priceData.loading ||
-      (dimensionsRequired && (configData.widthIn <= 0 || configData.heightIn <= 0)) ||
-      configData.qty <= 0
-    ) return;
+    if (priceData.loading) {
+      trackAddToCartBlocked({ product_slug: product.slug, reason: "loading" });
+      return;
+    }
+    if (priceData.price == null) {
+      trackAddToCartBlocked({ product_slug: product.slug, reason: "missing_price" });
+      return;
+    }
+    if ((dimensionsRequired && (configData.widthIn <= 0 || configData.heightIn <= 0)) || configData.qty <= 0) {
+      trackAddToCartBlocked({ product_slug: product.slug, reason: "invalid_configuration" });
+      return;
+    }
 
     // Hard gate: a product with required spec text (boat licence number) must not
     // reach the cart without it — the number IS the artwork for these jobs.
     if (configData.customTextValid === false) {
+      trackAddToCartBlocked({ product_slug: product.slug, reason: "invalid_configuration" });
       showToast("Enter your licence number before adding to cart", "error");
       document.getElementById(`ctf-${product.customTextFields?.find((f) => f.required)?.key}`)?.focus();
       return;
@@ -232,6 +265,10 @@ export function ProductPageClient({ product, initialSelection }: Props) {
           id="product-configurator"
           tabIndex={-1}
           aria-label="Product options and price"
+          onPointerDownCapture={handleProductConfigInteraction}
+          onKeyDownCapture={(event) => {
+            if (event.key !== "Tab") handleProductConfigInteraction();
+          }}
           className="bg-white border border-gray-200 rounded-2xl p-6 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2"
         >
           {product.slug === "stickers" && flags.useProductConfigStickerPublic() ? (
@@ -241,6 +278,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
               prefilled={initialSelection}
               onPriceChange={handlePriceChange}
               onConfigChange={handleConfigChange}
+              onPriceError={handlePriceError}
             />
           ) : (
             <ProductConfigurator
@@ -248,6 +286,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
               initialSelection={initialSelection}
               onPriceChange={handlePriceChange}
               onConfigChange={handleConfigChange}
+              onPriceError={handlePriceError}
             />
           )}
         </div>
