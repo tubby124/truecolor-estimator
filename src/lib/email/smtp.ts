@@ -257,21 +257,40 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
       ...(options.customerId ? { customer_id: options.customerId } : {}),
     }));
     try {
-      const logResponse = await fetch(`${supabaseUrl}/rest/v1/email_log`, {
-        method: "POST",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json",
-          Prefer: "return=minimal",
+      // A retry with the same provider idempotency key returns the original
+      // Resend message id. Do not append a second ledger row for that one
+      // logical message; provider acceptance and the ledger must stay 1:1.
+      const existingResponse = await fetch(
+        `${supabaseUrl}/rest/v1/email_log?select=provider_message_id&provider_message_id=eq.${encodeURIComponent(providerMessageId)}&limit=1`,
+        {
+          headers: {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+          },
+          signal: AbortSignal.timeout(5_000),
         },
-        body: JSON.stringify(rows),
-        signal: AbortSignal.timeout(5_000),
-      });
-      if (!logResponse.ok) {
-        console.error(`[smtp] email_log write failed (non-fatal): HTTP ${logResponse.status}`);
-      } else {
+      );
+      if (!existingResponse.ok) {
+        console.error(`[smtp] email_log duplicate check failed: HTTP ${existingResponse.status}`);
+      } else if ((await existingResponse.json() as Array<unknown>).length > 0) {
         emailLogWritten = true;
+      } else {
+        const logResponse = await fetch(`${supabaseUrl}/rest/v1/email_log`, {
+          method: "POST",
+          headers: {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify(rows),
+          signal: AbortSignal.timeout(5_000),
+        });
+        if (!logResponse.ok) {
+          console.error(`[smtp] email_log write failed (non-fatal): HTTP ${logResponse.status}`);
+        } else {
+          emailLogWritten = true;
+        }
       }
     } catch (err) {
       console.error("[smtp] email_log write failed (non-fatal):", err instanceof Error ? err.message : err);

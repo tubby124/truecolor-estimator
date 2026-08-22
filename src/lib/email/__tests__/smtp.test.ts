@@ -56,6 +56,7 @@ describe("sendEmail", () => {
           headers: { "Content-Type": "application/json" },
         })
       )
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response("no", { status: 500 }));
 
     const result = await sendEmail({
@@ -67,7 +68,7 @@ describe("sendEmail", () => {
     });
 
     expect(result).toEqual({ providerMessageId: "resend-456" });
-    const loggedRows = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
+    const loggedRows = JSON.parse(String(fetchMock.mock.calls[2][1]?.body));
     expect(loggedRows).toEqual([
       expect.objectContaining({
         provider_message_id: "resend-456",
@@ -87,6 +88,7 @@ describe("sendEmail", () => {
           headers: { "Content-Type": "application/json" },
         })
       )
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response("no", { status: 500 }));
 
     await expect(
@@ -111,6 +113,7 @@ describe("sendEmail", () => {
           headers: { "Content-Type": "application/json" },
         })
       )
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(null, { status: 201 }));
 
     const scheduledAt = "2026-07-22T18:00:00.000Z";
@@ -125,7 +128,7 @@ describe("sendEmail", () => {
     const providerBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     expect(providerBody.scheduled_at).toBe(scheduledAt);
 
-    const loggedRows = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
+    const loggedRows = JSON.parse(String(fetchMock.mock.calls[2][1]?.body));
     expect(loggedRows).toEqual([
       expect.objectContaining({
         order_id: "order-1",
@@ -133,6 +136,30 @@ describe("sendEmail", () => {
         status: "sent",
       }),
     ]);
+  });
+
+  it("does not append a second ledger row when an idempotent retry returns the same provider message", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://supabase.test");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "service-key");
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: "resend-original" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ provider_message_id: "resend-original" }]), { status: 200 }));
+
+    await expect(sendEmail({
+      to: "customer@example.com",
+      subject: "Retry",
+      html: "<p>Retry</p>",
+      idempotencyKey: "retry/one-message",
+      requireEmailLog: true,
+    })).resolves.toEqual({ providerMessageId: "resend-original" });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[1][0])).toContain("provider_message_id=eq.resend-original");
   });
 
   it("distinguishes definite provider rejection from ambiguous provider errors", async () => {
