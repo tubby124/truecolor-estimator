@@ -358,7 +358,9 @@ const REQUIRED_ACCOUNT_NEGATIVES = [
   // 2026-08-16 mining pass #3: label-stock brand ("avery" — buy-supplies intent, same family
   // as "label maker"/"label printers") and a marketplace competitor with no conquest group
   // ("sticker you" — stickermule/etsy precedent). Rationale in campaign-config.mjs.
-  "avery", "sticker you",
+  // 2026-08-22: True Color has no garment/apparel capability; this exact query spent
+  // on Generic Print Price and "tees" is not covered by the existing shirt negatives.
+  "avery", "sticker you", "custom tees printing",
 ];
 const PROTECTED_ACCOUNT_NEGATIVES = ["near me", "online", "cheap", ...COMPETITOR_TERMS];
 // Claim validation moved to docs/paid-search/approved-claims.mjs (2026-08-06).

@@ -24,6 +24,7 @@ export default function PrintingPricesOrderOnlinePage() {
         { slug: "coroplast-signs", label: "Signs" },
       ]}
       quoteCopy="Large-format, unusual sizes, design help, or a job that does not fit the configurator? Send the details and we will price it properly."
+      showLocalShopProof
     />
   );
 }

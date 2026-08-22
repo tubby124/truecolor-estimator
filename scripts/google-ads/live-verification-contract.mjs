@@ -411,7 +411,10 @@ function evaluateLiveState(live, {
   //   remove-account-negatives.mjs.
   // Composition after the reversal: 318 account-negative criteria + 91 ad-group cross-negatives
   // + 14 campaign negatives = 423.
-  if (live.positiveKeywords !== 192 || live.negativeCriteria !== 423) failures.push("keyword counts changed");
+  // 2026-08-22: 423 -> 429. Added account negative "custom tees printing" because
+  // a paid Generic Print Price click showed apparel intent; True Color has no garment capability.
+  // One account negative is created as EXACT+PHRASE across all 3 planned campaigns (+6).
+  if (live.positiveKeywords !== 192 || live.negativeCriteria !== 429) failures.push("keyword counts changed");
   const expectedNearMeKeywords = new Set(EXPECTED_NEAR_ME_TERMS.flatMap((text) => [
     `${text}|EXACT`,
     `${text}|PHRASE`,

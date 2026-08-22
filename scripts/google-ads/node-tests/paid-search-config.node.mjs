@@ -123,7 +123,7 @@ const makePausedLiveState = () => ({
       name: campaign.name,
       status: "PAUSED",
     })),
-    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 192, negativeCriteria: 423,
+    adGroups: 27, pausedAdGroups: 1, enabledAdGroups: 26, positiveKeywords: 192, negativeCriteria: 429,
     nearMeKeywords: [
       "die cut stickers near me",
       "custom die cut stickers near me",
@@ -1618,7 +1618,8 @@ test("live verification rejects conversion-graph and audience drift", () => {
     (live) => { live.campaignAssetLinks = 53; },
     // Keyword pins after the "who makes" reversal: the keyword is back, the negative is gone.
     (live) => { live.positiveKeywords = 190; },
-    (live) => { live.negativeCriteria = 429; },
+    // 429 is now expected after the one custom-tees account negative (+6 criteria).
+    (live) => { live.negativeCriteria = 423; },
   ];
   for (const drift of drifts) {
     const live = structuredClone(base);

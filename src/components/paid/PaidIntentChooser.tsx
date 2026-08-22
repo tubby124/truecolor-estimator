@@ -1,5 +1,6 @@
-import { ArrowRight } from "lucide-react";
-import { PaidCtaLink, PaidProductLink, PaidProductListTracker } from "@/components/paid/PaidProductLink";
+import Image from "next/image";
+import { ArrowRight, MapPin, Phone } from "lucide-react";
+import { PaidCtaLink, PaidPhoneLink, PaidProductLink, PaidProductListTracker } from "@/components/paid/PaidProductLink";
 import { getProduct } from "@/lib/data/products-content";
 import type { AnalyticsPlacement } from "@/lib/analytics";
 
@@ -27,7 +28,10 @@ type PaidIntentChooserProps = {
   placement: Extract<AnalyticsPlacement, "paid_print_chooser" | "paid_sign_chooser">;
   chooserTitle: string;
   quoteCopy: string;
+  showLocalShopProof?: boolean;
 };
+
+const DIRECTIONS_URL = "https://www.google.com/maps/dir/?api=1&destination=216+33rd+St+W%2C+Saskatoon%2C+SK+S7L+0V1";
 
 export function PaidIntentChooser({
   eyebrow,
@@ -37,6 +41,7 @@ export function PaidIntentChooser({
   placement,
   chooserTitle,
   quoteCopy,
+  showLocalShopProof = false,
 }: PaidIntentChooserProps) {
   const resolvedProducts = products.map(({ slug, label }) => {
     const product = getProduct(slug);
@@ -89,6 +94,15 @@ export function PaidIntentChooser({
           ))}
         </div>
 
+        <PaidCtaLink
+          href="/products"
+          action="browse_products"
+          placement="paid_chooser_more_products"
+          className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl px-1 text-sm font-bold text-[#087c9d] underline decoration-[#16C2F3] decoration-2 underline-offset-4 hover:text-[#1c1712] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3] focus-visible:ring-offset-2"
+        >
+          Need something else? View all products <ArrowRight size={16} aria-hidden="true" />
+        </PaidCtaLink>
+
         <div className="mt-6 rounded-2xl bg-[#f5f3ef] p-4 sm:flex sm:items-center sm:justify-between sm:gap-5">
           <div>
             <h2 className="font-black text-[#1c1712]">Need something custom?</h2>
@@ -104,6 +118,34 @@ export function PaidIntentChooser({
           </PaidCtaLink>
         </div>
       </section>
+
+      {showLocalShopProof ? (
+        <section className="mx-auto mt-5 max-w-4xl overflow-hidden rounded-3xl bg-[#1c1712] text-white shadow-sm" aria-labelledby="local-shop-heading">
+          <div className="grid lg:grid-cols-[1.08fr_0.92fr]">
+            <div className="grid grid-cols-2 gap-px bg-white/15">
+              <div className="relative aspect-square bg-gray-800">
+                <Image src="/images/about/shop-exterior.webp" alt="True Color Display Printing storefront at 216 33rd St W in Saskatoon" fill className="object-cover" sizes="(max-width: 640px) 50vw, 28vw" />
+              </div>
+              <div className="relative aspect-square bg-gray-800">
+                <Image src="/images/gallery/gallery-shop-roland-large-format.webp" alt="True Color staff production equipment in the Saskatoon print shop" fill className="object-cover" sizes="(max-width: 640px) 50vw, 28vw" />
+              </div>
+            </div>
+            <div className="p-6 sm:p-8">
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#16C2F3]">A real local print shop</p>
+              <h2 id="local-shop-heading" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Printed here. Pick up here.</h2>
+              <p className="mt-3 text-sm leading-relaxed text-gray-300">216 33rd St W, Saskatoon, SK S7L 0V1 · Upstairs entrance · Monday–Friday, 9 AM–5 PM.</p>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <PaidPhoneLink placement="paid_chooser_local_contact" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#16C2F3] px-4 text-sm font-bold text-[#1c1712] hover:bg-[#63d8f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                  <Phone size={17} aria-hidden="true" />Call Now
+                </PaidPhoneLink>
+                <PaidCtaLink href={DIRECTIONS_URL} action="directions_click" placement="paid_chooser_local_contact" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/30 px-4 text-sm font-bold text-white hover:border-[#16C2F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16C2F3]">
+                  <MapPin size={17} aria-hidden="true" />Get Directions
+                </PaidCtaLink>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

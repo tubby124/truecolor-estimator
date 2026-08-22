@@ -664,7 +664,11 @@ export const paidSearchConfig = {
     // (remove-conflicting-keywords.mjs, since executed); the owner call is the opposite —
     // delete the NEGATIVE and restore the keyword. remove-account-negatives.mjs takes the six
     // live criteria off the account; the keyword is re-created by apply-sync.mjs.
-    "avery", "sticker you",
+    // 2026-08-22: "saskatoon custom tees printing" drew a paid Generic Print Price click.
+    // True Color does not offer garment/apparel printing. Existing shirt negatives do not
+    // cover the plural noun "tees", so block this exact irrelevant query family without
+    // blocking any print/sign product that the shop actually sells.
+    "avery", "sticker you", "custom tees printing",
   ]),
   campaigns: [
     {
