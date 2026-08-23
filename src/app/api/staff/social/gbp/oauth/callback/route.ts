@@ -5,7 +5,14 @@ import { encryptRefreshToken, findTrueColorLocation, getGbpOAuthClient, oauthSta
 export const dynamic = "force-dynamic";
 
 function redirect(req: NextRequest, outcome: string) {
-  return NextResponse.redirect(new URL(`/staff/social/settings?gbp=${outcome}`, req.url));
+  const response = NextResponse.redirect(new URL(`/staff/social/settings?gbp=${outcome}`, req.url));
+  response.cookies.set(oauthStateCookie(), "", {
+    httpOnly: true,
+    secure: true,
+    path: "/api/staff/social/gbp/oauth",
+    maxAge: 0,
+  });
+  return response;
 }
 
 export async function GET(req: NextRequest) {
@@ -46,9 +53,7 @@ export async function GET(req: NextRequest) {
     }, { onConflict: "id" });
     if (error) return redirect(req, "storage-failed");
 
-    const response = redirect(req, "connected");
-    response.cookies.set(oauthStateCookie(), "", { httpOnly: true, secure: true, path: "/api/staff/social/gbp/oauth", maxAge: 0 });
-    return response;
+    return redirect(req, "connected");
   } catch {
     return redirect(req, "connection-failed");
   }
