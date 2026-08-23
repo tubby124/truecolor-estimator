@@ -2023,8 +2023,8 @@ export const PRODUCTS: Record<string, ProductContent> = {
 
   "custom-logo-design": {
     slug: "custom-logo-design",
-    name: "Custom Logo & Graphic Design",
-    tagline: "Original design from scratch by our in-house designer. $40 flat.",
+    name: "Logo Design & Print-Ready Artwork",
+    tagline: "New logo, logo cleanup, or print-ready artwork. $40 flat.",
     description:
       "Custom design is $40 flat with a same-day proof — original artwork built from scratch by our in-house designer in Saskatoon, working in Photoshop and Illustrator. That covers a new logo, a full sign or banner layout, a business card design, a flyer, or a vehicle decal layout. One flat $40 is the entire design charge; we don't bill hourly and we don't run a tiered scope ladder, so a simple wordmark and a detailed layout cost the same. Most customers order this alongside a print job, but you can buy it on its own — the finished files are yours whether or not you print with us. Order the $40 design here, then tell us what you need in the notes field at checkout: the business name, what the piece is for, colours or styles you like, and anything you want avoided. Upload any reference material in the artwork field — competitor examples, a rough sketch, photos, your existing branding. You get a same-day proof to review, and we revise from your feedback before anything is finalized. Turnaround on the design itself is same-day for the first proof; printing after approval runs 1–3 business days, or same-day rush for +$40 flat before 10 AM. If you already have a logo that just needs redrawing rather than inventing, order logo vectorization at $40 instead. Pickup at 216 33rd St W, Saskatoon.",
     fromPrice: "$40",
