@@ -320,6 +320,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
             preMinSubtotal={priceData.preMinSubtotal}
             lineItems={priceData.lineItems}
             showQtyDiscountTiers={!product.lotPriced}
+            serviceMode={product.serviceMode}
           />
         </div>
       </div>
@@ -337,7 +338,9 @@ export function ProductPageClient({ product, initialSelection }: Props) {
               ${priceData.price.toFixed(2)}
             </p>
           ) : (
-            <p className="text-sm text-gray-400 leading-none">Choose options below</p>
+            <p className="text-sm text-gray-400 leading-none">
+              {product.serviceMode ? "Preparing $40 service price" : "Choose options below"}
+            </p>
           )}
         </div>
 

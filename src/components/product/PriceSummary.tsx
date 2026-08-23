@@ -36,6 +36,7 @@ interface PriceSummaryProps {
   materialLabel: string;
   addonQtys: Record<string, number>;
   category: Category;
+  serviceMode?: boolean;
   /**
    * Whether this product can actually receive the engine's qty bulk discount.
    * STEP 4.5 only fires when the price came from a sqft tier (basePricePerSqft),
@@ -75,7 +76,7 @@ export function PriceSummary({
   widthIn, heightIn, qty, sides, materialLabel, addonQtys, category,
   pricePerUnit, qtyDiscountPct, qtyDiscountApplied,
   minChargeApplied, minChargeValue, preMinSubtotal, lineItems = [],
-  showQtyDiscountTiers = true,
+  showQtyDiscountTiers = true, serviceMode = false,
 }: PriceSummaryProps) {
   // Addon sub-lines = engine line_items beyond the first (base product) item
   const addonLines = lineItems.length > 1 ? lineItems.slice(1) : [];
@@ -106,7 +107,9 @@ export function PriceSummary({
         {/* Price display */}
         <div className={`transition-opacity duration-200 ${loading && hasPrice ? "opacity-60" : "opacity-100"}`}>
           {!hasPrice && !loading ? (
-            <p className="text-sm text-gray-400">Enter dimensions to see price</p>
+            <p className="text-sm text-gray-400">
+              {serviceMode ? "Preparing your flat service price" : "Enter dimensions to see price"}
+            </p>
           ) : !hasPrice && loading ? (
             <div className="space-y-2">
               <div className="h-9 bg-gray-100 rounded animate-pulse w-32" />
