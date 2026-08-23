@@ -48,6 +48,20 @@ async function getCampaignCount() {
   }
 }
 
+async function getGbpConnection() {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from("gbp_connections")
+      .select("location_title, connected_at, last_verified_at, last_error")
+      .eq("id", 1)
+      .maybeSingle();
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 const PLATFORM_ICONS: Record<string, string> = {
   instagram: "📸",
   facebook: "🌐",
@@ -56,12 +70,13 @@ const PLATFORM_ICONS: Record<string, string> = {
 };
 
 export default async function SettingsPage() {
-  const [accounts, campaignCount] = await Promise.all([getAccountsFromDB(), getCampaignCount()]);
+  const [accounts, campaignCount, gbpConnection] = await Promise.all([getAccountsFromDB(), getCampaignCount(), getGbpConnection()]);
 
   const hasOpenRouter = !!process.env.OPENROUTER_API_KEY;
   const hasBlotato = !!process.env.BLOTATO_API_KEY;
   const hasN8nSecret = !!process.env.N8N_WEBHOOK_SECRET;
   const hasSupabase = !!process.env.SUPABASE_SECRET_KEY;
+  const hasGbpConfig = !!process.env.GOOGLE_GBP_CLIENT_ID && !!process.env.GOOGLE_GBP_CLIENT_SECRET && !!process.env.GOOGLE_GBP_TOKEN_ENCRYPTION_KEY;
 
   const webhookUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca"}/api/webhooks/n8n`;
 
@@ -128,6 +143,32 @@ export default async function SettingsPage() {
           <p className="text-xs text-gray-400 mt-2">
             Set header <span className="font-mono font-semibold">x-n8n-secret</span> = value of your <span className="font-mono">N8N_WEBHOOK_SECRET</span> Railway var.
           </p>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-bold text-[#1c1712]">Google Business Profile</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Direct connection for True Color Display Printing Ltd.</p>
+            </div>
+            <span className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full ${gbpConnection ? "bg-green-100 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${gbpConnection ? "bg-green-500" : "bg-amber-500"}`} />
+              {gbpConnection ? "Connected" : hasGbpConfig ? "Ready to connect" : "Configuring"}
+            </span>
+          </div>
+          {gbpConnection ? (
+            <p className="mt-4 text-sm text-gray-600"><span className="font-semibold text-[#1c1712]">{gbpConnection.location_title}</span> is connected. Posting stays a separate staff action.</p>
+          ) : (
+            <p className="mt-4 text-sm text-gray-600">Connect only the verified True Color business profile. This does not alter the existing Blotato accounts.</p>
+          )}
+          <a
+            href="/api/staff/social/gbp/oauth/start"
+            className={`mt-4 inline-flex items-center justify-center min-h-[44px] rounded-xl px-4 text-sm font-bold transition-colors ${hasGbpConfig ? "bg-[#e63020] text-white hover:bg-[#bf2317]" : "bg-gray-100 text-gray-400 pointer-events-none"}`}
+            aria-disabled={!hasGbpConfig}
+          >
+            {gbpConnection ? "Reconnect Google Business Profile" : "Connect Google Business Profile"}
+          </a>
+          {!hasGbpConfig && <p className="mt-2 text-xs text-amber-700">OAuth credentials are being installed in the production secret store.</p>}
         </div>
 
         {/* Connected accounts */}
