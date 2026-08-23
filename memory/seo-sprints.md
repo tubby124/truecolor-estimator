@@ -644,3 +644,12 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **What changed:** Added the approved default social-card URL (`/og-image.png?v=20260820`) to each of those 23 route-level Open Graph objects, including `/why-true-color`.
 - **Intentionally retained:** Routes with genuine purpose-built product/gallery Open Graph images keep those specific images; they are not overwritten by the sitewide default card.
 - **Verification:** targeted lint and full production build passed.
+
+---
+
+## SEO Phase 109 — Flyer Printing metadata-only CTR experiment (2026-08-23)
+
+- **Source evidence:** Fully paginated finalized GSC data through 2026-08-19: `/flyer-printing-saskatoon` had 519 impressions, 0 clicks, and impression-weighted position 32.5; prior equal window had 729 impressions, 0 clicks, and position 35.9. Its main local query `flyer saskatoon` held position 6.0 on 8 impressions. Query-level review found no meaningful Saskatoon cannibalization; the only secondary Flyer URL was the separately governed Regina route at 3 impressions for the broad query.
+- **What changed:** Changed only the page title and matching Open Graph title from `Flyer Printing Saskatoon | 100 Flyers from $45` to `Flyer Printing Saskatoon | Same-Day Rush + 100 from $45`. The existing accurate description, H1, body, FAQs, schema, canonical, pricing, and internal links were left unchanged. Updated only this page's sitemap `lastModified` to 2026-08-23.
+- **Guardrails:** This is one page and one metadata experiment. No content, FAQ, schema, redirect, location-page, or price mutation is bundled with it. Protected-page baseline was refreshed 2026-08-11 and the final query preflight was recorded 2026-08-23.
+- **Next steps / trigger date:** Run production title/canonical/sitemap readback after deploy, then observe finalized GSC and GA4 for 7–14 completed days. Do not ship a second SEO page mutation until that gate passes.
