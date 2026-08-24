@@ -10,7 +10,7 @@ void iPhoneBrowserType;
 test.use(iPhone13);
 
 const ORDERABLE_PRODUCTS = [
-  { slug: "stickers", productName: "Stickers", expectedConfiguration: /4×4 in · 100/i },
+  { slug: "stickers", productName: "Vinyl Stickers", expectedConfiguration: /4×4 in · 100/i },
   { slug: "coroplast-signs", productName: "Coroplast Signs", expectedConfiguration: /12×18/i },
   { slug: "business-cards", productName: "Business Cards", expectedConfiguration: /3\.5×2|3\.5×2/i },
 ] as const;
