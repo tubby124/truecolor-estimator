@@ -71,11 +71,16 @@ describe("paid funnel event ownership", () => {
     expect(conversionConfig).not.toContain('eventName: "sticker_add_to_cart_click"');
   });
 
-  it("gives the orderable sticker page one price/cart decision point", () => {
+  it("gives every priced, orderable product page one mobile price/cart decision point", () => {
     const productPage = source("src/components/product/ProductPageClient.tsx");
-    expect(productPage).toContain('showGetPrice={product.slug !== "stickers"}');
-    expect(productPage).toContain("{configData.widthIn}×{configData.heightIn} in · {configData.qty.toLocaleString()} stickers");
+    expect(productPage).toContain("const mobileAddToCartReady = configuredPriceReady && hasValidCartConfiguration");
+    expect(productPage).toContain("const showMobileGetPrice = !mobileAddToCartReady");
+    expect(productPage).toContain('showGetPrice={showMobileGetPrice}');
+    expect(productPage).not.toContain('product.slug !== "stickers"');
+    expect(productPage).toContain("const mobileConfigurationLabel = configData.sizeLabel && configData.qty > 0");
+    expect(productPage).toContain('data-testid="mobile-config-label"');
     expect(productPage).toContain('data-testid="mobile-add-to-cart"');
+    expect(productPage).toContain('z-50');
     const mobileBar = source("src/components/product/MobileCallPriceBar.tsx");
     expect(mobileBar).toContain("showGetPrice: boolean");
     expect(mobileBar).toContain("{showGetPrice && (");

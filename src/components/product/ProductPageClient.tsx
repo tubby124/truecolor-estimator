@@ -259,6 +259,21 @@ export function ProductPageClient({ product, initialSelection }: Props) {
   }
 
   const materialLabel = MATERIAL_LABELS[product.slug] ?? product.name;
+  const dimensionsRequired = !product.serviceMode;
+  const hasValidCartConfiguration = (
+    (!dimensionsRequired || (configData.widthIn > 0 && configData.heightIn > 0))
+    && configData.qty > 0
+    && configData.customTextValid !== false
+  );
+  const configuredPriceReady = priceData.price != null && !priceData.loading;
+  const mobileAddToCartReady = configuredPriceReady && hasValidCartConfiguration;
+  // This one rule applies to every self-serve product page: while a shopper still
+  // needs to configure it, retain the helpful jump; once the current configuration
+  // has a valid live price and can be added, leave one mobile purchase action.
+  const showMobileGetPrice = !mobileAddToCartReady;
+  const mobileConfigurationLabel = configData.sizeLabel && configData.qty > 0
+    ? `${configData.sizeLabel} · ${configData.qty.toLocaleString()} ${product.name.toLowerCase()}`
+    : null;
 
   return (
     // pb-24 on mobile/tablet for sticky bar clearance; removed on lg+.
@@ -348,13 +363,13 @@ export function ProductPageClient({ product, initialSelection }: Props) {
       </div>
 
       {/* ── Mobile / tablet sticky bottom bar ────────────────────────────── */}
-      {!addedToCart && <div ref={mobileAddToCartBarRef} data-testid="mobile-add-to-cart-bar" className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
+      {!addedToCart && <div ref={mobileAddToCartBarRef} data-testid="mobile-add-to-cart-bar" className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
         {/* Price summary */}
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 leading-none mb-0.5">Price (before tax)</p>
-          {product.slug === "stickers" && configData.widthIn > 0 && configData.heightIn > 0 && configData.qty > 0 && (
-            <p className="text-[11px] font-medium text-gray-600 leading-tight truncate">
-              {configData.widthIn}×{configData.heightIn} in · {configData.qty.toLocaleString()} stickers
+          {mobileConfigurationLabel && (
+            <p data-testid="mobile-config-label" className="text-[11px] font-medium text-gray-600 leading-tight truncate">
+              {mobileConfigurationLabel}
             </p>
           )}
           <SameDayClock className="text-[10px] text-[#16C2F3] flex items-center gap-1 mb-0.5" />
@@ -375,11 +390,11 @@ export function ProductPageClient({ product, initialSelection }: Props) {
         <button
           data-testid="mobile-add-to-cart"
           onClick={handleAddToCart}
-          disabled={priceData.price == null || addedToCart || priceData.loading}
+          disabled={!mobileAddToCartReady}
           className={`shrink-0 px-6 py-3 rounded-xl font-bold text-white text-base transition-all ${
             addedToCart
               ? "bg-[#8CC63E] cursor-default"
-              : priceData.price == null || priceData.loading
+              : !mobileAddToCartReady
               ? "bg-gray-200 text-gray-400 cursor-not-allowed"
               : "bg-[#16C2F3] hover:bg-[#0fb0dd] active:scale-[0.98]"
           }`}
@@ -394,7 +409,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
       <MobileCallPriceBar
         visible={!addedToCart}
         bottomOffset={mobileAddToCartBarHeight}
-        showGetPrice={product.slug !== "stickers"}
+        showGetPrice={showMobileGetPrice}
         onGetPriceClick={scrollToConfigurator}
       />
 
