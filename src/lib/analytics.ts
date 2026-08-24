@@ -243,6 +243,18 @@ export function trackProductPriceError(params: {
   });
 }
 
+export function trackStickerAddToCartVisible(params: { product_slug: "stickers" }) {
+  gtag("event", "sticker_add_to_cart_visible", {
+    product_slug: params.product_slug,
+  });
+}
+
+export function trackStickerAddToCartClick(params: { product_slug: "stickers" }) {
+  gtag("event", "sticker_add_to_cart_click", {
+    product_slug: params.product_slug,
+  });
+}
+
 export function trackAddToCartBlocked(params: {
   product_slug: string;
   reason: "missing_price" | "loading" | "invalid_configuration";

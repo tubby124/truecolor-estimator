@@ -17,6 +17,8 @@ import {
   trackProductConfigReady,
   trackProductConfigStarted,
   trackProductPriceError,
+  trackStickerAddToCartClick,
+  trackStickerAddToCartVisible,
 } from "@/lib/analytics";
 import { metaTrackViewContent, metaTrackAddToCart } from "@/lib/analytics/metaPixel";
 import { SameDayClock } from "@/components/home/SameDayClock";
@@ -62,6 +64,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
   const productConfigStartedRef = useRef(false);
   const productConfigReadyRef = useRef(false);
   const productPriceErrorsRef = useRef(new Set<string>());
+  const stickerAddToCartVisibleRef = useRef(false);
 
   // Mobile paid-search call/price bar (src/components/product/MobileCallPriceBar.tsx)
   // stacks ABOVE the existing sticky Add to Cart bar below — never covers it.
@@ -134,7 +137,26 @@ export function ProductPageClient({ product, initialSelection }: Props) {
     setConfigData(config);
   }, []);
 
+  // The CTA is meaningful only once the default/configured sticker price has
+  // resolved. Fire once per page view; this is diagnostic-only, not an Ads goal.
+  useEffect(() => {
+    if (
+      product.slug === "stickers"
+      && priceData.price != null
+      && !priceData.loading
+      && !stickerAddToCartVisibleRef.current
+    ) {
+      stickerAddToCartVisibleRef.current = true;
+      trackStickerAddToCartVisible({ product_slug: "stickers" });
+    }
+  }, [priceData.loading, priceData.price, product.slug]);
+
   function handleAddToCart() {
+    // Record intent before every eligibility gate so a failed configuration is
+    // distinguishable from a shopper who never presses the CTA.
+    if (product.slug === "stickers") {
+      trackStickerAddToCartClick({ product_slug: "stickers" });
+    }
     // Flat-fee services carry no dimensions — the dimension gate would silently
     // drop every add-to-cart click for them (button enabled, nothing added).
     const dimensionsRequired = !product.serviceMode;
@@ -326,10 +348,15 @@ export function ProductPageClient({ product, initialSelection }: Props) {
       </div>
 
       {/* ── Mobile / tablet sticky bottom bar ────────────────────────────── */}
-      {!addedToCart && <div ref={mobileAddToCartBarRef} className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
+      {!addedToCart && <div ref={mobileAddToCartBarRef} data-testid="mobile-add-to-cart-bar" className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 lg:hidden shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
         {/* Price summary */}
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 leading-none mb-0.5">Price (before tax)</p>
+          {product.slug === "stickers" && configData.widthIn > 0 && configData.heightIn > 0 && configData.qty > 0 && (
+            <p className="text-[11px] font-medium text-gray-600 leading-tight truncate">
+              {configData.widthIn}×{configData.heightIn} in · {configData.qty.toLocaleString()} stickers
+            </p>
+          )}
           <SameDayClock className="text-[10px] text-[#16C2F3] flex items-center gap-1 mb-0.5" />
           {priceData.loading && priceData.price == null ? (
             <div className="h-6 w-24 bg-gray-100 rounded animate-pulse" />
@@ -346,6 +373,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
 
         {/* Add to Cart */}
         <button
+          data-testid="mobile-add-to-cart"
           onClick={handleAddToCart}
           disabled={priceData.price == null || addedToCart || priceData.loading}
           className={`shrink-0 px-6 py-3 rounded-xl font-bold text-white text-base transition-all ${
@@ -366,6 +394,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
       <MobileCallPriceBar
         visible={!addedToCart}
         bottomOffset={mobileAddToCartBarHeight}
+        showGetPrice={product.slug !== "stickers"}
         onGetPriceClick={scrollToConfigurator}
       />
 

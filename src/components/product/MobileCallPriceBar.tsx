@@ -29,10 +29,12 @@ interface MobileCallPriceBarProps {
   visible: boolean;
   /** Live-measured height (px) of the sticky bar/panel this one stacks above. */
   bottomOffset: number;
+  /** Keep the paid-search configurator jump on non-orderable/other product pages. */
+  showGetPrice: boolean;
   onGetPriceClick: () => void;
 }
 
-export function MobileCallPriceBar({ visible, bottomOffset, onGetPriceClick }: MobileCallPriceBarProps) {
+export function MobileCallPriceBar({ visible, bottomOffset, showGetPrice, onGetPriceClick }: MobileCallPriceBarProps) {
   if (!visible) return null;
 
   function handleGetPriceClick() {
@@ -49,25 +51,27 @@ export function MobileCallPriceBar({ visible, bottomOffset, onGetPriceClick }: M
       className="fixed left-0 right-0 z-40 md:hidden bg-white border-t border-gray-200 px-3 py-2 flex items-center gap-2 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]"
       style={{ bottom: bottomOffset, paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
       role="group"
-      aria-label="Call now or get your price"
+      aria-label={showGetPrice ? "Call now or get your price" : "Call True Color Display Printing"}
     >
       <a
         href={PHONE_TEL}
         data-call-placement={CALL_PLACEMENT}
         aria-label={`Call True Color Display Printing at ${PHONE_DISPLAY}`}
-        className="flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-[var(--brand)] text-[var(--brand)] font-bold text-sm px-3 py-2.5 transition-colors hover:bg-[var(--brand-50)] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
+        className={`${showGetPrice ? "flex-1" : "w-full"} min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-[var(--brand)] text-[var(--brand)] font-bold text-sm px-3 py-2.5 transition-colors hover:bg-[var(--brand-50)] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]`}
       >
         <Phone size={17} aria-hidden="true" />
         Call Now
       </a>
-      <button
-        type="button"
-        onClick={handleGetPriceClick}
-        className="flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--brand)] text-white font-bold text-sm px-3 py-2.5 transition-colors hover:opacity-90 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
-      >
-        <Tag size={17} aria-hidden="true" />
-        Get My Price
-      </button>
+      {showGetPrice && (
+        <button
+          type="button"
+          onClick={handleGetPriceClick}
+          className="flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--brand)] text-white font-bold text-sm px-3 py-2.5 transition-colors hover:opacity-90 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
+        >
+          <Tag size={17} aria-hidden="true" />
+          Get My Price
+        </button>
+      )}
     </div>
   );
 }

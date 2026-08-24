@@ -45,14 +45,40 @@ describe("paid funnel event ownership", () => {
 
   it("keeps diagnostic product events visible but outside the Ads conversion graph", () => {
     const analytics = source("src/lib/analytics.ts");
-    for (const event of ["product_config_started", "product_config_ready", "product_price_error", "add_to_cart_blocked"]) {
+    for (const event of [
+      "product_config_started",
+      "product_config_ready",
+      "product_price_error",
+      "add_to_cart_blocked",
+      "sticker_add_to_cart_visible",
+      "sticker_add_to_cart_click",
+    ]) {
       expect(analytics).toContain(`gtag("event", "${event}"`);
     }
+    const productPage = source("src/components/product/ProductPageClient.tsx");
+    expect(productPage).toContain('trackStickerAddToCartVisible({ product_slug: "stickers" })');
+    const handle = productPage.slice(productPage.indexOf("function handleAddToCart()"));
+    const clickIndex = handle.indexOf('trackStickerAddToCartClick({ product_slug: "stickers" })');
+    const blockedIndex = handle.indexOf("trackAddToCartBlocked({");
+    expect(clickIndex).toBeGreaterThan(-1);
+    expect(clickIndex).toBeLessThan(blockedIndex);
     const report = source("scripts/google-ads/paid-funnel-report.mjs");
     expect(report).toContain('"product_config_started"');
     expect(report).toContain("Diagnostic only — not bid conversions");
     const conversionConfig = source("docs/paid-search/campaign-config.mjs");
     expect(conversionConfig).not.toContain('eventName: "product_config_started"');
+    expect(conversionConfig).not.toContain('eventName: "sticker_add_to_cart_visible"');
+    expect(conversionConfig).not.toContain('eventName: "sticker_add_to_cart_click"');
+  });
+
+  it("gives the orderable sticker page one price/cart decision point", () => {
+    const productPage = source("src/components/product/ProductPageClient.tsx");
+    expect(productPage).toContain('showGetPrice={product.slug !== "stickers"}');
+    expect(productPage).toContain("{configData.widthIn}×{configData.heightIn} in · {configData.qty.toLocaleString()} stickers");
+    expect(productPage).toContain('data-testid="mobile-add-to-cart"');
+    const mobileBar = source("src/components/product/MobileCallPriceBar.tsx");
+    expect(mobileBar).toContain("showGetPrice: boolean");
+    expect(mobileBar).toContain("{showGetPrice && (");
   });
 
   it("delegates every customer tel link through one global tracker", () => {
