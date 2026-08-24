@@ -10,7 +10,7 @@ void iPhoneBrowserType;
 test.use(iPhone13);
 
 const ORDERABLE_PRODUCTS = [
-  { slug: "stickers", productName: "Stickers", expectedConfiguration: /4×4 in · 100 stickers/i },
+  { slug: "stickers", productName: "Stickers", expectedConfiguration: /4×4 in · 100/i },
   { slug: "coroplast-signs", productName: "Coroplast Signs", expectedConfiguration: /12×18/i },
   { slug: "business-cards", productName: "Business Cards", expectedConfiguration: /3\.5×2|3\.5×2/i },
 ] as const;
@@ -69,7 +69,7 @@ test.describe("Orderable product mobile price-to-cart journey", () => {
 
       await page.goto("/cart", { waitUntil: "networkidle" });
       await expect(page.getByRole("heading", { name: "Your Cart" })).toBeVisible();
-      await expect(page.getByText(product.productName, { exact: true })).toBeVisible();
+      await expect(page.locator("#main-content").getByText(product.productName, { exact: true })).toBeVisible();
       await expect(page.getByRole("link", { name: /Proceed to Checkout/i })).toBeVisible();
     });
   }

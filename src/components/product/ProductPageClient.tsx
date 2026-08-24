@@ -56,6 +56,11 @@ const EMPTY_CONFIG: ConfigData = {
   materialCode: "", sizeLabel: "", sidesLabel: "Single-sided",
 };
 
+function formatMobileSizeLabel(sizeLabel: string) {
+  const dimensions = sizeLabel.match(/(\d+(?:\.\d+)?)\s*(?:in|″|")?\s*×\s*(\d+(?:\.\d+)?)\s*(?:in|″|")?/i);
+  return dimensions ? `${dimensions[1]}×${dimensions[2]} in` : sizeLabel;
+}
+
 export function ProductPageClient({ product, initialSelection }: Props) {
   const { toasts, showToast, dismissToast } = useToast();
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
@@ -272,7 +277,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
   // has a valid live price and can be added, leave one mobile purchase action.
   const showMobileGetPrice = !mobileAddToCartReady;
   const mobileConfigurationLabel = configData.sizeLabel && configData.qty > 0
-    ? `${configData.sizeLabel} · ${configData.qty.toLocaleString()} ${product.name.toLowerCase()}`
+    ? `${formatMobileSizeLabel(configData.sizeLabel)} · ${configData.qty.toLocaleString()} ${product.name.toLowerCase()}`
     : null;
 
   return (
