@@ -398,6 +398,8 @@ const TRACKING_MAPPINGS = {
   utm_source: "google",
   utm_medium: "cpc",
   utm_campaign: "{campaignid}",
+  utm_id: "{campaignid}",
+  utm_source_platform: "google_ads",
   utm_term: "{keyword}",
   utm_content: "{creative}",
   keyword: "{keyword}",
