@@ -288,9 +288,11 @@ const EXPECTED_TOTAL_RESPONSIVE_SEARCH_ADS = 45;
 // the Core ENABLED count falls 23 -> 22 while the account total rises 58 -> 59.
 // 2026-08-12 Generic Print Price destination repoint: 14 -> 16. Its old variant B and legacy
 // variant A both point at /printing-prices-saskatoon and retire together in the atomic swap.
+// The later controlled chooser replacement added one more paused predecessor. A 2026-08-25
+// account-wide readback verified 17 superseded Core ads are paused and 22 Core ads are enabled.
 // Vehicle Decals adds one contract RSA after the repoint:
-// 45 contract RSAs + 16 superseded paused RSAs = 61 account RSAs.
-const SUPERSEDED_COPY_RSAS_PAUSED = 16;
+// 45 contract RSAs + 17 superseded paused RSAs = 62 account RSAs.
+const SUPERSEDED_COPY_RSAS_PAUSED = 17;
 
 function evaluateLiveState(live, {
   expectedCampaigns,
@@ -691,7 +693,7 @@ export function evaluateLaunchedLiveState(live) {
     // paused is the 12 retired Competitor groups + the 1 held Brand group (13), plus their
     // 21 Competitor RSAs + 2 Brand RSAs (23).
     expectedPausedAdGroups: 13,
-    // 23 contract-paused (21 retired Competitor + 2 held Brand) + 16 superseded Core copy ads.
+    // 23 contract-paused (21 retired Competitor + 2 held Brand) + 17 superseded Core copy ads.
     expectedPausedResponsiveSearchAds: 23 + SUPERSEDED_COPY_RSAS_PAUSED,
     expectedEnabledAdGroups: 14,
     // 2026-08-10 Generic Sign Shop destination repoint: 23 -> 22. That group had TWO enabled ads

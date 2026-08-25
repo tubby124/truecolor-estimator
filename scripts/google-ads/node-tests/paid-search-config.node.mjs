@@ -296,10 +296,11 @@ const makeLaunchedLiveState = () => {
   // variant B AND its legacy variant A, both pinned to /sign-company-saskatoon) and creates one
   // replacement, so the account carried 45 + 14 = 59 ads, 37 paused, and 22 enabled.
   // 2026-08-12 Generic Print Price repeats that pattern: +1 replacement, +2 superseded paused,
-  // and -1 enabled. Vehicle Decals then adds one contract ad. End state is
-  // 45 + 16 = 61 total, 39 paused, and 22 enabled.
-  live.responsiveSearchAds = 61;
-  live.pausedResponsiveSearchAds = 39;
+  // and -1 enabled. A later controlled chooser replacement adds one more paused predecessor.
+  // Vehicle Decals then adds one contract ad. End state is 45 + 17 = 62 total, 40 paused,
+  // and 22 enabled.
+  live.responsiveSearchAds = 62;
+  live.pausedResponsiveSearchAds = 40;
   live.enabledResponsiveSearchAds = 22;
   live.nearMeKeywords = live.nearMeKeywords.map((keyword) => ({ ...keyword, status: "ENABLED" }));
   // Competitor ads are retired, so their destinations must read back PAUSED, not ENABLED.
