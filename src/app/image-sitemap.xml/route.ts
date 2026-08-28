@@ -9,9 +9,40 @@ const ABT = `${BASE}/images/about`;
 
 // Sitemap-listed IndustryPage routes whose rendered hero images were previously
 // absent from the image sitemap. Each path was verified under public/ on 2026-08-11.
-const ADDITIONAL_INDUSTRY_HERO_PAGES = [
+const ADDITIONAL_INDUSTRY_HERO_PAGES: {
+  slug: string;
+  image: string;
+  alt: string;
+  additionalImages?: { image: string; alt: string }[];
+}[] = [
   { slug: "same-day-printing-saskatoon", image: "/images/products/heroes/retail-hero-1200x500.webp", alt: "Same day printing Saskatoon — signs, banners, and cards ready today" },
-  { slug: "graphic-design-saskatoon", image: "/images/products/heroes/construction-hero-1200x500.webp", alt: "Custom graphic design and printing in Saskatoon by True Color Display Printing" },
+  {
+    slug: "graphic-design-saskatoon",
+    image: "/images/logo-design-saskatoon/logo-design-saskatoon-hero.webp",
+    alt: "Illustrative Saskatoon logo design concept applied to business cards, storefront signage, and a banner",
+    additionalImages: [
+      {
+        image: "/images/logo-design-saskatoon/logo-sketch-to-vector-saskatoon.webp",
+        alt: "Illustrative sketch converted into clean vector logo artwork for a Saskatoon construction brand",
+      },
+      {
+        image: "/images/logo-design-saskatoon/logo-brand-system-saskatoon.webp",
+        alt: "Illustrative logo colour palette typography and layout system prepared for print in Saskatoon",
+      },
+      {
+        image: "/images/logo-design-saskatoon/logo-business-cards-saskatoon.webp",
+        alt: "Illustrative custom logo applied to business cards printed in Saskatoon",
+      },
+      {
+        image: "/images/logo-design-saskatoon/logo-signage-saskatoon.webp",
+        alt: "Illustrative custom logo applied to storefront and coroplast signage in Saskatoon",
+      },
+      {
+        image: "/images/logo-design-saskatoon/logo-banner-display-saskatoon.webp",
+        alt: "Illustrative custom logo applied to a retractable banner display in Saskatoon",
+      },
+    ],
+  },
   { slug: "wall-graphics-saskatoon", image: "/images/products/product/vinyl-lettering-office-wall-800x600.webp", alt: "Custom wall graphics and vinyl lettering in Saskatoon by True Color Display Printing" },
   { slug: "booklet-printing-saskatoon", image: "/images/products/product/coil-bound-booklet-hero-800x600.webp", alt: "Coil-bound booklet printing in Saskatoon by True Color Display Printing" },
   { slug: "trade-show-displays-saskatoon", image: "/images/products/heroes/retail-hero-1200x500.webp", alt: "Trade show displays Saskatoon — retractable banners and booth signage printed locally" },
@@ -1501,7 +1532,7 @@ const PAGES = [
       },
     ],
   },
-  ...ADDITIONAL_INDUSTRY_HERO_PAGES.map(({ slug, image, alt }) => ({
+  ...ADDITIONAL_INDUSTRY_HERO_PAGES.map(({ slug, image, alt, additionalImages = [] }) => ({
     loc: `${BASE}/${slug}`,
     images: [
       {
@@ -1509,6 +1540,11 @@ const PAGES = [
         title: alt,
         caption: alt,
       },
+      ...additionalImages.map(({ image: additionalImage, alt: additionalAlt }) => ({
+        loc: `${BASE}${additionalImage}`,
+        title: additionalAlt,
+        caption: additionalAlt,
+      })),
     ],
   })),
 ];

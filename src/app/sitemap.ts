@@ -40,7 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/retractable-banners-saskatoon`, lastModified: new Date("2026-01-08"), changeFrequency: "monthly", priority: 0.8 },
 
     // ── Product SEO pages — sprint (2026-03-02) ───────────────────────────────
-    { url: `${BASE_URL}/graphic-design-saskatoon`, lastModified: new Date("2026-06-12"), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${BASE_URL}/graphic-design-saskatoon`, lastModified: new Date("2026-08-28"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/printing-prices-saskatoon`, lastModified: new Date("2026-08-06"), changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/sign-company-saskatoon`, lastModified: new Date("2026-06-05"), changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/wall-graphics-saskatoon`, lastModified: new Date("2026-08-28"), changeFrequency: "monthly", priority: 0.8 },

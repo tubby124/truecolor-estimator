@@ -2,7 +2,9 @@
 
 Prepared: 2026-08-28  
 Target: existing canonical `/graphic-design-saskatoon`  
-Status: asset production can start; no live Logo Design page mutation is authorized by this brief.
+Status: completed as a visual-only Graphic Design page wave on 2026-08-28. The assets are shown
+as an illustrative concept, not as a client case study. Metadata, H1, schema, pricing and broader
+page copy remain unchanged.
 
 ## Page story
 
@@ -16,11 +18,11 @@ not a generic designer-at-a-laptop stock page.
 | File | Size / crop | What it should show | Page use |
 |---|---|---|---|
 | `logo-design-saskatoon-hero.webp` | 1600x900, safe centre crop | One original logo concept shown beside 2–3 finished print applications such as a storefront sign, business card and banner | Hero |
-| `logo-sketch-to-vector.webp` | 1200x900 | Rough sketch or low-resolution source beside the clean vector result | Process / before-after |
-| `logo-colour-type-system.webp` | 1200x900 | Logo lockups, approved colours and typography on a clean presentation board | Design-system proof |
-| `logo-on-business-cards.webp` | 1200x900 | Finished logo on a real card stack or print proof | Portfolio grid |
-| `logo-on-signage.webp` | 1200x900 | The same identity on coroplast, ACP or storefront signage | Portfolio grid |
-| `logo-on-banner-display.webp` | 1200x900 | The identity scaled correctly onto a banner or retractable display | Portfolio grid |
+| `logo-sketch-to-vector-saskatoon.webp` | 1200x900 | Rough sketch or low-resolution source beside the clean vector result | Process / before-after |
+| `logo-brand-system-saskatoon.webp` | 1200x900 | Logo lockups, approved colours and typography on a clean presentation board | Design-system proof |
+| `logo-business-cards-saskatoon.webp` | 1200x900 | Finished logo on a real card stack or print proof | Portfolio grid |
+| `logo-signage-saskatoon.webp` | 1200x900 | The same identity on coroplast, ACP or storefront signage | Portfolio grid |
+| `logo-banner-display-saskatoon.webp` | 1200x900 | The identity scaled correctly onto a banner or retractable display | Portfolio grid |
 
 ## Generation and selection rules
 
@@ -54,3 +56,10 @@ not a generic designer-at-a-laptop stock page.
    retaining the broader graphic-design services.
 4. Correct contradictory price claims during that body wave: standard layouts are $40 flat;
    complex original logos, multi-product systems and vehicle work are quoted after review.
+
+## Implemented image SEO
+
+- Source images supplied by the owner on 2026-08-28 were converted to sRGB WebP with descriptive,
+  location-qualified filenames in `public/images/logo-design-saskatoon/`.
+- The hero and five gallery images use descriptive alt text and are present in the image sitemap.
+- The page clearly labels the work as an illustrative concept rather than a real customer project.
