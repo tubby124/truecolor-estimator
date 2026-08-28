@@ -704,3 +704,22 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **Next trigger:** Read production title/canonical/indexability/sitemap after deploy. Compare this
   page and query after 7 completed finalized GSC days; keep or revert the title before publishing
   the Logo Design metadata experiment.
+
+---
+
+## SEO Phase 112 — Graphic Design illustrative logo-image SEO wave (2026-08-28)
+
+- **Owner request:** Integrate the supplied logo-design visuals now using the site's image SEO
+  path. This is a separate, visual-only wave on `/graphic-design-saskatoon`; it does not alter the
+  open Wall Graphics title experiment.
+- **Asset truth:** The supplied North Point / Northpoint artwork is illustrative concept work, not
+  a verified True Color customer case study. The page states that plainly and no fictional contact
+  information or client claim is repeated as website copy.
+- **What changed:** Converted six owner-supplied source images to optimized sRGB WebP files with
+  descriptive filenames. Replaced this page's hero with the illustrative design-and-print concept
+  and added five lazy-loaded, descriptive-alt gallery images: sketch-to-vector, brand system,
+  business cards, signage and retractable display. Added all six images to the image sitemap and
+  updated only this route's sitemap `lastModified` to 2026-08-28.
+- **Guardrails:** Title, meta description, Open Graph metadata, H1, URL, canonical, schema,
+  FAQs, price claims, CTA and internal-link structure are unchanged. The later Logo Design
+  metadata/body release remains gated behind the active Wall Graphics observation.

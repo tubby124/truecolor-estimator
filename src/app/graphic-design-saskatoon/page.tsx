@@ -24,8 +24,8 @@ export default function GraphicDesignSaskatoonPage() {
       primaryProductSlug="custom-logo-design"
       title="Graphic Design — Saskatoon"
       subtitle="Design + print in one shop. In-house Photoshop wizard. From sketch to finished sign."
-      heroImage="/images/products/heroes/construction-hero-1200x500.webp"
-      heroAlt="Custom graphic design and printing in Saskatoon by True Color Display Printing"
+      heroImage="/images/logo-design-saskatoon/logo-design-saskatoon-hero.webp"
+      heroAlt="Illustrative Saskatoon logo design concept applied to business cards, storefront signage, and a banner"
       description={
         "Most print shops in Saskatoon make you show up with a print-ready file. True Color is different — our in-house designer handles everything from a rough idea to a finished, print-ready layout, and then prints it the same day. No outsourcing, no agency mark-ups, no back-and-forth with a freelancer who's never seen a commercial printer. Your designer and your printer are in the same building.\n\nOur designer specializes in Photoshop-level custom work: logos built from scratch, artwork modified to fit new dimensions, low-resolution files cleaned up for large-format printing, full layouts for banners, signs, flyers, business cards, vehicle magnets, and retractable stands. If you've got a vision but not the software, that's exactly what we're here for. Bring a napkin sketch, a reference photo, or just a description — we'll build it.\n\nLogo design in Saskatoon usually starts with one practical question: do you need a new brand mark, or do you need an existing logo cleaned up for print? Design is $40 flat whatever the job — basic artwork setup and resizing, a full original design from scratch, or logo recreation and vectorization from a low-resolution JPG or PNG. One price, one same-day proof. We build print-ready files for signs, banners, cards, flyers, decals, and wall graphics so the logo is usable beyond a single order.\n\nStandard design layouts (business cards, flyers, basic banners) start at $40 flat — that covers your initial layout and two rounds of revisions. Complex projects like full logo creation, multi-panel trade show displays, or vehicle wrap layouts are quoted individually. Either way, you'll have a proof to approve before anything goes to print.\n\nEvery file we create is yours to keep. We send the print-ready PDF, and if you want the source file in PSD or AI format, just ask — no ransom fees. You paid for the design work, you own the artwork.\n\nTurnaround is fast because everything happens in-house. Submit your brief by 10 AM and most standard layouts come back as a proof the same day. Rush design is available on the same +$40 flat fee as our rush printing. If you need a banner designed and in your hands by 5 PM today, call (306) 954-8688 — it happens more often than you'd think.\n\nSaskatoon businesses, contractors, real estate agents, event organizers, and community groups rely on True Color because design and print in one shop means fewer emails, fewer handoffs, and no delays waiting for files to move between vendors. Come in, describe what you need, leave with a finished product."
       }
@@ -88,8 +88,34 @@ export default function GraphicDesignSaskatoonPage() {
             handoffs, and no delays waiting for files to move between vendors. Come in, describe
             what you need, leave with a finished product.
           </p>
+          <p className="text-sm leading-relaxed text-gray-500">
+            <strong className="text-gray-700">Illustrative logo-design concept:</strong> the images below show a
+            sample identity carried from sketch to print applications. They are not a client case study.
+          </p>
         </>
       }
+      galleryImages={[
+        {
+          src: "/images/logo-design-saskatoon/logo-sketch-to-vector-saskatoon.webp",
+          alt: "Illustrative sketch converted into clean vector logo artwork for a Saskatoon construction brand",
+        },
+        {
+          src: "/images/logo-design-saskatoon/logo-brand-system-saskatoon.webp",
+          alt: "Illustrative logo colour palette typography and layout system prepared for print in Saskatoon",
+        },
+        {
+          src: "/images/logo-design-saskatoon/logo-business-cards-saskatoon.webp",
+          alt: "Illustrative custom logo applied to business cards printed in Saskatoon",
+        },
+        {
+          src: "/images/logo-design-saskatoon/logo-signage-saskatoon.webp",
+          alt: "Illustrative custom logo applied to storefront and coroplast signage in Saskatoon",
+        },
+        {
+          src: "/images/logo-design-saskatoon/logo-banner-display-saskatoon.webp",
+          alt: "Illustrative custom logo applied to a retractable banner display in Saskatoon",
+        },
+      ]}
       products={[
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },

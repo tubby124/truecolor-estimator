@@ -12,6 +12,6 @@ describe("image sitemap", () => {
     expect(xml).not.toContain("<image:title>");
     expect(xml).not.toContain("<image:caption>");
     expect(xml.match(/<url>/g)).toHaveLength(111);
-    expect(xml.match(/<image:image>/g)).toHaveLength(336);
+    expect(xml.match(/<image:image>/g)).toHaveLength(341);
   });
 });
