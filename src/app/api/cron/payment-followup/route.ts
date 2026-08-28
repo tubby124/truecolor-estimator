@@ -28,6 +28,7 @@ import { sendEmail } from "@/lib/email/smtp";
 import { escHtml } from "@/lib/email/components/escHtml";
 import { recordCronRun } from "@/lib/cron/heartbeat";
 import { paymentFollowupOutcome } from "@/lib/cron/paymentFollowupOutcome";
+import { paymentFollowupOrderKey, paymentFollowupSessionKey } from "@/lib/cron/paymentFollowupIdempotency";
 import { nextFollowupTier, type FollowupTier } from "@/lib/orders/followupLadder";
 import { followupCopy, type LatestAttemptLite } from "@/lib/orders/followupCopy";
 import { buildPayLink } from "@/lib/orders/payLink";
@@ -281,6 +282,7 @@ export async function GET(req: NextRequest) {
             subject: copy.subject,
             html,
             text,
+            idempotencyKey: paymentFollowupOrderKey(tier, order.id),
           });
 
           const { error: followupUpdateError } = await supabase
@@ -393,6 +395,7 @@ export async function GET(req: NextRequest) {
             subject: "You left something at True Color Printing",
             html,
             text,
+            idempotencyKey: paymentFollowupSessionKey(session.id),
           });
 
           const { error: sessionUpdateError } = await supabase
