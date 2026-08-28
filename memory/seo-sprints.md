@@ -669,11 +669,15 @@ the stale `$75–$150` tier figures were left in place where they describe genui
   unchanged. Updated only this route's sitemap date to 2026-08-28. This is a factual correction on
   a protected page, not a CTR experiment.
 - **Staged, not shipped:** Added `seo-prep/2026-08-28-logo-wall-sequential-experiments.md`.
-  Experiment 1 reframes the existing `/graphic-design-saskatoon` page as Logo Design while
-  preserving broader graphic-design services and the existing URL. Experiment 2 is a later
-  Wall Graphics metadata test. Each remains behind its own 7–14 finalized-day observation gate.
+  Fresh 2026-08-28 evidence puts `wall graphics near me` at position 6.68 on 65 impressions with
+  0 clicks, versus `logo design saskatoon` at position 16.76 on 41 impressions with 0 clicks.
+  The lower-risk Wall Graphics metadata test is therefore first. A later metadata-only test
+  reframes the existing `/graphic-design-saskatoon` page as Logo Design while preserving broader
+  graphic-design services and the existing URL. Each remains behind its own 7–14 finalized-day
+  observation gate.
 - **Price guard for the future Logo release:** Standard design work is $40 flat; complex custom,
   multi-product and vehicle work is quoted after review. Do not promise that every logo scope is
   $40.
 - **Next trigger:** Run the already-scheduled Flyer observation on 2026-09-06. If it passes,
-  release only the Logo Design experiment, then observe it before reconsidering Wall Graphics.
+  release only the Wall Graphics metadata experiment, then observe it before reconsidering the
+  Logo Design metadata experiment.
