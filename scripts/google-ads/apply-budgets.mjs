@@ -182,7 +182,7 @@ if (!changes.length && !ceilingChanges.length) { console.log("\nNothing to do â€
 
 if (!EXECUTE) {
   console.log("\nDRY RUN â€” nothing was changed. Re-run with --execute to apply.");
-  console.log("Raising a budget does NOT raise the hard stop. The 15-minute monitor still pauses at the cap.");
+  console.log("Raising a budget does NOT raise the hard stop. The five-minute primary monitor still pauses at the threshold.");
   process.exit(0);
 }
 

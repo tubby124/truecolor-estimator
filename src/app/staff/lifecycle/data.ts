@@ -77,7 +77,7 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "dashboard-alerts",       maxAgeHours: 2  },  // hourly Telegram push layer
   { name: "wave-poll",              maxAgeHours: 7  },  // every 6h — backfills Wave state changes the webhook missed
   { name: "wave-payment-effects",   maxAgeHours: 0.5 }, // every 5m — crash recovery for Wave receipts/analytics/CRM
-  { name: "google-ads-monitor",     maxAgeHours: 0.5 }, // every 15m — spend warning + protective pause
+  { name: "google-ads-monitor",     maxAgeHours: 0.2 }, // primary every 5m; alert after two missed runs
   { name: "google-ads-conversions", maxAgeHours: 0.5 }, // every 15m — revenue + quote measurement delivery
   { name: "google-ads-performance",  maxAgeHours: 26 },  // daily 14:30 UTC — read-only search-term + spend review feed
 ];

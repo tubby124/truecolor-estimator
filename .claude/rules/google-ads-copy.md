@@ -108,9 +108,12 @@ escalation lever is therefore blocked by contract. Levers, cheapest first:
 5. Broad match / wider radius — highest waste risk; needs Smart Bidding this account lacks.
 6. Accept missing the promo — legitimate. CA$600 of credit is not worth CA$600 of bad clicks.
 
-**Decide at the pacing gate with data, not now.** And note the endgame: `protectivePause` and
-`absoluteCap` are both CA$600, so the tick that qualifies also pauses, and the earned credit
-cannot be spent without a separate deliberate raise.
+**Decide at the pacing gate with data, not now.** On 2026-08-28 the owner approved a narrow
+CA$50 qualification buffer: the promo target and `protectivePause` stay CA$600, while
+`absoluteCap` is CA$650. The extra CA$50 is safety headroom for click granularity and spend
+posting between five-minute heartbeats, not a target to consume. The monitor cannot distinguish
+cash cost from credit-funded cost; another contract change is required before intentionally
+allowing total reported cost beyond CA$650.
 
 ---
 

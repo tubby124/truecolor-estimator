@@ -11,6 +11,7 @@ import {
   HARD_STOP_CUSTOMER_ID,
   HARD_STOP_LOGIN_CUSTOMER_ID,
 } from "./hard-stop-contract.mjs";
+import { readFreshProductionMonitorEvidence } from "./stage-one-monitor-evidence.mjs";
 
 const API_VERSION = "v24";
 
@@ -35,7 +36,14 @@ if (unknownArgs.length > 0) {
   throw new Error(`Usage: node scripts/google-ads/enable-stage-one.mjs [--execute]`);
 }
 
-const required = ["GOOGLE_ADS_CLIENT_ID", "GOOGLE_ADS_CLIENT_SECRET", "GOOGLE_ADS_REFRESH_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN"];
+const required = [
+  "GOOGLE_ADS_CLIENT_ID",
+  "GOOGLE_ADS_CLIENT_SECRET",
+  "GOOGLE_ADS_REFRESH_TOKEN",
+  "GOOGLE_ADS_DEVELOPER_TOKEN",
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "SUPABASE_SECRET_KEY",
+];
 for (const name of required) if (!process.env[name]) throw new Error(`${name} is required`);
 
 async function accessToken() {
@@ -117,6 +125,9 @@ function assertPreconditions(account, campaigns) {
 
   return problems;
 }
+
+const monitorReceipt = await readFreshProductionMonitorEvidence();
+console.log(`monitor: production Railway heartbeat ${monitorReceipt.id} at ${monitorReceipt.at}`);
 
 const account = await readAccount();
 const before = await readCampaigns();
