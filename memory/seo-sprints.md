@@ -681,3 +681,26 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **Next trigger:** Run the already-scheduled Flyer observation on 2026-09-06. If it passes,
   release only the Wall Graphics metadata experiment, then observe it before reconsidering the
   Logo Design metadata experiment.
+
+---
+
+## SEO Phase 111 — Wall Graphics title experiment opened by owner (2026-08-28)
+
+- **Owner decision:** Start the highest-confidence live SEO opportunity now rather than hold every
+  page behind the Flyer observation window. This explicitly opens one protected-page wave; it does
+  not authorize concurrent live changes to Graphic Design, Flyer, schema, body copy, or new URLs.
+- **Fresh baseline:** Finalized 28-day GSC evidence through 2026-08-24 puts
+  `wall graphics near me` at average position 6.68 on 65 impressions with 0 clicks. The page is
+  already near page one, so this is a snippet/CTR test rather than a content expansion.
+- **What changed:** Changed only the metadata title and matching Open Graph title on
+  `/wall-graphics-saskatoon` from `Wall Graphics & Wall Coverings Saskatoon | From $11/sqft` to
+  `Wall Graphics Saskatoon | Removable Wall Vinyl from $11/sqft`. Updated only this route's
+  sitemap `lastModified` to 2026-08-28.
+- **Guardrails:** URL, canonical, meta description, H1, body, FAQ, schema, pricing, CTA, internal
+  links, and visual assets are unchanged. The inaccurate Roland UV body wording remains queued as
+  a separate factual correction so it cannot confound this title test.
+- **Logo Design preparation:** Added a production-ready asset brief for a later redesign of the
+  existing `/graphic-design-saskatoon` page. No Logo Design metadata or page copy changed live.
+- **Next trigger:** Read production title/canonical/indexability/sitemap after deploy. Compare this
+  page and query after 7 completed finalized GSC days; keep or revert the title before publishing
+  the Logo Design metadata experiment.

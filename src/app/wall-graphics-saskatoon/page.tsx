@@ -4,12 +4,12 @@ import { IndustryPage } from "@/components/site/IndustryPage";
 import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 
 export const metadata: Metadata = {
-  title: { absolute: "Wall Graphics & Wall Coverings Saskatoon | From $11/sqft" },
+  title: { absolute: "Wall Graphics Saskatoon | Removable Wall Vinyl from $11/sqft" },
   description:
     "Wall graphics and removable wall coverings in Saskatoon from $11/sqft. Large vinyl murals, office walls, retail displays. Rush +$40.",
   alternates: { canonical: "/wall-graphics-saskatoon" },
   openGraph: {
-    title: "Wall Graphics & Wall Coverings Saskatoon | From $11/sqft",
+    title: "Wall Graphics Saskatoon | Removable Wall Vinyl from $11/sqft",
     description:
       "Wall graphics and removable wall coverings in Saskatoon from $11/sqft. Large vinyl murals, office walls, retail displays. Rush +$40.",
     url: "https://truecolorprinting.ca/wall-graphics-saskatoon",
