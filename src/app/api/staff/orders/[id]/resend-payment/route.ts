@@ -14,8 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
-import { buildPayLink } from "@/lib/orders/payLink";
-import type { OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
+import { encodePaymentToken } from "@/lib/payment/token";
 import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { recordAuditEvent } from "@/lib/audit/record";
@@ -90,33 +89,9 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // All orders route through Clover gateway. Wave invoice (if any) stays
     // DRAFT until webhook approves + records payment.
-    const { data: ledgerRows, error: ledgerErr } = await supabase
-      .from("order_payments")
-      .select("amount, method, status, recorded_at")
-      .eq("order_id", id);
-    if (ledgerErr) {
-      console.error("[resend-payment] order_payments query failed:", ledgerErr.message);
-      return NextResponse.json({ error: "Could not verify the current balance" }, { status: 503 });
-    }
-    const ledger = (ledgerRows ?? []) as Array<{
-      amount: number | string;
-      method: string;
-      status: string | null;
-      recorded_at: string | null;
-    }>;
-    const paymentUrl = buildPayLink({
-      orderId: id,
-      orderNumber: order.order_number,
-      total,
-      customerEmail: customer.email,
-      siteUrl,
-      ledger: ledger.map((row): OrderPaymentLedgerEntry => ({
-        amount: Number(row.amount),
-        method: row.method as OrderPaymentLedgerEntry["method"],
-        status: (row.status ?? "recorded") as OrderPaymentLedgerEntry["status"],
-        recordedAt: row.recorded_at,
-      })),
-    });
+    const redirectUrl = `${siteUrl}/order-confirmed?oid=${id}`;
+    const payToken = encodePaymentToken(total, description, customer.email, redirectUrl, { orderId: id });
+    const paymentUrl = `${siteUrl}/pay/${payToken}`;
 
     // NOTE: do NOT update payment_reference here — it is set to the order UUID
     // by /pay/[token] when the customer clicks, and the Clover webhook matches on it.

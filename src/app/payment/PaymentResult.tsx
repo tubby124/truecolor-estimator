@@ -2,8 +2,7 @@ import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { buildPayLink } from "@/lib/orders/payLink";
-import type { OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
+import { encodePaymentToken } from "@/lib/payment/token";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 
 type PaymentResultKind = "success" | "failed" | "cancelled";
@@ -73,23 +72,6 @@ export async function PaymentResult({ kind, searchParams }: PaymentResultProps) 
       .maybeSingle();
     order = data as PaymentOrder | null;
 
-    let ledger: OrderPaymentLedgerEntry[] | null = null;
-    if (order) {
-      const { data: ledgerRows, error: ledgerErr } = await supabase
-        .from("order_payments")
-        .select("amount, method, status, recorded_at")
-        .eq("order_id", orderId);
-      if (!ledgerErr) {
-        ledger = (ledgerRows ?? []).map((row): OrderPaymentLedgerEntry => ({
-          amount: Number(row.amount),
-          method: row.method as OrderPaymentLedgerEntry["method"],
-          status: (row.status ?? "recorded") as OrderPaymentLedgerEntry["status"],
-          recordedAt: row.recorded_at,
-        }));
-      }
-      (order as PaymentOrder & { paymentLedger?: OrderPaymentLedgerEntry[] | null }).paymentLedger = ledger;
-    }
-
     if (!latestAttempt) {
       const { data: attempt } = await supabase
         .from("payment_attempts")
@@ -108,16 +90,13 @@ export async function PaymentResult({ kind, searchParams }: PaymentResultProps) 
   let retryUrl: string | null = null;
   if (order && order.status === "pending_payment") {
     try {
-      const ledger = (order as PaymentOrder & { paymentLedger?: OrderPaymentLedgerEntry[] | null }).paymentLedger;
-      if (!ledger) throw new Error("Current payment balance unavailable");
-      retryUrl = buildPayLink({
-          orderId: order.id,
-          orderNumber: order.order_number,
-          total: Number(order.total),
-          customerEmail: customerEmail ?? "",
-          siteUrl,
-          ledger,
-        }).replace(siteUrl, "");
+      retryUrl = `/pay/${encodePaymentToken(
+        Number(order.total),
+        `Order ${order.order_number}`,
+        customerEmail ?? undefined,
+        `${siteUrl}/order-confirmed?oid=${order.id}`,
+        { orderId: order.id },
+      )}`;
     } catch {
       retryUrl = null;
     }
