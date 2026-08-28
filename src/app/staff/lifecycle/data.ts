@@ -6,7 +6,8 @@
  */
 
 import { createServiceClient } from "@/lib/supabase/server";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { buildPayLink } from "@/lib/orders/payLink";
+import type { OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
 import type { LifecycleRow } from "./LifecycleTable";
 import type { Heartbeat } from "./HeartbeatsPanel";
 import type { Orphan } from "./OrphanPanel";
@@ -361,6 +362,31 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   const emailDeliveryRaw = emailDeliveryRes.data ?? [];
   const paymentAttemptsRaw = paymentAttemptsRes.data ?? [];
 
+  const ledgerByOrder = new Map<string, OrderPaymentLedgerEntry[]>();
+  let ledgerReady = orders.length === 0;
+  if (orders.length > 0) {
+    const { data: ledgerRows, error: ledgerErr } = await supabase
+      .from("order_payments")
+      .select("order_id, amount, method, status, recorded_at")
+      .in("order_id", orders.map((order) => order.id));
+    if (ledgerErr) {
+      console.error("[lifecycle] order_payments query failed:", ledgerErr.message);
+    } else {
+      ledgerReady = true;
+      for (const row of ledgerRows ?? []) {
+        if (!row.order_id) continue;
+        const entries = ledgerByOrder.get(row.order_id) ?? [];
+        entries.push({
+          amount: Number(row.amount),
+          method: row.method as OrderPaymentLedgerEntry["method"],
+          status: (row.status ?? "recorded") as OrderPaymentLedgerEntry["status"],
+          recordedAt: row.recorded_at,
+        });
+        ledgerByOrder.set(row.order_id, entries);
+      }
+    }
+  }
+
   // ── derive lifecycle rows (existing logic, plus pay_link pip) ─────────────
   const customerEmails = new Set<string>();
   const orderIdSet = new Set<string>();
@@ -434,9 +460,15 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     // Generate recovery URL
     let payLinkUrl = "";
     try {
-      const redirectUrl = `${siteUrl}/order-confirmed?oid=${row.id}`;
-      const token = encodePaymentToken(row.total, `Order ${row.order_number}`, row.customer_email || undefined, redirectUrl, { orderId: row.id });
-      payLinkUrl = `${siteUrl}/pay/${token}`;
+      if (!ledgerReady) throw new Error("Current payment balances unavailable");
+      payLinkUrl = buildPayLink({
+        orderId: row.id,
+        orderNumber: row.order_number,
+        total: row.total,
+        customerEmail: row.customer_email,
+        siteUrl,
+        ledger: ledgerByOrder.get(row.id) ?? [],
+      });
     } catch {
       payLinkUrl = "";
     }

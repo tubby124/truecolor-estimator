@@ -8,7 +8,8 @@ import { PurchaseEvent } from "@/app/order-confirmed/PurchaseEvent";
 import { CloverPaymentWatcher } from "@/app/order-confirmed/CloverPaymentWatcher";
 import { REVIEW_COUNT } from "@/lib/reviews";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { buildPayLink } from "@/lib/orders/payLink";
+import type { OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
 import { shouldTrackConfirmedPurchase } from "@/lib/analytics/purchase-readiness";
 import { isRevenueConversionType, pretaxConversionValue, type RevenueConversionType } from "@/lib/analytics/conversions";
 
@@ -60,6 +61,18 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
 
       if (data) {
         orderSummary = data as OrderSummary;
+        const { data: ledgerRows, error: ledgerErr } = await supabase
+          .from("order_payments")
+          .select("amount, method, status, recorded_at")
+          .eq("order_id", oid);
+        if (ledgerErr) throw ledgerErr;
+        const ledger = (ledgerRows ?? []).map((row): OrderPaymentLedgerEntry => ({
+          amount: Number(row.amount),
+          method: row.method as OrderPaymentLedgerEntry["method"],
+          status: (row.status ?? "recorded") as OrderPaymentLedgerEntry["status"],
+          recordedAt: row.recorded_at,
+        }));
+        (orderSummary as OrderSummary & { paymentLedger?: OrderPaymentLedgerEntry[] }).paymentLedger = ledger;
         const { data: latestAttempt } = await supabase
           .from("payment_attempts")
           .select("status, amount, failure_label, failure_detail, customer_message, clover_checkout_session_id, clover_payment_id, created_at")
@@ -84,14 +97,15 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
   if (!cardPayUrl && oid && orderSummary?.payment_method === "clover_card" && orderSummary.status === "pending_payment") {
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
-      const token = encodePaymentToken(
-        Number(orderSummary.total),
-        `Order ${orderSummary.order_number}`,
-        customerEmail ?? undefined,
-        `${siteUrl}/order-confirmed?oid=${oid}`,
-        { orderId: oid },
-      );
-      cardPayUrl = `/pay/${token}`;
+      const ledger = (orderSummary as OrderSummary & { paymentLedger?: OrderPaymentLedgerEntry[] }).paymentLedger ?? [];
+      cardPayUrl = buildPayLink({
+        orderId: oid,
+        orderNumber: orderSummary.order_number,
+        total: Number(orderSummary.total),
+        customerEmail: customerEmail ?? "",
+        siteUrl,
+        ledger,
+      }).replace(siteUrl, "");
     } catch {
       cardPayUrl = null;
     }

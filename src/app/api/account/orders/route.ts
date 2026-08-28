@@ -5,7 +5,8 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { buildPayLink } from "@/lib/orders/payLink";
+import type { OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
@@ -100,13 +101,21 @@ export async function GET(req: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
   const orderIds = (orders ?? []).map((order) => order.id);
   const latestAttemptByOrder = new Map<string, LatestPaymentAttempt>();
+  const ledgerByOrder = new Map<string, OrderPaymentLedgerEntry[]>();
+  let ledgerReady = orderIds.length === 0;
 
   if (orderIds.length > 0) {
-    const { data: attempts, error: attemptsErr } = await admin
-      .from("payment_attempts")
-      .select("order_id, status, amount, failure_label, failure_detail, customer_message, clover_checkout_session_id, clover_payment_id, created_at")
-      .in("order_id", orderIds)
-      .order("created_at", { ascending: false });
+    const [{ data: attempts, error: attemptsErr }, { data: ledgerRows, error: ledgerErr }] = await Promise.all([
+      admin
+        .from("payment_attempts")
+        .select("order_id, status, amount, failure_label, failure_detail, customer_message, clover_checkout_session_id, clover_payment_id, created_at")
+        .in("order_id", orderIds)
+        .order("created_at", { ascending: false }),
+      admin
+        .from("order_payments")
+        .select("order_id, amount, method, status, recorded_at")
+        .in("order_id", orderIds),
+    ]);
 
     if (attemptsErr) {
       console.error("[account/orders] payment_attempts:", attemptsErr.message);
@@ -120,20 +129,38 @@ export async function GET(req: NextRequest) {
         }
       }
     }
+    if (ledgerErr) {
+      console.error("[account/orders] order_payments:", ledgerErr.message);
+    } else {
+      ledgerReady = true;
+      for (const row of ledgerRows ?? []) {
+        const orderId = (row as { order_id?: string | null }).order_id;
+        if (!orderId) continue;
+        const entries = ledgerByOrder.get(orderId) ?? [];
+        entries.push({
+          amount: Number(row.amount),
+          method: row.method as OrderPaymentLedgerEntry["method"],
+          status: (row.status ?? "recorded") as OrderPaymentLedgerEntry["status"],
+          recordedAt: row.recorded_at,
+        });
+        ledgerByOrder.set(orderId, entries);
+      }
+    }
   }
 
   const ordersWithPayUrl = (orders ?? []).map((order) => {
     let pay_url: string | null = null;
     if (order.status === "pending_payment" && order.payment_method === "clover_card") {
       try {
-        const token = encodePaymentToken(
-          order.total,
-          `Order ${order.order_number}`,
-          user.email ?? undefined,
-          `${siteUrl}/order-confirmed?oid=${order.id}`,
-          { orderId: order.id },
-        );
-        pay_url = `/pay/${token}`;
+        if (!ledgerReady) throw new Error("Current payment balance unavailable");
+        pay_url = buildPayLink({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          total: Number(order.total),
+          customerEmail: user.email ?? "",
+          siteUrl,
+          ledger: ledgerByOrder.get(order.id) ?? [],
+        }).replace(siteUrl, "");
       } catch {
         // Non-fatal — payment token secret may not be configured
       }
