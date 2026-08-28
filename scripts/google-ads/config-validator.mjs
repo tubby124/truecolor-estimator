@@ -476,8 +476,8 @@ export function validateConfig(config) {
   if (config.pilot?.generatorAutoRollsDates !== false || config.pilot?.dateChangeRequiresApprovedContractChange !== true) fail("Pilot date changes must require an approved config and validator contract change");
   if (config.currency !== "CAD") fail("Account currency must be CAD");
   if (config.targetQualifyingSpendCad !== 600 || config.maximumPilotCad !== 650) fail("Pilot must target CA$600 qualifying spend with the owner-approved CA$650 absolute cap");
-  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 600, absoluteCapCad: 650, monitorCadenceMinutes: 5 })) {
-    fail("Spend controls must use exact-account total cost, warn at CA$450, start pausing at CA$600, retain CA$650 as safety headroom, and run every 5 minutes");
+  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 650, absoluteCapCad: 650, monitorCadenceMinutes: 5 })) {
+    fail("Spend controls must use exact-account total cost, warn at CA$450, pause at the CA$650 owner limit, and run every 5 minutes");
   }
   if (JSON.stringify(config.controlledTest) !== JSON.stringify({
     campaign: "GOOG_Search_TC_CoreProducts_2026",

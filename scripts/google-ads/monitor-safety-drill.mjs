@@ -103,7 +103,7 @@ export async function runMonitorSafetyDrill({
   if (!telegramMessageId) throw new Error("Telegram warning drill returned no message ID");
 
   const pauseResult = await runHardStopMonitor({
-    api: createDrillApi({ spendMicros: "600000000" }),
+    api: createDrillApi({ spendMicros: "650000000" }),
     options,
     now,
   });

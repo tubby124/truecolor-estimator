@@ -134,6 +134,6 @@ if (worstBudgetLost > 0.05) {
   console.log("     5. accept missing the promo — legitimate. CA$600 of credit is not worth CA$600 of bad clicks.");
 }
 
-console.log(`\nReminder: the qualifying target is ${cad(TARGET_CAD)} and the protective pause starts at ${cad(PROTECTIVE_PAUSE_CAD)}.`);
-console.log(`The owner-approved qualification buffer is ${cad(HARD_CAP_CAD - TARGET_CAD)}. The monitor cannot distinguish`);
-console.log(`cash cost from promotional-credit cost; ${cad(HARD_CAP_CAD)} is authorization headroom, not a spend target.`);
+console.log(`\nReminder: the qualifying target is ${cad(TARGET_CAD)} and the owner-approved total-spend stop is ${cad(PROTECTIVE_PAUSE_CAD)}.`);
+console.log(`Core may spend roughly ${cad(HARD_CAP_CAD - TARGET_CAD)} after qualification. The monitor cannot distinguish`);
+console.log(`cash cost from promotional-credit cost; ${cad(HARD_CAP_CAD)} governs total reported account cost.`);

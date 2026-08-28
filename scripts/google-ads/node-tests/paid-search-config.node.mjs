@@ -627,6 +627,7 @@ test("locks the confirmed True Color child account and verified account-side gat
       "CURRENT_KEYWORD_PLANNER_FORECAST",
       "CPC_CEILING_LAUNCH_APPROVAL",
       "BUDGET_APPROVAL",
+      "DATES_AND_HARD_STOP",
       "MOBILE_QA",
       "PRESENCE_ONLY_AND_EDITOR_PREVIEW",
     ],
@@ -636,7 +637,6 @@ test("locks the confirmed True Color child account and verified account-side gat
     [
       "PURCHASE_UPLOAD_CLICKS_OBSERVED",
       "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
-      "DATES_AND_HARD_STOP",
       "LAUNCH_CONTROL_SIGNOFF",
     ],
   );
@@ -879,7 +879,7 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.liveGoogleAds.conversionGoalGraph.customerGoals.phoneCallLeadCallFromAds.biddable, false);
   assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.primaryForGoal, false);
   assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.includedInConversions, false);
-  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 600, absoluteCapCad: 650, monitorCadenceMinutes: 5 });
+  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 650, absoluteCapCad: 650, monitorCadenceMinutes: 5 });
   assert.equal(paidSearchConfig.spendControls.absoluteCapCad, paidSearchConfig.maximumPilotCad);
   assert.deepEqual(
     [HARD_STOP_PROFILES["public-pilot"].warningCad, HARD_STOP_PROFILES["public-pilot"].thresholdCad, HARD_STOP_PROFILES["public-pilot"].approvedCapCad],

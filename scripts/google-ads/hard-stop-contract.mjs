@@ -16,16 +16,15 @@ export const HARD_STOP_PROFILES = Object.freeze({
     requiresExplicitWindow: true,
     maximumWindowHours: 72,
   }),
-  // 2026-08-28 owner directive: allow a CA$50 qualification buffer above the CA$600 promo target.
-  // The monitor reads exact account-wide cost and starts the pause at the CA$600
-  // qualification target. The owner-approved CA$650 limit is headroom for click granularity
-  // and spend that can post between five-minute heartbeats, not a target to consume.
+  // 2026-08-28 owner directive: keep Core serving for roughly CA$50 after the
+  // CA$600 promo target. The monitor reads exact account-wide cost and pauses at
+  // the owner-approved CA$650 total-cost limit.
   // Google Ads cost does not distinguish cash from promotional credit, so CA$650 is the total
   // account-cost ceiling unless the owner approves another contract change.
   "public-pilot": Object.freeze({
     spendScope: "EXACT_ACCOUNT_TOTAL",
     warningCad: 450,
-    thresholdCad: 600,
+    thresholdCad: 650,
     approvedCapCad: 650,
     requiresExplicitWindow: false,
     windowStart: "2026-07-20T00:00",
