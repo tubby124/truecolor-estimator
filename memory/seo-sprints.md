@@ -653,3 +653,31 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **What changed:** Changed only the page title and matching Open Graph title from `Flyer Printing Saskatoon | 100 Flyers from $45` to `Flyer Printing Saskatoon | Same-Day Rush + 100 from $45`. The existing accurate description, H1, body, FAQs, schema, canonical, pricing, and internal links were left unchanged. Updated only this page's sitemap `lastModified` to 2026-08-23.
 - **Guardrails:** This is one page and one metadata experiment. No content, FAQ, schema, redirect, location-page, or price mutation is bundled with it. Protected-page baseline was refreshed 2026-08-11 and the final query preflight was recorded 2026-08-23.
 - **Next steps / trigger date:** Run production title/canonical/sitemap readback after deploy, then observe finalized GSC and GA4 for 7–14 completed days. Do not ship a second SEO page mutation until that gate passes.
+
+---
+
+## SEO Phase 110 — Price-truth hotfix and sequential experiment staging (2026-08-28)
+
+- **Fresh gate evidence:** The opportunity survey found no net-new-page candidate. Finalized GSC
+  data currently ends 2026-08-24, leaving only about one finalized post-release day for the
+  2026-08-23 Flyer title experiment. The required 7–14 completed-day observation gate is not
+  mature, so no Logo Design or Wall Graphics ranking experiment shipped in this phase.
+- **Sticker price-truth hotfix:** Corrected only the stale metadata and matching Open Graph
+  description on `/sticker-printing-saskatoon`: default 4×4 pricing is 100 for $100, 500 for
+  $220 and 1000 for $330. Replaced the same snippets' inaccurate UV wording with the verified
+  eco-solvent process. The title, H1, URL, canonical, body, FAQs, schema and internal anchors are
+  unchanged. Updated only this route's sitemap date to 2026-08-28. This is a factual correction on
+  a protected page, not a CTR experiment.
+- **Staged, not shipped:** Added `seo-prep/2026-08-28-logo-wall-sequential-experiments.md`.
+  Fresh 2026-08-28 evidence puts `wall graphics near me` at position 6.68 on 65 impressions with
+  0 clicks, versus `logo design saskatoon` at position 16.76 on 41 impressions with 0 clicks.
+  The lower-risk Wall Graphics metadata test is therefore first. A later metadata-only test
+  reframes the existing `/graphic-design-saskatoon` page as Logo Design while preserving broader
+  graphic-design services and the existing URL. Each remains behind its own 7–14 finalized-day
+  observation gate.
+- **Price guard for the future Logo release:** Standard design work is $40 flat; complex custom,
+  multi-product and vehicle work is quoted after review. Do not promise that every logo scope is
+  $40.
+- **Next trigger:** Run the already-scheduled Flyer observation on 2026-09-06. If it passes,
+  release only the Wall Graphics metadata experiment, then observe it before reconsidering the
+  Logo Design metadata experiment.

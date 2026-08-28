@@ -627,7 +627,6 @@ test("locks the confirmed True Color child account and verified account-side gat
       "CURRENT_KEYWORD_PLANNER_FORECAST",
       "CPC_CEILING_LAUNCH_APPROVAL",
       "BUDGET_APPROVAL",
-      "DATES_AND_HARD_STOP",
       "MOBILE_QA",
       "PRESENCE_ONLY_AND_EDITOR_PREVIEW",
     ],
@@ -637,6 +636,7 @@ test("locks the confirmed True Color child account and verified account-side gat
     [
       "PURCHASE_UPLOAD_CLICKS_OBSERVED",
       "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
+      "DATES_AND_HARD_STOP",
       "LAUNCH_CONTROL_SIGNOFF",
     ],
   );
@@ -783,15 +783,15 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(brand.dailyBudgetCad, 3);
   assert.equal(brand.maximumPilotCad, 0);
   assert.equal(paidSearchConfig.targetQualifyingSpendCad, 600);
-  assert.equal(paidSearchConfig.maximumPilotCad, 600);
+  assert.equal(paidSearchConfig.maximumPilotCad, 650);
   const plannedMaximumCad = paidSearchConfig.campaigns.reduce((sum, campaign) => sum + campaign.maximumPilotCad, 0);
   // 2026-08-09: 1150 -> 966 (Competitor's 184 retired to 0). Core alone must still be able to
   // reach the CA$600 qualifying target, which the assertions below enforce.
   // 2026-08-14: 966 -> 1150 (Core 21 -> 25 across the 46 pilot days).
   // 2026-08-17: 1150 -> 1380 (Core 25 -> 30).
   assert.equal(plannedMaximumCad, 1380);
-  // Budget capacity intentionally EXCEEDS the CA$600 runtime ceiling: daily budgets are
-  // permission to capture cheap clicks on good days, and the 15-minute hard-stop monitor is
+  // Budget capacity intentionally exceeds the CA$650 runtime ceiling: daily budgets are
+  // permission to capture cheap clicks on good days, and the five-minute hard-stop monitor is
   // the binding constraint on total spend. Capacity must still be able to reach the target.
   assert.ok(plannedMaximumCad > paidSearchConfig.maximumPilotCad);
   assert.ok(plannedMaximumCad >= paidSearchConfig.targetQualifyingSpendCad);
@@ -879,7 +879,7 @@ test("canonical routing and campaign caps are complete", () => {
   assert.equal(paidSearchConfig.liveGoogleAds.conversionGoalGraph.customerGoals.phoneCallLeadCallFromAds.biddable, false);
   assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.primaryForGoal, false);
   assert.equal(paidSearchConfig.liveGoogleAds.historicalBrowserPurchaseConversion.includedInConversions, false);
-  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 600, absoluteCapCad: 600, monitorCadenceMinutes: 15 });
+  assert.deepEqual(paidSearchConfig.spendControls, { scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 600, absoluteCapCad: 650, monitorCadenceMinutes: 5 });
   assert.equal(paidSearchConfig.spendControls.absoluteCapCad, paidSearchConfig.maximumPilotCad);
   assert.deepEqual(
     [HARD_STOP_PROFILES["public-pilot"].warningCad, HARD_STOP_PROFILES["public-pilot"].thresholdCad, HARD_STOP_PROFILES["public-pilot"].approvedCapCad],

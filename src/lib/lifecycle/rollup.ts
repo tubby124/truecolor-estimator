@@ -339,7 +339,9 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
     const stale = h.hours_ago === null || h.hours_ago > (strictThirtyMinute ? h.max_age_hours : 2 * h.max_age_hours);
     if (stale) {
       const age = h.hours_ago === null ? "never ran" : `stale ${Math.round(h.hours_ago * 60)}m`;
-      const maxAge = h.max_age_hours === 0.5 ? "30m" : `${h.max_age_hours}h`;
+      const maxAge = h.max_age_hours < 1
+        ? `${Math.round(h.max_age_hours * 60)}m`
+        : `${h.max_age_hours}h`;
       reds.push({
         key: `cron:${h.name}:stale`,
         panel: "panel-cron-heartbeats",

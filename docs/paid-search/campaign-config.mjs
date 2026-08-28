@@ -199,16 +199,17 @@ export const paidSearchConfig = {
     generatorAutoRollsDates: false,
     dateChangeRequiresApprovedContractChange: true,
   },
-  // Owner's absolute maximum. Equal to the qualifying-spend target on purpose: the account
-  // reaches CA$600, qualifies for the promotion, and the runtime monitor pauses on that tick.
-  maximumPilotCad: 600,
+  // Owner-approved CA$50 qualification buffer above the CA$600 promotional target. The runtime
+  // monitor starts pausing exact account-wide cost at the CA$600 qualification target;
+  // the CA$50 authorization buffer is polling/posting headroom, not a spend target.
+  maximumPilotCad: 650,
   targetQualifyingSpendCad: 600,
   spendControls: {
     scope: "EXACT_ACCOUNT_TOTAL",
     warningCad: 450,
     protectivePauseCad: 600,
-    absoluteCapCad: 600,
-    monitorCadenceMinutes: 15,
+    absoluteCapCad: 650,
+    monitorCadenceMinutes: 5,
   },
   controlledTest: {
     campaign: "GOOG_Search_TC_CoreProducts_2026",
@@ -553,7 +554,7 @@ export const paidSearchConfig = {
     { code: "CURRENT_KEYWORD_PLANNER_FORECAST", status: "VERIFIED", required: "Current forecast from the correct account and CPC ceilings staged while paused", evidence: "2026-07-17 True Color forecast read from customer 1072816342; forecast-optimal ceilings Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 staged while paused" },
     { code: "CPC_CEILING_LAUNCH_APPROVAL", status: "VERIFIED", required: "Owner approves the staged Core CA$4.00, Competitor CA$2.50, and Brand CA$1.50 ceilings for launch", evidence: "2026-08-03 owner directive: spend the least per click for the most clicks and conversions; do not overshoot bids to force delivery. Ceilings held at the 2026-07-17 forecast-optimal values." },
     { code: "BUDGET_APPROVAL", status: "VERIFIED", required: "Pilot budgets approved", evidence: "Core CA$14/day, Competitor CA$4/day live at launch; Brand CA$3/day staged but PAUSED and excluded from pilot spend; controlled Coroplast test CA$5/day" },
-    { code: "DATES_AND_HARD_STOP", status: "VERIFIED", required: "46-day pilot dates 2026-08-03 to 2026-09-17, 15-minute scheduler heartbeat, CA$450 warning, CA$600 protective pause, and CA$600 absolute cap confirmed live", evidence: "Profile public-pilot verified live 2026-08-03T18:26:44Z (accountVerified true, windowEnd 2026-12-31T00:00, outcome BELOW_STOP, action NONE, spend CA$0), superseding the controlled-test profile whose expired 2026-07-26 window had been emitting STOPPED/ALREADY_PAUSED every 15 minutes. Thresholds lowered 2026-08-05 from 1000/1250/1300 to 450/600/600 on owner directive that CA$600 is the absolute maximum, not merely the qualifying target." },
+    { code: "DATES_AND_HARD_STOP", status: "BLOCKED", required: "46-day pilot dates 2026-08-03 to 2026-09-17, 5-minute scheduler heartbeat, CA$450 warning, CA$600 protective pause, and CA$650 authorized limit", evidence: "Profile public-pilot identity/window was verified live 2026-08-03. On 2026-08-28 the owner approved a narrow CA$50 safety buffer above the CA$600 promo target; daily budgets, CPC ceilings, networks, match types, and geo remain unchanged. Core stays blocked until the 5-minute Railway schedule and a fresh production heartbeat read warning=450, threshold=600, and cap=650." },
     { code: "MOBILE_QA", status: "VERIFIED", required: "Mobile landing-page and conversion-flow QA", evidence: "2026-08-03 owner attestation: mobile landing page and conversion flow reviewed on device and accepted." },
     { code: "LAUNCH_CONTROL_SIGNOFF", status: "BLOCKED", required: "Wilkie/Dubois launch controls reviewed and signed off" },
     { code: "PRESENCE_ONLY_AND_EDITOR_PREVIEW", status: "VERIFIED", required: "Presence-only set manually/API and confirmed in Google Ads Editor/account preview", evidence: "2026-08-03 credential-gated v24 readback of customer 1072816342: all three campaigns return geo target type PRESENCE with a single PROXIMITY criterion at 52.129728,-106.659637 radius 35 KILOMETERS, zero positive LOCATION criteria, and Search-only networks (searchNetwork/contentNetwork/partnerSearchNetwork all false). Satisfies the manual/API branch; API readback is stronger evidence than an Editor screenshot." },

@@ -24,6 +24,7 @@ import { paidSearchConfig } from "../../docs/paid-search/campaign-config.mjs";
 
 const PROMO_DEADLINE = "2026-09-16"; // promotion fulfillment expiry (UTC), per PROMOTION_ELIGIBILITY gate
 const TARGET_CAD = paidSearchConfig.targetQualifyingSpendCad ?? 600;
+const PROTECTIVE_PAUSE_CAD = paidSearchConfig.spendControls?.protectivePauseCad ?? 600;
 const HARD_CAP_CAD = paidSearchConfig.spendControls?.absoluteCapCad ?? 600;
 const PILOT_START = paidSearchConfig.pilot?.startDate ?? "2026-08-03";
 
@@ -133,6 +134,6 @@ if (worstBudgetLost > 0.05) {
   console.log("     5. accept missing the promo — legitimate. CA$600 of credit is not worth CA$600 of bad clicks.");
 }
 
-console.log(`\nReminder: protectivePause and absoluteCap are both ${cad(HARD_CAP_CAD)}. The tick that qualifies you`);
-console.log("for the promo is the same tick that pauses the account, and the earned credit cannot be spent");
-console.log("without a separate deliberate raise — the monitor cannot tell credit from cash.");
+console.log(`\nReminder: the qualifying target is ${cad(TARGET_CAD)} and the protective pause starts at ${cad(PROTECTIVE_PAUSE_CAD)}.`);
+console.log(`The owner-approved qualification buffer is ${cad(HARD_CAP_CAD - TARGET_CAD)}. The monitor cannot distinguish`);
+console.log(`cash cost from promotional-credit cost; ${cad(HARD_CAP_CAD)} is authorization headroom, not a spend target.`);

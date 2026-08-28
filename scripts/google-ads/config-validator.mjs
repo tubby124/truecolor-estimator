@@ -31,10 +31,10 @@ const PILOT_INCLUSIVE_DAYS = 46;
 // headroom under the bound, available to Core on evidence without touching the safety ceiling.
 // 2026-08-14: 28 -> 32 (Core 21 -> 25 on pacing evidence; Competitor 4 and Brand 3 stay paused
 // at their staged budgets). 2026-08-17: 32 -> 37 (Core 25 -> 30) after the owner approved a
-// budget-limited delivery increase; the CA$600 account hard stop remains unchanged.
+// budget-limited delivery increase; the account hard stop is a separate exact-cost control.
 const LAUNCHABLE_DAILY_BUDGET_CAD = 37;
-// Enabled-only daily burn ceiling. At CA$18/day an unmonitored account needs 33 days to reach
-// the CA$600 ceiling, which is far longer than any plausible monitor outage goes unnoticed.
+// Enabled-only daily burn ceiling. At CA$30/day an unmonitored account needs more than 21 days
+// to reach the CA$650 ceiling, far longer than any plausible monitor outage goes unnoticed.
 const MAX_UNMONITORED_DAILY_BURN_CAD = 30;
 const launchableDailyBudgetCad = (campaigns) => campaigns
   .filter((campaign) => campaign.status === "ENABLED")
@@ -475,9 +475,9 @@ export function validateConfig(config) {
   }
   if (config.pilot?.generatorAutoRollsDates !== false || config.pilot?.dateChangeRequiresApprovedContractChange !== true) fail("Pilot date changes must require an approved config and validator contract change");
   if (config.currency !== "CAD") fail("Account currency must be CAD");
-  if (config.targetQualifyingSpendCad !== 600 || config.maximumPilotCad !== 600) fail("Pilot must target CA$600 qualifying spend with a CA$600 absolute cap");
-  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 600, absoluteCapCad: 600, monitorCadenceMinutes: 15 })) {
-    fail("Spend controls must use exact-account total cost, warn at CA$450, pause at CA$600, cap at CA$600, and run every 15 minutes");
+  if (config.targetQualifyingSpendCad !== 600 || config.maximumPilotCad !== 650) fail("Pilot must target CA$600 qualifying spend with the owner-approved CA$650 absolute cap");
+  if (JSON.stringify(config.spendControls) !== JSON.stringify({ scope: "EXACT_ACCOUNT_TOTAL", warningCad: 450, protectivePauseCad: 600, absoluteCapCad: 650, monitorCadenceMinutes: 5 })) {
+    fail("Spend controls must use exact-account total cost, warn at CA$450, start pausing at CA$600, retain CA$650 as safety headroom, and run every 5 minutes");
   }
   if (JSON.stringify(config.controlledTest) !== JSON.stringify({
     campaign: "GOOG_Search_TC_CoreProducts_2026",
@@ -764,8 +764,8 @@ export function validateConfig(config) {
     }
   }
   const plannedMaximumCad = campaigns.reduce((sum, campaign) => sum + (campaign.maximumPilotCad ?? 0), 0);
-  // Budget CAPACITY (CA$828 over 46 days) deliberately exceeds the CA$600 runtime ceiling.
-  // Daily budgets are permission to capture cheap clicks on good days; the 15-minute hard-stop
+  // Budget capacity deliberately exceeds the CA$650 runtime ceiling.
+  // Daily budgets are permission to capture cheap clicks on good days; the five-minute hard-stop
   // monitor is the binding constraint on total spend, not the budget arithmetic. Capacity must
   // still be able to REACH the qualifying target, or the promotion is unreachable by construction.
   if (plannedMaximumCad < config.targetQualifyingSpendCad) fail("Planned campaign maximums must be able to reach the CA$600 qualifying-spend target");
@@ -773,7 +773,7 @@ export function validateConfig(config) {
   // how fast an unmonitored account can burn. This replaces the old capacity-vs-cap assertion,
   // which became meaningless once the runtime ceiling dropped to the qualifying target itself.
   if (launchableDailyBudgetCad(campaigns) > MAX_UNMONITORED_DAILY_BURN_CAD) {
-    fail(`Total enabled daily budget must stay within CA$${MAX_UNMONITORED_DAILY_BURN_CAD}/day so a monitor outage cannot burn the CA$600 ceiling in under a week`);
+    fail(`Total enabled daily budget must stay within CA$${MAX_UNMONITORED_DAILY_BURN_CAD}/day so a monitor outage cannot burn the CA$650 ceiling in under a week`);
   }
   const launchableDailyBudget = campaigns.reduce((sum, campaign) => sum + (campaign.dailyBudgetCad ?? 0), 0);
   if (launchableDailyBudget !== LAUNCHABLE_DAILY_BUDGET_CAD) fail(`Launchable Core, Competitor, and Brand budgets must total CA$${LAUNCHABLE_DAILY_BUDGET_CAD}/day`);

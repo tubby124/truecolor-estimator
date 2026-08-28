@@ -10,6 +10,7 @@
   "blockers": [
     "PURCHASE_UPLOAD_CLICKS_OBSERVED",
     "QUOTE_WON_UPLOAD_CLICKS_OBSERVED",
+    "DATES_AND_HARD_STOP",
     "LAUNCH_CONTROL_SIGNOFF"
   ],
   "recordedLiveEvidence": {
@@ -82,13 +83,13 @@
   "manualAdAssetsConfigured": true,
   "conversionFirstLaunchTiersConfigured": true,
   "targetQualifyingSpendCad": 600,
-  "maximumPilotCad": 600,
+  "maximumPilotCad": 650,
   "spendControls": {
     "scope": "EXACT_ACCOUNT_TOTAL",
     "warningCad": 450,
     "protectivePauseCad": 600,
-    "absoluteCapCad": 600,
-    "monitorCadenceMinutes": 15
+    "absoluteCapCad": 650,
+    "monitorCadenceMinutes": 5
   },
   "controlledTest": {
     "campaign": "GOOG_Search_TC_CoreProducts_2026",

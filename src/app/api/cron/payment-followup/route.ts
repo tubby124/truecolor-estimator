@@ -27,6 +27,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { escHtml } from "@/lib/email/components/escHtml";
 import { recordCronRun } from "@/lib/cron/heartbeat";
+import { paymentFollowupOutcome } from "@/lib/cron/paymentFollowupOutcome";
+import { paymentFollowupOrderKey, paymentFollowupSessionKey } from "@/lib/cron/paymentFollowupIdempotency";
 import { nextFollowupTier, type FollowupTier } from "@/lib/orders/followupLadder";
 import { followupCopy, type LatestAttemptLite } from "@/lib/orders/followupCopy";
 import { buildPayLink } from "@/lib/orders/payLink";
@@ -60,6 +62,7 @@ export async function GET(req: NextRequest) {
   const byTier: Record<string, number> = { t1: 0, t2: 0, t3: 0 };
   const skipped: Record<string, number> = { paused: 0, ambiguous: 0, notDue: 0, humanTouch: 0 };
   let chaseSignaled = false;
+  let failureCount = 0;
 
   // ── TC-10: pending_payment orders on the follow-up ladder ──────────────────
 
@@ -79,12 +82,14 @@ export async function GET(req: NextRequest) {
       .limit(50);
 
     if (error) {
+      failureCount++;
       console.error("[payment-followup] TC-10 query failed:", error.message);
     } else {
       const orderIds = (staleOrders ?? []).map((o) => o.id).filter(Boolean);
       const latestAttemptByOrder = new Map<string, LatestAttemptLite>();
       let ledgerByOrder: Map<string, OrderPaymentLedgerEntry[]> = new Map();
       let humanTouchOrderIds = new Set<string>();
+      let supportDataReady = true;
 
       if (orderIds.length > 0) {
         const [{ data: attempts, error: attemptsErr }, ledgerRes, auditRes] = await Promise.all([
@@ -107,6 +112,8 @@ export async function GET(req: NextRequest) {
         ]);
 
         if (attemptsErr) {
+          failureCount++;
+          supportDataReady = false;
           console.error("[payment-followup] payment_attempts query failed:", attemptsErr.message);
         } else {
           for (const attempt of attempts ?? []) {
@@ -115,6 +122,12 @@ export async function GET(req: NextRequest) {
               latestAttemptByOrder.set(orderId, attempt as LatestAttemptLite);
             }
           }
+        }
+
+        if (ledgerRes.error) {
+          failureCount++;
+          supportDataReady = false;
+          console.error("[payment-followup] order_payments query failed:", ledgerRes.error.message);
         }
 
         const ledgerRows = (ledgerRes.data ?? []) as {
@@ -141,13 +154,15 @@ export async function GET(req: NextRequest) {
         );
 
         if (auditRes.error) {
-          console.warn("[payment-followup] audit_events query failed (non-fatal):", auditRes.error.message);
+          failureCount++;
+          supportDataReady = false;
+          console.error("[payment-followup] audit_events query failed:", auditRes.error.message);
         } else {
           humanTouchOrderIds = new Set((auditRes.data ?? []).map((e) => e.entity_id).filter(Boolean));
         }
       }
 
-      for (const order of staleOrders ?? []) {
+      for (const order of supportDataReady ? (staleOrders ?? []) : []) {
         const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;
         const customer = customerRaw as { name: string; email: string } | null;
         if (!customer?.email) continue;
@@ -156,10 +171,14 @@ export async function GET(req: NextRequest) {
         // Ambiguous Clover matches may be real captured money. Do not ask the
         // customer to retry and risk a double payment; route it to staff only.
         if (latestAttempt?.status === "ambiguous") {
-          await supabase
+          const { error: ambiguousUpdateError } = await supabase
             .from("orders")
             .update({ followup_sent_at: new Date().toISOString() })
             .eq("id", order.id);
+          if (ambiguousUpdateError) {
+            failureCount++;
+            console.error("[payment-followup] ambiguous-order update failed:", ambiguousUpdateError.message);
+          }
           skipped.ambiguous++;
           console.warn(`[payment-followup] skipped customer retry for ambiguous Clover match | ${order.order_number}`);
           continue;
@@ -212,6 +231,7 @@ export async function GET(req: NextRequest) {
           });
         } catch {
           // PAYMENT_TOKEN_SECRET not set — skip this order
+          failureCount++;
           console.warn("[payment-followup] buildPayLink failed — PAYMENT_TOKEN_SECRET missing?");
           continue;
         }
@@ -262,21 +282,28 @@ export async function GET(req: NextRequest) {
             subject: copy.subject,
             html,
             text,
+            idempotencyKey: paymentFollowupOrderKey(tier, order.id),
           });
 
-          await supabase
+          const { error: followupUpdateError } = await supabase
             .from("orders")
             .update({ followup_sent_at: new Date().toISOString(), followup_count: tier })
             .eq("id", order.id);
+          if (followupUpdateError) {
+            failureCount++;
+            console.error("[payment-followup] follow-up state update failed:", followupUpdateError.message);
+          }
 
           byTier[`t${tier}`]++;
           console.log(`[payment-followup] TC-10 T${tier} sent → ${customer.email} | ${order.order_number}`);
         } catch (emailErr) {
+          failureCount++;
           console.error(`[payment-followup] TC-10 email failed for ${order.order_number}:`, emailErr);
         }
       }
     }
   } catch (err) {
+    failureCount++;
     console.error("[payment-followup] TC-10 block failed:", err);
   }
 
@@ -292,29 +319,44 @@ export async function GET(req: NextRequest) {
       .limit(50);
 
     if (error) {
+      failureCount++;
       console.error("[payment-followup] TC-9 query failed:", error.message);
     } else {
       for (const session of sessions ?? []) {
         // Skip if they actually placed an order after the session was captured
-        const { data: matchingCustomer } = await supabase
+        const { data: matchingCustomer, error: customerLookupError } = await supabase
           .from("customers")
           .select("id")
           .eq("email", session.email.toLowerCase())
           .maybeSingle();
+        if (customerLookupError) {
+          failureCount++;
+          console.error("[payment-followup] TC-9 customer lookup failed:", customerLookupError.message);
+          continue;
+        }
 
         if (matchingCustomer) {
-          const { count: existingOrders } = await supabase
+          const { count: existingOrders, error: existingOrdersError } = await supabase
             .from("orders")
             .select("id", { count: "exact", head: true })
             .eq("customer_id", matchingCustomer.id)
             .gt("created_at", session.created_at);
+          if (existingOrdersError) {
+            failureCount++;
+            console.error("[payment-followup] TC-9 order lookup failed:", existingOrdersError.message);
+            continue;
+          }
 
           if ((existingOrders ?? 0) > 0) {
             // They ordered — mark session as handled without emailing
-            await supabase
+            const { error: handledUpdateError } = await supabase
               .from("checkout_sessions")
               .update({ followup_sent_at: new Date().toISOString() })
               .eq("id", session.id);
+            if (handledUpdateError) {
+              failureCount++;
+              console.error("[payment-followup] TC-9 handled-session update failed:", handledUpdateError.message);
+            }
             continue;
           }
         }
@@ -353,21 +395,28 @@ export async function GET(req: NextRequest) {
             subject: "You left something at True Color Printing",
             html,
             text,
+            idempotencyKey: paymentFollowupSessionKey(session.id),
           });
 
-          await supabase
+          const { error: sessionUpdateError } = await supabase
             .from("checkout_sessions")
             .update({ followup_sent_at: new Date().toISOString() })
             .eq("id", session.id);
+          if (sessionUpdateError) {
+            failureCount++;
+            console.error("[payment-followup] TC-9 session update failed:", sessionUpdateError.message);
+          }
 
           tc9Sent++;
           console.log(`[payment-followup] TC-9 sent → ${session.email}`);
         } catch (emailErr) {
+          failureCount++;
           console.error(`[payment-followup] TC-9 email failed for ${session.email}:`, emailErr);
         }
       }
     }
   } catch (err) {
+    failureCount++;
     console.error("[payment-followup] TC-9 block failed:", err);
   }
 
@@ -443,16 +492,18 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  const { ok, status } = paymentFollowupOutcome(failureCount);
   await recordCronRun(
     "payment-followup",
-    true,
-    `tc9=${tc9Sent} t1=${byTier.t1} t2=${byTier.t2} t3=${byTier.t3} pause=${skipped.paused} amb=${skipped.ambiguous} human=${skipped.humanTouch} notdue=${skipped.notDue}${chaseSignaled ? " chase_signal=1" : ""}`,
+    ok,
+    `tc9=${tc9Sent} t1=${byTier.t1} t2=${byTier.t2} t3=${byTier.t3} pause=${skipped.paused} amb=${skipped.ambiguous} human=${skipped.humanTouch} notdue=${skipped.notDue} errors=${failureCount}${chaseSignaled ? " chase_signal=1" : ""}`,
   );
   return NextResponse.json({
-    ok: true,
+    ok,
     tc9: tc9Sent,
     tc10: byTier.t1 + byTier.t2 + byTier.t3,
     byTier,
     skipped,
-  });
+    errors: failureCount,
+  }, { status });
 }
