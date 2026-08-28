@@ -6,12 +6,12 @@ import { DesignDirectionGrid } from "@/components/site/DesignDirectionGrid";
 export const metadata: Metadata = {
   title: { absolute: "Sticker Printing Saskatoon | Die-Cut Vinyl | True Color" },
   description:
-    "Die-cut vinyl sticker printing in Saskatoon. 100 for $160, 250 for $325, 500 for $475. Full-colour UV, waterproof, custom sizes. Local pickup. Rush +$40.",
+    "Die-cut vinyl sticker printing in Saskatoon. Default 4×4: 100 for $100, 500 for $220, 1000 for $330. Waterproof eco-solvent print. Rush +$40.",
   alternates: { canonical: "/sticker-printing-saskatoon" },
   openGraph: {
     title: "Sticker Printing Saskatoon | True Color Display Printing",
     description:
-      "Custom die-cut vinyl stickers for Saskatoon businesses. 100 for $160, 250 for $325. Waterproof, UV print, same-day rush available. Local pickup.",
+      "Custom die-cut vinyl stickers in Saskatoon. Default 4×4: 100 for $100, 500 for $220, 1000 for $330. Waterproof eco-solvent print. Rush +$40.",
     url: "https://truecolorprinting.ca/sticker-printing-saskatoon",
     type: "website",
     images: [{ url: "/og-image.png?v=20260820", width: 1200, height: 630 }],
