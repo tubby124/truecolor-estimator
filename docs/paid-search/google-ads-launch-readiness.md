@@ -68,7 +68,7 @@ The generated Editor CSVs do not encode an advertiser ID or the advanced presenc
 - Core: CA$14/day; 46-day planning maximum CA$644.
 - Competitor: CA$4/day; 46-day planning maximum CA$184.
 - Brand: CA$3/day staged but **PAUSED**; excluded from approved pilot spend (planning maximum CA$0). Keeps the `HOLD_AUCTION_INSIGHTS` tier label.
-- Target qualifying spend and protective pause: **CA$600** (Google's promo requirement, pre-tax). Authorized limit: **CA$650** (2026-08-28 owner authorization). The extra CA$50 is safety headroom for click granularity and spend posting between five-minute heartbeats, not a spend target. It does not change any daily budget, CPC ceiling, keyword, network, match type, or geo control.
+- Target qualifying spend: **CA$600** (Google's promo requirement, pre-tax). Owner-authorized total-spend stop: **CA$650** (2026-08-28 superseding instruction). Core may therefore spend roughly CA$50 after qualification. This does not change any daily budget, CPC ceiling, keyword, network, match type, or geo control.
 - Google Ads uses daily budgets, not a true lifetime cap. The end date, monitoring, and hard stop are mandatory.
 - Maximize Clicks ceilings: Core CA$4.00, Competitor CA$2.50, Brand CA$1.50 — the 2026-07-17 forecast-optimal values. **Budget and bid are different levers.** The daily budget is permission to spend; the ceiling is the maximum price paid for a single click. Maximize Clicks always buys the cheapest available clicks first, so a raised budget with an unraised ceiling captures all cheap inventory without inflating average CPC. Raising the ceiling only buys marginal auctions that were previously priced out — do it only when Search lost IS (rank) proves auctions are being lost to rank rather than to a thin market.
 - All nine Core ad groups (Tier 1, including the three former Tier 2 expansion groups) plus exact-only competitor conquest launch together. Competitor stays exact-only permanently.
@@ -88,7 +88,7 @@ npm run monitor:google-ads-spend -- \
   --window-end=2026-07-23T08:00
 ```
 
-The controlled-test window is mandatory, interpreted in `America/Regina`, restricted to whole-hour boundaries, and cannot exceed 72 hours. Hour-segmented Google Ads cost is filtered to `window-start` inclusive and `window-end` exclusive. Its protective threshold is CA$25 against the separately approved CA$30 cap. The fixed public-pilot window is July 20, 2026 through December 31, 2026 local: CA$450 emits an operator warning, CA$600 starts the protective pause, and CA$650 is the owner-authorized limit. At or above a pause threshold—or after the selected window ends—the dry-run result is `STOP_REQUIRED` / `WOULD_PAUSE`.
+The controlled-test window is mandatory, interpreted in `America/Regina`, restricted to whole-hour boundaries, and cannot exceed 72 hours. Hour-segmented Google Ads cost is filtered to `window-start` inclusive and `window-end` exclusive. Its protective threshold is CA$25 against the separately approved CA$30 cap. The fixed public-pilot window is July 20, 2026 through December 31, 2026 local: CA$450 emits an operator warning and CA$650 is both the automatic pause threshold and owner-authorized limit. At or above a pause threshold—or after the selected window ends—the dry-run result is `STOP_REQUIRED` / `WOULD_PAUSE`.
 
 Only the explicit `--execute` flag authorizes a pause:
 
@@ -214,7 +214,7 @@ The July start date has passed. Moving the pilot requires an explicit approved d
 - [x] Call reporting is enabled and the customer-scoped call asset is wired to approved/reviewed `qualified_call_60s`.
 - [x] Customer purchase goal is biddable; page-view and call goals are non-biddable.
 - [x] Railway Wait for CI and the executable PostgreSQL outbox-trigger regression protect production from the prior app/schema drift and NULL-trigger incident.
-- [ ] Railway `*/5` primary cadence plus the CA$600 protective pause / CA$650 limit must deploy and read back before Core resumes; GitHub remains the 15-minute backup.
+- [x] Railway `*/5` primary cadence is live; the superseding public-pilot contract pauses at the CA$650 total-spend limit. GitHub remains the 15-minute backup.
 - [x] The exact-resource controlled activation and account-wide rollback controller passes tests, live preflight, and live validate-only mutation checks without enabling spend.
 - [x] CA$600/CAD promotion confirmed from the direct-customer API and qualified-call asset approved/reviewed.
 - [x] All 19 RSAs, including all nine Competitor RSAs, are approved/reviewed with no policy topics.

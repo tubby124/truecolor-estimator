@@ -102,7 +102,7 @@ Consequently the honest odds of reaching CA$600 by 2026-09-16 are **below the 40
 - **Search lost IS (rank) high** → auctions exist and are being lost on price. A ceiling increase is justified and is the correct lever.
 - **Search lost IS (budget) near zero and spend still low** → the market is thin. No bid increase will fix it; only reach (query coverage, match type, geography) would, and every one of those is currently forbidden by the launch controls in `config-validator.mjs` and requires an approved contract change first.
 
-A missed promotion still leaves a working paid channel, a real search-term corpus, and proven conversion plumbing for roughly the spend actually incurred. On 2026-08-28 the owner raised the runtime-enforced ceiling from CA$600 to CA$650, creating a narrow CA$50 qualification buffer above the CA$600 target. This does not change the daily budget, CPC ceiling, networks, match types, keywords, or geo.
+A missed promotion still leaves a working paid channel, a real search-term corpus, and proven conversion plumbing for roughly the spend actually incurred. On 2026-08-28 the owner authorized Core to keep serving for roughly CA$50 after the CA$600 qualifying target, with an automatic stop at CA$650 total account cost. This does not change the daily budget, CPC ceiling, networks, match types, keywords, or geo.
 
 ## Campaign architecture
 
@@ -133,7 +133,7 @@ A missed promotion still leaves a working paid channel, a real search-term corpu
 - Core: CA$14 average daily budget; CA$4.00 Maximize Clicks ceiling; CA$644 over the 46-day window (updated 2026-08-03 PM).
 - Competitor: CA$4 average daily budget; CA$2.50 ceiling; CA$184 over the 46-day window.
 - Brand: CA$3/day and CA$1.50 ceiling staged, but **PAUSED** and excluded from approved pilot spend (2026-08-03 PM owner decision; satisfies `AUCTION_INSIGHTS_SIGNOFF` via its "or kept paused" branch).
-- Qualifying-spend target: CA$600 from August 3 through September 17, 2026 (promo expires September 16). Warning: CA$450. Protective pause: CA$600. Authorized limit: CA$650 (2026-08-28 owner authorization). The CA$50 difference is safety headroom for click granularity and spend posting between five-minute heartbeats, not a spend target. Monitor window runs to December 31, 2026.
+- Qualifying-spend target: CA$600 from August 3 through September 17, 2026 (promo expires September 16). Warning: CA$450. Automatic pause and authorized total-spend limit: CA$650 (2026-08-28 superseding owner instruction). Monitor window runs to December 31, 2026.
 - Google reports credit-funded clicks in `metrics.cost_micros` exactly like cash, so the monitor cannot tell them apart. The CA$650 ceiling therefore governs total reported account cost, regardless of whether Google later offsets some cost with promotional credit.
 - Google may spend above the average daily budget on an individual day. Cumulative cost must therefore be enforced by the monitor rather than inferred from daily budgets.
 - Do not raise budgets unless the campaign is actually budget-limited.
@@ -219,7 +219,7 @@ A real ad-click order cannot be observed while every ad is inactive. After Gate 
 The CA$650 absolute cap is not enforceable through an end date or a manual glance. Before any controlled or public activation, deploy and prove the following checked-in controls:
 
 - a credentialed primary API monitor polling exact-account cumulative cost across every campaign every 5 minutes in `America/Regina`, with any unexpected enabled campaign treated as unsafe;
-- automatic account-wide pause of every enabled campaign at a protective CA$25 threshold during the CA$30 controlled test; during the public pilot, warn at CA$450 and automatically start pausing every enabled campaign at CA$600. The owner-authorized CA$650 limit provides CA$50 of polling/posting headroom;
+- automatic account-wide pause of every enabled campaign at a protective CA$25 threshold during the CA$30 controlled test; during the public pilot, warn at CA$450 and pause every enabled campaign at the CA$650 owner-authorized total-spend limit;
 - durable operator alert through the lifecycle rollup containing monitor state, spend, action, timestamp, and pause result;
 - after exact True Color account verification, fail-closed account-wide pause attempts when spend or campaign state cannot be verified; wrong/unreadable account identity never mutates, and authentication, mutation, or readback failure remains red;
 - a tested manual fallback owned by Hasan: if automation is unhealthy, inspect current cumulative spend immediately and keep every campaign paused until monitoring is healthy and the state is reconciled;

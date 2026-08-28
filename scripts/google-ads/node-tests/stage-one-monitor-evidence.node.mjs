@@ -25,7 +25,7 @@ function receipt(overrides = {}, topLevelOverrides = {}) {
       accountVerified: true,
       spendScope: "EXACT_ACCOUNT_TOTAL",
       warningCad: 450,
-      thresholdCad: 600,
+      thresholdCad: 650,
       approvedCapCad: 650,
       action: "NONE",
       outcome: "WARNING",
@@ -74,7 +74,7 @@ test("rejects stale, wrong-source, wrong-threshold, unsafe, and mutating evidenc
   const cases = [
     { value: { ...receipt(), at: "2026-08-28T17:49:59.999Z" }, pattern: /heartbeat age/ },
     { value: receipt({ schedulerSource: "MANUAL" }), pattern: /schedulerSource/ },
-    { value: receipt({ thresholdCad: 650 }), pattern: /thresholdCad/ },
+    { value: receipt({ thresholdCad: 600 }), pattern: /thresholdCad/ },
     { value: receipt({ approvedCapCad: 600 }), pattern: /approvedCapCad/ },
     { value: receipt({ outcome: "STOPPED" }), pattern: /outcome/ },
     { value: receipt({ action: "PAUSED" }), pattern: /action/ },
