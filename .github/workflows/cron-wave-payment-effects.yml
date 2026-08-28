@@ -5,8 +5,8 @@ on:
     # Backup only. GitHub does not reliably deliver a 5-minute schedule, so this
     # claimed */5 while actually firing far less often — the outage it was meant
     # to cover could last hours without anyone noticing. The primary delivery is
-    # now the Railway `google-ads-monitor-cron` service at */15; this stays as a
-    # truthful backup at the same cadence.
+    # now the Railway `google-ads-monitor-cron` service at */5; this stays as a
+    # truthful 15-minute backup cadence.
     - cron: "*/15 * * * *"
   workflow_dispatch:
 

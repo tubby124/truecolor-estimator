@@ -5,6 +5,8 @@ import {
 
 const EXPECTED_MONITOR = HARD_STOP_PROFILES["public-pilot"];
 export const MONITOR_EVIDENCE_MAX_AGE_MS = 10 * 60 * 1000;
+export const MONITOR_CADENCE_MIN_GAP_MS = 4 * 60 * 1000;
+export const MONITOR_CADENCE_MAX_GAP_MS = 7 * 60 * 1000;
 
 export function validateProductionMonitorEvidence(receipt, { nowMs = Date.now() } = {}) {
   if (!receipt?.id || !receipt?.at || !receipt?.detail) {
@@ -44,6 +46,24 @@ export function validateProductionMonitorEvidence(receipt, { nowMs = Date.now() 
   return { id: String(receipt.id), at: recordedAt.toISOString() };
 }
 
+export function validateProductionMonitorCadence(receipts, { nowMs = Date.now() } = {}) {
+  if (!Array.isArray(receipts) || receipts.length < 2) {
+    throw new Error("Core resume blocked: two consecutive Railway monitor heartbeats are required");
+  }
+
+  const validated = receipts
+    .slice(0, 2)
+    .map((receipt) => validateProductionMonitorEvidence(receipt, { nowMs }))
+    .sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+  const gapMs = Date.parse(validated[0].at) - Date.parse(validated[1].at);
+  if (gapMs < MONITOR_CADENCE_MIN_GAP_MS || gapMs > MONITOR_CADENCE_MAX_GAP_MS) {
+    throw new Error(
+      `Core resume blocked: Railway monitor heartbeat gap must be ${MONITOR_CADENCE_MIN_GAP_MS / 60_000}-${MONITOR_CADENCE_MAX_GAP_MS / 60_000} minutes`,
+    );
+  }
+  return validated[0];
+}
+
 export async function readFreshProductionMonitorEvidence({
   env = process.env,
   fetchImpl = fetch,
@@ -59,7 +79,7 @@ export async function readFreshProductionMonitorEvidence({
     event_type: "eq.google_ads.monitor.heartbeat",
     actor_id: "eq.google-ads-monitor",
     order: "at.desc",
-    limit: "1",
+    limit: "2",
   });
   const response = await fetchImpl(`${baseUrl}/rest/v1/audit_events?${query}`, {
     headers: {
@@ -70,6 +90,6 @@ export async function readFreshProductionMonitorEvidence({
   if (!response.ok) {
     throw new Error(`Production monitor evidence read failed with HTTP ${response.status}`);
   }
-  const [receipt] = await response.json();
-  return validateProductionMonitorEvidence(receipt, { nowMs });
+  const receipts = await response.json();
+  return validateProductionMonitorCadence(receipts, { nowMs });
 }
