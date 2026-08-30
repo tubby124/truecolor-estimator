@@ -105,10 +105,10 @@ export async function GET(req: NextRequest) {
             .eq("status", "recorded"),
           supabase
             .from("audit_events")
-            .select("entity_id, event_type, created_at")
+            .select("entity_id, event_type, at")
             .in("entity_id", orderIds)
             .in("event_type", [...HUMAN_TOUCH_EVENTS])
-            .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
+            .gte("at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
         ]);
 
         if (attemptsErr) {
