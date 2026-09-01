@@ -79,6 +79,7 @@ The systems cannot currently join a feed offer to a paid line without name/slug 
 
 ### Merchant and product surfaces
 
+- Owner-supplied Merchant Center account ID: `5847204541`, believed to be administered through the `hasan.sharif.realtor` Google login. This establishes the intended account identity but is not yet an API/UI readback of its data source or product status.
 - `https://truecolorprinting.ca/feed/products.xml`: HTTP 200, 16 offers.
 - IDs follow `tc-${slug}` and links use `/products/${slug}?merchant=tc-${slug}`.
 - Every offer declares `in_stock`, Canada, `Local pickup (Saskatoon)`, and `0.00 CAD` shipping. This is not accepted as business truth without owner confirmation.
