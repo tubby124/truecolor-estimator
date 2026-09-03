@@ -203,7 +203,7 @@ export default function CheckoutPage() {
     ) {
       const cartTotal = cart.reduce((sum, item) => sum + item.sell_price, 0);
       const ga4Items = cart.map((c) => ({
-        item_id: c.product_slug,
+        item_id: c.commerce_identity?.merchantOfferId ?? c.product_slug,
         item_name: c.product_name,
         item_category: c.category,
         price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price,
@@ -379,7 +379,7 @@ export default function CheckoutPage() {
       value: total,
       payment_type: method,
       items: items.map((c) => ({
-        item_id: c.product_slug,
+        item_id: c.commerce_identity?.merchantOfferId ?? c.product_slug,
         item_name: c.product_name,
         item_category: c.category,
         price: c.qty > 0 ? c.sell_price / c.qty : c.sell_price,
@@ -991,24 +991,17 @@ export default function CheckoutPage() {
               )}
             </section>
 
-            {/* Rush toggle */}
+            {/* Rush confirmation gate */}
             <section>
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={isRush}
-                  onChange={(e) => setIsRush(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-[#16C2F3]"
-                />
+              <div className="flex items-start gap-3">
                 <div>
-                  <p className="font-semibold text-[#1c1712] group-hover:text-[#16C2F3] transition-colors">
-                    Rush my order — +$40
-                  </p>
+                  <p className="font-semibold text-[#1c1712]">Need rush production?</p>
                   <p className="text-sm text-gray-500">
-                    Ready the same day if ordered before 10 AM. Call to confirm.
+                    Rush is a request only. Staff must confirm capacity, fee, and timing before payment.
                   </p>
+                  <a href="/quote" className="text-sm font-semibold text-[#16C2F3] hover:underline">Request rush confirmation</a>
                 </div>
-              </label>
+              </div>
             </section>
 
             {/* CASL marketing consent — unchecked by default */}

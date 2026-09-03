@@ -21,10 +21,10 @@ import {
   trackStickerAddToCartVisible,
 } from "@/lib/analytics";
 import { metaTrackViewContent, metaTrackAddToCart } from "@/lib/analytics/metaPixel";
-import { SameDayClock } from "@/components/home/SameDayClock";
 import { flags } from "@/lib/flags";
 import { PaidCartConfirmation } from "@/components/paid/PaidCartConfirmation";
 import { MobileCallPriceBar } from "@/components/product/MobileCallPriceBar";
+import { deriveCommerceIdentity } from "@/lib/commerce/catalog";
 
 // Friendly material labels shown in the customer proof
 const MATERIAL_LABELS: Record<string, string> = {
@@ -216,39 +216,43 @@ export function ProductPageClient({ product, initialSelection }: Props) {
 
     const label = `${configData.sizeLabel} — ${configData.sidesLabel} × ${configData.qty}${specLabel}${designLabel}`;
 
+    const cartConfig = {
+      category: product.category,
+      material_code: configData.materialCode,
+      width_in: configData.widthIn,
+      height_in: configData.heightIn,
+      sides: configData.sides,
+      qty: configData.qty,
+      design_status: configData.designStatus,
+      color: configData.color,
+      custom_text: configData.customText,
+      shape: configData.shape,
+      addons: Object.entries(configData.addonQtys)
+        .filter(([, q]) => q > 0)
+        .map(([addonLabel, addonQty]) => `${addonLabel} ×${addonQty}`),
+    };
+    const commerceIdentity = deriveCommerceIdentity({ product_slug: product.slug, config: cartConfig });
+
     addToCart({
       product_name: product.name,
       product_slug: product.slug,
       category: product.category,
       label,
-      config: {
-        category: product.category,
-        material_code: configData.materialCode,
-        width_in: configData.widthIn,
-        height_in: configData.heightIn,
-        sides: configData.sides,
-        qty: configData.qty,
-        design_status: configData.designStatus,
-        color: configData.color,
-        custom_text: configData.customText,
-        shape: configData.shape,
-        addons: Object.entries(configData.addonQtys)
-          .filter(([, q]) => q > 0)
-          .map(([addonLabel, addonQty]) => `${addonLabel} ×${addonQty}`),
-      },
+      config: cartConfig,
       sell_price: priceData.price,
       gst_rate: 0.05,
       design_fee: priceData.designFee ?? 0,
       qty: configData.qty,
       line_items: priceData.lineItems.length > 0 ? priceData.lineItems : undefined,
+      commerce_identity: commerceIdentity,
     });
 
     // GA4: add_to_cart
     trackAddToCart({
-      item_id: product.slug,
+      item_id: commerceIdentity.merchantOfferId ?? product.slug,
       item_name: product.name,
       item_category: product.category,
-      price: priceData.price,
+      unit_price: priceData.price / Math.max(configData.qty, 1),
       quantity: configData.qty,
     });
     // Meta Pixel: AddToCart
@@ -377,7 +381,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
               {mobileConfigurationLabel}
             </p>
           )}
-          <SameDayClock className="text-[10px] text-[#16C2F3] flex items-center gap-1 mb-0.5" />
+          <p className="text-[10px] text-[#16C2F3] leading-tight mb-0.5">Rush by staff confirmation before payment</p>
           {priceData.loading && priceData.price == null ? (
             <div className="h-6 w-24 bg-gray-100 rounded animate-pulse" />
           ) : priceData.price != null ? (

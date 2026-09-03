@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { COMMERCE_POLICY } from "@/lib/commerce/policies";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -67,9 +68,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-[#1c1712] mb-3">4. Turnaround and Pickup</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li>
-                Standard turnaround is 1–3 business days after artwork approval and payment. Rush
-                service (same day or next morning) is available for an additional flat fee — confirm
-                availability when ordering.
+                {COMMERCE_POLICY.production.summary} {COMMERCE_POLICY.rush.summary}
               </li>
               <li>
                 Orders are available for pickup at 216 33rd St W (upstairs), Saskatoon, SK S7L 0V1.
@@ -81,6 +80,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-[#1c1712] mb-3">5. Reprints and Refunds</h2>
             <ul className="list-disc pl-6 space-y-2">
+              <li>{COMMERCE_POLICY.returns.summary}</li>
               <li>
                 If we make a production error (wrong size, wrong colour due to our equipment), we
                 will reprint at no cost.

@@ -103,17 +103,17 @@ export function trackAddToCart(params: {
   item_id: string;
   item_name: string;
   item_category: string;
-  price: number;
+  unit_price: number;
   quantity: number;
 }) {
   gtag("event", "add_to_cart", {
     currency: "CAD",
-    value: params.price,
+    value: params.unit_price * params.quantity,
     items: [{
       item_id: params.item_id,
       item_name: params.item_name,
       item_category: params.item_category,
-      price: params.price,
+      price: params.unit_price,
       quantity: params.quantity,
     }],
   });

@@ -153,6 +153,9 @@ export function SiteFooter() {
             <Link href="/services" className="hover:text-white transition-colors">Services</Link>
             <Link href="/resources" className="hover:text-white transition-colors">Resources</Link>
             <Link href="/quote" className="hover:text-white transition-colors">Custom Quote</Link>
+            <Link href="/shipping" className="hover:text-white transition-colors">Pickup &amp; Shipping</Link>
+            <Link href="/returns" className="hover:text-white transition-colors">Returns &amp; Reprints</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
             <a
               href="https://g.page/r/CZH6HlbNejQAEAE/review"
               target="_blank"

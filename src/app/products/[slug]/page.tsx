@@ -9,7 +9,8 @@ import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
 import { PRODUCT_IMAGES } from "@/lib/data/productImages";
 import { NotifyMeForm } from "@/components/product/NotifyMeForm";
-import { getMerchantOfferSelection } from "@/lib/merchant/merchant-catalog";
+import { getMerchantOfferSelection, getMerchantPilotOffer } from "@/lib/merchant/merchant-catalog";
+import { merchantPilotProductSchema } from "@/lib/commerce/product-schema";
 
 
 interface Props {
@@ -47,6 +48,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
   if (!product) notFound();
   const merchant = (await searchParams).merchant;
   const merchantOffer = getMerchantOfferSelection(slug, typeof merchant === "string" ? merchant : undefined);
+  const pilotOffer = slug === "retractable-banners" && typeof merchant === "string"
+    ? getMerchantPilotOffer("https://truecolorprinting.ca")
+    : null;
+  const productSchema = pilotOffer && merchant === pilotOffer.offerId
+    ? merchantPilotProductSchema(pilotOffer)
+    : null;
 
   // Related products
   const related = product.relatedSlugs.map((s) => getProduct(s)).filter(Boolean);
@@ -67,6 +74,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
       {/* Structured data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      {productSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />}
 
       <main id="main-content" className="max-w-6xl mx-auto px-6 py-10">
         {/* Breadcrumb */}
@@ -98,6 +106,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <span className="font-mono text-lg font-bold text-[#c92719]">From {product.fromPrice}</span>
               <span aria-hidden="true">·</span>
               <span>Printed in Saskatoon · pickup at 216 33rd St W</span>
+            </p>
+          )}
+          {pilotOffer && productSchema && (
+            <p className="mt-2 text-sm text-gray-600">
+              Selected offer: {pilotOffer.sizeLabel}, {pilotOffer.sides === 1 ? "single-sided" : "double-sided"}, quantity {pilotOffer.qty} — <span className="font-semibold">${pilotOffer.price.toFixed(2)} CAD</span>.
             </p>
           )}
         </header>

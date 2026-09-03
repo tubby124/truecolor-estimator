@@ -3,6 +3,9 @@ import {
   CANONICAL_MERCHANT_PRODUCT_SLUGS,
   getMerchantOfferSelection,
   getMerchantOffers,
+  getMerchantPilotOffer,
+  isMerchantPilotImageCleared,
+  MERCHANT_PILOT_SERVING_ENABLED,
   type MerchantOfferSelection,
 } from "./merchant-catalog";
 import { PRODUCTS } from "@/lib/data/products-content";
@@ -68,6 +71,14 @@ describe("Merchant catalog", () => {
     });
     expect(getMerchantOfferSelection("photo-posters", "tc-flyers")).toBeUndefined();
     expect(getMerchantOfferSelection("rack-cards", "tc-rack-cards")).toBeUndefined();
+  });
+
+  it("keeps the exact pilot non-serving until external evidence gates pass", () => {
+    const pilot = getMerchantPilotOffer(SITE_URL);
+    expect(MERCHANT_PILOT_SERVING_ENABLED).toBe(false);
+    expect(pilot.offerId).toBe("tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s");
+    expect(pilot.link).toContain("merchant=tc-retractable-banners--33-5x80");
+    expect(isMerchantPilotImageCleared(pilot)).toBe(false);
   });
 
   it("prices every offer identically to the prefilled product page", () => {

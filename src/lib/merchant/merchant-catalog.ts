@@ -2,6 +2,7 @@ import type { Category } from "@/lib/data/types";
 import { PRODUCTS, type ProductContent } from "@/lib/data/products-content";
 import { estimate } from "@/lib/engine";
 import { ORDER_MINIMUM_DOLLARS } from "@/lib/pricing/order-min";
+import { findChannelClearedImage } from "@/lib/data/image-rights";
 
 const MIN_CHECKOUT_TOTAL = ORDER_MINIMUM_DOLLARS;
 
@@ -51,6 +52,15 @@ export interface MerchantOffer extends MerchantOfferSelection {
   price: number;
   productType: string;
 }
+
+/**
+ * A code switch is not an external Merchant approval. The source is empty by
+ * default so a deploy cannot begin a pilot before account/readback, image, and
+ * policy gates have separately passed.
+ */
+export const MERCHANT_PILOT_SERVING_ENABLED = false;
+// Intentionally unset until a rights receipt binds the exact public image file.
+export const MERCHANT_PILOT_IMAGE_SHA256: string | null = null;
 
 type MerchantOfferSeed = {
   slug: CanonicalMerchantProductSlug;
@@ -122,7 +132,8 @@ export function getMerchantOfferSelection(
   offerId: string | undefined,
 ): MerchantOfferSelection | undefined {
   const seed = MERCHANT_OFFER_SEEDS.find((candidate) => candidate.slug === slug);
-  if (!seed || offerId !== `tc-${seed.slug}`) return undefined;
+  const pilotId = "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s";
+  if (!seed || (offerId !== `tc-${seed.slug}` && !(seed.slug === "retractable-banners" && offerId === pilotId))) return undefined;
 
   const product = PRODUCTS[seed.slug];
   return selectionFor(seed, product);
@@ -168,8 +179,25 @@ export function getMerchantOffers(siteUrl: string): MerchantOffer[] {
   });
 }
 
+export function getMerchantPilotOffer(siteUrl: string): MerchantOffer {
+  const pilot = getMerchantOffers(siteUrl).find((offer) => offer.slug === "retractable-banners");
+  if (!pilot) throw new Error("Configured Merchant pilot is missing");
+  return {
+    ...pilot,
+    offerId: "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s",
+    link: `${siteUrl}/products/retractable-banners?merchant=tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s`,
+  };
+}
+
+export function isMerchantPilotImageCleared(offer: MerchantOffer): boolean {
+  return MERCHANT_PILOT_IMAGE_SHA256 !== null
+    && Boolean(findChannelClearedImage(MERCHANT_PILOT_IMAGE_SHA256, "merchant", offer.offerId));
+}
+
 export function renderMerchantFeedXml(siteUrl: string): string {
-  const items = getMerchantOffers(siteUrl)
+  const pilot = getMerchantPilotOffer(siteUrl);
+  const offers = MERCHANT_PILOT_SERVING_ENABLED && isMerchantPilotImageCleared(pilot) ? [pilot] : [];
+  const items = offers
     .map((offer) => `
     <item>
       <g:id>${escapeXml(offer.offerId)}</g:id>
@@ -184,11 +212,6 @@ export function renderMerchantFeedXml(siteUrl: string): string {
       <g:product_type>${escapeXml(offer.productType)}</g:product_type>
       <g:google_product_category>${escapeXml(GOOGLE_PRODUCT_CATEGORY)}</g:google_product_category>
       <g:identifier_exists>no</g:identifier_exists>
-      <g:shipping>
-        <g:country>CA</g:country>
-        <g:service>Local pickup (Saskatoon)</g:service>
-        <g:price>0.00 CAD</g:price>
-      </g:shipping>
     </item>`)
     .join("");
 

@@ -36,6 +36,18 @@ export interface CartItem {
   design_fee?: number; // design service portion bundled in sell_price
   qty: number;
   line_items?: LineItem[]; // engine breakdown: base product + addon sub-lines
+  /** Browser continuity only; server checkout always derives and overwrites this. */
+  commerce_identity?: {
+    commerceProductId: string | null;
+    variantKey: string | null;
+    merchantOfferId: string | null;
+    offerVersion: string | null;
+    configurationFingerprint: string | null;
+    pricingVersion: string | null;
+    pricingRuleId: string | null;
+    policyVersion: string;
+    classificationReason: string | null;
+  };
 }
 
 const CART_KEY = "tc_cart";

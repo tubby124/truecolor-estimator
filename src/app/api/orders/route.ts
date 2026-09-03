@@ -117,6 +117,14 @@ export async function POST(req: NextRequest) {
       gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
       loc_interest_ms, adgroupid, creative, campaignid, network,
     } = body;
+    // Rush capacity, fee, and timing are staff decisions. A browser checkbox
+    // cannot create a payable rush order.
+    if (is_rush === true) {
+      return NextResponse.json(
+        { error: "Rush requests require staff confirmation before payment. Please contact us for capacity, fee, and timing." },
+        { status: 409 },
+      );
+    }
 
     if (!UUID_RE.test(checkout_submission_id ?? "")) {
       return NextResponse.json({ error: "A valid checkout submission ID is required" }, { status: 400 });
@@ -632,6 +640,17 @@ export async function POST(req: NextRequest) {
       unit_price: item.sell_price / item.qty,
       line_total: item.sell_price,
       ...(item.line_items ? { line_items_json: item.line_items } : {}),
+      commerce_product_id: item.commerce_identity?.commerceProductId ?? null,
+      commerce_variant_key: item.commerce_identity?.variantKey ?? null,
+      merchant_offer_id: item.commerce_identity?.merchantOfferId ?? null,
+      offer_version: item.commerce_identity?.offerVersion ?? null,
+      configuration_fingerprint: item.commerce_identity?.configurationFingerprint ?? null,
+      pricing_version: item.commerce_identity?.pricingVersion ?? null,
+      pricing_rule_id: item.commerce_identity?.pricingRuleId ?? null,
+      fulfillment_selection: "pickup",
+      production_sla_anchor: "artwork_approval_and_payment",
+      policy_version: item.commerce_identity?.policyVersion ?? null,
+      classification_reason: item.commerce_identity?.classificationReason ?? null,
     }));
 
     // Attach first file path to first order item (DB column only stores one path per item)
@@ -657,6 +676,17 @@ export async function POST(req: NextRequest) {
         design_status: "PRINT_READY",
         unit_price: smallOrderFee,
         line_total: smallOrderFee,
+        commerce_product_id: null,
+        commerce_variant_key: null,
+        merchant_offer_id: null,
+        offer_version: null,
+        configuration_fingerprint: null,
+        pricing_version: null,
+        pricing_rule_id: null,
+        fulfillment_selection: "pickup",
+        production_sla_anchor: "artwork_approval_and_payment",
+        policy_version: null,
+        classification_reason: "non-product: order minimum setup fee",
       });
     }
 

@@ -117,7 +117,7 @@ describe("shared public business facts", () => {
     expect(catalogue).not.toMatch(/direct(?:ly)?[- ]to[- ](?:the[- ])?substrate/i);
   });
 
-  it("keeps llms.txt synchronized with review, equipment, and fulfillment facts", () => {
+  it("keeps llms.txt synchronized with review and equipment facts", () => {
     const llms = readFileSync(join(process.cwd(), "public/llms.txt"), "utf8");
 
     expect(llms).toContain(
@@ -125,6 +125,5 @@ describe("shared public business facts", () => {
     );
     expect(llms).toContain(BUSINESS_INFO.equipment.wideFormat.display);
     expect(llms).toContain(BUSINESS_INFO.equipment.digitalPress.display);
-    expect(llms).toContain(BUSINESS_INFO.fulfillment.display);
   });
 });

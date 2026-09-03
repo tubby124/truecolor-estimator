@@ -7,6 +7,7 @@
 
 import { estimate } from "@/lib/engine";
 import type { CartItem } from "@/lib/cart/cart";
+import { deriveCommerceIdentity } from "@/lib/commerce/catalog";
 
 /**
  * Server-side price revalidation.
@@ -53,7 +54,13 @@ export function revalidateItemPrices(items: CartItem[]): CartItem[] {
             `[orders] price revalidation: client=$${clientPrice.toFixed(2)} server=$${serverPrice.toFixed(2)} diff=$${diff.toFixed(2)} (${(diffPct * 100).toFixed(1)}%) — using server price | item: ${item.product_name}`
           );
         }
-        return { ...item, sell_price: serverPrice, design_fee: result.design_fee ?? 0, line_items: result.line_items };
+        return {
+          ...item,
+          sell_price: serverPrice,
+          design_fee: result.design_fee ?? 0,
+          line_items: result.line_items,
+          commerce_identity: deriveCommerceIdentity(item, result),
+        };
       }
       throw new Error(`Pricing engine returned ${result.status}`);
     } catch (err) {

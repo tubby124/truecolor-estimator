@@ -25,6 +25,7 @@
     "monitor:google-ads-spend": "node scripts/google-ads/hard-stop-monitor.mjs",
     "test:google-ads": "node --test scripts/google-ads/node-tests/*.node.mjs && node scripts/google-ads/export-google-ads.mjs --check",
     "validate:gallery": "node scripts/validate-gallery.mjs",
+    "validate:commerce-truth": "node scripts/validate-commerce-truth.mjs",
     "gallery:import": "node scripts/import-gallery-images.mjs",
     "harness:webhooks": "node scripts/harness/webhook-health.mjs",
     "harness:webhooks:probe": "node scripts/harness/webhook-health.mjs --probe",

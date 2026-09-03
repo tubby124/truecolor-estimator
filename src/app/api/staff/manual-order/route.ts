@@ -628,6 +628,10 @@ export async function POST(req: NextRequest) {
         design_status: "PRINT_READY",
         unit_price: Math.round(item.amount * 100) / 100,
         line_total: Math.round(item.amount * 100) / 100,
+        fulfillment_selection: "unclassified",
+        production_sla_anchor: null,
+        policy_version: null,
+        classification_reason: "unclassified: staff manual entry has no deterministic catalog configuration",
       });
       if (itemErr) {
         console.error(`[manual-order] order_items insert failed for order ${order.id}:`, itemErr.message);
