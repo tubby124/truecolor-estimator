@@ -59,8 +59,10 @@ export interface MerchantOffer extends MerchantOfferSelection {
  * policy gates have separately passed.
  */
 export const MERCHANT_PILOT_SERVING_ENABLED = false;
-// Intentionally unset until a rights receipt binds the exact public image file.
-export const MERCHANT_PILOT_IMAGE_SHA256: string | null = null;
+// Owner-created Economy pilot image, recorded with exact-hash/channel rights.
+// The feed remains non-serving until the separate account, tax, and release
+// gates pass.
+export const MERCHANT_PILOT_IMAGE_SHA256: string | null = "c1c12c72fca9ae4bd7ab408a2062375af76ffa22c18571e0f458368e7b22eda3";
 
 type MerchantOfferSeed = {
   slug: CanonicalMerchantProductSlug;

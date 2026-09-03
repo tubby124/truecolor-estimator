@@ -78,7 +78,7 @@ describe("Merchant catalog", () => {
     expect(MERCHANT_PILOT_SERVING_ENABLED).toBe(false);
     expect(pilot.offerId).toBe("tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s");
     expect(pilot.link).toContain("merchant=tc-retractable-banners--33-5x80");
-    expect(isMerchantPilotImageCleared(pilot)).toBe(false);
+    expect(isMerchantPilotImageCleared(pilot)).toBe(true);
   });
 
   it("prices every offer identically to the prefilled product page", () => {

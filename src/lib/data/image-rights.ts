@@ -13,9 +13,19 @@ export interface ImageRightsRecord {
   imageSitemap?: boolean;
 }
 
-// New distribution defaults to deny. Populate only with an evidence-backed
-// exact file hash, documented permission/privacy scope, and channel clearance.
-export const IMAGE_RIGHTS_REGISTER: readonly ImageRightsRecord[] = [];
+// New distribution defaults to deny. The one approved entry below is the
+// owner-created Economy pilot visual confirmed on 2026-09-02. It deliberately
+// does not authorize GBP, social, Ads, email, or image-sitemap distribution.
+export const IMAGE_RIGHTS_REGISTER: readonly ImageRightsRecord[] = [
+  {
+    assetId: "retractable-economy-owner-created-2026-09-02",
+    sha256: "c1c12c72fca9ae4bd7ab408a2062375af76ffa22c18571e0f458368e7b22eda3",
+    publicUrl: "https://truecolorprinting.ca/images/products/product/retractable-stand-600x900.webp",
+    exactOfferId: "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s",
+    channels: ["site", "merchant"],
+    status: "approved",
+  },
+];
 
 export function findChannelClearedImage(
   sha256: string,
