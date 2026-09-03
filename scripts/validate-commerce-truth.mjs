@@ -18,8 +18,18 @@ const banned = [
 ];
 
 const failures = [];
+let quarantined = 0;
 for (const target of targets) {
   const text = readFileSync(resolve(process.cwd(), target), "utf8");
+  const distribution = JSON.parse(text)._distribution?.status;
+  if (distribution === "quarantined") {
+    quarantined += 1;
+    continue;
+  }
+  if (distribution !== "approved") {
+    failures.push(`${target}: distribution must be explicitly approved or quarantined`);
+    continue;
+  }
   for (const pattern of banned) {
     if (pattern.test(text)) failures.push(`${target}: blocked stale operational claim (${pattern})`);
   }
@@ -30,5 +40,5 @@ if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`);
   process.exitCode = 1;
 } else {
-  console.log("commerce truth validation passed");
+  console.log(`commerce truth validation passed (${quarantined} source${quarantined === 1 ? "" : "s"} quarantined)`);
 }

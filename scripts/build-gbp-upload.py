@@ -56,6 +56,11 @@ def resolve_image(image_path):
 def main():
     data = json.loads(JSON_PATH.read_text())
 
+    if data.get("_distribution", {}).get("status") != "approved":
+        raise SystemExit(
+            "GBP upload build blocked: source is quarantined pending current operations, image-rights, and channel approval."
+        )
+
     # Clean old images/posts
     for d in (IMG_OUT, POST_OUT):
         if d.exists():

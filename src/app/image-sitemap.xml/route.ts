@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import sitemap from "../sitemap";
+import { isImageSitemapCleared } from "@/lib/data/image-rights";
 
 const BASE = "https://truecolorprinting.ca";
 const IMG = `${BASE}/images/products/product`;
@@ -1558,7 +1560,19 @@ function escape(str: string): string {
 }
 
 function buildXml(): string {
-  const items = PAGES.map((page) => {
+  // Do not advertise a redirected, noindex, or otherwise non-canonical page
+  // through a separate sitemap. Image distribution is also default-deny until
+  // an exact asset/hash/rights receipt explicitly clears the public URL.
+  const canonicalPageUrls = new Set(sitemap().map((entry) => entry.url));
+  const eligiblePages = PAGES
+    .filter((page) => canonicalPageUrls.has(page.loc))
+    .map((page) => ({
+      ...page,
+      images: page.images.filter((image) => isImageSitemapCleared(image.loc)),
+    }))
+    .filter((page) => page.images.length > 0);
+
+  const items = eligiblePages.map((page) => {
     const imgs = page.images
       .map(
         (img) => `

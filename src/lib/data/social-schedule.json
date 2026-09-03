@@ -1,4 +1,9 @@
 {
+  "_distribution": {
+    "status": "quarantined",
+    "reason": "Generated schedule inherits stale operational claims and unverified image permissions.",
+    "releaseRequires": ["current-operations-review", "image-rights-evidence", "channel-approval"]
+  },
   "_meta": {
     "generatedFrom": "src/lib/data/gbp-products.json::postSchedule",
     "generatedAt": "2026-05-05",
