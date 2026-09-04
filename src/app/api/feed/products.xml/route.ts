@@ -6,7 +6,7 @@
 // Public feed URL: https://truecolorprinting.ca/feed/products.xml
 // Legacy API URL remains available for existing external catalog configs.
 //
-// Generates the canonical, checkout-safe offer for each active product family.
+// Generates the canonical, checkout-safe offer set for active product families.
 // Cached at the edge for 1 hour to avoid hammering pricing data reads.
 
 import { NextResponse } from "next/server";

@@ -54,6 +54,11 @@ export interface MerchantOffer extends MerchantOfferSelection {
   availability: "in_stock";
   price: number;
   productType: string;
+  itemGroupId?: string;
+  itemGroupTitle?: string;
+  size?: string;
+  multipack?: number;
+  variantOption?: { name: string; value: string };
 }
 
 type MerchantOfferSeed = {
@@ -62,14 +67,18 @@ type MerchantOfferSeed = {
   qty: number;
   sides?: 1 | 2;
   tierMaterialCode?: string;
+  variantSize?: string;
+  multipack?: number;
+  descriptionLead?: string;
 };
 
-// Each offer is intentionally a specific, complete product configuration. This
-// lets the feed price match the selected configuration on its landing page and
-// keeps it above the site-wide $25 checkout minimum.
+// Each offer is intentionally a specific, complete product configuration. A
+// family can have multiple proven configurations, but every one must retain a
+// distinct ID, exact landing-page prefill, price parity, and image clearance.
 const MERCHANT_OFFER_SEEDS: MerchantOfferSeed[] = [
   { slug: "coroplast-signs", sizeLabel: "24×36\"", qty: 1 },
-  { slug: "vinyl-banners", sizeLabel: "2×4 ft", qty: 1 },
+  { slug: "vinyl-banners", sizeLabel: "2×4 ft", qty: 1, variantSize: "2×4 ft" },
+  { slug: "vinyl-banners", sizeLabel: "3×6 ft", qty: 1, variantSize: "3×6 ft" },
   { slug: "acp-signs", sizeLabel: "24×36\"", qty: 1 },
   { slug: "vehicle-magnets", sizeLabel: "18×24\"", qty: 1 },
   { slug: "foamboard-displays", sizeLabel: "24×36\"", qty: 1 },
@@ -81,10 +90,19 @@ const MERCHANT_OFFER_SEEDS: MerchantOfferSeed[] = [
   { slug: "postcards", sizeLabel: "4×6\"", qty: 50 },
   { slug: "brochures", sizeLabel: "Tri-fold (6 panels)", qty: 100 },
   { slug: "flyers", sizeLabel: "80lb — Full 8.5×11\"", qty: 100 },
-  { slug: "business-cards", sizeLabel: "3.5×2\"", qty: 250 },
+  { slug: "business-cards", sizeLabel: "3.5×2\"", qty: 250, multipack: 250 },
+  {
+    slug: "business-cards",
+    sizeLabel: "3.5×2\"",
+    qty: 500,
+    multipack: 500,
+    descriptionLead: "500 full-colour business cards printed on 14pt gloss stock.",
+  },
   { slug: "photo-posters", sizeLabel: "24×36\"", qty: 1 },
   { slug: "magnet-calendars", sizeLabel: "8.5×11\"", qty: 25 },
 ];
+
+export const MERCHANT_OFFER_COUNT = MERCHANT_OFFER_SEEDS.length;
 
 function selectionFor(seed: MerchantOfferSeed, product: ProductContent): MerchantOfferSelection {
   const size = product.sizePresets.find((preset) => preset.label === seed.sizeLabel);
@@ -138,65 +156,95 @@ export function getMerchantOfferSelection(
   slug: string,
   offerId: string | undefined,
 ): MerchantOfferSelection | undefined {
-  const seed = MERCHANT_OFFER_SEEDS.find((candidate) => candidate.slug === slug);
-  if (!seed) return undefined;
+  if (!offerId) return undefined;
+  const candidates = MERCHANT_OFFER_SEEDS
+    .filter((candidate) => candidate.slug === slug)
+    .map((seed) => selectionFor(seed, PRODUCTS[seed.slug]));
+  const exact = candidates.find((selection) => selection.offerId === offerId);
+  if (exact) return exact;
 
+  const primary = candidates[0];
+  if (!primary) return undefined;
+  const legacyPilotId = "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s";
+  if (offerId === `tc-${slug}` || offerId === legacyPilotId) return primary;
+  return undefined;
+}
+
+function merchantOfferForSeed(siteUrl: string, seed: MerchantOfferSeed): MerchantOffer {
   const product = PRODUCTS[seed.slug];
   const selection = selectionFor(seed, product);
-  const legacyPilotId = "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s";
-  if (offerId !== selection.offerId && offerId !== `tc-${seed.slug}` && offerId !== legacyPilotId) return undefined;
-  return selection;
+  const quote = estimate({
+    category: product.category as Category,
+    material_code: selection.materialCode,
+    width_in: selection.widthIn,
+    height_in: selection.heightIn,
+    qty: selection.qty,
+    sides: selection.sides,
+    design_status: "PRINT_READY",
+  });
+
+  if (quote.status !== "QUOTED" || quote.sell_price == null) {
+    throw new Error(`Merchant offer ${seed.slug} is not currently priceable`);
+  }
+  if (quote.sell_price < MIN_CHECKOUT_TOTAL) {
+    throw new Error(`Merchant offer ${seed.slug} falls below the $${MIN_CHECKOUT_TOTAL} checkout minimum`);
+  }
+
+  const configuration = `${selection.sizeLabel}, ${sideLabel(selection.sides)}, Qty ${selection.qty}`;
+  const familyHasVariants = MERCHANT_OFFER_SEEDS.filter((candidate) => candidate.slug === seed.slug).length > 1;
+
+  return {
+    ...selection,
+    slug: seed.slug,
+    title: `${product.name} — ${configuration}`,
+    description: `${seed.descriptionLead ?? product.tagline} This offer is ${configuration}.`,
+    // Link to /products/<slug>?merchant= so the exact submitted configuration,
+    // price, availability, and Product schema are present in the initial HTML.
+    // The route remains noindex for organic Search; robots.txt still permits
+    // Merchant's landing-page and image crawlers to perform policy checks.
+    link: `${siteUrl}/products/${seed.slug}?merchant=${selection.offerId}`,
+    imageLink: `${siteUrl}${product.heroImage}`,
+    availability: "in_stock",
+    price: quote.sell_price,
+    productType: `True Color > ${product.name}`,
+    itemGroupId: familyHasVariants ? `tc-family-${seed.slug}` : undefined,
+    itemGroupTitle: familyHasVariants ? product.name : undefined,
+    size: seed.variantSize,
+    multipack: seed.multipack,
+    variantOption: seed.variantSize
+      ? { name: "Size", value: seed.variantSize }
+      : seed.multipack
+        ? { name: "Pack quantity", value: String(seed.multipack) }
+        : undefined,
+  };
 }
 
 export function getMerchantOffers(siteUrl: string): MerchantOffer[] {
-  return MERCHANT_OFFER_SEEDS.map((seed) => {
-    const product = PRODUCTS[seed.slug];
-    const selection = selectionFor(seed, product);
-    const quote = estimate({
-      category: product.category as Category,
-      material_code: selection.materialCode,
-      width_in: selection.widthIn,
-      height_in: selection.heightIn,
-      qty: selection.qty,
-      sides: selection.sides,
-      design_status: "PRINT_READY",
-    });
-
-    if (quote.status !== "QUOTED" || quote.sell_price == null) {
-      throw new Error(`Merchant offer ${seed.slug} is not currently priceable`);
+  const offers = MERCHANT_OFFER_SEEDS.map((seed) => merchantOfferForSeed(siteUrl, seed));
+  const ids = new Set<string>();
+  for (const offer of offers) {
+    if (ids.has(offer.offerId)) {
+      throw new Error(`Duplicate Merchant offer ID: ${offer.offerId}`);
     }
-    if (quote.sell_price < MIN_CHECKOUT_TOTAL) {
-      throw new Error(`Merchant offer ${seed.slug} falls below the $${MIN_CHECKOUT_TOTAL} checkout minimum`);
-    }
-
-    const configuration = `${selection.sizeLabel}, ${sideLabel(selection.sides)}, Qty ${selection.qty}`;
-
-    return {
-      ...selection,
-      slug: seed.slug,
-      title: `${product.name} — ${configuration}`,
-      description: `${product.tagline} This offer is ${configuration}.`,
-      // Link to /products/<slug>?merchant= so the exact submitted configuration,
-      // price, availability, and Product schema are present in the initial HTML.
-      // The route remains noindex for organic Search; robots.txt still permits
-      // Merchant's landing-page and image crawlers to perform policy checks.
-      link: `${siteUrl}/products/${seed.slug}?merchant=${selection.offerId}`,
-      imageLink: `${siteUrl}${product.heroImage}`,
-      availability: "in_stock",
-      price: quote.sell_price,
-      productType: `True Color > ${product.name}`,
-    };
-  });
+    ids.add(offer.offerId);
+  }
+  return offers;
 }
 
 export function getMerchantPilotOffer(siteUrl: string): MerchantOffer {
-  const pilot = getMerchantOffers(siteUrl).find((offer) => offer.slug === "retractable-banners");
+  const pilot = getMerchantOffer(siteUrl, "retractable-banners", "tc-retractable-banners-85e2542c9a34");
   if (!pilot) throw new Error("Configured Merchant pilot is missing");
   return pilot;
 }
 
 export function getMerchantOffer(siteUrl: string, slug: string, offerId: string): MerchantOffer | undefined {
-  return getMerchantOffers(siteUrl).find((offer) => offer.slug === slug && offer.offerId === offerId);
+  const selection = getMerchantOfferSelection(slug, offerId);
+  if (!selection) return undefined;
+  const seed = MERCHANT_OFFER_SEEDS.find((candidate) => {
+    if (candidate.slug !== slug) return false;
+    return selectionFor(candidate, PRODUCTS[candidate.slug]).offerId === selection.offerId;
+  });
+  return seed ? merchantOfferForSeed(siteUrl, seed) : undefined;
 }
 
 export function isMerchantOfferImageCleared(offer: MerchantOffer): boolean {
@@ -228,6 +276,11 @@ export function renderMerchantFeedXml(siteUrl: string): string {
       <g:brand>True Color Display Printing</g:brand>
       <g:condition>new</g:condition>
       <g:product_type>${escapeXml(offer.productType)}</g:product_type>
+      ${offer.itemGroupId ? `<g:item_group_id>${escapeXml(offer.itemGroupId)}</g:item_group_id>` : ""}
+      ${offer.itemGroupTitle ? `<g:item_group_title>${escapeXml(offer.itemGroupTitle)}</g:item_group_title>` : ""}
+      ${offer.size ? `<g:size>${escapeXml(offer.size)}</g:size>` : ""}
+      ${offer.multipack ? `<g:multipack>${offer.multipack}</g:multipack>` : ""}
+      ${offer.variantOption ? `<g:variant_option><g:name>${escapeXml(offer.variantOption.name)}</g:name><g:value>${escapeXml(offer.variantOption.value)}</g:value></g:variant_option>` : ""}
       <g:identifier_exists>no</g:identifier_exists>
       <g:pickup_sla>${MERCHANT_PICKUP_SLA}</g:pickup_sla>
       <g:included_destination>Free_local_listings</g:included_destination>
