@@ -6,6 +6,7 @@ import {
   getMerchantPilotOffer,
   isMerchantOfferImageCleared,
   MERCHANT_CATALOG_SERVING_ENABLED,
+  MERCHANT_OFFER_COUNT,
   type MerchantOfferSelection,
 } from "./merchant-catalog";
 import { PRODUCTS } from "@/lib/data/products-content";
@@ -54,12 +55,12 @@ function productPagePrice(slug: string, selection: MerchantOfferSelection): numb
 }
 
 describe("Merchant catalog", () => {
-  it("uses one complete, priceable configuration per canonical product family", () => {
+  it("uses complete, priceable configurations across every canonical product family", () => {
     const offers = getMerchantOffers(SITE_URL);
 
-    expect(offers.map((offer) => offer.slug)).toEqual(CANONICAL_MERCHANT_PRODUCT_SLUGS);
-    expect(offers).toHaveLength(16);
-    expect(new Set(offers.map((offer) => offer.offerId)).size).toBe(16);
+    expect([...new Set(offers.map((offer) => offer.slug))]).toEqual(CANONICAL_MERCHANT_PRODUCT_SLUGS);
+    expect(offers).toHaveLength(MERCHANT_OFFER_COUNT);
+    expect(new Set(offers.map((offer) => offer.offerId)).size).toBe(offers.length);
     expect(offers.every((offer) => offer.offerId.length <= 50)).toBe(true);
     expect(offers.every((offer) => offer.price >= 25)).toBe(true);
     expect(offers.every((offer) => offer.link.includes(`merchant=${offer.offerId}`))).toBe(true);
@@ -78,6 +79,49 @@ describe("Merchant catalog", () => {
     expect(getMerchantOfferSelection("rack-cards", "tc-rack-cards")).toBeUndefined();
   });
 
+  it("resolves every same-family variant to its exact landing-page selection", () => {
+    expect(getMerchantOfferSelection("vinyl-banners", "tc-vinyl-banners-c29b4b917fc2")).toMatchObject({
+      sizeLabel: "2×4 ft",
+      qty: 1,
+    });
+    expect(getMerchantOfferSelection("vinyl-banners", "tc-vinyl-banners-284ff31492f0")).toMatchObject({
+      sizeLabel: "3×6 ft",
+      qty: 1,
+    });
+    expect(getMerchantOfferSelection("business-cards", "tc-business-cards-d6d62ed498b9")).toMatchObject({
+      qty: 250,
+      sides: 2,
+    });
+    expect(getMerchantOfferSelection("business-cards", "tc-business-cards-3ce49250f675")).toMatchObject({
+      qty: 500,
+      sides: 2,
+    });
+    expect(getMerchantOfferSelection("business-cards", "tc-vinyl-banners-284ff31492f0")).toBeUndefined();
+  });
+
+  it("groups variants with the exact differentiating attributes Google consumes", () => {
+    const offers = getMerchantOffers(SITE_URL);
+    const banners = offers.filter((offer) => offer.slug === "vinyl-banners");
+    const cards = offers.filter((offer) => offer.slug === "business-cards");
+
+    expect(banners.map((offer) => offer.itemGroupId)).toEqual(Array(2).fill("tc-family-vinyl-banners"));
+    expect(banners.map((offer) => offer.size)).toEqual(["2×4 ft", "3×6 ft"]);
+    expect(cards.map((offer) => offer.itemGroupId)).toEqual(Array(2).fill("tc-family-business-cards"));
+    expect(cards.map((offer) => offer.multipack)).toEqual([250, 500]);
+    expect(banners.map((offer) => offer.variantOption)).toEqual([
+      { name: "Size", value: "2×4 ft" },
+      { name: "Size", value: "3×6 ft" },
+    ]);
+    expect(cards.map((offer) => offer.variantOption)).toEqual([
+      { name: "Pack quantity", value: "250" },
+      { name: "Pack quantity", value: "500" },
+    ]);
+
+    const cards500 = cards.find((offer) => offer.qty === 500);
+    expect(cards500?.description).toContain("500 full-colour business cards");
+    expect(cards500?.description).not.toMatch(/250 cards|\$45/);
+  });
+
   it("serves the rights-cleared catalog with the exact Economy retractable identity", () => {
     const pilot = getMerchantPilotOffer(SITE_URL);
     expect(MERCHANT_CATALOG_SERVING_ENABLED).toBe(true);
@@ -89,17 +133,14 @@ describe("Merchant catalog", () => {
   it("prices every offer identically to the prefilled product page", () => {
     const offers = getMerchantOffers(SITE_URL);
 
-    for (const slug of CANONICAL_MERCHANT_PRODUCT_SLUGS) {
-      const offer = offers.find((candidate) => candidate.slug === slug);
-      expect(offer, `no merchant offer for ${slug}`).toBeDefined();
-
-      const selection = getMerchantOfferSelection(slug, offer!.offerId);
-      expect(selection, `no prefill selection for ${slug}`).toBeDefined();
+    for (const offer of offers) {
+      const selection = getMerchantOfferSelection(offer.slug, offer.offerId);
+      expect(selection, `no prefill selection for ${offer.offerId}`).toBeDefined();
 
       expect(
-        productPagePrice(slug, selection as MerchantOfferSelection),
-        `feed price for ${slug} does not match its product page`,
-      ).toBe(offer!.price);
+        productPagePrice(offer.slug, selection as MerchantOfferSelection),
+        `feed price for ${offer.offerId} does not match its product page`,
+      ).toBe(offer.price);
     }
   });
 });
