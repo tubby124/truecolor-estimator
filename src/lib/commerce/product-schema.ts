@@ -9,6 +9,7 @@ export function merchantProductSchema(offer: MerchantOffer) {
     sku: offer.offerId,
     description: offer.description,
     brand: { "@type": "Brand", name: "True Color Display Printing" },
+    ...(offer.itemGroupId ? { inProductGroupWithID: offer.itemGroupId } : {}),
     offers: {
       "@type": "Offer",
       url: offer.link,
