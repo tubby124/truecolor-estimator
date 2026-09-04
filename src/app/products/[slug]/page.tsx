@@ -110,13 +110,15 @@ export default async function ProductPage({ params, searchParams }: Props) {
           )}
           {merchantOffer && productSchema && (
             <aside className="mt-4 rounded-xl border border-[#16C2F3]/30 bg-[#16C2F3]/5 p-4" aria-label="Selected pickup offer">
-              <p className="font-semibold text-[#1c1712]">Available to order from True Color Display Printing</p>
+              <p className="font-semibold text-[#1c1712]">True Color Display Printing — Saskatoon pickup</p>
               <p className="mt-1 text-sm text-gray-700">
                 {merchantOffer.sizeLabel}, {merchantOffer.sides === 1 ? "single-sided" : "double-sided"}, quantity {merchantOffer.qty} — <span className="font-semibold">${merchantOffer.price.toFixed(2)} CAD before GST</span>.
               </p>
-              <p className="mt-1 text-sm text-gray-600">
-                {COMMERCE_POLICY.pickup.display}, Saskatoon. Allow one week or more from order placement for pickup. Most jobs enter standard production for {COMMERCE_POLICY.production.standard}.
-              </p>
+              <div className="mt-2 space-y-1 text-sm text-gray-700">
+                <p><span className="font-semibold">In-store availability:</span> Made to order — not stocked for same-day pickup.</p>
+                <p><span className="font-semibold">Pickup location:</span> {COMMERCE_POLICY.pickup.address}.</p>
+                <p><span className="font-semibold">Pickup timing:</span> Allow one week or more from order placement. Most jobs enter standard production for {COMMERCE_POLICY.production.standard}.</p>
+              </div>
             </aside>
           )}
         </header>
