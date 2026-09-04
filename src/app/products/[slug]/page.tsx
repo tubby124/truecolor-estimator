@@ -9,8 +9,9 @@ import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
 import { PRODUCT_IMAGES } from "@/lib/data/productImages";
 import { NotifyMeForm } from "@/components/product/NotifyMeForm";
-import { getMerchantOfferSelection, getMerchantPilotOffer } from "@/lib/merchant/merchant-catalog";
-import { merchantPilotProductSchema } from "@/lib/commerce/product-schema";
+import { getMerchantOffer, getMerchantOfferSelection } from "@/lib/merchant/merchant-catalog";
+import { merchantProductSchema } from "@/lib/commerce/product-schema";
+import { COMMERCE_POLICY } from "@/lib/commerce/policies";
 
 
 interface Props {
@@ -47,13 +48,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const product = getProduct(slug);
   if (!product) notFound();
   const merchant = (await searchParams).merchant;
-  const merchantOffer = getMerchantOfferSelection(slug, typeof merchant === "string" ? merchant : undefined);
-  const pilotOffer = slug === "retractable-banners" && typeof merchant === "string"
-    ? getMerchantPilotOffer("https://truecolorprinting.ca")
-    : null;
-  const productSchema = pilotOffer && merchant === pilotOffer.offerId
-    ? merchantPilotProductSchema(pilotOffer)
-    : null;
+  const merchantId = typeof merchant === "string" ? merchant : undefined;
+  const merchantSelection = getMerchantOfferSelection(slug, merchantId);
+  const merchantOffer = merchantId
+    ? getMerchantOffer("https://truecolorprinting.ca", slug, merchantId)
+    : undefined;
+  const productSchema = merchantOffer ? merchantProductSchema(merchantOffer) : null;
 
   // Related products
   const related = product.relatedSlugs.map((s) => getProduct(s)).filter(Boolean);
@@ -108,10 +108,16 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <span>Printed in Saskatoon · pickup at 216 33rd St W</span>
             </p>
           )}
-          {pilotOffer && productSchema && (
-            <p className="mt-2 text-sm text-gray-600">
-              Selected offer: {pilotOffer.sizeLabel}, {pilotOffer.sides === 1 ? "single-sided" : "double-sided"}, quantity {pilotOffer.qty} — <span className="font-semibold">${pilotOffer.price.toFixed(2)} CAD</span>.
-            </p>
+          {merchantOffer && productSchema && (
+            <aside className="mt-4 rounded-xl border border-[#16C2F3]/30 bg-[#16C2F3]/5 p-4" aria-label="Selected pickup offer">
+              <p className="font-semibold text-[#1c1712]">Available to order from True Color Display Printing</p>
+              <p className="mt-1 text-sm text-gray-700">
+                {merchantOffer.sizeLabel}, {merchantOffer.sides === 1 ? "single-sided" : "double-sided"}, quantity {merchantOffer.qty} — <span className="font-semibold">${merchantOffer.price.toFixed(2)} CAD before GST</span>.
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                {COMMERCE_POLICY.pickup.display}, Saskatoon. Allow one week or more from order placement for pickup. Most jobs enter standard production for {COMMERCE_POLICY.production.standard}.
+              </p>
+            </aside>
           )}
         </header>
 
@@ -128,7 +134,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <NotifyMeForm productName={product.name} productSlug={slug} />
             </div>
           ) : (
-            <ProductPageClient product={product} initialSelection={merchantOffer} />
+            <ProductPageClient product={product} initialSelection={merchantSelection} />
           )}
         </div>
 

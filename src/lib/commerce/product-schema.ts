@@ -1,7 +1,7 @@
 import type { MerchantOffer } from "@/lib/merchant/merchant-catalog";
 
-/** Exact offer schema for the isolated, noindex Merchant processing pilot. */
-export function merchantPilotProductSchema(offer: MerchantOffer) {
+/** Exact, configuration-bound offer schema for a Merchant landing page. */
+export function merchantProductSchema(offer: MerchantOffer) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -19,3 +19,6 @@ export function merchantPilotProductSchema(offer: MerchantOffer) {
     },
   };
 }
+
+// Kept while older callers migrate to the catalog-wide name.
+export const merchantPilotProductSchema = merchantProductSchema;

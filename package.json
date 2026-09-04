@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.4.2",
+    "@noble/hashes": "1.8.0",
     "@react-pdf/renderer": "^4.4.0",
     "@resvg/resvg-js": "^2.6.2",
     "@sentry/nextjs": "^10.67.0",

@@ -1,9 +1,10 @@
-import { createHash } from "node:crypto";
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex } from "@noble/hashes/utils";
 import type { CartItem } from "@/lib/cart/cart";
 import type { EstimateResponse } from "@/lib/engine/types";
 import { COMMERCE_POLICY_VERSION } from "@/lib/commerce/policies";
 
-export const COMMERCE_OFFER_VERSION = "2026-09-02.1";
+export const COMMERCE_OFFER_VERSION = "2026-09-04.1";
 
 const FAMILY_BY_SLUG: Record<string, string> = {
   "coroplast-signs": "tc:family:coroplast-signs",
@@ -78,13 +79,15 @@ export function deriveCommerceIdentity(
       classificationReason: "unclassified: missing deterministic product family or configuration",
     };
   }
-  const configurationFingerprint = createHash("sha256")
-    .update(`${commerceProductId}|${variantKey}`)
-    .digest("hex");
+  const configurationFingerprint = bytesToHex(
+    sha256(new TextEncoder().encode(`${commerceProductId}|${variantKey}`)),
+  );
   return {
     commerceProductId,
     variantKey,
-    merchantOfferId: `tc-${token(item.product_slug)}--${variantKey}`,
+    // Google limits product IDs to 50 characters. Keep the readable family and
+    // bind it to the exact configuration with a stable fingerprint suffix.
+    merchantOfferId: `tc-${token(item.product_slug)}-${configurationFingerprint.slice(0, 12)}`,
     offerVersion: COMMERCE_OFFER_VERSION,
     configurationFingerprint,
     pricingVersion: quote?.pricing_version ?? null,

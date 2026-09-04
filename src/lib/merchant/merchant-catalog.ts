@@ -2,7 +2,11 @@ import type { Category } from "@/lib/data/types";
 import { PRODUCTS, type ProductContent } from "@/lib/data/products-content";
 import { estimate } from "@/lib/engine";
 import { ORDER_MINIMUM_DOLLARS } from "@/lib/pricing/order-min";
-import { findChannelClearedImage } from "@/lib/data/image-rights";
+import { findChannelClearedImageForOffer } from "@/lib/data/image-rights";
+import { deriveCommerceIdentity } from "@/lib/commerce/catalog";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 const MIN_CHECKOUT_TOTAL = ORDER_MINIMUM_DOLLARS;
 
@@ -27,10 +31,9 @@ export const CANONICAL_MERCHANT_PRODUCT_SLUGS = [
 
 type CanonicalMerchantProductSlug = (typeof CANONICAL_MERCHANT_PRODUCT_SLUGS)[number];
 
-// Broad Google taxonomy shared by every offer — the feed spans signage, decals,
-// and business print, and no single leaf node covers all of them. Same value the
-// pre-refactor feed submitted, so existing Merchant Center categorisation holds.
-const GOOGLE_PRODUCT_CATEGORY = "Office Supplies > General Office Supplies > Office & Business Forms";
+export const MERCHANT_STORE_CODE = "06433554011397166938";
+export const MERCHANT_CATALOG_SERVING_ENABLED = true;
+export const MERCHANT_PICKUP_SLA = "multi-week";
 
 export interface MerchantOfferSelection {
   offerId: string;
@@ -52,17 +55,6 @@ export interface MerchantOffer extends MerchantOfferSelection {
   price: number;
   productType: string;
 }
-
-/**
- * A code switch is not an external Merchant approval. The source is empty by
- * default so a deploy cannot begin a pilot before account/readback, image, and
- * policy gates have separately passed.
- */
-export const MERCHANT_PILOT_SERVING_ENABLED = false;
-// Owner-created Economy pilot image, recorded with exact-hash/channel rights.
-// The feed remains non-serving until the separate account, tax, and release
-// gates pass.
-export const MERCHANT_PILOT_IMAGE_SHA256: string | null = "c1c12c72fca9ae4bd7ab408a2062375af76ffa22c18571e0f458368e7b22eda3";
 
 type MerchantOfferSeed = {
   slug: CanonicalMerchantProductSlug;
@@ -105,8 +97,21 @@ function selectionFor(seed: MerchantOfferSeed, product: ProductContent): Merchan
     throw new Error(`Merchant offer ${seed.slug} has no priceable material code`);
   }
 
+  const identity = deriveCommerceIdentity({
+    product_slug: seed.slug,
+    config: {
+      category: product.category,
+      material_code: materialCode,
+      width_in: size.width_in,
+      height_in: size.height_in,
+      qty: seed.qty,
+      sides: seed.sides ?? product.defaultSides,
+    },
+  });
+  if (!identity.merchantOfferId) throw new Error(`Merchant offer ${seed.slug} has no stable identity`);
+
   return {
-    offerId: `tc-${seed.slug}`,
+    offerId: identity.merchantOfferId,
     sizeLabel: size.label,
     widthIn: size.width_in,
     heightIn: size.height_in,
@@ -134,11 +139,13 @@ export function getMerchantOfferSelection(
   offerId: string | undefined,
 ): MerchantOfferSelection | undefined {
   const seed = MERCHANT_OFFER_SEEDS.find((candidate) => candidate.slug === slug);
-  const pilotId = "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s";
-  if (!seed || (offerId !== `tc-${seed.slug}` && !(seed.slug === "retractable-banners" && offerId === pilotId))) return undefined;
+  if (!seed) return undefined;
 
   const product = PRODUCTS[seed.slug];
-  return selectionFor(seed, product);
+  const selection = selectionFor(seed, product);
+  const legacyPilotId = "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s";
+  if (offerId !== selection.offerId && offerId !== `tc-${seed.slug}` && offerId !== legacyPilotId) return undefined;
+  return selection;
 }
 
 export function getMerchantOffers(siteUrl: string): MerchantOffer[] {
@@ -169,9 +176,10 @@ export function getMerchantOffers(siteUrl: string): MerchantOffer[] {
       slug: seed.slug,
       title: `${product.name} — ${configuration}`,
       description: `${product.tagline} This offer is ${configuration}.`,
-      // Decision: link to /products/<slug>?merchant= so the landing-page price is exactly the prefilled configurator price.
-      // Risk: /products/:path+ is served X-Robots-Tag "noindex, follow" (next.config.ts) and Merchant Center's crawler may refuse noindex landing pages.
-      // If items are disapproved for "landing page/crawl": exempt ?merchant= URLs from the noindex header + metadata, or repoint links to /<product>-saskatoon.
+      // Link to /products/<slug>?merchant= so the exact submitted configuration,
+      // price, availability, and Product schema are present in the initial HTML.
+      // The route remains noindex for organic Search; robots.txt still permits
+      // Merchant's landing-page and image crawlers to perform policy checks.
       link: `${siteUrl}/products/${seed.slug}?merchant=${selection.offerId}`,
       imageLink: `${siteUrl}${product.heroImage}`,
       availability: "in_stock",
@@ -184,21 +192,29 @@ export function getMerchantOffers(siteUrl: string): MerchantOffer[] {
 export function getMerchantPilotOffer(siteUrl: string): MerchantOffer {
   const pilot = getMerchantOffers(siteUrl).find((offer) => offer.slug === "retractable-banners");
   if (!pilot) throw new Error("Configured Merchant pilot is missing");
-  return {
-    ...pilot,
-    offerId: "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s",
-    link: `${siteUrl}/products/retractable-banners?merchant=tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s`,
-  };
+  return pilot;
 }
 
-export function isMerchantPilotImageCleared(offer: MerchantOffer): boolean {
-  return MERCHANT_PILOT_IMAGE_SHA256 !== null
-    && Boolean(findChannelClearedImage(MERCHANT_PILOT_IMAGE_SHA256, "merchant", offer.offerId));
+export function getMerchantOffer(siteUrl: string, slug: string, offerId: string): MerchantOffer | undefined {
+  return getMerchantOffers(siteUrl).find((offer) => offer.slug === slug && offer.offerId === offerId);
+}
+
+export function isMerchantOfferImageCleared(offer: MerchantOffer): boolean {
+  try {
+    const imagePath = new URL(offer.imageLink).pathname.replace(/^\/+/, "");
+    const actualSha256 = createHash("sha256")
+      .update(readFileSync(join(process.cwd(), "public", imagePath)))
+      .digest("hex");
+    return Boolean(findChannelClearedImageForOffer(offer.imageLink, "merchant", offer.offerId, actualSha256));
+  } catch {
+    return false;
+  }
 }
 
 export function renderMerchantFeedXml(siteUrl: string): string {
-  const pilot = getMerchantPilotOffer(siteUrl);
-  const offers = MERCHANT_PILOT_SERVING_ENABLED && isMerchantPilotImageCleared(pilot) ? [pilot] : [];
+  const offers = MERCHANT_CATALOG_SERVING_ENABLED
+    ? getMerchantOffers(siteUrl).filter(isMerchantOfferImageCleared)
+    : [];
   const items = offers
     .map((offer) => `
     <item>
@@ -212,8 +228,14 @@ export function renderMerchantFeedXml(siteUrl: string): string {
       <g:brand>True Color Display Printing</g:brand>
       <g:condition>new</g:condition>
       <g:product_type>${escapeXml(offer.productType)}</g:product_type>
-      <g:google_product_category>${escapeXml(GOOGLE_PRODUCT_CATEGORY)}</g:google_product_category>
       <g:identifier_exists>no</g:identifier_exists>
+      <g:pickup_sla>${MERCHANT_PICKUP_SLA}</g:pickup_sla>
+      <g:included_destination>Free_local_listings</g:included_destination>
+      <g:excluded_destination>Free_listings</g:excluded_destination>
+      <g:excluded_destination>Shopping_ads</g:excluded_destination>
+      <g:excluded_destination>Display_ads</g:excluded_destination>
+      <g:excluded_destination>Local_inventory_ads</g:excluded_destination>
+      <g:excluded_destination>YouTube_Shopping</g:excluded_destination>
     </item>`)
     .join("");
 
@@ -223,6 +245,27 @@ export function renderMerchantFeedXml(siteUrl: string): string {
     <title>True Color Display Printing</title>
     <link>${escapeXml(siteUrl)}</link>
     <description>Custom signs, banners, business cards, decals, and large-format print — Saskatoon, SK.</description>${items}
+  </channel>
+</rss>`;
+}
+
+export function renderMerchantLocalInventoryXml(siteUrl: string): string {
+  const offers = MERCHANT_CATALOG_SERVING_ENABLED
+    ? getMerchantOffers(siteUrl).filter(isMerchantOfferImageCleared)
+    : [];
+  const items = offers.map((offer) => `
+    <item>
+      <g:id>${escapeXml(offer.offerId)}</g:id>
+      <g:store_code>${MERCHANT_STORE_CODE}</g:store_code>
+      <g:availability>out_of_stock</g:availability>
+      <g:price>${offer.price.toFixed(2)} CAD</g:price>
+      <g:pickup_sla>${MERCHANT_PICKUP_SLA}</g:pickup_sla>
+    </item>`).join("");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
+  <channel>
+    <title>True Color Display Printing Local Inventory</title>${items}
   </channel>
 </rss>`;
 }

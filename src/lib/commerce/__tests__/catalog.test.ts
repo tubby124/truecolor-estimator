@@ -8,7 +8,8 @@ describe("commerce catalog identity", () => {
     const one = deriveCommerceIdentity({ product_slug: "retractable-banners", config });
     const two = deriveCommerceIdentity({ product_slug: "retractable-banners", config });
     const changed = deriveCommerceIdentity({ product_slug: "retractable-banners", config: { ...config, material_code: "OTHER" } });
-    expect(one).toMatchObject({ commerceProductId: "tc:family:retractable-banners", merchantOfferId: "tc-retractable-banners--33-5x80--1s--q1--mat-rbs33507875s--shape-square--addons-none" });
+    expect(one).toMatchObject({ commerceProductId: "tc:family:retractable-banners", merchantOfferId: "tc-retractable-banners-85e2542c9a34" });
+    expect(one.merchantOfferId?.length).toBeLessThanOrEqual(50);
     expect(one.configurationFingerprint).toBe(two.configurationFingerprint);
     expect(one.merchantOfferId).not.toBe(changed.merchantOfferId);
   });
@@ -21,6 +22,6 @@ describe("commerce catalog identity", () => {
   });
 
   it("defines a deterministic non-serving pilot candidate", () => {
-    expect(merchantPilotIdentity().merchantOfferId).toContain("tc-retractable-banners--33-5x80");
+    expect(merchantPilotIdentity().merchantOfferId).toBe("tc-retractable-banners-85e2542c9a34");
   });
 });
