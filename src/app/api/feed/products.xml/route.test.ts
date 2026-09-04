@@ -24,47 +24,33 @@ function values(xml: string, tag: string): string[] {
   return [...xml.matchAll(new RegExp(`<g:${tag}>([^<]+)</g:${tag}>`, "g"))].map((match) => match[1]);
 }
 
-// <g:shipping> carries its own nested <g:price>, so strip it before reading offer prices.
-function withoutShipping(xml: string): string {
-  return xml.replace(/<g:shipping>[\s\S]*?<\/g:shipping>/g, "");
-}
-
 describe("Merchant Center product feed", () => {
-  it("publishes one exact buyable offer for each canonical product page", async () => {
+  it("publishes one exact, rights-cleared configuration for every main product family", async () => {
     const response = await GET();
     const xml = await response.text();
     const ids = values(xml, "id");
     const links = values(xml, "link");
-    const prices = values(withoutShipping(xml), "price");
+    const prices = values(xml, "price");
 
-    expect(ids).toHaveLength(CANONICAL_PRODUCT_SLUGS.length);
-    expect(new Set(ids).size).toBe(ids.length);
-    expect(links).toEqual(
-      CANONICAL_PRODUCT_SLUGS.map(
-        (slug) => `https://truecolorprinting.ca/products/${slug}?merchant=tc-${slug}`,
-      ),
-    );
-    expect(prices).toHaveLength(CANONICAL_PRODUCT_SLUGS.length);
-    expect(prices.every((price) => Number.parseFloat(price) >= 25)).toBe(true);
-    expect(xml).toContain("<g:product_type>True Color &gt;");
+    expect(ids).toHaveLength(16);
+    expect(new Set(ids).size).toBe(16);
+    expect(ids.every((id) => id.length <= 50)).toBe(true);
+    expect(links).toHaveLength(16);
+    expect(prices).toHaveLength(16);
+    expect(CANONICAL_PRODUCT_SLUGS.every((slug) => links.some((link) => link.includes(`/products/${slug}?merchant=`)))).toBe(true);
+    expect(values(xml, "pickup_sla")).toEqual(Array(16).fill("multi-week"));
+    expect(values(xml, "included_destination")).toEqual(Array(16).fill("Free_local_listings"));
+    expect(xml).not.toContain("<g:shipping>");
   });
 
-  it("states the truthful local-pickup shipping block on every item", async () => {
+  it("never represents local pickup as Canada-wide free shipping", async () => {
     const response = await GET();
     const xml = await response.text();
     const shippingBlocks = [...xml.matchAll(/<g:shipping>[\s\S]*?<\/g:shipping>/g)].map((m) => m[0]);
 
-    expect(shippingBlocks).toHaveLength(CANONICAL_PRODUCT_SLUGS.length);
-    expect(new Set(shippingBlocks).size).toBe(1);
-    expect(shippingBlocks[0]).toContain("<g:country>CA</g:country>");
-    // Business truth (src/lib/business-info.ts): local pickup is standard, courier is
-    // by request at customer cost — so the feed must not advertise free courier delivery.
-    expect(shippingBlocks[0]).toContain("<g:service>Local pickup (Saskatoon)</g:service>");
-    expect(shippingBlocks[0]).toContain("<g:price>0.00 CAD</g:price>");
-    expect(values(xml, "google_product_category")).toEqual(
-      CANONICAL_PRODUCT_SLUGS.map(
-        () => "Office Supplies &gt; General Office Supplies &gt; Office &amp; Business Forms",
-      ),
-    );
+    expect(shippingBlocks).toHaveLength(0);
+    expect(xml).not.toContain("<g:price>0.00 CAD</g:price>");
+    expect(values(xml, "google_product_category")).toEqual([]);
+    expect(values(xml, "excluded_destination")).toHaveLength(16 * 5);
   });
 });

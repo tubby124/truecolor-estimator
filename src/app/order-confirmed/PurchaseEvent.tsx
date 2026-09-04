@@ -1,12 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { trackPurchase, trackRevenueConversion, type Ga4Item } from "@/lib/analytics";
+import { type Ga4Item } from "@/lib/analytics";
 import { metaTrackPurchase } from "@/lib/analytics/metaPixel";
-import {
-  conversionTransactionId,
-  type RevenueConversionType,
-} from "@/lib/analytics/conversions";
+import { type RevenueConversionType } from "@/lib/analytics/conversions";
 import {
   claimClientEvent,
   purchaseEventStorageKey,
@@ -43,26 +40,16 @@ export function PurchaseEvent({
     )) {
       return;
     }
-    trackPurchase({
-      transaction_id: orderId,
-      value: total,
-      payment_method: paymentMethod,
-      items: items ?? [],
-      tax: tax ?? 0,
-    });
-    const adsTransactionId = conversionType
-      ? conversionTransactionId({ conversionType, conversionKey, orderNumber })
-      : null;
-    if (conversionType && adsTransactionId && googleAdsValue > 0) {
-      trackRevenueConversion({
-        conversion_type: conversionType,
-        transaction_id: adsTransactionId,
-        value: googleAdsValue,
-      });
-      // Google Ads revenue is delivered by the durable server outbox created
-      // when payment is confirmed. Do not also fire a browser Ads conversion:
-      // confirmation reloads and late webhooks must never duplicate revenue.
-    }
+    // GA4 and Google Ads revenue are delivered through the durable server outbox only. Browser
+    // confirmations can reload or race payment webhooks, so they must not
+    // produce a second purchase or biddable revenue conversion.
+    void orderId;
+    void total;
+    void paymentMethod;
+    void tax;
+    void googleAdsValue;
+    void conversionType;
+    void conversionKey;
     // Meta Pixel: Purchase — eventID set to order_number for client+server CAPI dedup
     metaTrackPurchase({
       content_ids: (items ?? []).map((i) => i.item_id),

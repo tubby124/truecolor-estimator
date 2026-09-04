@@ -1,4 +1,5 @@
 import { RATING_VALUE, REVIEW_COUNT } from "@/lib/reviews";
+import { COMMERCE_POLICY } from "@/lib/commerce/policies";
 
 export type SaskatchewanWeekday =
   | "Mon"
@@ -50,8 +51,8 @@ export const BUSINESS_INFO = {
     display: "Mon–Fri 9 AM–5 PM",
   },
   turnaround: {
-    standardBusinessDays: "1–3 business days",
-    startsAfter: "artwork approval",
+    standardBusinessDays: COMMERCE_POLICY.production.standardWindow,
+    startsAfter: COMMERCE_POLICY.production.startsAfter,
   },
   sameDayRush: {
     feeDollars: 40,
@@ -62,11 +63,9 @@ export const BUSINESS_INFO = {
     display: "+$40 when ordered before 10 AM; call to confirm capacity",
   },
   fulfillment: {
-    pickup: "Local pickup is standard.",
-    courier:
-      "Saskatchewan courier may be arranged by request at customer cost.",
-    display:
-      "Local pickup is standard. Saskatchewan courier may be arranged by request at customer cost.",
+    pickup: COMMERCE_POLICY.pickup.summary,
+    shipping: COMMERCE_POLICY.shipping.summary,
+    display: `${COMMERCE_POLICY.pickup.summary} ${COMMERCE_POLICY.shipping.summary}`,
   },
   equipment: {
     wideFormat: {

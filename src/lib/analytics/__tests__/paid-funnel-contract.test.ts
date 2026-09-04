@@ -146,6 +146,6 @@ describe("paid funnel event ownership", () => {
       expect(source(route), route).toContain("sendMeasurementProtocolPurchase");
     }
     expect(source("src/lib/payment/wave-payment-effects.ts")).toContain("transaction_id: order.id");
-    expect(source("src/app/order-confirmed/PurchaseEvent.tsx")).toContain("transaction_id: orderId");
+    expect(source("src/app/order-confirmed/PurchaseEvent.tsx")).not.toContain("trackPurchase({");
   });
 });

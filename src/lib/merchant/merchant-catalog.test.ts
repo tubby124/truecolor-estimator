@@ -3,6 +3,9 @@ import {
   CANONICAL_MERCHANT_PRODUCT_SLUGS,
   getMerchantOfferSelection,
   getMerchantOffers,
+  getMerchantPilotOffer,
+  isMerchantOfferImageCleared,
+  MERCHANT_CATALOG_SERVING_ENABLED,
   type MerchantOfferSelection,
 } from "./merchant-catalog";
 import { PRODUCTS } from "@/lib/data/products-content";
@@ -56,8 +59,13 @@ describe("Merchant catalog", () => {
 
     expect(offers.map((offer) => offer.slug)).toEqual(CANONICAL_MERCHANT_PRODUCT_SLUGS);
     expect(offers).toHaveLength(16);
+    expect(new Set(offers.map((offer) => offer.offerId)).size).toBe(16);
+    expect(offers.every((offer) => offer.offerId.length <= 50)).toBe(true);
     expect(offers.every((offer) => offer.price >= 25)).toBe(true);
     expect(offers.every((offer) => offer.link.includes(`merchant=${offer.offerId}`))).toBe(true);
+    for (const offer of offers) {
+      expect(isMerchantOfferImageCleared(offer), `${offer.slug}: ${offer.offerId}`).toBe(true);
+    }
   });
 
   it("only activates the catalog configuration for its matching product-page offer", () => {
@@ -70,6 +78,14 @@ describe("Merchant catalog", () => {
     expect(getMerchantOfferSelection("rack-cards", "tc-rack-cards")).toBeUndefined();
   });
 
+  it("serves the rights-cleared catalog with the exact Economy retractable identity", () => {
+    const pilot = getMerchantPilotOffer(SITE_URL);
+    expect(MERCHANT_CATALOG_SERVING_ENABLED).toBe(true);
+    expect(pilot.offerId).toBe("tc-retractable-banners-85e2542c9a34");
+    expect(pilot.link).toContain(`merchant=${pilot.offerId}`);
+    expect(isMerchantOfferImageCleared(pilot)).toBe(true);
+  });
+
   it("prices every offer identically to the prefilled product page", () => {
     const offers = getMerchantOffers(SITE_URL);
 
@@ -77,7 +93,7 @@ describe("Merchant catalog", () => {
       const offer = offers.find((candidate) => candidate.slug === slug);
       expect(offer, `no merchant offer for ${slug}`).toBeDefined();
 
-      const selection = getMerchantOfferSelection(slug, `tc-${slug}`);
+      const selection = getMerchantOfferSelection(slug, offer!.offerId);
       expect(selection, `no prefill selection for ${slug}`).toBeDefined();
 
       expect(

@@ -1,4 +1,9 @@
 {
+  "_distribution": {
+    "status": "quarantined",
+    "reason": "Operational claims and image permissions require current owner review before any external reuse.",
+    "releaseRequires": ["current-operations-review", "image-rights-evidence", "channel-approval"]
+  },
   "products": [
     {
       "slug": "vinyl-banners",

@@ -462,7 +462,7 @@ export const PRODUCTS: Record<string, ProductContent> = {
     fromPrice: "$39",
     category: "RIGID",
     material_code: "RMACP002",
-    heroImage: "/images/products/product/acp-sign-princess-liquidation-800x600.webp",
+    heroImage: "/images/products/product/acp-aluminum-sign-800x600.webp",
     galleryImages: [
       "/images/gallery/gallery-acp-coop-humboldt-platinum.webp",
       "/images/gallery/gallery-acp-car-city-installed.webp",

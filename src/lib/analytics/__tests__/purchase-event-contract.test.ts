@@ -18,7 +18,8 @@ describe("PurchaseEvent Ads privacy contract", () => {
     expect(source).not.toContain("NEXT_PUBLIC_GOOGLE_ADS_QUOTE_WON_CONVERSION_LABEL");
     expect(source).toContain("durable server outbox");
     expect(source).toContain("orderNumber");
-    expect(source).toContain("transaction_id: orderId");
+    expect(source).not.toContain("trackPurchase({");
+    expect(source).not.toContain("trackRevenueConversion({");
     expect(source.match(/metaTrackPurchase\(/g)).toHaveLength(1);
     expect(source).toContain("eventId: orderNumber");
     expect(source).toContain("claimClientEvent");

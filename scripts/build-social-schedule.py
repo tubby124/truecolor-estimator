@@ -147,6 +147,11 @@ def derive_caption(post: dict, platform: str) -> str:
 def main():
     src = json.loads(SRC.read_text())
 
+    if src.get("_distribution", {}).get("status") != "approved":
+        raise SystemExit(
+            "Social schedule build blocked: source is quarantined pending current operations, image-rights, and channel approval."
+        )
+
     out = {
         "_meta": {
             "generatedFrom": "src/lib/data/gbp-products.json::postSchedule",
