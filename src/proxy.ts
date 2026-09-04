@@ -21,7 +21,7 @@ export function guardPrintResourcePath(pathname: string): NextResponse | null {
   });
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Server-side click capture. The client writer (UtmCapture) is the only thing
@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
   );
   // Appended (not `cookies.set`) so the value stays byte-identical to what
   // utm.ts serializes and the existing cookie parsers already consume, and so
-  // it rides on whatever response this middleware was already returning.
+  // it rides on whatever response this proxy was already returning.
   const withAttribution = (response: NextResponse) => {
     for (const cookie of attributionCookies) {
       response.headers.append("set-cookie", cookie);
@@ -85,7 +85,7 @@ export async function middleware(request: NextRequest) {
   );
 
   // getSession reads the JWT from cookies without a network round-trip — correct
-  // for middleware routing per CLAUDE.md rule #13. Server-side staff endpoints
+  // for proxy routing per CLAUDE.md rule #13. Server-side staff endpoints
   // (`requireStaffUser` on /api/staff/*) still re-verify via getUser, so the
   // actual security boundary is unchanged.
   const {
