@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
-import { guardPrintResourcePath, middleware } from "@/middleware";
+import { guardPrintResourcePath, proxy } from "@/proxy";
 
 describe("print resource middleware guard", () => {
   it("returns an actual noindex 404 response for an unknown resource slug", () => {
@@ -23,7 +23,7 @@ describe("print resource middleware guard", () => {
   });
 
   it("lets a known public resource through without requiring auth configuration", async () => {
-    const response = await middleware(
+    const response = await proxy(
       new NextRequest(
         "https://truecolorprinting.ca/print-resources/trade-show-print-kit",
       ),
