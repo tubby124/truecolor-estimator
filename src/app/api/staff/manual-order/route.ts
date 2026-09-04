@@ -25,6 +25,8 @@ import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { computeTaxCents } from "@/lib/payment/tax-math";
+import { parsePstExemption, pstExemptionInvoiceNote, type PstExemptionInput } from "@/lib/payment/pst-exemption";
 import {
   QUOTE_ATTRIBUTION_SELECT,
   AUTO_LINK_EXCLUDED_LIFECYCLE_STATUSES,
@@ -103,25 +105,29 @@ function centsToMoney(cents: number): number {
   return Math.round(cents) / 100;
 }
 
-export function computeBreakdownCents(items: OrderItemInput[]): MoneyBreakdown {
+export function computeBreakdownCents(items: OrderItemInput[], pstExempt = false): MoneyBreakdown {
   const subtotalCents = items.reduce((sum, item) => sum + moneyToCents(item.amount), 0);
-  const gstCents = Math.round(subtotalCents * GST_RATE);
-  const pstCents = Math.round(subtotalCents * PST_RATE);
+  const { gstCents, pstCents, totalCents } = computeTaxCents(
+    subtotalCents,
+    { gstRate: GST_RATE, pstRate: PST_RATE },
+    pstExempt,
+  );
   return {
     subtotalCents,
     gstCents,
     pstCents,
-    totalCents: subtotalCents + gstCents + pstCents,
+    totalCents,
   };
 }
 
 function findLastAmountForTargetTotal(
   baseSubtotalCents: number,
-  targetTotalCents: number
+  targetTotalCents: number,
+  pstExempt: boolean,
 ): number | null {
   const totalForLastAmount = (lastAmountCents: number) => {
     const subtotalCents = baseSubtotalCents + lastAmountCents;
-    return subtotalCents + Math.round(subtotalCents * GST_RATE) + Math.round(subtotalCents * PST_RATE);
+    return computeTaxCents(subtotalCents, { gstRate: GST_RATE, pstRate: PST_RATE }, pstExempt).totalCents;
   };
 
   let low = 0;
@@ -146,11 +152,11 @@ function findLastAmountForTargetTotal(
   return null;
 }
 
-export function applyOverrideTotal(items: OrderItemInput[], overrideTotal?: number): {
+export function applyOverrideTotal(items: OrderItemInput[], overrideTotal?: number, pstExempt = false): {
   items: OrderItemInput[];
   breakdown: MoneyBreakdown;
 } {
-  const computedBreakdown = computeBreakdownCents(items);
+  const computedBreakdown = computeBreakdownCents(items, pstExempt);
   if (overrideTotal === undefined || overrideTotal === null) {
     return { items, breakdown: computedBreakdown };
   }
@@ -174,7 +180,8 @@ export function applyOverrideTotal(items: OrderItemInput[], overrideTotal?: numb
   const baseSubtotalCents = baseItems.reduce((sum, item) => sum + moneyToCents(item.amount), 0);
   const lastAmountCents = findLastAmountForTargetTotal(
     baseSubtotalCents,
-    overrideTotalCents
+    overrideTotalCents,
+    pstExempt,
   );
 
   if (lastAmountCents === null) {
@@ -186,7 +193,7 @@ export function applyOverrideTotal(items: OrderItemInput[], overrideTotal?: numb
     amount: centsToMoney(lastAmountCents),
   };
 
-  const scaledBreakdown = computeBreakdownCents(scaledItems);
+  const scaledBreakdown = computeBreakdownCents(scaledItems, pstExempt);
   if (scaledBreakdown.totalCents !== overrideTotalCents) {
     throw new Error("Override total scaling failed to reconcile exactly");
   }
@@ -226,10 +233,18 @@ export async function POST(req: NextRequest) {
       /** Website quote this manual order fulfils. Makes the order a quote_won
        *  conversion and carries the quote's paid-search attribution across. */
       quote_request_id?: string;
+      replaces_order_id?: string;
+      pstExemption?: PstExemptionInput;
     };
 
     const { contact, payment_method, notes } = body;
     const quoteOnly = body.quote_only === true;
+    let pstExemption;
+    try {
+      pstExemption = parsePstExemption(body.pstExemption);
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid PST exemption" }, { status: 400 });
+    }
 
     // ── Normalize items (backward compat) ──
     let items: OrderItemInput[];
@@ -275,6 +290,21 @@ export async function POST(req: NextRequest) {
     }));
 
     const supabase = createServiceClient();
+
+    const replacementOrderId = body.replaces_order_id?.trim() || null;
+    if (replacementOrderId && !UUID_RE.test(replacementOrderId)) {
+      return NextResponse.json({ error: "replaces_order_id must be a UUID" }, { status: 400 });
+    }
+    if (replacementOrderId) {
+      const { data: replacedOrder, error: replacementError } = await supabase
+        .from("orders")
+        .select("id, status, voided_at, wave_voided_at")
+        .eq("id", replacementOrderId)
+        .maybeSingle();
+      if (replacementError || !replacedOrder || !replacedOrder.voided_at || !replacedOrder.wave_voided_at || replacedOrder.status !== "pending_payment") {
+        return NextResponse.json({ error: "The original request and its Wave invoice must be voided before creating a replacement" }, { status: 409 });
+      }
+    }
 
     // ── 0. Quote linkage + conversion identity ──
     // Every manual order used to insert with conversion_type NULL, and the Google
@@ -460,6 +490,17 @@ export async function POST(req: NextRequest) {
       console.error("[manual-order] customer upsert:", custErr);
       return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
     }
+    if ((pstExemption.rememberVendorNumber && pstExemption.vendorNumber) || pstExemption.clearRememberedVendorNumber) {
+      const { error: preferenceError } = await supabase
+        .from("customers")
+        .update({
+          pst_vendor_number: pstExemption.clearRememberedVendorNumber ? null : pstExemption.vendorNumber,
+          pst_vendor_number_updated_at: new Date().toISOString(),
+          pst_vendor_number_updated_by: auth.email ?? "staff",
+        })
+        .eq("id", customer.id);
+      if (preferenceError) return NextResponse.json({ error: "Could not save customer tax preference" }, { status: 500 });
+    }
 
     // ── 1b. Create Supabase auth account (non-fatal) ──
     // Two-step: createUser first (reliable), then generateLink for magic login URL.
@@ -504,7 +545,7 @@ export async function POST(req: NextRequest) {
     // rush, or installation are part of a taxable printed-material sale.
     let scaled;
     try {
-      scaled = applyOverrideTotal(items, body.overrideTotal);
+      scaled = applyOverrideTotal(items, body.overrideTotal, pstExemption.enabled);
     } catch (scaleErr) {
       return NextResponse.json(
         { error: scaleErr instanceof Error ? scaleErr.message : "Invalid total override" },
@@ -544,6 +585,10 @@ export async function POST(req: NextRequest) {
           gst,
           pst,
           total,
+          pst_exempt: pstExemption.enabled,
+          pst_vendor_number: pstExemption.enabled ? pstExemption.vendorNumber : null,
+          pst_resale_confirmed: pstExemption.resaleConfirmed,
+          replaces_order_id: replacementOrderId,
           payment_method: "clover_card",
           // conversion_key mirrors how /api/orders/route.ts builds it for the
           // online path: "<conversion_type>:<stable identifier>".
@@ -685,7 +730,7 @@ export async function POST(req: NextRequest) {
         unitPrice: Math.round(item.amount * 100) / 100,
         qty: 1,
         applyGst: true,
-        applyPst: true,
+        applyPst: !pstExemption.enabled,
       }));
       const wave = await provisionOrderWaveInvoice(supabase, order.id, {
         orderNumber: order.order_number,
@@ -693,6 +738,7 @@ export async function POST(req: NextRequest) {
         customerName: contact.name.trim(),
         waveItems: waveLineItems,
         isRush: false,
+        memo: pstExemptionInvoiceNote(pstExemption) ?? undefined,
       });
       if (wave.action !== "ready" || !wave.invoiceId) {
         throw new Error("Wave invoice provisioning is still being verified");
@@ -750,6 +796,7 @@ export async function POST(req: NextRequest) {
         customMessage: body.customMessage?.trim() || undefined,
         subjectOverride: body.customSubject?.trim() || undefined,
         accountInfo,
+        pstExemptionNote: pstExemptionInvoiceNote(pstExemption) ?? undefined,
       });
     } catch (emailErr) {
       console.error("[manual-order] customer email failed (non-fatal):", emailErr);
@@ -824,6 +871,8 @@ export async function POST(req: NextRequest) {
         quote_request_id: quoteRequestId,
         link_source: linkSource,
         acquisition_source: acquisitionSource,
+        pst_exempt: pstExemption.enabled,
+        ...(replacementOrderId ? { replaces_order_id: replacementOrderId } : {}),
         ...(attributionWarning ? { attribution_warning: attributionWarning.code } : {}),
       },
     });

@@ -58,6 +58,7 @@ export interface PaymentRequestEmailParams {
   accountInfo?: AccountInfo | null;
   discount_code?: string;
   discount_amount?: number;
+  pstExemptionNote?: string | null;
 }
 
 // ─── Public entry point ───────────────────────────────────────────────────────
@@ -201,7 +202,7 @@ function buildProofHtml(proofUrl?: string): string {
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, quoteOnly, notes, customMessage, accountInfo, discount_code, discount_amount } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, quoteOnly, notes, customMessage, accountInfo, discount_code, discount_amount, pstExemptionNote } = p;
 
   const heroTitle = quoteOnly ? "Your Quote" : "Payment Request";
   const methodNote = quoteOnly
@@ -338,6 +339,8 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                     </td>
                   </tr>
 
+                  ${pstExemptionNote ? `<tr style="background: #f9f6f3;"><td colspan="2" style="padding: 0 16px 10px; font-size: 12px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">${escHtml(pstExemptionNote)}</td></tr>` : ""}
+
                   <!-- TOTAL row -->
                   <tr style="background: #1c1712;">
                     <td style="padding: 16px; font-size: 15px; font-weight: 700; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
@@ -415,7 +418,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 // ─── Plain-text fallback ──────────────────────────────────────────────────────
 
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
-  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, quoteOnly, customMessage, accountInfo, discount_code, discount_amount } = p;
+  const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, quoteOnly, customMessage, accountInfo, discount_code, discount_amount, pstExemptionNote } = p;
 
   // Plain-text rendering uses Albert's pre-built block when available (kind="product"
   // with spec fields), and falls back to a 1-line representation otherwise.
@@ -474,6 +477,7 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     ...(discount_code && discount_amount && discount_amount > 0 ? [`  Discount (${discount_code}): -$${discount_amount.toFixed(2)}`] : []),
     `  GST (5%): $${gst.toFixed(2)}`,
     `  PST (6%): $${pst.toFixed(2)}`,
+    ...(pstExemptionNote ? [`  ${pstExemptionNote}`] : []),
     `  TOTAL:    $${total.toFixed(2)} CAD`,
     "",
     ...ctaBlock,

@@ -106,12 +106,15 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
       const supabase = createServiceClient();
       const { data: orderCheck, error: orderCheckError } = await supabase
         .from("orders")
-        .select("total, status, conversion_type, wave_invoice_id, wave_invoice_approved_at, quote_wave_state")
+        .select("total, status, voided_at, conversion_type, wave_invoice_id, wave_invoice_approved_at, quote_wave_state")
         .eq("id", orderId)
         .maybeSingle();
       if (orderCheckError || !orderCheck) {
         console.error("[pay/token] order readiness lookup failed:", orderCheckError?.message ?? "order not found");
         return <ErrorPage />;
+      }
+      if (orderCheck.voided_at) {
+        return <UpdatedLinkPage />;
       }
       // Block if already paid — prevents duplicate charges when customer clicks link again
       if (["payment_received", "in_production", "ready_for_pickup", "complete"].includes(orderCheck?.status ?? "")) {

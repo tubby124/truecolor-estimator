@@ -82,6 +82,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
       })
       .eq("id", id)
       .eq("status", "pending_payment")
+      .is("voided_at", null)
       .select("id")
       .maybeSingle();
 

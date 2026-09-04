@@ -29,6 +29,9 @@ import {
   FEE_PRESETS,
 } from "@/lib/constants/products";
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
+import { PstExemptionFields } from "@/components/staff/PstExemptionFields";
+import type { PstExemptionInput } from "@/lib/payment/pst-exemption";
+import { computeTaxCents } from "@/lib/payment/tax-math";
 
 // FlyerSku + the FlyerPicker now live in src/components/staff/FlyerPicker.tsx —
 // the single flyer selector shared by this modal and the /staff estimator.
@@ -204,6 +207,8 @@ interface FormState {
    *  search click IDs onto it, so the Google Ads outbox trigger can attribute
    *  the revenue instead of parking it as not_attributable. */
   quote_request_id: string;
+  replaces_order_id: string;
+  pstExemption: PstExemptionInput;
   acquisition_source: "" | "google_ads_call" | "google_organic_call" | "repeat_customer" | "referral" | "walk_in" | "other" | "unknown";
 }
 
@@ -262,7 +267,8 @@ const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
   payment_method: "clover", quote_only: true, notes: "",
-  customMessage: "", customSubject: "", overrideTotal: "", quote_request_id: "", acquisition_source: "",
+  customMessage: "", customSubject: "", overrideTotal: "", quote_request_id: "", replaces_order_id: "", acquisition_source: "",
+  pstExemption: { enabled: false, vendorNumber: "", resaleConfirmed: false, rememberVendorNumber: true },
 };
 
 const MAX_ITEMS = 10;
@@ -300,25 +306,25 @@ function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-function computeBreakdownCents(items: MoneyPreviewItem[]): MoneyBreakdown {
+function computeBreakdownCents(items: MoneyPreviewItem[], pstExempt = false): MoneyBreakdown {
   const subtotalCents = items.reduce((sum, item) => sum + item.amountCents, 0);
-  const gstCents = Math.round(subtotalCents * 0.05);
-  const pstCents = Math.round(subtotalCents * 0.06);
+  const tax = computeTaxCents(subtotalCents, { gstRate: 0.05, pstRate: 0.06 }, pstExempt);
   return {
     subtotalCents,
-    gstCents,
-    pstCents,
-    totalCents: subtotalCents + gstCents + pstCents,
+    gstCents: tax.gstCents,
+    pstCents: tax.pstCents,
+    totalCents: tax.totalCents,
   };
 }
 
 function findLastAmountForTargetTotal(
   baseSubtotalCents: number,
-  targetTotalCents: number
+  targetTotalCents: number,
+  pstExempt: boolean
 ): number | null {
   const totalForLastAmount = (lastAmountCents: number) => {
     const subtotalCents = baseSubtotalCents + lastAmountCents;
-    return subtotalCents + Math.round(subtotalCents * 0.05) + Math.round(subtotalCents * 0.06);
+    return computeTaxCents(subtotalCents, { gstRate: 0.05, pstRate: 0.06 }, pstExempt).totalCents;
   };
 
   let low = 0;
@@ -345,9 +351,10 @@ function findLastAmountForTargetTotal(
 
 function scaleItemsForOverridePreview(
   items: MoneyPreviewItem[],
-  overrideTotalCents: number | null
+  overrideTotalCents: number | null,
+  pstExempt: boolean
 ): ScaledPreview {
-  const computedBreakdown = computeBreakdownCents(items);
+  const computedBreakdown = computeBreakdownCents(items, pstExempt);
   if (!overrideTotalCents || overrideTotalCents <= 0) {
     return {
       itemAmountCents: items.map((item) => item.amountCents),
@@ -374,13 +381,14 @@ function scaleItemsForOverridePreview(
   const baseSubtotalCents = baseItems.reduce((sum, item) => sum + item.amountCents, 0);
   const lastAmountCents = findLastAmountForTargetTotal(
     baseSubtotalCents,
-    overrideTotalCents
+    overrideTotalCents,
+    pstExempt
   );
 
   if (lastAmountCents === null) {
     return {
       itemAmountCents: scaledItems.map((item) => item.amountCents),
-      breakdown: computeBreakdownCents(scaledItems),
+      breakdown: computeBreakdownCents(scaledItems, pstExempt),
       error: "This total cannot be matched exactly with the current tax mix.",
     };
   }
@@ -388,7 +396,7 @@ function scaleItemsForOverridePreview(
   scaledItems[lastIndex] = { ...scaledItems[lastIndex], amountCents: lastAmountCents };
   return {
     itemAmountCents: scaledItems.map((item) => item.amountCents),
-    breakdown: computeBreakdownCents(scaledItems),
+    breakdown: computeBreakdownCents(scaledItems, pstExempt),
     error: null,
   };
 }
@@ -426,6 +434,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         ...EMPTY_FORM,
         quote_only: manual !== "1",
         quote_request_id: searchParams?.get("quote")?.trim() ?? "",
+        replaces_order_id: searchParams?.get("replace")?.trim() ?? "",
       });
       setError(null);
       setSuccess(null);
@@ -554,7 +563,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     kind: it.kind,
     amountCents: itemSubtotals[i],
   }));
-  const computedBreakdown = computeBreakdownCents(moneyItems);
+  const pstExempt = form.pstExemption.enabled === true;
+  const computedBreakdown = computeBreakdownCents(moneyItems, pstExempt);
   const overrideTotalCents = parseMoneyCents(form.overrideTotal);
   const overrideRequested = overrideTotalCents !== null && form.overrideTotal.trim() !== "";
   const overrideValidationError =
@@ -565,7 +575,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         : null;
   const preview = scaleItemsForOverridePreview(
     moneyItems,
-    overrideValidationError ? null : overrideTotalCents
+    overrideValidationError ? null : overrideTotalCents,
+    pstExempt
   );
   const subtotal = preview.breakdown.subtotalCents / 100;
   const gst = preview.breakdown.gstCents / 100;
@@ -597,7 +608,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     setTimeout(() => { setSuccess(null); setError(null); }, 300);
   }
 
-  function set(field: keyof Omit<FormState, "items">, value: string) {
+  function set(field: keyof Omit<FormState, "items" | "pstExemption">, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (error) setError(null);
   }
@@ -729,6 +740,9 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
 
     if (!form.name.trim()) { setError("Customer name is required"); return; }
     if (!form.email.trim()) { setError("Customer email is required"); return; }
+    if (form.pstExemption.enabled && (!form.pstExemption.vendorNumber?.trim() || !form.pstExemption.resaleConfirmed)) {
+      setError("A PST vendor licence number and resale confirmation are required to remove PST."); return;
+    }
     if (!form.quote_request_id && !form.acquisition_source) { setError("Select how this customer found True Color"); return; }
     if (!allItemsValid) { setError("Each item needs a product and amount greater than $0"); return; }
     if (overrideValidationError) { setError(overrideValidationError); return; }
@@ -770,6 +784,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
           notes: form.notes.trim() || undefined,
           customMessage: form.customMessage.trim() || undefined,
           customSubject: form.customSubject.trim() || undefined,
+          pstExemption: form.pstExemption,
+          replaces_order_id: form.replaces_order_id || undefined,
         }),
       });
 
@@ -1192,6 +1208,19 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                         </div>
                       </div>
                     </div>
+
+                    {form.replaces_order_id && (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                        Creating a replacement for a voided payment request. Re-enter and review the corrected details before sending.
+                      </div>
+                    )}
+
+                    <PstExemptionFields
+                      email={form.email}
+                      value={form.pstExemption}
+                      onChange={(pstExemption) => setForm((prev) => ({ ...prev, pstExemption }))}
+                      disabled={loading}
+                    />
 
                     {/* ── ORDER ITEMS ── */}
                     <div>

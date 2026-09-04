@@ -238,6 +238,7 @@ export async function POST(req: NextRequest) {
           let pendingOrderQuery = supabase
             .from("orders")
             .select("id, order_number, total, status, customer_id, customers ( name, email, company )");
+          pendingOrderQuery = pendingOrderQuery.is("voided_at", null);
           pendingOrderQuery = attemptOrderId
             ? pendingOrderQuery.eq("id", attemptOrderId)
             : pendingOrderQuery.eq("payment_reference", matchRef);
@@ -460,8 +461,9 @@ export async function POST(req: NextRequest) {
               status: "payment_received",
               paid_at: new Date().toISOString(),
             })
-            .eq("id", pendingOrder.id)
-            .eq("status", "pending_payment")
+              .eq("id", pendingOrder.id)
+              .eq("status", "pending_payment")
+              .is("voided_at", null)
             .select(`id, order_number, customer_id, total, gst, pst, is_rush,
                      wave_invoice_id, wave_invoice_approved_at, wave_payment_recorded_at,
                      order_items ( product_name, qty, line_total )`);

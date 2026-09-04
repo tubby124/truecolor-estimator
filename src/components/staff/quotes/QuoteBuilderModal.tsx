@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { QuoteRequest, ItemMeta } from "@/app/staff/quotes/page";
+import { PstExemptionFields } from "@/components/staff/PstExemptionFields";
+import type { PstExemptionInput } from "@/lib/payment/pst-exemption";
+import { computeStructuredQuoteTotals } from "@/lib/payment/structured-quote-tax";
 
 type LineItem = {
   description: string;
@@ -40,6 +43,11 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [quoteSent, setQuoteSent] = useState(false);
   const [taxRates, setTaxRates] = useState<{ gstRate: number; pstRate: number } | null>(null);
+  const [pstExemption, setPstExemption] = useState<PstExemptionInput>({
+    enabled: false,
+    resaleConfirmed: false,
+    rememberVendorNumber: true,
+  });
 
   useEffect(() => {
     if (!open || taxRates) return;
@@ -85,6 +93,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
           subject: quoteSubject,
           lineItems: items,
           note: quoteNote || undefined,
+          pstExemption,
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -98,6 +107,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
           setQuoteSent(false);
           setLineItems(itemsFromRequest());
           setQuoteNote("");
+          setPstExemption({ enabled: false, resaleConfirmed: false, rememberVendorNumber: true });
         }, 1500);
       }
     } catch (err) {
@@ -281,15 +291,22 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                 </button>
               </div>
 
+              <PstExemptionFields
+                email={quote.email}
+                value={pstExemption}
+                onChange={setPstExemption}
+                disabled={quoteSending || quoteSent}
+              />
+
               {/* Subtotal / tax summary — rounded the same way the API computes it,
                   so the modal preview never drifts from what the customer email shows. */}
               {(() => {
-                const lineTotal = (li: LineItem) => (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0);
-                const subtotal = Math.round(lineItems.reduce((sum, li) => sum + lineTotal(li), 0) * 100) / 100;
                 if (!taxRates) return <p className="text-xs text-gray-500">Loading tax configuration…</p>;
-                const gst = Math.round(subtotal * taxRates.gstRate * 100) / 100;
-                const pst = Math.round(subtotal * taxRates.pstRate * 100) / 100;
-                const total = Math.round((subtotal + gst + pst) * 100) / 100;
+                const { subtotal, gst, pst, grandTotal: total } = computeStructuredQuoteTotals(
+                  lineItems,
+                  taxRates,
+                  pstExemption.enabled === true,
+                );
                 return subtotal > 0 ? (
                   <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 space-y-1 text-sm">
                     <div className="flex justify-between text-gray-600">
@@ -304,6 +321,9 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                       <span>PST ({taxRates.pstRate * 100}%)</span>
                       <span>${pst.toFixed(2)}</span>
                     </div>
+                    {pstExemption.enabled && (
+                      <div className="text-[11px] text-amber-800">PST exempt for resale; GST still applies.</div>
+                    )}
                     <div className="flex justify-between font-bold text-[#1a1a2e] border-t border-gray-200 pt-1 mt-1">
                       <span>Payment total (tax included)</span>
                       <span>${total.toFixed(2)}</span>

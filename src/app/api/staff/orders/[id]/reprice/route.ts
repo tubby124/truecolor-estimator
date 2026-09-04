@@ -78,6 +78,16 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (oErr || !order) {
       return NextResponse.json({ error: oErr?.message ?? "Order not found" }, { status: 404 });
     }
+    if (order.status !== "pending_payment") {
+      return NextResponse.json({
+        error: "Paid or progressed documents are immutable. Use the manual finance correction/refund process and record its Clover reference in the lifecycle queue.",
+      }, { status: 409 });
+    }
+    if (order.staff_notes?.startsWith("Manual order") || order.staff_notes?.startsWith("[QUOTE] Manual quote")) {
+      return NextResponse.json({
+        error: "Correct an unpaid manual payment request with Void & replace so its original Wave invoice and payment link are invalidated first.",
+      }, { status: 409 });
+    }
 
     const customer = Array.isArray(order.customers) ? order.customers[0] : order.customers;
     if (!customer?.email) {

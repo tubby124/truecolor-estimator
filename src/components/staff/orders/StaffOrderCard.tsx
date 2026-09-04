@@ -28,6 +28,8 @@ interface StaffOrderCardProps {
   resendingPayment: boolean;
   resendSuccess: boolean;
   onResendPayment: () => void;
+  voidingPayment: boolean;
+  onVoidAndReplace: () => void;
   pausingFollowup: boolean;
   onFollowupPause: (paused: boolean) => void;
   sendingReceipt: boolean;
@@ -52,6 +54,8 @@ export function StaffOrderCard({
   resendingPayment,
   resendSuccess,
   onResendPayment,
+  voidingPayment,
+  onVoidAndReplace,
   pausingFollowup,
   onFollowupPause,
   sendingReceipt,
@@ -253,6 +257,11 @@ export function StaffOrderCard({
                   Archived
                 </span>
               )}
+              {order.voided_at && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                  Voided — replacement required
+                </span>
+              )}
             </div>
 
             {/* Customer — name + company */}
@@ -359,11 +368,9 @@ export function StaffOrderCard({
                 Paid by eTransfer?
               </button>
             )}
-            {!order.is_archived && (
-              order.status === "pending_payment" ||
-              order.status === "payment_received" ||
-              order.status === "in_production"
-            ) && (
+            {!order.is_archived && !order.voided_at && order.status === "pending_payment" &&
+              !order.staff_notes?.startsWith("Manual order") &&
+              !order.staff_notes?.startsWith("[QUOTE] Manual quote") && (
               <button
                 onClick={() => setRepriceOpen(true)}
                 className="text-sm px-3 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 rounded-lg text-amber-800 transition-colors font-medium"
@@ -372,6 +379,15 @@ export function StaffOrderCard({
               >
                 Reprice
               </button>
+            )}
+            {order.status !== "pending_payment" && (
+              <a
+                href="/staff/lifecycle"
+                className="text-sm px-3 py-2 border border-slate-300 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-700 transition-colors font-medium"
+                title="Paid documents are corrected through the manual finance/refund process"
+              >
+                Finance correction / refund
+              </a>
             )}
             <button
               onClick={() => onToggleExpand()}
@@ -809,7 +825,7 @@ export function StaffOrderCard({
           </div>
 
           {/* Resend payment link — only for pending_payment orders */}
-          {order.status === "pending_payment" && (
+          {order.status === "pending_payment" && !order.voided_at && (
             <div>
               <button
                 onClick={() => onResendPayment()}
@@ -825,6 +841,20 @@ export function StaffOrderCard({
               <p className="text-xs text-gray-400 mt-1">
                 Re-emails the customer a fresh payment link
               </p>
+              {!order.voided_at && !order.quote_request_id && (
+                <button
+                  onClick={() => onVoidAndReplace()}
+                  disabled={voidingPayment}
+                  className="mt-2 text-sm font-semibold px-4 py-2 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                >
+                  {voidingPayment ? "Voiding…" : "Void & replace"}
+                </button>
+              )}
+              {!order.quote_request_id && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Voids the original Wave invoice and blocks its payment link before a corrected replacement is sent.
+                </p>
+              )}
               {order.followup_paused_at ? (
                 <button
                   onClick={() => onFollowupPause(false)}

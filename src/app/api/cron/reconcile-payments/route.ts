@@ -197,6 +197,7 @@ async function recoverCloverCapture(
     .update({ status: "payment_received", paid_at: paidAt })
     .eq("id", order.id)
     .eq("status", "pending_payment")
+    .is("voided_at", null)
     .select("id, order_number, customer_id, total");
 
   if (updateErr) throw new Error(`order update failed: ${updateErr.message}`);
@@ -439,6 +440,7 @@ export async function GET(req: NextRequest) {
              customers ( email, name, company )`)
     .eq("payment_method", "clover_card")
     .eq("status", "pending_payment")
+    .is("voided_at", null)
     // 2026-08-19: no payment_reference filter. TC-2026-0322 proved the
     // checkout session ref can fail to persist while money captured — NULL-ref
     // orphans are exactly the rows this check exists to heal. Matching safety

@@ -45,6 +45,7 @@ export interface ReceiptPdfData {
   rushFee: number;
   discountCode: string | null;
   discountAmount: number | null;
+  pstExemptionNote?: string | null;
 }
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -436,6 +437,11 @@ export function ReceiptPdf({ data }: { data: ReceiptPdfData }) {
               <Text style={s.totalsLabel}>PST (6%)</Text>
               <Text style={s.totalsValue}>${Number(data.pst).toFixed(2)}</Text>
             </View>
+            {data.pstExemptionNote ? (
+              <View style={s.totalsRow}>
+                <Text style={s.totalsLabel}>{data.pstExemptionNote}</Text>
+              </View>
+            ) : null}
             <View style={s.totalRow}>
               <Text style={s.totalLabel}>Total (CAD)</Text>
               <Text style={s.totalValue}>${Number(data.total).toFixed(2)}</Text>

@@ -128,6 +128,20 @@ describe("quote Wave provisioning", () => {
       .toBeLessThan(rpc.mock.invocationCallOrder.at(-1) ?? 0);
   });
 
+  it("removes PST from every stored Wave line for an exempt quote", async () => {
+    const { client } = clientFor({ action: "create", order: {
+      ...storedOrder,
+      pst_exempt: true,
+      pst_vendor_number: "SK-123",
+    } });
+
+    await provisionQuoteWaveInvoice(client, orderId);
+
+    expect(wave.createWaveInvoice).toHaveBeenCalledWith("wave-customer", [
+      expect.objectContaining({ applyGst: true, applyPst: false }),
+    ], expect.objectContaining({ memo: expect.stringContaining("SK-123") }));
+  });
+
   it("marks failures after a Wave call starts ambiguous so they cannot auto-retry", async () => {
     const { client, rpc } = clientFor({ action: "create", order: storedOrder });
     wave.createWaveInvoice.mockRejectedValueOnce(new Error("Wave response was lost"));

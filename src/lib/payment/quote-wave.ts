@@ -6,6 +6,7 @@ import {
   createWaveInvoice,
   type WaveLineItem,
 } from "@/lib/wave/invoice";
+import { pstExemptionInvoiceNote } from "@/lib/payment/pst-exemption";
 
 type WaveAction = "create" | "ready" | "wait";
 
@@ -32,6 +33,8 @@ interface StoredOrder {
   customerName: string;
   waveItems: WaveLineItem[];
   isRush: boolean;
+  pstExempt: boolean;
+  pstVendorNumber: string | null;
 }
 
 export interface QuoteWaveProvisioningResult {
@@ -45,6 +48,7 @@ export interface OrderWaveInvoicePlan {
   customerName: string;
   waveItems: WaveLineItem[];
   isRush?: boolean;
+  memo?: string;
 }
 
 export class QuoteWaveProvisioningError extends Error {
@@ -176,7 +180,7 @@ async function loadStoredOrder(supabase: SupabaseClient, orderId: string): Promi
   const { data, error } = await supabase
     .from("orders")
     .select(`
-      id, order_number, subtotal, quote_request_id, is_rush, discount_code, discount_amount,
+      id, order_number, subtotal, quote_request_id, is_rush, discount_code, discount_amount, pst_exempt, pst_vendor_number,
       customers ( name, email ),
       order_items ( product_name, qty, unit_price, line_total, category, material_code, line_items_json )
     `)
@@ -194,7 +198,11 @@ async function loadStoredOrder(supabase: SupabaseClient, orderId: string): Promi
     throw new Error("Stored order is incomplete");
   }
 
-  const waveItems = items.map(storedOrderItemToWaveLine);
+  const pstExempt = row.pst_exempt === true;
+  const waveItems = items.map((item) => {
+    const line = storedOrderItemToWaveLine(item);
+    return pstExempt ? { ...line, applyPst: false } : line;
+  });
   const storedSubtotalCents = Math.round(Number(row.subtotal) * 100);
   const discountCents = Math.round(Number(row.discount_amount ?? 0) * 100);
   const itemSubtotalBeforeDiscountCents = waveItems.reduce(
@@ -216,7 +224,7 @@ async function loadStoredOrder(supabase: SupabaseClient, orderId: string): Promi
       qty: 1,
       unitPrice: -(discountCents / 100),
       applyGst: true,
-      applyPst: true,
+      applyPst: !pstExempt,
     });
   }
 
@@ -229,6 +237,8 @@ async function loadStoredOrder(supabase: SupabaseClient, orderId: string): Promi
     // Structured quote orders persist rush as an order item. Catalog orders
     // use Wave's explicit rush option because their order_items exclude it.
     isRush: row.quote_request_id == null && row.is_rush === true,
+    pstExempt,
+    pstVendorNumber: typeof row.pst_vendor_number === "string" ? row.pst_vendor_number : null,
   };
 }
 
@@ -268,11 +278,17 @@ export async function provisionOrderWaveInvoice(
     const order = suppliedPlan
       ? { id: orderId, ...validatePlan(suppliedPlan), isRush: suppliedPlan.isRush === true }
       : await loadStoredOrder(supabase, orderId);
+    const memo = suppliedPlan?.memo ?? (
+      "pstExempt" in order
+        ? pstExemptionInvoiceNote({ enabled: order.pstExempt, vendorNumber: order.pstVendorNumber }) ?? undefined
+        : undefined
+    );
     externalCallStarted = true;
     const customerId = await createOrFindWaveCustomer(order.customerEmail, order.customerName);
     const invoice = await createWaveInvoice(customerId, order.waveItems, {
       orderNumber: order.orderNumber,
       isRush: order.isRush,
+      memo,
     });
     await approveWaveInvoice(invoice.invoiceId);
     await completeQuoteWaveProvisioning(supabase, {
