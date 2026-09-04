@@ -12,8 +12,8 @@ describe("quote payment linkage contract", () => {
     const route = source("src/app/api/staff/quotes/[id]/send-quote/route.ts");
     expect(route).toContain("quoteId: id");
     expect(route).toContain("quoteRevision: Number(delivery.quote_revision)");
-    expect(route).toContain('"prepare_structured_quote_send"');
-    expect(route.indexOf('"prepare_structured_quote_send"')).toBeLessThan(
+    expect(route).toContain('"prepare_structured_quote_send_v3"');
+    expect(route.indexOf('"prepare_structured_quote_send_v3"')).toBeLessThan(
       route.indexOf("await sendEmail("),
     );
   });
