@@ -250,7 +250,7 @@ export function SiteNav() {
           </Link>
 
           {/* Desktop nav: dropdowns */}
-          <nav className="hidden sm:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1">
             {/* Products dropdown */}
             <div className="relative">
               <button
@@ -414,21 +414,21 @@ export function SiteNav() {
           </nav>
 
           {/* Right side: icons + CTA + hamburger */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 lg:gap-4">
             <AccountIcon />
             <CartIcon />
-            <span className="hidden sm:block">
+            <span className="hidden lg:block">
               <StaffQuoteButton />
             </span>
             <Link
               href="/quote"
-              className="hidden sm:block border border-gray-600 text-gray-300 text-sm font-medium px-4 py-2.5 rounded-md hover:border-white hover:text-white transition-colors whitespace-nowrap"
+              className="hidden lg:block border border-gray-600 text-gray-300 text-sm font-medium px-4 py-2.5 rounded-md hover:border-white hover:text-white transition-colors whitespace-nowrap"
             >
               Custom Quote
             </Link>
             <Link
               href="/products"
-              className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden sm:block"
+              className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden lg:block"
             >
               Order Now →
             </Link>
@@ -436,7 +436,7 @@ export function SiteNav() {
             {/* Mobile quick-price CTA — 1-tap access, hidden on desktop */}
             <Link
               href="/products"
-              className="sm:hidden bg-[#16C2F3] text-white text-xs font-bold px-3 py-2 rounded-md whitespace-nowrap"
+              className="lg:hidden bg-[#16C2F3] text-white text-xs font-bold px-3 py-2 rounded-md whitespace-nowrap"
             >
               Order Now →
             </Link>
@@ -444,7 +444,7 @@ export function SiteNav() {
             {/* Hamburger — mobile only */}
             <button
               onClick={() => setDrawerOpen(true)}
-              className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white"
+              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white"
               aria-label="Open menu"
               aria-expanded={drawerOpen}
             >

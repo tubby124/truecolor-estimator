@@ -20,7 +20,7 @@ export function ProductGallery({ images, productName }: Props) {
   }, [lightbox]);
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       {/* Main image */}
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#f8f4ef]">
         <Image
@@ -64,7 +64,7 @@ export function ProductGallery({ images, productName }: Props) {
 
       {/* Thumbnails (only if more than 1 image) — horizontal scroll so long galleries never overflow the column */}
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1" role="listbox" aria-label={`${productName} photo gallery`}>
+        <div className="flex max-w-full gap-2 overflow-x-auto pb-1" role="listbox" aria-label={`${productName} photo gallery`}>
           {images.map((src, i) => (
             <button
               key={src}

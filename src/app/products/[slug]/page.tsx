@@ -12,6 +12,7 @@ import { NotifyMeForm } from "@/components/product/NotifyMeForm";
 import { getMerchantOffer, getMerchantOfferSelection } from "@/lib/merchant/merchant-catalog";
 import { merchantProductSchema } from "@/lib/commerce/product-schema";
 import { COMMERCE_POLICY } from "@/lib/commerce/policies";
+import { BUSINESS_INFO } from "@/lib/business-info";
 
 
 interface Props {
@@ -115,9 +116,10 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 {merchantOffer.sizeLabel}, {merchantOffer.sides === 1 ? "single-sided" : "double-sided"}, quantity {merchantOffer.qty} — <span className="font-semibold">${merchantOffer.price.toFixed(2)} CAD before GST</span>.
               </p>
               <div className="mt-2 space-y-1 text-sm text-gray-700">
-                <p><span className="font-semibold">In-store availability:</span> Made to order — not stocked for same-day pickup.</p>
+                <p><span className="font-semibold">In-store availability:</span> Available to order for Saskatoon pickup. The finished custom print is made after artwork approval; it is not preprinted shelf stock.</p>
                 <p><span className="font-semibold">Pickup location:</span> {COMMERCE_POLICY.pickup.address}.</p>
-                <p><span className="font-semibold">Pickup timing:</span> Allow one week or more from order placement. Most jobs enter standard production for {COMMERCE_POLICY.production.standard}.</p>
+                <p><span className="font-semibold">Standard pickup:</span> Allow one week or more from order placement to cover artwork approval. Production itself is usually {COMMERCE_POLICY.production.standard}.</p>
+                <p><span className="font-semibold">Same-day rush:</span> {BUSINESS_INFO.sameDayRush.display}. Call <a href={BUSINESS_INFO.phone.href} className="font-semibold text-[#087da0] underline">{BUSINESS_INFO.phone.display}</a> to confirm capacity before ordering.</p>
               </div>
             </aside>
           )}
