@@ -67,11 +67,27 @@ const results = []; // { name, status: 'PASS'|'FAIL'|'WARN'|'SKIP', detail }
 const add = (name, status, detail) => results.push({ name, status, detail });
 
 // ============================ --env: format checks ============================
-// PAYMENT_TOKEN_SECRET: 64 hex chars (signs pay links — rotating invalidates ALL outstanding links)
-const pts = get("PAYMENT_TOKEN_SECRET");
-if (!pts) add("PAYMENT_TOKEN_SECRET present", "WARN", "not set locally (Railway-only is fine)");
-else if (/^[0-9a-fA-F]{64}$/.test(pts)) add("PAYMENT_TOKEN_SECRET format", "PASS", "64 hex chars");
-else add("PAYMENT_TOKEN_SECRET format", "WARN", `expected 64 hex chars, got len=${pts.length}; works, but do not rotate casually because outstanding pay links would break`);
+// Payment token rotation stays local-only: public /api/health intentionally
+// exposes readiness, not environment configuration.
+const legacyTokenSecret = get("PAYMENT_TOKEN_SECRET");
+const nextTokenSecret = get("PAYMENT_TOKEN_SECRET_NEXT");
+const legacyUntil = get("PAYMENT_TOKEN_LEGACY_UNTIL");
+const is64Hex = (value) => /^[0-9a-fA-F]{64}$/.test(value);
+const isCanonicalUtc = (value) => {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) return false;
+  const timestamp = Date.parse(value);
+  const canonical = value.includes(".") ? value : value.replace("Z", ".000Z");
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString() === canonical;
+};
+
+if (!legacyTokenSecret && !nextTokenSecret) add("Payment token signing key (local)", "WARN", "not set locally (verify in Railway env)");
+else if (nextTokenSecret) {
+  add("PAYMENT_TOKEN_SECRET_NEXT format", is64Hex(nextTokenSecret) ? "PASS" : "WARN", is64Hex(nextTokenSecret) ? "64 hex chars" : `expected 64 hex chars, got len=${nextTokenSecret.length}`);
+  if (legacyTokenSecret) {
+    add("PAYMENT_TOKEN_LEGACY_UNTIL", isCanonicalUtc(legacyUntil) ? "PASS" : "FAIL", isCanonicalUtc(legacyUntil) ? "legacy decoder cutoff configured" : "required canonical UTC timestamp while both payment keys are configured");
+  }
+} else if (is64Hex(legacyTokenSecret)) add("PAYMENT_TOKEN_SECRET format", "PASS", "64 hex chars");
+else add("PAYMENT_TOKEN_SECRET format", "WARN", `expected 64 hex chars, got len=${legacyTokenSecret.length}; works, but do not rotate casually because outstanding pay links would break`);
 
 // NEXT_PUBLIC_SITE_URL: must be the live domain, NEVER vercel/railway (stale-URL pay-link + webhook bug class)
 const siteUrl = get("NEXT_PUBLIC_SITE_URL");
@@ -98,9 +114,8 @@ async function probe() {
     const res = await fetch(`${BASE}/api/health`, { signal: AbortSignal.timeout(10000) });
     const json = await res.json();
     if (!res.ok) add("Live health endpoint", "FAIL", `HTTP ${res.status}`);
-    else if (json.has_failures) add("Live health config failures", "FAIL", `${json.fail_count ?? "unknown"} failure(s)`);
-    else if (json.warn_count > 0) add("Live health config", "WARN", `${json.warn_count} warning(s), 0 failures`);
-    else add("Live health config", "PASS", "0 warnings, 0 failures");
+    else if (json?.ok !== true) add("Live health endpoint", "FAIL", "invalid readiness response");
+    else add("Live health endpoint", "PASS", "ready (detailed configuration is intentionally private)");
   } catch (e) {
     add("Live health endpoint", "FAIL", `request failed: ${e.name}`);
   }

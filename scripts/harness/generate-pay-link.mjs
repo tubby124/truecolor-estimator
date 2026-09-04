@@ -28,10 +28,11 @@ loadEnv();
 const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY;
 const PAYMENT_TOKEN_SECRET = process.env.PAYMENT_TOKEN_SECRET;
+const PAYMENT_TOKEN_SECRET_NEXT = process.env.PAYMENT_TOKEN_SECRET_NEXT;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 
-if (!SUPABASE_URL || !SUPABASE_KEY || !PAYMENT_TOKEN_SECRET) {
-  console.error("Missing SUPABASE_URL / SUPABASE_SECRET_KEY / PAYMENT_TOKEN_SECRET");
+if (!SUPABASE_URL || !SUPABASE_KEY || (!PAYMENT_TOKEN_SECRET && !PAYMENT_TOKEN_SECRET_NEXT)) {
+  console.error("Missing SUPABASE_URL / SUPABASE_SECRET_KEY / active PAYMENT_TOKEN_SECRET(_NEXT)");
   process.exit(1);
 }
 
@@ -53,7 +54,11 @@ if (!orders || orders.length === 0) {
 const o = orders[0];
 const customer = Array.isArray(o.customers) ? o.customers[0] : o.customers;
 
-const TOKEN_VERSION = 1;
+// Keep this emergency utility aligned with src/lib/payment/token.ts. During a
+// staged rotation new links must use the active next key, while older links
+// continue to verify only through the runtime's bounded legacy window.
+const PAYMENT_TOKEN_SIGNING_SECRET = PAYMENT_TOKEN_SECRET_NEXT || PAYMENT_TOKEN_SECRET;
+const TOKEN_VERSION = 2;
 const TTL_DAYS = 30;
 const expiry = Date.now() + TTL_DAYS * 24 * 60 * 60 * 1000;
 const payload = {
@@ -63,9 +68,10 @@ const payload = {
   e: expiry,
   em: customer?.email?.toLowerCase(),
   r: `${SITE_URL}/order-confirmed?oid=${o.id}`,
+  o: o.id,
 };
 const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
-const sig = createHmac("sha256", PAYMENT_TOKEN_SECRET).update(encoded).digest("base64url");
+const sig = createHmac("sha256", PAYMENT_TOKEN_SIGNING_SECRET).update(encoded).digest("base64url");
 const token = `${encoded}.${sig}`;
 const url = `${SITE_URL}/pay/${token}`;
 
