@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { getProduct } from "@/lib/data/products-content";
+import { BUSINESS_INFO } from "@/lib/business-info";
+import { CANONICAL_MERCHANT_PRODUCT_SLUGS } from "@/lib/merchant/merchant-catalog";
 
 /**
  * /products/* is noindex and is the destination for 8 paid ad groups. Google Ads
@@ -70,6 +72,29 @@ describe("paid product page fold contract", () => {
     for (const slug of PAID_SLUGS) {
       const product = getProduct(slug)!;
       expect(product.paidHeadline ?? `${product.name} Saskatoon`).toContain("Saskatoon");
+    }
+  });
+
+  it("states the conditional paid rush option without claiming finished shelf stock", () => {
+    const template = read("src/app/products/[slug]/page.tsx");
+    expect(BUSINESS_INFO.sameDayRush.display).toBe(
+      "+$40 flat on eligible weekday orders placed before 10 AM; staff confirmation required",
+    );
+    expect(template).toContain("BUSINESS_INFO.sameDayRush.display");
+    expect(template).toContain("confirm capacity before ordering");
+    expect(template).toContain("not preprinted shelf stock");
+    expect(template).not.toContain("not stocked for same-day pickup");
+    expect(template).not.toContain("Materials are stocked");
+  });
+
+  it("qualifies rush claims in Merchant product descriptions", () => {
+    for (const slug of CANONICAL_MERCHANT_PRODUCT_SLUGS) {
+      const description = getProduct(slug)!.description;
+      if (!/same-day rush/i.test(description)) continue;
+
+      expect(description, slug).toContain("+$40 flat");
+      expect(description, slug).toContain("eligible weekday orders placed before 10 AM");
+      expect(description, slug).toContain("confirm capacity before ordering");
     }
   });
 });

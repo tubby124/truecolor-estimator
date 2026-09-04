@@ -60,7 +60,7 @@ export const BUSINESS_INFO = {
     cutoffHour: 10,
     cutoffMinute: 0,
     requiresCapacityConfirmation: true,
-    display: "+$40 when ordered before 10 AM; call to confirm capacity",
+    display: "+$40 flat on eligible weekday orders placed before 10 AM; staff confirmation required",
   },
   fulfillment: {
     pickup: COMMERCE_POLICY.pickup.summary,
