@@ -35,10 +35,7 @@ describe("deployment health", () => {
     stubHealthyEnvironment();
     const response = await GET();
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({
-      ok: true,
-      has_failures: false,
-    });
+    await expect(response.json()).resolves.toEqual({ ok: true });
   });
 
   it("returns 503 so Railway rejects a hard configuration failure", async () => {
@@ -46,10 +43,7 @@ describe("deployment health", () => {
     vi.stubEnv("CLOVER_WEBHOOK_SECRET", "");
     const response = await GET();
     expect(response.status).toBe(503);
-    await expect(response.json()).resolves.toMatchObject({
-      ok: false,
-      has_failures: true,
-    });
+    await expect(response.json()).resolves.toEqual({ ok: false });
   });
 
   it.each(["RESEND_API_KEY", "RESEND_WEBHOOK_SECRET"])(
@@ -59,13 +53,7 @@ describe("deployment health", () => {
       vi.stubEnv(key, "");
       const response = await GET();
       expect(response.status).toBe(503);
-      const body = await response.json() as {
-        issues: Array<{ name: string; severity: string }>;
-      };
-      expect(body.issues).toContainEqual(expect.objectContaining({
-        name: key,
-        severity: "fail",
-      }));
+      await expect(response.json()).resolves.toEqual({ ok: false });
     },
   );
 
@@ -74,12 +62,24 @@ describe("deployment health", () => {
     vi.stubEnv("CLOUDFLARE_TURNSTILE_SECRET_KEY", "secret-only");
     const response = await GET();
     expect(response.status).toBe(503);
-    const body = await response.json() as {
-      issues: Array<{ name: string; severity: string }>;
-    };
-    expect(body.issues).toContainEqual(expect.objectContaining({
-      name: "CLOUDFLARE_TURNSTILE_KEY_PAIR",
-      severity: "fail",
-    }));
+    await expect(response.json()).resolves.toEqual({ ok: false });
+  });
+
+  it("rejects an active key rotation without a validated legacy cutoff", async () => {
+    stubHealthyEnvironment();
+    vi.stubEnv("PAYMENT_TOKEN_SECRET_NEXT", "b".repeat(64));
+    vi.stubEnv("PAYMENT_TOKEN_LEGACY_UNTIL", "invalid");
+    const response = await GET();
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ ok: false });
+  });
+
+  it("accepts a completed rotation with only the next signing key", async () => {
+    stubHealthyEnvironment();
+    vi.stubEnv("PAYMENT_TOKEN_SECRET", "");
+    vi.stubEnv("PAYMENT_TOKEN_SECRET_NEXT", "b".repeat(64));
+    const response = await GET();
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ ok: true });
   });
 });

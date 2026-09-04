@@ -14,10 +14,31 @@ import { createHmac, timingSafeEqual } from "crypto";
 const TOKEN_VERSION = 2;
 const TOKEN_TTL_DAYS = 30; // aligns with 30-day quote validity
 
-function getSecret(): string {
+function getLegacySecret(): string {
   const secret = process.env.PAYMENT_TOKEN_SECRET;
   if (!secret) throw new Error("PAYMENT_TOKEN_SECRET not configured");
   return secret;
+}
+
+function getSigningSecret(): string {
+  return process.env.PAYMENT_TOKEN_SECRET_NEXT || getLegacySecret();
+}
+
+function getLegacyUntil(): number | undefined {
+  const raw = process.env.PAYMENT_TOKEN_LEGACY_UNTIL;
+  if (!raw) return undefined;
+
+  // Require a canonical UTC instant rather than accepting Date.parse's
+  // implementation-dependent formats. A bad cutoff must never extend legacy
+  // token acceptance.
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(raw)) {
+    return undefined;
+  }
+  const timestamp = Date.parse(raw);
+  if (!Number.isFinite(timestamp)) return undefined;
+
+  const canonical = raw.includes(".") ? raw : raw.replace("Z", ".000Z");
+  return new Date(timestamp).toISOString() === canonical ? timestamp : undefined;
 }
 
 interface TokenPayload {
@@ -40,8 +61,15 @@ export interface PaymentTokenContext {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function sign(encoded: string): string {
-  return createHmac("sha256", getSecret()).update(encoded).digest("base64url");
+function sign(encoded: string, secret: string): string {
+  return createHmac("sha256", secret).update(encoded).digest("base64url");
+}
+
+function signatureMatches(encoded: string, sig: string, secret: string): boolean {
+  const expectedSig = sign(encoded, secret);
+  const sigBuf = Buffer.from(sig);
+  const expectedBuf = Buffer.from(expectedSig);
+  return sigBuf.length === expectedBuf.length && timingSafeEqual(sigBuf, expectedBuf);
 }
 
 /**
@@ -74,7 +102,7 @@ export function encodePaymentToken(
     ...(context.quoteRevision ? { qr: context.quoteRevision } : {}),
   };
   const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = sign(encoded);
+  const sig = sign(encoded, getSigningSecret());
   return `${encoded}.${sig}`;
 }
 
@@ -97,14 +125,20 @@ export function decodePaymentToken(token: string): {
   const encoded = token.slice(0, dot);
   const sig = token.slice(dot + 1);
 
-  // Verify HMAC signature using constant-time comparison to prevent timing attacks
-  const expectedSig = sign(encoded);
-  const sigBuf = Buffer.from(sig);
-  const expectedBuf = Buffer.from(expectedSig);
-  if (
-    sigBuf.length !== expectedBuf.length ||
-    !timingSafeEqual(sigBuf, expectedBuf)
-  ) {
+  // Verify HMAC signatures with constant-time comparisons. During a staged
+  // rotation, only tokens signed by the new key are accepted indefinitely;
+  // the old key is decoder-only and expires at its explicit cutoff.
+  const nextSecret = process.env.PAYMENT_TOKEN_SECRET_NEXT;
+  const signingSecret = nextSecret || getLegacySecret();
+  let signatureValid = signatureMatches(encoded, sig, signingSecret);
+  if (!signatureValid && nextSecret) {
+    const legacyUntil = getLegacyUntil();
+    if (legacyUntil !== undefined && Date.now() <= legacyUntil) {
+      const legacySecret = process.env.PAYMENT_TOKEN_SECRET;
+      if (legacySecret) signatureValid = signatureMatches(encoded, sig, legacySecret);
+    }
+  }
+  if (!signatureValid) {
     throw new Error("Invalid token signature");
   }
 

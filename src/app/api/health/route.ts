@@ -1,8 +1,9 @@
 /**
  * GET /api/health
  *
- * Public health check — verifies env var SHAPES (not values), no secrets returned.
- * Used as Railway health check endpoint AND by harness to validate prod config.
+ * Public health check — verifies configuration internally without exposing it.
+ * Used as Railway's readiness endpoint; detailed configuration validation stays
+ * in local/operator tooling rather than a public API response.
  *
  * Returns 200 when every hard requirement is present. Warnings remain healthy,
  * but a hard config failure returns 503 so Railway rejects the broken deployment.
@@ -32,18 +33,6 @@ function checkRequired(
   return { name: key, ok: true };
 }
 
-// Soft recommendation: deviation works but is suboptimal. Never an outage.
-function checkRecommended(
-  key: string,
-  validator: (v: string) => boolean,
-  warnNote: string
-): Check {
-  const val = process.env[key];
-  if (!val) return { name: key, ok: false, severity: "fail", note: "not set" };
-  if (!validator(val)) return { name: key, ok: false, severity: "warn", note: warnNote };
-  return { name: key, ok: true };
-}
-
 export async function GET() {
   const checks: Check[] = [];
 
@@ -52,13 +41,41 @@ export async function GET() {
   // a deviation is a WARN, not an outage. Critically: rotating this to fix the
   // format invalidates EVERY outstanding pay link (30-day window) — so do not
   // "fix" casually. Only present (not set) is a hard fail.
-  checks.push(
-    checkRecommended(
-      "PAYMENT_TOKEN_SECRET",
-      (v) => /^[0-9a-f]{64}$/i.test(v),
-      "below 64-hex/32-byte standard — works, but lower entropy. Do NOT rotate casually (invalidates all outstanding pay links). Rotate only during a low-unpaid-order window."
-    )
-  );
+  const legacySecret = process.env.PAYMENT_TOKEN_SECRET;
+  const nextSecret = process.env.PAYMENT_TOKEN_SECRET_NEXT;
+  if (!legacySecret && !nextSecret) {
+    checks.push({ name: "PAYMENT_TOKEN_SECRET", ok: false, severity: "fail", note: "not set" });
+  } else {
+    for (const [key, value] of [
+      ["PAYMENT_TOKEN_SECRET", legacySecret],
+      ["PAYMENT_TOKEN_SECRET_NEXT", nextSecret],
+    ] as const) {
+      if (!value) continue;
+      checks.push({
+        name: key,
+        ok: /^[0-9a-f]{64}$/i.test(value),
+        severity: /^[0-9a-f]{64}$/i.test(value) ? undefined : "warn",
+        note: /^[0-9a-f]{64}$/i.test(value)
+          ? undefined
+          : "below 64-hex/32-byte standard — works, but lower entropy. Do NOT rotate casually.",
+      });
+    }
+  }
+
+  const legacyUntil = process.env.PAYMENT_TOKEN_LEGACY_UNTIL;
+  if (nextSecret && legacySecret) {
+    const cutoff = legacyUntil && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(legacyUntil)
+      ? Date.parse(legacyUntil)
+      : Number.NaN;
+    const canonical = Number.isFinite(cutoff)
+      && new Date(cutoff).toISOString() === (legacyUntil?.includes(".") ? legacyUntil : legacyUntil?.replace("Z", ".000Z"));
+    checks.push({
+      name: "PAYMENT_TOKEN_LEGACY_UNTIL",
+      ok: canonical,
+      severity: canonical ? undefined : "fail",
+      note: canonical ? undefined : "must be a canonical UTC timestamp while staged payment-key rotation is active",
+    });
+  }
 
   // Site URL — wrong value puts ephemeral hosts in emailed pay links = dead links.
   checks.push(
@@ -140,20 +157,9 @@ export async function GET() {
     });
   }
 
-  const issues = checks.filter((c) => !c.ok);
-  const fails = issues.filter((c) => c.severity === "fail");
-  const warns = issues.filter((c) => c.severity === "warn");
+  const fails = checks.filter((c) => !c.ok && c.severity === "fail");
 
   const healthy = fails.length === 0;
 
-  return NextResponse.json({
-    ok: healthy,
-    config_clean: issues.length === 0,
-    has_failures: !healthy,
-    checks_total: checks.length,
-    fail_count: fails.length,
-    warn_count: warns.length,
-    issues: issues.length > 0 ? issues : undefined,
-    checks,
-  }, { status: healthy ? 200 : 503 });
+  return NextResponse.json({ ok: healthy }, { status: healthy ? 200 : 503 });
 }
