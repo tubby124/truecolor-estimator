@@ -9,7 +9,11 @@ import { MetaPixel } from "@/components/site/MetaPixel";
 import { MarketingConsent } from "@/components/site/MarketingConsent";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
 import { WebsiteCallSwap } from "@/components/site/WebsiteCallSwap";
-import { buildGoogleTagBootstrapScript, normalizeGoogleAdsConversionLabel } from "@/lib/analytics/google-ads";
+import {
+  buildGoogleTagBootstrapScript,
+  buildGoogleTagDocumentScript,
+  normalizeGoogleAdsConversionLabel,
+} from "@/lib/analytics/google-ads";
 
 // Self-hosted Geist + Geist Mono variable WOFF2 files. Switched from
 // next/font/google because Railway builds were intermittently failing on
@@ -292,6 +296,7 @@ const googleTagBootstrapScript = buildGoogleTagBootstrapScript(
   // consent banner is live; WebsiteCallSwap then registers it on consent instead.
   marketingConsentBannerEnabled ? undefined : (websiteCallLabel ?? undefined),
 );
+const googleTagDocumentScript = buildGoogleTagDocumentScript(googleTagBootstrapScript);
 
 export default function RootLayout({
   children,
@@ -302,7 +307,7 @@ export default function RootLayout({
     <html lang="en-CA">
       <head>
         <Script id="google-tag-bootstrap" strategy="beforeInteractive">
-          {googleTagBootstrapScript}
+          {googleTagDocumentScript}
         </Script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -319,10 +324,6 @@ export default function RootLayout({
         ) : null}
         {children}
         <BackToTop />
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-6HMQT7MNLL"
-          strategy="afterInteractive"
-        />
         {/* Meta stays dormant unless the banner is enabled: no banner → no consent → no pixel/CAPI. */}
         {process.env.NEXT_PUBLIC_MARKETING_CONSENT_BANNER === "true" ? (
           <>

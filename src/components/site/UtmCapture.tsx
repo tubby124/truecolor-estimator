@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import {
   ATTRIBUTION_KEYS,
   isPaidAttribution,
@@ -13,6 +14,7 @@ import {
   UTM_COOKIE_NAME,
   UTM_TTL_DAYS,
 } from "@/lib/analytics/utm";
+import { isSensitiveAnalyticsPath } from "@/lib/analytics/path";
 
 const LS_KEY = "tc_utm_first_touch";
 const LATEST_PAID_LS_KEY = "tc_utm_latest_paid_touch";
@@ -39,8 +41,9 @@ function persistAttribution(
 }
 
 export function UtmCapture() {
+  const pathname = usePathname();
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || isSensitiveAnalyticsPath(pathname)) return;
     const sp = new URLSearchParams(window.location.search);
 
     // 1. Collect any UTM params present on the URL.
@@ -105,7 +108,7 @@ export function UtmCapture() {
     } catch {
       // Browser storage may be blocked — attribution capture must never block browsing.
     }
-  }, []);
+  }, [pathname]);
 
   return null;
 }

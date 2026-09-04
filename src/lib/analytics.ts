@@ -2,6 +2,7 @@
 // Measurement ID: G-6HMQT7MNLL
 
 import { sendGoogleAdsClickToCall } from "@/lib/analytics/google-ads";
+import { isSensitiveAnalyticsPath } from "@/lib/analytics/path";
 
 declare global {
   interface Window {
@@ -10,7 +11,11 @@ declare global {
 }
 
 function gtag(...args: unknown[]) {
-  if (typeof window !== "undefined" && typeof window.gtag === "function") {
+  if (
+    typeof window !== "undefined" &&
+    !isSensitiveAnalyticsPath(window.location?.pathname ?? "") &&
+    typeof window.gtag === "function"
+  ) {
     window.gtag(...args);
   }
 }

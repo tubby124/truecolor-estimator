@@ -21,6 +21,7 @@ const env = {
   GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID: "222",
   GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID: "333",
   GOOGLE_DATA_MANAGER_PROJECT_ID: "true-color-ads-data",
+  GOOGLE_ADS_ENHANCED_CONVERSIONS_ENABLED: "true",
 };
 
 const job: PaidConversionJob = {
@@ -86,6 +87,15 @@ describe("enhanced conversions — hashed user-provided data", () => {
 
   it("omits userData and encoding entirely when no contact details resolve", () => {
     const request = buildDataManagerRequest(job, env) as Record<string, unknown>;
+    expect(request.encoding).toBeUndefined();
+    expect((request.events as Array<Record<string, unknown>>)[0].userData).toBeUndefined();
+  });
+
+  it("defaults to click-ID-only when enhanced conversions are not explicitly enabled", () => {
+    const request = buildDataManagerRequest(
+      { ...job, customer_email: "buyer@example.com", customer_phone: "306-954-8688" },
+      { ...env, GOOGLE_ADS_ENHANCED_CONVERSIONS_ENABLED: undefined },
+    ) as Record<string, unknown>;
     expect(request.encoding).toBeUndefined();
     expect((request.events as Array<Record<string, unknown>>)[0].userData).toBeUndefined();
   });

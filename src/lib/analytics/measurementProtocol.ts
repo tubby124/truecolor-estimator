@@ -2,8 +2,6 @@
 // Fires events directly to GA4 from server context, bypassing client gtag.
 // Captures orders that client-side gtag misses (ad blockers, ITP, corp networks).
 
-import { createHash } from "crypto";
-
 const MP_ENDPOINT = "https://www.google-analytics.com/mp/collect";
 const DEBUG_ENDPOINT = "https://www.google-analytics.com/debug/mp/collect";
 
@@ -27,18 +25,18 @@ export interface MpPurchaseParams {
   transaction_id: string;
   value: number;
   customer_id?: string | null;
+  ga_client_id?: string | null;
+  ga_session_id?: string | null;
+  ga_session_number?: string | null;
+  ga_context_captured_at?: string | null;
   payment_type?: string;
   tax?: number;
   items?: MpItem[];
 }
 
-// Deterministic client_id when no cookie is available — keeps a single customer
-// stable across server-side events even without their browser fingerprint.
-function deriveClientId(seed: string): string {
-  const hash = createHash("sha256").update(seed).digest("hex");
-  // GA4 client_id format: <random>.<timestamp> — 10 digits each is enough
-  return `${hash.slice(0, 10)}.${hash.slice(10, 20)}`;
-}
+const GA_CLIENT_ID_RE = /^\d{1,20}\.\d{1,20}$/;
+const GA_SESSION_ID_RE = /^\d{1,20}$/;
+const SESSION_CONTEXT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export async function sendMeasurementProtocolEvent(input: MpEventParams & { debug?: boolean }): Promise<boolean> {
   const measurementId = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
@@ -49,7 +47,11 @@ export async function sendMeasurementProtocolEvent(input: MpEventParams & { debu
     return false;
   }
 
-  const clientId = input.client_id ?? deriveClientId(input.user_id ?? input.event_name + Date.now().toString());
+  if (!input.client_id || !GA_CLIENT_ID_RE.test(input.client_id)) {
+    console.warn("[ga4-mp] missing or invalid client_id — skipping event", input.event_name);
+    return false;
+  }
+  const clientId = input.client_id;
 
   const body: Record<string, unknown> = {
     client_id: clientId,
@@ -90,19 +92,31 @@ export async function sendMeasurementProtocolEvent(input: MpEventParams & { debu
   }
 }
 
-export function deriveClientIdFromCustomer(customerId: string): string {
-  return deriveClientId(`tc-customer:${customerId}`);
-}
-
 export function sendMeasurementProtocolPurchase(input: MpPurchaseParams): Promise<boolean> {
+  const clientId = input.ga_client_id?.trim();
+  if (!clientId || !GA_CLIENT_ID_RE.test(clientId)) {
+    // A made-up client ID turns legitimate server purchases into "Unassigned"
+    // revenue. A legacy/manual order with no browser context is intentionally
+    // omitted from GA4 instead; accounting and the durable order ledger remain
+    // the source of truth for those sales.
+    console.info("[ga4-mp] purchase has no browser GA context — intentionally omitted");
+    return Promise.resolve(true);
+  }
+
+  const capturedAt = input.ga_context_captured_at ? new Date(input.ga_context_captured_at).getTime() : Number.NaN;
+  const sessionFresh = Number.isFinite(capturedAt) && Date.now() - capturedAt <= SESSION_CONTEXT_MAX_AGE_MS;
+  const sessionId = input.ga_session_id?.trim();
+  const sessionNumber = input.ga_session_number?.trim();
   return sendMeasurementProtocolEvent({
     event_name: "purchase",
-    client_id: deriveClientIdFromCustomer(input.customer_id ?? input.transaction_id),
-    user_id: input.customer_id ?? undefined,
+    client_id: clientId,
     params: {
       transaction_id: input.transaction_id,
       value: input.value,
       currency: "CAD",
+      ...(sessionFresh && sessionId && GA_SESSION_ID_RE.test(sessionId) ? { session_id: sessionId } : {}),
+      ...(sessionFresh && sessionNumber && GA_SESSION_ID_RE.test(sessionNumber) ? { session_number: sessionNumber } : {}),
+      ...(sessionFresh && sessionId && GA_SESSION_ID_RE.test(sessionId) ? { engagement_time_msec: 1 } : {}),
       ...(input.payment_type ? { payment_type: input.payment_type } : {}),
       ...(input.tax !== undefined ? { tax: input.tax } : {}),
       items: input.items ?? [],

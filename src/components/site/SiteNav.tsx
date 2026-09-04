@@ -329,7 +329,7 @@ export function SiteNav() {
                 >
                   {INDUSTRY_LINKS.map((link) => (
                     <Link
-                      key={link.href}
+                      key={`${link.label}:${link.href}`}
                       href={link.href}
                       onClick={() => setOpenMenu(null)}
                       className="block px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors first:rounded-t-lg last:rounded-b-lg"
@@ -598,7 +598,7 @@ export function SiteNav() {
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Industries</h3>
               <ul className="space-y-1">
                 {INDUSTRY_LINKS.map((link) => (
-                  <li key={link.href}>
+                  <li key={`${link.label}:${link.href}`}>
                     <Link
                       href={link.href}
                       onClick={() => setDrawerOpen(false)}

@@ -62,7 +62,11 @@ export function hashForDataManager(normalized: string): string {
 }
 
 /** Builds the hashed identifier list. Returns [] when nothing usable is present. */
-export function buildUserIdentifiers(job: PaidConversionJob): Array<Record<string, string>> {
+export function buildUserIdentifiers(
+  job: PaidConversionJob,
+  env: GoogleDataManagerEnv = process.env,
+): Array<Record<string, string>> {
+  if (!enhancedConversionsEnabled(env)) return [];
   const identifiers: Array<Record<string, string>> = [];
   const email = job.customer_email ? normalizeEmailForHashing(job.customer_email) : null;
   if (email) identifiers.push({ emailAddress: hashForDataManager(email) });
@@ -80,6 +84,12 @@ interface GoogleDataManagerEnv {
   GOOGLE_ADS_QUOTE_WON_CONVERSION_ACTION_ID?: string;
   GOOGLE_ADS_QUOTE_LEAD_CONVERSION_ACTION_ID?: string;
   GOOGLE_DATA_MANAGER_PROJECT_ID?: string;
+  GOOGLE_ADS_ENHANCED_CONVERSIONS_ENABLED?: string;
+}
+
+/** PII-derived enhanced conversions require an explicit owner opt-in. */
+export function enhancedConversionsEnabled(env: GoogleDataManagerEnv = process.env): boolean {
+  return env.GOOGLE_ADS_ENHANCED_CONVERSIONS_ENABLED?.trim().toLowerCase() === "true";
 }
 
 function requireEnv(env: GoogleDataManagerEnv, name: keyof GoogleDataManagerEnv): string {
@@ -128,7 +138,7 @@ export function buildDataManagerRequest(
   const transactionId = job.order_number.trim();
   if (!transactionId) throw new Error("order_number is required");
 
-  const userIdentifiers = buildUserIdentifiers(job);
+  const userIdentifiers = buildUserIdentifiers(job, env);
 
   return {
     destinations: [{
@@ -224,7 +234,7 @@ export async function uploadPaidConversion(
     return { response, body };
   };
 
-  const hasUserData = buildUserIdentifiers(job).length > 0;
+  const hasUserData = buildUserIdentifiers(job, env).length > 0;
   let enhancedConversionsApplied = hasUserData;
   let { response, body } = await send(buildDataManagerRequest(job, env, options.validateOnly === true));
 

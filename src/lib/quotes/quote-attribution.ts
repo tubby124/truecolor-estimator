@@ -33,11 +33,20 @@ export const QUOTE_ATTRIBUTION_COLUMNS = [
   "latest_paid_touch_captured_at",
 ] as const;
 
+/** Browser-issued GA4 context is copied separately from paid-click attribution. */
+export const QUOTE_GA4_CONTEXT_COLUMNS = [
+  "ga_client_id", "ga_session_id", "ga_session_number", "ga_context_captured_at",
+] as const;
+
 export type QuoteAttributionColumn = (typeof QUOTE_ATTRIBUTION_COLUMNS)[number];
-export type OrderAttributionColumns = Record<QuoteAttributionColumn, unknown>;
+export type QuoteGa4ContextColumn = (typeof QUOTE_GA4_CONTEXT_COLUMNS)[number];
+export type OrderAttributionColumns = Record<QuoteAttributionColumn | QuoteGa4ContextColumn, unknown>;
 
 /** PostgREST select list for the attribution columns. */
-export const QUOTE_ATTRIBUTION_SELECT = QUOTE_ATTRIBUTION_COLUMNS.join(", ");
+export const QUOTE_ATTRIBUTION_SELECT = [
+  ...QUOTE_ATTRIBUTION_COLUMNS,
+  ...QUOTE_GA4_CONTEXT_COLUMNS,
+].join(", ");
 
 /**
  * The only columns the outbox trigger reads when deciding `pending` vs
@@ -75,7 +84,8 @@ export function pickQuoteAttributionForOrder(
 ): Partial<OrderAttributionColumns> {
   if (!quoteRow) return {};
   return Object.fromEntries(
-    QUOTE_ATTRIBUTION_COLUMNS.map((column) => [column, quoteRow[column] ?? null]),
+    [...QUOTE_ATTRIBUTION_COLUMNS, ...QUOTE_GA4_CONTEXT_COLUMNS]
+      .map((column) => [column, quoteRow[column] ?? null]),
   ) as Partial<OrderAttributionColumns>;
 }
 

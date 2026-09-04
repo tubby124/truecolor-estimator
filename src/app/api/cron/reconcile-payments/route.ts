@@ -57,6 +57,10 @@ interface PendingCloverOrder {
   wave_invoice_id: string | null;
   wave_invoice_approved_at: string | null;
   customer_id: string | null;
+  ga_client_id: string | null;
+  ga_session_id: string | null;
+  ga_session_number: string | null;
+  ga_context_captured_at: string | null;
   order_items?: { product_name?: string | null; qty?: number | null; line_total?: number | string | null }[] | null;
   customers?: { email?: string | null; name?: string | null; company?: string | null } | { email?: string | null; name?: string | null; company?: string | null }[] | null;
 }
@@ -212,6 +216,10 @@ async function recoverCloverCapture(
     transaction_id: order.id,
     value: Number(order.total),
     customer_id: order.customer_id,
+    ga_client_id: order.ga_client_id,
+    ga_session_id: order.ga_session_id,
+    ga_session_number: order.ga_session_number,
+    ga_context_captured_at: order.ga_context_captured_at,
     payment_type: "clover_card",
     tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
     items: measurementItems.map((item) => ({
@@ -436,6 +444,7 @@ export async function GET(req: NextRequest) {
     .from("orders")
     .select(`id, order_number, total, gst, pst, created_at, payment_reference,
              wave_invoice_id, wave_invoice_approved_at, customer_id,
+             ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
              order_items ( product_name, qty, line_total ),
              customers ( email, name, company )`)
     .eq("payment_method", "clover_card")

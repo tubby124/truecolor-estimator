@@ -42,6 +42,7 @@ import {
 } from "@/lib/quote-request-guard";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { getMetaCapiRequestContext, sendMetaCapiEvent } from "@/lib/analytics/metaCapi";
+import { parseGa4ClientContext } from "@/lib/analytics/ga4-client-context";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -269,6 +270,11 @@ export async function POST(req: NextRequest) {
       shippingAddressRaw.length > 0 && shippingAddressRaw.length <= 300
         ? shippingAddressRaw
         : null;
+    const ga4Context = parseGa4ClientContext({
+      ga_client_id: form.get("ga_client_id"),
+      ga_session_id: form.get("ga_session_id"),
+      ga_session_number: form.get("ga_session_number"),
+    });
 
     // Contact validation
     if (!name || !email) {
@@ -528,6 +534,10 @@ export async function POST(req: NextRequest) {
               }).landing_referrer ?? "").slice(0, 500) || null,
             ...mapAttributionToDb(utm),
             ...mapLatestPaidAttributionToDb(latestPaidTouch),
+            ga_client_id: ga4Context?.ga_client_id ?? null,
+            ga_session_id: ga4Context?.ga_session_id ?? null,
+            ga_session_number: ga4Context?.ga_session_number ?? null,
+            ga_context_captured_at: ga4Context ? new Date().toISOString() : null,
           })
           .select("id, file_links")
           .single();

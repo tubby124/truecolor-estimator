@@ -170,6 +170,16 @@ export function buildGoogleTagBootstrapScript(
   return `window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};window.gtag('js',new Date());window.gtag('config','${GA4_MEASUREMENT_ID}');${adsConfig}${websiteCallConfig}`;
 }
 
+/**
+ * Keeps the Google tag completely out of payment-link documents. Those URLs
+ * carry a signed bearer token, so even tag bootstrap or attribution storage is
+ * inappropriate there. Public documents keep the same queue-before-library
+ * ordering as the standard Google tag snippet.
+ */
+export function buildGoogleTagDocumentScript(bootstrapScript: string): string {
+  return `if(!/^\\/pay(?:\\/|$)/.test(window.location.pathname)){${bootstrapScript}var tcGoogleTag=document.createElement('script');tcGoogleTag.async=true;tcGoogleTag.src='https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}';document.head.appendChild(tcGoogleTag);}`;
+}
+
 function browserStorages(): Pick<SendDependencies, "localStorage" | "sessionStorage"> {
   if (typeof window === "undefined") return {};
   let localStorage: StorageLike | undefined;

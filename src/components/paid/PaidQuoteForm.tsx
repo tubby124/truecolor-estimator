@@ -12,6 +12,7 @@ import {
 } from "@/lib/analytics/utm";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 import { sanitizeError } from "@/lib/errors/sanitize";
+import { appendGa4ClientContextToFormData } from "@/lib/analytics/ga4-client-context";
 import { trackPaidCta } from "@/components/paid/PaidProductLink";
 import {
   clearQuoteSubmission,
@@ -153,6 +154,7 @@ export function PaidQuoteForm() {
     const payload = buildPaidQuotePayload(fd, turnstileToken);
     appendAttributionToFormData(payload, readUtmFromStorage());
     appendLatestPaidAttributionToFormData(payload, readLatestPaidFromStorage());
+    await appendGa4ClientContextToFormData(payload);
     const { submissionKey } = getOrCreateQuoteSubmission(
       "paid-compact-quote",
       payload,

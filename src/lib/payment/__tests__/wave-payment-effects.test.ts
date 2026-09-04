@@ -36,6 +36,10 @@ const ORDER: WavePaymentOrder = {
   created_at: "2026-07-24T12:00:00.000Z",
   paid_at: "2026-07-24T12:05:00.000Z",
   receipt_token: "receipt-token",
+  ga_client_id: "1234567890.1234567890",
+  ga_session_id: "1234567890",
+  ga_session_number: "2",
+  ga_context_captured_at: "2026-07-24T12:00:00.000Z",
   customers: {
     email: "customer@example.com",
     name: "Test Customer",

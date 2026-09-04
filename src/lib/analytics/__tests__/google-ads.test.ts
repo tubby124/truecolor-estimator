@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  buildGoogleTagDocumentScript,
   buildGoogleTagBootstrapScript,
   deriveGoogleAdsTagId,
   normalizeGoogleAdsTagId,
@@ -43,6 +44,45 @@ describe("account-level Google Ads tag ID", () => {
   it("keeps the label-derived tag working when no explicit tag ID is set", () => {
     expect(configuredAdsTags(buildGoogleTagBootstrapScript("AW-123456789/label", undefined)))
       .toEqual(["AW-123456789"]);
+  });
+});
+
+describe("Google tag document guard", () => {
+  it("does not bootstrap or request Google tags on payment-link documents", () => {
+    const appended: Array<{ async?: boolean; src?: string }> = [];
+    const fakeWindow = { location: { pathname: "/pay/signed-token" } };
+    const fakeDocument = {
+      createElement: () => ({} as { async?: boolean; src?: string }),
+      head: { appendChild: (element: { async?: boolean; src?: string }) => appended.push(element) },
+    };
+
+    Function("window", "document", buildGoogleTagDocumentScript("window.bootstrapRan=true;"))(
+      fakeWindow,
+      fakeDocument,
+    );
+
+    expect(appended).toEqual([]);
+    expect(fakeWindow).not.toHaveProperty("bootstrapRan");
+  });
+
+  it("keeps the Google tag on public documents", () => {
+    const appended: Array<{ async?: boolean; src?: string }> = [];
+    const fakeWindow = { location: { pathname: "/" } };
+    const fakeDocument = {
+      createElement: () => ({} as { async?: boolean; src?: string }),
+      head: { appendChild: (element: { async?: boolean; src?: string }) => appended.push(element) },
+    };
+
+    Function("window", "document", buildGoogleTagDocumentScript("window.bootstrapRan=true;"))(
+      fakeWindow,
+      fakeDocument,
+    );
+
+    expect(fakeWindow).toHaveProperty("bootstrapRan", true);
+    expect(appended).toEqual([{
+      async: true,
+      src: "https://www.googletagmanager.com/gtag/js?id=G-6HMQT7MNLL",
+    }]);
   });
 });
 

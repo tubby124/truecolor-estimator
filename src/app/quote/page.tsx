@@ -9,6 +9,7 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
 import { appendLatestPaidAttributionToFormData } from "@/lib/analytics/utm";
+import { appendGa4ClientContextToFormData } from "@/lib/analytics/ga4-client-context";
 import { trackGenerateLead } from "@/lib/analytics";
 import { PRODUCT_OPTIONS } from "@/lib/constants/products";
 import { REVIEW_COUNT, RATING_VALUE } from "@/lib/reviews";
@@ -199,6 +200,7 @@ function QuoteForm() {
       // last submit path missing it (checkout, PaidQuoteForm, ContactForm, and
       // the portal all send it).
       appendLatestPaidAttributionToFormData(fd, readLatestPaidFromStorage());
+      await appendGa4ClientContextToFormData(fd);
 
       const res = await fetch("/api/quote-request", {
         method: "POST",

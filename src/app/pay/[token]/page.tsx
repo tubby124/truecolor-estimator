@@ -222,8 +222,7 @@ function QuotePayNowPage({
           ? "Secure checkout could not be confirmed. Please contact us before trying again."
           : null;
   return (
-    <html lang="en">
-      <body style={{ margin: 0, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#f1f5f9" }}>
+    <section style={{ minHeight: "100vh", padding: "1px 0", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#f1f5f9" }}>
         <main style={{ maxWidth: 480, margin: "80px auto", padding: "40px 32px", background: "white", borderRadius: 16, boxShadow: "0 1px 8px rgba(0,0,0,0.08)", textAlign: "center" }}>
           <p style={{ fontSize: 42, margin: "0 0 14px" }}>🔒</p>
           <h1 style={{ fontSize: 22, color: "#111827", margin: "0 0 10px" }}>Review and pay your quote</h1>
@@ -265,17 +264,16 @@ function QuotePayNowPage({
             Your order is created only after you continue. Your card details are handled securely by Clover.
           </p>
         </main>
-      </body>
-    </html>
+    </section>
   );
 }
 
 function AlreadyPaidPage() {
   return (
-    <html lang="en">
-      <body
+    <section
         style={{
-          margin: 0,
+          minHeight: "100vh",
+          padding: "1px 0",
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           background: "#f1f5f9",
         }}
@@ -328,17 +326,16 @@ function AlreadyPaidPage() {
             True Color Display Printing · info@true-color.ca
           </p>
         </div>
-      </body>
-    </html>
+    </section>
   );
 }
 
 function UpdatedLinkPage() {
   return (
-    <html lang="en">
-      <body
+    <section
         style={{
-          margin: 0,
+          minHeight: "100vh",
+          padding: "1px 0",
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           background: "#f1f5f9",
         }}
@@ -391,17 +388,16 @@ function UpdatedLinkPage() {
             True Color Display Printing · info@true-color.ca
           </p>
         </div>
-      </body>
-    </html>
+    </section>
   );
 }
 
 function ExpiredPage() {
   return (
-    <html lang="en">
-      <body
+    <section
         style={{
-          margin: 0,
+          minHeight: "100vh",
+          padding: "1px 0",
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           background: "#f1f5f9",
         }}
@@ -470,17 +466,16 @@ function ExpiredPage() {
             True Color Display Printing · info@true-color.ca
           </p>
         </div>
-      </body>
-    </html>
+    </section>
   );
 }
 
 function ErrorPage() {
   return (
-    <html lang="en">
-      <body
+    <section
         style={{
-          margin: 0,
+          minHeight: "100vh",
+          padding: "1px 0",
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           background: "#f1f5f9",
         }}
@@ -549,7 +544,6 @@ function ErrorPage() {
             True Color Display Printing · info@true-color.ca
           </p>
         </div>
-      </body>
-    </html>
+    </section>
   );
 }

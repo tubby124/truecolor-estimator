@@ -81,6 +81,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         discount_code, discount_amount, wave_invoice_id,
         wave_invoice_approved_at, wave_payment_recorded_at,
         created_at, receipt_token, meta_tracking_consent, meta_fbp, meta_fbc,
+        ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
         order_items ( product_name, qty, width_in, height_in, sides, line_total ),
         customers ( name, email, phone, company, marketing_consent )
       `)
@@ -171,6 +172,10 @@ export async function POST(req: NextRequest, { params }: Params) {
       transaction_id: order.id,
       value: Number(order.total),
       customer_id: order.customer_id,
+      ga_client_id: order.ga_client_id,
+      ga_session_id: order.ga_session_id,
+      ga_session_number: order.ga_session_number,
+      ga_context_captured_at: order.ga_context_captured_at,
       payment_type: "clover_card",
       tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
       items: measurementItems.map((item) => ({

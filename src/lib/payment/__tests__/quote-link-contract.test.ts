@@ -25,6 +25,7 @@ describe("quote payment linkage contract", () => {
     expect(quoteReturn).toBeLessThan(gateway.indexOf("createCloverCheckout("));
     expect(gateway).not.toContain("materializeQuoteOrder");
     expect(gateway).toContain('action="/api/pay/quote" method="post"');
+    expect(gateway).not.toContain('<html lang="en">');
 
     const post = source("src/app/api/pay/quote/route.ts");
     expect(post).toContain("export async function POST");

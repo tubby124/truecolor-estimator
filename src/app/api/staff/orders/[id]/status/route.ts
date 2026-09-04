@@ -145,6 +145,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       const { data: statsOrder } = await supabase
         .from("orders")
         .select(`customer_id, total, gst, pst, payment_method,
+                 ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
                  order_items ( product_name, qty, line_total )`)
         .eq("id", id)
         .single();
@@ -155,6 +156,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           transaction_id: id,
           value: Number(statsOrder.total),
           customer_id: statsOrder.customer_id,
+          ga_client_id: statsOrder.ga_client_id,
+          ga_session_id: statsOrder.ga_session_id,
+          ga_session_number: statsOrder.ga_session_number,
+          ga_context_captured_at: statsOrder.ga_context_captured_at,
           payment_type: statsOrder.payment_method ?? "staff_manual",
           tax: Number(statsOrder.gst ?? 0) + Number(statsOrder.pst ?? 0),
           items: measurementItems.map((item) => ({

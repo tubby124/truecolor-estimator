@@ -4,6 +4,7 @@ import {
   AUTO_LINK_WINDOW_DAYS,
   CLICK_ID_COLUMNS,
   QUOTE_ATTRIBUTION_COLUMNS,
+  QUOTE_GA4_CONTEXT_COLUMNS,
   QUOTE_ATTRIBUTION_SELECT,
   autoLinkStaffNote,
   autoLinkWindowStartIso,
@@ -29,7 +30,10 @@ describe("pickQuoteAttributionForOrder", () => {
       utm_source: "google",
       utm_medium: "cpc",
     });
-    expect(Object.keys(mapped).sort()).toEqual([...QUOTE_ATTRIBUTION_COLUMNS].sort());
+    expect(Object.keys(mapped).sort()).toEqual([
+      ...QUOTE_ATTRIBUTION_COLUMNS,
+      ...QUOTE_GA4_CONTEXT_COLUMNS,
+    ].sort());
     expect(mapped.gclid).toBe("Cj0KCQ-first-touch");
     expect(mapped.utm_source).toBe("google");
     expect(mapped.latest_paid_gclid).toBeNull();
@@ -71,7 +75,10 @@ describe("pickQuoteAttributionForOrder", () => {
   });
 
   it("exposes the same column set as a PostgREST select list", () => {
-    expect(QUOTE_ATTRIBUTION_SELECT.split(", ")).toEqual([...QUOTE_ATTRIBUTION_COLUMNS]);
+    expect(QUOTE_ATTRIBUTION_SELECT.split(", ")).toEqual([
+      ...QUOTE_ATTRIBUTION_COLUMNS,
+      ...QUOTE_GA4_CONTEXT_COLUMNS,
+    ]);
   });
 });
 

@@ -465,6 +465,7 @@ export async function POST(req: NextRequest) {
               .eq("status", "pending_payment")
               .is("voided_at", null)
             .select(`id, order_number, customer_id, total, gst, pst, is_rush,
+                     ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
                      wave_invoice_id, wave_invoice_approved_at, wave_payment_recorded_at,
                      order_items ( product_name, qty, line_total )`);
 
@@ -539,6 +540,10 @@ export async function POST(req: NextRequest) {
                 transaction_id: order.id,
                 value: Number(order.total),
                 customer_id: order.customer_id,
+                ga_client_id: order.ga_client_id,
+                ga_session_id: order.ga_session_id,
+                ga_session_number: order.ga_session_number,
+                ga_context_captured_at: order.ga_context_captured_at,
                 payment_type: "clover_card",
                 tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
                 items: purchaseItems.map((item) => ({

@@ -18,6 +18,7 @@ import {
   getOrCreateQuoteSubmission,
 } from "@/lib/quote-request-client";
 import { metaTrackLead } from "@/lib/analytics/metaPixel";
+import { appendGa4ClientContextToFormData } from "@/lib/analytics/ga4-client-context";
 
 // localStorage key per-brokerage so an agent who orders from two different
 // brokerage portals (rare but possible) doesn't bleed details across.
@@ -275,6 +276,7 @@ export function PortalOrderForm({
       form.append("shipping_address", shipForApi);
       appendAttributionToFormData(form, readUtmFromStorage());
       appendLatestPaidAttributionToFormData(form, readLatestPaidFromStorage());
+      await appendGa4ClientContextToFormData(form);
       const { submissionKey } = getOrCreateQuoteSubmission(
         `brokerage-portal:${brokerage.slug}`,
         form,

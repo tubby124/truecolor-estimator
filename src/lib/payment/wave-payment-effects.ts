@@ -28,6 +28,10 @@ export interface WavePaymentOrder {
   created_at: string;
   paid_at: string;
   receipt_token: string | null;
+  ga_client_id: string | null;
+  ga_session_id: string | null;
+  ga_session_number: string | null;
+  ga_context_captured_at: string | null;
   customers:
     | {
         email: string | null;
@@ -85,6 +89,7 @@ async function loadOrder(
       subtotal, gst, pst, total, is_rush,
       discount_code, discount_amount,
       created_at, paid_at, receipt_token,
+      ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
       customers ( email, name, company ),
       order_items ( product_name, qty, width_in, height_in, sides, line_total )
     `)
@@ -140,6 +145,10 @@ export async function performWavePaymentEffect(
       transaction_id: order.id,
       value: Number(order.total),
       customer_id: order.customer_id,
+      ga_client_id: order.ga_client_id,
+      ga_session_id: order.ga_session_id,
+      ga_session_number: order.ga_session_number,
+      ga_context_captured_at: order.ga_context_captured_at,
       tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
       payment_type: "wave",
       items: items.map((item) => ({

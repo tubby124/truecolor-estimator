@@ -2,12 +2,13 @@ import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { recordCronRun } from "@/lib/cron/heartbeat";
 import {
+  enhancedConversionsEnabled,
   retrievePaidConversionDiagnostics,
   uploadPaidConversion,
   type PaidConversionJob,
 } from "@/lib/google-ads/conversion-upload";
 import { createServiceClient } from "@/lib/supabase/server";
-import { deriveClientIdFromCustomer, sendMeasurementProtocolEvent } from "@/lib/analytics/measurementProtocol";
+import { sendMeasurementProtocolEvent } from "@/lib/analytics/measurementProtocol";
 
 interface PaidConversionDiagnosticJob extends PaidConversionJob {
   data_manager_request_id: string | null;
@@ -295,7 +296,9 @@ export async function POST(req: NextRequest) {
   let failed = 0;
   for (const job of jobs) {
     try {
-      const enrichedJob = await attachEnhancedConversionIdentifiers(supabase, job);
+      const enrichedJob = enhancedConversionsEnabled()
+        ? await attachEnhancedConversionIdentifiers(supabase, job)
+        : job;
       const result = await uploadPaidConversion(enrichedJob);
       if (!result.requestId) throw new Error("Data Manager ingest returned no request ID");
       const now = new Date();
@@ -494,20 +497,55 @@ export async function POST(req: NextRequest) {
     .rpc("claim_quote_measurement_events", { p_limit: CLAIM_LIMIT });
   const quoteEvents = (quoteEventData ?? []) as QuoteMeasurementJob[];
   let quoteSent = 0;
+  let quoteSkipped = 0;
   if (quoteEventClaimError) {
     failed += 1;
   } else {
     for (const event of quoteEvents) {
       try {
+        const { data: quoteContext, error: quoteContextError } = await supabase
+          .from("quote_requests")
+          .select("ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at")
+          .eq("id", event.quote_id)
+          .maybeSingle();
+        if (quoteContextError) throw new Error("Could not load quote GA4 context");
+
+        // The browser already emits generate_lead after a successful form submit.
+        // Do not replace a missing browser identity with a fabricated one in this
+        // durable fallback: it would create an unattributable synthetic visitor.
+        if (!quoteContext?.ga_client_id) {
+          const { error: skippedUpdateError } = await supabase
+            .from("quote_measurement_event_outbox")
+            .update({
+              status: "sent",
+              sent_at: new Date().toISOString(),
+              processing_started_at: null,
+              last_error: "GA4 skipped: browser context unavailable",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", event.id)
+            .eq("status", "processing");
+          if (skippedUpdateError) throw new Error(skippedUpdateError.message);
+          quoteSkipped += 1;
+          continue;
+        }
+
+        const capturedAt = quoteContext.ga_context_captured_at
+          ? new Date(quoteContext.ga_context_captured_at).getTime()
+          : Number.NaN;
+        const sessionFresh = Number.isFinite(capturedAt) && Date.now() - capturedAt <= 24 * 60 * 60 * 1000;
         const delivered = await sendMeasurementProtocolEvent({
           event_name: event.event_name,
-          client_id: deriveClientIdFromCustomer(event.quote_id),
-          user_id: event.quote_id,
+          client_id: quoteContext.ga_client_id,
           params: {
             quote_id: event.quote_id,
             event_id: `${event.event_name}:${event.quote_id}`,
             form_id: event.event_name === "quote_qualified" ? "staff_structured_quote" : "quote-request",
-            engagement_time_msec: 1,
+            ...(sessionFresh && quoteContext.ga_session_id ? {
+              session_id: quoteContext.ga_session_id,
+              engagement_time_msec: 1,
+              ...(quoteContext.ga_session_number ? { session_number: quoteContext.ga_session_number } : {}),
+            } : {}),
           },
         });
         if (!delivered) throw new Error(`GA4 Measurement Protocol did not accept ${event.event_name}`);
@@ -542,7 +580,7 @@ export async function POST(req: NextRequest) {
   await recordCronRun(
     "google-ads-conversions",
     ok,
-    `revenue_claimed=${jobs.length} revenue_submitted=${submitted} diagnostics_claimed=${diagnosticJobs.length} diagnostics_sent=${sent} diagnostics_processing=${diagnosticProcessing} diagnostics_retry=${diagnosticRetry} diagnostics_dead=${diagnosticDead}${quoteLeadMetrics} quote_claimed=${quoteEvents.length} quote_sent=${quoteSent} failed=${failed}`,
+    `revenue_claimed=${jobs.length} revenue_submitted=${submitted} diagnostics_claimed=${diagnosticJobs.length} diagnostics_sent=${sent} diagnostics_processing=${diagnosticProcessing} diagnostics_retry=${diagnosticRetry} diagnostics_dead=${diagnosticDead}${quoteLeadMetrics} quote_claimed=${quoteEvents.length} quote_sent=${quoteSent} quote_skipped=${quoteSkipped} failed=${failed}`,
   );
 
   return NextResponse.json({
@@ -559,7 +597,7 @@ export async function POST(req: NextRequest) {
       },
     },
     ...(quoteLead.dormant ? {} : { quoteLeads: quoteLead }),
-    quotes: { claimed: quoteEvents.length, sent: quoteSent },
+    quotes: { claimed: quoteEvents.length, sent: quoteSent, skipped: quoteSkipped },
     failed,
   }, { status: ok ? 200 : 503 });
 }

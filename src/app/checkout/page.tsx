@@ -21,6 +21,7 @@ import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/o
 import { computePstBase } from "@/lib/pricing/tax";
 import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
 import { toLatestPaidHintPayload } from "@/lib/analytics/utm";
+import { captureGa4ClientContext } from "@/lib/analytics/ga4-client-context";
 
 const DEFAULT_GST_RATE = 0.05;
 const PST_RATE = 0.06;
@@ -458,6 +459,9 @@ export default function CheckoutPage() {
     // Guarantee the funnel step exists even when the customer never touched the
     // payment radios (clover_card is preselected). No-op if already sent.
     trackPaymentMethod(payMethod);
+    // Capture the browser-issued GA identity while the checkout session is still
+    // active. It runs alongside artwork upload so analytics never adds latency.
+    const ga4ContextPromise = captureGa4ClientContext();
     try {
       // Upload artwork files one-by-one via server-side API (bypasses storage RLS)
       const filePaths: string[] = [];
@@ -496,6 +500,7 @@ export default function CheckoutPage() {
       }
 
       const attribution = readUtmFromStorage() ?? {};
+      const ga4Context = await ga4ContextPromise;
       // Latest paid touch travels under its own prefix so it cannot collide with
       // the flat first-touch fields spread below.
       const latestPaidHints = toLatestPaidHintPayload(readLatestPaidFromStorage());
@@ -517,6 +522,7 @@ export default function CheckoutPage() {
         discount_code: appliedDiscount?.code,
         discount_amount: appliedDiscount?.amount,
         marketing_consent: marketingConsent,
+        ...(ga4Context ?? {}),
         ...attribution,
         ...latestPaidHints,
       };

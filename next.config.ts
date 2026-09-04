@@ -233,6 +233,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/standing-banners",
+        destination: "/retractable-banners-saskatoon",
+        permanent: true,
+      },
+      {
         source: "/vinyl-decals-lettering-and-vehicle-decals",
         destination: "/vinyl-lettering-saskatoon",
         permanent: true,
@@ -420,6 +425,18 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.trustindex.io https://*.trustindex.io https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.gstatic.com https://challenges.cloudflare.com https://connect.facebook.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.trustindex.io https://*.trustindex.io; img-src 'self' data: https:; connect-src 'self' https://dczbgraekmzirxknjvwe.supabase.co wss://dczbgraekmzirxknjvwe.supabase.co https://api.brevo.com https://api.clover.com https://*.trustindex.io https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://www.google.com https://www.google.ca https://stats.g.doubleclick.net https://ad.doubleclick.net https://www.googleadservices.com https://googleads.g.doubleclick.net https://challenges.cloudflare.com https://www.facebook.com https://cloudflareinsights.com; frame-src https://*.trustindex.io https://www.trustindex.io https://challenges.cloudflare.com; frame-ancestors 'none'; font-src 'self' data: https://cdn.trustindex.io https://*.trustindex.io;",
           },
+        ],
+      },
+      // This must follow the all-routes security rule: Next applies matching
+      // header rules in order, and payment links need stricter cache/referrer
+      // controls than a normal public document.
+      {
+        source: "/pay/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+          { key: "Pragma", value: "no-cache" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
         ],
       },
     ];

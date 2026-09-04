@@ -32,4 +32,15 @@ describe("print resource middleware guard", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
+
+  it("keeps payment-link responses private and free of attribution cookies", async () => {
+    const response = await proxy(
+      new NextRequest("https://truecolorprinting.ca/pay/invalid-token?gclid=click-id"),
+    );
+
+    expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
+    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
+    expect(response.headers.get("set-cookie")).toBeNull();
+  });
 });

@@ -23,28 +23,39 @@ export function guardPrintResourcePath(pathname: string): NextResponse | null {
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  // Payment links contain a signed bearer token. They must not receive click
+  // attribution cookies or be cached/referred to a third party.
+  const isPaymentPath = /^\/pay(?:\/|$)/.test(path);
 
   // Server-side click capture. The client writer (UtmCapture) is the only thing
   // that ever stored a click ID, so a blocked script, a JS error, or Safari ITP
   // evicting a script-written cookie lost the click permanently. Doing it here
   // means the click is persisted before any JS runs.
-  const attributionCookies = buildAttributionSetCookies(
-    request.nextUrl,
-    request.headers.get("cookie"),
-    {
-      referrer: request.headers.get("referer"),
-      // Behind Cloudflare/Railway the inbound URL can be http even though the
-      // visitor is on https — trust the proxy header for the Secure attribute.
-      secure:
-        (request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", ""))
-          .split(",")[0]
-          .trim() === "https",
-    },
-  );
+  const attributionCookies = isPaymentPath
+    ? []
+    : buildAttributionSetCookies(
+      request.nextUrl,
+      request.headers.get("cookie"),
+      {
+        referrer: request.headers.get("referer"),
+        // Behind Cloudflare/Railway the inbound URL can be http even though the
+        // visitor is on https — trust the proxy header for the Secure attribute.
+        secure:
+          (request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", ""))
+            .split(",")[0]
+            .trim() === "https",
+      },
+    );
   // Appended (not `cookies.set`) so the value stays byte-identical to what
   // utm.ts serializes and the existing cookie parsers already consume, and so
   // it rides on whatever response this proxy was already returning.
   const withAttribution = (response: NextResponse) => {
+    if (isPaymentPath) {
+      response.headers.set("Cache-Control", "private, no-store, max-age=0");
+      response.headers.set("Pragma", "no-cache");
+      response.headers.set("Referrer-Policy", "no-referrer");
+      response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+    }
     for (const cookie of attributionCookies) {
       response.headers.append("set-cookie", cookie);
     }

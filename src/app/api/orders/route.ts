@@ -45,6 +45,7 @@ import {
 import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytics/attribution-db";
 import { getMetaCapiRequestContext } from "@/lib/analytics/metaCapi";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
+import { parseGa4ClientContext } from "@/lib/analytics/ga4-client-context";
 
 // `LatestPaidHintPayload` contributes the optional `latest_paid_*` fields the
 // checkout submit sends when localStorage still holds a paid touch that the
@@ -83,6 +84,9 @@ export interface CreateOrderRequest extends LatestPaidHintPayload {
   creative?: string;
   campaignid?: string;
   network?: string;
+  ga_client_id?: string;
+  ga_session_id?: string;
+  ga_session_number?: string;
 }
 
 const GST_RATE = 0.05;
@@ -116,6 +120,7 @@ export async function POST(req: NextRequest) {
       utm_source, utm_campaign, utm_medium, utm_content, utm_term,
       gclid, gbraid, wbraid, keyword, matchtype, device, loc_physical_ms,
       loc_interest_ms, adgroupid, creative, campaignid, network,
+      ga_client_id, ga_session_id, ga_session_number,
     } = body;
     // Rush capacity, fee, and timing are staff decisions. A browser checkbox
     // cannot create a payable rush order.
@@ -171,6 +176,7 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createServiceClient();
+    const ga4Context = parseGa4ClientContext({ ga_client_id, ga_session_id, ga_session_number });
 
     // 1. Find-or-insert customer.
     // The old upsert overwrote name/company/phone on every order — a returning
@@ -476,6 +482,10 @@ export async function POST(req: NextRequest) {
           meta_tracking_consent: metaContext.marketingConsent,
           meta_fbp: metaContext.fbp ?? null,
           meta_fbc: metaContext.fbc ?? null,
+          ga_client_id: ga4Context?.ga_client_id ?? null,
+          ga_session_id: ga4Context?.ga_session_id ?? null,
+          ga_session_number: ga4Context?.ga_session_number ?? null,
+          ga_context_captured_at: ga4Context ? new Date().toISOString() : null,
         })
         .select("id, order_number, customer_id, status, paid_at, total, payment_method, conversion_type, quote_request_id, checkout_request_fingerprint")
         .single();
