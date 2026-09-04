@@ -999,7 +999,7 @@ export default function CheckoutPage() {
                   <p className="text-sm text-gray-500">
                     Rush is a request only. Staff must confirm capacity, fee, and timing before payment.
                   </p>
-                  <a href="/quote" className="text-sm font-semibold text-[#16C2F3] hover:underline">Request rush confirmation</a>
+                  <Link href="/quote" className="text-sm font-semibold text-[#16C2F3] hover:underline">Request rush confirmation</Link>
                 </div>
               </div>
             </section>
