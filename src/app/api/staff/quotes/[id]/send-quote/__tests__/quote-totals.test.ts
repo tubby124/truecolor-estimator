@@ -42,6 +42,14 @@ describe("computeQuoteTotals — PST eligibility by structured tax class", () =>
     expect(t.grandTotal).toBe(55.5);
   });
 
+  it("makes an explicitly confirmed resale quote GST-only regardless of line tax class", () => {
+    const t = computeQuoteTotals([
+      { description: "Banner", qty: "1", unitPrice: "100", taxClass: "printed_good" },
+      { description: "Installation", qty: "1", unitPrice: "25", taxClass: "installation_service" },
+    ], rates, true);
+    expect(t).toEqual({ subtotal: 125, gst: 6.25, pst: 0, grandTotal: 131.25 });
+  });
+
   it("emphasizes the pre-tax subtotal consistently in HTML and plain text", () => {
     const opts = {
       customerName: "Ada Buyer",

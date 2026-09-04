@@ -76,6 +76,7 @@ export async function GET(req: NextRequest) {
         customers ( name, email )
       `)
       .eq("status", "pending_payment")
+      .is("voided_at", null)
       .or("is_archived.is.null,is_archived.eq.false")
       .lt("created_at", cutoff)
       .order("created_at", { ascending: true })

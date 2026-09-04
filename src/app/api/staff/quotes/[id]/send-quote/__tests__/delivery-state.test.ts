@@ -81,7 +81,7 @@ vi.mock("@/lib/supabase/server", () => ({
       throw new Error(`Unexpected table ${table}`);
     },
     rpc: async (name: string, args: Record<string, unknown>) => {
-      if (name === "prepare_structured_quote_send") {
+      if (name === "prepare_structured_quote_send" || name === "prepare_structured_quote_send_v3") {
         harness.events.push("prepare");
         if (harness.prepareError) {
           return { data: null, error: { message: harness.prepareError } };

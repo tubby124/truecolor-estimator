@@ -62,6 +62,13 @@ describe("applyOverrideTotal — exact tax-consistent back-solve", () => {
     expect(breakdown.totalCents).toBe(7777);
   });
 
+  it("keeps GST but removes PST for a confirmed resale exemption", () => {
+    const items = [product(100)];
+    const { breakdown } = applyOverrideTotal(items, undefined, true);
+    expect(breakdown).toEqual({ subtotalCents: 10000, gstCents: 500, pstCents: 0, totalCents: 10500 });
+    expect(computeBreakdownCents(items, true)).toEqual(breakdown);
+  });
+
   it("rejects a zero/negative override total", () => {
     expect(() => applyOverrideTotal([product(45)], 0)).toThrow();
     expect(() => applyOverrideTotal([product(45)], -5)).toThrow();

@@ -150,6 +150,8 @@ async function fetchOrders() {
       proof_sent_at,
       file_storage_paths,
       payment_reference,
+      voided_at,
+      quote_request_id,
       followup_count,
       followup_paused_at,
       followup_paused_reason,

@@ -59,6 +59,8 @@ export async function GET(
       subtotal,
       gst,
       pst,
+      pst_exempt,
+      pst_vendor_number,
       total,
       is_rush,
       discount_code,
@@ -145,6 +147,9 @@ export async function GET(
     rushFee,
     discountCode: order.discount_code ?? null,
     discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
+    pstExemptionNote: order.pst_exempt && order.pst_vendor_number
+      ? `PST exempt for resale — vendor licence ending ${String(order.pst_vendor_number).slice(-4)}`
+      : null,
   };
 
   // ── Render PDF ────────────────────────────────────────────────────────────────

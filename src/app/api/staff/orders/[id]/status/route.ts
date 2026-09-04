@@ -65,12 +65,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // a PAID receipt for money never collected.
     const { data: current } = await supabase
       .from("orders")
-      .select("status, order_number, completed_at")
+      .select("status, order_number, completed_at, voided_at")
       .eq("id", id)
       .maybeSingle();
 
     if (!current) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+    if (current.voided_at) {
+      return NextResponse.json({ error: "This payment request was voided and cannot be advanced" }, { status: 409 });
     }
     const isRepeatComplete = current.status === "complete" && status === "complete";
     if (current.status === status && !isRepeatComplete) {
@@ -97,7 +100,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         .from("orders")
         .update(transition)
         .eq("id", id)
-        .eq("status", current.status);
+        .eq("status", current.status)
+        .is("voided_at", null);
       if (status === "payment_received") transitionQuery = transitionQuery.is("paid_at", null);
       const { data: changedOrder, error } = await transitionQuery.select("id").maybeSingle();
 

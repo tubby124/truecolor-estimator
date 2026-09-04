@@ -20,17 +20,22 @@ import { encodePaymentToken } from "@/lib/payment/token";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import {
+  parsePstExemption,
+  pstExemptionInvoiceNote,
+  type PstExemptionDecision,
+  type PstExemptionInput,
+} from "@/lib/payment/pst-exemption";
+import {
+  computeStructuredQuoteTotals,
+  type StructuredQuoteLineItem,
+} from "@/lib/payment/structured-quote-tax";
+import {
   getQuoteTaxRates,
   validateStructuredQuotePricing,
   type QuoteTaxRates,
 } from "@/lib/payment/quote-order";
 
-export interface LineItem {
-  description: string;
-  qty: string;
-  unitPrice: string;
-  taxClass: "printed_good" | "design_service" | "rush_service" | "installation_service";
-}
+export type LineItem = StructuredQuoteLineItem;
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -89,12 +94,20 @@ export function buildQuoteSendFingerprint(input: {
   pstCents: number;
   totalCents: number;
   rates: QuoteTaxRates;
+  pstExemption?: PstExemptionDecision;
 }): string {
   // The property order is intentionally constructed here and never sourced
   // from user-provided objects. This gives exact HTTP retries one durable
   // logical-send key without conflating a changed price, recipient, or note.
+  const pstExemption = input.pstExemption ?? {
+    enabled: false,
+    vendorNumber: null,
+    resaleConfirmed: false,
+    rememberVendorNumber: false,
+    clearRememberedVendorNumber: false,
+  };
   const intent = {
-    version: 1,
+    version: 2,
     quoteId: input.quoteId,
     recipient: input.recipient.trim().toLowerCase(),
     customerName: input.customerName,
@@ -112,6 +125,9 @@ export function buildQuoteSendFingerprint(input: {
     totalCents: input.totalCents,
     gstRate: input.rates.gstRate,
     pstRate: input.rates.pstRate,
+    pstExempt: pstExemption.enabled,
+    pstVendorNumber: pstExemption.vendorNumber ?? "",
+    pstResaleConfirmed: pstExemption.resaleConfirmed,
   };
   return createHash("sha256").update(JSON.stringify(intent)).digest("hex");
 }
@@ -121,21 +137,12 @@ export function buildQuoteSendFingerprint(input: {
 // total the customer sees in the quote.
 // GST applies to the full subtotal. PST excludes separately itemized design
 // and rush services; printed goods and installation remain in the PST base.
-export function computeQuoteTotals(lineItems: LineItem[], rates: QuoteTaxRates): {
-  subtotal: number;
-  gst: number;
-  pst: number;
-  grandTotal: number;
-} {
-  const lineTotal = (li: LineItem) => (parseFloat(li.qty) || 0) * (parseFloat(li.unitPrice) || 0);
-  const subtotal = Math.round(lineItems.reduce((sum, li) => sum + lineTotal(li), 0) * 100) / 100;
-  const gst = Math.round(subtotal * rates.gstRate * 100) / 100;
-  const pstBase = lineItems
-    .filter((li) => !["design_service", "rush_service"].includes(li.taxClass))
-    .reduce((sum, li) => sum + lineTotal(li), 0);
-  const pst = Math.round(pstBase * rates.pstRate * 100) / 100;
-  const grandTotal = Math.round((subtotal + gst + pst) * 100) / 100;
-  return { subtotal, gst, pst, grandTotal };
+export function computeQuoteTotals(
+  lineItems: LineItem[],
+  rates: QuoteTaxRates,
+  pstExempt = false,
+) {
+  return computeStructuredQuoteTotals(lineItems, rates, pstExempt);
 }
 
 export function buildQuoteHtml(opts: {
@@ -145,11 +152,13 @@ export function buildQuoteHtml(opts: {
   payUrl: string;
   payLabel: string;
   rates: QuoteTaxRates;
+  pstExemption?: PstExemptionDecision;
 }): string {
-  const { customerName, lineItems, note, payUrl, payLabel, rates } = opts;
+  const { customerName, lineItems, note, payUrl, payLabel, rates, pstExemption } = opts;
   const firstName = customerName.split(/[\s,]/)[0];
 
-  const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems, rates);
+  const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems, rates, pstExemption?.enabled);
+  const exemptionNote = pstExemption ? pstExemptionInvoiceNote(pstExemption) : null;
 
   const rows = lineItems
     .map((li) => {
@@ -227,6 +236,7 @@ export function buildQuoteHtml(opts: {
       <div style="display:flex;justify-content:space-between;font-size:12px;color:#999;margin-bottom:12px;">
         <span>PST (${(rates.pstRate * 100).toFixed(2).replace(/\.00$/, "")}%)</span><span>$${pst.toFixed(2)}</span>
       </div>
+      ${exemptionNote ? `<div style="font-size:12px;color:#7c5c00;margin-bottom:12px;">${esc(exemptionNote)}</div>` : ""}
       <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#1a1a2e;border-top:2px solid #dee2e6;padding-top:12px;">
         <span>Payment total (tax included)</span><span>$${grandTotal.toFixed(2)} CAD</span>
       </div>
@@ -263,10 +273,11 @@ export function buildQuotePlainText(opts: {
   note?: string;
   payUrl: string;
   rates: QuoteTaxRates;
+  pstExemption?: PstExemptionDecision;
 }): string {
-  const { customerName, lineItems, note, payUrl, rates } = opts;
+  const { customerName, lineItems, note, payUrl, rates, pstExemption } = opts;
   const firstName = customerName.split(/[\s,]/)[0];
-  const { subtotal, gst, pst, grandTotal: total } = computeQuoteTotals(lineItems, rates);
+  const { subtotal, gst, pst, grandTotal: total } = computeQuoteTotals(lineItems, rates, pstExemption?.enabled);
   const lines = [
     `Hi ${firstName},`,
     "",
@@ -283,6 +294,9 @@ export function buildQuotePlainText(opts: {
     `QUOTE SUBTOTAL (BEFORE TAX): $${subtotal.toFixed(2)} CAD`,
     `GST (${rates.gstRate * 100}%): $${gst.toFixed(2)}`,
     `PST (${rates.pstRate * 100}%): $${pst.toFixed(2)}`,
+    ...(pstExemptionInvoiceNote(pstExemption ?? { enabled: false, vendorNumber: null })
+      ? [pstExemptionInvoiceNote(pstExemption ?? { enabled: false, vendorNumber: null })!]
+      : []),
     `Payment total (tax included): $${total.toFixed(2)} CAD`,
     "",
     `Pay securely by credit card to confirm your order: ${payUrl}`,
@@ -302,10 +316,11 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   try {
     const { id } = await params;
-    const { subject, lineItems, note } = (await req.json()) as {
+    const { subject, lineItems, note, pstExemption: pstExemptionInput } = (await req.json()) as {
       subject?: string;
       lineItems: LineItem[];
       note?: string;
+      pstExemption?: PstExemptionInput;
     };
 
     if (!lineItems?.length) {
@@ -326,6 +341,27 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
     const to = storedQuote.email;
     const customerName = storedQuote.name;
+    let pstExemption: PstExemptionDecision;
+    try {
+      pstExemption = parsePstExemption(pstExemptionInput);
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid PST exemption" }, { status: 400 });
+    }
+
+    if ((pstExemption.rememberVendorNumber && pstExemption.vendorNumber) || pstExemption.clearRememberedVendorNumber) {
+      const preferenceUpdate = pstExemption.clearRememberedVendorNumber
+        ? { pst_vendor_number: null, pst_vendor_number_updated_at: new Date().toISOString(), pst_vendor_number_updated_by: staffCheck.email ?? "staff" }
+        : { pst_vendor_number: pstExemption.vendorNumber, pst_vendor_number_updated_at: new Date().toISOString(), pst_vendor_number_updated_by: staffCheck.email ?? "staff" };
+      const { error: preferenceError } = await supabase
+        .from("customers")
+        .upsert(
+          { email: to.trim().toLowerCase(), name: customerName.trim(), ...preferenceUpdate },
+          { onConflict: "email", ignoreDuplicates: false },
+        );
+      if (preferenceError) {
+        return NextResponse.json({ error: "Could not save customer tax preference" }, { status: 500 });
+      }
+    }
 
     const emailSubject =
       subject?.trim() || "Your Custom Print Quote — True Color Display Printing";
@@ -333,7 +369,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // Pricing and the delivery claim commit before any customer email can
     // leave. Qualification is intentionally deferred until provider acceptance.
     const rates = await getQuoteTaxRates(supabase);
-    const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems, rates);
+    const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems, rates, pstExemption.enabled);
     const totalCents = Math.round(grandTotal * 100);
     const subtotalCents = Math.round(subtotal * 100);
     const gstCents = Math.round(gst * 100);
@@ -370,10 +406,11 @@ export async function POST(req: NextRequest, { params }: Params) {
       pstCents,
       totalCents,
       rates,
+      pstExemption,
     });
 
     const { data: preparedData, error: prepareError } = await supabase.rpc(
-      "prepare_structured_quote_send",
+      "prepare_structured_quote_send_v3",
       {
         p_quote_id: id,
         p_total_cents: totalCents,
@@ -386,6 +423,9 @@ export async function POST(req: NextRequest, { params }: Params) {
         p_recipient: to,
         p_subject: emailSubject,
         p_reply_body: replyBody,
+        p_pst_exempt: pstExemption.enabled,
+        p_pst_vendor_number: pstExemption.vendorNumber,
+        p_pst_resale_confirmed: pstExemption.resaleConfirmed,
       },
     );
     if (prepareError) throw new Error(prepareError.message || "Could not prepare quote delivery");
@@ -473,6 +513,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         payUrl,
         payLabel,
         rates,
+        pstExemption,
       });
       const renderedText = buildQuotePlainText({
         customerName,
@@ -480,6 +521,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         note,
         payUrl,
         rates,
+        pstExemption,
       });
       const { data: armedData, error: armError } = await supabase.rpc(
         "arm_structured_quote_send",
@@ -585,6 +627,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           total_cents: totalCents,
           quote_revision: Number(delivery.quote_revision),
           delivery_id: delivery.delivery_id,
+          pst_exempt: pstExemption.enabled,
         },
       });
     }

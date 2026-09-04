@@ -159,6 +159,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       .update({ status: "payment_received", paid_at: paidAt })
       .eq("id", order.id)
       .eq("status", "pending_payment")
+      .is("voided_at", null)
       .select("id");
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
     if ((updated?.length ?? 0) === 0) {

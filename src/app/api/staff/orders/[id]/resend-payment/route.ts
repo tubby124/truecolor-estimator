@@ -18,6 +18,7 @@ import { encodePaymentToken } from "@/lib/payment/token";
 import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { pstExemptionInvoiceNote } from "@/lib/payment/pst-exemption";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -41,6 +42,10 @@ export async function POST(req: NextRequest, { params }: Params) {
         total,
         subtotal,
         gst,
+        pst,
+        pst_exempt,
+        pst_vendor_number,
+        voided_at,
         payment_method,
         wave_invoice_id,
         notes,
@@ -61,6 +66,9 @@ export async function POST(req: NextRequest, { params }: Params) {
         { status: 400 }
       );
     }
+    if (order.voided_at) {
+      return NextResponse.json({ error: "This payment request was voided and cannot be resent" }, { status: 409 });
+    }
 
     const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;
     const customer = customerRaw as { name: string; email: string; company?: string | null } | null;
@@ -72,7 +80,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const total = Number(order.total);
     const subtotal = Number(order.subtotal);
     const gst = Number(order.gst);
-    const pst = Number((order as Record<string, unknown>).pst ?? 0);
+    const pst = Number(order.pst ?? 0);
 
     // Build a description from order_items (or fall back to notes)
     const items = (Array.isArray(order.order_items) ? order.order_items : [order.order_items])
@@ -118,6 +126,10 @@ export async function POST(req: NextRequest, { params }: Params) {
       paymentUrl,
       paymentMethod: order.payment_method === "wave" ? "wave" : "clover",
       notes: order.notes as string | null,
+      pstExemptionNote: pstExemptionInvoiceNote({
+        enabled: order.pst_exempt === true,
+        vendorNumber: order.pst_vendor_number ?? undefined,
+      }) ?? undefined,
     });
 
     console.log(`[resend-payment] payment link resent → ${customer.email} | order ${order.order_number} | wave_invoice_id ${order.wave_invoice_id ?? "none"}`);

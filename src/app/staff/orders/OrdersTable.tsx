@@ -56,6 +56,8 @@ export interface Order {
   proof_sent_at: string | null;
   file_storage_paths: string[] | null;
   payment_reference: string | null;
+  voided_at: string | null;
+  quote_request_id: string | null;
   followup_count?: number | null;
   followup_paused_at?: string | null;
   followup_paused_reason?: string | null;
@@ -222,6 +224,7 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
   // Resend payment link — keyed by order id
   const [resendingPaymentId, setResendingPaymentId] = useState<string | null>(null);
   const [resendSuccessIds, setResendSuccessIds] = useState<Set<string>>(new Set());
+  const [voidingPaymentId, setVoidingPaymentId] = useState<string | null>(null);
   const [pausingFollowupId, setPausingFollowupId] = useState<string | null>(null);
 
   // Confirm eTransfer — keyed by order id
@@ -469,6 +472,33 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
       showToast(err instanceof Error ? err.message : "Failed to resend — try again", "error");
     } finally {
       setResendingPaymentId(null);
+    }
+  }
+
+  async function handleVoidAndReplace(orderId: string, orderNumber: string) {
+    const reason = window.prompt(`Void ${orderNumber} and its Wave invoice before creating a corrected replacement. Why is it being corrected?`);
+    if (reason === null) return;
+    if (!reason.trim()) {
+      showToast("A correction reason is required.", "error");
+      return;
+    }
+
+    setVoidingPaymentId(orderId);
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/void-and-replace`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reason.trim() }),
+      });
+      const data = await res.json() as { replacementUrl?: string; error?: string };
+      if (!res.ok || !data.replacementUrl) throw new Error(data.error ?? "Could not void payment request");
+      showToast(`${orderNumber} voided. Enter the corrected replacement.`, "success");
+      router.push(data.replacementUrl);
+      router.refresh();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Could not void payment request", "error");
+    } finally {
+      setVoidingPaymentId(null);
     }
   }
 
@@ -861,6 +891,8 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
                 resendingPayment={resendingPaymentId === order.id}
                 resendSuccess={resendSuccessIds.has(order.id)}
                 onResendPayment={() => handleResendPayment(order.id, order.order_number)}
+                voidingPayment={voidingPaymentId === order.id}
+                onVoidAndReplace={() => handleVoidAndReplace(order.id, order.order_number)}
                 pausingFollowup={pausingFollowupId === order.id}
                 onFollowupPause={(paused) => handleFollowupPause(order.id, order.order_number, paused)}
                 sendingReceipt={sendingReceiptId === order.id}
