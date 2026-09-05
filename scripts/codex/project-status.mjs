@@ -4,7 +4,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const docs = ['AGENTS.md', 'docs/TRUE-COLOR-INDEX.md', ...['CURRENT-STATE.md', 'SEO-STANDARD.md', 'SOURCE-REGISTRY.md', 'CLOUD-PLAYBOOK.md', 'MIGRATION-RECEIPT.md'].map(p => `docs/operations/${p}`)];
+const docs = ['AGENTS.md', 'docs/TRUE-COLOR-INDEX.md', ...['CURRENT-STATE.md', 'BUSINESS-CONTEXT.md', 'SEO-STANDARD.md', 'SOURCE-REGISTRY.md', 'CLOUD-PLAYBOOK.md', 'MIGRATION-RECEIPT.md'].map(p => `docs/operations/${p}`)];
 const errors = [];
 for (const file of docs) {
   if (!existsSync(resolve(root,file))) { errors.push(`Missing ${file}`); continue; }

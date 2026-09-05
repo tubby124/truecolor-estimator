@@ -9,6 +9,7 @@ Repository: `tubby124/truecolor-estimator`; name: **True Color — App & Growth*
 - Maintenance: `bash scripts/codex/maintenance.sh`.
 - Agent internet: off by default; setup has dependency-download access. Research uses a separately authorized browsing session and adds cited findings.
 - No production secrets or privileged service integrations. Application checks use explicit non-production placeholders already used by CI.
+- Hosted tasks may use a local branch named `work`; verify source provenance by comparing the checkout SHA with the selected GitHub ref, not by requiring the original branch name locally.
 - Start from main or the named task branch. Read root AGENTS.md and docs/TRUE-COLOR-INDEX.md.
 
 ## First smoke task

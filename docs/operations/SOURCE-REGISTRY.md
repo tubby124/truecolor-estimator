@@ -15,6 +15,7 @@ Migration date: 2026-09-05. Public repo is the shared work home. This register u
 | SEO prepared experiments | Already Git; preserve draft/publication distinction | seo-prep/README.md and named proposal |
 | Directory PROFILE-AND-QUEUE and OWNER-HANDOFFS | Sanitized active queue migrated; exact forms, identities and UI handoffs retained privately | GROWTH-PIPELINE.json; directory task remains executor |
 | Backlink pipeline and send package | Sanitized organizations/status/next actions migrated | GROWTH-PIPELINE.json; exact messages, Gmail IDs/customer evidence retained privately |
+| Seven business operations notes: quote-to-cash, reviews, repeat orders, campaigns, issue register, operator lane and historical SEO resume | Sanitized intent and dated backlog reconciled against current code; private originals retained | BUSINESS-CONTEXT.md and existing linked implementation runbooks |
 | All remaining True Color Vault notes, activities, business correspondence, supplier/customer records | Historical/private reference retained with per-file inventory; no competing current task authority | Retrieve only a relevant source in authorized local session; add dated sanitized conclusion to shared runbook |
 
 ## Evidence exchange contract

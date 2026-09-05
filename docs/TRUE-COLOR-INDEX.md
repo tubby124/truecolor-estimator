@@ -6,6 +6,7 @@ The shared work home is [tubby124/truecolor-estimator](https://github.com/tubby1
 
 - [Current state, priorities and owners](operations/CURRENT-STATE.md)
 - [Growth pipeline: directories, GBP and earned links](operations/GROWTH-PIPELINE.json)
+- [Business operations, order lifecycle and reviews](operations/BUSINESS-CONTEXT.md)
 - [SEO operating standard](operations/SEO-STANDARD.md)
 - [Cloud setup, verification and handoff](operations/CLOUD-PLAYBOOK.md)
 - [Source registry and migration disposition](operations/SOURCE-REGISTRY.md)
