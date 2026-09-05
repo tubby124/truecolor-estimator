@@ -18,6 +18,10 @@ Custom printing is made after payment and artwork approval. Primary online avail
 
 Deferred: sticker product identity mismatch; boat-decals image-rights record; missing Deluxe banner photo; coroplast engine/checkout floor mismatch; rack-card dedicated image; booklet demand evidence; custom-shape price/image truth. Do not emit aliases as fake products or turn services/rush into Merchant goods. Refer to existing commerce runbooks and current source data before revising any offer.
 
+## Historical context added September 5
+
+The [project index](../TRUE-COLOR-INDEX.md) now links product/pricing, operations and growth history guides, preserving useful decisions and incident lessons. They distinguish existing code from dated proposals and live evidence. The press-console application is a separate project; its implementation was not migrated here. A code-confirmed future portability task is `scripts/build-gbp-upload.py` using macOS `sips`; Cloud asset generation requires a bounded Linux-compatible solution before use. This context pass changed no pricing, customer workflow or provider state.
+
 ## Next Cloud task
 
 Read this board and the referenced lane document, then produce or implement a bounded task with proportionate checks. When an action needs authenticated private-system evidence, return a precise request to the operational session and consume only its sanitized dated receipt. Do not mark an observation waiting on Google as complete from an HTTP-200 page or valid XML alone.

@@ -1,5 +1,7 @@
 # Email Architecture — True Color Display Printing
 
+> Historical architecture snapshot. Its transactional Brevo guidance predates the provider change; current `src/lib/email/smtp.ts` uses Resend. Read [operations history](operations/HISTORY-OPERATIONS.md) and current sender code before changes. This document is not current provider configuration.
+
 Last updated: 2026-03-30
 Audit prompt: see docs/order-audit-prompt.md
 

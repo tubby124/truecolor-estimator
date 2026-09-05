@@ -12,6 +12,14 @@ The shared work home is [tubby124/truecolor-estimator](https://github.com/tubby1
 - [Source registry and migration disposition](operations/SOURCE-REGISTRY.md)
 - [Completion/release evidence](operations/MIGRATION-RECEIPT.md)
 
+## Relevant project history
+
+Read the guide for your task; these preserve decisions and incident lessons, not current account status or an instruction to replay old plans.
+
+- [Product launches, pricing decisions and quote scope](operations/HISTORY-PRODUCTS.md)
+- [Staff workflows, payments, email and separate press-console context](operations/HISTORY-OPERATIONS.md)
+- [SEO, Ads, attribution, GBP and campaign history](operations/HISTORY-GROWTH.md)
+
 ## Existing implementation runbooks
 
 - [Merchant architecture](plans/2026-09-02-commerce-seo-merchant-architecture-audit.md)
