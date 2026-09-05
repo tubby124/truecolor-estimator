@@ -1,3 +1,4 @@
+import { buildPurchaseAmounts } from "@/lib/analytics/purchase-amounts";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -45,6 +46,8 @@ export interface WavePaymentOrder {
       }>
     | null;
   order_items: Array<{
+    merchant_offer_id?: string | null;
+    commerce_product_id?: string | null;
     product_name: string;
     qty: number | string;
     width_in: number | string | null;
@@ -91,7 +94,7 @@ async function loadOrder(
       created_at, paid_at, receipt_token,
       ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
       customers ( email, name, company ),
-      order_items ( product_name, qty, width_in, height_in, sides, line_total )
+      order_items ( merchant_offer_id, commerce_product_id, product_name, qty, width_in, height_in, sides, line_total )
     `)
     .eq("id", orderId)
     .single();
@@ -143,23 +146,13 @@ export async function performWavePaymentEffect(
   if (job.effect_type === "ga4_purchase") {
     const delivered = await sendMeasurementProtocolPurchase({
       transaction_id: order.id,
-      value: Number(order.total),
+      ...buildPurchaseAmounts(order),
       customer_id: order.customer_id,
       ga_client_id: order.ga_client_id,
       ga_session_id: order.ga_session_id,
       ga_session_number: order.ga_session_number,
       ga_context_captured_at: order.ga_context_captured_at,
-      tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
       payment_type: "wave",
-      items: items.map((item) => ({
-        item_id: (item.product_name ?? "").slice(0, 100),
-        item_name: item.product_name ?? "Unknown",
-        price:
-          Number(item.qty) > 0
-            ? Number(item.line_total) / Number(item.qty)
-            : Number(item.line_total),
-        quantity: Number(item.qty ?? 1),
-      })),
     });
     if (!delivered) throw new Error("GA4 Measurement Protocol did not accept Wave purchase");
     return;

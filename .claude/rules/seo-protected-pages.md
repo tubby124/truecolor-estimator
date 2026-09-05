@@ -1,5 +1,34 @@
 # SEO Protected Pages — Rankings as of 2026-08-11
 
+## Current verification supplement — 2026-09-04
+
+Direct GSC API, domain property, web search, page aggregation: August 5–September 1
+versus July 8–August 4, 2026. These figures supersede the historic figures below
+for these pages only; protection levels and the location freeze remain. This is
+not an automatic unlock or a claim that every historic baseline was refreshed.
+
+| Page | Position | Impressions | Clicks | Prior position | Decision |
+| --- | ---: | ---: | ---: | ---: | --- |
+| homepage | 14.07 | 3046 | 112 | 16.79 | Preserve; no title rewrite |
+| sticker-printing-saskatoon | 8.42 | 943 | 14 | 11.44 | DEFEND; conflicting broad-query signals |
+| sign-company-saskatoon | 21.67 | 2031 | 13 | 16.05 | HOLD; diagnose query expansion/decay |
+| poster-printing-saskatoon | 14.54 | 476 | 10 | 12.55 | DEFEND; exact local query 2.88 |
+| aluminum-signs-saskatoon | 9.49 | 476 | 6 | 10.06 | DEFEND |
+| photo-poster-printing-saskatoon | 9.17 | 752 | 6 | 12.91 | DEFEND |
+| wall-graphics-saskatoon | 17.18 | 517 | 6 | 12.42 | HOLD; observe August 28 title experiment |
+| banner-printing-saskatoon | 18.06 | 250 | 3 | 23.01 | Preserve recovery |
+| flyer-printing-saskatoon | 23.14 | 399 | 3 | 31.47 | Preserve recovery; observe title test |
+| foamboard-printing-saskatoon | 14.41 | 294 | 3 | 15.75 | Next content candidate; staged only |
+| coroplast-signs-saskatoon | 29.76 | 242 | 2 | 29.16 | DEFEND commercial page |
+| business-cards-saskatoon | 9.22 | 272 | 1 | 21.71 | DEFEND recovery |
+| graphic-design-saskatoon | 22.98 | 385 | 1 | 26.30 | Preserve; queued experiment held |
+
+September 4 Merchant SEO release resets the five-day site content release gate.
+Reconsider no earlier than September 9 after deployment time and a fresh finalized
+data review. See `seo-prep/2026-09-04-foamboard-strengthening.md` for the exact draft.
+
+The remaining text records historical baselines and standing protections.
+
 > This file supplements ~/.claude/rules/truecolor-seo-safety.md with specific page rankings.
 > **Refresh cadence: every 28 days from GSC (weekly read is fine; full doc refresh ≥ every 28 days).**
 > Last refreshed: 2026-08-11 from `seo_gsc_snapshots` Supabase table (28-day window 2026-07-12 → 2026-08-08, server-side SQL aggregation — no row-cap truncation; normal GSC three-day lag).

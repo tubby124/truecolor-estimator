@@ -6,7 +6,7 @@ const MP_ENDPOINT = "https://www.google-analytics.com/mp/collect";
 const DEBUG_ENDPOINT = "https://www.google-analytics.com/debug/mp/collect";
 
 export interface MpItem {
-  item_id: string;
+  item_id?: string;
   item_name: string;
   item_category?: string;
   price?: number;
@@ -31,6 +31,7 @@ export interface MpPurchaseParams {
   ga_context_captured_at?: string | null;
   payment_type?: string;
   tax?: number;
+  shipping?: number;
   items?: MpItem[];
 }
 
@@ -76,6 +77,7 @@ export async function sendMeasurementProtocolEvent(input: MpEventParams & { debu
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(5_000),
     });
 
     if (input.debug) {
@@ -84,10 +86,11 @@ export async function sendMeasurementProtocolEvent(input: MpEventParams & { debu
       return res.ok;
     }
 
-    // Non-debug endpoint always returns 204 No Content — fire-and-forget
+    // HTTP acceptance does not prove downstream GA4 processing or attribution.
     return res.ok;
   } catch (err) {
-    console.error("[ga4-mp] fetch failed:", err);
+    // Fetch errors can contain the request URL, including the API secret.
+    console.error("[ga4-mp] request failed", err instanceof Error ? err.name : "UnknownError");
     return false;
   }
 }
@@ -119,6 +122,7 @@ export function sendMeasurementProtocolPurchase(input: MpPurchaseParams): Promis
       ...(sessionFresh && sessionId && GA_SESSION_ID_RE.test(sessionId) ? { engagement_time_msec: 1 } : {}),
       ...(input.payment_type ? { payment_type: input.payment_type } : {}),
       ...(input.tax !== undefined ? { tax: input.tax } : {}),
+      ...(input.shipping !== undefined ? { shipping: input.shipping } : {}),
       items: input.items ?? [],
     },
   });

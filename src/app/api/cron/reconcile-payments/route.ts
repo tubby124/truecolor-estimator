@@ -37,6 +37,7 @@ import { recordCronRun } from "@/lib/cron/heartbeat";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { recordPaymentAttempt } from "@/lib/payments/attempts";
+import { buildPurchaseAmounts, type PurchaseOrderItem } from "@/lib/analytics/purchase-amounts";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 
 const WAVE_GQL = "https://gql.waveapps.com/graphql/public";
@@ -50,6 +51,7 @@ interface PendingCloverOrder {
   id: string;
   order_number: string;
   total: number | string;
+  discount_amount: number | string | null;
   gst: number | string | null;
   pst: number | string | null;
   created_at: string;
@@ -61,7 +63,7 @@ interface PendingCloverOrder {
   ga_session_id: string | null;
   ga_session_number: string | null;
   ga_context_captured_at: string | null;
-  order_items?: { product_name?: string | null; qty?: number | null; line_total?: number | string | null }[] | null;
+  order_items?: PurchaseOrderItem[] | null;
   customers?: { email?: string | null; name?: string | null; company?: string | null } | { email?: string | null; name?: string | null; company?: string | null }[] | null;
 }
 
@@ -211,27 +213,18 @@ async function recoverCloverCapture(
   await incrementCustomerOrderStats(supabase, order.customer_id, Number(order.total)).catch((err) => {
     console.error("[reconcile] customer stats increment failed (non-fatal):", err);
   });
-  const measurementItems = Array.isArray(order.order_items) ? order.order_items : [];
-  void sendMeasurementProtocolPurchase({
+
+  await sendMeasurementProtocolPurchase({
     transaction_id: order.id,
-    value: Number(order.total),
+    ...buildPurchaseAmounts(order),
     customer_id: order.customer_id,
     ga_client_id: order.ga_client_id,
     ga_session_id: order.ga_session_id,
     ga_session_number: order.ga_session_number,
     ga_context_captured_at: order.ga_context_captured_at,
     payment_type: "clover_card",
-    tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
-    items: measurementItems.map((item) => ({
-      item_id: (item.product_name ?? "").slice(0, 100),
-      item_name: item.product_name ?? "Unknown",
-      price: Number(item.qty) > 0
-        ? Number(item.line_total) / Number(item.qty)
-        : Number(item.line_total),
-      quantity: Number(item.qty ?? 1),
-    })),
   }).then((delivered) => {
-    if (!delivered) console.error("[reconcile] GA4 MP purchase was not delivered (non-fatal)");
+    if (!delivered) console.error("[reconcile] GA4 MP purchase request was not accepted (non-fatal)");
   }).catch((err) => {
     console.error("[reconcile] GA4 MP purchase failed (non-fatal):", err);
   });
@@ -442,10 +435,10 @@ export async function GET(req: NextRequest) {
   const cutoff10minClover = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data: stuckClover, error: err3 } = await supabase
     .from("orders")
-    .select(`id, order_number, total, gst, pst, created_at, payment_reference,
+    .select(`id, order_number, total, gst, pst, discount_amount, created_at, payment_reference,
              wave_invoice_id, wave_invoice_approved_at, customer_id,
              ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
-             order_items ( product_name, qty, line_total ),
+             order_items ( merchant_offer_id, commerce_product_id, product_name, qty, line_total ),
              customers ( email, name, company )`)
     .eq("payment_method", "clover_card")
     .eq("status", "pending_payment")

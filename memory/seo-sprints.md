@@ -723,3 +723,11 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - **Guardrails:** Title, meta description, Open Graph metadata, H1, URL, canonical, schema,
   FAQs, price claims, CTA and internal-link structure are unchanged. The later Logo Design
   metadata/body release remains gated behind the active Wall Graphics observation.
+
+## SEO Phase 113 — Fresh audit and Foamboard preparation (2026-09-04)
+
+- Source: direct domain GSC API, August 5–September 1 versus July 8–August 4; existing 28-day opportunity analyzer. No net-new-page candidates. API page totals include anonymized queries and differ from query-row sums.
+- Decision: protect Poster (exact local query position 2.88), Sticker, Photo Poster, Aluminum and recovering Business Cards. Foamboard is the next content candidate: 294 impressions, 3 clicks, position 14.41 versus 293/7/15.75. Small clicks and better position do not prove a content gap; existing unsupported process/rush claims provide the concrete corrective scope.
+- Prepared exact copy and checks: `seo-prep/2026-09-04-foamboard-strengthening.md`. Updated selected current evidence in `.claude/rules/seo-protected-pages.md` without unlocking protected pages.
+- Held publication: September 4 Merchant SEO release resets the five-day site gate. Reconsider September 9 after deployment time, finalized Wall Graphics observation and fresh query checks. Wall Graphics decline began before its August 28 title change; no unsupported causal rollback.
+- Public SEO page files, titles, H1s, schema, links and sitemap dates are unchanged. Privacy/tracking release is operational only.

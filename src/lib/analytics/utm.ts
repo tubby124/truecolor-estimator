@@ -1,3 +1,5 @@
+import { isSensitiveAnalyticsPath } from "./path";
+
 export const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
 export const PAID_ATTRIBUTION_KEYS = [
   "gclid", "gbraid", "wbraid", "keyword", "matchtype", "device",
@@ -46,10 +48,52 @@ function cleanLandingPath(value: unknown): string | undefined {
   // parameters (or accepting a path that could be used as an external URL).
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return undefined;
   try {
-    return new URL(raw, "https://truecolorprinting.invalid").pathname;
+    const path = new URL(raw, "https://truecolorprinting.invalid").pathname;
+    // Scrub historical first/latest touches too, not just new page captures.
+    if (isSensitiveAnalyticsPath(decodeURIComponent(path))) return undefined;
+    return path;
   } catch {
     return undefined;
   }
+}
+
+/** Remove legacy payment URLs without changing genuine attribution or its age. */
+export function redactStoredPaymentPath(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (typeof parsed?.landing_path !== "string") return raw;
+    const path = new URL(parsed.landing_path, "https://truecolorprinting.invalid").pathname;
+    if (!isSensitiveAnalyticsPath(decodeURIComponent(path))) return raw;
+    delete parsed.landing_path;
+    return JSON.stringify(parsed);
+  } catch {
+    return raw;
+  }
+}
+
+/** Rewrite affected legacy cookies even on payment redirects, where JS may never run. */
+export function buildPaymentPrivacyCookies(
+  cookieHeader: string | null | undefined,
+  secure = true,
+  now = Date.now(),
+): string[] {
+  const cookies: string[] = [];
+  for (const [name, ttl] of [[UTM_COOKIE_NAME, UTM_TTL_DAYS], [LATEST_PAID_COOKIE_NAME, PAID_TOUCH_TTL_DAYS]] as const) {
+    const entry = cookieHeader?.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${name}=`));
+    if (!entry) continue;
+    try {
+      const raw = decodeURIComponent(entry.slice(name.length + 1));
+      const redacted = redactStoredPaymentPath(raw);
+      if (redacted === raw) continue;
+      const capturedAt = Number((JSON.parse(redacted) as { captured_at?: number }).captured_at);
+      const remaining = Math.floor((capturedAt + ttl * DAY_MS - now) / 1000);
+      const valid = Number.isFinite(remaining) && remaining > 0 && capturedAt <= now;
+      cookies.push(`${name}=${valid ? encodeURIComponent(redacted) : ""}; Max-Age=${valid ? remaining : 0}; Path=/; SameSite=Lax${secure ? "; Secure" : ""}`);
+    } catch {
+      // Malformed cookies already fail closed in the attribution readers.
+    }
+  }
+  return cookies;
 }
 
 function cleanLandingReferrer(value: unknown): string | undefined {
@@ -330,6 +374,7 @@ export function buildAttributionSetCookies(
   cookieHeader: string | null | undefined,
   context: AttributionCookieContext = {},
 ): string[] {
+  if (isSensitiveAnalyticsPath(url.pathname)) return [];
   const input: Record<string, string> = {};
   for (const key of ATTRIBUTION_KEYS) {
     const value = url.searchParams.get(key);

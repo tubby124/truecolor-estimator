@@ -22,6 +22,7 @@ import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvo
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { buildPurchaseAmounts } from "@/lib/analytics/purchase-amounts";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 
 const VALID_STATUSES = [
@@ -144,34 +145,25 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (status === "payment_received" && current?.status === "pending_payment") {
       const { data: statsOrder } = await supabase
         .from("orders")
-        .select(`customer_id, total, gst, pst, payment_method,
+        .select(`customer_id, total, gst, pst, discount_amount, payment_method,
                  ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
-                 order_items ( product_name, qty, line_total )`)
+                 order_items ( merchant_offer_id, commerce_product_id, product_name, qty, line_total )`)
         .eq("id", id)
         .single();
       if (statsOrder) {
         await incrementCustomerOrderStats(supabase, statsOrder.customer_id, Number(statsOrder.total ?? 0));
-        const measurementItems = Array.isArray(statsOrder.order_items) ? statsOrder.order_items : [];
-        void sendMeasurementProtocolPurchase({
+
+        await sendMeasurementProtocolPurchase({
           transaction_id: id,
-          value: Number(statsOrder.total),
+          ...buildPurchaseAmounts(statsOrder),
           customer_id: statsOrder.customer_id,
           ga_client_id: statsOrder.ga_client_id,
           ga_session_id: statsOrder.ga_session_id,
           ga_session_number: statsOrder.ga_session_number,
           ga_context_captured_at: statsOrder.ga_context_captured_at,
           payment_type: statsOrder.payment_method ?? "staff_manual",
-          tax: Number(statsOrder.gst ?? 0) + Number(statsOrder.pst ?? 0),
-          items: measurementItems.map((item) => ({
-            item_id: (item.product_name ?? "").slice(0, 100),
-            item_name: item.product_name ?? "Unknown",
-            price: Number(item.qty) > 0
-              ? Number(item.line_total) / Number(item.qty)
-              : Number(item.line_total),
-            quantity: Number(item.qty ?? 1),
-          })),
         }).then((delivered) => {
-          if (!delivered) console.error("[staff/orders/status] GA4 MP purchase was not delivered (non-fatal)");
+          if (!delivered) console.error("[staff/orders/status] GA4 MP purchase request was not accepted (non-fatal)");
         }).catch((err) => {
           console.error("[staff/orders/status] GA4 MP purchase failed (non-fatal):", err);
         });
@@ -188,7 +180,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           .select(`order_number, subtotal, gst, pst, total, is_rush, discount_code,
                    discount_amount, wave_invoice_id, wave_invoice_approved_at,
                    wave_payment_recorded_at, payment_method, created_at, receipt_token,
-                   order_items ( product_name, qty, width_in, height_in, sides, line_total ),
+                   order_items ( merchant_offer_id, commerce_product_id, product_name, qty, width_in, height_in, sides, line_total ),
                    customers ( name, email )`)
           .eq("id", id)
           .single();

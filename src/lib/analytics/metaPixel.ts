@@ -1,3 +1,4 @@
+import { isSensitiveAnalyticsPath } from "./path";
 import { hasMarketingConsent } from "@/lib/analytics/metaConsent";
 
 declare global {
@@ -18,6 +19,7 @@ export interface MetaItem {
 type EventOptions = { eventId?: string };
 
 function fbq(eventName: string, params: Record<string, unknown>, options?: EventOptions) {
+  if (typeof window === "undefined" || isSensitiveAnalyticsPath(window.location?.pathname)) return;
   if (!hasMarketingConsent()) return;
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
     window.fbq("track", eventName, params, options?.eventId ? { eventID: options.eventId } : undefined);
