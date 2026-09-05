@@ -9,6 +9,7 @@ import type { SocialCampaign, Platform, PostType } from "@/lib/types/social";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
 import { ImagePicker } from "./ImagePicker";
 import { PostPreview } from "./PostPreview";
+import { reginaToIso } from "@/lib/social/schedule";
 
 const PLATFORMS: { key: Platform; icon: string; label: string }[] = [
   { key: "instagram", icon: "📸", label: "Instagram" },
@@ -93,7 +94,7 @@ export function ComposeForm({ campaigns }: Props) {
     );
   }
 
-  async function handleSave(status: "draft" | "ready") {
+  async function handleSave(destination: "draft" | "review") {
     if (!captionRaw.trim() && !captionInstagram.trim()) {
       showToast("Write a caption or generate one with AI first", "error");
       return;
@@ -101,7 +102,7 @@ export function ComposeForm({ campaigns }: Props) {
     setSaving(true);
     try {
       const scheduleTimestamp = scheduleDate && !useNextFreeSlot
-        ? `${scheduleDate}T${scheduleTime}:00`
+        ? reginaToIso(`${scheduleDate}T${scheduleTime}`)
         : null;
 
       const body = {
@@ -116,7 +117,7 @@ export function ComposeForm({ campaigns }: Props) {
         platforms,
         schedule_time: scheduleTimestamp,
         use_next_free_slot: useNextFreeSlot,
-        status,
+        status: "draft",
         post_type: postType,
         post_number: postNumber,
       };
@@ -132,8 +133,9 @@ export function ComposeForm({ campaigns }: Props) {
         throw new Error(d.error ?? "Save failed");
       }
 
-      showToast(status === "ready" ? "Post marked ready!" : "Post saved as draft!", "success");
-      setTimeout(() => router.push("/staff/social/queue"), 1200);
+      const saved = await res.json();
+      showToast("Post saved as draft!", "success");
+      router.push(destination === "review" ? `/staff/social/review?ids=${encodeURIComponent(saved.id)}` : "/staff/social/queue");
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Save failed", "error");
     } finally {
@@ -385,7 +387,7 @@ export function ComposeForm({ campaigns }: Props) {
                   )}
                   {scheduleDate && !useNextFreeSlot && (
                     <p className="text-xs text-gray-400 mt-2">
-                      Scheduled: {new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString("en-CA", { dateStyle: "medium", timeStyle: "short" })}
+                      Scheduled: {scheduleDate} at {scheduleTime} Regina
                     </p>
                   )}
                 </div>
@@ -431,11 +433,11 @@ export function ComposeForm({ campaigns }: Props) {
                     Save as Draft
                   </button>
                   <button
-                    onClick={() => handleSave("ready")}
+                    onClick={() => handleSave("review")}
                     disabled={saving || platforms.length === 0}
                     className="flex-1 bg-[#e63020] text-white text-sm font-bold py-3 rounded-xl hover:bg-[#c8281a] transition-colors disabled:opacity-50"
                   >
-                    {saving ? "Saving…" : "✓ Mark Ready"}
+                    {saving ? "Saving…" : "Save & Review"}
                   </button>
                 </div>
               </div>

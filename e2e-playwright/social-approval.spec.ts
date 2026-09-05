@@ -48,3 +48,18 @@ test("account or media blockers prevent approval", async ({ page }) => {
   await page.getByRole("checkbox").nth(1).check();
   await expect(page.getByRole("button", { name: "Approve 1 posts" })).toBeDisabled();
 });
+
+test("editing approved draft revokes to draft without shifting Regina schedule", async ({ page }) => {
+  let saved: Record<string, unknown> | undefined;
+  await page.route(`**/api/staff/social/posts/${id}`, async route => {
+    if (route.request().method() === "PATCH") { saved = route.request().postDataJSON(); return route.fulfill({ json: { ...review().post, ...saved } }); }
+    return route.fulfill({ json: { ...review("ready").post, caption_raw: "Original", platforms: ["instagram"], image_url: "/images/logo.png", created_at: "2026-09-05T12:00:00Z" } });
+  });
+  await page.route(`**/api/staff/social/posts/${id}/approval`, route => route.fulfill({ json: review() }));
+  await page.goto(`/staff/social/${id}`);
+  await expect(page.locator('input[type="time"]')).toHaveValue("15:00");
+  await page.getByRole("button", { name: "Save & Review" }).click();
+  await expect(page).toHaveURL(new RegExp(`/staff/social/review\\?ids=${id}`));
+  expect(saved?.status).toBe("draft");
+  expect(saved?.schedule_time).toBe("2027-01-12T21:00:00.000Z");
+});

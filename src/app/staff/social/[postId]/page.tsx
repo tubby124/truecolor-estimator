@@ -8,6 +8,7 @@ import { PostStatusBadge } from "@/components/social/PostStatusBadge";
 import { PlatformBadges } from "@/components/social/PlatformBadges";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { reginaDate, reginaToIso, SOCIAL_TIME_ZONE } from "@/lib/social/schedule";
 import type { SocialPost, Platform, PostStatus } from "@/lib/types/social";
 
 interface PageProps {
@@ -69,8 +70,8 @@ export default function PostDetailPage({ params }: PageProps) {
         setNotes(data.notes ?? "");
         if (data.schedule_time) {
           const d = new Date(data.schedule_time);
-          setScheduleDate(d.toISOString().split("T")[0]);
-          setScheduleTime(d.toTimeString().slice(0, 5));
+          setScheduleDate(reginaDate(d));
+          setScheduleTime(new Intl.DateTimeFormat("en-GB", { timeZone: SOCIAL_TIME_ZONE, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d));
         } else if (data.schedule_date) {
           setScheduleDate(data.schedule_date);
         }
@@ -80,10 +81,13 @@ export default function PostDetailPage({ params }: PageProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
 
-  async function handleSave() {
+  const editLocked = !!post && ["posting", "posted", "failed"].includes(post.status);
+
+  async function handleSave(review = false) {
+    if (editLocked) return;
     setSaving(true);
     try {
-      const scheduleTimestamp = scheduleDate ? `${scheduleDate}T${scheduleTime}:00` : null;
+      const scheduleTimestamp = scheduleDate ? reginaToIso(`${scheduleDate}T${scheduleTime}`) : null;
       const res = await fetch(`/api/staff/social/posts/${postId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -93,10 +97,11 @@ export default function PostDetailPage({ params }: PageProps) {
           caption_facebook: captionFacebook || null,
           caption_twitter: captionTwitter || null,
           image_url: imageUrl || null,
+          image_urls: imageUrl === post?.image_url ? (post?.image_urls ?? []) : (imageUrl ? [imageUrl] : []),
           hashtags: hashtags || null,
           schedule_time: scheduleTimestamp,
           platforms,
-          status,
+          status: status === "skip" ? "skip" : "draft",
           notes: notes || null,
         }),
       });
@@ -104,8 +109,8 @@ export default function PostDetailPage({ params }: PageProps) {
         const d = await res.json();
         throw new Error(d.error ?? "Save failed");
       }
-      showToast("Post saved!", "success");
-      setTimeout(() => router.push("/staff/social/queue"), 1200);
+      showToast("Changes saved; approval must be renewed.", "success");
+      router.push(review ? `/staff/social/review?ids=${encodeURIComponent(postId)}` : "/staff/social/queue");
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Save failed", "error");
     } finally {
@@ -119,21 +124,6 @@ export default function PostDetailPage({ params }: PageProps) {
     }).catch(() => {
       showToast("Copy failed", "error");
     });
-  }
-
-  async function handlePublish() {
-    setSaving(true);
-    try {
-      const res = await fetch(`/api/staff/social/posts/${postId}/publish`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Publish failed");
-      showToast(data.message ?? "Post marked ready!", "success");
-      setStatus("ready");
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : "Publish failed", "error");
-    } finally {
-      setSaving(false);
-    }
   }
 
   const PLATFORM_OPTIONS: { key: Platform; label: string }[] = [
@@ -191,15 +181,15 @@ export default function PostDetailPage({ params }: PageProps) {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
-              onClick={handlePublish}
-              disabled={saving}
+              onClick={() => handleSave(true)}
+              disabled={saving || editLocked}
               className="text-sm font-bold text-[#e63020] border-2 border-[#e63020] px-4 py-2 rounded-xl hover:bg-[#e63020]/5 transition-colors disabled:opacity-40"
             >
-              Mark Ready
+              Save & Review
             </button>
             <button
-              onClick={handleSave}
-              disabled={saving}
+              onClick={() => handleSave()}
+              disabled={saving || editLocked}
               className="text-sm font-bold bg-[#1c1712] text-white px-5 py-2 rounded-xl hover:bg-black transition-colors disabled:opacity-40"
             >
               {saving ? "Saving…" : "Save"}
@@ -208,7 +198,8 @@ export default function PostDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-8 space-y-5">
+      {editLocked && <p className="max-w-2xl mx-auto px-6 pt-5 text-sm text-gray-600">This post has a publishing attempt and cannot be edited. Review its delivery results from the queue.</p>}
+      <fieldset disabled={editLocked || saving} className="max-w-2xl mx-auto px-6 py-8 space-y-5 min-w-0">
 
         {/* ── Card A: Captions ── */}
         <motion.div
@@ -426,17 +417,17 @@ export default function PostDetailPage({ params }: PageProps) {
                 <input type="date" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1.5">Time</label>
+                <label className="text-xs font-semibold text-gray-500 block mb-1.5">Time (Regina)</label>
                 <input type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} className={inputClass} />
               </div>
               <div>
                 <label className="text-xs font-semibold text-gray-500 block mb-1.5">Status</label>
                 <select
-                  value={status}
+                  value={status === "skip" ? "skip" : "draft"}
                   onChange={e => setStatus(e.target.value as PostStatus)}
                   className={inputClass}
                 >
-                  {(["draft","ready","posting","posted","failed","skip"] as PostStatus[]).map(s => (
+                  {(["draft","skip"] as PostStatus[]).map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
@@ -445,7 +436,7 @@ export default function PostDetailPage({ params }: PageProps) {
           </div>
         </motion.div>
 
-      </div>
+      </fieldset>
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>

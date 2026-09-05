@@ -14,9 +14,11 @@ The server HMAC binds resolved content, target, schedule and image-byte digest t
 
 Read-only production inspection: 12 draft posts with dates, zero social_accounts, zero gbp_connections. OpenRouter configured; no Meta/Blotato publisher credentials. Railway source matched 1c2d14f at inspection. Browser without a staff session redirected correctly to login. No old draft changed. Current catalog rights cover website/Merchant, not social; [content candidates](PILOT-CONTENT.md) remain held.
 
+Read-only operator check: `railway run node scripts/social/readiness.mjs` from the verified linked application checkout. It emits counts/configuration booleans only and never calls publishing, scheduler or account-sync routes. Schema presence does not verify policies or triggers.
+
 ## Exact database package — approval required
 
-Prepared migration: `migrations/20260906_social_explicit_approval.sql`, for the True Color production project only. Adds nullable approval hash/time/owner/target/rights/media-digest fields, monotonic updated_at trigger and server-only write protections. No old row is approved, deleted, or scheduled. Existing server-side service-role routes remain writers; direct browser writes are removed. The existing private schema's policies must be inspected before application. Supabase MCP read-only introspection was denied for this project; that is an access gap, not a migration result.
+Prepared migration: `migrations/20260906_social_explicit_approval.sql`, for the True Color production project only. Adds nullable approval hash/time/owner/target/rights/media-digest fields, monotonic updated_at trigger and server-only write protections. No old row is approved, deleted, or scheduled. Existing server-side service-role routes remain writers; direct browser writes are removed. The existing private schema's policies must be inspected before application. Supabase MCP and available management credentials denied read-only database introspection for this project. CLI can list the healthy project but that does not establish database-query privileges. No protected direct-database credential was available. This is an access gap, not a migration result.
 
 Do not apply this migration based on another project's standing Supabase authorization. Obtain the owner's exact approval after diff/test review. Apply transactionally through the authorized project tool/CLI, read back columns/trigger/privileges, and verify row counts/statuses remain unchanged. Keep publishing disabled throughout.
 
@@ -38,8 +40,12 @@ Pause publishing first. Do not reset attempted `posting` rows to ready: inspect 
 
 - Local production build passed with non-production placeholders.
 - Focused approval/media tests passed (20 at backend handoff); weekly timezone tests passed.
-- Two mocked-provider local browser tests passed, including mobile durable review/refresh and blocked approval. No real account or public post used.
+- Three mocked-provider local browser tests passed, including mobile durable review/refresh, blocked approval and edit-to-draft without timezone drift. No real account or public post used.
 - Full local suite: 124 files / 1131 tests passed; ESLint zero errors (30 existing warnings).
 - Disposable local PostgreSQL regression passed: migration applied twice, legacy approvals remain null, monotonic version/CAS verified, direct browser table/column writes denied, service-role permissions retained; rolled back and test server stopped.
 - Independent code/security review resolved four initial findings; no remaining high/critical finding.
 - CI, production schema application and deployed pilot readback remain pending.
+
+## Owner coordination — September 5
+
+Exact migration approval requested through the verified owner True Color topic using the registered relay adapter. Provider accepted the question; owner acknowledgment is pending. No public-post approval was requested or inferred. The current implementation is in PR #32 and remains unmerged pending schema access and approval. Readiness readback at 22:47 UTC still showed 12 drafts, zero ready/attempted rows, no approval schema and publishing disabled.
