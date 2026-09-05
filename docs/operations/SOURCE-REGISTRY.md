@@ -23,3 +23,9 @@ Migration date: 2026-09-05. Public repo is the shared work home. This register u
 Local/authorized operator reads private system → records exact private receipt → adds safe dated finding, limitation and next action to Git lane record → review/merge → next Cloud/local task reads same Git state. Raw transcripts and mail are not the handoff.
 
 Never call the whole business archive public or claim Cloud has Gmail/production access. A task may prepare a communication; only an explicitly authorized sending session sends it and returns a receipt summary. Never copy production environment values to Cloud setup.
+
+## Follow-up history review — September 5
+
+A second scoped review added three task-oriented history guides: HISTORY-PRODUCTS.md, HISTORY-OPERATIONS.md and HISTORY-GROWTH.md. The private review ledger records the exact selected files, full/section review depth and mapped/already-in-Git disposition. It is distinct from the initial 207-file inventory; no claim is made that every retained file was reviewed end to end.
+
+Useful product contracts, pricing intent, incident lessons, staff workflow decisions, growth strategy progression and verification dependencies are summarized with current repository anchors. Private source contents remain retained. Old prices, customer examples, financial/HR records, account exports and executable historical launch prompts are not imported. Press-console code and device access remain with their separate project.
