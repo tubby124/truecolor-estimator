@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { invalidDraftFields } from "@/lib/social/approval";
 import type { CreatePostBody } from "@/lib/types/social";
 
 export const dynamic = "force-dynamic";
@@ -61,9 +62,9 @@ export async function POST(req: Request) {
   const auth = await requireStaffUser();
   if (auth instanceof NextResponse) return auth;
 
-  const body = await req.json() as CreatePostBody;
+  const body = await req.json().catch(() => null) as CreatePostBody | null;
 
-  if (!body.caption_raw && body.caption_raw !== "") {
+  if (!body || typeof body.caption_raw !== "string" || invalidDraftFields(body as unknown as Record<string, unknown>)) {
     return NextResponse.json({ error: "caption_raw is required" }, { status: 400 });
   }
 
@@ -85,7 +86,7 @@ export async function POST(req: Request) {
       schedule_date: body.schedule_date ?? null,
       schedule_time: body.schedule_time ?? null,
       use_next_free_slot: body.use_next_free_slot ?? false,
-      status: body.status ?? 'draft',
+      status: 'draft',
       post_type: body.post_type ?? null,
       post_number: body.post_number ?? null,
       notes: body.notes ?? null,

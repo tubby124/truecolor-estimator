@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { SOCIAL_TIME_ZONE } from "@/lib/social/schedule";
 import { motion, AnimatePresence } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 import { PostStatusBadge } from "./PostStatusBadge";
@@ -21,7 +22,7 @@ function formatSchedule(post: SocialPost) {
   if (post.use_next_free_slot) return "Next free slot";
   if (post.schedule_time) {
     return new Date(post.schedule_time).toLocaleDateString("en-CA", {
-      month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+      month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: SOCIAL_TIME_ZONE, timeZoneName: "short",
     });
   }
   if (post.schedule_date) return post.schedule_date;
@@ -267,13 +268,12 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
               {selectedIds.size} selected
             </span>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleBatchStatus("ready")}
-                disabled={batchUpdating}
+              <Link
+                href={`/staff/social/review?ids=${encodeURIComponent(Array.from(selectedIds).join(","))}`}
                 className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
               >
-                Mark Ready
-              </button>
+                Review selected
+              </Link>
               <button
                 onClick={() => handleBatchStatus("draft")}
                 disabled={batchUpdating}
@@ -383,13 +383,12 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
                     {/* Actions */}
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {post.status === "draft" && (
-                        <button
-                          onClick={() => handleStatusChange(post.id, "ready")}
-                          disabled={updating === post.id}
+                        <Link
+                          href={`/staff/social/review?ids=${encodeURIComponent(post.id)}`}
                           className="text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                         >
-                          Mark Ready
-                        </button>
+                          Review draft
+                        </Link>
                       )}
                       {post.status === "ready" && (
                         <button
@@ -408,10 +407,10 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
                         Duplicate
                       </button>
                       <Link
-                        href={`/staff/social/${post.id}`}
+                        href={`/staff/social/review?ids=${post.id}`}
                         className="text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"
                       >
-                        Edit
+                        Review
                       </Link>
                       <button
                         onClick={() => handleDelete(post.id)}

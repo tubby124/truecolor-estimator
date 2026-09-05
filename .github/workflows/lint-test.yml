@@ -43,6 +43,12 @@ jobs:
           --username postgres
           --dbname postgres
           --file scripts/google-ads/sql/outbox-trigger-regression.sql
+      - name: Social approval migration regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/approval-regression.sql
       - name: Execute Google Ads monitor evidence ACL regression
         env:
           PGPASSWORD: ${{ github.run_id }}
@@ -100,7 +106,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
-        run: npm run test:e2e:pw -- e2e-playwright/seo-paid-journeys.spec.ts
+        run: npm run test:e2e:pw -- e2e-playwright/seo-paid-journeys.spec.ts e2e-playwright/social-approval.spec.ts
 
   production-smoke:
     if: github.event_name == 'workflow_dispatch'

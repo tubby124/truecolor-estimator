@@ -4,6 +4,7 @@ Updated 2026-09-05. This is the canonical shared work board. Imported operationa
 
 | Lane / owner | Latest evidence and status | Next action / gate |
 |---|---|---|
+| Social / G1 automation task | Sep 5 live read-only: 12 drafts, no connected social/GBP accounts. Explicit approval pilot implemented locally; [runbook](../social/APPROVAL-PILOT.md). | Migration review/application, exact account setup, socially cleared media and owner batch approval before publishing. Legacy drafts remain untouched. |
 | Merchant commerce / commerce task | Private Sep 5 readback reports 18 primary offers and 18 matched local rows. The two business-card image retries, product-page/pickup-later reviews and inventory validation remain open. | Highest-priority Google-growth lane. Read Google review state; retain 25 legacy manual products until replacement approval/serving evidence. Do not widen to Ads or invented shipping. |
 | Organic / SEO experiment task | Wall Graphics observation active; Foamboard proposal prepared, not released. Repo `seo-prep/2026-09-04-foamboard-strengthening.md` carries gate. | Earliest reconsideration Sep 9 only after seven finalized post-release days and current release/GSC evidence; no automatic release at that date. |
 | Paid Ads / paid-search task | Aug 29 private override says all three campaigns paused; older Aug 27 operating-state says enabled and is superseded. Cap/enforcement and promotion evidence remain unresolved. | Live read-only campaign/cap check before any action. Do not resume or change spend as part of migration. |
