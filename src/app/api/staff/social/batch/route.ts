@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
 
+import { invalidDraftFields } from "@/lib/social/approval";
+
 export const dynamic = "force-dynamic";
 
 interface BatchPostInput {
@@ -30,7 +32,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { posts } = body;
+  const posts = body?.posts;
   if (!Array.isArray(posts) || posts.length === 0) {
     return NextResponse.json({ error: "posts array is required" }, { status: 400 });
   }
@@ -38,6 +40,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Max 14 posts per batch" }, { status: 400 });
   }
 
+  if (posts.some(p => !p || invalidDraftFields(p as unknown as Record<string, unknown>) || typeof p.caption_raw !== 'string' || typeof p.image_url !== 'string' || !Array.isArray(p.platforms) || p.platforms.some(v => !['instagram', 'facebook', 'twitter', 'tiktok'].includes(v)) || typeof p.schedule_time !== 'string')) {
+    return NextResponse.json({ error: 'Invalid post fields' }, { status: 400 });
+  }
   const supabase = createServiceClient();
 
   const rows = posts.map((p) => ({
@@ -49,8 +54,9 @@ export async function POST(req: Request) {
     image_url: p.image_url || null,
     platforms: p.platforms ?? ["instagram", "facebook"],
     schedule_time: p.schedule_time || null,
-    status: "ready",
-    post_type: "batch",
+    status: "draft",
+    source: "batch",
+    post_type: null,
     post_number: 1,
     campaign_id: null,
   }));

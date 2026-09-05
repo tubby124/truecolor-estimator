@@ -408,10 +408,10 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
                         Duplicate
                       </button>
                       <Link
-                        href={`/staff/social/${post.id}`}
+                        href={`/staff/social/review?ids=${post.id}`}
                         className="text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"
                       >
-                        Edit
+                        Review
                       </Link>
                       <button
                         onClick={() => handleDelete(post.id)}

@@ -23,8 +23,10 @@ export async function POST(req: Request) {
   });
 
   let file: File;
+  let forceJpeg = false;
   try {
     const formData = await req.formData();
+    forceJpeg = formData.get("format") === "jpeg";
     const raw = formData.get("file");
     if (!raw || typeof raw === "string") {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -58,7 +60,7 @@ export async function POST(req: Request) {
     const inputFormat = metadata.format;
 
     let processed: Sharp;
-    if (inputFormat === "png") {
+    if (inputFormat === "png" && !forceJpeg) {
       // Keep PNG — no lossy conversion
       processed = image.png();
       ext = "png";
@@ -66,7 +68,7 @@ export async function POST(req: Request) {
       format = "png";
     } else {
       // Convert WebP/HEIC to JPEG, or keep JPEG
-      processed = image.jpeg({ quality: JPEG_QUALITY });
+      processed = image.flatten({ background: "#ffffff" }).jpeg({ quality: JPEG_QUALITY });
       ext = "jpg";
       contentType = "image/jpeg";
       format = "jpeg";
@@ -85,7 +87,8 @@ export async function POST(req: Request) {
     width = outputMeta.width ?? metadata.width ?? 0;
     height = outputMeta.height ?? metadata.height ?? 0;
   } catch {
-    // Sharp failed — fall back to raw upload
+    if (forceJpeg) return NextResponse.json({ error: "Image could not be converted to JPEG. Please choose a supported photo." }, { status: 400 });
+    // Legacy callers retain raw fallback; the pilot never accepts an unvalidated JPEG.
     const origExt = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
     ext = origExt;
     contentType = file.type;

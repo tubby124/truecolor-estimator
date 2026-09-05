@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
+import { reginaDate, weeklySchedule, reginaToIso } from "@/lib/social/schedule";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,50 +26,8 @@ interface Slot {
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
-function toYMD(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
-
-function todayYMD() {
-  return toYMD(new Date());
-}
-
-/** Returns the next Mon / Wed / Fri on or after `from` */
-function nextMWF(from: Date): Date {
-  const d = new Date(from);
-  const targets = [1, 3, 5]; // Mon, Wed, Fri
-  const day = d.getDay();
-  const next = targets.find((t) => t >= day);
-  if (next !== undefined) {
-    d.setDate(d.getDate() + (next - day));
-  } else {
-    // Jump to next Monday
-    d.setDate(d.getDate() + (8 - day));
-  }
-  return d;
-}
-
-/**
- * Given a start date and count, returns ISO timestamps spread Mon/Wed/Fri at `time`.
- * First slot uses `startDate` as-is; subsequent slots advance to the next M/W/F.
- */
-function spreadSchedule(startYMD: string, count: number, time: string): string[] {
-  if (!startYMD) return Array(count).fill("");
-  const dates: string[] = [];
-  let cursor = new Date(startYMD + "T12:00:00");
-  for (let i = 0; i < count; i++) {
-    if (i === 0) {
-      dates.push(`${startYMD}T${time}:00`);
-    } else {
-      // Advance cursor past the last used date
-      cursor = new Date(dates[i - 1].slice(0, 10) + "T12:00:00");
-      cursor.setDate(cursor.getDate() + 1);
-      const next = nextMWF(cursor);
-      dates.push(`${toYMD(next)}T${time}:00`);
-    }
-  }
-  return dates;
-}
+const todayYMD = reginaDate;
+const spreadSchedule = weeklySchedule;
 
 // ─── Image helpers ────────────────────────────────────────────────────────────
 
@@ -99,6 +59,7 @@ async function compressForAI(file: File): Promise<{ base64: string; type: string
 async function uploadImage(file: File): Promise<string> {
   const form = new FormData();
   form.append("file", file);
+  form.append("format", "jpeg");
   const res = await fetch("/api/staff/social/upload", { method: "POST", body: form });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? "Upload failed");
@@ -138,16 +99,17 @@ export function BatchScheduler() {
   // Shared settings
   const [startDate, setStartDate] = useState(todayYMD);
   const [postTime, setPostTime] = useState("15:00");
-  const [platforms, setPlatforms] = useState<Platform[]>(["instagram", "facebook"]);
+  const [platforms, setPlatforms] = useState<Platform[]>(["instagram"]);
 
   // Per-photo slots
   const [slots, setSlots] = useState<Slot[]>([]);
 
   // Phase
-  const [phase, setPhase] = useState<"upload" | "review" | "done">("upload");
+  const [phase, setPhase] = useState<"upload" | "review">("upload");
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [savedCount, setSavedCount] = useState(0);
+  const [saveUncertain, setSaveUncertain] = useState(false);
+  const savingRef = useRef(false);
 
   // ── Add files ───────────────────────────────────────────────────────────────
 
@@ -214,6 +176,7 @@ export function BatchScheduler() {
         setSlots((prev) => prev.map((s, j) => j === i ? {
           ...s,
           imageUrl,
+          preview: imageUrl,
           captionInstagram: captions.instagram,
           captionFacebook: captions.facebook,
           captionTwitter: captions.twitter,
@@ -249,6 +212,8 @@ export function BatchScheduler() {
       showToast("No ready posts — generate captions first", "error");
       return;
     }
+    if (savingRef.current || saveUncertain) return;
+    savingRef.current = true;
     setSaving(true);
     try {
       const posts = readySlots.map((s) => ({
@@ -259,7 +224,7 @@ export function BatchScheduler() {
         hashtags: s.hashtags,
         image_url: s.imageUrl!,
         platforms,
-        schedule_time: s.scheduleTime,
+        schedule_time: reginaToIso(s.scheduleTime),
       }));
 
       const res = await fetch("/api/staff/social/batch", {
@@ -270,11 +235,12 @@ export function BatchScheduler() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Batch save failed");
 
-      setSavedCount(data.created);
-      setPhase("done");
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : "Failed to schedule", "error");
+      router.push(`/staff/social/review?ids=${encodeURIComponent(data.posts.map((post: { id: string }) => post.id).join(","))}`);
+    } catch {
+      setSaveUncertain(true);
+      showToast("Save result uncertain. Check the queue before preparing another batch; retry is disabled to avoid duplicates.", "error");
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
@@ -289,35 +255,6 @@ export function BatchScheduler() {
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
-  // DONE phase
-  if (phase === "done") {
-    return (
-      <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-10 max-w-md w-full text-center">
-          <div className="text-5xl mb-4">🎉</div>
-          <h2 className="text-2xl font-black text-[#1c1712] mb-2">All Scheduled!</h2>
-          <p className="text-gray-500 text-sm mb-6">
-            {savedCount} post{savedCount !== 1 ? "s" : ""} added to your queue.
-            They&apos;ll post automatically via Blotato on their scheduled dates.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => { setSlots([]); setPhase("upload"); setSavedCount(0); }}
-              className="flex-1 border-2 border-gray-200 text-[#1c1712] text-sm font-bold py-3 rounded-xl hover:border-gray-300 transition-colors"
-            >
-              Schedule More
-            </button>
-            <button
-              onClick={() => router.push("/staff/social/queue")}
-              className="flex-1 bg-[#e63020] text-white text-sm font-bold py-3 rounded-xl hover:bg-[#c8281a] transition-colors"
-            >
-              View Queue →
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
@@ -325,15 +262,15 @@ export function BatchScheduler() {
       <div className="bg-white border-b border-gray-200 px-6 py-5 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-black text-[#1c1712]">Batch Schedule</h1>
+            <h1 className="text-xl font-black text-[#1c1712]">Prepare a batch</h1>
             <p className="text-sm text-gray-400 mt-0.5">
-              Upload up to {MAX_SLOTS} photos → AI writes captions → schedule all in one click
+              Upload up to {MAX_SLOTS} photos → AI writes captions → save drafts → approve the finished batch
             </p>
           </div>
           {phase === "review" && (
             <button
               onClick={scheduleAll}
-              disabled={saving || slots.filter(s => s.done).length === 0}
+              disabled={saving || saveUncertain || slots.filter(s => s.done).length === 0}
               className="flex items-center gap-2 bg-[#e63020] text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-[#c8281a] transition-colors disabled:opacity-50"
             >
               {saving ? (
@@ -345,7 +282,7 @@ export function BatchScheduler() {
                   Saving…
                 </>
               ) : (
-                `✓ Schedule ${slots.filter(s => s.done).length} Posts`
+                `Save ${slots.filter(s => s.done).length} drafts`
               )}
             </button>
           )}
@@ -353,6 +290,8 @@ export function BatchScheduler() {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+
+        {saveUncertain && <p role="alert" className="rounded-xl bg-amber-50 p-4 text-sm">Check the <Link href="/staff/social/queue" className="underline">saved queue</Link> before creating another batch. The previous save may have succeeded.</p>}
 
         {/* ── Shared settings ── */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
@@ -370,13 +309,13 @@ export function BatchScheduler() {
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#e63020]/30 focus:border-[#e63020]"
               />
-              <p className="text-xs text-gray-400 mt-1">Others auto-spread Mon/Wed/Fri</p>
+              <p className="text-xs text-gray-400 mt-1">One post each week</p>
             </div>
 
             {/* Post time */}
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                Post time (local)
+                Post time (Regina)
               </label>
               <input
                 type="time"
@@ -384,7 +323,7 @@ export function BatchScheduler() {
                 onChange={(e) => setPostTime(e.target.value)}
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#e63020]/30 focus:border-[#e63020]"
               />
-              <p className="text-xs text-gray-400 mt-1">Applied to all posts</p>
+              <p className="text-xs text-gray-400 mt-1">America/Regina · applied to all posts</p>
             </div>
 
             {/* Platforms */}
@@ -525,15 +464,15 @@ export function BatchScheduler() {
                 {slots.filter(s => s.done).length} post{slots.filter(s => s.done).length !== 1 ? "s" : ""} ready
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                Captions and dates are locked in — hit Schedule to add them to your Blotato queue
+                Save these as drafts, then review the saved images, captions, account and dates before approval.
               </p>
             </div>
             <button
               onClick={scheduleAll}
-              disabled={saving || slots.filter(s => s.done).length === 0}
+              disabled={saving || saveUncertain || slots.filter(s => s.done).length === 0}
               className="flex items-center gap-2 bg-[#e63020] text-white text-sm font-bold px-6 py-3 rounded-xl hover:bg-[#c8281a] transition-colors disabled:opacity-50 whitespace-nowrap"
             >
-              {saving ? "Saving…" : `✓ Schedule All`}
+              {saving ? "Saving…" : `Save drafts for review`}
             </button>
           </div>
         )}
@@ -557,8 +496,9 @@ function SlotCard({
 }) {
   function formatSchedule(iso: string) {
     if (!iso) return "—";
-    const d = new Date(iso);
-    return d.toLocaleString("en-CA", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    let d: Date;
+    try { d = new Date(reginaToIso(iso)); } catch { return "Choose a valid date and time"; }
+    return d.toLocaleString("en-CA", { timeZone: "America/Regina", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   }
 
   return (
@@ -655,7 +595,7 @@ function SlotCard({
                   <input
                     type="datetime-local"
                     value={slot.scheduleTime.slice(0, 16)}
-                    onChange={(e) => onUpdate("scheduleTime", e.target.value + ":00")}
+                    onChange={(e) => onUpdate("scheduleTime", e.target.value ? e.target.value + ":00" : "")}
                     className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#e63020]/30 focus:border-[#e63020]"
                   />
                 </div>

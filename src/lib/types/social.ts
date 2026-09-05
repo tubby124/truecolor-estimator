@@ -32,6 +32,12 @@ export interface SocialCampaign {
 }
 
 export interface SocialPost {
+  approved_media_sha256?: string | null;
+  approved_rights?: boolean | null;
+  approval_hash?: string | null;
+  approved_at?: string | null;
+  approved_by?: string | null;
+  approval_target?: { platform: 'instagram'; accountId: string; pageId: string } | null;
   id: string;
   campaign_id: string | null;
   caption_raw: string;

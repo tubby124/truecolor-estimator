@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Social approval pilot and release gates](social/APPROVAL-PILOT.md)
+
 - [Merchant architecture](plans/2026-09-02-commerce-seo-merchant-architecture-audit.md)
 - [Commerce measurement](plans/2026-08-31-commerce-seo-measurement-phase-0.md)
 - [Paid-search operating plan](paid-search/revenue-growth-operating-plan.md)
