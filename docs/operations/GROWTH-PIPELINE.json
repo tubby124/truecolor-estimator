@@ -1,0 +1,177 @@
+{
+  "updated": "2026-09-05",
+  "source": "Sanitized campaign receipts through Sep 5 06:44 CST; full evidence stays private. Sent is not delivery or publication.",
+  "automatic_followups": false,
+  "opportunities": [
+    {
+      "id": "B01",
+      "organization": "33rd Street BID",
+      "url": "https://www.33rd.ca/contact.html",
+      "status": "sent",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "backlink-task",
+      "next_action": "Await eligibility/editorial response; coordinate directory entry with directory owner."
+    },
+    {
+      "id": "B02",
+      "organization": "Roland DGA",
+      "url": "https://www.rolanddga.com/gallery/professionals",
+      "status": "sent",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "backlink-task",
+      "next_action": "Await editorial routing; verify equipment and photo permissions before full story."
+    },
+    {
+      "id": "B03",
+      "organization": "PAVED Arts",
+      "url": "https://www.pavedarts.ca/concoction/",
+      "status": "sent",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "backlink-task",
+      "next_action": "Await optional program-printing credit response; do not claim sponsorship."
+    },
+    {
+      "id": "B04",
+      "organization": "Saskatchewan Printing Industries Association",
+      "url": "https://spia.ca/spiamembership/",
+      "status": "sent",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "backlink-task",
+      "next_action": "Information only; membership dues/benefits need evaluation."
+    },
+    {
+      "id": "B05",
+      "organization": "Greater Saskatoon Chamber",
+      "url": "https://saskatoonchamber.com/",
+      "status": "sent",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "backlink-task",
+      "next_action": "Information only; paid membership/advertising separate from editorial."
+    },
+    {
+      "id": "D01",
+      "organization": "Mysask411",
+      "url": "https://mysask411.com/saskatoon/true-color-display-printing-ltd/1019802",
+      "status": "submitted",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Verify existing record publication; no duplicate."
+    },
+    {
+      "id": "D02",
+      "organization": "Bing Places",
+      "url": "https://www.bingplaces.com/",
+      "status": "existing-verified",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Preserve existing verified current record."
+    },
+    {
+      "id": "D03",
+      "organization": "ChamberofCommerce.com",
+      "url": "https://canada.chamberofcommerce.com/",
+      "status": "blocked-captcha",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Historical CAPTCHA blocker; form is not confirmed staged in current session. Directory owner recovers exact correction; do not duplicate."
+    },
+    {
+      "id": "D04",
+      "organization": "Cylex",
+      "url": "https://www.cylex-canada.ca/company/true-color-display-printing-ltd--24173020.html",
+      "status": "blocked-captcha",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Historical CAPTCHA blocker; form is not confirmed staged in current session. Directory owner recovers exact correction; do not duplicate."
+    },
+    {
+      "id": "D05",
+      "organization": "MapQuest",
+      "url": "https://www.mapquest.com/ca/saskatchewan/true-color-display-printing-427073716",
+      "status": "submitted",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Free existing-record correction submitted; await publication, recheck Sep 12. Do not resubmit or purchase a plan."
+    },
+    {
+      "id": "D06",
+      "organization": "YourSaskatoon",
+      "url": "https://yoursaskatoon.com/add-your-business?category_id=51",
+      "status": "prepared",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Historical prepared guest form not currently verified. Directory owner must check phone/hours and account/CAPTCHA before submission."
+    },
+    {
+      "id": "G01",
+      "organization": "Google Business Profile",
+      "url": "https://business.google.com/",
+      "status": "owner-accepted",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "owner-view-receipt",
+      "owner": "directory-campaign",
+      "next_action": "All 15 remaining-2026/2027 closure dates accepted in owner view; public display for every future date not independently verified. Do not resubmit."
+    },
+    {
+      "id": "D07",
+      "organization": "Canpages",
+      "url": "https://alb.canpages.ca/page/SK/saskatoon/true-color-display-printing-ltd/102783964",
+      "status": "existing-verified",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Current address/phone/site/hours; preserve record."
+    },
+    {
+      "id": "D08",
+      "organization": "Apple Maps",
+      "url": "https://maps.apple.com/place?place-id=I9DBA5629D9101545",
+      "status": "existing-verified",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Current core identity/hours; name variant and claim optional; no duplicate."
+    },
+    {
+      "id": "D09",
+      "organization": "Yelp",
+      "url": "https://www.yelp.ca/biz/true-color-display-print-saskatoon",
+      "status": "existing-verified",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Current core details; public claimed label is not proof of dashboard access."
+    },
+    {
+      "id": "D10",
+      "organization": "ShopSaskatoon",
+      "url": "https://shopsaskatoon.ca/truecolordisplayprintingltdsaskatoon",
+      "status": "submitted",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Hours-only correction submitted; publication pending, recheck Sep 12. Unconfirmed suite untouched."
+    },
+    {
+      "id": "D11",
+      "organization": "WhitePagesCanada",
+      "url": "https://whitepagescanada.ca/dir/phone_search.php",
+      "status": "verification-needed",
+      "evidence_date": "2026-09-05",
+      "evidence_level": "local-receipt",
+      "owner": "directory-campaign",
+      "next_action": "Reverse lookup no record only; not exhaustive absence. Qualify business-add route before submission."
+    }
+  ]
+}
