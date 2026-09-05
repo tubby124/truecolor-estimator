@@ -66,8 +66,12 @@ async function uploadImage(file: File): Promise<string> {
   return data.url as string;
 }
 
-async function generateCaption(file: File, imageUrl: string) {
-  const { base64, type } = await compressForAI(file);
+async function generateCaption(imageUrl: string) {
+  // Analyze the validated JPEG derivative, including when the phone supplied HEIC.
+  const imageResponse = await fetch(imageUrl);
+  if (!imageResponse.ok) throw new Error("Uploaded photo could not be read for captioning");
+  const jpeg = new File([await imageResponse.blob()], "social-photo.jpg", { type: "image/jpeg" });
+  const { base64, type } = await compressForAI(jpeg);
   const res = await fetch("/api/staff/social/captions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -171,7 +175,7 @@ export function BatchScheduler() {
         // 1. Upload
         const imageUrl = await uploadImage(slots[i].file);
         // 2. Generate
-        const captions = await generateCaption(slots[i].file, imageUrl);
+        const captions = await generateCaption(imageUrl);
 
         setSlots((prev) => prev.map((s, j) => j === i ? {
           ...s,

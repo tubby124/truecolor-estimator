@@ -63,3 +63,37 @@ test("editing approved draft revokes to draft without shifting Regina schedule",
   expect(saved?.status).toBe("draft");
   expect(saved?.schedule_time).toBe("2027-01-12T21:00:00.000Z");
 });
+
+test("phone image captioning uses the converted JPEG and saves an unapproved draft", async ({ page }) => {
+  const sharp = (await import("sharp")).default;
+  const jpeg = await sharp({ create: { width: 600, height: 600, channels: 3, background: "#fff" } }).jpeg().toBuffer();
+  const imageUrl = "https://dczbgraekmzirxknjvwe.supabase.co/storage/v1/object/public/social-images/social/2026/1234.jpg";
+  await page.route(imageUrl, route => route.fulfill({ contentType: "image/jpeg", body: jpeg }));
+  await page.route("**/api/staff/social/upload", route => {
+    expect(route.request().postData()).toContain('name="format"');
+    return route.fulfill({ json: { url: imageUrl } });
+  });
+  await page.route("**/api/staff/social/captions", route => {
+    expect(route.request().postDataJSON().image_type).toBe("image/jpeg");
+    return route.fulfill({ json: { instagram: "A converted photo", facebook: "A converted photo", twitter: "A converted photo" } });
+  });
+  let saved: { posts: Array<{ schedule_time: string; platforms: string[] }> } | undefined;
+  await page.route("**/api/staff/social/batch", route => {
+    saved = route.request().postDataJSON();
+    return route.fulfill({ json: { created: 1, posts: [{ id, status: "draft" }] } });
+  });
+  await page.route(`**/api/staff/social/posts/${id}/approval`, route => route.fulfill({ json: review() }));
+  await page.goto("/staff/social/batch");
+  await page.locator('input[type="date"]').fill("2027-01-12");
+  await page.locator('input[type="file"]').setInputFiles({ name: "phone.heic", mimeType: "image/heic", buffer: Buffer.from("synthetic undecodable original") });
+  await page.getByRole("button", { name: /Generate 1 caption/ }).click();
+  await expect(page.getByRole("button", { name: "Save 1 drafts" })).toBeVisible();
+  // Clearing a slot date is recoverable and does not crash the review.
+  await page.locator('input[type="datetime-local"]').fill("");
+  await expect(page.getByRole("button", { name: "Save 1 drafts" })).toBeVisible();
+  await page.locator('input[type="datetime-local"]').fill("2027-01-12T15:00");
+  await page.getByRole("button", { name: "Save 1 drafts" }).click();
+  await expect(page).toHaveURL(new RegExp(`/staff/social/review\\?ids=${id}`));
+  expect(saved?.posts[0].schedule_time).toBe("2027-01-12T21:00:00.000Z");
+  expect(saved?.posts[0].platforms).toEqual(["instagram"]);
+});
