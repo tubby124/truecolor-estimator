@@ -433,7 +433,15 @@ const nextConfig: NextConfig = {
       {
         source: "/pay/:path*",
         headers: [
-          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+          { key: "Cache-Control", value: "private, no-store, max-age=0, no-transform" },
+          // Cloudflare documents no-transform as the injection opt-out. CSP is
+          // the browser-side backstop if edge configuration changes. Local
+          // Next chunks/inline hydration stay enabled; Clover uses a server
+          // redirect/form navigation, not a browser fetch or embedded frame.
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; frame-ancestors 'none'; font-src 'self' data:; object-src 'none'; base-uri 'self';",
+          },
           { key: "Pragma", value: "no-cache" },
           { key: "Referrer-Policy", value: "no-referrer" },
           { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },

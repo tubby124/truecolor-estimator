@@ -224,9 +224,9 @@ test("rendered section states the six counters and refuses to invent a qualified
     rendered,
     /3\. Qualified-lead conversions uploaded\s+n\/a — conversion action `quote_submit_qualified` not created yet \(plan Task 2\)/,
   );
-  assert.match(rendered, /4\. Paid quote_won conversions uploaded\s+0 sent \| 0 pending\/retry \| 1 not_attributable \| 0 dead/);
+  assert.match(rendered, /4\. Paid quote_won conversions uploaded\s+0 sent \| 0 pending\/retry \| 0 awaiting diagnostics \| 1 not_attributable \| 0 dead/);
   assert.match(rendered, /5\. Unattributable paid sales by origin\s+14 total — online_checkout 4 \| staff_manual 6 \| staff_quote 4 \| unknown 0/);
-  assert.match(rendered, /purchase_online outbox \(all origins\)\s+1 sent \| 0 pending\/retry \| 13 not_attributable \| 0 dead/);
+  assert.match(rendered, /purchase_online outbox \(all origins\)\s+1 sent \| 0 pending\/retry \| 0 awaiting diagnostics \| 13 not_attributable \| 0 dead/);
   assert.match(rendered, /6\. Click-ID survival \(quote -> order\)\s+2 quotes with a click ID \| 0 converted/);
   assert.match(rendered, /no click-ID quote has converted to an order yet/);
   assert.match(rendered, /honestly unattributable/);
@@ -242,7 +242,7 @@ test("renders qualified-lead outbox status counts only after the action is confi
     ],
   });
   const rendered = formatQuoteAttributionSection(summary, { qualifiedLeadConfigured: true }).join("\n");
-  assert.match(rendered, /3\. Qualified-lead conversions uploaded\s+1 sent \| 1 pending\/retry \| 1 not_attributable \| 0 dead/);
+  assert.match(rendered, /3\. Qualified-lead conversions uploaded\s+1 sent \| 1 pending\/retry \| 0 awaiting diagnostics \| 1 not_attributable \| 0 dead/);
 });
 
 test("paid landing-path report uses first-party rows without mixing GA4 or GSC counts", () => {
@@ -289,4 +289,17 @@ test("zero attributed revenue alongside real commercial signal triggers the hone
     "Commercial signal exists; revenue attribution coverage is incomplete.",
     "Do not use reported ROAS to pause or scale this campaign.",
   ]);
+});
+
+
+test("submitted revenue stays visible and separate from delivered conversions", () => {
+  const summary = summarizeQuoteAttribution({ orders: [order("pending-diagnostics")], outbox: [outboxRow("pending-diagnostics", { status: "submitted", conversion_type: "purchase_online" })] });
+  assert.equal(summary.byConversionType.purchase_online.submitted, 1);
+  assert.equal(summary.byConversionType.purchase_online.sent, 0);
+  assert.match(formatQuoteAttributionSection(summary).join("\n"), /1 awaiting diagnostics/);
+});
+
+test("first-party reports redact payment paths before grouping", () => {
+  const rows = summarizePaidLandingPaths({ orders: [order("a", {gclid:"g", landing_path:"/pay/secret-a"}), order("b", {gclid:"g", landing_path:"/pay/secret-b"})] });
+  assert.deepEqual(rows, [{path:"/pay/[redacted]",quotes:0,orders:2}]);
 });

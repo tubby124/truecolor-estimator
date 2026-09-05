@@ -20,6 +20,7 @@
 import { google } from "googleapis";
 import { createClient } from "@supabase/supabase-js";
 import { createReader } from "./gaql-read.mjs";
+import { safeReportPath, formatEnhancedConversionStatus, summarizeConversionDelivery } from "./report-safety.mjs";
 import {
   INCOMPLETE_COVERAGE_VERDICT,
   formatQuoteAttributionSection,
@@ -103,7 +104,8 @@ const funnelRows = await runReport({
 
 const byLanding = new Map();
 for (const r of funnelRows) {
-  const [landing, event] = r.dimensionValues.map((d) => d.value);
+  const [rawLanding, event] = r.dimensionValues.map((d) => d.value);
+  const landing = safeReportPath(rawLanding);
   const count = Number(r.metricValues[0].value);
   if (!byLanding.has(landing)) byLanding.set(landing, { sessions: 0, events: {} });
   const entry = byLanding.get(landing);
@@ -142,7 +144,7 @@ if (error) throw new Error(`outbox read failed: ${error.message}`);
 console.log("\n=== CONVERSION OUTBOX (window) ===");
 if (!outbox?.length) console.log("  (no conversions enqueued in range)");
 for (const row of outbox ?? []) {
-  const attributed = row.gclid || row.gbraid ? "AD-ATTRIBUTED" : "not ad-attributed";
+  const attributed = summarizeConversionDelivery([row]).candidates ? "click ID present" : "no click ID";
   console.log(`  ${row.created_at.slice(0, 10)} ${row.order_number} ${row.conversion_type} CA$${row.conversion_value} [${row.status}] — ${attributed}`);
 }
 // ---------- 3b. Quote attribution coverage ----------
@@ -174,10 +176,11 @@ console.log("");
 for (const line of formatPaidLandingPathSection(paidLandingPaths)) console.log(line);
 
 // ---------- 4. Enhanced conversions readiness ----------
-// The uploader attaches hashed email/phone and self-heals: if the account has not signed
-// the enhanced-conversions terms Google rejects the WHOLE request, so it retries without
-// userData. This probe (validateOnly — nothing is recorded) says which path is live today.
+// Match the uploader's default-off gate. API validation is readiness evidence,
+// never evidence that real customer identifiers were sent or delivered.
+const ecEnabled = process.env.GOOGLE_ADS_ENHANCED_CONVERSIONS_ENABLED?.trim().toLowerCase() === "true";
 const ecProbe = await (async () => {
+  if (!ecEnabled) return "DISABLED";
   try {
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -220,7 +223,7 @@ const ecProbe = await (async () => {
         validateOnly: true,
       }),
     });
-    if (response.ok) return "LIVE";
+    if (response.ok) return "ACCEPTED";
     const errorBody = await response.json().catch(() => ({}));
     const violation = (errorBody?.error?.details ?? [])
       .flatMap((detail) => detail?.fieldViolations ?? [])
@@ -232,21 +235,13 @@ const ecProbe = await (async () => {
 })();
 
 console.log("\n=== ENHANCED CONVERSIONS ===");
-if (ecProbe === "LIVE") {
-  console.log("  ✅ LIVE — hashed email/phone are accepted and uploaded with every conversion.");
-} else if (ecProbe === "DESTINATION_ACCOUNT_ENHANCED_CONVERSIONS_TERMS_NOT_SIGNED") {
-  console.log("  ⚠️  INERT — account has not signed the enhanced-conversions terms.");
-  console.log("     Conversions still upload on the click ID alone (self-healing fallback).");
-  console.log("     Fix (owner, 2 clicks): Google Ads → Goals → Settings → Enhanced conversions");
-  console.log("     → tick 'Turn on enhanced conversions', accept the TERMS dialog, SAVE.");
-  console.log("     No redeploy needed — the next conversion picks it up automatically.");
-} else {
-  console.log(`  ⚠️  UNEXPECTED: ${ecProbe}`);
-}
+for (const line of formatEnhancedConversionStatus({ enabled: ecEnabled, probe: ecProbe })) console.log(line);
 
-const attributedCount = (outbox ?? []).filter((r) => r.gclid || r.gbraid).length;
-console.log(`\nVERDICT: ${totalClicks} paid clicks, CA$${totalCost.toFixed(2)} spend, ${attributedCount} ad-attributed conversions in window.`);
-if (attributedCount === 0) console.log("Zero attributed conversions at this click volume is sample size, not breakage — the upload pipeline is armed and verified (2026-08-07 audit).");
+const delivery = summarizeConversionDelivery(outbox ?? []);
+const attributedCount = delivery.candidates;
+console.log(`\nVERDICT: ${totalClicks} paid clicks, CA$${totalCost.toFixed(2)} spend, ${delivery.candidates} conversion candidates with click IDs; ${delivery.markedSent} marked sent in the revenue outbox.`);
+console.log("Outbox status is delivery-pipeline evidence. Confirm credited conversions in Google Ads before reporting campaign return.");
+if (attributedCount === 0) console.log("Zero attributed conversions does not distinguish weak demand from a tracking failure. Check current collection and delivery evidence before drawing a conclusion.");
 if (needsIncompleteCoverageVerdict({ attributedCount, summary: attribution })) {
   for (const line of INCOMPLETE_COVERAGE_VERDICT) console.log(line);
 }

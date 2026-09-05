@@ -20,6 +20,7 @@ import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { buildPurchaseAmounts } from "@/lib/analytics/purchase-amounts";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaCapi";
 
@@ -45,7 +46,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
         wave_invoice_approved_at, wave_payment_recorded_at,
         created_at, receipt_token, meta_tracking_consent, meta_fbp, meta_fbc,
         ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
-        order_items ( product_name, qty, width_in, height_in, sides, line_total ),
+        order_items ( merchant_offer_id, commerce_product_id, product_name, qty, width_in, height_in, sides, line_total ),
         customer_id, customers ( name, email, phone, marketing_consent )
       `)
       .eq("id", id)
@@ -97,27 +98,17 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
     console.log(`[confirm-etransfer] order ${order.order_number} → payment_received`);
 
-    const measurementItems = Array.isArray(order.order_items) ? order.order_items : [];
-    void sendMeasurementProtocolPurchase({
+    await sendMeasurementProtocolPurchase({
       transaction_id: order.id,
-      value: Number(order.total),
+      ...buildPurchaseAmounts(order),
       customer_id: order.customer_id,
       ga_client_id: order.ga_client_id,
       ga_session_id: order.ga_session_id,
       ga_session_number: order.ga_session_number,
       ga_context_captured_at: order.ga_context_captured_at,
       payment_type: "etransfer",
-      tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
-      items: measurementItems.map((item) => ({
-        item_id: (item.product_name ?? "").slice(0, 100),
-        item_name: item.product_name ?? "Unknown",
-        price: Number(item.qty) > 0
-          ? Number(item.line_total) / Number(item.qty)
-          : Number(item.line_total),
-        quantity: Number(item.qty ?? 1),
-      })),
     }).then((delivered) => {
-      if (!delivered) console.error("[confirm-etransfer] GA4 MP purchase was not delivered (non-fatal)");
+      if (!delivered) console.error("[confirm-etransfer] GA4 MP purchase request was not accepted (non-fatal)");
     }).catch((err) => {
       console.error("[confirm-etransfer] GA4 MP purchase failed (non-fatal):", err);
     });

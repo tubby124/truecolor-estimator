@@ -38,7 +38,7 @@ describe("print resource middleware guard", () => {
       new NextRequest("https://truecolorprinting.ca/pay/invalid-token?gclid=click-id"),
     );
 
-    expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
+    expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0, no-transform");
     expect(response.headers.get("referrer-policy")).toBe("no-referrer");
     expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
     expect(response.headers.get("set-cookie")).toBeNull();

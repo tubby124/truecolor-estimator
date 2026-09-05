@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   ATTRIBUTION_KEYS,
+  buildPaymentPrivacyCookies,
+  redactStoredPaymentPath,
   isPaidAttribution,
   LATEST_PAID_COOKIE_NAME,
   type PaidAttributionTouch,
@@ -40,9 +42,32 @@ function persistAttribution(
   }
 }
 
+/** Run on every route, including payment pages, before any capture or read. */
+export function purgeLegacyPaymentAttribution() {
+  if (typeof window === "undefined") return;
+  for (const key of [LS_KEY, LATEST_PAID_LS_KEY]) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) continue;
+      const redacted = redactStoredPaymentPath(raw);
+      if (redacted !== raw) window.localStorage.setItem(key, redacted);
+    } catch {
+      // Storage can be disabled. Readers independently sanitize returned data.
+    }
+  }
+  try {
+    for (const cookie of buildPaymentPrivacyCookies(document.cookie, window.location.protocol === "https:")) {
+      document.cookie = cookie;
+    }
+  } catch {
+    // Cookie access may be blocked; do not interrupt browsing.
+  }
+}
+
 export function UtmCapture() {
   const pathname = usePathname();
   useEffect(() => {
+    purgeLegacyPaymentAttribution();
     if (typeof window === "undefined" || isSensitiveAnalyticsPath(pathname)) return;
     const sp = new URLSearchParams(window.location.search);
 
@@ -115,6 +140,7 @@ export function UtmCapture() {
 
 export function readUtmFromStorage(): UtmAttribution | null {
   if (typeof window === "undefined") return null;
+  purgeLegacyPaymentAttribution();
   try {
     const raw = window.localStorage.getItem(LS_KEY);
     if (!raw) return null;
@@ -133,6 +159,7 @@ export function readUtmFromStorage(): UtmAttribution | null {
  */
 export function readLatestPaidFromStorage(): PaidAttributionTouch | null {
   if (typeof window === "undefined") return null;
+  purgeLegacyPaymentAttribution();
   try {
     return parseStoredPaidAttributionTouch(window.localStorage.getItem(LATEST_PAID_LS_KEY));
   } catch {

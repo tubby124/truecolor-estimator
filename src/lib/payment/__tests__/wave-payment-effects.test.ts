@@ -47,6 +47,8 @@ const ORDER: WavePaymentOrder = {
   },
   order_items: [
     {
+      merchant_offer_id: "tc-coroplast-offer",
+      commerce_product_id: "coroplast-signs",
       product_name: "Coroplast Sign",
       qty: 2,
       width_in: 24,
@@ -134,7 +136,9 @@ describe("Wave payment effect worker", () => {
     expect(mocks.sendMeasurementProtocolPurchase).toHaveBeenLastCalledWith(
       expect.objectContaining({
         transaction_id: "order-123",
-        value: 111,
+        value: 100,
+        tax: 11,
+        items: [{ item_id: "tc-coroplast-offer", item_name: "Coroplast Sign", price: 50, quantity: 2 }],
         customer_id: "customer-123",
         payment_type: "wave",
       }),

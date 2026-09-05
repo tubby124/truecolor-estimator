@@ -16,7 +16,8 @@ describe("GA4 Measurement Protocol purchase", () => {
 
     await expect(sendMeasurementProtocolPurchase({
       transaction_id: "order-123",
-      value: 111,
+      value: 100,
+      tax: 11,
       customer_id: "customer-123",
       ga_client_id: "1234567890.1234567890",
       ga_session_id: "1234567890",
@@ -33,7 +34,8 @@ describe("GA4 Measurement Protocol purchase", () => {
       name: "purchase",
       params: {
         transaction_id: "order-123",
-        value: 111,
+        value: 100,
+        tax: 11,
         currency: "CAD",
         payment_type: "etransfer",
         session_id: "1234567890",
@@ -56,5 +58,18 @@ describe("GA4 Measurement Protocol purchase", () => {
     })).resolves.toBe(true);
 
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("bounds a stalled provider request and returns failure without exposing its URL", async () => {
+    vi.stubEnv("NEXT_PUBLIC_GA4_MEASUREMENT_ID", "G-TEST");
+    vi.stubEnv("GA4_API_SECRET", "test-secret");
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("request URL contained test-secret"));
+    await expect(sendMeasurementProtocolPurchase({
+      transaction_id: "order-failure", value: 100, ga_client_id: "123.456",
+    })).resolves.toBe(false);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls[0][1]?.signal).toBeInstanceOf(AbortSignal);
+    expect(JSON.stringify(errorLog.mock.calls)).not.toContain("test-secret");
   });
 });

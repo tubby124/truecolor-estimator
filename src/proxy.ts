@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { buildAttributionSetCookies } from "@/lib/analytics/utm";
+import { buildAttributionSetCookies, buildPaymentPrivacyCookies } from "@/lib/analytics/utm";
 import { isPrintResourceSlug } from "@/lib/data/print-resource-slugs";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
@@ -51,10 +51,15 @@ export async function proxy(request: NextRequest) {
   // it rides on whatever response this proxy was already returning.
   const withAttribution = (response: NextResponse) => {
     if (isPaymentPath) {
-      response.headers.set("Cache-Control", "private, no-store, max-age=0");
+      response.headers.set("Cache-Control", "private, no-store, max-age=0, no-transform");
       response.headers.set("Pragma", "no-cache");
       response.headers.set("Referrer-Policy", "no-referrer");
       response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+    }
+    // Repair old cookies before adding a newly captured touch, so a new paid
+    // visit can still win if both write the same cookie in this response.
+    for (const cookie of buildPaymentPrivacyCookies(request.headers.get("cookie"))) {
+      response.headers.append("set-cookie", cookie);
     }
     for (const cookie of attributionCookies) {
       response.headers.append("set-cookie", cookie);
@@ -128,5 +133,6 @@ export const config = {
   // Every page path, so an ad landing on any SEO page or product page gets its
   // click ID captured server-side. Static assets, image optimizer output, and
   // API routes are excluded — a click ID never arrives on those.
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.[\\w]+$).*)"],
+  // Signed payment tokens contain a dot; keep them out of the asset exclusion.
+  matcher: ["/pay/:path*", "/((?!api|_next/static|_next/image|favicon.ico|.*\\.[\\w]+$).*)"],
 };

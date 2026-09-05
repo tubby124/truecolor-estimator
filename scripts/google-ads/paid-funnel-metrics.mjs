@@ -13,11 +13,13 @@
 // exercise it against fixtures. The loader below takes an already-constructed Supabase client
 // so the report and any read-only probe share one definition of the queries.
 
+import { safeReportPath } from "./report-safety.mjs";
+
 export const FIRST_TOUCH_CLICK_ID_FIELDS = ["gclid", "gbraid", "wbraid"];
 export const LATEST_PAID_CLICK_ID_FIELDS = ["latest_paid_gclid", "latest_paid_gbraid", "latest_paid_wbraid"];
 export const ALL_CLICK_ID_FIELDS = [...FIRST_TOUCH_CLICK_ID_FIELDS, ...LATEST_PAID_CLICK_ID_FIELDS];
 
-export const OUTBOX_STATUSES = ["pending", "processing", "retry", "sent", "not_attributable", "dead"];
+export const OUTBOX_STATUSES = ["pending", "processing", "retry", "submitted", "sent", "not_attributable", "dead"];
 export const ORDER_ORIGINS = ["online_checkout", "staff_manual", "staff_quote", "unknown"];
 
 // staff_notes prefixes written by src/app/api/staff/manual-order/route.ts (~L428-431).
@@ -47,9 +49,9 @@ export function summarizePaidLandingPaths({ quoteRequests = [], orders = [] } = 
   const byPath = new Map();
   const add = (row, kind) => {
     if (!hasClickId(row) && !hasGoogleUtmSource(row)) return;
-    const path = isFilled(row?.latest_paid_landing_path)
+    const path = safeReportPath(isFilled(row?.latest_paid_landing_path)
       ? row.latest_paid_landing_path
-      : (isFilled(row?.landing_path) ? row.landing_path : "(path unknown)");
+      : (isFilled(row?.landing_path) ? row.landing_path : "(path unknown)"));
     const bucket = byPath.get(path) ?? { path, quotes: 0, orders: 0 };
     bucket[kind] += 1;
     byPath.set(path, bucket);
@@ -224,6 +226,7 @@ export function summarizeQuoteAttribution({
 
 const statusLine = (counts) =>
   `${counts.sent} sent | ${counts.pending + counts.retry + counts.processing} pending/retry | ` +
+  `${counts.submitted} awaiting diagnostics | ` +
   `${counts.not_attributable} not_attributable | ${counts.dead} dead`;
 
 const label = (text) => `  ${text.padEnd(46)}`;
@@ -233,7 +236,7 @@ export function formatQuoteAttributionSection(summary, { qualifiedLeadConfigured
   const { quotes, byConversionType, qualifiedLead, unattributable, survival } = summary;
   const lines = [
     "=== QUOTE ATTRIBUTION COVERAGE (window) ===",
-    "  How to read this: 1-2 = paid demand, 3-4 = signal actually sent to Google, 5 = honest non-attribution",
+    "  How to read this: 1-2 = paid demand, 3-4 = upload status, 5 = honest non-attribution",
     "  split by WHERE the order was created, 6 = does a paid click ID survive quote -> order -> outbox.",
     "",
     `${label("1. Website quote requests")}${quotes.total}`,
@@ -242,6 +245,7 @@ export function formatQuoteAttributionSection(summary, { qualifiedLeadConfigured
     `${label("3. Qualified-lead conversions uploaded")}${qualifiedLeadConfigured
       ? statusLine(qualifiedLead)
       : "n/a — conversion action `quote_submit_qualified` not created yet (plan Task 2)"}`,
+    "       Qualified-lead sent means ingest accepted; downstream delivery is not verified by this status.",
     `${label("4. Paid quote_won conversions uploaded")}${statusLine(byConversionType.quote_won)}`,
     `${label("5. Unattributable paid sales by origin")}${unattributable.total} total — ` +
       ORDER_ORIGINS.map((origin) => `${origin} ${unattributable.byOrigin[origin]}`).join(" | "),

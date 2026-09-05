@@ -16,6 +16,15 @@ describe("Meta browser events", () => {
     expect(fbq).not.toHaveBeenCalled();
   });
 
+  it("blocks events on a payment path even after consent and pixel initialization", () => {
+    const fbq = vi.fn();
+    vi.stubGlobal("window", { fbq, location: { pathname: "/pay/private-token" } });
+    vi.stubGlobal("document", { cookie: "tc_marketing_consent=granted" });
+    metaTrackLead({ content_name: "Quote Request" });
+    metaTrackPurchase({ content_ids: ["vinyl-banners"], value: 100 });
+    expect(fbq).not.toHaveBeenCalled();
+  });
+
   it("sends a single browser purchase event with the server deduplication ID", () => {
     const fbq = vi.fn();
     vi.stubGlobal("window", { fbq });

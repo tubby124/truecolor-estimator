@@ -23,6 +23,7 @@ import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { broadcastStaffNotification } from "@/lib/notifications/broadcast";
+import { buildPurchaseAmounts } from "@/lib/analytics/purchase-amounts";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 import { sendMetaCapiEvent } from "@/lib/analytics/metaCapi";
 import { recordAuditEvent } from "@/lib/audit/record";
@@ -464,10 +465,10 @@ export async function POST(req: NextRequest) {
               .eq("id", pendingOrder.id)
               .eq("status", "pending_payment")
               .is("voided_at", null)
-            .select(`id, order_number, customer_id, total, gst, pst, is_rush,
+            .select(`id, order_number, customer_id, total, gst, pst, discount_amount, is_rush,
                      ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
                      wave_invoice_id, wave_invoice_approved_at, wave_payment_recorded_at,
-                     order_items ( product_name, qty, line_total )`);
+                     order_items ( merchant_offer_id, commerce_product_id, product_name, qty, line_total )`);
 
           if (error) {
             console.error("[clover-webhook] order update failed:", error.message);
@@ -535,27 +536,18 @@ export async function POST(req: NextRequest) {
               }
 
               const order = updatedOrders[0];
-              const purchaseItems = Array.isArray(order.order_items) ? order.order_items : [];
-              void sendMeasurementProtocolPurchase({
+
+              await sendMeasurementProtocolPurchase({
                 transaction_id: order.id,
-                value: Number(order.total),
+                ...buildPurchaseAmounts(order),
                 customer_id: order.customer_id,
                 ga_client_id: order.ga_client_id,
                 ga_session_id: order.ga_session_id,
                 ga_session_number: order.ga_session_number,
                 ga_context_captured_at: order.ga_context_captured_at,
                 payment_type: "clover_card",
-                tax: Number(order.gst ?? 0) + Number(order.pst ?? 0),
-                items: purchaseItems.map((item) => ({
-                  item_id: (item.product_name ?? "").slice(0, 100),
-                  item_name: item.product_name ?? "Unknown",
-                  price: Number(item.qty) > 0
-                    ? Number(item.line_total) / Number(item.qty)
-                    : Number(item.line_total),
-                  quantity: Number(item.qty ?? 1),
-                })),
               }).then((delivered) => {
-                if (!delivered) console.error("[clover-webhook] GA4 MP purchase was not delivered (non-fatal)");
+                if (!delivered) console.error("[clover-webhook] GA4 MP purchase request was not accepted (non-fatal)");
               }).catch((err) => {
                 console.error("[clover-webhook] GA4 MP purchase failed (non-fatal):", err);
               });
