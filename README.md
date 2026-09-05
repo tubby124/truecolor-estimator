@@ -1,3 +1,7 @@
+# Shared project work
+
+Start with [True Color project index](docs/TRUE-COLOR-INDEX.md) for current state, Cloud setup and task handoffs.
+
 # True Color Display Printing — Estimator
 
 **Live site:** [truecolorprinting.ca](https://truecolorprinting.ca)

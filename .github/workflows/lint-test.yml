@@ -67,6 +67,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Shared project record contracts
+        run: bash scripts/codex/check.sh
+
       - name: ESLint (includes tc-local/no-void-supabase-builder)
         run: npx eslint src/ --max-warnings=999
 
