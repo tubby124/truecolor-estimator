@@ -8,9 +8,9 @@ Coordinator task: `01a077f8-3952-7a32-976f-e79bb7844a28`. The [approved handoff]
 
 | Lane | Task | Contract and release dependency | Evidence |
 |---|---|---|---|
-| Pricing / P | `01a077f7-0c52-7db1-a85d-0c7323e90b7c` | Server-only `resolveProductFacts` owns configuration, engine totals, order minimum, allowed claims and source fingerprint. Preserve negotiated and issued snapshots. | Reviewed PR [49](https://github.com/tubby124/truecolor-estimator/pull/49), exact-lock source tests/build passed; CI pending. Merge first. Tax SQL requires production approval. |
+| Pricing / P | `01a077f7-0c52-7db1-a85d-0c7323e90b7c` | Server-only `resolveProductFacts` owns configuration, engine totals, order minimum, allowed claims and source fingerprint. Preserve negotiated and issued snapshots. | Reviewed PR [49](https://github.com/tubby124/truecolor-estimator/pull/49), merged at `84a409e2` after exact-head CI; main CI and public runtime passed. Tax SQL requires production approval. |
 | Google, business isolation and monthly publishing / G | `01a077f7-4219-7c22-ae5e-22eea830acec` | `requireSocialBusiness(req?)` supplies authorized business context. `SOCIAL_BUSINESS_SCOPING_ENABLED` defaults off, preserving legacy schema and already-approved Meta deliveries. Shared platform name is `gbp`; approval field is `fact_fingerprint`. | Reviewed PR [48](https://github.com/tubby124/truecolor-estimator/pull/48); 1,340 source tests and 40 built browser contracts passed locally. Live-schema followup `3b425be4`; final CI pending. |
-| Catalogue-backed generation / C | `01a077f7-7ba0-7fe1-89cd-d4953bee2f03` | Uses P facts and G business context. New durable jobs require business migration followed by generation migration. Legacy on-demand compatibility stays explicit during rollout. | Reviewed PR [47](https://github.com/tubby124/truecolor-estimator/pull/47), exact head `ff664963` CI passed. Selected channels, deterministic source-backed price text and editable usage ceiling. |
+| Catalogue-backed generation / C | `01a077f7-7ba0-7fe1-89cd-d4953bee2f03` | Uses P facts and G business context. New durable jobs require business migration followed by generation migration. Legacy on-demand compatibility stays explicit during rollout. | Reviewed PR [47](https://github.com/tubby124/truecolor-estimator/pull/47), exact combined head `3427f091` CI passed and merged at `df586144`. Selected channels, deterministic source-backed price text and editable usage ceiling. |
 | Integration | This task | Owns shared CI workflow, this record, current-state board/index and merge sequence. | Documentation PR [45](https://github.com/tubby124/truecolor-estimator/pull/45) merged at `d081d062` after exact-head CI passed. Isolated integration branch starts there. |
 
 Shared-file changes must be coordinated. Lane owners supply reviewed PRs, exact test commands and their own runbooks. Integration adds SQL/browser commands to required CI and reviews the combined result. No lane independently activates production features or repeats successful posts.
@@ -19,13 +19,13 @@ Shared-file changes must be coordinated. Lane owners supply reviewed PRs, exact 
 
 | Area | Required evidence | Current status |
 |---|---|---|
-| Pricing | Cross-surface cents, tax classes, order minimum, manual provenance, revision and Wave amount parity; immutable issued history | Independent lane review approved; 1,287 exact-lock source tests and build passed. Final CI/integration pending. |
-| Facts and generation | Single source fingerprint; unchanged rerun without provider call; item-local invalidation; partial resume; bounded retries/usage; ambiguity held | Pending lane tests/review |
+| Pricing | Cross-surface cents, tax classes, order minimum, manual provenance, revision and Wave amount parity; immutable issued history | PR49 merged; main CI and exact Railway deployment passed. Public rates and three source prices verified; full integration still in progress. |
+| Facts and generation | Single source fingerprint; unchanged rerun without provider call; item-local invalidation; partial resume; bounded retries/usage; ambiguity held | C reviewed and merged after required CI; no paid provider call. Combined integration pending. |
 | Two-business isolation | Authorized routes, assets, jobs, credentials, approval targets and receipts; two synthetic businesses | Combined disposable SQL passes for generation/business FKs and post/job references; full lane route/assets tests pending. No real second client. |
 | Monthly approval and delivery | Exact media/copy/account/time/facts binding; stable creative IDs; paginated review; missed-schedule hold; per-platform receipts | Pending lane tests/browser contracts |
 | Migration package | Ordered SQL, review, disposable regression, backfill impact, rollback and activation instructions | Prepare before requesting missing production approval |
-| Git and CI | Reviewed intended files, required exact-head checks, P before dependent lanes | PR45 complete; lane PRs pending |
-| Deployment | Main CI, actual Railway deployment/commit and read-only runtime behavior | Baseline `40868735` deployment reported SUCCESS at takeover; no new runtime release verified |
+| Git and CI | Reviewed intended files, required exact-head checks, P before dependent lanes | PR45, PR49 and PR47 complete; G combined CI and root integration pending |
+| Deployment | Main CI, actual Railway deployment/commit and read-only runtime behavior | Pricing `84a409e2` deployed successfully; public rates/retractable/ACP/poster checks passed. C/G final runtime pending |
 | Provider setup | Google credentials/access, actual listing/history and live connection health | 18:40 UTC protected config confirms only client ID; secret, redirect URI and encryption key absent. OpenRouter key present; no paid test call. |
 | Ongoing scheduler | Reconcile existing six approved deliveries; replace the bounded trigger with one ongoing runner; preserve uncertain holds | Existing runner active and waiting; no replacement activated |
 
@@ -63,3 +63,12 @@ At **19:00:40 UTC**, the 13:00 Regina pair was independently confirmed: [Instagr
 Read-only SQL in the existing authenticated Supabase dashboard resolved the connector access limitation. Production is PostgreSQL17.6 (`170006`). No platform check constraints restrict `gbp`; OpenAPI confirms text[]/text platform fields. Current checks constrain status, post_type and post_number only. Required insert columns without defaults are accounts.platform, campaigns.slug/name and results.platform. Both orphan-count checks returned zero. Existing campaign slug uniqueness was global; G followup scopes it by business. The replacement campaign and receipt foreign keys preserve existing SET NULL and CASCADE behavior. One verified configured owner account was found through the protected auth admin read; its UUID is retained only in the private release package. No production schema was altered.
 
 The combined disposable fixture now includes these actual legacy constraints plus a deliberately broad storage read policy. Restrictive social-storage policy blocks browser access to both social buckets while retaining access to an unrelated bucket; the full combined test passes.
+
+
+## Pricing/caption merges and deployment gate
+
+Pricing PR49 merged at `84a409e2c31d30347012f6fa33a8245274793795`; required PR CI and main [run34053757527](https://github.com/tubby124/truecolor-estimator/actions/runs/34053757527) passed. Railway deployment `38d1b0b7-7d39-4720-8db5-e3f0b5277dd6` succeeded at that exact commit. At19:08:36UTC public tax rates and three pure estimate requests returned the committed $219 retractable, $78 ACP24×36 and $15 raw photo-poster prices, GST5%/PST6%. No order or provider mutation occurred; this does not verify a paid checkout or new finance delivery. P runbook retains the full bounded receipt.
+
+Caption PR47 merged at `df586144` after refreshing with final P and passing exact combined head `3427f091` [CI34053876903](https://github.com/tubby124/truecolor-estimator/actions/runs/34053876903). G is refreshing from both merged lanes.
+
+At19:12UTC the authenticated Railway service settings contradicted the dated release notes: Wait for CI was OFF. Integration reviewed the sole staged change, Check Suites false→true, and applied it under the approved release scope. Readback showed the setting on with no staged changes, and the next C deployment explicitly waiting for CI. No repository permission expansion or other service setting was performed.
