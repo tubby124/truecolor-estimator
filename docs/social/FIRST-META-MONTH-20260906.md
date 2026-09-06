@@ -1,5 +1,7 @@
 # First reviewable Meta month — September 6, 2026
 
+Latest continuation: **the owner approved the presented review and requested additional product-image trials.** [New comparisons, selection decisions and full automation progress](IMAGE-TRIALS-AND-AUTOMATION-20260906.md) supersede the earlier pending-review checkpoint. Prior altered-artwork holds remain; no new posting/scheduling request was made. PR51 merged and its exact commit was verified active on Railway; the new runbook carries release evidence and live-read boundaries.
+
 Status: private content preparation plus bounded profile/review implementation; final release evidence below. Coordinator uses GPT-6 Astra with a small bounded review/operations team. Base: verified origin/main `f3ead193` (PR46 merged). Integration task retains production SQL, activation, final Sunday reconciliation and the single VPS scheduler. This task owns this plan and separately named first-month artifacts. No new publication, paid generation, customer communication or live scheduler change is authorized.
 
 ## Decision and sequence

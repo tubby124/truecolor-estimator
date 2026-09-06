@@ -22,6 +22,9 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Product image trials, revision decisions and full automation progress](social/IMAGE-TRIALS-AND-AUTOMATION-20260906.md)
+- [First Meta month, owner review and profile implementation](social/FIRST-META-MONTH-20260906.md)
+
 - [Pricing and social integration work board and release evidence](social/INTEGRATION-20260906.md)
 - [Google credential setup, API application and remaining connection gates](social/GBP-CONNECTION-20260906.md)
 
