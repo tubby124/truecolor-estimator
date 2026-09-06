@@ -1,4 +1,4 @@
-/** Only explicitly approved Instagram pilots dispatch. Uncertain deliveries require manual reconciliation. */
+/** Only explicitly approved single-destination Instagram or Facebook pilots dispatch. Uncertain deliveries require manual reconciliation. */
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { createServiceClient } from '@/lib/supabase/server';

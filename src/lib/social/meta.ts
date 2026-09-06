@@ -26,7 +26,7 @@
  *   - Token expired (code 190) / permissions (200) / rate limit (4) → friendly messages
  *   - IG container ERROR / EXPIRED → failed with Meta's message
  *   - IG container still processing after poll window → "in-progress" with the
- *     container id stored as submissionId so the cron can reconcile later
+ *     container id stored as submissionId for manual operator reconciliation
  *   - No image/video → failed with clear message
  *   - Relative image URLs → normalized against NEXT_PUBLIC_SITE_URL (IG requires absolute)
  */
@@ -58,7 +58,7 @@ export interface MetaConfig {
 export interface PlatformPublishResult {
   platform: Platform;
   status: "published" | "failed" | "in-progress";
-  /** IG container/media id, FB media/post id — also used for cron reconciliation. */
+  /** IG container/media id, FB media/post id — retained for manual reconciliation. */
   submissionId?: string;
   publicUrl?: string;
   errorMessage?: string;
@@ -308,7 +308,7 @@ export async function publishInstagram(
           ...base,
           status: "in-progress",
           submissionId: containerId,
-          errorMessage: "IG media still processing — the next cron run will reconcile this post.",
+          errorMessage: "IG media still processing — manual reconciliation required; do not retry this post.",
         };
       }
       return { ...base, status: "failed", submissionId: containerId, errorMessage: waited.errorMessage };
@@ -325,7 +325,7 @@ export async function publishInstagram(
 /**
  * Reconcile a previously "in-progress" IG container (from an earlier poll
  * timeout). Returns null when the container is still processing — the post
- * stays in-progress and the next cron run checks again. IG containers expire
+ * stays in-progress. This helper is not called by the approval pilot scheduler. IG containers expire
  * 24h after creation, so repeated timeouts eventually resolve to EXPIRED.
  */
 export async function reconcileIgContainer(
