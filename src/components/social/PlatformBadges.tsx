@@ -1,6 +1,7 @@
 import type { Platform } from "@/lib/types/social";
 
 const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; bg: string }> = {
+  gbp: { label: "Google", color: "text-[#4285F4]", bg: "bg-[#4285F4]/10" },
   instagram: { label: "IG", color: "text-[#E1306C]", bg: "bg-[#E1306C]/10" },
   facebook: { label: "FB", color: "text-[#1877F2]", bg: "bg-[#1877F2]/10" },
   twitter: { label: "X", color: "text-[#1DA1F2]", bg: "bg-[#1DA1F2]/10" },
