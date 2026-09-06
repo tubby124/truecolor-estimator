@@ -8,7 +8,7 @@ import { QuoteBuilderModal } from "./QuoteBuilderModal";
 import { QuoteReplyModal } from "./QuoteReplyModal";
 import { getBrokerage } from "@/lib/data/brokerages";
 
-export function QuoteCard({ quote }: { quote: QuoteRequest }) {
+export function QuoteCard({ quote, initialBuilderOpen = false }: { quote: QuoteRequest; initialBuilderOpen?: boolean }) {
   const isNew =
     // eslint-disable-next-line react-hooks/purity -- "<24h ago" badge; staleness on re-render is acceptable
     Date.now() - new Date(quote.created_at).getTime() < 24 * 60 * 60 * 1000;
@@ -17,7 +17,7 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
   const brokerage = quote.brokerage_slug ? getBrokerage(quote.brokerage_slug) : null;
 
   // New unreplied quotes start expanded; others collapsed
-  const [expanded, setExpanded] = useState(isNew && !quote.replied_at);
+  const [expanded, setExpanded] = useState(initialBuilderOpen || (isNew && !quote.replied_at));
 
   // Optimistic reply state
   const [isPending, startTransition] = useTransition();
@@ -31,7 +31,7 @@ export function QuoteCard({ quote }: { quote: QuoteRequest }) {
   const [replyOpen, setReplyOpen] = useState(false);
 
   // Quote builder modal
-  const [quoteBuilderOpen, setQuoteBuilderOpen] = useState(false);
+  const [quoteBuilderOpen, setQuoteBuilderOpen] = useState(initialBuilderOpen);
 
   // Optimistic archive state — soft-hides the card immediately.
   const [optimisticArchived, setOptimisticArchived] = useOptimistic(!!quote.is_archived);

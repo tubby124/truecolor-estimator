@@ -23,7 +23,7 @@ const EXPECTED_PRODUCT_HREFS = [
 ];
 const EXPECTED_FROM_PRICES = [
   "$25", "$25", "$66", "$45", "$45", "$219", "$39", "$25",
-  "$15", "$25", "$25", "$45", "$35", "$70",
+  "$25", "$25", "$25", "$45", "$35", "$70",
 ];
 
 describe("paid-only why True Color page contract", () => {

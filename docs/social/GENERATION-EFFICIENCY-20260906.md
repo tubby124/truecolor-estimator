@@ -63,3 +63,7 @@ Rollback: turn the shared feature gate off through coordinated deployment, which
 Lane PR: [#47 — catalogue-backed resumable caption generation](https://github.com/tubby124/truecolor-estimator/pull/47). Implementation commits044282e7 andaf95e5bc; P/G dependency commits are separate. CI status is linked on the PR and must be green before integration. Merge sequencing belongs to the integration task. The combined migration package, final G authorization/source binding, approved production schema application and live deployment readback remain coordinated release work.
 
 Final provider-envelope regression: null/non-object JSON after a dispatched request is held with one call and unknown cost, preserving reservations. It cannot fall through as a zero-call failure. G integration also exercises the generation browser contracts using its authenticated loopback fixture.
+
+## Pricing integration refresh — September 6, 2026
+
+After pricing PR49 merged at84a409e2, origin/main was merged into this lane without conflicts atbdcb724b. Final P product-facts/source-tracing files match main; C caption implementation is preserved. The targeted generation/API/settings/product-facts/price-consistency suite passed108 tests across five files; strict TypeScript and whitespace checks passed. The refreshed branch is pushed to PR47 for combined required CI before the integration task merges it. No feature flag, production schema, provider or public-content action occurred.

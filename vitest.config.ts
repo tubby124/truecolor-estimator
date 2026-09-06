@@ -9,7 +9,7 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     // e2e/ smoke tests hit the live Vercel URL — run separately with npm run test:smoke
     // e2e-playwright/ specs run under Playwright (npx playwright test) — not vitest
-    exclude: ["**/node_modules/**", "**/e2e/**", "**/e2e-playwright/**"],
+    exclude: ["**/node_modules/**", "**/.next/**", "**/e2e/**", "**/e2e-playwright/**"],
   },
   resolve: {
     alias: {

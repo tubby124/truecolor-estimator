@@ -18,13 +18,17 @@ const validPricing: StructuredQuotePricing = {
 };
 
 describe("structured quote pricing", () => {
-  it("synchronizes DB tax rates from canonical pricing config", async () => {
+  it("reads and validates tax config without any database mutation", async () => {
     const maybeSingle = vi.fn().mockResolvedValue({ data: { gst_rate: 0.05, pst_rate: 0.06 }, error: null });
-    const select = vi.fn().mockReturnValue({ maybeSingle });
-    const upsert = vi.fn().mockReturnValue({ select });
-    const client = { from: vi.fn().mockReturnValue({ upsert }) } as never;
+    const eq = vi.fn().mockReturnValue({ maybeSingle });
+    const select = vi.fn().mockReturnValue({ eq });
+    const upsert = vi.fn();
+    const client = { from: vi.fn().mockReturnValue({ select, upsert }) } as never;
     await expect(getQuoteTaxRates(client)).resolves.toEqual({ gstRate: 0.05, pstRate: 0.06 });
-    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ gst_rate: 0.05, pst_rate: 0.06 }), { onConflict: "id" });
+    expect(upsert).not.toHaveBeenCalled();
+    maybeSingle.mockResolvedValue({ data: { gst_rate: 0.04, pst_rate: 0.06 }, error: null });
+    await expect(getQuoteTaxRates(client)).rejects.toThrow("authorized tax-config sync");
+    expect(upsert).not.toHaveBeenCalled();
   });
 
   it("accepts only an exact subtotal/GST/PST reconciliation", () => {

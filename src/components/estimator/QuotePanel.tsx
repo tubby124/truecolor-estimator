@@ -182,11 +182,11 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
         <td style="text-align:right;font-variant-numeric:tabular-nums;">$${sellPrice.toFixed(2)}</td>
       </tr>
       <tr class="gst-row">
-        <td>GST (5%)</td>
+        <td>GST</td>
         <td style="text-align:right;font-variant-numeric:tabular-nums;">$${gst.toFixed(2)}</td>
       </tr>
       <tr class="gst-row">
-        <td>PST (6%)</td>
+        <td>PST</td>
         <td style="text-align:right;font-variant-numeric:tabular-nums;">$${pst.toFixed(2)}</td>
       </tr>
       <tr class="total-row">
@@ -232,7 +232,7 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
 
   <!-- Terms -->
   <div class="terms">
-    50% deposit required to begin production · Balance due on pickup · All prices in CAD · GST (5%) + PST (6%) included<br />
+    50% deposit required to begin production · Balance due on pickup · All prices in CAD · GST + PST included<br />
     Prices valid for 30 days from quote date · Questions? Call (306) 954-8688 or email info@true-color.ca<br />
     True Color Display Printing · 216 33rd St W (Upstairs), Saskatoon SK S7L 0V1
   </div>
@@ -499,11 +499,11 @@ export function QuotePanel({ result, loading, isCustomerMode, onToggleCustomerMo
           </div>
           <div className="px-4 py-3 bg-gray-50 border-t border-[var(--border)] space-y-1">
             <div className="flex justify-between text-sm">
-              <span className="text-[var(--muted)]">GST (5%)</span>
+              <span className="text-[var(--muted)]">GST</span>
               <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>${gst.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-[var(--muted)]">PST (6%)</span>
+              <span className="text-[var(--muted)]">PST</span>
               <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>${pst.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-base font-semibold">

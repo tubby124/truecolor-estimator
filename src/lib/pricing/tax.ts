@@ -8,6 +8,7 @@
 //
 // Always read gst_rate from the engine response — never hardcode it.
 
+import { computeTaxCents } from "@/lib/payment/tax-math";
 import type { EstimateResponse } from "@/lib/engine/types";
 
 export interface TaxBreakdown {
@@ -17,13 +18,11 @@ export interface TaxBreakdown {
   pstBase: number;   // sell_price for taxable printed-material sales
 }
 
-type TaxInput = Pick<EstimateResponse, "sell_price" | "design_fee" | "rush_fee" | "gst_rate"> & {
+type TaxInput = Pick<EstimateResponse, "sell_price" | "design_fee" | "rush_fee" | "gst_rate" | "pst_rate"> & {
   /** Standalone service line (design, vectorization, upscale) — GST only, no PST. */
   pst_exempt?: boolean;
 };
 
-const PST_RATE = 0.06;
-const GST_RATE_FALLBACK = 0.05;
 
 /**
  * Engine categories that are pure services with no tangible printed goods
@@ -82,29 +81,29 @@ export function computePstBase(opts: {
 
 export function computeTax(result: TaxInput): TaxBreakdown {
   const sell = result.sell_price ?? 0;
-  const gstRate = result.gst_rate ?? GST_RATE_FALLBACK;
+  if (sell === 0) return { gst: 0, pst: 0, total: 0, pstBase: 0 };
+  if (result.gst_rate == null || result.pst_rate == null) {
+    throw new Error("This estimate needs a refresh from canonical tax rates");
+  }
   const pstBase = result.pst_exempt ? 0 : Math.max(0, sell);
-  const gst = round2(sell * gstRate);
-  const pst = round2(pstBase * PST_RATE);
-  const total = round2(sell + gst + pst);
-  return { gst, pst, total, pstBase };
+  const tax = computeTaxCents(Math.round(sell * 100), { gstRate: result.gst_rate, pstRate: result.pst_rate }, !!result.pst_exempt);
+  return { gst: tax.gstCents / 100, pst: tax.pstCents / 100, total: tax.totalCents / 100, pstBase };
 }
 
-// Cart aggregate — compute and round tax per taxable printed item, then sum.
+// Aggregate taxable bases in cents and round once, matching checkout/manual/SQL.
 export function computeTaxForCart(results: TaxInput[]): TaxBreakdown {
-  let sell = 0;
-  let gstSum = 0;
-  let pstSum = 0;
-  let pstBaseSum = 0;
-  for (const r of results) {
-    const t = computeTax(r);
-    sell += r.sell_price ?? 0;
-    gstSum += t.gst;
-    pstSum += t.pst;
-    pstBaseSum += t.pstBase;
+  if (!results.length) return { gst: 0, pst: 0, total: 0, pstBase: 0 };
+  const first = results.find((result) => (result.sell_price ?? 0) > 0);
+  if (!first) return { gst: 0, pst: 0, total: 0, pstBase: 0 };
+  computeTax(first); // reject stale estimates before using their rates
+  let subtotalCents = 0;
+  let pstBaseCents = 0;
+  for (const result of results) {
+    if (result.gst_rate !== first.gst_rate || result.pst_rate !== first.pst_rate) throw new Error("Refresh estimates with differing tax rates before sending");
+    const cents = Math.round((result.sell_price ?? 0) * 100);
+    subtotalCents += cents;
+    if (!result.pst_exempt) pstBaseCents += cents;
   }
-  const gst = round2(gstSum);
-  const pst = round2(pstSum);
-  const total = round2(sell + gst + pst);
-  return { gst, pst, total, pstBase: round2(pstBaseSum) };
+  const tax = computeTaxCents(subtotalCents, { gstRate: first.gst_rate!, pstRate: first.pst_rate! }, false, pstBaseCents);
+  return { gst: tax.gstCents / 100, pst: tax.pstCents / 100, total: tax.totalCents / 100, pstBase: pstBaseCents / 100 };
 }

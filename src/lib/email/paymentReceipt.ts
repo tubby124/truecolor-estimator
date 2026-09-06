@@ -210,11 +210,11 @@ function buildReceiptHtml(p: SendPaymentReceiptParams): string {
                     <td style="padding:8px 16px;font-size:12px;color:#4a3728;text-align:right;border-top:1px solid #e2dbd4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">$${p.subtotal.toFixed(2)}</td>
                   </tr>
                   <tr style="background:#f9f6f3;">
-                    <td style="padding:4px 16px;font-size:12px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">GST (5%)</td>
+                    <td style="padding:4px 16px;font-size:12px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">GST</td>
                     <td style="padding:4px 16px;font-size:12px;color:#4a3728;text-align:right;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">$${p.gst.toFixed(2)}</td>
                   </tr>
                   <tr style="background:#f9f6f3;">
-                    <td style="padding:4px 16px 8px;font-size:12px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">PST (6%)</td>
+                    <td style="padding:4px 16px 8px;font-size:12px;color:#7a6560;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">PST</td>
                     <td style="padding:4px 16px 8px;font-size:12px;color:#4a3728;text-align:right;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">$${p.pst.toFixed(2)}</td>
                   </tr>
                   <tr style="background:#1c1712;">
@@ -320,8 +320,8 @@ function buildReceiptText(p: SendPaymentReceiptParams): string {
       ? `  Discount${p.discountCode ? ` (${p.discountCode})` : ""}: -$${p.discountAmount.toFixed(2)}`
       : "",
     `  Subtotal:     $${p.subtotal.toFixed(2)}`,
-    `  GST (5%):     $${p.gst.toFixed(2)}`,
-    `  PST (6%):     $${p.pst.toFixed(2)}`,
+    `  GST:     $${p.gst.toFixed(2)}`,
+    `  PST:     $${p.pst.toFixed(2)}`,
     `  TOTAL:        $${p.total.toFixed(2)} CAD`,
     "",
     p.waveInvoiceUrl

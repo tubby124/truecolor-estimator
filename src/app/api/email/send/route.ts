@@ -1,16 +1,18 @@
 import { buildQuoteEmailHtml, buildDiagramSvgXml, type QuoteEmailData } from "@/lib/email/quoteTemplate";
+import { resolveStaffEstimate, StaffEstimateError, type StaffEstimateInput } from "@/lib/pricing/wave-quote";
 import type { EstimateResponse } from "@/lib/engine/types";
 import { sendEmail, type SendEmailAttachment } from "@/lib/email/smtp";
 import { requireStaffUser } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { computeTax, computeTaxForCart } from "@/lib/pricing/tax";
 
-interface QuoteItem {
+interface QuoteItem extends Partial<StaffEstimateInput> {
   quoteData: EstimateResponse;
   jobDetails: QuoteEmailData["jobDetails"];
 }
 
-interface SendQuoteRequest {
+interface SendQuoteRequest extends Partial<StaffEstimateInput> {
+  requestId: string;
   to: string;
   customerName?: string;
   note?: string;
@@ -130,8 +132,8 @@ function buildMultiItemEmailHtml(opts: {
         </thead>
         <tbody>
           <tr style="background:#f9fafb;"><td style="padding:8px 16px;font-size:13px;color:#6b7280;">Subtotal</td><td style="padding:8px 16px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:#6b7280;">$${combinedSubtotal.toFixed(2)}</td></tr>
-          <tr style="background:#f9fafb;"><td style="padding:8px 16px;font-size:13px;color:#6b7280;">GST (5%)</td><td style="padding:8px 16px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:#6b7280;">$${gst.toFixed(2)}</td></tr>
-          <tr style="background:#f9fafb;"><td style="padding:8px 16px;font-size:13px;color:#6b7280;">PST (6%)</td><td style="padding:8px 16px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:#6b7280;">$${pst.toFixed(2)}</td></tr>
+          <tr style="background:#f9fafb;"><td style="padding:8px 16px;font-size:13px;color:#6b7280;">GST</td><td style="padding:8px 16px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:#6b7280;">$${gst.toFixed(2)}</td></tr>
+          <tr style="background:#f9fafb;"><td style="padding:8px 16px;font-size:13px;color:#6b7280;">PST</td><td style="padding:8px 16px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:#6b7280;">$${pst.toFixed(2)}</td></tr>
           <tr style="background:#16C2F3;"><td style="padding:14px 16px;font-size:16px;font-weight:700;color:#fff;">Total (CAD)</td><td style="padding:14px 16px;font-size:16px;font-weight:700;color:#fff;text-align:right;font-variant-numeric:tabular-nums;">$${total.toFixed(2)}</td></tr>
         </tbody>
       </table>
@@ -200,8 +202,8 @@ function buildMultiItemPlainText(opts: {
     "",
     "--- Combined Total ---",
     `Subtotal: $${combinedSubtotal.toFixed(2)}`,
-    `GST (5%): $${gst.toFixed(2)}`,
-    `PST (6%): $${pst.toFixed(2)}`,
+    `GST: $${gst.toFixed(2)}`,
+    `PST: $${pst.toFixed(2)}`,
     `TOTAL: $${total.toFixed(2)} CAD`,
     "",
     "This quote is valid for 30 days.",
@@ -228,6 +230,10 @@ export async function POST(req: Request) {
 
   try {
     const body: SendQuoteRequest = await req.json();
+    if (!body || typeof body !== "object" || typeof body.requestId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.requestId)) {
+      return Response.json({ error: "A stable request ID is required. Refresh the estimator before sending." }, { status: 400 });
+    }
+    const idempotencyKey = `estimate:${body.requestId}`;
     const { to, customerName, note, proofImage, includePaymentLink } = body;
     if (includePaymentLink) {
       return Response.json(
@@ -237,10 +243,31 @@ export async function POST(req: Request) {
     }
 
     // Validate email
-    if (!to || !isValidEmail(to)) {
+    if (typeof to !== "string" || !isValidEmail(to)) {
       return Response.json({ error: "A valid customer email address is required." }, { status: 400 });
     }
 
+    if (body.items !== undefined && (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 50)) {
+      return Response.json({ error: "Include between 1 and 50 quote items." }, { status: 400 });
+    }
+    if ((body.items ?? [body]).some((item) => item.manualOverride !== undefined)) {
+      return Response.json({ error: "Save negotiated pricing with Make a Quote so the agreement and its reason remain on the customer record.", code: "SAVED_QUOTE_REQUIRED", quoteUrl: "/staff/orders?manual=quote" }, { status: 409 });
+    }
+    // Reject stale/tampered catalogue snapshots before sending anything. Issued
+    // quotes use the revision workflow; this endpoint only prepares a new email.
+    for (const item of body.items ?? [body]) {
+      const resolved = resolveStaffEstimate(item);
+      item.quoteData = resolved.quoteData;
+      item.jobDetails = {
+        category: resolved.request.category,
+        categoryLabel: resolved.quoteData.wave_line_name,
+        widthIn: resolved.request.width_in,
+        heightIn: resolved.request.height_in,
+        qty: resolved.request.qty ?? 1,
+        sides: resolved.request.sides,
+        isRush: resolved.request.is_rush ?? false,
+      };
+    }
     const isMultiItem = body.items && body.items.length > 0;
 
     // ── Multi-item path ────────────────────────────────────────────────────────
@@ -267,6 +294,8 @@ export async function POST(req: Request) {
         : `Multi-Item Quote (${items.length} items) from True Color Display Printing`;
 
       await sendEmail({
+        idempotencyKey,
+        requireEmailLog: true,
         from,
         to,
         bcc,
@@ -333,6 +362,8 @@ export async function POST(req: Request) {
     }
 
     await sendEmail({
+      idempotencyKey,
+      requireEmailLog: true,
       from,
       to,
       bcc,
@@ -344,6 +375,7 @@ export async function POST(req: Request) {
 
     return Response.json({ success: true });
   } catch (err) {
+    if (err instanceof StaffEstimateError) return Response.json({ error: err.message }, { status: err.status });
     const message = err instanceof Error ? err.message : "Failed to send email";
     console.error("[email/send]", message);
     return Response.json({ error: "Failed to send email" }, { status: 500 });
@@ -388,8 +420,8 @@ function buildPlainText({
     ...quoteData.line_items.map((i) => `${i.description}: $${i.line_total.toFixed(2)}`),
     "",
     `Subtotal: $${sellPrice.toFixed(2)}`,
-    `GST (5%): $${gst.toFixed(2)}`,
-    `PST (6%): $${pst.toFixed(2)}`,
+    `GST: $${gst.toFixed(2)}`,
+    `PST: $${pst.toFixed(2)}`,
     `TOTAL: $${total.toFixed(2)} CAD`,
     "",
     "This quote is valid for 30 days.",

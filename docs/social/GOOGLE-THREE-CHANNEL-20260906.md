@@ -74,3 +74,8 @@ The own-worktree production build completed successfully (Next16.3.4), followed 
 
 
 Integration's live read-only SQL preflight confirmed no platform CHECK/enum restriction on `gbp`, no campaign/receipt orphans and text[]/text platform columns. It identified a global campaign-slug uniqueness constraint: the prepared migration now replaces it with business+slug uniqueness while retaining global provider-account uniqueness. Business SQL regression exercises the actual old campaign SET NULL and receipt CASCADE foreign keys, proves both lifecycle behaviors survive composite scoping, and verifies two businesses may reuse a campaign slug while one business cannot duplicate it. Production application still requires explicit approval.
+
+
+## Combined main refresh
+
+After P PR49 and C PR47 merged, G merged `origin/main` at `df586144` without rebasing. Final P product facts and C generation/provider/store/validation/caption implementation match main. Resolved the shared helper conflict in favor of G's active-business membership enforcement for every context, retained current Compose browser selectors, and retained C's latest generation runbook. The combined suite passed **1,425 tests across149 files**, strict TypeScript, focused ESLint, project records, the aggregate pricing audit contract and21 Python scheduler tests. Required production-build/browser CI is attached to PR48 and must pass on this refreshed head before integration merges it. Production activation and the exact schema/Google/pilot gates above remain separate.

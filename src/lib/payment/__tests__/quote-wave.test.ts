@@ -4,6 +4,7 @@ const wave = vi.hoisted(() => ({
   approveWaveInvoice: vi.fn(),
   createOrFindWaveCustomer: vi.fn(),
   createWaveInvoice: vi.fn(),
+  getWaveInvoiceFinancials: vi.fn(),
 }));
 
 vi.mock("@/lib/wave/invoice", () => wave);
@@ -39,13 +40,21 @@ function clientFor(input: {
     if (name === "fail_quote_wave_provisioning") return { data: true, error: null };
     throw new Error(`Unexpected RPC ${name}: ${JSON.stringify(args)}`);
   });
+  const preTax = Number(input.order?.subtotal ?? 90) + (input.order?.is_rush ? 40 : 0);
+  const gst = Math.round(preTax * .05 * 100) / 100;
+  const pst = input.order?.pst_exempt ? 0 : Math.round(preTax * .06 * 100) / 100;
+  wave.getWaveInvoiceFinancials.mockResolvedValue({ subtotalCents: Math.round(preTax * 100), gstCents: Math.round(gst * 100), pstCents: Math.round(pst * 100), totalCents: Math.round((preTax + gst + pst) * 100) });
   const single = vi.fn().mockResolvedValue({
-    data: input.order ?? null,
+    data: { ...input.order, gst, pst, total: preTax + gst + pst },
     error: input.orderError ?? null,
   });
   const eq = vi.fn().mockReturnValue({ single });
   const select = vi.fn().mockReturnValue({ eq });
-  const from = vi.fn().mockReturnValue({ select });
+  const hold = { eq: vi.fn(), is: vi.fn(), select: vi.fn(), maybeSingle: vi.fn().mockResolvedValue({ data: { id: orderId }, error: null }), then: (resolve: (value: unknown) => unknown) => Promise.resolve({ error: null }).then(resolve) };
+  hold.eq.mockReturnValue(hold);
+  hold.is.mockReturnValue(hold);
+  hold.select.mockReturnValue(hold);
+  const from = vi.fn().mockReturnValue({ select, update: vi.fn().mockReturnValue(hold) });
   return { client: { rpc, from } as never, rpc, from };
 }
 
@@ -85,7 +94,8 @@ describe("quote Wave provisioning", () => {
       action: "ready",
       invoiceId: "existing-invoice",
     });
-    expect(from).not.toHaveBeenCalled();
+    expect(from).toHaveBeenCalled();
+    expect(wave.getWaveInvoiceFinancials).toHaveBeenCalledWith("existing-invoice");
     expect(wave.createWaveInvoice).not.toHaveBeenCalled();
   });
 
@@ -142,6 +152,23 @@ describe("quote Wave provisioning", () => {
     ], expect.objectContaining({ memo: expect.stringContaining("SK-123") }));
   });
 
+  it("holds a one-cent provider mismatch before approval or linkage", async () => {
+    const { client, rpc } = clientFor({ action: "create", order: storedOrder });
+    wave.getWaveInvoiceFinancials.mockResolvedValue({ subtotalCents: 10000, gstCents: 501, pstCents: 600, totalCents: 11101 });
+    await expect(provisionQuoteWaveInvoice(client, orderId)).rejects.toMatchObject({ ambiguous: true });
+    expect(wave.approveWaveInvoice).not.toHaveBeenCalled();
+    expect(rpc).toHaveBeenCalledWith("fail_quote_wave_provisioning", expect.objectContaining({ p_ambiguous: true }));
+    expect(rpc).not.toHaveBeenCalledWith("complete_quote_wave_provisioning", expect.anything());
+  });
+
+  it("verifies even an already-linked invoice and persists a visible hold on mismatch", async () => {
+    const { client, from } = clientFor({ action: "ready", invoiceId: "existing-invoice", order: storedOrder });
+    wave.getWaveInvoiceFinancials.mockResolvedValue({ subtotalCents: 10000, gstCents: 499, pstCents: 601, totalCents: 11100 });
+    await expect(provisionQuoteWaveInvoice(client, orderId)).rejects.toMatchObject({ ambiguous: true });
+    expect(from.mock.results.at(-1)?.value.update).toHaveBeenCalledWith(expect.objectContaining({ quote_wave_state: "ambiguous", wave_invoice_approved_at: null }));
+    expect(wave.createWaveInvoice).not.toHaveBeenCalled();
+  });
+
   it("marks failures after a Wave call starts ambiguous so they cannot auto-retry", async () => {
     const { client, rpc } = clientFor({ action: "create", order: storedOrder });
     wave.createWaveInvoice.mockRejectedValueOnce(new Error("Wave response was lost"));
@@ -190,7 +217,7 @@ describe("quote Wave provisioning", () => {
       isRush: true,
     })).resolves.toEqual({ action: "ready", invoiceId: "wave-invoice" });
 
-    expect(from).not.toHaveBeenCalled();
+    expect(from).toHaveBeenCalled();
     expect(wave.createWaveInvoice).toHaveBeenCalledWith("wave-customer", [{
       description: "Coroplast signs",
       qty: 2,
