@@ -1,5 +1,7 @@
 # Social approval pilot — implementation and release gate
 
+Latest operational checkpoint: [setup runbook](SETUP-RUNBOOK.md). Its dated receipt supersedes the historical pending migration/merge statements below.
+
 September 5, 2026. G1 of the private AISA master automation roadmap. Public-safe implementation record; no account tokens, private recordings or customer material.
 
 ## Intended behavior
