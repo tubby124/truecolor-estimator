@@ -53,3 +53,7 @@ At 05:05 UTC the repaired pipeline published the approved Facebook pilot with ex
 [Facebook](https://www.facebook.com/310364742156669_122234778494295517) and [Instagram](https://www.instagram.com/p/Dc7w50rkU41/) are live with independently verified exact captions and visually confirmed Fowlplay photo. Both app records are posted; Facebook was published once, Instagram failures were manually reconciled before its one successful publication, and the failed receipt remains preserved. PRs 39 and 40 fixed receipt persistence and the unsupported Instagram container-status field. Publishing was set back to false immediately afterward. [Final receipt](../social/PRACTICE-POST-20260906.md#successful-two-platform-delivery--september-6-2026) supersedes earlier pending-delivery checkpoints in this file. No unattended scheduler or Mac-asleep claim.
 
 Final hosted readback at 05:18:45 UTC confirmed `Publishing is paused`; readiness showed 12 drafts, zero ready/posting and two posted. Exactly one matching pilot per platform was found in fresh provider lists.
+
+## Inquiry automation audit — September 6, 2026
+
+[Inquiry plan](../lead-automation/INQUIRY-PLAN-20260906.md) records source-code/VPS observations, official Lofty research, domain separation, synthetic responses and acceptance gates. Recommendation: extend existing quote/CRM review flows; resolve actual inquiry context and competing sender ownership before broader automation. No campaign, customer send or runtime change. Actual Facebook-to-Lofty mapping, active sequences and account costs remain unverified.
