@@ -62,10 +62,19 @@ export function resolveProductFacts({ productSlug, configuration = {} }: {
   if (!product || product.comingSoon || product.serviceMode || productSlug === "custom-shape-signs" || !product.sizePresets.length) {
     throw new ProductFactsError("Select an available physical catalogue product.");
   }
-  const allowedKeys = ["material_code", "width_in", "height_in", "sides", "qty", "shape", "addons"];
+  const allowedKeys = ["material_code", "width_in", "height_in", "sides", "qty", "shape", "addons",
+    "category", "design_status", "is_rush"];
   if (!configuration || typeof configuration !== "object" || Array.isArray(configuration) ||
       Object.keys(configuration).some((key) => !allowedKeys.includes(key))) {
     throw new ProductFactsError("Unsupported catalogue configuration fields.");
+  }
+  // Returned snapshots can be re-resolved directly at approval/publication.
+  // These bound engine fields may round-trip, but cannot override product truth.
+  const bound = configuration as Partial<EstimateRequest>;
+  if ((bound.category !== undefined && bound.category !== product.category) ||
+      (bound.design_status !== undefined && bound.design_status !== "PRINT_READY") ||
+      (bound.is_rush !== undefined && bound.is_rush !== false)) {
+    throw new ProductFactsError("Configuration conflicts with the catalogue price basis.");
   }
   // Resolve material together with the selected size (flyer/postcard size aliases
   // are financially significant). A material may select an explicit tier.
