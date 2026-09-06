@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { reginaToIso } from "@/lib/social/schedule";
 import type { SocialPost } from "@/lib/types/social";
+import { MonthlyBatchProgress } from './MonthlyBatchProgress';
 
 interface Review {
   post: SocialPost;
@@ -105,6 +106,7 @@ export function BatchApprovalReview({ postIds, batchId }: { postIds: string[]; b
           <h1 className="text-2xl font-bold">Review saved batch</h1>
           <p className="mt-2 text-sm text-gray-600">{total} destination drafts saved. Page {page + 1}. Check the exact images, captions, destination and dates below. All times are Regina time.</p>
         </div>
+        {batchId && <MonthlyBatchProgress batchId={batchId} />}
         {loading && <p role="status">Loading saved previews…</p>}
         {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}</p>}
         {reviews.some(r => !r.publishingEnabled) && <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Publishing is paused. Approval can be recorded when the checks pass, but nothing will publish until the publisher is enabled. Missed dates need a fresh review.</p>}

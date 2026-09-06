@@ -2,6 +2,7 @@ import { requireSocialBusiness, socialAssetPrefix } from "@/lib/social/business"
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import sharp, { type Sharp } from "sharp";
+import { prepareMonthlyMedia } from "@/lib/social/prepare-media";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +26,11 @@ export async function POST(req: Request) {
 
   let file: File;
   let forceJpeg = false;
+  let fitForSocial = false;
   try {
     const formData = await req.formData();
-    forceJpeg = formData.get("format") === "jpeg";
+    fitForSocial = formData.get("fitForSocial") === "1";
+    forceJpeg = fitForSocial || formData.get("format") === "jpeg";
     const raw = formData.get("file");
     if (!raw || typeof raw === "string") {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -54,6 +57,12 @@ export async function POST(req: Request) {
   let format: string;
 
   try {
+    if (fitForSocial) {
+      const prepared = await prepareMonthlyMedia(buffer);
+      buffer = Buffer.from(prepared.buffer);
+      width = prepared.width; height = prepared.height;
+      ext = "jpg"; contentType = "image/jpeg"; format = "jpeg";
+    } else {
     const image = sharp(buffer);
     const metadata = await image.metadata();
 
@@ -87,6 +96,7 @@ export async function POST(req: Request) {
     const outputMeta = await sharp(buffer).metadata();
     width = outputMeta.width ?? metadata.width ?? 0;
     height = outputMeta.height ?? metadata.height ?? 0;
+    }
   } catch {
     if (forceJpeg) return NextResponse.json({ error: "Image could not be converted to JPEG. Please choose a supported photo." }, { status: 400 });
     // Legacy callers retain raw fallback; the pilot never accepts an unvalidated JPEG.
