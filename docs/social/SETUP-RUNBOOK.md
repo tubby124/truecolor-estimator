@@ -4,6 +4,10 @@ Updated September 5, 2026 (Regina). This is an operational record, not a claim o
 
 ## Current checkpoint
 
+**Connection verified; publishing paused.** Meta confirmed `@truecolorprint` and all five requested permissions; the configured Railway deployment succeeded. The local preview is complete. Next: exact cleared JPEG/caption/date approval, then hosted scheduling and independent public/Mac-asleep proof. See the final dated receipts below. Never create another app or user without first inspecting the existing setup.
+
+## Historical starting checkpoint
+
 PR #32 merged at `4b39430125faa0bee10c85bc8eeff6a1e6267224`. The preceding task reports successful Railway deployment and authenticated staff review. Its exact approved production migration was applied with dashboard SQL readback. Fresh read-only Railway receipt at 2026-09-06 00:58:40 UTC confirms approval schema present, 12 drafts, zero ready/attempted/posted rows, zero active social accounts, publishing disabled, and all three Meta publisher variables absent. This is not a provider connection.
 
 The owner-linked Instagram/Page and existing new publisher app were identified in the preceding task. Reuse that app; do not create another. The authenticated Business Suite system-user view loaded in this continuation. A dedicated employee user setup is being prepared; the owner reports accepting the required Meta policy certification. Creation was submitted once and remained loading; independent list readback is pending. No publisher credential has been created or installed in this continuation.
