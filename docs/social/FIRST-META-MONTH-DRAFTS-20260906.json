@@ -1,0 +1,190 @@
+{
+  "status": "editorial drafts only; no import or publishing approval",
+  "window": "2026-09-14 through 2026-10-11 America/Regina",
+  "items": [
+    {
+      "id": "M01",
+      "dateRegina": "2026-09-15T10:00:00-06:00",
+      "dateUTC": "2026-09-15T16:00:00Z",
+      "type": "Shop process",
+      "title": "From the shop archive",
+      "productSlug": "vinyl-banners",
+      "stage": "sample-review",
+      "approval": "not-approved",
+      "mediaStatus": "inspected-source-review-required",
+      "mediaBrief": "Exact source frame, no crop or retouch. Social rights still require owner review. No format conversion or final upload performed.",
+      "variants": {
+        "short": "From the shop archive: a banner taking shape. Past event artwork shown.",
+        "medium": "A look back at a banner coming through the printer. Past event artwork shown. For your Saskatoon banner enquiry, send the wording and the space you have available.",
+        "long": "From the shop archive: a banner coming through the printer. Past event artwork shown. Planning a Saskatoon banner? Send the wording and available space with your enquiry. We can confirm the print details and artwork requirements before you place the order."
+      },
+      "facebook": "From the shop archive: a banner coming through the printer. Past event artwork shown.\n\nPlanning your own banner in Saskatoon? Send the wording and available space with your enquiry. We can confirm the print details before you place the order.",
+      "instagram": "From the shop archive: a banner taking shape. Past event artwork shown.\n\nHave an idea for your own? Start with the wording and the space available.\n\n#Saskatoon #BannerPrinting",
+      "hashtagsEvidence": "Generic local/product suggestions; not researched or trending claims",
+      "optionalPriceCaption": "From the shop archive: a banner taking shape. Past event artwork shown.\n\nConfigured catalogue example; the photo does not establish the pictured order price. Print-ready artwork; extras excluded.\n\nVinyl Banners: CAD $66.00 for 2×4 ft, 1 side, quantity 1. Standalone order CAD $66.00 before tax. https://truecolorprinting.ca/products/vinyl-banners",
+      "factFingerprint": "636faf58d49f595ec485639fa65238253d65ad3a9c18c9dd4996dd0d339f4a80",
+      "sampleAssetId": "web-681f2e7a67fd14e5020d"
+    },
+    {
+      "id": "M02",
+      "dateRegina": "2026-09-18T10:00:00-06:00",
+      "dateUTC": "2026-09-18T16:00:00Z",
+      "type": "Useful design detail",
+      "title": "A sign has one first job",
+      "productSlug": "acp-signs",
+      "stage": "sample-review",
+      "approval": "not-approved",
+      "mediaStatus": "inspected-source-review-required",
+      "mediaBrief": "Exact source frame, no crop or retouch. Social rights still require owner review. No format conversion or final upload performed.",
+      "variants": {
+        "short": "A sign has one first job: help someone find the message.",
+        "medium": "A direction, an entrance or a name: what should people spot first? For your Saskatoon sign, choose the main message before adding the smaller details. Keep the reading job simple.",
+        "long": "A sign has a reading job: make the message easy to find. For a Saskatoon sign, decide what people should spot first, then give that line room. Send us the wording and where it will be used so we can discuss the material and size for your particular space."
+      },
+      "facebook": "A sign has one first job: help someone find the message.\n\nBefore adding every detail, decide what people need to spot first. Is it the entrance, a direction or your business name?\n\nSend True Color the wording and where the sign will be used.",
+      "instagram": "One sign. One main message.\n\nWhat should someone notice first? Give that line room before filling the rest of the layout.\n\n#Saskatoon #SignDesign",
+      "hashtagsEvidence": "Generic local/product suggestions; not researched or trending claims",
+      "optionalPriceCaption": "A sign has one first job: help someone find the message.\n\nConfigured catalogue example; the photo does not establish the pictured order price. Print-ready artwork; extras excluded.\n\nAluminum Composite Signs: CAD $19.50 for 12×18\", 1 side, quantity 1. $19.50 for this configuration; a standalone order totals $25.00 before tax because of the $25 order-total minimum. Standalone order CAD $25.00 before tax. https://truecolorprinting.ca/products/acp-signs",
+      "factFingerprint": "070243bda536371b1c5f32ffefa709e600d70463408155d660fd0969241521ed",
+      "sampleAssetId": "web-fafba9f452ee0e2d1794"
+    },
+    {
+      "id": "M03",
+      "dateRegina": "2026-09-22T10:00:00-06:00",
+      "dateUTC": "2026-09-22T16:00:00Z",
+      "type": "Choosing a format",
+      "title": "Look at the layout from a few steps back",
+      "productSlug": "retractable-banners",
+      "stage": "sample-review",
+      "approval": "not-approved",
+      "mediaStatus": "inspected-source-review-required",
+      "mediaBrief": "Exact source frame, no crop or retouch. Social rights still require owner review. No format conversion or final upload performed.",
+      "variants": {
+        "short": "Take a few steps back. Can you still find the main message?",
+        "medium": "Planning a display in Saskatoon? Look at the layout from a few steps back. Keep the name and main message easy to find, then add the supporting details below them.",
+        "long": "Try looking at your display layout from a few steps back. Can you still find the name and main message? Give those elements room before adding the smaller details. For a Saskatoon display enquiry, tell us where the stand will go and what it needs to say."
+      },
+      "facebook": "Try looking at your display layout from a few steps back.\n\nCan you still find the business name and main message? Keep supporting details below that first reading point.\n\nFor a Saskatoon display enquiry, tell us where the stand will go and what it needs to say.",
+      "instagram": "Take a few steps back.\n\nCan you still find the name and main message in your display layout? Give those elements room before adding the smaller details.\n\n#Saskatoon #DisplayDesign",
+      "hashtagsEvidence": "Generic local/product suggestions; not researched or trending claims",
+      "optionalPriceCaption": "Take a few steps back. Can you still find the main message?\n\nConfigured catalogue example; the photo does not establish the pictured order price. Print-ready artwork; extras excluded.\n\nRetractable Banner Stands: CAD $219.00 for Economy stand + print, quantity 1. Standalone order CAD $219.00 before tax. https://truecolorprinting.ca/products/retractable-banners",
+      "factFingerprint": "c244bd503da2d4e5e80fa07e76c26d8249fe2d7f3e5be05ddf28684dbc4f76c3",
+      "sampleAssetId": "web-4d4c0d83423171320714"
+    },
+    {
+      "id": "M04",
+      "dateRegina": "2026-09-25T10:00:00-06:00",
+      "dateUTC": "2026-09-25T16:00:00Z",
+      "type": "Order preparation",
+      "title": "A flyer needs a next step",
+      "productSlug": "flyers",
+      "stage": "outline-draft",
+      "approval": "not-approved",
+      "mediaStatus": "unselected",
+      "mediaBrief": "A distinct flyer photograph; no expired promotion, political campaign, unverifiable price or private order label.",
+      "variants": {
+        "short": "After someone reads your flyer, what should they do next?",
+        "medium": "A flyer can hold plenty of information, but it still needs a next step. For your Saskatoon print, decide whether people should visit, call or keep the details for later.",
+        "long": "A flyer can hold plenty of information, but it still needs a next step. Planning a Saskatoon handout? Make the action easy to find, whether it is a place to visit or a way to get in touch. Tell us the quantity and intended use when you ask about printing."
+      },
+      "facebook": "After someone reads your flyer, what should they do next?\n\nMake that step easy to find. A location, a phone number or a clear web address can give the reader somewhere to go.\n\nTell us your quantity and intended use when you ask about printing.",
+      "instagram": "A flyer needs a next step.\n\nVisit. Call. Keep the details. Pick the action that suits your message, then give it space in the layout.\n\n#Saskatoon #FlyerDesign",
+      "hashtagsEvidence": "Generic local/product suggestions; not researched or trending claims",
+      "optionalPriceCaption": "After someone reads your flyer, what should they do next?\n\nConfigured catalogue example; the photo does not establish the pictured order price. Print-ready artwork; extras excluded.\n\nFlyers: CAD $45.00 for 80lb — Full 8.5×11\", 2 sides, quantity 100. Standalone order CAD $45.00 before tax. https://truecolorprinting.ca/products/flyers",
+      "factFingerprint": "f3428bee87063ed7e3b21daf402b784867a53fc0281cded61346d370ff49a4bd",
+      "sampleAssetId": null
+    },
+    {
+      "id": "M05",
+      "dateRegina": "2026-09-29T10:00:00-06:00",
+      "dateUTC": "2026-09-29T16:00:00Z",
+      "type": "Choosing a format",
+      "title": "Check the space before the banner",
+      "productSlug": "vinyl-banners",
+      "stage": "outline-draft",
+      "approval": "not-approved",
+      "mediaStatus": "unselected",
+      "mediaBrief": "An unused banner photo in context; no repeat of shop-process artwork or Sunday banner; no implied installation inclusion.",
+      "variants": {
+        "short": "Measure the space before you fill it with a banner.",
+        "medium": "Planning a banner in Saskatoon? Measure the available space and note where it will hang before settling on the wording. A photo of the location can help us understand what you need.",
+        "long": "Planning a banner in Saskatoon? Measure the available width and height before settling on the wording. Tell us where it will hang, too. A photo of the location can help explain the space, and we can confirm the print details before you place the order."
+      },
+      "facebook": "Measure the space before you fill it with a banner.\n\nA quick note of the available width and height helps us talk through the options. Let us know where it will hang, too.\n\nPlanning a Saskatoon project? Send the measurements with your idea.",
+      "instagram": "Start with the space.\n\nMeasure the width and height available for your banner, then shape the message to suit.\n\n#Saskatoon #BannerPrinting",
+      "hashtagsEvidence": "Generic local/product suggestions; not researched or trending claims",
+      "optionalPriceCaption": "Measure the space before you fill it with a banner.\n\nConfigured catalogue example; the photo does not establish the pictured order price. Print-ready artwork; extras excluded.\n\nVinyl Banners: CAD $66.00 for 2×4 ft, 1 side, quantity 1. Standalone order CAD $66.00 before tax. https://truecolorprinting.ca/products/vinyl-banners",
+      "factFingerprint": "636faf58d49f595ec485639fa65238253d65ad3a9c18c9dd4996dd0d339f4a80",
+      "sampleAssetId": null
+    },
+    {
+      "id": "M06",
+      "dateRegina": "2026-10-02T10:00:00-06:00",
+      "dateUTC": "2026-10-02T16:00:00Z",
+      "type": "Useful design detail",
+      "title": "Keep contact details easy to find",
+      "productSlug": "business-cards",
+      "stage": "outline-draft",
+      "approval": "not-approved",
+      "mediaStatus": "unselected",
+      "mediaBrief": "Reserve until a genuinely unused card asset is cleared. The previously rejected posted card and all other observed duplicates remain excluded.",
+      "variants": {
+        "short": "A business card should make getting in touch easy.",
+        "medium": "What is the easiest way for someone to reach you? Give that detail a clear place on your business card. For a Saskatoon card refresh, check the spelling and contact details before printing.",
+        "long": "A business card should make getting in touch easy. Refreshing your cards in Saskatoon? Check your name, number and web address carefully. Then look at the layout: is the main contact method easy to find? Small details deserve a second look before printing."
+      },
+      "facebook": "A business card should make getting in touch easy.\n\nBefore printing, check the name, number and web address carefully. Then look at the layout: is the main way to reach you easy to find?\n\nA small detail worth a second look.",
+      "instagram": "Small card. Useful details.\n\nGive your main contact method room, and check the spelling before the file goes to print.\n\n#Saskatoon #BusinessCardDesign",
+      "hashtagsEvidence": "Generic local/product suggestions; not researched or trending claims",
+      "optionalPriceCaption": "A business card should make getting in touch easy.\n\nConfigured catalogue example; the photo does not establish the pictured order price. Print-ready artwork; extras excluded.\n\nBusiness Cards: CAD $45.00 for 3.5×2\", 2 sides, quantity 250. Standalone order CAD $45.00 before tax. https://truecolorprinting.ca/products/business-cards",
+      "factFingerprint": "bb1370e81d72639ce7a3638de1535904187154d672d650ab77a92b81a2473df5",
+      "sampleAssetId": null
+    },
+    {
+      "id": "M07",
+      "dateRegina": "2026-10-06T10:00:00-06:00",
+      "dateUTC": "2026-10-06T16:00:00Z",
+      "type": "Order preparation",
+      "title": "Tell us what the sign must do",
+      "productSlug": "acp-signs",
+      "stage": "outline-draft",
+      "approval": "not-approved",
+      "mediaStatus": "unselected",
+      "mediaBrief": "Distinct ACP sign photo, source-confirmed material. No durability, weatherproofing or installed-price claim. Selected captions omit price; optional price is a separate configured catalogue example.",
+      "variants": {
+        "short": "Where will your sign go, and what does it need to say?",
+        "medium": "A useful sign brief starts with the location, size and wording. For your Saskatoon project, share those details before choosing a material so we can discuss the options for your use.",
+        "long": "For a Saskatoon sign enquiry, send the location, available space and wording first. Material and size affect the print details, so we will confirm the configuration before quoting. A photograph alone cannot tell us how a sign was mounted or what its order cost."
+      },
+      "facebook": "Where will your sign go, and what does it need to say?\n\nSend the location, available space and wording with your enquiry. Those details help us discuss the material options for your use.\n\nA photo of the location is welcome if it helps explain the space.",
+      "instagram": "The useful details come first.\n\nWhere will your sign go? How much space is available? What should it say?\n\n#Saskatoon #SignPrinting",
+      "hashtagsEvidence": "Generic local/product suggestions; not researched or trending claims",
+      "optionalPriceCaption": "Where will your sign go, and what does it need to say?\n\nConfigured catalogue example; the photo does not establish the pictured order price. Print-ready artwork; extras excluded.\n\nAluminum Composite Signs: CAD $19.50 for 12×18\", 1 side, quantity 1. $19.50 for this configuration; a standalone order totals $25.00 before tax because of the $25 order-total minimum. Standalone order CAD $25.00 before tax. https://truecolorprinting.ca/products/acp-signs",
+      "factFingerprint": "070243bda536371b1c5f32ffefa709e600d70463408155d660fd0969241521ed",
+      "sampleAssetId": null
+    },
+    {
+      "id": "M08",
+      "dateRegina": "2026-10-09T10:00:00-06:00",
+      "dateUTC": "2026-10-09T16:00:00Z",
+      "type": "Useful design detail",
+      "title": "Help people recognise the entrance",
+      "productSlug": "window-decals",
+      "stage": "outline-draft",
+      "approval": "not-approved",
+      "mediaStatus": "unselected",
+      "mediaBrief": "Unused window graphic photo; no claim about privacy, visibility percentage, adhesive suitability or installation scope.",
+      "variants": {
+        "short": "What should someone see when they reach your door?",
+        "medium": "Your entrance has a simple reading job: help people recognise where they are. For a Saskatoon window graphic, start with the message and the glass area you want to use.",
+        "long": "For a Saskatoon window graphic, start with the message and the available glass area. Decide what someone needs to see as they approach the entrance. Send a photo and measurements with your enquiry; the final material, size and application details need confirmation."
+      },
+      "facebook": "What should someone see when they reach your door?\n\nStart with the message you want visitors to recognise. Then note the glass area available for the graphic.\n\nFor a Saskatoon window project, send a photo and measurements so we can discuss the details.",
+      "instagram": "Make the entrance easy to recognise.\n\nStart with the message, then look at the glass area you have to work with.\n\n#Saskatoon #WindowGraphics",
+      "hashtagsEvidence": "Generic local/product suggestions; not researched or trending claims",
+      "optionalPriceCaption": "What should someone see when they reach your door?\n\nConfigured catalogue example; the photo does not establish the pictured order price. Print-ready artwork; extras excluded.\n\nWindow Decals: CAD $11.00 for 12×12\", 1 side, quantity 1. $11.00 for this configuration; a standalone order totals $25.00 before tax because of the $25 order-total minimum. Standalone order CAD $25.00 before tax. https://truecolorprinting.ca/products/window-decals",
+      "factFingerprint": "669cdde3350fedb7f070e3b22b4e62ba10185b44a0987e74af71115bb13295a5",
+      "sampleAssetId": null
+    }
+  ]
+}
