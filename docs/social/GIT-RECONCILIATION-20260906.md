@@ -53,3 +53,16 @@ History-context and library-deployment-receipt local commits were also verified 
 ## Remaining reconciliation
 
 Keep social pilot delivery separate from recovery of old ads, payment and SEO work. Audit each candidate against current main, preserve any genuinely missing useful change on a fresh branch, run its current checks, then merge only that reviewed change. Do not delete dirty or unreadable worktrees. Branch deletion is housekeeping, not a prerequisite for a working social system.
+
+## Follow-up: semantic comparison of older candidates
+
+| Candidate | Current assessment | Disposition |
+|---|---|---|
+| Merchant feed | Superseded by canonical Merchant catalog, fixed-domain and verified local-offer implementation | Do not merge the older broad allowlist |
+| Attribution | Current main captures landing paths and diagnostics; older SQL funnel additionally proposes priced/won/paid cohorts and refund-adjusted pretax reporting | Preserve reporting idea for fresh schema/business review, no old migration application |
+| SEO safety guard | Search-surface registry, base-SHA and freshness validation concepts are not in main | Rebuild narrowly under current SEO standard; avoid competing old workflow/rules |
+| Printer facts | Older branch changes VG2 to VG-640; current business record and September 2 audit say VG2 | Resolve factual source first; do not mass-change pages |
+| PPC followups | Audience-observation and price-asset drift checks are not in current sync-plan diagnostics | Preserve diagnostics for isolated implementation; no campaign changes |
+| Outbox branch extra SEO commit | Flyer experiment is stale relative to current title; manifest validation overlaps SEO guard proposal | Do not replay experiment; consolidate guard concepts in a fresh design |
+
+These are targeted comparisons, not a certification of every old branch or dirty worktree. Useful ideas are preserved without importing unrelated production changes into the social pilot.
