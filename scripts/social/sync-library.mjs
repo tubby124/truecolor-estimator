@@ -37,23 +37,42 @@ if (error) {
   ({data:info,error} = await db.storage.getBucket(bucket));
 }
 if (error || !info || info.public !== false) throw new Error('Archive bucket must be verified private');
-let uploaded=0,existing=0,verified=0;
-for (const [key,{bytes,sha256}] of unique) {
-  const contentType = /\.webp$/.test(key)?'image/webp':/\.png$/.test(key)?'image/png':'image/jpeg';
-  const put = await db.storage.from(bucket).upload(key,bytes,{contentType,upsert:false});
-  if (put.error && !/already exists|duplicate/i.test(put.error.message) && Number(put.error.statusCode) !== 409) throw new Error('Archive upload failed');
-  if(put.error) existing++; else uploaded++;
-  const read = await db.storage.from(bucket).download(key);
-  if(read.error || !read.data || hash(Buffer.from(await read.data.arrayBuffer())) !== sha256) throw new Error('Archive hash readback failed');
-  verified++;
+let uploaded=0,existing=0,verified=0,cursor=0;
+const entries=[...unique];
+// Immutable independent keys can upload concurrently; the catalog remains one writer.
+async function readOriginal(key,sha256){
+  for(let attempt=0;attempt<3;attempt++){
+    const read=await db.storage.from(bucket).download(key);
+    if(!read.error&&read.data){
+      if(hash(Buffer.from(await read.data.arrayBuffer()))!==sha256)throw new Error('Original byte mismatch; sync stopped');
+      return;
+    }
+    if(attempt===2)throw new Error('Original readback unavailable after three attempts; sync stopped');
+  }
 }
+await Promise.all(Array.from({length:4},async()=>{
+  while(cursor<entries.length){
+    const [key,{bytes,sha256}]=entries[cursor++];
+    const contentType=/\.webp$/.test(key)?'image/webp':/\.png$/.test(key)?'image/png':'image/jpeg';
+    const put=await db.storage.from(bucket).upload(key,bytes,{contentType,upsert:false});
+    if(put.error&&!/already exists|duplicate/i.test(put.error.message)&&Number(put.error.statusCode)!==409)throw new Error('Archive upload failed');
+    if(put.error)existing++;else uploaded++;
+    await readOriginal(key,sha256);verified++;
+    if(verified%100===0)console.log(JSON.stringify({phase:'originals',verified,total:entries.length}));
+  }
+}));
 const snapshot = `catalogs/snapshots/${hash(catalogBytes)}.json`;
 const saved = await db.storage.from(bucket).upload(snapshot,catalogBytes,{contentType:'application/json',upsert:false});
 if (saved.error && !/already exists|duplicate/i.test(saved.error.message) && Number(saved.error.statusCode)!==409) throw new Error('Snapshot write failed');
 // Preserve previous current catalog before updating this single-business pointer.
 const previous = await db.storage.from(bucket).download('catalogs/website-v1.json');
 if(previous.data){const bytes=Buffer.from(await previous.data.arrayBuffer());const oldCatalog=parseLibraryCatalog(JSON.parse(bytes)); const ids=new Set(catalog.assets.map(a=>a.id)); if(oldCatalog.assets.some(a=>!ids.has(a.id)))throw new Error('Sync would remove existing assets; merge catalogs first'); const backup=await db.storage.from(bucket).upload(`catalogs/snapshots/${hash(bytes)}.json`,bytes,{contentType:'application/json',upsert:false});if(backup.error&&!/already exists|duplicate/i.test(backup.error.message)&&Number(backup.error.statusCode)!==409)throw new Error('Previous snapshot preservation failed');}
-else if(previous.error && Number(previous.error.statusCode)!==404 && !/not found|does not exist/i.test(previous.error.message))throw new Error('Cannot inspect previous catalog');
+else {
+  // Storage may return an opaque error for a missing object. Confirm absence
+  // independently; an unreadable existing catalog must never be overwritten.
+  const listed=await db.storage.from(bucket).list('catalogs',{limit:100,search:'website-v1.json'});
+  if(listed.error || !Array.isArray(listed.data) || listed.data.some(item=>item.name==='website-v1.json'))throw new Error('Cannot inspect previous catalog');
+}
 const current = await db.storage.from(bucket).upload('catalogs/website-v1.json',catalogBytes,{contentType:'application/json',upsert:true});
 if(current.error)throw new Error('Catalog write failed');
 const read = await db.storage.from(bucket).download('catalogs/website-v1.json');
