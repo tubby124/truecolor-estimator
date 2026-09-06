@@ -28,3 +28,8 @@ The [project index](../TRUE-COLOR-INDEX.md) now links product/pricing, operation
 ## Next Cloud task
 
 Read this board and the referenced lane document, then produce or implement a bounded task with proportionate checks. When an action needs authenticated private-system evidence, return a precise request to the operational session and consume only its sanitized dated receipt. Do not mark an observation waiting on Google as complete from an HTTP-200 page or valid XML alone.
+
+
+## Social library deployment — September 6, 2026
+
+PR #35 merged at `861030663d07565e3cc0045b5612b2c425b63730`; Railway deployment reported SUCCESS. [Library receipt](../social/ASSET-LIBRARY.md#deployment-receipt--september-6-2026) records verified private originals/catalog and signed-read hash, denied anonymous storage read, and matching private Drive archive checksum. Anonymous library API returned 401; staff UI redirected to login. Authenticated production browsing remains unverified. Readiness at approximately 02:30 UTC still showed 12 drafts and publishing false. Telegram intake, rotation enforcement, scheduled posting and Mac-asleep delivery remain later gates.
