@@ -3,7 +3,7 @@ const usage = { calls: 0, costUsd: 0, promptTokens: 0, completionTokens: 0, mode
 test.beforeEach(async ({ context, page, baseURL }) => {
   if (!baseURL?.startsWith('http://localhost:')) throw new Error('Mocked caption contracts require localhost');
   const session = { access_token: 'fixture.header.signature', refresh_token: 'fixture', token_type: 'bearer', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: 'fixture-owner', email: 'info@true-color.ca' } };
-  await context.addCookies([{ name: 'sb-example-auth-token', value: 'base64-' + Buffer.from(JSON.stringify(session)).toString('base64url'), url: baseURL }]);
+  await context.addCookies([{ name: `sb-${new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://example.supabase.co').hostname.split('.')[0]}-auth-token`, value: 'base64-' + Buffer.from(JSON.stringify(session)).toString('base64url'), url: baseURL }]);
   await page.route('**/api/staff/**', route => route.fulfill({ json: [] }));
   await page.route('**/api/staff/social/generation/settings', route => route.fulfill({ json: { configured: true, providerReady: true, dailyCallLimit: 20, dailyUsdLimit: null, maxCostPerCallUsd: null, usedCalls: 0, reservedCalls: 0, usedUsd: 0, reservedUsd: 0, model: 'mock' } }));
   await page.goto('/staff/social/compose');
