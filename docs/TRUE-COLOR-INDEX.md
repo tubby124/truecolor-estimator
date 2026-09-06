@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Approved pricing and three-channel implementation handoff](social/IMPLEMENTATION-HANDOFF-20260906.md)
+
 - [Social rebuild lessons, hosted scheduling test and product plan](social/REBUILD-AND-SCHEDULING.md)
 
 - [Private social asset library](social/ASSET-LIBRARY.md)
