@@ -33,3 +33,8 @@ Read this board and the referenced lane document, then produce or implement a bo
 ## Social library deployment — September 6, 2026
 
 PR #35 merged at `861030663d07565e3cc0045b5612b2c425b63730`; Railway deployment reported SUCCESS. [Library receipt](../social/ASSET-LIBRARY.md#deployment-receipt--september-6-2026) records verified private originals/catalog and signed-read hash, denied anonymous storage read, and matching private Drive archive checksum. Anonymous library API returned 401; staff UI redirected to login. Authenticated production browsing remains unverified. Readiness at approximately 02:30 UTC still showed 12 drafts and publishing false. Telegram intake, rotation enforcement, scheduled posting and Mac-asleep delivery remain later gates.
+
+
+## Two-destination practice and Git reconciliation — September 6
+
+Owner requested a real Instagram/Facebook practice plus branch reconciliation. [Practice receipt](../social/PRACTICE-POST-20260906.md) records the approved photo/copy and fresh missing Facebook permission. The bounded application extension allows one platform per draft, with independent approvals and delivery receipts. Deployment and actual posting remain separate checks. [Git audit](../social/GIT-RECONCILIATION-20260906.md) confirms recent social PRs32–36 merged and canonical local main fast-forwarded; old dirty worktrees and the conflicting legacy SEO PR are preserved for targeted review. No blanket old-branch merge or deletion.

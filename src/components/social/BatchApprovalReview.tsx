@@ -86,7 +86,7 @@ export function BatchApprovalReview({ postIds }: { postIds: string[] }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={review.content?.imageUrls[0] || review.post.image_urls?.[0] || review.post.image_url || ""} alt={review.post.alt_text || "Post image for approval"} className="max-h-[480px] w-full object-contain bg-gray-100" />
             <div className="space-y-3 p-5">
-              <p className="text-sm font-semibold">Instagram · {review.target ? `account ${review.target.accountId} · Page ${review.target.pageId}` : "Account not connected"}</p>
+              <p className="text-sm font-semibold">{review.target?.platform === 'facebook' ? 'Facebook' : review.target?.platform === 'instagram' ? 'Instagram' : 'Destination'} · {review.target ? `account ${review.target.accountId} · Page ${review.target.pageId}` : "Account not connected"}</p>
               <p className="whitespace-pre-wrap text-sm">{review.content?.caption || "Caption unavailable"}</p>
               <p className="text-sm font-semibold">{review.post.schedule_time ? new Date(review.post.schedule_time).toLocaleString("en-CA", { timeZone: "America/Regina", dateStyle: "full", timeStyle: "short" }) : "No date chosen"} · Regina</p>
               {!approved.includes(review.post.id) && review.blockers.length > 0 && <ul className="list-disc pl-5 text-sm text-amber-900">{review.blockers.map(item => <li key={item}>{item}</li>)}</ul>}

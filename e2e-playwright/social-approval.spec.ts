@@ -97,3 +97,12 @@ test("phone image captioning uses the converted JPEG and saves an unapproved dra
   expect(saved?.posts[0].schedule_time).toBe("2027-01-12T21:00:00.000Z");
   expect(saved?.posts[0].platforms).toEqual(["instagram"]);
 });
+
+
+test("Facebook review displays its exact caption and Page destination", async ({ page }) => {
+  await page.route(`**/api/staff/social/posts/${id}/approval`, route => route.fulfill({json:{...review(), target:{platform:"facebook",accountId:"synthetic-page",pageId:"synthetic-page"}, content:{caption:"Exact Facebook caption",imageUrls:["/images/logo.png"]}}}));
+  await page.goto(`/staff/social/review?ids=${id}`);
+  await expect(page.getByText("Facebook · account synthetic-page · Page synthetic-page",{exact:true})).toBeVisible();
+  await expect(page.getByText("Exact Facebook caption",{exact:true})).toBeVisible();
+  await expect(page.getByText(caption,{exact:true})).toHaveCount(0);
+});
