@@ -1,0 +1,28 @@
+[Unit]
+Description=Read-only True Color delivery and posting timer monitor
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Read the existing DynamicUser-owned runner journal without granting it writes.
+User=root
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH
+StateDirectory=truecolor-social-monitor
+UMask=0077
+LoadCredential=cron-secret:/etc/truecolor-social/cron-secret
+LoadCredential=telegram-bot-token:/etc/truecolor-social/telegram-bot-token
+LoadCredential=telegram-chat-id:/etc/truecolor-social/telegram-chat-id
+ExecStart=/usr/bin/python3 /opt/truecolor-social/vps-monitor.py
+TimeoutStartSec=180
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ReadOnlyPaths=/opt/truecolor-social /etc/truecolor-social -/var/lib/truecolor-social -/var/lib/private/truecolor-social

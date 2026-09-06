@@ -1,0 +1,11 @@
+[Unit]
+Description=Independently check True Color delivery and runner health every two minutes
+
+[Timer]
+OnCalendar=*-*-* *:0/2:00
+AccuracySec=5s
+Persistent=false
+Unit=truecolor-social-monitor.service
+
+[Install]
+WantedBy=timers.target

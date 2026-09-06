@@ -179,16 +179,13 @@ class RunnerTest(unittest.TestCase):
                 r.config_read(cfg)
 
 
-if __name__ == '__main__':
-    unittest.main()
-
 
 class OngoingRunnerTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.path = Path(self.tmp.name) / 'ongoing-state.json'
-        self.config = {'runner': 'ongoing', 'businessId': '00000000-0000-4000-8000-000000000001', 'enabled': True, 'pilotReconciled': True}
+        self.config = {'runner': 'ongoing', 'businessId': '00000000-0000-4000-8000-000000000001', 'enabled': True, 'pilotReconciled': True, 'postIds': ['00000000-0000-4000-8000-000000000002']}
         self.ready = {'ok': True, 'runner': 'ongoing', 'businessId': self.config['businessId'], 'publishingEnabled': True, 'held': False, 'pending': False}
 
     def test_config_requires_explicit_pilot_reconciliation(self):
@@ -232,3 +229,206 @@ class OngoingRunnerTest(unittest.TestCase):
         self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 0)
         self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 0)
         self.assertEqual(json.loads(self.path.read_text())['phase'], 'waiting')
+
+    def test_scope_requires_reviewed_unique_destination_ids(self):
+        path = Path(self.tmp.name) / 'config.json'
+        for ids in [[], ['bad'], self.config['postIds'] * 2]:
+            path.write_text(json.dumps({**self.config, 'postIds': ids}))
+            with self.assertRaises(ValueError):
+                r.config_read(path)
+
+    def test_heartbeat_covers_pause_without_mutating_dispatch_journal(self):
+        send = Mock(return_value={**self.ready, 'publishingEnabled': False})
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 0)
+        tick = json.loads(self.path.with_name('ongoing-heartbeat.json').read_text())
+        self.assertEqual(tick['exitCode'], 0)
+        self.assertIsNotNone(tick['finishedAt'])
+        self.assertFalse(self.path.exists())
+
+    def test_check_does_not_write_heartbeat(self):
+        r.execute_ongoing(self.config, self.path, check=True, send=Mock(return_value=self.ready))
+        self.assertFalse(self.path.with_name('ongoing-heartbeat.json').exists())
+
+    def test_scope_digest_is_order_independent(self):
+        config = {**self.config, 'postIds': self.config['postIds'] + ['00000000-0000-4000-8000-000000000003']}
+        self.assertEqual(r.scope_digest(config), r.scope_digest({**config, 'postIds': list(reversed(config['postIds']))}))
+
+
+
+# Imported by unittest discovery (the CI contract); no network in these fixtures.
+monitor_spec = importlib.util.spec_from_file_location('monitor', Path(__file__).with_name('vps-monitor.py'))
+m = importlib.util.module_from_spec(monitor_spec)
+monitor_spec.loader.exec_module(m)
+
+
+class OngoingMonitorTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.path = self.root / 'monitor-state.json'
+        self.now = r.instant('2026-09-07T15:00:00Z')
+        self.id = '00000000-0000-4000-8000-000000000002'
+        self.config = {'runner': 'ongoing', 'businessId': '00000000-0000-4000-8000-000000000001', 'enabled': True, 'pilotReconciled': True, 'postIds': [self.id]}
+        self.monitor = {'businessId': self.config['businessId'], 'enabled': True, 'expectPublishing': True, 'receiptSince': '2026-09-07T00:00:00.000Z'}
+        self.ready = {'publishingEnabled': True, 'held': False, 'due': 0, 'oldestDueAt': None, 'stale': False, 'pending': False}
+        self.receipt = {'id': self.id, 'status': 'posted', 'platform': 'facebook', 'scheduleTime': '2026-09-07T14:59:00Z', 'publicUrl': 'https://www.facebook.com/123_456'}
+        m.initialize(self.path, self.config, self.now)
+        self.tick()
+
+    def tick(self):
+        r.persist(self.root / 'ongoing-heartbeat.json', {'businessId': self.config['businessId'], 'fingerprint': r.fingerprint(self.config), 'startedAt': self.now.isoformat(), 'finishedAt': self.now.isoformat(), 'exitCode': 0})
+
+    def run_case(self, **kw):
+        return m.execute(self.config, self.monitor, self.root, self.path, now=kw.pop('now', self.now), check=kw.pop('check', Mock(return_value=self.ready)), read_receipts=kw.pop('read_receipts', Mock(return_value=[])), notify=kw.pop('notify', Mock(return_value=42)), active=kw.pop('active', Mock(return_value=True)), **kw)
+
+    def test_future_healthy_queue_and_disabled_preparation_are_quiet(self):
+        notify, check = Mock(return_value=42), Mock(return_value=self.ready)
+        self.assertEqual(self.run_case(notify=notify, check=check), 0)
+        check.assert_called_once_with(self.config, True)
+        notify.assert_not_called()
+        self.monitor['enabled'] = False
+        self.config['enabled'] = False
+        check.reset_mock()
+        self.assertEqual(self.run_case(notify=notify, check=check, active=Mock(return_value=False)), 0)
+        check.assert_not_called()
+        notify.assert_not_called()
+
+    def test_receipt_link_and_ack_deduplicate_without_provider_mutation(self):
+        check, notify = Mock(return_value=self.ready), Mock(return_value=123)
+        for _ in range(2):
+            self.assertEqual(self.run_case(check=check, notify=notify, read_receipts=Mock(return_value=[self.receipt])), 0)
+        notify.assert_called_once()
+        self.assertIn(self.id, notify.call_args.args[0])
+        self.assertIn(self.receipt['publicUrl'], notify.call_args.args[0])
+        event = next(iter(json.loads(self.path.read_text())['outbox'].values()))
+        self.assertEqual((event['phase'], event['messageId']), ('acknowledged', 123))
+        self.assertTrue(all(c.args[1] is True for c in check.call_args_list))
+
+    def test_unknown_telegram_ack_is_never_automatically_resent(self):
+        notify = Mock(side_effect=TimeoutError())
+        for _ in range(2):
+            self.assertEqual(self.run_case(notify=notify, read_receipts=Mock(return_value=[self.receipt])), 1)
+        notify.assert_called_once()
+        self.assertEqual(next(iter(json.loads(self.path.read_text())['outbox'].values()))['phase'], 'uncertain')
+
+    def test_process_crash_after_send_intent_never_replays(self):
+        def crash(message):
+            self.assertEqual(next(iter(json.loads(self.path.read_text())['outbox'].values()))['phase'], 'in_flight')
+            raise KeyboardInterrupt()
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_case(notify=crash, read_receipts=Mock(return_value=[self.receipt]))
+        notify = Mock(return_value=123)
+        self.assertEqual(self.run_case(notify=notify, read_receipts=Mock(return_value=[self.receipt])), 1)
+        notify.assert_not_called()
+
+    def test_missing_or_corrupt_existing_journal_never_resets(self):
+        notify = Mock(return_value=123)
+        self.path.unlink()
+        with self.assertRaises(ValueError):
+            self.run_case(notify=notify)
+        with self.assertRaises(ValueError):
+            m.initialize(self.path, self.config, self.now)
+        self.path.write_text('{bad')
+        with self.assertRaises(ValueError):
+            self.run_case(notify=notify)
+        notify.assert_not_called()
+
+    def test_persistence_failure_prevents_sending(self):
+        from unittest.mock import patch
+        notify = Mock(return_value=123)
+        with patch.object(m.runner, 'persist', side_effect=OSError()):
+            with self.assertRaises(OSError):
+                self.run_case(notify=notify, read_receipts=Mock(return_value=[self.receipt]))
+        notify.assert_not_called()
+
+    def test_ack_commit_failure_does_not_resend_after_restart(self):
+        from unittest.mock import patch
+        original = m.runner.persist
+        def persist(path, state):
+            if any(e.get('phase') == 'acknowledged' for e in state.get('outbox', {}).values()):
+                raise OSError()
+            original(path, state)
+        notify = Mock(return_value=123)
+        with patch.object(m.runner, 'persist', side_effect=persist):
+            with self.assertRaises(OSError):
+                self.run_case(notify=notify, read_receipts=Mock(return_value=[self.receipt]))
+        self.run_case(notify=notify, read_receipts=Mock(return_value=[self.receipt]))
+        notify.assert_called_once()
+
+    def test_pending_to_posted_is_rescanned_and_only_posted_exposes_link(self):
+        notify = Mock(return_value=123)
+        self.run_case(notify=notify, read_receipts=Mock(return_value=[{**self.receipt, 'status': 'posting'}]))
+        self.assertNotIn(self.receipt['publicUrl'], notify.call_args.args[0])
+        self.run_case(notify=notify, read_receipts=Mock(return_value=[self.receipt]))
+        self.assertEqual(notify.call_count, 2)
+        self.assertIn(self.receipt['publicUrl'], notify.call_args.args[0])
+
+    def test_paused_due_overdue_and_recovery_notify_only_transitions(self):
+        notify = Mock(return_value=123)
+        paused = {**self.ready, 'publishingEnabled': False, 'due': 1, 'oldestDueAt': '2026-09-07T14:40:00Z'}
+        for _ in range(2):
+            self.run_case(notify=notify, check=Mock(return_value=paused))
+        self.assertEqual(notify.call_count, 3)
+        self.run_case(notify=notify)
+        self.assertEqual(notify.call_count, 6)
+        self.run_case(notify=notify)
+        self.assertEqual(notify.call_count, 6)
+
+    def test_deliberate_pause_is_quiet_until_work_is_due(self):
+        self.monitor['expectPublishing'] = False
+        notify = Mock(return_value=123)
+        self.run_case(notify=notify, check=Mock(return_value={**self.ready, 'publishingEnabled': False}))
+        notify.assert_not_called()
+        self.run_case(notify=notify, check=Mock(return_value={**self.ready, 'publishingEnabled': False, 'due': 1}))
+        notify.assert_called_once()
+
+    def test_dead_timer_and_old_heartbeat_survive_remote_outage(self):
+        notify = Mock(return_value=123)
+        self.run_case(now=self.now + dt.timedelta(minutes=11), active=Mock(return_value=False), check=Mock(side_effect=TimeoutError()), read_receipts=Mock(side_effect=TimeoutError()), notify=notify)
+        messages = '\n'.join(c.args[0] for c in notify.call_args_list)
+        self.assertIn('timer is inactive', messages)
+        self.assertIn('heartbeat is older', messages)
+        self.assertIn('queue check failed', messages)
+
+    def test_monitor_never_changes_posting_journal(self):
+        p = self.root / 'ongoing-state.json'
+        p.write_text(json.dumps({'fingerprint': r.fingerprint(self.config), 'phase': 'in_flight'}))
+        before = p.read_bytes()
+        self.run_case()
+        self.assertEqual(p.read_bytes(), before)
+
+    def test_receipt_reader_rejects_out_of_scope_or_duplicate_ids(self):
+        for receipts in [[{**self.receipt, 'id': 'other'}], [self.receipt, self.receipt]]:
+            with self.assertRaises(ValueError):
+                m.receipt_read(self.config, self.monitor['receiptSince'], http=Mock(return_value={'receipts': receipts, 'nextAfter': None}))
+
+    def test_monitor_transport_never_allows_dispatch(self):
+        with self.assertRaises(ValueError):
+            m.readonly_http(self.config, {})
+        with self.assertRaises(ValueError):
+            m.queue_read(self.config, False)
+
+
+    def test_failed_check_does_not_fabricate_recovery(self):
+        notify = Mock(return_value=123)
+        paused = {**self.ready, 'publishingEnabled': False, 'due': 1, 'oldestDueAt': '2026-09-07T14:40:00Z'}
+        self.run_case(notify=notify, check=Mock(return_value=paused))
+        notify.reset_mock()
+        self.run_case(notify=notify, check=Mock(side_effect=TimeoutError()))
+        messages = '\n'.join(c.args[0] for c in notify.call_args_list)
+        self.assertNotIn('Recovered:', messages)
+        problems = json.loads(self.path.read_text())['problems']
+        self.assertTrue({'overdue', 'paused_due', 'unexpected_pause', 'queue_unavailable'} <= set(problems))
+
+    def test_failed_local_read_retains_prior_timer_problem(self):
+        notify = Mock(return_value=123)
+        self.run_case(notify=notify, active=Mock(return_value=False))
+        notify.reset_mock()
+        self.run_case(notify=notify, active=Mock(side_effect=OSError()))
+        self.assertNotIn('Recovered:', '\n'.join(c.args[0] for c in notify.call_args_list))
+        self.assertIn('timer_inactive', json.loads(self.path.read_text())['problems'])
+
+
+if __name__ == '__main__':
+    unittest.main()
