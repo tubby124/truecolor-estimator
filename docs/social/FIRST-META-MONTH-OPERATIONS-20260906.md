@@ -1,6 +1,6 @@
 # First Meta month: operating gates — September 6, 2026
 
-Latest checkpoint: owner approved the presented review, then requested more image tests. [Image trials and automation progress](IMAGE-TRIALS-AND-AUTOMATION-20260906.md) records three further built-in edits (five total), fidelity findings and the15:05Regina live audit. This is review/test progress; the final month and continuous content workflow are not activated by that approval.
+Latest checkpoint: owner approved the presented review, then requested more image tests. [Image trials and automation progress](IMAGE-TRIALS-AND-AUTOMATION-20260906.md) records three further built-in edits (five total), fidelity findings and the 15:05 Regina live audit. This is review/test progress; the final month and continuous content workflow are not activated by that approval.
 
 **Prepared proposal; no publication, paid generation, production SQL or scheduler change authorized by this document.** Start with three owner-reviewed examples, then eight logical creatives over four weeks: sixteen Facebook/Instagram destination drafts, provisionally September 14–October 11. Reduce the month if fewer than eight distinct cleared photographs and useful messages survive review. Google access does not block preparing this Meta month.
 
