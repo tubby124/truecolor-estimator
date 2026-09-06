@@ -19,12 +19,12 @@ Shared-file changes must be coordinated. Lane owners supply reviewed PRs, exact 
 |---|---|---|
 | Pricing | Cross-surface cents, tax classes, order minimum, manual provenance, revision and Wave amount parity; immutable issued history | Pending lane tests/review |
 | Facts and generation | Single source fingerprint; unchanged rerun without provider call; item-local invalidation; partial resume; bounded retries/usage; ambiguity held | Pending lane tests/review |
-| Two-business isolation | Authorized routes, assets, jobs, credentials, approval targets and receipts; two synthetic businesses | Pending disposable SQL/application tests; no real second client |
+| Two-business isolation | Authorized routes, assets, jobs, credentials, approval targets and receipts; two synthetic businesses | Combined disposable SQL passes for generation/business FKs and post/job references; full lane route/assets tests pending. No real second client. |
 | Monthly approval and delivery | Exact media/copy/account/time/facts binding; stable creative IDs; paginated review; missed-schedule hold; per-platform receipts | Pending lane tests/browser contracts |
 | Migration package | Ordered SQL, review, disposable regression, backfill impact, rollback and activation instructions | Prepare before requesting missing production approval |
 | Git and CI | Reviewed intended files, required exact-head checks, P before dependent lanes | PR45 complete; lane PRs pending |
 | Deployment | Main CI, actual Railway deployment/commit and read-only runtime behavior | Baseline `40868735` deployment reported SUCCESS at takeover; no new runtime release verified |
-| Provider setup | Google credentials/access, actual listing/history and live connection health | Earlier audit found only client ID configured; current lane verification pending |
+| Provider setup | Google credentials/access, actual listing/history and live connection health | 18:40 UTC protected config confirms only client ID; secret, redirect URI and encryption key absent. OpenRouter key present; no paid test call. |
 | Ongoing scheduler | Reconcile existing six approved deliveries; replace the bounded trigger with one ongoing runner; preserve uncertain holds | Existing runner active and waiting; no replacement activated |
 
 ## Read-only Sunday batch reconciliation
@@ -43,3 +43,12 @@ Hosted readiness at 18:27:21 UTC showed publishing enabled, 12 legacy drafts, fo
 The current approved Meta batch must continue to work with feature gates off. Do not invalidate its approval hashes during unrelated integration. Production migration authorization is explicitly excluded by repository AGENTS.md; prepare the exact reviewed package before asking the owner. Google account connection also needs its concrete credentials/API access steps. These gates do not block independent code and documentation work.
 
 GitHub main has no branch-protection record in the September 6 API read. Explicitly check completion before merge; do not treat `--auto` or a label as enforcement. Preserve Railway Wait for CI and inspect the actual deployment separately. Existing [Sunday evidence](SUNDAY-BATCH-20260906.md) documents a prior release that started before main CI completed.
+
+
+## Combined migration test — September 6, 2026
+
+Integration owns `supabase/migrations/20260906150000_social_generation_business_links.sql`, applied after G business/monthly migrations and C generation migration. It adds real-business references to all six generation tables and a composite business/job foreign key for social posts. Unexpected orphan references abort the package for review; it rewrites no rows.
+
+`tests` are synthetic: `scripts/social/sql/integration-regression.sql` assembles the actual approval, business, monthly, generation and integration migrations in one disposable PostgreSQL transaction. PostgreSQL18.4 execution passed, including repeat integration migration, preserved approved legacy snapshot, same-business generation-to-monthly-draft handoff, stable chunk replay without another generation charge, nonexistent/cross-business rejection and denied browser reads. Independent database review found no migration correctness issue; its missing-row preservation-test finding was fixed with a left join and the test reran successfully. GitHub PostgreSQL16 execution remains pending. No production schema was changed.
+
+At 18:40:54 UTC, protected configuration showed `SOCIAL_BUSINESS_SCOPING_ENABLED=false`; REST limit-zero probes for `social_businesses`, `social_batches`, `social_generation_jobs` and `social_generation_settings` returned 404/PGRST205. This proves unavailability in the current REST schema cache, not direct SQL absence.

@@ -43,12 +43,43 @@ jobs:
           --username postgres
           --dbname postgres
           --file scripts/google-ads/sql/outbox-trigger-regression.sql
+      - name: Structured quote PST policy migration regression
+        shell: bash
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: |
+          node scripts/db/structured-quote-pst20-regression.mjs |
+            psql -X -v ON_ERROR_STOP=1 --host 127.0.0.1 --username postgres --dbname postgres
       - name: Social approval migration regression
         env:
           PGPASSWORD: ${{ github.run_id }}
         run: >-
           psql --host 127.0.0.1 --username postgres --dbname postgres
           --file scripts/social/sql/approval-regression.sql
+      - name: Social business isolation migration regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/business-regression.sql
+      - name: Social monthly batch migration regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/monthly-regression.sql
+      - name: Social generation migration regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/generation-regression.sql
+      - name: Combined social migration and generation handoff regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/integration-regression.sql
       - name: Execute Google Ads monitor evidence ACL regression
         env:
           PGPASSWORD: ${{ github.run_id }}
@@ -90,6 +121,8 @@ jobs:
 
       - name: Pricing contract
         run: npm run validate:pricing
+      - name: Aggregate order consistency audit contracts
+        run: node --test scripts/pricing/audit-order-consistency.node.mjs
 
       - name: Google Ads safety contracts
         run: npm run test:google-ads
