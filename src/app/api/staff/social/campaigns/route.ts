@@ -1,18 +1,18 @@
+import { requireSocialBusiness, scopeSocialQuery, socialBusinessFields } from "@/lib/social/business";
 import { NextResponse } from "next/server";
-import { requireStaffUser } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { SocialCampaign } from "@/lib/types/social";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const auth = await requireStaffUser();
+export async function GET(req?: Request) {
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
 
   const supabase = createServiceClient();
 
   // Fetch campaigns with post counts via join
-  const { data: campaigns, error } = await supabase
+  const { data: campaigns, error } = await scopeSocialQuery(supabase
     .from("social_campaigns")
     .select(`
       *,
@@ -21,7 +21,7 @@ export async function GET() {
         status
       )
     `)
-    .order("event_date", { ascending: true, nullsFirst: false });
+    .order("event_date", { ascending: true, nullsFirst: false }), auth.businessId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -43,12 +43,12 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const auth = await requireStaffUser();
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
 
-  const body = await req.json() as Partial<SocialCampaign>;
+  const body = await req.json().catch(() => null) as Partial<SocialCampaign> | null;
 
-  if (!body.slug || !body.name) {
+  if (!body || typeof body.slug !== "string" || !body.slug.trim() || typeof body.name !== "string" || !body.name.trim()) {
     return NextResponse.json({ error: "slug and name are required" }, { status: 400 });
   }
 
@@ -56,6 +56,7 @@ export async function POST(req: Request) {
   const { data, error } = await supabase
     .from("social_campaigns")
     .insert({
+      ...socialBusinessFields(auth.businessId),
       slug: body.slug,
       name: body.name,
       campaign_color: body.campaign_color ?? '#6b7280',

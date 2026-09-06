@@ -1,14 +1,13 @@
+import { requireSocialBusiness, DEFAULT_SOCIAL_BUSINESS_ID } from "@/lib/social/business";
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function PATCH(req: NextRequest) {
-  try {
-    await requireStaffUser();
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireSocialBusiness(req);
+  if (auth instanceof NextResponse) return auth;
+  if (auth.businessId !== DEFAULT_SOCIAL_BUSINESS_ID) return NextResponse.json({ error: "Blitz is only available for True Color" }, { status: 403 });
 
   const { leadId } = await req.json();
   if (!leadId || typeof leadId !== "string" || !UUID_RE.test(leadId)) {

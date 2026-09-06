@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
+import { requireSocialBusiness } from "@/lib/social/business";
 import type { Metadata } from "next";
 import { SocialSidebar } from "@/components/social/SocialSidebar";
 import { RealtimeStatusRail } from "@/components/social/RealtimeStatusRail";
@@ -8,7 +11,9 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function SocialStudioLayout({ children }: { children: React.ReactNode }) {
+export default async function SocialStudioLayout({ children }: { children: React.ReactNode }) {
+  const auth = await requireSocialBusiness();
+  if (auth instanceof NextResponse) redirect("/staff/login");
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-[#0f1117]">
       <SocialSidebar />

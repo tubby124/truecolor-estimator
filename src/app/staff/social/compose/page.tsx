@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
+import { requireSocialBusiness, scopeSocialQuery } from "@/lib/social/business";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import lazyLoad from "next/dynamic";
@@ -17,12 +20,14 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 async function getCampaigns() {
+  const auth = await requireSocialBusiness();
+  if (auth instanceof NextResponse) redirect("/staff/login");
   try {
     const supabase = createServiceClient();
-    const { data } = await supabase
+    const { data } = await scopeSocialQuery(supabase
       .from("social_campaigns")
       .select("*")
-      .order("event_date", { ascending: true, nullsFirst: false });
+      .order("event_date", { ascending: true, nullsFirst: false }), auth.businessId);
     return data ?? [];
   } catch {
     return [];

@@ -1,65 +1,26 @@
 import { NextResponse } from "next/server";
-import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { requireSocialBusiness, scopeSocialQuery, DEFAULT_SOCIAL_BUSINESS_ID } from "@/lib/social/business";
+import { getMetaConfig } from "@/lib/social/meta";
 
 export const dynamic = "force-dynamic";
 
-/**
- * GET /api/staff/social/accounts
- * Returns connected Blotato social accounts from social_accounts table.
- * If BLOTATO_API_KEY is set, also fetches fresh data from Blotato and syncs.
- */
-export async function GET() {
-  const auth = await requireStaffUser();
+/** Read-only status. Fetching settings never syncs accounts or changes destinations. */
+export async function GET(req?: Request) {
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
-
-  const supabase = createServiceClient();
-  const blotatoKey = process.env.BLOTATO_API_KEY;
-
-  // If Blotato key is set, sync fresh account list
-  if (blotatoKey) {
-    try {
-      const resp = await fetch("https://backend.blotato.com/v2/users/me/accounts", {
-        headers: { "blotato-api-key": blotatoKey },
-      });
-
-      if (resp.ok) {
-        const blotatoAccounts = await resp.json() as Array<{
-          id: string;
-          platform: string;
-          name?: string;
-          pageId?: string;
-        }>;
-
-        // Upsert each account
-        for (const acct of blotatoAccounts) {
-          await supabase.from("social_accounts").upsert(
-            {
-              platform: acct.platform,
-              account_name: acct.name ?? null,
-              blotato_account_id: acct.id,
-              blotato_page_id: acct.pageId ?? null,
-              is_active: true,
-            },
-            { onConflict: "blotato_account_id" }
-          );
-        }
-      }
-    } catch {
-      // Sync failed — return cached accounts from DB
-    }
-  }
-
-  const { data, error } = await supabase
-    .from("social_accounts")
-    .select("*")
-    .order("platform");
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
+  const { data, error } = await scopeSocialQuery(createServiceClient().from("social_accounts")
+    .select("id,platform,account_name,blotato_account_id,blotato_page_id,is_active,connected_at")
+    .order("platform"), auth.businessId);
+  if (error) return NextResponse.json({ error: "Account status unavailable" }, { status: 503 });
+  const meta = auth.businessId === DEFAULT_SOCIAL_BUSINESS_ID ? getMetaConfig() : null;
   return NextResponse.json({
     accounts: data ?? [],
-    blotato_connected: !!blotatoKey,
-  });
+    blotato_connected: auth.businessId === DEFAULT_SOCIAL_BUSINESS_ID && !!process.env.BLOTATO_API_KEY,
+    meta: {
+      configured: !!meta,
+      facebook: meta ? { accountId: meta.pageId } : null,
+      instagram: meta ? { accountId: meta.igUserId, pageId: meta.pageId } : null,
+    },
+  }, { headers: { "Cache-Control": "private, no-store" } });
 }

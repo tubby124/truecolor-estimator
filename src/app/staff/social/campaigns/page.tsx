@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
+import { requireSocialBusiness, scopeSocialQuery } from "@/lib/social/business";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -12,11 +15,13 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 async function getData() {
+  const auth = await requireSocialBusiness();
+  if (auth instanceof NextResponse) redirect("/staff/login");
   try {
     const supabase = createServiceClient();
     const [{ data: campaigns }, { data: posts }] = await Promise.all([
-      supabase.from("social_campaigns").select("*").order("event_date", { ascending: true }),
-      supabase.from("social_posts").select("id, campaign_id, status").neq("status", "skip"),
+      scopeSocialQuery(supabase.from("social_campaigns").select("*").order("event_date", { ascending: true }), auth.businessId),
+      scopeSocialQuery(supabase.from("social_posts").select("id, campaign_id, status").neq("status", "skip"), auth.businessId),
     ]);
     return { campaigns: campaigns ?? [], posts: posts ?? [] };
   } catch {

@@ -21,6 +21,9 @@ import {
   type PlatformPublishResult,
   type PostContent,
 } from "./meta";
+import { DEFAULT_SOCIAL_BUSINESS_ID } from './business';
+import { getBusinessMetaConfig } from './credentials';
+import type { createServiceClient } from '@/lib/supabase/server';
 import type { SocialPost, Platform } from "@/lib/types/social";
 
 const BLOTATO_BASE = "https://backend.blotato.com";
@@ -44,6 +47,7 @@ const META_PLATFORMS: Platform[] = ["instagram", "facebook"];
 export function buildContent(post: SocialPost, platform: Platform): PostContent {
   let caption = post.caption_raw || "";
   if (platform === "instagram" && post.caption_instagram) caption = post.caption_instagram;
+  if (platform === "gbp" && post.caption_gbp) caption = post.caption_gbp;
   if (platform === "facebook" && post.caption_facebook) caption = post.caption_facebook;
   if (platform === "instagram" && post.hashtags) {
     caption = caption.trim() ? `${caption.trim()}\n\n${post.hashtags}` : post.hashtags;
@@ -56,16 +60,29 @@ export function buildContent(post: SocialPost, platform: Platform): PostContent 
   return { caption, imageUrls, videoUrl: post.image_url?.match(/\.(mp4|mov|webm|m4v)$/i) ? post.image_url : null };
 }
 
-export async function publishSocialPost(post: SocialPost): Promise<PublishOutcome> {
-  const meta: MetaConfig | null = getMetaConfig();
-  const blotatoKey = process.env.BLOTATO_API_KEY;
-  const hasAnyPublisher = !!meta || !!blotatoKey;
+export async function publishSocialPost(post: SocialPost, db?: ReturnType<typeof createServiceClient>): Promise<PublishOutcome> {
+  const businessId = post.business_id || DEFAULT_SOCIAL_BUSINESS_ID;
+  const meta: MetaConfig | null = db ? await getBusinessMetaConfig(db, businessId) : businessId === DEFAULT_SOCIAL_BUSINESS_ID ? getMetaConfig() : null;
+  const blotatoKey = businessId === DEFAULT_SOCIAL_BUSINESS_ID ? process.env.BLOTATO_API_KEY : undefined;
+  let hasAnyPublisher = !!meta || !!blotatoKey;
   const results: PlatformPublishResult[] = [];
 
   for (const platform of (post.platforms ?? []) as Platform[]) {
+    if (platform === 'gbp') {
+      if (!db) { results.push({platform,status:'failed',errorMessage:'Business Google publisher unavailable'}); continue; }
+      const { publishGbpPost } = await import('@/lib/gbp/publisher');
+      const result = await publishGbpPost(db, post);
+      results.push(result); hasAnyPublisher = true;
+      continue;
+    }
     const isMetaPlatform = META_PLATFORMS.includes(platform);
 
     if (isMetaPlatform && meta) {
+      const target=post.approval_target;
+      if(target && (target.platform!==platform || target.pageId!==meta.pageId || target.accountId!==(platform==='instagram'?meta.igUserId:meta.pageId))){
+        results.push({platform,status:'failed',errorMessage:'Approved destination changed before provider dispatch; review required'});
+        continue;
+      }
       const content = buildContent(post, platform);
       results.push(
         platform === "instagram"

@@ -1,5 +1,6 @@
+import { requireSocialBusiness, socialAssetPrefix } from "@/lib/social/business";
 import { NextResponse } from "next/server";
-import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 const BUCKET = "social-images";
@@ -8,13 +9,14 @@ const MAX_LIST_CALLS = 50;
 const MAX_IMAGES = 5000;
 const headers = { "Cache-Control": "private, no-store" };
 
-export async function GET() {
-  const auth = await requireStaffUser();
+export async function GET(req?: Request) {
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
 
   try {
     const storage = createServiceClient().storage.from(BUCKET);
-    const folders = ["social"];
+    const prefix = socialAssetPrefix(auth.businessId);
+    const folders = [prefix];
     const images: { url: string; name: string; created_at: string }[] = [];
     let calls = 0;
     let truncated = false;
@@ -31,7 +33,7 @@ export async function GET() {
           if (file.name === ".emptyFolderPlaceholder") continue;
           if (!file.id) {
             // Uploads use social/<year>/<uuid>; do not recursively walk arbitrary folders.
-            if (folder === "social" && /^\d{4}$/.test(file.name)) folders.push(`social/${file.name}`);
+            if (folder === prefix && /^\d{4}$/.test(file.name)) folders.push(`${prefix}/${file.name}`);
             continue;
           }
           if (!file.name || file.name.includes("/") || file.name === "." || file.name === "..") continue;

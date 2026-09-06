@@ -1,12 +1,14 @@
+import { requireSocialBusiness, DEFAULT_SOCIAL_BUSINESS_ID } from "@/lib/social/business";
 import { NextRequest, NextResponse } from "next/server";
-import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ niche: string }> }
 ) {
-  const auth = await requireStaffUser();
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
+  if (auth.businessId !== DEFAULT_SOCIAL_BUSINESS_ID) return NextResponse.json({ error: "Blitz is only available for True Color" }, { status: 403 });
 
   const { niche } = await params;
   const url = new URL(req.url);

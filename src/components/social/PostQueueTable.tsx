@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { SOCIAL_TIME_ZONE } from "@/lib/social/schedule";
 import { motion, AnimatePresence } from "motion/react";
-import { createClient } from "@/lib/supabase/client";
 import { PostStatusBadge } from "./PostStatusBadge";
 import { PlatformBadges } from "./PlatformBadges";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
@@ -52,30 +51,22 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
   const [batchUpdating, setBatchUpdating] = useState(false);
   const { toasts, showToast, dismissToast } = useToast();
 
-  // Realtime subscription
+  // Authorized API refresh works before and after browser table access is revoked.
   useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel("social-queue")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "social_posts" },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            setPosts(prev => [payload.new as SocialPost, ...prev]);
-          } else if (payload.eventType === "UPDATE") {
-            setPosts(prev =>
-              prev.map(p => p.id === payload.new.id ? { ...p, ...(payload.new as SocialPost) } : p)
-            );
-          } else if (payload.eventType === "DELETE") {
-            setPosts(prev => prev.filter(p => p.id !== payload.old.id));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+    let active = true;
+    const controller = new AbortController();
+    const refresh = async () => {
+      if (document.visibilityState === "hidden") return;
+      try {
+        const response = await fetch(`/api/staff/social/posts?limit=1000${campaignFilter ? `&campaign_id=${encodeURIComponent(campaignFilter)}` : ""}`, { cache: "no-store", signal: controller.signal });
+        if (!response.ok) return;
+        const rows: SocialPost[] = await response.json();
+        if (active && Array.isArray(rows)) setPosts(rows);
+      } catch { /* Preserve the last successful view while offline. */ }
+    };
+    const timer = setInterval(refresh, 15000);
+    return () => { active = false; controller.abort(); clearInterval(timer); };
+  }, [campaignFilter]);
 
   const filtered = posts.filter(p => {
     if (campaignFilter && p.campaign_id !== campaignFilter) return false;

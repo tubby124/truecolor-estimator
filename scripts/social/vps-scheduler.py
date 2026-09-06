@@ -23,6 +23,10 @@ def instant(value):
 
 def config_read(path):
     config = json.loads(Path(path).read_text())
+    if config.get('runner') == 'ongoing':
+        if set(config) != {'runner', 'businessId', 'enabled', 'pilotReconciled'} or not UUID.fullmatch(config.get('businessId', '')) or type(config.get('enabled')) is not bool or config.get('pilotReconciled') is not True:
+            raise ValueError('Ongoing runner requires explicit pilot reconciliation and business scope')
+        return config
     if set(config) != {'ids', 'enabled', 'notBefore', 'expiresAt'}:
         raise ValueError('Invalid config')
     ids = config['ids']
@@ -250,6 +254,61 @@ def execute(config, path, check=False, now=None, send=request, clock=None, notif
         return 1
 
 
+def request_ongoing(config, check):
+    credential = Path(os.environ['CREDENTIALS_DIRECTORY']) / 'cron-secret'
+    secret = credential.read_text().strip()
+    if not secret or '\n' in secret or '\r' in secret:
+        raise ValueError('Invalid credential')
+    query = {'runner': 'ongoing', 'businessId': config['businessId']}
+    if check:
+        query['mode'] = 'check'
+    req = urllib.request.Request(ENDPOINT + '?' + urllib.parse.urlencode(query), headers={'Authorization': 'Bearer ' + secret, 'Cache-Control': 'no-store', 'User-Agent': 'TrueColor-Social-Scheduler/1.0 (+https://truecolorprinting.ca)'})
+    with urllib.request.build_opener(NoRedirect()).open(req, timeout=180) as response:
+        result = json.loads(response.read(65537))
+    if result.get('ok') is not True or result.get('runner') != 'ongoing' or result.get('businessId') != config['businessId'] or type(result.get('held')) is not bool or type(result.get('publishingEnabled')) is not bool:
+        raise ValueError('Invalid ongoing response')
+    return result
+
+
+def execute_ongoing(config, path, check=False, send=request_ongoing):
+    """One canonical scoped trigger. Never silently replace the bounded pilot state.
+
+    A lost dispatch ACK leaves in_flight durable. Operator reconciliation is required
+    before removing ongoing-state.json; later runs only read remote queue state.
+    """
+    if check:
+        result = send(config, True)
+        print(json.dumps({key: result.get(key) for key in ('runner', 'businessId', 'publishingEnabled', 'held', 'due', 'backlog', 'stale', 'pending')}))
+        return 0 if not result['held'] else 1
+    if not config['enabled']:
+        print('ongoing_disabled')
+        return 0
+    key = fingerprint(config)
+    state = json.loads(path.read_text()) if path.exists() else {'fingerprint': key, 'phase': 'waiting'}
+    if state.get('fingerprint') != key or state.get('phase') != 'waiting':
+        send(config, True)  # Read only: remote receipts never implicitly clear uncertainty.
+        print('ongoing_held_manual_reconciliation')
+        return 1
+    try:
+        result = send(config, True)
+        if not result['publishingEnabled']:
+            print('ongoing_paused')
+            return 0
+        if result.get('pending'):
+            persist(path, {'fingerprint': key, 'phase': 'blocked'})
+            print('ongoing_pending_provider_reconciliation')
+            return 1
+        persist(path, {'fingerprint': key, 'phase': 'in_flight'})
+        result = send(config, False)
+        persist(path, {'fingerprint': key, 'phase': 'blocked' if result['held'] else 'waiting'})
+        print('ongoing_held' if result['held'] else 'ongoing_checked')
+        return 1 if result['held'] else 0
+    except Exception:
+        persist(path, {'fingerprint': key, 'phase': 'blocked'})
+        print('ongoing_uncertain_manual_reconciliation')
+        return 1
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='/etc/truecolor-social/pilot.json')
@@ -261,12 +320,15 @@ def main():
     try:
         config = config_read(args.config)
         directory = Path(args.state_dir)
+        ongoing = config.get('runner') == 'ongoing'
+        runner = execute_ongoing if ongoing else execute
+        state_path = directory / ('ongoing-state.json' if ongoing else 'state.json')
         if args.check:
-            return execute(config, directory / 'state.json', True)
+            return runner(config, state_path, True)
         directory.mkdir(parents=True, exist_ok=True)
         with (directory / 'runner.lock').open('a') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            return execute(config, directory / 'state.json')
+            return runner(config, state_path)
     except Exception:
         print('blocked_configuration_or_lock')
         return 1

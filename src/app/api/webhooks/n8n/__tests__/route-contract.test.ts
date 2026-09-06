@@ -21,9 +21,11 @@ describe("n8n webhook route contract", () => {
     expect(config).toContain('destination: "/api/webhooks/n8n"');
   });
 
-  it("shows the canonical webhook URL in staff settings", () => {
+  it("shows current direct publishing connections in staff settings", () => {
     const settings = source("src/app/staff/social/settings/page.tsx");
-    expect(settings).toContain('/api/webhooks/n8n`');
+    expect(settings).toContain('Direct Meta transport:');
+    expect(settings).toContain('GbpPanel');
+    expect(settings).not.toContain('Blotato');
     expect(settings).not.toContain('/api/staff/social/webhooks/n8n`');
   });
 });
