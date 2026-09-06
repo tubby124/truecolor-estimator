@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Social rebuild lessons, hosted scheduling test and product plan](social/REBUILD-AND-SCHEDULING.md)
+
 - [Private social asset library](social/ASSET-LIBRARY.md)
 - [Portable social automation and resale readiness](social/PORTABLE-SOCIAL-SYSTEM.md)
 

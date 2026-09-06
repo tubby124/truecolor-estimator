@@ -40,16 +40,24 @@ export function reviewPost(post: SocialPost, now = Date.now()) {
   const fingerprint = createHmac('sha256', process.env.SUPABASE_SECRET_KEY || '').update(JSON.stringify({ id: post.id, content, caption_raw: post.caption_raw, caption_instagram: post.caption_instagram, caption_facebook: post.caption_facebook, hashtags: post.hashtags, image_url: post.image_url, image_urls: post.image_urls, alt_text: post.alt_text, platforms: post.platforms, schedule_time: post.schedule_time ? new Date(post.schedule_time).toJSON() : null, use_next_free_slot: post.use_next_free_slot, target, mediaSha256: post.approved_media_sha256 ?? null })).digest('hex');
   return { post, content, fingerprint, target, blockers, publishingEnabled: publishingEnabled() };
 }
-export function dispatchBlocker(post: SocialPost, now = Date.now()): string | null {
-  if (!publishingEnabled()) return 'Publishing is paused';
+/** Pure approval integrity check: independent of publishing pause and whether time is due. */
+export function approvalIntegrityBlocker(post: SocialPost): string | null {
   if (!post.approval_hash || !post.approved_at || !post.approved_by || !post.approval_target || post.approved_rights !== true || !/^[a-f0-9]{64}$/.test(post.approved_media_sha256 || '')) return 'Explicit approval required';
   if (post.status !== 'ready') return 'Post is not ready';
-  // Review as a draft at the instant before its scheduled time to reuse content validation.
   const scheduled = Date.parse(post.schedule_time || '');
-  if (!Number.isFinite(scheduled) || scheduled > now) return 'Post is not due';
-  if (now - scheduled > 60 * 60 * 1000) return 'Schedule expired; hold for owner review';
+  if (!Number.isFinite(scheduled)) return 'Post is not due';
+  // Review as a draft immediately before its schedule to reuse all content checks.
   const review = reviewPost({ ...post, status: 'draft' }, scheduled - 1);
   if (review.blockers.length || review.fingerprint !== post.approval_hash || review.target?.accountId !== post.approval_target.accountId || review.target?.pageId !== post.approval_target.pageId || review.target?.platform !== post.approval_target.platform) return 'Approved content or destination changed';
+  return null;
+}
+export function dispatchBlocker(post: SocialPost, now = Date.now()): string | null {
+  if (!publishingEnabled()) return 'Publishing is paused';
+  const integrity = approvalIntegrityBlocker(post);
+  if (integrity) return integrity;
+  const scheduled = Date.parse(post.schedule_time!);
+  if (scheduled > now) return 'Post is not due';
+  if (now - scheduled > 60 * 60 * 1000) return 'Schedule expired; hold for owner review';
   return null;
 }
 

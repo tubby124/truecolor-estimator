@@ -8,20 +8,23 @@ From Telegram/Hermes or the staff app: ask for a post about a product or choose 
 
 ## Current truth
 
+September 6 superseding checkpoint: the manual Facebook/Instagram pilot is verified. Start with the [consolidated rebuild/scheduling guide](REBUILD-AND-SCHEDULING.md). Unattended three-slot delivery remains a separate test.
+
 | Capability | Evidence boundary |
 | --- | --- |
 | Staff upload and JPEG conversion, AI caption generation, mobile review, approval invalidation, direct Meta dispatch and scheduler endpoint | Existing implementation; consult setup receipts for deployment and provider checks |
 | Instagram connection | Provider-verified in the setup runbook; publishing remains paused there |
 | Reusable private source library | In progress in the current asset task; storage population, deployed browsing and retrieval require their own receipts |
 | Telegram/Hermes draft request bridge | Planned; preview notification wording is not an operating bridge |
-| Hosted trigger, approved public delivery and Mac-asleep operation | Not proven by the connection or endpoint alone |
+| Manual approved public delivery | Verified on both platforms; see pilot receipts |
+| Hosted trigger and Mac-asleep operation | Separate three-slot test; not proven by manual delivery |
 | Cross-business template | Design only; extract after the first successful end-to-end pilot |
 
 ## Required Telegram photo intake
 
 Two entry points feed the same draft and approval flow: upload a new photo into the authorized True Color Telegram topic, or select an existing library asset. For a new upload, the cloud saves the attachment privately, prepares captions and hashtags, and returns the exact review package before publication to the owner-selected destinations. This is a required planned bridge capability, not an existing ingestion receipt.
 
-Bind the request to the authenticated owner and configured business/topic. Resolve allowed destination identities from that business configuration and require an explicit selection in review; never guess a business or publishing account from the picture, caption or forwarded message. The current pilot remains Instagram-only until another destination is implemented and approved.
+Bind the request to the authenticated owner and configured business/topic. Resolve allowed destination identities from that business configuration and require an explicit selection in review; never guess a business or publishing account from the picture, caption or forwarded message. The current pilot supports separate Instagram and Facebook delivery drafts, each bound to the intended account.
 
 Resolve Telegram `file_id` on the server and download using protected bot credentials. Never expose the token-bearing download URL in logs, errors, Git, notifications or asset metadata. Record safe attachment/update identifiers and an attachment checksum for deduplication. A repeated Telegram update or retried download must return the same saved asset/request rather than create duplicate drafts. Verify media type, decoded size and dimensions before processing; keep failed or unsupported uploads out of the publish queue.
 

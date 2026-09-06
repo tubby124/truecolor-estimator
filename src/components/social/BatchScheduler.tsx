@@ -8,7 +8,7 @@ import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Platform = "instagram" | "facebook" | "twitter";
+type Platform = "instagram" | "facebook";
 
 interface Slot {
   file: File;
@@ -87,7 +87,6 @@ async function generateCaption(imageUrl: string) {
 const PLATFORM_OPTIONS: { key: Platform; icon: string; label: string }[] = [
   { key: "instagram", icon: "📸", label: "Instagram" },
   { key: "facebook",  icon: "🌐", label: "Facebook" },
-  { key: "twitter",   icon: "🐦", label: "X / Twitter" },
 ];
 
 const MAX_SLOTS = 7;
@@ -103,10 +102,11 @@ export function BatchScheduler() {
   // Shared settings
   const [startDate, setStartDate] = useState(todayYMD);
   const [postTime, setPostTime] = useState("15:00");
-  const [platforms, setPlatforms] = useState<Platform[]>(["instagram"]);
+  const [platforms, setPlatforms] = useState<Platform[]>(["instagram", "facebook"]);
 
   // Per-photo slots
   const [slots, setSlots] = useState<Slot[]>([]);
+  const readyCount = slots.filter(s => s.imageUrl && (s.captionInstagram.trim() || s.captionFacebook.trim())).length;
 
   // Phase
   const [phase, setPhase] = useState<"upload" | "review">("upload");
@@ -157,10 +157,10 @@ export function BatchScheduler() {
     setSlots((prev) => prev.map((s, i) => ({ ...s, scheduleTime: times[i] })));
   }
 
-  // ── Generate all captions ───────────────────────────────────────────────────
+  // ── Prepare photos with optional AI captions ───────────────────────────────────────────────────
 
-  async function generateAll() {
-    if (slots.length === 0) return;
+  async function prepareAll(withAI: boolean) {
+    if (slots.length === 0 || generating) return;
     setGenerating(true);
 
     // Spread schedule first
@@ -173,19 +173,21 @@ export function BatchScheduler() {
 
       try {
         // 1. Upload
-        const imageUrl = await uploadImage(slots[i].file);
-        // 2. Generate
-        const captions = await generateCaption(imageUrl);
+        const imageUrl = slots[i].imageUrl || await uploadImage(slots[i].file);
+        // Retain the uploaded derivative even if optional caption generation fails.
+        setSlots(prev => prev.map((s, j) => j === i ? { ...s, imageUrl, preview: imageUrl, scheduleTime: s.scheduleTime || times[i] } : s));
+        // Manual preparation never calls the paid caption endpoint.
+        const captions = withAI ? await generateCaption(imageUrl) : null;
 
         setSlots((prev) => prev.map((s, j) => j === i ? {
           ...s,
           imageUrl,
           preview: imageUrl,
-          captionInstagram: captions.instagram,
-          captionFacebook: captions.facebook,
-          captionTwitter: captions.twitter,
-          hashtags: captions.hashtags ?? "",
-          scheduleTime: times[i],
+          captionInstagram: captions?.instagram ?? s.captionInstagram,
+          captionFacebook: captions?.facebook ?? s.captionFacebook,
+          captionTwitter: captions?.twitter ?? s.captionTwitter,
+          hashtags: captions?.hashtags ?? s.hashtags,
+          scheduleTime: s.scheduleTime || times[i],
           processing: false,
           done: true,
         } : s));
@@ -211,9 +213,13 @@ export function BatchScheduler() {
   // ── Schedule all ────────────────────────────────────────────────────────────
 
   async function scheduleAll() {
-    const readySlots = slots.filter((s) => s.imageUrl && (s.captionInstagram || s.captionFacebook));
+    const readySlots = slots.filter((s) => s.imageUrl && (s.captionInstagram.trim() || s.captionFacebook.trim()));
     if (readySlots.length === 0) {
-      showToast("No ready posts — generate captions first", "error");
+      showToast("Add a caption to at least one uploaded photo first", "error");
+      return;
+    }
+    if (platforms.length === 0) {
+      showToast("Choose at least one destination", "error");
       return;
     }
     if (savingRef.current || saveUncertain) return;
@@ -268,13 +274,13 @@ export function BatchScheduler() {
           <div>
             <h1 className="text-xl font-black text-[#1c1712]">Prepare a batch</h1>
             <p className="text-sm text-gray-400 mt-0.5">
-              Upload up to {MAX_SLOTS} photos → AI writes captions → save drafts → approve the finished batch
+              Upload up to {MAX_SLOTS} photos → edit captions and times → approve the batch once for both destinations
             </p>
           </div>
           {phase === "review" && (
             <button
               onClick={scheduleAll}
-              disabled={saving || saveUncertain || slots.filter(s => s.done).length === 0}
+              disabled={saving || saveUncertain || readyCount === 0 || platforms.length === 0}
               className="flex items-center gap-2 bg-[#e63020] text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-[#c8281a] transition-colors disabled:opacity-50"
             >
               {saving ? (
@@ -286,7 +292,7 @@ export function BatchScheduler() {
                   Saving…
                 </>
               ) : (
-                `Save ${slots.filter(s => s.done).length} drafts`
+                `Save ${readyCount} posts · ${readyCount * platforms.length} deliveries`
               )}
             </button>
           )}
@@ -370,7 +376,7 @@ export function BatchScheduler() {
             onDrop={(e) => {
               e.preventDefault();
               setIsDragging(false);
-              if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+              if (!generating && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
             }}
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
@@ -392,6 +398,7 @@ export function BatchScheduler() {
             </p>
             <input
               ref={fileInputRef}
+              disabled={generating}
               type="file"
               accept="image/*"
               multiple
@@ -427,6 +434,7 @@ export function BatchScheduler() {
                   index={i}
                   phase={phase}
                   onRemove={() => removeSlot(i)}
+                  busy={generating}
                   onUpdate={(field, value) => updateCaption(i, field, value)}
                 />
               ))}
@@ -438,7 +446,7 @@ export function BatchScheduler() {
         {phase === "upload" && slots.length > 0 && (
           <div className="flex items-center gap-4">
             <button
-              onClick={generateAll}
+              onClick={() => void prepareAll(true)}
               disabled={generating || slots.length === 0}
               className="flex items-center gap-2 bg-[#1c1712] text-white text-sm font-bold px-6 py-3 rounded-xl hover:bg-black transition-colors disabled:opacity-50"
             >
@@ -448,15 +456,20 @@ export function BatchScheduler() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  Generating captions…
+                  Preparing photos…
                 </>
               ) : (
                 `✨ Generate ${slots.length} caption${slots.length !== 1 ? "s" : ""} with AI`
               )}
             </button>
-            <p className="text-xs text-gray-400">
-              Each photo is uploaded and analyzed — takes ~10s per photo
-            </p>
+            <button
+              onClick={() => void prepareAll(false)}
+              disabled={generating || slots.length === 0}
+              className="rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-bold disabled:opacity-50"
+            >
+              Write captions myself
+            </button>
+            <p className="text-xs text-gray-400">Manual entry uploads your photos without AI generation.</p>
           </div>
         )}
 
@@ -465,18 +478,18 @@ export function BatchScheduler() {
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-bold text-[#1c1712]">
-                {slots.filter(s => s.done).length} post{slots.filter(s => s.done).length !== 1 ? "s" : ""} ready
+                {readyCount} post{readyCount !== 1 ? "s" : ""} ready
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                Save these as drafts, then review the saved images, captions, account and dates before approval.
+                Each photo becomes one post with a separate delivery to each selected destination. Review the saved previews, then approve the whole batch once. Shared hashtags are included on both destinations.
               </p>
             </div>
             <button
               onClick={scheduleAll}
-              disabled={saving || saveUncertain || slots.filter(s => s.done).length === 0}
+              disabled={saving || saveUncertain || readyCount === 0 || platforms.length === 0}
               className="flex items-center gap-2 bg-[#e63020] text-white text-sm font-bold px-6 py-3 rounded-xl hover:bg-[#c8281a] transition-colors disabled:opacity-50 whitespace-nowrap"
             >
-              {saving ? "Saving…" : `Save drafts for review`}
+              {saving ? "Saving…" : `Save ${readyCount} posts · ${readyCount * platforms.length} deliveries`}
             </button>
           </div>
         )}
@@ -490,12 +503,13 @@ export function BatchScheduler() {
 // ─── Slot card ────────────────────────────────────────────────────────────────
 
 function SlotCard({
-  slot, index, phase, onRemove, onUpdate,
+  slot, index, phase, onRemove, onUpdate, busy,
 }: {
   slot: Slot;
   index: number;
   phase: "upload" | "review";
   onRemove: () => void;
+  busy: boolean;
   onUpdate: (field: "captionInstagram" | "captionFacebook" | "captionTwitter" | "hashtags" | "scheduleTime", value: string) => void;
 }) {
   function formatSchedule(iso: string) {
@@ -525,7 +539,7 @@ function SlotCard({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              <span className="text-white text-xs font-semibold">Analyzing…</span>
+              <span className="text-white text-xs font-semibold">Preparing…</span>
             </div>
           )}
           {slot.done && (
@@ -550,6 +564,7 @@ function SlotCard({
               </div>
               <button
                 onClick={onRemove}
+                disabled={busy}
                 className="text-xs text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
               >
                 ✕ Remove
@@ -589,6 +604,17 @@ function SlotCard({
                   onChange={(e) => onUpdate("captionFacebook", e.target.value)}
                   rows={2}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-800 resize-none focus:outline-none focus:ring-1 focus:ring-[#e63020]/30 focus:border-[#e63020]"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-500">Shared hashtags · both destinations</label>
+                <input
+                  type="text"
+                  value={slot.hashtags}
+                  onChange={e => onUpdate("hashtags", e.target.value)}
+                  placeholder="#Saskatoon #Printing"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs"
                 />
               </div>
 

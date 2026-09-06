@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 import type { SocialPost } from '@/lib/types/social';
-import { reviewPost, dispatchBlocker, dispatchApprovedPost } from '../approval';
+import { reviewPost, approvalIntegrityBlocker, dispatchBlocker, dispatchApprovedPost } from '../approval';
 const publish = vi.hoisted(() => vi.fn());
 vi.mock('../publisher', async importOriginal => ({ ...await importOriginal<typeof import('../publisher')>(), publishSocialPost: publish }));
 const scheduled = Date.parse('2030-01-01T12:00:00Z');
@@ -20,6 +20,14 @@ describe('explicit social approval', () => {
   it('reviews a future single JPEG without provider access', () => { expect(reviewPost(draft(),scheduled-1000).blockers).toEqual([]); expect(publish).not.toHaveBeenCalled(); });
   it('binds Facebook caption and Page and rejects destination changes', () => { const d = {...draft('facebook'), caption_facebook:'Facebook exact caption', caption_instagram:'Different Instagram caption'}; const r = reviewPost(d, scheduled-1000); expect(r.blockers).toEqual([]); expect(r.content.caption).toBe('Facebook exact caption'); expect(r.target).toEqual({platform:'facebook',accountId:'page',pageId:'page'}); const p = {...approved('facebook'), ...d, status:'ready', approval_hash:r.fingerprint} as SocialPost; expect(dispatchBlocker(p,scheduled)).toBeNull(); expect(dispatchBlocker({...p,caption_facebook:'Changed'},scheduled)).toMatch(/changed/); expect(dispatchBlocker({...p,platforms:['instagram']},scheduled)).toMatch(/changed/); vi.stubEnv('META_PAGE_ID','other-page'); expect(dispatchBlocker(p,scheduled)).toMatch(/changed/); });
   it('blocks legacy rows and absent approval', () => { const p=draft(); delete p.approval_hash; expect(reviewPost(p,scheduled-1000).blockers).toContain('Approval migration is not installed'); expect(dispatchBlocker({...p,status:'ready'},scheduled)).toBe('Explicit approval required'); });
+  it('checks future approval integrity while paused without provider access', () => {
+    const post = approved();
+    vi.stubEnv('SOCIAL_PUBLISHING_ENABLED', 'false');
+    expect(approvalIntegrityBlocker(post)).toBeNull();
+    for (const delta of [{approved_by: null}, {approved_at: null}, {approved_rights: false}, {approved_media_sha256: null}, {approval_target: null}]) expect(approvalIntegrityBlocker({...post, ...delta} as SocialPost)).toBe('Explicit approval required');
+    for (const delta of [{caption_raw: 'changed'}, {schedule_time: '2031-01-01T12:00:00Z'}, {approved_media_sha256: 'b'.repeat(64)}]) expect(approvalIntegrityBlocker({...post, ...delta})).toBe('Approved content or destination changed');
+    expect(publish).not.toHaveBeenCalled();
+  });
   it('defaults paused', () => { vi.stubEnv('SOCIAL_PUBLISHING_ENABLED',''); expect(dispatchBlocker(approved(),scheduled)).toBe('Publishing is paused'); });
   it('binds caption, media, target, and schedule', () => { const p=approved(); expect(dispatchBlocker(p,scheduled)).toBeNull(); expect(dispatchBlocker({...p,approved_media_sha256:'b'.repeat(64)},scheduled)).toBe('Approved content or destination changed'); expect(dispatchBlocker({...p,caption_raw:'Changed'},scheduled)).toBe('Approved content or destination changed'); expect(dispatchBlocker({...p,schedule_time:new Date(scheduled-1000).toISOString()},scheduled)).toBe('Approved content or destination changed'); vi.stubEnv('META_IG_USER_ID','other'); expect(dispatchBlocker(p,scheduled)).toBe('Approved content or destination changed'); });
   it('holds late and early posts and attempted deliveries', () => { expect(dispatchBlocker(approved(),scheduled+3600001)).toMatch(/expired/); expect(dispatchBlocker(approved(),scheduled-1)).toBe('Post is not due'); expect(dispatchBlocker({...approved(),status:'posting'},scheduled)).toBe('Post is not ready'); });

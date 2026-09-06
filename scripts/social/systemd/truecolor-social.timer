@@ -1,0 +1,11 @@
+[Unit]
+Description=Check the bounded True Color pilot every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+AccuracySec=1s
+Persistent=false
+Unit=truecolor-social.service
+
+[Install]
+WantedBy=timers.target

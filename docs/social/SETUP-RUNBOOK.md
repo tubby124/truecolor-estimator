@@ -1,10 +1,10 @@
 # Social setup: repeatable operator runbook
 
-Updated September 5, 2026 (Regina). This is an operational record, not a claim of completed Instagram delivery. Pair with [approval pilot](APPROVAL-PILOT.md), [shop voice](SHOP-VOICE-RECIPE.md), and [real-estate adaptation](REAL-ESTATE-ADAPTATION.md).
+Updated September 6, 2026 (Regina). Historical operational record with a current entry point. Pair with [approval pilot](APPROVAL-PILOT.md), [shop voice](SHOP-VOICE-RECIPE.md), and [real-estate adaptation](REAL-ESTATE-ADAPTATION.md).
 
 ## Current checkpoint
 
-**Connection verified; publishing paused.** Meta confirmed `@truecolorprint` and all five requested permissions; the configured Railway deployment succeeded. The local preview is complete. Next: exact cleared JPEG/caption/date approval, then hosted scheduling and independent public/Mac-asleep proof. See the final dated receipts below. Never create another app or user without first inspecting the existing setup.
+**Both manual pilot posts are live and verified; publishing was paused afterward.** The reusable [rebuild and scheduling guide](REBUILD-AND-SCHEDULING.md) consolidates the real architecture, credential/schema/API fixes, business-profile plan and Sunday three-slot unattended test. [Pilot receipts](PRACTICE-POST-20260906.md) preserve exact provider/deployment evidence. This supersedes the old connection-only state below. Do not create another app/user or repeat the original wizards.
 
 ## Historical starting checkpoint
 
