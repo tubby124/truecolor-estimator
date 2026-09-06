@@ -363,7 +363,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                   <!-- GST row -->
                   <tr style="background: #f9f6f3;">
                     <td style="padding: 4px 16px 4px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                      GST (5%)
+                      GST
                     </td>
                     <td style="padding: 4px 16px 4px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                       $${gst.toFixed(2)}
@@ -373,7 +373,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                   <!-- PST row -->
                   <tr style="background: #f9f6f3;">
                     <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                      PST (6%)
+                      PST
                     </td>
                     <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                       $${pst.toFixed(2)}
@@ -511,8 +511,8 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
     is_rush ? `  Rush fee: $${RUSH_FEE.toFixed(2)}` : "",
     discount_amount && discount_amount > 0 ? `  Discount${discount_code ? ` (${discount_code})` : ""}: -$${discount_amount.toFixed(2)}` : "",
     `  Subtotal: $${subtotal.toFixed(2)}`,
-    `  GST (5%): $${gst.toFixed(2)}`,
-    `  PST (6%): $${pst.toFixed(2)}`,
+    `  GST: $${gst.toFixed(2)}`,
+    `  PST: $${pst.toFixed(2)}`,
     `  TOTAL:    $${total.toFixed(2)} CAD`,
     "",
     "--- PAYMENT ---",

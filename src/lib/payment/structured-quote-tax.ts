@@ -20,28 +20,30 @@ export interface StructuredQuoteTotals {
   grandTotal: number;
 }
 
-const toCents = (amount: number) => Math.round(amount * 100);
+export const STRUCTURED_TAX_POLICY_VERSION = "pst20_20260906";
+
+/** Current policy for new revisions. Standalone design/rush remains GST only;
+ * services supplied with printed goods belong to that taxable print sale. */
+export function structuredQuotePstBaseCents(lineItems: StructuredQuoteLineItem[]): number {
+  const bundledPrint = lineItems.some((item) => item.taxClass === "printed_good");
+  return lineItems.reduce((sum, item) => {
+    if (!bundledPrint && ["design_service", "rush_service"].includes(item.taxClass)) return sum;
+    return sum + Math.round((parseFloat(item.qty) || 0) * (parseFloat(item.unitPrice) || 0) * 100);
+  }, 0);
+}
 
 export function computeStructuredQuoteTotals(
   lineItems: StructuredQuoteLineItem[],
   rates: TaxRates,
   pstExempt = false,
 ): StructuredQuoteTotals {
-  const lineTotal = (item: StructuredQuoteLineItem) =>
-    (parseFloat(item.qty) || 0) * (parseFloat(item.unitPrice) || 0);
-  const subtotal = Math.round(lineItems.reduce((sum, item) => sum + lineTotal(item), 0) * 100) / 100;
-  const pstBase = pstExempt
-    ? 0
-    : lineItems
-      .filter((item) => !["design_service", "rush_service"].includes(item.taxClass))
-      .reduce((sum, item) => sum + lineTotal(item), 0);
-  const whole = computeTaxCents(toCents(subtotal), { gstRate: rates.gstRate, pstRate: 0 });
-  const pst = pstExempt ? 0 : Math.round(pstBase * rates.pstRate * 100) / 100;
-  const gst = whole.gstCents / 100;
-  return {
-    subtotal,
-    gst,
-    pst,
-    grandTotal: Math.round((subtotal + gst + pst) * 100) / 100,
-  };
+  const subtotalCents = lineItems.reduce((sum, item) => sum + Math.round((parseFloat(item.qty) || 0) * (parseFloat(item.unitPrice) || 0) * 100), 0);
+  // Capability comes from the read-only DB config. Until the additive migration
+  // is applied, preview, API and existing SQL all keep the same legacy basis.
+  const pstBaseCents = rates.structuredTaxPolicyVersion === STRUCTURED_TAX_POLICY_VERSION
+    ? structuredQuotePstBaseCents(lineItems)
+    : lineItems.filter((item) => !["design_service", "rush_service"].includes(item.taxClass))
+      .reduce((sum, item) => sum + Math.round((parseFloat(item.qty) || 0) * (parseFloat(item.unitPrice) || 0) * 100), 0);
+  const tax = computeTaxCents(subtotalCents, rates, pstExempt, pstBaseCents);
+  return { subtotal: subtotalCents / 100, gst: tax.gstCents / 100, pst: tax.pstCents / 100, grandTotal: tax.totalCents / 100 };
 }

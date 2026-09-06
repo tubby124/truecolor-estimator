@@ -69,3 +69,23 @@ export function revalidateItemPrices(items: CartItem[]): CartItem[] {
     }
   });
 }
+
+/** Check the final reviewed charge only after authoritative discounts, minimum,
+ * rush and tax. Even a one-cent change requires review; item changes absorbed by
+ * the order floor do not change the charge. Missing legacy snapshots fail closed.
+ */
+export function compareReviewedCheckoutTotal(
+  expectedTotalCents: unknown,
+  authoritativeTotalCents: number,
+): { ok: true } | { ok: false; status: 400 | 409; code: string; error: string } {
+  if (!Number.isSafeInteger(authoritativeTotalCents) || authoritativeTotalCents < 0) {
+    throw new Error("Authoritative checkout total must be non-negative integer cents");
+  }
+  if (typeof expectedTotalCents !== "number" || !Number.isSafeInteger(expectedTotalCents) || expectedTotalCents < 0) {
+    return { ok: false, status: 400, code: "REVIEWED_TOTAL_REQUIRED", error: "Refresh checkout and review the total before submitting this order." };
+  }
+  if (expectedTotalCents !== authoritativeTotalCents) {
+    return { ok: false, status: 409, code: "STALE_CHECKOUT_PRICE", error: "Pricing, tax or discount availability changed. Refresh checkout and review the updated total before submitting. No order or payment was created." };
+  }
+  return { ok: true };
+}

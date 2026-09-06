@@ -1,3 +1,4 @@
+import { reviewedPricingMatches } from "@/lib/payment/reviewed-pricing";
 /**
  * POST /api/staff/quotes/[id]/send-quote
  *
@@ -135,8 +136,8 @@ export function buildQuoteSendFingerprint(input: {
 // Subtotal + configured GST/PST, rounded the same way the modal preview and
 // the email body compute it — so the Pay Now amount never drifts from the
 // total the customer sees in the quote.
-// GST applies to the full subtotal. PST excludes separately itemized design
-// and rush services; printed goods and installation remain in the PST base.
+// GST applies to the full subtotal. PST uses the verified DB policy capability:
+// new PST20 revisions include print-bundled services; older policy remains frozen.
 export function computeQuoteTotals(
   lineItems: LineItem[],
   rates: QuoteTaxRates,
@@ -316,8 +317,9 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   try {
     const { id } = await params;
-    const { subject, lineItems, note, pstExemption: pstExemptionInput } = (await req.json()) as {
+    const { subject, lineItems, note, expectedPricing, pstExemption: pstExemptionInput } = (await req.json()) as {
       subject?: string;
+      expectedPricing?: unknown;
       lineItems: LineItem[];
       note?: string;
       pstExemption?: PstExemptionInput;
@@ -348,6 +350,16 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid PST exemption" }, { status: 400 });
     }
 
+    const rates = await getQuoteTaxRates(supabase);
+    const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems, rates, pstExemption.enabled);
+    const totalCents = Math.round(grandTotal * 100);
+    const subtotalCents = Math.round(subtotal * 100);
+    const gstCents = Math.round(gst * 100);
+    const pstCents = Math.round(pst * 100);
+    if (!reviewedPricingMatches(expectedPricing, { ...rates, subtotalCents, gstCents, pstCents, totalCents })) {
+      return NextResponse.json({ error: "Pricing or tax policy changed since this preview. Reload and review the updated total before sending.", code: "STALE_QUOTE_PRICE" }, { status: 409 });
+    }
+
     if ((pstExemption.rememberVendorNumber && pstExemption.vendorNumber) || pstExemption.clearRememberedVendorNumber) {
       const preferenceUpdate = pstExemption.clearRememberedVendorNumber
         ? { pst_vendor_number: null, pst_vendor_number_updated_at: new Date().toISOString(), pst_vendor_number_updated_by: staffCheck.email ?? "staff" }
@@ -368,12 +380,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // Pricing and the delivery claim commit before any customer email can
     // leave. Qualification is intentionally deferred until provider acceptance.
-    const rates = await getQuoteTaxRates(supabase);
-    const { subtotal, gst, pst, grandTotal } = computeQuoteTotals(lineItems, rates, pstExemption.enabled);
-    const totalCents = Math.round(grandTotal * 100);
-    const subtotalCents = Math.round(subtotal * 100);
-    const gstCents = Math.round(gst * 100);
-    const pstCents = Math.round(pst * 100);
     const shortId = id.slice(0, 8);
     const cloverDescription = `Quote #${shortId} — ${customerName}`.slice(0, 90);
     validateStructuredQuotePricing({
@@ -418,7 +424,9 @@ export async function POST(req: NextRequest, { params }: Params) {
         p_gst_cents: gstCents,
         p_pst_cents: pstCents,
         p_description: cloverDescription,
-        p_line_items: lineItems,
+        p_line_items: rates.structuredTaxPolicyVersion === "pst20_20260906"
+          ? lineItems.map((item) => ({ ...item, taxPolicyVersion: "pst20_20260906", pricingSource: "staff_manual", applyPst: !pstExemption.enabled && (lineItems.some((line) => line.taxClass === "printed_good") || !["design_service", "rush_service"].includes(item.taxClass)) }))
+          : lineItems,
         p_request_fingerprint: requestFingerprint,
         p_recipient: to,
         p_subject: emailSubject,

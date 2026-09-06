@@ -7,14 +7,14 @@ describe("taxable printed-material tax", () => {
       sell_price: 140,
       design_fee: 25,
       rush_fee: 15,
-      gst_rate: 0.05,
+      pst_rate: 0.06, gst_rate: 0.05,
     })).toEqual({ gst: 7, pst: 8.4, total: 155.4, pstBase: 140 });
   });
 
-  it("sums rounded per-item tax across a cart", () => {
+  it("rounds tax once on the cart base", () => {
     expect(computeTaxForCart([
-      { sell_price: 25, design_fee: 5, rush_fee: 0, gst_rate: 0.05 },
-      { sell_price: 40, design_fee: 0, rush_fee: 10, gst_rate: 0.05 },
+      { sell_price: 25, design_fee: 5, rush_fee: 0, pst_rate: 0.06, gst_rate: 0.05 },
+      { sell_price: 40, design_fee: 0, rush_fee: 10, pst_rate: 0.06, gst_rate: 0.05 },
     ])).toEqual({ gst: 3.25, pst: 3.9, total: 72.15, pstBase: 65 });
   });
 });
@@ -35,7 +35,7 @@ describe("standalone service PST exemption", () => {
   });
 
   it("charges GST but no PST on a $40 vectorization", () => {
-    expect(computeTax({ sell_price: 40, gst_rate: 0.05, pst_exempt: true }))
+    expect(computeTax({ sell_price: 40, pst_rate: 0.06, gst_rate: 0.05, pst_exempt: true }))
       .toEqual({ gst: 2, pst: 0, total: 42, pstBase: 0 });
   });
 

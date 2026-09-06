@@ -104,11 +104,11 @@ export function MultiQuoteCart({ items, onRemoveItem, onClearCart }: Props) {
                 <span className="tabular-nums">${combinedSubtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>GST (5%)</span>
+                <span>GST</span>
                 <span className="tabular-nums">${gst.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>PST (6%)</span>
+                <span>PST</span>
                 <span className="tabular-nums">${pst.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm font-bold pt-1.5 border-t border-gray-200">

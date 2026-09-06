@@ -99,6 +99,8 @@ export function useEngineQuote(req: EngineQuoteRequest): EngineQuoteResult {
           design_fee: data.design_fee,
           rush_fee: data.rush_fee,
           gst_rate: data.gst_rate,
+          pst_rate: data.pst_rate,
+          pst_exempt: data.pst_exempt,
         });
         setPriceData({
           price: data.sell_price,

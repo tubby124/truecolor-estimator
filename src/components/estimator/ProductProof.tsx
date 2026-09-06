@@ -453,7 +453,7 @@ export function ProductProof({
               </div>
               {gstAmount != null && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-[var(--muted)]">GST (5%)</span>
+                  <span className="text-[var(--muted)]">GST</span>
                   <span className="tabular-nums" style={{ fontFamily: "var(--font-price)" }}>
                     ${gstAmount.toFixed(2)}
                   </span>

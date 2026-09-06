@@ -9,6 +9,7 @@
  * tied to order status = "ready_for_pickup".
  */
 
+import { getConfigNum } from "@/lib/data/loader";
 import { waveQuery, WAVE_BUSINESS_ID, WAVE_GST_TAX_ID, WAVE_PST_TAX_ID, WAVE_PRINT_PRODUCT_ID } from "./client";
 
 // --------------------------------------------------------------------------
@@ -135,7 +136,7 @@ export async function createWaveInvoice(
       productId: WAVE_PRINT_PRODUCT_ID,
       description: "Rush production fee — same-day turnaround",
       quantity: "1",
-      unitPrice: "40.00",
+      unitPrice: getConfigNum("rush_fee_flat").toFixed(2),
       taxes: [{ salesTaxId: WAVE_GST_TAX_ID }, { salesTaxId: WAVE_PST_TAX_ID }],
     });
   }
@@ -407,4 +408,56 @@ export async function sendWaveInvoice(
     const errs = data.invoiceSend.inputErrors?.map((e) => e.message).join(", ");
     throw new Error(`Wave invoiceSend failed: ${errs}`);
   }
+}
+
+
+export interface WaveInvoiceFinancials {
+  subtotalCents: number;
+  gstCents: number;
+  pstCents: number;
+  totalCents: number;
+}
+
+/** Read actual provider cents, including each named tax. Never infer tax from a grand total.
+ * Fields verified against Wave's official API Reference September 6, 2026. */
+export async function getWaveInvoiceFinancials(invoiceId: string): Promise<WaveInvoiceFinancials> {
+  type Money = { value: string };
+  const data = await waveQuery<{ business: { invoice: {
+    id: string; currency: { code: string }; total: Money; taxTotal: Money;
+    items: { subtotal: Money; taxes: { salesTax: { id: string }; amount: Money | null }[] }[];
+  } | null } | null }>(
+    `query($businessId: ID!, $invoiceId: ID!) {
+      business(id: $businessId) {
+        invoice(id: $invoiceId) {
+          id currency { code } total { value } taxTotal { value }
+          items { subtotal { value } taxes { salesTax { id } amount { value } } }
+        }
+      }
+    }`, { businessId: WAVE_BUSINESS_ID, invoiceId },
+  );
+  const invoice = data.business?.invoice;
+  if (!invoice || invoice.id !== invoiceId || invoice.currency.code !== "CAD" || !invoice.items.length) {
+    throw new Error("Wave invoice financial readback is unavailable or not CAD");
+  }
+  const cents = (value: string | undefined) => {
+    if (typeof value !== "string" || !/^-?\d+(?:\.\d+)?$/.test(value)) throw new Error("Wave returned invalid monetary precision");
+    const amount = Math.round(Number(value) * 100);
+    if (!Number.isSafeInteger(amount) || Math.abs(Number(value) * 100 - amount) > 1e-7) throw new Error("Wave returned an invalid amount or fractional cents");
+    return amount;
+  };
+  let subtotalCents = 0, gstCents = 0, pstCents = 0;
+  for (const item of invoice.items) {
+    subtotalCents += cents(item.subtotal.value);
+    for (const tax of item.taxes) {
+      const amount = cents(tax.amount?.value);
+      if (tax.salesTax.id === WAVE_GST_TAX_ID) gstCents += amount;
+      else if (tax.salesTax.id === WAVE_PST_TAX_ID) pstCents += amount;
+      else throw new Error("Wave invoice contains an unexpected tax");
+    }
+  }
+  const totalCents = cents(invoice.total.value);
+  if (gstCents + pstCents !== cents(invoice.taxTotal.value) || subtotalCents + gstCents + pstCents !== totalCents) {
+    throw new Error("Wave invoice financial readback does not reconcile");
+  }
+  return { subtotalCents, gstCents, pstCents, totalCents };
 }

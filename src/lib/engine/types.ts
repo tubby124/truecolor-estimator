@@ -41,6 +41,9 @@ export interface EstimateResponse {
   sell_price: number | null;
   design_fee?: number; // design service portion bundled in sell_price
   rush_fee?: number;   // rush service portion bundled in sell_price (0 when not rushed)
+  estimate_request?: EstimateRequest; // validated catalogue input for server revalidation
+  pst_exempt?: boolean; // verified standalone service classification
+  pst_rate?: number; // canonical config.v1.csv PST rate
   gst_rate?: number;   // GST rate from config.v1.csv — UI should never hardcode 0.05
   line_items: LineItem[];
   sqft_calculated: number | null;

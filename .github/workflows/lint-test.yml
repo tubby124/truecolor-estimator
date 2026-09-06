@@ -43,6 +43,13 @@ jobs:
           --username postgres
           --dbname postgres
           --file scripts/google-ads/sql/outbox-trigger-regression.sql
+      - name: Structured quote PST policy migration regression
+        shell: bash
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: |
+          node scripts/db/structured-quote-pst20-regression.mjs |
+            psql -X -v ON_ERROR_STOP=1 --host 127.0.0.1 --username postgres --dbname postgres
       - name: Social approval migration regression
         env:
           PGPASSWORD: ${{ github.run_id }}
@@ -90,6 +97,9 @@ jobs:
 
       - name: Pricing contract
         run: npm run validate:pricing
+
+      - name: Aggregate order consistency audit contracts
+        run: node --test scripts/pricing/audit-order-consistency.node.mjs
 
       - name: Google Ads safety contracts
         run: npm run test:google-ads

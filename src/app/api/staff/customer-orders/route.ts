@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
       .from("orders")
       .select(`
         id, order_number, status, created_at, subtotal, total, is_rush,
-        order_items ( id, product_name, qty, line_total, category )
+        order_items ( id, product_name, qty, line_total, category, material_code, line_items_json )
       `)
       .eq("customer_id", customer.id)
       .order("created_at", { ascending: false })

@@ -30,7 +30,7 @@ The shop now enforces a **single $25 order-total minimum at checkout** via `src/
 | Flyers | from $45 | lot price | 100 flyers 80lb 2S = $45 (real) |
 | Brochures | from $70 | lot price | tri-fold 100lb (real) |
 | Stickers | from $25 | V2 per-unit model (`src/lib/pricing/sticker-model-v2.ts`, NOT the dead STICKER-* CSV rows) | 25× 2×2" = $25 (real; $1.00/ea floor at qty 25-49). 4×4: 100 = $100, 500 = $220, 1000 = $330 |
-| Posters | from $15 | per-unit | 1 small poster — bumps to $25 at checkout if single-item order |
+| Posters | from $25 per standalone order | per-unit | Small poster print is $15; $25 order-total minimum applies at checkout |
 | Retractable Banners | from $219 | lot price | economy stand + print (real) |
 | Postcards | from $35 | lot price | 100 postcards (real) |
 | Labels (cosmetic / candle / freezer / product) | from $25 | V2 sticker model (labels = STICKER category, same engine) | 25 labels start at $25 (the "$5.50/sqft" claim was retired 2026-08-06 — see products-content.ts) |

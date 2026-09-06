@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getConfigNum } from "@/lib/data/loader";
+import { getCanonicalTaxRates } from "@/lib/pricing/canonical-rates";
 
 export interface StructuredQuoteLineItem {
   description: string;
@@ -21,6 +21,7 @@ export interface StructuredQuotePricing {
 export interface QuoteTaxRates {
   gstRate: number;
   pstRate: number;
+  structuredTaxPolicyVersion?: string;
 }
 
 export interface QuotePaymentBreakdown {
@@ -71,19 +72,11 @@ export function resolveStoredQuotePaymentBreakdown(
 }
 
 export async function getQuoteTaxRates(supabase: SupabaseClient): Promise<QuoteTaxRates> {
-  const canonical = {
-    gstRate: getConfigNum("gst_rate"),
-    pstRate: getConfigNum("pst_rate"),
-  };
+  const canonical = getCanonicalTaxRates();
   const { data, error } = await supabase
     .from("truecolor_tax_config")
-    .upsert({
-      id: true,
-      gst_rate: canonical.gstRate,
-      pst_rate: canonical.pstRate,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "id" })
-    .select("gst_rate, pst_rate")
+    .select("*")
+    .eq("id", true)
     .maybeSingle();
   if (error || !data) throw new Error(error?.message || "Quote tax configuration is unavailable");
   const gstRate = Number(data.gst_rate);
@@ -92,9 +85,12 @@ export async function getQuoteTaxRates(supabase: SupabaseClient): Promise<QuoteT
     throw new Error("Quote tax configuration is invalid");
   }
   if (gstRate !== canonical.gstRate || pstRate !== canonical.pstRate) {
-    throw new Error("Quote tax configuration did not synchronize to canonical pricing config");
+    throw new Error("Quote tax configuration differs from canonical CSV. An authorized tax-config sync is required before sending.");
   }
-  return canonical;
+  if (data.structured_tax_policy_version != null && data.structured_tax_policy_version !== "pst20_20260906") {
+    throw new Error("Structured quote tax policy version is unsupported. Coordinate the application and database release.");
+  }
+  return { ...canonical, ...(data.structured_tax_policy_version === "pst20_20260906" ? { structuredTaxPolicyVersion: "pst20_20260906" } : {}) };
 }
 
 export interface QuoteOrderResult {
