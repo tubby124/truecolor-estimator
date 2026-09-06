@@ -1,5 +1,7 @@
 # Pricing and social integration — September 6, 2026
 
+The [migration release package](MIGRATION-RELEASE-20260906.md) records the five-file order and production approval boundary.
+
 Coordinator task: `01a077f8-3952-7a32-976f-e79bb7844a28`. The [approved handoff](IMPLEMENTATION-HANDOFF-20260906.md) defines scope; this record tracks integration and release evidence. Implementation authorization does not approve new public content, customer communications or production database migrations.
 
 ## Shared work and dependencies
