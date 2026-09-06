@@ -28,6 +28,8 @@ export function EmailModal({ result, jobDetails, onClose, proofImage, cartItems 
   const [sendState, setSendState] = useState<SendState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
+  const requestId = useRef(crypto.randomUUID());
+  const requestStartedAt = useRef(Date.now());
   const emailRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -95,23 +97,32 @@ export function EmailModal({ result, jobDetails, onClose, proofImage, cartItems 
       if (!window.confirm(msg)) return;
     }
 
+    if (Date.now() - requestStartedAt.current > 23 * 60 * 60 * 1000) {
+      setErrorMsg("This send attempt is older than 23 hours. Check delivery history before preparing another email.");
+      setSendState("error");
+      return;
+    }
     setSendState("sending");
     setErrorMsg("");
 
     try {
       const body = isMultiMode
         ? {
+            requestId: requestId.current,
             to: email,
             customerName: name.trim() || undefined,
             note: note.trim() || undefined,
-            items: cartItems!.map((it) => ({ quoteData: it.result, jobDetails: it.jobDetails })),
+            items: cartItems!.map((it) => ({ quoteData: it.result, estimateRequest: it.result.estimate_request, expectedSubtotal: it.result.sell_price, jobDetails: it.jobDetails })),
             includePaymentLink,
           }
         : {
+            requestId: requestId.current,
             to: email,
             customerName: name.trim() || undefined,
             note: note.trim() || undefined,
             quoteData: result,
+            estimateRequest: result?.estimate_request,
+            expectedSubtotal: result?.sell_price,
             jobDetails,
             proofImage: proofImage ?? undefined,
             includePaymentLink,

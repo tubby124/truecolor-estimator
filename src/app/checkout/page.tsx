@@ -18,14 +18,13 @@ import {
 } from "@/lib/analytics/client-event-dedupe";
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
+import { useCanonicalRates } from "@/lib/pricing/use-canonical-rates";
+import { computeTaxCents } from "@/lib/payment/tax-math";
 import { computePstBase } from "@/lib/pricing/tax";
 import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
 import { toLatestPaidHintPayload } from "@/lib/analytics/utm";
 import { captureGa4ClientContext } from "@/lib/analytics/ga4-client-context";
 
-const DEFAULT_GST_RATE = 0.05;
-const PST_RATE = 0.06;
-const RUSH_FEE = 40;
 const CHECKOUT_SUBMISSION_KEY = "tc_checkout_submission_id";
 
 function getOrCreateCheckoutSubmissionId(): string {
@@ -115,6 +114,7 @@ function SignPreview({ widthIn, heightIn }: { widthIn: number; heightIn: number 
 }
 
 export default function CheckoutPage() {
+  const { rates: canonicalRates, error: ratesError } = useCanonicalRates();
   const [items, setItems] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
 
@@ -354,8 +354,7 @@ export default function CheckoutPage() {
   // checkout preview and the server quote is what burned customers post-overhaul
   // (preview showed $0.49, API charged $28). Source of truth: order-min.ts.
   const itemsSubtotal = items.reduce((s, i) => s + i.sell_price, 0);
-  const rush = isRush ? RUSH_FEE : 0;
-  const gstRate = items[0]?.gst_rate ?? DEFAULT_GST_RATE;
+  const rush = isRush ? canonicalRates?.rushFee ?? 0 : 0;
   const discount = Math.min(appliedDiscount?.amount ?? 0, itemsSubtotal + rush);
   const discountedItemsSubtotal = itemsSubtotal - discount;
   const orderMin = computeOrderMinSurcharge(discountedItemsSubtotal + rush);
@@ -367,9 +366,10 @@ export default function CheckoutPage() {
   // service lines are GST-only — shared helper so this preview can never drift
   // from what POST /api/orders actually charges.
   const pstBase = computePstBase({ items, discountedSubtotal, rush });
-  const gst = Math.round((discountedSubtotal + rush) * gstRate * 100) / 100;
-  const pst = Math.round(pstBase * PST_RATE * 100) / 100;
-  const total = discountedSubtotal + rush + gst + pst;
+  const tax = canonicalRates ? computeTaxCents(Math.round((discountedSubtotal + rush) * 100), canonicalRates, false, Math.round(pstBase * 100)) : null;
+  const gst = tax ? tax.gstCents / 100 : 0;
+  const pst = tax ? tax.pstCents / 100 : 0;
+  const total = tax ? tax.totalCents / 100 : 0;
 
   // Fires GA4 add_payment_info — the only funnel signal between begin_checkout
   // and purchase. Deduped per method so re-selecting the same option is a no-op.
@@ -435,6 +435,7 @@ export default function CheckoutPage() {
   }
 
   async function handleSubmit() {
+    if (!canonicalRates) { setError(ratesError ?? "Loading current tax rates. Please wait."); return; }
     setError("");
     if (!name.trim() || !email.trim()) {
       setError("Name and email are required.");
@@ -507,6 +508,7 @@ export default function CheckoutPage() {
 
       const body: CreateOrderRequest = {
         checkout_submission_id: getOrCreateCheckoutSubmissionId(),
+        expectedTotalCents: Math.round(total * 100),
         items,
         contact: {
           name,
@@ -536,8 +538,10 @@ export default function CheckoutPage() {
         orderNumber?: string;
         checkoutUrl?: string | null;
         error?: string;
+        code?: string;
       };
       if (!res.ok) {
+        if (data.code === "STALE_CHECKOUT_PRICE") throw new Error(data.error ?? "Pricing changed. Refresh and review before paying.");
         if (res.status === 409 || res.status === 503) {
           try {
             sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY);
@@ -1123,7 +1127,7 @@ export default function CheckoutPage() {
             {/* Tax-inclusive total — mirrors the summary line so the mobile
                 single-column layout shows it before the button, not after */}
             <p className="text-xs text-gray-500">
-              Estimated total incl. GST (5%) + PST (6%):{" "}
+              {!canonicalRates && <span role="status">{ratesError ?? "Loading current pricing…"} </span>}Estimated total incl. GST ({canonicalRates ? canonicalRates.gstRate * 100 : "…"}%) + PST ({canonicalRates ? canonicalRates.pstRate * 100 : "…"}%):{" "}
               <span className="font-semibold text-[#1c1712]">${total.toFixed(2)} CAD</span>
             </p>
 
@@ -1131,7 +1135,7 @@ export default function CheckoutPage() {
             {payMethod === "clover_card" ? (
               <button
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={loading || !canonicalRates}
                 className="w-full bg-[#16C2F3] hover:bg-[#0fb0dd] disabled:opacity-60 text-white font-bold text-lg py-4 rounded-xl transition-colors"
               >
                 {loading
@@ -1141,7 +1145,7 @@ export default function CheckoutPage() {
             ) : (
               <button
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={loading || !canonicalRates}
                 className="w-full bg-[#1c1712] hover:bg-black disabled:opacity-60 text-white font-bold text-lg py-4 rounded-xl transition-colors"
               >
                 {loading
@@ -1175,7 +1179,7 @@ export default function CheckoutPage() {
             <div className="bg-gray-50 rounded-2xl p-6 sticky top-24">
               <h2 className="text-lg font-bold text-[#1c1712] mb-1">Order summary</h2>
               <p className="text-xs text-gray-500 mb-5">
-                Estimated total incl. GST (5%) + PST (6%):{" "}
+                {!canonicalRates && <span role="status">{ratesError ?? "Loading current pricing…"} </span>}Estimated total incl. GST ({canonicalRates ? canonicalRates.gstRate * 100 : "…"}%) + PST ({canonicalRates ? canonicalRates.pstRate * 100 : "…"}%):{" "}
                 <span className="font-semibold text-[#1c1712]">${total.toFixed(2)} CAD</span>
               </p>
 
@@ -1277,7 +1281,7 @@ export default function CheckoutPage() {
                 {isRush && (
                   <div className="flex justify-between text-sm text-gray-500">
                     <span>Rush fee</span>
-                    <span>${RUSH_FEE.toFixed(2)}</span>
+                    <span>${(canonicalRates?.rushFee ?? 0).toFixed(2)}</span>
                   </div>
                 )}
                 {discount > 0 && (
@@ -1293,11 +1297,11 @@ export default function CheckoutPage() {
                   </div>
                 )}
                 <div className="flex justify-between text-sm text-gray-500">
-                  <span>GST (5%)</span>
+                  <span>GST ({canonicalRates ? canonicalRates.gstRate * 100 : "…"}%)</span>
                   <span>${gst.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-500">
-                  <span>PST (6%)</span>
+                  <span>PST ({canonicalRates ? canonicalRates.pstRate * 100 : "…"}%)</span>
                   <span>${pst.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-[#1c1712] text-base pt-2" aria-live="polite">

@@ -4,6 +4,8 @@ import {
   approveWaveInvoice,
   createOrFindWaveCustomer,
   createWaveInvoice,
+  getWaveInvoiceFinancials,
+  type WaveInvoiceFinancials,
   type WaveLineItem,
 } from "@/lib/wave/invoice";
 import { pstExemptionInvoiceNote } from "@/lib/payment/pst-exemption";
@@ -122,6 +124,11 @@ async function failQuoteWaveProvisioning(
   }
 }
 
+function fieldFromLineJson(value: unknown, field: string): unknown {
+  if (Array.isArray(value)) return value.map((row) => fieldFromLineJson(row, field)).find((entry) => entry !== undefined);
+  return value && typeof value === "object" ? (value as Record<string, unknown>)[field] : undefined;
+}
+
 function taxClassFromJson(value: unknown): string | null {
   if (Array.isArray(value)) {
     for (const item of value) {
@@ -140,6 +147,15 @@ export function storedOrderItemToWaveLine(item: StoredOrderItem): WaveLineItem {
   const qty = Number(item.qty);
   const unitPrice = Number(item.unit_price);
   const lineTotal = Number(item.line_total);
+  // Manual line totals are authoritative; a negotiated lot need not divide into
+  // whole-cent unit prices (e.g. $10 for 3). Preserve its original quantity in
+  // the description and invoice one lot, matching initial manual provisioning.
+  if (String(item.category).toUpperCase() === "MANUAL" && Array.isArray(item.line_items_json) &&
+      fieldFromLineJson(item.line_items_json, "pricingSource") !== undefined) {
+    if (!description || !Number.isSafeInteger(qty) || qty <= 0 || !Number.isFinite(lineTotal) || lineTotal < 0) throw new Error("Stored manual line is invalid");
+    return { description: qty > 1 ? `${description} — Quantity: ${qty}` : description, qty: 1, unitPrice: lineTotal, applyGst: true,
+      applyPst: fieldFromLineJson(item.line_items_json, "applyPst") !== false };
+  }
   if (
     !description || !Number.isSafeInteger(qty) || qty <= 0 ||
     !Number.isFinite(unitPrice) || unitPrice < 0 ||
@@ -164,9 +180,15 @@ export function storedOrderItemToWaveLine(item: StoredOrderItem): WaveLineItem {
     "rush_service",
     "installation_service",
   ]);
-  const applyPst = taxClass && structuredTaxClasses.has(taxClass)
-    ? true
-    : String(item.category ?? "").toUpperCase() !== "SERVICE";
+  const policyVersion = fieldFromLineJson(item.line_items_json, "taxPolicyVersion");
+  const historicalFormula = fieldFromLineJson(item.line_items_json, "taxFormulaVersion");
+  const applyPst = policyVersion === "pst20_20260906"
+    ? fieldFromLineJson(item.line_items_json, "applyPst") === true
+    : historicalFormula === "sk_print_only_v2"
+      ? !["design_service", "rush_service"].includes(taxClass ?? "")
+      : taxClass && structuredTaxClasses.has(taxClass)
+        ? true
+        : String(item.category ?? "").toUpperCase() !== "SERVICE";
 
   return { description, qty, unitPrice, applyGst: true, applyPst };
 }
@@ -260,6 +282,26 @@ function validatePlan(plan: OrderWaveInvoicePlan): OrderWaveInvoicePlan {
   return plan;
 }
 
+async function loadSavedFinancials(supabase: SupabaseClient, orderId: string): Promise<WaveInvoiceFinancials> {
+  const { data, error } = await supabase.from("orders").select("gst, pst, total").eq("id", orderId).single();
+  if (error || !data) throw new Error("Could not read saved order amounts before Wave verification");
+  const values = [data.gst, data.pst, data.total];
+  if (values.some((value) => value == null || !Number.isFinite(Number(value)) || Number(value) < 0)) throw new Error("Saved order amounts are invalid");
+  const [gstCents, pstCents, totalCents] = values.map((value) => Math.round(Number(value) * 100));
+  const subtotalCents = totalCents - gstCents - pstCents;
+  if (subtotalCents < 0 || !Number.isSafeInteger(totalCents)) throw new Error("Saved order amounts do not reconcile");
+  return { subtotalCents, gstCents, pstCents, totalCents };
+}
+
+class WaveFinancialMismatchError extends Error {}
+
+async function verifyInvoiceFinancials(invoiceId: string, expected: WaveInvoiceFinancials): Promise<void> {
+  const actual = await getWaveInvoiceFinancials(invoiceId);
+  if ((Object.keys(expected) as (keyof WaveInvoiceFinancials)[]).some((key) => actual[key] !== expected[key])) {
+    throw new WaveFinancialMismatchError(`Wave invoice ${invoiceId} differs from saved subtotal/GST/PST/total. Reconcile before sending or collecting payment.`);
+  }
+}
+
 export async function provisionOrderWaveInvoice(
   supabase: SupabaseClient,
   orderId: string,
@@ -268,6 +310,20 @@ export async function provisionOrderWaveInvoice(
   const reservation = await reserveOrderWaveProvisioning(supabase, orderId);
   if (reservation.action === "ready") {
     if (!reservation.invoiceId) throw new Error("Ready Wave provisioning has no linked invoice");
+    try {
+      await verifyInvoiceFinancials(reservation.invoiceId, await loadSavedFinancials(supabase, orderId));
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : "Wave financial verification failed";
+      // A transient read failure blocks this attempt. A confirmed mismatch
+      // invalidates the old readiness evidence so reserve cannot restore ready
+      // merely from the previously approved timestamp. Provider ID/history stay.
+      if (!(cause instanceof WaveFinancialMismatchError)) throw new QuoteWaveProvisioningError(message, true, { cause });
+      const { data: held, error } = await supabase.from("orders").update({ quote_wave_state: "ambiguous", wave_invoice_approved_at: null, quote_wave_last_error: message.slice(0, 1000) })
+        .eq("id", orderId).eq("wave_invoice_id", reservation.invoiceId).eq("quote_wave_state", "ready")
+        .eq("status", "pending_payment").is("paid_at", null).is("voided_at", null).select("id").maybeSingle();
+      if (error || !held) throw new QuoteWaveProvisioningError("Wave amounts could not be verified and the accounting hold could not be saved", true, { cause });
+      throw new QuoteWaveProvisioningError(message, true, { cause });
+    }
     return { action: "ready", invoiceId: reservation.invoiceId };
   }
   if (reservation.action === "wait") return { action: "wait", invoiceId: null };
@@ -275,6 +331,7 @@ export async function provisionOrderWaveInvoice(
 
   let externalCallStarted = false;
   try {
+    const expectedFinancials = await loadSavedFinancials(supabase, orderId);
     const order = suppliedPlan
       ? { id: orderId, ...validatePlan(suppliedPlan), isRush: suppliedPlan.isRush === true }
       : await loadStoredOrder(supabase, orderId);
@@ -290,6 +347,7 @@ export async function provisionOrderWaveInvoice(
       isRush: order.isRush,
       memo,
     });
+    await verifyInvoiceFinancials(invoice.invoiceId, expectedFinancials);
     await approveWaveInvoice(invoice.invoiceId);
     await completeQuoteWaveProvisioning(supabase, {
       orderId,
