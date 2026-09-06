@@ -11,7 +11,6 @@ import {
 } from "@/lib/data/order-constants";
 import { CustomerHistoryWidget } from "@/app/staff/orders/CustomerHistoryWidget";
 import type { Order } from "@/app/staff/orders/OrdersTable";
-import { RepriceModal } from "./RepriceModal";
 import { OrderMessagesPanel } from "./OrderMessagesPanel";
 import { formatAttemptAge } from "@/lib/payments/attempts";
 
@@ -81,8 +80,6 @@ export function StaffOrderCard({
   const [proofUploading, setProofUploading] = useState(false);
   const [proofSentId, setProofSentId] = useState<string | null>(null);
   const [proofError, setProofError] = useState<string | null>(null);
-  const [repriceOpen, setRepriceOpen] = useState(false);
-  const [repriceResult, setRepriceResult] = useState<{ new_total: number; delta: number; mode: string; pay_link_url: string | null } | null>(null);
   const [cloverPaymentId, setCloverPaymentId] = useState("");
   const [cloverReason, setCloverReason] = useState("Verified in Clover dashboard");
   const [cloverFormError, setCloverFormError] = useState<string | null>(null);
@@ -368,17 +365,14 @@ export function StaffOrderCard({
                 Paid by eTransfer?
               </button>
             )}
-            {!order.is_archived && !order.voided_at && order.status === "pending_payment" &&
-              !order.staff_notes?.startsWith("Manual order") &&
-              !order.staff_notes?.startsWith("[QUOTE] Manual quote") && (
-              <button
-                onClick={() => setRepriceOpen(true)}
-                className="text-sm px-3 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 rounded-lg text-amber-800 transition-colors font-medium"
-                aria-label="Reprice this order"
-                title="Adjust the price + email customer"
-              >
-                Reprice
-              </button>
+            {!order.is_archived && !order.voided_at && !order.paid_at && order.status === "pending_payment" && (
+              order.quote_request_id ? (
+                <a href={`/staff/quotes?quote=${encodeURIComponent(order.quote_request_id)}`} className="text-sm px-3 py-2 border border-amber-300 rounded-lg text-amber-800">Revise complete quote</a>
+              ) : (
+                <button onClick={onVoidAndReplace} disabled={voidingPayment} className="text-sm px-3 py-2 border border-amber-300 bg-amber-50 rounded-lg text-amber-800 disabled:opacity-50" title="Void the original invoice and review a complete replacement">
+                  {voidingPayment ? "Voiding…" : "Correct with replacement"}
+                </button>
+              )
             )}
             {order.status !== "pending_payment" && (
               <a
@@ -399,26 +393,6 @@ export function StaffOrderCard({
           </div>
         </div>
       </div>
-      {repriceOpen && (
-        <RepriceModal
-          orderId={order.id}
-          orderNumber={order.order_number}
-          customerName={(Array.isArray(order.customers) ? order.customers[0] : order.customers)?.name ?? "—"}
-          customerEmail={(Array.isArray(order.customers) ? order.customers[0] : order.customers)?.email ?? ""}
-          currentTotal={Number(order.total ?? 0)}
-          onClose={() => setRepriceOpen(false)}
-          onSuccess={(result) => {
-            setRepriceResult(result);
-            setRepriceOpen(false);
-            // Light page refresh to pull updated total + staff_notes
-            if (typeof window !== "undefined") window.location.reload();
-          }}
-        />
-      )}
-      {repriceResult && (
-        <div className="hidden" data-reprice-completed={repriceResult.mode} />
-      )}
-
       {/* ── Expanded section ── */}
       {isExpanded && (
         <div className="border-t border-gray-100 bg-gray-50 p-5 space-y-6">

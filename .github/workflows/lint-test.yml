@@ -124,6 +124,9 @@ jobs:
       - name: Aggregate order consistency audit contracts
         run: node --test scripts/pricing/audit-order-consistency.node.mjs
 
+      - name: Aggregate order consistency audit contracts
+        run: node --test scripts/pricing/audit-order-consistency.node.mjs
+
       - name: Google Ads safety contracts
         run: npm run test:google-ads
 

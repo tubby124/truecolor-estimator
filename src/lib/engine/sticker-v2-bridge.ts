@@ -55,7 +55,7 @@ function blocked(reason: string): EstimateResponse {
   } catch { /* config not loaded */ }
   return {
     status: "BLOCKED", sell_price: null, design_fee: 0, rush_fee: 0,
-    gst_rate: 0.05, line_items: [], sqft_calculated: null,
+    gst_rate: undefined, pst_rate: undefined, line_items: [], sqft_calculated: null,
     price_per_sqft: null, tier_applied: null, min_charge_applied: false,
     min_charge_value: null, min_charge_skipped: false, rules_fired: [],
     cost: null, wave_line_name: "", needs_clarification: true,
@@ -148,6 +148,7 @@ export function runStickerV2(req: EstimateRequest): EstimateResponse | null {
     design_fee: designFee,
     rush_fee: rushFee,
     gst_rate: gstRate,
+    pst_rate: getConfigNum("pst_rate"),
     line_items: lineItems,
     sqft_calculated: result.sqft,
     price_per_sqft: result.sqft_rate,

@@ -28,10 +28,12 @@ import { encodePaymentToken } from "@/lib/payment/token";
 import type { CartItem } from "@/lib/cart/cart";
 import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
-import { revalidateItemPrices } from "@/lib/orders/revalidate";
+import { revalidateItemPrices, compareReviewedCheckoutTotal } from "@/lib/orders/revalidate";
 import { getConfigNum } from "@/lib/data/loader";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
+import { getCanonicalTaxRates } from "@/lib/pricing/canonical-rates";
+import { computeTaxCents } from "@/lib/payment/tax-math";
 import { computePstBase } from "@/lib/pricing/tax";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { classifyReferrer } from "@/lib/analytics/referrer";
@@ -51,6 +53,7 @@ import { parseGa4ClientContext } from "@/lib/analytics/ga4-client-context";
 // checkout submit sends when localStorage still holds a paid touch that the
 // cookie lost (Safari ITP). Whitelisted server-side by collectLatestPaidHints.
 export interface CreateOrderRequest extends LatestPaidHintPayload {
+  expectedTotalCents?: number;
   checkout_submission_id: string;
   items: CartItem[];
   contact: {
@@ -89,8 +92,6 @@ export interface CreateOrderRequest extends LatestPaidHintPayload {
   ga_session_number?: string;
 }
 
-const GST_RATE = 0.05;
-const PST_RATE = 0.06;
 // Rush fee is read from config.v1.csv at the call site (see below) rather than
 // hardcoded here. This was the 4th independent copy of the rush fee (engine STEP 8,
 // sticker-v2-bridge, services.v1.csv, here) and the one most likely to be missed on a
@@ -197,6 +198,105 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to save customer" }, { status: 500 });
     }
 
+    customer = existing;
+
+    // 2. Validate discount code (server-side — never trust client amount)
+    let validatedDiscountCode: string | null = null;
+    let validatedDiscount = 0;
+    let discountCodeId: string | null = null;
+    const { data: storedSubmission, error: storedSubmissionError } = await supabase
+      .from("orders")
+      .select("discount_code, discount_amount")
+      .eq("checkout_submission_id", checkout_submission_id)
+      .maybeSingle();
+    if (storedSubmissionError) {
+      return NextResponse.json({ error: "Could not verify the saved checkout attempt" }, { status: 500 });
+    }
+    if (storedSubmission) {
+      validatedDiscountCode = typeof storedSubmission.discount_code === "string"
+        ? storedSubmission.discount_code
+        : null;
+      validatedDiscount = Math.max(0, Number(storedSubmission.discount_amount ?? 0));
+    } else if (rawDiscountCode?.trim()) {
+      try {
+        const codeUpper = rawDiscountCode.trim().toUpperCase();
+        const { data: dc } = await supabase
+          .from("discount_codes")
+          .select("id, code, discount_amount, is_active, per_account_limit, max_uses, expires_at")
+          .ilike("code", codeUpper)
+          .maybeSingle();
+
+        if (dc && dc.is_active && (!dc.expires_at || new Date(dc.expires_at) > new Date())) {
+          // Existing customer usage can be read before creating a new profile.
+          // A new customer has no prior account redemptions.
+          let used = 0;
+          if (customer) {
+            const { count, error: usageError } = await supabase
+              .from("discount_redemptions")
+              .select("*", { count: "exact", head: true })
+              .eq("code_id", dc.id)
+              .eq("customer_id", customer.id);
+            if (usageError) throw new Error("Could not verify discount usage");
+            used = count ?? 0;
+          }
+
+          // Check global max_uses
+          let globalOk = true;
+          if (dc.max_uses !== null) {
+            const { count: totalUsed } = await supabase
+              .from("discount_redemptions")
+              .select("*", { count: "exact", head: true })
+              .eq("code_id", dc.id);
+            globalOk = (totalUsed ?? 0) < dc.max_uses;
+          }
+
+          if ((used ?? 0) < dc.per_account_limit && globalOk) {
+            validatedDiscountCode = dc.code;
+            validatedDiscount = Number(dc.discount_amount);
+            discountCodeId = dc.id;
+          } else {
+            console.warn(`[orders] discount code ${codeUpper} rejected — already used or limit reached for customer ${customer?.id ?? "new"}`);
+          }
+        } else if (dc) {
+          console.warn(`[orders] discount code ${codeUpper} rejected — inactive or expired`);
+        }
+      } catch (discountErr) {
+        // Non-fatal — order proceeds without discount
+        console.error("[orders] discount validation error (non-fatal):", discountErr);
+      }
+    }
+
+    // 3. Calculate totals
+    const itemsSubtotal = items.reduce((s, i) => s + i.sell_price, 0);
+    const rush = is_rush ? getConfigNum("rush_fee_flat") : 0;
+    // Discount reduces pre-tax base (legally correct — reduces taxable amount)
+    const discount = Math.min(validatedDiscount, itemsSubtotal + rush); // cap: total can't go negative
+    const discountedItemsSubtotal = itemsSubtotal - discount;
+    // Order-total minimum surcharge — replaces the per-product min charge that was
+    // killed 2026-05-19. If the discounted items total is below the order minimum
+    // ($25), top it up via a transparent "Small order setup fee" line. Discount is
+    // applied first so customers using a coupon don't get unexpectedly bumped.
+    // PST applies to it (setup is a service on tangible goods); GST always applies.
+    const orderMin = computeOrderMinSurcharge(discountedItemsSubtotal + rush);
+    const smallOrderFee = orderMin.surcharge;
+    const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
+    // Saskatchewan PST-20 taxes the full charge for taxable printed material,
+    // including design, production, rush, and setup charges. Standalone service
+    // lines (DESIGN/SERVICE — vectorization, upscale, design with no print job)
+    // ship no tangible goods and are GST-only; computePstBase carves them out and
+    // returns 0 for a service-only order. Checkout's preview calls the same helper.
+    const pstBase = computePstBase({ items, discountedSubtotal, rush });
+    const tax = computeTaxCents(Math.round((discountedSubtotal + rush) * 100), getCanonicalTaxRates(), false, Math.round(pstBase * 100));
+    const gst = tax.gstCents / 100;
+    const pst = tax.pstCents / 100;
+    const total = tax.totalCents / 100;
+    const reviewedTotal = compareReviewedCheckoutTotal(body.expectedTotalCents, tax.totalCents);
+    if (!reviewedTotal.ok) {
+      return NextResponse.json({ error: reviewedTotal.error, code: reviewedTotal.code }, { status: reviewedTotal.status });
+    }
+
+    // Pricing is now the amount reviewed in the browser. Only now may checkout
+    // create/update customer records or proceed to order/provider mutations.
     if (existing) {
       customer = existing;
     } else {
@@ -283,89 +383,6 @@ export async function POST(req: NextRequest) {
       })();
     }
 
-    // 2. Validate discount code (server-side — never trust client amount)
-    let validatedDiscountCode: string | null = null;
-    let validatedDiscount = 0;
-    let discountCodeId: string | null = null;
-    const { data: storedSubmission, error: storedSubmissionError } = await supabase
-      .from("orders")
-      .select("discount_code, discount_amount")
-      .eq("checkout_submission_id", checkout_submission_id)
-      .maybeSingle();
-    if (storedSubmissionError) {
-      return NextResponse.json({ error: "Could not verify the saved checkout attempt" }, { status: 500 });
-    }
-    if (storedSubmission) {
-      validatedDiscountCode = typeof storedSubmission.discount_code === "string"
-        ? storedSubmission.discount_code
-        : null;
-      validatedDiscount = Math.max(0, Number(storedSubmission.discount_amount ?? 0));
-    } else if (rawDiscountCode?.trim()) {
-      try {
-        const codeUpper = rawDiscountCode.trim().toUpperCase();
-        const { data: dc } = await supabase
-          .from("discount_codes")
-          .select("id, code, discount_amount, is_active, per_account_limit, max_uses, expires_at")
-          .ilike("code", codeUpper)
-          .maybeSingle();
-
-        if (dc && dc.is_active && (!dc.expires_at || new Date(dc.expires_at) > new Date())) {
-          // Check per-account usage
-          const { count: used } = await supabase
-            .from("discount_redemptions")
-            .select("*", { count: "exact", head: true })
-            .eq("code_id", dc.id)
-            .eq("customer_id", customer.id);
-
-          // Check global max_uses
-          let globalOk = true;
-          if (dc.max_uses !== null) {
-            const { count: totalUsed } = await supabase
-              .from("discount_redemptions")
-              .select("*", { count: "exact", head: true })
-              .eq("code_id", dc.id);
-            globalOk = (totalUsed ?? 0) < dc.max_uses;
-          }
-
-          if ((used ?? 0) < dc.per_account_limit && globalOk) {
-            validatedDiscountCode = dc.code;
-            validatedDiscount = Number(dc.discount_amount);
-            discountCodeId = dc.id;
-          } else {
-            console.warn(`[orders] discount code ${codeUpper} rejected — already used or limit reached for customer ${customer.id}`);
-          }
-        } else if (dc) {
-          console.warn(`[orders] discount code ${codeUpper} rejected — inactive or expired`);
-        }
-      } catch (discountErr) {
-        // Non-fatal — order proceeds without discount
-        console.error("[orders] discount validation error (non-fatal):", discountErr);
-      }
-    }
-
-    // 3. Calculate totals
-    const itemsSubtotal = items.reduce((s, i) => s + i.sell_price, 0);
-    const rush = is_rush ? getConfigNum("rush_fee_flat") : 0;
-    // Discount reduces pre-tax base (legally correct — reduces taxable amount)
-    const discount = Math.min(validatedDiscount, itemsSubtotal + rush); // cap: total can't go negative
-    const discountedItemsSubtotal = itemsSubtotal - discount;
-    // Order-total minimum surcharge — replaces the per-product min charge that was
-    // killed 2026-05-19. If the discounted items total is below the order minimum
-    // ($25), top it up via a transparent "Small order setup fee" line. Discount is
-    // applied first so customers using a coupon don't get unexpectedly bumped.
-    // PST applies to it (setup is a service on tangible goods); GST always applies.
-    const orderMin = computeOrderMinSurcharge(discountedItemsSubtotal + rush);
-    const smallOrderFee = orderMin.surcharge;
-    const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
-    // Saskatchewan PST-20 taxes the full charge for taxable printed material,
-    // including design, production, rush, and setup charges. Standalone service
-    // lines (DESIGN/SERVICE — vectorization, upscale, design with no print job)
-    // ship no tangible goods and are GST-only; computePstBase carves them out and
-    // returns 0 for a service-only order. Checkout's preview calls the same helper.
-    const pstBase = computePstBase({ items, discountedSubtotal, rush });
-    const gst = Math.round((discountedSubtotal + rush) * GST_RATE * 100) / 100;
-    const pst = Math.round(pstBase * PST_RATE * 100) / 100;
-    const total = discountedSubtotal + rush + gst + pst;
     const checkoutRequestFingerprint = createHash("sha256")
       .update(JSON.stringify({
         customer: {

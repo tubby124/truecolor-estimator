@@ -16,7 +16,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { checkPriceConsistency } from "../price-consistency";
+import { checkPriceConsistency, marketingPriceStatus } from "../price-consistency";
 
 describe("Price consistency — getProductConfig migration safety net", () => {
   const rows = checkPriceConsistency();
@@ -39,4 +39,15 @@ describe("Price consistency — getProductConfig migration safety net", () => {
       expect(["match", "skipped"]).toContain(row.status);
     });
   }
+});
+
+// An advertised starting configuration must actually be purchasable at that
+// price. Higher actual prices are drift just as lower actual prices are.
+it("rejects under-advertised prices and reports both drift directions", () => {
+  expect(marketingPriceStatus(78, 66)).toBe("drift");
+  expect(marketingPriceStatus(66, 78)).toBe("drift");
+  expect(marketingPriceStatus(78, 78)).toBe("match");
+});
+it("does not retain the already-resolved ACP retired-lock advisory", () => {
+  expect(checkPriceConsistency().some((row) => row.config_label.includes("RIGID-ACP3-24X36-S (docs ref)"))).toBe(false);
 });

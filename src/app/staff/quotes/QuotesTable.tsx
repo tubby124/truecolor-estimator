@@ -36,7 +36,7 @@ function StatCard({
 
 // ─── QuotesTable ──────────────────────────────────────────────────────────────
 
-export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] }) {
+export function QuotesTable({ quotes: initialQuotes, focusedQuoteId }: { quotes: QuoteRequest[]; focusedQuoteId?: string | null }) {
   const [quotes, setQuotes] = useState<QuoteRequest[]>(initialQuotes);
   const [filter, setFilter] = useState<"pending" | "recent" | "all">("pending");
   const [search, setSearch] = useState("");
@@ -143,7 +143,7 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
 
   // Filtered + searched + sorted
   const displayed = useMemo(() => {
-    let result = visibleBase;
+    let result = visibleBase.filter((quote) => quote.id !== focusedQuoteId);
 
     if (filter === "pending") result = result.filter((q) => !q.replied_at);
     else if (filter === "recent")
@@ -168,7 +168,7 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
     else sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
 
     return sorted;
-  }, [visibleBase, filter, search, sortBy]);
+  }, [visibleBase, filter, search, sortBy, focusedQuoteId]);
 
   if (quotes.length === 0) {
     return (
@@ -183,6 +183,12 @@ export function QuotesTable({ quotes: initialQuotes }: { quotes: QuoteRequest[] 
 
   return (
     <div>
+      {focusedQuoteId && quotes.find((quote) => quote.id === focusedQuoteId) && (
+        <section className="mb-6" aria-label="Quote selected for correction">
+          <p className="mb-2 text-sm font-semibold text-amber-800">Review the complete quote revision before sending.</p>
+          <QuoteCard key={`correction:${focusedQuoteId}`} quote={quotes.find((quote) => quote.id === focusedQuoteId)!} initialBuilderOpen />
+        </section>
+      )}
       {/* New quote alert */}
       {newQuoteAlert && (
         <div className="mb-4 bg-sky-50 border border-[#16C2F3]/40 rounded-lg px-4 py-3 flex items-center justify-between">

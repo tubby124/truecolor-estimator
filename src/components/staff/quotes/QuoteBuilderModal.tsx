@@ -25,6 +25,11 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
   // Pre-fill ALL items from the customer request (not just the first). Multi-item
   // quote requests were silently dropping items 2-N — staff had to re-type them.
   const itemsFromRequest = (): LineItem[] => {
+    // An issued customer-specific revision outranks today's catalogue and the
+    // original unpriced request. Staff edits this snapshot intentionally.
+    if (quote.quote_line_items?.length) return quote.quote_line_items.map((item) => ({
+      description: item.description, qty: String(item.qty), unitPrice: String(item.unitPrice), taxClass: item.taxClass,
+    }));
     const mapped = quote.items.map((item) => ({
       description: [item.product, item.dimensions, item.material].filter(Boolean).join(" — "),
       qty: String(item.qty || 1),
@@ -42,10 +47,11 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
   const [quoteSending, setQuoteSending] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [quoteSent, setQuoteSent] = useState(false);
-  const [taxRates, setTaxRates] = useState<{ gstRate: number; pstRate: number } | null>(null);
+  const [taxRates, setTaxRates] = useState<{ gstRate: number; pstRate: number; structuredTaxPolicyVersion?: string } | null>(null);
   const [pstExemption, setPstExemption] = useState<PstExemptionInput>({
-    enabled: false,
-    resaleConfirmed: false,
+    enabled: quote.pst_exempt === true,
+    vendorNumber: quote.pst_vendor_number ?? "",
+    resaleConfirmed: quote.pst_resale_confirmed === true,
     rememberVendorNumber: true,
   });
 
@@ -54,7 +60,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
     void fetch("/api/staff/pricing/tax-rates")
       .then(async (response) => {
         if (!response.ok) throw new Error("Tax configuration unavailable");
-        return response.json() as Promise<{ gstRate: number; pstRate: number }>;
+        return response.json() as Promise<{ gstRate: number; pstRate: number; structuredTaxPolicyVersion?: string }>;
       })
       .then(setTaxRates)
       .catch((error) => setQuoteError(error instanceof Error ? error.message : "Tax configuration unavailable"));
@@ -83,6 +89,8 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
       setQuoteError("Tax configuration is still loading. Please try again.");
       return;
     }
+    const reviewedTotals = computeStructuredQuoteTotals(lineItems, taxRates, pstExemption.enabled);
+    const expectedPricing = { ...taxRates, subtotalCents: Math.round(reviewedTotals.subtotal * 100), gstCents: Math.round(reviewedTotals.gst * 100), pstCents: Math.round(reviewedTotals.pst * 100), totalCents: Math.round(reviewedTotals.grandTotal * 100) };
     setQuoteSending(true);
     setQuoteError(null);
     try {
@@ -91,14 +99,16 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subject: quoteSubject,
+          expectedPricing,
           lineItems: items,
           note: quoteNote || undefined,
           pstExemption,
         }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string; code?: string };
       if (!res.ok || !data.ok) {
         setQuoteError(data.error ?? "Failed to send quote");
+        if (data.code === "STALE_QUOTE_PRICE") setTaxRates(null);
       } else {
         setQuoteSent(true);
         onSent();

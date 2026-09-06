@@ -228,6 +228,7 @@ function request(overrides: Record<string, unknown> = {}): NextRequest {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      expectedPricing: { gstRate: .05, pstRate: .06, subtotalCents: 10000, gstCents: 500, pstCents: 600, totalCents: 11100 },
       subject: "Your quote",
       lineItems: [
         {
@@ -267,6 +268,13 @@ function post(req = request()) {
 }
 
 describe("payable quote delivery state", () => {
+  it("rejects a stale reviewed total before preparing or sending a revision", async () => {
+    const response = await post(request({ expectedPricing: { gstRate: .05, pstRate: .06, subtotalCents: 10000, gstCents: 500, pstCents: 600, totalCents: 11099 } }));
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ code: "STALE_QUOTE_PRICE" });
+    expect(harness.sendEmail).not.toHaveBeenCalled();
+    expect(harness.revision).toBe(0);
+  });
   beforeEach(() => {
     harness.sendEmail.mockReset();
     harness.audit.mockReset();

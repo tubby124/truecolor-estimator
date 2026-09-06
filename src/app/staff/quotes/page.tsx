@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createServiceClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
+import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { QuotesTable } from "./QuotesTable";
 import { LOGO_PATH } from "@/lib/config";
 
@@ -35,9 +37,17 @@ export interface QuoteRequest {
   shipping_address: string | null;
   is_archived: boolean;
   archived_at: string | null;
+  quote_line_items?: Array<{ description: string; qty: string | number; unitPrice: string | number; taxClass: "printed_good" | "design_service" | "rush_service" | "installation_service" }> | null;
+  pst_exempt?: boolean;
+  pst_vendor_number?: string | null;
+  pst_resale_confirmed?: boolean;
 }
 
-export default async function StaffQuotesPage() {
+export default async function StaffQuotesPage({ searchParams }: { searchParams?: Promise<{ quote?: string }> }) {
+  const auth = await requireStaffUser();
+  if (auth instanceof NextResponse) redirect("/staff/login");
+  const requestedQuote = (await searchParams)?.quote;
+  const focusedQuoteId = typeof requestedQuote === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestedQuote) ? requestedQuote : null;
   let quotes: QuoteRequest[] = [];
   let fetchError: string | null = null;
 
@@ -46,13 +56,21 @@ export default async function StaffQuotesPage() {
     const { data, error } = await supabase
       .from("quote_requests")
       .select(
-        "id, created_at, name, email, phone, items, file_links, replied_at, staff_note, reply_body, brokerage_slug, shipping_address, is_archived, archived_at"
+        "id, created_at, name, email, phone, items, file_links, replied_at, staff_note, reply_body, brokerage_slug, shipping_address, is_archived, archived_at, quote_line_items, pst_exempt, pst_vendor_number, pst_resale_confirmed"
       )
       .order("created_at", { ascending: false })
       .limit(200);
 
     if (error) throw new Error(error.message);
     quotes = (data ?? []) as QuoteRequest[];
+    if (requestedQuote && !focusedQuoteId) throw new Error("The quote correction link is invalid.");
+    if (focusedQuoteId && !quotes.some((quote) => quote.id === focusedQuoteId)) {
+      const { data: focused, error: focusedError } = await supabase.from("quote_requests")
+        .select("id, created_at, name, email, phone, items, file_links, replied_at, staff_note, reply_body, brokerage_slug, shipping_address, is_archived, archived_at, quote_line_items, pst_exempt, pst_vendor_number, pst_resale_confirmed")
+        .eq("id", focusedQuoteId).maybeSingle();
+      if (focusedError || !focused) throw new Error("The quote selected for correction could not be loaded.");
+      quotes = [focused as QuoteRequest, ...quotes];
+    }
   } catch (err) {
     fetchError = err instanceof Error ? err.message : "Could not load quotes";
   }
@@ -125,7 +143,7 @@ export default async function StaffQuotesPage() {
             <p className="text-red-500 text-sm mt-1">{fetchError}</p>
           </div>
         ) : (
-          <QuotesTable quotes={quotes} />
+          <QuotesTable quotes={quotes} focusedQuoteId={focusedQuoteId} />
         )}
       </main>
 
