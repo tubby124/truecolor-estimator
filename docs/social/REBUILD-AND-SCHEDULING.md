@@ -86,9 +86,11 @@ Acceptance:
 - Held/uncertain delivery stops automatic action and remains visible; expired jobs do not catch up in a burst.
 - Completion/expiry stops further publishing calls; only pending notices and read-only uncertainty recovery may continue. Record final timer/queue state and pause publishing after the test.
 
-The test has not passed merely because it is configured or because the manual pilot passed. Final time-based evidence will only exist after the scheduled slots.
+The test has not passed merely because it is configured or because the manual pilot passed. Final time-based evidence will only exist after the scheduled slots. See the [Sunday configuration receipt](SUNDAY-BATCH-20260906.md) for the installed runtime and approval checks.
 
 Telegram delivery notices were explicitly requested for every post and issue. Reuse the existing owner notification destination. Keep delivery and notification state separate so a failed Telegram call cannot cause a duplicate Facebook or Instagram post. A Telegram HTTP timeout can leave message acceptance uncertain; any retry may duplicate a notice, but never the social publication.
+
+The live VPS initially received Cloudflare 403 / 1010 with Python’s default User-Agent. A transparent `TrueColor-Social-Scheduler/1.0` product User-Agent passed the same authenticated read-only request; no WAF setting or access check was weakened. Test from the actual VPS before arming.
 
 ## VPS installation contract
 
