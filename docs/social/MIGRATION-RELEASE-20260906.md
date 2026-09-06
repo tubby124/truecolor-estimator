@@ -37,7 +37,7 @@ A schema readback does not prove Google OAuth, provider account access, delivere
 - Combined actual-migration fixture passes on disposable PostgreSQL18.4, including preserved legacy approval snapshot, stable monthly replay, no repeat generation charge, and cross-business rejection.
 - Independent review found no integration-migration correctness issue. One missing-row assertion in the fixture was corrected and rerun.
 - Business isolation and versioned tax regressions also pass sequentially on the disposable database used by integration.
-- All eight required SQL regressions pass in CI order on disposable PostgreSQL18.4 at integrated source `b60099bf`. Required GitHub PostgreSQL16 coverage is added in PR46. P/C/G combined app CI passed (1,425 unit tests and40 browser contracts).
+- All eight required SQL regressions pass in CI order on disposable PostgreSQL18.4 at integrated source `b60099bf`. Required GitHub PostgreSQL16 execution passed all eight steps in run34055149545. P/C/G combined app CI passed (1,425 unit tests and40 browser contracts).
 - 18:40:54 UTC production read showed the social feature gate false and the four probed new tables unavailable in the REST schema cache. No production migrations or feature activation were performed.
 
 
