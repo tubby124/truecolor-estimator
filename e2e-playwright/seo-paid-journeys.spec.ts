@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import path from "node:path";
 
 const paidProductRoutes = [
   "/products/coroplast-signs",
@@ -30,11 +31,45 @@ test.describe("paid and organic ordering journeys", () => {
   // Without this block, every run against production fires real GA4 hits and pollutes
   // the google/cpc segment — by 2026-08-07 the fake sessions outnumbered real ad
   // clicks ~5:1, corrupting the paid-funnel read the ads cadence depends on.
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, baseURL }) => {
+    // These local ordering contracts use the real image assets without making
+    // pricing/cart requests compete with runtime thumbnail optimization. Image
+    // optimizer behavior is a separate check; no estimate/cart API is mocked here.
+    if (process.env.SOCIAL_E2E_AUTH_FIXTURE === "true") {
+      await page.route("**/_next/image?**", async (route) => {
+        const requestUrl = new URL(route.request().url());
+        if (!baseURL || requestUrl.origin !== new URL(baseURL).origin || requestUrl.pathname !== "/_next/image") {
+          return route.continue();
+        }
+        const source = requestUrl.searchParams.get("url");
+        if (!source?.startsWith("/images/")) return route.continue();
+        const assetUrl = new URL(source, requestUrl.origin);
+        if (assetUrl.origin !== requestUrl.origin || !assetUrl.pathname.startsWith("/images/")) {
+          return route.continue();
+        }
+        const publicRoot = path.resolve(process.cwd(), "public");
+        const assetPath = path.resolve(publicRoot, `.${decodeURIComponent(assetUrl.pathname)}`);
+        if (!assetPath.startsWith(`${publicRoot}${path.sep}images${path.sep}`)) {
+          throw new Error("Image fixture path escaped public/images");
+        }
+        await route.fulfill({ path: assetPath });
+      });
+    }
     await page.route(
       /googletagmanager\.com|google-analytics\.com|analytics\.google\.com|doubleclick\.net|connect\.facebook\.net|facebook\.com\/tr/,
       (route) => route.abort(),
     );
+  });
+
+  test("local image optimizer serves a real coroplast thumbnail", async ({ request }) => {
+    test.skip(process.env.SOCIAL_E2E_AUTH_FIXTURE !== "true", "Local synthetic suite only");
+    const source = "/images/gallery/gallery-coroplast-diecut-sasknation-key.webp";
+    const response = await request.get(`/_next/image?url=${encodeURIComponent(source)}&w=128&q=75`, {
+      timeout: 10_000,
+    });
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toMatch(/^image\//);
+    expect((await response.body()).byteLength).toBeGreaterThan(0);
   });
 
   for (const [route, heading, productRoutes] of [
