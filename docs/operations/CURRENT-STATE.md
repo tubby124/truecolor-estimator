@@ -1,10 +1,10 @@
 # Current work state
 
-Updated 2026-09-05. This is the canonical shared work board. Imported operational observations are explicitly dated reports; this migration does not certify live account state. Refresh the relevant system before a mutation.
+Updated 2026-09-06. This is the canonical shared work board. Imported operational observations are explicitly dated reports; this migration does not certify live account state. Refresh the relevant system before a mutation.
 
 | Lane / owner | Latest evidence and status | Next action / gate |
 |---|---|---|
-| Social / G1 automation task | Sep 5 live read-only: 12 drafts, no connected social/GBP accounts. Explicit approval pilot implemented locally; [runbook](../social/APPROVAL-PILOT.md). | Migration review/application, exact account setup, socially cleared media and owner batch approval before publishing. Legacy drafts remain untouched. |
+| Social / G1 automation task | Sep 6: real staff approvals and verified Facebook/Instagram pilot delivery completed; two posted, 12 legacy drafts untouched. [Live links and repair receipts](../social/PRACTICE-POST-20260906.md#successful-two-platform-delivery--september-6-2026). | Publishing pause verified by hosted readback at 05:18 UTC. Simplify to one compose screen and one approval; unattended scheduling and Telegram remain separate, untested work. |
 | Merchant commerce / commerce task | Private Sep 5 readback reports 18 primary offers and 18 matched local rows. The two business-card image retries, product-page/pickup-later reviews and inventory validation remain open. | Highest-priority Google-growth lane. Read Google review state; retain 25 legacy manual products until replacement approval/serving evidence. Do not widen to Ads or invented shipping. |
 | Organic / SEO experiment task | Wall Graphics observation active; Foamboard proposal prepared, not released. Repo `seo-prep/2026-09-04-foamboard-strengthening.md` carries gate. | Earliest reconsideration Sep 9 only after seven finalized post-release days and current release/GSC evidence; no automatic release at that date. |
 | Paid Ads / paid-search task | Aug 29 private override says all three campaigns paused; older Aug 27 operating-state says enabled and is superseded. Cap/enforcement and promotion evidence remain unresolved. | Live read-only campaign/cap check before any action. Do not resume or change spend as part of migration. |
@@ -46,3 +46,10 @@ The two authorized posts received real staff approvals, but the 04:50 UTC dispat
 
 
 At 05:05 UTC the repaired pipeline published the approved Facebook pilot with exact-caption Meta readback. Instagram's saved failure identified an unsupported container-status field; a narrow correction is being verified. Facebook must not be retried. [Latest practice receipt](../social/PRACTICE-POST-20260906.md#facebook-published-instagram-status-field-repair).
+
+
+## Two-platform pilot completed — September 6, 2026
+
+[Facebook](https://www.facebook.com/310364742156669_122234778494295517) and [Instagram](https://www.instagram.com/p/Dc7w50rkU41/) are live with independently verified exact captions and visually confirmed Fowlplay photo. Both app records are posted; Facebook was published once, Instagram failures were manually reconciled before its one successful publication, and the failed receipt remains preserved. PRs 39 and 40 fixed receipt persistence and the unsupported Instagram container-status field. Publishing was set back to false immediately afterward. [Final receipt](../social/PRACTICE-POST-20260906.md#successful-two-platform-delivery--september-6-2026) supersedes earlier pending-delivery checkpoints in this file. No unattended scheduler or Mac-asleep claim.
+
+Final hosted readback at 05:18:45 UTC confirmed `Publishing is paused`; readiness showed 12 drafts, zero ready/posting and two posted. Exactly one matching pilot per platform was found in fresh provider lists.
