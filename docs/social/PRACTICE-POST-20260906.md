@@ -12,7 +12,7 @@ The current application approval pilot originally allowed Instagram only. The bo
 
 A private local preview shows the saved Fowlplay Decoys coroplast sign photo and proposed copy in two destination cards. Its source image bytes are unchanged. Customer photo, raw manifest, preview and private paths are outside this public repository. Three caption lengths were prepared; source facts for the optional long version come from the current coroplast SKU and $25 order-minimum implementation.
 
-This is a visual rehearsal, not a saved/approved production post. Owner approved the displayed photo and caption in chat. Final validated JPEG and exact delivery-time binding remain necessary before dispatch. No image cleanup or cover text was added. The source photo's public website presence is not recorded as a new social-use grant.
+Owner approved the displayed photo and caption in chat. At 02:53:56 UTC the operator saved two fixed-ID, unapproved production drafts and verified the final JPEG hash by readback. Exact delivery-time binding and production approval remain necessary before dispatch. No image cleanup or cover text was added. The source photo's public website presence is not recorded as a new social-use grant.
 
 ## Completion sequence
 
@@ -25,3 +25,15 @@ This is a visual rehearsal, not a saved/approved production post. Owner approved
 Telegram intake, automatic category/style rotation, hosted scheduling and a Mac-asleep test are separate later milestones. This one-post rehearsal does not establish resale readiness.
 
 Git audit: [reconciliation receipt](GIT-RECONCILIATION-20260906.md).
+
+## Implementation and provider setup checkpoint
+
+PR 37 merged at `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c` after full CI/security passed and independent review reported no high or critical findings. The application supports separate approved Instagram and Facebook drafts.
+
+Owner authorized adding the Meta Page use case. After an initial opaque UI error, direct UI readback showed `pages_manage_posts` as Ready for testing. A token wizard was prepared with six scopes. This is app configuration evidence, not proof that a new credential has those grants. At the owner's explicit request the new credential was saved to Railway through protected standard input. A fresh protected Meta read at 02:55:32 UTC verified `pages_manage_posts` plus all prior Instagram scopes and the intended Page/Instagram pair. Publishing remained disabled. No credential or access-bearing link is stored here.
+
+## Deployment and draft evidence
+
+The PR 37 code deployment `40289fa0-862a-4237-91e1-a3baa605bca3` reported SUCCESS at commit `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c`. The subsequent credential-configuration deployment `03415b4b-e2a5-45b2-afa2-b6ff81589f8c` subsequently reported SUCCESS using the same commit. This was independently checked after the earlier code deployment.
+
+Fresh readiness at 02:57:09 UTC verified 14 drafts, zero ready posts, zero posted posts, zero attempts and publishing disabled. Staff browser login is the remaining immediate blocker before authenticated production approval. No public delivery is claimed.

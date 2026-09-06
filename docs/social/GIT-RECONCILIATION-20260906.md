@@ -20,11 +20,11 @@ PRs 35 and 36 independently showed passing lint-test, PostgreSQL regression and 
 
 AISA roadmap PRs [12](https://github.com/tubby124/ai-survival-academy/pull/12) and [13](https://github.com/tubby124/ai-survival-academy/pull/13) are merged. A retried live open-PR query returned zero AISA open PRs. An earlier request timed out with HTTP 504; the successful retry supersedes that retrieval failure.
 
-## One open True Color PR needs disposition
+## Legacy True Color PR disposition
 
-[PR 9](https://github.com/tubby124/truecolor-estimator/pull/9), the June 19 sticker FAQ/SearchAction proposal, is open and conflicting. Its old passing checks are not current merge validation.
+[PR 9](https://github.com/tubby124/truecolor-estimator/pull/9), the June 19 sticker FAQ/SearchAction proposal, was open and conflicting during the audit. It is now closed as superseded; its branch and history are retained. Its old passing checks were not current merge validation.
 
-Its SearchAction proposal targets `/quote?q=`, while current main already has a SearchAction targeting `/products?q=`. Its sticker price copy also differs from current main, and its dated SEO release evidence does not establish a current release gate. Recommendation: close as superseded after recording that decision, and create a fresh narrowly scoped proposal only if current pricing and SEO evidence justify anything still missing. Do not merge the stale branch wholesale. It remains open after this audit.
+Its SearchAction proposal targets `/quote?q=`, while current main already has a SearchAction targeting `/products?q=`. Its sticker price copy also differs from current main, and its dated SEO release evidence does not establish a current release gate. Any future work requires a fresh narrowly scoped proposal supported by current pricing and SEO evidence. The stale branch was not merged.
 
 ## Local leftovers are not all missing work
 
@@ -66,3 +66,7 @@ Keep social pilot delivery separate from recovery of old ads, payment and SEO wo
 | Outbox branch extra SEO commit | Flyer experiment is stale relative to current title; manifest validation overlaps SEO guard proposal | Do not replay experiment; consolidate guard concepts in a fresh design |
 
 These are targeted comparisons, not a certification of every old branch or dirty worktree. Useful ideas are preserved without importing unrelated production changes into the social pilot.
+
+## Dual-platform extension receipt
+
+[PR 37](https://github.com/tubby124/truecolor-estimator/pull/37) merged at `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c` after full CI and security checks passed. Independent review reported no high or critical findings. Code deployment subsequently reported SUCCESS; the provider credential grants were verified separately. The credential-configuration deployment also independently reported SUCCESS. Exact receipts and remaining delivery gates are recorded in the practice receipt.
