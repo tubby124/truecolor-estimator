@@ -55,3 +55,12 @@ At 04:50:25 UTC the controlled scheduler request returned `dispatched=0, held=2`
 Protected provider reconciliation at 04:54:51 UTC checked the latest 25 Instagram media and Facebook published posts. Both newest posts were from May 29 and neither list contained the pilot caption. The saved credential could derive the intended Page access token; that Page credential passed the published-post read and was securely saved without exposing it. Granted permission presence alone had not proven the token type required by Page endpoints.
 
 A zero-row receipt upsert probe returned PostgreSQL `42P10`: production lacks a unique constraint on `(post_id, platform)`. The prior upsert could therefore discard both successful and failed provider receipts. The repair appends receipts using `insert`, retaining the existing atomic ready-to-posting claim and all approval checks. Fixed classifications now distinguish pre-provider media failure from receipt failure; attempted records remain held. No database migration or automatic retry was added. The original provider outcome cannot be reconstructed from the missing receipts; the fresh provider reconciliation establishes no published pilot at that checkpoint.
+
+
+### Facebook published; Instagram status-field repair
+
+PR [39](https://github.com/tubby124/truecolor-estimator/pull/39) merged at `4175b654ba8cf7af2f2a2c76b14319edbac47edf` after required CI and independent review passed. Deployment `0901de4b-51d1-49d9-89d3-ac373985e887` succeeded. After provider reconciliation, the same two records were returned to draft with approvals cleared, then freshly approved through the staff UI for 05:05 UTC.
+
+Facebook published at 05:05 UTC: [live post](https://www.facebook.com/310364742156669_122234778494295517), photo ID `122234778470295517`. An independent Meta photo read returned the exact approved caption and hashtags. Instagram remained held with a saved failure: its container-status request incorrectly requested the nonexistent `error` field. This confirms that receipt persistence is now working. The bounded follow-up requests `status_code,status`, as documented in [Meta's official API collection](https://www.postman.com/meta/instagram/request/munmruq/get-ig-container-status), and preserves the container ID if a status request fails. Facebook must not be resubmitted.
+
+Owner feedback: the staff experience should be one photo, one caption, destination toggles and one approval, with delivery results separated internally. Completing this pilot takes priority over a broader UI redesign.
