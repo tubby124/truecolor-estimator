@@ -315,7 +315,8 @@ test.describe("paid and organic ordering journeys", () => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          body: JSON.stringify({ sell_price: qty * 10, line_items: [], gst_rate: 0.05 }),
+          // Match the current estimate contract: tax rates are source-backed, never implicit.
+          body: JSON.stringify({ sell_price: qty * 10, line_items: [], gst_rate: 0.05, pst_rate: 0.06 }),
         });
       } catch {
         // An aborted stale request is the expected result.
