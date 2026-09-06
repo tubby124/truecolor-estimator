@@ -1,6 +1,6 @@
 /** Approved dispatch only; scoped checks never write or call providers. */
 import { NextRequest, NextResponse } from 'next/server';
-import { timingSafeEqual } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { approvalIntegrityBlocker, dispatchApprovedPost, publishingEnabled, approvalReset } from '@/lib/social/approval';
 import { recordCronRun } from '@/lib/cron/heartbeat';
@@ -8,6 +8,16 @@ import type { SocialPost } from '@/lib/types/social';
 
 export const dynamic = 'force-dynamic';
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Approval verification and compare-and-swap dispatch require this saved snapshot.
+const ongoingColumns = [
+  'id', 'business_id', 'status', 'updated_at', 'schedule_time', 'use_next_free_slot',
+  'approval_hash', 'approval_version', 'approved_at', 'approved_by', 'approval_target',
+  'approved_rights', 'approved_media_sha256', 'caption_raw', 'caption_instagram',
+  'caption_facebook', 'caption_twitter', 'caption_gbp', 'hashtags', 'image_url',
+  'image_urls', 'alt_text', 'platforms', 'fact_fingerprint', 'product_slug',
+  'product_configuration', 'offer_id', 'gbp_payload', 'batch_id', 'creative_id',
+  'generation_job_id',
+].join(',');
 function publicLink(post: SocialPost) {
   if (post.status !== 'posted' || !post.post_public_url) return null;
   try {
@@ -75,28 +85,64 @@ async function ongoing(req: NextRequest) {
   const params = req.nextUrl.searchParams;
   const businessId = params.get('businessId') ?? '';
   const check = params.get('mode') === 'check';
-  if (!uuid.test(businessId) || [...params.keys()].some(key => !['runner', 'businessId', 'mode'].includes(key) || params.getAll(key).length !== 1) || (params.has('mode') && !check)) return NextResponse.json({ error: 'Invalid ongoing scope' }, { status: 400 });
+  const receipts = params.get('mode') === 'receipts';
+  const allowed = receipts ? ['runner', 'businessId', 'scope', 'mode', 'since', 'after'] : ['runner', 'businessId', 'scope', 'mode'];
+  if (!uuid.test(businessId) || [...params.keys()].some(key => !allowed.includes(key) || params.getAll(key).length !== 1) || (params.has('mode') && !check && !receipts)) return NextResponse.json({ error: 'Invalid ongoing scope' }, { status: 400 });
   if (process.env.SOCIAL_BUSINESS_SCOPING_ENABLED !== 'true' || process.env.SOCIAL_ONGOING_SCHEDULER_ENABLED !== 'true' || process.env.SOCIAL_ONGOING_BUSINESS_ID !== businessId) return NextResponse.json({ error: 'Ongoing scheduling is not activated for this business' }, { status: 503 });
+  const ids = ongoingIds(params.get('scope'));
+  if (!ids) return NextResponse.json({ error: 'Exact ongoing destination scope is not activated' }, { status: 503 });
+  if (receipts) return ongoingReceipts(businessId, ids, params);
   const db = createServiceClient();
   const cutoff = new Date(Date.now() - 3600000).toISOString();
-  const scope = () => db.from('social_posts').select('*').eq('business_id', businessId);
-  const pending = await scope().in('status', ['posting', 'failed']).limit(1);
-  const stale = await scope().eq('status', 'ready').lt('schedule_time', cutoff).limit(1);
-  const due = await scope().eq('status', 'ready').not('approval_hash', 'is', null).lte('schedule_time', new Date().toISOString()).gte('schedule_time', cutoff).order('schedule_time').order('id').limit(26);
-  if (pending.error || stale.error || due.error) return NextResponse.json({ error: 'Ongoing queue unavailable; held' }, { status: 503 });
-  const initialHeld = Boolean(pending.data?.length || stale.data?.length);
-  if (check || !publishingEnabled()) return NextResponse.json({ ok: true, runner: 'ongoing', businessId, publishingEnabled: publishingEnabled(), held: initialHeld, due: due.data?.length ?? 0, backlog: (due.data?.length ?? 0) > 25, stale: Boolean(stale.data?.length), pending: Boolean(pending.data?.length) });
+  const read = await db.from('social_posts').select(ongoingColumns).eq('business_id', businessId).in('id', ids).returns<SocialPost[]>().limit(101);
+  if (read.error || read.data?.length !== ids.length || read.data.some(post => !ids.includes(post.id))) return NextResponse.json({ error: 'Exact ongoing scope is incomplete or unavailable; held' }, { status: 503 });
+  const pending = read.data.some(post => ['posting', 'failed'].includes(post.status));
+  const ready = read.data.filter(post => post.status === 'ready').sort((a, b) => Date.parse(a.schedule_time ?? '') - Date.parse(b.schedule_time ?? '') || a.id.localeCompare(b.id));
+  const stale = ready.some(post => Date.parse(post.schedule_time ?? '') < Date.parse(cutoff));
+  const due = ready.filter(post => post.approval_hash && Date.parse(post.schedule_time ?? '') <= Date.now() && Date.parse(post.schedule_time ?? '') >= Date.parse(cutoff));
+  const oldestDueAt = ready.find(post => Date.parse(post.schedule_time ?? '') <= Date.now())?.schedule_time ?? null;
+  if (check || !publishingEnabled() || pending) return NextResponse.json({ ok: true, runner: 'ongoing', businessId, publishingEnabled: publishingEnabled(), held: pending || stale, due: due.length, oldestDueAt, backlog: due.length > 25, stale, pending });
   // Do not move a claimed or posted delivery. Expired schedules return visibly to review.
-  const expired = await db.from('social_posts').update({ ...approvalReset, status: 'draft', error_message: 'Schedule missed by more than one hour; choose a new time and approve again.' }).eq('business_id', businessId).eq('status', 'ready').lt('schedule_time', cutoff).select('id');
+  const expired = await db.from('social_posts').update({ ...approvalReset, status: 'draft', error_message: 'Schedule missed by more than one hour; choose a new time and approve again.' }).eq('business_id', businessId).in('id', ids).eq('status', 'ready').lt('schedule_time', cutoff).select('id');
   if (expired.error) return NextResponse.json({ error: 'Stale schedule hold could not be saved' }, { status: 503 });
   let dispatched = 0;
   let held = expired.data?.length ?? 0;
   // Each dispatch atomically claims its existing approval. No generation, receipt replay or retry.
-  for (const post of (due.data ?? []).slice(0, 25)) {
+  for (const post of due.slice(0, 25)) {
     const result = await dispatchApprovedPost(db, post);
     if (result.status === 200 && 'post' in result && result.post?.status === 'posted') dispatched++;
     else held++;
   }
-  await recordCronRun('social-scheduler', held === 0 && !pending.data?.length, `ongoing dispatched=${dispatched} held=${held}`);
-  return NextResponse.json({ ok: true, runner: 'ongoing', businessId, publishingEnabled: publishingEnabled(), dispatched, held: held > 0 || Boolean(pending.data?.length), heldCount: held, backlog: (due.data?.length ?? 0) > 25 });
+  await recordCronRun('social-scheduler', held === 0, `ongoing dispatched=${dispatched} held=${held}`);
+  return NextResponse.json({ ok: true, runner: 'ongoing', businessId, publishingEnabled: publishingEnabled(), dispatched, held: held > 0, heldCount: held, backlog: due.length > 25 });
+}
+
+/** Repeated scans recover delivery evidence after lost ACKs; never dispatch or write. */
+async function ongoingReceipts(businessId: string, ids: string[], params: URLSearchParams) {
+  const since = params.get('since') ?? '';
+  const after = params.get('after');
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(since) || !Number.isFinite(Date.parse(since)) || new Date(since).toISOString() !== since || (after !== null && !uuid.test(after))) {
+    return NextResponse.json({ error: 'Invalid receipt scope' }, { status: 400 });
+  }
+  let query = createServiceClient().from('social_posts')
+    .select('id,status,platforms,schedule_time,post_public_url')
+    .eq('business_id', businessId).in('id', ids).gte('schedule_time', since)
+    .lte('schedule_time', new Date().toISOString())
+    .in('status', ['posted', 'posting', 'failed']).order('id').limit(101);
+  if (after) query = query.gt('id', after);
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: 'Delivery evidence unavailable' }, { status: 503 });
+  const page = (data ?? []).slice(0, 100);
+  return NextResponse.json({ ok: true, runner: 'ongoing', businessId, receipts: page.map(post => ({
+    id: post.id, platform: post.platforms?.[0] ?? 'unknown', status: post.status,
+    scheduleTime: Number.isFinite(Date.parse(post.schedule_time ?? '')) ? new Date(post.schedule_time!).toISOString() : null, publicUrl: publicLink(post as SocialPost),
+  })), nextAfter: (data?.length ?? 0) > 100 ? page[99].id : null });
+}
+
+function ongoingIds(scope: string | null): string[] | null {
+  const ids = (process.env.SOCIAL_ONGOING_POST_IDS ?? '').split(',');
+  if (!ids.length || ids.length > 100 || ids.some(id => !/^[0-9a-f-]+$/.test(id) || !uuid.test(id)) || new Set(ids).size !== ids.length) return null;
+  ids.sort();
+  const expected = createHash('sha256').update(ids.join(',')).digest('hex');
+  return scope === expected ? ids : null;
 }

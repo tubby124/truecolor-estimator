@@ -1,5 +1,6 @@
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { createHash } from 'node:crypto';
 const from = vi.hoisted(() => vi.fn());
 const dispatch = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/supabase/server',()=>({createServiceClient:()=>({from})}));
@@ -88,35 +89,81 @@ describe('scoped VPS scheduler', () => {
 
 });
 
-const ongoing = (check = false, business = ids[0]) => scoped(`runner=ongoing&businessId=${business}${check ? '&mode=check' : ''}`);
-describe('ongoing scheduler activation and stale holds', () => {
- beforeEach(() => { vi.stubEnv('CRON_SECRET', 'secret'); vi.stubEnv('SOCIAL_PUBLISHING_ENABLED', 'true'); vi.stubEnv('SOCIAL_BUSINESS_SCOPING_ENABLED', 'true'); vi.stubEnv('SOCIAL_ONGOING_SCHEDULER_ENABLED', 'true'); vi.stubEnv('SOCIAL_ONGOING_BUSINESS_ID', ids[0]); from.mockReset(); dispatch.mockReset(); });
+const digest = (values = ids) => createHash('sha256').update([...values].sort().join(',')).digest('hex');
+const ongoing = (check = false, business = ids[0], values = ids) => scoped(`runner=ongoing&businessId=${business}&scope=${digest(values)}${check ? '&mode=check' : ''}`);
+const receiptRequest = (extra = '', business = ids[0]) => scoped(`runner=ongoing&businessId=${business}&scope=${digest()}&mode=receipts&since=2026-09-01T00:00:00.000Z${extra}`);
+describe('ongoing exact scope and read-only evidence', () => {
+ beforeEach(() => { vi.stubEnv('CRON_SECRET', 'secret'); vi.stubEnv('SOCIAL_PUBLISHING_ENABLED', 'true'); vi.stubEnv('SOCIAL_BUSINESS_SCOPING_ENABLED', 'true'); vi.stubEnv('SOCIAL_ONGOING_SCHEDULER_ENABLED', 'true'); vi.stubEnv('SOCIAL_ONGOING_BUSINESS_ID', ids[0]); vi.stubEnv('SOCIAL_ONGOING_POST_IDS', ids.join(',')); from.mockReset(); dispatch.mockReset(); });
  afterEach(() => vi.unstubAllEnvs());
- function queue(reads: { data?: unknown[]; error?: unknown }[]) {
-  const q = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), in: vi.fn().mockReturnThis(), lt: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(), not: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(), limit: vi.fn() };
-  reads.forEach(read => q.limit.mockResolvedValueOnce({ error: null, data: [], ...read }));
+ const row = (id: string, status = 'ready', age = 1000) => ({ id, business_id: ids[0], status, approval_hash: 'approved', schedule_time: new Date(Date.now() - age).toISOString() });
+ function queue(data: unknown[] = ids.map(id => row(id)), error: unknown = null) {
+  const q = { select: vi.fn().mockReturnThis(), returns: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), in: vi.fn().mockReturnThis(), lt: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(), gt: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(), limit: vi.fn().mockResolvedValue({ data, error }) };
   from.mockReturnValue(q); return q;
  }
- it('requires independent explicit activation and one configured business', async () => {
+ it('requires activation, exact digest and a unique destination allowlist', async () => {
   vi.stubEnv('SOCIAL_ONGOING_SCHEDULER_ENABLED', ''); expect((await GET(ongoing())).status).toBe(503);
   vi.stubEnv('SOCIAL_ONGOING_SCHEDULER_ENABLED', 'true'); expect((await GET(ongoing(false, ids[1]))).status).toBe(503);
+  expect((await GET(scoped(`runner=ongoing&businessId=${ids[0]}`))).status).toBe(503);
+  for (const configured of ['', 'bad', `${ids[0]},${ids[0]}`, ids[0]]) {
+   vi.stubEnv('SOCIAL_ONGOING_POST_IDS', configured); expect((await GET(ongoing())).status).toBe(503);
+  }
   expect(from).not.toHaveBeenCalled();
  });
- it('check scopes every read and exposes stale/provider holds without mutations', async () => {
-  const q = queue([{ data: [{ status: 'posting' }] }, { data: [{ status: 'ready' }] }, { data: [] }]);
-  expect(await (await GET(ongoing(true))).json()).toMatchObject({ held: true, pending: true, stale: true });
-  expect(q.eq.mock.calls.filter(c => c[0] === 'business_id')).toEqual(Array(3).fill(['business_id', ids[0]])); expect(dispatch).not.toHaveBeenCalled();
+ it('rejects missing or foreign destinations rather than reporting healthy empty scope', async () => {
+  for (const rows of [[], [row(ids[0])], [row(ids[0]), row('00000000-0000-0000-0000-000000000009')]]) {
+   queue(rows); expect((await GET(ongoing(true))).status).toBe(503);
+  }
+  expect(dispatch).not.toHaveBeenCalled();
  });
- it('does not dispatch if any queue read failed', async () => {
-  queue([{ error: { code: '42703' } }, {}, {}]); expect((await GET(ongoing())).status).toBe(503); expect(dispatch).not.toHaveBeenCalled();
+ it('check scopes every read and exposes oldest due without mutations', async () => {
+  const q = queue([row(ids[0], 'posting'), row(ids[1], 'ready', 7200000)]);
+  const result = await (await GET(ongoing(true))).json();
+  expect(result).toMatchObject({ held: true, pending: true, stale: true });
+  expect(Date.parse(result.oldestDueAt)).toBeLessThan(Date.now() - 7100000);
+  expect(q.eq).toHaveBeenCalledWith('business_id', ids[0]);
+  expect(q.in).toHaveBeenCalledWith('id', ids); expect(dispatch).not.toHaveBeenCalled();
  });
- it('holds expired schedules visibly before dispatching a bounded due page', async () => {
-  const rows = Array.from({ length: 26 }, (_, i) => ({ id: String(i), status: 'ready' }));
-  const q = queue([{}, { data: [{ id: 'stale' }] }, { data: rows }]);
-  const update = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnThis(), lt: vi.fn().mockReturnThis(), select: vi.fn().mockResolvedValue({ data: [{ id: 'stale' }], error: null }) });
-  from.mockReturnValueOnce(q).mockReturnValueOnce(q).mockReturnValueOnce(q).mockReturnValueOnce({ update });
+ it('direct mutation is held when a scoped delivery is already posting', async () => {
+  queue([row(ids[0], 'posting'), row(ids[1])]);
+  expect(await (await GET(ongoing())).json()).toMatchObject({ held: true, pending: true });
+  expect(dispatch).not.toHaveBeenCalled();
+ });
+ it('does not dispatch when scope read fails', async () => {
+  queue([], { code: '42703' }); expect((await GET(ongoing())).status).toBe(503); expect(dispatch).not.toHaveBeenCalled();
+ });
+ it('bounds dispatch and stale reset to the exact allowlist', async () => {
+  const values = Array.from({ length: 27 }, (_, i) => `00000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`);
+  vi.stubEnv('SOCIAL_ONGOING_POST_IDS', values.join(','));
+  const q = queue(values.map((id, i) => row(id, 'ready', i === 0 ? 7200000 : 1000)));
+  const updateQuery = { eq: vi.fn().mockReturnThis(), in: vi.fn().mockReturnThis(), lt: vi.fn().mockReturnThis(), select: vi.fn().mockResolvedValue({ data: [{ id: values[0] }], error: null }) };
+  const update = vi.fn().mockReturnValue(updateQuery);
+  from.mockReturnValueOnce(q).mockReturnValueOnce({ update });
   dispatch.mockResolvedValue({ status: 200, post: { status: 'posted' } });
-  expect(await (await GET(ongoing())).json()).toMatchObject({ dispatched: 25, held: true, backlog: true });
-  expect(update).toHaveBeenCalledWith(expect.objectContaining({ status: 'draft', approval_hash: null, error_message: expect.stringContaining('one hour') })); expect(dispatch).toHaveBeenCalledTimes(25);
+  expect(await (await GET(ongoing(false, ids[0], values))).json()).toMatchObject({ dispatched: 25, held: true, backlog: true });
+  expect(updateQuery.in).toHaveBeenCalledWith('id', values);
+  expect(updateQuery.eq).toHaveBeenCalledWith('business_id', ids[0]);
+  expect(update).toHaveBeenCalledWith(expect.objectContaining({ status: 'draft', approval_hash: null }));
+  expect(dispatch).toHaveBeenCalledTimes(25);
+ });
+ it('receipt scope rejects extra parameters, invalid cursors and another business', async () => {
+  for (const extra of ['&after=bad', '&force=true', '&since=2026-09-02T00:00:00.000Z']) expect((await GET(receiptRequest(extra))).status).toBe(400);
+  expect((await GET(receiptRequest('', ids[1]))).status).toBe(503);
+  expect(from).not.toHaveBeenCalled();
+ });
+ it('reads only allowlisted stored statuses and strips unsafe or unconfirmed links', async () => {
+  const q = queue([{ ...row(ids[0], 'posted'), platforms: ['facebook'], post_public_url: 'https://www.facebook.com/123_456', schedule_time: '2026-09-07T14:59:00.123456+00:00' }, { ...row(ids[1], 'posting'), platforms: ['instagram'], post_public_url: 'https://www.instagram.com/p/unconfirmed/' }]);
+  const result = await (await GET(receiptRequest())).json();
+  expect(result.receipts).toEqual([expect.objectContaining({ id: ids[0], status: 'posted', publicUrl: 'https://www.facebook.com/123_456', scheduleTime: '2026-09-07T14:59:00.123Z' }), expect.objectContaining({ id: ids[1], status: 'posting', publicUrl: null })]);
+  expect(q.eq).toHaveBeenCalledWith('business_id', ids[0]); expect(q.in).toHaveBeenCalledWith('id', ids);
+  expect(q.select).toHaveBeenCalledWith('id,status,platforms,schedule_time,post_public_url');
+  expect(q.gte).toHaveBeenCalledWith('schedule_time', '2026-09-01T00:00:00.000Z');
+  expect(dispatch).not.toHaveBeenCalled(); expect(result.nextAfter).toBeNull();
+  for (const url of ['https://example.test/private', 'https://www.facebook.com/123?access_token=secret', 'https://user:secret@www.facebook.com/123']) {
+   queue([{ ...row(ids[0], 'posted'), platforms: ['facebook'], post_public_url: url }]);
+   expect((await (await GET(receiptRequest())).json()).receipts[0].publicUrl).toBeNull();
+  }
+ });
+ it('receipt read failures fail closed without dispatch', async () => {
+  queue([], { code: 'error' }); expect((await GET(receiptRequest())).status).toBe(503); expect(dispatch).not.toHaveBeenCalled();
  });
 });

@@ -24,8 +24,11 @@ def instant(value):
 def config_read(path):
     config = json.loads(Path(path).read_text())
     if config.get('runner') == 'ongoing':
-        if set(config) != {'runner', 'businessId', 'enabled', 'pilotReconciled'} or not UUID.fullmatch(config.get('businessId', '')) or type(config.get('enabled')) is not bool or config.get('pilotReconciled') is not True:
+        if set(config) != {'runner', 'businessId', 'enabled', 'pilotReconciled', 'postIds'} or not UUID.fullmatch(config.get('businessId', '')) or type(config.get('enabled')) is not bool or config.get('pilotReconciled') is not True:
             raise ValueError('Ongoing runner requires explicit pilot reconciliation and business scope')
+        ids = config['postIds']
+        if not isinstance(ids, list) or not 1 <= len(ids) <= 100 or any(not isinstance(i, str) or not UUID.fullmatch(i) for i in ids) or len(set(ids)) != len(ids):
+            raise ValueError('Exact reviewed destination IDs required')
         return config
     if set(config) != {'ids', 'enabled', 'notBefore', 'expiresAt'}:
         raise ValueError('Invalid config')
@@ -39,6 +42,10 @@ def config_read(path):
 
 def fingerprint(config):
     return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
+
+
+def scope_digest(config):
+    return hashlib.sha256(','.join(sorted(config['postIds'])).encode()).hexdigest()
 
 
 def persist(path, value):
@@ -88,6 +95,7 @@ def telegram(message):
         result = json.loads(response.read(65537))
     if result.get('ok') is not True or not isinstance(result.get('result', {}).get('message_id'), int):
         raise ValueError('Telegram delivery unconfirmed')
+    return result['result']['message_id']
 
 
 def notifications(path, config, result=None, alert=None, notify=telegram):
@@ -254,23 +262,47 @@ def execute(config, path, check=False, now=None, send=request, clock=None, notif
         return 1
 
 
-def request_ongoing(config, check):
+def ongoing_http(config, parameters, timeout=180):
     credential = Path(os.environ['CREDENTIALS_DIRECTORY']) / 'cron-secret'
     secret = credential.read_text().strip()
     if not secret or '\n' in secret or '\r' in secret:
         raise ValueError('Invalid credential')
-    query = {'runner': 'ongoing', 'businessId': config['businessId']}
-    if check:
-        query['mode'] = 'check'
+    query = {**parameters, 'runner': 'ongoing', 'businessId': config['businessId'], 'scope': scope_digest(config)}
     req = urllib.request.Request(ENDPOINT + '?' + urllib.parse.urlencode(query), headers={'Authorization': 'Bearer ' + secret, 'Cache-Control': 'no-store', 'User-Agent': 'TrueColor-Social-Scheduler/1.0 (+https://truecolorprinting.ca)'})
-    with urllib.request.build_opener(NoRedirect()).open(req, timeout=180) as response:
+    with urllib.request.build_opener(NoRedirect()).open(req, timeout=timeout) as response:
         result = json.loads(response.read(65537))
-    if result.get('ok') is not True or result.get('runner') != 'ongoing' or result.get('businessId') != config['businessId'] or type(result.get('held')) is not bool or type(result.get('publishingEnabled')) is not bool:
+    if result.get('ok') is not True or result.get('runner') != 'ongoing' or result.get('businessId') != config['businessId']:
         raise ValueError('Invalid ongoing response')
     return result
 
 
-def execute_ongoing(config, path, check=False, send=request_ongoing):
+def request_ongoing(config, check):
+    result = ongoing_http(config, {'mode': 'check'} if check else {})
+    if type(result.get('held')) is not bool or type(result.get('publishingEnabled')) is not bool:
+        raise ValueError('Invalid ongoing response')
+    return result
+
+
+def execute_ongoing(config, path, check=False, send=request_ongoing, clock=None):
+    """A separate local tick journal lets a read-only monitor detect stopped runs."""
+    if check:
+        return _execute_ongoing(config, path, True, send)
+    clock = clock or (lambda: dt.datetime.now(dt.timezone.utc))
+    heartbeat_path = path.with_name('ongoing-heartbeat.json')
+    heartbeat = {'businessId': config['businessId'], 'fingerprint': fingerprint(config),
+                 'startedAt': clock().isoformat(), 'finishedAt': None, 'exitCode': None}
+    persist(heartbeat_path, heartbeat)
+    try:
+        code = _execute_ongoing(config, path, False, send)
+        heartbeat.update(finishedAt=clock().isoformat(), exitCode=code)
+        persist(heartbeat_path, heartbeat)
+        return code
+    except BaseException:
+        # Retain the unfinished start; a crash must not manufacture a healthy tick.
+        raise
+
+
+def _execute_ongoing(config, path, check=False, send=request_ongoing):
     """One canonical scoped trigger. Never silently replace the bounded pilot state.
 
     A lost dispatch ACK leaves in_flight durable. Operator reconciliation is required
