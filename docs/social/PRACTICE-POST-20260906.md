@@ -1,6 +1,6 @@
 # Two-destination practice post — September 6, 2026
 
-Owner requested an ELI12 readiness check, one practice post verified on both Instagram and Facebook, and Git reconciliation. No public delivery has occurred in this checkpoint.
+Owner requested an ELI12 readiness check, one practice post verified on both Instagram and Facebook, and Git reconciliation. Earlier checkpoints below precede the controlled live execution receipt at the end of this document.
 
 ## Fresh provider evidence
 
@@ -37,3 +37,21 @@ Owner authorized adding the Meta Page use case. After an initial opaque UI error
 The PR 37 code deployment `40289fa0-862a-4237-91e1-a3baa605bca3` reported SUCCESS at commit `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c`. The subsequent credential-configuration deployment `03415b4b-e2a5-45b2-afa2-b6ff81589f8c` subsequently reported SUCCESS using the same commit. This was independently checked after the earlier code deployment.
 
 Fresh readiness at 02:57:09 UTC verified 14 drafts, zero ready posts, zero posted posts, zero attempts and publishing disabled. Staff browser login is the remaining immediate blocker before authenticated production approval. No public delivery is claimed.
+
+
+## Controlled execution — September 6, 2026
+
+Fresh readiness at 04:41 UTC found 14 drafts, zero ready/posting/posted records and publishing paused. The authenticated staff browser was available. Instagram had acquired two selected platforms and an expired time since the prior checkpoint; the existing draft was corrected to Instagram only. Facebook retained its separately approved caption with hashtags. Neither creative nor image bytes were changed.
+
+The staff editor saved both drafts for September 5 at 10:50 p.m. Regina (September 6 at 04:50 UTC). The real staff review flow recorded both approvals; database readback at 04:44 UTC confirmed staff actors, rights confirmations, destination bindings and the expected JPEG SHA256 `b358a82d6aea43d6e4c163e63e2e37859c9b92866f2b323cc4a59b068b24acc9`. Only these two posts were ready; the other 12 drafts remained untouched. No approval actor was fabricated and no approval/version check was bypassed.
+
+A protected Meta read independently confirmed the True Color Display Printing Ltd. Page and linked `@truecolorprint`. The controlled publishing enablement deployment is `38e8c79e-2c91-42ab-a92b-be18bb5c66f2`. Delivery and pause readback are recorded below when verified. Private execution receipts remain in the authorized local practice package.
+
+
+### Initial hold and repair
+
+At 04:50:25 UTC the controlled scheduler request returned `dispatched=0, held=2`. Both drafts remained `posting`; no delivery receipts existed. Publishing was immediately disabled again. No blind retry followed.
+
+Protected provider reconciliation at 04:54:51 UTC checked the latest 25 Instagram media and Facebook published posts. Both newest posts were from May 29 and neither list contained the pilot caption. The saved credential could derive the intended Page access token; that Page credential passed the published-post read and was securely saved without exposing it. Granted permission presence alone had not proven the token type required by Page endpoints.
+
+A zero-row receipt upsert probe returned PostgreSQL `42P10`: production lacks a unique constraint on `(post_id, platform)`. The prior upsert could therefore discard both successful and failed provider receipts. The repair appends receipts using `insert`, retaining the existing atomic ready-to-posting claim and all approval checks. Fixed classifications now distinguish pre-provider media failure from receipt failure; attempted records remain held. No database migration or automatic retry was added. The original provider outcome cannot be reconstructed from the missing receipts; the fresh provider reconciliation establishes no published pilot at that checkpoint.

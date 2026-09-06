@@ -60,14 +60,31 @@ export async function dispatchApprovedPost(db: ReturnType<typeof createServiceCl
   const { data: claimed, error } = await db.from('social_posts').update({ status: 'posting' }).eq('id', post.id).eq('status', 'ready').eq('updated_at', post.updated_at).eq('approval_hash', post.approval_hash!).select('*').maybeSingle();
   if (error || !claimed) return { error: 'Post changed or was already claimed', status: 409 };
   if (!publishingEnabled()) return { error: 'Publishing paused after claim; manual review required', status: 409 };
+  const hold = async (message: string, status: number) => {
+    // Only fixed, safe classifications are persisted; raw exceptions can contain credentials.
+    try {
+      const { data: diagnostic, error: diagnosticError } = await db.from('social_posts').update({ error_message: message }).eq('id', post.id).eq('status', 'posting').select('*').maybeSingle();
+      if (diagnosticError || !diagnostic) return { error: `${message}; diagnostic could not be saved`, status };
+    } catch { return { error: `${message}; diagnostic could not be saved`, status }; }
+    return { error: message, status };
+  };
   try {
-    const media = await inspectApprovedMedia(buildContent(claimed, claimed.approval_target!.platform).imageUrls[0]);
-    if (media.sha256 !== claimed.approved_media_sha256) return { error: 'Approved image bytes changed; manual review required', status: 409 };
+    let media: Awaited<ReturnType<typeof inspectApprovedMedia>>;
+    try {
+      media = await inspectApprovedMedia(buildContent(claimed, claimed.approval_target!.platform).imageUrls[0]);
+    } catch (error) {
+      const timeout = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError');
+      return await hold(timeout
+        ? 'Media preflight timed out before provider dispatch; manual review required'
+        : 'Media preflight failed before provider dispatch (unavailable or invalid image); manual review required', 503);
+    }
+    if (media.sha256 !== claimed.approved_media_sha256) return await hold('Approved image bytes changed before provider dispatch; manual review required', 409);
     if (!publishingEnabled()) return { error: 'Publishing paused; manual review required', status: 409 };
     const { results, attempted } = await publishSocialPost(claimed);
+    // CAS permits one dispatch; append receipts without requiring a database unique index.
     for (const result of results) {
-      const { error: receiptError } = await db.from('social_post_results').upsert({ post_id: post.id, platform: result.platform, blotato_submission_id: result.submissionId ?? null, status: result.status, public_url: result.publicUrl ?? null, error_message: result.errorMessage ?? null, posted_at: result.status === 'published' ? new Date().toISOString() : null }, { onConflict: 'post_id,platform' });
-      if (receiptError) return { error: 'Delivery receipt could not be saved; manual reconciliation required', status: 503 };
+      const { error: receiptError } = await db.from('social_post_results').insert({ post_id: post.id, platform: result.platform, blotato_submission_id: result.submissionId ?? null, status: result.status, public_url: result.publicUrl ?? null, error_message: result.errorMessage ?? null, posted_at: result.status === 'published' ? new Date().toISOString() : null });
+      if (receiptError) return await hold('Delivery receipt could not be saved after provider dispatch; manual reconciliation required', 503);
     }
     const published = attempted && results.length === 1 && results[0].status === 'published' && results[0].platform === claimed.approval_target!.platform;
     const { data, error: saveError } = await db.from('social_posts').update({ status: published ? 'posted' : 'posting', posted_at: published ? new Date().toISOString() : null, post_public_url: published ? results[0].publicUrl ?? null : null, error_message: published ? null : 'Delivery needs manual reconciliation; automatic retries disabled' }).eq('id', post.id).eq('status', 'posting').select('*').maybeSingle();
