@@ -44,10 +44,12 @@ export class ProductFactsError extends Error {
 let modelFingerprint: string | undefined;
 function getModelFingerprint(): string {
   return modelFingerprint ??= createHash("sha256").update([
-    "src/lib/engine/index.ts", "src/lib/engine/sticker-v2-bridge.ts",
-    "src/lib/engine/design-fee.ts", "src/lib/pricing/sticker-model-v2.ts",
-    "src/lib/pricing/order-min.ts",
-  ].map((file) => readFileSync(path.join(process.cwd(), file), "utf8")).join("\n")).digest("hex");
+    readFileSync(path.join(process.cwd(), "src/lib/engine/index.ts"), "utf8"),
+    readFileSync(path.join(process.cwd(), "src/lib/engine/sticker-v2-bridge.ts"), "utf8"),
+    readFileSync(path.join(process.cwd(), "src/lib/engine/design-fee.ts"), "utf8"),
+    readFileSync(path.join(process.cwd(), "src/lib/pricing/sticker-model-v2.ts"), "utf8"),
+    readFileSync(path.join(process.cwd(), "src/lib/pricing/order-min.ts"), "utf8"),
+  ].join("\n")).digest("hex");
 }
 
 /** Defaults are the website's named first preset, never the cheapest unrelated SKU.
