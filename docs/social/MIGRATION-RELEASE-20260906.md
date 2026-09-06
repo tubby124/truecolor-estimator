@@ -1,6 +1,6 @@
 # Pricing and social migration release package — September 6, 2026
 
-**Prepared, not approved or applied.** Integration owns this package. Repository `AGENTS.md` states: “True Color production database migration approval is not inferred from permissions for other Supabase projects.” Git pushes, merges and Railway deployment authorization do not authorize this SQL application.
+**Applied after final owner approval on September6 at approximately22:53UTC.** The historical preparation/checklist below is retained for custody; the [current integration receipt](INTEGRATION-20260906.md#final-september-approval-and-production-schema-application) records exact execution and readback. Integration owns this package. Repository `AGENTS.md` states: “True Color production database migration approval is not inferred from permissions for other Supabase projects.” Git pushes, merges and Railway deployment authorization do not authorize this SQL application.
 
 Target: True Color Supabase project `dczbgraekmzirxknjvwe`. Apply no fixture/regression script to production. The exact source and executable hashes are recorded below. Required integration CI is attached to PR46 and must pass before application approval is requested.
 
