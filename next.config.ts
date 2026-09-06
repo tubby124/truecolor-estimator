@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
   // Keep build tracing anchored to this checkout. Local worktrees otherwise
   // inherit an unrelated parent lockfile and emit an unusable nested server.
   outputFileTracingRoot: process.cwd(),
+  // Product fact freshness binds the actual executable pricing model sources.
+  outputFileTracingIncludes: {
+    "/*": ["./src/lib/engine/index.ts", "./src/lib/engine/sticker-v2-bridge.ts",
+      "./src/lib/engine/design-fee.ts", "./src/lib/pricing/sticker-model-v2.ts",
+      "./src/lib/pricing/order-min.ts"],
+  },
   turbopack: {
     root: process.cwd(),
   },
