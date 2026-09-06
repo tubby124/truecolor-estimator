@@ -16,7 +16,7 @@ export type BusinessServiceFact = {
 /** Maintained intake-shaped facts, not an intake form or another business onboarding. */
 export const TRUE_COLOR_BUSINESS_PROFILE = {
   schemaVersion: 1,
-  version: 'truecolor-shop-voice-v3',
+  version: 'truecolor-shop-voice-v5',
   businessSlug: 'true-color',
   name: 'True Color Display Printing',
   location: 'Saskatoon',
@@ -58,6 +58,9 @@ export const TRUE_COLOR_BUSINESS_PROFILE = {
   ] satisfies BusinessServiceFact[],
   rotatingServiceIds: ['onsite-graphic-designer', 'online-ordering', 'rush-options', 'standard-turnaround'],
   coreMetaHashtags: ['#TrueColorPrinting', '#SaskatoonPrintShop'],
+  hashtagPolicy: 'Aim for five relevant Meta hashtags: the two brand/local core tags, #Saskatoon, and two tags specific to the print product. These are maintained editorial choices, not researched trends or a reach guarantee. Never exceed five; Google captions have no hashtags.',
+  weeklyImageMix: { concept: 4, realWork: 3, note: 'Editable planning target per seven days; owner can change the mix. A held image is never published just to fill a day.' },
+  postingCadence: 'One creative each day for Facebook and Instagram, with destination-specific copy. Select Google posts deliberately. Daily is the planning target, not permission to publish an unreviewed or held item.',
   voice: 'Friendly, casual shop language. Lead with the pictured or selected print product and a practical customer use. Explain a specific relevant benefit, then connect it to a confirmed shop service or a light invitation when useful. Reject generic design lectures disconnected from the product or its use. Vary openings; no corporate filler. A showcase may omit prices.',
   voiceExamples: [
     'A banner can help visitors find the event entrance. Tell us where yours will hang and what it needs to say.',
@@ -66,13 +69,14 @@ export const TRUE_COLOR_BUSINESS_PROFILE = {
   avoid: ['Generic design lectures', 'Invented customer stories or results', 'Unverified service fees or turnaround', 'Manufactured urgency', 'Corporate filler', 'Repeated openings and service messages'],
   imageRules: [
     'Preserve exact printed artwork, lettering, logos, colours and layout; never invent or repair unreadable detail.',
-    'Finished-product photos default to a clean neutral studio-like background; preserve the product shape, proportions and artwork exactly.',
+    'Mix clean studio treatments with authentic finished-product, workshop and installation photos across the month. Use a neutral studio background when it improves product clarity; preserve shape, proportions and artwork exactly.',
     'Keep an original that is already clean, complete and readable; a style preference alone is not a reason to regenerate it.',
     'Keep useful installation context for window graphics, vehicle graphics and mounted signs; do not extract away the setting that demonstrates their use.',
     'Hold a studio treatment when the product is cropped, obscured or too unclear to preserve. Obtain a complete source instead of inventing edges or printed detail.',
     'Record KEEP, REVISE or HOLD with the observed reason before editing. REVISE authorizes a candidate for review, never automatic acceptance; independently compare the candidate with the immutable original.',
     'Process photos retain their authentic scene with minimal cleanup; captions never authorize image edits.',
     'Label generated backgrounds as staged. Hold any output with changed lettering, QR codes, printed photographs, artwork colours or invented detail, even if the backdrop looks better.',
+    'New GPT concepts may use realistic fictional business branding to demonstrate a product. Identify them as sample designs; never invent a real client relationship, testimonial, contact detail or completed job.',
     'Social rights and privacy need explicit evidence. A public website image is not social-use permission.',
     'Use only visible or source-confirmed product detail; do not infer material, order price, customer endorsement or job history.',
   ],
@@ -83,4 +87,22 @@ export function generationServiceFacts() {
   return TRUE_COLOR_BUSINESS_PROFILE.serviceFacts.filter(fact =>
     fact.useInGeneration && fact.statement && (fact.status === 'owner_confirmed' || fact.status === 'source_verified'),
   );
+}
+
+/** Relevant generic defaults, distinct from time-limited researched hashtag candidates. */
+export function productHashtagDefaults(productSlug?: string): string[] {
+  const products: Record<string, [string, string]> = {
+    'vinyl-banners': ['#BannerPrinting', '#CustomBanners'],
+    'retractable-banners': ['#RetractableBanners', '#DisplayPrinting'],
+    'coroplast-signs': ['#CustomSigns', '#SignPrinting'],
+    'acp-signs': ['#BusinessSigns', '#SignPrinting'],
+    'flyers': ['#FlyerPrinting', '#CustomFlyers'],
+    'business-cards': ['#BusinessCards', '#BusinessCardPrinting'],
+    'brochures': ['#BrochurePrinting', '#PrintDesign'],
+    'coil-bound-booklets': ['#BookletPrinting', '#PrintDesign'],
+    'window-decals': ['#WindowGraphics', '#DecalPrinting'],
+    'stickers': ['#CustomStickers', '#StickerPrinting'],
+    'photo-posters': ['#PosterPrinting', '#CustomPosters'],
+  };
+  return ['#Saskatoon', ...(products[productSlug ?? ''] ?? ['#CustomPrinting', '#PrintDesign'])];
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { MonthlyPlanImport } from './MonthlyPlanImport';
 import { MarketingQualityCheck } from './MarketingQualityCheck';
 import type { GenerationUsage } from '@/lib/social/generation-contract';
 import type { ProductFacts } from '@/lib/pricing/product-facts';
@@ -21,6 +22,8 @@ const fresh = (): Session => ({ batchId: crypto.randomUUID(), month: reginaDate(
 /** Preparation is private. Server chunks are immutable; saved draft edits happen in exact review. */
 export function MonthlyBatchScheduler() {
   const [session, setSession] = useState<Session | null>(null);
+  const sessionRef = useRef<Session | null>(null);
+  sessionRef.current = session;
   const [batches, setBatches] = useState<{ id: string; month: string }[]>([]);
   const [batchPage, setBatchPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
@@ -48,6 +51,7 @@ export function MonthlyBatchScheduler() {
     // Persist the stable request before sending it. Storage failure prevents a potentially duplicate save.
     if (!businessStorageKey.current) throw new Error('Business context unavailable');
     localStorage.setItem(businessStorageKey.current, JSON.stringify(next));
+    sessionRef.current = next;
     setSession(next);
   }
   function update(id: string, change: Partial<Creative>) {
@@ -60,7 +64,7 @@ export function MonthlyBatchScheduler() {
     let current = session;
     try {
       for (const file of Array.from(files).slice(0, 31 - session.creatives.length)) {
-        const form = new FormData(); form.append('file', file); form.append('format', 'jpeg');
+        const form = new FormData(); form.append('file', file); form.append('format', 'jpeg'); form.append('fitForSocial', '1');
         const res = await fetch('/api/staff/social/upload', { method: 'POST', body: form });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Upload failed');
@@ -141,6 +145,12 @@ export function MonthlyBatchScheduler() {
     <p className="text-sm">Prepare up to 31 logical creatives. Instagram and Facebook start selected. Add Google Business Profile only for the specific offers you want there, usually 1–2 each week. Every destination gets an exact saved approval.</p>
     {error && <p role="alert" className="rounded bg-amber-50 p-4">{error}</p>}
     {message && <p role="status">{message}</p>}
+    {!session.creatives.length && !session.chunks.length && <MonthlyPlanImport disabled={busy || !available} onBusyChange={value => { busyRef.current = value; setBusy(value); }} onPrepared={(month, creatives) => {
+      const current = sessionRef.current;
+      if (!current || current.creatives.length || current.chunks.length) throw new Error('Preparation changed. Start an empty batch before importing.');
+      retain({ ...current, month, creatives });
+      setMessage('Prepared month loaded. Review the final uploaded photos, captions and dates, then save drafts.');
+    }} />}
     <label className="block">Month (Regina) <input type="month" value={session.month} disabled={locked || !!session.creatives.length} onChange={e => retain({ ...session, month: e.target.value })} /></label>
     <label className="block">Add photos <input type="file" accept="image/*" multiple disabled={locked || !available || session.creatives.length >= 31} onChange={e => void upload(e.target.files)} /></label>
     <p className="text-xs">Uploaded preparation and request IDs are retained on this browser. Saved chunks and exact approvals are stored on the server and can be resumed below.</p>

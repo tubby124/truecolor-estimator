@@ -44,4 +44,40 @@ describe('monthly chunk saves', () => {
   const response = await GET(new Request(`https://example.test?batchId=${id(1)}&page=2`));
   expect(q.eq).toHaveBeenCalledWith('business_id', id(8)); expect(q.range).toHaveBeenCalledWith(18, 26); expect(await response.json()).toMatchObject({ total: 40, hasMore: true });
  });
+ it('returns a complete read-only progress snapshot with scoped receipt fields', async () => {
+  const posts = [{ id: id(4), creative_id: id(3), platforms: ['facebook'], status: 'posted', schedule_time: creative.schedule_time, error_message: null, results: [{ platform: 'facebook', status: 'published', public_url: 'https://example.test/post' }] }];
+  const q = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(), range: vi.fn().mockResolvedValue({ data: posts, count: 1, error: null }) }; from.mockReturnValue(q);
+  const response = await GET(new Request(`https://example.test?batchId=${id(1)}&view=progress&businessId=${id(77)}`));
+  expect(response.status).toBe(200);
+  expect(response.headers.get('Cache-Control')).toBe('no-store');
+  expect(await response.json()).toEqual({ batchId: id(1), posts, total: 1, checkedAt: expect.any(String) });
+  expect(q.eq.mock.calls).toEqual([['business_id', id(8)], ['batch_id', id(1)]]);
+  expect(q.select).toHaveBeenCalledWith(expect.stringContaining('results:social_post_results(platform,status,public_url)'), { count: 'exact' });
+  expect(q.range).toHaveBeenCalledWith(0, 999);
+  expect(rpc).not.toHaveBeenCalled();
+ });
+ it.each([
+  { data: [], count: 1001, error: null },
+  { data: [], count: 1, error: null },
+  { data: [], count: null, error: null },
+  { data: null, count: null, error: { message: 'private database diagnostic' } },
+ ])('does not report complete progress for a capped, incomplete or failed read: %j', async result => {
+  const q = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(), range: vi.fn().mockResolvedValue(result) }; from.mockReturnValue(q);
+  const response = await GET(new Request(`https://example.test?batchId=${id(1)}&view=progress`));
+  expect(response.status).toBe(503);
+  const body = await response.json();
+  expect(body.posts).toBeUndefined(); expect(body.total).toBeUndefined();
+  expect(JSON.stringify(body)).not.toContain('private database diagnostic');
+ });
+ it('requires a valid explicit batch for progress before accessing the database', async () => {
+  for (const query of ['view=progress', 'view=progress&batchId=bad']) expect((await GET(new Request(`https://example.test?${query}`))).status).toBe(400);
+  expect(from).not.toHaveBeenCalled();
+ });
+ it('keeps progress behind the same business activation and authorization gates', async () => {
+  const request = new Request(`https://example.test?batchId=${id(1)}&view=progress`);
+  enabled.mockReturnValue(false); expect((await GET(request)).status).toBe(503);
+  enabled.mockReturnValue(true); auth.mockResolvedValue(NextResponse.json({ error: 'Forbidden' }, { status: 403 }));
+  expect((await GET(request)).status).toBe(403);
+  expect(from).not.toHaveBeenCalled(); expect(rpc).not.toHaveBeenCalled();
+ });
 });

@@ -1,0 +1,619 @@
+{
+  "schemaVersion": 1,
+  "checkedOn": "2026-09-06",
+  "scope": "Sep 2026 through Sep 2027 inclusive; 13 supported sector groups and reusable triggers, not a promise to cover every industry or observance.",
+  "sources": {
+    "SK": "https://www.saskatchewan.ca/business/employment-standards/public-statutory-holidays/list-of-saskatchewan-public-holidays",
+    "SK2027": "https://taskroom.saskatchewan.ca/employee-resources/709-designated-holidays",
+    "FED": "https://www.canada.ca/en/services/jobs/workplace/federal-labour-standards/vacations-holidays.html",
+    "CRA2026": "https://www.canada.ca/en/revenue-agency/services/tax/public-holidays.html",
+    "NDTR": "https://www.canada.ca/en/canadian-heritage/campaigns/national-day-truth-reconciliation.html",
+    "CULTURE": "https://www.canada.ca/en/canadian-heritage/campaigns/celebrate-canada.html",
+    "HALLOWEEN": "https://our-languages.canada.ca/en/writing-tips-plus/halloween",
+    "NONSK": "https://www.saskatchewan.ca/business/employment-standards/public-statutory-holidays/paying-employees-for-public-holidays"
+  },
+  "calendarInterpretation": [
+    "SK2027 is an official public-service calendar: use actual dates only alongside the general SK statutory list; floating holidays and its employee-specific observed dates are not general shop rules.",
+    "Federal means federally regulated workplaces under the Canada Labour Code; not a claim all Canadian employers close.",
+    "Easter Monday, Christmas Eve and Boxing Day are not SK statutory holidays; Easter Monday is also absent from the ten Canada Labour Code general holidays.",
+    "Halloween source was available in search result; subsequent direct open returned 403. Date is October 31; do not imply statutory status.",
+    "The holiday sources were checked 2026-09-06. Recheck policy/classification when building the next-year publishing batch, and shop hours separately.",
+    "School breaks, local events, lunar faith dates and promotional dates beyond this verified set require organizer or official calendar evidence before scheduling."
+  ],
+  "holidayCalendar": [
+    {
+      "id": "2026-09-07-labour-day",
+      "date": "2026-09-07",
+      "weekday": "Monday",
+      "name": "Labour Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2026-07-27",
+        "reviewBy": "2026-08-10",
+        "firstUsefulPromotionBy": "2026-08-17"
+      },
+      "angle": "Too late for a new lead campaign on Sep 6; only verified operational information if needed.",
+      "sourceIds": [
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2026-09-30-national-day-for-truth-and-reconciliation",
+      "date": "2026-09-30",
+      "weekday": "Wednesday",
+      "name": "National Day for Truth and Reconciliation",
+      "saskatchewanStatutory": false,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "Federally regulated only",
+      "tone": "solemn",
+      "holidaySalesDefault": false,
+      "commercialPlanning": null,
+      "angle": "No holiday-linked sales; owner-reviewed acknowledgement or silence.",
+      "sourceIds": [
+        "SK",
+        "FED",
+        "NDTR"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2026-10-12-thanksgiving",
+      "date": "2026-10-12",
+      "weekday": "Monday",
+      "name": "Thanksgiving",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2026-08-31",
+        "reviewBy": "2026-09-14",
+        "firstUsefulPromotionBy": "2026-09-21"
+      },
+      "angle": "Restaurant take-home flyers and retail seasonal signage; campaign asks businesses to plan before their event.",
+      "sourceIds": [
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2026-10-31-halloween",
+      "date": "2026-10-31",
+      "weekday": "Saturday",
+      "name": "Halloween",
+      "saskatchewanStatutory": false,
+      "federalRegulatedGeneralHoliday": false,
+      "scopeLabel": "Non-statutory observance in SK",
+      "tone": "seasonal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2026-09-19",
+        "reviewBy": "2026-10-03",
+        "firstUsefulPromotionBy": "2026-10-10"
+      },
+      "angle": "Retail windows, event wayfinding and community flyers; no invented live event or discount.",
+      "sourceIds": [
+        "HALLOWEEN"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2026-11-11-remembrance-day",
+      "date": "2026-11-11",
+      "weekday": "Wednesday",
+      "name": "Remembrance Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "solemn",
+      "holidaySalesDefault": false,
+      "commercialPlanning": null,
+      "angle": "No sales framing or promotional CTA; remembrance only if owner chooses.",
+      "sourceIds": [
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2026-12-25-christmas-day",
+      "date": "2026-12-25",
+      "weekday": "Friday",
+      "name": "Christmas Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "religious-cultural",
+      "holidaySalesDefault": false,
+      "commercialPlanning": null,
+      "angle": "Prepare holiday menus, gift labels and retail signage in advance; actual hours require owner evidence.",
+      "sourceIds": [
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2026-12-26-boxing-day",
+      "date": "2026-12-26",
+      "weekday": "Saturday",
+      "name": "Boxing Day",
+      "saskatchewanStatutory": false,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "Federally regulated only",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2026-11-14",
+        "reviewBy": "2026-11-28",
+        "firstUsefulPromotionBy": "2026-12-05"
+      },
+      "angle": "Retail campaign only with an actual owner-approved offer. Do not imply shop closure on Dec 28.",
+      "sourceIds": [
+        "CRA2026",
+        "FED",
+        "NONSK"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-01-01-new-years-day",
+      "date": "2027-01-01",
+      "weekday": "Friday",
+      "name": "New Year's Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2026-11-20",
+        "reviewBy": "2026-12-04",
+        "firstUsefulPromotionBy": "2026-12-11"
+      },
+      "angle": "Professional refresh, opening signs and updated cards; no automatic discount.",
+      "sourceIds": [
+        "SK2027",
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-02-15-family-day",
+      "date": "2027-02-15",
+      "weekday": "Monday",
+      "name": "Family Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": false,
+      "scopeLabel": "SK statutory only",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2027-01-04",
+        "reviewBy": "2027-01-18",
+        "firstUsefulPromotionBy": "2027-01-25"
+      },
+      "angle": "Community event signage and activity flyers; event date/details must come from organizer.",
+      "sourceIds": [
+        "SK2027",
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-03-26-good-friday",
+      "date": "2027-03-26",
+      "weekday": "Friday",
+      "name": "Good Friday",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "religious-cultural",
+      "holidaySalesDefault": false,
+      "commercialPlanning": null,
+      "angle": "Faith/community service communications only when relevant; no automatic religious sale.",
+      "sourceIds": [
+        "SK2027",
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-05-24-victoria-day",
+      "date": "2027-05-24",
+      "weekday": "Monday",
+      "name": "Victoria Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2027-04-12",
+        "reviewBy": "2027-04-26",
+        "firstUsefulPromotionBy": "2027-05-03"
+      },
+      "angle": "Seasonal openings, property signs and outdoor event banners; verify installation and product suitability.",
+      "sourceIds": [
+        "SK2027",
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-06-21-national-indigenous-peoples-day",
+      "date": "2027-06-21",
+      "weekday": "Monday",
+      "name": "National Indigenous Peoples Day",
+      "saskatchewanStatutory": false,
+      "federalRegulatedGeneralHoliday": false,
+      "scopeLabel": "Non-statutory observance in SK",
+      "tone": "community-led",
+      "holidaySalesDefault": false,
+      "commercialPlanning": null,
+      "angle": "Community-led work or respectful acknowledgement; no invented Indigenous art, affiliation or automatic sale.",
+      "sourceIds": [
+        "CULTURE",
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-07-01-canada-day",
+      "date": "2027-07-01",
+      "weekday": "Thursday",
+      "name": "Canada Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2027-05-20",
+        "reviewBy": "2027-06-03",
+        "firstUsefulPromotionBy": "2027-06-10"
+      },
+      "angle": "Event wayfinding and community banners; fictional concepts must not imply an actual sponsored event.",
+      "sourceIds": [
+        "SK2027",
+        "SK",
+        "FED",
+        "CULTURE"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-08-02-saskatchewan-day",
+      "date": "2027-08-02",
+      "weekday": "Monday",
+      "name": "Saskatchewan Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": false,
+      "scopeLabel": "SK statutory only",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2027-06-21",
+        "reviewBy": "2027-07-05",
+        "firstUsefulPromotionBy": "2027-07-12"
+      },
+      "angle": "Local events and seasonal businesses; local relevance without unsupported local-manufacture claims.",
+      "sourceIds": [
+        "SK2027",
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-09-06-labour-day",
+      "date": "2027-09-06",
+      "weekday": "Monday",
+      "name": "Labour Day",
+      "saskatchewanStatutory": true,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "SK + federally regulated",
+      "tone": "normal",
+      "holidaySalesDefault": "only if a real approved offer exists",
+      "commercialPlanning": {
+        "briefBy": "2027-07-26",
+        "reviewBy": "2027-08-09",
+        "firstUsefulPromotionBy": "2027-08-16"
+      },
+      "angle": "Fall openings and back-to-school preparation; verify division/organizer calendars separately.",
+      "sourceIds": [
+        "SK2027",
+        "SK",
+        "FED"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    },
+    {
+      "id": "2027-09-30-national-day-for-truth-and-reconciliation",
+      "date": "2027-09-30",
+      "weekday": "Thursday",
+      "name": "National Day for Truth and Reconciliation",
+      "saskatchewanStatutory": false,
+      "federalRegulatedGeneralHoliday": true,
+      "scopeLabel": "Federally regulated only",
+      "tone": "solemn",
+      "holidaySalesDefault": false,
+      "commercialPlanning": null,
+      "angle": "No holiday-linked sales; owner-reviewed acknowledgement or silence.",
+      "sourceIds": [
+        "SK",
+        "FED",
+        "NDTR"
+      ],
+      "shopHours": "unverified; never inferred from holiday status"
+    }
+  ],
+  "audiences": [
+    {
+      "id": "retail",
+      "name": "Retail and makers",
+      "priority": "near-term",
+      "canonicalPage": "/retail-signs-saskatoon",
+      "productSlugs": [
+        "window-decals",
+        "flyers",
+        "coroplast-signs",
+        "vinyl-banners"
+      ],
+      "triggers": "Seasonal window change, launch, pop-up, product release",
+      "usefulBenefit": "Make the next action clear at the window or counter",
+      "scopeLimit": null
+    },
+    {
+      "id": "restaurants",
+      "name": "Restaurants, cafes and food businesses",
+      "priority": "near-term",
+      "canonicalPage": "/restaurant-signs-saskatoon",
+      "productSlugs": [
+        "flyers",
+        "foamboard-displays",
+        "window-decals",
+        "retractable-banners"
+      ],
+      "triggers": "Menu change, catering season, opening, event",
+      "usefulBenefit": "Give customers a menu or takeaway reminder they can use",
+      "scopeLimit": null
+    },
+    {
+      "id": "trades",
+      "name": "Trades and construction",
+      "priority": "near-term",
+      "canonicalPage": "/construction-signs-saskatoon",
+      "productSlugs": [
+        "coroplast-signs",
+        "vehicle-magnets",
+        "vinyl-banners",
+        "business-cards"
+      ],
+      "triggers": "New job site, seasonal services, crew growth",
+      "usefulBenefit": "Identify the business and point visitors to the right place",
+      "scopeLimit": null
+    },
+    {
+      "id": "real-estate",
+      "name": "Real estate and property",
+      "priority": "rotation",
+      "canonicalPage": "/real-estate-signs-saskatoon",
+      "productSlugs": [
+        "coroplast-signs",
+        "flyers",
+        "postcards",
+        "business-cards"
+      ],
+      "triggers": "New listing, open house, property management update",
+      "usefulBenefit": "Give visitors useful directions and property information",
+      "scopeLimit": null
+    },
+    {
+      "id": "events",
+      "name": "Events and exhibitions",
+      "priority": "rotation",
+      "canonicalPage": "/trade-show-displays-saskatoon",
+      "productSlugs": [
+        "retractable-banners",
+        "foamboard-displays",
+        "vinyl-banners",
+        "coroplast-signs"
+      ],
+      "triggers": "Booking an expo, registration opens, venue confirmed",
+      "usefulBenefit": "Help people recognize the booth and navigate the event",
+      "scopeLimit": null
+    },
+    {
+      "id": "nonprofit",
+      "name": "Nonprofits and community groups",
+      "priority": "rotation",
+      "canonicalPage": "/non-profit-signs-saskatoon",
+      "productSlugs": [
+        "coroplast-signs",
+        "vinyl-banners",
+        "retractable-banners",
+        "flyers",
+        "brochures"
+      ],
+      "triggers": "Fundraiser, volunteer drive, community event",
+      "usefulBenefit": "Explain the cause or next step without inventing impact claims",
+      "scopeLimit": null
+    },
+    {
+      "id": "schools",
+      "name": "Schools and education",
+      "priority": "rotation",
+      "canonicalPage": "/school-signs-saskatoon",
+      "productSlugs": [
+        "coroplast-signs",
+        "vinyl-banners",
+        "foamboard-displays",
+        "flyers"
+      ],
+      "triggers": "Open house, enrolment, graduation, term start",
+      "usefulBenefit": "Make arrival and event information easier for families",
+      "scopeLimit": null
+    },
+    {
+      "id": "professional",
+      "name": "Professional services",
+      "priority": "rotation",
+      "canonicalPage": "/law-office-signs-saskatoon",
+      "productSlugs": [
+        "acp-signs",
+        "business-cards",
+        "brochures",
+        "retractable-banners"
+      ],
+      "triggers": "Office opening, relocation, team change, networking",
+      "usefulBenefit": "Help visitors find the office and take contact details away",
+      "scopeLimit": "Professional-services extension beyond law offices is a planning inference, not a verified page for every profession."
+    },
+    {
+      "id": "agriculture",
+      "name": "Agriculture and farm businesses",
+      "priority": "rotation",
+      "canonicalPage": "/agriculture-signs-saskatoon",
+      "productSlugs": [
+        "coroplast-signs",
+        "vinyl-banners",
+        "vehicle-magnets",
+        "flyers",
+        "business-cards"
+      ],
+      "triggers": "Farm gate season, producer market, seasonal access",
+      "usefulBenefit": "Identify the farm or market offer without unverified origin claims",
+      "scopeLimit": null
+    },
+    {
+      "id": "agribusiness",
+      "name": "Agribusiness and dealers",
+      "priority": "rotation",
+      "canonicalPage": "/agribusiness-signs-saskatchewan",
+      "productSlugs": [
+        "acp-signs",
+        "retractable-banners",
+        "vinyl-banners",
+        "coroplast-signs",
+        "business-cards"
+      ],
+      "triggers": "Dealer event, ag show, premises update",
+      "usefulBenefit": "Help buyers recognize the booth, premises or service",
+      "scopeLimit": null
+    },
+    {
+      "id": "healthcare",
+      "name": "Healthcare and clinics",
+      "priority": "rotation",
+      "canonicalPage": "/healthcare-signs-saskatoon",
+      "productSlugs": [
+        "acp-signs",
+        "foamboard-displays",
+        "retractable-banners",
+        "window-decals",
+        "business-cards"
+      ],
+      "triggers": "Clinic relocation, wayfinding update, approved service notice",
+      "usefulBenefit": "Help patients find reception and read approved information",
+      "scopeLimit": null
+    },
+    {
+      "id": "sports-clubs",
+      "name": "Sports teams and clubs",
+      "priority": "rotation",
+      "canonicalPage": null,
+      "productSlugs": [
+        "vinyl-banners",
+        "coil-bound-booklets"
+      ],
+      "triggers": "Registration, tournament, season start, genuine milestone",
+      "usefulBenefit": "Recognize the team or give participants usable information",
+      "scopeLimit": "Sports has gallery/product evidence, not a dedicated sector landing page found."
+    },
+    {
+      "id": "faith-cultural",
+      "name": "Faith and cultural groups",
+      "priority": "rotation",
+      "canonicalPage": "/church-banners-saskatoon",
+      "productSlugs": [
+        "vinyl-banners",
+        "retractable-banners",
+        "coroplast-signs",
+        "foamboard-displays",
+        "brochures"
+      ],
+      "triggers": "Organizer-confirmed gathering or service",
+      "usefulBenefit": "Welcome visitors with respectful, accurate information",
+      "scopeLimit": "Cultural groups use community-printing products; faith pages do not represent every tradition."
+    }
+  ],
+  "recordFields": [
+    {
+      "field": "id, revision, status",
+      "purpose": "Stable campaign identity; draft, reviewed, owner-approved, scheduled and delivered remain distinct."
+    },
+    {
+      "field": "segmentIds, trigger, objective, usefulBenefit",
+      "purpose": "Who needs this, why now and the single practical value."
+    },
+    {
+      "field": "productSlug, factsRevision, claims[]",
+      "purpose": "Canonical product facts and sources; offer is null unless exact terms are verified."
+    },
+    {
+      "field": "calendarEventId, actualDate, jurisdiction, sensitivity",
+      "purpose": "Separate statutory dates, observances and commercial triggers; never infer hours."
+    },
+    {
+      "field": "briefBy, reviewBy, promotionWindow, timezone",
+      "purpose": "Editorial planning windows in America/Regina; independent of print turnaround."
+    },
+    {
+      "field": "creativeKind, sourceAssetIds, conceptBriefId, provenance",
+      "purpose": "real-client, shop-process and generated-concept never share source status."
+    },
+    {
+      "field": "mediaPath, sha256, promptVersion, model, generationTime, cost",
+      "purpose": "Bind exact output to review; leave unknown values null, not guessed."
+    },
+    {
+      "field": "copyByChannel, destinationByChannel, tracking",
+      "purpose": "FB/IG/GBP variants with a verified useful destination and concept disclosure."
+    },
+    {
+      "field": "qualityReview, rightsReview, claimReview",
+      "purpose": "Independent visual/editorial pass and separate rights or publication holds."
+    },
+    {
+      "field": "approvalActor, approvedAt, approvalHash, approvedChannels",
+      "purpose": "Exact media/copy/target approval; broad concept interest is not publication approval."
+    },
+    {
+      "field": "plannedAt, expiresAt, liveReceipts, reconciliation",
+      "purpose": "Do not call a schedule delivered; retain provider link and duplicate checks."
+    },
+    {
+      "field": "measurementWindow, qualifiedEnquiries, evidence",
+      "purpose": "Record observed outcomes without predicted engagement scores."
+    }
+  ],
+  "limits": [
+    "Planning reference only; not a live scheduler or automatic campaign generator.",
+    "Verified holiday status does not establish shop hours or production turnaround.",
+    "Review dates, products and audience relevance before each monthly draft."
+  ]
+}

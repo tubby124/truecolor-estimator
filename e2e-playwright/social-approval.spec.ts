@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { createHash } from 'node:crypto';
 
 const id = "12345678-1234-1234-1234-123456789abc";
 const caption = "A precise saved caption.\n\n#Saskatoon";
@@ -184,4 +185,117 @@ test('monthly partial generation resumes missing channels with a new stable atte
   expect(requests[1].image_base64).toBe(requests[0].image_base64);
   await expect(page.locator('textarea').nth(0)).toHaveValue('Retained Instagram');
   await expect(page.locator('textarea').nth(1)).toHaveValue('Recovered Facebook');
+});
+
+test('prepared month selection stays local and verifies image bytes before any upload', async ({ page }) => {
+  await page.route('**/*', route => ['localhost', '127.0.0.1'].includes(new URL(route.request().url()).hostname) ? route.fallback() : route.abort());
+  const business = '00000000-0000-4000-8000-000000000001';
+  await page.route('**/api/staff/social/batch/monthly?*', route => route.fulfill({ json: { businessId: business, batches: [], hasMore: false } }));
+  const writes: string[] = [];
+  page.on('request', request => { if (request.method() === 'POST') writes.push(request.url()); });
+  const image = Buffer.from('synthetic original image bytes');
+  const makeCreative = (number: number, date: string) => ({ id: `00000000-0000-4000-8000-00000000000${number}`, title: `Product ${number}`, scheduleTime: date, captionFacebook: 'Banner printing with design help. #TrueColorPrinting #SaskatoonPrintShop', captionInstagram: 'Print your event banner with us. #TrueColorPrinting #SaskatoonPrintShop', imageFilename: `product-${number}.jpg`, imageSha256: createHash('sha256').update(number === 1 ? image : Buffer.from('other image')).digest('hex') });
+  const plan = { schemaVersion: 1, kind: 'truecolor-month-plan', title: 'Synthetic month split', creatives: [makeCreative(1, '2026-10-01T02:00:00Z'), makeCreative(2, '2026-10-01T16:00:00Z')] };
+  await page.goto('/staff/social/monthly');
+  await page.getByLabel('Prepared plan JSON').setInputFiles({ name: 'month.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(plan)) });
+  await expect(page.getByLabel('Import month')).toHaveValue('2026-09');
+  await expect(page.getByText(/2026-09-30 20:00 Regina/)).toBeVisible();
+  await page.getByLabel('Import month').selectOption('2026-10');
+  await expect(page.getByText(/2026-10-01 10:00 Regina/)).toBeVisible();
+  await page.getByLabel('Import month').selectOption('2026-09');
+  await page.getByLabel('Matching original image files').setInputFiles({ name: 'product-1.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('changed image') });
+  expect(writes).toEqual([]);
+  await page.getByRole('button', { name: 'Upload photos into preparation' }).click();
+  await expect(page.getByRole('region', { name: 'Import prepared month' }).getByRole('alert')).toContainText('image bytes do not match');
+  expect(writes).toEqual([]);
+  await expect(page.getByRole('button', { name: 'Save drafts in chunks' })).toBeDisabled();
+});
+
+test('prepared month upload retry retains successful photos and never saves, approves or generates automatically', async ({ page }) => {
+  await page.route('**/*', route => ['localhost', '127.0.0.1'].includes(new URL(route.request().url()).hostname) ? route.fallback() : route.abort());
+  const business = '00000000-0000-4000-8000-000000000001';
+  await page.route('**/api/staff/social/batch/monthly?*', route => route.fulfill({ json: { businessId: business, batches: [], hasMore: false } }));
+  const imageFiles = [1, 2].map(number => ({ name: `product-${number}.jpg`, mimeType: 'image/jpeg', buffer: Buffer.from(`synthetic photo ${number}`) }));
+  const creatives = imageFiles.map((file, i) => ({ id: `00000000-0000-4000-8000-00000000000${i + 1}`, title: `Product ${i + 1}`, scheduleTime: `2027-01-${i + 12}T16:00:00Z`, captionFacebook: `Banner ${i + 1} printing with design help. #TrueColorPrinting #SaskatoonPrintShop`, captionInstagram: `Print event banner ${i + 1} with us. #TrueColorPrinting #SaskatoonPrintShop`, imageFilename: file.name, imageSha256: createHash('sha256').update(file.buffer).digest('hex') }));
+  const plan = { schemaVersion: 1, kind: 'truecolor-month-plan', title: 'Synthetic prepared month', creatives };
+  const writes: string[] = [], uploads: string[] = [];
+  page.on('request', request => { if (request.method() === 'POST') writes.push(new URL(request.url()).pathname); });
+  await page.route('https://example.test/prepared/**', route => route.fulfill({ status: 204 }));
+  await page.route('**/api/staff/social/upload', async route => {
+    const body = route.request().postDataBuffer()!.toString(); uploads.push(body);
+    expect(body).toContain('name="format"\r\n\r\njpeg');
+    expect(body).toContain('name="fitForSocial"\r\n\r\n1');
+    if (uploads.length === 2) return route.fulfill({ status: 503, json: { error: 'Synthetic upload interruption' } });
+    return route.fulfill({ json: { url: `https://example.test/prepared/${uploads.length}.jpg`, width: 1080, height: 1350, format: 'jpeg' } });
+  });
+  await page.goto('/staff/social/monthly');
+  await page.getByLabel('Prepared plan JSON').setInputFiles({ name: 'month.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(plan)) });
+  await page.getByLabel('Matching original image files').setInputFiles(imageFiles);
+  expect(writes).toEqual([]);
+  await page.getByRole('button', { name: 'Upload photos into preparation' }).click();
+  await expect(page.getByRole('region', { name: 'Import prepared month' }).getByRole('alert')).toContainText('1 confirmed uploads retained');
+  await page.getByRole('button', { name: 'Upload photos into preparation' }).click();
+  await expect(page.locator('textarea')).toHaveCount(4);
+  expect(uploads).toHaveLength(3);
+  expect(uploads[0]).toContain('filename="product-1.jpg"');
+  expect(uploads[1]).toContain('filename="product-2.jpg"');
+  expect(uploads[2]).toContain('filename="product-2.jpg"');
+  expect(writes).toEqual(Array(3).fill('/api/staff/social/upload'));
+  const saved = await page.evaluate(business => JSON.parse(localStorage.getItem(`social-monthly-preparation-v1:${business}`)!), business);
+  expect(saved.month).toBe('2027-01');
+  expect(saved.chunks).toEqual([]);
+  expect(saved.creatives[0].id).toBe(creatives[0].id);
+  expect(saved.creatives[0].imageUrl).toBe('https://example.test/prepared/1.jpg');
+  expect(saved.creatives[0].captions.facebook).toBe(creatives[0].captionFacebook);
+  expect(saved.creatives[0].requestId).not.toBe(saved.creatives[1].requestId);
+  await page.reload();
+  await expect(page.locator('textarea').first()).toHaveValue(creatives[0].captionFacebook);
+  expect(writes).toHaveLength(3);
+});
+
+test('monthly progress refresh updates receipts, preserves approvals and marks stale failures', async ({ page }) => {
+  await page.route('**/*', route => ['localhost', '127.0.0.1'].includes(new URL(route.request().url()).hostname) ? route.fallback() : route.abort());
+  const batch = '00000000-0000-4000-8000-000000000099';
+  const otherId = '00000000-0000-4000-8000-000000000098';
+  let phase = 0;
+  const writes: string[] = [];
+  page.on('request', request => { if (request.method() !== 'GET') writes.push(request.url()); });
+  await page.route('**/api/staff/social/batch/monthly?*', route => {
+    if (new URL(route.request().url()).searchParams.get('view') !== 'progress') return route.fulfill({ json: { posts: [{ id }], total: 2, hasMore: false } });
+    if (phase === 2) return route.fulfill({ status: 503, json: { error: 'Synthetic unavailable snapshot' } });
+    const posts = [
+      { id, creative_id: id, platforms: ['instagram'], status: phase ? 'posted' : 'ready', schedule_time: '2027-01-12T21:00:00Z', error_message: null, results: phase ? [{ platform: 'instagram', status: 'published', public_url: 'https://example.test/verified-receipt' }, { platform: 'instagram', status: 'published', public_url: 'javascript:alert(1)' }] : [] },
+      { id: otherId, creative_id: id, platforms: ['facebook'], status: 'posting', schedule_time: '2027-01-12T21:00:00Z', error_message: phase ? null : 'Manual reconciliation required', results: [] },
+    ];
+    return route.fulfill({ json: { batchId: batch, posts, total: 2, checkedAt: phase ? '2027-01-12T21:02:00Z' : '2027-01-12T21:01:00Z' } });
+  });
+  await page.route(`**/api/staff/social/posts/${id}/approval`, route => route.fulfill({ json: review() }));
+  await page.goto(`/staff/social/review?batchId=${batch}`);
+  const progress = page.getByRole('region', { name: 'Monthly delivery progress' });
+  const count = (label: string) => progress.locator('dl').getByText(label, { exact: true }).locator('..').locator('dd');
+  await expect(progress.getByText('2 saved destinations · 1 creative')).toBeVisible();
+  await expect(count('Approved')).toHaveText('1');
+  await expect(count('Needs attention')).toHaveText('1');
+  await page.getByRole('checkbox').nth(0).check();
+  await page.getByRole('checkbox').nth(1).check();
+
+  phase = 1;
+  await progress.getByRole('button', { name: 'Refresh progress', exact: true }).click();
+  await expect(count('Provider reported published')).toHaveText('1');
+  await expect(count('Approved')).toHaveText('0');
+  await expect(count('Awaiting receipt')).toHaveText('1');
+  await expect(progress.getByRole('link', { name: 'Open instagram receipt link' })).toHaveAttribute('href', 'https://example.test/verified-receipt');
+  await expect(progress.locator('a[href^="javascript:"]')).toHaveCount(0);
+  await expect(page.getByRole('checkbox').nth(0)).toBeChecked();
+  await expect(page.getByRole('checkbox').nth(1)).toBeChecked();
+  const lastSuccess = await progress.getByText(/Last successful refresh:/).textContent();
+
+  phase = 2;
+  await progress.getByRole('button', { name: 'Refresh progress', exact: true }).click();
+  await expect(progress.getByRole('alert')).toContainText('previously shown results may be stale');
+  await expect(count('Provider reported published')).toHaveText('1');
+  await expect(progress.getByText(/Last successful refresh:/)).toHaveText(lastSuccess!);
+  await expect(progress.getByRole('link', { name: 'Open instagram receipt link' })).toBeVisible();
+  await expect(page.getByRole('checkbox').nth(1)).toBeChecked();
+  expect(writes).toEqual([]);
 });

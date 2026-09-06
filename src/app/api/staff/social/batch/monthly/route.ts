@@ -50,10 +50,18 @@ export async function GET(req: Request) {
   if (!socialBusinessScopingEnabled()) return unavailable();
   const params = new URL(req.url).searchParams;
   const batchId = params.get('batchId');
+  const progressView = params.get('view') === 'progress';
   const pageText = params.get('page') ?? '0';
-  if (!/^\d{1,5}$/.test(pageText) || (batchId && !uuid.test(batchId))) return NextResponse.json({ error: 'Invalid page or batch' }, { status: 400 });
+  if (!/^\d{1,5}$/.test(pageText) || (batchId && !uuid.test(batchId)) || (progressView && !batchId)) return NextResponse.json({ error: 'Invalid page or batch' }, { status: 400 });
   const page = Number(pageText);
   const db = createServiceClient();
+  if (progressView) {
+    // One bounded snapshot, including an exact count. Never turn a database row
+    // cap or missing count into an apparently complete month summary.
+    const { data, error, count } = await db.from('social_posts').select('id,creative_id,platforms,status,schedule_time,error_message,results:social_post_results(platform,status,public_url)', { count: 'exact' }).eq('business_id', auth.businessId).eq('batch_id', batchId!).order('schedule_time').order('id').range(0, 999);
+    if (error || count == null || count > 1000 || data?.length !== count) return NextResponse.json({ error: 'Complete batch progress is unavailable. Previous results may be stale; refresh again.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ batchId, posts: data, total: count, checkedAt: new Date().toISOString() }, { headers: { 'Cache-Control': 'no-store' } });
+  }
   if (!batchId) {
     const { data, error } = await db.from('social_batches').select('id,month,created_at', { count: 'exact' }).eq('business_id', auth.businessId).order('created_at', { ascending: false }).order('id').range(page * 20, page * 20 + 20);
     if (error) return unavailable();
