@@ -22,6 +22,11 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Pricing and social integration work board and release evidence](social/INTEGRATION-20260906.md)
+- [Google credential setup, API application and remaining connection gates](social/GBP-CONNECTION-20260906.md)
+
+- [Prepared pricing and social migration release package](social/MIGRATION-RELEASE-20260906.md)
+
 - [Approved pricing and three-channel implementation handoff](social/IMPLEMENTATION-HANDOFF-20260906.md)
 
 - [Social rebuild lessons, hosted scheduling test and product plan](social/REBUILD-AND-SCHEDULING.md)

@@ -56,6 +56,30 @@ jobs:
         run: >-
           psql --host 127.0.0.1 --username postgres --dbname postgres
           --file scripts/social/sql/approval-regression.sql
+      - name: Social business isolation migration regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/business-regression.sql
+      - name: Social monthly batch migration regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/monthly-regression.sql
+      - name: Social generation migration regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/generation-regression.sql
+      - name: Combined social migration and generation handoff regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/integration-regression.sql
       - name: Execute Google Ads monitor evidence ACL regression
         env:
           PGPASSWORD: ${{ github.run_id }}
@@ -97,7 +121,6 @@ jobs:
 
       - name: Pricing contract
         run: npm run validate:pricing
-
       - name: Aggregate order consistency audit contracts
         run: node --test scripts/pricing/audit-order-consistency.node.mjs
 
@@ -116,12 +139,23 @@ jobs:
 
       - name: Paid-funnel browser contracts
         env:
-          SOCIAL_E2E_AUTH_FIXTURE: "true"
-          PLAYWRIGHT_USE_BUILD: "true"
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:3198
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          SOCIAL_E2E_AUTH_FIXTURE: "true"
+          PLAYWRIGHT_USE_BUILD: "true"
         run: npm run test:e2e:pw -- e2e-playwright/seo-paid-journeys.spec.ts e2e-playwright/social-approval.spec.ts e2e-playwright/social-library.spec.ts e2e-playwright/social-generation.spec.ts
+
+      - name: Retain failed synthetic browser evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-contract-failure-${{ github.run_id }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
 
   production-smoke:
     if: github.event_name == 'workflow_dispatch'
