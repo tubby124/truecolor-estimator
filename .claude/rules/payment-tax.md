@@ -14,8 +14,10 @@ These rules apply automatically when editing staff portal, API routes, email tem
 ## Tax Display
 
 - GST (5%) + PST (6%) shown ONLY on checkout and in emails. All other pages show pre-tax `sell_price`.
-- PST formula for itemized orders: `pst = (sell_price - design_fee) * 0.06` per item. Rush fee is PST-exempt.
-- PST formula for manual orders (no itemized fees): `pst = subtotal * 0.06`.
+- Current policy: taxable printing includes bundled design and rush in the full PST base. Standalone service SKUs and confirmed resale exemptions keep their explicit exemption semantics. Rates come from `data/tables/config.v1.csv`; use shared cents math.
+- Source verified September 6, 2026: Saskatchewan Finance [PST-20, revised July 2024](https://sets.saskatchewan.ca/rptp/wcm/connect/0f9a6404-128b-4393-b0a2-70477959c771/PST.020%2BPrinters.pdf?MOD=AJPERES), section A. The earlier blanket design/rush exemption above was superseded.
+- Structured quotes require the approved `pst20_20260906` DB capability before creating new-policy revisions. Unmarked historical revisions retain their saved formula and amounts. Do not change existing issued invoices or silently apply migrations.
+- Manual printing orders use the full taxable subtotal, except explicitly classified standalone service sales or confirmed resale exemptions.
 - Total always = subtotal + gst + pst. Never subtotal + gst only.
 
 ## Modal ↔ API ↔ Email Consistency Check

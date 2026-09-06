@@ -170,7 +170,8 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
   const [minChargeValue, setMinChargeValue] = useState<number | null>(null);
   const [preMinSubtotal, setPreMinSubtotal] = useState<number | null>(null);
   const [rushFee, setRushFee] = useState<number>(0);
-  const [gstRate, setGstRate] = useState<number>(0.05);
+  const [gstRate, setGstRate] = useState<number | undefined>();
+  const [pstRate, setPstRate] = useState<number | undefined>();
   const priceRequestSequence = useRef(0);
   const showToastRef = useRef(showToast);
 
@@ -231,7 +232,8 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
         setMinChargeValue(data.min_charge_value ?? null);
         setPreMinSubtotal(data.pre_min_subtotal ?? null);
         setRushFee(data.rush_fee ?? 0);
-        setGstRate(data.gst_rate ?? 0.05);
+        setGstRate(data.gst_rate);
+        setPstRate(data.pst_rate);
         // GA4: price_calculated — fires every time a valid price is returned
         trackPriceCalculated({
           item_id: product.material_code ?? product.category,
@@ -252,7 +254,8 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
         setMinChargeValue(null);
         setPreMinSubtotal(null);
         setRushFee(0);
-        setGstRate(0.05);
+        setGstRate(undefined);
+        setPstRate(undefined);
       }
     } catch (err) {
       if (signal.aborted || requestId !== priceRequestSequence.current) return;
@@ -338,6 +341,7 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
           design_fee: designFee,
           rush_fee: rushFee,
           gst_rate: gstRate,
+          pst_rate: pstRate,
           // Standalone services ship no tangible goods — GST only, no PST.
           pst_exempt: product.serviceMode,
         })
@@ -359,7 +363,7 @@ export function ProductConfigurator({ product, initialSelection, onPriceChange, 
       preMinSubtotal,
       lineItems,
     });
-  }, [price, loading, addonTotal, designStatus, rushFee, gstRate, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, preMinSubtotal, lineItems]);
+  }, [price, loading, addonTotal, designStatus, rushFee, gstRate, pstRate, onPriceChange, pricePerUnit, qtyDiscountPct, qtyDiscountApplied, minChargeApplied, minChargeValue, preMinSubtotal, lineItems]);
 
   // Only the fields relevant to the selected size are shown — and only those are
   // validated. A hidden field must never block Add to Cart.

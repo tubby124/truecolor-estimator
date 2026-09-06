@@ -29,6 +29,8 @@
 import { estimate } from "@/lib/engine";
 import { getProducts } from "./loader";
 import type { Category } from "./types";
+import { PRODUCTS } from "./products-content";
+import { resolveProductFacts, type ProductFactsConfiguration } from "@/lib/pricing/product-facts";
 import type { PriceConsistencyRow } from "@/app/staff/lifecycle/PriceConsistencyPanel";
 
 /**
@@ -49,7 +51,6 @@ const LOCKED_SKUS: Array<{ productId: string; expected: number; note: string }> 
  */
 const DOCS_REFERENCED_LOCKED_SKUS = [
   "BANNER-V13-2X6FT",
-  "RIGID-ACP3-24X36-S", // retired 2026-05-20 — AGENTS.md still says locked
   "SIGN-CORO4-4X8FT-S",
 ];
 
@@ -58,26 +59,26 @@ const DOCS_REFERENCED_LOCKED_SKUS = [
  * Each maps to a REAL product_id in products.v1.csv whose engine-priced
  * amount we then verify matches the marketing claim.
  */
-const MARKETING_ANCHORS: Array<{
-  category: Category;
-  config_label: string;
-  expected_from: number;
-  product_id: string;
-  note: string;
-}> = [
-  // Sqft-tier categories — verified against smallest active SKU
-  { category: "BANNER",        config_label: "Banner 'from $66' → 2×4 ft",         expected_from: 66, product_id: "BANNER-V13-2X4FT",   note: "Smallest active banner SKU" },
-  { category: "RIGID",         config_label: "ACP 'from $39' → 18×24″",            expected_from: 39, product_id: "RIGID-ACP3-18X24-S", note: "Smallest active ACP SKU" },
-  { category: "FOAMBOARD",     config_label: "Foamboard 'from $45' → 18×24″",      expected_from: 45, product_id: "FOAM-5MM-18X24-S",   note: "18×24 fixed SKU" },
-  // Lot-priced categories — verified against the SKU each "from $X" claim references
-  { category: "BUSINESS_CARD", config_label: "BC 'from $45' → 250 qty 14pt 2S",    expected_from: 45, product_id: "BC-14PT-250-2S",     note: "250 qty 14pt double-sided" },
-  { category: "FLYER",         config_label: "Flyer 'from $45' → 100 qty 80lb",    expected_from: 45, product_id: "FLYER-80LB-100",     note: "100 qty 80lb full-letter" },
-  { category: "STICKER",       config_label: "Stickers 'from $25' → 25 qty 2×2",   expected_from: 25, product_id: "STICKER-2X2-25",     note: "25 qty 2×2 stickers" },
-  { category: "POSTCARD",      config_label: "Postcards 'from $35' → 50 qty 3×4",  expected_from: 35, product_id: "PC-3X4-50",          note: "50 qty 3×4 postcards" },
-  { category: "BROCHURE",      config_label: "Brochures 'from $70' → 100 qty TF",  expected_from: 70, product_id: "BROCH-TF-100",       note: "100 qty tri-fold brochures" },
-  { category: "PHOTO_POSTER",  config_label: "Photo poster 'from $15' → 12×18",    expected_from: 15, product_id: "POST-12X18",         note: "12×18 photo poster" },
-  { category: "DISPLAY",       config_label: "Retractable banner 'from $219'",     expected_from: 219, product_id: "DISP-RETRACT-ECO",   note: "Economy retractable stand + print" },
+// Explicit advertised configurations. Expected values come from the PUBLIC
+// product content itself, so changing duplicated test constants cannot hide drift.
+const MARKETING_ANCHORS: Array<{ productSlug: string; configuration?: ProductFactsConfiguration }> = [
+  { productSlug: "vinyl-banners" },
+  { productSlug: "acp-signs", configuration: { width_in: 18, height_in: 24 } },
+  { productSlug: "coroplast-signs" },
+  { productSlug: "foamboard-displays", configuration: { width_in: 18, height_in: 24 } },
+  { productSlug: "business-cards" },
+  { productSlug: "flyers" },
+  { productSlug: "stickers", configuration: { width_in: 2, height_in: 2 } },
+  { productSlug: "postcards", configuration: { width_in: 4, height_in: 3, qty: 50 } },
+  { productSlug: "brochures" },
+  { productSlug: "photo-posters" },
+  { productSlug: "retractable-banners" },
 ];
+
+export function marketingPriceStatus(actual: number | null, advertised: number): PriceConsistencyRow["status"] {
+  if (actual === null || !Number.isFinite(advertised)) return "blocked";
+  return Math.abs(actual - advertised) < 0.01 ? "match" : "drift";
+}
 
 export function checkPriceConsistency(): PriceConsistencyRow[] {
   const rows: PriceConsistencyRow[] = [];
@@ -198,72 +199,31 @@ export function checkPriceConsistency(): PriceConsistencyRow[] {
     });
   }
 
-  // ─── Layer 3: marketing anchors ──────────────────────────────────────────
+  // Compare each advertised starting configuration's checkout subtotal exactly.
   for (const anchor of MARKETING_ANCHORS) {
-    const p = productsById.get(anchor.product_id);
-    if (!p) {
-      rows.push({
-        category: anchor.category,
-        config_label: anchor.config_label,
-        expected_source: "marketing_anchor",
-        expected_price: anchor.expected_from,
-        actual_price: null,
-        delta: null,
-        status: "drift",
-        note: `Marketing anchor maps to ${anchor.product_id} but that product_id is missing from products.v1.csv. ${anchor.note}`,
-      });
-      continue;
-    }
-    if (p.is_active === false) {
-      rows.push({
-        category: anchor.category,
-        config_label: anchor.config_label,
-        expected_source: "marketing_anchor",
-        expected_price: anchor.expected_from,
-        actual_price: Number(p.price ?? 0),
-        delta: null,
-        status: "drift",
-        note: `Marketing anchor points at retired SKU ${anchor.product_id}. Find a new representative SKU or update PRICING_QUICK_REFERENCE.md. ${anchor.note}`,
-      });
-      continue;
-    }
-    const sides = (p.sides === 2 ? 2 : 1) as 1 | 2;
+    const product = PRODUCTS[anchor.productSlug];
+    const expected = Number(product.fromPrice.match(/\$([\d.]+)/)?.[1]);
     let actual: number | null = null;
-    let note = anchor.note;
+    let label = product.name;
+    let note = "Public product fromPrice compared with configured standalone pre-tax order total.";
     try {
-      const result = estimate({
-        category: anchor.category,
-        material_code: p.material_code,
-        width_in: p.width_in,
-        height_in: p.height_in,
-        sides,
-        qty: p.qty,
-      });
-      actual = result.sell_price ?? null;
-    } catch (err) {
-      note = `Engine threw: ${err instanceof Error ? err.message : String(err)}`;
+      const facts = resolveProductFacts(anchor);
+      actual = facts.standalonePreTaxOrderTotal;
+      label = facts.configurationLabel;
+      if (facts.minimumDisclosure) note += ` ${facts.minimumDisclosure}`;
+    } catch (error) {
+      note = error instanceof Error ? error.message : String(error);
     }
-    const delta = actual != null ? Math.round((actual - anchor.expected_from) * 100) / 100 : null;
-    // Marketing anchor passes when engine price EQUALS the from-claim (exact)
-    // OR is ABOVE it (we charge more than advertised — still honest because
-    // larger configs always cost more, and the "from" is the floor).
-    // The drift case is engine BELOW marketing claim — bait-and-switch risk.
-    const status: PriceConsistencyRow["status"] =
-      actual == null ? "blocked"
-      : Math.abs((actual - anchor.expected_from)) < 0.01 ? "match"
-      : actual > anchor.expected_from ? "match"
-      : "drift";
     rows.push({
-      category: anchor.category,
-      config_label: anchor.config_label,
+      category: product.category,
+      config_label: `${product.name} — ${label}`,
       expected_source: "marketing_anchor",
-      expected_price: anchor.expected_from,
+      expected_price: expected,
       actual_price: actual,
-      delta,
-      status,
+      delta: actual === null ? null : Math.round((actual - expected) * 100) / 100,
+      status: marketingPriceStatus(actual, expected),
       note,
     });
   }
-
   return rows;
 }

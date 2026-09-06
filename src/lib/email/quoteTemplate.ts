@@ -217,13 +217,13 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
 
                   <!-- GST -->
                   <tr style="background: #f9f6f3;">
-                    <td style="padding: 4px 16px 4px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">GST (5%)</td>
+                    <td style="padding: 4px 16px 4px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">GST</td>
                     <td style="padding: 4px 16px 4px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${gst.toFixed(2)}</td>
                   </tr>
 
                   <!-- PST -->
                   <tr style="background: #f9f6f3;">
-                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">PST (6%)</td>
+                    <td style="padding: 4px 16px 10px; font-size: 13px; color: #7a6560; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">PST</td>
                     <td style="padding: 4px 16px 10px; font-size: 13px; color: #4a3728; text-align: right; font-variant-numeric: tabular-nums; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">$${pst.toFixed(2)}</td>
                   </tr>
 

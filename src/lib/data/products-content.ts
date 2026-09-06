@@ -1616,10 +1616,10 @@ export const PRODUCTS: Record<string, ProductContent> = {
   "photo-posters": {
     slug: "photo-posters",
     name: "Photo Posters",
-    tagline: "220gsm matte poster paper. Seven sizes. From $15.",
+    tagline: "220gsm matte poster paper. Seven sizes. Posters from $15; $25 order minimum.",
     description:
       "220gsm matte poster paper produces a rich, non-glossy finish that eliminates glare under overhead lighting — ideal for framed prints, clinic walls, gallery displays, school hallways, and any space with fluorescent or track lighting. True Color prints photo posters on our wide-format Roland TrueVIS equipment, which handles photographic image detail at sizes up to 36\" wide without visible pixel loss. Seven standard sizes are available: 12×18\", 16×20\", 18×24\", 20×30\", 24×36\", 30×40\", and 36×48\". Sizes 12×18\" through 24×36\" correspond to standard IKEA and retail frame dimensions — order the poster and grab a matching frame in the same trip. Minimum file resolution: 100 DPI at the print size (a 24×36\" print needs at least a 2400×3600 pixel file). Supply 150–300 DPI for the sharpest result; we'll flag any low-resolution files before printing so there are no surprises. Each poster is priced individually — single posters are welcome; carts under $25 top up at checkout. Common uses in Saskatoon: event feature posters, team and graduation photos, real estate development renderings, restaurant menu wall art, and clinic patient education displays. Oversized prints beyond 36×48\" are available on banner material by request. Pickup at 216 33rd St W.",
-    fromPrice: "$15",
+    fromPrice: "$25",
     category: "PHOTO_POSTER",
     material_code: "RMPS002",
     heroImage: "/images/products/product/photo-posters-800x600.webp",

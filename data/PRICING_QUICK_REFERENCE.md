@@ -39,7 +39,7 @@ The "from $X" is the smallest amount a customer can realistically be quoted onli
 | Boat Registration Numbers | from $39 | Per PAIR (both sides of the bow), 3" block characters. Ladder: 3" $39 · 3.5" $45 · 4" $52 · 6" $65. Boat name decal $18 each. Qty scales per boat. Rules `PR-BOATNUM-*`. |
 | Postcards | from $35 | 50 qty 3×4" |
 | Brochures | from $70 | 100 qty tri-fold |
-| Photo Posters | from $15 | 12×18" |
+| Photo Posters | from $25 per standalone order | 12×18" print remains $15; $25 order-total minimum applies |
 | Retractable Banners | from $219 | Economy stand |
 | Magnet Calendars | from $45 | 4×7" |
 | Rack Cards | from $25 | 100 qty 1-sided |

@@ -14,6 +14,8 @@
  * Returns: { orderId, orderNumber, paymentUrl }
  */
 
+import { reviewedPricingMatches } from "@/lib/payment/reviewed-pricing";
+import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
 import { provisionOrderWaveInvoice } from "@/lib/payment/quote-wave";
@@ -25,7 +27,10 @@ import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
-import { computeTaxCents } from "@/lib/payment/tax-math";
+import type { TaxRates } from "@/lib/payment/tax-math";
+import { getCanonicalTaxRates } from "@/lib/pricing/canonical-rates";
+import { manualBreakdownCents, scaleManualPricing } from "@/lib/payment/manual-pricing";
+import { STRUCTURED_TAX_POLICY_VERSION, type StructuredQuoteTaxClass } from "@/lib/payment/structured-quote-tax";
 import { parsePstExemption, pstExemptionInvoiceNote, type PstExemptionInput } from "@/lib/payment/pst-exemption";
 import {
   QUOTE_ATTRIBUTION_SELECT,
@@ -45,8 +50,6 @@ import {
   type QuoteLinkSource,
 } from "@/lib/quotes/quote-attribution";
 
-const GST_RATE = 0.05;
-const PST_RATE = 0.06;
 
 // Commercial source is deliberately separate from paid-click attribution. A
 // staff-taken call can be a real sale without being a Google Ads conversion;
@@ -71,6 +74,10 @@ function parseAcquisitionSource(value: unknown, quoteRequestId: string | null): 
 }
 
 export interface OrderItemInput {
+  taxClass?: StructuredQuoteTaxClass;
+  standaloneService?: boolean;
+  pricingSource?: "staff_manual" | "historic_copy";
+  sourceOrderId?: string;
   kind?: "product" | "fee";  // default "product" — fee lines skip the spec block
   title?: string;            // optional invoice line headline (overrides display name)
   product: string;           // product category OR fee name (e.g. "Installation Fee")
@@ -88,117 +95,14 @@ export interface OrderItemInput {
   proofUrl?: string;         // public URL derived server-side from proofPath
 }
 
-interface MoneyBreakdown {
-  subtotalCents: number;
-  gstCents: number;
-  pstCents: number;
-  totalCents: number;
+function centsToMoney(cents: number): number { return Math.round(cents) / 100; }
+
+export function computeBreakdownCents(items: OrderItemInput[], pstExempt = false, rates: TaxRates = getCanonicalTaxRates()) {
+  return manualBreakdownCents(items, rates, pstExempt);
 }
 
-const MAX_OVERRIDE_TOTAL_CENTS = Math.round(99999 * 1.11 * 100);
-
-function moneyToCents(amount: number): number {
-  return Math.round(amount * 100);
-}
-
-function centsToMoney(cents: number): number {
-  return Math.round(cents) / 100;
-}
-
-export function computeBreakdownCents(items: OrderItemInput[], pstExempt = false): MoneyBreakdown {
-  const subtotalCents = items.reduce((sum, item) => sum + moneyToCents(item.amount), 0);
-  const { gstCents, pstCents, totalCents } = computeTaxCents(
-    subtotalCents,
-    { gstRate: GST_RATE, pstRate: PST_RATE },
-    pstExempt,
-  );
-  return {
-    subtotalCents,
-    gstCents,
-    pstCents,
-    totalCents,
-  };
-}
-
-function findLastAmountForTargetTotal(
-  baseSubtotalCents: number,
-  targetTotalCents: number,
-  pstExempt: boolean,
-): number | null {
-  const totalForLastAmount = (lastAmountCents: number) => {
-    const subtotalCents = baseSubtotalCents + lastAmountCents;
-    return computeTaxCents(subtotalCents, { gstRate: GST_RATE, pstRate: PST_RATE }, pstExempt).totalCents;
-  };
-
-  let low = 0;
-  let high = Math.max(targetTotalCents, 1);
-  while (totalForLastAmount(high) < targetTotalCents && high < targetTotalCents * 2 + 1000) {
-    high *= 2;
-  }
-
-  while (low <= high) {
-    const mid = Math.floor((low + high) / 2);
-    const total = totalForLastAmount(mid);
-    if (total === targetTotalCents) return mid;
-    if (total < targetTotalCents) low = mid + 1;
-    else high = mid - 1;
-  }
-
-  const start = Math.max(0, low - 200);
-  const end = low + 200;
-  for (let cents = start; cents <= end; cents++) {
-    if (totalForLastAmount(cents) === targetTotalCents) return cents;
-  }
-  return null;
-}
-
-export function applyOverrideTotal(items: OrderItemInput[], overrideTotal?: number, pstExempt = false): {
-  items: OrderItemInput[];
-  breakdown: MoneyBreakdown;
-} {
-  const computedBreakdown = computeBreakdownCents(items, pstExempt);
-  if (overrideTotal === undefined || overrideTotal === null) {
-    return { items, breakdown: computedBreakdown };
-  }
-
-  const overrideTotalCents = moneyToCents(overrideTotal);
-  if (overrideTotalCents <= 0 || overrideTotalCents > MAX_OVERRIDE_TOTAL_CENTS) {
-    throw new Error("Override total must be greater than $0 and within the maximum allowed");
-  }
-  if (computedBreakdown.totalCents <= 0) {
-    throw new Error("Cannot edit total before line amounts are greater than $0");
-  }
-
-  const k = overrideTotalCents / computedBreakdown.totalCents;
-  const scaledItems = items.map((item) => ({
-    ...item,
-    amount: centsToMoney(Math.round(moneyToCents(item.amount) * k)),
-  }));
-
-  const lastIndex = scaledItems.length - 1;
-  const baseItems = scaledItems.slice(0, lastIndex);
-  const baseSubtotalCents = baseItems.reduce((sum, item) => sum + moneyToCents(item.amount), 0);
-  const lastAmountCents = findLastAmountForTargetTotal(
-    baseSubtotalCents,
-    overrideTotalCents,
-    pstExempt,
-  );
-
-  if (lastAmountCents === null) {
-    throw new Error("Override total cannot be matched exactly with the current taxable line mix");
-  }
-
-  scaledItems[lastIndex] = {
-    ...scaledItems[lastIndex],
-    amount: centsToMoney(lastAmountCents),
-  };
-
-  const scaledBreakdown = computeBreakdownCents(scaledItems, pstExempt);
-  if (scaledBreakdown.totalCents !== overrideTotalCents) {
-    throw new Error("Override total scaling failed to reconcile exactly");
-  }
-
-  return { items: scaledItems, breakdown: scaledBreakdown };
+export function applyOverrideTotal(items: OrderItemInput[], overrideTotal?: number, pstExempt = false, rates: TaxRates = getCanonicalTaxRates()) {
+  return scaleManualPricing(items, rates, overrideTotal, pstExempt);
 }
 
 function buildProofUrl(proofPath?: string): string | undefined {
@@ -219,6 +123,8 @@ export async function POST(req: NextRequest) {
       contact: { name: string; email: string; company?: string; phone?: string };
       // Multi-item (new)
       items?: OrderItemInput[];
+      submissionId?: string;
+      expectedPricing?: unknown;
       // Legacy single-item (backward compat)
       description?: string;
       amount?: number;
@@ -238,6 +144,11 @@ export async function POST(req: NextRequest) {
     };
 
     const { contact, payment_method, notes } = body;
+    if (typeof body.submissionId !== "string" || !UUID_RE.test(body.submissionId)) {
+      return NextResponse.json({ error: "A stable submissionId is required. Reload the quote form before submitting." }, { status: 400 });
+    }
+    const submissionId = body.submissionId;
+    const requestFingerprint = createHash("sha256").update(JSON.stringify({ channel: "staff_manual", request: body })).digest("hex");
     const quoteOnly = body.quote_only === true;
     let pstExemption;
     try {
@@ -274,8 +185,26 @@ export async function POST(req: NextRequest) {
       if (!item.product?.trim()) {
         return NextResponse.json({ error: "Each item requires a product type" }, { status: 400 });
       }
-      if (!item.amount || item.amount <= 0 || isNaN(item.amount)) {
+      if (typeof item.amount !== "number" || !Number.isFinite(item.amount) || item.amount <= 0) {
         return NextResponse.json({ error: `Amount for "${item.product}" must be greater than $0` }, { status: 400 });
+      }
+      if (!Number.isSafeInteger(item.qty) || item.qty <= 0 || item.qty > 100000) {
+        return NextResponse.json({ error: "Every item quantity must be a positive whole number" }, { status: 400 });
+      }
+      if (item.taxClass !== undefined && !["printed_good", "design_service", "rush_service", "installation_service"].includes(item.taxClass)) {
+        return NextResponse.json({ error: "Invalid line tax class" }, { status: 400 });
+      }
+      if (item.standaloneService !== undefined && typeof item.standaloneService !== "boolean") {
+        return NextResponse.json({ error: "Invalid standalone service classification" }, { status: 400 });
+      }
+      if (item.standaloneService && !["design_service", "rush_service"].includes(item.taxClass ?? "")) {
+        return NextResponse.json({ error: "Standalone service exemption requires an explicit service tax class" }, { status: 400 });
+      }
+      if (item.pricingSource !== undefined && !["staff_manual", "historic_copy"].includes(item.pricingSource)) {
+        return NextResponse.json({ error: "Manual pricing source must be staff_manual or historic_copy" }, { status: 400 });
+      }
+      if (item.pricingSource === "historic_copy" && (!item.sourceOrderId || !UUID_RE.test(item.sourceOrderId))) {
+        return NextResponse.json({ error: "Historic pricing requires the source order ID" }, { status: 400 });
       }
       if (item.amount > 99999) {
         return NextResponse.json({ error: `Amount for "${item.product}" exceeds maximum ($99,999)` }, { status: 400 });
@@ -285,11 +214,42 @@ export async function POST(req: NextRequest) {
     items = items.map((item) => ({
       ...item,
       kind: item.kind ?? "product",
+      taxClass: item.taxClass ?? "printed_good",
+      unitPrice: item.unitPrice != null && Number.isFinite(item.unitPrice) && Math.abs(item.unitPrice * 100 - Math.round(item.unitPrice * 100)) < 1e-8 && Math.round(item.unitPrice * 100) * item.qty === Math.round(item.amount * 100) ? item.unitPrice : undefined,
+      pricingSource: item.pricingSource ?? "staff_manual",
       title: item.title?.trim() || undefined,
       proofUrl: buildProofUrl(item.proofPath),
     }));
 
+    // Validate money before customer/auth mutations and preserve bespoke no-floor pricing.
+    let scaled;
+    try {
+      scaled = applyOverrideTotal(items, body.overrideTotal, pstExemption.enabled);
+    } catch (cause) {
+      return NextResponse.json({ error: cause instanceof Error ? cause.message : "Invalid pricing" }, { status: 400 });
+    }
+    const originalItems = items;
+    items = scaled.items;
     const supabase = createServiceClient();
+    const readDuplicate = async () => {
+      const { data: existing, error: existingError } = await supabase.from("orders")
+        .select("id, order_number, checkout_request_fingerprint, quote_wave_state")
+        .eq("checkout_submission_id", submissionId).maybeSingle();
+      if (existingError) throw new Error("Could not verify the previous manual submission");
+      if (!existing) return null;
+      if (existing.checkout_request_fingerprint !== requestFingerprint) {
+        return NextResponse.json({ error: "This submission was already saved with different details. Review the existing order before creating a new request.", orderId: existing.id }, { status: 409 });
+      }
+      // An uncertain provider/email result must never generate a new invoice or
+      // send again. The existing order is the durable recovery entry point.
+      return NextResponse.json({ orderId: existing.id, orderNumber: existing.order_number, paymentUrl: null, duplicate: true,
+        customerEmailSent: false, deliveryWarning: "This request was already saved. Review its accounting and email status on the existing order before retrying delivery." });
+    };
+    const duplicate = await readDuplicate();
+    if (duplicate) return duplicate;
+    if (!reviewedPricingMatches(body.expectedPricing, { ...getCanonicalTaxRates(), ...scaled.breakdown })) {
+      return NextResponse.json({ error: "Tax rates or pricing changed since the preview. Reload and review the updated total before sending.", code: "STALE_QUOTE_PRICE" }, { status: 409 });
+    }
 
     const replacementOrderId = body.replaces_order_id?.trim() || null;
     if (replacementOrderId && !UUID_RE.test(replacementOrderId)) {
@@ -543,16 +503,6 @@ export async function POST(req: NextRequest) {
     // ── 2. Calculate totals ──
     // Saskatchewan PST-20 taxes the full charge when services such as design,
     // rush, or installation are part of a taxable printed-material sale.
-    let scaled;
-    try {
-      scaled = applyOverrideTotal(items, body.overrideTotal, pstExemption.enabled);
-    } catch (scaleErr) {
-      return NextResponse.json(
-        { error: scaleErr instanceof Error ? scaleErr.message : "Invalid total override" },
-        { status: 400 }
-      );
-    }
-    items = scaled.items;
     const subtotal = centsToMoney(scaled.breakdown.subtotalCents);
     const gst = centsToMoney(scaled.breakdown.gstCents);
     const pst = centsToMoney(scaled.breakdown.pstCents);
@@ -578,6 +528,8 @@ export async function POST(req: NextRequest) {
         .from("orders")
         .insert({
           order_number: orderNumber,
+          checkout_submission_id: submissionId,
+          checkout_request_fingerprint: requestFingerprint,
           customer_id: customer.id,
           status: "pending_payment",
           is_rush: false,
@@ -603,7 +555,7 @@ export async function POST(req: NextRequest) {
           staff_notes: (quoteOnly
             ? `[QUOTE] Manual quote — ${items.length} item(s) — Pay Now link sent; customer can pay to confirm or reply for changes.`
             : `Manual order — ${items.length} item(s) created by staff via payment request`) +
-            ` · source=${acquisitionSource}` + autoLinkNote,
+            ` · source=${acquisitionSource} · pricing=customer_specific_staff_override` + autoLinkNote,
         })
         .select("id, order_number")
         .single();
@@ -617,6 +569,10 @@ export async function POST(req: NextRequest) {
         console.error("[manual-order] order INSERT:", error);
         return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
       }
+      // A concurrent request may have won the unique submission claim since
+      // the preflight. Return that order; never re-send or insert another row.
+      const concurrentDuplicate = await readDuplicate();
+      if (concurrentDuplicate) return concurrentDuplicate;
       // orders_quote_request_id_uidx and orders_conversion_key_uidx are UNIQUE
       // as well (20260720100000_quote_conversion_measurement.sql:252-256), so a
       // 23505 is not always an order_number collision. On an auto-linked quote
@@ -661,7 +617,7 @@ export async function POST(req: NextRequest) {
     // — see src/lib/customers/incrementOrderStats.ts
 
     // ── 4. Insert order_items rows (one per item) ──
-    for (const item of items) {
+    for (const [itemIndex, item] of items.entries()) {
       const { error: itemErr } = await supabase.from("order_items").insert({
         order_id: order.id,
         category: "MANUAL",
@@ -671,8 +627,17 @@ export async function POST(req: NextRequest) {
         addons: [],
         is_rush: false,
         design_status: "PRINT_READY",
-        unit_price: Math.round(item.amount * 100) / 100,
+        unit_price: item.amount / item.qty,
         line_total: Math.round(item.amount * 100) / 100,
+        line_items_json: [{
+          taxClass: item.taxClass,
+          standaloneService: item.standaloneService === true,
+          taxPolicyVersion: STRUCTURED_TAX_POLICY_VERSION,
+          applyPst: !pstExemption.enabled && !item.standaloneService && (items.some((line) => line.taxClass === "printed_good") || !["design_service", "rush_service"].includes(item.taxClass!)),
+          pricingSource: body.overrideTotal == null ? item.pricingSource : "staff_total_override",
+          originalAmount: originalItems[itemIndex].amount,
+          ...(item.sourceOrderId ? { sourceOrderId: item.sourceOrderId } : {}),
+        }],
         fulfillment_selection: "unclassified",
         production_sla_anchor: null,
         policy_version: null,
@@ -680,6 +645,12 @@ export async function POST(req: NextRequest) {
       });
       if (itemErr) {
         console.error(`[manual-order] order_items insert failed for order ${order.id}:`, itemErr.message);
+        const { error: holdError } = await supabase.from("orders").update({
+          quote_wave_state: "failed",
+          quote_wave_last_error: "Manual order item persistence failed before Wave creation; reconcile stored lines before retrying.",
+        }).eq("id", order.id).is("quote_wave_state", null);
+        if (holdError) console.error("[manual-order] could not persist accounting hold:", holdError.message);
+        return NextResponse.json({ error: "Order line persistence failed. No payment email was sent. Reconcile this order before retrying.", orderId: order.id }, { status: 503 });
       }
     }
 
@@ -734,7 +705,7 @@ export async function POST(req: NextRequest) {
         unitPrice: Math.round(item.amount * 100) / 100,
         qty: 1,
         applyGst: true,
-        applyPst: !pstExemption.enabled,
+        applyPst: !pstExemption.enabled && !item.standaloneService && (items.some((line) => line.taxClass === "printed_good") || !["design_service", "rush_service"].includes(item.taxClass!)),
       }));
       const wave = await provisionOrderWaveInvoice(supabase, order.id, {
         orderNumber: order.order_number,
@@ -767,6 +738,7 @@ export async function POST(req: NextRequest) {
     // ── 6. Send payment request email to customer ──
     // Both quote-only and not-quote-only modes include the Pay Now link. The
     // quote IS the invoice — customer pays it to confirm or replies for changes.
+    let customerEmailSent = false;
     try {
       await sendPaymentRequestEmail({
         orderNumber: order.order_number,
@@ -802,6 +774,7 @@ export async function POST(req: NextRequest) {
         accountInfo,
         pstExemptionNote: pstExemptionInvoiceNote(pstExemption) ?? undefined,
       });
+      customerEmailSent = true;
     } catch (emailErr) {
       console.error("[manual-order] customer email failed (non-fatal):", emailErr);
     }
@@ -832,7 +805,7 @@ export async function POST(req: NextRequest) {
         is_rush: false,
         payment_method: "clover_pending",
         notes: quoteOnly
-          ? `[QUOTE ONLY — Clover] ${notes?.trim() ?? "Quote sent — no payment link until customer approves"}`
+          ? `[QUOTE — Pay Now included] ${notes?.trim() ?? "Customer can pay to confirm or reply for changes"}`
           : `[Manual Order] ${notes?.trim() ?? "Created via staff payment request"}`,
         filePaths: [],
         siteUrl,
@@ -888,6 +861,8 @@ export async function POST(req: NextRequest) {
       orderId: order.id,
       orderNumber: order.order_number,
       paymentUrl,
+      customerEmailSent,
+      ...(customerEmailSent ? {} : { deliveryWarning: "The order was saved, but the customer email failed. Retry delivery from this order; do not create another order." }),
       quoteRequestId,
       linkSource,
       ...(attributionWarning ? { attributionWarning } : {}),

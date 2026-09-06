@@ -31,7 +31,11 @@ import {
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/data/order-constants";
 import { PstExemptionFields } from "@/components/staff/PstExemptionFields";
 import type { PstExemptionInput } from "@/lib/payment/pst-exemption";
-import { computeTaxCents } from "@/lib/payment/tax-math";
+import { historicManualPricing } from "@/lib/payment/historic-manual-pricing";
+import type { TaxRates } from "@/lib/payment/tax-math";
+import { useCanonicalRates } from "@/lib/pricing/use-canonical-rates";
+import { manualBreakdownCents, scaleManualPricing, maximumManualTotalCents } from "@/lib/payment/manual-pricing";
+import type { StructuredQuoteTaxClass } from "@/lib/payment/structured-quote-tax";
 
 // FlyerSku + the FlyerPicker now live in src/components/staff/FlyerPicker.tsx —
 // the single flyer selector shared by this modal and the /staff estimator.
@@ -47,6 +51,8 @@ interface CustomerLookup {
 }
 
 interface PastOrderItem {
+  material_code?: string | null;
+  line_items_json?: unknown;
   id: string;
   product_name: string;
   qty: number;
@@ -171,6 +177,11 @@ function parseProductNameToSpec(productName: string): {
  * everything into `details` if they want.
  */
 interface OrderItem {
+  standaloneService?: boolean;
+  taxClassificationRequired?: boolean;
+  taxClass?: StructuredQuoteTaxClass;
+  pricingSource?: "staff_manual" | "historic_copy";
+  sourceOrderId?: string;
   id: string;
   kind: "product" | "fee";
   title: string;       // optional project title shown on invoice (e.g. "The Power of Branding")
@@ -272,13 +283,14 @@ const EMPTY_FORM: FormState = {
 };
 
 const MAX_ITEMS = 10;
-const MAX_OVERRIDE_TOTAL_CENTS = Math.round(99999 * 1.11 * 100);
 
 const inputClass = "w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow";
 
 interface MoneyPreviewItem {
   kind: "product" | "fee";
   amountCents: number;
+  taxClass?: StructuredQuoteTaxClass;
+  standaloneService?: boolean;
 }
 
 interface MoneyBreakdown {
@@ -306,109 +318,32 @@ function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-function computeBreakdownCents(items: MoneyPreviewItem[], pstExempt = false): MoneyBreakdown {
-  const subtotalCents = items.reduce((sum, item) => sum + item.amountCents, 0);
-  const tax = computeTaxCents(subtotalCents, { gstRate: 0.05, pstRate: 0.06 }, pstExempt);
-  return {
-    subtotalCents,
-    gstCents: tax.gstCents,
-    pstCents: tax.pstCents,
-    totalCents: tax.totalCents,
-  };
+function computeBreakdownCents(items: MoneyPreviewItem[], rates: TaxRates | null, pstExempt = false): MoneyBreakdown {
+  if (!rates) return { subtotalCents: 0, gstCents: 0, pstCents: 0, totalCents: 0 };
+  return manualBreakdownCents(items.map((item) => ({ amount: item.amountCents / 100, taxClass: item.taxClass, standaloneService: item.standaloneService })), rates, pstExempt);
 }
 
-function findLastAmountForTargetTotal(
-  baseSubtotalCents: number,
-  targetTotalCents: number,
-  pstExempt: boolean
-): number | null {
-  const totalForLastAmount = (lastAmountCents: number) => {
-    const subtotalCents = baseSubtotalCents + lastAmountCents;
-    return computeTaxCents(subtotalCents, { gstRate: 0.05, pstRate: 0.06 }, pstExempt).totalCents;
-  };
-
-  let low = 0;
-  let high = Math.max(targetTotalCents, 1);
-  while (totalForLastAmount(high) < targetTotalCents && high < targetTotalCents * 2 + 1000) {
-    high *= 2;
+function scaleItemsForOverridePreview(items: MoneyPreviewItem[], overrideTotalCents: number | null, pstExempt: boolean, rates: TaxRates | null): ScaledPreview {
+  const original = { itemAmountCents: items.map((item) => item.amountCents), breakdown: computeBreakdownCents(items, rates, pstExempt) };
+  if (!rates) return { ...original, error: "Loading canonical tax rates…" };
+  try {
+    const scaled = scaleManualPricing(items.map((item) => ({ amount: item.amountCents / 100, taxClass: item.taxClass, standaloneService: item.standaloneService })), rates, overrideTotalCents == null ? undefined : overrideTotalCents / 100, pstExempt);
+    return { itemAmountCents: scaled.items.map((item) => Math.round(item.amount * 100)), breakdown: scaled.breakdown, error: null };
+  } catch (cause) {
+    return { ...original, error: cause instanceof Error ? cause.message : "Invalid total" };
   }
-
-  while (low <= high) {
-    const mid = Math.floor((low + high) / 2);
-    const total = totalForLastAmount(mid);
-    if (total === targetTotalCents) return mid;
-    if (total < targetTotalCents) low = mid + 1;
-    else high = mid - 1;
-  }
-
-  const start = Math.max(0, low - 200);
-  const end = low + 200;
-  for (let cents = start; cents <= end; cents++) {
-    if (totalForLastAmount(cents) === targetTotalCents) return cents;
-  }
-  return null;
-}
-
-function scaleItemsForOverridePreview(
-  items: MoneyPreviewItem[],
-  overrideTotalCents: number | null,
-  pstExempt: boolean
-): ScaledPreview {
-  const computedBreakdown = computeBreakdownCents(items, pstExempt);
-  if (!overrideTotalCents || overrideTotalCents <= 0) {
-    return {
-      itemAmountCents: items.map((item) => item.amountCents),
-      breakdown: computedBreakdown,
-      error: null,
-    };
-  }
-
-  if (computedBreakdown.totalCents <= 0) {
-    return {
-      itemAmountCents: items.map((item) => item.amountCents),
-      breakdown: computedBreakdown,
-      error: "Add line amounts before editing the total.",
-    };
-  }
-
-  const scaledItems = items.map((item) => ({
-    ...item,
-    amountCents: Math.round(item.amountCents * (overrideTotalCents / computedBreakdown.totalCents)),
-  }));
-
-  const lastIndex = scaledItems.length - 1;
-  const baseItems = scaledItems.slice(0, lastIndex);
-  const baseSubtotalCents = baseItems.reduce((sum, item) => sum + item.amountCents, 0);
-  const lastAmountCents = findLastAmountForTargetTotal(
-    baseSubtotalCents,
-    overrideTotalCents,
-    pstExempt
-  );
-
-  if (lastAmountCents === null) {
-    return {
-      itemAmountCents: scaledItems.map((item) => item.amountCents),
-      breakdown: computeBreakdownCents(scaledItems, pstExempt),
-      error: "This total cannot be matched exactly with the current tax mix.",
-    };
-  }
-
-  scaledItems[lastIndex] = { ...scaledItems[lastIndex], amountCents: lastAmountCents };
-  return {
-    itemAmountCents: scaledItems.map((item) => item.amountCents),
-    breakdown: computeBreakdownCents(scaledItems, pstExempt),
-    error: null,
-  };
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────────
 
 export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: number }) {
+  const { rates: taxRates, error: taxRatesError } = useCanonicalRates();
+  const submissionIdRef = useRef<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{ orderNumber: string; email: string; quoteOnly: boolean } | null>(null);
+  const [success, setSuccess] = useState<{ orderNumber: string; email: string; quoteOnly: boolean; deliveryWarning?: string } | null>(null);
   const [totalOverrideOpen, setTotalOverrideOpen] = useState(false);
   const [proofUploadingIds, setProofUploadingIds] = useState<string[]>([]);
   const searchParams = useSearchParams();
@@ -427,6 +362,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     const isManualOpen = manual === "1" || manual === "quote";
     if (isManualOpen && lastConsumedManualRef.current !== manual) {
       lastConsumedManualRef.current = manual;
+      submissionIdRef.current = null;
       // ?quote=<uuid> links this manual order to the website quote request that
       // produced it. The API turns that into conversion_type='quote_won' plus
       // the quote's attribution columns.
@@ -562,21 +498,24 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const moneyItems = form.items.map((it, i): MoneyPreviewItem => ({
     kind: it.kind,
     amountCents: itemSubtotals[i],
+    taxClass: it.taxClass,
+    standaloneService: it.standaloneService,
   }));
   const pstExempt = form.pstExemption.enabled === true;
-  const computedBreakdown = computeBreakdownCents(moneyItems, pstExempt);
+  const computedBreakdown = computeBreakdownCents(moneyItems, taxRates, pstExempt);
   const overrideTotalCents = parseMoneyCents(form.overrideTotal);
   const overrideRequested = overrideTotalCents !== null && form.overrideTotal.trim() !== "";
   const overrideValidationError =
     overrideRequested && (!overrideTotalCents || overrideTotalCents <= 0)
       ? "Edited total must be greater than $0."
-      : overrideRequested && overrideTotalCents > MAX_OVERRIDE_TOTAL_CENTS
+      : overrideRequested && taxRates && overrideTotalCents > maximumManualTotalCents(taxRates)
         ? "Edited total is above the maximum allowed."
         : null;
   const preview = scaleItemsForOverridePreview(
     moneyItems,
     overrideValidationError ? null : overrideTotalCents,
-    pstExempt
+    pstExempt,
+    taxRates
   );
   const subtotal = preview.breakdown.subtotalCents / 100;
   const gst = preview.breakdown.gstCents / 100;
@@ -585,14 +524,15 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const hasValidAmount = preview.breakdown.subtotalCents > 0;
   const allItemsValid = form.items.every((it) => {
     const amountCents = parseMoneyCents(it.amount);
-    return it.product.trim() !== "" && !!amountCents && amountCents > 0;
+    return !it.taxClassificationRequired && it.product.trim() !== "" && !!amountCents && amountCents > 0;
   });
   const defaultSubject = form.quote_only
     ? `Your Quote — $${total.toFixed(2)} CAD | True Color Display Printing`
     : `Payment Request — $${total.toFixed(2)} CAD | True Color Display Printing`;
-  const canSubmit = hasValidAmount && allItemsValid && !overrideValidationError && !preview.error;
+  const canSubmit = !!taxRates && hasValidAmount && allItemsValid && !overrideValidationError && !preview.error;
 
   function openModal() {
+    submissionIdRef.current = null;
     setForm(EMPTY_FORM);
     setError(null);
     setSuccess(null);
@@ -618,7 +558,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
       ...prev,
       items: prev.items.map((it) => {
         if (it.id !== id) return it;
-        const next: OrderItem = { ...it, [field]: value };
+        const next: OrderItem = { ...it, [field]: value, ...(field === "taxClass" ? { taxClassificationRequired: false } : {}), ...(["amount", "unitPrice", "qty"].includes(field) ? { pricingSource: "staff_manual" as const, sourceOrderId: undefined } : {}) };
 
         // Auto-calc amount when staff types a unitPrice OR changes qty (and unitPrice is set).
         // Typing amount directly overrides — we leave unitPrice alone.
@@ -640,7 +580,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   function patchItem(id: string, patch: Partial<OrderItem>) {
     setForm((prev) => ({
       ...prev,
-      items: prev.items.map((it) => (it.id === id ? { ...it, ...patch } : it)),
+      items: prev.items.map((it) => (it.id === id ? { ...it, ...patch, ...(("amount" in patch || "unitPrice" in patch) ? { pricingSource: "staff_manual" as const, sourceOrderId: undefined } : {}) } : it)),
     }));
     if (error) setError(null);
   }
@@ -681,10 +621,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
       // If parser couldn't pull a product out (legacy data, weird names), fall
       // back to the loose matcher so the combobox still gets a category.
       const product = spec.product || matchProduct(oi.product_name);
-      const unit = oi.qty > 0 ? Math.round((oi.line_total / oi.qty) * 100) / 100 : 0;
+      const historic = historicManualPricing(oi);
       return {
         id: crypto.randomUUID(),
-        kind: "product" as const,
+        ...historic,
         title: spec.title,
         lineDescription: "",
         product,
@@ -694,10 +634,12 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         process: spec.process,
         qty: String(oi.qty),
         details: spec.details,
-        unitPrice: copyHistoricPrice && unit > 0 ? unit.toFixed(2) : "",
+        unitPrice: copyHistoricPrice ? historic.unitPrice : "",
         amount: copyHistoricPrice ? String(oi.line_total) : "",
         proofPath: "",
         proofName: "",
+        pricingSource: copyHistoricPrice ? "historic_copy" : "staff_manual",
+        sourceOrderId: copyHistoricPrice ? order.id : undefined,
       };
     });
     setForm((prev) => ({ ...prev, items: reorderItems }));
@@ -713,6 +655,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
       const detail = (event as CustomEvent<{ customer?: { name?: string; email?: string; company?: string | null; phone?: string | null }; order?: PastOrder }>).detail;
       if (!detail?.customer || !detail.order) return;
       const customer = detail.customer;
+      submissionIdRef.current = null;
       setForm({
         ...EMPTY_FORM,
         name: customer.name ?? "",
@@ -737,6 +680,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
+    if (!taxRates) { setError(taxRatesError ?? "Wait for canonical tax rates before submitting."); return; }
 
     if (!form.name.trim()) { setError("Customer name is required"); return; }
     if (!form.email.trim()) { setError("Customer email is required"); return; }
@@ -752,10 +696,13 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     setError(null);
 
     try {
+      submissionIdRef.current ??= crypto.randomUUID();
       const res = await fetch("/api/staff/manual-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          submissionId: submissionIdRef.current,
+          expectedPricing: { gstRate: taxRates.gstRate, pstRate: taxRates.pstRate, ...preview.breakdown },
           contact: {
             name: form.name.trim(),
             email: form.email.trim(),
@@ -764,6 +711,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
           },
           items: form.items.map((it) => ({
             kind: it.kind,
+            taxClass: it.taxClass ?? "printed_good",
+            standaloneService: it.standaloneService === true,
+            pricingSource: it.pricingSource ?? "staff_manual",
+            sourceOrderId: it.sourceOrderId,
             title: it.lineDescription.trim() || it.title.trim() || undefined,
             product: it.product.trim(),
             material: it.material.trim() || undefined,
@@ -789,14 +740,15 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         }),
       });
 
-      const data = await res.json() as { orderId?: string; orderNumber?: string; paymentUrl?: string | null; error?: string };
+      const data = await res.json() as { orderId?: string; orderNumber?: string; paymentUrl?: string | null; error?: string; customerEmailSent?: boolean; deliveryWarning?: string };
 
       if (!res.ok || data.error) {
         setError(data.error ?? "Something went wrong. Please try again.");
         return;
       }
 
-      setSuccess({ orderNumber: data.orderNumber!, email: form.email.trim(), quoteOnly: form.quote_only });
+      setSuccess({ orderNumber: data.orderNumber!, email: form.email.trim(), quoteOnly: form.quote_only, deliveryWarning: data.deliveryWarning });
+      if (data.deliveryWarning) { showToast(data.deliveryWarning, "info"); return; }
       showToast(
         form.quote_only
           ? `Quote sent to ${form.email.trim()}`
@@ -1013,10 +965,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-[#1c1712] mb-2">
-                      {success.quoteOnly ? "Quote sent!" : "Payment request sent!"}
+                      {success.deliveryWarning ? "Order saved — email needs attention" : success.quoteOnly ? "Quote sent!" : "Payment request sent!"}
                     </h3>
                     <p className="text-sm text-gray-500 mb-1">
-                      Email sent to <span className="font-semibold text-gray-700">{success.email}</span>
+                      {success.deliveryWarning ?? <>Email sent to <span className="font-semibold text-gray-700">{success.email}</span></>}
                     </p>
                     <p className="text-xs text-gray-400 mb-6">
                       Order <span className="font-mono font-bold text-gray-600">{success.orderNumber}</span> created — now visible in the orders list below.
@@ -1312,6 +1264,17 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                     </div>
                                   </div>
                                   <div>
+                                    <label className="block text-[10px] font-semibold text-gray-500 mb-1">
+                                      Tax classification {item.taxClassificationRequired && <span className="text-red-600">— choose before sending</span>}
+                                      <select className={inputClass} value={item.taxClassificationRequired ? "" : item.taxClass ?? "printed_good"} onChange={(event) => setItem(item.id, "taxClass", event.target.value)}>
+                                        <option value="" disabled>Choose the service tax classification</option>
+                                        <option value="printed_good">Taxable print charge / bundled fee</option>
+                                        <option value="design_service">Standalone design (GST only without print)</option>
+                                        <option value="rush_service">Standalone service rush (GST only without print)</option>
+                                        <option value="installation_service">Installation (taxable)</option>
+                                      </select>
+                                      {item.standaloneService && <span>Independent service copied from the source order; GST only.</span>}
+                                    </label>
                                     <label htmlFor={`pr-fee-notes-${item.id}`} className="block text-[10px] font-semibold text-gray-500 mb-1">
                                       Notes <span className="text-gray-300 font-normal">(optional)</span>
                                     </label>
@@ -1698,7 +1661,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                                 type="number"
                                 step="0.01"
                                 min="0.01"
-                                max={(MAX_OVERRIDE_TOTAL_CENTS / 100).toFixed(2)}
+                                max={taxRates ? (maximumManualTotalCents(taxRates) / 100).toFixed(2) : undefined}
                                 value={form.overrideTotal}
                                 onChange={(e) => set("overrideTotal", e.target.value)}
                                 placeholder={hasValidAmount ? (computedBreakdown.totalCents / 100).toFixed(2) : "0.00"}
@@ -1707,7 +1670,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             </div>
                             {(overrideValidationError || preview.error) && (
                               <p className="mt-1.5 text-[11px] font-semibold text-red-600">
-                                {overrideValidationError ?? preview.error}
+                                {taxRatesError ?? overrideValidationError ?? preview.error}
                               </p>
                             )}
                           </div>
@@ -1721,13 +1684,13 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                           </div>
                         </div>
                         <div>
-                          <p className="text-[10px] font-semibold text-gray-500 mb-1">GST (5%)</p>
+                          <p className="text-[10px] font-semibold text-gray-500 mb-1">GST ({taxRates ? taxRates.gstRate * 100 : "…"}%)</p>
                           <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
                             {hasValidAmount ? `$${gst.toFixed(2)}` : "—"}
                           </div>
                         </div>
                         <div>
-                          <p className="text-[10px] font-semibold text-gray-500 mb-1">PST (6%)</p>
+                          <p className="text-[10px] font-semibold text-gray-500 mb-1">PST ({taxRates ? taxRates.pstRate * 100 : "…"}%)</p>
                           <div className="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-sm font-semibold text-gray-500 tabular-nums">
                             {hasValidAmount ? `$${pst.toFixed(2)}` : "—"}
                           </div>
