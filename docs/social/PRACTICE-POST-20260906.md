@@ -64,3 +64,22 @@ PR [39](https://github.com/tubby124/truecolor-estimator/pull/39) merged at `4175
 Facebook published at 05:05 UTC: [live post](https://www.facebook.com/310364742156669_122234778494295517), photo ID `122234778470295517`. An independent Meta photo read returned the exact approved caption and hashtags. Instagram remained held with a saved failure: its container-status request incorrectly requested the nonexistent `error` field. This confirms that receipt persistence is now working. The bounded follow-up requests `status_code,status`, as documented in [Meta's official API collection](https://www.postman.com/meta/instagram/request/munmruq/get-ig-container-status), and preserves the container ID if a status request fails. Facebook must not be resubmitted.
 
 Owner feedback: the staff experience should be one photo, one caption, destination toggles and one approval, with delivery results separated internally. Completing this pilot takes priority over a broader UI redesign.
+
+
+## Successful two-platform delivery — September 6, 2026
+
+Both approved posts are live, independently verified through Meta and their rendered pages. The Fowlplay photo, full caption and all five hashtags match the approved package. Neither post's creative was changed.
+
+| Platform | Provider ID | Live link | Provider timestamp (UTC) |
+| --- | --- | --- | --- |
+| Facebook | photo `122234778470295517`, post `310364742156669_122234778494295517` | [Facebook post](https://www.facebook.com/310364742156669_122234778494295517) | 05:05:16 |
+| Instagram | media `18107906618180319` | [Instagram post](https://www.instagram.com/p/Dc7w50rkU41/) | 05:16:21 |
+
+PR [40](https://github.com/tubby124/truecolor-estimator/pull/40) merged at `cc20d00b234052a5c6a9e0782bbe2dc13d09fd64` after required CI and independent review passed. Deployment `b5013ce6-235f-4670-99a7-421c0d95d90b` succeeded. The unsupported status-field error occurred before `media_publish`; Instagram provider absence was rechecked, the failed receipt retained, and only Instagram returned to draft for fresh real staff approval at 05:16 UTC. Facebook was not dispatched again.
+
+The final Instagram-only dispatch returned `dispatched=1, held=0` at 05:16:26 UTC. At 05:16:41 UTC independent provider reads returned exact caption matches and both application posts were `posted`. Instagram's earlier failed receipt remains alongside its successful receipt; no history was deleted. Both rendered pages were visually checked, including the original Fowlplay sign image. Facebook showed Public visibility; the Instagram post rendered without sign-in after dismissing its sign-up prompt.
+
+Publishing was set back to false immediately after the Instagram dispatch. Final runtime pause evidence is recorded below. This proves the manual staff-approved two-platform path only; scheduled unattended delivery, Mac-asleep operation and Telegram remain untested. Owner's requested simpler one-compose/one-approval experience is recorded above; no broader redesign was undertaken.
+
+
+Final pause deployment `fe7f1a6b-ceac-4061-95ce-48f3ce562364` reported SUCCESS. At 05:18:45 UTC the authenticated hosted scheduler returned HTTP 200 with `skipped=true`, reason `Publishing is paused`. Readiness at 05:18:46 UTC confirmed 12 drafts, zero ready/posting and two posted records. A fresh provider-list duplicate check at 05:18 UTC found exactly one matching pilot per platform. The controlled publishing window is closed.
