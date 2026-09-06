@@ -8,6 +8,24 @@ import { fileURLToPath } from 'node:url';
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
+async function writePackage(files) {
+  // Exclusive writes preserve versioned originals and any previous prepared outputs.
+  const created = [];
+  try {
+    for (const [path, bytes] of files) {
+      const handle = await open(path, 'wx');
+      created.push(path);
+      try { await handle.writeFile(bytes); } finally { await handle.close(); }
+    }
+  } catch (error) {
+    // Only paths exclusively created by this invocation belong to its rollback.
+    const cleanup = await Promise.allSettled(created.map((path) => unlink(path)));
+    const failures = cleanup.filter((result) => result.status === 'rejected').map((result) => result.reason);
+    if (failures.length) throw new AggregateError([error, ...failures], 'Brand package failed and cleanup was incomplete');
+    throw error;
+  }
+}
+
 export async function brandMedia({ source, output, logo, corner, widthRatio = 0.20, inset = 0.035 }) {
   if (!logo) throw new Error('Explicit transparent logo path is required');
   if (!['top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(corner)) throw new Error('Explicit corner is required');
@@ -45,21 +63,7 @@ export async function brandMedia({ source, output, logo, corner, widthRatio = 0.
     layout: { corner, widthRatio, inset, artwork: { left: 0, top: 0, width, height }, logo: { left: logoLeft, top: logoTop, width: brand.info.width, height: brand.info.height } },
   };
   await mkdir(dirname(paths.output), { recursive: true });
-  // Exclusive writes preserve versioned originals and any previous prepared outputs.
-  const created = [];
-  try {
-    for (const [path, bytes] of [[pngPath, png], [paths.output, jpeg], [manifestPath, JSON.stringify(manifest, null, 2) + '\n']]) {
-      const handle = await open(path, 'wx');
-      created.push(path);
-      try { await handle.writeFile(bytes); } finally { await handle.close(); }
-    }
-  } catch (error) {
-    // Only paths exclusively created by this invocation belong to its rollback.
-    const cleanup = await Promise.allSettled(created.map((path) => unlink(path)));
-    const failures = cleanup.filter((result) => result.status === 'rejected').map((result) => result.reason);
-    if (failures.length) throw new AggregateError([error, ...failures], 'Brand package failed and cleanup was incomplete');
-    throw error;
-  }
+  await writePackage([[pngPath, png], [paths.output, jpeg], [manifestPath, JSON.stringify(manifest, null, 2) + '\n']]);
   return { ...manifest, files: { output: paths.output, lossless: pngPath, manifest: manifestPath } };
 }
 
