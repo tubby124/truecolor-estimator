@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { LOGO_PATH } from "@/lib/config";
 
 const NAV_ITEMS = [
+  {href:'/staff/social/monthly',label:'Monthly review',icon:<span aria-hidden="true">▦</span>},
+  {href:'/staff/social/offers',label:'Shared offers',icon:<span aria-hidden="true">◇</span>},
   {
     href: "/staff/social/library",
     label: "Asset Library",

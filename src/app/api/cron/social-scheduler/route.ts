@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { createServiceClient } from '@/lib/supabase/server';
-import { approvalIntegrityBlocker, dispatchApprovedPost, publishingEnabled } from '@/lib/social/approval';
+import { approvalIntegrityBlocker, dispatchApprovedPost, publishingEnabled, approvalReset } from '@/lib/social/approval';
 import { recordCronRun } from '@/lib/cron/heartbeat';
 import type { SocialPost } from '@/lib/types/social';
 
@@ -35,6 +35,8 @@ export async function GET(req: NextRequest) {
   const received = Buffer.from(req.headers.get('Authorization') || '');
   if (expected.length !== received.length || !timingSafeEqual(expected, received)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const params = req.nextUrl.searchParams;
+  if (params.get('runner') === 'ongoing') return ongoing(req);
+
   const ids = params.has('ids') ? params.get('ids')!.split(',') : null;
   const expiry = params.get('expiresAt');
   const deadline = expiry ? Date.parse(expiry) : Infinity;
@@ -65,14 +67,36 @@ export async function GET(req: NextRequest) {
     await recordCronRun('social-scheduler', !attemptHeld, `dispatched=${dispatched}; scoped run`);
     return NextResponse.json({ ok: true, publishingEnabled: publishingEnabled(), ...state, expired: Date.now() >= deadline, held: attemptHeld || state.held, dispatched });
   }
-  const { data, error } = await db.from('social_posts').select('*').eq('status', 'ready').not('approval_hash', 'is', null).lte('schedule_time', new Date().toISOString()).gte('schedule_time', new Date(Date.now() - 3600000).toISOString()).order('schedule_time', { ascending: true }).limit(10);
-  if (error) return NextResponse.json({ error: 'Approval queue unavailable; scheduler held' }, { status: 503 });
+  return NextResponse.json({ ok: true, skipped: true, reason: 'Use the explicitly activated ongoing runner; legacy unscoped dispatch is disabled' });
+}
+
+/** Separate activation prevents this deployment from widening the approved pilot. */
+async function ongoing(req: NextRequest) {
+  const params = req.nextUrl.searchParams;
+  const businessId = params.get('businessId') ?? '';
+  const check = params.get('mode') === 'check';
+  if (!uuid.test(businessId) || [...params.keys()].some(key => !['runner', 'businessId', 'mode'].includes(key) || params.getAll(key).length !== 1) || (params.has('mode') && !check)) return NextResponse.json({ error: 'Invalid ongoing scope' }, { status: 400 });
+  if (process.env.SOCIAL_BUSINESS_SCOPING_ENABLED !== 'true' || process.env.SOCIAL_ONGOING_SCHEDULER_ENABLED !== 'true' || process.env.SOCIAL_ONGOING_BUSINESS_ID !== businessId) return NextResponse.json({ error: 'Ongoing scheduling is not activated for this business' }, { status: 503 });
+  const db = createServiceClient();
+  const cutoff = new Date(Date.now() - 3600000).toISOString();
+  const scope = () => db.from('social_posts').select('*').eq('business_id', businessId);
+  const pending = await scope().in('status', ['posting', 'failed']).limit(1);
+  const stale = await scope().eq('status', 'ready').lt('schedule_time', cutoff).limit(1);
+  const due = await scope().eq('status', 'ready').not('approval_hash', 'is', null).lte('schedule_time', new Date().toISOString()).gte('schedule_time', cutoff).order('schedule_time').order('id').limit(26);
+  if (pending.error || stale.error || due.error) return NextResponse.json({ error: 'Ongoing queue unavailable; held' }, { status: 503 });
+  const initialHeld = Boolean(pending.data?.length || stale.data?.length);
+  if (check || !publishingEnabled()) return NextResponse.json({ ok: true, runner: 'ongoing', businessId, publishingEnabled: publishingEnabled(), held: initialHeld, due: due.data?.length ?? 0, backlog: (due.data?.length ?? 0) > 25, stale: Boolean(stale.data?.length), pending: Boolean(pending.data?.length) });
+  // Do not move a claimed or posted delivery. Expired schedules return visibly to review.
+  const expired = await db.from('social_posts').update({ ...approvalReset, status: 'draft', error_message: 'Schedule missed by more than one hour; choose a new time and approve again.' }).eq('business_id', businessId).eq('status', 'ready').lt('schedule_time', cutoff).select('id');
+  if (expired.error) return NextResponse.json({ error: 'Stale schedule hold could not be saved' }, { status: 503 });
   let dispatched = 0;
-  let held = 0;
-  for (const post of data ?? []) {
+  let held = expired.data?.length ?? 0;
+  // Each dispatch atomically claims its existing approval. No generation, receipt replay or retry.
+  for (const post of (due.data ?? []).slice(0, 25)) {
     const result = await dispatchApprovedPost(db, post);
-    if (result.status === 200 && 'post' in result && result.post?.status === 'posted') dispatched++; else held++;
+    if (result.status === 200 && 'post' in result && result.post?.status === 'posted') dispatched++;
+    else held++;
   }
-  await recordCronRun('social-scheduler', held === 0, `dispatched=${dispatched} held=${held}; automatic reconciliation disabled`);
-  return NextResponse.json({ ok: true, dispatched, held });
+  await recordCronRun('social-scheduler', held === 0 && !pending.data?.length, `ongoing dispatched=${dispatched} held=${held}`);
+  return NextResponse.json({ ok: true, runner: 'ongoing', businessId, publishingEnabled: publishingEnabled(), dispatched, held: held > 0 || Boolean(pending.data?.length), heldCount: held, backlog: (due.data?.length ?? 0) > 25 });
 }

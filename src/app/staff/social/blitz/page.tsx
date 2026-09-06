@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { NextResponse } from "next/server";
+import { requireSocialBusiness } from "@/lib/social/business";
 import type { Metadata } from "next";
 import Link from "next/link";
 import lazyLoad from "next/dynamic";
@@ -29,6 +32,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 async function getData() {
+  const auth = await requireSocialBusiness();
+  if (auth instanceof NextResponse) redirect("/staff/login");
   try {
     const supabase = createServiceClient();
 

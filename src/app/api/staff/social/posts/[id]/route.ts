@@ -1,5 +1,6 @@
+import { requireSocialBusiness, scopeSocialQuery, socialBusinessScopingEnabled } from "@/lib/social/business";
 import { NextResponse } from "next/server";
-import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { approvalReset, invalidDraftFields } from "@/lib/social/approval";
 import type { CreatePostBody } from "@/lib/types/social";
 
@@ -7,21 +8,21 @@ export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function GET(_req: Request, { params }: Params) {
-  const auth = await requireStaffUser();
+export async function GET(req: Request, { params }: Params) {
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
 
   const { id } = await params;
   const supabase = createServiceClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await scopeSocialQuery(supabase
     .from("social_posts")
     .select(`
       *,
       campaign:social_campaigns (*),
       results:social_post_results (*)
     `)
-    .eq("id", id)
+    .eq("id", id), auth.businessId)
     .single();
 
   if (error) {
@@ -32,7 +33,7 @@ export async function GET(_req: Request, { params }: Params) {
 }
 
 export async function PATCH(req: Request, { params }: Params) {
-  const auth = await requireStaffUser();
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
 
   const { id } = await params;
@@ -56,16 +57,23 @@ export async function PATCH(req: Request, { params }: Params) {
     }
   }
 
+  if (socialBusinessScopingEnabled()) {
+    for (const key of ['caption_gbp', 'fact_fingerprint', 'product_slug', 'product_configuration', 'offer_id', 'generation_job_id', 'gbp_payload'] as const) {
+      if (key in body) updates[key] = body[key];
+    }
+  }
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
   }
 
+  // Any edited legacy draft must pass current approval checks; untouched approvals stay intact.
+  if (socialBusinessScopingEnabled()) updates.approval_version = 2;
   const supabase = createServiceClient();
-  const { data, error } = await supabase
+  const { data, error } = await scopeSocialQuery(supabase
     .from("social_posts")
     .update({ ...updates, ...approvalReset, status: body.status === 'skip' ? 'skip' : 'draft' })
     .eq("id", id)
-    .in("status", ["draft", "ready", "skip"])
+    .in("status", ["draft", "ready", "skip"]), auth.businessId)
     .select(`
       *,
       campaign:social_campaigns (id, slug, name, campaign_color)
@@ -79,18 +87,18 @@ export async function PATCH(req: Request, { params }: Params) {
   return NextResponse.json(data);
 }
 
-export async function DELETE(_req: Request, { params }: Params) {
-  const auth = await requireStaffUser();
+export async function DELETE(req: Request, { params }: Params) {
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
 
   const { id } = await params;
   const supabase = createServiceClient();
 
-  const { data: deleted, error } = await supabase
+  const { data: deleted, error } = await scopeSocialQuery(supabase
     .from("social_posts")
     .delete()
     .eq("id", id)
-    .in("status", ["draft", "ready", "skip"])
+    .in("status", ["draft", "ready", "skip"]), auth.businessId)
     .select("id");
 
   if (error) {

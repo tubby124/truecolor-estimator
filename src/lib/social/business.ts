@@ -12,22 +12,24 @@ export async function requireSocialBusiness(req?: Request): Promise<SocialBusine
   if (user instanceof NextResponse) return user;
   const businessId = req?.headers.get('X-Social-Business-Id') || DEFAULT_SOCIAL_BUSINESS_ID;
   if (!uuid.test(businessId)) return NextResponse.json({ error: 'Invalid business context' }, { status: 400 });
-  // The existing single staff owner retains exactly the legacy True Color scope.
-  if (businessId === DEFAULT_SOCIAL_BUSINESS_ID) return { businessId, user };
-  if (!socialBusinessScopingEnabled()) return NextResponse.json({ error: 'Business scope unavailable' }, { status: 403 });
-  const { data, error } = await createServiceClient().from('social_business_members').select('business_id')
-    .eq('business_id', businessId).eq('user_id', user.id).eq('role', 'operator').maybeSingle();
+  // Pre-migration only: requireStaffUser is the existing sole-owner boundary.
+  if (!socialBusinessScopingEnabled()) {
+    if (businessId === DEFAULT_SOCIAL_BUSINESS_ID) return { businessId, user };
+    return NextResponse.json({ error: 'Business scope unavailable' }, { status: 403 });
+  }
+  const { data, error } = await createServiceClient().from('social_business_members').select('business_id,business:social_businesses!inner(is_active)')
+    .eq('business_id', businessId).eq('user_id', user.id).eq('role', 'operator').eq('business.is_active', true).maybeSingle();
   if (error || !data) return NextResponse.json({ error: 'Business access denied' }, { status: 403 });
   return { businessId, user };
 }
 
 /** Feature gate keeps existing approved deliveries readable before the approved migration. */
-export function scopeSocialQuery<T extends { eq: (column: string, value: string) => T }>(query: T, businessId: string): T {
+export function scopeSocialQuery<T>(query: T, businessId: string): T {
   if (!socialBusinessScopingEnabled()) {
     if (businessId !== DEFAULT_SOCIAL_BUSINESS_ID) throw new Error('Business scope unavailable');
     return query;
   }
-  return query.eq('business_id', businessId);
+  return (query as { eq: (column: string, value: string) => unknown }).eq('business_id', businessId) as T;
 }
 export function socialBusinessFields(businessId: string) {
   if (!socialBusinessScopingEnabled()) {

@@ -1,3 +1,4 @@
+import { requireSocialBusiness, DEFAULT_SOCIAL_BUSINESS_ID } from "@/lib/social/business";
 /**
  * POST /api/staff/social/blitz/sync-brevo-lists
  *
@@ -11,7 +12,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -62,9 +63,10 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return chunks;
 }
 
-export async function POST() {
-  const auth = await requireStaffUser();
+export async function POST(req?: Request) {
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
+  if (auth.businessId !== DEFAULT_SOCIAL_BUSINESS_ID) return NextResponse.json({ error: "Blitz is only available for True Color" }, { status: 403 });
 
   const brevoKey = process.env.BREVO_API_KEY ?? "";
   if (!brevoKey) {

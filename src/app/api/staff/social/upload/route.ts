@@ -1,5 +1,6 @@
+import { requireSocialBusiness, socialAssetPrefix } from "@/lib/social/business";
 import { NextResponse } from "next/server";
-import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import sharp, { type Sharp } from "sharp";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ const JPEG_QUALITY = 85;
 const MAX_SIZE_BYTES = 30 * 1024 * 1024; // 30MB
 
 export async function POST(req: Request) {
-  const auth = await requireStaffUser();
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
 
   const supabase = createServiceClient();
@@ -99,7 +100,7 @@ export async function POST(req: Request) {
 
   const year = new Date().getFullYear();
   const uuid = crypto.randomUUID();
-  const path = `social/${year}/${uuid}.${ext}`;
+  const path = `${socialAssetPrefix(auth.businessId)}/${year}/${uuid}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)

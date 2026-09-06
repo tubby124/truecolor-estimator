@@ -181,3 +181,54 @@ class RunnerTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class OngoingRunnerTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = Path(self.tmp.name) / 'ongoing-state.json'
+        self.config = {'runner': 'ongoing', 'businessId': '00000000-0000-4000-8000-000000000001', 'enabled': True, 'pilotReconciled': True}
+        self.ready = {'ok': True, 'runner': 'ongoing', 'businessId': self.config['businessId'], 'publishingEnabled': True, 'held': False, 'pending': False}
+
+    def test_config_requires_explicit_pilot_reconciliation(self):
+        path = Path(self.tmp.name) / 'config.json'
+        path.write_text(json.dumps({**self.config, 'pilotReconciled': False}))
+        with self.assertRaises(ValueError):
+            r.config_read(path)
+        path.write_text(json.dumps(self.config))
+        self.assertEqual(r.config_read(path), self.config)
+
+    def test_paused_and_disabled_never_dispatch(self):
+        send = Mock(return_value={**self.ready, 'publishingEnabled': False})
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 0)
+        send.assert_called_once_with(self.config, True)
+        send.reset_mock()
+        self.assertEqual(r.execute_ongoing({**self.config, 'enabled': False}, self.path, send=send), 0)
+        send.assert_not_called()
+
+    def test_unknown_dispatch_response_remains_read_only_after_restart(self):
+        send = Mock(side_effect=[self.ready, TimeoutError(), self.ready])
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 1)
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 1)
+        self.assertEqual([c.args[1] for c in send.call_args_list], [True, False, True])
+
+    def test_crash_during_dispatch_leaves_durable_claim(self):
+        def send(config, check):
+            if not check:
+                self.assertEqual(json.loads(self.path.read_text())['phase'], 'in_flight')
+                raise KeyboardInterrupt()
+            return self.ready
+        with self.assertRaises(KeyboardInterrupt):
+            r.execute_ongoing(self.config, self.path, send=send)
+        read = Mock(return_value=self.ready)
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=read), 1)
+        read.assert_called_once_with(self.config, True)
+
+    def test_successful_cycles_continue_and_check_never_writes(self):
+        send = Mock(return_value=self.ready)
+        self.assertEqual(r.execute_ongoing(self.config, self.path, check=True, send=send), 0)
+        self.assertFalse(self.path.exists())
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 0)
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 0)
+        self.assertEqual(json.loads(self.path.read_text())['phase'], 'waiting')

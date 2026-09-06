@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { createClient } from "@/lib/supabase/client";
 import type { SocialPost, SocialCampaign } from "@/lib/types/social";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -32,18 +31,21 @@ export function CalendarGrid({ initialPosts, campaigns }: Props) {
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [viewMode, setViewMode] = useState<"month" | "quarter">("month");
 
-  // Realtime
+  // Authorized API refresh works before and after browser table access is revoked.
   useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel("social-calendar")
-      .on("postgres_changes", { event: "*", schema: "public", table: "social_posts" }, (payload) => {
-        if (payload.eventType === "INSERT") setPosts(p => [...p, payload.new as SocialPost]);
-        else if (payload.eventType === "UPDATE") setPosts(p => p.map(x => x.id === payload.new.id ? { ...x, ...payload.new as SocialPost } : x));
-        else if (payload.eventType === "DELETE") setPosts(p => p.filter(x => x.id !== payload.old.id));
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    let active = true;
+    const controller = new AbortController();
+    const refresh = async () => {
+      if (document.visibilityState === "hidden") return;
+      try {
+        const response = await fetch("/api/staff/social/posts?limit=1000", { cache: "no-store", signal: controller.signal });
+        if (!response.ok) return;
+        const rows: SocialPost[] = await response.json();
+        if (active && Array.isArray(rows)) setPosts(rows.filter(post => post.status !== "skip"));
+      } catch { /* Preserve the last successful view while offline. */ }
+    };
+    const timer = setInterval(refresh, 15000);
+    return () => { active = false; controller.abort(); clearInterval(timer); };
   }, []);
 
   const year = viewDate.getFullYear();
