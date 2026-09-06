@@ -63,7 +63,7 @@ The aggregate scan is application-record evidence, not complete independent Wave
 
 Initial facts/marketing independent review: 36 focused tests passed, including round-trip freshness, stale source price fingerprint, excluded unverified custom shapes, live retractable/ACP/poster facts, preserved lots and two-way marketing drift. Finance initial focused set: 67 tests passed, followed by independent review; final results and CI are recorded below when complete.
 
-Pending before release: required PR CI, integration-controlled merge and deployed readback. Production migration activation, historical provider reconciliation and genuine finance delivery remain separate evidence/gates. Do not restore retired unsafe reprice/orphan-Wave handlers as a recovery shortcut.
+PR #49 passed all required CI checks and integration merged it as `84a409e2c31d30347012f6fa33a8245274793795`. Bounded production readback passed as recorded below. Production migration activation, historical provider reconciliation and genuine finance delivery remain separate evidence/gates. Do not restore retired unsafe reprice/orphan-Wave handlers as a recovery shortcut.
 
 ## Prepared migration and controlled operations
 
@@ -85,5 +85,25 @@ Independent final code review approved after remediation, with zero remaining cr
 - Full ESLint: zero errors,29 warnings; strict TypeScript and production standalone build passed using public CI placeholders.
 - Pricing validation passed; Google Ads130 tests and deterministic artifacts passed; VPS scheduler16 tests and aggregate audit1 test passed. Project records and whitespace checks passed.
 - Disposable PostgreSQL regression passed and rolled back; exact PST policy and audit regression steps are added to required CI under integration's explicit shared-workflow permission.
-- Chromium exercised the35 required paid-journey/social contracts against local standalone on port3017. Initial34 passed; one stale synthetic response omitted the newly explicit PST rate. Its fixture now supplies both canonical rates and the affected contract passed on rerun. Required PR CI will run the complete35 together. Staff/provider APIs were intercepted or lacked production credentials; no live delivery test occurred.
+- Chromium exercised the35 required paid-journey/social contracts against local standalone on port3017. Initial34 passed; one stale synthetic response omitted the newly explicit PST rate. Its fixture now supplies both canonical rates and the affected contract passed on rerun. Required PR CI subsequently passed all 35 together; see the deployed record below. Staff/provider APIs were intercepted or lacked production credentials; no live delivery test occurred.
 - Independent review approved with zero remaining critical/high findings. Production provider query readback and historical scan limits are stated above.
+
+
+## Merged pricing runtime verification — 2026-09-06
+
+PR [#49](https://github.com/tubby124/truecolor-estimator/pull/49) passed required CI on head `5927673f59bd5c4fd3a9df0f5f6d28ccb5fbec14`: application lint/test/build, PostgreSQL regressions and GitGuardian security. [Run 34053456425](https://github.com/tubby124/truecolor-estimator/actions/runs/34053456425) confirms **1,287 unit tests across 140 files and all 35 Chromium contracts passed**. The manually dispatched production-smoke job was skipped as expected.
+
+Main-branch [CI run 34053757527](https://github.com/tubby124/truecolor-estimator/actions/runs/34053757527) also completed successfully on merge `84a409e2c31d30347012f6fa33a8245274793795`: application checks and PostgreSQL regressions passed; manually dispatched production smoke was skipped.
+
+Railway readback showed deployment `38d1b0b7-7d39-4720-8db5-e3f0b5277dd6` in `SUCCESS` at exact main commit `84a409e2c31d30347012f6fa33a8245274793795`, created at `2026-09-06T19:05:08.639Z`; the previous deployment was removed. Public runtime checks started at **2026-09-06T19:08:36Z** against `https://truecolorprinting.ca`.
+
+| Read-only runtime request | Observed result |
+|---|---|
+| GET `/api/pricing/tax-rates` | HTTP 200; `Cache-Control: no-store`; `gstRate: 0.05`, `pstRate: 0.06`, `rushFee: 40` |
+| POST `/api/estimate`: DISPLAY, RBS33507875S, website preset 33.5×80, quantity 1 | HTTP 200, QUOTED, raw pre-tax `sell_price: 219` |
+| POST `/api/estimate`: RIGID, RMACP002, 24×36, quantity 1 | HTTP 200, QUOTED, raw pre-tax `sell_price: 78` |
+| POST `/api/estimate`: PHOTO_POSTER, RMPS002, 12×18, quantity 1 | HTTP 200, QUOTED, raw pre-tax `sell_price: 15` |
+
+All three estimates used single-sided, print-ready, non-rush inputs without add-ons. Every response preserved the complete source request in `estimate_request`, returned the canonical 5% GST/6% PST rates and classified the printed product as `pst_exempt: false`. The prices match committed source facts. Retractable dimensions here identify the existing website request only; the unresolved dimension claim remains excluded from generated promotional copy.
+
+These POSTs only computed public estimates; they did not create orders, save revisions, contact providers or send messages. This readback verifies public source prices and rates, not a paid checkout, the poster's $25 standalone-order minimum, database tax capability, authenticated staff revision behavior or new Wave/Clover/email delivery. No production migration or finance correction was applied. Later integration deployments need their own deployment identity/readback; this is evidence for the exact pricing merge above.
