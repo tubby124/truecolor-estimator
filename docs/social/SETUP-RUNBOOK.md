@@ -61,3 +61,8 @@ Recovery lesson: prepare protected credential storage before generating a token,
 
 
 Final deployment receipt: Railway deployment `13775233-a5f4-4a06-942b-6b1113e68911` reported SUCCESS after saving the verified Instagram ID. Read-only configuration confirms all three Meta variables present and publishing false. Meta content-publishing-limit read succeeded with zero quota usage. This completes the scoped connection plus unpublished rehearsal objective; it does not complete the later approved public-pilot, scheduler or Mac-asleep gates.
+
+
+## Reusable library continuation — September 6
+
+Owner requested website/Google owner-photo preservation, private cloud/Drive storage, Telegram photo intake, varied product/photo rotation and a repeatable other-business setup. [Asset library](ASSET-LIBRARY.md) owns concrete collection/storage evidence; [portable system](PORTABLE-SOCIAL-SYSTEM.md) owns the staged design and acceptance requirements. Weak-photo cleanup through Codex and cover text are explicitly deferred. No auto-post policy or new destination is enabled by this scope.

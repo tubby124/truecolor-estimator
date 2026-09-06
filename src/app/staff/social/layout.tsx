@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function SocialStudioLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-[#0f1117]">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-[#0f1117]">
       <SocialSidebar />
       {/* Main content */}
       <div className="flex-1 min-w-0 bg-[#f8f8f8] lg:rounded-l-2xl overflow-hidden">

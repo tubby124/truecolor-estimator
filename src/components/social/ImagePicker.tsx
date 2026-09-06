@@ -184,8 +184,13 @@ export function ImagePicker({
       // eslint-disable-next-line react-hooks/set-state-in-effect -- loading state before async fetch
       setLibraryLoading(true);
       fetch("/api/staff/social/images")
-        .then((res) => res.json())
-        .then((data: { images: LibraryImage[] }) => {
+        .then(async (res) => {
+          if (!res.ok) throw new Error("Library unavailable");
+          return res.json();
+        })
+        .then((data: { images: LibraryImage[]; truncated?: boolean }) => {
+          if (!Array.isArray(data.images)) throw new Error("Invalid library response");
+          if (data.truncated) showToast("Showing part of the image library. Use the asset library to browse sources.", "success");
           setLibrary(data.images);
           setLibraryLoaded(true);
         })
