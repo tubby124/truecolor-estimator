@@ -23,6 +23,7 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 ## Existing implementation runbooks
 
 - [Pricing and social integration work board and release evidence](social/INTEGRATION-20260906.md)
+- [Google credential setup, API application and remaining connection gates](social/GBP-CONNECTION-20260906.md)
 
 - [Prepared pricing and social migration release package](social/MIGRATION-RELEASE-20260906.md)
 

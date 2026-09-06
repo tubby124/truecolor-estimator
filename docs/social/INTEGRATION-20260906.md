@@ -26,7 +26,7 @@ Shared-file changes must be coordinated. Lane owners supply reviewed PRs, exact 
 | Migration package | Ordered SQL, review, disposable regression, backfill impact, rollback and activation instructions | Exact five-source package and private executable prepared, reviewed and tested; production approval required. |
 | Git and CI | Reviewed intended files, required exact-head checks, P before dependent lanes | PR45, PR49, PR47, PR50 and PR48 merged; root PR46 owns final combined SQL/CI and records. |
 | Deployment | Main CI, actual Railway deployment/commit and read-only runtime behavior | Combined P/C/G `5351b32f` deployment SUCCESS; public prices/rates and anonymous social authorization checks passed at19:29UTC. |
-| Provider setup | Google credentials/access, actual listing/history and live connection health | 19:18UTC: existing client/callback verified; Railway redirect and encryption key configured. Client secret missing, quota/access and actual Google history unverified. No paid test call. |
+| Provider setup | Google credentials/access, actual listing/history and live connection health | Google task saved the owner-authorized secret; config deployment097e6db1 SUCCESS. Last verified API quota0; support application submitted, approval/OAuth/history pending. [Connection receipt](GBP-CONNECTION-20260906.md). |
 | Ongoing scheduler | Reconcile existing six approved deliveries; replace the bounded trigger with one ongoing runner; preserve uncertain holds | Existing runner active and waiting; no replacement activated |
 
 ## Read-only Sunday batch reconciliation
@@ -103,3 +103,6 @@ GBP coordination update: owner reports the API support application submitted and
 Final local browser verification:29 ordering/image-availability contracts passed with direct real-image fixtures;12 social contracts then passed on the required localhost fixture origin. An initial local social invocation used127.0.0.1 and was correctly rejected by the explicit localhost guard; rerun changed only the local invocation origin. Strict TypeScript and whitespace checks pass. Final independent review approves the test-only isolation, including exact baseURL origin and public/images path checks. Required CI will run all41 together.
 
 Google task reports authorized client-secret storage succeeded with protected configuration readback, callback equality and64-hex encryption-key validation. Its config deployment `097e6db1-3a0a-4b32-a4ec-a535c7f62db6` was WAITING when reported; this does not prove runtime activation or OAuth. API support application is submitted; approval/quota restoration and owner OAuth remain outstanding. Root has made no further environment writes and preserves Wait for CI.
+
+
+Google task committed its [connection receipt](GBP-CONNECTION-20260906.md) as `c23983bf` on this shared integration branch. Root readback subsequently confirms config deployment `097e6db1-3a0a-4b32-a4ec-a535c7f62db6` SUCCESS at app5351b32f. This proves configuration deployment, not Google API approval or an OAuth connection. Final integration changes after app5351b32f remain prepared SQL, CI/tests and records.
