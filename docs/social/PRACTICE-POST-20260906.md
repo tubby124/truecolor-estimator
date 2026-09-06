@@ -34,6 +34,6 @@ Owner authorized adding the Meta Page use case. After an initial opaque UI error
 
 ## Deployment and draft evidence
 
-The PR 37 code deployment `40289fa0-862a-4237-91e1-a3baa605bca3` reported SUCCESS at commit `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c`. The subsequent credential-configuration deployment `03415b4b-e2a5-45b2-afa2-b6ff81589f8c` was still building at this checkpoint, using the same commit. Do not infer its completion from the earlier code deployment.
+The PR 37 code deployment `40289fa0-862a-4237-91e1-a3baa605bca3` reported SUCCESS at commit `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c`. The subsequent credential-configuration deployment `03415b4b-e2a5-45b2-afa2-b6ff81589f8c` subsequently reported SUCCESS using the same commit. This was independently checked after the earlier code deployment.
 
-The two newly saved unapproved drafts imply an expected total of 14 drafts; a fresh total-count read is pending. Staff browser login and authenticated production review remain pending. No public delivery is claimed.
+Fresh readiness at 02:57:09 UTC verified 14 drafts, zero ready posts, zero posted posts, zero attempts and publishing disabled. Staff browser login is the remaining immediate blocker before authenticated production approval. No public delivery is claimed.
