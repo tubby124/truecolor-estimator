@@ -146,6 +146,17 @@ jobs:
           PLAYWRIGHT_USE_BUILD: "true"
         run: npm run test:e2e:pw -- e2e-playwright/seo-paid-journeys.spec.ts e2e-playwright/social-approval.spec.ts e2e-playwright/social-library.spec.ts e2e-playwright/social-generation.spec.ts
 
+      - name: Retain failed synthetic browser evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-contract-failure-${{ github.run_id }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
   production-smoke:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
