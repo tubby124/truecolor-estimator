@@ -1,6 +1,6 @@
 import type { GenerationUsage } from '../generation-contract';
 import { MODEL } from './prompt';
-export const emptyUsage = (): GenerationUsage => ({ calls: 0, promptTokens: null, completionTokens: null, costUsd: null, provider: 'openrouter', model: MODEL, providerRequestIds: [] });
+export const emptyUsage = (): GenerationUsage => ({ calls: 0, promptTokens: 0, completionTokens: 0, costUsd: 0, provider: 'openrouter', model: MODEL, providerRequestIds: [] });
 export class ProviderFailure extends Error {
   constructor(public kind: 'retryable' | 'held' | 'failed', public usage: GenerationUsage, message: string) { super(message); }
 }
@@ -9,7 +9,7 @@ export async function callProvider(prompt: { system: string; context: string }, 
   const usage = emptyUsage();
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new ProviderFailure('failed', usage, 'Caption provider is not configured.');
-  usage.calls = 1;
+  usage.calls = 1; usage.promptTokens = null; usage.completionTokens = null; usage.costUsd = null;
   let response: Response;
   try {
     response = await fetcher('https://openrouter.ai/api/v1/chat/completions', {

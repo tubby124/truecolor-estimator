@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { generateCaptions } from "@/lib/social/generation-client";
+import { generateCaptions, GenerationRequestError } from "@/lib/social/generation-client";
 import type { GenerationChannel, GenerationResponse } from "@/lib/social/generation-contract";
 import { GenerationUsageSettings } from "./GenerationUsageSettings";
 import { PRODUCTS } from "@/lib/data/products-content";
@@ -56,12 +56,13 @@ async function compressImage(file: File): Promise<{ base64: string; type: string
 }
 
 // Upload image to Supabase Storage via our API, returns public URL
-async function uploadImage(file: File): Promise<string> {
+async function uploadImage(file: File, businessId?: string): Promise<string> {
   const form = new FormData();
   form.append("file", file);
   const res = await fetch("/api/staff/social/upload", {
     method: "POST",
     body: form,
+    headers: businessId ? { "X-Social-Business-Id": businessId } : {},
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? "Upload failed");
@@ -77,9 +78,10 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
   const [channels, setChannels] = useState<GenerationChannel[]>(selectedChannels ?? ["instagram", "facebook"]);
   const [productSlug, setProductSlug] = useState("");
   const [includePrice, setIncludePrice] = useState(false);
+  const [needsNewRequest, setNeedsNewRequest] = useState(false);
   const [generation, setGeneration] = useState<GenerationResponse | null>(null);
   const requestRef = useRef<{ key: string; id: string } | null>(null);
-  const uploadedRef = useRef<{ file: File; url: string } | null>(null);
+  const uploadedRef = useRef<{ file: File; url: string; businessId?: string } | null>(null);
   // Image state
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -121,21 +123,22 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  async function handleGenerate(resumeJobId?: string) {
+  async function handleGenerate(resumeJobId?: string, newRequest = false) {
     if (!canGenerate) {
       setError("Write a caption or upload an image of your work.");
       return;
     }
     setLoading(true);
     setError(null);
+    setNeedsNewRequest(false);
     try {
       const payload: Record<string, unknown> = { campaign_slug: campaignSlug, selectedChannels: channels, productSlug: productSlug || undefined, includePrice };
 
       if (hasImage && imageFile) {
         // Step 1: Upload image to Supabase Storage → get public URL
         setLoadingStep("uploading");
-        const publicUrl = uploadedRef.current?.file === imageFile ? uploadedRef.current.url : await uploadImage(imageFile);
-        uploadedRef.current = { file: imageFile, url: publicUrl };
+        const publicUrl = uploadedRef.current?.file === imageFile && uploadedRef.current.businessId === businessId ? uploadedRef.current.url : await uploadImage(imageFile, businessId);
+        uploadedRef.current = { file: imageFile, url: publicUrl, businessId };
         onImageUploaded?.(publicUrl);
 
         // Step 2: Compress for AI vision analysis
@@ -153,9 +156,9 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
       const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(payload)));
       const key = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
       const storageKey = `social-generation:${businessId ?? "default"}:${key}`;
-      if (resumeJobId) {
+      if (resumeJobId || newRequest) {
         requestRef.current = { key, id: crypto.randomUUID() };
-        payload.resumeJobId = resumeJobId;
+        if (resumeJobId) payload.resumeJobId = resumeJobId;
       } else if (requestRef.current?.key !== key) {
         let saved: string | null = null;
         try { saved = sessionStorage.getItem(storageKey); } catch { /* Storage may be unavailable. */ }
@@ -180,6 +183,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
       if (data.errors.length) setError(data.errors.join(" "));
       if (data.status === "held" || data.status === "running") setError("This job is " + data.status + ". Keep the request ID for recovery; do not start a duplicate generation.");
     } catch (e) {
+      setNeedsNewRequest(e instanceof GenerationRequestError && e.status === 409);
       setError(e instanceof Error ? e.message : "Generation failed");
     } finally {
       setLoading(false);
@@ -301,6 +305,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
 
       {generation && <p className="text-xs text-gray-500">{generation.cacheHit ? "Reused saved copy · " : ""}{generation.usage.calls} AI calls · {generation.usage.costUsd === null ? "Cost unavailable" : `USD ${generation.usage.costUsd.toFixed(4)}`} · {generation.status}. Job {generation.jobId}. Hashtags: {generation.hashtagEvidence.kind === "researched" ? `research dated ${generation.hashtagEvidence.researchedAt}` : "generic suggestions"}.</p>}
       {generation?.status === "partial" && <button type="button" disabled={loading} onClick={() => handleGenerate(generation.jobId)} className="text-xs border rounded px-3 py-2">Retry missing channels (uses generation allowance)</button>}
+      {needsNewRequest && <button type="button" disabled={loading} onClick={() => handleGenerate(undefined, true)} className="text-xs border rounded px-3 py-2">Start with current catalogue facts</button>}
       {/* AI angle note */}
       <AnimatePresence>
         {result?.angle && (

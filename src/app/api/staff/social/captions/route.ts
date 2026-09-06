@@ -13,8 +13,17 @@ export async function POST(req: Request) {
   if (auth instanceof NextResponse) return auth;
   if (auth.businessId !== DEFAULT_SOCIAL_BUSINESS_ID) return NextResponse.json({ error: 'Caption generation requires a configured business voice and catalogue. This business has not been onboarded.' }, { status: 503 });
   // Bound parsing before any provider/storage work, including chunked requests.
-  const raw = await req.text();
-  if (raw.length > 3_000_000) return NextResponse.json({ error: 'Caption request is too large.' }, { status: 413 });
+  const reader = req.body?.getReader();
+  const chunks: Uint8Array[] = []; let bytes = 0;
+  if (reader) {
+    while (true) {
+      const { done, value } = await reader.read(); if (done) break;
+      bytes += value.byteLength;
+      if (bytes > 3_000_000) { await reader.cancel(); return NextResponse.json({ error: 'Caption request is too large.' }, { status: 413 }); }
+      chunks.push(value);
+    }
+  }
+  const raw = Buffer.concat(chunks).toString('utf8');
   let parsed;
   try { parsed = parseGenerationInput(JSON.parse(raw)); }
   catch (e) { return NextResponse.json({ error: e instanceof Error ? e.message : 'Invalid caption request.' }, { status: 400 }); }
@@ -36,7 +45,7 @@ export async function GET(req: Request) {
   if (auth instanceof NextResponse) return auth;
   if (!socialBusinessScopingEnabled()) return NextResponse.json({ error: 'Durable generation migration is required.' }, { status: 503 });
   const id = new URL(req.url).searchParams.get('requestId');
-  if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: 'Provide a requestId UUID.' }, { status: 400 });
+  if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) return NextResponse.json({ error: 'Provide a requestId UUID.' }, { status: 400 });
   try {
     const job = await generationStore().job(auth.businessId, id);
     if (!job) return NextResponse.json({ error: 'Generation job not found.' }, { status: 404 });
