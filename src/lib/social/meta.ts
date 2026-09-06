@@ -229,13 +229,13 @@ async function waitForIgContainer(config: MetaConfig, containerId: string): Prom
     if (attempt > 0) await sleep(intervalMs);
     const res = await graph<{
       status_code?: string;
-      error?: { message?: string };
-    }>(config, containerId, { fields: "status_code,error" });
+      status?: string;
+    }>(config, containerId, { fields: "status_code,status" });
     if (res.status_code === "FINISHED") return { status: "FINISHED" };
     if (res.status_code === "ERROR" || res.status_code === "EXPIRED") {
       return {
         status: res.status_code,
-        errorMessage: res.error?.message ?? `IG media container ${res.status_code}`,
+        errorMessage: res.status ?? `IG media container ${res.status_code}`,
       };
     }
     // IN_PROGRESS (or absent) → keep polling
@@ -267,8 +267,8 @@ export async function publishInstagram(
   content: PostContent
 ): Promise<PlatformPublishResult> {
   const base = { platform: "instagram" as const };
+  let containerId: string | undefined;
   try {
-    let containerId: string;
 
     if (content.videoUrl) {
       containerId = await createIgContainer(config, {
@@ -318,7 +318,7 @@ export async function publishInstagram(
     const permalink = await igPermalink(config, mediaId);
     return { ...base, status: "published", submissionId: mediaId, publicUrl: permalink };
   } catch (err) {
-    return { ...base, status: "failed", errorMessage: friendlyMetaError(err) };
+    return { ...base, status: "failed", submissionId: containerId, errorMessage: friendlyMetaError(err) };
   }
 }
 

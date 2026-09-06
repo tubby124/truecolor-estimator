@@ -117,7 +117,7 @@ describe("publishInstagram", () => {
     expect(calls[0].body).toContain("image_url=https%3A%2F%2Ftruecolorprinting.ca%2Fimages%2Fone.jpg");
     expect(calls[0].body).toContain("caption=Hello+%23print");
     expect(calls[1].url).toContain("/container-1?");
-    expect(calls[1].url).toContain("fields=status_code%2Cerror");
+    expect(calls[1].url).toContain("fields=status_code%2Cstatus");
     expect(calls[3].url).toContain("/ig1/media_publish");
     expect(calls[3].body).toContain("creation_id=container-1");
   });
@@ -176,7 +176,7 @@ describe("publishInstagram", () => {
   it("maps container ERROR to a failed result", async () => {
     mockSequence(
       jsonResponse({ id: "container-1" }),
-      jsonResponse({ status_code: "ERROR", error: { message: "bad image url" } })
+      jsonResponse({ status_code: "ERROR", status: "bad image url" })
     );
 
     const result = await publishInstagram(config, { caption: "x", imageUrls: ["https://cdn/x.jpg"] });
@@ -196,6 +196,15 @@ describe("publishInstagram", () => {
     expect(result.submissionId).toBe("container-1");
     // 1 create + 8 polls, no publish call
     expect(fetchMock).toHaveBeenCalledTimes(9);
+  });
+
+  it("retains the container and never publishes after a failed status request", async () => {
+    mockSequence(jsonResponse({ id: "container-1" }), errorResponse(100, "Unsupported status field"));
+    const result = await publishInstagram(config, { caption: "x", imageUrls: ["https://cdn/x.jpg"] });
+    expect(result.status).toBe("failed");
+    expect(result.submissionId).toBe("container-1");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls.some(c => String(c[0]).includes("/media_publish"))).toBe(false);
   });
 
   it("maps token-expired API errors to a friendly failure", async () => {
@@ -312,7 +321,7 @@ describe("reconcileIgContainer", () => {
   });
 
   it("marks an ERROR container failed", async () => {
-    fetchMock.mockResolvedValueOnce(jsonResponse({ status_code: "ERROR", error: { message: "expired" } }));
+    fetchMock.mockResolvedValueOnce(jsonResponse({ status_code: "ERROR", status: "expired" }));
     const result = await reconcileIgContainer(config, "container-1");
     expect(result?.status).toBe("failed");
     expect(result?.errorMessage).toContain("expired");

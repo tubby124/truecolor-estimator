@@ -43,3 +43,6 @@ Owner requested a real Instagram/Facebook practice plus branch reconciliation. [
 ## Practice execution repair — September 6, 2026
 
 The two authorized posts received real staff approvals, but the 04:50 UTC dispatch held both with no receipts. Publishing was disabled again. Protected provider readback found neither pilot published. A production receipt schema mismatch was reproduced with a zero-row probe; the narrow fix uses append-only receipt inserts under the existing CAS claim and preserves manual holds. The correct derived Page credential was verified and saved. [Practice evidence](../social/PRACTICE-POST-20260906.md#initial-hold-and-repair) records verification and remaining delivery gate. No automatic retry, Telegram or Mac-asleep proof is claimed.
+
+
+At 05:05 UTC the repaired pipeline published the approved Facebook pilot with exact-caption Meta readback. Instagram's saved failure identified an unsupported container-status field; a narrow correction is being verified. Facebook must not be retried. [Latest practice receipt](../social/PRACTICE-POST-20260906.md#facebook-published-instagram-status-field-repair).
