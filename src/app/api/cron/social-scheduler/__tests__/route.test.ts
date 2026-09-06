@@ -76,4 +76,14 @@ describe('scoped VPS scheduler', () => {
    expect(dispatch).not.toHaveBeenCalled();
  });
 
+ it('returns only stored posted public links on the matching platform hostname', async () => {
+   mockRead([{...row(ids[0], 'posted'), platforms:['facebook'], post_public_url:'https://www.facebook.com/123_456'}, {...row(ids[1], 'posting'), platforms:['instagram'], post_public_url:'https://www.instagram.com/p/unconfirmed/'}]);
+   const result = await (await GET(scoped())).json();
+   expect(result.receipts).toEqual([expect.objectContaining({id: ids[0], platform: 'facebook', publicUrl:'https://www.facebook.com/123_456'}), expect.objectContaining({id: ids[1], publicUrl:null})]);
+   for (const link of ['https://example.test/?token=secret', 'https://www.facebook.com/123?access_token=secret', 'https://user:secret@www.facebook.com/123']) {
+     mockRead([{...row(ids[0], 'posted'), platforms:['facebook'], post_public_url:link}, row(ids[1])]);
+     expect((await (await GET(scoped())).json()).receipts[0].publicUrl).toBeNull();
+   }
+ });
+
 });

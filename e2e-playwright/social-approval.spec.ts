@@ -87,15 +87,15 @@ test("phone image captioning uses the converted JPEG and saves an unapproved dra
   await page.locator('input[type="date"]').fill("2027-01-12");
   await page.locator('input[type="file"]').setInputFiles({ name: "phone.heic", mimeType: "image/heic", buffer: Buffer.from("synthetic undecodable original") });
   await page.getByRole("button", { name: /Generate 1 caption/ }).click();
-  await expect(page.getByRole("button", { name: "Save 1 drafts" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save 1 posts · 2 deliveries" })).toBeVisible();
   // Clearing a slot date is recoverable and does not crash the review.
   await page.locator('input[type="datetime-local"]').fill("");
-  await expect(page.getByRole("button", { name: "Save 1 drafts" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save 1 posts · 2 deliveries" })).toBeVisible();
   await page.locator('input[type="datetime-local"]').fill("2027-01-12T15:00");
-  await page.getByRole("button", { name: "Save 1 drafts" }).click();
+  await page.getByRole("button", { name: "Save 1 posts · 2 deliveries" }).click();
   await expect(page).toHaveURL(new RegExp(`/staff/social/review\\?ids=${id}`));
   expect(saved?.posts[0].schedule_time).toBe("2027-01-12T21:00:00.000Z");
-  expect(saved?.posts[0].platforms).toEqual(["instagram"]);
+  expect(saved?.posts[0].platforms).toEqual(["instagram", "facebook"]);
 });
 
 

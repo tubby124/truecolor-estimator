@@ -21,7 +21,7 @@ class RunnerTest(unittest.TestCase):
         self.waiting = {'ok': True, 'held': False, 'complete': False, 'total': 6, 'counts': {'ready': 6}, 'publishingEnabled': True, 'nextTimes': ['2026-09-06T15:00:00Z']}
 
     def run_case(self, send, **kw):
-        return r.execute(self.config, self.path, now=self.now, send=send, clock=kw.pop("clock", lambda: self.now), **kw)
+        return r.execute(self.config, self.path, now=self.now, send=send, notify=kw.pop("notify", Mock()), clock=kw.pop("clock", lambda: self.now), **kw)
 
     def test_check_crossing_expiry_never_dispatches(self):
         send = Mock(return_value=self.waiting)
@@ -33,7 +33,8 @@ class RunnerTest(unittest.TestCase):
         send = Mock(side_effect=[self.waiting, TimeoutError()])
         self.assertEqual(self.run_case(send), 1)
         self.assertEqual(self.run_case(send), 1)
-        self.assertEqual(send.call_count, 2)
+        self.assertEqual(send.call_args_list[1].args, (self.config, False))
+        self.assertTrue(all(call.args[1] for call in send.call_args_list[2:]))
 
     def test_journal_exists_before_request_and_crash_blocks(self):
         def crash(*args):
@@ -41,9 +42,9 @@ class RunnerTest(unittest.TestCase):
             raise KeyboardInterrupt()
         with self.assertRaises(KeyboardInterrupt):
             self.run_case(crash)
-        send = Mock()
+        send = Mock(return_value=self.waiting)
         self.assertEqual(self.run_case(send), 1)
-        send.assert_not_called()
+        send.assert_called_once_with(self.config, True)
 
     def test_expired_or_disabled_never_calls(self):
         send = Mock()
@@ -80,6 +81,95 @@ class RunnerTest(unittest.TestCase):
             self.run_case(send)
             self.run_case(send)
             self.assertEqual(send.call_count, 1)
+        self.assertTrue(all(call.args[1] for call in send.call_args_list))
+
+    def test_notification_failure_retries_without_republishing(self):
+        receipt = {'id': self.config['ids'][0], 'platform': 'facebook', 'status': 'posted', 'scheduleTime': '2026-09-06T15:00:00Z', 'publicUrl': 'https://www.facebook.com/123_456'}
+        done = {**self.waiting, 'complete': True, 'receipts': [receipt]}
+        send = Mock(side_effect=[self.waiting, done])
+        notify = Mock(side_effect=[TimeoutError(), None])
+        self.assertEqual(self.run_case(send, notify=notify), 0)
+        self.assertEqual(json.loads(self.path.read_text())['phase'], 'complete')
+        self.assertEqual(self.run_case(send, notify=notify), 0)
+        self.run_case(send, notify=notify)
+        self.assertEqual([call.args[1] for call in send.call_args_list], [True, False])
+        self.assertEqual(notify.call_count, 2)
+        self.assertIn(receipt['publicUrl'], notify.call_args.args[0])
+        self.assertTrue(all(e['sent'] for e in json.loads(self.path.with_name('notifications.json').read_text()).values()))
+
+    def test_partial_success_notice_has_only_verified_link_and_hold(self):
+        receipts = [
+            {'id': self.config['ids'][0], 'platform': 'facebook', 'status': 'posted', 'scheduleTime': '2026-09-06T15:00:00Z', 'publicUrl': 'https://www.facebook.com/123_456'},
+            {'id': self.config['ids'][1], 'platform': 'instagram', 'status': 'posting', 'scheduleTime': '2026-09-06T15:00:00Z', 'publicUrl': 'https://www.instagram.com/p/unconfirmed/'},
+        ]
+        notify = Mock()
+        send = Mock(return_value={**self.waiting, 'held': True, 'receipts': receipts})
+        self.run_case(send, notify=notify)
+        self.run_case(send, notify=notify)
+        self.assertEqual(notify.call_count, 2)  # one pair update and one deduplicated hold
+        message = notify.call_args_list[0].args[0]
+        self.assertIn('https://www.facebook.com/123_456', message)
+        self.assertIn('Instagram: HELD', message)
+        self.assertNotIn('unconfirmed', message)
+        self.assertTrue(all(call.args[1] for call in send.call_args_list))
+
+    def test_expiry_retries_notifications_without_endpoint_requests(self):
+        self.config['expiresAt'] = '2026-09-06T15:00:00Z'
+        send, notify = Mock(), Mock(side_effect=[TimeoutError(), None])
+        self.run_case(send, notify=notify)
+        self.run_case(send, notify=notify)
+        send.assert_not_called()
+        self.assertEqual(notify.call_count, 2)
+        self.assertIn('expired', notify.call_args.args[0])
+
+    def final_result(self):
+        return {**self.waiting, 'complete': True, 'receipts': [{'id': self.config['ids'][0], 'platform': 'facebook', 'status': 'posted', 'scheduleTime': '2026-09-06T15:00:00Z', 'publicUrl': 'https://www.facebook.com/123_456'}]}
+
+    def test_crash_after_complete_commit_recovers_notification_without_network(self):
+        send, notify = Mock(side_effect=[self.waiting, self.final_result()]), Mock()
+        original = r.notifications
+        def crash(path, config, result=None, alert=None, notify=None):
+            if result and result.get('complete'):
+                raise KeyboardInterrupt()
+            return original(path, config, result, alert, notify)
+        from unittest.mock import patch
+        with patch.object(r, 'notifications', side_effect=crash):
+            with self.assertRaises(KeyboardInterrupt):
+                self.run_case(send, notify=notify)
+        self.assertEqual(json.loads(self.path.read_text())['phase'], 'complete')
+        self.run_case(send, notify=notify)
+        self.assertEqual(send.call_count, 2)
+        notify.assert_called_once()
+        self.assertIn('https://www.facebook.com/123_456', notify.call_args.args[0])
+
+    def test_outbox_storage_failure_does_not_lose_terminal_receipt(self):
+        from unittest.mock import patch
+        send, notify = Mock(side_effect=[self.waiting, self.final_result()]), Mock()
+        with patch.object(r, 'notifications', side_effect=OSError()):
+            self.run_case(send, notify=notify)
+        self.assertEqual(json.loads(self.path.read_text())['phase'], 'complete')
+        self.run_case(send, notify=notify)
+        self.assertEqual(send.call_count, 2)
+        notify.assert_called_once()
+
+    def test_uncertain_final_delivery_recovers_readonly_after_expiry(self):
+        self.config['expiresAt'] = '2026-09-06T15:00:00Z'
+        r.persist(self.path, {'fingerprint': r.fingerprint(self.config), 'phase': 'in_flight'})
+        send, notify = Mock(return_value=self.final_result()), Mock()
+        self.run_case(send, notify=notify)
+        self.run_case(send, notify=notify)
+        send.assert_called_once_with(self.config, True)
+        self.assertEqual(json.loads(self.path.read_text())['phase'], 'complete')
+        notify.assert_called_once()
+
+    def test_local_crash_hold_notifies_when_remote_rows_are_still_ready(self):
+        r.persist(self.path, {'fingerprint': r.fingerprint(self.config), 'phase': 'in_flight'})
+        send, notify = Mock(return_value=self.waiting), Mock()
+        self.run_case(send, notify=notify)
+        self.run_case(send, notify=notify)
+        send.assert_called_once_with(self.config, True)
+        notify.assert_called_once()
+        self.assertIn('HELD', notify.call_args.args[0])
 
     def test_config_rejects_missing_duplicate_or_extra_ids(self):
         for ids in [[], self.config['ids'][:5], self.config['ids'] + ['bad'], [self.config['ids'][0]] * 6]:

@@ -8,6 +8,14 @@ import type { SocialPost } from '@/lib/types/social';
 
 export const dynamic = 'force-dynamic';
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function publicLink(post: SocialPost) {
+  if (post.status !== 'posted' || !post.post_public_url) return null;
+  try {
+    const url = new URL(post.post_public_url);
+    const allowed = post.platforms?.[0] === 'instagram' ? ['instagram.com', 'www.instagram.com'] : ['facebook.com', 'www.facebook.com'];
+    return url.protocol === 'https:' && allowed.includes(url.hostname) && !url.username && !url.password && !url.search && !url.hash ? url.href : null;
+  } catch { return null; }
+}
 function summary(posts: SocialPost[], expected: number) {
   const counts: Record<string, number> = {};
   let held = posts.length !== expected;
@@ -18,7 +26,7 @@ function summary(posts: SocialPost[], expected: number) {
     if (post.status !== 'posted' && (post.status !== 'ready' || approvalIntegrityBlocker(post) !== null || !Number.isFinite(time) || time < Date.now() - 3600000)) held = true;
     if (post.status === 'ready' && Number.isFinite(time)) upcoming.push(new Date(time).toISOString());
   }
-  return { counts, total: posts.length, complete: posts.length === expected && counts.posted === expected, held, nextTimes: [...new Set(upcoming)].sort() };
+  return { receipts: posts.map(post => ({ id: post.id, platform: post.platforms?.[0] ?? 'unknown', status: post.status, scheduleTime: Number.isFinite(Date.parse(post.schedule_time || '')) ? new Date(post.schedule_time!).toISOString() : null, publicUrl: publicLink(post) })), counts, total: posts.length, complete: posts.length === expected && counts.posted === expected, held, nextTimes: [...new Set(upcoming)].sort() };
 }
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;

@@ -72,46 +72,180 @@ def request(config, check):
     return result
 
 
-def execute(config, path, check=False, now=None, send=request, clock=None):
+def telegram(message):
+    directory = Path(os.environ['CREDENTIALS_DIRECTORY'])
+    token = (directory / 'telegram-bot-token').read_text().strip()
+    chat = (directory / 'telegram-chat-id').read_text().strip()
+    if not re.fullmatch(r'[0-9]+:[A-Za-z0-9_-]+', token) or not re.fullmatch(r'-?[0-9]+', chat):
+        raise ValueError('Invalid Telegram credential')
+    body = json.dumps({'chat_id': chat, 'text': message, 'disable_web_page_preview': True}).encode()
+    req = urllib.request.Request('https://api.telegram.org/bot' + token + '/sendMessage', data=body, headers={'Content-Type': 'application/json'})
+    with urllib.request.build_opener(NoRedirect()).open(req, timeout=20) as response:
+        result = json.loads(response.read(65537))
+    if result.get('ok') is not True or not isinstance(result.get('result', {}).get('message_id'), int):
+        raise ValueError('Telegram delivery unconfirmed')
+
+
+def notifications(path, config, result=None, alert=None, notify=telegram):
+    """Separate durable outbox: failure here can never change provider dispatch state.
+
+    Telegram has no idempotency key. An accepted message whose ACK was lost may
+    repeat; confirmed ACKs are deduplicated. Never claim an unconfirmed send.
+    """
+    outpath = path.with_name('notifications.json')
+    outbox = json.loads(outpath.read_text()) if outpath.exists() else {}
+    def enqueue(key, message):
+        event = hashlib.sha256((fingerprint(config) + key).encode()).hexdigest()
+        if event not in outbox:
+            outbox[event] = {'message': message, 'sent': False}
+    if result is not None:
+        groups = {}
+        for receipt in result.get('receipts', []):
+            if receipt.get('id') in config['ids']:
+                groups.setdefault(receipt.get('scheduleTime'), []).append(receipt)
+        for scheduled, group in groups.items():
+            if not any(r.get('status') in ('posted', 'posting', 'failed') for r in group):
+                continue
+            group.sort(key=lambda r: r['id'])
+            lines = ['True Color scheduled post update', 'Scheduled UTC: ' + str(scheduled)]
+            for receipt in group:
+                platform = receipt.get('platform')
+                platform = platform if platform in ('facebook', 'instagram') else 'destination'
+                status = receipt.get('status')
+                label = 'published' if status == 'posted' else 'HELD - needs manual reconciliation' if status in ('posting', 'failed') else 'pending'
+                lines.append(platform.title() + ': ' + label)
+                link = receipt.get('publicUrl')
+                if status == 'posted' and isinstance(link, str):
+                    url = urllib.parse.urlsplit(link)
+                    hosts = ('instagram.com', 'www.instagram.com') if platform == 'instagram' else ('facebook.com', 'www.facebook.com')
+                    if url.scheme == 'https' and url.netloc in hosts and not url.query and not url.fragment:
+                        lines.append(link)
+            enqueue(json.dumps(group, sort_keys=True), '\n'.join(lines))
+        if result.get('held'):
+            alert = 'held'
+    if alert:
+        labels = {'held': 'Scheduled publishing HELD. Review approval or delivery state; provider retries are disabled.', 'uncertain': 'Scheduled publishing response uncertain. Manual reconciliation required; provider retries are disabled.', 'expired': 'Scheduling window expired before all destinations were confirmed published.', 'paused': 'A scheduled post is due but publishing is paused.'}
+        enqueue('alert:' + alert, 'True Color: ' + labels[alert])
+    persist(outpath, outbox)
+    pending = False
+    for event in outbox.values():
+        if event['sent']:
+            continue
+        try:
+            notify(event['message'])
+            event['sent'] = True
+            persist(outpath, outbox)
+        except Exception:
+            pending = True
+            print('notification_pending')
+            break
+    return not pending
+
+
+def receipt_snapshot(result, config):
+    """Persist only the safe receipt fields, never arbitrary server responses."""
+    receipts = []
+    for receipt in result.get('receipts', []):
+        if receipt.get('id') not in config['ids'] or receipt.get('platform') not in ('facebook', 'instagram') or receipt.get('status') not in ('draft', 'ready', 'posting', 'posted', 'failed'):
+            continue
+        scheduled = receipt.get('scheduleTime')
+        try:
+            instant(scheduled)
+        except (ValueError, TypeError):
+            scheduled = None
+        link = receipt.get('publicUrl')
+        url = urllib.parse.urlsplit(link) if isinstance(link, str) else None
+        hosts = ('instagram.com', 'www.instagram.com') if receipt['platform'] == 'instagram' else ('facebook.com', 'www.facebook.com')
+        if receipt['status'] != 'posted' or not url or url.scheme != 'https' or url.netloc not in hosts or url.query or url.fragment:
+            link = None
+        receipts.append({'id': receipt['id'], 'platform': receipt['platform'], 'status': receipt['status'], 'scheduleTime': scheduled, 'publicUrl': link})
+    return {'receipts': receipts, 'held': result.get('held') is True, 'complete': result.get('complete') is True}
+
+
+def execute(config, path, check=False, now=None, send=request, clock=None, notify=telegram):
     clock = clock or (lambda: dt.datetime.now(dt.timezone.utc))
     now = now or clock()
     key = fingerprint(config)
     state = json.loads(path.read_text()) if path.exists() else {'fingerprint': key, 'phase': 'waiting'}
-    # A check is remote read-only, even when locally held; never clears local state.
     if check:
         result = send(config, True)
         print('check_held' if result['held'] else 'check_complete' if result['complete'] else 'check_waiting')
         return 0
-    if not config['enabled'] or now >= instant(config['expiresAt']):
+
+    def notices(result=None, alert=None):
+        try:
+            return notifications(path, config, result, alert, notify)
+        except Exception:
+            print('notification_storage_pending')
+            return False
+
+    def save(phase, result=None, recovery=False):
+        nonlocal state
+        snapshot = receipt_snapshot(result, config) if result is not None else state.get('lastResult')
+        state = {'fingerprint': key, 'phase': phase, 'lastResult': snapshot, 'recovery': recovery}
+        persist(path, state)  # Phase and notification intent commit atomically.
+
+    # Replay the durable intent even if the process died before creating the outbox.
+    notices(result=state.get('lastResult') if state.get('fingerprint') == key else None)
+    expired = now >= instant(config['expiresAt'])
+    if not config['enabled']:
         print('disabled_or_expired')
         return 0
-    if state.get('fingerprint') != key or state.get('phase') not in ('waiting', 'complete'):
+    if state.get('fingerprint') != key:
+        notices(alert='held')
         print('blocked_manual_reconciliation')
         return 1
+    if state.get('phase') not in ('waiting', 'complete'):
+        # Recovery reads may continue after expiry. They NEVER dispatch, and stop
+        # once remote state is definitive; posting remains held for reconciliation.
+        if state.get('recovery', True) and now >= instant(config['notBefore']):
+            try:
+                result = send(config, True)
+                unresolved = any(r.get('status') == 'posting' for r in result.get('receipts', []))
+                save('complete' if result['complete'] else 'blocked', result, unresolved)
+                notices(result=state['lastResult'], alert=None if result['complete'] else 'held')
+            except Exception:
+                notices(alert='uncertain')
+        elif state.get('phase') != 'complete':
+            notices(alert='held')
+        if expired and state.get('phase') != 'complete':
+            notices(alert='expired')
+        print('complete' if state.get('phase') == 'complete' else 'blocked_manual_reconciliation')
+        return 0 if expired or state.get('phase') == 'complete' else 1
+    if expired:
+        if state.get('phase') != 'complete':
+            notices(alert='expired')
+        print('disabled_or_expired')
+        return 0
     if state['phase'] == 'complete' or now < instant(config['notBefore']):
         print('complete' if state['phase'] == 'complete' else 'before_window')
         return 0
-    # Persist BEFORE even the read-only network call. Any error/crash blocks later runs.
-    persist(path, {'fingerprint': key, 'phase': 'in_flight'})
+    save('in_flight', recovery=True)
     try:
         result = send(config, True)
+        save('in_flight', result, True)
         if not result['held'] and not result['complete'] and result.get('publishingEnabled') is True:
             times = result.get('nextTimes')
             if not isinstance(times, list) or not times:
                 raise ValueError('Missing schedules')
             current = clock()
             if current >= instant(config['expiresAt']):
-                persist(path, {'fingerprint': key, 'phase': 'waiting'})
+                save('waiting', result)
+                notices(result=state['lastResult'], alert='expired')
                 print('expired_before_dispatch')
                 return 0
             if any(instant(t) <= current for t in times):
                 result = send(config, False)
         phase = 'blocked' if result['held'] else 'complete' if result['complete'] else 'waiting'
-        persist(path, {'fingerprint': key, 'phase': phase})
+        save(phase, result, any(r.get('status') == 'posting' for r in result.get('receipts', [])))
+        notices(result=state['lastResult'])
+        if result.get('publishingEnabled') is False and any(instant(t) <= clock() for t in result.get('nextTimes', [])):
+            notices(alert='paused')
         print(phase)
         return 1 if phase == 'blocked' else 0
     except Exception:
-        persist(path, {'fingerprint': key, 'phase': 'blocked'})
+        save('blocked', recovery=True)
+        notices(alert='uncertain')
         print('blocked_uncertain_http')
         return 1
 
