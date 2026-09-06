@@ -18,14 +18,15 @@ if [[ ! -x node_modules/.bin/tsc ]]; then
   echo 'Run bash scripts/codex/setup.sh before --full.' >&2
   exit 1
 fi
-# Same public build placeholders as CI. Do not copy a production .env into Cloud.
-export NEXT_TELEMETRY_DISABLED=1
-export NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co
-export NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=ci-placeholder-publishable-key
-export NEXT_PUBLIC_SITE_URL=https://truecolorprinting.ca
 ./node_modules/.bin/eslint src/ --max-warnings=999
 ./node_modules/.bin/tsc --noEmit
 npm test
 npm run validate:pricing
 npm run test:google-ads
+# Match CI: build placeholders must not change unit-test fixture origins.
+# Do not copy a production .env into Cloud.
+export NEXT_TELEMETRY_DISABLED=1
+export NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co
+export NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=ci-placeholder-publishable-key
+export NEXT_PUBLIC_SITE_URL=https://truecolorprinting.ca
 npm run build
