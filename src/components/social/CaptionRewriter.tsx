@@ -2,6 +2,10 @@
 
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { generateCaptions, GenerationRequestError } from "@/lib/social/generation-client";
+import type { GenerationChannel, GenerationResponse } from "@/lib/social/generation-contract";
+import { GenerationUsageSettings } from "./GenerationUsageSettings";
+import { PRODUCTS } from "@/lib/data/products-content";
 
 interface RewriteResult {
   instagram: string;
@@ -9,6 +13,9 @@ interface RewriteResult {
   twitter: string;
   hashtags?: string;
   angle?: string;
+  gbp?: string;
+  facts?: GenerationResponse["facts"];
+  jobId?: string;
 }
 
 interface Props {
@@ -16,6 +23,8 @@ interface Props {
   campaignSlug?: string;
   onResult: (result: RewriteResult) => void;
   onImageUploaded?: (url: string) => void;
+  selectedChannels?: GenerationChannel[];
+  businessId?: string;
 }
 
 // Compress image to max 1024px JPEG before sending to AI
@@ -47,24 +56,32 @@ async function compressImage(file: File): Promise<{ base64: string; type: string
 }
 
 // Upload image to Supabase Storage via our API, returns public URL
-async function uploadImage(file: File): Promise<string> {
+async function uploadImage(file: File, businessId?: string): Promise<string> {
   const form = new FormData();
   form.append("file", file);
   const res = await fetch("/api/staff/social/upload", {
     method: "POST",
     body: form,
+    headers: businessId ? { "X-Social-Business-Id": businessId } : {},
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? "Upload failed");
   return data.url as string;
 }
 
-export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUploaded }: Props) {
+export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUploaded, selectedChannels, businessId }: Props) {
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState<"uploading" | "generating" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RewriteResult | null>(null);
 
+  const [channels, setChannels] = useState<GenerationChannel[]>(selectedChannels ?? ["instagram", "facebook"]);
+  const [productSlug, setProductSlug] = useState("");
+  const [includePrice, setIncludePrice] = useState(false);
+  const [needsNewRequest, setNeedsNewRequest] = useState(false);
+  const [generation, setGeneration] = useState<GenerationResponse | null>(null);
+  const requestRef = useRef<{ key: string; id: string } | null>(null);
+  const uploadedRef = useRef<{ file: File; url: string; businessId?: string } | null>(null);
   // Image state
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -73,7 +90,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
 
   const hasCaption = captionRaw.trim().length > 0;
   const hasImage = imageFile !== null;
-  const canGenerate = hasCaption || hasImage;
+  const canGenerate = (hasCaption || hasImage || !!productSlug) && channels.length > 0;
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -106,21 +123,22 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  async function handleGenerate() {
+  async function handleGenerate(resumeJobId?: string, newRequest = false) {
     if (!canGenerate) {
       setError("Write a caption or upload an image of your work.");
       return;
     }
     setLoading(true);
     setError(null);
+    setNeedsNewRequest(false);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const payload: Record<string, any> = { campaign_slug: campaignSlug };
+      const payload: Record<string, unknown> = { campaign_slug: campaignSlug, selectedChannels: channels, productSlug: productSlug || undefined, includePrice };
 
       if (hasImage && imageFile) {
         // Step 1: Upload image to Supabase Storage → get public URL
         setLoadingStep("uploading");
-        const publicUrl = await uploadImage(imageFile);
+        const publicUrl = uploadedRef.current?.file === imageFile && uploadedRef.current.businessId === businessId ? uploadedRef.current.url : await uploadImage(imageFile, businessId);
+        uploadedRef.current = { file: imageFile, url: publicUrl, businessId };
         onImageUploaded?.(publicUrl);
 
         // Step 2: Compress for AI vision analysis
@@ -135,16 +153,37 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
         payload.caption_raw = captionRaw;
       }
 
-      const res = await fetch("/api/staff/social/captions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Generation failed");
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(payload)));
+      const key = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+      const storageKey = `social-generation:${businessId ?? "default"}:${key}`;
+      if (resumeJobId || newRequest) {
+        requestRef.current = { key, id: crypto.randomUUID() };
+        if (resumeJobId) payload.resumeJobId = resumeJobId;
+      } else if (requestRef.current?.key !== key) {
+        let saved: string | null = null;
+        try { saved = sessionStorage.getItem(storageKey); } catch { /* Storage may be unavailable. */ }
+        requestRef.current = { key, id: saved ?? crypto.randomUUID() };
+      }
+      try { sessionStorage.setItem(storageKey, requestRef.current.id); } catch { /* Current request still retains its ID. */ }
+      const settingsResponse = await fetch("/api/staff/social/generation/settings", { headers: businessId ? { "X-Social-Business-Id": businessId } : {} });
+      const settings = await settingsResponse.json();
+      if (!settingsResponse.ok) throw new Error(settings.error ?? "Generation settings unavailable.");
+      let data: GenerationResponse;
+      if (settings.configured) {
+        data = await generateCaptions({ ...payload, requestId: requestRef.current.id, selectedChannels: channels } as Parameters<typeof generateCaptions>[0], businessId);
+      } else {
+        // Compatibility only while approved migrations are pending. No hidden retry.
+        const res = await fetch("/api/staff/social/captions", { method: "POST", headers: { "Content-Type": "application/json", ...(businessId ? { "X-Social-Business-Id": businessId } : {}) }, body: JSON.stringify(payload) });
+        data = await res.json();
+        if (!res.ok) throw new Error((data as unknown as { error: string }).error ?? "Generation failed");
+      }
+      setGeneration(data);
       setResult(data);
       onResult(data);
+      if (data.errors.length) setError(data.errors.join(" "));
+      if (data.status === "held" || data.status === "running") setError("This job is " + data.status + ". Keep the request ID for recovery; do not start a duplicate generation.");
     } catch (e) {
+      setNeedsNewRequest(e instanceof GenerationRequestError && e.status === 409);
       setError(e instanceof Error ? e.message : "Generation failed");
     } finally {
       setLoading(false);
@@ -163,7 +202,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
       {/* Image drop zone */}
       <div>
         <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
-          Drop a photo of your work — AI generates everything
+          Drop a photo of your work — choose channels and review the draft
         </p>
         <AnimatePresence mode="wait">
           {imagePreview ? (
@@ -215,7 +254,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
                 {isDragging ? "Drop it!" : "Drop a photo or click to browse"}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                AI identifies the product and writes platform-specific captions + hashtags
+                AI observes visible details; select a catalogue product for verified pricing
               </p>
             </motion.div>
           )}
@@ -229,9 +268,15 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
         />
       </div>
 
+      <div className="space-y-2 text-xs">
+        <div className="flex gap-3">{(["instagram", "facebook", "gbp"] as GenerationChannel[]).map(channel => <label key={channel}><input type="checkbox" checked={channels.includes(channel)} disabled={loading} onChange={() => { setChannels(current => current.includes(channel) ? current.filter(c => c !== channel) : [...current, channel]); }} /> {channel === "gbp" ? "Google Business Profile" : channel}</label>)}</div>
+        <label className="block">Catalogue product (optional for showcases)<select aria-label="Catalogue product" value={productSlug} onChange={e => { setProductSlug(e.target.value); setIncludePrice(false); }} className="block border rounded p-2 w-full"><option value="">Photo showcase without pricing</option>{Object.entries(PRODUCTS).filter(([, p]) => !p.comingSoon && !p.serviceMode && p.sizePresets.length).map(([slug, p]) => <option key={slug} value={slug}>{p.name}</option>)}</select></label>
+        <label className="block"><input type="checkbox" checked={includePrice} disabled={!productSlug} onChange={e => setIncludePrice(e.target.checked)} /> Include verified catalogue configuration and order-minimum disclosure</label>
+      </div>
+      <GenerationUsageSettings businessId={businessId} />
       {/* Generate button */}
       <button
-        onClick={handleGenerate}
+        onClick={() => handleGenerate()}
         disabled={loading || !canGenerate}
         className="flex items-center gap-2 bg-[#1c1712] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
@@ -250,7 +295,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
 
       {!hasImage && !hasCaption && (
         <p className="text-xs text-gray-400">
-          Write a caption above, or drop a photo — AI generates posts + hashtags for all 3 platforms.
+          Write a caption above, or drop a photo — AI drafts only your selected channels.
         </p>
       )}
 
@@ -258,6 +303,9 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
         <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
       )}
 
+      {generation && <p className="text-xs text-gray-500">{generation.cacheHit ? "Reused saved copy · " : ""}{generation.usage.calls} AI calls · {generation.usage.costUsd === null ? "Cost unavailable" : `USD ${generation.usage.costUsd.toFixed(4)}`} · {generation.status}. Job {generation.jobId}. Hashtags: {generation.hashtagEvidence.kind === "researched" ? `research dated ${generation.hashtagEvidence.researchedAt}` : "generic suggestions"}.</p>}
+      {generation?.status === "partial" && <button type="button" disabled={loading} onClick={() => handleGenerate(generation.jobId)} className="text-xs border rounded px-3 py-2">Retry missing channels (uses generation allowance)</button>}
+      {needsNewRequest && <button type="button" disabled={loading} onClick={() => handleGenerate(undefined, true)} className="text-xs border rounded px-3 py-2">Start with current catalogue facts</button>}
       {/* AI angle note */}
       <AnimatePresence>
         {result?.angle && (
@@ -280,39 +328,31 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
             exit={{ opacity: 0, y: 8 }}
             className="grid gap-3"
           >
-            <PlatformPreview
+            {channels.includes("instagram") && <PlatformPreview
               platform="Instagram"
               icon="📸"
               content={result.instagram}
-              charLimit={220}
+              charLimit={2200}
               color="#E1306C"
               onUpdate={(v) => {
                 setResult((r) => r ? { ...r, instagram: v } : r);
                 onResult({ ...result, instagram: v });
               }}
             />
-            <PlatformPreview
+            }
+            {channels.includes("facebook") && <PlatformPreview
               platform="Facebook"
               icon="🌐"
               content={result.facebook}
-              charLimit={300}
+              charLimit={5000}
               color="#1877F2"
               onUpdate={(v) => {
                 setResult((r) => r ? { ...r, facebook: v } : r);
                 onResult({ ...result, facebook: v });
               }}
             />
-            <PlatformPreview
-              platform="X / Twitter"
-              icon="🐦"
-              content={result.twitter}
-              charLimit={200}
-              color="#1DA1F2"
-              onUpdate={(v) => {
-                setResult((r) => r ? { ...r, twitter: v } : r);
-                onResult({ ...result, twitter: v });
-              }}
-            />
+            }
+            {channels.includes("gbp") && <PlatformPreview platform="Google Business Profile" icon="📍" content={result.gbp ?? ""} charLimit={1500} color="#4285f4" onUpdate={v => { setResult(r => r ? { ...r, gbp: v } : r); onResult({ ...result, gbp: v }); }} />}
           </motion.div>
         )}
       </AnimatePresence>

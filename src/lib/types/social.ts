@@ -4,7 +4,7 @@
  */
 
 export type PostStatus = 'draft' | 'ready' | 'posting' | 'posted' | 'failed' | 'skip';
-export type Platform = 'instagram' | 'facebook' | 'twitter' | 'tiktok';
+export type Platform = 'instagram' | 'facebook' | 'twitter' | 'tiktok' | 'gbp';
 export type PostType = 'launch' | 'mid' | 'last-call';
 export type CampaignStatus = 'planned' | 'in-progress' | 'complete' | 'archived';
 
@@ -32,12 +32,23 @@ export interface SocialCampaign {
 }
 
 export interface SocialPost {
+  business_id?: string;
+  approval_version?: number | null;
+  caption_gbp?: string | null;
+  fact_fingerprint?: string | null;
+  product_slug?: string | null;
+  product_configuration?: Record<string, unknown> | null;
+  offer_id?: string | null;
+  batch_id?: string | null;
+  creative_id?: string | null;
+  generation_job_id?: string | null;
+  gbp_payload?: GbpPostPayload | null;
   approved_media_sha256?: string | null;
   approved_rights?: boolean | null;
   approval_hash?: string | null;
   approved_at?: string | null;
   approved_by?: string | null;
-  approval_target?: { platform: 'instagram' | 'facebook'; accountId: string; pageId: string } | null;
+  approval_target?: { platform: 'instagram' | 'facebook' | 'gbp'; accountId: string; pageId: string } | null;
   id: string;
   campaign_id: string | null;
   caption_raw: string;
@@ -94,6 +105,13 @@ export interface SocialAccount {
 // API request/response types
 
 export interface CreatePostBody {
+  caption_gbp?: string;
+  fact_fingerprint?: string;
+  product_slug?: string;
+  product_configuration?: Record<string, unknown>;
+  offer_id?: string;
+  generation_job_id?: string;
+  gbp_payload?: GbpPostPayload;
   campaign_id?: string | null;
   caption_raw: string;
   caption_instagram?: string;
@@ -147,4 +165,13 @@ export interface HashtagTemplate {
   product: string[];    // #VinylBanners #PrintShop etc
   seasonal: string[];   // event-specific
   audience: string[];   // target buyer type
+}
+
+export interface GbpDate { year: number; month: number; day: number }
+export interface GbpPostPayload {
+  topicType: 'STANDARD' | 'OFFER';
+  languageCode?: string;
+  callToAction?: { actionType: 'LEARN_MORE'; url: string };
+  event?: { title: string; schedule: { startDate: GbpDate; endDate: GbpDate; startTime?: { hours: number; minutes: number }; endTime?: { hours: number; minutes: number } } };
+  offer?: { couponCode?: string; redeemOnlineUrl?: string; termsConditions?: string };
 }
