@@ -50,7 +50,7 @@ function deliveryDb(initial: SocialPost, receiptFails = false) {
           events.push(row.status);
           return { data: { ...row }, error: null };
         },
-        async upsert(receipt: unknown) { receipts.push(receipt); events.push('receipt'); return { error: receiptFails ? {message:'receipt failed'} : null }; },
+        async insert(receipt: unknown) { receipts.push(receipt); events.push('receipt'); return { error: receiptFails ? {message:'receipt failed'} : null }; },
       };
       return chain;
     },
@@ -93,10 +93,26 @@ describe('approved delivery positive path', () => {
     vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(bytes)));
     publish.mockResolvedValue({attempted:true,results:[{platform:'facebook',status:outcome === 'receipt-error' ? 'published' : outcome}]});
     await dispatchApprovedPost(db as never,post);
+    if (outcome === 'receipt-error') expect(db.row().error_message).toMatch(/receipt could not be saved after provider dispatch/);
     expect(db.row().status).toBe('posting');
     expect((await dispatchApprovedPost(db as never,post)).status).toBe(409);
     expect((await dispatchApprovedPost(db as never,db.row())).status).toBe(409);
     expect(publish).toHaveBeenCalledTimes(1);
+  });
+  it.each(['TimeoutError', 'Error'])('records safe %s media preflight failure without dispatch', async (name) => {
+    const post = approved();
+    const db = deliveryDb(post);
+    const error = new Error('secret-token-must-not-be-persisted');
+    error.name = name;
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(error));
+    const result = await dispatchApprovedPost(db as never, post);
+    expect(result.status).toBe(503);
+    expect(result.error).toContain(name === 'TimeoutError' ? 'Media preflight timed out' : 'Media preflight failed');
+    expect(db.row().error_message).toBe(result.error);
+    expect(db.row().error_message).not.toContain('secret-token');
+    expect(db.row().status).toBe('posting');
+    expect(db.receipts).toEqual([]);
+    expect(publish).not.toHaveBeenCalled();
   });
   it('holds a claimed post without provider activity when approved bytes changed', async () => {
     const changedBytes = await sharp({ create: { width: 1080, height: 1080, channels: 3, background: '#000' } }).jpeg().toBuffer();
@@ -106,6 +122,7 @@ describe('approved delivery positive path', () => {
     const result = await dispatchApprovedPost(db as never, post);
     expect(result.status).toBe(409);
     expect(result.error).toMatch(/bytes changed/);
+    expect(db.row().error_message).toBe(result.error);
     expect(db.row().status).toBe('posting');
     expect(db.receipts).toEqual([]);
     expect((await dispatchApprovedPost(db as never, db.row())).status).toBe(409);
