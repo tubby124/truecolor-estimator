@@ -30,7 +30,7 @@ test('selected channels and stable request IDs survive repeat preparation withou
   await page.locator('textarea').filter({ hasText: 'A colourful print idea for Saskatoon.' }).first().fill('Display your services on a retractable banner. Our onsite graphic designer can help with artwork. #TrueColorPrinting #SaskatoonPrintShop');
   await expect(review.getByText('Copy preflight complete — photo and marketing review still required')).toBeVisible();
   await review.getByText('Check the actual image, caption and destination').click();
-  await expect(review.getByText(/Finished-product photos default to a clean neutral studio-like background/)).toBeVisible();
+  await expect(review.getByText(/Mix clean studio treatments with authentic finished-product/)).toBeVisible();
   expect(bodies).toHaveLength(2); // Editing/reviewing never triggers another generation.
 });
 test('confirmed stale facts offer an explicit fresh request', async ({ page }) => {

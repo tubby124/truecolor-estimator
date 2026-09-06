@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { GenerationInput } from '../../generation-contract';
-import { SAFE_RUSH_ENQUIRY, TRUE_COLOR_BUSINESS_PROFILE } from '../business-profile';
+import { SAFE_RUSH_ENQUIRY, productHashtagDefaults, TRUE_COLOR_BUSINESS_PROFILE } from '../business-profile';
 import { assemblePrompt, MODEL, PROFILE_VERSION, PROMPT_VERSION } from '../prompt';
 import { validateDraft } from '../validation';
 import { COMMERCE_POLICY } from '@/lib/commerce/policies';
@@ -36,11 +36,21 @@ describe('maintained True Color caption profile', () => {
     for (const channel of ['facebook', 'instagram']) {
       expect(context.hashtagRules[channel]).toEqual({ required: ['#TrueColorPrinting', '#SaskatoonPrintShop'], maxTotal: 5 });
     }
-    expect(context.hashtagCandidates).toEqual(['#TrueColorPrinting', '#SaskatoonPrintShop', '#BannerPrinting']);
+    expect(context.hashtagCandidates).toEqual(['#TrueColorPrinting', '#SaskatoonPrintShop', '#Saskatoon', '#CustomPrinting', '#PrintDesign', '#BannerPrinting']);
     expect(prompt.system).toContain('Every Facebook and Instagram caption must include #TrueColorPrinting #SaskatoonPrintShop');
     expect(prompt.system).toContain('Reject generic design lectures disconnected from the product or its use.');
     expect(context.imageRules).toContain('Preserve exact printed artwork, lettering, logos, colours and layout; never invent or repair unreadable detail.');
     expect(context.avoid).toContain('Generic design lectures');
+  });
+
+  it('gives the selected print product specific generic tags within the five-tag plan', () => {
+    const prompt = assemblePrompt({...input(['instagram']), productSlug:'window-decals'}, null, null, '', []);
+    const context = JSON.parse(prompt.context);
+    expect(context.hashtagCandidates).toEqual(['#TrueColorPrinting','#SaskatoonPrintShop','#Saskatoon','#WindowGraphics','#DecalPrinting']);
+    expect(context.genericHashtagDefaults).toEqual(productHashtagDefaults('window-decals'));
+    expect(context.hashtagPolicy).toContain('not researched trends');
+    expect(productHashtagDefaults('photo-posters')).toEqual(['#Saskatoon','#PosterPrinting','#CustomPosters']);
+    expect(prompt.system).toContain('Aim for five relevant tags');
   });
 
   it('keeps brand hashtags out of GBP-only requests even when research supplies them', () => {
@@ -58,7 +68,7 @@ describe('maintained True Color caption profile', () => {
     const context = JSON.parse(prompt.context);
     expect(context.hashtagRules.instagram.required).toHaveLength(2);
     expect(context.hashtagRules.gbp).toEqual({ required: [], maxTotal: 0 });
-    expect(context.hashtagCandidates).toEqual(['#TrueColorPrinting', '#SaskatoonPrintShop']);
+    expect(context.hashtagCandidates).toEqual(['#TrueColorPrinting', '#SaskatoonPrintShop', '#Saskatoon', '#CustomPrinting', '#PrintDesign']);
     expect(PROMPT_VERSION).not.toBe('catalogue-captions-v1');
     expect(PROFILE_VERSION).toBe(TRUE_COLOR_BUSINESS_PROFILE.version);
     expect(PROFILE_VERSION).not.toBe('truecolor-shop-voice-v1');
