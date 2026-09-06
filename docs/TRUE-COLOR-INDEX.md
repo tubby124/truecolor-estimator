@@ -22,6 +22,9 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Private social asset library](social/ASSET-LIBRARY.md)
+- [Portable social automation and resale readiness](social/PORTABLE-SOCIAL-SYSTEM.md)
+
 - [Social approval pilot and release gates](social/APPROVAL-PILOT.md)
 
 - [Merchant architecture](plans/2026-09-02-commerce-seo-merchant-architecture-audit.md)

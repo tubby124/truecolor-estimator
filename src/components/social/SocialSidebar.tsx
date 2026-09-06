@@ -8,6 +8,11 @@ import { LOGO_PATH } from "@/lib/config";
 
 const NAV_ITEMS = [
   {
+    href: "/staff/social/library",
+    label: "Asset Library",
+    icon: <span className="w-5 h-5 flex-shrink-0" aria-hidden="true">▧</span>,
+  },
+  {
     href: "/staff/social",
     exact: true,
     label: "Command Center",
