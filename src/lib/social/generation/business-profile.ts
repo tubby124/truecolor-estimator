@@ -16,7 +16,7 @@ export type BusinessServiceFact = {
 /** Maintained intake-shaped facts, not an intake form or another business onboarding. */
 export const TRUE_COLOR_BUSINESS_PROFILE = {
   schemaVersion: 1,
-  version: 'truecolor-shop-voice-v2',
+  version: 'truecolor-shop-voice-v3',
   businessSlug: 'true-color',
   name: 'True Color Display Printing',
   location: 'Saskatoon',
@@ -67,6 +67,10 @@ export const TRUE_COLOR_BUSINESS_PROFILE = {
   imageRules: [
     'Preserve exact printed artwork, lettering, logos, colours and layout; never invent or repair unreadable detail.',
     'Finished-product photos default to a clean neutral studio-like background; preserve the product shape, proportions and artwork exactly.',
+    'Keep an original that is already clean, complete and readable; a style preference alone is not a reason to regenerate it.',
+    'Keep useful installation context for window graphics, vehicle graphics and mounted signs; do not extract away the setting that demonstrates their use.',
+    'Hold a studio treatment when the product is cropped, obscured or too unclear to preserve. Obtain a complete source instead of inventing edges or printed detail.',
+    'Record KEEP, REVISE or HOLD with the observed reason before editing. REVISE authorizes a candidate for review, never automatic acceptance; independently compare the candidate with the immutable original.',
     'Process photos retain their authentic scene with minimal cleanup; captions never authorize image edits.',
     'Label generated backgrounds as staged. Hold any output with changed lettering, QR codes, printed photographs, artwork colours or invented detail, even if the backdrop looks better.',
     'Social rights and privacy need explicit evidence. A public website image is not social-use permission.',
