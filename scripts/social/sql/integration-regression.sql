@@ -15,16 +15,29 @@ CREATE SCHEMA IF NOT EXISTS auth;
 CREATE TABLE auth.users(id uuid PRIMARY KEY);
 INSERT INTO auth.users VALUES('00000000-0000-4000-8000-000000000099');
 SET LOCAL app.social_owner_user_id='00000000-0000-4000-8000-000000000099';
-CREATE TABLE public.social_campaigns(id uuid PRIMARY KEY);
-CREATE TABLE public.social_accounts(id uuid PRIMARY KEY);
+CREATE TABLE public.social_campaigns(id uuid PRIMARY KEY,slug text NOT NULL,name text NOT NULL,
+  CONSTRAINT social_campaigns_slug_key UNIQUE(slug));
+CREATE TABLE public.social_accounts(id uuid PRIMARY KEY,platform text NOT NULL,blotato_account_id text UNIQUE);
 CREATE TABLE public.social_posts(
-  id uuid PRIMARY KEY, campaign_id uuid, status text NOT NULL DEFAULT 'draft',
+  id uuid PRIMARY KEY, campaign_id uuid REFERENCES public.social_campaigns(id) ON DELETE SET NULL,
+  status text NOT NULL DEFAULT 'draft',
   caption_raw text, caption_instagram text, caption_facebook text, hashtags text,
   image_url text, platforms text[], schedule_time timestamptz,
   source text, post_number integer, created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
-CREATE TABLE public.social_post_results(id uuid PRIMARY KEY,post_id uuid,status text);
+CREATE TABLE public.social_post_results(id uuid PRIMARY KEY,
+  post_id uuid REFERENCES public.social_posts(id) ON DELETE CASCADE,platform text NOT NULL,status text);
+CREATE SCHEMA storage;
+CREATE TABLE storage.objects(id uuid PRIMARY KEY,bucket_id text NOT NULL,name text NOT NULL);
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+GRANT USAGE ON SCHEMA storage TO authenticated;
+GRANT SELECT ON storage.objects TO authenticated;
+CREATE POLICY legacy_broad_read ON storage.objects FOR SELECT TO authenticated USING(true);
+INSERT INTO storage.objects VALUES
+ (gen_random_uuid(),'social-library','businesses/synthetic-a/private.jpg'),
+ (gen_random_uuid(),'social-images','businesses/synthetic-b/cleared.jpg'),
+ (gen_random_uuid(),'unrelated-bucket','unrelated.jpg');
 GRANT USAGE ON SCHEMA public TO anon,authenticated,service_role;
 GRANT ALL ON public.social_posts,public.social_post_results TO anon,authenticated,service_role;
 \ir ../../../migrations/20260906_social_explicit_approval.sql
@@ -88,6 +101,10 @@ END $$;
 RESET ROLE;
 SET LOCAL ROLE authenticated;
 DO $$ BEGIN
+ PERFORM pg_temp.check_that(NOT EXISTS(SELECT FROM storage.objects WHERE bucket_id IN('social-images','social-library')),
+   'Broad legacy policy exposed social storage to browser');
+ PERFORM pg_temp.check_that((SELECT count(*)=1 FROM storage.objects WHERE bucket_id='unrelated-bucket'),
+   'Social storage restriction changed an unrelated bucket');
  BEGIN
   PERFORM * FROM public.social_posts;
   RAISE EXCEPTION 'Browser read integrated social data';

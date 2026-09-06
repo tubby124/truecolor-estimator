@@ -39,3 +39,6 @@ A schema readback does not prove Google OAuth, provider account access, delivere
 - Business isolation and versioned tax regressions also pass sequentially on the disposable database used by integration.
 - Required GitHub PostgreSQL16, complete integrated app/browser CI, final file hashes and final deployment readback remain pending lane integration.
 - 18:40:54 UTC production read showed the social feature gate false and the four probed new tables unavailable in the REST schema cache. No production migrations or feature activation were performed.
+
+
+Read-only production preflight now confirms PostgreSQL17.6, no platform enum/check blocking GBP, and zero orphan post/campaign or receipt/post references. Exact existing uniqueness and FK lifecycle definitions informed G followup3b425be4. A reusable read-only preflight lives in `scripts/social/sql/production-preflight.sql`. Authenticated dashboard access is available even though the configured Supabase MCP token cannot access this project; no schema application has been performed.
