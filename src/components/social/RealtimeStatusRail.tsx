@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { createClient } from "@/lib/supabase/client";
-import type { SocialPostResult } from "@/lib/types/social";
+import type { SocialPost } from "@/lib/types/social";
 
 interface Notification {
   id: string;
@@ -17,7 +16,7 @@ interface Notification {
 const PLATFORM_ICONS: Record<string, string> = {
   instagram: "📸",
   facebook: "🌐",
-  twitter: "🐦",
+  gbp: "📍",
   tiktok: "🎵",
 };
 
@@ -25,33 +24,42 @@ export function RealtimeStatusRail() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel("social-results-rail")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "social_post_results" },
-        (payload) => {
-          const result = payload.new as SocialPostResult;
-          const id = Math.random().toString(36).slice(2);
-          setNotifications(prev => [
-            ...prev.slice(-2), // keep max 3
-            {
-              id,
-              platform: result.platform,
-              status: result.status,
-              at: Date.now(),
-            },
-          ]);
-          // Auto-dismiss after 10s
-          setTimeout(() => {
-            setNotifications(prev => prev.filter(n => n.id !== id));
-          }, 10_000);
+    let active = true;
+    let initialized = false;
+    const seen = new Set<string>();
+    const controller = new AbortController();
+    const dismissTimers = new Set<ReturnType<typeof setTimeout>>();
+    const refresh = async () => {
+      if (document.visibilityState === "hidden") return;
+      try {
+        const response = await fetch("/api/staff/social/posts?limit=1000", { cache: "no-store", signal: controller.signal });
+        if (!response.ok) return;
+        const posts: SocialPost[] = await response.json();
+        if (!active || !Array.isArray(posts)) return;
+        const next: Notification[] = [];
+        for (const post of posts) for (const result of post.results ?? []) {
+          const id = `${result.id}:${result.status}`;
+          if (!seen.has(id) && initialized) next.push({ id, platform: result.platform, status: result.status, at: Date.now() });
+          seen.add(id);
         }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+        initialized = true;
+        if (!next.length) return;
+        setNotifications(prev => [...prev, ...next].slice(-3));
+        const timer = setTimeout(() => {
+          dismissTimers.delete(timer);
+          if (active) setNotifications(prev => prev.filter(n => !next.some(item => item.id === n.id)));
+        }, 10000);
+        dismissTimers.add(timer);
+      } catch { /* Keep status quiet while disconnected. */ }
+    };
+    void refresh();
+    const timer = setInterval(refresh, 15000);
+    return () => {
+      active = false;
+      controller.abort();
+      clearInterval(timer);
+      dismissTimers.forEach(clearTimeout);
+    };
   }, []);
 
   if (notifications.length === 0) return null;

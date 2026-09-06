@@ -1,17 +1,15 @@
+import { requireSocialBusiness, DEFAULT_SOCIAL_BUSINESS_ID } from "@/lib/social/business";
 import { NextResponse } from "next/server";
-import { requireStaffUser } from "@/lib/supabase/server";
 
 const N8N_WEBHOOK_URL = process.env.N8N_BLITZ_WEBHOOK_URL;
 
 let lastTriggeredAt = 0;
 const COOLDOWN_MS = 30_000;
 
-export async function POST() {
-  try {
-    await requireStaffUser();
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export async function POST(req?: Request) {
+  const auth = await requireSocialBusiness(req);
+  if (auth instanceof NextResponse) return auth;
+  if (auth.businessId !== DEFAULT_SOCIAL_BUSINESS_ID) return NextResponse.json({ error: "Blitz is only available for True Color" }, { status: 403 });
 
   if (!N8N_WEBHOOK_URL) {
     return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });

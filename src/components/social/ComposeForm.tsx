@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { CaptionRewriter } from "./CaptionRewriter";
 import { CAMPAIGN_HASHTAGS, CAMPAIGN_COLORS, getSuggestedScheduleDate } from "@/lib/data/social-hashtags";
-import type { SocialCampaign, Platform, PostType } from "@/lib/types/social";
+import type { ProductFacts } from "@/lib/pricing/product-facts";
+import type { SocialCampaign, Platform, PostType, GbpPostPayload } from "@/lib/types/social";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
 import { ImagePicker } from "./ImagePicker";
 import { PostPreview } from "./PostPreview";
@@ -14,7 +15,7 @@ import { reginaToIso } from "@/lib/social/schedule";
 const PLATFORMS: { key: Platform; icon: string; label: string }[] = [
   { key: "instagram", icon: "📸", label: "Instagram" },
   { key: "facebook", icon: "🌐", label: "Facebook" },
-  { key: "twitter", icon: "🐦", label: "X/Twitter" },
+  { key: "gbp", icon: "📍", label: "Google" },
 ];
 
 const POST_TYPES: { key: PostType; label: string; desc: string }[] = [
@@ -65,7 +66,12 @@ export function ComposeForm({ campaigns }: Props) {
   const [captionRaw, setCaptionRaw] = useState("");
   const [captionInstagram, setCaptionInstagram] = useState("");
   const [captionFacebook, setCaptionFacebook] = useState("");
-  const [captionTwitter, setCaptionTwitter] = useState("");
+  const [captionTwitter] = useState("");
+  const [captionGbp, setCaptionGbp] = useState("");
+  const [sourceFacts, setSourceFacts] = useState<ProductFacts | null>(null);
+  const [generationJobId, setGenerationJobId] = useState<string | null>(null);
+  const [offerId, setOfferId] = useState<string | null>(null);
+  const [gbpPayload, setGbpPayload] = useState<GbpPostPayload>({topicType:"STANDARD"});
 
   // Step 3
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -87,6 +93,20 @@ export function ComposeForm({ campaigns }: Props) {
       setScheduleDate(getSuggestedScheduleDate(campaign.event_date, postType));
     }
   }, [campaign, postType]);
+
+  useEffect(() => {
+    const id = searchParams.get('offer');
+    if (!id) return;
+    void fetch(`/api/staff/social/offers?id=${encodeURIComponent(id)}`, {cache:'no-store'}).then(async res => {
+      const data=await res.json(); if(!res.ok)throw new Error(data.error || 'Offer unavailable');
+      setOfferId(data.offer.id); setSourceFacts(data.offer.facts); setImageUrls([data.offer.image_url]);
+      setCaptionRaw(data.draft.caption_raw); setCaptionInstagram(data.draft.caption_instagram);
+      setCaptionFacebook(data.draft.caption_facebook); setCaptionGbp(data.draft.caption_gbp);setGbpPayload(data.draft.gbp_payload);
+      setStep(2);
+    }).catch(() => showToast('Shared offer unavailable', 'error'));
+  // Search params are the immutable source ID; editing copy does not reload it.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   function togglePlatform(p: Platform) {
     setPlatforms(prev =>
@@ -114,6 +134,11 @@ export function ComposeForm({ campaigns }: Props) {
         hashtags: hashtags || null,
         image_url: imageUrls[0] || null,
         image_urls: imageUrls,
+        caption_gbp:captionGbp || null,
+        ...(sourceFacts ? {product_slug:sourceFacts.productSlug,product_configuration:sourceFacts.configuration,fact_fingerprint:sourceFacts.sourceFingerprint} : {}),
+        ...(generationJobId ? {generation_job_id:generationJobId} : {}),
+        ...(offerId ? {offer_id:offerId} : {}),
+        ...(platforms.includes('gbp') ? {gbp_payload:gbpPayload} : {}),
         platforms,
         schedule_time: scheduleTimestamp,
         use_next_free_slot: useNextFreeSlot,
@@ -122,20 +147,18 @@ export function ComposeForm({ campaigns }: Props) {
         post_number: postNumber,
       };
 
-      const res = await fetch("/api/staff/social/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error ?? "Save failed");
+      const ids: string[] = [];
+      for (const platform of platforms) {
+        const res = await fetch("/api/staff/social/posts", {
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({...body, platforms:[platform]}),
+        });
+        const saved = await res.json();
+        if (!res.ok) throw new Error(`${saved.error ?? 'Save failed'}${ids.length ? '; earlier destination drafts are saved in the queue' : ''}`);
+        ids.push(saved.id);
       }
-
-      const saved = await res.json();
-      showToast("Post saved as draft!", "success");
-      router.push(destination === "review" ? `/staff/social/review?ids=${encodeURIComponent(saved.id)}` : "/staff/social/queue");
+      showToast("Destination drafts saved", "success");
+      router.push(destination === "review" ? `/staff/social/review?ids=${encodeURIComponent(ids.join(','))}` : "/staff/social/queue");
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Save failed", "error");
     } finally {
@@ -258,17 +281,20 @@ export function ComposeForm({ campaigns }: Props) {
                     value={captionRaw}
                     onChange={e => setCaptionRaw(e.target.value)}
                     rows={3}
-                    placeholder="e.g. 2×4ft vinyl banner, green, for the St. Patrick's Day promo — $66"
+                    placeholder="Describe the photo, product and intended audience"
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#e63020]/30 focus:border-[#e63020] resize-none"
                   />
                 </div>
                 <CaptionRewriter
                   captionRaw={captionRaw}
                   campaignSlug={campaign?.slug}
+                  selectedChannels={platforms.filter((p): p is "instagram" | "facebook" | "gbp" => p === "instagram" || p === "facebook" || p === "gbp")}
                   onResult={(r) => {
                     setCaptionInstagram(r.instagram);
                     setCaptionFacebook(r.facebook);
-                    setCaptionTwitter(r.twitter);
+                    setCaptionGbp(r.gbp || "");
+                    setSourceFacts(r.facts || null);
+                    setGenerationJobId(r.jobId || null);
                     // Auto-fill hashtags from AI when provided
                     if (r.hashtags?.trim()) setHashtags(r.hashtags);
                   }}
@@ -283,7 +309,7 @@ export function ComposeForm({ campaigns }: Props) {
                     {[
                       { key: "instagram" as const, label: "📸 Instagram", value: captionInstagram, set: setCaptionInstagram, limit: 220 },
                       { key: "facebook" as const, label: "🌐 Facebook", value: captionFacebook, set: setCaptionFacebook, limit: 300 },
-                      { key: "twitter" as const, label: "🐦 X/Twitter", value: captionTwitter, set: setCaptionTwitter, limit: 200 },
+                      { key: "gbp" as const, label: "📍 Google", value: captionGbp, set: setCaptionGbp, limit: 1500 },
                     ].map(p => (
                       <div key={p.key}>
                         <div className="flex items-center justify-between mb-1">
@@ -318,7 +344,7 @@ export function ComposeForm({ campaigns }: Props) {
 
                 <div>
                   <label className="block text-sm font-semibold text-[#1c1712] mb-1">Hashtags</label>
-                  <p className="text-xs text-gray-400 mb-2">Paste these in the first comment after posting on Instagram (not in the caption)</p>
+                  <p className="text-xs text-gray-400 mb-2">These are included in the approved Instagram caption.</p>
                   <textarea
                     value={hashtags}
                     onChange={e => setHashtags(e.target.value)}

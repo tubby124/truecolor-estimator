@@ -12,7 +12,7 @@ const asset = {
 test.beforeEach(async ({ context, page, baseURL }) => {
   if (!baseURL?.startsWith("http://localhost:")) throw new Error("Social library fixtures must run on localhost");
   const session = { access_token: "fixture.header.signature", refresh_token: "fixture", token_type: "bearer", expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: "fixture-owner", email: "info@true-color.ca" } };
-  await context.addCookies([{ name: "sb-example-auth-token", value: "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url"), url: baseURL }]);
+  await context.addCookies([{ name: `sb-${new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || "https://example.supabase.co").hostname.split(".")[0]}-auth-token`, value: "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url"), url: baseURL }]);
   await page.route("**/api/staff/**", route => route.fulfill({ json: [] }));
   await page.route("**/synthetic-library-preview.svg", route => route.fulfill({ contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240"><rect width="320" height="240" fill="#eeeeee"/><text x="20" y="120" font-size="20">Synthetic preview</text></svg>' }));
   await page.setViewportSize({ width: 390, height: 844 });

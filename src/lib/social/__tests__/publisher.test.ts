@@ -171,3 +171,13 @@ describe("publishSocialPost", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+describe('exact dispatch destination', () => {
+  it('holds when newly read Meta credentials differ from approved account', async () => {
+    getMetaConfigMock.mockReturnValue({pageId:'changed-page',igUserId:'changed-ig',accessToken:'synthetic',graphVersion:'v22.0'});
+    publishFacebookMock.mockClear(); publishInstagramMock.mockClear();
+    const result=await publishSocialPost(makePost({platforms:['facebook'],approval_target:{platform:'facebook',accountId:'approved-page',pageId:'approved-page'}}));
+    expect(result.results[0].errorMessage).toMatch(/destination changed/);
+    expect(publishFacebookMock).not.toHaveBeenCalled();expect(publishInstagramMock).not.toHaveBeenCalled();
+  });
+});

@@ -1,20 +1,21 @@
+import { requireSocialBusiness, DEFAULT_SOCIAL_BUSINESS_ID } from "@/lib/social/business";
 import { NextResponse } from "next/server";
-import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { LIBRARY_BUCKET, LIBRARY_CATALOG, parseLibraryCatalog } from "@/lib/social/asset-library";
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "private, no-store", "Referrer-Policy": "no-referrer" };
-export async function GET() {
-  const auth = await requireStaffUser();
+export async function GET(req?: Request) {
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) { auth.headers.set("Cache-Control", "private, no-store"); return auth; }
   try {
     const storage = createServiceClient().storage;
     const { data: bucket, error: bucketError } = await storage.getBucket(LIBRARY_BUCKET);
     if (bucketError || !bucket) return NextResponse.json({ state: "unavailable", assets: [], message: "The private asset library has not been connected or is temporarily unavailable." }, { headers });
     if (bucket.public) return NextResponse.json({ error: "The asset library must be private before browsing." }, { status: 503, headers });
-    const { data, error } = await storage.from(LIBRARY_BUCKET).download(LIBRARY_CATALOG);
+    const { data, error } = await storage.from(LIBRARY_BUCKET).download(auth.businessId === DEFAULT_SOCIAL_BUSINESS_ID ? LIBRARY_CATALOG : `businesses/${auth.businessId}/${LIBRARY_CATALOG}`);
     if (error || !data) return NextResponse.json({ state: "unavailable", assets: [], message: "No catalog is available yet. Complete the private collection upload, then refresh." }, { headers });
     if (data.size > 8 * 1024 * 1024) throw new Error("Catalog too large");
-    const catalog = parseLibraryCatalog(JSON.parse(await data.text()));
+    const catalog = parseLibraryCatalog(JSON.parse(await data.text()), auth.businessId === DEFAULT_SOCIAL_BUSINESS_ID ? "truecolor" : auth.businessId);
     const paths = catalog.assets.map(a => a.storagePath);
     const signed = paths.length ? await storage.from(LIBRARY_BUCKET).createSignedUrls(paths, 900) : { data: [], error: null };
     if (signed.error) throw new Error("Preview unavailable");

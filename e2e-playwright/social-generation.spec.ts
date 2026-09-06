@@ -7,8 +7,8 @@ test.beforeEach(async ({ context, page, baseURL }) => {
   await page.route('**/api/staff/**', route => route.fulfill({ json: [] }));
   await page.route('**/api/staff/social/generation/settings', route => route.fulfill({ json: { configured: true, providerReady: true, dailyCallLimit: 20, dailyUsdLimit: null, maxCostPerCallUsd: null, usedCalls: 0, reservedCalls: 0, usedUsd: 0, reservedUsd: 0, model: 'mock' } }));
   await page.goto('/staff/social/compose');
-  await page.getByRole('button', { name: /next/i }).click();
-  await page.getByPlaceholder(/e.g. 2/).fill('A colourful banner showcase');
+  await page.getByRole('button', { name: 'Next →', exact: true }).click();
+  await page.getByPlaceholder('Describe the photo, product and intended audience').fill('A colourful banner showcase');
 });
 test('selected channels and stable request IDs survive repeat preparation without X', async ({ page }) => {
   const bodies: Record<string, unknown>[] = [];

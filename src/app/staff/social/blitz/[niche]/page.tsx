@@ -1,5 +1,7 @@
+import { NextResponse } from "next/server";
+import { requireSocialBusiness } from "@/lib/social/business";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { LeadsTable } from "@/components/social/LeadsTable";
 import { TemplateTimeline } from "@/components/social/TemplateTimeline";
@@ -17,6 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ niche: st
 }
 
 async function getData(nicheSlug: string) {
+  const auth = await requireSocialBusiness();
+  if (auth instanceof NextResponse) redirect("/staff/login");
   const supabase = createServiceClient();
 
   const { data: nicheData } = await supabase

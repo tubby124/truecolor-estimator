@@ -31,7 +31,7 @@ const spreadSchedule = weeklySchedule;
 
 // ─── Image helpers ────────────────────────────────────────────────────────────
 
-async function compressForAI(file: File): Promise<{ base64: string; type: string }> {
+export async function compressForAI(file: File): Promise<{ base64: string; type: string }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = reject;
@@ -302,6 +302,8 @@ export function BatchScheduler() {
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
 
         {saveUncertain && <p role="alert" className="rounded-xl bg-amber-50 p-4 text-sm">Check the <Link href="/staff/social/queue" className="underline">saved queue</Link> before creating another batch. The previous save may have succeeded.</p>}
+
+        <Link href="/staff/social/monthly" className="block rounded-xl border bg-white p-4 text-sm underline">Prepare or resume a monthly batch with Instagram, Facebook and Google Business Profile</Link>
 
         {/* ── Shared settings ── */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">

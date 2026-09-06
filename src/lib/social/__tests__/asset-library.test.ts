@@ -10,6 +10,14 @@ describe("asset library", () => {
   beforeEach(() => vi.resetAllMocks());
   it("preserves hold even for an already published source", () => { const result = parseLibraryCatalog(catalog()); expect(result.assets[0].rightsStatus).toBe("hold"); expect(libraryReviewLabel(result.assets[0])).toBe("Held — do not use"); });
   it.each([{ storagePath: "originals/../secret" }, { sourceUrl: "javascript:alert(1)" }, { sourceUrl: "https://example.com/p?token=secret" }, { rightsStatus: "approved" }, { width: 0 }])("rejects invalid or unsafe asset fields %o", update => { const c = catalog(); Object.assign(c.assets[0], update); expect(() => parseLibraryCatalog(c)).toThrow(); });
+  it("requires a tenant catalog identity and exact tenant original path together", () => {
+    const businessId = "00000000-0000-4000-8000-000000000002";
+    const c = { ...catalog(), businessId, assets: [{ ...asset, storagePath: `businesses/${businessId}/originals/photo.jpg` }] };
+    expect(parseLibraryCatalog(c, businessId).businessId).toBe(businessId);
+    expect(() => parseLibraryCatalog(c)).toThrow();
+    expect(() => parseLibraryCatalog({ ...c, assets: [asset] }, businessId)).toThrow();
+    expect(() => parseLibraryCatalog({ ...c, assets: [{ ...asset, storagePath: `businesses/${businessId}/originals/../secret` }] }, businessId)).toThrow();
+  });
   it("drops unknown private metadata", () => { const c = catalog(); Object.assign(c.assets[0], { localPath: "/private/file" }); expect(parseLibraryCatalog(c).assets[0]).not.toHaveProperty("localPath"); });
   it("rejects duplicate IDs and other business catalogs", () => { const c = catalog(); c.assets.push({ ...asset }); expect(() => parseLibraryCatalog(c)).toThrow(); expect(() => parseLibraryCatalog({ ...catalog(), businessId: "other" })).toThrow(); });
   it.each([401, 403])("requires staff before storage access (%s)", async status => { mocks.auth.mockResolvedValue(NextResponse.json({ error: "Denied" }, { status })); expect((await GET()).status).toBe(status); expect(mocks.service).not.toHaveBeenCalled(); });
