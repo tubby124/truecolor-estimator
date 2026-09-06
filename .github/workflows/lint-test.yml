@@ -129,7 +129,7 @@ jobs:
 
       - name: Production build
         env:
-          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:3198
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
           NEXT_PUBLIC_SITE_URL: https://truecolorprinting.ca
         run: npm run build
@@ -139,9 +139,11 @@ jobs:
 
       - name: Paid-funnel browser contracts
         env:
-          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:3198
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          SOCIAL_E2E_AUTH_FIXTURE: "true"
+          PLAYWRIGHT_USE_BUILD: "true"
         run: npm run test:e2e:pw -- e2e-playwright/seo-paid-journeys.spec.ts e2e-playwright/social-approval.spec.ts e2e-playwright/social-library.spec.ts e2e-playwright/social-generation.spec.ts
 
   production-smoke:

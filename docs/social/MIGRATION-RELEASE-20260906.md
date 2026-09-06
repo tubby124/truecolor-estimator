@@ -28,7 +28,7 @@ The two migration directories are intentional existing lane locations. Do not re
 
 ## Recovery and verification limits
 
-Prefer a forward correction with new features disabled. Retain issued quote snapshots, provider receipts, generation usage reservations and stored drafts. Do not drop tables, rewrite financial history, clear holds, or restore retired unsafe financial handlers as a rollback shortcut. The pricing runbook governs its versioned SQL recovery; do not guess that removing a capability marker is safe after new revisions exist.
+Prefer a forward correction with new generation/publication disabled. Once any additional business exists, retain business scoping and authorization; switching back to legacy single-business mode is not a safe rollback. Retain issued quote snapshots, provider receipts, generation usage reservations and stored drafts. Do not drop tables, rewrite financial history, clear holds, or restore retired unsafe financial handlers as a rollback shortcut. The pricing runbook governs its versioned SQL recovery; do not guess that removing a capability marker is safe after new revisions exist.
 
 A schema readback does not prove Google OAuth, provider account access, delivered financial messages or publication. Google still needs its concrete credential/API setup. New real three-channel content needs its own exact owner review and approval. Existing Meta delivery approvals are preserved independently.
 
