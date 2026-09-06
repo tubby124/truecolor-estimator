@@ -71,3 +71,6 @@ Twelve distinct Chromium social contracts passed against a loopback synthetic au
 
 
 The own-worktree production build completed successfully (Next16.3.4), followed by **40/40 required Chromium tests against the built standalone app**, including paid journeys and all social contracts. The final legacy-unapproved-draft hardening then passed its new regression and28 focused approval tests; exact final commit build is enforced by PR CI. No test process remained running afterward.
+
+
+Integration's live read-only SQL preflight confirmed no platform CHECK/enum restriction on `gbp`, no campaign/receipt orphans and text[]/text platform columns. It identified a global campaign-slug uniqueness constraint: the prepared migration now replaces it with business+slug uniqueness while retaining global provider-account uniqueness. Business SQL regression exercises the actual old campaign SET NULL and receipt CASCADE foreign keys, proves both lifecycle behaviors survive composite scoping, and verifies two businesses may reuse a campaign slug while one business cannot duplicate it. Production application still requires explicit approval.

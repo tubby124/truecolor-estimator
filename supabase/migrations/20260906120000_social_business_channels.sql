@@ -68,6 +68,9 @@ ALTER TABLE public.social_posts ADD COLUMN IF NOT EXISTS batch_id uuid;
 ALTER TABLE public.social_posts ADD COLUMN IF NOT EXISTS creative_id uuid;
 ALTER TABLE public.social_posts ADD COLUMN IF NOT EXISTS generation_job_id uuid;
 ALTER TABLE public.social_posts ADD COLUMN IF NOT EXISTS gbp_payload jsonb;
+-- Campaign slugs are reusable across businesses, but remain unique within one business.
+ALTER TABLE public.social_campaigns DROP CONSTRAINT IF EXISTS social_campaigns_slug_key;
+CREATE UNIQUE INDEX IF NOT EXISTS social_campaigns_business_slug_idx ON public.social_campaigns(business_id,slug);
 CREATE UNIQUE INDEX IF NOT EXISTS social_posts_business_id_id_idx ON public.social_posts(business_id,id);
 CREATE UNIQUE INDEX IF NOT EXISTS social_campaigns_business_id_id_idx ON public.social_campaigns(business_id,id);
 CREATE INDEX IF NOT EXISTS social_posts_business_due_idx ON public.social_posts(business_id,status,schedule_time,id);
