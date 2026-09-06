@@ -25,3 +25,9 @@ This is a visual rehearsal, not a saved/approved production post. Owner approved
 Telegram intake, automatic category/style rotation, hosted scheduling and a Mac-asleep test are separate later milestones. This one-post rehearsal does not establish resale readiness.
 
 Git audit: [reconciliation receipt](GIT-RECONCILIATION-20260906.md).
+
+## Implementation and provider setup checkpoint
+
+PR 37 merged at `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c` after full CI/security passed and independent review reported no high or critical findings. The application supports separate approved Instagram and Facebook drafts.
+
+Owner authorized adding the Meta Page use case. After an initial opaque UI error, direct UI readback showed `pages_manage_posts` as Ready for testing. A token wizard was prepared with six scopes. This is app configuration evidence, not proof that a new credential has those grants. Owner credential handoff and saving the resulting credential to Railway remain pending, followed by a fresh protected provider read. No credential or access-bearing link is stored here.
