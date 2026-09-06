@@ -69,3 +69,10 @@ Owner approved implementation with separate pricing, GBP/publishing and generati
 ## Active pricing and social integration — September 6, 2026
 
 Documentation PR45 merged at `d081d062` after required exact-head CI passed. The [integration work board](../social/INTEGRATION-20260906.md) records lane contracts, task ownership, migration order, test/release gates and fresh provider reconciliation. Three engineering lanes are active in isolated worktrees. Their code has not yet been merged or deployed at this checkpoint. The latest table row supersedes older social queue snapshots above; historical receipts remain preserved.
+
+
+## September storyboard and transparent logo review — September 6, 2026
+
+A private September 7–30 storyboard contains 24 creatives / 48 Facebook and Instagram destinations, with varied Regina times, 14 concepts and 10 real-work images. All four new GPT concepts remain included. October ideas are held without scheduled dates. The owner rejected a white footer and requested a transparent TRUECOLOR / PRINTING.CA variant, preserving the original company logo. The candidate uses reviewed corners and dark/light lettering. See the [branding standard](../social/BRANDING-STANDARD.md).
+
+All 48 captions and 24 selected media hashes pass the actual application validator; private review/export/mobile checks pass with zero external requests. This is private preparation, not uploaded, approved, scheduled or published. Latest owner clarification is to save the direction and prepare for exact month approval. Existing Sunday pilot ownership and approvals remain separate with integration. The candidate logo is not deployed as the main company identity.
