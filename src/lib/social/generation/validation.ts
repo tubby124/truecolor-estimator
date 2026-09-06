@@ -1,3 +1,4 @@
+import { SAFE_RUSH_ENQUIRY } from './business-profile';
 import { createHash } from 'node:crypto';
 import type { ProductFacts } from '@/lib/pricing/product-facts';
 import { GENERATION_CHANNELS, type GenerationInput, type GenerationChannel, type GenerationObservation } from '../generation-contract';
@@ -53,7 +54,7 @@ export function priceDisclosure(facts: ProductFacts): string {
 export function validateDraft(text: unknown, channel: GenerationChannel): string | null {
   if (typeof text !== 'string' || !text.trim() || text.length > LIMITS[channel]) return 'Missing caption or platform character limit exceeded.';
   if (/[$€£¥%]|\b(?:CAD|USD|dollars?|percent|bucks)\b|\d/i.test(text)) return 'Model supplied an unsupported numeric or price claim.';
-  if (/\b(?:free|discount|sale|save|saving|cheapest|cheaper|beat|best|guarantee\w*|warrant\w*|lifetime|half.price|buy.{0,20}get|(?:one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|thousand)[ -](?:day|hour|week|dollar)|(?:next|this)[ -](?:week|month)|delivery|shipping|rush|turnaround|same.day|next.day|today.only|limited.time|last.chance|weatherproof|waterproof|UV|eco.solvent|13oz|durab\w*|premium|quality|professional|affordable|client|customer|completed|installed|delivered|we (?:made|printed|built)|for (?:our|a local)|staples|fedex|ups store)\b/i.test(text)) return 'Model supplied a claim requiring manual review.';
+  if (/\b(?:free|discount|sale|save|saving|cheapest|cheaper|beat|best|guarantee\w*|warrant\w*|lifetime|half.price|buy.{0,20}get|(?:one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|thousand)[ -](?:day|hour|week|dollar)|(?:next|this)[ -](?:week|month)|delivery|shipping|rush|turnaround|same.day|next.day|today.only|limited.time|last.chance|weatherproof|waterproof|UV|eco.solvent|13oz|durab\w*|premium|quality|professional|affordable|client|customer|completed|installed|delivered|we (?:made|printed|built)|for (?:our|a local)|staples|fedex|ups store)\b/i.test(text.replaceAll(SAFE_RUSH_ENQUIRY, ''))) return 'Model supplied a claim requiring manual review.';
   if (channel === 'gbp' && /#\w/.test(text)) return 'GBP copy must not include hashtags.';
   return null;
 }
