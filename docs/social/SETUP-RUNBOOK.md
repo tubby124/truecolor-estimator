@@ -38,3 +38,10 @@ Local [interactive dry-run preview](DRY-RUN-PREVIEW.html) is versioned here for 
 ## Evidence handoff
 
 After each meaningful checkpoint, update this file/current-state lane and the private AISA roadmap through named-file diffs and Git. Record exact result, revision, checks, remaining gate and recovery action. Do not turn undocumented trial-and-error into a claimed best practice. AISA owns the teaching sequence and original member-question source mapping; this public repository owns sanitized implementation instructions.
+
+
+## September 5 continuation — provider setup and future scope
+
+Owner reports creating the employee system user and assigning the intended Page, app and Instagram assets, then generating a token. Browser-control timeouts prevent independent asset readback. Do not create another user: inspect the existing identity first. Production readiness at September 6 01:34:39 UTC verifies Page ID configured, Instagram ID/token still absent, publishing explicitly false, all 12 posts still draft and zero active social-account rows. No publication attempted. Token handoff must go directly into protected Railway configuration; no credential belongs in Git or receipts.
+
+[Future channels](FUTURE-CHANNELS.md) preserves paid Meta ads, replies and Google Business Profile posting as separate future builds. This plan does not enable those permissions, spend or outbound communication.
