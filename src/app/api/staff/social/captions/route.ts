@@ -1,124 +1,45 @@
-import { NextResponse } from "next/server";
-import { requireStaffUser } from "@/lib/supabase/server";
-import type { CaptionRewriteBody, CaptionRewriteResponse } from "@/lib/types/social";
-import {
-  TC_VOICE_PROMPT,
-  TC_GENERATE_FROM_IMAGE_PROMPT,
-  TC_GENERATE_FROM_TOPIC_PROMPT,
-} from "@/lib/data/social-hashtags";
-
-export const dynamic = "force-dynamic";
-
+import { randomUUID } from 'node:crypto';
+import { NextResponse } from 'next/server';
+import { requireSocialBusiness, socialBusinessScopingEnabled, DEFAULT_SOCIAL_BUSINESS_ID } from '@/lib/social/business';
+import { resolveProductFacts } from '@/lib/pricing/product-facts';
+import { parseGenerationInput } from '@/lib/social/generation/validation';
+import { generate, GenerationError } from '@/lib/social/generation/service';
+import { generationStore } from '@/lib/social/generation/store';
+import { callProvider } from '@/lib/social/generation/provider';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
 export async function POST(req: Request) {
-  const auth = await requireStaffUser();
+  const auth = await requireSocialBusiness(req);
   if (auth instanceof NextResponse) return auth;
-
-  const body = await req.json() as CaptionRewriteBody;
-
-  const hasCaption = !!body.caption_raw?.trim();
-  const hasImage = !!body.image_base64?.trim();
-  const hasTopic = !!body.topic?.trim();
-
-  if (!hasCaption && !hasImage && !hasTopic) {
-    return NextResponse.json(
-      { error: "Provide a caption, upload an image, or enter a topic." },
-      { status: 400 }
-    );
-  }
-
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "OPENROUTER_API_KEY not configured. Add it in Railway environment variables." },
-      { status: 503 }
-    );
-  }
-
+  if (auth.businessId !== DEFAULT_SOCIAL_BUSINESS_ID) return NextResponse.json({ error: 'Caption generation requires a configured business voice and catalogue. This business has not been onboarded.' }, { status: 503 });
+  // Bound parsing before any provider/storage work, including chunked requests.
+  const raw = await req.text();
+  if (raw.length > 3_000_000) return NextResponse.json({ error: 'Caption request is too large.' }, { status: 413 });
+  let parsed;
+  try { parsed = parseGenerationInput(JSON.parse(raw)); }
+  catch (e) { return NextResponse.json({ error: e instanceof Error ? e.message : 'Invalid caption request.' }, { status: 400 }); }
+  const { input, legacy } = parsed;
+  const durable = socialBusinessScopingEnabled();
+  if (!durable && !legacy) return NextResponse.json({ error: 'Resumable generation requires the approved social and generation migrations plus SOCIAL_BUSINESS_SCOPING_ENABLED. Existing manual captions remain editable.', code: 'generation_migration_required' }, { status: 503 });
+  if (!durable && input.includePrice) return NextResponse.json({ error: 'Price-bearing copy requires the approved source-binding migration. Generate a price-free showcase or edit manually.' }, { status: 503 });
+  if (legacy) input.requestId = randomUUID();
+  let facts = null;
+  try { if (input.productSlug) facts = resolveProductFacts({ productSlug: input.productSlug, configuration: input.configuration }); }
+  catch { return NextResponse.json({ error: 'This product configuration could not be verified. Select a current catalogue configuration.' }, { status: 400 }); }
   try {
-    // Determine system prompt + user message based on mode
-    let systemPrompt: string;
-    let userContent: unknown;
-
-    if (hasImage) {
-      // Vision mode: analyze the uploaded image and generate captions
-      systemPrompt = TC_GENERATE_FROM_IMAGE_PROMPT;
-      const imageType = body.image_type ?? "image/jpeg";
-      const imageUrl = `data:${imageType};base64,${body.image_base64}`;
-
-      const contextNote = body.caption_raw?.trim()
-        ? `\n\nAdditional context from staff: "${body.caption_raw.trim()}"`
-        : "";
-
-      userContent = [
-        {
-          type: "image_url",
-          image_url: { url: imageUrl },
-        },
-        {
-          type: "text",
-          text: `Generate social media captions for this print job. Also include an "alt_text" field in your JSON: a concise, descriptive alt text for this image (under 125 characters, no hashtags, describe what is physically in the image for accessibility).${contextNote}`,
-        },
-      ];
-    } else if (hasCaption) {
-      // Rewrite mode: take the raw caption and adapt it for each platform
-      systemPrompt = TC_VOICE_PROMPT;
-      userContent = `Rewrite this caption for Instagram, Facebook, and X:\n\n${body.caption_raw}`;
-    } else {
-      // Topic/keyword mode: generate from scratch about a product or subject
-      systemPrompt = TC_GENERATE_FROM_TOPIC_PROMPT;
-      userContent = `Generate social media posts about: ${body.topic}`;
-    }
-
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "HTTP-Referer": "https://truecolorprinting.ca",
-        "X-Title": "True Color Social Studio",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "anthropic/claude-sonnet-4-6",
-        max_tokens: 1024,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userContent },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenRouter error:", response.status, errorText);
-      return NextResponse.json(
-        { error: `AI generation failed: ${response.status}` },
-        { status: 502 }
-      );
-    }
-
-    const result = await response.json() as {
-      choices: Array<{ message: { content: string } }>;
-    };
-
-    const content = result.choices?.[0]?.message?.content?.trim();
-    if (!content) {
-      return NextResponse.json({ error: "Empty response from AI" }, { status: 502 });
-    }
-
-    // Strip markdown code blocks if Claude wrapped the JSON
-    const cleaned = content.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
-    const captions = JSON.parse(cleaned) as CaptionRewriteResponse;
-
-    if (!captions.instagram || !captions.facebook || !captions.twitter) {
-      throw new Error("Incomplete response — missing platform captions");
-    }
-
-    return NextResponse.json(captions);
-  } catch (err) {
-    console.error("Caption generation error:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Caption generation failed" },
-      { status: 500 }
-    );
-  }
+    const result = await generate(input, auth.businessId, facts, generationStore(), callProvider, durable);
+    return NextResponse.json({ ...result, durability: durable ? 'durable' : 'legacy', compatibility: legacy ? 'X captions are no longer generated; select supported channels and persist requestId for resumability.' : undefined });
+  } catch (e) { return NextResponse.json({ error: e instanceof GenerationError ? e.message : 'Caption generation is unavailable. No automatic retry was started.' }, { status: e instanceof GenerationError ? e.status : 503 }); }
+}
+export async function GET(req: Request) {
+  const auth = await requireSocialBusiness(req);
+  if (auth instanceof NextResponse) return auth;
+  if (!socialBusinessScopingEnabled()) return NextResponse.json({ error: 'Durable generation migration is required.' }, { status: 503 });
+  const id = new URL(req.url).searchParams.get('requestId');
+  if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: 'Provide a requestId UUID.' }, { status: 400 });
+  try {
+    const job = await generationStore().job(auth.businessId, id);
+    if (!job) return NextResponse.json({ error: 'Generation job not found.' }, { status: 404 });
+    return NextResponse.json({ jobId: id, status: job.status, result: job.result });
+  } catch { return NextResponse.json({ error: 'Generation job unavailable.' }, { status: 503 }); }
 }
