@@ -46,3 +46,10 @@ For a missing catalog, check the private bucket and exact manifest before recoll
 - Private working storage: September 6, 02:29 UTC sync verified the private bucket, downloaded and SHA-256 checked all 519 originals, and verified the 537-record current catalog. No publishing state changed.
 - Validation: 1,153 unit tests passed in 126 files; strict TypeScript and production build passed; ESLint zero errors (29 existing warnings). Two synthetic mobile library browser tests passed, with source/category/search/hold/error checks and readable full-width layout. Review found and resolved catalog refresh data loss and unsafe output-path handling.
 - Full provider delivery, phone/Hermes intake, automated content rotation, background replacement and Mac-asleep publication remain untested future checkpoints.
+
+
+## Deployment receipt — September 6, 2026
+
+[PR #35](https://github.com/tubby124/truecolor-estimator/pull/35) merged at `861030663d07565e3cc0045b5612b2c425b63730`. Railway deployment `b2cd4d9e-1883-4e6d-8cae-6f49c71bea96` for that revision reported SUCCESS. Anonymous library API read returned 401 and the staff library page redirected to login. No signed-in production walkthrough was available, so authenticated deployed browsing remains unverified.
+
+The private-storage receipt at `2026-09-06T02:29:20Z` additionally verified a signed original read against its SHA-256 and an anonymous storage read was denied with HTTP 400. Readiness at approximately 02:30 UTC retained 12 drafts and publishing false. The matching private Drive archive MD5 establishes transfer integrity, not a completed restore exercise. No content approval, posting, Telegram bridge or automated rotation was enabled by this deployment.
