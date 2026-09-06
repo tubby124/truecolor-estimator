@@ -11,6 +11,11 @@ describe("source-backed product facts", () => {
       priceBasis: "configured_quantity", currency: "CAD", availability: "made_to_order",
     });
   });
+  it("round-trips stored facts through freshness verification", () => {
+    const facts = resolveProductFacts({ productSlug: "flyers" });
+    expect(resolveProductFacts({ productSlug: facts.productSlug, configuration: facts.configuration })).toEqual(facts);
+    expect(() => resolveProductFacts({ productSlug: "acp-signs", configuration: facts.configuration })).toThrow(ProductFactsError);
+  });
   it("uses the real retractable price and suppresses unresolved dimensions in claims", () => {
     const facts = resolveProductFacts({ productSlug: "retractable-banners" });
     expect(facts.rawSubtotal).toBe(219);
