@@ -69,4 +69,4 @@ These are targeted comparisons, not a certification of every old branch or dirty
 
 ## Dual-platform extension receipt
 
-[PR 37](https://github.com/tubby124/truecolor-estimator/pull/37) merged at `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c` after full CI and security checks passed. Independent review reported no high or critical findings. This proves reviewed inclusion in main; deployment and provider permissions are separately recorded in the practice receipt.
+[PR 37](https://github.com/tubby124/truecolor-estimator/pull/37) merged at `3ed6862b16cb18ddfeec6787bbfe47ee14cd955c` after full CI and security checks passed. Independent review reported no high or critical findings. Code deployment subsequently reported SUCCESS; the provider credential grants were verified separately. The credential-configuration deployment was still building. Exact receipts and remaining delivery gates are recorded in the practice receipt.
