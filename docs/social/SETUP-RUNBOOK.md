@@ -45,3 +45,12 @@ After each meaningful checkpoint, update this file/current-state lane and the pr
 Owner reports creating the employee system user and assigning the intended Page, app and Instagram assets, then generating a token. Browser-control timeouts prevent independent asset readback. Do not create another user: inspect the existing identity first. Production readiness at September 6 01:34:39 UTC verifies Page ID configured, Instagram ID/token still absent, publishing explicitly false, all 12 posts still draft and zero active social-account rows. No publication attempted. Token handoff must go directly into protected Railway configuration; no credential belongs in Git or receipts.
 
 [Future channels](FUTURE-CHANNELS.md) preserves paid Meta ads, replies and Google Business Profile posting as separate future builds. This plan does not enable those permissions, spend or outbound communication.
+
+
+## Verified provider connection — September 6, 01:40 UTC
+
+The owner saved the token directly in Railway. Read-only authenticated Meta Graph API returned the intended True Color Display Printing Ltd. Page and linked Instagram username `truecolorprint`. `/me/permissions` returned granted `instagram_basic`, `instagram_content_publish`, `pages_show_list`, `pages_read_engagement`, and `business_management` (plus provider-default `public_profile`). No credential value was printed or committed. The verified Instagram ID was then saved to Railway; publishing remains explicitly false. Deployment readback is tracked separately below.
+
+The `social_accounts` table is the legacy Blotato account cache; zero rows there does not contradict the direct Meta publisher connection. The direct publisher/review target resolves the three server Meta variables. Account identity and permissions are now provider-verified, but permission to publish does not prove a successful post. Final JPEG/content approval, a hosted trigger, independent public readback and Mac-asleep operation remain later gates. The local preview and owner-message rehearsal remain simulated.
+
+Recovery lesson: prepare protected credential storage before generating a token, then use server-side provider reads to resolve identity/scopes. Avoid repeated browser wizards when a scoped token and authenticated CLI can supply the required evidence. A token exposed in chat should be revoked/replaced; the owner elected to continue with it for this setup, so rotation remains recommended.
