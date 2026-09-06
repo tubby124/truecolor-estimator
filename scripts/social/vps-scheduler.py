@@ -64,7 +64,7 @@ def request(config, check):
     query = {'ids': ','.join(config['ids']), 'expiresAt': config['expiresAt']}
     if check:
         query['mode'] = 'check'
-    req = urllib.request.Request(ENDPOINT + '?' + urllib.parse.urlencode(query), headers={'Authorization': 'Bearer ' + secret, 'Cache-Control': 'no-store'})
+    req = urllib.request.Request(ENDPOINT + '?' + urllib.parse.urlencode(query), headers={'Authorization': 'Bearer ' + secret, 'Cache-Control': 'no-store', 'User-Agent': 'TrueColor-Social-Scheduler/1.0 (+https://truecolorprinting.ca)'})
     with urllib.request.build_opener(NoRedirect()).open(req, timeout=180) as response:
         result = json.loads(response.read(65537))
     if result.get('ok') is not True or type(result.get('held')) is not bool or type(result.get('complete')) is not bool or result.get('total') != 6 or not isinstance(result.get('counts'), dict):
