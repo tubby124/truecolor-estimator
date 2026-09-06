@@ -115,6 +115,13 @@ describe('deterministic request and output validation', () => {
   });
 });
 describe('OpenRouter adapter metadata without real calls', () => {
+  it('retains a dispatched call and unknown cost for a null provider envelope', async () => {
+    vi.stubEnv('OPENROUTER_API_KEY', 'test-placeholder');
+    const f = vi.fn().mockResolvedValue(Response.json(null));
+    try { await callProvider({ system: 'voice', context: 'context' }, null, f); throw new Error('Expected hold'); }
+    catch (e) { expect(e).toBeInstanceOf(ProviderFailure); expect((e as ProviderFailure).kind).toBe('held'); expect((e as ProviderFailure).usage.calls).toBe(1); expect((e as ProviderFailure).usage.costUsd).toBeNull(); }
+    vi.unstubAllEnvs();
+  });
   it('requests current model only once and records unknown costs as null', async () => {
     vi.stubEnv('OPENROUTER_API_KEY', 'test-placeholder');
     const f = vi.fn().mockResolvedValue(Response.json({ id: 'mock-provider', choices: [{ message: { content: '{}' } }], usage: { prompt_tokens: 17 } }));

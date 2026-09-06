@@ -25,6 +25,7 @@ export async function callProvider(prompt: { system: string; context: string }, 
   if (!response.ok) throw new ProviderFailure(response.status === 429 ? 'retryable' : response.status >= 500 || response.status === 408 ? 'held' : 'failed', usage, `Caption provider returned HTTP ${response.status}.`);
   let body;
   try { body = await response.json(); } catch { throw new ProviderFailure('held', usage, 'Provider response was interrupted. Reconcile before retrying.'); }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) throw new ProviderFailure('held', usage, 'Provider returned an unrecognized response. Reconcile before retrying.');
   const u = body.usage;
   usage.promptTokens = numberOrNull(u?.prompt_tokens); usage.completionTokens = numberOrNull(u?.completion_tokens); usage.costUsd = numberOrNull(u?.cost);
   if (typeof body.id === 'string') usage.providerRequestIds = [body.id];
