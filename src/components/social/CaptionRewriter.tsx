@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { generateCaptions, GenerationRequestError } from "@/lib/social/generation-client";
 import type { GenerationChannel, GenerationResponse } from "@/lib/social/generation-contract";
+import { MarketingQualityCheck } from "./MarketingQualityCheck";
 import { GenerationUsageSettings } from "./GenerationUsageSettings";
 import { PRODUCTS } from "@/lib/data/products-content";
 
@@ -306,6 +307,7 @@ export function CaptionRewriter({ captionRaw, campaignSlug, onResult, onImageUpl
       {generation && <p className="text-xs text-gray-500">{generation.cacheHit ? "Reused saved copy · " : ""}{generation.usage.calls} AI calls · {generation.usage.costUsd === null ? "Cost unavailable" : `USD ${generation.usage.costUsd.toFixed(4)}`} · {generation.status}. Job {generation.jobId}. Hashtags: {generation.hashtagEvidence.kind === "researched" ? `research dated ${generation.hashtagEvidence.researchedAt}` : "generic suggestions"}.</p>}
       {generation?.status === "partial" && <button type="button" disabled={loading} onClick={() => handleGenerate(generation.jobId)} className="text-xs border rounded px-3 py-2">Retry missing channels (uses generation allowance)</button>}
       {needsNewRequest && <button type="button" disabled={loading} onClick={() => handleGenerate(undefined, true)} className="text-xs border rounded px-3 py-2">Start with current catalogue facts</button>}
+      {result && <MarketingQualityCheck captions={{ facebook: result.facebook, instagram: result.instagram, gbp: result.gbp }} channels={channels} />}
       {/* AI angle note */}
       <AnimatePresence>
         {result?.angle && (

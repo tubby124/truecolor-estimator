@@ -24,6 +24,14 @@ test('selected channels and stable request IDs survive repeat preparation withou
   expect(bodies[0].selectedChannels).toEqual(['facebook']);
   expect(bodies[1].requestId).toBe(bodies[0].requestId);
   await expect(page.getByText('X / Twitter', { exact: true })).toHaveCount(0);
+  const review = page.getByRole('region', { name: 'Marketing quality review' });
+  await expect(review.getByText('Fix copy before owner review')).toBeVisible();
+  await expect(review.getByText(/Include #TrueColorPrinting/)).toBeVisible();
+  await page.locator('textarea').filter({ hasText: 'A colourful print idea for Saskatoon.' }).first().fill('Display your services on a retractable banner. Our onsite graphic designer can help with artwork. #TrueColorPrinting #SaskatoonPrintShop');
+  await expect(review.getByText('Copy preflight complete — photo and marketing review still required')).toBeVisible();
+  await review.getByText('Check the actual image, caption and destination').click();
+  await expect(review.getByText(/Finished-product photos default to a clean neutral studio-like background/)).toBeVisible();
+  expect(bodies).toHaveLength(2); // Editing/reviewing never triggers another generation.
 });
 test('confirmed stale facts offer an explicit fresh request', async ({ page }) => {
   const ids: string[] = [];

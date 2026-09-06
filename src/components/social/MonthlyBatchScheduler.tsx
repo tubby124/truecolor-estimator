@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { MarketingQualityCheck } from './MarketingQualityCheck';
 import type { GenerationUsage } from '@/lib/social/generation-contract';
 import type { ProductFacts } from '@/lib/pricing/product-facts';
 import { compressForAI } from './BatchScheduler';
@@ -150,6 +151,7 @@ export function MonthlyBatchScheduler() {
       <div className="flex gap-4">{channels.map(channel => <label key={channel}><input type="checkbox" disabled={locked} checked={c.channels.includes(channel)} onChange={e => update(c.id, { channels: e.target.checked ? [...c.channels, channel] : c.channels.filter(v => v !== channel), requestId: crypto.randomUUID(), resumeJobId: undefined, generationStatus: undefined })} /> {channel === 'gbp' ? 'Google Business Profile' : channel}</label>)}</div>
       <label className="block">Catalogue product slug (optional) <input value={c.productSlug} disabled={locked} onChange={e => update(c.id, { productSlug: e.target.value, requestId: crypto.randomUUID(), resumeJobId: undefined, generationStatus: undefined, factFingerprint: undefined, configuration: undefined, jobId: undefined })} className="border p-2" /></label>
       <button disabled={locked || !c.channels.length} onClick={() => void generate(c)} className="rounded border p-2">Generate / resume selected captions</button>
+      <MarketingQualityCheck captions={c.captions} channels={c.channels} recentCaptions={Object.fromEntries(channels.map(channel => [channel, session.creatives.filter(other => other.id !== c.id && other.channels.includes(channel)).map(other => other.captions[channel] || "").filter(Boolean)]))} />
       {c.generationStatus === 'partial' && <button disabled={locked} onClick={() => void generate(c, true)} className="ml-3 rounded border p-2">Resume missing channels with a new attempt</button>}
       {c.usage && <p className="text-xs">Reported usage for this response: {c.usage.calls} provider calls · {c.usage.promptTokens ?? 'unknown'} input tokens · {c.usage.completionTokens ?? 'unknown'} output tokens · {c.usage.costUsd === null ? 'cost unavailable' : `US$${c.usage.costUsd.toFixed(4)}`}</p>}
       {c.channels.map(channel => <label key={channel} className="block">{channel} exact caption<textarea rows={3} value={c.captions[channel]} disabled={locked} onChange={e => update(c.id, { captions: { ...c.captions, [channel]: e.target.value } })} className="block w-full rounded border p-2" /></label>)}
