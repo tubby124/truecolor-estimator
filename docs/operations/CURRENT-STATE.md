@@ -56,4 +56,4 @@ Final hosted readback at 05:18:45 UTC confirmed `Publishing is paused`; readines
 
 ## Inquiry automation audit — September 6, 2026
 
-[Inquiry plan](../lead-automation/INQUIRY-PLAN-20260906.md) records source-code/VPS observations, official Lofty research, domain separation, synthetic responses and acceptance gates. Recommendation: extend existing quote/CRM review flows; resolve actual inquiry context and competing sender ownership before broader automation. No campaign, customer send or runtime change. Actual Facebook-to-Lofty mapping, active sequences and account costs remain unverified.
+[Scope correction](../lead-automation/INQUIRY-PLAN-20260906.md): owner clarified that True Color is wholly separate from realtor CRM/cold-lead reactivation. Realtor Smart Plans belong in tubby124/dripemtilltheydie. Printing observations retained; no combined implementation, new printing campaign, customer send or runtime change.
