@@ -19,10 +19,12 @@ LOCAL_PROBLEMS = {'timer_inactive', 'runner_disabled', 'runner_held', 'heartbeat
 
 def monitor_config(path, config):
     value = json.loads(Path(path).read_text())
-    if set(value) != {'businessId', 'enabled', 'expectPublishing', 'receiptSince'}:
+    if set(value) - {'notificationMode'} != {'businessId', 'enabled', 'expectPublishing', 'receiptSince'}:
         raise ValueError('Invalid monitor configuration')
     if value['businessId'] != config['businessId'] or type(value['enabled']) is not bool or type(value['expectPublishing']) is not bool:
         raise ValueError('Monitor scope mismatch')
+    if value.get('notificationMode', 'all') not in ('all', 'posted_only'):
+        raise ValueError('Invalid notification mode')
     since = runner.instant(value['receiptSince'])
     if since.isoformat(timespec='milliseconds').replace('+00:00', 'Z') != value['receiptSince']:
         raise ValueError('receiptSince requires canonical millisecond UTC')
@@ -150,10 +152,12 @@ def transitions(state, problems):
     state['problems'] = problems
 
 
-def flush_outbox(path, state, notify=runner.telegram):
+def flush_outbox(path, state, notify=runner.telegram, posted_only=False):
     """At most one attempt per event. Lost ACK requires manual readback, not retry."""
     attempts = 0
     for event in state['outbox'].values():
+        if posted_only and 'Publication recorded in saved delivery state.' not in event['message']:
+            continue
         if event['phase'] != 'pending':
             continue
         if attempts >= 4:
@@ -162,14 +166,19 @@ def flush_outbox(path, state, notify=runner.telegram):
         event['phase'] = 'in_flight'
         runner.persist(path, state)  # Commit intent before any network transmission.
         try:
-            message_id = notify(event['message'] + '\nObserved UTC: ' + event['observedAt'])
+            message = event['message'] + '\nObserved UTC: ' + event['observedAt']
+            if posted_only:
+                lines = event['message'].splitlines()
+                message = 'True Color posted to ' + lines[2] + '.\n' + lines[-1]
+            message_id = notify(message)
             if type(message_id) is not int:
                 raise ValueError('Missing Telegram acknowledgment')
             event.update(phase='acknowledged', messageId=message_id)
         except Exception:
             event['phase'] = 'uncertain'
         runner.persist(path, state)
-    return all(e['phase'] == 'acknowledged' for e in state['outbox'].values())
+    return all(e['phase'] == 'acknowledged' for e in state['outbox'].values()
+               if not posted_only or 'Publication recorded in saved delivery state.' in e['message'])
 
 
 def local_problems(config, directory, state, now, active):
@@ -237,14 +246,19 @@ def execute(config, monitor, runner_dir, path, now=None, check=queue_read,
     try:
         for receipt in read_receipts(config, monitor['receiptSince']):
             message = receipt_message(receipt)
-            if message:
+            if message and (monitor.get('notificationMode') != 'posted_only' or
+                            'Publication recorded in saved delivery state.' in message):
                 enqueue(state, 'receipt:' + receipt['id'] + ':' + hashlib.sha256(message.encode()).hexdigest(), message)
     except Exception:
         problems['receipts_unavailable'] = 'Scoped delivery receipt readback failed; publication is not verified.'
-    transitions(state, problems)
+    posted_only = monitor.get('notificationMode') == 'posted_only'
+    if posted_only:
+        state['problems'] = problems
+    else:
+        transitions(state, problems)
     state['lastObservedAt'] = now.isoformat()
     runner.persist(path, state)
-    confirmed = flush_outbox(path, state, notify)
+    confirmed = flush_outbox(path, state, notify, posted_only=posted_only)
     print(json.dumps({'problems': sorted(problems), 'notificationsConfirmed': confirmed}))
     return 1 if problems or not confirmed else 0
 

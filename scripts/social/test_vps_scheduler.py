@@ -186,7 +186,26 @@ class OngoingRunnerTest(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.path = Path(self.tmp.name) / 'ongoing-state.json'
         self.config = {'runner': 'ongoing', 'businessId': '00000000-0000-4000-8000-000000000001', 'enabled': True, 'pilotReconciled': True, 'postIds': ['00000000-0000-4000-8000-000000000002']}
-        self.ready = {'ok': True, 'runner': 'ongoing', 'businessId': self.config['businessId'], 'publishingEnabled': True, 'held': False, 'pending': False}
+        self.ready = {'ok': True, 'runner': 'ongoing', 'businessId': self.config['businessId'], 'publishingEnabled': True, 'held': False, 'pending': False, 'due': 1}
+
+    def test_read_timeout_recovers_next_tick_without_hold(self):
+        send = Mock(side_effect=[TimeoutError(), self.ready, self.ready])
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 1)
+        self.assertFalse(self.path.exists())
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 0)
+        self.assertEqual([c.args[1] for c in send.call_args_list], [True, True, False])
+
+    def test_idle_never_dispatches_or_claims(self):
+        send = Mock(return_value={**self.ready, 'due': 0})
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 0)
+        send.assert_called_once_with(self.config, True)
+        self.assertFalse(self.path.exists())
+
+    def test_remote_hold_never_dispatches_or_permanently_locks(self):
+        send = Mock(return_value={**self.ready, 'held': True})
+        self.assertEqual(r.execute_ongoing(self.config, self.path, send=send), 1)
+        self.assertFalse(self.path.exists())
+        send.assert_called_once_with(self.config, True)
 
     def test_config_requires_explicit_pilot_reconciliation(self):
         path = Path(self.tmp.name) / 'config.json'
@@ -293,6 +312,34 @@ class OngoingMonitorTest(unittest.TestCase):
         self.assertEqual(self.run_case(notify=notify, check=check, active=Mock(return_value=False)), 0)
         check.assert_not_called()
         notify.assert_not_called()
+
+    def test_posted_only_suppresses_alerts_and_preserves_receipt_dedupe(self):
+        notify = Mock(return_value=123)
+        self.run_case(notify=notify, read_receipts=Mock(return_value=[self.receipt]))
+        notify.reset_mock()
+        self.monitor['notificationMode'] = 'posted_only'
+        self.run_case(notify=notify, check=Mock(side_effect=TimeoutError()), read_receipts=Mock(return_value=[self.receipt]))
+        notify.assert_not_called()
+        self.assertIn('queue_unavailable', json.loads(self.path.read_text())['problems'])
+
+    def test_posted_only_ignores_pending_legacy_alert_confirmation(self):
+        state = json.loads(self.path.read_text())
+        state['outbox']['legacy'] = {'message': 'True Color scheduler: unavailable', 'phase': 'pending'}
+        r.persist(self.path, state)
+        self.monitor['notificationMode'] = 'posted_only'
+        notify = Mock(return_value=123)
+        self.assertEqual(self.run_case(notify=notify), 0)
+        notify.assert_not_called()
+        self.assertEqual(json.loads(self.path.read_text())['outbox']['legacy']['phase'], 'pending')
+
+    def test_posted_only_sends_simple_success_once(self):
+        self.monitor['notificationMode'] = 'posted_only'
+        notify = Mock(return_value=123)
+        self.assertEqual(self.run_case(notify=notify, read_receipts=Mock(return_value=[{**self.receipt, 'status': 'posting'}])), 0)
+        notify.assert_not_called()
+        for _ in range(2):
+            self.run_case(notify=notify, read_receipts=Mock(return_value=[self.receipt]))
+        notify.assert_called_once_with('True Color posted to Facebook.\n' + self.receipt['publicUrl'])
 
     def test_receipt_link_and_ack_deduplicate_without_provider_mutation(self):
         check, notify = Mock(return_value=self.ready), Mock(return_value=123)
