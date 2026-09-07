@@ -1,0 +1,3 @@
+import {describe,it,expect} from 'vitest';
+import {previewHtml} from './preview-html';
+describe('standalone private preview',()=>{it('escapes exact captions and includes no scripts or approval controls',()=>{const html=previewHtml({businessName:'Example',imageUrl:'https://example.test/a.jpg',captions:{instagram:'<script>alert(1)</script>',facebook:'A & B'},scheduleTime:'2030-01-02T16:00:00Z',status:'review',revision:1,mediaTreatment:'Photo preserved',expiresAt:'2030-01-03T00:00:00Z'});expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');expect(html).toContain('A &amp; B');expect(html).not.toContain('<script');expect(html).not.toContain('<form');expect(html).toContain('10:00');expect(html).toContain('America/Regina');});});

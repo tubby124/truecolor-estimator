@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { requireSocialBusiness, scopeSocialQuery } from "@/lib/social/business";
 import type { Metadata } from "next";
 import { createServiceClient } from "@/lib/supabase/server";
+import { decorateIntakeQueuePosts } from "@/lib/social/intake/queue-preview";
 import { PostQueueTable } from "@/components/social/PostQueueTable";
 
 export const metadata: Metadata = {
@@ -28,7 +29,7 @@ async function getPosts(campaignId?: string) {
     if (campaignId) query = query.eq("campaign_id", campaignId);
 
     const { data } = await query;
-    return data ?? [];
+    return await decorateIntakeQueuePosts(data ?? [], auth.businessId, supabase);
   } catch {
     return [];
   }

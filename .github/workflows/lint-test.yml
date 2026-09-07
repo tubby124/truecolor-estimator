@@ -80,6 +80,12 @@ jobs:
         run: >-
           psql --host 127.0.0.1 --username postgres --dbname postgres
           --file scripts/social/sql/integration-regression.sql
+      - name: Photo intake approval and scheduling regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: >-
+          psql --host 127.0.0.1 --username postgres --dbname postgres
+          --file scripts/social/sql/intake-regression.sql
       - name: Execute Google Ads monitor evidence ACL regression
         env:
           PGPASSWORD: ${{ github.run_id }}
@@ -118,6 +124,11 @@ jobs:
 
       - name: Bounded social VPS runner contracts
         run: python3 -B -m unittest discover -s scripts/social -p test_vps_scheduler.py
+
+      - name: Telegram photo intake and enhancement contracts
+        run: |
+          python3 -B -m unittest discover -s scripts/social/hermes-plugin -p test_intake.py
+          python3 -B -m unittest discover -s scripts/social/enhancement -p test_worker.py
 
       - name: Pricing contract
         run: npm run validate:pricing

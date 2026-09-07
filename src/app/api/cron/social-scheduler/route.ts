@@ -4,6 +4,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 import { approvalIntegrityBlocker, dispatchApprovedPost, publishingEnabled, approvalReset } from '@/lib/social/approval';
 import { recordCronRun } from '@/lib/cron/heartbeat';
+import { enrolledApprovals } from '@/lib/social/intake-scheduling/enrollments';
 import type { SocialPost } from '@/lib/types/social';
 
 export const dynamic = 'force-dynamic';
@@ -86,24 +87,34 @@ async function ongoing(req: NextRequest) {
   const businessId = params.get('businessId') ?? '';
   const check = params.get('mode') === 'check';
   const receipts = params.get('mode') === 'receipts';
-  const allowed = receipts ? ['runner', 'businessId', 'scope', 'mode', 'since', 'after'] : ['runner', 'businessId', 'scope', 'mode'];
+  const allowed = receipts ? ['runner', 'businessId', 'scope', 'mode', 'since', 'after', 'intake'] : ['runner', 'businessId', 'scope', 'mode', 'intake'];
   if (!uuid.test(businessId) || [...params.keys()].some(key => !allowed.includes(key) || params.getAll(key).length !== 1) || (params.has('mode') && !check && !receipts)) return NextResponse.json({ error: 'Invalid ongoing scope' }, { status: 400 });
   if (process.env.SOCIAL_BUSINESS_SCOPING_ENABLED !== 'true' || process.env.SOCIAL_ONGOING_SCHEDULER_ENABLED !== 'true' || process.env.SOCIAL_ONGOING_BUSINESS_ID !== businessId) return NextResponse.json({ error: 'Ongoing scheduling is not activated for this business' }, { status: 503 });
-  const ids = ongoingIds(params.get('scope'));
+  const baseIds = ongoingIds(params.get('scope'));
+  const includeIntake = params.get('intake') === '1';
+  if (params.has('intake') && (!includeIntake || process.env.SOCIAL_INTAKE_SCHEDULER_ENABLED !== 'true')) return NextResponse.json({ error: 'Intake scheduling is not activated' }, { status: 503 });
+  let enrollments = new Map<string, string>();
+  if (includeIntake && baseIds && !receipts) {
+    try { enrollments = await enrolledApprovals(businessId); }
+    catch { return NextResponse.json({ error: 'Approved intake queue unavailable' }, { status: 503 }); }
+  }
+  const ids = baseIds ? [...new Set([...baseIds, ...enrollments.keys()])].sort() : null;
   if (!ids) return NextResponse.json({ error: 'Exact ongoing destination scope is not activated' }, { status: 503 });
-  if (receipts) return ongoingReceipts(businessId, ids, params);
+  if (receipts) return ongoingReceipts(businessId, ids, params, includeIntake);
   const db = createServiceClient();
   const cutoff = new Date(Date.now() - 3600000).toISOString();
-  const read = await db.from('social_posts').select(ongoingColumns).eq('business_id', businessId).in('id', ids).returns<SocialPost[]>().limit(101);
+  const read = await db.from('social_posts').select(ongoingColumns).eq('business_id', businessId).in('id', ids).returns<SocialPost[]>().limit(501);
   if (read.error || read.data?.length !== ids.length || read.data.some(post => !ids.includes(post.id))) return NextResponse.json({ error: 'Exact ongoing scope is incomplete or unavailable; held' }, { status: 503 });
-  const pending = read.data.some(post => ['posting', 'failed'].includes(post.status));
-  const ready = read.data.filter(post => post.status === 'ready').sort((a, b) => Date.parse(a.schedule_time ?? '') - Date.parse(b.schedule_time ?? '') || a.id.localeCompare(b.id));
+  // Editing/cancelling an intake withdraws that approval without stopping unrelated work.
+  const eligible = read.data.filter(post => baseIds!.includes(post.id) || post.approval_hash === enrollments.get(post.id));
+  const pending = eligible.some(post => ['posting', 'failed'].includes(post.status));
+  const ready = eligible.filter(post => post.status === 'ready').sort((a, b) => Date.parse(a.schedule_time ?? '') - Date.parse(b.schedule_time ?? '') || a.id.localeCompare(b.id));
   const stale = ready.some(post => Date.parse(post.schedule_time ?? '') < Date.parse(cutoff));
   const due = ready.filter(post => post.approval_hash && Date.parse(post.schedule_time ?? '') <= Date.now() && Date.parse(post.schedule_time ?? '') >= Date.parse(cutoff));
   const oldestDueAt = ready.find(post => Date.parse(post.schedule_time ?? '') <= Date.now())?.schedule_time ?? null;
   if (check || !publishingEnabled() || pending) return NextResponse.json({ ok: true, runner: 'ongoing', businessId, publishingEnabled: publishingEnabled(), held: pending || stale, due: due.length, oldestDueAt, backlog: due.length > 25, stale, pending });
   // Do not move a claimed or posted delivery. Expired schedules return visibly to review.
-  const expired = await db.from('social_posts').update({ ...approvalReset, status: 'draft', error_message: 'Schedule missed by more than one hour; choose a new time and approve again.' }).eq('business_id', businessId).in('id', ids).eq('status', 'ready').lt('schedule_time', cutoff).select('id');
+  const expired = await db.from('social_posts').update({ ...approvalReset, status: 'draft', error_message: 'Schedule missed by more than one hour; choose a new time and approve again.' }).eq('business_id', businessId).in('id', eligible.map(post => post.id)).eq('status', 'ready').lt('schedule_time', cutoff).select('id');
   if (expired.error) return NextResponse.json({ error: 'Stale schedule hold could not be saved' }, { status: 503 });
   let dispatched = 0;
   let held = expired.data?.length ?? 0;
@@ -118,11 +129,15 @@ async function ongoing(req: NextRequest) {
 }
 
 /** Repeated scans recover delivery evidence after lost ACKs; never dispatch or write. */
-async function ongoingReceipts(businessId: string, ids: string[], params: URLSearchParams) {
+async function ongoingReceipts(businessId: string, ids: string[], params: URLSearchParams, includeIntake = false) {
   const since = params.get('since') ?? '';
   const after = params.get('after');
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(since) || !Number.isFinite(Date.parse(since)) || new Date(since).toISOString() !== since || (after !== null && !uuid.test(after))) {
     return NextResponse.json({ error: 'Invalid receipt scope' }, { status: 400 });
+  }
+  if (includeIntake) {
+    try { ids = [...new Set([...ids, ...(await enrolledApprovals(businessId, createServiceClient(), {since,after})).keys()])].sort(); }
+    catch { return NextResponse.json({ error: 'Approved intake receipt scope unavailable' }, { status: 503 }); }
   }
   let query = createServiceClient().from('social_posts')
     .select('id,status,platforms,schedule_time,post_public_url')
@@ -133,7 +148,7 @@ async function ongoingReceipts(businessId: string, ids: string[], params: URLSea
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: 'Delivery evidence unavailable' }, { status: 503 });
   const page = (data ?? []).slice(0, 100);
-  return NextResponse.json({ ok: true, runner: 'ongoing', businessId, receipts: page.map(post => ({
+  return NextResponse.json({ ok: true, runner: 'ongoing', businessId, ...(includeIntake ? { authorizedIds: ids } : {}), receipts: page.map(post => ({
     id: post.id, platform: post.platforms?.[0] ?? 'unknown', status: post.status,
     scheduleTime: Number.isFinite(Date.parse(post.schedule_time ?? '')) ? new Date(post.schedule_time!).toISOString() : null, publicUrl: publicLink(post as SocialPost),
   })), nextAfter: (data?.length ?? 0) > 100 ? page[99].id : null });

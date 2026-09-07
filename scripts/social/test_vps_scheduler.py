@@ -445,10 +445,38 @@ class OngoingMonitorTest(unittest.TestCase):
         self.run_case()
         self.assertEqual(p.read_bytes(), before)
 
+    def test_enrolled_receipts_require_opt_in_and_server_scope(self):
+        foreign = '00000000-0000-4000-8000-000000000009'
+        receipt = {**self.receipt, 'id': foreign}
+        http = Mock(return_value={'receipts': [receipt], 'nextAfter': None, 'authorizedIds': [self.id, foreign]})
+        with self.assertRaises(ValueError):
+            m.receipt_read(self.config, self.monitor['receiptSince'], http=http)
+        self.config['includeIntake'] = True
+        self.assertEqual(m.receipt_read(self.config, self.monitor['receiptSince'], http=http), [receipt])
+        for scope in [None, [foreign], [self.id, 'bad'], [self.id, self.id]]:
+            with self.assertRaises(ValueError):
+                m.receipt_read(self.config, self.monitor['receiptSince'], http=Mock(return_value={'receipts': [receipt], 'nextAfter': None, 'authorizedIds': scope}))
+
     def test_receipt_reader_rejects_out_of_scope_or_duplicate_ids(self):
         for receipts in [[{**self.receipt, 'id': 'other'}], [self.receipt, self.receipt]]:
             with self.assertRaises(ValueError):
                 m.receipt_read(self.config, self.monitor['receiptSince'], http=Mock(return_value={'receipts': receipts, 'nextAfter': None}))
+
+    def test_intake_receipt_watermark_retains_pending_and_failed_reads(self):
+        self.config['includeIntake'] = True
+        state = json.loads(self.path.read_text())
+        state['fingerprint'] = r.fingerprint(self.config)
+        state['receiptScanAt'] = '2026-09-12T15:00:00+00:00'
+        r.persist(self.path, state)
+        later = self.now + dt.timedelta(days=6)
+        receipts = Mock(return_value=[])
+        self.run_case(now=later, check=Mock(return_value={**self.ready, 'pending': True}), read_receipts=receipts)
+        receipts.assert_called_once_with(self.config, '2026-09-10T15:00:00.000Z')
+        self.assertEqual(json.loads(self.path.read_text())['receiptScanAt'], state['receiptScanAt'])
+        self.run_case(now=later, read_receipts=Mock(side_effect=TimeoutError()))
+        self.assertEqual(json.loads(self.path.read_text())['receiptScanAt'], state['receiptScanAt'])
+        self.run_case(now=later, read_receipts=Mock(return_value=[]))
+        self.assertEqual(json.loads(self.path.read_text())['receiptScanAt'], later.isoformat())
 
     def test_monitor_transport_never_allows_dispatch(self):
         with self.assertRaises(ValueError):

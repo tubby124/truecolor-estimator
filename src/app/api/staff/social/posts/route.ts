@@ -1,6 +1,7 @@
 import { requireSocialBusiness, scopeSocialQuery, socialBusinessFields, socialBusinessScopingEnabled } from "@/lib/social/business";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { decorateIntakeQueuePosts } from "@/lib/social/intake/queue-preview";
 import { invalidDraftFields } from "@/lib/social/approval";
 import type { CreatePostBody } from "@/lib/types/social";
 
@@ -60,7 +61,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data ?? []);
+  return NextResponse.json(await decorateIntakeQueuePosts(data ?? [], auth.businessId, supabase), { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(req: Request) {

@@ -324,10 +324,10 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
 
                     {/* Image thumbnail */}
                     <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-                      {post.image_url ? (
+                      {(post.preview_image_url || post.image_url) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={post.image_url}
+                          src={post.preview_image_url || post.image_url || ""}
                           alt=""
                           className="w-full h-full object-cover"
                           onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
@@ -375,7 +375,7 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {post.status === "draft" && (
                         <Link
-                          href={`/staff/social/review?ids=${encodeURIComponent(post.id)}`}
+                          href={post.intake_id ? `/staff/social/intake/${post.intake_id}` : `/staff/social/review?ids=${encodeURIComponent(post.id)}`}
                           className="text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                         >
                           Review draft
@@ -398,7 +398,7 @@ export function PostQueueTable({ initialPosts, campaignFilter }: Props) {
                         Duplicate
                       </button>
                       <Link
-                        href={`/staff/social/review?ids=${post.id}`}
+                        href={post.intake_id ? `/staff/social/intake/${post.intake_id}` : `/staff/social/review?ids=${post.id}`}
                         className="text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"
                       >
                         Review
