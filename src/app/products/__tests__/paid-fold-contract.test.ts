@@ -84,6 +84,8 @@ describe("paid product page fold contract", () => {
     expect(template).toContain("confirm capacity before ordering");
     expect(template).toContain("Out of stock for immediate pickup at this location");
     expect(template).toContain("available to order for later Saskatoon pickup");
+    expect(template).toContain("This is our only pickup location");
+    expect(template).toContain("defaultValue={MERCHANT_STORE_CODE}");
     expect(template).toContain("not preprinted shelf stock");
     expect(template).not.toContain("not stocked for same-day pickup");
     expect(template).not.toContain("Materials are stocked");
