@@ -91,7 +91,7 @@ def receipt_read(config, since, http=readonly_http):
     # Exact allowlist is at most 100 destinations. A bounded second page handles
     # future API page-size changes without an unbounded polling loop.
     after, receipts = None, []
-    for _ in range(2):
+    for _ in range(6):
         params = {'mode': 'receipts', 'since': since}
         if after:
             params['after'] = after
@@ -99,8 +99,13 @@ def receipt_read(config, since, http=readonly_http):
         page, cursor = result.get('receipts'), result.get('nextAfter')
         if not isinstance(page, list) or len(page) > 100:
             raise ValueError('Invalid receipt page')
+        authorized = config['postIds']
+        if config.get('includeIntake'):
+            authorized = result.get('authorizedIds')
+            if not isinstance(authorized, list) or not 1 <= len(authorized) <= 500 or len(set(authorized)) != len(authorized) or any(not isinstance(i, str) or not runner.UUID.fullmatch(i) for i in authorized) or not set(config['postIds']) <= set(authorized):
+                raise ValueError('Invalid enrolled receipt scope')
         for receipt in page:
-            if not isinstance(receipt, dict) or receipt.get('id') not in config['postIds']:
+            if not isinstance(receipt, dict) or receipt.get('id') not in authorized:
                 raise ValueError('Receipt outside approved destination scope')
             if receipt['id'] in {r['id'] for r in receipts}:
                 raise ValueError('Duplicate receipt')
@@ -232,6 +237,7 @@ def execute(config, monitor, runner_dir, path, now=None, check=queue_read,
     state = journal_read(path, config)
     state['lastObservedAt'] = now.isoformat()
     problems = {}
+    result = None
     try:
         problems.update(local_problems(config, runner_dir, state, now, active()))
     except Exception:
@@ -244,11 +250,19 @@ def execute(config, monitor, runner_dir, path, now=None, check=queue_read,
         problems.update({key: value for key, value in state.get('problems', {}).items() if key in REMOTE_PROBLEMS})
         problems['queue_unavailable'] = 'Read-only scoped queue check failed; inspect activation, scope and connectivity.'
     try:
-        for receipt in read_receipts(config, monitor['receiptSince']):
+        since = monitor['receiptSince']
+        # Keep an overlap for delayed receipts, but do not rescan all history forever.
+        # Pending provider outcomes retain the old watermark until reconciled.
+        if config.get('includeIntake') and state.get('receiptScanAt'):
+            overlap = timestamp(state['receiptScanAt']) - dt.timedelta(days=2)
+            since = max(runner.instant(since), overlap).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+        for receipt in read_receipts(config, since):
             message = receipt_message(receipt)
             if message and (monitor.get('notificationMode') != 'posted_only' or
                             'Publication recorded in saved delivery state.' in message):
                 enqueue(state, 'receipt:' + receipt['id'] + ':' + hashlib.sha256(message.encode()).hexdigest(), message)
+        if config.get('includeIntake') and result is not None and not result.get('pending'):
+            state['receiptScanAt'] = now.isoformat()
     except Exception:
         problems['receipts_unavailable'] = 'Scoped delivery receipt readback failed; publication is not verified.'
     posted_only = monitor.get('notificationMode') == 'posted_only'

@@ -32,6 +32,9 @@ export interface SocialCampaign {
 }
 
 export interface SocialPost {
+  /** Authenticated display-only fields; never persist or use for publishing. */
+  preview_image_url?: string;
+  intake_id?: string;
   business_id?: string;
   approval_version?: number | null;
   caption_gbp?: string | null;

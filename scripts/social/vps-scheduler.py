@@ -24,8 +24,10 @@ def instant(value):
 def config_read(path):
     config = json.loads(Path(path).read_text())
     if config.get('runner') == 'ongoing':
-        if set(config) != {'runner', 'businessId', 'enabled', 'pilotReconciled', 'postIds'} or not UUID.fullmatch(config.get('businessId', '')) or type(config.get('enabled')) is not bool or config.get('pilotReconciled') is not True:
+        if set(config) - {'includeIntake'} != {'runner', 'businessId', 'enabled', 'pilotReconciled', 'postIds'} or not UUID.fullmatch(config.get('businessId', '')) or type(config.get('enabled')) is not bool or config.get('pilotReconciled') is not True:
             raise ValueError('Ongoing runner requires explicit pilot reconciliation and business scope')
+        if 'includeIntake' in config and type(config['includeIntake']) is not bool:
+            raise ValueError('Invalid intake scheduling option')
         ids = config['postIds']
         if not isinstance(ids, list) or not 1 <= len(ids) <= 100 or any(not isinstance(i, str) or not UUID.fullmatch(i) for i in ids) or len(set(ids)) != len(ids):
             raise ValueError('Exact reviewed destination IDs required')
@@ -75,6 +77,8 @@ def request(config, check):
     query = {'ids': ','.join(config['ids']), 'expiresAt': config['expiresAt']}
     if check:
         query['mode'] = 'check'
+    if config.get('includeIntake'):
+        query['intake'] = '1'
     req = urllib.request.Request(ENDPOINT + '?' + urllib.parse.urlencode(query), headers={'Authorization': 'Bearer ' + secret, 'Cache-Control': 'no-store', 'User-Agent': 'TrueColor-Social-Scheduler/1.0 (+https://truecolorprinting.ca)'})
     with urllib.request.build_opener(NoRedirect()).open(req, timeout=180) as response:
         result = json.loads(response.read(65537))
@@ -268,6 +272,8 @@ def ongoing_http(config, parameters, timeout=180):
     if not secret or '\n' in secret or '\r' in secret:
         raise ValueError('Invalid credential')
     query = {**parameters, 'runner': 'ongoing', 'businessId': config['businessId'], 'scope': scope_digest(config)}
+    if config.get('includeIntake'):
+        query['intake'] = '1'
     req = urllib.request.Request(ENDPOINT + '?' + urllib.parse.urlencode(query), headers={'Authorization': 'Bearer ' + secret, 'Cache-Control': 'no-store', 'User-Agent': 'TrueColor-Social-Scheduler/1.0 (+https://truecolorprinting.ca)'})
     with urllib.request.build_opener(NoRedirect()).open(req, timeout=timeout) as response:
         result = json.loads(response.read(65537))

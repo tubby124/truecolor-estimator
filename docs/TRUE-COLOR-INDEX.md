@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Telegram photo intake, temporary previews and exact approval](social/TELEGRAM-INTAKE.md)
+
 - [Efficient social launches: authenticated APIs, local dates and resumable receipts](social/LAUNCH-OPERATIONS.md)
 
 - [Social branding standard and transparent website-logo review](social/BRANDING-STANDARD.md)

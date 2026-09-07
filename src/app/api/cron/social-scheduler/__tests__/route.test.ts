@@ -3,6 +3,8 @@ import { NextRequest } from 'next/server';
 import { createHash } from 'node:crypto';
 const from = vi.hoisted(() => vi.fn());
 const dispatch = vi.hoisted(() => vi.fn());
+const enrollments = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/social/intake-scheduling/enrollments',()=>({enrolledApprovals:enrollments}));
 vi.mock('@/lib/supabase/server',()=>({createServiceClient:()=>({from})}));
 vi.mock('@/lib/social/approval',()=>({approvalReset:{approval_hash:null},approvalIntegrityBlocker:(post: {approved_rights?: boolean})=>post.approved_rights === false ? 'Explicit approval required' : null,publishingEnabled:()=>process.env.SOCIAL_PUBLISHING_ENABLED==='true', dispatchApprovedPost:dispatch}));
 vi.mock('@/lib/cron/heartbeat',()=>({recordCronRun:vi.fn()}));
@@ -100,6 +102,21 @@ describe('ongoing exact scope and read-only evidence', () => {
   const q = { select: vi.fn().mockReturnThis(), returns: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), in: vi.fn().mockReturnThis(), lt: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: vi.fn().mockReturnThis(), gt: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(), limit: vi.fn().mockResolvedValue({ data, error }) };
   from.mockReturnValue(q); return q;
  }
+ it('requires explicit two-sided intake activation', async () => {
+  expect((await GET(scoped(`runner=ongoing&businessId=${ids[0]}&scope=${digest()}&mode=check&intake=1`))).status).toBe(503);
+  expect(from).not.toHaveBeenCalled();
+ });
+ it('includes only exact approved intake versions and ignores withdrawn ones', async () => {
+  vi.stubEnv('SOCIAL_INTAKE_SCHEDULER_ENABLED','true');
+  const added='00000000-0000-4000-8000-000000000099';
+  enrollments.mockResolvedValue(new Map([[added,'a'.repeat(64)]]));
+  const request=()=>scoped(`runner=ongoing&businessId=${ids[0]}&scope=${digest()}&mode=check&intake=1`);
+  queue([...ids.map(id=>row(id,'posted')),{...row(added),approval_hash:'a'.repeat(64)}]);
+  expect(await (await GET(request())).json()).toMatchObject({due:1});
+  queue([...ids.map(id=>row(id,'posted')),{...row(added),approval_hash:'b'.repeat(64)}]);
+  expect(await (await GET(request())).json()).toMatchObject({due:0,held:false});
+  expect(dispatch).not.toHaveBeenCalled();
+ });
  it('requires activation, exact digest and a unique destination allowlist', async () => {
   vi.stubEnv('SOCIAL_ONGOING_SCHEDULER_ENABLED', ''); expect((await GET(ongoing())).status).toBe(503);
   vi.stubEnv('SOCIAL_ONGOING_SCHEDULER_ENABLED', 'true'); expect((await GET(ongoing(false, ids[1]))).status).toBe(503);
