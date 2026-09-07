@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Efficient social launches: authenticated APIs, local dates and resumable receipts](social/LAUNCH-OPERATIONS.md)
+
 - [Social branding standard and transparent website-logo review](social/BRANDING-STANDARD.md)
 
 - [Full-month workflow, GPT concepts, holiday/audience planning and import](social/FULL-MONTH-WORKFLOW-20260906.md)
