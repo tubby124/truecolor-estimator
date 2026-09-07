@@ -321,23 +321,35 @@ def _execute_ongoing(config, path, check=False, send=request_ongoing):
         send(config, True)  # Read only: remote receipts never implicitly clear uncertainty.
         print('ongoing_held_manual_reconciliation')
         return 1
+    # A failed read cannot have published anything: retry next timer tick.
     try:
         result = send(config, True)
-        if not result['publishingEnabled']:
-            print('ongoing_paused')
-            return 0
-        if result.get('pending'):
-            persist(path, {'fingerprint': key, 'phase': 'blocked'})
-            print('ongoing_pending_provider_reconciliation')
-            return 1
+    except Exception as exc:
+        print('ongoing_check_retry:' + type(exc).__name__ +
+              (':' + str(exc.code) if hasattr(exc, 'code') else ''))
+        return 1
+    if not result['publishingEnabled']:
+        print('ongoing_paused')
+        return 0
+    if result.get('pending') or result.get('held'):
+        print('ongoing_remote_hold')
+        return 1
+    if type(result.get('due')) is not int or result['due'] < 0:
+        print('ongoing_invalid_due_retry')
+        return 1
+    if result['due'] == 0:
+        print('ongoing_idle')
+        return 0
+    try:
         persist(path, {'fingerprint': key, 'phase': 'in_flight'})
         result = send(config, False)
         persist(path, {'fingerprint': key, 'phase': 'blocked' if result['held'] else 'waiting'})
         print('ongoing_held' if result['held'] else 'ongoing_checked')
         return 1 if result['held'] else 0
-    except Exception:
+    except Exception as exc:
         persist(path, {'fingerprint': key, 'phase': 'blocked'})
-        print('ongoing_uncertain_manual_reconciliation')
+        print('ongoing_dispatch_uncertain:' + type(exc).__name__ +
+              (':' + str(exc.code) if hasattr(exc, 'code') else ''))
         return 1
 
 
