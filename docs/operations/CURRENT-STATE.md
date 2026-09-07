@@ -1,3 +1,9 @@
+## First September pair verified — September 7, 15:09 UTC
+
+The first ongoing September pair, scheduled for 9 a.m. Regina, is independently verified live on [Facebook](https://www.facebook.com/122234777786295517/posts/122234961128295517) and [Instagram](https://www.instagram.com/p/Dc_Yhfhm1FA/). Each exact destination is posted with one published database receipt, one exact-caption provider match and one public link. No duplicate was found in the current provider lists, and no manual dispatch or retry was performed. This verifies the first new pair, not future delivery of the rest of the month.
+
+The exact-scope VPS runner and independent monitor remain the owners of routine scheduled posting. The launch verification follow-up can be paused after this Git closeout; it does not disable those VPS timers. Existing September scope and staggered morning times remain unchanged. October remains excluded. The API-first workflow and AISA collaboration learnings are already recorded; no duplicate capture is needed.
+
 # Current work state
 
 Updated 2026-09-06. This is the canonical shared work board. Imported operational observations are explicitly dated reports; this migration does not certify live account state. Refresh the relevant system before a mutation.
