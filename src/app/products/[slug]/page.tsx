@@ -9,7 +9,7 @@ import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
 import { PRODUCT_IMAGES } from "@/lib/data/productImages";
 import { NotifyMeForm } from "@/components/product/NotifyMeForm";
-import { getMerchantOffer, getMerchantOfferSelection } from "@/lib/merchant/merchant-catalog";
+import { getMerchantOffer, getMerchantOfferSelection, MERCHANT_STORE_CODE } from "@/lib/merchant/merchant-catalog";
 import { merchantProductSchema } from "@/lib/commerce/product-schema";
 import { COMMERCE_POLICY } from "@/lib/commerce/policies";
 import { BUSINESS_INFO } from "@/lib/business-info";
@@ -116,6 +116,18 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 {merchantOffer.sizeLabel}, {merchantOffer.sides === 1 ? "single-sided" : "double-sided"}, quantity {merchantOffer.qty} — <span className="font-semibold">${merchantOffer.price.toFixed(2)} CAD before GST</span>.
               </p>
               <div className="mt-2 space-y-1 text-sm text-gray-700">
+                <div className="pb-1">
+                  <label className="mb-1 block font-semibold" htmlFor={`pickup-store-${merchantOffer.offerId}`}>Pickup store</label>
+                  <select
+                    id={`pickup-store-${merchantOffer.offerId}`}
+                    name="pickup-store"
+                    defaultValue={MERCHANT_STORE_CODE}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-[#1c1712]"
+                  >
+                    <option value={MERCHANT_STORE_CODE}>True Color Display Printing — {COMMERCE_POLICY.pickup.address}</option>
+                  </select>
+                  <p className="mt-1 text-xs text-gray-600">This is our only pickup location.</p>
+                </div>
                 <p><span className="font-semibold">In-store availability:</span> Out of stock for immediate pickup at this location. This custom print is available to order for later Saskatoon pickup after artwork approval; it is not preprinted shelf stock.</p>
                 <p><span className="font-semibold">Pickup location:</span> {COMMERCE_POLICY.pickup.address}.</p>
                 <p><span className="font-semibold">Standard pickup:</span> Allow one week or more from order placement to cover artwork approval. Production itself is usually {COMMERCE_POLICY.production.standard}.</p>
