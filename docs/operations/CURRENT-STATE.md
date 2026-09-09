@@ -121,3 +121,8 @@ Production migration, app credentials/flags, native plugin enable/restart and dy
 ## Focused sticker campaign and learning continuity — September 9, 2026
 
 Owner accepted the sticker direction and requests premium creative plus a second daily campaign post alongside approved mornings. [Campaign decision and scorecard](../social/campaigns/STICKERS-20260909.md) preserve the buyer hypothesis, private research locator, UTM/measurement definitions and repeatable manual review. Final creative, exact dates/accounts and publishing approvals remain pending; five concepts do not constitute a daily second-slot inventory. No runtime, queue, collector, automated learning or spending change. Next: finalize private assets, validate the exact package through the existing monthly review, then capture dated outcomes without modifying posted records.
+
+
+## Unified social harness preparation — September 9, 2026
+
+[Owner direction and integration contract](../social/UNIFIED-HARNESS.md) records the plan to join daily cleared customer-work posts and additional harness content through the existing staff review/calendar/queue. Private hypothetical week/year preview prepared; cadence, final logo treatment and exact publication packages remain for review. Existing September batch preserved. Source audit found a 31-creative monthly import cap, hardcoded brand/timezone assumptions and no automated engagement collector in audited social code. Sales attribution is excluded from this milestone. No runtime, queue, provider or image-library mutation occurred. Next: owner review of combined preview, then compatible package/planner/render integration and an exact-approved pilot before annual scheduling.
