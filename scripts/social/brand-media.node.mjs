@@ -76,3 +76,25 @@ test('requires explicit logo/corner and bounded size; rejects opaque logos', asy
     assert.deepEqual((await readdir(dir)).sort(), ['logo.png', 'source.png']);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
+
+
+test('white badge preserves artwork outside its bounds and records the logo inset', async () => {
+  const dir=await mkdtemp(join(tmpdir(),'brand-white-'));
+  try {
+    const args=await fixture(dir);const before=await readFile(args.source);
+    const result=await brandMedia({...args,corner:'top-right',backing:'white'});
+    assert.equal(result.method,'white-backed-corner-overlay');
+    const badge=result.layout.badge, logo=result.layout.logo;
+    assert.equal(logo.left,badge.left+badge.padding);assert.equal(logo.top,badge.top+badge.padding);
+    const {data,info}=await sharp(result.files.lossless).removeAlpha().raw().toBuffer({resolveWithObject:true});
+    const expected=await sharp(args.source).removeAlpha().raw().toBuffer();
+    const x=badge.left+Math.floor(badge.width/2), y=badge.top+1;
+    assert.deepEqual([...data.subarray((y*info.width+x)*3,(y*info.width+x)*3+3)],[255,255,255]);
+    for(let y=0;y<info.height;y++)for(let x=0;x<info.width;x++){
+      if(x>=badge.left&&x<badge.left+badge.width&&y>=badge.top&&y<badge.top+badge.height)continue;
+      const i=(y*info.width+x)*3;assert.deepEqual(data.subarray(i,i+3),expected.subarray(i,i+3));
+    }
+    assert.deepEqual(await readFile(args.source),before);
+    await assert.rejects(brandMedia({...args,backing:'black'}),/backing/);
+  } finally {await rm(dir,{recursive:true,force:true});}
+});
