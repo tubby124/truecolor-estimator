@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { BackToTop } from "@/components/site/BackToTop";
 import { AuthRedirect } from "@/components/site/AuthRedirect";
+import { Ga4ContextPrimer } from "@/components/site/Ga4ContextPrimer";
 import { UtmCapture } from "@/components/site/UtmCapture";
 import { MetaPixel } from "@/components/site/MetaPixel";
 import { MarketingConsent } from "@/components/site/MarketingConsent";
@@ -319,6 +320,7 @@ export default function RootLayout({
         </a>
         <AuthRedirect />
         <UtmCapture />
+        <Ga4ContextPrimer />
         {websiteCallLabel ? (
           <WebsiteCallSwap label={websiteCallLabel} requiresConsent={marketingConsentBannerEnabled} />
         ) : null}

@@ -45,3 +45,7 @@ The next target and exact draft are in `seo-prep/2026-09-04-foamboard-strengthen
 - Independent code/security review completed; its candidate-versus-sent report finding was fixed and re-reviewed with no remaining blockers.
 - Local production browser checks: dotted invalid payment URL renders the expired-link screen with only same-origin scripts; product add-to-cart hydrates correctly; checkout shows $45 + $2.25 GST + $2.70 PST = $49.95 and rejects empty required fields. Payment and checkout have no horizontal overflow at 390px. No provider payment, customer order or outbound message was created.
 - Release deployment and production smoke evidence will be recorded on the pull request after the exact merged commit is live. These checks do not establish a completed provider transaction or Merchant approval.
+
+## September 9 continuity follow-through
+
+See [the bounded repair and release receipt](CONTINUITY-RELEASE-20260909.md) and [current provider/reporting readiness](ATTRIBUTION-READINESS-20260909.md). Historical implementation statements above are retained as dated evidence. No historical purchase replay is allowed; the old backfill command is being retired with a hard safety stop. Genuine future purchase attribution and durable delivery remain separate gates.

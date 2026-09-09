@@ -97,23 +97,36 @@ const cpcFilter = (excludeSynthetic) => ({
 const funnelRows = await runReport({
   dateRanges: [range],
   dimensions: [{ name: "landingPage" }, { name: "eventName" }],
-  metrics: [{ name: "eventCount" }, { name: "sessions" }],
+  metrics: [{ name: "eventCount" }],
   dimensionFilter: cpcFilter(true),
   limit: "500",
 });
 
+const landingSessionRows = await runReport({
+  dateRanges: [range],
+  dimensions: [{ name: "landingPage" }],
+  metrics: [{ name: "sessions" }],
+  dimensionFilter: cpcFilter(true),
+  limit: "500",
+});
 const byLanding = new Map();
+for (const row of landingSessionRows) {
+  const landing = safeReportPath(row.dimensionValues[0].value);
+  const entry = byLanding.get(landing) ?? { sessions: 0, events: {} };
+  entry.sessions += Number(row.metricValues[0].value);
+  byLanding.set(landing, entry);
+}
 for (const r of funnelRows) {
   const [rawLanding, event] = r.dimensionValues.map((d) => d.value);
   const landing = safeReportPath(rawLanding);
   const count = Number(r.metricValues[0].value);
   if (!byLanding.has(landing)) byLanding.set(landing, { sessions: 0, events: {} });
   const entry = byLanding.get(landing);
-  if (event === "session_start") entry.sessions += count;
   if (FUNNEL_EVENTS.includes(event)) entry.events[event] = (entry.events[event] ?? 0) + count;
 }
 
 console.log("=== GA4 — real paid sessions by landing page (synthetic excluded) ===");
+console.log("  Independent session totals and event activity; not a sequential cohort funnel or conversion rate.");
 console.log("  Diagnostic only — not bid conversions: product_config_started, product_config_ready, product_price_error, add_to_cart_blocked.");
 if (byLanding.size === 0) console.log("  (no real google/cpc sessions in range)");
 for (const [landing, { sessions, events }] of [...byLanding.entries()].sort((a, b) => b[1].sessions - a[1].sessions)) {
