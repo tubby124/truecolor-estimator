@@ -1,7 +1,38 @@
+import { getMarketingConsent } from "./metaConsent";
+import { isSensitiveAnalyticsPath } from "./path";
+
 const GA4_MEASUREMENT_ID = "G-6HMQT7MNLL";
 const GA_CLIENT_ID_RE = /^\d{1,20}\.\d{1,20}$/;
 const GA_SESSION_VALUE_RE = /^\d{1,20}$/;
-const GA_CONTEXT_TIMEOUT_MS = 500;
+export const GA4_CONTEXT_CACHE_KEY = `tc_ga4_context:v1:${GA4_MEASUREMENT_ID}`;
+const CACHE_TTL_MS = 60_000;
+let generation = 0;
+let submissionsInFlight = 0;
+
+export function clearGa4ClientContext(): void {
+  generation++;
+  try { window.sessionStorage.removeItem(GA4_CONTEXT_CACHE_KEY); } catch { /* Optional storage. */ }
+}
+
+function eligible(): boolean {
+  if (typeof window === "undefined") return false;
+  const consent = getMarketingConsent();
+  return !isSensitiveAnalyticsPath(window.location.pathname)
+    && !/^\/(staff|account)(\/|$)/.test(window.location.pathname)
+    && consent !== "denied"
+    && (process.env.NEXT_PUBLIC_MARKETING_CONSENT_BANNER !== "true" || consent === "granted");
+}
+
+function readCache(): { context: Ga4ClientContext; capturedAt: number } | null {
+  try {
+    const raw = JSON.parse(window.sessionStorage.getItem(GA4_CONTEXT_CACHE_KEY) ?? "null");
+    if (!raw || typeof raw !== "object" || typeof raw.capturedAt !== "number"
+      || !Number.isFinite(raw.capturedAt) || raw.capturedAt > Date.now()
+      || Date.now() - raw.capturedAt >= CACHE_TTL_MS || !raw.context || typeof raw.context !== "object") return null;
+    const context = parseGa4ClientContext(raw.context);
+    return context?.ga_session_id ? { context, capturedAt: raw.capturedAt } : null;
+  } catch { return null; }
+}
 
 declare global {
   interface Window {
@@ -11,7 +42,7 @@ declare global {
 
 /**
  * Pseudonymous identifiers issued by the site's existing GA4 tag. They are
- * captured only at a form/checkout submission and let a later server-confirmed
+ * read on public routes and refreshed at form/checkout submission and let a later server-confirmed
  * purchase join the visitor's actual GA4 session. They are not customer PII.
  */
 export interface Ga4ClientContext {
@@ -42,7 +73,7 @@ export function parseGa4ClientContext(input: {
   };
 }
 
-function getGtagValue(field: "client_id" | "session_id" | "session_number"): Promise<unknown> {
+function getGtagValue(field: "client_id" | "session_id" | "session_number", timeoutMs: number): Promise<unknown> {
   const gtag = typeof window === "undefined" ? undefined : window.gtag;
   if (typeof gtag !== "function") {
     return Promise.resolve(undefined);
@@ -56,7 +87,7 @@ function getGtagValue(field: "client_id" | "session_id" | "session_number"): Pro
       window.clearTimeout(timeout);
       resolve(value);
     };
-    const timeout = window.setTimeout(() => finish(undefined), GA_CONTEXT_TIMEOUT_MS);
+    const timeout = window.setTimeout(() => finish(undefined), timeoutMs);
     try {
       gtag("get", GA4_MEASUREMENT_ID, field, finish);
     } catch {
@@ -65,21 +96,54 @@ function getGtagValue(field: "client_id" | "session_id" | "session_number"): Pro
   });
 }
 
-/**
- * Uses Google's supported gtag `get` API instead of parsing GA cookies. The
- * half-second cap keeps a slow or blocked analytics tag from materially
- * delaying checkout.
- */
-export async function captureGa4ClientContext(): Promise<Ga4ClientContext | null> {
+/** Supported gtag reads only. Priming gets 3s; a submission always makes a fresh 500ms read. */
+async function readContext(timeoutMs: number): Promise<Ga4ClientContext | null> {
+  if (!eligible()) { clearGa4ClientContext(); return null; }
+  const token = ++generation;
+  const capturedAt = Date.now();
   const [ga_client_id, ga_session_id, ga_session_number] = await Promise.all([
-    getGtagValue("client_id"),
-    getGtagValue("session_id"),
-    getGtagValue("session_number"),
+    getGtagValue("client_id", timeoutMs),
+    getGtagValue("session_id", timeoutMs),
+    getGtagValue("session_number", timeoutMs),
   ]);
-  return parseGa4ClientContext({ ga_client_id, ga_session_id, ga_session_number });
+  if (!eligible()) { clearGa4ClientContext(); return null; }
+  // A later read or privacy boundary invalidates earlier asynchronous work.
+  if (token !== generation) return null;
+  const live = parseGa4ClientContext({ ga_client_id, ga_session_id, ga_session_number });
+  const cached = readCache();
+  if (!live) { clearGa4ClientContext(); return null; }
+  let result = live;
+  if (!live.ga_session_id && cached?.context.ga_client_id === live.ga_client_id
+    && (!live.ga_session_number || live.ga_session_number === cached.context.ga_session_number)) {
+    result = { ...cached.context, ...live };
+  }
+  try {
+    // Store only independently observed live sessions. Fallback never extends TTL.
+    if (live.ga_session_id) {
+      window.sessionStorage.setItem(GA4_CONTEXT_CACHE_KEY, JSON.stringify({ context: live, capturedAt }));
+    } else if (result === live) {
+      window.sessionStorage.removeItem(GA4_CONTEXT_CACHE_KEY);
+    }
+  } catch { /* Analytics must not block checkout when storage is unavailable. */ }
+  return result;
+}
+
+export async function captureGa4ClientContext(): Promise<Ga4ClientContext | null> {
+  submissionsInFlight++;
+  try { return await readContext(500); } finally { submissionsInFlight--; }
+}
+
+export function primeGa4ClientContext(): Promise<Ga4ClientContext | null> {
+  if (!eligible()) { clearGa4ClientContext(); return Promise.resolve(null); }
+  // Background focus/navigation work must not invalidate a pending submission.
+  if (submissionsInFlight > 0) return Promise.resolve(null);
+  return readContext(3000);
 }
 
 export async function appendGa4ClientContextToFormData(form: FormData): Promise<void> {
+  form.delete("ga_client_id");
+  form.delete("ga_session_id");
+  form.delete("ga_session_number");
   const context = await captureGa4ClientContext();
   if (!context) return;
   form.set("ga_client_id", context.ga_client_id);

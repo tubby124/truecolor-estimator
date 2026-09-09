@@ -461,8 +461,7 @@ export default function CheckoutPage() {
     // payment radios (clover_card is preselected). No-op if already sent.
     trackPaymentMethod(payMethod);
     // Capture the browser-issued GA identity while the checkout session is still
-    // active. It runs alongside artwork upload so analytics never adds latency.
-    const ga4ContextPromise = captureGa4ClientContext();
+    // active. Refresh after uploads so a long upload cannot age the session read.
     try {
       // Upload artwork files one-by-one via server-side API (bypasses storage RLS)
       const filePaths: string[] = [];
@@ -501,7 +500,7 @@ export default function CheckoutPage() {
       }
 
       const attribution = readUtmFromStorage() ?? {};
-      const ga4Context = await ga4ContextPromise;
+      const ga4Context = await captureGa4ClientContext();
       // Latest paid touch travels under its own prefix so it cannot collide with
       // the flat first-touch fields spread below.
       const latestPaidHints = toLatestPaidHintPayload(readLatestPaidFromStorage());
