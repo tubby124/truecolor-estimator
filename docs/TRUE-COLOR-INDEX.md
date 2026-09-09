@@ -22,6 +22,7 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Connected learning-to-render preparation before publication](social/CONNECTED-PREPARATION.md)
 - [Bounded harness batch to existing review and queue](social/HARNESS-BATCH-BRIDGE.md)
 
 - [Social feedback capture, learning boundaries and Vault brief](social/LEARNING-LOOP.md)
