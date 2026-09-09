@@ -146,3 +146,8 @@ Owner explicitly cancelled the one-year objective. Earlier year/annual statement
 ## Learning continuation: draft context and live bounded collection — September 9, 2026
 
 [Learning runbook](../social/LEARNING-LOOP.md) now includes exact-scoped, date-aware draft-context export and GET-only per-post Meta collection. Live Instagram collection matched a saved app receipt and verified provider owner/publication time; numeric likes/comments were captured, denied/unsupported metrics remained null. The normalized event was imported privately and a Vault proof written. Source lineage is unmapped legacy, not the new creative recipe. Bound learning context handed to the separate small-batch task for provenance consumption. Unit/security review passed. No recurring collector, authenticated feedback UI, automatic generator application or provider/queue mutation is claimed. Annual scope stays cancelled.
+
+
+## Connected preparation enforcement — September 9, 2026
+
+[Connected preparation](../social/CONNECTED-PREPARATION.md) adds an explicit learning-to-settings compiler and a one-command runner consuming the companion PR77 bridge. Current ledger→typed white-logo policy→raw render→final uploader preview succeeded for three creatives with actual file/caption/time verification. Forty Python tests and independent review pass. Desktop/phone final preview checked. Exact-package browser/queue rehearsal remains separately receipted by the bridge task; no live upload/approval/enrollment/publication. Captions remain supplied drafts, not automatically rewritten from free-form learning. This replaces passive feedback attachment for the implemented rendering rule, without claiming an unattended monthly system.
