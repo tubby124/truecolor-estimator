@@ -13,3 +13,5 @@ Migrated from the private True Color operating standard (effective Aug 23, prior
 - Weekly: read-only four-lane review. Every 14 days: interpret the experiment as positive/inconclusive/negative. Refresh protected-page status monthly with fully paginated evidence.
 
 Record each experiment/opportunity and resulting evidence in the existing repo SEO log/runbook. The Vault stores supporting private evidence, not a second editable queue.
+
+Gallery/media changes also follow [product gallery assurance](GALLERY-ASSURANCE.md): explicit consumer mapping, preserved search/commercial invariants, source-bound image permissions, and separate conversion/organic evidence. A visual refresh is not an SEO rewrite or distribution approval.
