@@ -126,3 +126,8 @@ Owner accepted the sticker direction and requests premium creative plus a second
 ## Unified social harness preparation — September 9, 2026
 
 [Owner direction and integration contract](../social/UNIFIED-HARNESS.md) records the plan to join daily cleared customer-work posts and additional harness content through the existing staff review/calendar/queue. Private hypothetical week/year preview prepared; cadence, final logo treatment and exact publication packages remain for review. Existing September batch preserved. Source audit found a 31-creative monthly import cap, hardcoded brand/timezone assumptions and no automated engagement collector in audited social code. Sales attribution is excluded from this milestone. No runtime, queue, provider or image-library mutation occurred. Next: owner review of combined preview, then compatible package/planner/render integration and an exact-approved pilot before annual scheduling.
+
+
+## Unified harness direction accepted — September 9, 2026
+
+Owner approved the private preview mix (daily cleared real work plus three creative posts weekly), visual direction and top-right logos. Added rolling October–September theme plan, monthly review/feedback release cycle and source-backed caption fact rotation to [UNIFIED-HARNESS](../social/UNIFIED-HARNESS.md). Existing business profile already supplies service facts; its older weekly mix requires replacement in future integration. Exact future packages are not yet approved or scheduled. Runtime integration, image completion and delivery/engagement acceptance remain open.

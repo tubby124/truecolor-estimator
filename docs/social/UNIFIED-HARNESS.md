@@ -6,7 +6,7 @@ One reusable system prepares daily customer-work gallery posts and additional cr
 
 Sales/revenue attribution is explicitly outside this milestone and must not block completion. Learn from delivery reliability, owner feedback and available post engagement instead. A year of content is the later target after the workflow is proven; no annual schedule is authorized or implemented by this document.
 
-Current deliverable: source-audited implementation contract and private hypothetical week/year preview. The preview proposes daily cleared customer work plus three additional creative posts per week. This is a reviewable cadence example, not an approved policy or queued schedule. Customer slots remain placeholders until real cleared sources are selected. Three saved illustrative assets demonstrate showcase, helpful-tip and use-case captions. Existing six-format proof remains separately available to the owner. Preview approval is distinct from approval of exact publishable media/accounts/times.
+Current deliverable: source-audited implementation contract and private hypothetical week/year preview. Owner approved the preview mix on September 9: daily cleared customer work plus three additional creative posts per week. The visual direction and top-right logo treatment are accepted. This approves the planning baseline, not unidentified future media/accounts/times or a queued schedule. Customer slots remain placeholders until real cleared sources are selected. Three saved illustrative assets demonstrate showcase, helpful-tip and use-case captions. Existing six-format proof remains separately available to the owner. Preview approval is distinct from approval of exact publishable media/accounts/times.
 
 ## Use the existing control room
 
@@ -36,7 +36,7 @@ Customer-work stream: select actual cleared job media, preserve depicted artwork
 
 Creative stream: select a product and purpose, then a reviewed recipe/source. Mix showcases, practical tips, use cases and occasional offers. Price and CTA are required for an offer, not every social post. Keep provenance internal unless a public clarification is needed to prevent a specific misconception. Never describe a concept as a completed customer job. Review channel-appropriate hashtags without claims of guaranteed reach.
 
-Both streams share history, near-duplicate groups, slot reservations and category/scene/caption-opening checks. Scheduled and pending material counts toward variety. Reserve before generating to avoid collisions. Proposed extra cadence is not a permanent cross-business rule.
+Both streams share history, near-duplicate groups, slot reservations and category/scene/caption-opening checks. Scheduled and pending material counts toward variety. Reserve before generating to avoid collisions. The accepted True Color cadence is not a permanent cross-business rule.
 
 For offers only, bind current exact configuration and price evidence; recheck before approval and dispatch, holding changed packages for renewed review. Showcase and tip preparation can proceed without sales attribution or unnecessary price copy.
 
@@ -50,7 +50,7 @@ For offers only, bind current exact configuration and price evidence; recheck be
 ## Build order and acceptance
 
 1. Finish image-library acceptance in its current task; import accepted asset/recipe manifests without regenerating approved sources. Inventory completion does not prove social rendition approval.
-2. Review the combined hypothetical week and format samples with the owner. Resolve cadence and future logo treatment using actual final exports.
+2. DONE for direction: owner accepted the combined preview, cadence and top-right logos on September 9. Final monthly image/caption/account/time packages remain for review.
 3. Implement compatible package/configuration and shared planning changes. Prove a 31-day month with daily real work plus additional creatives, with no conflicting reserved timestamps or duplicate creative/destination enrollment, while allowing intentional multiple posts per date/account and avoiding accidental doubling from FB/IG destinations.
 4. Connect final rendering and copy to existing review/approval. Test: real customer photo, illustrative product showcase, useful tip, freshly validated offer, and a second fictional business with a different brand/timezone. Test cross-business access denial and same-asset/caption reuse detection. Keep fictional acceptance data clearly synthetic.
 5. After exact owner approval, stage and deliver one bounded pilot through the existing queue; verify provider result and notification, including uncertain-result reconciliation. Do not modify September approvals or create another scheduler.
@@ -60,3 +60,19 @@ For offers only, bind current exact configuration and price evidence; recheck be
 ## Completion evidence
 
 A preview is not runtime integration. Required final receipts: reviewed assets; accepted mixed-calendar package; versioned business config; exact approval invalidation; one queue with both streams; verified delivery; feedback/engagement observation; second-business isolation proof. Sales measurement is excluded. Preserve status distinctions: proposed, prepared, reviewed, approved, scheduled, provider-delivered and independently verified.
+
+
+## Monthly review and fact rotation — accepted September 9
+
+The owner wants a twelve-month direction with a rolling monthly release: prepare the next month, show finished images and captions, incorporate feedback, then approve that month. Preserve the ability to change recipes and architecture for future drafts without changing already approved packages. No recurring wakeup or autonomous monthly approval is configured by this record.
+
+A fact bank already exists in `src/lib/social/generation/business-profile.ts`: onsite designer, standard online ordering, conditional rush enquiry and production-start conditions, with source/status fields. Extend this source instead of introducing a conflicting copy of business facts. Prices come from the maintained pricing/configuration adapter, not evergreen prose. The current profile still contains an older four-concept/three-real-work weekly mix; future runtime integration must explicitly replace that default with the accepted two-stream plan while retaining September packages.
+
+For each caption select zero or one relevant supporting fact after the product message: online ordering, artwork help, a useful verified product fact, or an exact current price. Rotate across recent and scheduled posts. Do not force a price or CTA into every post. Price mentions require a complete current configuration and tax/exclusion terms; designer availability alone does not establish a fee or proof deadline. Record fact IDs and version with each draft so corrections can invalidate affected drafts.
+
+Examples for future copy review:
+- Window showcase + ordering: “We print window decals with your logo, business hours or custom artwork. Order standard window decals online.”
+- Business cards + service: “Need help putting your business card artwork together? An onsite graphic designer is available at True Color.”
+- Product showcase alone remains acceptable between service/offer messages.
+
+Annual theme outline: [rolling year plan](YEAR-DIRECTION.md). Themes are planning suggestions; monthly review chooses exact products, scenes and copy. Holiday-related content does not establish business closures, customer vacations, discounts or production deadlines.
