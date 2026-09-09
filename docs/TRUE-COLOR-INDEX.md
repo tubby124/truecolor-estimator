@@ -32,6 +32,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 - [Social branding standard and transparent website-logo review](social/BRANDING-STANDARD.md)
 
+- [Product gallery + photo-first social harness checkpoint](social/PRODUCT-GALLERY-SOCIAL-HARNESS-20260909.md)
+
 - [Full-month workflow, GPT concepts, holiday/audience planning and import](social/FULL-MONTH-WORKFLOW-20260906.md)
 - [Product image trials, revision decisions and full automation progress](social/IMAGE-TRIALS-AND-AUTOMATION-20260906.md)
 - [First Meta month, owner review and profile implementation](social/FIRST-META-MONTH-20260906.md)
