@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Creative operating system: offline foundation](social/creative-os/RUNBOOK.md) — adapter-owned facts, separate brand/recipe rules, cross-product synthetic acceptance and private sticker preview; owner co-designs styles/planner next. Calendar, collector and writeback remain future work. [Architecture and contracts](social/creative-os/README.md).
+
 - [Weekly storyboard preparation and monthly handoff](social/WEEKLY-STORYBOARD.md)
 
 - [Telegram photo intake, temporary previews and exact approval](social/TELEGRAM-INTAKE.md)
@@ -29,6 +31,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 - [Efficient social launches: authenticated APIs, local dates and resumable receipts](social/LAUNCH-OPERATIONS.md)
 
 - [Social branding standard and transparent website-logo review](social/BRANDING-STANDARD.md)
+
+- [Product gallery + photo-first social harness checkpoint](social/PRODUCT-GALLERY-SOCIAL-HARNESS-20260909.md)
 
 - [Full-month workflow, GPT concepts, holiday/audience planning and import](social/FULL-MONTH-WORKFLOW-20260906.md)
 - [Product image trials, revision decisions and full automation progress](social/IMAGE-TRIALS-AND-AUTOMATION-20260906.md)

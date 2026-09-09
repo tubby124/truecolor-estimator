@@ -1,0 +1,51 @@
+{
+  "id": "truecolor-pilot-kit",
+  "brandKey": "true-color",
+  "revision": 1,
+  "usageScope": "fixture_only",
+  "sourceRefs": [
+    {
+      "id": "owner-creative-direction",
+      "kind": "owner_decision",
+      "observedAt": "2026-09-09T00:00:00.000Z",
+      "revisionOrDigest": "creative-os-design-v1",
+      "evidenceScope": "Owner direction recorded September 9; timestamp represents the record date, not the exact conversation time.",
+      "limitation": "Direction for a proposed kit; no final-media approval."
+    },
+    {
+      "id": "public-business-identity",
+      "kind": "repository",
+      "observedAt": "2026-09-09T00:00:00.000Z",
+      "revisionOrDigest": "0675d93d40b39e5afdc1b5e1f6e57c0004bd4e2e",
+      "evidenceScope": "AGENTS.md public identity, checked on the recorded date.",
+      "limitation": "Repository evidence; not a fresh storefront inspection."
+    }
+  ],
+  "identity": {
+    "name": "True Color Display Printing Ltd.",
+    "website": "https://truecolorprinting.ca/",
+    "address": "216 33rd St W (upstairs), Saskatoon SK S7L 0V1",
+    "phone": "306-954-8688"
+  },
+  "voice": [
+    "Short, clear, friendly and locally grounded. Name the printed product.",
+    "Use the exact verified configuration when stating a price. A custom-options or design-help piece does not need a price.",
+    "Keep one purchase question per piece. Avoid generic design lectures and unsupported customer stories."
+  ],
+  "logoPolicy": {
+    "requirement": "optional",
+    "illustrativeOverlay": "forbidden",
+    "instructions": "Do not redraw marks or cover product artwork."
+  },
+  "visualConstraints": [
+    "Keep product naming, offer qualifiers and action readable. Preserve original artwork and marks."
+  ],
+  "actionPolicy": {
+    "requiredIdentityFields": [
+      "website",
+      "address",
+      "phone"
+    ],
+    "instructions": "Make the website, pickup address and phone readable."
+  }
+}

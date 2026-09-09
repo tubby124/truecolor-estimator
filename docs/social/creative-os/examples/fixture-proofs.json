@@ -1,0 +1,48 @@
+[
+  {
+    "id": "synthetic-illustration",
+    "brandKey": "true-color",
+    "revision": 1,
+    "usageScope": "fixture_only",
+    "proofKind": "illustration",
+    "rightsStatus": "cleared",
+    "allowedUse": "creative_brief",
+    "assetId": "no-image-synthetic-illustration",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "disclosure": "Design example. Synthetic reference for testing; no image has been produced.",
+    "sourceRefId": "synthetic-proof-record",
+    "sourceRefs": [
+      {
+        "id": "synthetic-proof-record",
+        "kind": "repository",
+        "observedAt": "2026-09-09T00:00:00.000Z",
+        "revisionOrDigest": "creative-os-synthetic-v1",
+        "evidenceScope": "Synthetic proof record for text-brief testing only.",
+        "limitation": "No source image or real customer job. Cannot be used for production."
+      }
+    ]
+  },
+  {
+    "id": "synthetic-diagram",
+    "brandKey": "true-color",
+    "revision": 1,
+    "usageScope": "fixture_only",
+    "proofKind": "diagram",
+    "rightsStatus": "cleared",
+    "allowedUse": "creative_brief",
+    "assetId": "no-image-synthetic-diagram",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "disclosure": "Illustrative guide. Synthetic reference for testing; not a live interface screenshot.",
+    "sourceRefId": "synthetic-proof-record",
+    "sourceRefs": [
+      {
+        "id": "synthetic-proof-record",
+        "kind": "repository",
+        "observedAt": "2026-09-09T00:00:00.000Z",
+        "revisionOrDigest": "creative-os-synthetic-v1",
+        "evidenceScope": "Synthetic proof record for text-brief testing only.",
+        "limitation": "No source image or real customer job. Cannot be used for production."
+      }
+    ]
+  }
+]
