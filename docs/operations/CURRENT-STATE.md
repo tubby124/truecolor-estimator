@@ -1,3 +1,7 @@
+## Gallery assurance and measured learning — September 9, 2026
+
+Owner requests catalogue-first product imagery with SEO protection and durable learning. [Gallery assurance](GALLERY-ASSURANCE.md) records current hero/Merchant coupling, filename-derived alt limitations, default-deny image sitemap, dated Vault lessons, reusable social handoff requirements and before/after release checks. Source review passed seven existing test files / 14 tests; no website asset, feed or search setting changed. Customer originals remain preserved while product-gallery placement can be individually redesigned. Analytics evidence and release state are recorded in that runbook; documentation is not an implemented replacement engine or permission to widen publishing. Next: reconcile approved source IDs, implement bounded bindings/checks, and satisfy the active organic observation gate before any indexed-route experiment.
+
 ## First September pair verified — September 7, 15:09 UTC
 
 The first ongoing September pair, scheduled for 9 a.m. Regina, is independently verified live on [Facebook](https://www.facebook.com/122234777786295517/posts/122234961128295517) and [Instagram](https://www.instagram.com/p/Dc_Yhfhm1FA/). Each exact destination is posted with one published database receipt, one exact-caption provider match and one public link. No duplicate was found in the current provider lists, and no manual dispatch or retry was performed. This verifies the first new pair, not future delivery of the rest of the month.
