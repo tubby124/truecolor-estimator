@@ -131,3 +131,8 @@ Owner accepted the sticker direction and requests premium creative plus a second
 ## Unified harness direction accepted — September 9, 2026
 
 Owner approved the private preview mix (daily cleared real work plus three creative posts weekly), visual direction and top-right logos. Added rolling October–September theme plan, monthly review/feedback release cycle and source-backed caption fact rotation to [UNIFIED-HARNESS](../social/UNIFIED-HARNESS.md). Existing business profile already supplies service facts; its older weekly mix requires replacement in future integration. Exact future packages are not yet approved or scheduled. Runtime integration, image completion and delivery/engagement acceptance remain open.
+
+
+## Offline social learning capture — September 9, 2026
+
+Implemented [private capture and monthly brief](../social/LEARNING-LOOP.md): immutable scoped events, duplicate/conflict protection, evidence-linked owner-decision imports, engagement import validation, expiry/supersession and exact recipe/scope retrieval. Recorded actual owner preview direction privately and generated an October brief in the existing Vault project folder. Tests and independent review passed; CI includes the new suite. This is local operator capture/retrieval, not authenticated hosted approval, provider collection, automatic planner application or self-modifying production. Sales attribution remains excluded; approved September queue untouched.

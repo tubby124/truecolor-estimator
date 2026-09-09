@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Social feedback capture, learning boundaries and Vault brief](social/LEARNING-LOOP.md)
+
 - [Unified social harness: customer gallery, creative content, review and learning](social/UNIFIED-HARNESS.md)
 
 - [Weekly storyboard preparation and monthly handoff](social/WEEKLY-STORYBOARD.md)
