@@ -58,3 +58,5 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 - [Foamboard prepared proposal](../seo-prep/2026-09-04-foamboard-strengthening.md)
 
 Every task closes by recording its resulting state and evidence in the relevant entry. Private records stay with their authorized source; the Vault index points here for the shared work queue.
+
+- [Accepted small-run sticker campaign and repeatable learning scorecard](social/campaigns/STICKERS-20260909.md)
