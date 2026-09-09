@@ -59,6 +59,19 @@ class PolicyTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             compile_policy(c, b)
 
+    def test_new_active_decision_requires_mapping(self):
+        c, b = fixture()
+        extra = copy.deepcopy(c['lessons'][0])
+        extra['decision_id'] = 'new-correction'
+        extra['proposed_change'] = 'Use a larger logo'
+        c['lessons'].append(extra)
+        c['selected_decision_ids'].append(extra['decision_id'])
+        seal(c, 'context_sha256')
+        b['source_context_sha256'] = c['context_sha256']
+        seal(b, 'binding_sha256')
+        with self.assertRaisesRegex(ValueError, 'Every active decision'):
+            compile_policy(c, b)
+
     def test_receipt(self):
         p = compile_policy(*fixture())
         receipt = dict(schema='social-render-receipt-v1', **{k:p[k] for k in ['business_id', 'target_package_id', 'policy_sha256', 'renderer']}, source_sha256='b'*64, output_sha256='c'*64)

@@ -84,6 +84,8 @@ def compile_policy(context, binding, *, as_of=None):
         if not mapping.get('owner_evidence_ref') or mapping['owner_evidence_ref'] not in owner_refs:
             raise ValueError('Owner evidence reference mismatch')
         used.append(mapping['decision_id'])
+    if set(used) != set(selected):
+        raise ValueError('Every active decision in this focused context requires an explicit mapping')
     result = dict(schema='social-preparation-policy-v1', business_id=binding['business_id'], target_package_id=binding['target_package_id'], source_context_sha256=context['context_sha256'], source_scope=scope, applied_decision_ids=used, renderer=binding['renderer'], caption=binding['caption'], binding_sha256=binding['binding_sha256'], authority='preparation_only_not_publication')
     result['policy_sha256'] = digest(result)
     return result
