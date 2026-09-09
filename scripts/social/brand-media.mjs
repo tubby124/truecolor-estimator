@@ -26,7 +26,8 @@ async function writePackage(files) {
   }
 }
 
-export async function brandMedia({ source, output, logo, corner, widthRatio = 0.20, inset = 0.035, backing = 'transparent' }) {
+export async function brandMedia({ source, output, logo, corner, widthRatio = 0.20, inset = 0.035, backing = 'transparent', maxHeight = 1080 }) {
+  if (![1080,1350].includes(maxHeight)) throw new Error('maxHeight must be 1080 or 1350');
   if (!['transparent', 'white'].includes(backing)) throw new Error('backing must be transparent or white');
   if (!logo) throw new Error('Explicit transparent logo path is required');
   if (!['top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(corner)) throw new Error('Explicit corner is required');
@@ -45,7 +46,7 @@ export async function brandMedia({ source, output, logo, corner, widthRatio = 0.
   if (!logoMeta.hasAlpha || logoStats.isOpaque) throw new Error('Logo must have transparent pixels');
   const normalized = await sharp(sourceBytes).rotate().flatten({ background: '#ffffff' }).png().toBuffer();
   const meta = await sharp(normalized).metadata();
-  const artwork = await sharp(normalized).resize({ width: 1080, height: 1080, fit: 'inside', withoutEnlargement: true }).png().toBuffer({ resolveWithObject: true });
+  const artwork = await sharp(normalized).resize({ width: 1080, height: maxHeight, fit: 'inside', withoutEnlargement: true }).png().toBuffer({ resolveWithObject: true });
   const { width, height } = artwork.info;
   const marginX = Math.round(width * inset);
   const marginY = Math.round(height * inset);
