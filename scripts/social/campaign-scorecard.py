@@ -13,12 +13,14 @@ def validate(card):
         raise ValueError("Unsupported scorecard schema")
     if card.get("status") not in ("not_launched", "awaiting_publication", "collecting", "reviewed"):
         raise ValueError("Invalid status")
-    for group in ("campaign_metrics", "comparison_metrics", "delivery"):
+    for group in ("campaign_metrics", "comparison_metrics", "delivery", "coverage"):
         for key, value in card.get(group, {}).items():
-            if key.endswith("file"):
+            if key.endswith("file") or (group == "coverage" and key not in ("known_source_outcomes", "unknown_source_outcomes")):
                 continue
             if value is not None and (isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0):
                 raise ValueError(f"{group}.{key} must be null or a finite nonnegative number")
+            if value is not None and key != "attributed_paid_revenue_cad" and value != int(value):
+                raise ValueError(f"{group}.{key} must be a whole count")
     current = card.get("campaign_metrics", {})
     if any(key not in current for key in METRICS):
         raise ValueError("Missing campaign metric fields; unavailable metrics must explicitly be null")

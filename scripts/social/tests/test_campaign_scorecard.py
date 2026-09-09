@@ -50,10 +50,21 @@ class ScorecardTests(unittest.TestCase):
             module.validate(accepted)
 
     def test_invalid_numbers_rejected(self):
-        for value in (-1, float("nan"), True):
+        for value in (-1, float("nan"), float("inf"), True, 1.5):
             self.card["delivery"]["verified_published_destinations"] = value
             with self.assertRaises(ValueError):
                 module.validate(self.card)
+
+
+    def test_coverage_counts_validate_and_zero_is_preserved(self):
+        self.card["coverage"]["known_source_outcomes"] = -1
+        with self.assertRaises(ValueError):
+            module.validate(self.card)
+        self.card["coverage"]["known_source_outcomes"] = 0
+        self.card["coverage"]["unknown_source_outcomes"] = None
+        module.validate(self.card)
+        self.assertEqual(self.card["coverage"]["known_source_outcomes"], 0)
+        self.assertIsNone(self.card["coverage"]["unknown_source_outcomes"])
 
 
 if __name__ == "__main__":
