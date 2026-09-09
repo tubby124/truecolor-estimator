@@ -26,7 +26,9 @@ async function writePackage(files) {
   }
 }
 
-export async function brandMedia({ source, output, logo, corner, widthRatio = 0.20, inset = 0.035 }) {
+export async function brandMedia({ source, output, logo, corner, widthRatio = 0.20, inset = 0.035, backing = 'transparent', maxHeight = 1080 }) {
+  if (![1080,1350].includes(maxHeight)) throw new Error('maxHeight must be 1080 or 1350');
+  if (!['transparent', 'white'].includes(backing)) throw new Error('backing must be transparent or white');
   if (!logo) throw new Error('Explicit transparent logo path is required');
   if (!['top-left', 'top-right', 'bottom-left', 'bottom-right'].includes(corner)) throw new Error('Explicit corner is required');
   if (!Number.isFinite(widthRatio) || widthRatio < 0.1 || widthRatio > 0.3) throw new Error('widthRatio must be between 0.1 and 0.3');
@@ -44,23 +46,31 @@ export async function brandMedia({ source, output, logo, corner, widthRatio = 0.
   if (!logoMeta.hasAlpha || logoStats.isOpaque) throw new Error('Logo must have transparent pixels');
   const normalized = await sharp(sourceBytes).rotate().flatten({ background: '#ffffff' }).png().toBuffer();
   const meta = await sharp(normalized).metadata();
-  const artwork = await sharp(normalized).resize({ width: 1080, height: 1080, fit: 'inside', withoutEnlargement: true }).png().toBuffer({ resolveWithObject: true });
+  const artwork = await sharp(normalized).resize({ width: 1080, height: maxHeight, fit: 'inside', withoutEnlargement: true }).png().toBuffer({ resolveWithObject: true });
   const { width, height } = artwork.info;
   const marginX = Math.round(width * inset);
   const marginY = Math.round(height * inset);
   const brand = await sharp(logoBytes).rotate().resize({ width: Math.max(1, Math.round(width * widthRatio)) }).png().toBuffer({ resolveWithObject: true });
-  if (brand.info.width + 2 * marginX > width || brand.info.height + 2 * marginY > height) throw new Error('Logo does not fit within source; choose a smaller widthRatio');
-  const logoLeft = corner.endsWith('right') ? width - marginX - brand.info.width : marginX;
-  const logoTop = corner.startsWith('bottom') ? height - marginY - brand.info.height : marginY;
-  const png = await sharp(artwork.data).composite([{ input: brand.data, left: logoLeft, top: logoTop }]).png().toBuffer();
+  const padding = backing === 'white' ? Math.max(2, Math.round(brand.info.width * 0.08)) : 0;
+  const badgeWidth = brand.info.width + 2 * padding, badgeHeight = brand.info.height + 2 * padding;
+  if (badgeWidth + 2 * marginX > width || badgeHeight + 2 * marginY > height) throw new Error('Logo does not fit within source; choose a smaller widthRatio');
+  const badgeLeft = corner.endsWith('right') ? width - marginX - badgeWidth : marginX;
+  const badgeTop = corner.startsWith('bottom') ? height - marginY - badgeHeight : marginY;
+  let overlay = brand.data;
+  if (backing === 'white') {
+    const backdrop = Buffer.from(`<svg width="${badgeWidth}" height="${badgeHeight}"><rect width="${badgeWidth}" height="${badgeHeight}" rx="${Math.max(2,Math.round(padding*.6))}" fill="#fff"/></svg>`);
+    overlay = await sharp(backdrop).composite([{input:brand.data,left:padding,top:padding}]).png().toBuffer();
+  }
+  const logoLeft = badgeLeft + padding, logoTop = badgeTop + padding;
+  const png = await sharp(artwork.data).composite([{ input: overlay, left: badgeLeft, top: badgeTop }]).png().toBuffer();
   const jpeg = await sharp(png).jpeg({ quality: 90, chromaSubsampling: '4:4:4' }).toBuffer();
   const manifest = {
-    method: 'transparent-corner-overlay', version: 2, approvalStage: 'prepared-for-review',
+    method: backing === 'white' ? 'white-backed-corner-overlay' : 'transparent-corner-overlay', version: backing === 'white' ? 3 : 2, approvalStage: 'prepared-for-review',
     source: { sha256: sha256(sourceBytes), width: meta.width, height: meta.height },
     logo: { sha256: sha256(logoBytes) },
     output: { sha256: sha256(jpeg), format: 'jpeg', quality: 90, width, height },
     lossless: { sha256: sha256(png), format: 'png' },
-    layout: { corner, widthRatio, inset, artwork: { left: 0, top: 0, width, height }, logo: { left: logoLeft, top: logoTop, width: brand.info.width, height: brand.info.height } },
+    layout: { corner, widthRatio, inset, ...(backing === 'white' ? {badge:{left:badgeLeft,top:badgeTop,width:badgeWidth,height:badgeHeight,backing,padding}} : {}), artwork: { left: 0, top: 0, width, height }, logo: { left: logoLeft, top: logoTop, width: brand.info.width, height: brand.info.height } },
   };
   await mkdir(dirname(paths.output), { recursive: true });
   await writePackage([[pngPath, png], [paths.output, jpeg], [manifestPath, JSON.stringify(manifest, null, 2) + '\n']]);
@@ -68,7 +78,7 @@ export async function brandMedia({ source, output, logo, corner, widthRatio = 0.
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const [source, output, logo, corner, ratio, ...extra] = process.argv.slice(2);
-  if (extra.length) throw new Error('Usage: node scripts/social/brand-media.mjs SOURCE OUTPUT.jpg LOGO CORNER [WIDTH_RATIO]');
-  brandMedia({ source, output, logo, corner, widthRatio: ratio === undefined ? undefined : Number(ratio) }).then((result) => console.log(JSON.stringify(result, null, 2))).catch((error) => { console.error(error.message); process.exitCode = 1; });
+  const [source, output, logo, corner, ratio, backing, ...extra] = process.argv.slice(2);
+  if (extra.length) throw new Error('Usage: node scripts/social/brand-media.mjs SOURCE OUTPUT.jpg LOGO CORNER [WIDTH_RATIO] [transparent|white]');
+  brandMedia({ source, output, logo, corner, widthRatio: ratio === undefined ? undefined : Number(ratio), backing }).then((result) => console.log(JSON.stringify(result, null, 2))).catch((error) => { console.error(error.message); process.exitCode = 1; });
 }
