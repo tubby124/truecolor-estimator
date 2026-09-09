@@ -1,6 +1,8 @@
-# Rolling year direction — October 2026 to September 2027
+# Historical — cancelled year direction
 
-Owner-approved rhythm: daily cleared real customer work plus three creative posts per week. Monthly review and feedback precede each exact release. The themes below are proposed starting points, not an approved batch or posting authorization. Daily real-work supply is checked each month; shortages remain visible instead of inventing jobs.
+**CANCELLED September 9, 2026:** Hasan explicitly withdrew the one-year content objective. Retained solely as historical evidence. Do not generate, expand or schedule content from this outline. Current scope is a small end-to-end learning cycle and bounded next-batch planning.
+
+Previously recorded rhythm: daily cleared real customer work plus three creative posts per week. Monthly review and feedback precede each exact release. The themes below are proposed starting points, not an approved batch or posting authorization. Daily real-work supply is checked each month; shortages remain visible instead of inventing jobs.
 
 | Month | Creative direction for monthly review |
 | --- | --- |

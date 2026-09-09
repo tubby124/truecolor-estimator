@@ -4,7 +4,7 @@
 
 One reusable system prepares daily customer-work gallery posts and additional creative content, presents the exact finished posts for owner review, then uses the existing approval and publishing workflow. Preserve the already approved September batch. Future logo/background treatment is versioned and reviewed before scheduling; it does not alter approved media retroactively. Finish the separate image-library work in its existing task.
 
-Sales/revenue attribution is explicitly outside this milestone and must not block completion. Learn from delivery reliability, owner feedback and available post engagement instead. A year of content is the later target after the workflow is proven; no annual schedule is authorized or implemented by this document.
+Sales/revenue attribution is explicitly outside this milestone and must not block completion. Learn from delivery reliability, owner feedback and available post engagement instead. Owner cancelled the one-year content objective on September 9. No annual generation, year-plan expansion or annual scheduling remains in active scope. Focus on a small end-to-end learning cycle and bounded next-batch planning.
 
 Current deliverable: source-audited implementation contract and private hypothetical week/year preview. Owner approved the preview mix on September 9: daily cleared customer work plus three additional creative posts per week. The visual direction and top-right logo treatment are accepted. This approves the planning baseline, not unidentified future media/accounts/times or a queued schedule. Customer slots remain placeholders until real cleared sources are selected. Three saved illustrative assets demonstrate showcase, helpful-tip and use-case captions. Existing six-format proof remains separately available to the owner. Preview approval is distinct from approval of exact publishable media/accounts/times.
 
@@ -17,7 +17,7 @@ Source audit at `55fd001e` confirms these seams:
 | Responsibility | Existing seam | Work required |
 | --- | --- | --- |
 | Monthly package | `src/lib/social/monthly-plan.ts`; `MonthlyPlanImport.tsx`; `MonthlyBatchScheduler.tsx` | Remove fixed True Color naming/timezone assumptions through a versioned compatible contract. Existing cap is 31 creatives: combined daily plus additional content exceeds it. Preserve old package parsing and approvals. |
-| Planning | `weekly-plan.ts`; `WeeklyPlanner.tsx` | Shared source/recipe history and reservation across both streams; annual planning and bounded release windows. |
+| Planning | `weekly-plan.ts`; `WeeklyPlanner.tsx` | Shared source/recipe history and reservation across both streams; bounded next-batch preparation only. |
 | Review | `BatchApprovalReview.tsx`; `PostPreview.tsx` | Show both streams, source type, final rendition, channel copy, account, date/time and timezone. |
 | Approval | `src/lib/social/approval.ts`; post approval API | Keep exact media/copy/account/schedule binding and edit invalidation. A visual preference does not authorize dispatch. |
 | Calendar and queue | `CalendarGrid.tsx`; `PostQueueTable.tsx`; `social_posts` | Add explicit content lane and recipe/source lineage. Existing intake `source` is not a substitute for documentary vs illustrative classification. |
@@ -55,7 +55,7 @@ For offers only, bind current exact configuration and price evidence; recheck be
 4. Connect final rendering and copy to existing review/approval. Test: real customer photo, illustrative product showcase, useful tip, freshly validated offer, and a second fictional business with a different brand/timezone. Test cross-business access denial and same-asset/caption reuse detection. Keep fictional acceptance data clearly synthetic.
 5. After exact owner approval, stage and deliver one bounded pilot through the existing queue; verify provider result and notification, including uncertain-result reconciliation. Do not modify September approvals or create another scheduler.
 6. Add the engagement observer and demonstrate one exact post's available metrics or an honest unsupported/permission result. Keep approved content immutable.
-7. Run the workflow for a review period, then expand to annual planning/scheduling. The present importer cannot ingest 365 days. Build bounded, resumable enrollment, inventory sufficiency checks, future freshness/expiry holds and cancellation before claiming year-scale operation. Monthly release windows are the recommended default; a literal year of scheduled posts needs explicit implementation and acceptance, not a calendar mockup.
+7. Complete one bounded learning cycle, inspect the actual evidence and prepare only the next agreed batch. Annual planning/generation/scheduling is cancelled. Preserve inventory checks, exact approval and duplicate protection at the chosen batch size.
 
 ## Completion evidence
 
@@ -64,7 +64,7 @@ A preview is not runtime integration. Required final receipts: reviewed assets; 
 
 ## Monthly review and fact rotation — accepted September 9
 
-The owner wants a twelve-month direction with a rolling monthly release: prepare the next month, show finished images and captions, incorporate feedback, then approve that month. Preserve the ability to change recipes and architecture for future drafts without changing already approved packages. No recurring wakeup or autonomous monthly approval is configured by this record.
+The owner cancelled the twelve-month objective. Retain a bounded review cycle: prepare the next agreed batch, show finished images and captions, incorporate feedback, then approve that exact batch. Preserve the ability to change recipes and architecture for future drafts without changing already approved packages. No recurring wakeup or autonomous monthly approval is configured by this record.
 
 A fact bank already exists in `src/lib/social/generation/business-profile.ts`: onsite designer, standard online ordering, conditional rush enquiry and production-start conditions, with source/status fields. Extend this source instead of introducing a conflicting copy of business facts. Prices come from the maintained pricing/configuration adapter, not evergreen prose. The current profile still contains an older four-concept/three-real-work weekly mix; future runtime integration must explicitly replace that default with the accepted two-stream plan while retaining September packages.
 
@@ -75,4 +75,4 @@ Examples for future copy review:
 - Business cards + service: “Need help putting your business card artwork together? An onsite graphic designer is available at True Color.”
 - Product showcase alone remains acceptable between service/offer messages.
 
-Annual theme outline: [rolling year plan](YEAR-DIRECTION.md). Themes are planning suggestions; monthly review chooses exact products, scenes and copy. Holiday-related content does not establish business closures, customer vacations, discounts or production deadlines.
+Historical cancelled outline: [former year plan](YEAR-DIRECTION.md). Do not expand or execute it. Bounded next-batch review chooses exact products, scenes and copy. Holiday-related content does not establish business closures, customer vacations, discounts or production deadlines.

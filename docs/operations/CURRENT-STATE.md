@@ -136,3 +136,8 @@ Owner approved the private preview mix (daily cleared real work plus three creat
 ## Offline social learning capture — September 9, 2026
 
 Implemented [private capture and monthly brief](../social/LEARNING-LOOP.md): immutable scoped events, duplicate/conflict protection, evidence-linked owner-decision imports, engagement import validation, expiry/supersession and exact recipe/scope retrieval. Recorded actual owner preview direction privately and generated an October brief in the existing Vault project folder. Tests and independent review passed; CI includes the new suite. This is local operator capture/retrieval, not authenticated hosted approval, provider collection, automatic planner application or self-modifying production. Sales attribution remains excluded; approved September queue untouched.
+
+
+## Superseding scope: annual content cancelled — September 9, 2026
+
+Owner explicitly cancelled the one-year objective. Earlier year/annual statements in this chronological board are historical and superseded. No annual content generation, year-plan expansion or annual scheduling is active. Preserve the former outline as cancelled history. Current focus: small end-to-end harness learning cycle and bounded next-batch preparation, preserving approved September posts. This task owns offline learning capture/brief code and its documentation in PR74; no hosted collector, planner/queue integration or annual worker is running here.
