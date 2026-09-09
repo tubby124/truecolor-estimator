@@ -155,7 +155,7 @@ jobs:
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
           SOCIAL_E2E_AUTH_FIXTURE: "true"
           PLAYWRIGHT_USE_BUILD: "true"
-        run: npm run test:e2e:pw -- e2e-playwright/ga4-context.spec.ts e2e-playwright/seo-paid-journeys.spec.ts e2e-playwright/social-approval.spec.ts e2e-playwright/social-library.spec.ts e2e-playwright/social-generation.spec.ts e2e-playwright/social-weekly.spec.ts
+        run: npm run test:e2e:pw -- e2e-playwright/ga4-context.spec.ts e2e-playwright/seo-paid-journeys.spec.ts e2e-playwright/social-approval.spec.ts e2e-playwright/social-library.spec.ts e2e-playwright/social-generation.spec.ts e2e-playwright/social-weekly.spec.ts e2e-playwright/social-harness-batch.spec.ts
 
       - name: Retain failed synthetic browser evidence
         if: failure()

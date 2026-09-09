@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Bounded harness batch to existing review and queue](social/HARNESS-BATCH-BRIDGE.md)
+
 - [Weekly storyboard preparation and monthly handoff](social/WEEKLY-STORYBOARD.md)
 
 - [Telegram photo intake, temporary previews and exact approval](social/TELEGRAM-INTAKE.md)

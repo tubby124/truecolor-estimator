@@ -121,3 +121,8 @@ Production migration, app credentials/flags, native plugin enable/restart and dy
 ## Focused sticker campaign and learning continuity — September 9, 2026
 
 Owner accepted the sticker direction and requests premium creative plus a second daily campaign post alongside approved mornings. [Campaign decision and scorecard](../social/campaigns/STICKERS-20260909.md) preserve the buyer hypothesis, private research locator, UTM/measurement definitions and repeatable manual review. Final creative, exact dates/accounts and publishing approvals remain pending; five concepts do not constitute a daily second-slot inventory. No runtime, queue, collector, automated learning or spending change. Next: finalize private assets, validate the exact package through the existing monthly review, then capture dated outcomes without modifying posted records.
+
+
+## Small harness batch bridge — September 9, 2026
+
+Owner cancelled annual content work and authorized a small-batch rehearsal through existing review/queue contracts. [Batch bridge](../social/HARNESS-BATCH-BRIDGE.md) prepares existing assets and captions as a compatible month-plan with stable creative IDs, source/recipe lineage and consulted learning-context digest. Read-only live scheduler audit at 21:48:35 UTC found active sole posting/monitor timers, clean check state and exactly 48 existing base destinations; new monthly drafts do not enroll automatically. No live queue, approval, scheduler scope or published media changed. Exact owner review, authenticated import/readback and explicitly reconciled enrollment remain.
