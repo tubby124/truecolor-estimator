@@ -22,6 +22,8 @@ The current private inventory is 75 new gallery sources plus 6 retained overview
 
 No image is swapped into a product or SEO route until its mapping record identifies the old placement, target page, product/variation, source/derivative status, alt text, dimensions, and permission/provenance state. Retain customer-work placements until they have an explicit, separate disposition.
 
+The authoritative regression-prevention procedure is the pending [gallery assurance runbook (PR #73)](https://github.com/tubby124/truecolor-estimator/pull/73). It supplies the protected-route inventory, pre/post invariants, source/consumer proof, scoped rollback, image sitemap/Merchant gates, and current-evidence limitations. This harness checkpoint does not duplicate or relax those rules.
+
 For each approved replacement:
 
 1. Preserve route URLs, headings, structured-data entities, internal links, and page intent; a media change is not authorization for an SEO rewrite.
