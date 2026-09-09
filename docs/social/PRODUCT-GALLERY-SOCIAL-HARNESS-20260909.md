@@ -16,7 +16,7 @@ This is the default **gallery showcase** lane, not a universal layout rule:
 
 The site target is a complete clean product gallery: each scoped product gets intentional overview, material/detail, application, and alternate views where the product recipe calls for them. Material/product evidence should show useful differences—for example, coroplast flute/edge construction, different real-use settings, or vehicle-decals application contexts—rather than four cosmetic variations of one image.
 
-The current private inventory is 75 new gallery sources plus 6 retained overview sources: 81 effective sources of 124 planned. The remaining 43 are planned work, not missing live website assets. New generation is owner-controlled; no automatic batch resumes merely because a queue exists.
+The current private inventory covers all 124 planned source slots. They remain private illustrative candidates: 14 pre-existing revision holds remain, and zero sources are approved website replacements. Source completion is not permission to change a page, sitemap, customer-work record, Merchant image, or public channel.
 
 ## SEO-safe replacement gate
 
