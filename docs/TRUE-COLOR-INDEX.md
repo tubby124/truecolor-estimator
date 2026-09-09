@@ -24,6 +24,10 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 - [Bounded harness batch to existing review and queue](social/HARNESS-BATCH-BRIDGE.md)
 
+- [Social feedback capture, learning boundaries and Vault brief](social/LEARNING-LOOP.md)
+
+- [Unified social harness: customer gallery, creative content, review and learning](social/UNIFIED-HARNESS.md)
+
 - [Weekly storyboard preparation and monthly handoff](social/WEEKLY-STORYBOARD.md)
 
 - [Telegram photo intake, temporary previews and exact approval](social/TELEGRAM-INTAKE.md)

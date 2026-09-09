@@ -16,6 +16,13 @@ The legacy `scripts/ga4-backfill.mjs` entry point becomes an unconditional safet
 
 Reporting and provider evidence are maintained in [attribution readiness](ATTRIBUTION-READINESS-20260909.md). Event activity and session acquisition are separate from first-user acquisition; aggregate event counts do not establish a sequential cohort funnel.
 
+## Traced event ownership
+
+- Public tag → supported client/session read → checkout JSON after uploads → `api/orders` validation → order context and capture timestamp. Quote forms use the same context helper.
+- Confirmed payment → shared amount/item builder → GA4 Measurement Protocol helper. Callers are Clover webhook, payment reconciliation, staff Clover confirmation, staff e-transfer confirmation, staff status confirmation and the Wave payment-effect worker. Browser confirmation does not emit a second GA4/Ads purchase.
+- Google Ads uses the separate paid-conversion outbox. Website checkout classifies `purchase_online`; quote-origin orders classify `quote_won`. The committed schema has a unique order constraint; paid transitions enqueue one destination action and the cron handles upload/diagnostics. This source contract and current Ads goal configuration do not substitute for genuine destination-credit/deduplication evidence.
+- Meta has separate consent-gated Pixel/CAPI paths and event-ID matching contracts. Presence of that implementation is not proof of receipt, match quality, value parity or paid attribution.
+
 ## Acceptance and remaining proof
 
 Release verification must cover blocked/late tags, consent withdrawal during reads, cache expiry, client/session changes, unavailable storage and signed payment-page privacy. Browser fixtures must stay on loopback with external collectors blocked and order submission intercepted. Passing these fixtures proves the handoff contract, not a production purchase.
@@ -36,4 +43,10 @@ Commerce truth validation passed. Gallery validation exposed a pre-existing mani
 
 Local verification: 162 unit files / 1,540 tests passed before the final FormData-reuse regression; the final focused context/backfill suite passed 26 tests. Ads/reporting Node suite passed 133 tests. TypeScript passed; full source lint had zero errors and 29 existing warnings. Production build passed. The built-app browser suite passed 34/34 tests, including five new GA context tests, intercepted checkout payloads with and without real-context fixtures, payment cache/collector boundaries, existing product/cart journeys and real image optimization. Pricing validation passed with its two existing warnings. No provider events or customer orders were sent by these local fixtures.
 
-Independent Astra Low review found no critical/high blockers; its defensive FormData reuse observation was fixed and tested. Required GitHub CI, merge and production verification remain pending.
+Independent Astra Low review found no critical/high blockers; its defensive FormData reuse observation was fixed and tested. [PR #75](https://github.com/tubby124/truecolor-estimator/pull/75) merged September 9 at 21:40:44 UTC as `e38445438feecfb62a0561f8af75a729ea807fa3`. Its required [CI run](https://github.com/tubby124/truecolor-estimator/actions/runs/34407708960) passed 1,541 unit tests, 133 Ads/reporting tests, 50 browser contracts, PostgreSQL regressions, type/lint/build and the other required project contracts. The merged revision also passed [main CI](https://github.com/tubby124/truecolor-estimator/actions/runs/34408242223). Railway deployment `334375d0-0942-472c-bbca-683b1d07e801` for that revision was read back SUCCESS. Production smoke completed September 9 at 21:47:50 UTC:
+
+- Public product page HTTP 200; supported gtag reads returned valid client/session/session-number values, exactly matching the fresh session cache. No identifiers were logged. Mobile viewport had no horizontal overflow.
+- The expected GA4 and Ads destination libraries were present. The initial smoke's assumption of one total Google library was too strict: Google loads the configured Ads destination separately. The application still has its single existing bootstrap, and this repair adds no tag loader/configuration.
+- Invalid dotted payment page HTTP 200, expired-link screen, cache cleared, zero external script libraries and zero external requests originating from the payment document; restrictive CSP and no-referrer header confirmed. Three collect requests observed around navigation originated from the preceding public product document; they were not payment-page collection. Mobile payment layout had no overflow.
+
+No order, payment, synthetic conversion or customer message was created. The normal public-page visit exercised the existing tag only. This closes the code/deployment/browser-continuity slice. The genuine future purchase, PPC credit, future Meta and durable-delivery gates above remain open.

@@ -65,4 +65,4 @@ gaps and risk duplicate delivery, so this change deliberately does not do that.
 
 ## September 9 continuity follow-through
 
-See [the bounded repair and release receipt](CONTINUITY-RELEASE-20260909.md) and [current provider/reporting readiness](ATTRIBUTION-READINESS-20260909.md). Historical implementation statements above are retained as dated evidence. No historical purchase replay is allowed; the old backfill command is being retired with a hard safety stop. Genuine future purchase attribution and durable delivery remain separate gates.
+See [the bounded repair and release receipt](CONTINUITY-RELEASE-20260909.md) and [current provider/reporting readiness](ATTRIBUTION-READINESS-20260909.md). Historical implementation statements above are retained as dated evidence. No historical purchase replay is allowed; the old backfill command is retired with a deployed hard safety stop. Genuine future purchase attribution and durable delivery remain separate gates.
