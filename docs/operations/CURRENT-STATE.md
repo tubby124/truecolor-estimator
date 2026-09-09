@@ -6,6 +6,10 @@ The exact-scope VPS runner and independent monitor remain the owners of routine 
 
 # Current work state
 
+## Weekly storyboard preparation — September 9, 2026
+
+Local implementation adds `/staff/social/weekly`: a seven-day theme/audience/objective plan, selected posting days and catalogue offer intent. Private JSON retains the brief; completed creatives export through the existing month-plan contract only when all enabled days pass preparation checks. The existing importer and server approval remain responsible for image bytes and current facts. No database, scheduler, live queue or existing September approval is changed. See [weekly workflow](../social/WEEKLY-STORYBOARD.md). This entry records local implementation only; release and deployment require separate evidence.
+
 Updated 2026-09-07. This is the canonical shared work board. Imported operational observations are explicitly dated reports; this migration does not certify live account state. Refresh the relevant system before a mutation.
 
 | Lane / owner | Latest evidence and status | Next action / gate |

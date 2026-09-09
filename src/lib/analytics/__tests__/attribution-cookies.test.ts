@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildAttributionSetCookies,
   LATEST_PAID_COOKIE_NAME,
@@ -22,6 +22,9 @@ function cookieHeaderFrom(setCookies: string[]): string {
 }
 
 describe("buildAttributionSetCookies (middleware server-side click capture)", () => {
+  // Cookie construction and expiry parsing must share the same test clock.
+  beforeEach(() => { vi.spyOn(Date, "now").mockReturnValue(NOW); });
+  afterEach(() => { vi.restoreAllMocks(); });
   it("sets latest-paid and first-touch cookies for a gclid landing", () => {
     const cookies = build("?gclid=EAIaIQobCh_123&utm_source=google&utm_medium=cpc");
 
@@ -59,11 +62,22 @@ describe("buildAttributionSetCookies (middleware server-side click capture)", ()
 
   it("replants first touch when the existing cookie is stale or unusable", () => {
     const expired = `${UTM_COOKIE_NAME}=${encodeURIComponent(
-      JSON.stringify({ utm_source: "google", captured_at: Date.now() - 31 * 24 * 60 * 60 * 1000 }),
+      JSON.stringify({ utm_source: "google", captured_at: NOW - 31 * 24 * 60 * 60 * 1000 }),
     )}`;
 
     expect(build("?gclid=fresh_click", expired)).toHaveLength(2);
     expect(build("?gclid=fresh_click", `${UTM_COOKIE_NAME}=not-json`)).toHaveLength(2);
+  });
+
+  it.each([
+    [30 * 24 * 60 * 60 * 1000 - 1, false],
+    [30 * 24 * 60 * 60 * 1000, false],
+    [30 * 24 * 60 * 60 * 1000 + 1, true],
+  ])("checks first-touch expiry at age %i ms", (age, expired) => {
+    const cookie = `${UTM_COOKIE_NAME}=${encodeURIComponent(
+      JSON.stringify({ utm_source: "referral", captured_at: NOW - age }),
+    )}`;
+    expect(build("?gclid=fresh_click", cookie).some(c => c.startsWith(`${UTM_COOKIE_NAME}=`))).toBe(expired);
   });
 
   it("overwrites the latest-paid cookie on every new click", () => {
