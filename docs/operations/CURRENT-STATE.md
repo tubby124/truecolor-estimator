@@ -121,3 +121,28 @@ Production migration, app credentials/flags, native plugin enable/restart and dy
 ## Focused sticker campaign and learning continuity — September 9, 2026
 
 Owner accepted the sticker direction and requests premium creative plus a second daily campaign post alongside approved mornings. [Campaign decision and scorecard](../social/campaigns/STICKERS-20260909.md) preserve the buyer hypothesis, private research locator, UTM/measurement definitions and repeatable manual review. Final creative, exact dates/accounts and publishing approvals remain pending; five concepts do not constitute a daily second-slot inventory. No runtime, queue, collector, automated learning or spending change. Next: finalize private assets, validate the exact package through the existing monthly review, then capture dated outcomes without modifying posted records.
+
+
+## Unified social harness preparation — September 9, 2026
+
+[Owner direction and integration contract](../social/UNIFIED-HARNESS.md) records the plan to join daily cleared customer-work posts and additional harness content through the existing staff review/calendar/queue. Private hypothetical week/year preview prepared; cadence, final logo treatment and exact publication packages remain for review. Existing September batch preserved. Source audit found a 31-creative monthly import cap, hardcoded brand/timezone assumptions and no automated engagement collector in audited social code. Sales attribution is excluded from this milestone. No runtime, queue, provider or image-library mutation occurred. Next: owner review of combined preview, then compatible package/planner/render integration and an exact-approved pilot before annual scheduling.
+
+
+## Unified harness direction accepted — September 9, 2026
+
+Owner approved the private preview mix (daily cleared real work plus three creative posts weekly), visual direction and top-right logos. Added rolling October–September theme plan, monthly review/feedback release cycle and source-backed caption fact rotation to [UNIFIED-HARNESS](../social/UNIFIED-HARNESS.md). Existing business profile already supplies service facts; its older weekly mix requires replacement in future integration. Exact future packages are not yet approved or scheduled. Runtime integration, image completion and delivery/engagement acceptance remain open.
+
+
+## Offline social learning capture — September 9, 2026
+
+Implemented [private capture and monthly brief](../social/LEARNING-LOOP.md): immutable scoped events, duplicate/conflict protection, evidence-linked owner-decision imports, engagement import validation, expiry/supersession and exact recipe/scope retrieval. Recorded actual owner preview direction privately and generated an October brief in the existing Vault project folder. Tests and independent review passed; CI includes the new suite. This is local operator capture/retrieval, not authenticated hosted approval, provider collection, automatic planner application or self-modifying production. Sales attribution remains excluded; approved September queue untouched.
+
+
+## Superseding scope: annual content cancelled — September 9, 2026
+
+Owner explicitly cancelled the one-year objective. Earlier year/annual statements in this chronological board are historical and superseded. No annual content generation, year-plan expansion or annual scheduling is active. Preserve the former outline as cancelled history. Current focus: small end-to-end harness learning cycle and bounded next-batch preparation, preserving approved September posts. This task owns offline learning capture/brief code and its documentation in PR74; no hosted collector, planner/queue integration or annual worker is running here.
+
+
+## Learning continuation: draft context and live bounded collection — September 9, 2026
+
+[Learning runbook](../social/LEARNING-LOOP.md) now includes exact-scoped, date-aware draft-context export and GET-only per-post Meta collection. Live Instagram collection matched a saved app receipt and verified provider owner/publication time; numeric likes/comments were captured, denied/unsupported metrics remained null. The normalized event was imported privately and a Vault proof written. Source lineage is unmapped legacy, not the new creative recipe. Bound learning context handed to the separate small-batch task for provenance consumption. Unit/security review passed. No recurring collector, authenticated feedback UI, automatic generator application or provider/queue mutation is claimed. Annual scope stays cancelled.
