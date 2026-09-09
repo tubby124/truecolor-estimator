@@ -89,36 +89,37 @@ export function readExampleInputs(inputDir) {
   });
   const [kit, recipes, proofs, requests] = values;
   if (!Array.isArray(requests) || requests.length < 1 || requests.length > 31) throw new Error('Use one to thirty-one brief requests. This is not publishing capacity.');
-  return { bundle: { schemaVersion: 1, kind: 'creative_os_bundle', kit, recipes, proofs }, requests };
+  return { bundle: { schemaVersion: 2, kind: 'creative_os_bundle', kit, recipes, proofs }, requests };
 }
 
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const list = values => `<ul>${(values ?? []).map(value => `<li>${escapeHtml(value)}</li>`).join('')}</ul>`;
-const modeLabels = { exact_configuration: 'A specific priced offer', configurator: 'Choosing your own options', design_help: 'Help with the artwork' };
+const modeLabels = { exact_configuration: 'A specific priced offer', configurator: 'Choosing your own options', design_help: 'Help with the artwork', education: 'Product education' };
 
-export function renderPreview(briefs, report, recipes = []) {
+export function renderPreview(briefs, report, recipes = [], identity = {}) {
+  const brandName = identity.name ?? briefs[0]?.brandKey ?? 'Creative kit';
   const cards = briefs.map((brief, i) => `<article class="card">
     <div class="number">EXAMPLE ${String(i + 1).padStart(2, '0')} <span>${escapeHtml(modeLabels[brief.facts.mode] ?? 'Draft brief')}</span></div>
     <h2>${escapeHtml(recipes.find(recipe => recipe.id === brief.recipeRef.id)?.purchaseQuestion ?? brief.headlineDirection)}</h2>
     <p class="label">What the post must communicate</p>
     <section class="words"><h3>${escapeHtml(brief.headlineDirection)}</h3>${list(brief.requiredVisibleText)}</section>
     <p class="label">What the artist should make</p>${list(brief.layoutInstructions)}
-    <p class="label">The customer’s next step</p>${list([brief.facts.cta.instruction, brief.contactPanel.website, `Pickup: ${brief.contactPanel.address}`, brief.contactPanel.phone])}
+    <p class="label">The customer’s next step</p>${list([brief.facts.cta.instruction, ...Object.values(brief.contactPanel)])}
     <p class="note">${escapeHtml(brief.proofRefs.map(proof => proof.disclosure).join(' '))}</p>
     <details><summary>Facts, source checks and boundaries</summary><pre>${escapeHtml(JSON.stringify(brief, null, 2))}</pre></details>
     <a class="download" href="${escapeHtml(brief.id)}.json" download>Download this brief →</a>
   </article>`).join('');
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
-  <title>True Color — First working creative kit</title><style>
+  <title>${escapeHtml(brandName)} — Creative brief review</title><style>
   *{box-sizing:border-box}body{margin:0;background:#f4f2ec;color:#162127;font-family:Arial,Helvetica,sans-serif;line-height:1.55}main{max-width:1500px;margin:auto;padding:48px 32px 72px}.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:700;color:#38535b}h1{font-size:clamp(34px,4vw,58px);line-height:1.06;max-width:900px;letter-spacing:-.04em;margin:18px 0}.intro{font-size:19px;max-width:760px;color:#405259}.status{display:inline-block;background:#deece7;color:#214c3e;border-radius:24px;padding:8px 15px;font-weight:700;font-size:13px}.explain{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:34px 0 42px;border-block:1px solid #c9d0cd;padding:22px 0}.explain p{margin:5px 0;color:#405259}.explain strong{font-size:16px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.card{background:#fffefa;border:1px solid #d6dad5;border-radius:18px;padding:25px;min-width:0}.number{font-size:11px;letter-spacing:.1em;color:#4b656d;font-weight:700}.number span{display:block;margin-top:7px;font-weight:400;letter-spacing:0}h2{font-size:25px;line-height:1.25;margin:18px 0 28px}.label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:27px 0 10px;color:#4b656d}.words{background:#073f9b;color:#fffaf0;padding:22px;border-radius:12px;min-height:240px}.card:nth-child(2) .words{background:#ece8dc;color:#253b40}.card:nth-child(3) .words{background:#202c35;color:#fffaf0}h3{font-size:28px;line-height:1.15;margin:0 0 20px;letter-spacing:-.025em}ul{padding-left:19px;margin:0}li{margin:9px 0;overflow-wrap:anywhere}.words ul{list-style:none;padding:0}.words li{font-size:15px}.note{font-size:13px;color:#566970;border-top:1px solid #d6dad5;padding-top:18px;margin-top:28px}details{font-size:13px;margin-top:20px}summary{cursor:pointer;font-weight:700}pre{font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere;background:#edf1ee;padding:12px;border-radius:8px}.download{display:inline-block;margin-top:24px;color:#06458e;text-decoration:none;font-weight:700;font-size:14px}.footer{max-width:900px;margin-top:38px}.footer h2{margin-bottom:12px}.footer p{color:#405259}.fine{font-size:12px;color:#53636a}@media(max-width:1000px){.grid{grid-template-columns:1fr}.words{min-height:0}.explain{gap:18px}main{padding:30px 20px}}@media(max-width:560px){.explain{grid-template-columns:1fr;gap:15px}.card{padding:22px}main{padding-inline:16px}}
-  </style></head><body><main><div class="eyebrow">TRUE COLOR / CREATIVE KIT · FIRST WORKING VERSION</div>
-  <h1>Same business.<br>Three different stories.</h1>
+  </style></head><body><main><div class="eyebrow">${escapeHtml(brandName)} / CREATIVE BRIEF REVIEW</div>
+  <h1>${briefs.length} draft ${briefs.length === 1 ? 'brief' : 'briefs'} to discuss.</h1>
   <p class="intro">This tool turns the saved brand rules and product facts into clear instructions for making a post. These are text briefs, not finished ads.</p>
   <div class="status">Private test · No images generated · Nothing scheduled</div>
-  <section class="explain"><div><strong>The kit remembers the brand.</strong><p>Your voice, visual direction and clear website/address/phone panel.</p></div><div><strong>The price comes from the engine.</strong><p>Only the exact configured offer gets a price. Custom options and design help stay separate.</p></div><div><strong>You judge the creative.</strong><p>Next we use these instructions to make one image, review it, then make contrasting pieces.</p></div></section>
+  <section class="explain"><div><strong>The kit defines the brand.</strong><p>Identity, voice and lasting constraints; each recipe supplies its composition.</p></div><div><strong>Facts come from the adapter.</strong><p>An exact offer binds its validated configuration. Educational briefs can work without a price.</p></div><div><strong>You guide the creative.</strong><p>Discuss your samples and visual preferences before choosing a direction or planning new artwork.</p></div></section>
   <section class="grid">${cards}</section>
-  <section class="footer"><h2>What you need to decide</h2><p>Do these feel like three useful, different reasons to contact True Color? Is any wording wrong, or does a direction feel off? You don’t need to fill out another brand questionnaire.</p><p class="fine">Synthetic proof records only: no real customer work or image rights are being asserted. This page cannot approve, import, post, or change any business settings. Local pricing verification does not prove deployed pricing.</p><details><summary>Build receipt</summary><pre>${escapeHtml(JSON.stringify(report, null, 2))}</pre></details></section></main></body></html>`;
+  <section class="footer"><h2>What to discuss</h2><p>Compare the wording and directions with your own samples. The planner and visual choices will be designed with you in that discussion.</p><p class="fine">Proof provenance and limitations are shown with each brief. This page does not authenticate rights, approve, import, post, or change business settings. Local fact verification does not prove deployed facts.</p><details><summary>Build receipt</summary><pre>${escapeHtml(JSON.stringify(report, null, 2))}</pre></details></section></main></body></html>`;
 }
 
 /** Outputs must be new and outside every detected Git checkout, including symlink aliases. */

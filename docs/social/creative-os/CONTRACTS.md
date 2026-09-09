@@ -2,6 +2,8 @@
 
 Design version 0.1, September 9, 2026. These are implementation specifications, not installed schemas. All records below reject unknown fields and cross-brand references. Public examples use synthetic or sanitized data only; populated evidence and media manifests remain private.
 
+September 9 audit correction: the current implementation and [repair acceptance](BUILD-PLAN.md#current-milestone--repair-the-shared-foundation) supersede the original ownership assumptions. Shared exact configuration is adapter-owned canonical JSON, not a universal print schema. Brand constraints may limit execution but cannot silently select a product scene. Recipes own scene/layout choices. Proof owns its provenance. The scope label is `review_candidate`, always separate from rights verification and approval. The broader envelope, planning and learning contracts below remain proposals; use the runbook and source types for executable records.
+
 ## Shared envelope and identity
 
 Every record: `schemaVersion: 1`, `kind`, stable `id`, `brandKey: "true-color"`, integer `revision >= 1`, `status`, `createdAt` (UTC ISO instant), and `sourceRefs[]`. IDs use lowercase ASCII `[a-z0-9][a-z0-9._-]{0,95}`. Campaign references preserve the existing `tc_stickers_small_run_pilot` identity. IDs do not change on edits; revision increments. Materially changed variants get their own IDs. References specify `{id, revision, digest}`. No last-write-wins lookup of an unpinned “latest” record in a frozen brief.
@@ -20,12 +22,12 @@ Required fields beyond envelope:
 
 | Field | Contract |
 |---|---|
-| `identity` | Display name, public website, canonical public address and phone; each has sourceRef |
+| `identity` | Verified display name and applicable public contact fields; required fields follow the selected brand/action rules rather than a universal pickup address |
 | `voice` | Tone, preferred examples, prohibited unsupported claims; distinction between permanent brand and campaign copy |
 | `tokens` | Identity colours/fonts with provenance; campaign overrides marked proposed/accepted; font asset/rights reference where relevant |
-| `visualLanes[]` | ID, narrative job, palette roles, subject/scene guidance, allowed proof types, layout constraints |
-| `contactPanels[]` | ID, required identity fields, action hierarchy, safe-area/readability constraints; values referenced from identity, not duplicated |
-| `logoPolicy` | Default optional; lane overrides, exact asset ref if used, no redraw, no cover of product artwork; illustrative hero overlay disabled |
+| `visualConstraints[]` | Lasting brand-level visual constraints; narrative job, campaign palette, scene and layout belong to recipes |
+| `actionPolicy` | Required verified identity fields and readability constraints; recipes choose contact presentation without duplicating identity values |
+| `logoPolicy` | Brand-supplied requirement and illustration-overlay treatment; True Color's current illustrative overlay remains forbidden, other brands supply their own policy |
 | `semanticRequirements` | Required product/service naming by intent and amount/qualifier association rules |
 | `qualityPolicy` | Hard factual gates plus separate visual-review rubric |
 | `precedence` | Scoped owner decision refs and explicit superseded historical guidance |
@@ -74,7 +76,7 @@ For exact mode:
 }
 ```
 
-This is a **partial historical example**, not a complete executable record or current production quote. A real record also stores raw line subtotal, standalone minimum adjustment/disclosure, current configuration label, resolver rule IDs, allowed claims and evidence refs. Tax-inclusive copy is excluded from the first slice; later tax display must consume the shared tax calculation, never hardcoded rates or assumed exemption status. Do not represent order minimum top-up as a universal per-item price.
+This is a **partial historical sticker-adapter example**, not a universal configuration, complete executable record or current production quote. Other adapters validate their own fields without supplying a fictitious sticker shape. A real record also stores raw line subtotal, standalone minimum adjustment/disclosure, current configuration label, resolver rule IDs, allowed claims and evidence refs. Tax-inclusive copy is excluded from the first slice; later tax display must consume the shared tax calculation, never hardcoded rates or assumed exemption status. Do not represent order minimum top-up as a universal per-item price.
 
 `validity = {checkedAt, reviewBy, sourceRevision, verificationScope, requiredRecheck: [brief_compile, final_media_review, existing_approval_handoff]}`. Proposed review window is at most seven days for cached numeric briefs, shortened by any fact/flag/configuration/source change. Timestamp freshness alone never establishes validity: re-resolve numeric facts on each compilation, compare fingerprint and complete configuration, and fail closed on unavailable sources. Production consistency is checked later by the existing authenticated approval flow; this local compiler does not acquire credentials.
 
@@ -82,7 +84,7 @@ The adapter produces `resolved|needs_configuration|unsupported|stale|source_unav
 
 ## ProofRef and Recipe
 
-`ProofRef` has `proofKind: actual_work|illustration|diagram|interface_capture`, `usageScope: fixture_only|production_candidate`, `assetId`, `assetVersion`, `sha256`, `nearDuplicateGroup`, `rightsStatus: cleared|pending|withdrawn`, allowed brand/use, source type, private provenance ref, disclosure text, restrictions and optional expiry. Source originals and metadata live in private storage. A generated mockup can be cleared as an illustration but never converted into actual_work. Real-source content transformations need original/derivative provenance and fidelity review. Fixture clearance applies only to tests. A production_candidate label alone does not establish clearance or acceptance.
+`ProofRef` has `proofKind: actual_work|illustration|diagram|interface_capture`, `usageScope: fixture_only|review_candidate`, `assetId`, `assetVersion`, `sha256`, `nearDuplicateGroup`, `rightsStatus: cleared|pending|withdrawn`, allowed brand/use, source type, its own provenance references, disclosure text, restrictions and optional expiry. Source originals and metadata live in private storage. A generated mockup can be cleared as an illustration but never converted into actual_work. Real-source content transformations need original/derivative provenance and fidelity review. Fixture clearance applies only to tests. A review_candidate label alone does not establish clearance or acceptance. Standalone compiled briefs retain exact asset ID/hash and proof source references so a later consumer can check the selected evidence.
 
 Recipe required fields:
 
@@ -104,7 +106,7 @@ Brief compilation rejects missing required capabilities, contradictory visible c
 
 `CompiledBrief = envelope + {campaignKey|null, recipeRef, kitRef, offerRefs[], proofRefs[], headlineDirection, requiredVisibleText[], captionGuidance, altTextGuidance, layoutInstructions, forbiddenClaims[], diversitySignature, lessonRefs[], inputBundleDigest, verificationReport}`. All strings bounded (headline direction 200 chars; instruction blocks 4000; total JSON package 1 MiB excluding media). Limits are proposed local safeguards; no new platform limits asserted.
 
-Both compiled briefs and editorial plans additionally require `usageScope: fixture_only|production_candidate`. Any fixture-only input forces fixture-only output, including mixed-input packages. Mark it visibly in the HTML report; a future production handoff must reject it. Neither scope value is an approval state, and the initial compiler has no production handoff adapter.
+Both compiled briefs and editorial plans additionally require `usageScope: fixture_only|review_candidate`. Any fixture-only input forces fixture-only output, including mixed-input packages. Mark it visibly in the HTML report; a future production handoff must reject it. Neither scope value is an approval state, and the initial compiler has no production handoff adapter.
 
 Compiler API, proposed TypeScript signatures:
 

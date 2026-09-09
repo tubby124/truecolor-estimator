@@ -1,57 +1,194 @@
 [
   {
-    "id": "sticker-small-batch", "brandKey": "true-color", "revision": 1,
-    "purpose": "offer", "productSlug": "stickers", "offerMode": "exact_configuration",
+    "id": "sticker-small-batch",
+    "brandKey": "true-color",
+    "revision": 1,
+    "purpose": "offer",
+    "productSlug": "stickers",
+    "offerMode": "exact_configuration",
     "purchaseQuestion": "Can I start with a small run of custom stickers?",
     "headlineDirection": "Small run. Big presence.",
-    "requiredVisibleText": ["Custom stickers"],
-    "visualLaneId": "colour-studio", "contactPanelId": "dark-base",
-    "proofKinds": ["illustration"],
-    "diversityTags": ["product-hero", "packaging", "saturated", "small-run"],
-    "avoid": ["Logo overlay on the illustrative hero", "Universal custom-sticker price", "Implied free design"]
+    "requiredVisibleText": [
+      "Custom stickers"
+    ],
+    "proofKinds": [
+      "illustration"
+    ],
+    "diversityTags": [
+      "product-hero",
+      "packaging",
+      "saturated",
+      "small-run"
+    ],
+    "avoid": [
+      "Logo overlay on the illustrative hero",
+      "Universal custom-sticker price",
+      "Implied free design"
+    ],
+    "visualLane": {
+      "id": "colour-studio",
+      "instructions": "Large tactile sticker/product hero, saturated cobalt campaign field and cream headline. Restrained props and generous breathing room. Illustrative design example, no logo overlay."
+    },
+    "contactPanel": {
+      "id": "dark-base",
+      "instructions": "Clear dark base panel: action and readable website first, pickup address next, phone prominent. Keep text off the printed artwork."
+    },
+    "claimIds": [
+      "sticker-product"
+    ]
   },
   {
-    "id": "sticker-custom-fit", "brandKey": "true-color", "revision": 1,
-    "purpose": "education", "productSlug": "stickers", "offerMode": "configurator",
+    "id": "sticker-custom-fit",
+    "brandKey": "true-color",
+    "revision": 1,
+    "purpose": "education",
+    "productSlug": "stickers",
+    "offerMode": "configurator",
     "purchaseQuestion": "Which sticker shape and size fits my packaging?",
     "headlineDirection": "Make room for your idea.",
-    "requiredVisibleText": ["Choose your sticker shape and size"],
-    "visualLaneId": "material-study", "contactPanelId": "editorial-margin",
-    "proofKinds": ["diagram", "illustration"],
-    "diversityTags": ["top-down-study", "dimension-guide", "light", "fit"],
-    "avoid": ["Price borrowed from a different configuration", "Unsupported clear-vinyl or custom-material claims", "Repeated packaging-box hero"]
+    "requiredVisibleText": [
+      "Choose your sticker shape and size"
+    ],
+    "proofKinds": [
+      "diagram",
+      "illustration"
+    ],
+    "diversityTags": [
+      "top-down-study",
+      "dimension-guide",
+      "light",
+      "fit"
+    ],
+    "avoid": [
+      "Price borrowed from a different configuration",
+      "Unsupported clear-vinyl or custom-material claims",
+      "Repeated packaging-box hero"
+    ],
+    "visualLane": {
+      "id": "material-study",
+      "instructions": "Quiet ivory composition, top-down sticker sizing study. Use honest dimension guides; do not invent a measurement or material test. Avoid the packaging-box hero composition."
+    },
+    "contactPanel": {
+      "id": "editorial-margin",
+      "instructions": "Light editorial margin with the same clear website, pickup address and phone hierarchy. Keep it spacious; do not stamp the hero footer onto this layout."
+    },
+    "claimIds": [
+      "sticker-shape-size"
+    ]
   },
   {
-    "id": "sticker-design-help", "brandKey": "true-color", "revision": 1,
-    "purpose": "design_help", "productSlug": "stickers", "offerMode": "design_help",
+    "id": "sticker-design-help",
+    "brandKey": "true-color",
+    "revision": 1,
+    "purpose": "design_help",
+    "productSlug": "stickers",
+    "offerMode": "design_help",
     "purchaseQuestion": "Can someone help me with my sticker artwork?",
     "headlineDirection": "Your idea. Clearly printed.",
-    "requiredVisibleText": ["Sticker design help"],
-    "visualLaneId": "design-desk", "contactPanelId": "integrated-space",
-    "proofKinds": ["illustration", "diagram"],
-    "diversityTags": ["type-study", "flat-artwork", "dark", "artwork-help"],
-    "avoid": ["Design included in the print price", "Unverified proof deadline", "Invented customer artwork"]
+    "requiredVisibleText": [
+      "Sticker design help"
+    ],
+    "proofKinds": [
+      "illustration",
+      "diagram"
+    ],
+    "diversityTags": [
+      "type-study",
+      "flat-artwork",
+      "dark",
+      "artwork-help"
+    ],
+    "avoid": [
+      "Design included in the print price",
+      "Unverified proof deadline",
+      "Invented customer artwork"
+    ],
+    "visualLane": {
+      "id": "design-desk",
+      "instructions": "Dark editorial type study showing how a sticker message can be arranged clearly. Original illustrative artwork, not an invented client commission."
+    },
+    "contactPanel": {
+      "id": "integrated-space",
+      "instructions": "Use genuine negative space for the action, website, pickup address and phone. Keep the entire contact block readable at phone size."
+    },
+    "claimIds": [
+      "sticker-design-help"
+    ]
   },
   {
-    "id": "sticker-real-work", "brandKey": "true-color", "revision": 1,
-    "purpose": "proof", "productSlug": "stickers", "offerMode": "configurator",
+    "id": "sticker-real-work",
+    "brandKey": "true-color",
+    "revision": 1,
+    "purpose": "proof",
+    "productSlug": "stickers",
+    "offerMode": "configurator",
     "purchaseQuestion": "What does a real finished sticker job look like?",
     "headlineDirection": "Details worth a closer look.",
-    "requiredVisibleText": ["Custom stickers", "Choose your own options in the online sticker configurator."],
-    "visualLaneId": "real-work", "contactPanelId": "integrated-space",
-    "proofKinds": ["actual_work"],
-    "diversityTags": ["authentic-detail", "customer-product", "natural", "finished-result"],
-    "avoid": ["Generated mockup presented as a printed job", "Uncleared customer artwork", "Unsupported testimonial"]
+    "requiredVisibleText": [
+      "Custom stickers"
+    ],
+    "proofKinds": [
+      "actual_work"
+    ],
+    "diversityTags": [
+      "authentic-detail",
+      "customer-product",
+      "natural",
+      "finished-result"
+    ],
+    "avoid": [
+      "Generated mockup presented as a printed job",
+      "Uncleared customer artwork",
+      "Unsupported testimonial"
+    ],
+    "visualLane": {
+      "id": "real-work",
+      "instructions": "Preserve an authentic, cleared product photograph and its actual context. Minimal intervention; do not invent customer endorsement."
+    },
+    "contactPanel": {
+      "id": "integrated-space",
+      "instructions": "Use genuine negative space for the action, website, pickup address and phone. Keep the entire contact block readable at phone size."
+    },
+    "claimIds": [
+      "sticker-product"
+    ]
   },
   {
-    "id": "sticker-ordering-guide", "brandKey": "true-color", "revision": 1,
-    "purpose": "ordering", "productSlug": "stickers", "offerMode": "configurator",
+    "id": "sticker-ordering-guide",
+    "brandKey": "true-color",
+    "revision": 1,
+    "purpose": "ordering",
+    "productSlug": "stickers",
+    "offerMode": "configurator",
     "purchaseQuestion": "How do I price my sticker order online?",
     "headlineDirection": "Choose it. Then price it.",
-    "requiredVisibleText": ["Price your custom stickers online", "Choose your sticker options in the online configurator."],
-    "visualLaneId": "ordering-guide", "contactPanelId": "editorial-margin",
-    "proofKinds": ["diagram"],
-    "diversityTags": ["choice-diagram", "ordering-steps", "light", "online-ordering"],
-    "avoid": ["Diagram presented as a live screenshot", "Claim that a link prefills the configuration", "Unverified clickable Instagram caption"]
+    "requiredVisibleText": [
+      "Custom stickers"
+    ],
+    "proofKinds": [
+      "diagram"
+    ],
+    "diversityTags": [
+      "choice-diagram",
+      "ordering-steps",
+      "light",
+      "online-ordering"
+    ],
+    "avoid": [
+      "Diagram presented as a live screenshot",
+      "Claim that a link prefills the configuration",
+      "Unverified clickable Instagram caption"
+    ],
+    "visualLane": {
+      "id": "ordering-guide",
+      "instructions": "Clean step-by-step choice diagram. Label it as a guide, not a screenshot of the live configurator."
+    },
+    "contactPanel": {
+      "id": "editorial-margin",
+      "instructions": "Light editorial margin with the same clear website, pickup address and phone hierarchy. Keep it spacious; do not stamp the hero footer onto this layout."
+    },
+    "claimIds": [
+      "sticker-product"
+    ]
   }
 ]

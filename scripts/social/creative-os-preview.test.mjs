@@ -86,4 +86,11 @@ describe('private offline creative review', () => {
     await writeFile(path.join(root, 'truecolor-kit.json'), ' '.repeat(1024 * 1024 + 1));
     expect(() => readExampleInputs(root)).toThrow('exceeds one MiB');
   }));
+  it('uses supplied identity, count and required contacts without True Color defaults', () => {
+    const html = renderPreview([{id: 'sample',brandKey: 'other',facts: {mode: 'education',cta: {instruction: 'Explore samples'}},recipeRef: {id: 'sample'},headlineDirection: 'A sample',requiredVisibleText: [],layoutInstructions: [],contactPanel: {website: 'https://example.test/'},proofRefs: [{disclosure: 'Illustration'}]}], {}, [], {name: 'Example Studio'});
+    expect(html).toContain('Example Studio');
+    expect(html).toContain('1 draft brief to discuss');
+    expect(html).not.toMatch(/True Color|TRUE COLOR|Pickup:|Three different|undefined/);
+    expect(html).toContain('your own samples');
+  });
 });

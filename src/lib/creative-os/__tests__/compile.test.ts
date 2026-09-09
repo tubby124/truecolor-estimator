@@ -15,7 +15,7 @@ vi.mock('node:fs', async importOriginal => {
 });
 
 function json(name: string) { return JSON.parse(readFileSync(`docs/social/creative-os/examples/${name}.json`,'utf8')); }
-function fixture(): Bundle { return { schemaVersion: 1,kind: 'creative_os_bundle',kit: json('truecolor-kit'),recipes: json('sticker-recipes'),proofs: json('fixture-proofs') }; }
+function fixture(): Bundle { return { schemaVersion: 2,kind: 'creative_os_bundle',kit: json('truecolor-kit'),recipes: json('sticker-recipes'),proofs: json('fixture-proofs') }; }
 function requests(): BriefInput[] { return json('offer-inputs'); }
 const adapter = () => createTrueColorFactsAdapter({ sourceRevision: 'test-local-revision',now: () => '2026-09-09T18:00:00.000Z' });
 
@@ -60,8 +60,24 @@ describe('offline creative brief contract', () => {
     const pinned = {...r,expectedFingerprint: first.facts.quote!.factFingerprint};
     expect(() => compileBrief({...pinned,configuration: {...r.configuration!,qty: 50}},fixture(),factsAdapter)).toThrow(/Stale fact/);
   });
+  it('preserves stable maintained capability IDs and original source provenance', () => {
+    const brief = compileBrief(requests()[2],fixture(),adapter());
+    const claim = brief.claimRefs.find(c => c.id === 'onsite-graphic-designer');
+    expect(claim?.text).toContain('onsite graphic designer');
+    expect(claim?.sourceRefIds).toContain('onsite-graphic-designer-source-0');
+    expect(brief.facts.sourceRefs.find(s => s.id === 'onsite-graphic-designer-source-0')).toMatchObject({kind: 'owner_decision',observedAt: '2026-09-06T00:00:00.000Z'});
+    expect(brief.proofRefs[0].assetId).toBe(fixture().proofs[0].assetId);
+    expect(brief.proofRefs[0].sha256).toBe(fixture().proofs[0].sha256);
+  });
+  it('rejects inconsistent quote totals or unsupported preselection claims', () => {
+    const a = adapter(); const resolve = a.resolve;
+    a.resolve = r => { const f = resolve(r); f.quote!.rawSubtotalMinor += 1; return f; };
+    expect(() => compileBrief(requests()[0],fixture(),a)).toThrow(/quote reconciliation/);
+    a.resolve = r => { const f = resolve(r); Object.assign(f.cta,{preselectionVerified: true}); return f; };
+    expect(() => compileBrief(requests()[0],fixture(),a)).toThrow(/preselected/);
+  });
   it('fails on unavailable source or a resolver changing the configuration', () => {
-    const unavailable: LocalFactsAdapter = {brandKey: 'true-color',resolve: () => { throw new Error('source unavailable'); }};
+    const unavailable: LocalFactsAdapter = {brandKey: 'true-color',validateConfiguration: adapter().validateConfiguration,resolve: () => { throw new Error('source unavailable'); }};
     expect(() => compileBrief(requests()[0],fixture(),unavailable)).toThrow('source unavailable');
     const a = adapter(); const realResolve = a.resolve;
     a.resolve = r => { const f = realResolve(r); return {...f,quote: {...f.quote!,configuration: {...f.quote!.configuration,qty: 50}}}; };
@@ -73,15 +89,15 @@ describe('offline creative brief contract', () => {
   });
   it('requires complete exact configuration and excludes design quotes from this parser', () => {
     const r = requests()[0]; const incomplete = {...r.configuration} as Record<string, unknown>; delete incomplete.shape;
-    expect(() => validateBriefInput({...r,configuration: incomplete})).toThrow();
-    expect(() => validateBriefInput({...r,configuration: {...r.configuration,design_status: 'NEEDS_DESIGN'}})).toThrow();
+    expect(() => compileBrief({...r,configuration: incomplete},fixture(),adapter())).toThrow();
+    expect(() => compileBrief({...r,configuration: {...r.configuration,design_status: 'NEEDS_DESIGN'}},fixture(),adapter())).toThrow();
     expect(() => validateBriefInput({...requests()[1],configuration: r.configuration})).toThrow(/Nonnumeric/);
   });
   it('rejects invalid IDs, unknown version, duplicates and orphan references', () => {
     expect(() => validateBriefInput({...requests()[0],id: '../escape'})).toThrow(/ID/);
-    expect(() => validateBundle({...fixture(),schemaVersion: 2})).toThrow(/schema/);
+    expect(() => validateBundle({...fixture(),schemaVersion: 1})).toThrow(/schema/);
     const b = fixture(); b.recipes.push(b.recipes[0]); expect(() => validateBundle(b)).toThrow(/Duplicate/);
-    const c = fixture(); c.recipes[0].visualLaneId = 'missing'; expect(() => validateBundle(c)).toThrow(/Orphan/);
+    const c = fixture(); c.proofs[0].sourceRefId = 'missing'; expect(() => validateBundle(c)).toThrow(/Orphan/);
   });
   it('rejects cross-brand kit, request and adapter mixing', () => {
     const b = fixture(); b.proofs[0].brandKey = 'other-brand'; expect(() => validateBundle(b)).toThrow(/Cross-brand/);
@@ -91,7 +107,7 @@ describe('offline creative brief contract', () => {
   it('blocks uncleared or mismatched proof and propagates fixture scope from any input', () => {
     const b = fixture(); b.proofs[0].rightsStatus = 'pending'; expect(() => compileBrief(requests()[0],b,adapter())).toThrow(/rights/);
     const c = fixture(); c.proofs[0].proofKind = 'actual_work'; expect(() => compileBrief(requests()[0],c,adapter())).toThrow(/rights/);
-    const d = fixture(); d.kit.usageScope = 'production_candidate'; d.proofs[0].usageScope = 'production_candidate';
+    const d = fixture(); d.kit.usageScope = 'review_candidate'; d.proofs[0].usageScope = 'review_candidate';
     expect(compileBrief(requests()[0],d,adapter()).usageScope).toBe('fixture_only');
   });
   it.each(['Custom stickers $25','Any size available','Design included','twenty dollars'])('blocks unbound claim %s', claim => {
@@ -105,21 +121,21 @@ describe('offline creative brief contract', () => {
   it('does not allow nonnumeric price leakage through voice or layout instructions', () => {
     const b = fixture(); b.kit.voice.push('Only $25 for stickers');
     expect(() => compileBrief(requests()[1],b,adapter())).toThrow(/Unbound numeric/);
-    const c = fixture(); c.kit.visualLanes[1].instructions += ' Add a $25 price bubble.';
+    const c = fixture(); c.recipes[1].visualLane.instructions += ' Add a $25 price bubble.';
     expect(() => compileBrief(requests()[1],c,adapter())).toThrow(/Unbound numeric/);
   });
   it.each(['voice','proof','lane','panel'])('blocks blanket commercial claims in positive %s instructions', field => {
     const b = fixture();
     if (field === 'voice') b.kit.voice.push('Design is free.');
     if (field === 'proof') b.proofs[1].disclosure = 'Illustrative guide. Design included for any size.';
-    if (field === 'lane') b.kit.visualLanes[1].instructions += ' Promise unlimited sizes.';
-    if (field === 'panel') b.kit.contactPanels[1].instructions += ' Show free design included.';
+    if (field === 'lane') b.recipes[1].visualLane.instructions += ' Promise unlimited sizes.';
+    if (field === 'panel') b.recipes[1].contactPanel.instructions += ' Show free design included.';
     expect(() => compileBrief(requests()[1],b,adapter())).toThrow(/blanket commercial/);
   });
   it('cannot be imported as an existing monthly publishing plan', () => {
     const brief = compileBrief(requests()[0],fixture(),adapter());
     expect(() => parseMonthPlan(brief)).toThrow();
-    expect(() => parseMonthPlan({schemaVersion: 1,kind: 'creative_os_bundle',briefs: [brief]})).toThrow();
+    expect(() => parseMonthPlan({schemaVersion: 2,kind: 'creative_os_bundle',briefs: [brief]})).toThrow();
     expect(brief).not.toHaveProperty('scheduleTime');
     expect(brief).not.toHaveProperty('destinations');
   });

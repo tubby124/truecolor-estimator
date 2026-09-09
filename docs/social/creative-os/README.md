@@ -2,6 +2,8 @@
 
 September 9, 2026 · **Architecture with a first offline implementation.** The owner authorized the first build after this design. Start with the [working-tool runbook](RUNBOOK.md): three text briefs, local facts and a private review page. The full calendar/collector/writeback design below remains future work; no final creative or production activation is implied.
 
+The audit repair now has a [cross-product acceptance milestone](BUILD-PLAN.md#current-milestone--repair-the-shared-foundation). The original three sticker briefs were insufficient proof of reuse. Brand invariants, recipe execution and adapter-owned product facts must remain separate. The owner will supply style references and co-design each substantial planner decision before implementation; this repair does not authorize automatic artwork or planner construction.
+
 Build a portable creative brief system inside the existing True Color repository. Its reusable core defines the questions, evidence bindings and quality checks; the True Color skin supplies the visual identity, product facts, proof and conversion treatment. Start with local JSON and pure validation/composition functions. A graph database, hosted service and autonomous agent loop are unnecessary for the first proof.
 
 The desired outcome is repeated, beautiful, recognizably True Color creative with visibly different ideas. The system can enforce factual constraints and expose repetition; human visual review still decides whether a piece is good. Passing a schema does not establish premium quality or commercial performance.
@@ -51,24 +53,24 @@ Private locators stay in the existing owner-private campaign handoff and ecosyst
 
 ### Resolve instruction conflicts explicitly
 
-The current owner instruction overrides the older mandatory-logo bullet in the merged campaign record and the earlier section of the private handoff. This design records that precedence without editing an existing asset, approval or branding implementation. Future brand-kit adoption must add a scoped correction to those documents so a new agent cannot resurrect the rejected overlay.
+The current owner instruction overrides the older mandatory-logo bullet in the campaign record and the earlier section of the private handoff. The scoped correction now appears in the campaign record and branding standard so a new agent can resolve it directly. Existing assets, approvals and branding implementation are unchanged.
 
-Older `.claude/rules/brand-voice.md` requires price/design/rush language in every piece, while the maintained social profile supports conditional service claims. The pilot needs product-specific clarity, not every service in every graphic. Proposed social-only precedence: current owner decision → campaign/brand-kit revision → current engine and verified service facts → recipe → historical content examples. A price is compulsory when an asset advertises an exact priced offer. A custom-options or design brief can use a nonnumeric configurator action when no exact offer applies. Never insert an unverified price to satisfy an old generic rule. No global rule file changes occur in this task.
+The September 9 authority section in `.claude/rules/brand-voice.md` supersedes its old universal price/design/rush mandates and the conflicting mandates in adjacent content checklists. Current owner decisions govern creative intent; executable prices and eligible maintained service facts govern factual claims. A campaign or recipe cannot override those facts. Exact priced offers require their amount and qualifiers; education, custom-options and design-help pieces may be nonpriced. Historical examples supply context, not current factual authority.
 
 ## Brand kit: stable recognition, variable compositions
 
-**Existing accepted direction:** confident short headline, tactile product foreground, legible selling information, visibly True Color conversion panel; no mandatory logo overlay on the illustrative hero. The selected hero is a visual reference, not evidence of a real printed job or measured sales lift.
+**Existing sticker-campaign direction:** confident short headline, tactile product foreground, legible selling information and clear True Color contact treatment; illustrative hero overlay disabled. These are scoped campaign choices. The selected hero is a visual reference, not evidence of a real printed job or measured sales lift.
 
 **Proposed invariants:**
 
-- Product/object is the visual subject. Headline introduces one benefit or purchase question. Material, scale and intended use remain plausible.
-- Explicit semantic label: “Custom stickers”, “Sticker design help”, “Choose your sticker shape and size”, or “Price your stickers online”, matching the actual brief. A poetic headline alone does not pass.
-- Exact offers keep quantity, dimensions, material, shape, artwork assumption, no-rush scope and before-tax qualifier visibly associated with the amount. Essential qualifiers cannot be hidden in caption-only text.
-- True Color conversion panel has a consistent reading hierarchy: action + `truecolorprinting.ca`; pickup `216 33rd St W, Saskatoon`; `306-954-8688`. Full identity record preserves “upstairs” and postal address. A visit-focused brief can include upstairs without inventing a suite. Layout and colour may vary, identity must not.
+- Product/service and purpose are clear; depicted material, scale and intended use remain plausible. The recipe chooses whether the subject is a product, process, person or diagram.
+- Use the product/service wording supplied by the selected facts. “Custom stickers” is appropriate only for a sticker brief; a poetic headline alone does not identify the subject.
+- Exact offers keep the selected adapter's price-bearing configuration and essential qualifiers visibly associated with the amount. Sticker shape is a sticker requirement, not a universal product field.
+- True Color identity remains accurate: `truecolorprinting.ca`, `216 33rd St W, Saskatoon`, `306-954-8688`. The full record preserves “upstairs” and postal address. Required action fields follow the brief's policy; layout, presentation and campaign colour belong to the recipe. Other brands supply their own identity and requirements.
 - Exact brand marks are optional, never generated or approximated. Hero lane defaults to no overlay; a real-work lane can propose a corner mark only with clear space and visual review. Preserve customer artwork. Branding is composed before final review, never at dispatch.
 - Plain, local voice. “Small run. Big presence.” is an approved direction for this campaign, not compulsory recurring copy or a permanent company tagline.
 
-**Proposed variable lanes:**
+**Proposed sticker recipe lanes, not brand invariants:**
 
 | Lane | Audience experience | Distinct composition | Suitable proof |
 |---|---|---|---|

@@ -2,7 +2,36 @@
 
 September 9, 2026. **Design followed by owner-authorized first build.** The [runbook](RUNBOOK.md) describes the implemented offline subset. The remaining phases below are proposals. Nothing here activates a collector, writeback process, image worker or publishing integration.
 
-## Exact first implementation slice
+## Current milestone — repair the shared foundation
+
+Owner authorized the audit repair on September 9. This milestone supersedes the original sticker-only slice's portability acceptance below. The original slice is retained as history: three sticker examples proved price/semantic handling but missed product-specific fields and creative choices in the shared layer.
+
+Repair ownership: the shared compiler validates bindings and evidence; each facts adapter validates its own configuration; the brand kit holds lasting identity/voice constraints; recipes choose scenes, layouts and campaign treatments; proof records carry their own provenance. Compiled output must preserve that separation. Old schema inputs must fail clearly rather than silently acquire changed meaning.
+
+Acceptance examples must differ materially:
+
+| Example | Required evidence |
+|---|---|
+| Existing sticker offer | Exact configuration still resolves to its local price; no copied blanket offer or logo overlay |
+| Business-card education | Same compiler, no price, no borrowed sticker instructions |
+| Banner/sign education | Same compiler, its own facts and composition, no invented material or turnaround |
+| Exact non-sticker fixture | Adapter validates its own fields; no fake `shape` needed; stale/mismatched facts still fail |
+| Second synthetic brand | Its own logo/action rules; no inherited True Color identity, pickup or phone requirement |
+| Authentic work without eligible proof | Blocks; an illustration cannot become a real job |
+
+Tests establish synthetic portability, not a verified live business-card/banner catalogue or a second-business integration. Independent review must assess these requirements as well as test results. Existing fact freshness, fixture propagation, input/output isolation and price safety remain acceptance gates.
+
+The offer renderer's duplicated fields/title and caption subtotal disclosure are recorded separate follow-ups in existing application code. This offline repair does not change those runtime paths.
+
+## Owner-led next phases
+
+The owner will co-design the monthly planner and supply examples, downloaded references or links showing desired post styles. Do not implement the planner, decide its detailed mix or start final media from this repair alone. Discuss each substantial part with the owner before building it, using a short concrete proposal and their examples.
+
+For each reference, distinguish what the owner likes (such as hierarchy, spacing, photography or typography), which product/campaign it suits, and the scope of the accepted direction. A reference is inspiration until its permitted use is established; it is not evidence of a True Color job. Record accepted direction in the project at the appropriate recipe/campaign scope. Do not turn a sample layout into a permanent brand rule. No references have been supplied in this repair milestone.
+
+The sequence after repair is owner style discussion, a separately agreed visual proof, then owner-led mixed-product planner design and implementation. Collector, accepted learning and other-business integration remain later scoped phases. Each milestone reports its capability, evidence and remaining gap; passing one does not complete the broader roadmap.
+
+## Original first implementation slice — historical scope
 
 Build an offline True Color brief compiler, after owner acceptance of this design. Aim for one reviewable input/output proof, not a platform launch.
 

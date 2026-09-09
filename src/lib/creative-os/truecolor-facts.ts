@@ -9,6 +9,26 @@ import { ContractError, digest, type BriefInput, type Configuration, type Source
 import type { FactsResolution, LocalFactsAdapter } from './compile';
 
 export interface TrueColorAdapterOptions { sourceRevision: string; now: () => string }
+interface StickerConfiguration extends Configuration {
+  category: string; material_code: string; width_in: number; height_in: number; sides: number;
+  qty: number; shape: string; addons: string[]; design_status: 'PRINT_READY'; is_rush: false;
+}
+function validateConfiguration(input: unknown): StickerConfiguration {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new ContractError('Sticker configuration required');
+  const c = input as Record<string, unknown>;
+  const keys = ['category','material_code','width_in','height_in','sides','qty','shape','addons','design_status','is_rush'];
+  if (Object.keys(c).length !== keys.length || keys.some(k => !Object.hasOwn(c,k))) throw new ContractError('Incomplete or unknown sticker configuration');
+  if (c.category !== 'STICKER' || typeof c.material_code !== 'string' || !c.material_code || !['square','circle','die_cut'].includes(c.shape as string)) throw new ContractError('Invalid sticker configuration');
+  for (const key of ['width_in','height_in','qty']) if (typeof c[key] !== 'number' || !Number.isFinite(c[key]) || c[key] <= 0) throw new ContractError(`Invalid sticker ${key}`);
+  if (![1,2].includes(c.sides as number) || !Number.isSafeInteger(c.qty) || c.design_status !== 'PRINT_READY' || c.is_rush !== false) throw new ContractError('Unsupported sticker configuration basis');
+  if (!Array.isArray(c.addons) || c.addons.some(v => typeof v !== 'string' || !/^[a-z0-9][a-z0-9._-]*$/.test(v)) || new Set(c.addons).size !== c.addons.length) throw new ContractError('Invalid sticker addons');
+  return JSON.parse(JSON.stringify(c)) as StickerConfiguration;
+}
+function attributed(facts: Omit<FactsResolution,'claims'>, ids: string[]): FactsResolution {
+  const texts = [...facts.requiredVisibleText,facts.cta.instruction];
+  if (texts.length !== ids.length) throw new ContractError('Incomplete True Color claim attribution');
+  return {...facts,claims: texts.map((text,i) => ({id: ids[i],productSlug: facts.productSlug,text,sourceRefIds: facts.sourceRefs.map(s => s.id)}))};
+}
 // Runtime dependency closure, including adapter logic. Built-ins are provided by
 // the local Node runtime; type-only imports have no executable effect. Revisit
 // this manifest whenever these modules gain another runtime dependency.
@@ -22,7 +42,7 @@ function sourceDigest(): string {
 const processSourceDigest = sourceDigest();
 function money(amount: number) { return Math.round(amount * 100); }
 export function createTrueColorFactsAdapter(options: TrueColorAdapterOptions): LocalFactsAdapter {
-  return { brandKey: 'true-color', resolve(request: BriefInput): FactsResolution {
+  return { brandKey: 'true-color', validateConfiguration, resolve(request: BriefInput): FactsResolution {
     if (request.brandKey !== 'true-color' || request.productSlug !== 'stickers') throw new ContractError('True Color pilot supports stickers only');
     const checkedAt = options.now();
     const currentSourceDigest = sourceDigest();
@@ -30,27 +50,34 @@ export function createTrueColorFactsAdapter(options: TrueColorAdapterOptions): L
     const sourceRefs: SourceRef[] = [{ id: 'truecolor-local-facts',kind: 'repository', observedAt: checkedAt,revisionOrDigest: currentSourceDigest,evidenceScope: 'Current local source files and loaded catalogue, not production',limitation: 'Local process only; no remote runtime or provider verification.' }];
     const base = { brandKey: 'true-color',productSlug: 'stickers',mode: request.mode,sourceRevision: options.sourceRevision,sourceDigest: currentSourceDigest,checkedAt,verificationScope: 'local_source_only' as const,runtimeFlags: { NEXT_PUBLIC_USE_STICKER_PRICING_V2: process.env.NEXT_PUBLIC_USE_STICKER_PRICING_V2 === 'true' },sourceRefs };
     if (request.mode === 'exact_configuration') {
-      if (!request.configuration) throw new ContractError('Exact configuration required');
+      validateConfiguration(request.configuration);
       const facts = resolveProductFacts({ productSlug: 'stickers',configuration: request.configuration as Parameters<typeof resolveProductFacts>[0]['configuration'] });
-      const configuration = facts.configuration as Configuration;
+      const configuration = facts.configuration as StickerConfiguration;
       if (digest(configuration) !== digest(request.configuration)) throw new ContractError('Resolver changed complete input configuration');
       // This first adapter intentionally supports the proven white-vinyl material
       // and printed-artwork basis; other sellable presets require an explicit extension.
       if (configuration.material_code !== 'PLACEHOLDER_STICKER_2X2' || configuration.addons.length || configuration.sides !== 1) throw new ContractError('Material/addon/side semantics not implemented in pilot adapter');
       const shape = ({ square: 'square',circle: 'round',die_cut: 'die-cut' } as Record<string,string>)[configuration.shape];
       if (!shape) throw new ContractError('Unknown sticker shape');
-      return { ...base,
+      return attributed({ ...base,
         requiredVisibleText: ['Custom stickers',`CAD $${facts.standalonePreTaxOrderTotal.toFixed(2)} before tax for this configured standalone order`,`${configuration.qty} ${shape} stickers · ${configuration.width_in} × ${configuration.height_in} inches · white vinyl · one side · print-ready artwork · no addons · no rush`,...(facts.minimumDisclosure ? [facts.minimumDisclosure] : [])],
         cta: { url: facts.productUrl,preselectionVerified: false,instruction: 'Select the shown size, shape, quantity and artwork options in the online configurator.' },
         quote: { currency: 'CAD',amountMinor: money(facts.standalonePreTaxOrderTotal),rawSubtotalMinor: money(facts.rawSubtotal),minimumAdjustmentMinor: money(facts.standalonePreTaxOrderTotal - facts.rawSubtotal),minimumDisclosure: facts.minimumDisclosure,costMinor: null,margin: null,factFingerprint: facts.sourceFingerprint,configuration,configurationLabel: facts.configurationLabel,sourceRuleIds: facts.sourceRuleIds },
-      };
+      }, ['sticker-product','configured-standalone-price','configured-sticker-basis',...(facts.minimumDisclosure ? ['standalone-minimum'] : []),'configure-exact-stickers']);
     }
     if (request.mode === 'configurator') {
-      if (!PRODUCTS.stickers?.sizePresets.length || !generationServiceFacts().some(f => f.id === 'online-ordering')) throw new ContractError('Configurator capability source unavailable');
-      return { ...base,quote: null,requiredVisibleText: ['Custom stickers','Choose your sticker shape and size','Price your selected options in the online configurator.','Ask us about requirements beyond the listed options.'],cta: { url: 'https://truecolorprinting.ca/products/stickers',preselectionVerified: false,instruction: 'Choose the listed shape, size, quantity and artwork options online.' } };
+      const service = generationServiceFacts().find(f => f.id === 'online-ordering');
+      if (!PRODUCTS.stickers?.sizePresets.length || !service) throw new ContractError('Configurator capability source unavailable');
+      sourceRefs.push(...serviceSources(service));
+      return attributed({ ...base,quote: null,requiredVisibleText: ['Custom stickers','Choose your sticker shape and size','Price your selected options in the online configurator.','Ask us about requirements beyond the listed options.'],cta: { url: 'https://truecolorprinting.ca/products/stickers',preselectionVerified: false,instruction: 'Choose the listed shape, size, quantity and artwork options online.' } }, ['sticker-product','sticker-shape-size','online-ordering','sticker-custom-enquiry','configure-stickers']);
     }
+    if (request.mode !== 'design_help') throw new ContractError('True Color education adapter not implemented');
     const service = generationServiceFacts().find(f => f.id === 'onsite-graphic-designer');
     if (!service?.statement) throw new ContractError('Design help capability source unavailable');
-    return { ...base,quote: null,requiredVisibleText: ['Sticker design help',service.statement,'Tell us what you need help designing; confirm the scope with the shop.'],cta: { url: 'https://truecolorprinting.ca/',preselectionVerified: false,instruction: 'Call True Color to discuss your sticker artwork and design requirements.' } };
+    sourceRefs.push(...serviceSources(service));
+    return attributed({ ...base,quote: null,requiredVisibleText: ['Sticker design help',service.statement,'Tell us what you need help designing; confirm the scope with the shop.'],cta: { url: 'https://truecolorprinting.ca/',preselectionVerified: false,instruction: 'Call True Color to discuss your sticker artwork and design requirements.' } }, ['sticker-design-help','onsite-graphic-designer','design-scope-enquiry','contact-sticker-design']);
   } };
+}
+function serviceSources(service: ReturnType<typeof generationServiceFacts>[number]): SourceRef[] {
+  return service.provenance.map((p,i) => ({id: `${service.id}-source-${i}`,kind: p.kind === 'owner_confirmation' ? 'owner_decision' : 'repository',observedAt: `${p.checkedOn}T00:00:00.000Z`,revisionOrDigest: digest(service),evidenceScope: `${service.status}: ${p.reference}`,limitation: 'Maintained capability record; observed date is the recorded date, not a new verification or production clearance.'}));
 }

@@ -41,18 +41,18 @@ async function main() {
   const ids = briefs.map(brief => brief.id);
   if (new Set(ids).size !== ids.length || ids.some(id => ['index', 'report', 'briefs'].includes(id) || id.includes('..'))) throw new Error('Brief IDs must be unique and cannot use reserved output names.');
   const report = {
-    schemaVersion: 1, kind: 'creative_os_local_review', status: 'draft',
+    schemaVersion: 2, kind: 'creative_os_local_review', status: 'draft',
     createdAt: checkedAt, sourceRevision, sourceRevisionScope: 'Git HEAD label; actual local fact source digest is recorded in each brief, including uncommitted source.',
     inputBundleDigest: digest(bundle), requestSetDigest: digest(requests),
-    briefCount: briefs.length, usageScope: briefs.some(brief => brief.usageScope === 'fixture_only') ? 'fixture_only' : 'production_candidate',
+    briefCount: briefs.length, usageScope: briefs.some(brief => brief.usageScope === 'fixture_only') ? 'fixture_only' : 'review_candidate',
     runtimeFlags: { NEXT_PUBLIC_USE_STICKER_PRICING_V2: options['--sticker-v2'] === 'true' },
     productionRuntimeRefreshed: false, imagesGenerated: 0, publishingActions: 0,
     limitations: ['Text instructions only; visual quality and owner review are still pending.', 'Synthetic input proof cannot establish real artwork rights.', 'This output is not a monthly importer or publishing file.'],
   };
   const files = Object.fromEntries(briefs.map(brief => [brief.id + '.json', JSON.stringify(brief, null, 2) + '\n']));
-  files['briefs.json'] = JSON.stringify({ kind: 'creative_os_brief_collection', schemaVersion: 1, briefs }, null, 2) + '\n';
+  files['briefs.json'] = JSON.stringify({ kind: 'creative_os_brief_collection', schemaVersion: 2, briefs }, null, 2) + '\n';
   files['report.json'] = JSON.stringify(report, null, 2) + '\n';
-  files['index.html'] = renderPreview(briefs, report, bundle.recipes);
+  files['index.html'] = renderPreview(briefs, report, bundle.recipes, bundle.kit.identity);
   const output = await writeReviewPackage(options['--output'], files);
   process.stdout.write(JSON.stringify({ status: 'draft_review_created', output, briefCount: briefs.length, usageScope: report.usageScope, productionRuntimeRefreshed: false }) + '\n');
 }
