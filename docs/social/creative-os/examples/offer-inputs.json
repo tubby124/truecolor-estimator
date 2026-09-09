@@ -1,0 +1,24 @@
+[
+  {
+    "schemaVersion": 1, "kind": "creative_brief_request",
+    "id": "small-batch-example", "brandKey": "true-color",
+    "recipeId": "sticker-small-batch", "proofId": "synthetic-illustration",
+    "productSlug": "stickers", "mode": "exact_configuration",
+    "configuration": {"category": "STICKER", "material_code": "PLACEHOLDER_STICKER_2X2", "width_in": 2, "height_in": 2, "sides": 1, "qty": 25, "shape": "square", "addons": [], "design_status": "PRINT_READY", "is_rush": false},
+    "expectedFingerprint": null, "expectedSourceRevision": null, "expectedSourceDigest": null
+  },
+  {
+    "schemaVersion": 1, "kind": "creative_brief_request",
+    "id": "custom-fit-example", "brandKey": "true-color",
+    "recipeId": "sticker-custom-fit", "proofId": "synthetic-diagram",
+    "productSlug": "stickers", "mode": "configurator",
+    "configuration": null, "expectedFingerprint": null, "expectedSourceRevision": null, "expectedSourceDigest": null
+  },
+  {
+    "schemaVersion": 1, "kind": "creative_brief_request",
+    "id": "design-help-example", "brandKey": "true-color",
+    "recipeId": "sticker-design-help", "proofId": "synthetic-illustration",
+    "productSlug": "stickers", "mode": "design_help",
+    "configuration": null, "expectedFingerprint": null, "expectedSourceRevision": null, "expectedSourceDigest": null
+  }
+]

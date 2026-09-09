@@ -6,6 +6,12 @@ The exact-scope VPS runner and independent monitor remain the owners of routine 
 
 # Current work state
 
+## Creative OS design prepared — September 9, 2026
+
+Owner subsequently authorized the first offline build. [Working-tool runbook](../social/creative-os/RUNBOOK.md): strict kit/recipe/proof/request records, local configuration-bound sticker facts, nonnumeric options/design-help briefs, and a private three-brief HTML comparison. Synthetic proof is explicitly fixture-only; output cannot enter existing monthly publishing imports. No new image production, calendar composer, collector, learning acceptance endpoint or map/Vault writeback. This supersedes the earlier design-only checkpoint below for implementation state, not production state. Exact kit/brief visual acceptance remains pending; the task preserves the live system and holds main merge/deployment.
+
+[Architecture, source map, contracts and phased build plan](../social/creative-os/README.md) are prepared for owner review on a local documentation branch based on `0675d93d` (merged PR #71). They propose an offline True Color brand-kit/offer/recipe compiler before visual proof, monthly composition, read-only collection and accepted-learning pointer writeback. The latest owner instruction rejects the illustrative-hero logo overlay and retains the clear website/address/phone conversion panel; it supersedes the older campaign logo requirement for this design. The $25 sticker example remains configuration-specific, with a dated local receipt and required future revalidation. No acceptance of the new system, implementation, final media production, publication, scheduling, approval changes, spend, runtime, database, credential or private-map/Vault writeback is claimed. Next: owner review of the design, then the exact offline first slice in its build plan.
+
 ## Weekly storyboard preparation — September 9, 2026
 
 Local implementation adds `/staff/social/weekly`: a seven-day theme/audience/objective plan, selected posting days and catalogue offer intent. Private JSON retains the brief; completed creatives export through the existing month-plan contract only when all enabled days pass preparation checks. The existing importer and server approval remain responsible for image bytes and current facts. No database, scheduler, live queue or existing September approval is changed. See [weekly workflow](../social/WEEKLY-STORYBOARD.md). This entry records local implementation only; release and deployment require separate evidence.

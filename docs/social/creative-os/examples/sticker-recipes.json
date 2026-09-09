@@ -1,0 +1,57 @@
+[
+  {
+    "id": "sticker-small-batch", "brandKey": "true-color", "revision": 1,
+    "purpose": "offer", "productSlug": "stickers", "offerMode": "exact_configuration",
+    "purchaseQuestion": "Can I start with a small run of custom stickers?",
+    "headlineDirection": "Small run. Big presence.",
+    "requiredVisibleText": ["Custom stickers"],
+    "visualLaneId": "colour-studio", "contactPanelId": "dark-base",
+    "proofKinds": ["illustration"],
+    "diversityTags": ["product-hero", "packaging", "saturated", "small-run"],
+    "avoid": ["Logo overlay on the illustrative hero", "Universal custom-sticker price", "Implied free design"]
+  },
+  {
+    "id": "sticker-custom-fit", "brandKey": "true-color", "revision": 1,
+    "purpose": "education", "productSlug": "stickers", "offerMode": "configurator",
+    "purchaseQuestion": "Which sticker shape and size fits my packaging?",
+    "headlineDirection": "Make room for your idea.",
+    "requiredVisibleText": ["Choose your sticker shape and size"],
+    "visualLaneId": "material-study", "contactPanelId": "editorial-margin",
+    "proofKinds": ["diagram", "illustration"],
+    "diversityTags": ["top-down-study", "dimension-guide", "light", "fit"],
+    "avoid": ["Price borrowed from a different configuration", "Unsupported clear-vinyl or custom-material claims", "Repeated packaging-box hero"]
+  },
+  {
+    "id": "sticker-design-help", "brandKey": "true-color", "revision": 1,
+    "purpose": "design_help", "productSlug": "stickers", "offerMode": "design_help",
+    "purchaseQuestion": "Can someone help me with my sticker artwork?",
+    "headlineDirection": "Your idea. Clearly printed.",
+    "requiredVisibleText": ["Sticker design help"],
+    "visualLaneId": "design-desk", "contactPanelId": "integrated-space",
+    "proofKinds": ["illustration", "diagram"],
+    "diversityTags": ["type-study", "flat-artwork", "dark", "artwork-help"],
+    "avoid": ["Design included in the print price", "Unverified proof deadline", "Invented customer artwork"]
+  },
+  {
+    "id": "sticker-real-work", "brandKey": "true-color", "revision": 1,
+    "purpose": "proof", "productSlug": "stickers", "offerMode": "configurator",
+    "purchaseQuestion": "What does a real finished sticker job look like?",
+    "headlineDirection": "Details worth a closer look.",
+    "requiredVisibleText": ["Custom stickers", "Choose your own options in the online sticker configurator."],
+    "visualLaneId": "real-work", "contactPanelId": "integrated-space",
+    "proofKinds": ["actual_work"],
+    "diversityTags": ["authentic-detail", "customer-product", "natural", "finished-result"],
+    "avoid": ["Generated mockup presented as a printed job", "Uncleared customer artwork", "Unsupported testimonial"]
+  },
+  {
+    "id": "sticker-ordering-guide", "brandKey": "true-color", "revision": 1,
+    "purpose": "ordering", "productSlug": "stickers", "offerMode": "configurator",
+    "purchaseQuestion": "How do I price my sticker order online?",
+    "headlineDirection": "Choose it. Then price it.",
+    "requiredVisibleText": ["Price your custom stickers online", "Choose your sticker options in the online configurator."],
+    "visualLaneId": "ordering-guide", "contactPanelId": "editorial-margin",
+    "proofKinds": ["diagram"],
+    "diversityTags": ["choice-diagram", "ordering-steps", "light", "online-ordering"],
+    "avoid": ["Diagram presented as a live screenshot", "Claim that a link prefills the configuration", "Unverified clickable Instagram caption"]
+  }
+]

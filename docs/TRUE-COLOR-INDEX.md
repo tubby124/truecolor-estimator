@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Creative operating system: first offline brief tool](social/creative-os/RUNBOOK.md) — local True Color kit, three text briefs and private review; calendar, collector and writeback remain future work. [Architecture and contracts](social/creative-os/README.md).
+
 - [Weekly storyboard preparation and monthly handoff](social/WEEKLY-STORYBOARD.md)
 
 - [Telegram photo intake, temporary previews and exact approval](social/TELEGRAM-INTAKE.md)
