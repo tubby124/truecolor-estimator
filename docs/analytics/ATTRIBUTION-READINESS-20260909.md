@@ -1,6 +1,6 @@
 # Attribution readiness — 2026-09-09
 
-Status: code release in progress; genuine purchase attribution proof remains incomplete. Campaigns stay paused. This report authorizes no spend, settings changes, synthetic events, order creation, payment, replay, or customer communication.
+Status: repair merged and deployed with production browser continuity/privacy verified; genuine purchase attribution proof remains incomplete. See [release receipt](CONTINUITY-RELEASE-20260909.md). Campaigns stay paused. This report authorizes no spend, settings changes, synthetic events, order creation, payment, replay, or customer communication.
 
 ## Verified provider reads
 
