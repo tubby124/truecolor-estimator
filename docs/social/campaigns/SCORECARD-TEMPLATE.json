@@ -2,7 +2,7 @@
   "schema": "truecolor-campaign-scorecard",
   "version": 1,
   "storage": "private-only-when-populated",
-  "campaign_key": "tc-stickers-small-run-202609",
+  "campaign_key": "tc_stickers_small_run_pilot",
   "reviewed_at": null,
   "status": "not_launched",
   "window": {"start_inclusive": null, "end_inclusive": null, "timezone": "America/Regina"},
