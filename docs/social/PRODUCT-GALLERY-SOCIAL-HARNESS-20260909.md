@@ -16,7 +16,7 @@ This is the default **gallery showcase** lane, not a universal layout rule:
 
 The site target is a complete clean product gallery: each scoped product gets intentional overview, material/detail, application, and alternate views where the product recipe calls for them. Material/product evidence should show useful differences—for example, coroplast flute/edge construction, different real-use settings, or vehicle-decals application contexts—rather than four cosmetic variations of one image.
 
-The current private inventory covers all 124 planned source slots. They remain private illustrative candidates: 14 pre-existing revision holds remain, and zero sources are approved website replacements. Source completion is not permission to change a page, sitemap, customer-work record, Merchant image, or public channel.
+The current private inventory covers all 124 planned source slots. The owner authorized them as the asset pool for a bounded website build; fictional sample copy is acceptable illustrative artwork and no in-image True Color logo treatment is required. Fourteen pre-existing revision holds remain. Asset-pool authorization is not permission for a broad page swap, sitemap/customer-work/Merchant change, public-channel distribution, or deployment: each implementation wave still passes the assurance gate.
 
 ## SEO-safe replacement gate
 
