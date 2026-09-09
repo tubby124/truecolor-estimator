@@ -1,0 +1,21 @@
+{
+  "schema": "truecolor-campaign-scorecard",
+  "version": 1,
+  "storage": "private-only-when-populated",
+  "campaign_key": "tc-stickers-small-run-202609",
+  "reviewed_at": null,
+  "status": "not_launched",
+  "window": {"start_inclusive": null, "end_inclusive": null, "timezone": "America/Regina"},
+  "comparison_window": {"start_inclusive": null, "end_inclusive": null, "timezone": "America/Regina"},
+  "sources": [],
+  "source_entry_contract": {"source": "provider/report name", "private_report_file": "local relative path", "retrieved_at": "ISO timestamp", "timezone": "source timezone", "filters": [], "limits": [], "attribution_definition": "explicit definition"},
+  "delivery": {"approved_destinations": null, "verified_published_destinations": null, "held_or_failed_destinations": null, "private_receipt_file": null},
+  "campaign_metrics": {"platform_reach": null, "platform_link_clicks": null, "production_campaign_sessions": null, "qualified_inquiries": null, "paid_orders_deterministic": null, "paid_orders_customer_reported": null, "attributed_paid_revenue_cad": null},
+  "comparison_metrics": {"production_campaign_sessions": null, "qualified_inquiries": null, "paid_orders_deterministic": null, "paid_orders_customer_reported": null, "attributed_paid_revenue_cad": null},
+  "outcome_definitions": {"qualified_inquiry": "Staff-confirmed relevant product need and usable contact; deduplicated privately", "paid_order": "Completed payment with stated campaign-association evidence", "revenue": "Observed attributed paid revenue; no incremental or margin claim"},
+  "coverage": {"known_source_outcomes": null, "unknown_source_outcomes": null, "tracking_reliable_for_revenue": null, "limitations": []},
+  "creative_observations": [],
+  "lesson": {"classification": "hypothesis", "observation": null, "competing_explanation": null, "proposed_change": null, "confidence": "insufficient_data", "owner_decision": "pending", "decision_date": null, "supersedes": null},
+  "public_git_summary": null,
+  "rules": ["Null means unavailable or unverified, never zero", "Private evidence and populated scorecards stay out of public Git", "Separate deterministic and customer-reported outcomes; never double-count", "Do not edit posts, approvals, provider receipts or spend from a scorecard", "Do not claim whole-business changes as campaign lift"]
+}
