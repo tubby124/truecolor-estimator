@@ -52,6 +52,14 @@ describe('bounded harness to existing month-plan bridge', () => {
     expect(()=>checkedPreparationPolicy({...input,preparationPolicy:{...transparent,policy_sha256:digest(transparent)}},validateHarnessBatch(input))).toThrow(/solid white/);
     const raw=fixture();raw.lineage[0].sourceStage='already-branded';expect(()=>checkedPreparationPolicy(raw,validateHarnessBatch(raw))).toThrow(/unbranded/);
   });
+  it('holds a policy that omits a newly selected accepted decision', () => {
+    const input=fixture();const ctx={...input.learningContext};Reflect.deleteProperty(ctx,'context_sha256');
+    ctx.selected_decision_ids=[...ctx.selected_decision_ids,'new-correction'];ctx.lessons=[...ctx.lessons,{decision_id:'new-correction'}];
+    input.learningContext={...ctx,context_sha256:digest(ctx)};
+    const policy={...input.preparationPolicy,source_context_sha256:input.learningContext.context_sha256};Reflect.deleteProperty(policy,'policy_sha256');
+    input.preparationPolicy={...policy,policy_sha256:digest(policy)};
+    expect(()=>checkedPreparationPolicy(input,validateHarnessBatch(input))).toThrow(/decision evidence/);
+  });
   it('checks bytes before writing and exports actual uploader rendition plus private identity map', async () => {
     const root=await mkdtemp(join(tmpdir(),'tc-harness-'));
     try {
