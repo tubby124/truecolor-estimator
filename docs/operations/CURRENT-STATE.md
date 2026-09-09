@@ -141,3 +141,8 @@ Implemented [private capture and monthly brief](../social/LEARNING-LOOP.md): imm
 ## Superseding scope: annual content cancelled — September 9, 2026
 
 Owner explicitly cancelled the one-year objective. Earlier year/annual statements in this chronological board are historical and superseded. No annual content generation, year-plan expansion or annual scheduling is active. Preserve the former outline as cancelled history. Current focus: small end-to-end harness learning cycle and bounded next-batch preparation, preserving approved September posts. This task owns offline learning capture/brief code and its documentation in PR74; no hosted collector, planner/queue integration or annual worker is running here.
+
+
+## Learning continuation: draft context and live bounded collection — September 9, 2026
+
+[Learning runbook](../social/LEARNING-LOOP.md) now includes exact-scoped, date-aware draft-context export and GET-only per-post Meta collection. Live Instagram collection matched a saved app receipt and verified provider owner/publication time; numeric likes/comments were captured, denied/unsupported metrics remained null. The normalized event was imported privately and a Vault proof written. Source lineage is unmapped legacy, not the new creative recipe. Bound learning context handed to the separate small-batch task for provenance consumption. Unit/security review passed. No recurring collector, authenticated feedback UI, automatic generator application or provider/queue mutation is claimed. Annual scope stays cancelled.

@@ -87,6 +87,41 @@ class LearningTests(unittest.TestCase):
         self.assertNotIn('lesson-1:', loop.brief(self.ledger, 'brand-a', '2026-10', recipe_version='v2'))
         self.assertNotIn('lesson-1:', loop.brief(self.ledger, 'brand-a', '2026-10', scope_kind='post'))
 
+    def context(self, day='2026-09-09', **kwargs):
+        args = dict(ledger=self.ledger, business='brand-a', as_of=day, recipe_id='gallery', recipe_version='v1', scope_kind='package', scope_id='october', target_draft_package_id='november-draft')
+        args.update(kwargs)
+        return loop.draft_context(**args)
+
+    def test_context_expiry_exact_day_and_hash_binding(self):
+        self.put(self.owner)
+        self.put(self.lesson(expires_on='2026-09-10'))
+        result = self.context('2026-09-10')
+        self.assertEqual(result['selected_decision_ids'], ['lesson-1'])
+        self.assertEqual(result['target']['status'], 'draft')
+        self.assertEqual(result['lessons'][0]['evidence'][0]['event_sha256'], loop.digest(self.owner))
+        expected = result.pop('context_sha256')
+        self.assertEqual(expected, loop.digest(result))
+        self.assertEqual(self.context('2026-09-11')['lessons'], [])
+        self.assertNotEqual(expected, self.context('2026-09-10', target_draft_package_id='other-draft')['context_sha256'])
+
+    def test_context_future_records_and_nonaccepted_excluded(self):
+        self.put(self.owner)
+        self.put(self.lesson('proposed', event_id='proposal'))
+        self.put(self.lesson('rejected', event_id='rejection'))
+        self.put(self.lesson(recorded_at='2026-09-10T00:00:00Z'))
+        self.assertEqual(self.context()['lessons'], [])
+        self.assertEqual(self.context('2026-09-10')['selected_decision_ids'], ['lesson-1'])
+        self.assertEqual(self.context('2026-09-10', recipe_version='v2')['lessons'], [])
+        self.assertEqual(self.context('2026-09-10', scope_kind='post')['lessons'], [])
+
+    def test_context_future_supersession_does_not_retroactively_remove(self):
+        self.put(self.owner)
+        self.put(self.lesson())
+        self.put(self.lesson('rejected', event_id='revoke', recorded_at='2026-09-11T00:00:00Z', supersedes='lesson-1'))
+        self.assertEqual(self.context('2026-09-10')['selected_decision_ids'], ['lesson-1'])
+        self.assertEqual(self.context('2026-09-11')['lessons'], [])
+        self.assertEqual(self.context('2026-09-08')['lessons'], [])
+
     def test_metric_missingness_and_finite_counts(self):
         event = dict(self.owner, event_id='engagement-1', kind='engagement', scope=dict(kind='post', id='local-post-1'), platform='instagram', provider_post_id='provider-123', collected_at='2026-09-09T12:00:00Z', observation_window=dict(start='2026-09-01T00:00:00Z', end='2026-09-09T00:00:00Z'), limitations='Manual provider report', metrics=dict.fromkeys(loop.METRICS), source_snapshot_sha256='a' * 64, metric_definitions={key: 'Provider reported ' + key for key in loop.METRICS}, missing_reasons={key: 'Unavailable in report' for key in loop.METRICS})
         self.put(event)
