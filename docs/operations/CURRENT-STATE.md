@@ -1,3 +1,7 @@
+## Gallery batch three — candidate, September 10, 2026
+
+Window Decals and Brochures are the next bounded product-display candidate: each retains its existing original hero and adds four hash-bound illustrative views through the isolated display registry. The [batch-three record](GALLERY-BATCH-THREE-20260910.md) lists the product/rights boundaries, visual review and explicit Product Labels hold. This is local candidate state only: no PR, merge, deployment or production readback has occurred. Homepage, indexed landing pages, Merchant imagery, feeds, metadata, structured data, sitemaps and customer-work galleries remain unchanged. Next: complete local semantic, visual and performance evidence, then use the required PR/main/Railway/live gates; homepage is a separately audited phase after its consumer and organic-observation review.
+
 ## Gallery batch two — September 9, 2026
 
 Postcards and retractable banners are deployed and live verified: original hero first plus three illustrations each. [Batch record](GALLERY-BATCH-TWO-20260909.md) owns scope and evidence. PR 80 merged at `0734da25`; PR/main CI passed (1,558 unit tests, 60 browser contracts), Railway exact-commit deployment succeeded, 29 live HTML/XML records had zero differences, and all 24 gallery views passed. [Repeatable workflow](GALLERY-REPEATABLE-WORKFLOW.md) records reuse and faster Terra High execution without skipping gates. No indexed-page experiment or social publication occurred.

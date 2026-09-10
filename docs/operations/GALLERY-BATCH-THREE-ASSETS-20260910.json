@@ -1,0 +1,55 @@
+{
+  "approval_reference": "owner-gallery-rollout-20260910",
+  "scope": "Website product display galleries only: window-decals and brochures.",
+  "provenance": {
+    "origin": "Retained AI-generated illustrative artwork; the original and delivery bytes are hash-bound below.",
+    "generator_result_receipt": null,
+    "prompt_linkage": "No exact provider generation receipt is claimed for this batch."
+  },
+  "site_authority": "Owner-authorized bounded continuation after the verified first and second product-gallery batches.",
+  "other_channel_authority": false,
+  "expiry": "No expiry was supplied; hold/review on owner revocation or any byte change.",
+  "runbook": "docs/operations/GALLERY-BATCH-THREE-20260910.md",
+  "products": [
+    {
+      "slug": "window-decals",
+      "preserved_old_gallery_count": 6,
+      "hero": {
+        "public_path": "/images/products/product/window-decal-before-after-800x600.webp",
+        "alt": "Before-and-after storefront window showing a colourful True Color vinyl graphic.",
+        "width": 800,
+        "height": 600,
+        "bytes": 38898,
+        "sha256": "8dcaed29179d5d4b718495b69b4a3c1f9b9bf60acc02f6945e4d99f1eefa610b",
+        "offer_id": "tc-window-decals-dba69897d9ac",
+        "rights_id": "merchant-window-decals-2026-09-04"
+      },
+      "assets": [
+        {"slot":"overview","public_path":"/images/products/gallery/window-decals/window-decals-overview-v1-1200w.webp","alt":"Illustrative Bloom Room flower graphic applied to a glass storefront door.","source_sha256":"6bdd831f935a078875892232f90b1449413d485ffd2409160188836e543a40f5","source_format":"png","source_width":1448,"source_height":1086,"delivery_sha256":"9d47382081c94d4372656e2d3e5f689ebd9d87244b17e2ba5b05bcb7dd5bc397","format":"webp","width":1200,"height":900,"bytes":102128},
+        {"slot":"material-detail","public_path":"/images/products/gallery/window-decals/window-decals-material-detail-v1-1200w.webp","alt":"Illustrative pink cherry graphic cut from opaque vinyl on a glass door.","source_sha256":"6e7b13c308a917020560f468172764cea878c6d52b6536ac5d44e1e47a04ad99","source_format":"png","source_width":1448,"source_height":1086,"delivery_sha256":"add1c02236a89ab81f138eb99b819bf3a9f8a3e91ac51a8ee36d9dee462a70fc","format":"webp","width":1200,"height":900,"bytes":61554},
+        {"slot":"application","public_path":"/images/products/gallery/window-decals/window-decals-application-v1-1200w.webp","alt":"Illustrative coffee-cup window graphic on a café door, clear of its handle.","source_sha256":"bbe07cb8236f9be0f165a6f6aebf525b891f56401c35ad87c9272d7c74a1119f","source_format":"png","source_width":1448,"source_height":1086,"delivery_sha256":"cff45cb63d7c75a7380fd7c0101842cc646c99e6a8075bff4cc8d24c3bdfc1e0","format":"webp","width":1200,"height":900,"bytes":81236},
+        {"slot":"alternate-design","public_path":"/images/products/gallery/window-decals/window-decals-alternate-design-v1-1200w.webp","alt":"Illustrative floral cut-vinyl graphic and lettering on a studio glass door.","source_sha256":"53f1016b6b105edc6fee17ff76ed04ab598a061240c966555e7319d1d36ad9e2","source_format":"png","source_width":1448,"source_height":1086,"delivery_sha256":"7ec4ecc2740e0cfe57f44f5de527862b3e7a4f9141cbe5d25c6b04849ee362e7","format":"webp","width":1200,"height":900,"bytes":80178}
+      ]
+    },
+    {
+      "slug": "brochures",
+      "preserved_old_gallery_count": 3,
+      "hero": {
+        "public_path": "/images/products/product/brochures-800x600.webp",
+        "alt": "Open full-colour brochure with pages of business imagery and colour blocks.",
+        "width": 800,
+        "height": 600,
+        "bytes": 56916,
+        "sha256": "bf7b180ed030dbdac4105b5ae15033dbcc2ca48f4b66d81d289ebe416ec01e2a",
+        "offer_id": "tc-brochures-862c2c49791a",
+        "rights_id": "merchant-brochures-2026-09-04"
+      },
+      "assets": [
+        {"slot":"overview","public_path":"/images/products/gallery/brochures/brochures-overview-v1-1200w.webp","alt":"Illustrative green botanical tri-fold brochure open beside its folded cover.","source_sha256":"3914c5a7f78ffaea88a65b54f72bb51e65b67d148686367c849a503749bfb2c0","source_format":"png","source_width":1448,"source_height":1086,"delivery_sha256":"b480f13fd19cd8052f8bacec6f5ef50e0dacb4707fa0defea1af60abd0ecc756","format":"webp","width":1200,"height":900,"bytes":118274},
+        {"slot":"material-detail","public_path":"/images/products/gallery/brochures/brochures-material-detail-v1-1200w.webp","alt":"Illustrative blue and coral tri-fold brochure showing three scored panels.","source_sha256":"6c670e5711ab4574e17a7e23676b11611998fcc603c09e279b43509fe02ac2ea","source_format":"png","source_width":1448,"source_height":1086,"delivery_sha256":"53b771e6285389e2cc929f696b9f8daed44e5a538620dd630d782c63ac3768c6","format":"webp","width":1200,"height":900,"bytes":24916},
+        {"slot":"application","public_path":"/images/products/gallery/brochures/brochures-application-v1-1200w.webp","alt":"Illustrative blue-and-cream tri-fold brochure standing open on a counter.","source_sha256":"a173c7852b007e4523cfa7ac4966977b74c65910a5770bf03600cf1fb94a42ea","source_format":"png","source_width":1448,"source_height":1086,"delivery_sha256":"8c57347438e5a85ddfa4951210123a0922e655efedf33f8b74171a18b7ef564f","format":"webp","width":1200,"height":900,"bytes":78310},
+        {"slot":"alternate-design","public_path":"/images/products/gallery/brochures/brochures-alternate-design-v1-1200w.webp","alt":"Illustrative terracotta and olive half-fold brochure on a desk beside a notebook.","source_sha256":"8e8f3f42528b9d999d60102bbbf8aa73c08b79ccd889784d8f02a5eb89ecedcb","source_format":"png","source_width":1448,"source_height":1086,"delivery_sha256":"117c484821b74dea6607df5fb5bd57a3f6b76d4231ef938e5442bc2961161cbb","format":"webp","width":1200,"height":900,"bytes":35204}
+      ]
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import { PRODUCTS } from "../products-content";
 import { getProductDisplayGallery } from "../product-display-galleries";
 import { findChannelClearedImageForOffer, isImageSitemapCleared } from "../image-rights";
 import batchReceipt from "../../../../docs/operations/GALLERY-BATCH-TWO-ASSETS-20260909.json";
+import batchThreeReceipt from "../../../../docs/operations/GALLERY-BATCH-THREE-ASSETS-20260910.json";
 import receipt from "../../../../docs/operations/COROPLAST-PILOT-ASSETS-20260909.json";
 
 describe("isolated coroplast display gallery", () => {
@@ -24,7 +25,7 @@ describe("isolated coroplast display gallery", () => {
   });
 
   it("leaves every non-pilot product and the standalone vehicle route on the existing path", () => {
-    for (const slug of [...Object.keys(PRODUCTS).filter((slug) => !["coroplast-signs", "postcards", "retractable-banners"].includes(slug)), "vehicle-decals", "unknown", "__proto__"])
+    for (const slug of [...Object.keys(PRODUCTS).filter((slug) => !["coroplast-signs", "postcards", "retractable-banners", "window-decals", "brochures"].includes(slug)), "vehicle-decals", "unknown", "__proto__"])
       expect(getProductDisplayGallery(slug)).toBeUndefined();
   });
 
@@ -83,6 +84,40 @@ for (const product of batchReceipt.products) {
     });
 
     it("keeps the original Merchant clearance and grants no new Merchant or sitemap images", () => {
+      const heroUrl = `https://truecolorprinting.ca${product.hero.public_path}`;
+      expect(findChannelClearedImageForOffer(heroUrl, "merchant", product.hero.offer_id, product.hero.sha256)).toBeDefined();
+      for (const asset of product.assets) {
+        const url = `https://truecolorprinting.ca${asset.public_path}`;
+        expect(findChannelClearedImageForOffer(url, "merchant", product.hero.offer_id, asset.delivery_sha256)).toBeUndefined();
+        expect(isImageSitemapCleared(url)).toBe(false);
+      }
+    });
+  });
+}
+
+for (const product of batchThreeReceipt.products) {
+  describe(`${product.slug} display gallery batch three`, () => {
+    it("preserves the Merchant-cleared hero while binding four website-only illustrations", () => {
+      const images = getProductDisplayGallery(product.slug)!;
+      expect(images).toHaveLength(5);
+      expect(images.map((image) => image.src)).toEqual([product.hero.public_path, ...product.assets.map((asset) => asset.public_path)]);
+      expect(images[0].src).toBe(PRODUCTS[product.slug].heroImage);
+      expect(PRODUCTS[product.slug].galleryImages).toHaveLength(product.preserved_old_gallery_count);
+    });
+
+    it("binds visible descriptions and exact reviewed delivery bytes without widening distribution", async () => {
+      const images = getProductDisplayGallery(product.slug)!;
+      for (const [index, image] of images.entries()) {
+        const bound = index === 0 ? product.hero : product.assets[index - 1];
+        expect(image.alt).toBe(bound.alt);
+        expect(image.alt.length).toBeGreaterThanOrEqual(10);
+        expect(image.alt.length).toBeLessThanOrEqual(125);
+        const bytes = await readFile(path.join(process.cwd(), "public", image.src));
+        const metadata = await sharp(bytes).metadata();
+        expect([metadata.width, metadata.height, metadata.format]).toEqual([image.width, image.height, "webp"]);
+        expect(bytes.length).toBe(bound.bytes);
+        expect(createHash("sha256").update(bytes).digest("hex")).toBe(index === 0 ? product.hero.sha256 : product.assets[index - 1].delivery_sha256);
+      }
       const heroUrl = `https://truecolorprinting.ca${product.hero.public_path}`;
       expect(findChannelClearedImageForOffer(heroUrl, "merchant", product.hero.offer_id, product.hero.sha256)).toBeDefined();
       for (const asset of product.assets) {

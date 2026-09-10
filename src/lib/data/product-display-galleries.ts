@@ -92,11 +92,81 @@ const RETRACTABLE_DISPLAY_GALLERY: readonly ProductDisplayImage[] = [
   }
 ];
 
+// Batch three is website-display-only.  The original heroes remain first so
+// Merchant, feed, and shared-hero consumers keep their approved assets.
+const WINDOW_DECALS_DISPLAY_GALLERY: readonly ProductDisplayImage[] = [
+  {
+    src: "/images/products/product/window-decal-before-after-800x600.webp",
+    alt: "Before-and-after storefront window showing a colourful True Color vinyl graphic.",
+    width: 800,
+    height: 600,
+  },
+  {
+    src: "/images/products/gallery/window-decals/window-decals-overview-v1-1200w.webp",
+    alt: "Illustrative Bloom Room flower graphic applied to a glass storefront door.",
+    width: 1200,
+    height: 900,
+  },
+  {
+    src: "/images/products/gallery/window-decals/window-decals-material-detail-v1-1200w.webp",
+    alt: "Illustrative pink cherry graphic cut from opaque vinyl on a glass door.",
+    width: 1200,
+    height: 900,
+  },
+  {
+    src: "/images/products/gallery/window-decals/window-decals-application-v1-1200w.webp",
+    alt: "Illustrative coffee-cup window graphic on a café door, clear of its handle.",
+    width: 1200,
+    height: 900,
+  },
+  {
+    src: "/images/products/gallery/window-decals/window-decals-alternate-design-v1-1200w.webp",
+    alt: "Illustrative floral cut-vinyl graphic and lettering on a studio glass door.",
+    width: 1200,
+    height: 900,
+  },
+];
+
+const BROCHURES_DISPLAY_GALLERY: readonly ProductDisplayImage[] = [
+  {
+    src: "/images/products/product/brochures-800x600.webp",
+    alt: "Open full-colour brochure with pages of business imagery and colour blocks.",
+    width: 800,
+    height: 600,
+  },
+  {
+    src: "/images/products/gallery/brochures/brochures-overview-v1-1200w.webp",
+    alt: "Illustrative green botanical tri-fold brochure open beside its folded cover.",
+    width: 1200,
+    height: 900,
+  },
+  {
+    src: "/images/products/gallery/brochures/brochures-material-detail-v1-1200w.webp",
+    alt: "Illustrative blue and coral tri-fold brochure showing three scored panels.",
+    width: 1200,
+    height: 900,
+  },
+  {
+    src: "/images/products/gallery/brochures/brochures-application-v1-1200w.webp",
+    alt: "Illustrative blue-and-cream tri-fold brochure standing open on a counter.",
+    width: 1200,
+    height: 900,
+  },
+  {
+    src: "/images/products/gallery/brochures/brochures-alternate-design-v1-1200w.webp",
+    alt: "Illustrative terracotta and olive half-fold brochure on a desk beside a notebook.",
+    width: 1200,
+    height: 900,
+  },
+];
+
 export function getProductDisplayGallery(slug: string): readonly ProductDisplayImage[] | undefined {
   switch (slug) {
     case "coroplast-signs": return COROPLAST_DISPLAY_GALLERY;
     case "postcards": return POSTCARDS_DISPLAY_GALLERY;
     case "retractable-banners": return RETRACTABLE_DISPLAY_GALLERY;
+    case "window-decals": return WINDOW_DECALS_DISPLAY_GALLERY;
+    case "brochures": return BROCHURES_DISPLAY_GALLERY;
     default: return undefined;
   }
 }
