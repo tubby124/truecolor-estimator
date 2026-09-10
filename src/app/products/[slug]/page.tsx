@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ProductPageClient } from "@/components/product/ProductPageClient";
+import { ProductDisplayGallery } from "@/components/product/ProductDisplayGallery";
 import { ProductAccordion } from "@/components/product/ProductAccordion";
 import { getProduct, PRODUCT_SLUGS } from "@/lib/data/products-content";
 import { PRODUCT_IMAGES } from "@/lib/data/productImages";
@@ -13,6 +14,7 @@ import { getMerchantOffer, getMerchantOfferSelection, MERCHANT_STORE_CODE } from
 import { merchantProductSchema } from "@/lib/commerce/product-schema";
 import { COMMERCE_POLICY } from "@/lib/commerce/policies";
 import { BUSINESS_INFO } from "@/lib/business-info";
+import { getProductDisplayGallery } from "@/lib/data/product-display-galleries";
 
 
 interface Props {
@@ -55,6 +57,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
     ? getMerchantOffer("https://truecolorprinting.ca", slug, merchantId)
     : undefined;
   const productSchema = merchantOffer ? merchantProductSchema(merchantOffer) : null;
+  const displayGallery = getProductDisplayGallery(product.slug);
 
   // Related products
   const related = product.relatedSlugs.map((s) => getProduct(s)).filter(Boolean);
@@ -140,14 +143,17 @@ export default async function ProductPage({ params, searchParams }: Props) {
         {/* Interactive product layout — gallery + options + sticky price panel */}
         <div className="mb-8">
           {product.comingSoon ? (
-            <div className="border border-amber-200 bg-amber-50 rounded-2xl p-10 text-center">
-              <span className="inline-block text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1 rounded-full uppercase tracking-wide mb-4">
-                Coming Soon
-              </span>
-              <h2 className="text-2xl font-bold text-[#1c1712] mb-3">{product.name}</h2>
-              <p className="text-gray-600 max-w-lg mx-auto mb-6">{product.description}</p>
-              <p className="text-sm text-gray-400 mb-6">Pricing and online ordering coming soon. Call <a href="tel:+13069548688" className="text-[#16C2F3] hover:underline">(306) 954-8688</a> to inquire.</p>
-              <NotifyMeForm productName={product.name} productSlug={slug} />
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 items-start">
+              {displayGallery && <ProductDisplayGallery images={displayGallery} productName={product.name} />}
+              <div className="border border-amber-200 bg-amber-50 rounded-2xl p-10 text-center">
+                <span className="inline-block text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1 rounded-full uppercase tracking-wide mb-4">
+                  Coming Soon
+                </span>
+                <h2 className="text-2xl font-bold text-[#1c1712] mb-3">{product.name}</h2>
+                <p className="text-gray-600 max-w-lg mx-auto mb-6">{product.description}</p>
+                <p className="text-sm text-gray-400 mb-6">Pricing and online ordering coming soon. Call <a href="tel:+13069548688" className="text-[#16C2F3] hover:underline">(306) 954-8688</a> to inquire.</p>
+                <NotifyMeForm productName={product.name} productSlug={slug} />
+              </div>
             </div>
           ) : (
             <ProductPageClient product={product} initialSelection={merchantSelection} />
