@@ -65,3 +65,11 @@ Postcards: 14 semantic records (10 HTML + four XML), zero differences/errors. Re
 Five cold and one warm production-build runs per product/width; Chromium 145.0.7632.6, DPR1, 40 ms latency, 10 Mbps, 4× CPU slowdown and consistent request isolation. All release tolerances pass; zero image-attributable shift entries. All four views per product pass keyboard/zoom, dimensions and overflow checks at all three widths. These medians are controlled lab evidence, not field p75 or commercial lift.
 
 DPR2 verification covered all four views × three widths × two products: 24 successful optimized WebP decodes, warm optimizer HIT for every view, largest measured delivered image 59,224 bytes. Source hashes remain separate from optimized response bytes.
+
+## Production release receipt — September 10, 01:31 UTC
+
+[PR 80](https://github.com/tubby124/truecolor-estimator/pull/80) merged at `0734da25b343b80ab46112956c4ad4d99d2c7147`. Required PR CI and [main push lint-test](https://github.com/tubby124/truecolor-estimator/actions/runs/34424906275) succeeded (1,558 unit tests and 60 browser contracts). Railway deployment `a1c82913-615a-4c09-9def-d2e88f4bb7ee` returned SUCCESS for the exact merge.
+
+Production readback passed 14 postcard and 15 retractable HTML/XML records with zero differences/errors. All eight served source images matched expected hashes, dimensions, bytes and WebP MIME. All 24 gallery views across three screen widths passed decoded image, alt, layout, keyboard, focus and lightbox controls. Two banner network-idle waits timed out; final visual-only readiness used DOM ready plus visible gallery and exact active-image decode. Performance protocol and prior controlled comparisons were unchanged. Isolated browser screenshots may show a pricing error toast because production POST requests were deliberately blocked; no order/cart/payment was exercised.
+
+No technical SEO regression was detected within this measured scope. Future rankings, field p75 and commercial impact remain unproven. [Faster continuation rules](GALLERY-REPEATABLE-WORKFLOW.md) and the [separate evening plan](../social/EVENING-LAUNCH-20260909.md) carry forward the lessons.

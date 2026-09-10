@@ -1,6 +1,10 @@
 ## Gallery batch two — September 9, 2026
 
-Owner requested more noindex product galleries after the coroplast release. Candidate scope: postcards and retractable banners, original hero first plus three illustrative views each. [Batch record](GALLERY-BATCH-TWO-20260909.md) owns exclusions, image SEO/provenance, consumer controls, baseline and rollback. The existing display component is reused without modification. Fresh coroplast production recheck found zero differences across nine HTML contracts/four XML files. Required exact-head CI and live deployment verification remain release gates for this second batch; no indexed-page experiment or social publishing expansion.
+Postcards and retractable banners are deployed and live verified: original hero first plus three illustrations each. [Batch record](GALLERY-BATCH-TWO-20260909.md) owns scope and evidence. PR 80 merged at `0734da25`; PR/main CI passed (1,558 unit tests, 60 browser contracts), Railway exact-commit deployment succeeded, 29 live HTML/XML records had zero differences, and all 24 gallery views passed. [Repeatable workflow](GALLERY-REPEATABLE-WORKFLOW.md) records reuse and faster Terra High execution without skipping gates. No indexed-page experiment or social publication occurred.
+
+## Daily evening social — prepared September 9, 2026
+
+[Current execution plan](../social/EVENING-LAUNCH-20260909.md) supersedes older three-extra-per-week/customer-only-AM assumptions: preserve the existing September AM creative campaign and add one daily creative at 19:00 America/Regina. Terra High prepared three consecutive evening creatives for September 10–12 through the existing connected renderer/review contract. No upload, approval, enrollment or publication occurred. Fresh read-only VPS/app evidence verifies the unchanged 48-ID AM scope, active runner/monitor and no backlog; the plan owns delivery/Telegram/learning boundaries. Next: new operational task reviews/imports the exact private package, uses normal approval and reconciles enrollment through the existing single runner.
 
 ## Coroplast display-gallery pilot — September 9, 2026
 
