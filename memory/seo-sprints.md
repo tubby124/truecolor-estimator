@@ -731,3 +731,8 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 - Prepared exact copy and checks: `seo-prep/2026-09-04-foamboard-strengthening.md`. Updated selected current evidence in `.claude/rules/seo-protected-pages.md` without unlocking protected pages.
 - Held publication: September 4 Merchant SEO release resets the five-day site gate. Reconsider September 9 after deployment time, finalized Wall Graphics observation and fresh query checks. Wall Graphics decline began before its August 28 title change; no unsupported causal rollback.
 - Public SEO page files, titles, H1s, schema, links and sitemap dates are unchanged. Privacy/tracking release is operational only.
+
+
+## Coroplast product-gallery pilot — September 9, 2026
+
+Owner authorized a bounded deployment test on `/products/coroplast-signs` (existing noindex/follow). Original FOR SALE stays first, followed by three illustrative views; material-detail held for flute/stake plausibility. New display binding preserves Merchant hero, old customer assets, indexed content, metadata/schema/links and sitemap dates. See [pilot release record](../docs/operations/COROPLAST-GALLERY-PILOT-20260909.md) for evidence and rollback. This is a shopper presentation pilot, not a ranking experiment or proof of conversion improvement. Image SEO skill and live GitHub rule review apply to all subsequent image changes.

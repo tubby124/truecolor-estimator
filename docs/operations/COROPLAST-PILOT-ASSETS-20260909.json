@@ -1,0 +1,75 @@
+{
+  "scope": "Coroplast product detail only",
+  "held_material_detail_excluded": true,
+  "merchant_hero_preserved": {
+    "offer_id": "tc-coroplast-signs-0ace18fa203c",
+    "image_url": "https://truecolorprinting.ca/images/products/product/coroplast-yard-sign-800x600.webp",
+    "image_sha256": "bbac41598e7ca5e9f1f3dd93a459c1d088d0955277cc3faeb28b5e072d48477b",
+    "rights_id": "merchant-coroplast-signs-2026-09-04",
+    "image_sitemap_opt_in": false
+  },
+  "assets": [
+    {
+      "slot": "overview",
+      "public_path": "/images/products/gallery/coroplast-signs/coroplast-signs-overview-v1-1200w.webp",
+      "source_sha256": "08a76038abe2e43b7f221ec145f65f1524617e3d241053cbbb42ccd3d0cfe438",
+      "delivery_sha256": "8f50227c0148f166b5c0f6b196c6dfdd7d33f77645ee3d683c758912738bf8fb",
+      "bytes": 230812,
+      "width": 1200,
+      "height": 900,
+      "site_authority": "Owner requested use and coroplast pilot deployment test on 2026-09-09",
+      "other_channel_authority": false,
+      "expiry": "No expiry supplied; review on owner revocation or byte changes",
+      "format": "webp",
+      "source_format": "png",
+      "approval_reference": "owner-coroplast-site-pilot-20260909",
+      "provenance": {
+        "origin": "AI-generated illustrative artwork; not a customer installation photograph",
+        "source_evidence": "SHA-256 byte-exact match to retained local generated output and exact-version saved prompt filename",
+        "generator_result_receipt": "Not available; no provider receipt asserted"
+      }
+    },
+    {
+      "slot": "application",
+      "public_path": "/images/products/gallery/coroplast-signs/coroplast-signs-application-v1-1200w.webp",
+      "source_sha256": "458577f81a0c4c0c5d9b86f7d628ea71cefb2dac46c1985bcdbd1c97a7e2fb1e",
+      "delivery_sha256": "c5bb5c59f191b491212f051108fa88d0cce87ca254ac92d6bb0f64271a14c3f9",
+      "bytes": 228706,
+      "width": 1200,
+      "height": 900,
+      "site_authority": "Owner requested use and coroplast pilot deployment test on 2026-09-09",
+      "other_channel_authority": false,
+      "expiry": "No expiry supplied; review on owner revocation or byte changes",
+      "format": "webp",
+      "source_format": "png",
+      "approval_reference": "owner-coroplast-site-pilot-20260909",
+      "provenance": {
+        "origin": "AI-generated illustrative artwork; not a customer installation photograph",
+        "source_evidence": "SHA-256 byte-exact match to retained local generated output and exact-version saved prompt filename",
+        "generator_result_receipt": "Not available; no provider receipt asserted"
+      }
+    },
+    {
+      "slot": "alternate-design",
+      "public_path": "/images/products/gallery/coroplast-signs/coroplast-signs-alternate-design-v1-1200w.webp",
+      "source_sha256": "3804d0c48d1cc952628cfd52c9165fbc2cd602202ae56c72bc033ffcfd18bf14",
+      "delivery_sha256": "345eafd169a0f81f3a006500d5299e9ac8d12dd70bc537f5392df881672d9395",
+      "bytes": 167822,
+      "width": 1200,
+      "height": 900,
+      "site_authority": "Owner requested use and coroplast pilot deployment test on 2026-09-09",
+      "other_channel_authority": false,
+      "expiry": "No expiry supplied; review on owner revocation or byte changes",
+      "format": "webp",
+      "source_format": "png",
+      "approval_reference": "owner-coroplast-site-pilot-20260909",
+      "provenance": {
+        "origin": "AI-generated illustrative artwork; not a customer installation photograph",
+        "source_evidence": "SHA-256 byte-exact match to retained local generated output and exact-version saved prompt filename",
+        "generator_result_receipt": "Not available; no provider receipt asserted"
+      }
+    }
+  ],
+  "approval_reference": "owner-coroplast-site-pilot-20260909",
+  "placement_and_rollback_record": "docs/operations/COROPLAST-GALLERY-PILOT-20260909.md"
+}
