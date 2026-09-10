@@ -57,6 +57,7 @@ export default function VehicleMagnetsSaskatoonPage() {
           </p>
         </>
       }
+      galleryImages={[{ src: "/images/products/gallery/vehicle-magnets/vehicle-magnets-application-v1-1200w.webp", alt: "Illustrative removable contractor vehicle magnet applied flat to a white van door" }]}
       products={[
         { name: "Vehicle Magnets", from: "from $24/sqft", slug: "vehicle-magnets" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },

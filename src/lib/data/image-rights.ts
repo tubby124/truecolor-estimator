@@ -29,10 +29,34 @@ function approvedMerchantImage(
   };
 }
 
+function approvedImageSitemapImage(
+  assetId: string,
+  sha256: string,
+  imagePath: string,
+): ImageRightsRecord {
+  return {
+    assetId,
+    sha256,
+    publicUrl: `https://truecolorprinting.ca${imagePath}`,
+    channels: ["site"],
+    imageSitemap: true,
+    status: "approved",
+  };
+}
+
 // New distribution defaults to deny. These exact store-catalog assets were
 // owner-directed for Merchant distribution on 2026-09-04. They deliberately do
 // not authorize GBP, social, Ads, email, or image-sitemap distribution.
 export const IMAGE_RIGHTS_REGISTER: readonly ImageRightsRecord[] = [
+  // Owner-approved September 10 image-search distribution for the selected
+  // catalogue leads. These illustrations remain separate from Merchant feeds.
+  approvedImageSitemapImage("image-seo-acp-signs-2026-09-10", "f7f8154cf354894b2628e7172944dd816d0aa56bd802ec048543afd093d6fb0d", "/images/products/gallery/acp-signs/acp-signs-application-v1-1200w.webp"),
+  approvedImageSitemapImage("image-seo-business-cards-2026-09-10", "8d8e195c11a96ea0772dcf5d2a0e5f9379ede39095d85ead9f08fe7cfcc4c927", "/images/products/gallery/business-cards/business-cards-application-v1-1200w.webp"),
+  approvedImageSitemapImage("image-seo-flyers-2026-09-10", "5d32c5616b44f3882d0b6971cb972b1457653c91683ae7ef39b0a485ecd12088", "/images/products/gallery/flyers/flyers-application-v1-1200w.webp"),
+  approvedImageSitemapImage("image-seo-foamboard-2026-09-10", "582db206e10ef7275ef50e5f56e35c3327d8037a0afcb8e40b37824eebb05b48", "/images/products/gallery/foamboard-displays/foamboard-displays-application-v1-1200w.webp"),
+  approvedImageSitemapImage("image-seo-vehicle-magnets-2026-09-10", "f7d225725db2873095946d0ca65ec94aa384472134db9b65ebf96ff6107b510c", "/images/products/gallery/vehicle-magnets/vehicle-magnets-application-v1-1200w.webp"),
+  approvedImageSitemapImage("image-seo-vinyl-banners-2026-09-10", "3a4d7cc511d215d55d08abf8b75a7aadb7114243d45d159743fdd1325447c047", "/images/products/gallery/vinyl-banners/vinyl-banners-application-v1-1200w.webp"),
+  approvedImageSitemapImage("image-seo-vinyl-lettering-2026-09-10", "9c9374ae5305ac6be515ab25141122e5f75db99d4b1b3c8f304644ec4a738e0f", "/images/products/gallery/vinyl-lettering/vinyl-lettering-overview-v1-1200w.webp"),
   approvedMerchantImage("merchant-coroplast-signs-2026-09-04", "bbac41598e7ca5e9f1f3dd93a459c1d088d0955277cc3faeb28b5e072d48477b", "/images/products/product/coroplast-yard-sign-800x600.webp", "tc-coroplast-signs-0ace18fa203c"),
   approvedMerchantImage("merchant-vinyl-banners-2026-09-04", "b0f5c0fd11f1f8de975d589f11e0329701b22739c163161dd6e011c0a2457bcd", "/images/products/product/banner-vinyl-colorful-800x600.webp", "tc-vinyl-banners-c29b4b917fc2"),
   approvedMerchantImage("merchant-vinyl-banners-3x6-2026-09-04", "b0f5c0fd11f1f8de975d589f11e0329701b22739c163161dd6e011c0a2457bcd", "/images/products/product/banner-vinyl-colorful-800x600.webp", "tc-vinyl-banners-284ff31492f0"),

@@ -84,6 +84,7 @@ export default function VinylLetteringSaskatoonPage() {
           </p>
         </>
       }
+      galleryImages={[{ src: "/images/products/gallery/vinyl-lettering/vinyl-lettering-overview-v1-1200w.webp", alt: "Illustrative white cut vinyl storefront hours and wordmark lettering on glass" }]}
       products={[
         { name: "Vinyl Lettering", from: "from $8.50/sqft", slug: "vinyl-lettering" },
         { name: "Window Decals", from: "from $11/sqft", slug: "window-decals" },

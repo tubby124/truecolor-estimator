@@ -146,6 +146,7 @@ export default function AluminumSignsSaskatoonPage() {
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
+      galleryImages={[{ src: "/images/products/gallery/acp-signs/acp-signs-application-v1-1200w.webp", alt: "Illustrative aluminum composite business directory sign mounted outdoors in Saskatoon" }]}
       products={[
         { name: "ACP Aluminum Signs", from: "from $13/sqft", slug: "acp-signs" },
         { name: "Coroplast Signs", from: "from $8/sqft", slug: "coroplast-signs" },

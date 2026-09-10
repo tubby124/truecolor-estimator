@@ -746,3 +746,23 @@ Owner requested two more noindex product-detail galleries after verified coropla
 ## 2026-09-09 gallery batch two release closeout
 
 PR80 merge0734da25 deployed successfully; 1558 unit and60 browser contracts passed. Production29 HTML/XML records unchanged;24 gallery views passed; all8 original/new source deliveries matched receipt hashes. See docs/operations/GALLERY-BATCH-TWO-20260909.md and GALLERY-REPEATABLE-WORKFLOW.md. Evening PM planning is separate and no social publication occurred.
+
+---
+
+## SEO Phase 114 — Promoted catalogue image-search distribution (2026-09-10)
+
+- **Owner request:** Give the seven owner-selected catalogue leads the image-SEO treatment after
+  their product-card release. This is an explicit, narrowly scoped image-distribution change.
+- **What changed:** Added each image to its matching canonical Saskatoon service page as a
+  lazy-loaded, descriptive-alt gallery image, then listed the same visible asset under that page
+  in the image sitemap. Exact SHA-256 and explicit `site` + image-sitemap permission are recorded
+  for ACP signs, business cards, flyers, foamboard, vehicle magnets, vinyl banners and vinyl
+  lettering. Merchant feed images remain unchanged.
+- **Guardrails:** No title, meta description, H1, URL, canonical, robots, Product schema,
+  pricing, CTA, internal links, or sitemap `lastModified` date changed. The images are honestly
+  labelled illustrative; no customer-job or installation claim is added. Window decals, stickers,
+  and product labels remain out of this image-search distribution until dedicated replacement
+  artwork is approved.
+- **Next:** Verify production page galleries and image sitemap after deployment, then observe
+  Google Search Console image data separately. Inclusion in an image sitemap is a discovery signal,
+  not proof of indexing, rank, or sales impact.

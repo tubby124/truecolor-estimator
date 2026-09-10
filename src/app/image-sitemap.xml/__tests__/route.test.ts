@@ -11,11 +11,12 @@ describe("image sitemap", () => {
     expect(response.headers.get("content-type")).toBe("application/xml; charset=utf-8");
     expect(xml).not.toContain("<image:title>");
     expect(xml).not.toContain("<image:caption>");
-    // No historic gallery/representative asset is assumed cleared merely
-    // because it is public. The empty register intentionally emits nothing
-    // until exact hash, permission, and sitemap-channel evidence is recorded.
-    expect(xml.match(/<url>/g)).toBeNull();
-    expect(xml.match(/<image:image>/g)).toBeNull();
+    // The September 10 catalogue leads are distributed only after an exact
+    // hash, explicit owner permission, and a matching canonical-page gallery.
+    expect(xml.match(/<url>/g)).toHaveLength(7);
+    expect(xml.match(/<image:image>/g)).toHaveLength(7);
+    expect(xml).toContain("/images/products/gallery/acp-signs/acp-signs-application-v1-1200w.webp");
+    expect(xml).toContain("/images/products/gallery/vinyl-lettering/vinyl-lettering-overview-v1-1200w.webp");
 
     const canonicalUrls = new Set(sitemap().map((entry) => entry.url));
     const emittedUrls = [...xml.matchAll(/<loc>(https:\/\/truecolorprinting\.ca\/[^<]*)<\/loc>/g)]

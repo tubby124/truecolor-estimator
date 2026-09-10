@@ -123,6 +123,7 @@ export default function BannerPrintingSaskatoonPage() {
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
+      galleryImages={[{ src: "/images/products/gallery/vinyl-banners/vinyl-banners-application-v1-1200w.webp", alt: "Illustrative custom vinyl banner secured on an outdoor courtyard fence" }]}
       products={[
         { name: "Vinyl Banners", from: "from $8.25/sqft", slug: "vinyl-banners" },
         { name: "Retractable Banners", from: "from $219", slug: "retractable-banners" },
