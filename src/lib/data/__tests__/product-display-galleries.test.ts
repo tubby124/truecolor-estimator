@@ -11,6 +11,16 @@ import batchThreeReceipt from "../../../../docs/operations/GALLERY-BATCH-THREE-A
 import fullNoindexReceipt from "../../../../docs/operations/GALLERY-FULL-NOINDEX-ASSETS-20260910.json";
 import receipt from "../../../../docs/operations/COROPLAST-PILOT-ASSETS-20260909.json";
 
+const PROMOTED_LEADS: Readonly<Record<string, string>> = {
+  "acp-signs": "/images/products/gallery/acp-signs/acp-signs-application-v1-1200w.webp",
+  "business-cards": "/images/products/gallery/business-cards/business-cards-application-v1-1200w.webp",
+  "flyers": "/images/products/gallery/flyers/flyers-application-v1-1200w.webp",
+  "foamboard-displays": "/images/products/gallery/foamboard-displays/foamboard-displays-application-v1-1200w.webp",
+  "vehicle-magnets": "/images/products/gallery/vehicle-magnets/vehicle-magnets-application-v1-1200w.webp",
+  "vinyl-banners": "/images/products/gallery/vinyl-banners/vinyl-banners-application-v1-1200w.webp",
+  "vinyl-lettering": "/images/products/gallery/vinyl-lettering/vinyl-lettering-overview-v1-1200w.webp",
+};
+
 describe("isolated coroplast display gallery", () => {
   it("retains the original first and excludes the held material detail", () => {
     const images = getProductDisplayGallery("coroplast-signs")!;
@@ -132,24 +142,32 @@ for (const product of batchThreeReceipt.products) {
 
 for (const product of fullNoindexReceipt.products) {
   describe(`${product.slug} full noindex gallery`, () => {
-    it("keeps the existing hero first and binds every website-only illustration", () => {
+    it("keeps the Merchant hero while putting only selected visual leads first", () => {
       const images = getProductDisplayGallery(product.slug)!;
-      expect(images.map((image) => image.src)).toEqual([product.hero.public_path, ...product.assets.map((asset) => asset.public_path)]);
-      expect(images[0].src).toBe(PRODUCTS[product.slug].heroImage);
+      expect(images[0].src).toBe(PROMOTED_LEADS[product.slug] ?? product.hero.public_path);
+      expect(images.map((image) => image.src).sort()).toEqual(
+        [product.hero.public_path, ...product.assets.map((asset) => asset.public_path)].sort(),
+      );
+      expect(PRODUCTS[product.slug].heroImage).toBe(product.hero.public_path);
     });
 
     it("uses decoded, hash-bound WebP files without granting Merchant or sitemap distribution", async () => {
       const images = getProductDisplayGallery(product.slug)!;
-      for (const [index, image] of images.entries()) {
-        const bound = index === 0 ? product.hero : product.assets[index - 1];
-        expect(image.alt).toBe(bound.alt);
+      for (const image of images) {
+        const bound = image.src === product.hero.public_path
+          ? product.hero
+          : product.assets.find((asset) => asset.public_path === image.src);
+        expect(bound).toBeDefined();
+        expect(image.alt).toBe(bound!.alt);
         expect(image.alt.length).toBeGreaterThanOrEqual(10);
         expect(image.alt.length).toBeLessThanOrEqual(125);
         const bytes = await readFile(path.join(process.cwd(), "public", image.src));
         const metadata = await sharp(bytes).metadata();
         expect([metadata.width, metadata.height, metadata.format]).toEqual([image.width, image.height, "webp"]);
-        expect(bytes.length).toBe(bound.bytes);
-        expect(createHash("sha256").update(bytes).digest("hex")).toBe(index === 0 ? product.hero.sha256 : product.assets[index - 1].delivery_sha256);
+        expect(bytes.length).toBe(bound!.bytes);
+        expect(createHash("sha256").update(bytes).digest("hex")).toBe(
+          "sha256" in bound! ? bound!.sha256 : bound!.delivery_sha256,
+        );
       }
       for (const asset of product.assets) {
         const url = `https://truecolorprinting.ca${asset.public_path}`;
