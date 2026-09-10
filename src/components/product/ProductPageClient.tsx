@@ -3,6 +3,8 @@
 import { useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { addToCart } from "@/lib/cart/cart";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { ProductDisplayGallery } from "@/components/product/ProductDisplayGallery";
+import { getProductDisplayGallery } from "@/lib/data/product-display-galleries";
 import { ProductConfigurator, type PriceData, type ConfigData } from "@/components/product/ProductConfigurator";
 import { UnifiedConfigurator } from "@/components/product/UnifiedConfigurator";
 import { PriceSummary } from "@/components/product/PriceSummary";
@@ -268,6 +270,7 @@ export function ProductPageClient({ product, initialSelection }: Props) {
   }
 
   const materialLabel = MATERIAL_LABELS[product.slug] ?? product.name;
+  const displayGallery = getProductDisplayGallery(product.slug);
   const dimensionsRequired = !product.serviceMode;
   const hasValidCartConfiguration = (
     (!dimensionsRequired || (configData.widthIn > 0 && configData.heightIn > 0))
@@ -295,11 +298,15 @@ export function ProductPageClient({ product, initialSelection }: Props) {
       {/* minmax(0,…) so a wide thumbnail rail can't blow the columns past the viewport (grid min-content blowout) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,2fr)_minmax(0,1.4fr)] gap-8 items-start">
 
-        {/* Col 1 — Gallery (heroImage always first; deduped if already in galleryImages) */}
-        <ProductGallery
-          images={[product.heroImage, ...product.galleryImages.filter((i) => i !== product.heroImage)]}
-          productName={product.name}
-        />
+        {/* Col 1 — Explicit display pilot; legacy hero/Merchant data stays unchanged. */}
+        {displayGallery ? (
+          <ProductDisplayGallery images={displayGallery} productName={product.name} />
+        ) : (
+          <ProductGallery
+            images={[product.heroImage, ...product.galleryImages.filter((i) => i !== product.heroImage)]}
+            productName={product.name}
+          />
+        )}
 
         {/* Col 2 — Options (white card). Wave 1: stickers behind public flag
             mount the UnifiedConfigurator (reads from getProductConfig). All
